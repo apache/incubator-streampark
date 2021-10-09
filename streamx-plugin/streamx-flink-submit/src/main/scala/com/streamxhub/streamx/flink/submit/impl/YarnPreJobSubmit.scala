@@ -105,9 +105,9 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
         )
         logInfo(
           s"""
-             ||-------------------------<<applicationId>>------------------------|
-             ||jobGraph getJobID: ${jobGraph.getJobID.toString}|
-             ||__________________________________________________________________|
+             |-------------------------<<applicationId>>------------------------
+             |jobGraph getJobID: ${jobGraph.getJobID.toString}
+             |__________________________________________________________________
              |""".stripMargin)
         deployInternal(
           clusterDescriptor,
@@ -122,9 +122,9 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
       val applicationId = clusterClient.getClusterId
       logInfo(
         s"""
-           ||-------------------------<<applicationId>>------------------------|
-           ||Flink Job Started: applicationId: $applicationId|
-           ||__________________________________________________________________|
+           |-------------------------<<applicationId>>------------------------
+           |Flink Job Started: applicationId: $applicationId
+           |__________________________________________________________________
            |""".stripMargin)
 
       SubmitResponse(applicationId.toString, flinkConfig)

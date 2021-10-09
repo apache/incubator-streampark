@@ -29,7 +29,7 @@ export default {
     EXISTS: '/flink/project/exists',
     CREATE: '/flink/project/create',
     BUILD: '/flink/project/build',
-    CLOSEWS: '/flink/project/closews',
+    CLOSEBUILD: '/flink/project/closebuild',
     LIST: '/flink/project/list',
     FILELIST: '/flink/project/filelist',
     MODULES: '/flink/project/modules',

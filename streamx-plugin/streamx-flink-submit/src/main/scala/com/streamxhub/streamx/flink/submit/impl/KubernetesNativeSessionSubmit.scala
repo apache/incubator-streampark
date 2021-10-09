@@ -33,6 +33,7 @@ import org.apache.flink.client.program.{ClusterClient, PackagedProgram, Packaged
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+import org.apache.flink.util.IOUtils
 
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -106,9 +107,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         e.printStackTrace()
         throw e
     } finally {
-      if (client != null) client.close()
-      if (packageProgram != null) packageProgram.close()
-      if (clusterDescriptor != null) clusterDescriptor.close()
+      IOUtils.closeAll(client, packageProgram, clusterDescriptor)
     }
   }
 

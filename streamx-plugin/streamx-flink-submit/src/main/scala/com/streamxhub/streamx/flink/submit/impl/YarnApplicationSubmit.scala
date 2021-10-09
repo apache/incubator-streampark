@@ -83,9 +83,9 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
 
           logInfo(
             s"""
-               ||-------------------------<<applicationId>>------------------------|
-               ||Flink Job Started: applicationId: $applicationId|
-               ||__________________________________________________________________|
+               |-------------------------<<applicationId>>------------------------
+               |Flink Job Started: applicationId: $applicationId
+               |__________________________________________________________________
                |""".stripMargin)
 
           SubmitResponse(applicationId.toString, flinkConfig)
@@ -134,10 +134,12 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
           }
           val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
           version match {
+            case Array(1, 12, _) =>
+              providedLibs += s"${workspace.APP_SHIMS}/flink-1.12"
             case Array(1, 13, _) =>
               providedLibs += s"${workspace.APP_SHIMS}/flink-1.13"
-            case Array(1, 11 | 12, _) =>
-              providedLibs += s"${workspace.APP_SHIMS}/flink-1.12"
+            case Array(1, 14, _) =>
+              providedLibs += s"${workspace.APP_SHIMS}/flink-1.14"
             case _ =>
               throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
           }

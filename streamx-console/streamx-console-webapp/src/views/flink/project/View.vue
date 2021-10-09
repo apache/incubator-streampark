@@ -178,7 +178,7 @@
   </div>
 </template>
 <script>
-import { build, list,remove,closews } from '@api/project'
+import { build, list,remove,closebuild } from '@api/project'
 import { check } from '@api/setting'
 import Ellipsis from '@comp/Ellipsis'
 import SockJS from 'sockjs-client'
@@ -334,7 +334,7 @@ export default {
       const container = document.getElementById('terminal')
       this.terminal.open(container, true)
       const url = baseUrl().concat('/websocket')
-      const socket = new SockJS(url)
+      const socket = new SockJS( url, null, { timeout: 15000} )
       this.stompClient = Stomp.over(socket)
       this.stompClient.connect({}, (success) => {
         this.stompClient.subscribe('/resp/build', (msg) => this.terminal.writeln(msg.body))
@@ -343,7 +343,7 @@ export default {
     },
 
     handleClose () {
-      closews({ id: this.projectId })
+      closebuild({ id: this.projectId })
       this.stompClient.disconnect()
       this.controller.visible = false
       this.terminal.clear()

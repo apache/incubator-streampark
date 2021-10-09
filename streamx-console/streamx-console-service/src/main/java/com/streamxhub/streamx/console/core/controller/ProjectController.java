@@ -61,9 +61,9 @@ public class ProjectController {
         return projectService.build(id);
     }
 
-    @PostMapping("closews")
-    @RequiresPermissions("project:view")
-    public RestResponse close(Long id) {
+    @PostMapping("closebuild")
+    @RequiresPermissions("project:build")
+    public RestResponse closeBuild(Long id) {
         projectService.closeBuildLog(id);
         return RestResponse.create();
     }

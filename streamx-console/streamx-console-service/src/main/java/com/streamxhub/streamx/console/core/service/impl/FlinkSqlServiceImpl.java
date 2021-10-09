@@ -208,9 +208,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     private synchronized ClassLoader getFlinkShimsClassLoader() {
         // TODO: 根据用户选择的Flink版本选择对应的版本实现.
         String version = "1.13";
-
         if (!shimsClassLoaderCache.containsKey(version)) {
-            String shimsRegex = "streamx-flink-shims_flink-(1.12|1.13)-(.*).jar";
+            String shimsRegex = "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar";
             Pattern pattern = Pattern.compile(shimsRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
             List<File> shimsJars = Arrays.stream(Objects.requireNonNull(new File(WebUtils.getAppDir("lib")).listFiles((pathname) -> {
@@ -224,9 +223,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             URLClassLoader classLoader = new BottomUpClassLoader(urls, getClass().getClassLoader());
             shimsClassLoaderCache.put(version, classLoader);
         }
-
         return shimsClassLoaderCache.get(version);
-
     }
 
     private boolean isFlinkSqlBacked(FlinkSql sql) {

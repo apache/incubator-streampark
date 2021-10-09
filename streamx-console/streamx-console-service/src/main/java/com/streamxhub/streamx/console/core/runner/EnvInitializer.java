@@ -136,7 +136,7 @@ public class EnvInitializer implements ApplicationRunner {
             if (fsOperator.exists(appShims)) {
                 fsOperator.delete(appShims);
             }
-            String regex = "^streamx-flink-shims_flink-(1.12|1.13)-(.*).jar$";
+            String regex = "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$";
             Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
             File[] shims = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(regex));
             for (File file : Objects.requireNonNull(shims)) {
