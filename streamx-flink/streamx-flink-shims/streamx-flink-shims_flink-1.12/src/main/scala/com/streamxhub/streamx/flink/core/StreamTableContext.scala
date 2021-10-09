@@ -23,6 +23,7 @@ package com.streamxhub.streamx.flink.core
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.table.descriptors.{ConnectorDescriptor, StreamTableDescriptor}
 
 /**
  * 融合了流(stream)和table的api
@@ -48,6 +49,9 @@ class StreamTableContext(override val parameter: ParameterTool,
    * @param args
    */
   def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initJavaStreamTable(args))
+
+
+  @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
 
 
 }

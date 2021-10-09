@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.core
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.enums.TableMode.TableMode
-import com.streamxhub.streamx.common.enums.{ApiType, PlannerType, TableMode}
+import com.streamxhub.streamx.common.enums.{ApiType, TableMode}
 import com.streamxhub.streamx.common.util.{DeflaterUtils, PropertiesUtils}
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.PipelineOptions
@@ -163,23 +163,6 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
 
   def initTableEnv(tableMode: TableMode): Unit = {
     val builder = EnvironmentSettings.newInstance()
-    val plannerType = Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER))).getOrElse {
-      logWarn(s" $KEY_FLINK_TABLE_PLANNER undefined,use default by: blinkPlanner")
-      PlannerType.blink
-    }
-
-    plannerType match {
-      case PlannerType.blink =>
-        logInfo("blinkPlanner will be use.")
-        builder.useBlinkPlanner()
-      case PlannerType.old =>
-        logInfo("oldPlanner will be use.")
-        builder.useOldPlanner()
-      case PlannerType.any =>
-        logInfo("anyPlanner will be use.")
-        builder.useAnyPlanner()
-    }
-
     val mode = Try(TableMode.withName(parameter.get(KEY_FLINK_TABLE_MODE))).getOrElse(tableMode)
     mode match {
       case TableMode.batch =>

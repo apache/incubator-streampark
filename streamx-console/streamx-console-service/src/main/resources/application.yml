@@ -48,6 +48,8 @@ spring:
     time-zone: GMT+8
   flyway:
     enabled: true
+  main:
+    banner-mode: off
 
 management:
   endpoints:

@@ -25,6 +25,7 @@ import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironm
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{Schema, Table}
 import org.apache.flink.table.connector.ChangelogMode
+import org.apache.flink.table.descriptors.{ConnectorDescriptor, StreamTableDescriptor}
 import org.apache.flink.table.module.ModuleEntry
 import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.types.Row
@@ -98,5 +99,8 @@ class StreamTableContext(override val parameter: ParameterTool,
   override def useModules(strings: String*): Unit = tableEnv.useModules(strings: _*)
 
   override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
+
+  @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
+
 
 }

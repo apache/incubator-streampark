@@ -30,6 +30,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+import static org.fusesource.jansi.Ansi.Color.*;
+import static org.fusesource.jansi.Ansi.ansi;
+
 /**
  * @author benjobs
  */
@@ -44,7 +47,19 @@ public class StartedUpRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (context.isActive()) {
-            log.info("Streamx-console start successful，time：" + LocalDateTime.now());
+            System.out.println(ansi().eraseScreen().fg(YELLOW).a("\n\n              .+.                          ").fg(RED).a("       ").reset());
+            System.out.println(ansi().eraseScreen().fg(YELLOW).a("        _____/ /_________  ____ _____ ___ ").fg(RED).a(" _  __").reset());
+            System.out.println(ansi().eraseScreen().fg(YELLOW).a("       / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\").fg(RED).a("| |/_/").reset());
+            System.out.println(ansi().eraseScreen().fg(YELLOW).a("      (__  ) /_/ /  /  __/ /_/ / / / / / /").fg(RED).a(">  <  ").reset());
+            System.out.println(ansi().eraseScreen().fg(YELLOW).a("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/").fg(RED).a("_/|_|  ").reset());
+            System.out.println(ansi().eraseScreen().fg(YELLOW).a("                                         ").fg(RED).a("  |/   ").reset());
+            System.out.println(ansi().eraseScreen().fg(YELLOW).a("                                         ").fg(RED).a("  .    ").reset());
+            System.out.println("\n   WebSite:  http://www.streamxhub.com            ");
+            System.out.println("   GitHub :  https://github.com/streamxhub/streamx");
+            System.out.println("   Gitee  :  https://gitee.com/benjobs/streamx    ");
+            System.out.println("   Ver    :  1.2.0                                ");
+            System.out.println("   Start  :  " + LocalDateTime.now());
+            System.out.println("\n");
         }
     }
 }

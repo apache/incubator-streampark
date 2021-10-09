@@ -22,20 +22,16 @@ package com.streamxhub.streamx.flink.core.scala
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
-import com.streamxhub.streamx.flink.core.scala.ext.TableExt
 import com.streamxhub.streamx.flink.core.{FlinkTableInitializer, TableContext}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.TableConfig
-import org.apache.flink.table.descriptors.ConnectTableDescriptor
 
 import scala.language.implicitConversions
 
 trait FlinkTable extends Logger {
 
   var jobExecutionResult: JobExecutionResult = _
-
-  final implicit def descriptorExt(table: ConnectTableDescriptor): TableExt.ConnectTableDescriptor = new TableExt.ConnectTableDescriptor(table)
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 
