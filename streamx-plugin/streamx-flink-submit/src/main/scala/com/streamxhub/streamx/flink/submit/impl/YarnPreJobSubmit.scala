@@ -88,17 +88,12 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
              |------------------------------------------------------------------
              |""".stripMargin)
 
-        var savepointRestoreSettings = SavepointRestoreSettings.none();
-
-        if (submitRequest.savePoint != null) {
+        val savepointRestoreSettings = {
           // 判断参数 submitRequest.option 中是否包涵 -n 参数；赋值 allowNonRestoredState: true or false
-          var allowNonRestoredState = false;
-          if (submitRequest.option != null && submitRequest.option.contains(" -n ")) {
-            allowNonRestoredState = true;
-
-          } else {
-            savepointRestoreSettings = SavepointRestoreSettings.forPath(submitRequest.savePoint, allowNonRestoredState)
-
+          lazy val allowNonRestoredState = Try(submitRequest.option.split("\\s+").contains("-n")).getOrElse(false)
+          submitRequest.savePoint match {
+            case sp if Try(sp.isEmpty).getOrElse(true) => SavepointRestoreSettings.none
+            case sp => SavepointRestoreSettings.forPath(sp, allowNonRestoredState)
           }
         }
 
