@@ -26,8 +26,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.common.conf.ConfigConst;
-import com.streamxhub.streamx.common.util.HdfsUtils;
+import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -61,8 +60,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationBackUpServiceImpl
-        extends ServiceImpl<ApplicationBackUpMapper, ApplicationBackUp>
-        implements ApplicationBackUpService {
+    extends ServiceImpl<ApplicationBackUpMapper, ApplicationBackUp>
+    implements ApplicationBackUpService {
 
     @Autowired
     private ApplicationService applicationService;
@@ -77,13 +76,13 @@ public class ApplicationBackUpServiceImpl
     private FlinkSqlService flinkSqlService;
 
     private ExecutorService executorService = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 2,
-            200,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("streamx-rollback-executor"),
-            new ThreadPoolExecutor.AbortPolicy()
+        Runtime.getRuntime().availableProcessors() * 2,
+        200,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("streamx-rollback-executor"),
+        new ThreadPoolExecutor.AbortPolicy()
     );
 
 
@@ -97,10 +96,14 @@ public class ApplicationBackUpServiceImpl
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public void rollback(ApplicationBackUp backParam) {
+
+        Application application = applicationService.getById(backParam.getAppId());
+
+        FsOperator fsOperator = application.getFsOperator();
         /**
          * 备份文件不存在
          */
-        if (!HdfsUtils.exists(backParam.getPath())) {
+        if (!fsOperator.exists(backParam.getPath())) {
             return;
         }
         executorService.execute(() -> {
@@ -108,7 +111,6 @@ public class ApplicationBackUpServiceImpl
                 FlinkTrackingTask.refreshTracking(backParam.getAppId(), () -> {
                     // 备份文件存在则执行回滚
                     // 1) 在回滚时判断当前生效的项目是否需要备份.如需要则先执行备份...
-                    Application application = applicationService.getById(backParam.getAppId());
                     if (backParam.isBackup()) {
                         application.setBackUpDescription(backParam.getDescription());
                         backup(application);
@@ -136,11 +138,11 @@ public class ApplicationBackUpServiceImpl
                     }
 
                     // 4) 删除当前的有效项目工程文件(注意:该操作如果整个回滚失败,则要恢复...)
-                    HdfsUtils.delete(application.getAppHome().getAbsolutePath());
+                    fsOperator.delete(application.getRemoteAppHome().getAbsolutePath());
 
                     try {
                         // 5)将备份的文件copy到有效项目目录下.
-                        HdfsUtils.copyHdfsDir(backParam.getPath(), application.getAppHome().getAbsolutePath(), false, true);
+                        fsOperator.copyDir(backParam.getPath(), application.getRemoteAppHome().getAbsolutePath());
                     } catch (Exception e) {
                         //1. TODO: 如果失败了,则要恢复第4部操作.
 
@@ -151,9 +153,9 @@ public class ApplicationBackUpServiceImpl
                     // 6) 更新重启状态
                     try {
                         applicationService.update(new UpdateWrapper<Application>()
-                                .lambda()
-                                .eq(Application::getId, application.getId())
-                                .set(Application::getDeploy, DeployState.NEED_RESTART_AFTER_ROLLBACK.get())
+                            .lambda()
+                            .eq(Application::getId, application.getId())
+                            .set(Application::getDeploy, DeployState.NEED_RESTART_AFTER_ROLLBACK.get())
                         );
                     } catch (Exception e) {
                         //1. TODO: 如果失败,则要恢复第4第5步操作.
@@ -174,21 +176,24 @@ public class ApplicationBackUpServiceImpl
         ApplicationBackUp backup = baseMapper.getLastBackup(application.getId());
         assert backup != null;
         String path = backup.getPath();
-        HdfsUtils.movie(path, ConfigConst.APP_WORKSPACE());
+        application.getFsOperator().move(path, application.getWorkspace().APP_WORKSPACE());
         removeById(backup.getId());
     }
 
     @Override
-    public void removeApp(Long appId) {
-        baseMapper.removeApp(appId);
-        HdfsUtils.delete(ConfigConst.APP_BACKUPS().concat("/").concat(appId.toString()));
+    public void removeApp(Application application) {
+        baseMapper.removeApp(application.getId());
+        application.getFsOperator().delete(
+            application.getWorkspace().APP_BACKUPS().concat("/").concat(application.getId().toString())
+        );
     }
 
     @Override
     public void rollbackFlinkSql(Application application, FlinkSql sql) {
         ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
         assert backUp != null;
-        if (!HdfsUtils.exists(backUp.getPath())) {
+        FsOperator fsOperator = application.getFsOperator();
+        if (!fsOperator.exists(backUp.getPath())) {
             return;
         }
         try {
@@ -198,10 +203,10 @@ public class ApplicationBackUpServiceImpl
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
 
                 // 2) 删除当前项目
-                HdfsUtils.delete(application.getAppHome().getAbsolutePath());
+                fsOperator.delete(application.getRemoteAppHome().getAbsolutePath());
                 try {
                     // 5)将备份的文件copy到有效项目目录下.
-                    HdfsUtils.copyHdfsDir(backUp.getPath(), application.getAppHome().getAbsolutePath(), false, true);
+                    fsOperator.copyDir(backUp.getPath(), application.getRemoteAppHome().getAbsolutePath());
                 } catch (Exception e) {
                     throw e;
                 }
@@ -216,7 +221,7 @@ public class ApplicationBackUpServiceImpl
     public boolean isFlinkSqlBacked(Long appId, Long sqlId) {
         LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new QueryWrapper<ApplicationBackUp>().lambda();
         queryWrapper.eq(ApplicationBackUp::getAppId, appId)
-                .eq(ApplicationBackUp::getSqlId,sqlId);
+            .eq(ApplicationBackUp::getSqlId, sqlId);
         return baseMapper.selectCount(queryWrapper) > 0;
     }
 
@@ -228,7 +233,8 @@ public class ApplicationBackUpServiceImpl
     public Boolean delete(Long id) throws ServiceException {
         ApplicationBackUp backUp = getById(id);
         try {
-            HdfsUtils.delete(backUp.getPath());
+            Application application = applicationService.getById(backUp.getAppId());
+            application.getFsOperator().delete(backUp.getPath());
             removeById(id);
             return true;
         } catch (Exception e) {
@@ -240,8 +246,9 @@ public class ApplicationBackUpServiceImpl
     @Transactional(rollbackFor = {Exception.class})
     public void backup(Application application) {
         //1) 基础的配置文件备份
-        File appHome = application.getAppHome();
-        if (HdfsUtils.exists(appHome.getPath())) {
+        File appHome = application.getRemoteAppHome();
+        FsOperator fsOperator = application.getFsOperator();
+        if (fsOperator.exists(appHome.getPath())) {
             // 3) 需要备份的做备份,移动文件到备份目录...
             ApplicationConfig config = configService.getEffective(application.getId());
             if (config != null) {
@@ -251,11 +258,11 @@ public class ApplicationBackUpServiceImpl
             //2) FlinkSQL任务需要备份sql和依赖.
             int version = 1;
             if (application.isFlinkSqlJob()) {
-                FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(),false);
+                FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
                 assert flinkSql != null;
                 application.setSqlId(flinkSql.getId());
                 version = flinkSql.getVersion();
-            } else if(config != null){
+            } else if (config != null) {
                 version = config.getVersion();
             }
 
@@ -263,8 +270,8 @@ public class ApplicationBackUpServiceImpl
             applicationBackUp.setVersion(version);
 
             this.save(applicationBackUp);
-            HdfsUtils.mkdirs(applicationBackUp.getPath());
-            HdfsUtils.movie(appHome.getPath(), applicationBackUp.getPath());
+            fsOperator.mkdirs(applicationBackUp.getPath());
+            fsOperator.move(appHome.getPath(), applicationBackUp.getPath());
         }
     }
 

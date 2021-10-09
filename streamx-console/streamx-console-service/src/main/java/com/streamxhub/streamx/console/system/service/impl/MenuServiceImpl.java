@@ -177,10 +177,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             queryWrapper.eq(Menu::getType, menu.getType());
         }
         if (StringUtils.isNotBlank(menu.getCreateTimeFrom())
-                && StringUtils.isNotBlank(menu.getCreateTimeTo())) {
+            && StringUtils.isNotBlank(menu.getCreateTimeTo())) {
             queryWrapper
-                    .ge(Menu::getCreateTime, menu.getCreateTimeFrom())
-                    .le(Menu::getCreateTime, menu.getCreateTimeTo());
+                .ge(Menu::getCreateTime, menu.getCreateTimeFrom())
+                .le(Menu::getCreateTime, menu.getCreateTimeTo());
         }
     }
 }

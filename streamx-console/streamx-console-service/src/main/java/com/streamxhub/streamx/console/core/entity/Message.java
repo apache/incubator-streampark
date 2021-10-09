@@ -50,7 +50,8 @@ public class Message {
 
     private Date createTime;
 
-    public Message() {}
+    public Message() {
+    }
 
     public Message(Long userId, Long appId, String title, String context, NoticeType noticeType) {
         this.userId = userId;

@@ -105,6 +105,7 @@ object DataStreamExt {
 
     /**
      * 扩展process方法,使其调用更加简单.
+     *
      * @param processFunction
      * @param onTimerFunction
      * @tparam R

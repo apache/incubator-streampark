@@ -31,7 +31,7 @@ public interface StreamEnvConfigFunction {
     /**
      * 用于初始化StreamExecutionEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
      *
-     * @param environment: StreamExecutionEnvironment instance
+     * @param environment:   StreamExecutionEnvironment instance
      * @param parameterTool: ParameterTool
      */
     void configuration(StreamExecutionEnvironment environment, ParameterTool parameterTool);

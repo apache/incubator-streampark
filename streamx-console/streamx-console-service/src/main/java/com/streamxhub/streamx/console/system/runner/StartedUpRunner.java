@@ -44,47 +44,7 @@ public class StartedUpRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (context.isActive()) {
-            log.info("                          ▒▓██▓██▒                          ");
-            log.info("                      ▓████▒▒█▓▒▓███▓▒                      ");
-            log.info("                   ▓███▓░░        ▒▒▒▓██▒  ▒                ");
-            log.info("                 ░██▒   ▒▒▓▓█▓▓▒░      ▒████                ");
-            log.info("                 ██▒         ░▒▓███▒    ▒█▒█▒               ");
-            log.info("                   ░▓█            ███   ▓░▒██               ");
-            log.info("                     ▓█       ▒▒▒▒▒▓██▓░▒░▓▓█               ");
-            log.info("                   █░ █   ▒▒░       ███▓▓█ ▒█▒▒▒            ");
-            log.info("                   ████░   ▒▓█▓      ██▒▒▒ ▓███▒            ");
-            log.info("                ░▒█▓▓██       ▓█▒    ▓█▒▓██▓ ░█░            ");
-            log.info("          ▓░▒▓████▒ ██         ▒█    █▓░▒█▒░▒█▒             ");
-            log.info("         ███▓░██▓  ▓█           █   █▓ ▒▓█▓▓█▒              ");
-            log.info("       ░██▓  ░█░            █  █▒ ▒█████▓▒ ██▓░▒            ");
-            log.info("      ███░ ░ █░          ▓ ░█ █████▒░░    ░█░▓  ▓░          ");
-            log.info("     ██▓█ ▒▒▓▒          ▓███████▓░       ▒█▒ ▒▓ ▓██▓        ");
-            log.info("  ▒██▓ ▓█ █▓█       ░▒█████▓▓▒░         ██▒▒  █ ▒  ▓█▒      ");
-            log.info("  ▓█▓  ▓█ ██▓ ░▓▓▓▓▓▓▓▒              ▒██▓           ░█▒     ");
-            log.info("  ▓█    █ ▓███▓▒░              ░▓▓▓███▓          ░▒░ ▓█     ");
-            log.info("  ██▓    ██▒    ░▒▓▓███▓▓▓▓▓██████▓▒            ▓███  █     ");
-            log.info(" ▓███▒ ███   ░▓▓▒░░   ░▓████▓░                  ░▒▓▒  █▓    ");
-            log.info(" █▓▒▒▓▓██  ░▒▒░░░▒▒▒▒▓██▓░                            █▓    ");
-            log.info(" ██ ▓░▒█   ▓▓▓▓▒░░  ▒█▓       ▒▓▓██▓    ▓▒          ▒▒▓     ");
-            log.info(" ▓█▓ ▓▒█  █▓░  ░▒▓▓██▒            ░▓█▒   ▒▒▒░▒▒▓█████▒      ");
-            log.info("  ██░ ▓█▒█▒  ▒▓▓▒  ▓█                █░      ░░░░   ░█▒     ");
-            log.info("  ▓█   ▒█▓   ░     █░                ▒█              █▓     ");
-            log.info("   █▓   ██         █░                 ▓▓        ▒█▓▓▓▒█░    ");
-            log.info("    █▓ ░▓██░       ▓▒                  ▓█▓▒░░░▒▓█░    ▒█    ");
-            log.info("     ██   ▓█▓░      ▒                    ░▒█▒██▒      ▓▓    ");
-            log.info("      ▓█▒   ▒█▓▒░                         ▒▒ █▒█▓▒▒░░▒██    ");
-            log.info("       ░██▒    ▒▓▓▒                     ▓██▓▒█▒ ░▓▓▓▓▒█▓    ");
-            log.info("         ░▓██▒                          ▓░  ▒█▓█  ░░▒▒▒     ");
-            log.info("             ▒▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░▓▓  ▓░▒█░       ");
-            log.info("                                                            ");
-            log.info("              ____ __                          _  __        ");
-            log.info("             / __// /_ ____ ___  ___ _ __ _   | |/_/        ");
-            log.info("            _\\ \\ / __// __// -_)/ _ `//  ' \\ _>  <       ");
-            log.info("           /___/ \\__//_/   \\__/ \\_,_//_/_/_//_/|_|       ");
-            log.info("                                                            ");
-            log.info("            [StreamX] Make Flink|Spark easier ô‿ô!           ");
-            log.info("                                                            ");
-            log.info("            StreamX 启动完毕，时间：" + LocalDateTime.now());
+            log.info(" start successful，time：" + LocalDateTime.now());
         }
     }
 }

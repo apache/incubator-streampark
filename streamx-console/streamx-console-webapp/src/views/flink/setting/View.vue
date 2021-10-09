@@ -9,7 +9,6 @@
         <a-list-item v-for="(item,index) in settings" :key="index">
           <a-list-item-meta style="width: 50%">
             <svg-icon class="avatar" name="flink" size="large" slot="avatar" v-if="item.key === 'env.flink.home'"></svg-icon>
-            <svg-icon class="avatar" name="workspace" size="large" slot="avatar" v-if="item.key === 'streamx.console.workspace'"></svg-icon>
             <svg-icon class="avatar" name="maven" size="large" slot="avatar" v-if="item.key === 'maven.central.repository'"></svg-icon>
             <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
             <svg-icon class="avatar" name="host" size="large" slot="avatar" v-if="item.key === 'alert.email.host'"></svg-icon>
@@ -18,6 +17,9 @@
             <svg-icon class="avatar" name="user" size="large" slot="avatar" v-if="item.key === 'alert.email.userName'"></svg-icon>
             <svg-icon class="avatar" name="keys" size="large" slot="avatar" v-if="item.key === 'alert.email.password'"></svg-icon>
             <svg-icon class="avatar" name="ssl" size="large" slot="avatar" v-if="item.key === 'alert.email.ssl'"></svg-icon>
+            <svg-icon class="avatar" name="docker" size="large" slot="avatar" v-if="item.key === 'docker.register.address'"></svg-icon>
+            <svg-icon class="avatar" name="auth" size="large" slot="avatar" v-if="item.key === 'docker.register.user'"></svg-icon>
+            <svg-icon class="avatar" name="password" size="large" slot="avatar" v-if="item.key === 'docker.register.password'"></svg-icon>
             <span slot="title">
               {{ item.title }}
             </span>

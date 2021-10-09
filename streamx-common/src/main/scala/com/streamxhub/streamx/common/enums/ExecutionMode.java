@@ -21,18 +21,44 @@
 package com.streamxhub.streamx.common.enums;
 
 
+import com.google.common.collect.Lists;
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * @author benjobs
  */
 
-public enum ExecutionMode {
+public enum ExecutionMode implements Serializable {
 
-    LOCAL(0, "remote"),
+    /**
+     * Local mode
+     */
+    LOCAL(0, "local"),
+    /**
+     * remote
+     */
     REMOTE(1, "remote"),
+    /**
+     * yarn-pre-job mode
+     */
     YARN_PRE_JOB(2, "yarn-pre-job"),
+    /**
+     * yarn session
+     */
     YARN_SESSION(3, "yarn-session"),
-    APPLICATION(4, "yarn-application"),
-    KUBERNETES(5, "kubernetes");
+    /**
+     * yarn application
+     */
+    YARN_APPLICATION(4, "yarn-application"),
+    /**
+     * kubernetes session
+     */
+    KUBERNETES_NATIVE_SESSION(5, "kubernetes-session"),
+    /**
+     * kubernetes application
+     */
+    KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application");
 
     private Integer mode;
     private String name;
@@ -67,4 +93,25 @@ public enum ExecutionMode {
     public String getName() {
         return name;
     }
+
+    public static boolean isYarnMode(ExecutionMode mode) {
+        return YARN_PRE_JOB.equals(mode) || YARN_APPLICATION.equals(mode) || YARN_SESSION.equals(mode);
+    }
+
+    public static boolean isYarnMode(Integer value) {
+        return isYarnMode(of(value));
+    }
+
+    public static boolean isKubernetesMode(ExecutionMode mode) {
+        return KUBERNETES_NATIVE_SESSION.equals(mode) || KUBERNETES_NATIVE_APPLICATION.equals(mode);
+    }
+
+    public static boolean isKubernetesMode(Integer value) {
+        return isKubernetesMode(of(value));
+    }
+
+    public static List<Integer> getKubernetesMode(){
+        return Lists.newArrayList(KUBERNETES_NATIVE_SESSION.getMode(), KUBERNETES_NATIVE_APPLICATION.getMode());
+    }
+
 }

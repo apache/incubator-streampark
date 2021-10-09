@@ -140,11 +140,11 @@ public class ObjectUtils {
      * @return whether the constant has been found in the given array
      */
     public static boolean containsConstant(
-            Enum<?>[] enumValues, String constant, boolean caseSensitive) {
+        Enum<?>[] enumValues, String constant, boolean caseSensitive) {
         for (Enum<?> candidate : enumValues) {
             if (caseSensitive
-                    ? candidate.toString().equals(constant)
-                    : candidate.toString().equalsIgnoreCase(constant)) {
+                ? candidate.toString().equals(constant)
+                : candidate.toString().equalsIgnoreCase(constant)) {
                 return true;
             }
         }
@@ -167,9 +167,9 @@ public class ObjectUtils {
             }
         }
         throw new IllegalArgumentException(
-                String.format(
-                        "constant [%s] does not exist in enum type %s",
-                        constant, enumValues.getClass().getComponentType().getName()));
+            String.format(
+                "constant [%s] does not exist in enum type %s",
+                constant, enumValues.getClass().getComponentType().getName()));
     }
 
     /**

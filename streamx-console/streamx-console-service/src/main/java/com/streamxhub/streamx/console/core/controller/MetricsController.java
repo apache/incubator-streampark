@@ -94,15 +94,15 @@ public class MetricsController {
         String file = flameGraphService.generateFlameGraph(flameGraph);
         if (file != null) {
             String contentDisposition = ContentDisposition
-                    .builder("attachment")
-                    .filename(file)
-                    .build()
-                    .toString();
+                .builder("attachment")
+                .filename(file)
+                .build()
+                .toString();
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
-                    .contentType(MediaType.parseMediaType("image/svg+xml"))
-                    .body(new FileSystemResource(file));
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
+                .contentType(MediaType.parseMediaType("image/svg+xml"))
+                .body(new FileSystemResource(file));
         } else {
             return null;
         }

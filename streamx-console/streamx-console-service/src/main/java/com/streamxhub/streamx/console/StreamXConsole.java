@@ -28,12 +28,25 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 /**
- * <pre><b>
- * 十步杀一人
- * 千里不留行
- * 事了拂衣去
- * 深藏身与名
- * </b></pre>
+ * <pre>
+ *
+ *               .+.
+ *         _____/ /_________  ____ _____ ___  _  __
+ *        / ___/ __/ ___/ _ \/ __ `/ __ `__ \| |/_/
+ *       (__  ) /_/ /  /  __/ /_/ / / / / / />   <
+ *      /____/\__/_/   \___/\__,_/_/ /_/ /_/_/|_|
+ *                                            |/
+ *                                            .
+ *
+ *      WebSite:  http://www.streamxhub.com
+ *      GitHub :  https://github.com/streamxhub/streamx
+ *      Gitee  :  https://gitee.com/benjobs/streamx
+ *
+ *      [StreamX] Make Flink|Spark easier ô‿ô!
+ *
+ *      十步杀一人 千里不留行 事了拂衣去 深藏身与名
+ *
+ * </pre>
  *
  * @author benjobs
  */

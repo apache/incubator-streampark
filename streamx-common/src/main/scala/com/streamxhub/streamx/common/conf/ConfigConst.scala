@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.common.conf
 
+import com.streamxhub.streamx.common.util.SystemPropertyUtils
+
 object ConfigConst {
   /**
    *
@@ -61,6 +63,10 @@ object ConfigConst {
    * kerberos
    */
   val KEY_KERBEROS = "kerberos"
+
+  val KEY_HADOOP_USER_NAME = "HADOOP_USER_NAME"
+
+  val DEFAULT_HADOOP_USER_NAME = "hdfs"
 
   /**
    * hadoop.security.authentication
@@ -107,6 +113,8 @@ object ConfigConst {
   val KEY_FLINK_DEPLOYMENT_OPTION_PREFIX = "flink.deployment.option."
 
   val KEY_FLINK_APP_NAME = "yarn.application.name"
+
+  val KEY_FLINK_SAVEPOINT_PATH = "execution.savepoint.path"
 
   // --checkpoints--
   val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"
@@ -281,84 +289,45 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
-  val STREAMX_HDFS_WORKSPACE_DEFAULT = "/streamx"
+  val KEY_STREAMX_WORKSPACE_LOCAL = "streamx.workspace.local"
 
-  val KEY_STREAMX_HDFS_WORKSPACE = "streamx.hdfs.workspace"
+  val KEY_STREAMX_WORKSPACE_REMOTE = "streamx.workspace.remote"
 
-  lazy val HDFS_WORKSPACE: String = {
-    val workspace = System.getProperties.getProperty(KEY_STREAMX_HDFS_WORKSPACE, STREAMX_HDFS_WORKSPACE_DEFAULT)
-    require(!workspace.startsWith("hdfs://"))
-    workspace
-  }
-
-  lazy val APP_PLUGINS = s"$HDFS_WORKSPACE/plugins"
+  val STREAMX_WORKSPACE_DEFAULT = "/streamx"
 
   /**
-   * 存放不同版本flink相关的jar
+   * maven repository used for built-in compilation
    */
-  lazy val APP_SHIMS = s"$HDFS_WORKSPACE/shims"
-
-  lazy val APP_UPLOADS = s"$HDFS_WORKSPACE/uploads"
-
-  lazy val APP_WORKSPACE = s"$HDFS_WORKSPACE/workspace"
-
-  lazy val APP_FLINK = s"$HDFS_WORKSPACE/flink"
-
-  lazy val APP_BACKUPS = s"$HDFS_WORKSPACE/backups"
-
-  lazy val APP_SAVEPOINTS = s"$HDFS_WORKSPACE/savepoints"
+  val DEFAULT_MAVEN_REMOTE_URL = "https://repo1.maven.org/maven2/"
 
   /**
-   * 存放全局公共的jar
+   * namespace for docker image used in docker build env and image register
    */
-  lazy val APP_JARS = s"$HDFS_WORKSPACE/jars"
+  val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
+  val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
+  lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
   val LOGO =
     """
       |
-      |                         ▒▓██▓██▒
-      |                     ▓████▒▒█▓▒▓███▓▒
-      |                  ▓███▓░░        ▒▒▒▓██▒  ▒
-      |                ░██▒   ▒▒▓▓█▓▓▒░      ▒████
-      |                ██▒         ░▒▓███▒    ▒█▒█▒
-      |                  ░▓█            ███   ▓░▒██
-      |                    ▓█       ▒▒▒▒▒▓██▓░▒░▓▓█
-      |                  █░ █   ▒▒░       ███▓▓█ ▒█▒▒▒
-      |                  ████░   ▒▓█▓      ██▒▒▒ ▓███▒
-      |               ░▒█▓▓██       ▓█▒    ▓█▒▓██▓ ░█░
-      |         ▓░▒▓████▒ ██         ▒█    █▓░▒█▒░▒█▒
-      |        ███▓░██▓  ▓█           █   █▓ ▒▓█▓▓█▒
-      |      ░██▓  ░█░            █  █▒ ▒█████▓▒ ██▓░▒
-      |     ███░ ░ █░          ▓ ░█ █████▒░░    ░█░▓  ▓░
-      |    ██▓█ ▒▒▓▒          ▓███████▓░       ▒█▒ ▒▓ ▓██▓
-      | ▒██▓ ▓█ █▓█       ░▒█████▓▓▒░         ██▒▒  █ ▒  ▓█▒
-      | ▓█▓  ▓█ ██▓ ░▓▓▓▓▓▓▓▒              ▒██▓           ░█▒
-      | ▓█    █ ▓███▓▒░              ░▓▓▓███▓          ░▒░ ▓█
-      | ██▓    ██▒    ░▒▓▓███▓▓▓▓▓██████▓▒            ▓███  █
-      |▓███▒ ███   ░▓▓▒░░   ░▓████▓░                  ░▒▓▒  █▓
-      |█▓▒▒▓▓██  ░▒▒░░░▒▒▒▒▓██▓░                            █▓
-      |██ ▓░▒█   ▓▓▓▓▒░░  ▒█▓       ▒▓▓██▓    ▓▒          ▒▒▓
-      |▓█▓ ▓▒█  █▓░  ░▒▓▓██▒            ░▓█▒   ▒▒▒░▒▒▓█████▒
-      | ██░ ▓█▒█▒  ▒▓▓▒  ▓█                █░      ░░░░   ░█▒
-      | ▓█   ▒█▓   ░     █░                ▒█              █▓
-      |  █▓   ██         █░                 ▓▓        ▒█▓▓▓▒█░
-      |   █▓ ░▓██░       ▓▒                  ▓█▓▒░░░▒▓█░    ▒█
-      |    ██   ▓█▓░      ▒                    ░▒█▒██▒      ▓▓
-      |     ▓█▒   ▒█▓▒░                         ▒▒ █▒█▓▒▒░░▒██
-      |      ░██▒    ▒▓▓▒                     ▓██▓▒█▒ ░▓▓▓▓▒█▓
-      |        ░▓██▒                          ▓░  ▒█▓█  ░░▒▒▒
-      |            ▒▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░▓▓  ▓░▒█░
+      |                 .+.
+      |           _____/ /_________  ____ _____ ___  _  __
+      |          / ___/ __/ ___/ _ \/ __ `/ __ `__ \| |/_/
+      |         (__  ) /_/ /  /  __/ /_/ / / / / / />  <
+      |        /____/\__/_/   \___/\__,_/_/ /_/ /_/_/|_|
+      |                                              |/
+      |                                              .
       |
+      |        WebSite:  http://www.streamxhub.com
+      |        GitHub :  https://github.com/streamxhub/streamx
+      |        Gitee  :  https://gitee.com/benjobs/streamx
+      |        Ver    :  1.2.0
       |
-      |            ____ __                          _  __
-      |           / __// /_ ____ ___  ___ _ __ _   | |/_/
-      |          _\ \ / __// __// -_)/ _ `//  ' \ _>  <
-      |         /___/ \__//_/   \__/ \_,_//_/_/_//_/|_|
+      |        [StreamX] Make Flink|Spark easier ô‿ô!
       |
-      |
-      |          [StreamX] Make Flink|Spark easier ô‿ô!
       |
       |""".stripMargin
+
 
 }
 

@@ -41,11 +41,11 @@ public class SortUtils {
      * @param camelToUnderscore 是否开启驼峰转下划线
      */
     public static void handlePageSort(
-            RestRequest request,
-            Page page,
-            String defaultSort,
-            String defaultOrder,
-            boolean camelToUnderscore) {
+        RestRequest request,
+        Page page,
+        String defaultSort,
+        String defaultOrder,
+        boolean camelToUnderscore) {
         page.setCurrent(request.getPageNum());
         page.setSize(request.getPageSize());
         String sortField = WebUtils.camelToUnderscore(request.getSortField());
@@ -54,9 +54,9 @@ public class SortUtils {
             defaultSort = WebUtils.camelToUnderscore(defaultSort);
         }
         if (StringUtils.isNotBlank(request.getSortField())
-                && StringUtils.isNotBlank(request.getSortOrder())
-                && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
-                && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
+            && StringUtils.isNotBlank(request.getSortOrder())
+            && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
+            && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
             if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
                 page.setDesc(sortField);
             } else {
@@ -104,20 +104,20 @@ public class SortUtils {
      * @param camelToUnderscore 是否开启驼峰转下划线
      */
     public static void handleWrapperSort(
-            RestRequest request,
-            QueryWrapper wrapper,
-            String defaultSort,
-            String defaultOrder,
-            boolean camelToUnderscore) {
+        RestRequest request,
+        QueryWrapper wrapper,
+        String defaultSort,
+        String defaultOrder,
+        boolean camelToUnderscore) {
         String sortField = request.getSortField();
         if (camelToUnderscore) {
             sortField = WebUtils.camelToUnderscore(sortField);
             defaultSort = WebUtils.camelToUnderscore(defaultSort);
         }
         if (StringUtils.isNotBlank(request.getSortField())
-                && StringUtils.isNotBlank(request.getSortOrder())
-                && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
-                && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
+            && StringUtils.isNotBlank(request.getSortOrder())
+            && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
+            && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
             if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
                 wrapper.orderByDesc(sortField);
             } else {
@@ -152,7 +152,7 @@ public class SortUtils {
      * @param camelToUnderscore 是否开启驼峰转下划线
      */
     public static void handleWrapperSort(
-            RestRequest request, QueryWrapper wrapper, boolean camelToUnderscore) {
+        RestRequest request, QueryWrapper wrapper, boolean camelToUnderscore) {
         handleWrapperSort(request, wrapper, null, null, camelToUnderscore);
     }
 }

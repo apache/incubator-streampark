@@ -42,14 +42,14 @@ import java.util.Date;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective>
-        implements EffectiveService {
+    implements EffectiveService {
 
     @Override
     public void delete(Long appId, EffectiveType effectiveType) {
         Wrapper<Effective> queryWrapper = new QueryWrapper<Effective>()
-                .lambda()
-                .eq(Effective::getAppId, appId)
-                .eq(Effective::getTargetType, effectiveType.getType());
+            .lambda()
+            .eq(Effective::getAppId, appId)
+            .eq(Effective::getTargetType, effectiveType.getType());
         baseMapper.delete(queryWrapper);
     }
 
@@ -61,9 +61,9 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
     @Override
     public void saveOrUpdate(Long appId, EffectiveType type, Long id) {
         Wrapper<Effective> queryWrapper = new QueryWrapper<Effective>()
-                .lambda()
-                .eq(Effective::getAppId, appId)
-                .eq(Effective::getTargetType, type.getType());
+            .lambda()
+            .eq(Effective::getAppId, appId)
+            .eq(Effective::getTargetType, type.getType());
         int count = count(queryWrapper);
         if (count == 0) {
             Effective effective = new Effective();
@@ -74,10 +74,10 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
             save(effective);
         } else {
             update(new UpdateWrapper<Effective>()
-                    .lambda()
-                    .eq(Effective::getAppId, appId)
-                    .eq(Effective::getTargetType, type.getType())
-                    .set(Effective::getTargetId, id)
+                .lambda()
+                .eq(Effective::getAppId, appId)
+                .eq(Effective::getTargetType, type.getType())
+                .set(Effective::getTargetId, id)
             );
         }
     }

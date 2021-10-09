@@ -24,7 +24,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
+import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -44,6 +46,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class SavePointController {
 
     @Autowired
+    private ApplicationService applicationService;
+
+    @Autowired
     private SavePointService savePointService;
 
     @PostMapping("latest")
@@ -61,7 +66,11 @@ public class SavePointController {
     @PostMapping("delete")
     @RequiresPermissions("savepoint:delete")
     public RestResponse delete(Long id) throws ServiceException {
-        Boolean deleted = savePointService.delete(id);
+        SavePoint savePoint = savePointService.getById(id);
+        assert savePoint != null;
+        Application application = applicationService.getById(savePoint.getAppId());
+        assert application != null;
+        Boolean deleted = savePointService.delete(id, application);
         return RestResponse.create().data(deleted);
     }
 }

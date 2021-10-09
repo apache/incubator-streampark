@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.submit.impl
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.DeflaterUtils
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
-import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.cli.CommandLine
 import org.apache.flink.client.cli.CustomCommandLine
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
@@ -46,6 +46,7 @@ import scala.util.Try
 /**
  * yarn PreJob mode submit
  */
+@deprecated
 object YarnPreJobSubmit extends YarnSubmitTrait {
 
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
@@ -126,7 +127,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
            ||__________________________________________________________________|
            |""".stripMargin)
 
-      SubmitResponse(applicationId, flinkConfig)
+      SubmitResponse(applicationId.toString, flinkConfig)
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }
@@ -135,8 +136,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
   private def getEffectiveConfiguration[T](submitRequest: SubmitRequest, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine) = {
     val effectiveConfiguration = super.applyConfiguration(submitRequest, activeCustomCommandLine, commandLine)
     val (providedLibs, programArgs) = {
-      val providedLibs = ListBuffer(submitRequest.workspaceEnv.appJars)
-
+      val providedLibs = ListBuffer(submitRequest.hdfsWorkspace.appJars)
       val programArgs = new ArrayBuffer[String]()
       Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
       programArgs += PARAM_KEY_APP_NAME

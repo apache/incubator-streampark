@@ -34,7 +34,6 @@ public interface SettingService extends IService<Setting> {
 
     String KEY_MAVEN_REPOSITORY = "maven.central.repository";
     String KEY_STREAMX_ADDRESS = "streamx.console.webapp.address";
-    String KEY_STREAMX_WORKSPACE = "streamx.console.workspace";
 
     String KEY_ALERT_EMAIL_HOST = "alert.email.host";
     String KEY_ALERT_EMAIL_PORT = "alert.email.port";
@@ -42,6 +41,11 @@ public interface SettingService extends IService<Setting> {
     String KEY_ALERT_EMAIL_USERNAME = "alert.email.userName";
     String KEY_ALERT_EMAIL_PASSWORD = "alert.email.password";
     String KEY_ALERT_EMAIL_SSL = "alert.email.ssl";
+
+    String KEY_DOCKER_REGISTER_ADDRESS = "docker.register.address";
+    String KEY_DOCKER_REGISTER_USER = "docker.register.user";
+    String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
+
 
     String KEY_ENV_FLINK_HOME = "env.flink.home";
 
@@ -56,8 +60,6 @@ public interface SettingService extends IService<Setting> {
      * @return
      */
     boolean update(Setting setting);
-
-    String getStreamXWorkspace();
 
     String getStreamXAddress();
 
@@ -76,6 +78,12 @@ public interface SettingService extends IService<Setting> {
     String getFlinkVersion();
 
     String getFlinkYaml();
+
+    String getDockerRegisterAddress();
+
+    String getDockerRegisterUser();
+
+    String getDockerRegisterPassword();
 
     void syncFlinkConf() throws IOException;
 }
