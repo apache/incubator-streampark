@@ -50,7 +50,7 @@
           @change="handleFlinkVersion">>
           <a-select-option
             v-for="(v,index) in flinkVersions"
-            :key="`version_${index}`"
+            :key="`flink_version_${index}`"
             :value="v.id">
             {{ v.flinkName }}
           </a-select-option>

@@ -543,6 +543,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.setJobType(application.getJobType());
             //以下参数发生变化,需要重新任务才能生效
             application.setJobName(appParam.getJobName());
+            application.setVersionId(appParam.getVersionId());
             application.setArgs(appParam.getArgs());
             application.setOptions(appParam.getOptions());
             application.setDynamicOptions(appParam.getDynamicOptions());

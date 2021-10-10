@@ -36,6 +36,7 @@ import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.util.JsonUtils;
+import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.core.enums.ApplicationType;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
@@ -462,11 +463,19 @@ public class Application implements Serializable {
         //5) Options 是否发生变化
         //6) Dynamic Option 是否发生变化
         //7) Program Args 是否发生变化
-        if (!this.getResolveOrder().equals(other.getResolveOrder()) ||
-            !this.getExecutionMode().equals(other.getExecutionMode()) ||
-            !this.getK8sRestExposedType().equals(other.getK8sRestExposedType())) {
+        //8) Flink Version  是否发生变化
+
+        if (!ObjectUtils.safeEquals(this.getVersionId(),other.getVersionId())) {
             return false;
         }
+
+        if (!ObjectUtils.safeEquals(this.getResolveOrder(), other.getResolveOrder()) ||
+            !ObjectUtils.safeEquals(this.getExecutionMode(), other.getExecutionMode()) ||
+            !ObjectUtils.safeEquals(this.getK8sRestExposedType(), other.getK8sRestExposedType())) {
+            return false;
+        }
+
+
 
         if (this.getOptions() != null) {
             if (other.getOptions() != null) {
