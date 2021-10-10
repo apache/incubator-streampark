@@ -43,6 +43,23 @@
         </a-select>
       </a-form-item>
 
+      <a-form-item
+        label="Flink Version"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          placeholder="Flink Version"
+          v-decorator="[ 'versionId', {rules: [{ required: true, message: 'Flink Version is required' }] }]"
+          @change="handleFlinkVersion">>
+          <a-select-option
+            v-for="(v,index) in flinkVersions"
+            :key="`version_${index}`"
+            :value="v.id">
+            {{ v.flinkName }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
       <template v-if="executionMode === 5|| executionMode === 6">
         <a-form-item
           label="Kubernetes Namespace"
@@ -862,6 +879,7 @@
 import Ellipsis from '@/components/Ellipsis'
 import {jars, listConf, modules, select} from '@api/project'
 import {create, exists, main, name, readConf, upload} from '@api/application'
+import {list as listVersion} from '@api/flinkversion'
 import {template} from '@api/config'
 import Mergely from './Mergely'
 import configOptions from './Option'
@@ -892,8 +910,10 @@ export default {
       tableEnv: 1,
       projectList: [],
       projectId: null,
+      versionId: null,
       module: null,
       moduleList: [],
+      flinkVersions: [],
       jars: [],
       resolveOrder: [
         {name: 'parent-first', order: 0},
@@ -1112,6 +1132,11 @@ export default {
       this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
       this.form.getFieldDecorator('executionMode', {initialValue: 4})
       this.form.getFieldDecorator('restartSize', {initialValue: 0})
+      listVersion().then((resp)=>{
+        this.flinkVersions = resp.data
+        const v = this.flinkVersions.filter((v) => {return v.isDefault})[0]
+        this.form.getFieldDecorator('versionId', {initialValue: v.id})
+      })
     },
 
     handleChangeJobType(value) {
@@ -1157,6 +1182,10 @@ export default {
 
     handleChangeMode(mode) {
       this.executionMode = mode
+    },
+
+    handleFlinkVersion(id) {
+      this.versionId = id
     },
 
     handleChangeJmMemory(value) {
@@ -1501,6 +1530,7 @@ export default {
       const params = {
         jobType: 1,
         executionMode: values.executionMode,
+        versionId: values.versionId,
         projectId: values.project,
         module: values.module,
         appType: this.appType,
@@ -1572,6 +1602,7 @@ export default {
       const params = {
         jobType: 2,
         executionMode: values.executionMode,
+        versionId: values.versionId,
         flinkSql: this.controller.flinkSql.value,
         appType: 1,
         config: config,

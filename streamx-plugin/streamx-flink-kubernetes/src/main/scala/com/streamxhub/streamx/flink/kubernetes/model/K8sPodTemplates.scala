@@ -34,6 +34,12 @@ object K8sPodTemplates {
   def of(podTemplate: String, jmPodTemplate: String, tmPodTemplate: String): K8sPodTemplates =
     K8sPodTemplates(safeGet(podTemplate), safeGet(jmPodTemplate), safeGet(tmPodTemplate))
 
-  private[this] def safeGet(content: String) = if (content != null && content.trim.nonEmpty) content else ""
+  private[this] def safeGet(content: String) = {
+    content match {
+      case null => ""
+      case x if x.trim.isEmpty => ""
+      case x => x
+    }
+  }
 
 }

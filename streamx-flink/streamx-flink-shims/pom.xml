@@ -18,6 +18,7 @@
         <module>streamx-flink-shims-base</module>
         <module>streamx-flink-shims_flink-1.12</module>
         <module>streamx-flink-shims_flink-1.13</module>
+        <module>streamx-flink-shims_flink-1.14</module>
     </modules>
 
 </project>

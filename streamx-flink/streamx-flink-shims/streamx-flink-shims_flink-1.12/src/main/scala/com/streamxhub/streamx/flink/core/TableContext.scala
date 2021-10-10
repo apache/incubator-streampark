@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.core
 
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.TableEnvironment
+import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor}
 
 
 class TableContext(override val parameter: ParameterTool,
@@ -40,5 +41,9 @@ class TableContext(override val parameter: ParameterTool,
    * @param args
    */
   def this(args: TableEnvConfig) = this(FlinkTableInitializer.initJavaTable(args))
+
+
+  @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
+
 
 }

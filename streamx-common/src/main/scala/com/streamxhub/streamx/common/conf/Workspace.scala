@@ -49,7 +49,8 @@ case class Workspace(storageType: StorageType) {
         path
       case StorageType.HDFS =>
         SystemPropertyUtils.get(KEY_STREAMX_WORKSPACE_REMOTE) match {
-          case null => STREAMX_WORKSPACE_DEFAULT
+          case null =>
+            s"${HdfsUtils.getDefaultFS}$STREAMX_WORKSPACE_DEFAULT"
           case p =>
             require(p.startsWith("hdfs://"))
             val path = p.replaceFirst("^hdfs://((.*):\\d+/+|/+|)", "/")

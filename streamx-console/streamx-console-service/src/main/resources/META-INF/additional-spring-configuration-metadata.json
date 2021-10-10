@@ -44,6 +44,21 @@
       "name": "streamx.flink-k8s.tracking.polling-interval-sec.cluster-metric",
       "type": "java.lang.String",
       "description": "Description for streamx.flink-k8s.tracking.polling-interval-sec.cluster-metric."
+    },
+    {
+      "name": "spring.devtools.restart.enabled",
+      "type": "java.lang.String",
+      "description": "Description for spring.devtools.restart.enabled."
+    },
+    {
+      "name": "streamx.workspace.local",
+      "type": "java.lang.String",
+      "description": "Description for streamx.workspace.local."
+    },
+    {
+      "name": "streamx.workspace.remote",
+      "type": "java.lang.String",
+      "description": "Description for streamx.workspace.remote."
     }
   ]
 }

@@ -45,7 +45,10 @@ object HdfsOperator extends FsOperator with Logger {
   override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit =
     HdfsUtils.copyHdfsDir(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
 
-  override def fileMd5(path: String): String = HdfsUtils.fileMd5(toHdfsPath(path))
+  override def fileMd5(path: String): String = {
+    require(path != null && path.nonEmpty)
+    HdfsUtils.fileMd5(toHdfsPath(path))
+  }
 
   private def toHdfsPath(path: String): String = {
     path match {

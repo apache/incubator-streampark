@@ -49,3 +49,5 @@ object MixinTableDataStreamApp extends FlinkStreamTable {
 
   }
 }
+
+case class Entity(id: String, name: String)

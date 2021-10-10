@@ -55,6 +55,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author benjobs
@@ -65,7 +66,7 @@ import java.util.concurrent.*;
 public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     implements ProjectService {
 
-    private final Map<Long, Byte> tailOutMap = new ConcurrentHashMap<>();
+    private volatile Map<Long, Byte> tailOutMap = new ConcurrentHashMap<>();
 
     private final Map<Long, StringBuilder> tailBuffer = new ConcurrentHashMap<>();
 
@@ -137,11 +138,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public RestResponse build(Long id) {
         Project project = getById(id);
         this.baseMapper.startBuild(project);
-        tailBuffer.put(id, new StringBuilder());
+        StringBuilder builder = new StringBuilder();
+        tailBuffer.put(id, builder.append(project.getLog4BuildStart()));
         boolean success = cloneSourceCode(project);
         if (success) {
             executorService.execute(() -> {
-                boolean build = ProjectServiceImpl.this.mavenBuild(project);
+                boolean build = ProjectServiceImpl.this.projectBuild(project);
                 if (build) {
                     this.baseMapper.successBuild(project);
                     // 发布到apps下
@@ -411,36 +413,39 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
      * @param project
      * @return
      */
-    private boolean mavenBuild(Project project) {
+    private boolean projectBuild(Project project) {
         StringBuilder builder = tailBuffer.get(project.getId());
-        builder.append(project.getLog4BuildStart());
+        AtomicBoolean success = new AtomicBoolean(false);
         CommandUtils.execute(project.getMavenBuildCmd(), (line) -> {
-            if (tailOutMap.containsKey(project.getId())) {
-                if (tailBeginning.remove(project.getId()) != null) {
-                    Arrays.stream(builder.toString().split("\n"))
-                        .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/build", x));
-                } else {
-                    simpMessageSendingOperations.convertAndSend("/resp/build", line);
-                }
-            }
             builder.append(line).append("\n");
+            if (line.contains("BUILD SUCCESS")) {
+                success.set(true);
+            }
+            if (tailOutMap.containsKey(project.getId())) {
+                if (tailBeginning.containsKey(project.getId())) {
+                    tailBeginning.remove(project.getId());
+                    Arrays.stream(builder.toString().split("\n"))
+                        .forEach(out -> simpMessageSendingOperations.convertAndSend("/resp/build", out));
+                }
+                simpMessageSendingOperations.convertAndSend("/resp/build", line);
+            }
         });
-        String out = builder.toString();
-        tailCleanUp(project.getId());
-        log.info(out);
-        return out.contains("BUILD SUCCESS");
+        closeBuildLog(project.getId());
+        log.info(builder.toString());
+        tailBuffer.remove(project.getId());
+        return success.get();
     }
 
     @Override
     public void tailBuildLog(Long id) {
         this.tailOutMap.put(id, Byte.valueOf("0"));
-        // 首次会从buffer里从头读取数据.有且仅有一次.
         this.tailBeginning.put(id, Byte.valueOf("0"));
     }
 
-    private void tailCleanUp(Long id) {
+    @Override
+    public void closeBuildLog(Long id) {
         tailOutMap.remove(id);
         tailBeginning.remove(id);
-        tailBuffer.remove(id);
     }
+
 }

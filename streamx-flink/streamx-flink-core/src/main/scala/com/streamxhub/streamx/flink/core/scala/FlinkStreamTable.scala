@@ -28,7 +28,6 @@ import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.{Table, TableConfig}
-import org.apache.flink.table.descriptors.ConnectTableDescriptor
 
 import scala.language.implicitConversions
 
@@ -38,8 +37,6 @@ trait FlinkStreamTable extends Logger {
   final implicit def tableExt(table: Table): TableExt.Table = new TableExt.Table(table)
 
   final implicit def tableConversions(table: Table): TableExt.TableConversions = new TableExt.TableConversions(table)
-
-  final implicit def descriptorExt(table: ConnectTableDescriptor): TableExt.ConnectTableDescriptor = new TableExt.ConnectTableDescriptor(table)
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 

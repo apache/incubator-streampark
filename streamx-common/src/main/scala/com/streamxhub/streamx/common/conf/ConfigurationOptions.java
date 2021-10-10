@@ -38,4 +38,6 @@ public class ConfigurationOptions {
 
     public static String KEY_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size";
 
+    public static String OPTION_DEFAULT_VALUE = "default";
+
 }

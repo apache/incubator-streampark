@@ -36,6 +36,7 @@ import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.util.JsonUtils;
+import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.core.enums.ApplicationType;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
@@ -50,7 +51,6 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -59,6 +59,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.streamxhub.streamx.common.conf.ConfigurationOptions.OPTION_DEFAULT_VALUE;
 import static com.streamxhub.streamx.console.core.enums.FlinkAppState.of;
 
 /**
@@ -93,6 +94,11 @@ public class Application implements Serializable {
 
     @TableField(strategy = FieldStrategy.IGNORED)
     private String jobId;
+
+    /**
+     * 对应的flink的版本.
+     */
+    private Long versionId;
 
     /**
      * k8s部署下clusterId
@@ -242,9 +248,7 @@ public class Application implements Serializable {
     private transient String flinkRestUrl;
 
     public void setK8sNamespace(String k8sNamespace) {
-        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ?
-            KubernetesConfigOptions.NAMESPACE.defaultValue() :
-            k8sNamespace;
+        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? OPTION_DEFAULT_VALUE : k8sNamespace;
     }
 
     public K8sPodTemplates getK8sPodTemplates() {
@@ -337,6 +341,7 @@ public class Application implements Serializable {
                 String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
                 return httpGetDoResult(url, AppInfo.class);
             } catch (IOException e) {
+                log.warn(e.getMessage());
                 String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
                 return httpGetDoResult(url, AppInfo.class);
             }
@@ -352,6 +357,7 @@ public class Application implements Serializable {
                 String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
                 return httpGetDoResult(url, JobsOverview.class);
             } catch (IOException e) {
+                log.warn(e.getMessage());
                 String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
                 return httpGetDoResult(url, JobsOverview.class);
             }
@@ -366,6 +372,7 @@ public class Application implements Serializable {
             String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
             return httpGetDoResult(url, Overview.class);
         } catch (IOException e) {
+            log.warn(e.getMessage());
             String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
             return httpGetDoResult(url, Overview.class);
         }
@@ -378,6 +385,7 @@ public class Application implements Serializable {
             String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId, jobId);
             return httpGetDoResult(url, CheckPoints.class);
         } catch (IOException e) {
+            log.warn(e.getMessage());
             String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId, jobId);
             return httpGetDoResult(url, CheckPoints.class);
         }
@@ -455,9 +463,15 @@ public class Application implements Serializable {
         //5) Options 是否发生变化
         //6) Dynamic Option 是否发生变化
         //7) Program Args 是否发生变化
-        if (!this.getResolveOrder().equals(other.getResolveOrder()) ||
-            !this.getExecutionMode().equals(other.getExecutionMode()) ||
-            !this.getK8sRestExposedType().equals(other.getK8sRestExposedType())) {
+        //8) Flink Version  是否发生变化
+
+        if (!ObjectUtils.safeEquals(this.getVersionId(),other.getVersionId())) {
+            return false;
+        }
+
+        if (!ObjectUtils.safeEquals(this.getResolveOrder(), other.getResolveOrder()) ||
+            !ObjectUtils.safeEquals(this.getExecutionMode(), other.getExecutionMode()) ||
+            !ObjectUtils.safeEquals(this.getK8sRestExposedType(), other.getK8sRestExposedType())) {
             return false;
         }
 

@@ -24,8 +24,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
 
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author benjobs
@@ -46,9 +44,6 @@ public interface SettingService extends IService<Setting> {
     String KEY_DOCKER_REGISTER_USER = "docker.register.user";
     String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
 
-
-    String KEY_ENV_FLINK_HOME = "env.flink.home";
-
     /**
      * @param key
      * @return
@@ -65,19 +60,9 @@ public interface SettingService extends IService<Setting> {
 
     String getMavenRepository();
 
-    String getEffectiveFlinkHome();
-
-    Map<String, String> getFlinkDefaultConfig();
-
     boolean checkWorkspace();
 
     SenderEmail getSenderEmail();
-
-    Setting getFlinkSetting() throws IOException;
-
-    String getFlinkVersion();
-
-    String getFlinkYaml();
 
     String getDockerRegisterAddress();
 
@@ -85,5 +70,4 @@ public interface SettingService extends IService<Setting> {
 
     String getDockerRegisterPassword();
 
-    void syncFlinkConf() throws IOException;
 }

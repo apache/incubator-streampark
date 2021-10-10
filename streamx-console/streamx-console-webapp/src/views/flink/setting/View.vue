@@ -1,73 +1,121 @@
 <template>
   <div>
-    <a-card
-      :bordered="false"
-      style="margin-top: 24px"
-      class="system_setting"
-      title="System Setting">
-      <a-list>
-        <a-list-item v-for="(item,index) in settings" :key="index">
-          <a-list-item-meta style="width: 50%">
-            <svg-icon class="avatar" name="flink" size="large" slot="avatar" v-if="item.key === 'env.flink.home'"></svg-icon>
-            <svg-icon class="avatar" name="maven" size="large" slot="avatar" v-if="item.key === 'maven.central.repository'"></svg-icon>
-            <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
-            <svg-icon class="avatar" name="host" size="large" slot="avatar" v-if="item.key === 'alert.email.host'"></svg-icon>
-            <svg-icon class="avatar" name="port" size="large" slot="avatar" v-if="item.key === 'alert.email.port'"></svg-icon>
-            <svg-icon class="avatar" name="mail" size="large" slot="avatar" v-if="item.key === 'alert.email.from'"></svg-icon>
-            <svg-icon class="avatar" name="user" size="large" slot="avatar" v-if="item.key === 'alert.email.userName'"></svg-icon>
-            <svg-icon class="avatar" name="keys" size="large" slot="avatar" v-if="item.key === 'alert.email.password'"></svg-icon>
-            <svg-icon class="avatar" name="ssl" size="large" slot="avatar" v-if="item.key === 'alert.email.ssl'"></svg-icon>
-            <svg-icon class="avatar" name="docker" size="large" slot="avatar" v-if="item.key === 'docker.register.address'"></svg-icon>
-            <svg-icon class="avatar" name="auth" size="large" slot="avatar" v-if="item.key === 'docker.register.user'"></svg-icon>
-            <svg-icon class="avatar" name="password" size="large" slot="avatar" v-if="item.key === 'docker.register.password'"></svg-icon>
-            <span slot="title">
-              {{ item.title }}
-            </span>
-            <span slot="description">
-              {{ item.description }}
-            </span>
-          </a-list-item-meta>
-          <div class="list-content" style="width: 50%">
-            <div class="list-content-item" style="width: 100%">
-              <template v-if="item.type === 1">
-                <input
-                  v-if="item.editable"
-                  :value="item.value"
-                  :class="item.key.replace(/\./g,'_')"
-                  class="ant-input"/>
-                <div v-else style="width: 100%;text-align: right">
-                  {{ item.value }}
+    <a-tabs type="card" class="setting">
+      <a-tab-pane key="system" tab="System Setting">
+        <a-card
+          :bordered="false"
+          class="system_setting">
+          <a-list>
+            <a-list-item v-for="(item,index) in settings" :key="index">
+              <a-list-item-meta style="width: 50%">
+                <svg-icon class="avatar" name="maven" size="large" slot="avatar" v-if="item.key === 'maven.central.repository'"></svg-icon>
+                <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
+                <svg-icon class="avatar" name="host" size="large" slot="avatar" v-if="item.key === 'alert.email.host'"></svg-icon>
+                <svg-icon class="avatar" name="port" size="large" slot="avatar" v-if="item.key === 'alert.email.port'"></svg-icon>
+                <svg-icon class="avatar" name="mail" size="large" slot="avatar" v-if="item.key === 'alert.email.from'"></svg-icon>
+                <svg-icon class="avatar" name="user" size="large" slot="avatar" v-if="item.key === 'alert.email.userName'"></svg-icon>
+                <svg-icon class="avatar" name="keys" size="large" slot="avatar" v-if="item.key === 'alert.email.password'"></svg-icon>
+                <svg-icon class="avatar" name="ssl" size="large" slot="avatar" v-if="item.key === 'alert.email.ssl'"></svg-icon>
+                <svg-icon class="avatar" name="docker" size="large" slot="avatar" v-if="item.key === 'docker.register.address'"></svg-icon>
+                <svg-icon class="avatar" name="auth" size="large" slot="avatar" v-if="item.key === 'docker.register.user'"></svg-icon>
+                <svg-icon class="avatar" name="password" size="large" slot="avatar" v-if="item.key === 'docker.register.password'"></svg-icon>
+                <span slot="title">{{ item.title }}</span>
+                <span slot="description">{{ item.description }}</span>
+              </a-list-item-meta>
+              <div class="list-content" style="width: 50%">
+                <div class="list-content-item" style="width: 100%">
+                  <template v-if="item.type === 1">
+                    <input
+                      v-if="item.editable"
+                      :value="item.value"
+                      :class="item.key.replace(/\./g,'_')"
+                      class="ant-input"/>
+                    <div v-else style="width: 100%;text-align: right">
+                      {{ item.value }}
+                    </div>
+                  </template>
+                  <template v-else>
+                    <a-switch
+                      checked-children="ON"
+                      un-checked-children="OFF"
+                      style="float: right;margin-right: 30px"
+                      :default-checked="item.value === 'true'"
+                      @change="handleSwitch(item)" />
+                  </template>
                 </div>
-              </template>
-              <template v-else>
-                <a-switch
-                  checked-children="ON"
-                  un-checked-children="OFF"
-                  style="float: right;margin-right: 30px"
-                  :default-checked="item.value === 'true'"
-                  @change="handleSwitch(item)" />
-              </template>
-            </div>
+              </div>
+              <div slot="actions" v-if="item.type === 1">
+                <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
+                <a v-else @click="handleSubmit(item)">Submit</a>
+              </div>
+            </a-list-item>
+          </a-list>
+        </a-card>
+      </a-tab-pane>
+      <a-tab-pane key="flink" tab="Flink Home">
+        <a-card
+          :bordered="false"
+          class="system_setting">
+          <div
+            v-permit="'project:create'">
+            <a-button
+              type="dashed"
+              style="width: 100%;margin-top: 20px"
+              icon="plus"
+              @click="handleFlinkFormVisible(true)">
+              Add New
+            </a-button>
           </div>
-          <div slot="actions" v-if="item.type === 1">
-            <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
-            <a v-else @click="handleSubmit(item)">Submit</a>
-            <a-divider v-if="item.key === 'env.flink.home'" type="vertical" />
-            <a v-if="item.key === 'env.flink.home'" @click="handleFlinkConf()">Flink Conf</a>
-          </div>
-        </a-list-item>
-      </a-list>
-    </a-card>
+          <a-list>
+            <a-list-item v-for="(item,index) in flinks" :key="index">
+              <a-list-item-meta style="width: 60%">
+                <svg-icon class="avatar" name="flink" size="large" slot="avatar"></svg-icon>
+                <span slot="title">{{ item.flinkName }}</span>
+                <span slot="description">{{ item.description }}</span>
+              </a-list-item-meta>
+
+              <div class="list-content" style="width: 40%">
+                <div class="list-content-item" style="width: 60%">
+                  <span>Flink Home</span>
+                  <p style="margin-top: 10px">
+                    {{ item.flinkHome }}
+                  </p>
+                </div>
+                <div
+                  class="list-content-item"
+                  style="width: 30%">
+                  <span>Default</span>
+                  <p style="margin-top: 10px">
+                    <a-switch :disabled="item.isDefault" @click="handleSetDefault(item)" v-model="item.isDefault">
+                      <a-icon slot="checkedChildren" type="check" />
+                      <a-icon slot="unCheckedChildren" type="close"/>
+                    </a-switch>
+                  </p>
+                </div>
+              </div>
+
+              <div slot="actions">
+                <a @click="handleEditFlink(item)">Edit</a>
+                <a-divider type="vertical" />
+                <a @click="handleFlinkConf(item)">Flink Conf</a>
+              </div>
+
+            </a-list-item>
+          </a-list>
+        </a-card>
+      </a-tab-pane>
+    </a-tabs>
+
     <a-drawer
       :mask-closable="false"
       width="calc(100% - 40%)"
       placement="right"
-      :visible="visiable"
+      :visible="flinkConfVisible"
       :centered="true"
       :keyboard="false"
       :body-style="{ paddingBottom: '80px' }"
       title="Flink Conf"
-      @close="handleClose()">
+      @close="handleCloseConf()">
       <a-col style="font-size: 0.9rem">
         <div style="padding-bottom: 15px">
           Flink Home: &nbsp;&nbsp; {{ flinkHome }}
@@ -87,11 +135,80 @@
         </div>
       </a-col>
     </a-drawer>
+
+    <a-modal
+      v-model="flinkFormVisible">
+      <template
+        slot="title">
+        <svg-icon
+          slot="icon"
+          name="play"/>
+        Add Flink
+      </template>
+
+      <a-form
+        :form="flinkForm">
+        <a-form-item
+          label="Flink Name"
+          style="margin-bottom: 10px"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-input
+            type="text"
+            placeholder="Please enter flink name"
+            v-decorator="['flinkName',{ rules: [{ required: true } ]}]"/>
+          <span
+            class="conf-switch"
+            style="color:darkgrey">the flink name, e.g: flink-1.12 </span>
+        </a-form-item>
+
+        <a-form-item
+          label="Flink Home"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-input
+            type="text"
+            placeholder="Please enter flink home"
+            v-decorator="['flinkHome',{ rules: [{ required: true } ]}]"/>
+          <span
+            class="conf-switch"
+            style="color:darkgrey">The absolute path of the FLINK_HOME</span>
+        </a-form-item>
+
+        <a-form-item
+          label="Description"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-textarea
+            rows="4"
+            name="description"
+            placeholder="Please enter description"
+            v-decorator="['description']"/>
+        </a-form-item>
+
+      </a-form>
+
+      <template slot="footer">
+        <a-button
+          key="back"
+          @click="handleFlinkFormVisible(false)">
+          Cancel
+        </a-button>
+        <a-button
+          key="submit"
+          @click="handleSubmitFlink"
+          type="primary">
+          Submit
+        </a-button>
+      </template>
+    </a-modal>
+
   </div>
 </template>
 
 <script>
-import {all, sync, update, getFlink } from '@api/setting'
+import {all, update } from '@api/setting'
+import {list, create, get as getFlink, sync, update as updateFlink,exists, setDefault } from '@api/flinkversion'
 import SvgIcon from '@/components/SvgIcon'
 import monaco from '@/views/flink/app/Monaco.yaml'
 
@@ -101,10 +218,15 @@ export default {
   data() {
     return {
       settings: [],
+      flinks: [],
+      flinkName: null,
       flinkHome: null,
       flinkConf: null,
-      visiable: false,
-      editor: null
+      versionId: null,
+      flinkConfVisible: false,
+      flinkFormVisible: false,
+      editor: null,
+      flinkForm: null
     }
   },
 
@@ -115,8 +237,9 @@ export default {
   },
 
   mounted() {
-    this.form = this.$form.createForm(this)
-    this.handleAll()
+    this.flinkForm = this.$form.createForm(this)
+    this.handleSettingAll()
+    this.handleFlinkAll()
   },
 
   methods: {
@@ -153,7 +276,7 @@ export default {
       }
     },
 
-    handleAll() {
+    handleSettingAll() {
       all({}).then((resp) => {
         this.settings = resp.data
       })
@@ -176,24 +299,85 @@ export default {
         key: setting.key,
         value: value
       }).then((resp) => {
-        this.handleAll()
+        this.handleSettingAll()
       })
     },
 
-    handleSync () {
-      sync({}).then((resp)=>{
-        this.$swal.fire({
-            icon: 'success',
-            title: 'Flink default conf sync successful!',
-            showConfirmButton: false,
-            timer: 2000
+    handleFlinkFormVisible(flag) {
+      this.versionId = null
+      this.flinkFormVisible = flag
+      this.flinkForm.resetFields()
+    },
+
+    handleEditFlink(item) {
+      this.versionId = item.id
+      this.flinkFormVisible = true
+      this.$nextTick(()=>{
+        this.flinkForm.setFieldsValue({
+          'flinkName': item.flinkName,
+          'flinkHome': item.flinkHome,
+          'description': item.description || null
+        })
+      })
+    },
+
+    handleFlinkAll() {
+      list({}).then((resp)=>{
+        this.flinks = resp.data
+      })
+    },
+
+    handleSubmitFlink(e) {
+      e.preventDefault()
+      this.flinkForm.validateFields((err, values) => {
+        if (!err) {
+          exists({
+            id: this.versionId,
+            flinkName: values.flinkName,
+            flinkHome: values.flinkHome
+          }).then((resp)=>{
+            if(resp.data) {
+              if(this.versionId == null) {
+                create(values).then((resp)=>{
+                  if(resp.data) {
+                    this.flinkFormVisible = false
+                    this.handleFlinkAll()
+                  }
+                })
+              } else {
+                updateFlink({
+                  id: this.versionId,
+                  flinkName: values.flinkName,
+                  flinkHome: values.flinkHome,
+                  description: values.description || null
+                }).then((resp)=>{
+                  this.flinkFormVisible = false
+                  this.$swal.fire({
+                    icon: 'success',
+                    title: values.flinkName.concat(' update successful!'),
+                    showConfirmButton: false,
+                    timer: 2000
+                  })
+                  this.handleFlinkAll()
+                })
+              }
+            } else {
+              this.$swal.fire(
+                'Failed',
+                'flink name or version is already exists',
+                'error'
+              )
+            }
           })
+        }
       })
     },
 
-    handleFlinkConf () {
-      this.visiable = true
-      getFlink({}).then((resp)=>{
+    handleFlinkConf (flink) {
+      this.flinkConfVisible = true
+      this.versionId = flink.id
+      this.flinkName = flink.flinkName
+      getFlink({id: this.versionId}).then((resp)=>{
         this.flinkHome = resp.data.flinkHome
         this.flinkConf = resp.data.flinkConf
         this.handleInitEditor()
@@ -213,8 +397,33 @@ export default {
       })
     },
 
-    handleClose() {
-      this.visiable = false
+    handleSync () {
+      sync({id: this.versionId}).then((resp)=>{
+        this.$swal.fire({
+          icon: 'success',
+          title: this.flinkName.concat(' conf sync successful!'),
+          showConfirmButton: false,
+          timer: 2000
+        })
+      })
+    },
+
+    handleSetDefault(item) {
+      if(item.isDefault) {
+        setDefault({ id: item.id }).then((resp)=>{
+          this.$swal.fire({
+            icon: 'success',
+            title: item.flinkName.concat(' set default successful!'),
+            showConfirmButton: false,
+            timer: 2000
+          })
+          this.handleFlinkAll()
+        })
+      }
+    },
+
+    handleCloseConf() {
+      this.flinkConfVisible = false
     },
 
     handleHeight(elem, h) {
@@ -227,7 +436,7 @@ export default {
         key: setting.key,
         value: setting.value !== 'true'
       }).then((resp) => {
-        this.handleAll()
+        this.handleSettingAll()
       })
     }
   },

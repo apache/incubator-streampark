@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.console.system.runner;
 
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -27,8 +28,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 /**
  * @author benjobs
@@ -44,7 +43,7 @@ public class StartedUpRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (context.isActive()) {
-            log.info(" start successful，time：" + LocalDateTime.now());
+            ConfigConst.printLogo("streamx-console start successful");
         }
     }
 }

@@ -33,6 +33,7 @@ import java.util.List;
  */
 public interface FlinkSqlService extends IService<FlinkSql> {
 
+    //TODO 所有的历史记录和版本相关功能,需要重构,重新讨论实现
     /**
      * @param flinkSql
      * @param latest   是否latest
@@ -48,7 +49,7 @@ public interface FlinkSqlService extends IService<FlinkSql> {
     void setCandidateOrEffective(CandidateType candidateType, Long appId, Long sqlId);
 
     /**
-     * @param appParam
+     * @param appId
      * @param decode
      * @return
      */
@@ -61,7 +62,7 @@ public interface FlinkSqlService extends IService<FlinkSql> {
     List<FlinkSql> history(Application application);
 
     /**
-     * @param application
+     * @param appId
      * @return
      */
     FlinkSql getCandidate(Long appId, CandidateType type);
@@ -77,5 +78,5 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
     void rollback(Application application);
 
-    SqlError verifySql(String sql);
+    SqlError verifySql(String sql, Long versionId);
 }

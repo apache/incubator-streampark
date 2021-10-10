@@ -32,6 +32,7 @@ import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{DeploymentOptionsInternal, PipelineOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+import org.apache.flink.util.IOUtils
 
 import java.io.File
 import scala.util.Try
@@ -125,8 +126,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
         throw e
     } finally {
-      if (clusterClient != null) clusterClient.close()
-      if (clusterDescriptor != null) clusterDescriptor.close()
+      IOUtils.closeAll(clusterClient, clusterDescriptor)
     }
   }
 

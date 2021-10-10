@@ -31,6 +31,9 @@ import scala.util.{Failure, Success, Try}
 
 
 /**
+ *
+ * <pre>
+ *
  * <<出征>>
  *
  * 让我扭过头决绝地走
@@ -91,10 +94,8 @@ import scala.util.{Failure, Success, Try}
  * 在出发之前唱起满江红
  * 看这一次
  * 无数的双手撑起黄鹤楼
+ * </pre>
  *
- */
-
-/**
  * @author benjobs
  */
 object RedisUtils extends Logger {

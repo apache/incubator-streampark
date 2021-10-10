@@ -70,8 +70,7 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
   }
 
   @Deprecated override def execute(jobName: String): JobExecutionResult = {
-    println(s"\033[95;1m$LOGO\033[1m\n")
-    println(s"[StreamX] FlinkStreaming $jobName Starting...")
+    printLogo(s"FlinkStreaming $jobName Starting...")
     super.execute(jobName)
   }
 }

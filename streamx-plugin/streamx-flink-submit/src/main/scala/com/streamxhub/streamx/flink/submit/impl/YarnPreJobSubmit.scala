@@ -124,9 +124,9 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
         )
         logInfo(
           s"""
-             ||-------------------------<<applicationId>>------------------------|
-             ||jobGraph getJobID: ${jobGraph.getJobID.toString}|
-             ||__________________________________________________________________|
+             |-------------------------<<applicationId>>------------------------
+             |jobGraph getJobID: ${jobGraph.getJobID.toString}
+             |__________________________________________________________________
              |""".stripMargin)
         deployInternal(
           clusterDescriptor,
@@ -141,9 +141,9 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
       val applicationId = clusterClient.getClusterId
       logInfo(
         s"""
-           ||-------------------------<<applicationId>>------------------------|
-           ||Flink Job Started: applicationId: $applicationId|
-           ||__________________________________________________________________|
+           |-------------------------<<applicationId>>------------------------
+           |Flink Job Started: applicationId: $applicationId
+           |__________________________________________________________________
            |""".stripMargin)
 
       SubmitResponse(applicationId.toString, flinkConfig)
@@ -161,7 +161,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
       programArgs += PARAM_KEY_APP_NAME
       programArgs += submitRequest.effectiveAppName
       programArgs += PARAM_KEY_FLINK_CONF
-      programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
+      programArgs += submitRequest.flinkYaml
 
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINKSQL =>
