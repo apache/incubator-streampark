@@ -55,9 +55,9 @@ public class FlinkVersionController {
     }
 
     @PostMapping("create")
-    public RestResponse create(FlinkVersion version) throws Exception {
-        flinkVersionService.create(version);
-        return RestResponse.create();
+    public RestResponse create(FlinkVersion version) {
+        boolean success = flinkVersionService.create(version);
+        return RestResponse.create().data(success);
     }
 
     @PostMapping("get")

@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2019 The StreamX Project
+ *
+ * <p>Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.streamxhub.streamx.console.core.entity;
 
 
@@ -6,10 +22,12 @@ import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
 import lombok.Data;
+import net.minidev.json.annotate.JsonIgnore;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -23,7 +41,7 @@ import java.util.regex.Pattern;
  */
 @Data
 @TableName("t_flink_version")
-public class FlinkVersion {
+public class FlinkVersion implements Serializable {
 
     private Long id;
 
@@ -44,9 +62,11 @@ public class FlinkVersion {
 
     private Date createTime;
 
+    @JsonIgnore
     private transient final Pattern flinkVersionPattern = Pattern.compile("^Version: (.*), Commit ID: (.*)$");
 
-    public String getFlinkVersion(String path) {
+    @JsonIgnore
+    public String extractFlinkVersion(String path) {
         assert path != null;
         AtomicReference<String> flinkVersion = new AtomicReference<>();
         if (path != null) {
@@ -76,11 +96,6 @@ public class FlinkVersion {
         return flinkVersion.get();
     }
 
-    public void setFlinkHome(String flinkHome) {
-        this.flinkHome = flinkHome;
-        this.version = getFlinkVersion(flinkHome);
-    }
-
     public void doSetFlinkConf() throws IOException {
         assert this.flinkHome != null;
         File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
@@ -91,10 +106,11 @@ public class FlinkVersion {
 
     public void doSetVersion() throws IOException {
         assert this.flinkHome != null;
-        this.setVersion(this.getFlinkVersion(this.getFlinkHome()));
+        this.setVersion(this.extractFlinkVersion(this.getFlinkHome()));
     }
 
-    public Map<String, String> getFlinkYamlMap() {
+    @JsonIgnore
+    public Map<String, String> convertFlinkYamlAsMap() {
         String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
         return PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
     }

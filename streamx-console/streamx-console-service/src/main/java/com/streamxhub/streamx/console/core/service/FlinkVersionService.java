@@ -44,7 +44,7 @@ public interface FlinkVersionService extends IService<FlinkVersion> {
      * @param version
      * @throws IOException
      */
-    void create(FlinkVersion version) throws IOException;
+    boolean create(FlinkVersion version);
 
     /**
      * update

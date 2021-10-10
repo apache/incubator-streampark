@@ -77,7 +77,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         FlinkVersion flinkVersion = flinkVersionService.getByAppId(entity.getAppId());
         assert flinkVersion != null;
         int cpThreshold = Integer.parseInt(
-            flinkVersion.getFlinkYamlMap()
+            flinkVersion.convertFlinkYamlAsMap()
                 .getOrDefault("state.checkpoints.num-retained", "1")
         );
 

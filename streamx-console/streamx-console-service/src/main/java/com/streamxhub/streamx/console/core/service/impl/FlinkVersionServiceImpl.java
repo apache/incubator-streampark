@@ -57,7 +57,7 @@ public class FlinkVersionServiceImpl extends ServiceImpl<FlinkVersionMapper, Fli
         );
         if (count == 0) {
             //2) check version
-            String flinkVersion = version.getFlinkVersion(version.getFlinkHome());
+            String flinkVersion = version.extractFlinkVersion(version.getFlinkHome());
             count = this.count(
                 new LambdaQueryWrapper<FlinkVersion>().eq(FlinkVersion::getVersion, flinkVersion)
             );
@@ -67,15 +67,20 @@ public class FlinkVersionServiceImpl extends ServiceImpl<FlinkVersionMapper, Fli
     }
 
     @Override
-    public void create(FlinkVersion version) throws IOException {
+    public boolean create(FlinkVersion version) {
         int count = this.baseMapper.selectCount(null);
         if (count == 0) {
             version.setIsDefault(true);
         }
-        version.setCreateTime(new Date());
-        version.doSetVersion();
-        version.doSetFlinkConf();
-        save(version);
+        try {
+            version.setCreateTime(new Date());
+            version.doSetVersion();
+            version.doSetFlinkConf();
+            return save(version);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return false;
+        }
     }
 
     @Override

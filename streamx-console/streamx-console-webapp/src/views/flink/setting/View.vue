@@ -70,7 +70,7 @@
             <a-list-item v-for="(item,index) in flinks" :key="index">
               <a-list-item-meta style="width: 50%">
                 <svg-icon class="avatar" name="flink" size="large" slot="avatar"></svg-icon>
-                <span slot="title">{{ item.name }}</span>
+                <span slot="title">{{ item.flinkName }}</span>
                 <span slot="description">{{ item.description }}</span>
               </a-list-item-meta>
               <div class="list-content" style="width: 50%">
@@ -156,6 +156,18 @@
             class="conf-switch"
             style="color:darkgrey">The absolute path of the FLINK_HOME</span>
         </a-form-item>
+
+        <a-form-item
+          label="Description"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-textarea
+            rows="4"
+            name="description"
+            placeholder="Please enter description"
+            v-decorator="['description']"/>
+        </a-form-item>
+
       </a-form>
 
       <template slot="footer">
@@ -188,20 +200,7 @@ export default {
   data() {
     return {
       settings: [],
-      flinks: [
-        {
-          name: 'flink 1.12.0',
-          flinkHome: '/usr/local/flink-1.12.0',
-          description: 'flink 1.12.0',
-          editable: false,
-        },
-        {
-          name: 'flink 1.13.0',
-          flinkHome: '/usr/local/flink-1.13.0',
-          description: 'flink 1.13.0',
-          editable: false,
-        },
-      ],
+      flinks: [],
       flinkHome: null,
       flinkConf: null,
       flinkConfVisible: false,
@@ -219,7 +218,8 @@ export default {
 
   mounted() {
     this.flinkForm = this.$form.createForm(this)
-    this.handleAll()
+    this.handleSettingAll()
+    this.handleFlinkAll()
   },
 
   methods: {
@@ -256,7 +256,7 @@ export default {
       }
     },
 
-    handleAll() {
+    handleSettingAll() {
       all({}).then((resp) => {
         this.settings = resp.data
       })
@@ -279,7 +279,7 @@ export default {
         key: setting.key,
         value: value
       }).then((resp) => {
-        this.handleAll()
+        this.handleSettingAll()
       })
     },
 
@@ -295,11 +295,35 @@ export default {
 
     },
 
+    handleFlinkAll() {
+      list({}).then((resp)=>{
+        this.flinks = resp.data
+      })
+    },
+
     handleSubmitFlink(e) {
       e.preventDefault()
       this.flinkForm.validateFields((err, values) => {
         if (!err) {
-
+          exists({
+            flinkName: values.flinkName,
+            flinkHome: values.flinkHome
+          }).then((resp)=>{
+            if(resp.data) {
+              create(values).then((resp)=>{
+                if(resp.data) {
+                  this.flinkFormVisible = false
+                  this.handleFlinkAll()
+                }
+              })
+            } else {
+              this.$swal.fire(
+                'Failed',
+                'flink name or version is already exists',
+                'error'
+              )
+            }
+          })
         }
       })
     },
@@ -340,7 +364,7 @@ export default {
         key: setting.key,
         value: setting.value !== 'true'
       }).then((resp) => {
-        this.handleAll()
+        this.handleSettingAll()
       })
     }
   },
