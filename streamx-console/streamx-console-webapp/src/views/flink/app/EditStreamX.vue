@@ -1202,6 +1202,7 @@ export default {
         }
         this.defaultOptions = JSON.parse(this.app.options)
         this.configId = this.app.configId
+        this.versionId = this.app.versionId
         this.defaultFlinkSqlId = this.app['sqlId'] || null
         this.handleReset()
         this.handleListConfVersion()

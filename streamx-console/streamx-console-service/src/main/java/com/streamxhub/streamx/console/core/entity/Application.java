@@ -475,8 +475,6 @@ public class Application implements Serializable {
             return false;
         }
 
-
-
         if (this.getOptions() != null) {
             if (other.getOptions() != null) {
                 if (!this.getOptions().trim().equals(other.getOptions().trim())) {

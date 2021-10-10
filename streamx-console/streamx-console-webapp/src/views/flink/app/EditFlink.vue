@@ -564,6 +564,7 @@ export default {
     handleGet(appId) {
       get({ id: appId }).then((resp) => {
         this.app = resp.data
+        this.versionId = this.app.versionId
         this.defaultOptions = JSON.parse(this.app.options)
         jars({
           id: this.app.projectId,
