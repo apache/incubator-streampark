@@ -57,8 +57,7 @@ abstract class FlinkTableTrait(val parameter: ParameterTool,
   }
 
   override def execute(jobName: String): JobExecutionResult = {
-    println(s"\033[95;1m$LOGO\033[1m\n")
-    println(s"[StreamX] FlinkTable $jobName Starting...")
+    printLogo(s"FlinkTable $jobName Starting...")
     tableEnv.execute(jobName)
   }
 

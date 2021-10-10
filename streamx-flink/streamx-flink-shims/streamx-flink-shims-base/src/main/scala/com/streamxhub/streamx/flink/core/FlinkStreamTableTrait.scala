@@ -87,8 +87,7 @@ abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
   }
 
   @deprecated override def execute(jobName: String): JobExecutionResult = {
-    println(s"\033[95;1m$LOGO\033[1m\n")
-    println(s"[StreamX] FlinkStreamTable $jobName Starting...")
+    printLogo(s"FlinkStreamTable $jobName Starting...")
     if (isConvertedToDataStream) {
       streamEnv.execute(jobName)
     } else null

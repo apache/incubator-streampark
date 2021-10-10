@@ -1,63 +1,103 @@
 <template>
   <div>
-    <a-card
-      :bordered="false"
-      style="margin-top: 24px"
-      class="system_setting"
-      title="System Setting">
-      <a-list>
-        <a-list-item v-for="(item,index) in settings" :key="index">
-          <a-list-item-meta style="width: 50%">
-            <svg-icon class="avatar" name="flink" size="large" slot="avatar" v-if="item.key === 'env.flink.home'"></svg-icon>
-            <svg-icon class="avatar" name="maven" size="large" slot="avatar" v-if="item.key === 'maven.central.repository'"></svg-icon>
-            <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
-            <svg-icon class="avatar" name="host" size="large" slot="avatar" v-if="item.key === 'alert.email.host'"></svg-icon>
-            <svg-icon class="avatar" name="port" size="large" slot="avatar" v-if="item.key === 'alert.email.port'"></svg-icon>
-            <svg-icon class="avatar" name="mail" size="large" slot="avatar" v-if="item.key === 'alert.email.from'"></svg-icon>
-            <svg-icon class="avatar" name="user" size="large" slot="avatar" v-if="item.key === 'alert.email.userName'"></svg-icon>
-            <svg-icon class="avatar" name="keys" size="large" slot="avatar" v-if="item.key === 'alert.email.password'"></svg-icon>
-            <svg-icon class="avatar" name="ssl" size="large" slot="avatar" v-if="item.key === 'alert.email.ssl'"></svg-icon>
-            <svg-icon class="avatar" name="docker" size="large" slot="avatar" v-if="item.key === 'docker.register.address'"></svg-icon>
-            <svg-icon class="avatar" name="auth" size="large" slot="avatar" v-if="item.key === 'docker.register.user'"></svg-icon>
-            <svg-icon class="avatar" name="password" size="large" slot="avatar" v-if="item.key === 'docker.register.password'"></svg-icon>
-            <span slot="title">
-              {{ item.title }}
-            </span>
-            <span slot="description">
-              {{ item.description }}
-            </span>
-          </a-list-item-meta>
-          <div class="list-content" style="width: 50%">
-            <div class="list-content-item" style="width: 100%">
-              <template v-if="item.type === 1">
-                <input
-                  v-if="item.editable"
-                  :value="item.value"
-                  :class="item.key.replace(/\./g,'_')"
-                  class="ant-input"/>
-                <div v-else style="width: 100%;text-align: right">
-                  {{ item.value }}
+    <a-tabs type="card" class="setting">
+      <a-tab-pane key="system" tab="System Setting">
+        <a-card
+          :bordered="false"
+          class="system_setting">
+          <a-list>
+            <a-list-item v-for="(item,index) in settings" :key="index">
+              <a-list-item-meta style="width: 50%">
+                <svg-icon class="avatar" name="flink" size="large" slot="avatar" v-if="item.key === 'env.flink.home'"></svg-icon>
+                <svg-icon class="avatar" name="maven" size="large" slot="avatar" v-if="item.key === 'maven.central.repository'"></svg-icon>
+                <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
+                <svg-icon class="avatar" name="host" size="large" slot="avatar" v-if="item.key === 'alert.email.host'"></svg-icon>
+                <svg-icon class="avatar" name="port" size="large" slot="avatar" v-if="item.key === 'alert.email.port'"></svg-icon>
+                <svg-icon class="avatar" name="mail" size="large" slot="avatar" v-if="item.key === 'alert.email.from'"></svg-icon>
+                <svg-icon class="avatar" name="user" size="large" slot="avatar" v-if="item.key === 'alert.email.userName'"></svg-icon>
+                <svg-icon class="avatar" name="keys" size="large" slot="avatar" v-if="item.key === 'alert.email.password'"></svg-icon>
+                <svg-icon class="avatar" name="ssl" size="large" slot="avatar" v-if="item.key === 'alert.email.ssl'"></svg-icon>
+                <svg-icon class="avatar" name="docker" size="large" slot="avatar" v-if="item.key === 'docker.register.address'"></svg-icon>
+                <svg-icon class="avatar" name="auth" size="large" slot="avatar" v-if="item.key === 'docker.register.user'"></svg-icon>
+                <svg-icon class="avatar" name="password" size="large" slot="avatar" v-if="item.key === 'docker.register.password'"></svg-icon>
+                <span slot="title">{{ item.title }}</span>
+                <span slot="description">{{ item.description }}</span>
+              </a-list-item-meta>
+              <div class="list-content" style="width: 50%">
+                <div class="list-content-item" style="width: 100%">
+                  <template v-if="item.type === 1">
+                    <input
+                      v-if="item.editable"
+                      :value="item.value"
+                      :class="item.key.replace(/\./g,'_')"
+                      class="ant-input"/>
+                    <div v-else style="width: 100%;text-align: right">
+                      {{ item.value }}
+                    </div>
+                  </template>
+                  <template v-else>
+                    <a-switch
+                      checked-children="ON"
+                      un-checked-children="OFF"
+                      style="float: right;margin-right: 30px"
+                      :default-checked="item.value === 'true'"
+                      @change="handleSwitch(item)" />
+                  </template>
                 </div>
-              </template>
-              <template v-else>
-                <a-switch
-                  checked-children="ON"
-                  un-checked-children="OFF"
-                  style="float: right;margin-right: 30px"
-                  :default-checked="item.value === 'true'"
-                  @change="handleSwitch(item)" />
-              </template>
-            </div>
+              </div>
+              <div slot="actions" v-if="item.type === 1">
+                <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
+                <a v-else @click="handleSubmit(item)">Submit</a>
+                <a-divider v-if="item.key === 'env.flink.home'" type="vertical" />
+                <a v-if="item.key === 'env.flink.home'" @click="handleFlinkConf()">Flink Conf</a>
+              </div>
+            </a-list-item>
+          </a-list>
+        </a-card>
+      </a-tab-pane>
+      <a-tab-pane key="flink" tab="Flink Home">
+        <a-card
+          :bordered="false"
+          class="system_setting">
+          <div
+            v-permit="'project:create'">
+            <a-button
+              type="dashed"
+              style="width: 100%;margin-top: 20px"
+              icon="plus"
+              @click="handleAddFlink">
+              Add New
+            </a-button>
           </div>
-          <div slot="actions" v-if="item.type === 1">
-            <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
-            <a v-else @click="handleSubmit(item)">Submit</a>
-            <a-divider v-if="item.key === 'env.flink.home'" type="vertical" />
-            <a v-if="item.key === 'env.flink.home'" @click="handleFlinkConf()">Flink Conf</a>
-          </div>
-        </a-list-item>
-      </a-list>
-    </a-card>
+          <a-list>
+            <a-list-item v-for="(item,index) in flinks" :key="index">
+              <a-list-item-meta style="width: 50%">
+                <svg-icon class="avatar" name="flink" size="large" slot="avatar"></svg-icon>
+                <span slot="title">{{ item.name }}</span>
+                <span slot="description">{{ item.description }}</span>
+              </a-list-item-meta>
+              <div class="list-content" style="width: 50%">
+                <div class="list-content-item" style="width: 100%">
+                  <input
+                    v-if="item.editable"
+                    :value="item.path"
+                    class="ant-input"/>
+                  <div v-else style="width: 100%;text-align: right">
+                    {{ item.path }}
+                  </div>
+                </div>
+              </div>
+              <div slot="actions">
+                <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
+                <a v-else @click="handleEditFlink(item)">Submit</a>
+                <a-divider type="vertical" />
+                <a @click="handleFlinkConf(item)">Flink Conf</a>
+              </div>
+            </a-list-item>
+          </a-list>
+        </a-card>
+      </a-tab-pane>
+    </a-tabs>
     <a-drawer
       :mask-closable="false"
       width="calc(100% - 40%)"
@@ -101,6 +141,20 @@ export default {
   data() {
     return {
       settings: [],
+      flinks: [
+        {
+          name: 'flink 1.12.0',
+          path: '/usr/local/flink-1.12.0',
+          description: 'flink 1.12.0',
+          editable: false,
+        },
+        {
+          name: 'flink 1.13.0',
+          path: '/usr/local/flink-1.13.0',
+          description: 'flink 1.13.0',
+          editable: false,
+        },
+      ],
       flinkHome: null,
       flinkConf: null,
       visiable: false,
@@ -189,6 +243,14 @@ export default {
             timer: 2000
           })
       })
+    },
+
+    handleAddFlink() {
+
+    },
+
+    handleEditFlink() {
+
     },
 
     handleFlinkConf () {
