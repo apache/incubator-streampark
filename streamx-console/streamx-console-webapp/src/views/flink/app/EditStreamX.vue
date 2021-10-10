@@ -40,6 +40,23 @@
         </a-select>
       </a-form-item>
 
+      <a-form-item
+        label="Flink Version"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          placeholder="Flink Version"
+          v-decorator="[ 'versionId', {rules: [{ required: true, message: 'Flink Version is required' }] }]"
+          @change="handleFlinkVersion">>
+          <a-select-option
+            v-for="(v,index) in flinkVersions"
+            :key="`version_${index}`"
+            :value="v.id">
+            {{ v.flinkName }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
       <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode === 5 || executionMode === 6)">
         <a-form-item
           label="Kubernetes Namespace"
@@ -979,6 +996,7 @@ import {
 } from './AddEdit'
 
 import { toPomString } from './Pom'
+import {list as listVersion} from '@/api/flinkversion'
 
 export default {
   name: 'EditStreamX',
@@ -1028,6 +1046,8 @@ export default {
       isSetConfig: false,
       configOverride: null,
       configId: null,
+      versionId: null,
+      flinkVersions: [],
       configVersions: [],
       flinkSqlHistory: [],
       flinkSql: {},
@@ -1146,6 +1166,9 @@ export default {
       this.optionsValueMapping.set(item.name, item.key)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
+    listVersion().then((resp)=>{
+      this.flinkVersions = resp.data
+    })
   },
 
   filters: {
@@ -1186,6 +1209,10 @@ export default {
       }).catch((error) => {
         this.$message.error(error.message)
       })
+    },
+
+    handleFlinkVersion(id) {
+      this.versionId = id
     },
 
     handleChangeMode(mode) {
@@ -1549,7 +1576,6 @@ export default {
     },
 
     handleSubmitCustomJob(values) {
-      debugger
       const options = this.handleFormValue(values)
       const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
       let config = this.configOverride || this.app.config
@@ -1564,6 +1590,7 @@ export default {
         jobName: values.jobName,
         format: format,
         configId: configId,
+        versionId: values.versionId,
         config: config,
         args: values.args,
         options: JSON.stringify(options),
@@ -1614,6 +1641,7 @@ export default {
         sqlId: this.defaultFlinkSqlId || null,
         flinkSql: this.controller.flinkSql.value,
         config: config,
+        versionId: values.versionId,
         jobName: values.jobName,
         args: values.args || null,
         dependency: dependency.pom === undefined && dependency.jar === undefined ? null : JSON.stringify(dependency),
@@ -1793,6 +1821,7 @@ export default {
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
           'resolveOrder': this.app.resolveOrder,
+          'versionId': this.app.versionId,
           'k8sRestExposedType': this.app.k8sRestExposedType,
           'executionMode': this.app.executionMode,
           'restartSize': this.app.restartSize,

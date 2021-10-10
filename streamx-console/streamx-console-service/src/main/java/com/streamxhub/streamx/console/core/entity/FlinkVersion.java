@@ -118,4 +118,8 @@ public class FlinkVersion implements Serializable {
     public void unzipFlinkConf() {
         this.flinkConf = DeflaterUtils.unzipString(this.flinkConf);
     }
+
+    public String getLargeVersion() {
+        return this.version.substring(0, this.version.lastIndexOf("."));
+    }
 }

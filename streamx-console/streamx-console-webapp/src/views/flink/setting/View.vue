@@ -62,33 +62,44 @@
               type="dashed"
               style="width: 100%;margin-top: 20px"
               icon="plus"
-              @click="flinkFormVisible = true">
+              @click="handleFlinkFormVisible(true)">
               Add New
             </a-button>
           </div>
           <a-list>
             <a-list-item v-for="(item,index) in flinks" :key="index">
-              <a-list-item-meta style="width: 50%">
+              <a-list-item-meta style="width: 60%">
                 <svg-icon class="avatar" name="flink" size="large" slot="avatar"></svg-icon>
                 <span slot="title">{{ item.flinkName }}</span>
                 <span slot="description">{{ item.description }}</span>
               </a-list-item-meta>
-              <div class="list-content" style="width: 50%">
-                <div class="list-content-item" style="width: 100%">
-                  <input
-                    v-if="item.editable"
-                    :value="item.flinkHome"
-                    class="ant-input"/>
-                  <div v-else style="width: 100%;text-align: right">
+
+              <div class="list-content" style="width: 40%">
+                <div class="list-content-item" style="width: 60%">
+                  <span>Flink Home</span>
+                  <p style="margin-top: 10px">
                     {{ item.flinkHome }}
-                  </div>
+                  </p>
+                </div>
+                <div
+                  class="list-content-item"
+                  style="width: 30%">
+                  <span>Default</span>
+                  <p style="margin-top: 10px">
+                    <a-switch :disabled="item.isDefault" @click="handleSetDefault(item)" v-model="item.isDefault">
+                      <a-icon slot="checkedChildren" type="check" />
+                      <a-icon slot="unCheckedChildren" type="close"/>
+                    </a-switch>
+                  </p>
                 </div>
               </div>
+
               <div slot="actions">
                 <a @click="handleEditFlink(item)">Edit</a>
                 <a-divider type="vertical" />
                 <a @click="handleFlinkConf(item)">Flink Conf</a>
               </div>
+
             </a-list-item>
           </a-list>
         </a-card>
@@ -180,7 +191,7 @@
       <template slot="footer">
         <a-button
           key="back"
-          @click="flinkFormVisible = false">
+          @click="handleFlinkFormVisible(false)">
           Cancel
         </a-button>
         <a-button
@@ -292,11 +303,23 @@ export default {
       })
     },
 
-    handleEditFlink() {
-
+    handleFlinkFormVisible(flag) {
+      this.versionId = null
+      this.flinkFormVisible = flag
+      this.flinkForm.resetFields()
     },
 
-
+    handleEditFlink(item) {
+      this.versionId = item.id
+      this.flinkFormVisible = true
+      this.$nextTick(()=>{
+        this.flinkForm.setFieldsValue({
+          'flinkName': item.flinkName,
+          'flinkHome': item.flinkHome,
+          'description': item.description || null
+        })
+      })
+    },
 
     handleFlinkAll() {
       list({}).then((resp)=>{
@@ -309,16 +332,35 @@ export default {
       this.flinkForm.validateFields((err, values) => {
         if (!err) {
           exists({
+            id: this.versionId,
             flinkName: values.flinkName,
             flinkHome: values.flinkHome
           }).then((resp)=>{
             if(resp.data) {
-              create(values).then((resp)=>{
-                if(resp.data) {
+              if(this.versionId == null) {
+                create(values).then((resp)=>{
+                  if(resp.data) {
+                    this.flinkFormVisible = false
+                    this.handleFlinkAll()
+                  }
+                })
+              } else {
+                updateFlink({
+                  id: this.versionId,
+                  flinkName: values.flinkName,
+                  flinkHome: values.flinkHome,
+                  description: values.description || null
+                }).then((resp)=>{
                   this.flinkFormVisible = false
+                  this.$swal.fire({
+                    icon: 'success',
+                    title: values.flinkName.concat(' update successful!'),
+                    showConfirmButton: false,
+                    timer: 2000
+                  })
                   this.handleFlinkAll()
-                }
-              })
+                })
+              }
             } else {
               this.$swal.fire(
                 'Failed',
@@ -364,6 +406,20 @@ export default {
           timer: 2000
         })
       })
+    },
+
+    handleSetDefault(item) {
+      if(item.isDefault) {
+        setDefault({ id: item.id }).then((resp)=>{
+          this.$swal.fire({
+            icon: 'success',
+            title: item.flinkName.concat(' set default successful!'),
+            showConfirmButton: false,
+            timer: 2000
+          })
+          this.handleFlinkAll()
+        })
+      }
     },
 
     handleCloseConf() {

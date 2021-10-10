@@ -36,7 +36,7 @@ public interface FlinkVersionMapper extends BaseMapper<FlinkVersion> {
      *
      * @param id
      */
-    @Update("update t_flink_version set is_default = case id then #{id} then 1 else 0 end")
+    @Update("update t_flink_version set is_default = case id when #{id} then 1 else 0 end")
     void setDefault(@Param("id") Long id);
 
     /**

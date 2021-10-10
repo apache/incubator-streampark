@@ -46,8 +46,8 @@ public class FlinkSqlController {
     private FlinkSqlService flinkSqlService;
 
     @PostMapping("verify")
-    public RestResponse verify(String sql) {
-        SqlError sqlError = flinkSqlService.verifySql(sql);
+    public RestResponse verify(String sql, Long versionId) {
+        SqlError sqlError = flinkSqlService.verifySql(sql, versionId);
         if (sqlError != null) {
             String[] array = sqlError.sql().trim().split("\n");
             String start = array[0].trim();

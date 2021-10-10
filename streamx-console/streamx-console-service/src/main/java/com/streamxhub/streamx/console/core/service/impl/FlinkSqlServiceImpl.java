@@ -32,11 +32,13 @@ import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.FlinkSqlMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
+import com.streamxhub.streamx.console.core.entity.FlinkVersion;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
+import com.streamxhub.streamx.console.core.service.FlinkVersionService;
 import com.streamxhub.streamx.flink.core.SqlError;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +74,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Autowired
     private ApplicationBackUpService backUpService;
+
+    @Autowired
+    private FlinkVersionService flinkVersionService;
 
     private final Map<String, URLClassLoader> shimsClassLoaderCache = new ConcurrentHashMap<>();
 
@@ -184,8 +189,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     }
 
     @Override
-    public SqlError verifySql(String sql) {
-        ClassLoader loader = getFlinkShimsClassLoader();
+    public SqlError verifySql(String sql, Long versionId) {
+        ClassLoader loader = getFlinkShimsClassLoader(versionId);
         String error = ClassLoaderUtils.runAsClassLoader(loader, (Supplier<String>) () -> {
             try {
                 Class<?> clazz = loader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
@@ -205,9 +210,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     }
 
     @SneakyThrows
-    private synchronized ClassLoader getFlinkShimsClassLoader() {
-        // TODO: 根据用户选择的Flink版本选择对应的版本实现.
-        String version = "1.13";
+    private synchronized ClassLoader getFlinkShimsClassLoader(Long versionId) {
+        FlinkVersion flinkVersion = flinkVersionService.getById(versionId);
+        String version = flinkVersion.getLargeVersion();
         if (!shimsClassLoaderCache.containsKey(version)) {
             String shimsRegex = "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar";
             Pattern pattern = Pattern.compile(shimsRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
