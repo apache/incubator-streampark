@@ -33,6 +33,10 @@ export function get(params) {
   return http.post(api.FlinkVersion.GET, params)
 }
 
+export function sync(params) {
+  return http.post(api.FlinkVersion.SYNC, params)
+}
+
 export function create(params) {
   return http.post(api.FlinkVersion.CREATE, params)
 }

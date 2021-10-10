@@ -67,6 +67,13 @@ public class FlinkVersionController {
         return RestResponse.create().data(flinkVersion);
     }
 
+
+    @PostMapping("sync")
+    public RestResponse sync(Long id) throws Exception {
+        flinkVersionService.syncConf(id);
+        return RestResponse.create();
+    }
+
     @PostMapping("update")
     public RestResponse update(FlinkVersion version) throws Exception {
         flinkVersionService.update(version);

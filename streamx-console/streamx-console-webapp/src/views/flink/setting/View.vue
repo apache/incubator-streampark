@@ -62,7 +62,7 @@
               type="dashed"
               style="width: 100%;margin-top: 20px"
               icon="plus"
-              @click="handleAddFlink">
+              @click="flinkFormVisible = true">
               Add New
             </a-button>
           </div>
@@ -113,6 +113,13 @@
           Flink Conf:
           <div style="padding: 15px 0">
             <div id="conf"></div>
+            <a-button
+              type="primary"
+              style="float:right;margin-top: 10px;margin-right: 130px"
+              @click="handleSync">
+              <a-icon type="sync" />
+              Sync Conf
+            </a-button>
           </div>
         </div>
       </a-col>
@@ -173,7 +180,7 @@
       <template slot="footer">
         <a-button
           key="back"
-          @click="handleAddCancel">
+          @click="flinkFormVisible = false">
           Cancel
         </a-button>
         <a-button
@@ -190,7 +197,7 @@
 
 <script>
 import {all, update } from '@api/setting'
-import {list, create, get as getFlink, update as updateFlink,exists, setDefault } from '@api/flinkversion'
+import {list, create, get as getFlink, sync, update as updateFlink,exists, setDefault } from '@api/flinkversion'
 import SvgIcon from '@/components/SvgIcon'
 import monaco from '@/views/flink/app/Monaco.yaml'
 
@@ -201,8 +208,10 @@ export default {
     return {
       settings: [],
       flinks: [],
+      flinkName: null,
       flinkHome: null,
       flinkConf: null,
+      versionId: null,
       flinkConfVisible: false,
       flinkFormVisible: false,
       editor: null,
@@ -283,17 +292,11 @@ export default {
       })
     },
 
-    handleAddFlink() {
-      this.flinkFormVisible = true
-    },
-
-    handleAddCancel() {
-      this.flinkFormVisible = false
-    },
-
     handleEditFlink() {
 
     },
+
+
 
     handleFlinkAll() {
       list({}).then((resp)=>{
@@ -330,7 +333,9 @@ export default {
 
     handleFlinkConf (flink) {
       this.flinkConfVisible = true
-      getFlink({id: flink.id}).then((resp)=>{
+      this.versionId = flink.id
+      this.flinkName = flink.flinkName
+      getFlink({id: this.versionId}).then((resp)=>{
         this.flinkHome = resp.data.flinkHome
         this.flinkConf = resp.data.flinkConf
         this.handleInitEditor()
@@ -347,6 +352,17 @@ export default {
       }
       this.$nextTick(()=>{
         this.editor.getModel().setValue(this.flinkConf)
+      })
+    },
+
+    handleSync () {
+      sync({id: this.versionId}).then((resp)=>{
+        this.$swal.fire({
+          icon: 'success',
+          title: this.flinkName.concat(' conf sync successful!'),
+          showConfirmButton: false,
+          timer: 2000
+        })
       })
     },
 

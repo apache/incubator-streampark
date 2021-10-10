@@ -91,6 +91,7 @@ export default {
     CREATE:  '/flink/version/create',
     EXISTS: '/flink/version/exists',
     GET: '/flink/version/get',
+    SYNC: '/flink/version/sync',
     UPDATE: '/flink/version/update',
     DEFAULT: '/flink/version/default',
   },

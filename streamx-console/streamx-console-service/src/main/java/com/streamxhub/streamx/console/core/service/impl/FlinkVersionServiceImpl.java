@@ -112,4 +112,11 @@ public class FlinkVersionServiceImpl extends ServiceImpl<FlinkVersionMapper, Fli
             new LambdaQueryWrapper<FlinkVersion>().eq(FlinkVersion::getIsDefault, true)
         );
     }
+
+    @Override
+    public void syncConf(Long id) throws IOException {
+        FlinkVersion flinkVersion = getById(id);
+        flinkVersion.doSetFlinkConf();
+        updateById(flinkVersion);
+    }
 }

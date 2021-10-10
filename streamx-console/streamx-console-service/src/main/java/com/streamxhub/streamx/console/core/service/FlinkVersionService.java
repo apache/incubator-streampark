@@ -75,4 +75,11 @@ public interface FlinkVersionService extends IService<FlinkVersion> {
      * @return
      */
     FlinkVersion getDefault();
+
+    /**
+     * 同步配置文件
+     *
+     * @param id
+     */
+    void syncConf(Long id) throws IOException;
 }
