@@ -111,7 +111,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       val programArgs = new ArrayBuffer[String]()
       Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
       programArgs += PARAM_KEY_FLINK_CONF
-      programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
+      programArgs += submitRequest.flinkYaml
       programArgs += PARAM_KEY_APP_NAME
       programArgs += submitRequest.effectiveAppName
       val parallelism = getParallelism(submitRequest)

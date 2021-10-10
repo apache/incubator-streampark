@@ -8,7 +8,6 @@
           <a-list>
             <a-list-item v-for="(item,index) in settings" :key="index">
               <a-list-item-meta style="width: 50%">
-                <svg-icon class="avatar" name="flink" size="large" slot="avatar" v-if="item.key === 'env.flink.home'"></svg-icon>
                 <svg-icon class="avatar" name="maven" size="large" slot="avatar" v-if="item.key === 'maven.central.repository'"></svg-icon>
                 <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
                 <svg-icon class="avatar" name="host" size="large" slot="avatar" v-if="item.key === 'alert.email.host'"></svg-icon>
@@ -80,10 +79,10 @@
                 <div class="list-content-item" style="width: 100%">
                   <input
                     v-if="item.editable"
-                    :value="item.path"
+                    :value="item.flinkHome"
                     class="ant-input"/>
                   <div v-else style="width: 100%;text-align: right">
-                    {{ item.path }}
+                    {{ item.flinkHome }}
                   </div>
                 </div>
               </div>
@@ -144,13 +143,13 @@ export default {
       flinks: [
         {
           name: 'flink 1.12.0',
-          path: '/usr/local/flink-1.12.0',
+          flinkHome: '/usr/local/flink-1.12.0',
           description: 'flink 1.12.0',
           editable: false,
         },
         {
           name: 'flink 1.13.0',
-          path: '/usr/local/flink-1.13.0',
+          flinkHome: '/usr/local/flink-1.13.0',
           description: 'flink 1.13.0',
           editable: false,
         },

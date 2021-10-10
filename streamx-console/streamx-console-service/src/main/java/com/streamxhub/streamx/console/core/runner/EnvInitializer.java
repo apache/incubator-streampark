@@ -27,6 +27,7 @@ import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
+import com.streamxhub.streamx.console.core.entity.FlinkVersion;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,8 +161,8 @@ public class EnvInitializer implements ApplicationRunner {
         }
     }
 
-    public void checkFlinkEnv(StorageType storageType) {
-        String flinkLocalHome = settingService.getEffectiveFlinkHome();
+    public void checkFlinkEnv(StorageType storageType, FlinkVersion flinkVersion) {
+        String flinkLocalHome = flinkVersion.getFlinkHome();
         if (flinkLocalHome == null) {
             throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
         }

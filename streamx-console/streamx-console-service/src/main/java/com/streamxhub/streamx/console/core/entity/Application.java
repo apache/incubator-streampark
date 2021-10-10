@@ -95,6 +95,11 @@ public class Application implements Serializable {
     private String jobId;
 
     /**
+     * 对应的flink的版本.
+     */
+    private Long versionId;
+
+    /**
      * k8s部署下clusterId
      */
     private String clusterId;

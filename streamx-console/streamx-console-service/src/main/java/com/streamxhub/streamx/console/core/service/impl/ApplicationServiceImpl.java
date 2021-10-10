@@ -25,9 +25,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.common.conf.*;
+import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.conf.ConfigurationOptions;
+import com.streamxhub.streamx.common.conf.FlinkMemorySize;
+import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
@@ -101,6 +105,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private ApplicationBackUpService backUpService;
 
     @Autowired
+    private FlinkVersionService flinkVersionService;
+
+    @Autowired
     private ApplicationConfigService configService;
 
     @Autowired
@@ -141,7 +148,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     private Workspace localWorkspace = Workspace.local();
 
-    private Workspace remoteWorkspace =  Workspace.remote();
+    private Workspace remoteWorkspace = Workspace.remote();
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
@@ -302,7 +309,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         backUpService.revoke(application);
 
         //3) 相关状态恢复
-        LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
+        LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(Application::getId, application.getId());
         if (application.isFlinkSqlJob()) {
             updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
@@ -372,7 +379,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean checkStart(Application appParam) {
         try {
             Application application = getById(appParam.getId());
-            envInitializer.checkFlinkEnv(application.getStorageType());
+            FlinkVersion flinkVersion = flinkVersionService.getById(appParam.getVersionId());
+            envInitializer.checkFlinkEnv(application.getStorageType(), flinkVersion);
             envInitializer.storageInitialize(application.getStorageType());
             return true;
         } catch (Throwable e) {
@@ -659,7 +667,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         return null;
                     });
 
-                    LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
+                    LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
                     updateWrapper.eq(Application::getId, application.getId());
                     try {
                         if (application.isCustomCodeJob()) {
@@ -907,6 +915,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public void cancel(Application appParam) {
         FlinkTrackingTask.setOptionState(appParam.getId(), OptionState.CANCELLING);
         Application application = getById(appParam.getId());
+
         application.setState(FlinkAppState.CANCELLING.getValue());
         if (appParam.getSavePointed()) {
             // 正在执行savepoint...
@@ -917,6 +926,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
         this.baseMapper.updateById(application);
         //此步骤可能会比较耗时,重新开启一个线程去执行
+
+        FlinkVersion flinkVersion = flinkVersionService.getById(application.getVersionId());
+
         executorService.submit(() -> {
             try {
                 // intfer savepoint
@@ -928,7 +940,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
                 }
                 StopRequest stopInfo = new StopRequest(
-                    settingService.getEffectiveFlinkHome(),
+                    flinkVersion.getFlinkHome(),
                     application.getAppId(),
                     application.getJobId(),
                     appParam.getSavePointed(),
@@ -1163,10 +1175,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.getK8sPodTemplates(),
             application.getK8sRestExposedTypeEnum()
         );
+
+        FlinkVersion flinkVersion = flinkVersionService.getById(application.getVersionId());
+
         SubmitRequest submitInfo = new SubmitRequest(
-            settingService.getEffectiveFlinkHome(),
-            settingService.getFlinkVersion(),
-            settingService.getFlinkYaml(),
+            flinkVersion.getFlinkHome(),
+            flinkVersion.getVersion(),
+            flinkVersion.getFlinkConf(),
             flinkUserJar,
             DevelopmentMode.of(application.getJobType()),
             ExecutionMode.of(application.getExecutionMode()),
