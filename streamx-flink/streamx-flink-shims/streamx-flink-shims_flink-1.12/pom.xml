@@ -50,7 +50,6 @@
             <version>${flink.version}</version>
         </dependency>
 
-
         <!--flink base-->
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -92,12 +91,6 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-common</artifactId>
             <version>${flink.version}</version>
         </dependency>
 
