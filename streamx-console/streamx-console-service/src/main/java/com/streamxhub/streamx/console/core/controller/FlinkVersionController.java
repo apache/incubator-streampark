@@ -60,6 +60,13 @@ public class FlinkVersionController {
         return RestResponse.create();
     }
 
+    @PostMapping("get")
+    public RestResponse get(Long id) throws Exception {
+        FlinkVersion flinkVersion = flinkVersionService.getById(id);
+        flinkVersion.unzipFlinkConf();
+        return RestResponse.create().data(flinkVersion);
+    }
+
     @PostMapping("update")
     public RestResponse update(FlinkVersion version) throws Exception {
         flinkVersionService.update(version);

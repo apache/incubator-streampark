@@ -86,6 +86,14 @@ export default {
     HISTORY: '/flink/conf/history',
     DELETE: '/flink/conf/delete'
   },
+  FlinkVersion: {
+    LIST: '/flink/version/list',
+    CREATE:  '/flink/version/create',
+    EXISTS: '/flink/version/exists',
+    GET: '/flink/version/get',
+    UPDATE: '/flink/version/update',
+    DEFAULT: '/flink/version/default',
+  },
   FlinkSQL: {
     VERIFY: '/flink/sql/verify',
     GET: '/flink/sql/get',

@@ -53,7 +53,7 @@ public class FlinkVersionServiceImpl extends ServiceImpl<FlinkVersionMapper, Fli
     public boolean exists(FlinkVersion version) {
         //1) check name
         int count = this.count(
-            new LambdaQueryWrapper<FlinkVersion>().eq(FlinkVersion::getName, version.getName())
+            new LambdaQueryWrapper<FlinkVersion>().eq(FlinkVersion::getFlinkName, version.getFlinkName())
         );
         if (count == 0) {
             //2) check version
@@ -83,7 +83,7 @@ public class FlinkVersionServiceImpl extends ServiceImpl<FlinkVersionMapper, Fli
         FlinkVersion flinkVersion = super.getById(version.getId());
         assert flinkVersion != null;
         flinkVersion.setDescription(version.getDescription());
-        flinkVersion.setName(version.getName());
+        flinkVersion.setFlinkName(version.getFlinkName());
         if (!version.getFlinkHome().equals(flinkVersion.getFlinkHome())) {
             flinkVersion.setFlinkHome(version.getFlinkHome());
             flinkVersion.doSetFlinkConf();

@@ -47,8 +47,6 @@
               <div slot="actions" v-if="item.type === 1">
                 <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
                 <a v-else @click="handleSubmit(item)">Submit</a>
-                <a-divider v-if="item.key === 'env.flink.home'" type="vertical" />
-                <a v-if="item.key === 'env.flink.home'" @click="handleFlinkConf()">Flink Conf</a>
               </div>
             </a-list-item>
           </a-list>
@@ -87,8 +85,7 @@
                 </div>
               </div>
               <div slot="actions">
-                <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
-                <a v-else @click="handleEditFlink(item)">Submit</a>
+                <a @click="handleEditFlink(item)">Edit</a>
                 <a-divider type="vertical" />
                 <a @click="handleFlinkConf(item)">Flink Conf</a>
               </div>
@@ -97,16 +94,17 @@
         </a-card>
       </a-tab-pane>
     </a-tabs>
+
     <a-drawer
       :mask-closable="false"
       width="calc(100% - 40%)"
       placement="right"
-      :visible="visiable"
+      :visible="flinkConfVisible"
       :centered="true"
       :keyboard="false"
       :body-style="{ paddingBottom: '80px' }"
       title="Flink Conf"
-      @close="handleClose()">
+      @close="handleCloseConf()">
       <a-col style="font-size: 0.9rem">
         <div style="padding-bottom: 15px">
           Flink Home: &nbsp;&nbsp; {{ flinkHome }}
@@ -115,22 +113,72 @@
           Flink Conf:
           <div style="padding: 15px 0">
             <div id="conf"></div>
-            <a-button
-              type="primary"
-              style="float:right;margin-top: 10px;margin-right: 130px"
-              @click="handleSync">
-              <a-icon type="sync" />
-              Sync Conf
-            </a-button>
           </div>
         </div>
       </a-col>
     </a-drawer>
+
+    <a-modal
+      v-model="flinkFormVisible">
+      <template
+        slot="title">
+        <svg-icon
+          slot="icon"
+          name="play"/>
+        Add Flink
+      </template>
+
+      <a-form
+        :form="flinkForm">
+        <a-form-item
+          label="Flink Name"
+          style="margin-bottom: 10px"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-input
+            type="text"
+            placeholder="Please enter flink name"
+            v-decorator="['flinkName',{ rules: [{ required: true } ]}]"/>
+          <span
+            class="conf-switch"
+            style="color:darkgrey">the flink name, e.g: flink-1.12 </span>
+        </a-form-item>
+
+        <a-form-item
+          label="Flink Home"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-input
+            type="text"
+            placeholder="Please enter flink home"
+            v-decorator="['flinkHome',{ rules: [{ required: true } ]}]"/>
+          <span
+            class="conf-switch"
+            style="color:darkgrey">The absolute path of the FLINK_HOME</span>
+        </a-form-item>
+      </a-form>
+
+      <template slot="footer">
+        <a-button
+          key="back"
+          @click="handleAddCancel">
+          Cancel
+        </a-button>
+        <a-button
+          key="submit"
+          @click="handleSubmitFlink"
+          type="primary">
+          Submit
+        </a-button>
+      </template>
+    </a-modal>
+
   </div>
 </template>
 
 <script>
-import {all, sync, update, getFlink } from '@api/setting'
+import {all, update } from '@api/setting'
+import {list, create, get as getFlink, update as updateFlink,exists, setDefault } from '@api/flinkversion'
 import SvgIcon from '@/components/SvgIcon'
 import monaco from '@/views/flink/app/Monaco.yaml'
 
@@ -156,8 +204,10 @@ export default {
       ],
       flinkHome: null,
       flinkConf: null,
-      visiable: false,
-      editor: null
+      flinkConfVisible: false,
+      flinkFormVisible: false,
+      editor: null,
+      flinkForm: null
     }
   },
 
@@ -168,7 +218,7 @@ export default {
   },
 
   mounted() {
-    this.form = this.$form.createForm(this)
+    this.flinkForm = this.$form.createForm(this)
     this.handleAll()
   },
 
@@ -233,28 +283,30 @@ export default {
       })
     },
 
-    handleSync () {
-      sync({}).then((resp)=>{
-        this.$swal.fire({
-            icon: 'success',
-            title: 'Flink default conf sync successful!',
-            showConfirmButton: false,
-            timer: 2000
-          })
-      })
+    handleAddFlink() {
+      this.flinkFormVisible = true
     },
 
-    handleAddFlink() {
-
+    handleAddCancel() {
+      this.flinkFormVisible = false
     },
 
     handleEditFlink() {
 
     },
 
-    handleFlinkConf () {
-      this.visiable = true
-      getFlink({}).then((resp)=>{
+    handleSubmitFlink(e) {
+      e.preventDefault()
+      this.flinkForm.validateFields((err, values) => {
+        if (!err) {
+
+        }
+      })
+    },
+
+    handleFlinkConf (flink) {
+      this.flinkConfVisible = true
+      getFlink({id: flink.id}).then((resp)=>{
         this.flinkHome = resp.data.flinkHome
         this.flinkConf = resp.data.flinkConf
         this.handleInitEditor()
@@ -274,8 +326,8 @@ export default {
       })
     },
 
-    handleClose() {
-      this.visiable = false
+    handleCloseConf() {
+      this.flinkConfVisible = false
     },
 
     handleHeight(elem, h) {

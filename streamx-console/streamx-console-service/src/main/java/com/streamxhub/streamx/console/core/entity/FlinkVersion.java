@@ -27,15 +27,15 @@ public class FlinkVersion {
 
     private Long id;
 
-    private String name;
-
-    private String description;
+    private String flinkName;
 
     private String flinkHome;
 
-    private String version;
-
     private String flinkConf;
+
+    private String description;
+
+    private String version;
 
     /**
      * 是否为默认版本.
@@ -99,4 +99,7 @@ public class FlinkVersion {
         return PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
     }
 
+    public void unzipFlinkConf() {
+        this.flinkConf = DeflaterUtils.unzipString(this.flinkConf);
+    }
 }
