@@ -33,7 +33,7 @@ object MavenTool extends Logger {
   @throws[Exception] def buildFatJar(@Nonnull jarLibs: Set[String], @Nonnull outFatJarPath: String): File = {
     // check userJarPath
     val uberJar = new File(outFatJarPath)
-    require(uberJar.isFile, s"[streamx-packer] outFatJarPath($outFatJarPath) should be a file.")
+    require(!uberJar.isDirectory, s"[streamx-packer] outFatJarPath($outFatJarPath) should be a file.")
     // resolve all jarLibs
     val jarSet = new util.HashSet[File]
     jarLibs.map(lib => new File(lib))
