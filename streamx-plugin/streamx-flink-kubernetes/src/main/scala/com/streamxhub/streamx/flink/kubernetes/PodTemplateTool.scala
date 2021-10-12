@@ -24,6 +24,7 @@ import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
 import org.apache.commons.io.FileUtils
 import org.apache.flink.configuration.ConfigOptions.key
 import org.apache.flink.configuration.{ConfigOption, Configuration}
+import scala.collection.JavaConverters
 
 import java.io.File
 import scala.collection.mutable
@@ -62,20 +63,20 @@ object PodTemplateTool {
     if (!workspaceDir.exists())
       workspaceDir.mkdir()
 
-    val podTmplfileMap = mutable.Map[ConfigOption[String], String]()
+    val podTempleMap = mutable.Map[ConfigOption[String], String]()
     val outputTmplContent = (tmplContent: String, tmplOption: ConfigOption[String]) => {
       if (tmplContent.nonEmpty) {
         val outputPath = s"${buildWorkspace}/${K8S_POD_TEMPLATE_DEFAULT_FILE_NAME(tmplOption)}"
         val outputFile = new File(outputPath)
         FileUtils.write(outputFile, tmplContent, "UTF-8")
-        podTmplfileMap += (tmplOption -> outputPath)
+        podTempleMap += (tmplOption -> outputPath)
       }
     }
 
     outputTmplContent(podTemplates.podTemplate, KUBERNETES_POD_TEMPLATE_FILE)
     outputTmplContent(podTemplates.jmPodTemplate, KUBERNETES_POD_TEMPLATE_FILE_JOBMANAGER)
     outputTmplContent(podTemplates.tmPodTemplate, KUBERNETES_POD_TEMPLATE_FILE_TASKMANAGER)
-    K8sPodTemplateFiles(podTmplfileMap.toMap)
+    K8sPodTemplateFiles(podTempleMap.toMap)
   }
 
 

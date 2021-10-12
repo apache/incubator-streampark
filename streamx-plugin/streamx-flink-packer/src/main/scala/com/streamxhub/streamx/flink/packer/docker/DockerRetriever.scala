@@ -14,7 +14,7 @@ object DockerRetriever {
   /**
    * docker config param from system properties,
    * see in https://github.com/docker-java/docker-java/blob/master/docs/getting_started.md#properties-docker-javaproperties
-   * todo support custom docker configuration parameters in unifined configurations in the future
+   * todo support custom docker configuration parameters in unified configurations in the future
    */
   lazy val dockerClientConf: DockerClientConfig = {
     DefaultDockerClientConfig.createDefaultConfigBuilder().build()
@@ -22,7 +22,7 @@ object DockerRetriever {
 
   /**
    * docker http client builder, use ApacheDockerHttpClient by default
-   * todo support custom http client configuration parameters in unifined configurations in the future
+   * todo support custom http client configuration parameters in unified configurations in the future
    */
   lazy val dockerHttpClientBuilder: ApacheDockerHttpClient.Builder = new ApacheDockerHttpClient.Builder()
     .dockerHost(dockerClientConf.getDockerHost)

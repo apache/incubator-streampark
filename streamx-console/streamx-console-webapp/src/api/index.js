@@ -29,6 +29,7 @@ export default {
     EXISTS: '/flink/project/exists',
     CREATE: '/flink/project/create',
     BUILD: '/flink/project/build',
+    CLOSEBUILD: '/flink/project/closebuild',
     LIST: '/flink/project/list',
     FILELIST: '/flink/project/filelist',
     MODULES: '/flink/project/modules',
@@ -84,6 +85,15 @@ export default {
     LIST: '/flink/conf/list',
     HISTORY: '/flink/conf/history',
     DELETE: '/flink/conf/delete'
+  },
+  FlinkVersion: {
+    LIST: '/flink/version/list',
+    CREATE:  '/flink/version/create',
+    EXISTS: '/flink/version/exists',
+    GET: '/flink/version/get',
+    SYNC: '/flink/version/sync',
+    UPDATE: '/flink/version/update',
+    DEFAULT: '/flink/version/default',
   },
   FlinkSQL: {
     VERIFY: '/flink/sql/verify',

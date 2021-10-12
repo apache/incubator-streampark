@@ -24,8 +24,8 @@ import com.streamxhub.streamx.common.util.Utils
 import org.apache.commons.lang.StringUtils
 
 import java.util.regex.Pattern
-import javax.annotation.Nonnull
 import java.util.{Map => JavaMap}
+import javax.annotation.Nonnull
 import scala.collection.JavaConverters._
 import scala.util.Try
 
@@ -39,17 +39,19 @@ object FlinkSubmitHelper {
    */
   @Nonnull
   def extractDynamicOption(dynamicOption: Array[String]): Map[String, String] = {
-    if (Utils.isEmpty(dynamicOption)) {
-      return Map.empty
+    dynamicOption match {
+      case x if Utils.isEmpty(x) =>
+        Map.empty
+      case _ =>
+        Try(dynamicOption
+          .filter(_ != null)
+          .map(_.trim)
+          .map(DYNAMIC_OPTION_ITEM_PATTERN.matcher(_))
+          .filter(m => m.matches())
+          .map(m => m.group(2) -> m.group(3))
+          .toMap
+        ).getOrElse(Map.empty)
     }
-    Try(dynamicOption
-      .filter(_ != null)
-      .map(_.trim)
-      .map(DYNAMIC_OPTION_ITEM_PATTERN.matcher(_))
-      .filter(m => m.matches())
-      .map(m => m.group(2) -> m.group(3))
-      .toMap)
-      .getOrElse(Map.empty)
   }
 
   /**

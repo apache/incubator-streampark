@@ -25,7 +25,7 @@ import org.apache.hadoop.yarn.api.records._
 import org.apache.hadoop.yarn.util.ConverterUtils
 
 import java.util
-import java.util.List
+import java.util.{List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
@@ -37,7 +37,7 @@ object YarnUtils {
    * @param appName
    * @return
    */
-  def getAppId(appName: String): List[ApplicationId] = {
+  def getAppId(appName: String): JavaList[ApplicationId] = {
     val appStates = util.EnumSet.of(RUNNING, ACCEPTED, SUBMITTED)
     val appIds = try {
       HadoopUtils.yarnClient.getApplications(appStates).filter(_.getName == appName).map(_.getApplicationId)

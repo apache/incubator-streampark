@@ -21,7 +21,6 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.conf.ConfigConst.APP_WORKSPACE
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.flink.kubernetes.PodTemplateTool
 import com.streamxhub.streamx.flink.packer.docker.{DockerTool, FlinkDockerfileTemplate}
@@ -33,6 +32,7 @@ import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{DeploymentOptionsInternal, PipelineOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+import org.apache.flink.util.IOUtils
 
 import java.io.File
 import scala.util.Try
@@ -53,7 +53,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     // init build workspace of flink job
     val buildWorkspace = {
       // sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/
-      val dirPath = s"$APP_WORKSPACE" +
+      val dirPath = s"${workspace.APP_WORKSPACE}" +
         s"/${flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)}@${flinkConfig.getString(KubernetesConfigOptions.NAMESPACE)}"
       val dir = new File(dirPath)
       if (!dir.exists()) dir.mkdir()
@@ -70,7 +70,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
 
     // step-2: build fat-jar
     val fatJar = {
-      val fatJarOutputPath = s"${buildWorkspace}/flink-job.jar"
+      val fatJarOutputPath = s"$buildWorkspace/flink-job.jar"
       val flinkLibs = extractProvidedLibs(submitRequest)
       val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
       MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
@@ -88,7 +88,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     // add flink pipeline.jars configuration
     flinkConfig.set(PipelineOptions.JARS, Lists.newArrayList(dockerFileTemplate.getJobJar))
     // add flink conf conciguration, mainly to set the log4j configuration
-    if (!flinkConfig.contains(DeploymentOptionsInternal.CONF_DIR)){
+    if (!flinkConfig.contains(DeploymentOptionsInternal.CONF_DIR)) {
       flinkConfig.set(DeploymentOptionsInternal.CONF_DIR, s"${submitRequest.flinkHome}/conf")
     }
     // build docker image
@@ -126,8 +126,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
         throw e
     } finally {
-      if (clusterClient != null) clusterClient.close()
-      if (clusterDescriptor != null) clusterDescriptor.close()
+      IOUtils.closeAll(clusterClient, clusterDescriptor)
     }
   }
 

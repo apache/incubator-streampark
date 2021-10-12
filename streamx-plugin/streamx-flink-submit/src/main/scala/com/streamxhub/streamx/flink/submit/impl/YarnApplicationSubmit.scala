@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils}
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
@@ -84,9 +83,9 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
 
           logInfo(
             s"""
-               ||-------------------------<<applicationId>>------------------------|
-               ||Flink Job Started: applicationId: $applicationId|
-               ||__________________________________________________________________|
+               |-------------------------<<applicationId>>------------------------
+               |Flink Job Started: applicationId: $applicationId
+               |__________________________________________________________________
                |""".stripMargin)
 
           SubmitResponse(applicationId.toString, flinkConfig)
@@ -112,7 +111,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       val programArgs = new ArrayBuffer[String]()
       Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
       programArgs += PARAM_KEY_FLINK_CONF
-      programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
+      programArgs += submitRequest.flinkYaml
       programArgs += PARAM_KEY_APP_NAME
       programArgs += submitRequest.effectiveAppName
       val parallelism = getParallelism(submitRequest)
@@ -121,9 +120,9 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
         programArgs += s"$parallelism"
       }
       val providedLibs = ListBuffer(
-        submitRequest.workspaceEnv.flinkLib,
-        submitRequest.workspaceEnv.appJars,
-        submitRequest.workspaceEnv.appPlugins
+        submitRequest.hdfsWorkspace.flinkLib,
+        submitRequest.hdfsWorkspace.appJars,
+        submitRequest.hdfsWorkspace.appPlugins
       )
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINKSQL =>
@@ -135,14 +134,16 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
           }
           val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
           version match {
+            case Array(1, 12, _) =>
+              providedLibs += s"${workspace.APP_SHIMS}/flink-1.12"
             case Array(1, 13, _) =>
-              providedLibs += s"${HdfsUtils.getDefaultFS}$APP_SHIMS/flink-1.13"
-            case Array(1, 11 | 12, _) =>
-              providedLibs += s"${HdfsUtils.getDefaultFS}$APP_SHIMS/flink-1.12"
+              providedLibs += s"${workspace.APP_SHIMS}/flink-1.13"
+            case Array(1, 14, _) =>
+              providedLibs += s"${workspace.APP_SHIMS}/flink-1.14"
             case _ =>
               throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
           }
-          val jobLib = s"${HdfsUtils.getDefaultFS}$APP_WORKSPACE/${submitRequest.jobID}/lib"
+          val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
           if (HdfsUtils.exists(jobLib)) {
             providedLibs += jobLib
           }
@@ -167,7 +168,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
     //yarn.provided.lib.dirs
     effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
     //flinkDistJar
-    effectiveConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.workspaceEnv.flinkDistJar)
+    effectiveConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.hdfsWorkspace.flinkDistJar)
     //pipeline.jars
     effectiveConfiguration.set(PipelineOptions.JARS, Collections.singletonList(submitRequest.flinkUserJar))
     //execution.target

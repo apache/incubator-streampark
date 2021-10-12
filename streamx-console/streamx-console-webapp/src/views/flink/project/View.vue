@@ -165,7 +165,7 @@
       :body-style="controller.modalStyle"
       :destroy-on-close="controller.modalDestroyOnClose"
       :footer="null"
-      @ok="handleClose">
+      @cancel="handleClose">
       <template slot="title">
         <svg-icon name="code" />&nbsp;
         {{ controller.consoleName }}
@@ -178,7 +178,7 @@
   </div>
 </template>
 <script>
-import { build, list,remove } from '@api/project'
+import { build, list,remove,closebuild } from '@api/project'
 import { check } from '@api/setting'
 import Ellipsis from '@comp/Ellipsis'
 import SockJS from 'sockjs-client'
@@ -200,6 +200,7 @@ export default {
       sortedInfo: null,
       stompClient: null,
       terminal: null,
+      projectId: null,
       controller: {
         ellipsis: 100,
         modalStyle: {
@@ -307,6 +308,7 @@ export default {
     },
 
     handleOpenWS (project) {
+      this.projectId = project.id
       const rows = parseInt(this.controller.modalStyle.height.replace('px', '')) / 16
       const cols = (document.querySelector('.terminal').offsetWidth - 10) / 8
       this.terminal = new Terminal({
@@ -331,15 +333,17 @@ export default {
       })
       const container = document.getElementById('terminal')
       this.terminal.open(container, true)
-      const socket = new SockJS(baseUrl(true).concat('/websocket'))
+      const url = baseUrl().concat('/websocket')
+      const socket = new SockJS( url, null, { timeout: 15000} )
       this.stompClient = Stomp.over(socket)
       this.stompClient.connect({}, (success) => {
         this.stompClient.subscribe('/resp/build', (msg) => this.terminal.writeln(msg.body))
-        this.stompClient.send('/req/SockJSbuild/' + project.id)
+        this.stompClient.send('/req/build/' + this.projectId)
       })
     },
 
     handleClose () {
+      closebuild({ id: this.projectId })
       this.stompClient.disconnect()
       this.controller.visible = false
       this.terminal.clear()

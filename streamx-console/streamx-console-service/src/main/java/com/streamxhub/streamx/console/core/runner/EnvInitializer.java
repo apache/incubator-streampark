@@ -22,10 +22,12 @@
 package com.streamxhub.streamx.console.core.runner;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.fs.FsOperatorGetter;
+import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
+import com.streamxhub.streamx.console.core.entity.FlinkVersion;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,14 +64,17 @@ public class EnvInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
+        overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_LOCAL(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
+        overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_REMOTE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
         overrideSystemProp(ConfigConst.KEY_DOCKER_IMAGE_NAMESPACE(), ConfigConst.DOCKER_IMAGE_NAMESPACE_DEFAULT());
-        // local storage must exists
-        storageInitialize(StorageType.LFS);
+        //automatic in local
+        storageInitialize(LFS);
     }
 
-    private void overrideSystemProp(String key, String defaultValue){
-        System.getProperties().setProperty(key, context.getEnvironment().getProperty(key, defaultValue));
+    private void overrideSystemProp(String key, String defaultValue) {
+        String value = context.getEnvironment().getProperty(key, defaultValue);
+        log.info("initialize system properties: key:{}, value:{}", key, value);
+        SystemPropertyUtils.set(key, value);
     }
 
     /**
@@ -78,40 +83,40 @@ public class EnvInitializer implements ApplicationRunner {
      */
     public synchronized void storageInitialize(StorageType storageType) throws Exception {
         if (initialized.get(storageType) == null) {
+            FsOperator fsOperator = FsOperator.of(storageType);
+            Workspace workspace = Workspace.of(storageType);
 
-            FsOperator fsOperator = FsOperatorGetter.get(storageType);
-
-            String appUploads = ConfigConst.APP_UPLOADS();
+            String appUploads = workspace.APP_UPLOADS();
             if (!fsOperator.exists(appUploads)) {
                 log.info("mkdir {} starting ...", appUploads);
                 fsOperator.mkdirs(appUploads);
             }
 
-            String appWorkspace = ConfigConst.APP_WORKSPACE();
+            String appWorkspace = workspace.APP_WORKSPACE();
             if (!fsOperator.exists(appWorkspace)) {
                 log.info("mkdir {} starting ...", appWorkspace);
                 fsOperator.mkdirs(appWorkspace);
             }
 
-            String appBackups = ConfigConst.APP_BACKUPS();
+            String appBackups = workspace.APP_BACKUPS();
             if (!fsOperator.exists(appBackups)) {
                 log.info("mkdir {} starting ...", appBackups);
                 fsOperator.mkdirs(appBackups);
             }
 
-            String appSavePoints = ConfigConst.APP_SAVEPOINTS();
+            String appSavePoints = workspace.APP_SAVEPOINTS();
             if (!fsOperator.exists(appSavePoints)) {
                 log.info("mkdir {} starting ...", appSavePoints);
                 fsOperator.mkdirs(appSavePoints);
             }
 
-            String appJars = ConfigConst.APP_JARS();
+            String appJars = workspace.APP_JARS();
             if (!fsOperator.exists(appJars)) {
                 log.info("mkdir {} starting ...", appJars);
                 fsOperator.mkdirs(appJars);
             }
 
-            String appPlugins = ConfigConst.APP_PLUGINS();
+            String appPlugins = workspace.APP_PLUGINS();
             if (fsOperator.exists(appPlugins)) {
                 fsOperator.delete(appPlugins);
             }
@@ -128,11 +133,11 @@ public class EnvInitializer implements ApplicationRunner {
                 }
             }
 
-            String appShims = ConfigConst.APP_SHIMS();
+            String appShims = workspace.APP_SHIMS();
             if (fsOperator.exists(appShims)) {
                 fsOperator.delete(appShims);
             }
-            String regex = "^streamx-flink-shims_flink-(1.12|1.13)-(.*).jar$";
+            String regex = "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$";
             Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
             File[] shims = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(regex));
             for (File file : Objects.requireNonNull(shims)) {
@@ -148,21 +153,22 @@ public class EnvInitializer implements ApplicationRunner {
                 }
             }
             // create maven local repository dir
-            String localMavnRepo = ConfigConst.MAVEN_LOCAL_DIR();
-            if (FsOperatorGetter.get(LFS).exists(localMavnRepo)) {
-                FsOperatorGetter.get(LFS).mkdirs(localMavnRepo);
+            String localMavenRepo = workspace.MAVEN_LOCAL_DIR();
+            if (FsOperator.lfs().exists(localMavenRepo)) {
+                FsOperator.lfs().mkdirs(localMavenRepo);
             }
             initialized.put(storageType, Boolean.TRUE);
         }
     }
 
-    public void checkFlinkEnv(StorageType storageType) {
-        String flinkLocalHome = settingService.getEffectiveFlinkHome();
+    public void checkFlinkEnv(StorageType storageType, FlinkVersion flinkVersion) {
+        String flinkLocalHome = flinkVersion.getFlinkHome();
         if (flinkLocalHome == null) {
             throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
         }
-        String appFlink = ConfigConst.APP_FLINK();
-        FsOperator fsOperator = FsOperatorGetter.get(storageType);
+        Workspace workspace = Workspace.of(storageType);
+        String appFlink = workspace.APP_FLINK();
+        FsOperator fsOperator = FsOperator.of(storageType);
         if (!fsOperator.exists(appFlink)) {
             log.info("mkdir {} starting ...", appFlink);
             fsOperator.mkdirs(appFlink);

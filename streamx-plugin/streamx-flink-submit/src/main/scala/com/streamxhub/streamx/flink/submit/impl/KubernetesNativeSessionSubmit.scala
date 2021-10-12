@@ -21,7 +21,6 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.conf.ConfigConst.APP_WORKSPACE
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
@@ -34,6 +33,7 @@ import org.apache.flink.client.program.{ClusterClient, PackagedProgram, Packaged
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+import org.apache.flink.util.IOUtils
 
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -59,11 +59,11 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     val fatJar = {
       // sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/job-name/
       // is streamx, flink job-name under the specified clusterId/namespace must be unique.
-      val fatJarOutputPath = s"$APP_WORKSPACE" +
+      val fatJarOutputPath = s"${workspace.APP_WORKSPACE}" +
         s"/${flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)}@${flinkConfig.getString(KubernetesConfigOptions.NAMESPACE)}" +
         s"/${flinkConfig.getString(PipelineOptions.NAME)}/flink-job.jar"
       val flinkLibs = extractProvidedLibs(submitRequest)
-      val jarPackDeps =  submitRequest.k8sSubmitParam.jarPackDeps
+      val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
       MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
       // cache file MD5 is used to compare whether it is consistent when it is generated next time.
       //  If it is consistent, it is used directly and returned directly instead of being regenerated
@@ -84,8 +84,8 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         .setConfiguration(flinkConfig)
         .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
         .setArguments(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-            .orElse(Lists.newArrayList())
-            : _*
+          .orElse(Lists.newArrayList())
+          : _*
         ).build()
       val jobGraph = PackagedProgramUtils.createJobGraph(
         packageProgram,
@@ -107,9 +107,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         e.printStackTrace()
         throw e
     } finally {
-      if (client != null) client.close()
-      if (packageProgram != null) packageProgram.close()
-      if (clusterDescriptor != null) clusterDescriptor.close()
+      IOUtils.closeAll(client, packageProgram, clusterDescriptor)
     }
   }
 

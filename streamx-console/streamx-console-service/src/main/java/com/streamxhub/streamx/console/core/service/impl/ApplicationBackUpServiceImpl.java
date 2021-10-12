@@ -26,7 +26,6 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
@@ -139,11 +138,11 @@ public class ApplicationBackUpServiceImpl
                     }
 
                     // 4) 删除当前的有效项目工程文件(注意:该操作如果整个回滚失败,则要恢复...)
-                    fsOperator.delete(application.getAppHome().getAbsolutePath());
+                    fsOperator.delete(application.getRemoteAppHome().getAbsolutePath());
 
                     try {
                         // 5)将备份的文件copy到有效项目目录下.
-                        fsOperator.copyDir(backParam.getPath(), application.getAppHome().getAbsolutePath());
+                        fsOperator.copyDir(backParam.getPath(), application.getRemoteAppHome().getAbsolutePath());
                     } catch (Exception e) {
                         //1. TODO: 如果失败了,则要恢复第4部操作.
 
@@ -177,7 +176,7 @@ public class ApplicationBackUpServiceImpl
         ApplicationBackUp backup = baseMapper.getLastBackup(application.getId());
         assert backup != null;
         String path = backup.getPath();
-        application.getFsOperator().move(path, ConfigConst.APP_WORKSPACE());
+        application.getFsOperator().move(path, application.getWorkspace().APP_WORKSPACE());
         removeById(backup.getId());
     }
 
@@ -185,7 +184,7 @@ public class ApplicationBackUpServiceImpl
     public void removeApp(Application application) {
         baseMapper.removeApp(application.getId());
         application.getFsOperator().delete(
-            ConfigConst.APP_BACKUPS().concat("/").concat(application.getId().toString())
+            application.getWorkspace().APP_BACKUPS().concat("/").concat(application.getId().toString())
         );
     }
 
@@ -204,10 +203,10 @@ public class ApplicationBackUpServiceImpl
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
 
                 // 2) 删除当前项目
-                fsOperator.delete(application.getAppHome().getAbsolutePath());
+                fsOperator.delete(application.getRemoteAppHome().getAbsolutePath());
                 try {
                     // 5)将备份的文件copy到有效项目目录下.
-                    fsOperator.copyDir(backUp.getPath(), application.getAppHome().getAbsolutePath());
+                    fsOperator.copyDir(backUp.getPath(), application.getRemoteAppHome().getAbsolutePath());
                 } catch (Exception e) {
                     throw e;
                 }
@@ -247,7 +246,7 @@ public class ApplicationBackUpServiceImpl
     @Transactional(rollbackFor = {Exception.class})
     public void backup(Application application) {
         //1) 基础的配置文件备份
-        File appHome = application.getAppHome();
+        File appHome = application.getRemoteAppHome();
         FsOperator fsOperator = application.getFsOperator();
         if (fsOperator.exists(appHome.getPath())) {
             // 3) 需要备份的做备份,移动文件到备份目录...

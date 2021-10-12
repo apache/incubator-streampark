@@ -21,8 +21,9 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType, StorageType}
-import com.streamxhub.streamx.common.fs.FsOperatorGetter
+import com.streamxhub.streamx.common.conf.Workspace
+import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType}
+import com.streamxhub.streamx.common.fs.FsOperator
 import com.streamxhub.streamx.common.util.DeflaterUtils
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.domain._
@@ -53,6 +54,8 @@ import scala.util.Try
  */
 //noinspection DuplicatedCode
 trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
+
+  lazy val workspace: Workspace = Workspace.local
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
 
@@ -149,7 +152,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       // please transfer the execution.savepoint.ignore-unclaimed-state to submitRequest.property or dynamicOption
       flinkConfig.set(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, JavaBool.TRUE)
     }
-    val args = extractProgarmArgs(submitRequest)
+    val args = extractProgramArgs(submitRequest)
     flinkConfig.set(ApplicationConfiguration.APPLICATION_ARGS, args.toList.asJava)
 
     // copy from submitRequest.property
@@ -187,11 +190,11 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     }
   }
 
-  private[submit] def extractProgarmArgs(submitRequest: SubmitRequest): ArrayBuffer[String] = {
+  private[submit] def extractProgramArgs(submitRequest: SubmitRequest): ArrayBuffer[String] = {
     val programArgs = new ArrayBuffer[String]()
     Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
     programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
+    programArgs += submitRequest.flinkYaml
     programArgs += PARAM_KEY_APP_NAME
     programArgs += submitRequest.effectiveAppName
     submitRequest.developmentMode match {
@@ -211,24 +214,23 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   }
 
   private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): Set[String] = {
-    val flinkLib = s"$APP_FLINK/${new File(submitRequest.flinkHome).getName}/lib"
     val providedLibs = ArrayBuffer(
       // flinkLib,
-      APP_JARS,
-      APP_PLUGINS,
+      workspace.APP_JARS,
+      workspace.APP_PLUGINS,
       submitRequest.flinkUserJar
     )
     val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
     version match {
       case Array(1, 13, _) =>
-        providedLibs += s"$APP_SHIMS/flink-1.13"
+        providedLibs += s"${workspace.APP_SHIMS}/flink-1.13"
       case Array(1, 11 | 12, _) =>
-        providedLibs += s"$APP_SHIMS/flink-1.12"
+        providedLibs += s"${workspace.APP_SHIMS}/flink-1.12"
       case _ =>
         throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
     }
-    val jobLib = s"$APP_WORKSPACE/${submitRequest.jobID}/lib"
-    if (FsOperatorGetter.get(StorageType.LFS).exists(jobLib)) {
+    val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
+    if (FsOperator.lfs.exists(jobLib)) {
       providedLibs += jobLib
     }
 
