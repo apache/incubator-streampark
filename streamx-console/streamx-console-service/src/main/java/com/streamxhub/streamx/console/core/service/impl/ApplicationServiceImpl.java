@@ -379,7 +379,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean checkStart(Application appParam) {
         try {
             Application application = getById(appParam.getId());
-            FlinkVersion flinkVersion = flinkVersionService.getById(appParam.getVersionId());
+            FlinkVersion flinkVersion = flinkVersionService.getById(application.getVersionId());
             envInitializer.checkFlinkEnv(application.getStorageType(), flinkVersion);
             envInitializer.storageInitialize(application.getStorageType());
             return true;
