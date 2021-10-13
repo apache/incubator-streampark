@@ -66,7 +66,7 @@ object CommandUtils extends Logger {
       require(commands != null && commands.nonEmpty)
       logDebug(s"Command execute:\n${commands.mkString("\n")} ")
       val process = Utils.isWindows match {
-        case x if x => Runtime.getRuntime.exec("cmd /c ", null, null)
+        case x if x => Runtime.getRuntime.exec("cmd /k ", null, null)
         case _ => Runtime.getRuntime.exec("/bin/bash ", null, null)
       }
       val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)

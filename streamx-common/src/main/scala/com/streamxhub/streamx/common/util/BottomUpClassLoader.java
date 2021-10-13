@@ -38,7 +38,7 @@ import java.util.function.Consumer;
  * override that.
  * @author benjobs
  */
-public final class UpwardClassLoader extends URLClassLoader {
+public final class BottomUpClassLoader extends URLClassLoader {
 
     static {
         ClassLoader.registerAsParallelCapable();
@@ -49,11 +49,11 @@ public final class UpwardClassLoader extends URLClassLoader {
 
     private final Consumer<Throwable> classLoadingExceptionHandler;
 
-    public UpwardClassLoader(URL[] urls, ClassLoader parent) {
+    public BottomUpClassLoader(URL[] urls, ClassLoader parent) {
         this(urls, parent, NOOP_EXCEPTION_HANDLER);
     }
 
-    public UpwardClassLoader(
+    public BottomUpClassLoader(
         URL[] urls,
         ClassLoader parent,
         Consumer<Throwable> classLoadingExceptionHandler) {

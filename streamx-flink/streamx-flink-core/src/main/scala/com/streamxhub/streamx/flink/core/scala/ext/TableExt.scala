@@ -26,8 +26,6 @@ import org.apache.flink.api.scala.DataSet
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.table.api.bridge.scala.{TableConversions => FlinkTableConversions}
 import org.apache.flink.table.api.{Table => FlinkTable}
-import org.apache.flink.table.descriptors.{Schema, ConnectTableDescriptor => TableDescriptor}
-import org.apache.flink.table.types.DataType
 
 object TableExt {
 
@@ -61,14 +59,5 @@ object TableExt {
 
   }
 
-  class ConnectTableDescriptor(table: TableDescriptor) {
-
-    def withSchema(fieldMapping: (String, DataType)*): TableDescriptor = {
-      val schema = new Schema()
-      fieldMapping.foreach(x => schema.field(x._1, x._2))
-      table.withSchema(schema)
-    }
-
-  }
 
 }

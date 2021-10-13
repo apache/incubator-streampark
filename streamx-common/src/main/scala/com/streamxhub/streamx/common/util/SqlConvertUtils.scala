@@ -48,7 +48,7 @@ object SqlConvertUtils extends Logger {
    * @param length
    * @return
    */
-  def toFlinkDataType(dataType: String, length: String): String = {
+  private[this] def toFlinkDataType(dataType: String, length: String): String = {
     dataType.toUpperCase() match {
       case "TEXT" | "LONGTEXT" => "VARCHAR"
       case "DATETIME" => "TIMESTAMP"
@@ -64,7 +64,7 @@ object SqlConvertUtils extends Logger {
    * @param length
    * @return
    */
-  def toClickhouseDataType(dataType: String, length: String): String = {
+  private[this] def toClickhouseDataType(dataType: String, length: String): String = {
     dataType.toUpperCase() match {
       case "TEXT" | "LONGTEXT" | "BLOB" | "VARCHAR" | "VARBINARY" => "String"
       case "DATETIME" | "TIMESTAMP" => "DateTime"
@@ -104,7 +104,7 @@ object SqlConvertUtils extends Logger {
    * @param sql '
    * @return
    */
-  def formatSql(sql: String): String = {
+  private[this] def formatSql(sql: String): String = {
 
     val LENGTH_REGEXP = "(.*?)\\s*\\([^\\\\)|^\\n]+,$".r
 
@@ -143,7 +143,7 @@ object SqlConvertUtils extends Logger {
       }
     }
 
-    val body = sql.substring(sql.indexOf("("),sql.lastIndexOf(")") + 1)
+    val body = sql.substring(sql.indexOf("("), sql.lastIndexOf(")") + 1)
       .replaceAll("\r\n", "")
       .replaceFirst("\\(", "(\n")
       .replaceFirst("\\)$", "\n)")
@@ -186,10 +186,10 @@ object SqlConvertUtils extends Logger {
    * @param postfix  : 后缀内容
    * @return
    */
-  def convertSql(sql: String,
-                 typeFunc: (String, String) => String = null,
-                 keyFunc: String => String = null,
-                 postfix: String = null): String = {
+  private[this] def convertSql(sql: String,
+                               typeFunc: (String, String) => String = null,
+                               keyFunc: String => String = null,
+                               postfix: String = null): String = {
 
     val formattedSql = formatSql(sql)
     val scanner = new Scanner(formattedSql)

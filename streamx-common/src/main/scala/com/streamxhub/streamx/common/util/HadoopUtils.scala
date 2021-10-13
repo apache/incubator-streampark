@@ -61,6 +61,8 @@ object HadoopUtils extends Logger {
 
   private val hadoopUserName: String = SystemPropertyUtils.get(KEY_HADOOP_USER_NAME, DEFAULT_HADOOP_USER_NAME)
 
+  private[this] var ugi: UserGroupInformation = _
+
   private[this] var reusableYarnClient: YarnClient = _
 
   private[this] var reusableConf: Configuration = _
@@ -70,33 +72,6 @@ object HadoopUtils extends Logger {
   private[this] var rmHttpURL: String = _
 
   private[this] lazy val configurationCache: util.Map[String, Configuration] = new ConcurrentHashMap[String, Configuration]()
-
-  def hdfs: FileSystem = {
-    if (reusableHdfs == null) {
-      reusableHdfs = Try {
-        val ugi = UserGroupInformation.createRemoteUser(hadoopUserName)
-        ugi.doAs[FileSystem](new PrivilegedAction[FileSystem]() {
-          override def run(): FileSystem = FileSystem.get(reusableConf)
-        })
-      } match {
-        case Success(fs) => fs
-        case Failure(e) =>
-          throw new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
-      }
-    }
-    reusableHdfs
-  }
-
-  def yarnClient: YarnClient = {
-    if (reusableYarnClient == null || !reusableYarnClient.isInState(STATE.STARTED)) {
-      reusableYarnClient = YarnClient.createYarnClient
-      val yarnConf = new YarnConfiguration(hadoopConf)
-      reusableYarnClient.init(yarnConf)
-      reusableYarnClient.start()
-    }
-    reusableYarnClient
-  }
-
 
   lazy val kerberosConf: Map[String, String] = SystemPropertyUtils.get("app.home", null) match {
     case null =>
@@ -178,7 +153,7 @@ object HadoopUtils extends Logger {
       }
     }
 
-    def kerberosLogin(conf: Configuration): Unit = {
+    def kerberosLogin(conf: Configuration): UserGroupInformation = {
       logInfo("kerberos login starting....")
       val principal = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim
       val keytab = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KEYTAB, "").trim
@@ -201,11 +176,12 @@ object HadoopUtils extends Logger {
       conf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
       try {
         UserGroupInformation.setConfiguration(conf)
-        UserGroupInformation.loginUserFromKeytab(principal, keytab)
+        val ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(principal, keytab)
         logInfo("kerberos authentication successful")
+        ugi
       } catch {
         case e: IOException =>
-          logInfo(s"kerberos login failed,${ExceptionUtils.stringifyException(e)}")
+          logError(s"kerberos login failed,${ExceptionUtils.stringifyException(e)}")
           throw e
       }
     }
@@ -246,13 +222,42 @@ object HadoopUtils extends Logger {
         val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
         val kerberosEnable = Try(enableString.trim.toBoolean).getOrElse(false)
         if (kerberosEnable) {
-          kerberosLogin(reusableConf)
+          ugi = kerberosLogin(reusableConf)
           reLoginKerberos()
+        } else {
+          ugi = UserGroupInformation.createRemoteUser(hadoopUserName)
         }
       }
     }
     reusableConf
   }
+
+
+  def hdfs: FileSystem = {
+    if (reusableHdfs == null) {
+      reusableHdfs = Try {
+        ugi.doAs[FileSystem](new PrivilegedAction[FileSystem]() {
+          override def run(): FileSystem = FileSystem.get(reusableConf)
+        })
+      } match {
+        case Success(fs) => fs
+        case Failure(e) =>
+          throw new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
+      }
+    }
+    reusableHdfs
+  }
+
+  def yarnClient: YarnClient = {
+    if (reusableYarnClient == null || !reusableYarnClient.isInState(STATE.STARTED)) {
+      reusableYarnClient = YarnClient.createYarnClient
+      val yarnConf = new YarnConfiguration(hadoopConf)
+      reusableYarnClient.init(yarnConf)
+      reusableYarnClient.start()
+    }
+    reusableYarnClient
+  }
+
 
   /**
    * <pre>
@@ -268,9 +273,7 @@ object HadoopUtils extends Logger {
     if (rmHttpURL == null || getLatest) {
       synchronized {
         if (rmHttpURL == null || getLatest) {
-
           val conf = hadoopConf
-
           val useHttps = YarnConfiguration.useHttps(conf)
           val (addressPrefix, defaultPort, protocol) = useHttps match {
             case x if x => (YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS, "8090", "https://")

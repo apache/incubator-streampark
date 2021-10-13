@@ -23,8 +23,8 @@ package com.streamxhub.streamx.common.util
 import java.text.{ParseException, SimpleDateFormat}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.concurrent.TimeUnit
 import java.util._
+import java.util.concurrent.TimeUnit
 import scala.util._
 
 
@@ -32,9 +32,7 @@ object DateUtils {
 
   val fullFormat = "yyyy-MM-dd HH:mm:ss"
 
-  val foramt_yyyyMMdd = "yyyyMMdd"
-
-  val `foramt_yyyy-MM-dd` = "yyyy-MM-dd"
+  val format_yyyyMMdd = "yyyyMMdd"
 
   def parse(date: String, format: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): Date = {
     val df: SimpleDateFormat = new SimpleDateFormat(format)
@@ -46,7 +44,7 @@ object DateUtils {
 
   def second2Date(time: Long): Date = milliSecond2Date(time * 1000)
 
-  def now(dateFormat: String = foramt_yyyyMMdd, timeZone: TimeZone = TimeZone.getDefault): String = {
+  def now(dateFormat: String = format_yyyyMMdd, timeZone: TimeZone = TimeZone.getDefault): String = {
     val df: SimpleDateFormat = new SimpleDateFormat(dateFormat)
     df.setTimeZone(timeZone)
     df.format(new Date())

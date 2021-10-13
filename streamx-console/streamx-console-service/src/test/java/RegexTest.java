@@ -51,7 +51,7 @@ public class RegexTest {
     public void classLoader() throws MalformedURLException {
         List<URL> libCache = new ArrayList<>(0);
         List<URL> shimsCache = new ArrayList<>(0);
-        String regex = "(^|.*)streamx-flink-shims_flink-(1.12|1.13)-(.*).jar$";
+        String regex = "(^|.*)streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         String lib = "~/workspace/streamx/streamx-console-service-1.1.0-SNAPSHOT/lib";
 

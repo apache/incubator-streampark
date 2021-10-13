@@ -152,7 +152,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       // please transfer the execution.savepoint.ignore-unclaimed-state to submitRequest.property or dynamicOption
       flinkConfig.set(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, JavaBool.TRUE)
     }
-    val args = extractProgarmArgs(submitRequest)
+    val args = extractProgramArgs(submitRequest)
     flinkConfig.set(ApplicationConfiguration.APPLICATION_ARGS, args.toList.asJava)
 
     // copy from submitRequest.property
@@ -190,11 +190,11 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     }
   }
 
-  private[submit] def extractProgarmArgs(submitRequest: SubmitRequest): ArrayBuffer[String] = {
+  private[submit] def extractProgramArgs(submitRequest: SubmitRequest): ArrayBuffer[String] = {
     val programArgs = new ArrayBuffer[String]()
     Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
     programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
+    programArgs += submitRequest.flinkYaml
     programArgs += PARAM_KEY_APP_NAME
     programArgs += submitRequest.effectiveAppName
     submitRequest.developmentMode match {

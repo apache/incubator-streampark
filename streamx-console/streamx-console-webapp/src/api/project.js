@@ -45,6 +45,10 @@ export function build (params) {
   return http.post(api.Project.BUILD, params)
 }
 
+export function closebuild(params) {
+  return http.post(api.Project.CLOSEBUILD, params)
+}
+
 export function fileList (params) {
   return http.post(api.Project.FILELIST, params)
 }

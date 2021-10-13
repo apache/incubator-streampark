@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.core
 
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.TableEnvironment
+import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor}
 import org.apache.flink.table.module.ModuleEntry
 
 
@@ -47,5 +48,7 @@ class TableContext(override val parameter: ParameterTool,
 
 
   override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
+
+  @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
 
 }

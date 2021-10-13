@@ -23,11 +23,10 @@ package com.streamxhub.streamx.flink.core
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableEnvironment, TableResult}
+import org.apache.flink.table.api._
 import org.apache.flink.table.catalog.Catalog
-import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor}
 import org.apache.flink.table.expressions.Expression
-import org.apache.flink.table.functions.{ScalarFunction, UserDefinedFunction}
+import org.apache.flink.table.functions._
 import org.apache.flink.table.module.Module
 import org.apache.flink.table.sources.TableSource
 import org.apache.flink.table.types.AbstractDataType
@@ -58,8 +57,7 @@ abstract class FlinkTableTrait(val parameter: ParameterTool,
   }
 
   override def execute(jobName: String): JobExecutionResult = {
-    println(s"\033[95;1m$LOGO\033[1m\n")
-    println(s"[StreamX] FlinkTable $jobName Starting...")
+    printLogo(s"FlinkTable $jobName Starting...")
     tableEnv.execute(jobName)
   }
 
@@ -178,8 +176,6 @@ abstract class FlinkTableTrait(val parameter: ParameterTool,
   @Deprecated override def getCompletionHints(statement: String, position: Int): Array[String] = tableEnv.getCompletionHints(statement, position)
 
   @Deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
-
-  @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
 
 }
 
