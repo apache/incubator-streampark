@@ -23,7 +23,7 @@
         <scala.binary.version>2.11</scala.binary.version>
         <junit.version>4.13.1</junit.version>
 
-        <streamx.shims.version>1.12</streamx.shims.version>
+        <streamx.shims.version>1.14</streamx.shims.version>
         <frontend.project.name>streamx-console-webapp</frontend.project.name>
         <env>dev</env>
 

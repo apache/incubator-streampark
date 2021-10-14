@@ -107,7 +107,7 @@ object FlinkSqlValidator extends Logger {
               }
             } catch {
               case e: Throwable =>
-                logError(s"verify error: ${ExceptionUtils.stringifyException(e)}")
+                logError(s"verify error:${ExceptionUtils.stringifyException(e)}")
                 return SqlError(
                   SqlErrorType.SYNTAX_ERROR,
                   e.getMessage,
@@ -123,6 +123,7 @@ object FlinkSqlValidator extends Logger {
       null
     } catch {
       case exception: Exception =>
+        logError(s"verify error:${ExceptionUtils.stringifyException(exception)}")
         val separator = "\001"
         val error = exception.getLocalizedMessage
         val array = error.split(separator)
