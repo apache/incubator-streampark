@@ -39,6 +39,7 @@ import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.service.FlinkVersionService;
+import com.streamxhub.streamx.flink.core.FlinkSqlValidator;
 import com.streamxhub.streamx.flink.core.SqlError;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -190,7 +191,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public SqlError verifySql(String sql, Long versionId) {
-        ClassLoader loader = getFlinkShimsClassLoader(versionId);
+        return FlinkSqlValidator.verifySql(sql);
+       /* ClassLoader loader = getFlinkShimsClassLoader(versionId);
         String error = ClassLoaderUtils.runAsClassLoader(loader, (Supplier<String>) () -> {
             try {
                 Class<?> clazz = loader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
@@ -206,7 +208,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             }
             return null;
         });
-        return SqlError.fromString(error);
+        return SqlError.fromString(error);*/
     }
 
     @SneakyThrows

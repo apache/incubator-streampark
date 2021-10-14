@@ -321,7 +321,7 @@ object ConfigConst {
     println(ansi.eraseScreen.fg(YELLOW).a("                                            ").fg(RED).a("  .    ").reset)
     println("\n       WebSite:  http://www.streamxhub.com            ")
     println("       GitHub :  https://github.com/streamxhub/streamx")
-    println("       Gitee  :  https://gitee.com/benjobs/streamx    ")
+    println("       Gitee  :  https://gitee.com/streamxhub/streamx    ")
     println("       Ver    :  1.2.0                                ")
     println(s"       Info   :  $info")
     println(s"       Time   :  ${LocalDateTime.now}")
