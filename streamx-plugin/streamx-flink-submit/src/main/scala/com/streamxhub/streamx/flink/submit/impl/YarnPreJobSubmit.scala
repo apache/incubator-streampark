@@ -35,9 +35,11 @@ import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTar
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.fs.{Path => HadoopPath}
 import org.apache.hadoop.yarn.api.records.ApplicationId
-
 import java.io.File
 import java.lang.{Boolean => JavaBool}
+
+import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
@@ -46,6 +48,7 @@ import scala.util.Try
 /**
  * yarn PreJob mode submit
  */
+@deprecated
 object YarnPreJobSubmit extends YarnSubmitTrait {
 
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
@@ -85,8 +88,25 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
              |------------------------------------------------------------------
              |""".stripMargin)
 
+        val savepointRestoreSettings = {
+          // 判断参数 submitRequest.option 中是否包涵 -n 参数；赋值 allowNonRestoredState: true or false
+          lazy val allowNonRestoredState = Try(submitRequest.option.split("\\s+").contains("-n")).getOrElse(false)
+          submitRequest.savePoint match {
+            case sp if Try(sp.isEmpty).getOrElse(true) => SavepointRestoreSettings.none
+            case sp => SavepointRestoreSettings.forPath(sp, allowNonRestoredState)
+          }
+        }
+
+        logInfo(
+          s"""
+             |------------------------<<savepointRestoreSettings>>--------------
+             |$savepointRestoreSettings
+             |------------------------------------------------------------------
+             |""".stripMargin)
+
         val packagedProgram = PackagedProgram
           .newBuilder
+          .setSavepointRestoreSettings(savepointRestoreSettings)
           .setJarFile(new File(submitRequest.flinkUserJar))
           .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
           .setArguments(
@@ -104,9 +124,9 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
         )
         logInfo(
           s"""
-             ||-------------------------<<applicationId>>------------------------|
-             ||jobGraph getJobID: ${jobGraph.getJobID.toString}|
-             ||__________________________________________________________________|
+             |-------------------------<<applicationId>>------------------------
+             |jobGraph getJobID: ${jobGraph.getJobID.toString}
+             |__________________________________________________________________
              |""".stripMargin)
         deployInternal(
           clusterDescriptor,
@@ -121,9 +141,9 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
       val applicationId = clusterClient.getClusterId
       logInfo(
         s"""
-           ||-------------------------<<applicationId>>------------------------|
-           ||Flink Job Started: applicationId: $applicationId|
-           ||__________________________________________________________________|
+           |-------------------------<<applicationId>>------------------------
+           |Flink Job Started: applicationId: $applicationId
+           |__________________________________________________________________
            |""".stripMargin)
 
       SubmitResponse(applicationId.toString, flinkConfig)
@@ -135,14 +155,13 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
   private def getEffectiveConfiguration[T](submitRequest: SubmitRequest, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine) = {
     val effectiveConfiguration = super.applyConfiguration(submitRequest, activeCustomCommandLine, commandLine)
     val (providedLibs, programArgs) = {
-      val providedLibs = ListBuffer(submitRequest.workspaceEnv.appJars)
-
+      val providedLibs = ListBuffer(submitRequest.hdfsWorkspace.appJars)
       val programArgs = new ArrayBuffer[String]()
       Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
       programArgs += PARAM_KEY_APP_NAME
       programArgs += submitRequest.effectiveAppName
       programArgs += PARAM_KEY_FLINK_CONF
-      programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
+      programArgs += submitRequest.flinkYaml
 
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINKSQL =>

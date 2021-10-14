@@ -20,6 +20,12 @@
  */
 package com.streamxhub.streamx.common.conf
 
+import com.streamxhub.streamx.common.util.SystemPropertyUtils
+import org.fusesource.jansi.Ansi.Color._
+import org.fusesource.jansi.Ansi.ansi
+
+import java.time.LocalDateTime
+
 object ConfigConst {
   /**
    *
@@ -287,42 +293,11 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
-  val KEY_STREAMX_WORKSPACE = "streamx.workspace.path"
+  val KEY_STREAMX_WORKSPACE_LOCAL = "streamx.workspace.local"
+
+  val KEY_STREAMX_WORKSPACE_REMOTE = "streamx.workspace.remote"
 
   val STREAMX_WORKSPACE_DEFAULT = "/streamx"
-
-  lazy val WORKSPACE: String = {
-    val workspace = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE, STREAMX_WORKSPACE_DEFAULT)
-    require(!workspace.startsWith("hdfs://"))
-    workspace
-  }
-
-  lazy val APP_PLUGINS = s"$WORKSPACE/plugins"
-
-  /**
-   * 存放不同版本flink相关的jar
-   */
-  lazy val APP_SHIMS = s"$WORKSPACE/shims"
-
-  lazy val APP_UPLOADS = s"$WORKSPACE/uploads"
-
-  lazy val APP_WORKSPACE = s"$WORKSPACE/workspace"
-
-  lazy val APP_FLINK = s"$WORKSPACE/flink"
-
-  lazy val APP_BACKUPS = s"$WORKSPACE/backups"
-
-  lazy val APP_SAVEPOINTS = s"$WORKSPACE/savepoints"
-
-  /**
-   * 存放全局公共的jar
-   */
-  lazy val APP_JARS = s"$WORKSPACE/jars"
-
-  /**
-   * dirpath of the maven local repository with built-in compilation process
-   */
-  lazy val MAVEN_LOCAL_DIR = s"$WORKSPACE/mvnrepo"
 
   /**
    * maven repository used for built-in compilation
@@ -332,31 +307,26 @@ object ConfigConst {
   /**
    * namespace for docker image used in docker build env and image register
    */
-    val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
-    val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
-    lazy val DOCKER_IMAGE_NAMESPACE: String = System.getProperties.getProperty(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
+  val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
+  val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
+  lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
-  val LOGO =
-    """
-      |
-      |                 .+.
-      |           _____/ /_________  ____ _____ ___  _  __
-      |          / ___/ __/ ___/ _ \/ __ `/ __ `__ \| |/_/
-      |         (__  ) /_/ /  /  __/ /_/ / / / / / />  <
-      |        /____/\__/_/   \___/\__,_/_/ /_/ /_/_/|_|
-      |                                              |/
-      |                                              .
-      |
-      |        WebSite:  http://www.streamxhub.com
-      |        GitHub :  https://github.com/streamxhub/streamx
-      |        Gitee  :  https://gitee.com/benjobs/streamx
-      |        Ver    :  1.2.0
-      |
-      |        [StreamX] Make Flink|Spark easier ô‿ô!
-      |
-      |
-      |""".stripMargin
-
+  def printLogo(info: String): Unit = {
+    println(ansi.eraseScreen.fg(YELLOW).a("\n\n                 .+.                          ").reset)
+    println(ansi.eraseScreen.fg(YELLOW).a("           _____/ /_________  ____ _____ ___ ").fg(RED).a(" _  __").reset)
+    println(ansi.eraseScreen.fg(YELLOW).a("          / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\").fg(RED).a("| |/_/").reset)
+    println(ansi.eraseScreen.fg(YELLOW).a("         (__  ) /_/ /  /  __/ /_/ / / / / / /").fg(RED).a(">  <  ").reset)
+    println(ansi.eraseScreen.fg(YELLOW).a("        /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/").fg(RED).a("_/|_|  ").reset)
+    println(ansi.eraseScreen.fg(YELLOW).a("                                            ").fg(RED).a("  |/   ").reset)
+    println(ansi.eraseScreen.fg(YELLOW).a("                                            ").fg(RED).a("  .    ").reset)
+    println("\n       WebSite:  http://www.streamxhub.com            ")
+    println("       GitHub :  https://github.com/streamxhub/streamx")
+    println("       Gitee  :  https://gitee.com/streamxhub/streamx    ")
+    println("       Ver    :  1.2.0                                ")
+    println(s"       Info   :  $info")
+    println(s"       Time   :  ${LocalDateTime.now}")
+    println("\n")
+  }
 
 }
 

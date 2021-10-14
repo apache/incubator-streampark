@@ -22,12 +22,13 @@ package com.streamxhub.streamx.flink.submit.domain
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType, ResolveOrder}
+import com.streamxhub.streamx.common.conf.Workspace
+import com.streamxhub.streamx.common.enums._
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf
 import com.streamxhub.streamx.flink.packer.maven.JarPackDeps
-import com.streamxhub.streamx.flink.submit.`trait`.WorkspaceEnv
+import com.streamxhub.streamx.flink.submit.`trait`.HdfsWorkspace
 import org.apache.flink.client.cli.CliFrontend
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -119,13 +120,14 @@ case class SubmitRequest(flinkHome: String,
     }
   }
 
-  private[submit] lazy val workspaceEnv = {
+  private[submit] lazy val hdfsWorkspace = {
     /**
      * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
      */
+    val workspace = Workspace.remote
     val flinkName = new File(flinkHome).getName
-    val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
-    WorkspaceEnv(
+    val flinkHdfsHome = s"${workspace.APP_FLINK}/$flinkName"
+    HdfsWorkspace(
       flinkName,
       flinkHome,
       flinkLib = s"$flinkHdfsHome/lib",
@@ -134,8 +136,8 @@ case class SubmitRequest(flinkHome: String,
         case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
         case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
       },
-      appJars = s"${HdfsUtils.getDefaultFS}$APP_JARS",
-      appPlugins = s"${HdfsUtils.getDefaultFS}$APP_PLUGINS"
+      appJars = workspace.APP_JARS,
+      appPlugins = workspace.APP_PLUGINS
     )
   }
 

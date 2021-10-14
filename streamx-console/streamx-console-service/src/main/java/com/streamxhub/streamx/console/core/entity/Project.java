@@ -25,8 +25,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
-import com.streamxhub.streamx.console.base.util.SpringContextUtils;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.Data;
@@ -101,13 +101,6 @@ public class Project implements Serializable {
     @JsonIgnore
     private transient SettingService settingService;
 
-    private String getStreamXWorkspace() {
-        if (settingService == null) {
-            settingService = SpringContextUtils.getBean(SettingService.class);
-        }
-        return settingService.getStreamXWorkspace();
-    }
-
     /**
      * 获取项目源码路径
      *
@@ -116,7 +109,7 @@ public class Project implements Serializable {
     @JsonIgnore
     public File getAppSource() {
         if (appSource == null) {
-            appSource = getStreamXWorkspace().concat("/project");
+            appSource = Workspace.local().PROJECT_LOCAL_DIR();
         }
         File sourcePath = new File(appSource);
         if (!sourcePath.exists()) {
@@ -134,7 +127,7 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public File getAppBase() {
-        String appBase = getStreamXWorkspace().concat("/app/");
+        String appBase = Workspace.local().APP_WORKSPACE().concat("/app/");
         return new File(appBase.concat(id.toString()));
     }
 
@@ -232,8 +225,8 @@ public class Project implements Serializable {
     @JsonIgnore
     public String getLog4BuildStart() {
         return String.format(
-            "%s project [%s] branches [%s],maven install beginning! cmd: %s\n\n",
-            getLogHeader("maven"),
+            "%sproject : %s\nbranches: %s\ncommand : %s\n\n",
+            getLogHeader("maven install"),
             getName(),
             getBranches(),
             getMavenBuildCmd()
@@ -241,19 +234,9 @@ public class Project implements Serializable {
     }
 
     @JsonIgnore
-    public String getLog4PullStart() {
-        return String.format(
-            "%s project [%s] branches [%s] remote [origin],git pull beginning!\n\n",
-            getLogHeader("git pull"),
-            getName(),
-            getBranches()
-        );
-    }
-
-    @JsonIgnore
     public String getLog4CloneStart() {
         return String.format(
-            "%s project [%s] branches [%s], clone into [%s],git clone beginning!\n\n",
+            "%sproject  : %s\nbranches : %s\nworkspace: %s\n\n",
             getLogHeader("git clone"),
             getName(),
             getBranches(),

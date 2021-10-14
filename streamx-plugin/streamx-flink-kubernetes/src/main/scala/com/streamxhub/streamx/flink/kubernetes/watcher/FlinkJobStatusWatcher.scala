@@ -129,8 +129,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
             // publish JobStatuChangeEvent when necessary
             trkRs.filter(e =>
               preCache.get(e._1) match {
-                case cv if cv.isEmpty => true
-                case cv if cv.get.jobState != e._2.jobState => true
+                case cv if cv.isEmpty || cv.get.jobState != e._2.jobState => true
                 case _ => false
               }).map(e => FlinkJobStatusChangeEvent(e._1, e._2))
               .foreach(eventBus.postSync)
@@ -139,7 +138,9 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
               .map(_._1)
               .foreach(trkId => {
                 cachePool.trackIds.invalidate(trkId)
-                if (trkId.executeMode == APPLICATION) cachePool.clusterRestUrls.invalidate(trkId.toClusterKey)
+                if (trkId.executeMode == APPLICATION) {
+                  cachePool.clusterRestUrls.invalidate(trkId.toClusterKey)
+                }
               })
         }
         future
@@ -151,7 +152,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
     ).failed.map(_ =>
       logInfo(s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
         s" limitSeconds=${conf.sglTrkTaskTimeoutSec}," +
-        s" trakcingClusterKeys=${trkClusterKeys.mkString(",")}"))
+        s" trackingClusterKeys=${trkClusterKeys.mkString(",")}"))
   }
 
   /**
@@ -175,10 +176,11 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
           val preCache = cachePool.jobStatuses.getIfPresent(trkId)
           val state = inferSilentOrLostFromPreCache(preCache)
           val nonFirstSilent = state == FlinkJobState.SILENT && preCache != null && preCache.jobState == FlinkJobState.SILENT
-          if (nonFirstSilent)
+          if (nonFirstSilent) {
             JobStatusCV(jobState = state, jobId = trkId.jobId, pollEmitTime = preCache.pollEmitTime, pollAckTime = preCache.pollAckTime)
-          else
+          } else {
             JobStatusCV(jobState = state, jobId = trkId.jobId, pollEmitTime = pollEmitTime, pollAckTime = System.currentTimeMillis)
+          }
         }
       ).toArray
   }
@@ -195,11 +197,12 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
     lazy val defaultResult = Array.empty[(TrkId, JobStatusCV)]
     val pollEmitTime = System.currentTimeMillis
     val jobDetails = listJobsDetails(ClusterKey(SESSION, namespace, clusterId)).getOrElse(return defaultResult).jobs
-    if (jobDetails.isEmpty)
+    if (jobDetails.isEmpty) {
       defaultResult
-    else
+    } else {
       jobDetails.map(jobDetail =>
         TrkId.onSession(namespace, clusterId, jobDetail.jid) -> jobDetail.toJobStatusCV(pollEmitTime, System.currentTimeMillis))
+    }
   }
 
   /**
@@ -214,11 +217,12 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
     implicit val pollEmitTime: Long = System.currentTimeMillis
     lazy val k8sInferResult = inferApplicationFlinkJobStateFromK8sEvent(clusterId, namespace)
     val jobDetails = listJobsDetails(ClusterKey(APPLICATION, namespace, clusterId)).getOrElse(return k8sInferResult).jobs
-    if (jobDetails.isEmpty)
+    if (jobDetails.isEmpty) {
       k8sInferResult
-    else
-    // just receive the first result
+    } else {
+      // just receive the first result
       Some(TrkId.onApplication(namespace, clusterId) -> jobDetails.iterator.next.toJobStatusCV(pollEmitTime, System.currentTimeMillis))
+    }
   }
 
 

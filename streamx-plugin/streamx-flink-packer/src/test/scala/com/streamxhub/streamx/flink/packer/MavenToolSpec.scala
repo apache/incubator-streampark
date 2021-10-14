@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.flink.packer
 
-import com.streamxhub.streamx.common.conf.ConfigConst.KEY_STREAMX_WORKSPACE
 import com.streamxhub.streamx.flink.packer.maven.{JarPackDeps, MavenArtifact, MavenTool}
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfterAll
@@ -35,17 +34,15 @@ import scala.language.postfixOps
 class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
 
   val outputDir = "MavenToolSpec-output/"
-  val preWorkSpaceVal: String = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE)
+  val preWorkSpaceVal: String = "/streamx"
 
   override protected def beforeAll(): Unit = {
     val output = new File(outputDir)
     FileUtils.deleteDirectory(output)
     FileUtils.forceMkdir(output)
-    System.getProperties.setProperty(KEY_STREAMX_WORKSPACE, outputDir)
   }
 
   override protected def afterAll(): Unit = {
-    System.getProperties.setProperty(KEY_STREAMX_WORKSPACE, preWorkSpaceVal)
     FileUtils.deleteDirectory(new File(outputDir))
   }
 

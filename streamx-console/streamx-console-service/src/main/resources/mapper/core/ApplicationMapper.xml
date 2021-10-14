@@ -10,7 +10,7 @@
         <result column="DYNAMIC_OPTIONS" jdbcType="LONGVARCHAR" property="dynamicOptions"/>
         <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
-        <result column="CLUSTER_ID" jdbcType="VARCHAR" property="clusterId"/>
+        <result column="VERSION_ID" jdbcType="BIGINT" property="versionId"/>
         <result column="FLINK_IMAGE" jdbcType="VARCHAR" property="flinkImage"/>
         <result column="K8S_NAMESPACE" jdbcType="VARCHAR" property="k8sNamespace"/>
         <result column="APP_TYPE" jdbcType="INTEGER" property="appType"/>
@@ -20,7 +20,7 @@
         <result column="JAR" jdbcType="VARCHAR" property="jar"/>
         <result column="MAIN_CLASS" jdbcType="VARCHAR" property="mainClass"/>
         <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
-        <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
+        <result column="USER_ID" jdbcType="BIGINT" property="userId"/>
         <result column="START_TIME" jdbcType="DATE" property="startTime"/>
         <result column="END_TIME" jdbcType="DATE" property="endTime"/>
         <result column="DURATION" jdbcType="BIGINT" property="duration"/>

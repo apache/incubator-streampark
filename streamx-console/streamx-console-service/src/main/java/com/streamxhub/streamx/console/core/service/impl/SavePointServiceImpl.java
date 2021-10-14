@@ -25,7 +25,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
@@ -33,8 +32,10 @@ import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.entity.FlinkVersion;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
+import com.streamxhub.streamx.console.core.service.FlinkVersionService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,9 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     @Autowired
     private SettingService settingService;
 
+    @Autowired
+    private FlinkVersionService flinkVersionService;
+
     @Override
     public void obsolete(Long appId) {
         this.baseMapper.obsolete(appId);
@@ -70,9 +74,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     private void expire(SavePoint entity) {
+        FlinkVersion flinkVersion = flinkVersionService.getByAppId(entity.getAppId());
+        assert flinkVersion != null;
         int cpThreshold = Integer.parseInt(
-            settingService
-                .getFlinkDefaultConfig()
+            flinkVersion.convertFlinkYamlAsMap()
                 .getOrDefault("state.checkpoints.num-retained", "1")
         );
 
@@ -129,6 +134,6 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     public void removeApp(Application application) {
         Long appId = application.getId();
         baseMapper.removeApp(application.getId());
-        application.getFsOperator().delete(ConfigConst.APP_SAVEPOINTS().concat("/").concat(appId.toString()));
+        application.getFsOperator().delete(application.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
     }
 }

@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import java.util.function.UnaryOperator
 import javax.annotation.concurrent.ThreadSafe
+import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.util.Try
 
@@ -73,9 +74,9 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
    * determines whether the specified TrkId is in the trace
    */
   def isInTracking(trkId: TrkId): Boolean = {
-    if (Try(trkId.nonLegal).getOrElse(true))
-      return false
-    trackIds.getIfPresent(trkId) != null
+    if (Try(trkId.nonLegal).getOrElse(true)) false; else {
+      trackIds.getIfPresent(trkId) != null
+    }
   }
 
   /**
@@ -88,16 +89,16 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
    */
   def collectAccMetric(): FlinkMetricCV = {
     // get cluster metrics that in tracking
-    val clusterKeys = collectTrkClusterKeys()
-    if (clusterKeys.isEmpty) {
-      return FlinkMetricCV.empty
+    collectTrkClusterKeys() match {
+      case k if k.isEmpty => FlinkMetricCV.empty
+      case k =>
+        flinkMetrics.getAllPresent(k) match {
+          case m if m.isEmpty => FlinkMetricCV.empty
+          case m =>
+            // aggregate metrics
+            m.values.fold(FlinkMetricCV.empty)((x, y) => x + y)
+        }
     }
-    val metrics = flinkMetrics.getAllPresent(clusterKeys.asJava).asScala
-    if (metrics.isEmpty) {
-      return FlinkMetricCV.empty
-    }
-    // aggregate metrics
-    metrics.values.fold(FlinkMetricCV.empty)((x, y) => x + y)
   }
 
   /**

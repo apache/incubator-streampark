@@ -12,6 +12,10 @@
     <artifactId>streamx-flink-submit</artifactId>
     <name>StreamX : Flink Submit</name>
 
+    <properties>
+        <streamx.shims.version>1.14</streamx.shims.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
@@ -22,14 +26,6 @@
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- The flink session mode would resolve the DAG within streamx process,
-             so a full build dependencies is required. -->
-        <dependency>
-            <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims_flink-1.13</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -45,10 +41,18 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- The flink session mode would resolve the DAG within streamx process,
+          so a full build dependencies is required. -->
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-shims_flink-${streamx.shims.version}</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-shaded-guava</artifactId>
-            <version>18.0-12.0</version>
+            <version>30.1.1-jre-14.0</version>
         </dependency>
 
         <dependency>

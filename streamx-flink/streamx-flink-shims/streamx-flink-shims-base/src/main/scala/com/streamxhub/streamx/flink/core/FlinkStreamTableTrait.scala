@@ -34,15 +34,14 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.ReadableConfig
 import org.apache.flink.core.execution.{JobClient, JobListener}
 import org.apache.flink.runtime.state.StateBackend
+import org.apache.flink.streaming.api._
 import org.apache.flink.streaming.api.environment.{CheckpointConfig, StreamExecutionEnvironment => JavaStreamExecutionEnvironment}
-import org.apache.flink.streaming.api.functions.source.{FileMonitoringFunction, FileProcessingMode, SourceFunction}
+import org.apache.flink.streaming.api.functions.source._
 import org.apache.flink.streaming.api.graph.StreamGraph
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
+import org.apache.flink.streaming.api.scala._
+import org.apache.flink.table.api._
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
-import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableResult}
 import org.apache.flink.table.catalog.Catalog
-import org.apache.flink.table.descriptors.{ConnectorDescriptor, StreamTableDescriptor}
 import org.apache.flink.table.expressions.Expression
 import org.apache.flink.table.functions._
 import org.apache.flink.table.module.Module
@@ -88,8 +87,7 @@ abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
   }
 
   @deprecated override def execute(jobName: String): JobExecutionResult = {
-    println(s"\033[95;1m$LOGO\033[1m\n")
-    println(s"[StreamX] FlinkStreamTable $jobName Starting...")
+    printLogo(s"FlinkStreamTable $jobName Starting...")
     if (isConvertedToDataStream) {
       streamEnv.execute(jobName)
     } else null
@@ -336,8 +334,6 @@ abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
   @Deprecated override def registerDataStream[T](name: String, dataStream: DataStream[T], fields: Expression*): Unit = tableEnv.registerDataStream(name, dataStream, fields: _*)
 
   @Deprecated override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
-
-  @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
 
   @Deprecated override def registerFunction(name: String, function: ScalarFunction): Unit = tableEnv.registerFunction(name, function)
 
