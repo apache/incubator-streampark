@@ -24,7 +24,7 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey}
 import com.streamxhub.streamx.flink.kubernetes.{FlinkTrkCachePool, KubernetesRetriever}
 import io.fabric8.kubernetes.api.model.apps.Deployment
-import io.fabric8.kubernetes.client.{KubernetesClient, KubernetesClientException, Watcher}
+import io.fabric8.kubernetes.client.{KubernetesClient, Watcher, WatcherException}
 
 import javax.annotation.concurrent.ThreadSafe
 import scala.util.Try
@@ -89,7 +89,7 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger
           handleDeploymentEvent(action, event)
         }
 
-        override def onClose(e: KubernetesClientException): Unit = {
+        override def onClose(e: WatcherException): Unit = {
           logInfo(s"K8sEventWatcher[Kind=Deployment] stop, message=${e.getMessage}")
         }
       })
@@ -104,8 +104,6 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger
     cachePool.k8sDeploymentEvents.put(
       K8sEventKey(namespace, clusterId), K8sDeploymentEventCV(action, event, System.currentTimeMillis()))
   }
-
-
 
 
 }
