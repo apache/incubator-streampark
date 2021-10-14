@@ -13,7 +13,6 @@
     <name>StreamX : Flink Kubernetes Integration</name>
 
     <properties>
-        <caffeine.version>2.8.6</caffeine.version>
         <apache.httpclient5.version>5.1</apache.httpclient5.version>
         <scalatest.skiptests>true</scalatest.skiptests>
     </properties>
@@ -23,33 +22,12 @@
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-common</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- flink dependencies -->
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-core</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-scala_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-clients_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-kubernetes_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-shims_flink-${streamx.shims.version}</artifactId>
+            <version>${project.version}</version>
+            <classifier>shaded</classifier>
         </dependency>
 
         <!-- local cache -->

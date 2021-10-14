@@ -12,10 +12,6 @@
     <artifactId>streamx-flink-submit</artifactId>
     <name>StreamX : Flink Submit</name>
 
-    <properties>
-        <streamx.shims.version>1.14</streamx.shims.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
@@ -47,6 +43,7 @@
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-shims_flink-${streamx.shims.version}</artifactId>
             <version>${project.version}</version>
+            <classifier>shaded</classifier>
         </dependency>
 
         <dependency>
@@ -92,13 +89,6 @@
                     <groupId>com.google.guava</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-kubernetes_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>

@@ -431,20 +431,14 @@
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-sqlclient</artifactId>
-            <version>1.2.0</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-shims_flink-${streamx.shims.version}</artifactId>
-            <version>1.2.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
-            <version>1.2.0</version>
+            <version>${project.version}</version>
+            <classifier>shaded</classifier>
             <scope>provided</scope>
         </dependency>
 
