@@ -379,6 +379,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean checkStart(Application appParam) {
         try {
             Application application = getById(appParam.getId());
+            if (application.getVersionId() == null) {
+                //任务未指定flink version.则检查是否配置的默认的flink version
+                FlinkVersion version = flinkVersionService.getDefault();
+                if (version == null) {
+                    return false;
+                }
+            }
             FlinkVersion flinkVersion = flinkVersionService.getById(application.getVersionId());
             envInitializer.checkFlinkEnv(application.getStorageType(), flinkVersion);
             envInitializer.storageInitialize(application.getStorageType());
@@ -1178,6 +1185,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         );
 
         FlinkVersion flinkVersion = flinkVersionService.getById(application.getVersionId());
+        if (flinkVersion == null) {
+            //任务未指定flink version则使用默认的version
+            flinkVersion = flinkVersionService.getDefault();
+        }
 
         SubmitRequest submitInfo = new SubmitRequest(
             flinkVersion.getFlinkHome(),

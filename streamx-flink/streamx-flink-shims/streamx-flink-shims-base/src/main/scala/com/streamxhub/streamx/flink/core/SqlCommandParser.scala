@@ -33,7 +33,7 @@ object SqlCommandParser extends Logger {
   def parseSQL(sql: String): List[SqlCommandCall] = {
     val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
-    val lines = sql.split("\\n").filter(_ != null).filter(_.trim.nonEmpty).filter(!_.startsWith("--"))
+    val lines = sql.split("\\n").filter(_ != null).filter(x => x.trim.nonEmpty && !x.trim.startsWith("--"))
     lines match {
       case x if x.isEmpty => throw new RuntimeException(sqlEmptyError)
       case x =>
