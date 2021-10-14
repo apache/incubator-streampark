@@ -510,7 +510,27 @@
                         </dependency>
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
+                            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
+                            <version>1.2.0</version>
+                            <classifier>shaded</classifier>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.13</artifactId>
+                            <version>1.2.0</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.streamxhub.streamx</groupId>
+                            <artifactId>streamx-flink-shims_flink-1.13</artifactId>
+                            <version>1.2.0</version>
+                            <classifier>shaded</classifier>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.streamxhub.streamx</groupId>
+                            <artifactId>streamx-flink-shims_flink-1.14</artifactId>
                             <version>1.2.0</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
@@ -518,6 +538,7 @@
                             <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.14</artifactId>
                             <version>1.2.0</version>
+                            <classifier>shaded</classifier>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                     </artifactItems>
