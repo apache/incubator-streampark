@@ -124,6 +124,12 @@
             <version>${flink.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-shaded-guava</artifactId>
+            <version>18.0-12.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
