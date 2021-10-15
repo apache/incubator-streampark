@@ -37,7 +37,6 @@ import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
 import com.streamxhub.streamx.console.core.service.FlinkVersionService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
-import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,9 +52,6 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint> implements SavePointService {
-
-    @Autowired
-    private SettingService settingService;
 
     @Autowired
     private FlinkVersionService flinkVersionService;
