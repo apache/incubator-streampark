@@ -387,6 +387,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             }
             FlinkVersion flinkVersion = flinkVersionService.getById(application.getVersionId());
+            flinkVersion = flinkVersion == null ? flinkVersionService.getDefault() : flinkVersion;
             envInitializer.checkFlinkEnv(application.getStorageType(), flinkVersion);
             envInitializer.storageInitialize(application.getStorageType());
             return true;
