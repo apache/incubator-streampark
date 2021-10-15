@@ -24,7 +24,6 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType}
 import com.streamxhub.streamx.common.fs.FsOperator
-import com.streamxhub.streamx.common.util.DeflaterUtils
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.collections.MapUtils
@@ -220,29 +219,20 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       workspace.APP_PLUGINS,
       submitRequest.flinkUserJar
     )
-    val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
-    version match {
-      case Array(1, 13, _) =>
-        providedLibs += s"${workspace.APP_SHIMS}/flink-1.13"
-      case Array(1, 11 | 12, _) =>
-        providedLibs += s"${workspace.APP_SHIMS}/flink-1.12"
-      case _ =>
-        throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
+    providedLibs += {
+      val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
+      version match {
+        case Array(1, 12, _) => s"${workspace.APP_SHIMS}/flink-1.12"
+        case Array(1, 13, _) => s"${workspace.APP_SHIMS}/flink-1.13"
+        case Array(1, 14, _) => s"${workspace.APP_SHIMS}/flink-1.14"
+        case _ => throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
+      }
     }
     val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
     if (FsOperator.lfs.exists(jobLib)) {
       providedLibs += jobLib
     }
-
     val libSet = providedLibs.toSet
-    // loop join md5sum per file
-    //    val joinedMd5 = libSet.flatMap(lib =>
-    //      new File(lib) match {
-    //        case f if f.isFile => List(f)
-    //        case d => d.listFiles().toList
-    //      }
-    //    ).map(f => DigestUtils.md5Hex(new FileInputStream(f))).mkString("")
-    //    DigestUtils.md5Hex(joinedMd5) -> libSet
     libSet
   }
 

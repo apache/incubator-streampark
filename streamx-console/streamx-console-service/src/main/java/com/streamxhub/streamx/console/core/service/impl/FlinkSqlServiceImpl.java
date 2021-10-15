@@ -214,7 +214,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         FlinkVersion flinkVersion = flinkVersionService.getById(versionId);
         String version = flinkVersion.getLargeVersion();
         if (!shimsClassLoaderCache.containsKey(version)) {
-            String shimsRegex = "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar";
+            String shimsRegex = "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*)-shaded.jar";
             Pattern pattern = Pattern.compile(shimsRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
             List<File> shimsJars = Arrays.stream(Objects.requireNonNull(new File(WebUtils.getAppDir("lib")).listFiles((pathname) -> {
