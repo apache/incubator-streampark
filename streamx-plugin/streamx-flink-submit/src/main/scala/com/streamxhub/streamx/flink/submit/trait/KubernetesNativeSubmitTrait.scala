@@ -219,24 +219,15 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       workspace.APP_PLUGINS,
       submitRequest.flinkUserJar
     )
-    // extract flink-shims paths to provided libs
-    providedLibs ++= {
+    providedLibs += {
       val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
-      val shimsDic = version match {
+      version match {
         case Array(1, 12, _) => s"${workspace.APP_SHIMS}/flink-1.12"
         case Array(1, 13, _) => s"${workspace.APP_SHIMS}/flink-1.13"
         case Array(1, 14, _) => s"${workspace.APP_SHIMS}/flink-1.14"
         case _ => throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
       }
-      new File(shimsDic) match {
-        case dic if dic.exists() && dic.isDirectory => dic.listFiles()
-          .map(_.getAbsolutePath)
-          .filter(_.endsWith(".jar"))
-          .filter(!_.endsWith("-shaded.jar"))
-        case _ => Array.empty[String]
-      }
     }
-
     val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
     if (FsOperator.lfs.exists(jobLib)) {
       providedLibs += jobLib

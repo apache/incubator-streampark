@@ -62,6 +62,13 @@ public class EnvInitializer implements ApplicationRunner {
 
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
 
+    private static final Pattern PATTERN_FLINK_SHIMS_ORIGIN_JAR = Pattern.compile(
+        "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*)(?<!shaded).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static final Pattern PATTERN_FLINK_SHIMS_SHADED_JAR = Pattern.compile(
+        "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*)-shaded.jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_LOCAL(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
@@ -137,11 +144,11 @@ public class EnvInitializer implements ApplicationRunner {
             if (fsOperator.exists(appShims)) {
                 fsOperator.delete(appShims);
             }
-            String regex = "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$";
-            Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-            File[] shims = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(regex));
+
+            Pattern shimsPattern = StorageType.LFS.equals(storageType) ? PATTERN_FLINK_SHIMS_ORIGIN_JAR : PATTERN_FLINK_SHIMS_SHADED_JAR;
+            File[] shims = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(shimsPattern.pattern()));
             for (File file : Objects.requireNonNull(shims)) {
-                Matcher matcher = pattern.matcher(file.getName());
+                Matcher matcher = shimsPattern.matcher(file.getName());
                 if (!keepFile.equals(file.getName()) && matcher.matches()) {
                     String version = matcher.group(1);
                     String shimsPath = appShims.concat("/flink-").concat(version);
