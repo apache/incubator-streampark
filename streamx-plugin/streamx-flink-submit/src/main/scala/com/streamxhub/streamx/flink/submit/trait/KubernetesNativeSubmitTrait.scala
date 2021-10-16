@@ -24,10 +24,6 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType}
 import com.streamxhub.streamx.common.fs.FsOperator
-<<<<<<< HEAD
-=======
-import com.streamxhub.streamx.common.util.DeflaterUtils
->>>>>>> main
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.collections.MapUtils
@@ -223,7 +219,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       workspace.APP_PLUGINS,
       submitRequest.flinkUserJar
     )
-<<<<<<< HEAD
     providedLibs += {
       val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
       version match {
@@ -232,16 +227,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
         case Array(1, 14, _) => s"${workspace.APP_SHIMS}/flink-1.14"
         case _ => throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
       }
-=======
-    val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
-    version match {
-      case Array(1, 13, _) =>
-        providedLibs += s"${workspace.APP_SHIMS}/flink-1.13"
-      case Array(1, 11 | 12, _) =>
-        providedLibs += s"${workspace.APP_SHIMS}/flink-1.12"
-      case _ =>
-        throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
->>>>>>> main
     }
     val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
     if (FsOperator.lfs.exists(jobLib)) {
