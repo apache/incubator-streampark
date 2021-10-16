@@ -308,7 +308,9 @@ object ConfigConst {
    * namespace for docker image used in docker build env and image register
    */
   val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
+
   val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
+
   lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
   def printLogo(info: String): Unit = {

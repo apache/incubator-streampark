@@ -18,11 +18,13 @@
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-shims_flink-${streamx.shims.version}</artifactId>
@@ -43,6 +45,7 @@
             <artifactId>httpclient5</artifactId>
             <version>${apache.httpclient5.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5-fluent</artifactId>

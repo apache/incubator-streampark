@@ -96,7 +96,7 @@ import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 @DependsOn({"flyway", "flywayInitializer"})
 public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Application>
-    implements ApplicationService {
+        implements ApplicationService {
 
     @Autowired
     private ProjectService projectService;
@@ -151,13 +151,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private Workspace remoteWorkspace = Workspace.remote();
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() * 2,
-        200,
-        60L,
-        TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(1024),
-        ThreadUtils.threadFactory("streamx-deploy-executor"),
-        new ThreadPoolExecutor.AbortPolicy()
+            Runtime.getRuntime().availableProcessors() * 2,
+            200,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("streamx-deploy-executor"),
+            new ThreadPoolExecutor.AbortPolicy()
     );
 
     @PostConstruct
@@ -448,8 +448,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public AppExistsState checkExists(Application appParam) {
         boolean inDB = this.baseMapper.selectCount(
-            new QueryWrapper<Application>().lambda()
-                .eq(Application::getJobName, appParam.getJobName())) > 0;
+                new QueryWrapper<Application>().lambda()
+                        .eq(Application::getJobName, appParam.getJobName())) > 0;
 
         if (appParam.getId() != null) {
             Application app = getById(appParam.getId());
@@ -464,20 +464,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkAppState state = FlinkAppState.of(app.getState());
             //当前任务已停止的状态
             if (state.equals(FlinkAppState.ADDED) ||
-                state.equals(FlinkAppState.DEPLOYED) ||
-                state.equals(FlinkAppState.CREATED) ||
-                state.equals(FlinkAppState.FAILED) ||
-                state.equals(FlinkAppState.CANCELED) ||
-                state.equals(FlinkAppState.LOST) ||
-                state.equals(FlinkAppState.KILLED)) {
+                    state.equals(FlinkAppState.DEPLOYED) ||
+                    state.equals(FlinkAppState.CREATED) ||
+                    state.equals(FlinkAppState.FAILED) ||
+                    state.equals(FlinkAppState.CANCELED) ||
+                    state.equals(FlinkAppState.LOST) ||
+                    state.equals(FlinkAppState.KILLED)) {
                 // check whether jobName exists on yarn
                 if (ExecutionMode.isYarnMode(appParam.getExecutionMode())
-                    && YarnUtils.isContains(appParam.getJobName())) {
+                        && YarnUtils.isContains(appParam.getJobName())) {
                     return AppExistsState.IN_YARN;
                 }
                 // check whether clusterId, namespace, jobId on kubernetes
                 else if (ExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-                    && k8sFlinkTrkMonitor.checkIsInRemoteCluster(toTrkId(appParam))) {
+                        && k8sFlinkTrkMonitor.checkIsInRemoteCluster(toTrkId(appParam))) {
                     return AppExistsState.IN_KUBERNETES;
                 }
             }
@@ -488,12 +488,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             // check whether jobName exists on yarn
             if (ExecutionMode.isYarnMode(appParam.getExecutionMode())
-                && YarnUtils.isContains(appParam.getJobName())) {
+                    && YarnUtils.isContains(appParam.getJobName())) {
                 return AppExistsState.IN_YARN;
             }
             // check whether clusterId, namespace, jobId on kubernetes
             else if (ExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-                && k8sFlinkTrkMonitor.checkIsInRemoteCluster(toTrkId(appParam))) {
+                    && k8sFlinkTrkMonitor.checkIsInRemoteCluster(toTrkId(appParam))) {
                 return AppExistsState.IN_KUBERNETES;
             }
         }
@@ -666,11 +666,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     }
                     FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                         baseMapper.update(
-                            application,
-                            new UpdateWrapper<Application>()
-                                .lambda()
-                                .eq(Application::getId, application.getId())
-                                .set(Application::getDeploy, DeployState.DEPLOYING.get())
+                                application,
+                                new UpdateWrapper<Application>()
+                                        .lambda()
+                                        .eq(Application::getId, application.getId())
+                                        .set(Application::getDeploy, DeployState.DEPLOYING.get())
 
                         );
                         return null;
@@ -692,8 +692,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             File localJobHome = new File(application.getLocalAppHome(), application.getModule());
                             fsOperator.upload(localJobHome.getAbsolutePath(), application.getWorkspace().APP_WORKSPACE());
                             fsOperator.move(
-                                application.getWorkspace().APP_WORKSPACE().concat("/").concat(application.getModule()),
-                                appHome.getPath()
+                                    application.getWorkspace().APP_WORKSPACE().concat("/").concat(application.getModule()),
+                                    appHome.getPath()
                             );
                         } else {
                             log.info("FlinkSqlJob deploying...");
@@ -721,11 +721,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         }
                     } catch (Exception e) {
                         Message message = new Message(
-                            serverComponent.getUser().getUserId(),
-                            application.getId(),
-                            application.getJobName().concat(" deploy failed"),
-                            ExceptionUtils.stringifyException(e),
-                            NoticeType.EXCEPTION
+                                serverComponent.getUser().getUserId(),
+                                application.getId(),
+                                application.getJobName().concat(" deploy failed"),
+                                ExceptionUtils.stringifyException(e),
+                                NoticeType.EXCEPTION
                         );
                         messageService.push(message);
                         updateWrapper.set(Application::getState, FlinkAppState.ADDED.getValue());
@@ -779,9 +779,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
              */
             builder.setLength(0);
             builder.append("org.apache.flink:force-shading,")
-                .append("com.google.code.findbugs:jsr305,")
-                .append("org.slf4j:*,")
-                .append("org.apache.logging.log4j:*,");
+                    .append("com.google.code.findbugs:jsr305,")
+                    .append("org.slf4j:*,")
+                    .append("org.apache.logging.log4j:*,");
             /*
              * 用户指定需要排除的依赖.
              */
@@ -798,23 +798,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             Collection<String> dependencyJars;
             try {
                 dependencyJars = JavaConversions.asJavaCollection(DependencyUtils.resolveMavenDependencies(
-                    exclusions,
-                    packages,
-                    null,
-                    null,
-                    null,
-                    out -> {
-                        if (tailOutMap.containsKey(id)) {
-                            if (tailBeginning.containsKey(id)) {
-                                tailBeginning.remove(id);
-                                Arrays.stream(logBuilder.toString().split("\n"))
-                                    .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/mvn", x));
-                            } else {
-                                simpMessageSendingOperations.convertAndSend("/resp/mvn", out);
+                        exclusions,
+                        packages,
+                        null,
+                        null,
+                        null,
+                        out -> {
+                            if (tailOutMap.containsKey(id)) {
+                                if (tailBeginning.containsKey(id)) {
+                                    tailBeginning.remove(id);
+                                    Arrays.stream(logBuilder.toString().split("\n"))
+                                            .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/mvn", x));
+                                } else {
+                                    simpMessageSendingOperations.convertAndSend("/resp/mvn", out);
+                                }
                             }
+                            logBuilder.append(out).append("\n");
                         }
-                        logBuilder.append(out).append("\n");
-                    }
                 ));
             } catch (Exception e) {
                 simpMessageSendingOperations.convertAndSend("/resp/mvn", "[Exception] ".concat(e.getMessage()));
@@ -944,18 +944,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String customSavepoint = "";
                 if (isKubernetesApp(application)) {
                     customSavepoint = StringUtils.isNotBlank(appParam.getSavePoint()) ? appParam.getSavePoint() :
-                        FlinkSubmitHelper
-                            .extractDynamicOptionAsJava(application.getDynamicOptions())
-                            .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
+                            FlinkSubmitHelper
+                                    .extractDynamicOptionAsJava(application.getDynamicOptions())
+                                    .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
                 }
                 StopRequest stopInfo = new StopRequest(
-                    flinkVersion.getFlinkHome(),
-                    application.getAppId(),
-                    application.getJobId(),
-                    appParam.getSavePointed(),
-                    appParam.getDrain(),
-                    customSavepoint,
-                    application.getK8sNamespace()
+                        flinkVersion.getFlinkHome(),
+                        application.getAppId(),
+                        application.getJobId(),
+                        appParam.getSavePointed(),
+                        appParam.getDrain(),
+                        customSavepoint,
+                        application.getK8sNamespace()
                 );
                 StopResponse stopActionResult = FlinkSubmit.stop(ExecutionMode.of(application.getExecutionMode()), stopInfo);
                 String savePointDir = stopActionResult.savePointDir();
@@ -1098,8 +1098,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             File localPlugins = new File(WebUtils.getAppDir("plugins"));
             assert localPlugins.exists();
             List<String> jars =
-                Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
-                    .collect(Collectors.toList());
+                    Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
+                            .collect(Collectors.toList());
             if (jars.isEmpty()) {
                 throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localPlugins);
             }
@@ -1146,8 +1146,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         String[] dynamicOption = CommonUtils.notEmpty(application.getDynamicOptions())
-            ? application.getDynamicOptions().split("\\s+")
-            : new String[0];
+                ? application.getDynamicOptions().split("\\s+")
+                : new String[0];
 
         Map<String, Serializable> flameGraph = null;
         if (appParam.getFlameGraph()) {
@@ -1173,16 +1173,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
 
         KubernetesSubmitParam kubernetesSubmitParam = new KubernetesSubmitParam(
-            application.getClusterId(),
-            application.getFlinkImage(),
-            application.getK8sNamespace(),
-            jarPackDeps,
-            new DockerAuthConf(
-                settingService.getDockerRegisterAddress(),
-                settingService.getDockerRegisterUser(),
-                settingService.getDockerRegisterPassword()),
-            application.getK8sPodTemplates(),
-            application.getK8sRestExposedTypeEnum()
+                application.getClusterId(),
+                application.getFlinkImage(),
+                application.getK8sNamespace(),
+                jarPackDeps,
+                new DockerAuthConf(
+                        settingService.getDockerRegisterAddress(),
+                        settingService.getDockerRegisterUser(),
+                        settingService.getDockerRegisterPassword()),
+                application.getK8sPodTemplates(),
+                application.getK8sRestExposedTypeEnum()
         );
 
         FlinkVersion flinkVersion = flinkVersionService.getById(application.getVersionId());
@@ -1192,23 +1192,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         SubmitRequest submitInfo = new SubmitRequest(
-            flinkVersion.getFlinkHome(),
-            flinkVersion.getVersion(),
-            flinkVersion.getFlinkConf(),
-            flinkUserJar,
-            DevelopmentMode.of(application.getJobType()),
-            ExecutionMode.of(application.getExecutionMode()),
-            resolveOrder,
-            application.getJobName(),
-            appConf,
-            application.getApplicationType().getName(),
-            savePointDir,
-            flameGraph,
-            option.toString(),
-            optionMap,
-            dynamicOption,
-            application.getArgs(),
-            kubernetesSubmitParam
+                flinkVersion.getFlinkHome(),
+                flinkVersion.getVersion(),
+                flinkVersion.getFlinkConf(),
+                flinkUserJar,
+                DevelopmentMode.of(application.getJobType()),
+                ExecutionMode.of(application.getExecutionMode()),
+                resolveOrder,
+                application.getJobName(),
+                appConf,
+                application.getApplicationType().getName(),
+                savePointDir,
+                flameGraph,
+                option.toString(),
+                optionMap,
+                dynamicOption,
+                application.getArgs(),
+                kubernetesSubmitParam
         );
 
         ApplicationLog log = new ApplicationLog();

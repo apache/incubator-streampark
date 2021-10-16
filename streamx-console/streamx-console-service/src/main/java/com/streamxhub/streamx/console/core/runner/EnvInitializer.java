@@ -63,10 +63,10 @@ public class EnvInitializer implements ApplicationRunner {
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
 
     private static final Pattern PATTERN_FLINK_SHIMS_ORIGIN_JAR = Pattern.compile(
-        "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*)(?<!shaded).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*)(?<!shaded).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final Pattern PATTERN_FLINK_SHIMS_SHADED_JAR = Pattern.compile(
-        "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*)-shaded.jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*)-shaded.jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 
     @Override
@@ -187,6 +187,5 @@ public class EnvInitializer implements ApplicationRunner {
             fsOperator.upload(flinkLocalHome, flinkHome, false, false);
         }
     }
-
 
 }

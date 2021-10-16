@@ -12,11 +12,7 @@
 
     <artifactId>streamx-flink-shims-base</artifactId>
     <name>StreamX : Flink Shims Base</name>
-    <!--
-    scope:provided 和 optional的区别:
-    optional: 主要用于"可选依赖"的场景,例如该框架实现了很多source和sink,至于是否引入mysql和hbase,取决于用户的使用情况,如使用了mysql,则需要用户手动导入mysql依赖.
-    provided: 表示的不是依赖可选,它表示这个依赖是必须的,但是这个依赖通常是已经提供的,应用服务不需要额外引入,通常也不用关心
-    -->
+
     <dependencies>
 
         <dependency>
