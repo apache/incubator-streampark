@@ -49,26 +49,26 @@ trait FlinkSubmitTrait extends Logger {
   @throws[Exception] def submit(submitRequest: SubmitRequest): SubmitResponse = {
     logInfo(
       s"""
-         |---------------------------------------- flink start ----------------------------------------
-         |    userFlinkHome    : ${submitRequest.flinkHome}
-         |    flinkVersion     : ${submitRequest.flinkVersion}
-         |    appName          : ${submitRequest.appName}
-         |    devMode          : ${submitRequest.developmentMode.name()}
-         |    execMode         : ${submitRequest.executionMode.name()}
-         |    k8sNamespace     : ${submitRequest.k8sSubmitParam.kubernetesNamespace}
-         |    flinkDockerImage : ${submitRequest.k8sSubmitParam.flinkBaseImage}
-         |    clusterId        : ${submitRequest.k8sSubmitParam.clusterId}
-         |    resolveOrder     : ${submitRequest.resolveOrder.getName}
-         |    applicationType  : ${submitRequest.applicationType}
-         |    flameGraph       : ${submitRequest.flameGraph != null}
-         |    savePoint        : ${submitRequest.savePoint}
-         |    userJar          : ${submitRequest.flinkUserJar}
-         |    option           : ${submitRequest.option}
-         |    property         : ${submitRequest.property}
-         |    dynamicOption    : ${submitRequest.dynamicOption.mkString(" ")}
-         |    args             : ${submitRequest.args}
-         |    appConf          : ${submitRequest.appConf}
-         |---------------------------------------------------------------------------------------------
+         |┌--------------------------------------- flink start ----------------------------------------
+         |│    userFlinkHome    : ${submitRequest.flinkHome}
+         ||    flinkVersion     : ${submitRequest.flinkVersion}
+         ||    appName          : ${submitRequest.appName}
+         ||    devMode          : ${submitRequest.developmentMode.name()}
+         ||    execMode         : ${submitRequest.executionMode.name()}
+         ||    k8sNamespace     : ${submitRequest.k8sSubmitParam.kubernetesNamespace}
+         ||    flinkDockerImage : ${submitRequest.k8sSubmitParam.flinkBaseImage}
+         ||    clusterId        : ${submitRequest.k8sSubmitParam.clusterId}
+         ||    resolveOrder     : ${submitRequest.resolveOrder.getName}
+         ||    applicationType  : ${submitRequest.applicationType}
+         ||    flameGraph       : ${submitRequest.flameGraph != null}
+         ||    savePoint        : ${submitRequest.savePoint}
+         ||    userJar          : ${submitRequest.flinkUserJar}
+         ||    option           : ${submitRequest.option}
+         ||    property         : ${submitRequest.property}
+         ||    dynamicOption    : ${submitRequest.dynamicOption.mkString(" ")}
+         ||    args             : ${submitRequest.args}
+         |│    appConf          : ${submitRequest.appConf}
+         |└--------------------------------------------------------------------------------------------
          |""".stripMargin)
     doSubmit(submitRequest)
   }
@@ -76,14 +76,14 @@ trait FlinkSubmitTrait extends Logger {
   @throws[Exception] def stop(stopRequest: StopRequest): StopResponse = {
     logInfo(
       s"""
-         |---------------------------------------- flink stop ----------------------------------------
-         |    flinkHome      : ${stopRequest.flinkHome}
-         |    withSavePoint  : ${stopRequest.withSavePoint}
-         |    withDrain      : ${stopRequest.withDrain}
-         |    k8sNamespace   : ${stopRequest.kubernetesNamespace}
-         |    appId          : ${stopRequest.clusterId}
-         |    jobId          : ${stopRequest.jobId}
-         |---------------------------------------------------------------------------------------------
+         |┌----------------------------------------- flink stop ----------------------------------------
+         |│     flinkHome      : ${stopRequest.flinkHome}
+         ||     withSavePoint  : ${stopRequest.withSavePoint}
+         ||     withDrain      : ${stopRequest.withDrain}
+         ||     k8sNamespace   : ${stopRequest.kubernetesNamespace}
+         ||     appId          : ${stopRequest.clusterId}
+         ||     jobId          : ${stopRequest.jobId}
+         |└---------------------------------------------------------------------------------------------
          |""".stripMargin)
     doStop(stopRequest)
   }

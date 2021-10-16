@@ -49,17 +49,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author benjobs
@@ -214,17 +211,34 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         FlinkVersion flinkVersion = flinkVersionService.getById(versionId);
         String version = flinkVersion.getLargeVersion();
         if (!shimsClassLoaderCache.containsKey(version)) {
-            String shimsRegex = "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*)-shaded.jar";
+            String shimsRegex = "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar";
             Pattern pattern = Pattern.compile(shimsRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-            List<File> shimsJars = Arrays.stream(Objects.requireNonNull(new File(WebUtils.getAppDir("lib")).listFiles((pathname) -> {
-                Matcher matcher = pattern.matcher(pathname.getName());
-                return matcher.matches() && version.equals(matcher.group(1));
-            }))).collect(Collectors.toList());
+            List<URL> shimsUrls = new ArrayList<>(0);
 
-            assert shimsJars.size() == 1;
+            Arrays.stream(Objects.requireNonNull(new File(WebUtils.getAppDir("lib")).listFiles())).forEach((jar) -> {
+                Matcher matcher = pattern.matcher(jar.getName());
+                if (matcher.matches() && version.equals(matcher.group(1))) {
+                    try {
+                        shimsUrls.add(jar.toURI().toURL());
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
 
-            URL[] urls = {shimsJars.get(0).toURI().toURL()};
+            assert shimsUrls.size() == 1;
+
+            Arrays.stream(Objects.requireNonNull(new File(flinkVersion.getFlinkHome(), "lib").listFiles())).forEach((jar) -> {
+                try {
+                    shimsUrls.add(jar.toURI().toURL());
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            URL[] urls = shimsUrls.toArray(new URL[0]);
+
             URLClassLoader classLoader = new BottomUpClassLoader(urls, getClass().getClassLoader());
             shimsClassLoaderCache.put(version, classLoader);
         }
