@@ -13,11 +13,6 @@
     <artifactId>streamx-flink-shims_flink-1.13</artifactId>
     <name>StreamX : Flink Shims 1.13</name>
 
-    <!--
-    scope:provided 和 optional的区别:
-    optional: 主要用于"可选依赖"的场景,例如该框架实现了很多source和sink,至于是否引入mysql和hbase,取决于用户的使用情况,如使用了mysql,则需要用户手动导入mysql依赖.
-    provided: 表示的不是依赖可选,它表示这个依赖是必须的,但是这个依赖通常是已经提供的,应用服务不需要额外引入,通常也不用关心
-    -->
     <properties>
         <flink.version>1.13.0</flink.version>
     </properties>
@@ -83,7 +78,7 @@
         <!-- table -->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-api-scala-bridge_${scala.binary.version}</artifactId>
+            <artifactId>flink-table-uber_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
 
@@ -117,6 +112,12 @@
             <version>${flink.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-shaded-guava</artifactId>
+            <version>18.0-13.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -124,6 +125,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
+                <configuration>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>shaded</shadedClassifierName>
+                </configuration>
             </plugin>
         </plugins>
     </build>

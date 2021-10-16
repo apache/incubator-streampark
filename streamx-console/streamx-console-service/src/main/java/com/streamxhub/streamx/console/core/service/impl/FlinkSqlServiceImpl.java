@@ -118,12 +118,12 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     public void setCandidate(Long appId, Long sqlId, CandidateType candidateType) {
         LambdaUpdateWrapper<FlinkSql> updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
         updateWrapper.set(FlinkSql::getCandidate, 0)
-            .eq(FlinkSql::getAppId, appId);
+                .eq(FlinkSql::getAppId, appId);
         this.update(updateWrapper);
 
         updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
         updateWrapper.set(FlinkSql::getCandidate, candidateType.get())
-            .eq(FlinkSql::getId, sqlId);
+                .eq(FlinkSql::getId, sqlId);
         this.update(updateWrapper);
     }
 
@@ -131,7 +131,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     public List<FlinkSql> history(Application application) {
         LambdaQueryWrapper<FlinkSql> wrapper = new QueryWrapper<FlinkSql>().lambda();
         wrapper.eq(FlinkSql::getAppId, application.getId())
-            .orderByDesc(FlinkSql::getVersion);
+                .orderByDesc(FlinkSql::getVersion);
 
         List<FlinkSql> sqlList = this.baseMapper.selectList(wrapper);
         FlinkSql effective = getEffective(application.getId(), false);
@@ -214,7 +214,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         FlinkVersion flinkVersion = flinkVersionService.getById(versionId);
         String version = flinkVersion.getLargeVersion();
         if (!shimsClassLoaderCache.containsKey(version)) {
-            String shimsRegex = "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar";
+            String shimsRegex = "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*)-shaded.jar";
             Pattern pattern = Pattern.compile(shimsRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
             List<File> shimsJars = Arrays.stream(Objects.requireNonNull(new File(WebUtils.getAppDir("lib")).listFiles((pathname) -> {

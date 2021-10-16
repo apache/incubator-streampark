@@ -362,11 +362,19 @@ export default {
                 })
               }
             } else {
-              this.$swal.fire(
-                'Failed',
-                'flink name or version is already exists',
-                'error'
-              )
+              if(resp.status === 'error') {
+                this.$swal.fire(
+                  'Failed',
+                  'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
+                  'error'
+                )
+              } else {
+                this.$swal.fire(
+                  'Failed',
+                  'flink name or version is already exists',
+                  'error'
+                )
+              }
             }
           })
         }

@@ -118,7 +118,8 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
    * 页面定义参数优先级 > flink-conf.yaml中配置优先级
    *
    * @param submitRequest
-   * @param customConfiguration
+   * @param activeCustomCommandLine
+   * @param commandLine
    * @return
    */
   private[submit] def applyConfiguration(submitRequest: SubmitRequest,

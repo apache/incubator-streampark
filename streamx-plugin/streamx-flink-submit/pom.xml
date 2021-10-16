@@ -37,10 +37,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- The flink session mode would resolve the DAG within streamx process,
+          so a full build dependencies is required. -->
         <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-shaded-guava</artifactId>
-            <version>18.0-12.0</version>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-shims_flink-${streamx.shims.version}</artifactId>
+            <version>${project.version}</version>
+            <classifier>shaded</classifier>
         </dependency>
 
         <dependency>
@@ -80,13 +83,6 @@
                     <groupId>com.google.guava</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-kubernetes_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>

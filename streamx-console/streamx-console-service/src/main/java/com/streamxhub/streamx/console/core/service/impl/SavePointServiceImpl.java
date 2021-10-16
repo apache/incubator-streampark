@@ -37,7 +37,6 @@ import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
 import com.streamxhub.streamx.console.core.service.FlinkVersionService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
-import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,9 +52,6 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint> implements SavePointService {
-
-    @Autowired
-    private SettingService settingService;
 
     @Autowired
     private FlinkVersionService flinkVersionService;
@@ -77,8 +73,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         FlinkVersion flinkVersion = flinkVersionService.getByAppId(entity.getAppId());
         assert flinkVersion != null;
         int cpThreshold = Integer.parseInt(
-            flinkVersion.convertFlinkYamlAsMap()
-                .getOrDefault("state.checkpoints.num-retained", "1")
+                flinkVersion.convertFlinkYamlAsMap()
+                        .getOrDefault("state.checkpoints.num-retained", "1")
         );
 
         if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
@@ -90,10 +86,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         } else {
             LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
             queryWrapper.select(SavePoint::getTriggerTime)
-                .eq(SavePoint::getAppId, entity.getAppId())
-                .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
-                .orderByDesc(SavePoint::getTriggerTime)
-                .last("limit 0," + cpThreshold + 1);
+                    .eq(SavePoint::getAppId, entity.getAppId())
+                    .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
+                    .orderByDesc(SavePoint::getTriggerTime)
+                    .last("limit 0," + cpThreshold + 1);
 
             List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
             if (!savePointList.isEmpty() && savePointList.size() > cpThreshold) {

@@ -308,7 +308,9 @@ object ConfigConst {
    * namespace for docker image used in docker build env and image register
    */
   val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
+
   val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
+
   lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
   def printLogo(info: String): Unit = {
@@ -321,7 +323,7 @@ object ConfigConst {
     println(ansi.eraseScreen.fg(YELLOW).a("                                            ").fg(RED).a("  .    ").reset)
     println("\n       WebSite:  http://www.streamxhub.com            ")
     println("       GitHub :  https://github.com/streamxhub/streamx")
-    println("       Gitee  :  https://gitee.com/benjobs/streamx    ")
+    println("       Gitee  :  https://gitee.com/streamxhub/streamx    ")
     println("       Ver    :  1.2.0                                ")
     println(s"       Info   :  $info")
     println(s"       Time   :  ${LocalDateTime.now}")
