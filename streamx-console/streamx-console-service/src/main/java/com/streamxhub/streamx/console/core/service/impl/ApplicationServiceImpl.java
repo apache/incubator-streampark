@@ -378,7 +378,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public boolean checkStart(Application appParam) {
         Application application = getById(appParam.getId());
-        Integer appState = application.getState();
+        FlinkAppState appState = FlinkAppState.of(application.getState());
         try {
             if (application.getVersionId() == null) {
                 //任务未指定flink version.则检查是否配置的默认的flink version
@@ -389,19 +389,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             FlinkVersion flinkVersion = flinkVersionService.getById(application.getVersionId());
             flinkVersion = flinkVersion == null ? flinkVersionService.getDefault() : flinkVersion;
-
-            application.setState(FlinkAppState.INITIALIZING.getValue());
-
+            updateState(application, FlinkAppState.INITIALIZING);
             envInitializer.checkFlinkEnv(application.getStorageType(), flinkVersion);
             envInitializer.storageInitialize(application.getStorageType());
             return true;
         } catch (Throwable e) {
             log.error(ExceptionUtils.stringifyException(e));
-            application.setState(appState);
+            updateState(application, appState);
             return false;
-        } finally {
-            updateById(application);
         }
+    }
+
+    @RefreshCache
+    private void updateState(Application application, FlinkAppState state) {
+        application.setState(state.getValue());
+        updateById(application);
     }
 
     private void removeApp(Application application) {

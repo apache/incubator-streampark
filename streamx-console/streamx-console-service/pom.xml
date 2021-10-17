@@ -524,6 +524,13 @@
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.14 support-->
+                        <!--what fuck......-->
+                        <dependency>
+                            <groupId>org.apache.flink</groupId>
+                            <artifactId>flink-shaded-guava</artifactId>
+                            <version>30.1.1-jre-14.0</version>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                        </dependency>
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.14</artifactId>
