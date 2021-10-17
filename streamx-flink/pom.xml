@@ -14,10 +14,33 @@
     <name>StreamX : Flink Parent</name>
     <packaging>pom</packaging>
 
-    <modules>
-        <module>streamx-flink-shims</module>
-        <module>streamx-flink-core</module>
-        <module>streamx-flink-test</module>
-    </modules>
+    <profiles>
+        <!-- default -->
+        <profile>
+            <id>streamx-flink-all</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>streamx-flink-shims</module>
+                <module>streamx-flink-core</module>
+                <module>streamx-flink-test</module>
+            </modules>
+        </profile>
+        <!-- when skip tests enable -->
+        <profile>
+            <id>streamx-flink-skip-test</id>
+            <activation>
+                <property>
+                    <name>skipTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <modules>
+                <module>streamx-flink-shims</module>
+                <module>streamx-flink-core</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>

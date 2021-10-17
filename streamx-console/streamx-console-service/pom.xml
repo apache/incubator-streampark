@@ -19,10 +19,11 @@
         <mybatis-plus.version>3.1.0</mybatis-plus.version>
         <hadoop.version>2.10.1</hadoop.version>
         <hbase.version>2.1.10</hbase.version>
-        <flink.version>1.13.0</flink.version>
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <junit.version>4.13.1</junit.version>
+
+        <streamx.shims.version>1.14</streamx.shims.version>
         <frontend.project.name>streamx-console-webapp</frontend.project.name>
         <env>dev</env>
 
@@ -430,13 +431,14 @@
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-sqlclient</artifactId>
-            <version>1.2.0</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-core</artifactId>
-            <version>${flink.version}</version>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-shims_flink-${streamx.shims.version}</artifactId>
+            <version>${project.version}</version>
+            <classifier>shaded</classifier>
             <scope>provided</scope>
         </dependency>
 
@@ -502,6 +504,7 @@
                     <excludeTransitive>false</excludeTransitive>
                     <stripVersion>false</stripVersion>
                     <artifactItems>
+                        <!-- flink 1.12 support-->
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.12</artifactId>
@@ -510,7 +513,31 @@
                         </dependency>
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
+                            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
+                            <version>1.2.0</version>
+                            <classifier>shaded</classifier>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+
+                        <!-- flink 1.13 support-->
+                        <dependency>
+                            <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.13</artifactId>
+                            <version>1.2.0</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.streamxhub.streamx</groupId>
+                            <artifactId>streamx-flink-shims_flink-1.13</artifactId>
+                            <version>1.2.0</version>
+                            <classifier>shaded</classifier>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+
+                        <!-- flink 1.14 support-->
+                        <dependency>
+                            <groupId>com.streamxhub.streamx</groupId>
+                            <artifactId>streamx-flink-shims_flink-1.14</artifactId>
                             <version>1.2.0</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
@@ -518,6 +545,7 @@
                             <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.14</artifactId>
                             <version>1.2.0</version>
+                            <classifier>shaded</classifier>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                     </artifactItems>
