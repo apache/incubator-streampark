@@ -371,7 +371,7 @@ export default {
               } else {
                 this.$swal.fire(
                   'Failed',
-                  'flink name or version is already exists',
+                  'flink name is already exists',
                   'error'
                 )
               }

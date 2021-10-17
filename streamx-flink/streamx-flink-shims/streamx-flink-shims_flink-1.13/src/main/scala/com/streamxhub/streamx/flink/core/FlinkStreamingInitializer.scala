@@ -305,7 +305,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     if (stateBackend != null) {
       require(
         stateBackend == XStateBackend.hashmap || stateBackend == XStateBackend.rocksdb,
-        "state.backend must be [hashmap|rocksdb] in flink 1.13"
+        "state.backend must be [hashmap|rocksdb] in flink 1.13 and above"
       )
       val storage = {
         val storage = parameter.get(KEY_FLINK_STATE_CHECKPOINT_STORAGE, null) match {
