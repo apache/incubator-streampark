@@ -50,7 +50,8 @@ object MavenTool extends Logger {
       req.setJars(jarSet)
       req.setUberJar(uberJar)
       req.setFilters(Lists.newArrayList())
-      req.setResourceTransformers(Lists.newArrayList())
+      // ref https://ci.apache.org/projects/flink/flink-docs-master/docs/connectors/table/overview/#transform-table-connectorformat-resources
+      req.setResourceTransformers(Lists.newArrayList(new ServicesResourceTransformer()))
       req.setRelocators(Lists.newArrayList())
       req
     }
