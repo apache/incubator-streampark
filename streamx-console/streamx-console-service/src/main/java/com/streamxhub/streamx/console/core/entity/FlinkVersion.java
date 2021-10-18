@@ -122,4 +122,17 @@ public class FlinkVersion implements Serializable {
     public String getLargeVersion() {
         return this.version.substring(0, this.version.lastIndexOf("."));
     }
+
+    public String getVersionOfFirst() {
+        return this.version.split("\\.")[0];
+    }
+
+    public String getVersionOfMiddle() {
+        return this.version.split("\\.")[1];
+    }
+
+    public String getVersionOfLast() {
+        return this.version.split("\\.")[2];
+    }
+
 }

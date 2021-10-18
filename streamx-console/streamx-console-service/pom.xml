@@ -103,6 +103,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-shaded-guava</artifactId>
+            <version>30.1.1-jre-14.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <exclusions>
@@ -390,6 +396,12 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-repl</artifactId>
             <version>${project.version}</version>
             <exclusions>
@@ -432,21 +444,6 @@
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-sqlclient</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims_flink-${streamx.shims.version}</artifactId>
-            <version>${project.version}</version>
-            <classifier>shaded</classifier>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
-            <version>1.2.0</version>
-            <scope>provided</scope>
         </dependency>
 
     </dependencies>
@@ -511,14 +508,6 @@
                             <version>1.2.0</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
-                        <dependency>
-                            <groupId>com.streamxhub.streamx</groupId>
-                            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
-                            <version>1.2.0</version>
-                            <classifier>shaded</classifier>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
-
                         <!-- flink 1.13 support-->
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
@@ -526,26 +515,11 @@
                             <version>1.2.0</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
-                        <dependency>
-                            <groupId>com.streamxhub.streamx</groupId>
-                            <artifactId>streamx-flink-shims_flink-1.13</artifactId>
-                            <version>1.2.0</version>
-                            <classifier>shaded</classifier>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
-
                         <!-- flink 1.14 support-->
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.14</artifactId>
                             <version>1.2.0</version>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.streamxhub.streamx</groupId>
-                            <artifactId>streamx-flink-shims_flink-1.14</artifactId>
-                            <version>1.2.0</version>
-                            <classifier>shaded</classifier>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                     </artifactItems>

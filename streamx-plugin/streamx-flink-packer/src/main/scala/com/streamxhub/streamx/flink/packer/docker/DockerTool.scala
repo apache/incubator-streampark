@@ -82,7 +82,7 @@ object DockerTool extends Logger {
         true
     } {
       exception =>
-        logError(s"[streamx-packer] push docker image fail, tag=${imageTag}, registerAddr=${authConf.registerAddress}," +
+        logError(s"[streamx-packer] push docker image fail, tag=$imageTag, registerAddress=${authConf.registerAddress}," +
           s" exception=${exception.getMessage}")
         false
     }
@@ -92,10 +92,10 @@ object DockerTool extends Logger {
   /**
    * compile image tag with namespace and remote address.
    */
-  private def compileTag(tag: String, registerAddr: String): String = {
+  private def compileTag(tag: String, registerAddress: String): String = {
     var tagName = if (tag.contains("/")) tag else s"$DOCKER_IMAGE_NAMESPACE/$tag"
-    if (registerAddr.nonEmpty && !tagName.startsWith(registerAddr))
-      tagName = s"$registerAddr/$tagName"
+    if (registerAddress.nonEmpty && !tagName.startsWith(registerAddress))
+      tagName = s"$registerAddress/$tagName"
     tagName
   }
 

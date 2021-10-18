@@ -32,6 +32,11 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
+            <directory>${project.build.directory}/lib</directory>
+            <outputDirectory>lib</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
             <directory>${project.build.directory}/shims</directory>
             <outputDirectory>lib</outputDirectory>
             <fileMode>0755</fileMode>
