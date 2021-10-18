@@ -79,20 +79,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     private final Map<String, URLClassLoader> shimsClassLoaderCache = new ConcurrentHashMap<>();
 
     private final Pattern shimsPattern = Pattern.compile(
-            "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+        "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL
     );
-
-    private final Pattern tablePattern = Pattern.compile(
-            "flink-table-(.*)_2.11-(1.12|1.13|1.14)\\.(\\d+).jar",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-    );
-
-    private final Pattern guavaPattern = Pattern.compile(
-            "flink-shaded-guava-(.*)-(12|13|14)\\.(\\d+).jar",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-    );
-
 
     /**
      * @param appId
@@ -132,12 +121,12 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     public void setCandidate(Long appId, Long sqlId, CandidateType candidateType) {
         LambdaUpdateWrapper<FlinkSql> updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
         updateWrapper.set(FlinkSql::getCandidate, 0)
-                .eq(FlinkSql::getAppId, appId);
+            .eq(FlinkSql::getAppId, appId);
         this.update(updateWrapper);
 
         updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
         updateWrapper.set(FlinkSql::getCandidate, candidateType.get())
-                .eq(FlinkSql::getId, sqlId);
+            .eq(FlinkSql::getId, sqlId);
         this.update(updateWrapper);
     }
 
@@ -145,7 +134,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     public List<FlinkSql> history(Application application) {
         LambdaQueryWrapper<FlinkSql> wrapper = new QueryWrapper<FlinkSql>().lambda();
         wrapper.eq(FlinkSql::getAppId, application.getId())
-                .orderByDesc(FlinkSql::getVersion);
+            .orderByDesc(FlinkSql::getVersion);
 
         List<FlinkSql> sqlList = this.baseMapper.selectList(wrapper);
         FlinkSql effective = getEffective(application.getId(), false);
@@ -227,7 +216,6 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     private synchronized ClassLoader getFlinkShimsClassLoader(Long versionId) {
         FlinkVersion flinkVersion = flinkVersionService.getById(versionId);
         String largeVersion = flinkVersion.getLargeVersion();
-        String middleVersion = flinkVersion.getVersionOfMiddle();
 
         if (!shimsClassLoaderCache.containsKey(largeVersion)) {
             List<URL> shimsUrls = new ArrayList<>(0);
@@ -247,18 +235,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             Arrays.stream(Objects.requireNonNull(new File(WebUtils.getAppDir("lib")).listFiles())).forEach((jar) -> {
                 try {
                     Matcher shimsMatcher = shimsPattern.matcher(jar.getName());
-                    Matcher tableMatcher = tablePattern.matcher(jar.getName());
-                    Matcher guavaMatcher = guavaPattern.matcher(jar.getName());
                     if (shimsMatcher.matches()) {
                         if (largeVersion.equals(shimsMatcher.group(1))) {
-                            shimsUrls.add(jar.toURI().toURL());
-                        }
-                    } else if (tableMatcher.matches()) {
-                        if (largeVersion.equals(tableMatcher.group(2))) {
-                            shimsUrls.add(jar.toURI().toURL());
-                        }
-                    } else if (guavaMatcher.matches()) {
-                        if (middleVersion.equals(guavaMatcher.group(2))) {
                             shimsUrls.add(jar.toURI().toURL());
                         }
                     } else {
@@ -274,6 +252,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             URLClassLoader classLoader = new BottomUpClassLoader(urls, getClass().getClassLoader());
             shimsClassLoaderCache.put(largeVersion, classLoader);
         }
+
+        log.info("flink shims version: {}", largeVersion);
+
         return shimsClassLoaderCache.get(largeVersion);
     }
 
