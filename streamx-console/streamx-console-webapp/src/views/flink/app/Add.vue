@@ -1136,6 +1136,7 @@ export default {
         this.flinkVersions = resp.data
         const v = this.flinkVersions.filter((v) => {return v.isDefault})[0]
         this.form.getFieldDecorator('versionId', {initialValue: v.id})
+        this.versionId = v.id
       })
     },
 
