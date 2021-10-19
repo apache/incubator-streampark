@@ -89,6 +89,13 @@ streamx:
         job-status: 2
         cluster-metric: 3
 
+  # packer garbage resources collection configuration
+  packer-gc:
+    # maximum retention time for temporary build resources
+    max-resource-expired-hours: 120
+    # gc task running interval hours
+    exec-cron: 0 0 0/1 * * ?
+
   shiro:
     # token有效期，单位秒
     jwtTimeOut: 86400
