@@ -103,7 +103,7 @@
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
-            placeholder="classloader.resolve-order"
+            placeholder="kubernetes.rest-service.exposed.type"
             v-decorator="[ 'k8sRestExposedType' ]">
             <a-select-option
               v-for="(o,index) in k8sRestExposedType"

@@ -103,7 +103,7 @@
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
-            placeholder="classloader.resolve-order"
+            placeholder="kubernetes.rest-service.exposed.type"
             v-decorator="[ 'k8sRestExposedType' ]">
             <a-select-option
               v-for="(o,index) in k8sRestExposedType"
@@ -1136,6 +1136,7 @@ export default {
         this.flinkVersions = resp.data
         const v = this.flinkVersions.filter((v) => {return v.isDefault})[0]
         this.form.getFieldDecorator('versionId', {initialValue: v.id})
+        this.versionId = v.id
       })
     },
 
