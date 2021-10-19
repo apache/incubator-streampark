@@ -193,6 +193,10 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public SqlError verifySql(String sql, Long versionId) {
+        // when versionId is null, use default flink version
+        if (versionId == null) {
+            versionId = flinkVersionService.getDefault().getId();
+        }
         ClassLoader loader = getFlinkShimsClassLoader(versionId);
         String error = ClassLoaderUtils.runAsClassLoader(loader, (Supplier<String>) () -> {
             try {
