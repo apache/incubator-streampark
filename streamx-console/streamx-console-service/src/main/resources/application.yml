@@ -94,7 +94,7 @@ streamx:
     # maximum retention time for temporary build resources
     max-resource-expired-hours: 120
     # gc task running interval hours
-    exec-cron: 0 0 0/1 * * ?
+    exec-cron: 0 0 0/6 * * ?
 
   shiro:
     # token有效期，单位秒

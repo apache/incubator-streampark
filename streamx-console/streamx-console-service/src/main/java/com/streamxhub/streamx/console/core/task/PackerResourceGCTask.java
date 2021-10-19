@@ -11,7 +11,8 @@
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
- * Unless required by applicable law or agreed to in writing,
+ * Unless required by applicable law or agreed to in writing\
+ *
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the
@@ -36,7 +37,7 @@ public class PackerResourceGCTask {
     @Value("${streamx.packer-gc.max-resource-expired-hours:120}")
     public Integer maxResourceIntervalHours;
 
-    @Scheduled(cron = "${streamx.packer-gc.exec-cron:0 0 0/1 * * ?}")
+    @Scheduled(cron = "${streamx.packer-gc.exec-cron:0 0 0/6 * * ?}")
     public void collectGarbage() {
         log.info("[streamx-packer] Starting Packer Resource GC Task.");
         PackerResourceGC.startGc(maxResourceIntervalHours);
