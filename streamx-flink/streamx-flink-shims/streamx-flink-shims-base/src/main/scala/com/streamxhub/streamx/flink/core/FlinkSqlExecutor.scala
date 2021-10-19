@@ -122,11 +122,9 @@ object FlinkSqlExecutor extends Logger {
           }
           if (TableConfigOptions.TABLE_SQL_DIALECT.key().equalsIgnoreCase(args)) {
             val dialect = x.operands(1)
-            if (SqlDialect.HIVE.name().equalsIgnoreCase(dialect)) {
-              context.getConfig.setSqlDialect(SqlDialect.HIVE)
-              if (SqlDialect.DEFAULT.name().equalsIgnoreCase(dialect)) {
-                context.getConfig.setSqlDialect(SqlDialect.DEFAULT)
-              }
+            Try(SqlDialect.valueOf(dialect.toUpperCase())) match {
+              case Success(x) => context.getConfig.setSqlDialect(x)
+              case _ =>
             }
           } else {
             context.getConfig.getConfiguration.setString(args, x.operands(1))
