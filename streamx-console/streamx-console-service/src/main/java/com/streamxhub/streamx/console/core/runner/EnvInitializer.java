@@ -28,7 +28,6 @@ import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.entity.FlinkVersion;
-import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -55,19 +54,12 @@ import static com.streamxhub.streamx.common.enums.StorageType.LFS;
 public class EnvInitializer implements ApplicationRunner {
 
     @Autowired
-    private SettingService settingService;
-
-    @Autowired
     private ApplicationContext context;
 
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
 
-    private static final Pattern PATTERN_FLINK_SHIMS_ORIGIN_JAR = Pattern.compile(
-            "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*)(?<!shaded).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
-    private static final Pattern PATTERN_FLINK_SHIMS_SHADED_JAR = Pattern.compile(
-            "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*)-shaded.jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
+    private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
+            "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -145,10 +137,9 @@ public class EnvInitializer implements ApplicationRunner {
                 fsOperator.delete(appShims);
             }
 
-            Pattern shimsPattern = StorageType.LFS.equals(storageType) ? PATTERN_FLINK_SHIMS_ORIGIN_JAR : PATTERN_FLINK_SHIMS_SHADED_JAR;
-            File[] shims = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(shimsPattern.pattern()));
+            File[] shims = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
             for (File file : Objects.requireNonNull(shims)) {
-                Matcher matcher = shimsPattern.matcher(file.getName());
+                Matcher matcher = PATTERN_FLINK_SHIMS_JAR.matcher(file.getName());
                 if (!keepFile.equals(file.getName()) && matcher.matches()) {
                     String version = matcher.group(1);
                     String shimsPath = appShims.concat("/flink-").concat(version);

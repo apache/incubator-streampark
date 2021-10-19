@@ -993,6 +993,10 @@
           {text: 'Flink SQL', value: 2}
         ]
       }, {
+        title: 'Flink Version',
+        dataIndex: 'flinkVersion',
+        width: 120
+      }, {
         title: 'Start Time',
         dataIndex: 'startTime',
         sorter: true,
@@ -1008,7 +1012,6 @@
       }, {
         title: 'Task',
         dataIndex: 'task',
-        scopedSlots: {customRender: 'task'},
         width: 120
       }, {
         title: 'Run Status',

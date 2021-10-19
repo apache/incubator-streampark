@@ -29,7 +29,6 @@
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-shims_flink-${streamx.shims.version}</artifactId>
             <version>${project.version}</version>
-            <classifier>shaded</classifier>
         </dependency>
 
         <!-- local cache -->

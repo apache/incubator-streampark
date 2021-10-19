@@ -49,7 +49,7 @@ object LFsOperator extends FsOperator with Logger {
     if (notEmpty(path)) {
       val file = new File(path)
       if (!file.exists()) {
-        logWarn(s"delete file: file is no exists, ${path}")
+        logWarn(s"delete file: file is no exists, $path")
       } else {
         FileUtils.forceDelete(file)
       }

@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
  *
  *      WebSite:  http://www.streamxhub.com
  *      GitHub :  https://github.com/streamxhub/streamx
- *      Gitee  :  https://gitee.com/benjobs/streamx
+ *      Gitee  :  https://gitee.com/streamxhub/streamx
  *
  *      [StreamX] Make Flink|Spark easier ô‿ô!
  *

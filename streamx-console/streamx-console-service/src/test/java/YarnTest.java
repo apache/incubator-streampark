@@ -53,7 +53,7 @@ public class YarnTest {
         System.out.println(ansi().eraseScreen().fg(YELLOW).a("                                         ").fg(RED).a("  .    ").reset());
         System.out.println("\n   WebSite:  http://www.streamxhub.com            ");
         System.out.println("   GitHub :  https://github.com/streamxhub/streamx");
-        System.out.println("   Gitee  :  https://gitee.com/benjobs/streamx    ");
+        System.out.println("   Gitee  :  https://gitee.com/streamxhub/streamx    ");
         System.out.println("   Ver    :  1.2.0                                ");
         System.out.println("                                                  ");
         System.out.println(ansi().eraseScreen().fg(GREEN).a("   [StreamX] Make Flink|Spark easier ô‿ô!         ").reset());
