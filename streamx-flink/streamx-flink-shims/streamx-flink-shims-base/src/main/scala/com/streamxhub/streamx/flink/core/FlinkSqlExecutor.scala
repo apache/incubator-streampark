@@ -120,16 +120,15 @@ object FlinkSqlExecutor extends Logger {
           if (!tableConfigOptions.containsKey(args)) {
             throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html")
           }
+          val operand = x.operands(1)
           if (TableConfigOptions.TABLE_SQL_DIALECT.key().equalsIgnoreCase(args)) {
-            val dialect = x.operands(1)
-            Try(SqlDialect.valueOf(dialect.toUpperCase())) match {
-              case Success(x) => context.getConfig.setSqlDialect(x)
-              case _ =>
-            }
+            Try(SqlDialect.valueOf(operand.toUpperCase()))
+              .map(context.getConfig.setSqlDialect(_))
+              .getOrElse(throw new IllegalArgumentException(s"$operand is not a valid dialect"))
           } else {
-            context.getConfig.getConfiguration.setString(args, x.operands(1))
+            context.getConfig.getConfiguration.setString(args, operand)
           }
-          logInfo(s"$command: $args --> ${x.operands(1)}")
+          logInfo(s"$command: $args --> $operand")
         case RESET =>
           val confDataField = classOf[Configuration].getDeclaredField("confData")
           confDataField.setAccessible(true)
