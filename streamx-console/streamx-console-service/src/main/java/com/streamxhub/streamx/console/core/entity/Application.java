@@ -332,7 +332,7 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public File getLocalAppHome() {
-        String path = String.format("%s/app/%s",
+        String path = String.format("%s/%s",
             Workspace.local().APP_WORKSPACE(),
             id.toString()
         );
