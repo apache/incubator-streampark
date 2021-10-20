@@ -1085,7 +1085,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
                         appConf = String.format("%s://%s", format, applicationConfig.getContent());
                         File libPath = new File(application.getLocalAppHome(), "lib");
-                        flinkUserJar = new File(libPath, application.getModule().concat(".jar")).getAbsolutePath();
+                        flinkUserJar = new File(libPath, application.getDistJarName()).getAbsolutePath();
                         break;
                     case APACHE_FLINK:
                         appConf = String.format(
@@ -1095,7 +1095,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         );
                         flinkUserJar = new File(
                             application.getLocalAppHome(),
-                            application.getModule().concat(".jar")
+                            application.getDistJarName()
                         ).getAbsolutePath();
                         break;
                     default:
