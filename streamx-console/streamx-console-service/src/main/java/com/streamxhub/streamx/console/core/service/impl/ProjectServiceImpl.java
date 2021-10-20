@@ -179,7 +179,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             String appPath = app.getAbsolutePath();
             // 1). tar.gz文件....
             if (appPath.endsWith("tar.gz")) {
-                File deployPath = project.getAppBase();
+                File deployPath = project.getDistHome();
                 if (!deployPath.exists()) {
                     deployPath.mkdirs();
                 }
@@ -197,7 +197,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     // 2) .jar文件(普通,官方标准的flink工程)
                     Utils.checkJarFile(app.toURI().toURL());
                     String moduleName = app.getName().replace(".jar", "");
-                    File appBase = project.getAppBase();
+                    File appBase = project.getDistHome();
                     File targetDir = new File(appBase, moduleName);
                     if (!targetDir.exists()) {
                         targetDir.mkdirs();
@@ -253,7 +253,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public List<String> modules(Long id) {
         Project project = getById(id);
-        File appHome = project.getAppBase();
+        File appHome = project.getDistHome();
         List<String> list = new ArrayList<>();
         Arrays.stream(Objects.requireNonNull(appHome.listFiles())).forEach((x) -> list.add(x.getName()));
         return list;
@@ -262,7 +262,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public List<String> jars(Project project) {
         List<String> list = new ArrayList<>(0);
-        File apps = new File(project.getAppBase(), project.getModule());
+        File apps = new File(project.getDistHome(), project.getModule());
         for (File file : Objects.requireNonNull(apps.listFiles())) {
             if (file.getName().endsWith(".jar")) {
                 list.add(file.getName());
@@ -274,7 +274,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public String getAppConfPath(Long id, String module) {
         Project project = getById(id);
-        File appHome = project.getAppBase();
+        File appHome = project.getDistHome();
         Optional<File> fileOptional = Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
             .filter((x) -> x.getName().equals(module))
             .findFirst();
@@ -302,7 +302,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public List<Map<String, Object>> listConf(Project project) {
         try {
-            File file = new File(project.getAppBase(), project.getModule());
+            File file = new File(project.getDistHome(), project.getModule());
             File unzipFile = new File(file.getAbsolutePath().replaceAll(".tar.gz", ""));
             if (!unzipFile.exists()) {
                 GZipUtils.decompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());
