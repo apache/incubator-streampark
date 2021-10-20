@@ -699,7 +699,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             FsOperator fsOperator = application.getFsOperator();
                             fsOperator.delete(appHome.getPath());
                             //本地编译路径
-                            File distHome = application.getDistAppHome();
+                            File distHome = application.getDistHome();
                             fsOperator.upload(distHome.getAbsolutePath(), appHome.getPath());
                         } else {
                             log.info("FlinkSqlJob deploying...");

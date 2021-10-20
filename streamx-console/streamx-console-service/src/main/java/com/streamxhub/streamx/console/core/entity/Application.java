@@ -320,9 +320,9 @@ public class Application implements Serializable {
      * @return
      */
     @JsonIgnore
-    public File getDistAppHome() {
-        String path = String.format("%s/dist/%s/%s",
-            Workspace.local().APP_WORKSPACE(),
+    public File getDistHome() {
+        String path = String.format("%s/%s/%s",
+            Workspace.local().APP_LOCAL_DIST(),
             projectId.toString(),
             getModule()
         );

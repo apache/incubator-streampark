@@ -127,8 +127,7 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public File getDistHome() {
-        String appBase = Workspace.local().APP_WORKSPACE().concat("/dist/");
-        return new File(appBase.concat(id.toString()));
+        return new File(Workspace.local().APP_LOCAL_DIST(), id.toString());
     }
 
     @JsonIgnore
