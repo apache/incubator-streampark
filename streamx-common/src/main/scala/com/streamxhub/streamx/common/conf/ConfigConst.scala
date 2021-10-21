@@ -311,20 +311,19 @@ object ConfigConst {
   lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
   def printLogo(info: String): Unit = {
-    println("\n\n                 .+.                                 ")
-    println("           _____/ /_________  ____ _____ ___  _  __  ")
-    println("          / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\| |/_/  ")
-    println("         (__  ) /_/ /  /  __/ /_/ / / / / / />  <    ")
+    println("\n\n                 .+.                                ")
+    println("           _____/ /_________  ____ _____ ___  _  __     ")
+    println("          / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\| |/_/   ")
+    println("         (__  ) /_/ /  /  __/ /_/ / / / / / />  <       ")
     println("        /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/_/|_|    ")
-    println("                                              |/     ")
-    println("                                              .      ")
+    println("                                              |/        ")
+    println("                                              .         ")
     println("\n       WebSite:  http://www.streamxhub.com            ")
-    println("       GitHub :  https://github.com/streamxhub/streamx")
-    println("       Gitee  :  https://gitee.com/streamxhub/streamx    ")
-    println("       Ver    :  1.2.0                                ")
-    println(s"       Info   :  $info")
-    println(s"       Time   :  ${LocalDateTime.now}")
-    println("\n")
+    println("       GitHub :  https://github.com/streamxhub/streamx  ")
+    println("       Gitee  :  https://gitee.com/streamxhub/streamx   ")
+    println("       Ver    :  1.2.0                                  ")
+    println(s"       Info   :  $info                                 ")
+    println(s"       Time   :  ${LocalDateTime.now}                \n")
   }
 
 }
