@@ -433,6 +433,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (app == null) {
                 return record;
             }
+            app.setFlinkVersion(record.getFlinkVersion());
             app.setProjectName(record.getProjectName());
             return app;
         }).collect(Collectors.toList());
@@ -699,8 +700,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             FsOperator fsOperator = application.getFsOperator();
                             fsOperator.delete(appHome);
                             //本地编译路径
-                            File distHome = application.getDistHome();
-                            fsOperator.upload(distHome.getAbsolutePath(), appHome);
+                            String distHome = application.getDistHome();
+                            fsOperator.upload(distHome, appHome);
                         } else {
                             log.info("FlinkSqlJob deploying...");
                             FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
