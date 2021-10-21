@@ -977,15 +977,6 @@
           }
         },
       }, {
-        title: 'Job Type',
-        dataIndex: 'jobType',
-        width: 120,
-        scopedSlots: {customRender: 'jobType'},
-        filters: [
-          {text: 'Custom Code', value: 1},
-          {text: 'Flink SQL', value: 2}
-        ]
-      }, {
         title: 'Flink Version',
         dataIndex: 'flinkVersion',
         width: 120
