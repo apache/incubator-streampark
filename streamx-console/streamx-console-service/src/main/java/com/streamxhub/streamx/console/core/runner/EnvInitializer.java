@@ -85,12 +85,10 @@ public class EnvInitializer implements ApplicationRunner {
             FsOperator fsOperator = FsOperator.of(storageType);
             Workspace workspace = Workspace.of(storageType);
 
-            if (storageType.equals(LFS)) {
-                String localDist = workspace.APP_LOCAL_DIST();
-                if (!fsOperator.exists(localDist)) {
-                    log.info("mkdir {} starting ...", localDist);
-                    fsOperator.mkdirs(localDist);
-                }
+            String localDist = workspace.APP_LOCAL_DIST();
+            if (!fsOperator.exists(localDist)) {
+                log.info("mkdir {} starting ...", localDist);
+                fsOperator.mkdirs(localDist);
             }
 
             String appUploads = workspace.APP_UPLOADS();
