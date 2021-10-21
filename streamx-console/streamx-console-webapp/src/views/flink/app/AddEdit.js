@@ -134,13 +134,7 @@ export function initPodTemplateEditor(vue) {
 
 export function verifySQL(vue) {
   const controller = vue.controller
-  if(vue.versionId == null) {
-    this.$swal.fire(
-      'Failed',
-      'please select flink version first.',
-      'error'
-    )
-  } else {
+  if(vue.versionId != null) {
     const callback = arguments[1] || function (r) {
     }
     verify({
