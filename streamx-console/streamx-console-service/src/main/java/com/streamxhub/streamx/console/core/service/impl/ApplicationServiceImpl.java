@@ -376,7 +376,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean checkStart(Application appParam) {
+    public boolean checkEnv(Application appParam) {
         Application application = getById(appParam.getId());
         FlinkAppState appState = FlinkAppState.of(application.getState());
         try {
@@ -1060,49 +1060,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         if (application.isCustomCodeJob()) {
             assert executionMode != null;
-            if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
-                switch (application.getApplicationType()) {
-                    case STREAMX_FLINK:
-                        String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
-                        appConf = String.format("%s://%s", format, applicationConfig.getContent());
-                        String classPath = String.format("%s/%s/lib", remoteWorkspace.APP_WORKSPACE(), application.getId());
-                        flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
-                        break;
-                    case APACHE_FLINK:
-                        appConf = String.format("json://{\"%s\":\"%s\"}",
-                            ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
-                            application.getMainClass()
-                        );
-                        classPath = String.format("%s/%s", remoteWorkspace.APP_WORKSPACE(), application.getId());
-                        flinkUserJar = String.format("%s/%s", classPath, application.getJar());
-                        break;
-                    default:
-                        throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
-                }
-            } else if (executionMode.equals(ExecutionMode.YARN_PRE_JOB)) {
-                switch (application.getApplicationType()) {
-                    case STREAMX_FLINK:
-                        String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
-                        appConf = String.format("%s://%s", format, applicationConfig.getContent());
-                        File libPath = new File(application.getLocalAppHome(), "lib");
-                        flinkUserJar = new File(libPath, application.getDistJarName()).getAbsolutePath();
-                        break;
-                    case APACHE_FLINK:
-                        appConf = String.format(
-                            "json://{\"%s\":\"%s\"}",
-                            ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
-                            application.getMainClass()
-                        );
-                        flinkUserJar = new File(
-                            application.getLocalAppHome(),
-                            application.getDistJarName()
-                        ).getAbsolutePath();
-                        break;
-                    default:
-                        throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
-                }
-            } else {
-                throw new UnsupportedOperationException("Unsupported..." + executionMode);
+            switch (application.getApplicationType()) {
+                case STREAMX_FLINK:
+                    String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
+                    appConf = String.format("%s://%s", format, applicationConfig.getContent());
+                    flinkUserJar = String.format("%s/lib/%s", application.getAppHome(), application.getModule().concat(".jar"));
+                    break;
+                case APACHE_FLINK:
+                    appConf = String.format("json://{\"%s\":\"%s\"}",
+                        ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
+                        application.getMainClass()
+                    );
+                    flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+                    break;
+                default:
+                    throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
             }
         } else if (application.isFlinkSqlJob()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);

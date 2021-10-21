@@ -314,11 +314,6 @@ public class Application implements Serializable {
         return false;
     }
 
-    @JsonIgnore
-    public String getDistJarName() {
-        return this.getModule().concat(".jar");
-    }
-
     /**
      * 本地的编译打包工作目录
      *
