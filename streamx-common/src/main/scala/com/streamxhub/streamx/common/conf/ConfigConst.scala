@@ -21,9 +21,6 @@
 package com.streamxhub.streamx.common.conf
 
 import com.streamxhub.streamx.common.util.SystemPropertyUtils
-import org.fusesource.jansi.Ansi.Color._
-import org.fusesource.jansi.Ansi.ansi
-
 import java.time.LocalDateTime
 
 object ConfigConst {
@@ -314,13 +311,13 @@ object ConfigConst {
   lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
   def printLogo(info: String): Unit = {
-    print(ansi.eraseScreen.fg(YELLOW).a("\n\n                 .+.                          "))
-    print(ansi.eraseScreen.fg(YELLOW).a("           _____/ /_________  ____ _____ ___ ").fg(RED).a(" _  __"))
-    print(ansi.eraseScreen.fg(YELLOW).a("          / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\").fg(RED).a("| |/_/"))
-    print(ansi.eraseScreen.fg(YELLOW).a("         (__  ) /_/ /  /  __/ /_/ / / / / / /").fg(RED).a(">  <  "))
-    print(ansi.eraseScreen.fg(YELLOW).a("        /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/").fg(RED).a("_/|_|  "))
-    print(ansi.eraseScreen.fg(YELLOW).a("                                            ").fg(RED).a("  |/   "))
-    print(ansi.eraseScreen.fg(YELLOW).a("                                            ").fg(RED).a("  .    "))
+    println("                 .+.                                 ")
+    println("           _____/ /_________  ____ _____ ___  _  __  ")
+    println("          / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\| |/_/  ")
+    println("         (__  ) /_/ /  /  __/ /_/ / / / / / />  <    ")
+    println("        /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/_/|_|    ")
+    println("                                              |/     ")
+    println("                                              .      ")
     println("\n       WebSite:  http://www.streamxhub.com            ")
     println("       GitHub :  https://github.com/streamxhub/streamx")
     println("       Gitee  :  https://gitee.com/streamxhub/streamx    ")
@@ -330,6 +327,9 @@ object ConfigConst {
     println("\n")
   }
 
+  def main(args: Array[String]): Unit = {
+    printLogo("123")
+  }
 }
 
 
