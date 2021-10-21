@@ -311,7 +311,7 @@ object ConfigConst {
   lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
   def printLogo(info: String): Unit = {
-    println("                 .+.                                 ")
+    println("\n\n                 .+.                                 ")
     println("           _____/ /_________  ____ _____ ___  _  __  ")
     println("          / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\| |/_/  ")
     println("         (__  ) /_/ /  /  __/ /_/ / / / / / />  <    ")
@@ -327,9 +327,6 @@ object ConfigConst {
     println("\n")
   }
 
-  def main(args: Array[String]): Unit = {
-    printLogo("123")
-  }
 }
 
 
