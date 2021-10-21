@@ -283,16 +283,16 @@
         <template
           slot="customRender"
           slot-scope="text, record, index, column">
-            <span
-              class="app_type app_jar"
-              v-if="record['jobType'] === 1">
-              JAR
-            </span>
-            <span
-              class="app_type app_sql"
-              v-if="record['jobType'] === 2">
-              SQL
-            </span>
+          <span
+            class="app_type app_jar"
+            v-if="record['jobType'] === 1">
+            JAR
+          </span>
+          <span
+            class="app_type app_sql"
+            v-if="record['jobType'] === 2">
+            SQL
+          </span>
 
           <!--有条件搜索-->
           <template v-if="searchText && searchedColumn === column.dataIndex">
@@ -958,7 +958,7 @@
       return [{
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 220,
+        width: 240,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
