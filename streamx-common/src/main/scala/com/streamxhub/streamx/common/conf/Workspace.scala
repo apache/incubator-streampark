@@ -74,6 +74,11 @@ case class Workspace(storageType: StorageType) {
 
   lazy val APP_BACKUPS = s"$WORKSPACE/backups"
 
+  /**
+   * 本地构建项目存放路径
+   */
+  lazy val APP_LOCAL_DIST = s"$WORKSPACE/dist"
+
   lazy val APP_SAVEPOINTS = s"$WORKSPACE/savepoints"
 
   /**

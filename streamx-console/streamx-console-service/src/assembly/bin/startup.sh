@@ -306,8 +306,6 @@ JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streamx-flink-shims_.*.jar$")
 for jar in $JARS;do
    APP_CLASSPATH=$APP_CLASSPATH:$jar
 done
-# latest streamx-flink-shims
-APP_CLASSPATH=$APP_CLASSPATH:$APP_LIB/streamx-flink-shims_flink-1.13-1.1.1.jar
 
 if [[ -n "${HADOOP_CONF_DIR}" ]] && [[ -d "${HADOOP_CONF_DIR}" ]]; then
   echo_r "Using HADOOP_CONF_DIR:   ${HADOOP_CONF_DIR}"

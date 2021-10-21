@@ -126,9 +126,8 @@ public class Project implements Serializable {
     }
 
     @JsonIgnore
-    public File getAppBase() {
-        String appBase = Workspace.local().APP_WORKSPACE().concat("/app/");
-        return new File(appBase.concat(id.toString()));
+    public File getDistHome() {
+        return new File(Workspace.local().APP_LOCAL_DIST(), id.toString());
     }
 
     @JsonIgnore
@@ -207,7 +206,7 @@ public class Project implements Serializable {
     public void cleanCloned() throws IOException {
         if (isCloned()) {
             FileUtils.deleteDirectory(getAppSource());
-            FileUtils.deleteDirectory(getAppBase());
+            FileUtils.deleteDirectory(getDistHome());
         }
     }
 
