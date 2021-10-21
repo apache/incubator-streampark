@@ -12,22 +12,15 @@
     <name>StreamX : Flink Test TableSql</name>
 
     <properties>
-        <flink.version>1.14.0</flink.version>
-        <shims.version>1.14</shims.version>
+        <flink.version>1.13.0</flink.version>
     </properties>
 
     <dependencies>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims_flink-${shims.version}</artifactId>
+            <artifactId>streamx-flink-shims_flink-${streamx.shims.version}</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-runtime</artifactId>
-            <version>${flink.version}</version>
         </dependency>
 
         <dependency>
