@@ -303,7 +303,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert application != null;
 
         //1) 将已经发布到workspace的文件删除
-        application.getFsOperator().delete(application.getAppHome().getAbsolutePath());
+        application.getFsOperator().delete(application.getAppHome());
 
         //2) 将backup里的文件回滚到workspace
         backUpService.revoke(application);
@@ -695,12 +695,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                 this.backUpService.backup(application);
                             }
                             // 3) deploying...
-                            File appHome = application.getAppHome();
+                            String appHome = application.getAppHome();
                             FsOperator fsOperator = application.getFsOperator();
-                            fsOperator.delete(appHome.getPath());
+                            fsOperator.delete(appHome);
                             //本地编译路径
                             File distHome = application.getDistHome();
-                            fsOperator.upload(distHome.getAbsolutePath(), appHome.getPath());
+                            fsOperator.upload(distHome.getAbsolutePath(), appHome);
                         } else {
                             log.info("FlinkSqlJob deploying...");
                             FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
@@ -842,12 +842,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
 
             // 3) deploying...
-            File appHome = application.getAppHome();
             FsOperator fsOperator = application.getFsOperator();
-            fsOperator.delete(appHome.getPath());
+            fsOperator.delete(application.getAppHome());
 
             //3) upload jar by pomJar
-            fsOperator.delete(application.getAppHome().getAbsolutePath());
+            fsOperator.delete(application.getAppHome());
 
             fsOperator.upload(jobLocalHome.getAbsolutePath(), application.getWorkspace().APP_WORKSPACE());
 
@@ -857,7 +856,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (Utils.notEmpty(jars)) {
                 jars.forEach(jar -> {
                     String src = APP_UPLOADS.concat("/").concat(jar);
-                    fsOperator.copy(src, application.getAppHome().getAbsolutePath().concat("/lib"), false, true);
+                    fsOperator.copy(src, application.getAppHome().concat("/lib"), false, true);
                 });
             }
 

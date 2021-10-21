@@ -331,24 +331,24 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public File getLocalAppHome() {
+    public String getLocalAppHome() {
         String path = String.format("%s/%s",
             Workspace.local().APP_WORKSPACE(),
             id.toString()
         );
         log.info("local appHome:{}", path);
-        return new File(path);
+        return path;
     }
 
     @JsonIgnore
-    public File getRemoteAppHome() {
+    public String getRemoteAppHome() {
         String path = String.format(
             "%s/%s",
             Workspace.remote().APP_WORKSPACE(),
             id.toString()
         );
         log.info("remote appHome:{}", path);
-        return new File(path);
+        return path;
     }
 
     /**
@@ -357,7 +357,7 @@ public class Application implements Serializable {
      * @return
      */
     @JsonIgnore
-    public File getAppHome() {
+    public String getAppHome() {
         switch (this.getExecutionModeEnum()) {
             case KUBERNETES_NATIVE_APPLICATION:
             case KUBERNETES_NATIVE_SESSION:
