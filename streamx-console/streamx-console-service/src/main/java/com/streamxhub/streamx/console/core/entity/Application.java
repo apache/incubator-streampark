@@ -315,13 +315,66 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
+    public String getDistJarName() {
+        return this.getModule().concat(".jar");
+    }
+
+    /**
+     * 本地的编译打包工作目录
+     *
+     * @return
+     */
+    @JsonIgnore
+    public File getDistHome() {
+        String path = String.format("%s/%s/%s",
+            Workspace.local().APP_LOCAL_DIST(),
+            projectId.toString(),
+            getModule()
+        );
+        log.info("local distHome:{}", path);
+        return new File(path);
+    }
+
+    @JsonIgnore
     public File getLocalAppHome() {
-        return new File(Workspace.local().APP_WORKSPACE().concat("/app/").concat(projectId.toString()));
+        String path = String.format("%s/%s",
+            Workspace.local().APP_WORKSPACE(),
+            id.toString()
+        );
+        log.info("local appHome:{}", path);
+        return new File(path);
     }
 
     @JsonIgnore
     public File getRemoteAppHome() {
-        return new File(Workspace.remote().APP_WORKSPACE().concat("/").concat(id.toString()));
+        String path = String.format(
+            "%s/%s",
+            Workspace.remote().APP_WORKSPACE(),
+            id.toString()
+        );
+        log.info("remote appHome:{}", path);
+        return new File(path);
+    }
+
+    /**
+     * 根据 app ExecutionModeEnum 自动识别remoteAppHome 或 localAppHome
+     *
+     * @return
+     */
+    @JsonIgnore
+    public File getAppHome() {
+        switch (this.getExecutionModeEnum()) {
+            case KUBERNETES_NATIVE_APPLICATION:
+            case KUBERNETES_NATIVE_SESSION:
+            case YARN_PRE_JOB:
+            case YARN_SESSION:
+            case LOCAL:
+                return getLocalAppHome();
+            case YARN_APPLICATION:
+                return getRemoteAppHome();
+            default:
+                throw new UnsupportedOperationException("unsupported executionMode ".concat(getExecutionModeEnum().getName()));
+        }
     }
 
     @JsonIgnore
@@ -466,7 +519,7 @@ public class Application implements Serializable {
         //7) Program Args 是否发生变化
         //8) Flink Version  是否发生变化
 
-        if (!ObjectUtils.safeEquals(this.getVersionId(),other.getVersionId())) {
+        if (!ObjectUtils.safeEquals(this.getVersionId(), other.getVersionId())) {
             return false;
         }
 
