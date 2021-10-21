@@ -21,9 +21,6 @@
 package com.streamxhub.streamx.common.conf
 
 import com.streamxhub.streamx.common.util.SystemPropertyUtils
-import org.fusesource.jansi.Ansi.Color._
-import org.fusesource.jansi.Ansi.ansi
-
 import java.time.LocalDateTime
 
 object ConfigConst {
@@ -314,20 +311,19 @@ object ConfigConst {
   lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
   def printLogo(info: String): Unit = {
-    println(ansi.eraseScreen.fg(YELLOW).a("\n\n                 .+.                          ").reset)
-    println(ansi.eraseScreen.fg(YELLOW).a("           _____/ /_________  ____ _____ ___ ").fg(RED).a(" _  __").reset)
-    println(ansi.eraseScreen.fg(YELLOW).a("          / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\").fg(RED).a("| |/_/").reset)
-    println(ansi.eraseScreen.fg(YELLOW).a("         (__  ) /_/ /  /  __/ /_/ / / / / / /").fg(RED).a(">  <  ").reset)
-    println(ansi.eraseScreen.fg(YELLOW).a("        /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/").fg(RED).a("_/|_|  ").reset)
-    println(ansi.eraseScreen.fg(YELLOW).a("                                            ").fg(RED).a("  |/   ").reset)
-    println(ansi.eraseScreen.fg(YELLOW).a("                                            ").fg(RED).a("  .    ").reset)
+    println("\n\n                 .+.                                ")
+    println("           _____/ /_________  ____ _____ ___  _  __     ")
+    println("          / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\| |/_/   ")
+    println("         (__  ) /_/ /  /  __/ /_/ / / / / / />  <       ")
+    println("        /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/_/|_|    ")
+    println("                                              |/        ")
+    println("                                              .         ")
     println("\n       WebSite:  http://www.streamxhub.com            ")
-    println("       GitHub :  https://github.com/streamxhub/streamx")
-    println("       Gitee  :  https://gitee.com/streamxhub/streamx    ")
-    println("       Ver    :  1.2.0                                ")
-    println(s"       Info   :  $info")
-    println(s"       Time   :  ${LocalDateTime.now}")
-    println("\n")
+    println("       GitHub :  https://github.com/streamxhub/streamx  ")
+    println("       Gitee  :  https://gitee.com/streamxhub/streamx   ")
+    println("       Ver    :  1.2.0                                  ")
+    println(s"       Info   :  $info                                 ")
+    println(s"       Time   :  ${LocalDateTime.now}                \n")
   }
 
 }
