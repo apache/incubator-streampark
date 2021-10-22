@@ -117,11 +117,17 @@
               class="list-content-item"
               style="width: 150px">
               <span>Build State</span>
-              <p v-if="item.buildState === 2">
-                <a-tag color="#f5222d">FAILED</a-tag>
+              <p v-if="item.buildState === -1">
+                <a-tag color="#C0C0C0">NOT BUILD</a-tag>
+              </p>
+              <p v-if="item.buildState === 0">
+                <a-tag color="#1AB58E">BUILDING</a-tag>
+              </p>
+              <p v-if="item.buildState === 1">
+                <a-tag color="#52c41a">SUCCESSFUL</a-tag>
               </p>
               <p v-else>
-                <a-tag color="#52c41a">SUCCESSFUL</a-tag>
+                <a-tag color="#f5222d">FAILED</a-tag>
               </p>
             </div>
           </div>
