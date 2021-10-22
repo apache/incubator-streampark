@@ -28,7 +28,7 @@
 
 </div>
 
-[English](README.md) | 中文
+##[English](README.md) | 中文
 
 # StreamX
 
@@ -56,6 +56,8 @@ Make Flink|Spark easier!!!
 * 一系列开箱即用的connectors
 * 支持项目编译功能(maven 编译)
 * 在线参数配置
+* 多版本flink支持(1.12.x,1.13.x,1.14.x)
+* Kubernetes部署支持(k8s-native-session,k8s-application)
 * 支持 `Applicaion` 模式， `Yarn-Per-Job` 模式启动
 * 快捷的日常操作(任务`启动`、`停止`、`savepoint`，从`savepoint`恢复)
 * 支持火焰图
@@ -114,7 +116,7 @@ Make Flink|Spark easier!!!
 
 ```
 git clone https://github.com/streamxhub/streamx.git
-cd Streamx
+cd streamx
 mvn clean install -DskipTests -Denv=prod
 ```
 
@@ -137,6 +139,19 @@ mvn clean install -DskipTests -Denv=prod
 [FlinkX](http://github.com/DTStack/flinkx)
 是基于flink的分布式数据同步工具，实现了多种异构数据源之间高效的数据迁移，定位比较明确，专门用来做数据抽取和迁移，可以作为一个服务组件来使用，`StreamX` 关注开发阶段和任务后期的管理，定位有所不同，`streamx-pump`
 模块也在规划中， 致力于解决数据源抽取和迁移，最终会集成到 `streamx-console` 中
+
+
+## 🤝 如何贡献
+
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/streamxhub/streamx/pulls)
+
+如果你希望参与贡献 欢迎 [Pull Request](https://github.com/streamxhub/streamx/pulls)，或给我们 [报告 Bug](https://github.com/streamxhub/streamx/issues/new/choose)。
+
+> 强烈推荐阅读 [《提问的智慧》](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way)(**本指南不提供此项目的实际支持服务！**)、[《如何有效地报告 Bug》](http://www.chiark.greenend.org.uk/%7Esgtatham/bugs-cn.html)、[《如何向开源项目提交无法解答的问题》](https://zhuanlan.zhihu.com/p/25795393)，更好的问题更容易获得帮助。
+
+感谢 [JetBrains](https://www.jetbrains.com/?from=streamx) 提供的免费开源 License 赞助
+
+[![JetBrains](https://img.alicdn.com/tfs/TB1sSomo.z1gK0jSZLeXXb9kVXa-120-130.svg)](https://www.jetbrains.com/?from=streamx)
 
 ## 🍼 Feedback
 
@@ -170,6 +185,7 @@ StreamX现在离这个目标还有一段距离，还需持续投入，相应的�
 
 <p>
   <a href="https://github.com/wolfboys" alt="benjobs"><img src="https://avatars.githubusercontent.com/u/13284744?v=4" height="50" width="50"></a>
+  <a href="https://github.com/Kitming25" alt="Kitming25"><img src="https://avatars.githubusercontent.com/u/11773106?v=4" height="50" width="50"></a>
   <a href="https://github.com/Narcasserun" alt="Narcasserun"><img src="https://avatars.githubusercontent.com/u/39329477?v=4" height="50" width="50"></a>
 </p>
 
@@ -177,6 +193,7 @@ StreamX现在离这个目标还有一段距离，还需持续投入，相应的�
 
 <p>
     <a href="https://github.com/lianxiaobao" alt="lianxiaobao"><img src="https://avatars.githubusercontent.com/u/36557317?v=4" height="50" width="50"></a>
+    <a href="https://github.com/su94998" alt="su94998"><img src="https://avatars.githubusercontent.com/u/33316193?v=4" height="50" width="50"></a>
 </p>
 
 ### 🥈 白银赞助商
