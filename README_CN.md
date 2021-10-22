@@ -153,15 +153,6 @@ mvn clean install -DskipTests -Denv=prod
 
 [![JetBrains](https://img.alicdn.com/tfs/TB1sSomo.z1gK0jSZLeXXb9kVXa-120-130.svg)](https://www.jetbrains.com/?from=streamx)
 
-## 🍼 Feedback
-
-你可以快速的提一个[ISSUES](https://github.com/streamxhub/streamx/issues) ，在提之前，请检查问题后再尝试使用以下联系方式！也许你的问题已经被别人问到了，或者已经被回答了。谢谢！
-
-您可以通过以下方法向我提供反馈或问题：
-
-- [快速创建issue!](https://github.com/streamxhub/streamx/issues/new)
-- [加入社区](#-加入社区)
-
 ## 💰 Donation
 
 Are you **enjoying this project** ? 👋
