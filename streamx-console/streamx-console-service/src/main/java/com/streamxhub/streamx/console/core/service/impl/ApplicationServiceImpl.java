@@ -303,7 +303,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert application != null;
 
         //1) 将已经发布到workspace的文件删除
-        application.getFsOperator().delete(application.getAppHome().getAbsolutePath());
+        application.getFsOperator().delete(application.getAppHome());
 
         //2) 将backup里的文件回滚到workspace
         backUpService.revoke(application);
@@ -376,7 +376,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean checkStart(Application appParam) {
+    public boolean checkEnv(Application appParam) {
         Application application = getById(appParam.getId());
         FlinkAppState appState = FlinkAppState.of(application.getState());
         try {
@@ -433,6 +433,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (app == null) {
                 return record;
             }
+            app.setFlinkVersion(record.getFlinkVersion());
             app.setProjectName(record.getProjectName());
             return app;
         }).collect(Collectors.toList());
@@ -695,12 +696,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                 this.backUpService.backup(application);
                             }
                             // 3) deploying...
-                            File appHome = application.getAppHome();
+                            String appHome = application.getAppHome();
                             FsOperator fsOperator = application.getFsOperator();
-                            fsOperator.delete(appHome.getPath());
+                            fsOperator.delete(appHome);
                             //本地编译路径
-                            File distHome = application.getDistHome();
-                            fsOperator.upload(distHome.getAbsolutePath(), appHome.getPath());
+                            String distHome = application.getDistHome();
+                            fsOperator.upload(distHome, appHome);
                         } else {
                             log.info("FlinkSqlJob deploying...");
                             FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
@@ -842,12 +843,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
 
             // 3) deploying...
-            File appHome = application.getAppHome();
             FsOperator fsOperator = application.getFsOperator();
-            fsOperator.delete(appHome.getPath());
+            fsOperator.delete(application.getAppHome());
 
             //3) upload jar by pomJar
-            fsOperator.delete(application.getAppHome().getAbsolutePath());
+            fsOperator.delete(application.getAppHome());
 
             fsOperator.upload(jobLocalHome.getAbsolutePath(), application.getWorkspace().APP_WORKSPACE());
 
@@ -857,7 +857,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (Utils.notEmpty(jars)) {
                 jars.forEach(jar -> {
                     String src = APP_UPLOADS.concat("/").concat(jar);
-                    fsOperator.copy(src, application.getAppHome().getAbsolutePath().concat("/lib"), false, true);
+                    fsOperator.copy(src, application.getAppHome().concat("/lib"), false, true);
                 });
             }
 
@@ -1060,49 +1060,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         if (application.isCustomCodeJob()) {
             assert executionMode != null;
-            if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
-                switch (application.getApplicationType()) {
-                    case STREAMX_FLINK:
-                        String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
-                        appConf = String.format("%s://%s", format, applicationConfig.getContent());
-                        String classPath = String.format("%s/%s/lib", remoteWorkspace.APP_WORKSPACE(), application.getId());
-                        flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
-                        break;
-                    case APACHE_FLINK:
-                        appConf = String.format("json://{\"%s\":\"%s\"}",
-                            ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
-                            application.getMainClass()
-                        );
-                        classPath = String.format("%s/%s", remoteWorkspace.APP_WORKSPACE(), application.getId());
-                        flinkUserJar = String.format("%s/%s", classPath, application.getJar());
-                        break;
-                    default:
-                        throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
-                }
-            } else if (executionMode.equals(ExecutionMode.YARN_PRE_JOB)) {
-                switch (application.getApplicationType()) {
-                    case STREAMX_FLINK:
-                        String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
-                        appConf = String.format("%s://%s", format, applicationConfig.getContent());
-                        File libPath = new File(application.getLocalAppHome(), "lib");
-                        flinkUserJar = new File(libPath, application.getDistJarName()).getAbsolutePath();
-                        break;
-                    case APACHE_FLINK:
-                        appConf = String.format(
-                            "json://{\"%s\":\"%s\"}",
-                            ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
-                            application.getMainClass()
-                        );
-                        flinkUserJar = new File(
-                            application.getLocalAppHome(),
-                            application.getDistJarName()
-                        ).getAbsolutePath();
-                        break;
-                    default:
-                        throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
-                }
-            } else {
-                throw new UnsupportedOperationException("Unsupported..." + executionMode);
+            switch (application.getApplicationType()) {
+                case STREAMX_FLINK:
+                    String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
+                    appConf = String.format("%s://%s", format, applicationConfig.getContent());
+                    flinkUserJar = String.format("%s/lib/%s", application.getAppHome(), application.getModule().concat(".jar"));
+                    break;
+                case APACHE_FLINK:
+                    appConf = String.format("json://{\"%s\":\"%s\"}",
+                        ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
+                        application.getMainClass()
+                    );
+                    flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+                    break;
+                default:
+                    throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
             }
         } else if (application.isFlinkSqlJob()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);

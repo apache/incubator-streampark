@@ -112,6 +112,7 @@ public class ApplicationController {
     public RestResponse deploy(Application app) {
         Application application = applicationService.getById(app.getId());
         assert application != null;
+        applicationService.checkEnv(app);
         application.setBackUp(true);
         application.setBackUpDescription(app.getBackUpDescription());
         applicationService.deploy(application);
@@ -128,7 +129,7 @@ public class ApplicationController {
     @PostMapping("start")
     @RequiresPermissions("app:start")
     public RestResponse start(Application app) throws Exception {
-        boolean success = applicationService.checkStart(app);
+        boolean success = applicationService.checkEnv(app);
         if (success) {
             applicationService.starting(app);
             boolean started = applicationService.start(app, false);
