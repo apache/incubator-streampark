@@ -121,7 +121,7 @@
                 <a-tag color="#C0C0C0">NOT BUILD</a-tag>
               </p>
               <p v-else-if="item.buildState === 0">
-                <a-tag color="#1AB58E">BUILDING</a-tag>
+                <a-tag color="#1AB58E" class="status-processing-building">BUILDING</a-tag>
               </p>
               <p v-else-if="item.buildState === 1">
                 <a-tag color="#52c41a">SUCCESSFUL</a-tag>
@@ -449,5 +449,20 @@ export default {
   border-radius: 50%;
   background-color: #ebebeb;
   border: 6px solid #ebebeb;
+}
+
+.status-processing-building {
+  animation: building-color 800ms ease-out infinite alternate;
+}
+
+@keyframes building-color {
+  0% {
+    border-color: #1AB58E;
+    box-shadow: 0 0 1px #1AB58E, inset 0 0 2px #1AB58E;
+  }
+  100% {
+    border-color: #1AB58E;
+    box-shadow: 0 0 10px #1AB58E, inset 0 0 5px #1AB58E;
+  }
 }
 </style>
