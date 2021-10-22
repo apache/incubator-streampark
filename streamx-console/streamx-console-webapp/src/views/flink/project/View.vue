@@ -15,7 +15,7 @@
           <a-radio-button
             @click="handleQuery(-1)"
             value="-1">
-            Unbuild
+            Not Build
           </a-radio-button>
           <a-radio-button
             @click="handleQuery(0)"
