@@ -152,7 +152,7 @@ object FlinkSqlExecutor extends Logger {
           }
           callback(builder.toString())
         case EXPLAIN =>
-          val tableResult = context.executeSql(sql)
+          val tableResult = context.executeSql(args)
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
         case INSERT_INTO | INSERT_OVERWRITE => insertArray += args

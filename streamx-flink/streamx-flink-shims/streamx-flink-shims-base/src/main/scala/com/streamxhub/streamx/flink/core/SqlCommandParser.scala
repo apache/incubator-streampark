@@ -310,7 +310,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object EXPLAIN extends SqlCommand(
     "explain plan for",
-    "EXPLAIN\\s+PLAN\\s+FOR\\s+(SELECT\\s+.*|INSERT\\s+.*)"
+    "(EXPLAIN\\s+PLAN\\s+FOR\\s+(SELECT\\s+.*|INSERT\\s+.*))"
   )
 
   case object SET extends SqlCommand(
