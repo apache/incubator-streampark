@@ -38,30 +38,23 @@ done
 # Get standard environment variables
 # shellcheck disable=SC2006
 PRG_DIR=`dirname "$PRG"`
+EXECUTABLE=streamx.sh
 
-# shellcheck disable=SC2006
-# shellcheck disable=SC2164
-APP_HOME=`cd "$PRG_DIR/.." >/dev/null; pwd`
-APP_PID="$APP_HOME"/.pid
-
-if [ -f "$APP_PID" ]; then
-  pid=$(cat "${APP_PID}")
+# Check that target executable exists
+if $os400; then
+  # -x will Only work on the os400 if the files are:
+  # 1. owned by the user
+  # 2. owned by the PRIMARY group of the user
+  # this will not work if the user belongs in secondary groups
+  eval
 else
-  # shellcheck disable=SC2006
-  # StreamX main
-  MAIN="com.streamxhub.streamx.console.StreamXConsole"
-  # shellcheck disable=SC2006
-  pid=`jps -l|grep $MAIN|awk '{print $1}'`
-fi
-
-if [[ -z "${pid}" ]] ; then
-  echo "StreamX already stopped."
-else
-  echo "StreamX pid is ${pid},now stopping..."
-  kill "${pid}"
-  if [ $? -eq 0 ] ; then
-    echo "StreamX stop successful!"
-  else
-    echo "StreamX stop failed!"
+  if [ ! -x "$PRG_DIR"/"$EXECUTABLE" ]; then
+    echo "Cannot find $PRG_DIR/$EXECUTABLE"
+    echo "The file is absent or does not have execute permission"
+    echo "This file is needed to run this program"
+    exit 1
   fi
 fi
+
+exec "$PRG_DIR"/"$EXECUTABLE" stop "$@"
+
