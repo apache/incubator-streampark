@@ -18,19 +18,7 @@
     </resultMap>
 
     <select id="findUserDetail" resultType="user" parameterType="user">
-        SELECT
-        user_id as userId,
-        username,
-        nick_Name as nickName,
-        password,
-        email,
-        mobile,
-        STATUS,
-        create_time createTime,
-        sex,
-        AVATAR,
-        DESCRIPTION,
-        LAST_LOGIN_TIME lastLoginTime
+        SELECT *
         FROM
         t_user
         <where>

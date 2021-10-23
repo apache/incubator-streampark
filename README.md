@@ -54,6 +54,8 @@ data laker.
 * Out-of-the-box connectors
 * Support maven compilation
 * Configuration
+* Multi version flick support(1.12.x,1.13.x,1.14.x)
+* Kubernetes deployment (k8s-native-session,k8s-application)
 * Support `Applicaion` and `Yarn-Per-Job` mode
 * `start`, `stop`, `savepoint`, resume from `savepoint`
 * Flame graph
@@ -118,8 +120,8 @@ early inspiration and help.
 
 ```
 git clone https://github.com/streamxhub/streamx.git
-cd Streamx
-mvn clean install -DskipTests -Denv=prod
+cd streamx
+./mvnw clean install -DskipTests -Denv=prod
 ```
 
 click [Document](http://www.streamxhub.com/zh/doc/) for more information
@@ -144,15 +146,19 @@ in DTStack, which realizes efficient data migration between multiple heterogeneo
 `StreamX` focuses on the management of development phases and tasks. The `streamx-pump` module is also under planning, dedicated to solving
 data source migration, and will eventually be integrated into the `streamx-console`.
 
-## 🍼 Feedback
 
-You can quickly submit an issue. Before submitting, please check the problem and try to use the following contact information! Maybe your
-question has already been asked by others, or it has already been answered. Thank you!
+## 🤝 Contributing
 
-You can contact us or ask questions via:
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/streamxhub/streamx/pulls)
 
-- [New an issue](https://github.com/streamxhub/streamx/issues/new)
-- [Join us](#-Join-us)
+You can submit any ideas as [pull requests](https://github.com/streamxhub/streamx/pulls) or as [GitHub issues](https://github.com/streamxhub/streamx/issues/new/choose).
+
+> If you're new to posting issues, we ask that you read [*How To Ask Questions The Smart Way*](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
+
+Thanks to [JetBrains](https://www.jetbrains.com/?from=streamx) for supporting us free open source licenses.
+
+[![JetBrains](https://img.alicdn.com/tfs/TB1sSomo.z1gK0jSZLeXXb9kVXa-120-130.svg)](https://www.jetbrains.com/?from=streamx)
+
 
 ## 💰 Donation
 
@@ -174,6 +180,7 @@ Welcome individuals and enterprises to sponsor, your support will help us better
 
 <p>
   <a href="https://github.com/wolfboys" alt="benjobs"><img src="https://avatars.githubusercontent.com/u/13284744?v=4" height="50" width="50"></a>
+  <a href="https://github.com/Kitming25" alt="Kitming25"><img src="https://avatars.githubusercontent.com/u/11773106?v=4" height="50" width="50"></a>
   <a href="https://github.com/Narcasserun" alt="Narcasserun"><img src="https://avatars.githubusercontent.com/u/39329477?v=4" height="50" width="50"></a>
 </p>
 
@@ -181,6 +188,7 @@ Welcome individuals and enterprises to sponsor, your support will help us better
 
 <p>
     <a href="https://github.com/lianxiaobao" alt="lianxiaobao"><img src="https://avatars.githubusercontent.com/u/36557317?v=4" height="50" width="50"></a>
+    <a href="https://github.com/su94998" alt="su94998"><img src="https://avatars.githubusercontent.com/u/33316193?v=4" height="50" width="50"></a>
 </p>
 
 ### 🥈 Silver Supplier

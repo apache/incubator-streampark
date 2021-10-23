@@ -8,9 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.fusesource.jansi.Ansi.Color.*;
-import static org.fusesource.jansi.Ansi.ansi;
-
 public class YarnTest {
 
     @Test
@@ -42,21 +39,5 @@ public class YarnTest {
         System.out.println(map.size());
     }
 
-    @Test
-    public void logo() {
-        System.out.println(ansi().eraseScreen().fg(YELLOW).a("\n\n              .+.                          ").fg(RED).a("       ").reset());
-        System.out.println(ansi().eraseScreen().fg(YELLOW).a("        _____/ /_________  ____ _____ ___ ").fg(RED).a(" _  __").reset());
-        System.out.println(ansi().eraseScreen().fg(YELLOW).a("       / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\").fg(RED).a("| |/_/").reset());
-        System.out.println(ansi().eraseScreen().fg(YELLOW).a("      (__  ) /_/ /  /  __/ /_/ / / / / / /").fg(RED).a(">  <  ").reset());
-        System.out.println(ansi().eraseScreen().fg(YELLOW).a("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/").fg(RED).a("_/|_|  ").reset());
-        System.out.println(ansi().eraseScreen().fg(YELLOW).a("                                         ").fg(RED).a("  |/   ").reset());
-        System.out.println(ansi().eraseScreen().fg(YELLOW).a("                                         ").fg(RED).a("  .    ").reset());
-        System.out.println("\n   WebSite:  http://www.streamxhub.com            ");
-        System.out.println("   GitHub :  https://github.com/streamxhub/streamx");
-        System.out.println("   Gitee  :  https://gitee.com/streamxhub/streamx    ");
-        System.out.println("   Ver    :  1.2.0                                ");
-        System.out.println("                                                  ");
-        System.out.println(ansi().eraseScreen().fg(GREEN).a("   [StreamX] Make Flink|Spark easier ô‿ô!         ").reset());
-    }
 
 }

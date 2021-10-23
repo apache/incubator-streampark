@@ -184,14 +184,7 @@ export default {
             case '1': return <a-tag color = "pink"> 按钮 </a-tag>
             default: return text
           }
-        },
-        filters: [
-          { text: 'Button', value: '1' },
-          { text: 'Router', value: '0' }
-        ],
-        filterMultiple: false,
-        filteredValue: filteredInfo.type || null,
-        onFilter: (value, record) => record.type.includes(value)
+        }
       }, {
         title: 'Path',
         dataIndex: 'path'
@@ -318,23 +311,8 @@ export default {
           this.dataSource = data.rows.children
         }
       })
-    },
-
-    expandIcon (props) {
-      if (props.record.children && props.record.children.length > 0) {
-        if (props.expanded) {
-          return <a class="table-expanded-icon" onClick={e => {
-            props.onExpand(props.record, e)
-          }}><a-icon type="caret-down"/></a>
-        } else {
-          return <a class="table-expanded-icon" onClick={e => {
-            props.onExpand(props.record, e)
-          }}><a-icon type="caret-right"/></a>
-        }
-      } else {
-        return <span></span>
-      }
     }
+
   }
 }
 </script>
