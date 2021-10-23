@@ -121,7 +121,7 @@ early inspiration and help.
 ```
 git clone https://github.com/streamxhub/streamx.git
 cd streamx
-mvn clean install -DskipTests -Denv=prod
+./mvnw clean install -DskipTests -Denv=prod
 ```
 
 click [Document](http://www.streamxhub.com/zh/doc/) for more information
