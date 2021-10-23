@@ -45,6 +45,20 @@ GREEN_COLOR="\E[1;32m";
 YELLOW_COLOR="\E[1;33m";
 RES="\E[0m";
 
+printf "\n\n"
+printf "${RED_COLOR}                .+.                                         ${RES}\n"
+printf "${RED_COLOR}          _____/ /_________  ____ _____ ___  _  __          ${RES}\n"
+printf "${RED_COLOR}         / ___/ __/ ___/ _ \/ __ \`/ __ \`__ \| |/_/        ${RES}\n"
+printf "${RED_COLOR}        (__  ) /_/ /  /  __/ /_/ / / / / / />   <           ${RES}\n"
+printf "${RED_COLOR}       /____/\__/_/   \___/\__,_/_/ /_/ /_/_/|_|            ${RES}\n"
+printf "${RED_COLOR}                                             |/             ${RES}\n"
+printf "${RED_COLOR}                                             .              ${RES}\n\n"
+printf "${GREEN_COLOR}       WebSite:  http://www.streamxhub.com                  ${RES}\n"
+printf "${GREEN_COLOR}       GitHub :  https://github.com/streamxhub/streamx      ${RES}\n"
+printf "${GREEN_COLOR}       Gitee  :  https://gitee.com/streamxhub/streamx       ${RES}\n"
+printf "${GREEN_COLOR}       [StreamX] Make Flink|Spark easier ô‿ô!               ${RES}\n\n\n"
+
+
 echo_r () {
     # Color red: Error, Failed
     [[ $# -ne 1 ]] && return 1
@@ -109,8 +123,9 @@ APP_BASE="$APP_HOME"
 APP_CONF="$APP_BASE"/conf
 APP_BIN="$APP_BASE"/bin
 APP_LIB="$APP_BASE"/lib
+APP_LOG="$APP_BASE"/logs
 APP_PID="$APP_BASE"/.pid
-APP_OUT="$APP_BASE"/streamx.out
+APP_OUT="$APP_LOG"/streamx.out
 # shellcheck disable=SC2034
 APP_TMPDIR="$APP_BASE"/temp
 
@@ -229,52 +244,29 @@ if ${cygwin}; then
 fi
 
 if [ -z "$USE_NOHUP" ]; then
-    if $hpux; then
-        USE_NOHUP="true"
-    else
-        USE_NOHUP="false"
-    fi
+  if $hpux; then
+    USE_NOHUP="true"
+  else
+    USE_NOHUP="false"
+  fi
 fi
-unset _NOHUP
+unset NOHUP
 if [ "$USE_NOHUP" = "true" ]; then
-    _NOHUP="nohup"
+  NOHUP="nohup"
 fi
 
 # ----- Execute The Requested Command -----------------------------------------
 
-# Bugzilla 37848: only output this if we have a TTY
-if [[ ${have_tty} -eq 1 ]]; then
-  echo_w "Using APP_BASE:   $APP_BASE"
-  echo_w "Using APP_HOME:   $APP_HOME"
-  if [[ "$1" = "debug" ]] ; then
-    echo_w "Using JAVA_HOME:   $JAVA_HOME"
-  else
-    echo_w "Using JRE_HOME:   $JRE_HOME"
-  fi
-  # shellcheck disable=SC2236
-  if [[ ! -z "$APP_PID" ]]; then
-    echo_w "Using APP_PID:   $APP_PID"
-  fi
-fi
-
-# shellcheck disable=SC2120
-usage() {
-    echo_g "Unknown command: $1"
-    echo_g "Usage: $PROGRAM ( commands ... )"
-    echo_g "commands:"
-    echo_g "  start             Start StreamX"
-    echo_g "  stop              Stop  StreamX"
-    echo_g "                    are you running?"
-    exit 1
-}
-
 # shellcheck disable=SC2120
 exist() {
-  # shellcheck disable=SC2006
-  if [ -z "`cat "$APP_PID"`" ]; then
-    return 1
+  if [ -f "$APP_PID" ]; then
+    if [ -z "`cat "$APP_PID"`" ]; then
+      return 1
+    else
+      return 0
+    fi
   else
-    return 0
+    return 1
   fi
 }
 
@@ -283,22 +275,40 @@ start() {
   exist
   # shellcheck disable=SC2181
   if [ $? -eq "0" ]; then
-    echo_r "StreamX is already running PID:$pid"
+    # shellcheck disable=SC2006
+    echo_r "StreamX is already running PID `cat "$APP_PID"`"
     exit 1
   fi
+
+  # Bugzilla 37848: only output this if we have a TTY
+  if [[ ${have_tty} -eq 1 ]]; then
+    echo_w "Using APP_BASE:   $APP_BASE"
+    echo_w "Using APP_HOME:   $APP_HOME"
+    if [[ "$1" = "debug" ]] ; then
+      echo_w "Using JAVA_HOME:   $JAVA_HOME"
+    else
+      echo_w "Using JRE_HOME:   $JRE_HOME"
+    fi
+    # shellcheck disable=SC2236
+    if [[ ! -z "$APP_PID" ]]; then
+      echo_w "Using APP_PID:   $APP_PID"
+    fi
+  fi
+
+  shift
 
   if [[ $# -eq 0 ]]; then
     #default application.yml
     PROPER="${APP_CONF}/application.yml"
     if [[ ! -f "$PROPER" ]] ; then
-       PROPER="${APP_CONF}/application.properties"
-        if [[ ! -f "$PROPER" ]] ; then
-          echo_r "Usage: properties file (application.properties|application.yml) not found! ";
-        else
-          echo_g "Usage: properties file:application.properties ";
-        fi
+      PROPER="${APP_CONF}/application.properties"
+      if [[ ! -f "$PROPER" ]] ; then
+        echo_r "Usage: properties file (application.properties|application.yml) not found! ";
+      else
+        echo_g "Usage: properties file:application.properties ";
+      fi
     else
-       echo_g "Usage: properties file:application.yml ";
+      echo_g "Usage: properties file:application.yml ";
     fi
   else
     #Solve the path problem, arbitrary path, ignore prefix, only take the content after conf/
@@ -309,24 +319,24 @@ start() {
   # shellcheck disable=SC2126
   ymlFile=$(echo "${PROPER}"|grep "\.yml$"|wc -l)
   if [[ $ymlFile -eq 1 ]]; then
-     #source yaml.sh
-      # shellcheck disable=SC1090
-      source "${APP_BIN}"/yaml.sh
-      yaml_get "${PROPER}"
-      # shellcheck disable=SC2046
-      # shellcheck disable=SC2116
-      # shellcheck disable=SC2154
-      PROFILE=$(echo "${spring_profiles_active}")
-      if [[ ! "${PROFILE}" == "" ]];then
-        PROFILE="${APP_CONF}/application-${PROFILE}.yml"
-        PROPER="${PROFILE},${PROPER}"
-      fi
+    #source yaml.sh
+    # shellcheck disable=SC1090
+    source "${APP_BIN}"/yaml.sh
+    yaml_get "${PROPER}"
+    # shellcheck disable=SC2046
+    # shellcheck disable=SC2116
+    # shellcheck disable=SC2154
+    PROFILE=$(echo "${spring_profiles_active}")
+    if [[ ! "${PROFILE}" == "" ]];then
+      PROFILE="${APP_CONF}/application-${PROFILE}.yml"
+      PROPER="${PROFILE},${PROPER}"
+    fi
   else
-      PROFILE=$(grep 'spring.profiles.active' "${PROPER}" | grep -v '^#' | awk -F'=' '{print $2}')
-      if [[ ! "${PROFILE}" == "" ]];then
-        PROPER="${APP_CONF}/application-${PROFILE}.properties"
-        PROPER="${PROFILE},${PROPER}"
-      fi
+    PROFILE=$(grep 'spring.profiles.active' "${PROPER}" | grep -v '^#' | awk -F'=' '{print $2}')
+    if [[ ! "${PROFILE}" == "" ]];then
+      PROPER="${APP_CONF}/application-${PROFILE}.properties"
+      PROPER="${PROFILE},${PROPER}"
+    fi
   fi
 
   if [ "${HADOOP_HOME}"x == ""x ]; then
@@ -347,11 +357,11 @@ start() {
   JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streamx-flink-shims_.*.jar$")
   # shellcheck disable=SC2128
   for jar in $JARS;do
-     APP_CLASSPATH=$APP_CLASSPATH:$jar
+    APP_CLASSPATH=$APP_CLASSPATH:$jar
   done
 
   if [[ -n "${HADOOP_CONF_DIR}" ]] && [[ -d "${HADOOP_CONF_DIR}" ]]; then
-    echo_r "Using HADOOP_CONF_DIR:   ${HADOOP_CONF_DIR}"
+    echo_w "Using HADOOP_CONF_DIR:   ${HADOOP_CONF_DIR}"
     APP_CLASSPATH+=":${HADOOP_CONF_DIR}"
   else
     APP_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
@@ -376,130 +386,174 @@ start() {
   -Xloggc:${APP_HOME}/logs/gc.log
   """
 
-  eval $_NOHUP "\"$_RUNJAVA\"" $JAVA_OPTS \
+  eval $NOHUP "\"$RUNJAVA\"" $JAVA_OPTS \
     -classpath "\"$APP_CLASSPATH\"" \
     -Dapp.home="\"${APP_HOME}\"" \
     -Dspring.config.location="\"${PROPER}\"" \
     -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
     -Dpid="\"${APP_PID}\"" \
-    com.streamxhub.streamx.console.StreamXConsole
+    com.streamxhub.streamx.console.StreamXConsole \
     >> "$APP_OUT" 2>&1 "&"
 
-   echo_g "StreamX started."
+  SLEEP_INTERVAL=5
+
+  STARTED=0
+  while [ $SLEEP_INTERVAL -ge 0 ]; do
+    # shellcheck disable=SC2236
+    if [ ! -z "$APP_PID" ]; then
+      if [ -f "$APP_PID" ]; then
+        if [ -s "$APP_PID" ]; then
+          echo_g "StreamX started. pid: `cat "$APP_PID"`"
+          STARTED=1
+          break
+        fi
+      fi
+    fi
+    if [ $SLEEP_INTERVAL -gt 0 ]; then
+      sleep 1
+    fi
+    SLEEP_INTERVAL=`expr $SLEEP_INTERVAL - 1 `
+  done
+
+  if [ $STARTED -eq 0 ] ;then
+    echo_g "StreamX started."
+  fi
 }
 
 # shellcheck disable=SC2120
 stop () {
   exist
   # shellcheck disable=SC2181
-  if [ $? -eq "0" ]; then
+  if [ $? -eq "1" ]; then
     echo_r "StreamX is not running."
     exit 1
   fi
 
+  shift
+
   SLEEP=5
-  # shellcheck disable=SC2236
   if [ ! -z "$1" ]; then
-    echo "$1" | grep "[^0-9]" >/dev/null 2>&1
-    # shellcheck disable=SC2181
+    echo $1 | grep "[^0-9]" >/dev/null 2>&1
     if [ $? -gt 0 ]; then
       SLEEP=$1
       shift
     fi
   fi
 
+  FORCE=0
+  if [ "$1" = "-force" ]; then
+    shift
+    FORCE=1
+  fi
+
   # shellcheck disable=SC2236
   if [ ! -z "$APP_PID" ]; then
     if [ -f "$APP_PID" ]; then
-      while [ "$SLEEP" -ge 0 ]; do
+      if [ -s "$APP_PID" ]; then
         # shellcheck disable=SC2046
         # shellcheck disable=SC2006
         kill -0 `cat "$APP_PID"` >/dev/null 2>&1
         # shellcheck disable=SC2181
         if [ $? -gt 0 ]; then
-          rm -f "$APP_PID" >/dev/null 2>&1
-          if [ $? != 0 ]; then
-            if [ -w "$APP_PID" ]; then
-              cat /dev/null > "$APP_PID"
-              # If StreamX has stopped don't try and force a stop with an empty PID file
-              FORCE=0
-            else
-              echo "The PID file could not be removed or cleared."
-            fi
-          fi
-          echo "StreamX stopped."
-          break
-        fi
-
-        if [ $SLEEP -gt 0 ]; then
-          sleep 1
-        fi
-        if [ $SLEEP -eq 0 ]; then
-          echo "StreamX did not stop in time."
-          if [ $FORCE -eq 0 ]; then
-            echo "PID file was not removed."
-          fi
-          echo "To aid diagnostics a thread dump has been written to standard out."
-          # shellcheck disable=SC2046
-          kill -3 `cat "$APP_PID"`
-        fi
-        # shellcheck disable=SC2006
-        SLEEP=`expr $SLEEP - 1 `
-      done
-    fi
-  fi
-
-  KILL_SLEEP_INTERVAL=5
-  if [ $FORCE -eq 1 ]; then
-    if [ -z "$APP_PID" ]; then
-      echo "Kill failed: \$APP_PID not set"
-    else
-      if [ -f "$APP_PID" ]; then
-        # shellcheck disable=SC2006
-        PID=`cat "$APP_PID"`
-        echo "Killing StreamX with the PID: $PID"
-        kill -9 "$PID"
-        while [ $KILL_SLEEP_INTERVAL -ge 0 ]; do
-            # shellcheck disable=SC2046
-            # shellcheck disable=SC2006
-            kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-            # shellcheck disable=SC2181
-            if [ $? -gt 0 ]; then
-                rm -f "$APP_PID" >/dev/null 2>&1
-                # shellcheck disable=SC2181
-                if [ $? != 0 ]; then
-                    if [ -w "$APP_PID" ]; then
-                        cat /dev/null > "$APP_PID"
-                    else
-                        echo "The PID file could not be removed."
-                    fi
+          echo "PID file found but either no matching process was found or the current user does not have permission to stop the process. Stop aborted."
+          exit 1
+        else
+          kill -15 `cat "$APP_PID"` >/dev/null 2>&1
+          if [ ! -z "$APP_PID" ]; then
+            if [ -f "$APP_PID" ]; then
+              while [ $SLEEP -ge 0 ]; do
+                if [ ! -z "$APP_PID" ]; then
+                   if [ -f "$APP_PID" ]; then
+                     kill -0 `cat "$APP_PID"` >/dev/null 2>&1
+                     if [ $? -gt 0 ]; then
+                       rm -f "$APP_PID" >/dev/null 2>&1
+                       if [ $? != 0 ]; then
+                         if [ -w "$APP_PID" ]; then
+                           cat /dev/null > "$APP_PID"
+                           # If StreamX has stopped don't try and force a stop with an empty PID file
+                           FORCE=0
+                         else
+                           echo "The PID file could not be removed or cleared."
+                         fi
+                       fi
+                       echo "StreamX stopped."
+                       break
+                     fi
+                   fi
                 fi
-                echo "The StreamX process has been killed."
-                break
+                SLEEP=`expr $SLEEP - 1 `
+              done
+
+              #stop failed.normal kill failed? Try a force kill.
+              if [ ! -z "$APP_PID" ]; then
+                if [ -f "$APP_PID" ]; then
+                  if [ -s "$APP_PID" ]; then
+                    kill -0 `cat "$APP_PID"` >/dev/null 2>&1
+                    if [ $? -eq 0 ]; then
+                       FORCE=1
+                    fi
+                  fi
+                fi
+              fi
+
+              if [ $FORCE -eq 1 ]; then
+                if [ -z "$APP_PID" ]; then
+                  echo "Kill failed: \$APP_PID not set"
+                else
+                  KILL_SLEEP_INTERVAL=5
+                  if [ -f "$APP_PID" ]; then
+                    PID=`cat "$APP_PID"`
+                    echo_y "Killing StreamX with the PID: $PID"
+                    kill -9 "$PID"
+                    while [ $KILL_SLEEP_INTERVAL -ge 0 ]; do
+                      kill -0 `cat "$APP_PID"` >/dev/null 2>&1
+                      if [ $? -gt 0 ]; then
+                        rm -f "$APP_PID" >/dev/null 2>&1
+                        if [ $? != 0 ]; then
+                          if [ -w "$APP_PID" ]; then
+                            cat /dev/null > "$APP_PID"
+                          else
+                            echo_r "The PID file could not be removed."
+                          fi
+                        fi
+                        echo_y "The StreamX process has been killed."
+                        break
+                      fi
+                      if [ $KILL_SLEEP_INTERVAL -gt 0 ]; then
+                        sleep 1
+                      fi
+                      KILL_SLEEP_INTERVAL=`expr $KILL_SLEEP_INTERVAL - 1 `
+                    done
+                    if [ $KILL_SLEEP_INTERVAL -lt 0 ]; then
+                      echo "StreamX has not been killed completely yet. The process might be waiting on some system call or might be UNINTERRUPTIBLE."
+                    fi
+                  fi
+                fi
+              fi
             fi
-            if [ $KILL_SLEEP_INTERVAL -gt 0 ]; then
-                sleep 1
-            fi
-            # shellcheck disable=SC2006
-            # shellcheck disable=SC2003
-            KILL_SLEEP_INTERVAL=`expr $KILL_SLEEP_INTERVAL - 1 `
-        done
-        if [ "$KILL_SLEEP_INTERVAL" -lt 0 ]; then
-            echo "StreamX has not been killed completely yet. The process might be waiting on some system call or might be UNINTERRUPTIBLE."
+          fi
         fi
+      else
+        echo "PID file is empty and has been ignored."
+        exit 1
       fi
+    else
+      echo "\$APP_PID was set but the specified file does not exist. Is StreamX running? Stop aborted."
+      exit 1
     fi
   fi
+
 }
 
 status () {
-    exist
-    # shellcheck disable=SC2181
-    if [ $? -eq "0" ]; then
-      echo_g "StreamX is running PID is ${pid}"
-    else
-      echo_r "StreamX is not running"
-    fi
+  exist
+  # shellcheck disable=SC2181
+  if [ $? -eq "0" ]; then
+    # shellcheck disable=SC2006
+    echo_g "StreamX is running PID is: `cat "$APP_PID"`"
+  else
+    echo_r "StreamX is not running"
+  fi
 }
 
 restart () {
@@ -511,20 +565,27 @@ restart () {
 
 case "$1" in
   "start")
-    start
-    ;;
+      start
+      ;;
   "stop")
-    stop
-    ;;
+      stop
+      ;;
   "status")
-    status
-    ;;
+      status
+      ;;
   "restart")
-    restart
-    ;;
+      restart
+      ;;
   *)
-    usage
-    ;;
+      echo_r "Unknown command: $1"
+      echo_w "Usage: streamx.sh ( commands ... )"
+      echo_w "commands:"
+      echo_w "  start \$conf               Start StreamX with application config."
+      echo_w "  stop n -force             Stop StreamX, wait up to n seconds and then use kill -KILL if still running"
+      echo_w "  status                    StreamX status"
+      echo_w "  restart \$conf             restart StreamX with application config."
+      exit 0
+      ;;
 esac
 
 exit 0;
