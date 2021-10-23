@@ -23,9 +23,9 @@ package com.streamxhub.streamx.flink.repl.test;
 import com.streamxhub.streamx.flink.repl.interpreter.FlinkInterpreter;
 import com.streamxhub.streamx.flink.repl.interpreter.InterpreterOutput;
 import com.streamxhub.streamx.flink.repl.interpreter.InterpreterResult;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
 
@@ -36,7 +36,7 @@ public class FlinkInterpreterTest {
 
     private String flinkHome = System.getenv("FLINK_HOME");
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Properties p = new Properties();
         p.setProperty("repl.out", "true");
@@ -46,7 +46,7 @@ public class FlinkInterpreterTest {
         interpreter = new FlinkInterpreter(p);
     }
 
-    @After
+    @AfterEach
     public void testDown() throws Exception {
         if (interpreter != null) {
             interpreter.close();
