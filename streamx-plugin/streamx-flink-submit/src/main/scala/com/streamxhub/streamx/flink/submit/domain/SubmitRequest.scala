@@ -28,6 +28,7 @@ import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesU
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf
 import com.streamxhub.streamx.flink.packer.maven.JarPackDeps
+import com.streamxhub.streamx.flink.repl.shims.ReplFlinkVersion
 import com.streamxhub.streamx.flink.submit.`trait`.HdfsWorkspace
 import org.apache.flink.client.cli.CliFrontend
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
@@ -85,6 +86,8 @@ case class SubmitRequest(flinkHome: String,
   lazy val flinkSQL: String = property.remove(KEY_FLINK_SQL()).toString
 
   lazy val jobID: String = property.remove(KEY_JOB_ID).toString
+
+  lazy val replFlinkVersion: ReplFlinkVersion = ReplFlinkVersion(flinkVersion, flinkHome)
 
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
     if (this.appConf == null) Map.empty[String, String] else {

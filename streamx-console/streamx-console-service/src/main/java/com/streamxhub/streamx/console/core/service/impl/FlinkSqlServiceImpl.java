@@ -25,11 +25,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.common.util.BottomUpClassLoader;
 import com.streamxhub.streamx.common.util.ClassLoaderUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
-import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.FlinkSqlMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
@@ -41,22 +39,16 @@ import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.service.FlinkVersionService;
 import com.streamxhub.streamx.flink.core.SqlError;
-import lombok.SneakyThrows;
+import com.streamxhub.streamx.flink.repl.shims.FlinkShimsClassLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -75,8 +67,6 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Autowired
     private FlinkVersionService flinkVersionService;
-
-    private final Map<String, URLClassLoader> shimsClassLoaderCache = new ConcurrentHashMap<>();
 
     private final Pattern shimsPattern = Pattern.compile(
         "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar",
@@ -193,7 +183,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public SqlError verifySql(String sql, Long versionId) {
-        ClassLoader loader = getFlinkShimsClassLoader(versionId);
+        FlinkVersion flinkVersion = flinkVersionService.getById(versionId);
+        ClassLoader loader = FlinkShimsClassLoader.choiceFlinkShimsClassLoader(flinkVersion.toReplFlinkVersion(), true);
         String error = ClassLoaderUtils.runAsClassLoader(loader, (Supplier<String>) () -> {
             try {
                 Class<?> clazz = loader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
@@ -210,52 +201,6 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             return null;
         });
         return SqlError.fromString(error);
-    }
-
-    @SneakyThrows
-    private synchronized ClassLoader getFlinkShimsClassLoader(Long versionId) {
-        FlinkVersion flinkVersion = flinkVersionService.getById(versionId);
-        String largeVersion = flinkVersion.getLargeVersion();
-
-        if (!shimsClassLoaderCache.containsKey(largeVersion)) {
-            List<URL> shimsUrls = new ArrayList<>(0);
-
-            //1) flink/lib
-            Arrays.stream(Objects.requireNonNull(new File(flinkVersion.getFlinkHome(), "lib").listFiles())).forEach((jar) -> {
-                try {
-                    if (!jar.getName().startsWith("log4j")) {
-                        shimsUrls.add(jar.toURI().toURL());
-                    }
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            //2) shims jar
-            Arrays.stream(Objects.requireNonNull(new File(WebUtils.getAppDir("lib")).listFiles())).forEach((jar) -> {
-                try {
-                    Matcher shimsMatcher = shimsPattern.matcher(jar.getName());
-                    if (shimsMatcher.matches()) {
-                        if (largeVersion.equals(shimsMatcher.group(1))) {
-                            shimsUrls.add(jar.toURI().toURL());
-                        }
-                    } else {
-                        shimsUrls.add(jar.toURI().toURL());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-
-            URL[] urls = shimsUrls.toArray(new URL[0]);
-
-            URLClassLoader classLoader = new BottomUpClassLoader(urls, getClass().getClassLoader());
-            shimsClassLoaderCache.put(largeVersion, classLoader);
-        }
-
-        log.info("flink shims version: {}", largeVersion);
-
-        return shimsClassLoaderCache.get(largeVersion);
     }
 
     private boolean isFlinkSqlBacked(FlinkSql sql) {
