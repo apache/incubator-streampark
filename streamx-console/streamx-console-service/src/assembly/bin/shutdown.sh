@@ -59,6 +59,7 @@ if [[ -z "${pid}" ]] ; then
 else
   echo "StreamX pid is ${pid},now stopping..."
   kill "${pid}"
+  # shellcheck disable=SC2181
   if [ $? -eq 0 ] ; then
     echo "StreamX stop successful!"
   else
