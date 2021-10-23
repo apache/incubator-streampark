@@ -476,7 +476,6 @@ stop () {
                            echo "The PID file could not be removed or cleared."
                          fi
                        fi
-                       echo "StreamX stopped."
                        break
                      fi
                    fi
@@ -490,7 +489,9 @@ stop () {
                   if [ -s "$APP_PID" ]; then
                     kill -0 `cat "$APP_PID"` >/dev/null 2>&1
                     if [ $? -eq 0 ]; then
-                       FORCE=1
+                      FORCE=1
+                    else
+                      echo "StreamX stopped."
                     fi
                   fi
                 fi
