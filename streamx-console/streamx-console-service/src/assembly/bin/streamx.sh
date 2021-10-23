@@ -276,7 +276,7 @@ start() {
   # shellcheck disable=SC2181
   if [ $? -eq "0" ]; then
     # shellcheck disable=SC2006
-    echo_r "StreamX is already running PID `cat "$APP_PID"`"
+    echo_r "StreamX is already running pid: `cat "$APP_PID"`"
     exit 1
   fi
 
@@ -289,10 +289,7 @@ start() {
     else
       echo_w "Using JRE_HOME:   $JRE_HOME"
     fi
-    # shellcheck disable=SC2236
-    if [[ ! -z "$APP_PID" ]]; then
-      echo_w "Using APP_PID:   $APP_PID"
-    fi
+    echo_w "Using APP_PID:   $APP_PID"
   fi
 
   shift
@@ -400,13 +397,11 @@ start() {
   STARTED=0
   while [ $SLEEP_INTERVAL -ge 0 ]; do
     # shellcheck disable=SC2236
-    if [ ! -z "$APP_PID" ]; then
-      if [ -f "$APP_PID" ]; then
-        if [ -s "$APP_PID" ]; then
-          echo_g "StreamX started. pid: `cat "$APP_PID"`"
-          STARTED=1
-          break
-        fi
+    if [ -f "$APP_PID" ]; then
+      if [ -s "$APP_PID" ]; then
+        echo_g "StreamX started. pid: `cat "$APP_PID"`"
+        STARTED=1
+        break
       fi
     fi
     if [ $SLEEP_INTERVAL -gt 0 ]; then
@@ -431,7 +426,7 @@ stop () {
 
   shift
 
-  SLEEP=5
+  local SLEEP=5
   if [ ! -z "$1" ]; then
     echo $1 | grep "[^0-9]" >/dev/null 2>&1
     if [ $? -gt 0 ]; then
@@ -440,108 +435,105 @@ stop () {
     fi
   fi
 
-  FORCE=0
+  local FORCE=0
   if [ "$1" = "-force" ]; then
     shift
     FORCE=1
   fi
 
+  local STOPPED=0
   # shellcheck disable=SC2236
-  if [ ! -z "$APP_PID" ]; then
-    if [ -f "$APP_PID" ]; then
-      if [ -s "$APP_PID" ]; then
-        # shellcheck disable=SC2046
-        # shellcheck disable=SC2006
-        kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-        # shellcheck disable=SC2181
-        if [ $? -gt 0 ]; then
-          echo "PID file found but either no matching process was found or the current user does not have permission to stop the process. Stop aborted."
-          exit 1
-        else
-          kill -15 `cat "$APP_PID"` >/dev/null 2>&1
-          if [ ! -z "$APP_PID" ]; then
-            if [ -f "$APP_PID" ]; then
-              while [ $SLEEP -ge 0 ]; do
-                if [ ! -z "$APP_PID" ]; then
-                   if [ -f "$APP_PID" ]; then
-                     kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-                     if [ $? -gt 0 ]; then
-                       rm -f "$APP_PID" >/dev/null 2>&1
-                       if [ $? != 0 ]; then
-                         if [ -w "$APP_PID" ]; then
-                           cat /dev/null > "$APP_PID"
-                           # If StreamX has stopped don't try and force a stop with an empty PID file
-                           FORCE=0
-                         else
-                           echo "The PID file could not be removed or cleared."
-                         fi
-                       fi
-                       break
-                     fi
+  if [ -f "$APP_PID" ]; then
+    if [ -s "$APP_PID" ]; then
+      # shellcheck disable=SC2046
+      # shellcheck disable=SC2006
+      kill -0 `cat "$APP_PID"` >/dev/null 2>&1
+      # shellcheck disable=SC2181
+      if [ $? -gt 0 ]; then
+        echo "PID file found but either no matching process was found or the current user does not have permission to stop the process. Stop aborted."
+        exit 1
+      else
+        kill -15 `cat "$APP_PID"` >/dev/null 2>&1
+        if [ -f "$APP_PID" ]; then
+          while [ $SLEEP -ge 0 ]; do
+             if [ -f "$APP_PID" ]; then
+               kill -0 `cat "$APP_PID"` >/dev/null 2>&1
+               if [ $? -gt 0 ]; then
+                 rm -f "$APP_PID" >/dev/null 2>&1
+                 if [ $? != 0 ]; then
+                   if [ -w "$APP_PID" ]; then
+                     cat /dev/null > "$APP_PID"
+                     # If StreamX has stopped don't try and force a stop with an empty PID file
+                     FORCE=0
+                   else
+                     echo "The PID file could not be removed or cleared."
                    fi
-                fi
-                SLEEP=`expr $SLEEP - 1 `
-              done
+                 fi
+                 STOPPED=1
+                 break
+               fi
+             else
+               STOPPED=1
+               break
+             fi
+             SLEEP=`expr $SLEEP - 1 `
+          done
 
-              #stop failed.normal kill failed? Try a force kill.
-              if [ ! -z "$APP_PID" ]; then
-                if [ -f "$APP_PID" ]; then
-                  if [ -s "$APP_PID" ]; then
-                    kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-                    if [ $? -eq 0 ]; then
-                      FORCE=1
-                    else
-                      echo "StreamX stopped."
-                    fi
-                  fi
-                fi
-              fi
-
-              if [ $FORCE -eq 1 ]; then
-                if [ -z "$APP_PID" ]; then
-                  echo "Kill failed: \$APP_PID not set"
-                else
-                  KILL_SLEEP_INTERVAL=5
-                  if [ -f "$APP_PID" ]; then
-                    PID=`cat "$APP_PID"`
-                    echo_y "Killing StreamX with the PID: $PID"
-                    kill -9 "$PID"
-                    while [ $KILL_SLEEP_INTERVAL -ge 0 ]; do
-                      kill -0 `cat "$APP_PID"` >/dev/null 2>&1
-                      if [ $? -gt 0 ]; then
-                        rm -f "$APP_PID" >/dev/null 2>&1
-                        if [ $? != 0 ]; then
-                          if [ -w "$APP_PID" ]; then
-                            cat /dev/null > "$APP_PID"
-                          else
-                            echo_r "The PID file could not be removed."
-                          fi
-                        fi
-                        echo_y "The StreamX process has been killed."
-                        break
-                      fi
-                      if [ $KILL_SLEEP_INTERVAL -gt 0 ]; then
-                        sleep 1
-                      fi
-                      KILL_SLEEP_INTERVAL=`expr $KILL_SLEEP_INTERVAL - 1 `
-                    done
-                    if [ $KILL_SLEEP_INTERVAL -lt 0 ]; then
-                      echo "StreamX has not been killed completely yet. The process might be waiting on some system call or might be UNINTERRUPTIBLE."
-                    fi
-                  fi
-                fi
+          #stop failed.normal kill failed? Try a force kill.
+          if [ -f "$APP_PID" ]; then
+            if [ -s "$APP_PID" ]; then
+              kill -0 `cat "$APP_PID"` >/dev/null 2>&1
+              if [ $? -eq 0 ]; then
+                FORCE=1
               fi
             fi
           fi
+
+          if [ $FORCE -eq 1 ]; then
+            KILL_SLEEP_INTERVAL=5
+            if [ -f "$APP_PID" ]; then
+              PID=`cat "$APP_PID"`
+              echo_y "Killing StreamX with the PID: $PID"
+              kill -9 "$PID"
+              while [ $KILL_SLEEP_INTERVAL -ge 0 ]; do
+                kill -0 `cat "$APP_PID"` >/dev/null 2>&1
+                if [ $? -gt 0 ]; then
+                  rm -f "$APP_PID" >/dev/null 2>&1
+                  if [ $? != 0 ]; then
+                    if [ -w "$APP_PID" ]; then
+                      cat /dev/null > "$APP_PID"
+                    else
+                      echo_r "The PID file could not be removed."
+                    fi
+                  fi
+                  echo_y "The StreamX process has been killed."
+                  break
+                fi
+                if [ $KILL_SLEEP_INTERVAL -gt 0 ]; then
+                  sleep 1
+                fi
+                KILL_SLEEP_INTERVAL=`expr $KILL_SLEEP_INTERVAL - 1 `
+              done
+              if [ $KILL_SLEEP_INTERVAL -lt 0 ]; then
+                echo "StreamX has not been killed completely yet. The process might be waiting on some system call or might be UNINTERRUPTIBLE."
+              fi
+            fi
+          fi
+        else
+          STOPPED=1
         fi
-      else
-        echo "PID file is empty and has been ignored."
-        exit 1
       fi
     else
-      echo "\$APP_PID was set but the specified file does not exist. Is StreamX running? Stop aborted."
+      echo "PID file is empty and has been ignored."
       exit 1
     fi
+  else
+    echo "\$APP_PID was set but the specified file does not exist. Is StreamX running? Stop aborted."
+    exit 1
+  fi
+
+  if [ $STOPPED -eq 1 ]; then
+     echo_r "StreamX stopped."
   fi
 
 }
