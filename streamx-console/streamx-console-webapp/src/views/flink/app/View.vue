@@ -1193,29 +1193,37 @@
     },
 
     handleStart(app) {
-      if (this.optionApps.starting.get(app.id) === undefined || app['optionState'] === 0) {
-        this.application = app
-        latest({
-          appId: this.application.id
-        }).then((resp) => {
-          this.latestSavePoint = resp.data || null
-          this.startVisible = true
-          this.executionMode = app.executionMode
-          if (!this.latestSavePoint) {
-            history({
-              appId: this.application.id,
-              pageNum: 1,
-              pageSize: 9999
-            }).then((resp) => {
-              this.historySavePoint = []
-              resp.data.records.forEach(x => {
-                if (x.path) {
-                  this.historySavePoint.push(x)
-                }
+      if (app.flinkVersion == null) {
+        this.$swal.fire(
+          'Failed',
+          'please set flink version first.',
+          'error'
+        )
+      } else {
+        if (this.optionApps.starting.get(app.id) === undefined || app['optionState'] === 0) {
+          this.application = app
+          latest({
+            appId: this.application.id
+          }).then((resp) => {
+            this.latestSavePoint = resp.data || null
+            this.startVisible = true
+            this.executionMode = app.executionMode
+            if (!this.latestSavePoint) {
+              history({
+                appId: this.application.id,
+                pageNum: 1,
+                pageSize: 9999
+              }).then((resp) => {
+                this.historySavePoint = []
+                resp.data.records.forEach(x => {
+                  if (x.path) {
+                    this.historySavePoint.push(x)
+                  }
+                })
               })
-            })
-          }
-        })
+            }
+          })
+        }
       }
     },
 
@@ -1242,13 +1250,6 @@
           this.handleMapUpdate('starting')
           this.handleStartCancel()
 
-          if (this.application.flinkVersion == null) {
-            this.$swal.fire(
-              'Failed',
-              'please set flink version first.',
-              'error'
-            )
-          } else {
             this.$swal.fire({
               icon: 'success',
               title: 'The current job is starting',
@@ -1278,7 +1279,6 @@
                 }
               })
             })
-          }
         }
       })
     },
