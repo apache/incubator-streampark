@@ -38,11 +38,11 @@
 # -----------------------------------------------------------------------------
 
 #echo color
-WHITE_COLOR="\E[1;37m";
 RED_COLOR="\E[1;31m";
-BLUE_COLOR='\E[1;34m';
 GREEN_COLOR="\E[1;32m";
 YELLOW_COLOR="\E[1;33m";
+BLUE_COLOR='\E[1;34m';
+WHITE_COLOR="\E[1;37m";
 RES="\E[0m";
 
 printf "\n\n"
@@ -53,10 +53,10 @@ printf "${RED_COLOR}        (__  ) /_/ /  /  __/ /_/ / / / / / />   <           
 printf "${RED_COLOR}       /____/\__/_/   \___/\__,_/_/ /_/ /_/_/|_|            ${RES}\n"
 printf "${RED_COLOR}                                             |/             ${RES}\n"
 printf "${RED_COLOR}                                             .              ${RES}\n\n"
-printf "${GREEN_COLOR}       WebSite:  http://www.streamxhub.com                  ${RES}\n"
-printf "${GREEN_COLOR}       GitHub :  https://github.com/streamxhub/streamx      ${RES}\n"
-printf "${GREEN_COLOR}       Gitee  :  https://gitee.com/streamxhub/streamx       ${RES}\n"
-printf "${GREEN_COLOR}       [StreamX] Make Flink|Spark easier ô‿ô!               ${RES}\n\n\n"
+printf "${BLUE_COLOR}       WebSite:  http://www.streamxhub.com                 ${RES}\n"
+printf "${BLUE_COLOR}       GitHub :  https://github.com/streamxhub/streamx     ${RES}\n"
+printf "${BLUE_COLOR}       Gitee  :  https://gitee.com/streamxhub/streamx      ${RES}\n\n"
+printf "${GREEN_COLOR}                ────────  Make Flink|Spark easier ô‿ô!     ${RES}\n\n\n"
 
 
 echo_r () {
@@ -258,23 +258,31 @@ fi
 # ----- Execute The Requested Command -----------------------------------------
 
 # shellcheck disable=SC2120
-exist() {
+running() {
   if [ -f "$APP_PID" ]; then
-    if [ -z "`cat "$APP_PID"`" ]; then
-      return 1
+    if [ -s "$APP_PID" ]; then
+        # shellcheck disable=SC2046
+        # shellcheck disable=SC2006
+        kill -0 `cat "$APP_PID"` >/dev/null 2>&1
+        # shellcheck disable=SC2181
+        if [ $? -eq 0 ]; then
+          return 1
+        else
+          return 0
+        fi
     else
       return 0
     fi
   else
-    return 1
+    return 0
   fi
 }
 
 # shellcheck disable=SC2120
 start() {
-  exist
+  running
   # shellcheck disable=SC2181
-  if [ $? -eq "0" ]; then
+  if [ $? -eq "1" ]; then
     # shellcheck disable=SC2006
     echo_r "StreamX is already running pid: `cat "$APP_PID"`"
     exit 1
@@ -417,9 +425,9 @@ start() {
 
 # shellcheck disable=SC2120
 stop () {
-  exist
+  running
   # shellcheck disable=SC2181
-  if [ $? -eq "1" ]; then
+  if [ $? -eq "0" ]; then
     echo_r "StreamX is not running."
     exit 1
   fi
@@ -494,7 +502,7 @@ stop () {
             if [ -f "$APP_PID" ]; then
               PID=`cat "$APP_PID"`
               echo_y "Killing StreamX with the PID: $PID"
-              kill -9 "$PID"
+              kill -9 "$PID" >/dev/null 2>&1
               while [ $KILL_SLEEP_INTERVAL -ge 0 ]; do
                 kill -0 `cat "$APP_PID"` >/dev/null 2>&1
                 if [ $? -gt 0 ]; then
@@ -539,11 +547,11 @@ stop () {
 }
 
 status () {
-  exist
+  running
   # shellcheck disable=SC2181
-  if [ $? -eq "0" ]; then
+  if [ $? -eq "1" ]; then
     # shellcheck disable=SC2006
-    echo_g "StreamX is running PID is: `cat "$APP_PID"`"
+    echo_g "StreamX is running pid is: `cat "$APP_PID"`"
   else
     echo_r "StreamX is not running"
   fi
