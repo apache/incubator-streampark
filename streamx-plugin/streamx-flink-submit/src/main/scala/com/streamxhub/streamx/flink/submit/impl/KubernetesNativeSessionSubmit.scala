@@ -22,7 +22,9 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.ExecutionMode
-import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.fs.FsOperator
+import com.streamxhub.streamx.common.util.DateUtils.fullCompact
+import com.streamxhub.streamx.common.util.{DateUtils, Logger}
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
@@ -61,19 +63,20 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // extract flink configuration
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
 
-    // build fat-jar
+    // sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/job-name/
+    // in streamx, flink job-name under the specified clusterId/namespace must be unique.
+    val buildWorkspace = s"${workspace.APP_WORKSPACE}" +
+      s"/${flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)}@${flinkConfig.getString(KubernetesConfigOptions.NAMESPACE)}" +
+      s"/${flinkConfig.getString(PipelineOptions.NAME)}"
+    FsOperator.lfs.delete(buildWorkspace)
+    FsOperator.lfs.mkdirs(buildWorkspace)
+
+    // build fat-jar, output file name: streamx-flinkjob_<job-name>_<timespamp>, like: streamx-flinkjob_myjobtest_20211024134822
     val fatJar = {
-      // sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/job-name/
-      // is streamx, flink job-name under the specified clusterId/namespace must be unique.
-      val fatJarOutputPath = s"${workspace.APP_WORKSPACE}" +
-        s"/${flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)}@${flinkConfig.getString(KubernetesConfigOptions.NAMESPACE)}" +
-        s"/${flinkConfig.getString(PipelineOptions.NAME)}/flink-job.jar"
+      val fatJarOutputPath = s"${buildWorkspace}/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}_${DateUtils.now(fullCompact)}.jar"
       val flinkLibs = extractProvidedLibs(submitRequest)
       val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
       MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
-      // cache file MD5 is used to compare whether it is consistent when it is generated next time.
-      //  If it is consistent, it is used directly and returned directly instead of being regenerated
-      // fatJarCached.getOrElseUpdate(flinkLibs._1, MavenTool.buildFatJar(flinkLibs._2, fatJarPath))
     }
     logInfo(s"[flink-submit] already built flink job fat-jar. " +
       s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
@@ -98,7 +101,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       val jmRestUrl = KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
         .getOrElse(throw new Exception(s"[flink-submit] retrieve flink session rest url failed, clusterKey=$clusterKey"))
       // submit job via rest api
-      val jobId = FlinkSessionSubmitHelper.submitWithRestApi(jmRestUrl, fatJar, flinkConfig)
+      val jobId = FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig)
       SubmitResponse(clusterKey.clusterId, flinkConfig, jobId)
     } catch {
       case e: Exception =>

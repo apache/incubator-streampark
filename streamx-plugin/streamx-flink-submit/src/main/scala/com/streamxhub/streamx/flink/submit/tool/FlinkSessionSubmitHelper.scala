@@ -49,7 +49,7 @@ object FlinkSessionSubmitHelper extends Logger {
    * @param flinkConfig flink configuration
    * @return jobID of submitted flink job
    */
-  @throws[Exception] def submitWithRestApi(jmRestUrl: String, flinkJobJar: File, flinkConfig: Configuration): String = {
+  @throws[Exception] def submitViaRestApi(jmRestUrl: String, flinkJobJar: File, flinkConfig: Configuration): String = {
     // upload flink-job jar
     val uploadResult = Request.post(s"$jmRestUrl/jars/upload")
       .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
