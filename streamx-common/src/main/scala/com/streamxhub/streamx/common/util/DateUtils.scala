@@ -34,6 +34,8 @@ object DateUtils {
 
   val format_yyyyMMdd = "yyyyMMdd"
 
+  val fullCompact = "yyyyMMddHHmmss"
+
   def parse(date: String, format: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): Date = {
     val df: SimpleDateFormat = new SimpleDateFormat(format)
     df.setTimeZone(timeZone)

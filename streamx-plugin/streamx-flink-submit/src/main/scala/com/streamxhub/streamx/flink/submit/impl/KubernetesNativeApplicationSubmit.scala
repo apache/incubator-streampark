@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.common.fs.FsOperator
 import com.streamxhub.streamx.flink.kubernetes.PodTemplateTool
 import com.streamxhub.streamx.flink.packer.docker.{DockerTool, FlinkDockerfileTemplate}
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
@@ -34,7 +35,6 @@ import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.util.IOUtils
 
-import java.io.File
 import scala.util.Try
 
 /**
@@ -51,14 +51,11 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     // extract flink config
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
     // init build workspace of flink job
-    val buildWorkspace = {
-      // sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/
-      val dirPath = s"${workspace.APP_WORKSPACE}" +
-        s"/${flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)}@${flinkConfig.getString(KubernetesConfigOptions.NAMESPACE)}"
-      val dir = new File(dirPath)
-      if (!dir.exists()) dir.mkdir()
-      dirPath
-    }
+    // sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/
+    val buildWorkspace = s"${workspace.APP_WORKSPACE}" +
+      s"/${flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)}@${flinkConfig.getString(KubernetesConfigOptions.NAMESPACE)}"
+    FsOperator.lfs.delete(buildWorkspace)
+    FsOperator.lfs.mkdirs(buildWorkspace)
 
     // step-1: build k8s pod template file
     if (submitRequest.k8sSubmitParam.podTemplates != null) {
@@ -68,20 +65,18 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
         s"${flinkConfIdentifierInfo(flinkConfig)}, k8sPodTemplateFile=${k8sPodTmplConf.tmplFiles}")
     }
 
-    // step-2: build fat-jar
+    // step-2: build fat-jar, output file name: streamx-flinkjob_<jobamme>.jar, like "streamx-flinkjob_myjob-test.jar"
     val fatJar = {
-      val fatJarOutputPath = s"$buildWorkspace/flink-job.jar"
+      val fatJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}.jar"
       val flinkLibs = extractProvidedLibs(submitRequest)
       val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
       MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
-      // cache file MD5 is used to compare whether it is consistent when it is generated next time.
-      //  If it is consistent, it is used directly and returned directly instead of being regenerated
-      // fatJarCached.getOrElseUpdate(flinkLibs._1, MavenTool.buildFatJar(flinkLibs._2, fatJarPath))
     }
     logInfo(s"[flink-submit] already built flink job fat-jar. " +
       s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
 
     logInfo(s"[flink-submit] start building flink job docker image. ${flinkConfIdentifierInfo(flinkConfig)}")
+
     // step-3: build and push flink application image
     val tagName = s"flinkjob-${submitRequest.k8sSubmitParam.clusterId}"
     val dockerFileTemplate = new FlinkDockerfileTemplate(submitRequest.k8sSubmitParam.flinkBaseImage, fatJar.getAbsolutePath)

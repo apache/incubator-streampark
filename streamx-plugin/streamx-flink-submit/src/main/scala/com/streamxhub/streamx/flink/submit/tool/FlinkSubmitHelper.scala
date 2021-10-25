@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.submit
+package com.streamxhub.streamx.flink.submit.tool
 
 import com.streamxhub.streamx.common.util.Utils
 import org.apache.commons.lang.StringUtils

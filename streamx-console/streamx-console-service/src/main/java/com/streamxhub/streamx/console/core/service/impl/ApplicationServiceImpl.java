@@ -60,8 +60,8 @@ import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf;
 import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
 import com.streamxhub.streamx.flink.submit.FlinkSubmit;
-import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper;
 import com.streamxhub.streamx.flink.submit.domain.*;
+import com.streamxhub.streamx.flink.submit.tool.FlinkSubmitHelper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -955,6 +955,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
                 }
                 StopRequest stopInfo = new StopRequest(
+                    flinkVersion.getVersion(),
                     flinkVersion.getFlinkHome(),
                     application.getAppId(),
                     application.getJobId(),
