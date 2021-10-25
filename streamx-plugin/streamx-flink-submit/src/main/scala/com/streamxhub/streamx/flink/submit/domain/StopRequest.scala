@@ -21,14 +21,18 @@
 
 package com.streamxhub.streamx.flink.submit.domain
 
+import com.streamxhub.streamx.flink.repl.shims.ReplFlinkVersion
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
-case class StopRequest(flinkHome: String,
+case class StopRequest(flinkVersion: String,
+                       flinkHome: String,
                        clusterId: String,
                        jobId: String,
                        withSavePoint: Boolean,
                        withDrain: Boolean,
                        customSavePointPath: String,
                        kubernetesNamespace: String = KubernetesConfigOptions.NAMESPACE.defaultValue()) {
+
+  lazy val replFlinkVersion: ReplFlinkVersion = ReplFlinkVersion(flinkVersion, flinkHome)
 
 }

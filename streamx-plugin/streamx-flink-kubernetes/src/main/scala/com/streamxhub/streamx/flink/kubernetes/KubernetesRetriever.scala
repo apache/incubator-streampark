@@ -20,8 +20,9 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.common.util.Utils.tryWithResourceException
+import com.streamxhub.streamx.common.util.Utils.{tryWithResource, tryWithResourceException}
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
+import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
 import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.{ClusterClientFactory, DefaultClusterClientServiceLoader}
@@ -114,5 +115,16 @@ object KubernetesRetriever {
           .exists(e => e.getMetadata.getName == name)
     } { _ => false }
 
+
+  /**
+   * retrieve flink jobmanger rest url
+   */
+  def retrieveFlinkRestUrl(clusterKey: ClusterKey): Option[String] = tryWithResource(
+    Try(KubernetesRetriever.newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode))
+      .getOrElse(return None)) {
+    client =>
+      val url = Try(client.getWebInterfaceURL).filter(_.nonEmpty).getOrElse(return None)
+      Some(url)
+  }
 
 }

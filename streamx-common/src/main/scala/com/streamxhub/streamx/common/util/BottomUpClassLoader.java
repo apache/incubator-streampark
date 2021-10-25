@@ -53,6 +53,10 @@ public final class BottomUpClassLoader extends URLClassLoader {
         this(urls, parent, NOOP_EXCEPTION_HANDLER);
     }
 
+    public BottomUpClassLoader(List<URL> urls, ClassLoader parent) {
+        this(urls.toArray(new URL[0]), parent, NOOP_EXCEPTION_HANDLER);
+    }
+
     public BottomUpClassLoader(
         URL[] urls,
         ClassLoader parent,

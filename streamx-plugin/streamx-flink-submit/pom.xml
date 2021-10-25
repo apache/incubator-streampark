@@ -46,6 +46,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-repl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-mapreduce-client-core</artifactId>
             <version>${hadoop.version}</version>

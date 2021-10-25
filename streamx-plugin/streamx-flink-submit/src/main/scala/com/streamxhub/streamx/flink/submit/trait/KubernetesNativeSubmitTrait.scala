@@ -24,18 +24,18 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType}
 import com.streamxhub.streamx.common.fs.FsOperator
-import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
+import com.streamxhub.streamx.flink.submit.tool.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.collections.MapUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.flink.api.common.JobID
+import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.deployment.{ClusterSpecification, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
-import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType
+import org.apache.flink.kubernetes.{KubernetesClusterClientFactory, KubernetesClusterDescriptor}
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
 import java.io.File
@@ -108,18 +108,15 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     */
   def getK8sClusterDescriptorAndSpecification(flinkConfig: Configuration)
   : (KubernetesClusterDescriptor, ClusterSpecification) = {
-    val serviceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory = serviceLoader.getClusterClientFactory(flinkConfig)
-    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[KubernetesClusterDescriptor]
+    val clientFactory = new KubernetesClusterClientFactory()
+    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
     val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
     (clusterDescriptor, clusterSpecification)
   }
 
-  //noinspection DuplicatedCode
   def getK8sClusterDescriptor(flinkConfig: Configuration): KubernetesClusterDescriptor = {
-    val serviceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory = serviceLoader.getClusterClientFactory(flinkConfig)
-    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[KubernetesClusterDescriptor]
+    val clientFactory = new KubernetesClusterClientFactory()
+    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
     clusterDescriptor
   }
 

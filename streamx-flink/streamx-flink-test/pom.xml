@@ -14,6 +14,10 @@
     <name>StreamX : Flink Test Parent</name>
     <packaging>pom</packaging>
 
+    <properties>
+        <streamx.shims.version>1.13</streamx.shims.version>
+    </properties>
+
     <modules>
         <module>streamx-flink-test-datastream</module>
         <module>streamx-flink-test-tablesql</module>
