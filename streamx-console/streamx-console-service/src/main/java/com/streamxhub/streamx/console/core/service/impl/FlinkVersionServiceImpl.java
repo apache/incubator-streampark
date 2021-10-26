@@ -85,6 +85,7 @@ public class FlinkVersionServiceImpl extends ServiceImpl<FlinkVersionMapper, Fli
         flinkVersion.setFlinkName(version.getFlinkName());
         if (!version.getFlinkHome().equals(flinkVersion.getFlinkHome())) {
             flinkVersion.setFlinkHome(version.getFlinkHome());
+            flinkVersion.doSetVersion();
             flinkVersion.doSetFlinkConf();
         }
         updateById(flinkVersion);
@@ -105,6 +106,15 @@ public class FlinkVersionServiceImpl extends ServiceImpl<FlinkVersionMapper, Fli
         return this.baseMapper.selectOne(
                 new LambdaQueryWrapper<FlinkVersion>().eq(FlinkVersion::getIsDefault, true)
         );
+    }
+
+    @Override
+    public FlinkVersion getByIdOrDefault(Long id) {
+        FlinkVersion flinkVersion = getById(id);
+        if (flinkVersion == null) {
+            return getDefault();
+        }
+        return flinkVersion;
     }
 
     @Override

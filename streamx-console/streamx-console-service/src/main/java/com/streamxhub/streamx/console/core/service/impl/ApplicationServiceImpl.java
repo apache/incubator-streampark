@@ -42,6 +42,7 @@ import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
+import com.streamxhub.streamx.console.base.util.FlinkShimsUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.annotation.RefreshCache;
@@ -53,15 +54,14 @@ import com.streamxhub.streamx.console.core.runner.EnvInitializer;
 import com.streamxhub.streamx.console.core.service.*;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.console.system.authentication.ServerComponent;
-import com.streamxhub.streamx.flink.core.scala.conf.ParameterCli;
+import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf;
 import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
-import com.streamxhub.streamx.flink.submit.FlinkSubmit;
+import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper;
 import com.streamxhub.streamx.flink.submit.domain.*;
-import com.streamxhub.streamx.flink.submit.tool.FlinkSubmitHelper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -80,8 +80,10 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Supplier;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
@@ -97,6 +99,22 @@ import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper
 @DependsOn({"flyway", "flywayInitializer"})
 public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Application>
     implements ApplicationService {
+
+    private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
+
+    private final Map<Long, StringBuilder> tailBuffer = new ConcurrentHashMap<>();
+
+    private final Map<Long, Boolean> tailBeginning = new ConcurrentHashMap<>();
+
+    private final ExecutorService executorService = new ThreadPoolExecutor(
+        Runtime.getRuntime().availableProcessors() * 2,
+        200,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("streamx-deploy-executor"),
+        new ThreadPoolExecutor.AbortPolicy()
+    );
 
     @Autowired
     private ProjectService projectService;
@@ -134,12 +152,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Autowired
     private EnvInitializer envInitializer;
 
-    private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
-
-    private final Map<Long, StringBuilder> tailBuffer = new ConcurrentHashMap<>();
-
-    private final Map<Long, Boolean> tailBeginning = new ConcurrentHashMap<>();
-
     @Autowired
     private SimpMessageSendingOperations simpMessageSendingOperations;
 
@@ -149,16 +161,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private Workspace localWorkspace = Workspace.local();
 
     private Workspace remoteWorkspace = Workspace.remote();
-
-    private final ExecutorService executorService = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() * 2,
-        200,
-        60L,
-        TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(1024),
-        ThreadUtils.threadFactory("streamx-deploy-executor"),
-        new ThreadPoolExecutor.AbortPolicy()
-    );
 
     @PostConstruct
     public void resetOptionState() {
@@ -380,15 +382,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Application application = getById(appParam.getId());
         FlinkAppState appState = FlinkAppState.of(application.getState());
         try {
-            if (application.getVersionId() == null) {
+            FlinkVersion flinkVersion;
+            if (application.getVersionId() != null) {
+                flinkVersion = flinkVersionService.getByIdOrDefault(application.getVersionId());
+            } else {
                 //任务未指定flink version.则检查是否配置的默认的flink version
-                FlinkVersion version = flinkVersionService.getDefault();
-                if (version == null) {
-                    return false;
-                }
+                flinkVersion = flinkVersionService.getDefault();
             }
-            FlinkVersion flinkVersion = flinkVersionService.getById(application.getVersionId());
-            flinkVersion = flinkVersion == null ? flinkVersionService.getDefault() : flinkVersion;
+            if (flinkVersion == null) {
+                return false;
+            }
             updateState(application, FlinkAppState.INITIALIZING);
             envInitializer.checkFlinkEnv(application.getStorageType(), flinkVersion);
             envInitializer.storageInitialize(application.getStorageType());
@@ -964,7 +967,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     customSavepoint,
                     application.getK8sNamespace()
                 );
-                StopResponse stopActionResult = FlinkSubmit.stop(ExecutionMode.of(application.getExecutionMode()), stopInfo);
+                StopResponse stopActionResult = stop(flinkVersion, ExecutionMode.of(application.getExecutionMode()), stopInfo);
                 String savePointDir = stopActionResult.savePointDir();
                 if (savePointDir != null) {
                     log.info("savePoint path:{}", savePointDir);
@@ -1116,18 +1119,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             throw new UnsupportedOperationException("Unsupported...");
         }
 
-        String savePointDir = null;
-        if (appParam.getSavePointed()) {
-            if (appParam.getSavePoint() == null) {
-                SavePoint savePoint = savePointService.getLatest(appParam.getId());
-                if (savePoint != null) {
-                    savePointDir = savePoint.getPath();
-                }
-            } else {
-                savePointDir = appParam.getSavePoint();
-            }
-        }
-
         StringBuilder option = new StringBuilder();
         if (appParam.getAllowNonRestored()) {
             option.append(" -n ");
@@ -1136,18 +1127,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String[] dynamicOption = CommonUtils.notEmpty(application.getDynamicOptions())
             ? application.getDynamicOptions().split("\\s+")
             : new String[0];
-
-        Map<String, Serializable> flameGraph = null;
-        if (appParam.getFlameGraph()) {
-            flameGraph = new HashMap<>(8);
-            flameGraph.put("reporter", "com.streamxhub.streamx.plugin.profiling.reporter.HttpReporter");
-            flameGraph.put("type", ApplicationType.STREAMX_FLINK.getType());
-            flameGraph.put("id", application.getId());
-            flameGraph.put("url", settingService.getStreamXAddress().concat("/metrics/report"));
-            flameGraph.put("token", Utils.uuid());
-            flameGraph.put("sampleInterval", 1000 * 60 * 2);
-            flameGraph.put("metricInterval", 1000 * 60 * 2);
-        }
 
         Map<String, Object> optionMap = application.getOptionMap();
         JarPackDeps jarPackDeps = JarPackDeps.empty();
@@ -1173,44 +1152,42 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.getK8sRestExposedTypeEnum()
         );
 
-        FlinkVersion flinkVersion = flinkVersionService.getById(application.getVersionId());
+        FlinkVersion flinkVersion = flinkVersionService.getByIdOrDefault(application.getVersionId());
         if (flinkVersion == null) {
-            //任务未指定flink version则使用默认的version
-            flinkVersion = flinkVersionService.getDefault();
+            throw new IllegalArgumentException("[StreamX] can no found flink version");
         }
-
-        SubmitRequest submitInfo = new SubmitRequest(
-            flinkVersion.getFlinkHome(),
-            flinkVersion.getVersion(),
-            flinkVersion.getFlinkConf(),
-            flinkUserJar,
-            DevelopmentMode.of(application.getJobType()),
-            ExecutionMode.of(application.getExecutionMode()),
-            resolveOrder,
-            application.getJobName(),
-            appConf,
-            application.getApplicationType().getName(),
-            savePointDir,
-            flameGraph,
-            option.toString(),
-            optionMap,
-            dynamicOption,
-            application.getArgs(),
-            kubernetesSubmitParam
-        );
 
         ApplicationLog log = new ApplicationLog();
         log.setAppId(application.getId());
         log.setStartTime(new Date());
 
         try {
-            SubmitResponse submitResponse = FlinkSubmit.submit(submitInfo);
+            SubmitRequest submitInfo = new SubmitRequest(
+                flinkVersion.getFlinkHome(),
+                flinkVersion.getVersion(),
+                flinkVersion.getFlinkConf(),
+                flinkUserJar,
+                DevelopmentMode.of(application.getJobType()),
+                ExecutionMode.of(application.getExecutionMode()),
+                resolveOrder,
+                application.getJobName(),
+                appConf,
+                application.getApplicationType().getName(),
+                getSavePointed(appParam),
+                appParam.getFlameGraph() ? getFlameGraph(application) : null,
+                option.toString(),
+                optionMap,
+                dynamicOption,
+                application.getArgs(),
+                kubernetesSubmitParam
+            );
+            SubmitResponse submitResponse = submit(flinkVersion, submitInfo);
             if (submitResponse.flinkConfig() != null) {
-                String jmMemory = submitResponse.flinkConfig().toMap().get(ConfigurationOptions.KEY_TOTAL_PROCESS_MEMORY);
+                String jmMemory = submitResponse.flinkConfig().get(ConfigurationOptions.KEY_TOTAL_PROCESS_MEMORY);
                 if (jmMemory != null) {
                     application.setJmMemory(FlinkMemorySize.parse(jmMemory).getMebiBytes());
                 }
-                String tmMemory = submitResponse.flinkConfig().toMap().get(ConfigurationOptions.KEY_TOTAL_PROCESS_MEMORY);
+                String tmMemory = submitResponse.flinkConfig().get(ConfigurationOptions.KEY_TOTAL_PROCESS_MEMORY);
                 if (tmMemory != null) {
                     application.setTmMemory(FlinkMemorySize.parse(tmMemory).getMebiBytes());
                 }
@@ -1261,4 +1238,80 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
     }
 
+    private String getSavePointed(Application appParam) {
+        if (appParam.getSavePointed()) {
+            if (appParam.getSavePoint() == null) {
+                SavePoint savePoint = savePointService.getLatest(appParam.getId());
+                if (savePoint != null) {
+                    return savePoint.getPath();
+                }
+            } else {
+                return appParam.getSavePoint();
+            }
+        }
+        return null;
+    }
+
+    private Map<String, Serializable> getFlameGraph(Application application) {
+        Map<String, Serializable> flameGraph = new HashMap<>(8);
+        flameGraph.put("reporter", "com.streamxhub.streamx.plugin.profiling.reporter.HttpReporter");
+        flameGraph.put("type", ApplicationType.STREAMX_FLINK.getType());
+        flameGraph.put("id", application.getId());
+        flameGraph.put("url", settingService.getStreamXAddress().concat("/metrics/report"));
+        flameGraph.put("token", Utils.uuid());
+        flameGraph.put("sampleInterval", 1000 * 60 * 2);
+        flameGraph.put("metricInterval", 1000 * 60 * 2);
+        return flameGraph;
+    }
+
+    private SubmitResponse submit(FlinkVersion flinkVersion, SubmitRequest submitInfo) {
+        ClassLoader loader = FlinkShimsUtils.getFlinkShimsClassLoader(flinkVersion.getLargeVersion(), flinkVersion.getFlinkHome());
+        SubmitResponse submitResponse = ClassLoaderUtils.runAsClassLoader(loader, (Supplier<SubmitResponse>) () -> {
+            try {
+                Class<?> clazz = loader.loadClass("com.streamxhub.streamx.flink.submit.FlinkSubmit");
+                Class<?> submitRequestClazz = loader.loadClass("com.streamxhub.streamx.flink.submit.domain.SubmitRequest");
+                Method method = clazz.getDeclaredMethod("submit", submitRequestClazz);
+                method.setAccessible(true);
+
+                Object obj = method.invoke(null, FlinkShimsUtils.getClassLoaderObject(loader, submitInfo));
+                if (obj == null) {
+                    return null;
+                }
+                return (SubmitResponse) FlinkShimsUtils.getClassLoaderObject(this.getClass().getClassLoader(), obj);
+            } catch (Throwable e) {
+                log.error("submit invocationTargetException: {}", ExceptionUtils.stringifyException(e));
+            }
+            return null;
+        });
+        if (submitResponse == null) {
+            throw new UnsupportedOperationException("Unsupported submit");
+        }
+        return submitResponse;
+    }
+
+    private StopResponse stop(FlinkVersion flinkVersion, ExecutionMode executionMode, StopRequest stopInfo) {
+        ClassLoader loader = FlinkShimsUtils.getFlinkShimsClassLoader(flinkVersion.getLargeVersion(), flinkVersion.getFlinkHome());
+        StopResponse stopResponse = ClassLoaderUtils.runAsClassLoader(loader, (Supplier<StopResponse>) () -> {
+            try {
+                Class<?> clazz = loader.loadClass("com.streamxhub.streamx.flink.submit.FlinkSubmit");
+                Class<?> executionModeClazz = loader.loadClass("com.streamxhub.streamx.common.enums.ExecutionMode");
+                Class<?> stopRequestClazz = loader.loadClass("com.streamxhub.streamx.flink.submit.domain.StopRequest");
+                Method method = clazz.getDeclaredMethod("stop", executionModeClazz, stopRequestClazz);
+                method.setAccessible(true);
+
+                Object obj = method.invoke(null, FlinkShimsUtils.getClassLoaderObject(loader, executionMode), FlinkShimsUtils.getClassLoaderObject(loader, stopInfo));
+                if (obj == null) {
+                    return null;
+                }
+                return (StopResponse) FlinkShimsUtils.getClassLoaderObject(this.getClass().getClassLoader(), obj);
+            } catch (Throwable e) {
+                log.error("submit invocationTargetException: {}", ExceptionUtils.stringifyException(e));
+            }
+            return null;
+        });
+        if (stopResponse == null) {
+            throw new UnsupportedOperationException("Unsupported submit");
+        }
+        return stopResponse;
+    }
 }

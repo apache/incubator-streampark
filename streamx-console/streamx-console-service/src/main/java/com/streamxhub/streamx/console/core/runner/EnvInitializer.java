@@ -183,7 +183,7 @@ public class EnvInitializer implements ApplicationRunner {
         String flinkHome = appFlink.concat("/").concat(flinkName);
         if (!fsOperator.exists(flinkHome)) {
             log.info("{} is not exists,upload beginning....", flinkHome);
-            fsOperator.upload(flinkLocalHome, flinkHome, false, false);
+            fsOperator.upload(flinkLocalHome, flinkHome, false, true);
         }
     }
 

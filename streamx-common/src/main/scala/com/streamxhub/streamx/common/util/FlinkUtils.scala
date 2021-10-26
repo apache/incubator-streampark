@@ -24,10 +24,25 @@ import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.FunctionInitializationContext
 
+import java.io.File
+import java.net.{URL, URLClassLoader}
+import java.util.{List => JavaList}
+import scala.collection.JavaConverters._
+
 object FlinkUtils {
 
   def getUnionListState[R: TypeInformation](context: FunctionInitializationContext, descriptorName: String): ListState[R] = {
     context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(descriptorName, implicitly[TypeInformation[R]].getTypeClass))
+  }
+
+  private def getFlinkHomeLib(flinkHome: String): Array[URL] = {
+    val file = new File(flinkHome, "lib")
+    require(file.isDirectory, s"FLINK_HOME $file does not exist")
+    file.listFiles.filter(!_.getName.startsWith("log4j")).map(_.toURI.toURL)
+  }
+
+  def getFlinkHomeLibWithoutLog4j(flinkHome: String): JavaList[URL] = {
+    getFlinkHomeLib(flinkHome).toList.asJava
   }
 
 }

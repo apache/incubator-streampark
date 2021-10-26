@@ -77,6 +77,13 @@ public interface FlinkVersionService extends IService<FlinkVersion> {
     FlinkVersion getDefault();
 
     /**
+     * 根据id获取 如果获取不到则使用默认的flink版本
+     *
+     * @return
+     */
+    FlinkVersion getByIdOrDefault(Long id);
+
+    /**
      * 同步配置文件
      *
      * @param id

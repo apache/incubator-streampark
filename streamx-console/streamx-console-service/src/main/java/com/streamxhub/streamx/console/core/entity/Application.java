@@ -113,7 +113,7 @@ public class Application implements Serializable {
     /**
      * k8s部署下的namespace
      */
-    private String k8sNamespace = "default";
+    private String k8sNamespace = OPTION_DEFAULT_VALUE;
 
 
     private Integer state;

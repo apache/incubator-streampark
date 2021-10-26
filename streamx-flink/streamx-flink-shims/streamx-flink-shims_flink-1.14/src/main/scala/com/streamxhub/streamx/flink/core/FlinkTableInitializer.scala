@@ -32,9 +32,9 @@ import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableConfig, TableEnvironment}
 
 import java.io.File
-import scala.collection.JavaConversions._
-import scala.collection.Map
-import scala.util.{Failure, Success, Try}
+import collection.JavaConversions._
+import collection.Map
+import util.{Failure, Success, Try}
 
 private[flink] object FlinkTableInitializer {
 

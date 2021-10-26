@@ -124,14 +124,7 @@ object FlinkSqlValidator extends Logger {
     } catch {
       case exception: Exception =>
         logError(s"verify error:${ExceptionUtils.stringifyException(exception)}")
-        val separator = "\001"
-        val error = exception.getMessage
-        val array = error.split(separator)
-        SqlError(
-          SqlErrorType.of(array.head.toInt),
-          if (array(1) == "null") null else array(1),
-          array.last
-        )
+        SqlError.fromString(exception.getMessage)
     }
   }
 

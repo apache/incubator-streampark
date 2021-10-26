@@ -20,8 +20,6 @@
  */
 package com.streamxhub.streamx.flink.kubernetes.enums
 
-import org.apache.flink.api.common.JobStatus
-
 /**
  * flink job status on kubernetes
  * author:Al-assad
@@ -52,11 +50,6 @@ object FlinkJobState extends Enumeration {
 
   def of(value: String): FlinkJobState.Value = {
     this.values.find(_.toString == value).getOrElse(OTHER)
-  }
-
-  def of(jobStatus: JobStatus): FlinkJobState.Value = {
-    val jobStatusStr = jobStatus.toString
-    this.values.find(_.toString == jobStatusStr).getOrElse(OTHER)
   }
 
   // whether flink job state is ending state

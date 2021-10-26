@@ -23,7 +23,7 @@
         <scala.binary.version>2.11</scala.binary.version>
         <junit.version>4.13.1</junit.version>
 
-        <streamx.shims.version>1.13</streamx.shims.version>
+        <streamx.shims.version>1.14</streamx.shims.version>
         <frontend.project.name>streamx-console-webapp</frontend.project.name>
         <env>dev</env>
 
@@ -102,11 +102,6 @@
             </exclusions>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.apache.flink</groupId>-->
-<!--            <artifactId>flink-shaded-guava</artifactId>-->
-<!--            <version>30.1.1-jre-14.0</version>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -402,6 +397,12 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-shims-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-repl</artifactId>
             <version>${project.version}</version>
             <exclusions>
@@ -414,18 +415,21 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-submit</artifactId>
+            <artifactId>streamx-flink-packer</artifactId>
             <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-submit-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-submit-core</artifactId>
+            <version>${project.version}</version>
+           <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -615,6 +619,7 @@
             <!--放在最后,确保依赖其他插件生成的目录和文件都能成功打包进去-->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.1</version>
                 <configuration>
                     <descriptors>
                         <descriptor>src/assembly/assembly.xml</descriptor>
