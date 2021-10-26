@@ -29,7 +29,6 @@ import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
-import com.streamxhub.streamx.flink.repl.shims.FlinkShimsClassLoader
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
@@ -117,46 +116,44 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   // noinspection DuplicatedCode
   @throws[Exception]
   private def jobGraphSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, jobID: JobID, fatJar: File): SubmitResponse = {
-    FlinkShimsClassLoader.runAsSpecVersion(submitRequest.replFlinkVersion, fromCache = false, () => {
-      // retrieve k8s cluster and submit flink job on session mode
-      var clusterDescriptor: KubernetesClusterDescriptor = null
-      var packageProgram: PackagedProgram = null
-      var client: ClusterClient[String] = null
-      try {
-        clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
-        // build JobGraph
-        packageProgram = PackagedProgram.newBuilder()
-          .setJarFile(fatJar)
-          .setConfiguration(flinkConfig)
-          .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
-          .setArguments(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-            .orElse(Lists.newArrayList())
-            : _*
-          ).build()
-        val jobGraph = PackagedProgramUtils.createJobGraph(
-          packageProgram,
-          flinkConfig,
-          flinkConfig.getInteger(CoreOptions.DEFAULT_PARALLELISM),
-          jobID,
-          false)
-        // retrieve client and submit JobGraph
-        client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
-        val submitResult = client.submitJob(jobGraph)
-        val jobId = submitResult.get().toString
-        val result = SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId)
-        logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId=${jobID.toString}")
-        result
-      } catch {
-        case e: Exception =>
-          logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
-          e.printStackTrace()
-          throw e
-      } finally {
-        // ref FLINK-21164 FLINK-9844 packageProgram.close()
-        // must be flink 1.12.2 and above
-        IOUtils.closeAll(client, packageProgram, clusterDescriptor)
-      }
-    })
+    // retrieve k8s cluster and submit flink job on session mode
+    var clusterDescriptor: KubernetesClusterDescriptor = null
+    var packageProgram: PackagedProgram = null
+    var client: ClusterClient[String] = null
+    try {
+      clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
+      // build JobGraph
+      packageProgram = PackagedProgram.newBuilder()
+        .setJarFile(fatJar)
+        .setConfiguration(flinkConfig)
+        .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
+        .setArguments(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+          .orElse(Lists.newArrayList())
+          : _*
+        ).build()
+      val jobGraph = PackagedProgramUtils.createJobGraph(
+        packageProgram,
+        flinkConfig,
+        flinkConfig.getInteger(CoreOptions.DEFAULT_PARALLELISM),
+        jobID,
+        false)
+      // retrieve client and submit JobGraph
+      client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
+      val submitResult = client.submitJob(jobGraph)
+      val jobId = submitResult.get().toString
+      val result = SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId)
+      logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId=${jobID.toString}")
+      result
+    } catch {
+      case e: Exception =>
+        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
+        e.printStackTrace()
+        throw e
+    } finally {
+      // ref FLINK-21164 FLINK-9844 packageProgram.close()
+      // must be flink 1.12.2 and above
+      IOUtils.closeAll(client, packageProgram, clusterDescriptor)
+    }
   }
 
   override def doStop(stopInfo: StopRequest): StopResponse = {

@@ -23,12 +23,12 @@ package com.streamxhub.streamx.flink.submit.domain
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.{ConfigurationOptions, Workspace}
+import com.streamxhub.streamx.common.dto.FlinkVersionDTO
 import com.streamxhub.streamx.common.enums._
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf
 import com.streamxhub.streamx.flink.packer.maven.JarPackDeps
-import com.streamxhub.streamx.flink.repl.shims.ReplFlinkVersion
 
 import java.io.File
 import java.util.{Map => JavaMap}
@@ -52,8 +52,7 @@ case class KubernetesSubmitParam(clusterId: String,
                                  @Nullable podTemplates: K8sPodTemplates,
                                  @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
 
-case class SubmitRequest(flinkHome: String,
-                         flinkVersion: String,
+case class SubmitRequest(flinkVersion: FlinkVersionDTO,
                          flinkYaml: String,
                          flinkUserJar: String,
                          developmentMode: DevelopmentMode,
@@ -81,8 +80,6 @@ case class SubmitRequest(flinkHome: String,
   lazy val flinkSQL: String = property.remove(KEY_FLINK_SQL()).toString
 
   lazy val jobID: String = property.remove(KEY_JOB_ID).toString
-
-  lazy val replFlinkVersion: ReplFlinkVersion = ReplFlinkVersion(flinkVersion, flinkHome)
 
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
     if (this.appConf == null) Map.empty[String, String] else {
@@ -123,6 +120,7 @@ case class SubmitRequest(flinkHome: String,
      * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
      */
     val workspace = Workspace.remote
+    val flinkHome = flinkVersion.flinkHome
     val flinkName = new File(flinkHome).getName
     val flinkHdfsHome = s"${workspace.APP_FLINK}/$flinkName"
     HdfsWorkspace(

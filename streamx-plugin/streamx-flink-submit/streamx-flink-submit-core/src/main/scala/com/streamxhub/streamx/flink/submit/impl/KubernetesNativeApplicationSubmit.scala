@@ -86,7 +86,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     flinkConfig.set(PipelineOptions.JARS, Lists.newArrayList(dockerFileTemplate.getJobJar))
     // add flink conf conciguration, mainly to set the log4j configuration
     if (!flinkConfig.contains(DeploymentOptionsInternal.CONF_DIR)) {
-      flinkConfig.set(DeploymentOptionsInternal.CONF_DIR, s"${submitRequest.flinkHome}/conf")
+      flinkConfig.set(DeploymentOptionsInternal.CONF_DIR, s"${submitRequest.flinkVersion.flinkHome}/conf")
     }
     // build docker image
     val flinkImageTag = DockerTool.buildFlinkImage(

@@ -59,8 +59,8 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
       "-m" -> "yarn-cluster",
       "-c" -> submitRequest.appMain
     )
-
-    val activeCommandLine = validateAndGetActiveCommandLine(getCustomCommandLines(submitRequest.flinkHome), commandLine)
+    val flinkHome = submitRequest.flinkVersion.flinkHome
+    val activeCommandLine = validateAndGetActiveCommandLine(getCustomCommandLines(flinkHome), commandLine)
     val flinkConfig = getEffectiveConfiguration(submitRequest, activeCommandLine, commandLine)
 
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
@@ -68,13 +68,13 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
     val clusterDescriptor = {
       val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[YarnClusterDescriptor]
-      val flinkDistJar = new File(s"${submitRequest.flinkHome}/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-        case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in ${submitRequest.flinkHome}/lib")
-        case array if array.length == 1 => s"${submitRequest.flinkHome}/lib/${array.head}"
-        case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in ${submitRequest.flinkHome}/lib,[${more.mkString(",")}]")
+      val flinkDistJar = new File(s"${flinkHome}/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+        case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in ${flinkHome}/lib")
+        case array if array.length == 1 => s"${flinkHome}/lib/${array.head}"
+        case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in ${flinkHome}/lib,[${more.mkString(",")}]")
       }
       clusterDescriptor.setLocalJarPath(new HadoopPath(flinkDistJar))
-      clusterDescriptor.addShipFiles(List(new File(s"${submitRequest.flinkHome}/plugins")))
+      clusterDescriptor.addShipFiles(List(new File(s"${flinkHome}/plugins")))
       clusterDescriptor
     }
 

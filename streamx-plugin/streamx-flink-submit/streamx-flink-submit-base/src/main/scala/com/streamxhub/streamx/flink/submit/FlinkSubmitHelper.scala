@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 The StreamX Project
+ * Copyright (c) 2020 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -20,7 +20,9 @@
  */
 package com.streamxhub.streamx.flink.submit
 
-import com.streamxhub.streamx.common.util.Utils
+import com.streamxhub.streamx.common.util.{Logger, Utils}
+import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy
+import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import org.apache.commons.lang.StringUtils
 
 import java.util.regex.Pattern
@@ -29,10 +31,44 @@ import javax.annotation.Nonnull
 import scala.collection.JavaConverters._
 import scala.util.Try
 
-object FlinkSubmitHelper {
+object FlinkSubmitHelper extends Logger {
 
   // effective k-v regex pattern of submit.dynamicOption
   private val DYNAMIC_OPTION_ITEM_PATTERN = Pattern.compile("(-D)?(\\S+)=(\\S+)")
+
+  def submit(submitRequest: SubmitRequest): SubmitResponse = {
+    FlinkShimsProxy.proxy(submitRequest.flinkVersion, (classLoader: ClassLoader) => {
+      try {
+        val clazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.FlinkSubmit")
+        val submitRequestClazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.domain.SubmitRequest")
+        val method = clazz.getDeclaredMethod("submit", submitRequestClazz)
+        method.setAccessible(true)
+        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, submitRequest))
+        if (obj == null) null
+        else FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[SubmitResponse]
+      } catch {
+        case e: Throwable => logError("submit invocationTargetException", e)
+          null
+      }
+    })
+  }
+
+  def stop(stopRequest: StopRequest): StopResponse = {
+    FlinkShimsProxy.proxy(stopRequest.flinkVersion, (classLoader: ClassLoader) => {
+      try {
+        val clazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.FlinkSubmit")
+        val stopRequestClazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.domain.StopRequest")
+        val method = clazz.getDeclaredMethod("stop", stopRequestClazz)
+        method.setAccessible(true)
+        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, stopRequest))
+        if (obj == null) null
+        else FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[StopResponse]
+      } catch {
+        case e: Throwable => logError("submit invocationTargetException", e)
+          null
+      }
+    })
+  }
 
   /**
    * extract flink configuration from submitRequest.dynamicOption

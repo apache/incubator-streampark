@@ -18,10 +18,10 @@ package com.streamxhub.streamx.console.core.entity;
 
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.streamxhub.streamx.common.dto.FlinkVersionDTO;
 import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
-import com.streamxhub.streamx.flink.repl.shims.ReplFlinkVersion;
 import lombok.Data;
 import net.minidev.json.annotate.JsonIgnore;
 import org.apache.commons.io.FileUtils;
@@ -136,8 +136,8 @@ public class FlinkVersion implements Serializable {
         return this.version.split("\\.")[2];
     }
 
-    public ReplFlinkVersion toReplFlinkVersion() {
-        return new ReplFlinkVersion(this.version, this.flinkHome);
+    public FlinkVersionDTO toFlinkVersionDTO() {
+        return new FlinkVersionDTO(this.version, this.flinkHome);
     }
 
 }

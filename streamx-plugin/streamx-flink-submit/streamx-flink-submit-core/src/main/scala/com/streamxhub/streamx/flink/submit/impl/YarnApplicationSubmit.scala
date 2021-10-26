@@ -55,7 +55,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       "-t" -> YarnDeploymentTarget.APPLICATION.getName
     )
 
-    val activeCommandLine = validateAndGetActiveCommandLine(getCustomCommandLines(submitRequest.flinkHome), commandLine)
+    val activeCommandLine = validateAndGetActiveCommandLine(getCustomCommandLines(submitRequest.flinkVersion.flinkHome), commandLine)
 
     val uri = PackagedProgramUtils.resolveURI(submitRequest.flinkUserJar)
 
@@ -132,7 +132,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
             programArgs += PARAM_KEY_APP_CONF
             programArgs += submitRequest.appConf
           }
-          val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
+          val version = submitRequest.flinkVersion.version.split("\\.").map(_.trim.toInt)
           version match {
             case Array(1, 12, _) =>
               providedLibs += s"${workspace.APP_SHIMS}/flink-1.12"
@@ -155,7 +155,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       providedLibs -> programArgs
     }
 
-    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkHome)
+    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
 
     val currentUser = UserGroupInformation.getCurrentUser
     logDebug(s"UserGroupInformation currentUser: $currentUser")

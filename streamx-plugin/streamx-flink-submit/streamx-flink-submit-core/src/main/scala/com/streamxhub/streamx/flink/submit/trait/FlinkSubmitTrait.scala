@@ -51,8 +51,8 @@ trait FlinkSubmitTrait extends Logger {
     logInfo(
       s"""
          |--------------------------------------- flink start ---------------------------------------
-         |    userFlinkHome    : ${submitRequest.flinkHome}
-         |    flinkVersion     : ${submitRequest.flinkVersion}
+         |    userFlinkHome    : ${submitRequest.flinkVersion.flinkHome}
+         |    flinkVersion     : ${submitRequest.flinkVersion.version}
          |    appName          : ${submitRequest.appName}
          |    devMode          : ${submitRequest.developmentMode.name()}
          |    execMode         : ${submitRequest.executionMode.name()}
@@ -78,7 +78,8 @@ trait FlinkSubmitTrait extends Logger {
     logInfo(
       s"""
          |----------------------------------------- flink stop --------------------------------------
-         |     flinkHome      : ${stopRequest.flinkHome}
+         |     userFlinkHome  : ${stopRequest.flinkVersion.flinkHome}
+         |     flinkVersion   : ${stopRequest.flinkVersion.version}
          |     withSavePoint  : ${stopRequest.withSavePoint}
          |     withDrain      : ${stopRequest.withDrain}
          |     k8sNamespace   : ${stopRequest.kubernetesNamespace}
@@ -102,7 +103,7 @@ trait FlinkSubmitTrait extends Logger {
   private[submit] def getEffectiveCommandLine(submitRequest: SubmitRequest,
                                               otherParam: (String, String)*): CommandLine = {
 
-    val customCommandLines = getCustomCommandLines(submitRequest.flinkHome)
+    val customCommandLines = getCustomCommandLines(submitRequest.flinkVersion.flinkHome)
     //merge options....
     val customCommandLineOptions = new Options
     for (customCommandLine <- customCommandLines) {

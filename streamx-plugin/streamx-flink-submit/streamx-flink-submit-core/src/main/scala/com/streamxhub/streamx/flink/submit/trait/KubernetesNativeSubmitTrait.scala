@@ -125,7 +125,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
    */
   @Nonnull def extractEffectiveFlinkConfig(@Nonnull submitRequest: SubmitRequest): Configuration = {
     // base from default config
-    val flinkConfig = Try(getFlinkDefaultConfiguration(submitRequest.flinkHome)).getOrElse(new Configuration)
+    val flinkConfig = Try(getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)).getOrElse(new Configuration)
 
     // extract from submitRequest
     flinkConfig.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.FALSE)
@@ -217,7 +217,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       submitRequest.flinkUserJar
     )
     providedLibs += {
-      val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
+      val version = submitRequest.flinkVersion.version.split("\\.").map(_.trim.toInt)
       version match {
         case Array(1, 12, _) => s"${workspace.APP_SHIMS}/flink-1.12"
         case Array(1, 13, _) => s"${workspace.APP_SHIMS}/flink-1.13"

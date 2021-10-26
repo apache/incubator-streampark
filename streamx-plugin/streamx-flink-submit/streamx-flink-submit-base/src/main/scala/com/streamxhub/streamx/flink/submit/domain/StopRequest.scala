@@ -22,17 +22,16 @@
 package com.streamxhub.streamx.flink.submit.domain
 
 import com.streamxhub.streamx.common.conf.ConfigurationOptions.OPTION_DEFAULT_VALUE
-import com.streamxhub.streamx.flink.repl.shims.ReplFlinkVersion
+import com.streamxhub.streamx.common.dto.FlinkVersionDTO
+import com.streamxhub.streamx.common.enums.ExecutionMode
 
-case class StopRequest(flinkVersion: String,
-                       flinkHome: String,
+case class StopRequest(flinkVersion: FlinkVersionDTO,
+                       executionMode: ExecutionMode,
                        clusterId: String,
                        jobId: String,
                        withSavePoint: Boolean,
                        withDrain: Boolean,
                        customSavePointPath: String,
                        kubernetesNamespace: String = OPTION_DEFAULT_VALUE) {
-
-  lazy val replFlinkVersion: ReplFlinkVersion = ReplFlinkVersion(flinkVersion, flinkHome)
 
 }

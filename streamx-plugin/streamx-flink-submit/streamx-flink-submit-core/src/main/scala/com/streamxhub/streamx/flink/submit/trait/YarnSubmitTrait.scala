@@ -67,7 +67,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     }
 
     val savePointDir = getOptionFromDefaultFlinkConfig(
-      stopRequest.flinkHome,
+      stopRequest.flinkVersion.flinkHome,
       ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
         .stringType()
         .defaultValue(s"${workspace.APP_SAVEPOINTS}")
@@ -82,7 +82,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     }
 
     if (savepointPathFuture == null) null else try {
-      val clientTimeout = getOptionFromDefaultFlinkConfig(stopRequest.flinkHome, ClientOptions.CLIENT_TIMEOUT)
+      val clientTimeout = getOptionFromDefaultFlinkConfig(stopRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
       val savepointDir = savepointPathFuture.get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
       StopResponse(savepointDir)
     } catch {
@@ -109,7 +109,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
       Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString)
     } else {
-      val parallelism = getFlinkDefaultConfiguration(submitRequest.flinkHome).getInteger(CoreOptions.DEFAULT_PARALLELISM, -1)
+      val parallelism = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome).getInteger(CoreOptions.DEFAULT_PARALLELISM, -1)
       if (parallelism == -1) null else parallelism
     }
   }
@@ -131,7 +131,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     val customConfiguration = new Configuration(executorConfig)
     val configuration = new Configuration()
     //flink-conf.yaml配置
-    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkHome)
+    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
     flinkDefaultConfiguration.keySet.foreach(x => {
       flinkDefaultConfiguration.getString(x, null) match {
         case v if v != null => configuration.setString(x, v)
