@@ -75,6 +75,9 @@ object SqlCommandParser extends Logger {
 
 }
 
+object Converters {
+  val NO_OPERANDS = (_: Array[String]) => Some(Array.empty[String])
+}
 
 sealed abstract class SqlCommand(
                                   val name: String,
@@ -95,8 +98,6 @@ sealed abstract class SqlCommand(
 object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   val values: immutable.IndexedSeq[SqlCommand] = findValues
-
-  private[this] val NO_OPERANDS = (_: Array[String]) => Some(Array.empty[String])
 
   //----CREATE Statements----
 
@@ -217,49 +218,49 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   case object SHOW_CATALOGS extends SqlCommand(
     "show catalogs",
     "SHOW\\s+CATALOGS",
-    NO_OPERANDS
+    Converters.NO_OPERANDS
   )
 
   case object SHOW_CURRENT_CATALOG extends SqlCommand(
     "show current catalogs",
     "SHOW\\s+CURRENT\\s+CATALOG",
-    NO_OPERANDS
+    Converters.NO_OPERANDS
   )
 
   case object SHOW_DATABASES extends SqlCommand(
     "show databases",
     "SHOW\\s+DATABASES",
-    NO_OPERANDS
+    Converters.NO_OPERANDS
   )
 
   case object SHOW_CURRENT_DATABASE extends SqlCommand(
     "show current database",
     "SHOW\\s+CURRENT\\s+DATABASE",
-    NO_OPERANDS
+    Converters.NO_OPERANDS
   )
 
   case object SHOW_TABLES extends SqlCommand(
     "show tables",
     "SHOW\\s+TABLES",
-    NO_OPERANDS
+    Converters.NO_OPERANDS
   )
 
   case object SHOW_VIEWS extends SqlCommand(
     "show views",
     "SHOW\\s+VIEWS",
-    NO_OPERANDS
+    Converters.NO_OPERANDS
   )
 
   case object SHOW_FUNCTIONS extends SqlCommand(
     "show functions",
     "SHOW\\s+FUNCTIONS",
-    NO_OPERANDS
+    Converters.NO_OPERANDS
   )
 
   case object SHOW_MODULES extends SqlCommand(
     "show modules",
     "SHOW\\s+MODULES",
-    NO_OPERANDS
+    Converters.NO_OPERANDS
   )
 
 
