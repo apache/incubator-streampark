@@ -331,9 +331,9 @@ print_logo() {
   printf '\n'
   printf '%s           %s.+. %s   %s     %s     %s          %s                         %s\n' $RAINBOW $RESET
   printf '%s     _____%s/ /_%s_____%s___  %s____ %s_____ ___ %s _  __                  %s\n' $RAINBOW $RESET
-  printf '%s    / ___/%s __/%s ___%s/ _ \%s/ __ `%s/ __ `__ \%s| |/_/                  %s\n' $RAINBOW $RESET
-  printf '%s   (__  )%s /_/%s /  %s/  __/%s /_/ %s/ / / / / /%s>   <                   %s\n' $RAINBOW $RESET
-  printf '%s  /____/%s\__/%s_/   %s\___/%s\__,_%s/_/ /_/ /_/%s_/|_|                    %s\n' $RAINBOW $RESET
+  printf '%s    / ___/%s __%s/ ___%s/ _ \%s/ __ `%s/ __ `__ \%s| |/_/                  %s\n' $RAINBOW $RESET
+  printf '%s   (__  )%s /_%s/ /  %s/  __/%s /_/ %s/ / / / / /%s>   <                   %s\n' $RAINBOW $RESET
+  printf '%s  /____/%s\__%s/_/   %s\___/%s\__,_%s/_/ /_/ /_/%s_/|_|                    %s\n' $RAINBOW $RESET
   printf '%s       %s    %s     %s      %s     %s           %s  |/                     %s\n' $RAINBOW $RESET
   printf '%s      %s    %s    %s      %s     %s             %s  .                      %s\n' $RAINBOW $RESET
   printf '%s\n'"  • WebSite:  $(fmt_link "@streamxhub" http://www.streamxhub.com)"
