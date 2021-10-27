@@ -88,7 +88,7 @@ object FlinkShimsProxy extends Logger {
     val majorVersion = flinkVersion.majorVersion
     logInfo(flinkVersion.toString)
 
-    SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(majorVersion, {
+    SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(s"${flinkVersion.fullVersion}", {
       //1) flink/lib
       val libURL = getFlinkHomeLib(flinkVersion.flinkHome)
       val shimsUrls = ListBuffer[URL](libURL: _*)

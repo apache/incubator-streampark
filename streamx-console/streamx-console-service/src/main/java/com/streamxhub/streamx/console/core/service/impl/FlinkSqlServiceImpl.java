@@ -177,7 +177,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     @Override
     public SqlError verifySql(String sql, Long versionId) {
         FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
-        String error = FlinkShimsProxy.proxy(flinkEnv.toFlinkVersion(), (Function<ClassLoader, String>) classLoader -> {
+        String error = FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), (Function<ClassLoader, String>) classLoader -> {
             try {
                 Class<?> clazz = classLoader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
                 Method method = clazz.getDeclaredMethod("verifySql", String.class);

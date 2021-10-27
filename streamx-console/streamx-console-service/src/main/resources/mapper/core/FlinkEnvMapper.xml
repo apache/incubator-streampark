@@ -8,6 +8,7 @@
         <result column="FLINK_CONF" jdbcType="VARCHAR" property="flinkConf"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
         <result column="VERSION" jdbcType="VARCHAR" property="version"/>
+        <result column="SCALA_VERSION" jdbcType="VARCHAR" property="scalaVersion"/>
         <result column="IS_DEFAULT" jdbcType="BOOLEAN" property="isDefault"/>
         <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
     </resultMap>

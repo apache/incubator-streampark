@@ -951,7 +951,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
                 }
                 StopRequest stopInfo = new StopRequest(
-                    flinkEnv.toFlinkVersion(),
+                    flinkEnv.getFlinkVersion(),
                     ExecutionMode.of(application.getExecutionMode()),
                     application.getAppId(),
                     application.getJobId(),
@@ -1155,7 +1155,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         SubmitRequest submitRequest = new SubmitRequest(
-            flinkEnv.toFlinkVersion(),
+            flinkEnv.getFlinkVersion(),
             flinkEnv.getFlinkConf(),
             flinkUserJar,
             DevelopmentMode.of(application.getJobType()),
