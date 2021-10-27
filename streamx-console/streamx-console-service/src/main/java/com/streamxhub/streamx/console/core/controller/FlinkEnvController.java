@@ -36,7 +36,7 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("flink/version")
+@RequestMapping("flink/env")
 public class FlinkEnvController {
 
     @Autowired

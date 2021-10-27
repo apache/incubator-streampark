@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
  * @author benjobs
  */
 @Data
-@TableName("t_flink_version")
+@TableName("t_flink_env")
 public class FlinkEnv implements Serializable {
 
     private Long id;

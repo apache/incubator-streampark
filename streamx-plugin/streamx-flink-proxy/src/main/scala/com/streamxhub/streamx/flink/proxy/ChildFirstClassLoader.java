@@ -51,10 +51,6 @@ public final class ChildFirstClassLoader extends URLClassLoader {
     public static final Consumer<Throwable> NOOP_EXCEPTION_HANDLER = classLoadingException -> {
     };
 
-    private static final String[] ALWAYS_PARENT_FIRST_LOADER_PATTERNS = "java.;scala.;org.apache.flink.;com.esotericsoftware.kryo;org.apache.hadoop.;javax.annotation.;org.slf4j;org.apache.log4j;org.apache.logging;org.apache.commons.logging;ch.qos.logback;org.xml;javax.xml;org.apache.xerces;org.w3c"
-        .split(";");
-
-
     private Pattern FLINK_PATTERN = Pattern.compile(
         "flink-(.*).jar",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL
@@ -169,13 +165,6 @@ public final class ChildFirstClassLoader extends URLClassLoader {
         Class<?> c = super.findLoadedClass(name);
         if (c == null) {
             if (c == null) {
-                // check whether the class should go parent-first
-                for (String alwaysParentFirstPattern : ALWAYS_PARENT_FIRST_LOADER_PATTERNS) {
-                    if (name.startsWith(alwaysParentFirstPattern)) {
-                        return super.loadClass(name, resolve);
-                    }
-                }
-
                 try {
                     // check the URLs
                     c = findClass(name);

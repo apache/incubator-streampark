@@ -39,13 +39,13 @@ object FlinkSubmitHelper extends Logger {
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
     FlinkShimsProxy.proxy(submitRequest.flinkVersion, (classLoader: ClassLoader) => {
       try {
-        val clazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.FlinkSubmit")
-        val submitRequestClazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.domain.SubmitRequest")
-        val method = clazz.getDeclaredMethod("submit", submitRequestClazz)
+        val submitClass = classLoader.loadClass("com.streamxhub.streamx.flink.submit.FlinkSubmit")
+        val requestClass = classLoader.loadClass("com.streamxhub.streamx.flink.submit.domain.SubmitRequest")
+        val method = submitClass.getDeclaredMethod("submit", requestClass)
         method.setAccessible(true)
         val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, submitRequest))
-        if (obj == null) null
-        else FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[SubmitResponse]
+        require(obj != null)
+        FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[SubmitResponse]
       } catch {
         case e: Throwable => logError("submit invocationTargetException", e)
           null
@@ -56,13 +56,13 @@ object FlinkSubmitHelper extends Logger {
   def stop(stopRequest: StopRequest): StopResponse = {
     FlinkShimsProxy.proxy(stopRequest.flinkVersion, (classLoader: ClassLoader) => {
       try {
-        val clazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.FlinkSubmit")
-        val stopRequestClazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.domain.StopRequest")
-        val method = clazz.getDeclaredMethod("stop", stopRequestClazz)
+        val submitClass = classLoader.loadClass("com.streamxhub.streamx.flink.submit.FlinkSubmit")
+        val requestClass = classLoader.loadClass("com.streamxhub.streamx.flink.submit.domain.StopRequest")
+        val method = submitClass.getDeclaredMethod("stop", requestClass)
         method.setAccessible(true)
         val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, stopRequest))
-        if (obj == null) null
-        else FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[StopResponse]
+        require(obj != null)
+        FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[StopResponse]
       } catch {
         case e: Throwable => logError("submit invocationTargetException", e)
           null
@@ -73,8 +73,7 @@ object FlinkSubmitHelper extends Logger {
   /**
    * extract flink configuration from submitRequest.dynamicOption
    */
-  @Nonnull
-  def extractDynamicOption(dynamicOption: Array[String]): Map[String, String] = {
+  @Nonnull def extractDynamicOption(dynamicOption: Array[String]): Map[String, String] = {
     dynamicOption match {
       case x if Utils.isEmpty(x) =>
         Map.empty
@@ -93,8 +92,7 @@ object FlinkSubmitHelper extends Logger {
   /**
    * extract flink configuration from application.dynamicOption
    */
-  @Nonnull
-  def extractDynamicOption(dynamicOptions: String): Map[String, String] = {
+  @Nonnull def extractDynamicOption(dynamicOptions: String): Map[String, String] = {
     if (StringUtils.isEmpty(dynamicOptions)) {
       Map.empty[String, String]
     } else {
@@ -102,8 +100,7 @@ object FlinkSubmitHelper extends Logger {
     }
   }
 
-  @Nonnull
-  def extractDynamicOptionAsJava(dynamicOptions: String): JavaMap[String, String] = extractDynamicOption(dynamicOptions).asJava
+  @Nonnull def extractDynamicOptionAsJava(dynamicOptions: String): JavaMap[String, String] = extractDynamicOption(dynamicOptions).asJava
 
 
 }

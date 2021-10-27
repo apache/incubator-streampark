@@ -21,12 +21,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-proxy</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <!--flink base-->
         <dependency>
             <groupId>org.apache.flink</groupId>

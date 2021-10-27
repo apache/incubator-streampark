@@ -420,13 +420,6 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-submit-core</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-jvm-profiler</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -518,6 +511,13 @@
                             <artifactId>streamx-flink-shims_flink-1.14</artifactId>
                             <version>1.2.0</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <!-- flink-submit-core -->
+                        <dependency>
+                            <groupId>com.streamxhub.streamx</groupId>
+                            <artifactId>streamx-flink-submit-core</artifactId>
+                            <version>1.2.0</version>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
                         </dependency>
                     </artifactItems>
                 </configuration>

@@ -100,13 +100,6 @@ object FlinkShimsProxy extends Logger {
         val appHome = System.getProperty("app.home")
         require(appHome != null)
 
-        val pluginsPath = new File(s"$appHome/plugins")
-        require(pluginsPath.exists())
-
-        shimsUrls += pluginsPath.listFiles()
-          .find(_.getName.matches("streamx-flink-submit-core-(.*).jar"))
-          .get.toURI.toURL
-
         val libPath = new File(s"$appHome/lib")
         require(libPath.exists())
 
@@ -127,7 +120,7 @@ object FlinkShimsProxy extends Logger {
           }
         })
         val urls = shimsUrls.toArray
-        classLoader = new ChildFirstClassLoader(urls, getFlinkShimsResourcePattern(majorVersion))
+        classLoader = new ChildFirstClassLoader(urls, Thread.currentThread().getContextClassLoader, getFlinkShimsResourcePattern(majorVersion))
         SHIMS_CLASS_LOADER_CACHE.put(majorVersion, classLoader)
         classLoader
       case c => c
