@@ -21,8 +21,9 @@
 package com.streamxhub.streamx.flink.core
 
 import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.streaming.api.graph.StreamGraph
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.table.api.bridge.scala.{StreamStatementSet, StreamTableEnvironment}
 import org.apache.flink.table.api.{Schema, Table, TableDescriptor}
 import org.apache.flink.table.connector.ChangelogMode
 import org.apache.flink.table.module.ModuleEntry
@@ -114,5 +115,9 @@ class StreamTableContext(override val parameter: ParameterTool,
   }
 
   def from(descriptor: TableDescriptor): org.apache.flink.table.api.Table = tableEnv.from(descriptor)
+
+  def $getStreamGraph(clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(clearTransformations)
+
+  override def createStatementSet(): StreamStatementSet = tableEnv.createStatementSet()
 
 }

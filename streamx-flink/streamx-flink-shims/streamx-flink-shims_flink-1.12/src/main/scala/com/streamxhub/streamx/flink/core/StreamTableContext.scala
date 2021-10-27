@@ -21,7 +21,9 @@
 package com.streamxhub.streamx.flink.core
 
 import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.streaming.api.graph.StreamGraph
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.table.api.StatementSet
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.descriptors.{ConnectorDescriptor, StreamTableDescriptor}
 
@@ -53,5 +55,10 @@ class StreamTableContext(override val parameter: ParameterTool,
 
   @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
 
+  def $getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
+
+  def $getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(jobName, clearTransformations)
+
+  override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
 
 }

@@ -86,7 +86,7 @@ object FlinkSqlExecutor extends Logger {
     //TODO registerHiveCatalog
     val insertArray = new ArrayBuffer[String]()
     SqlCommandParser.parseSQL(flinkSql).foreach(x => {
-      val args = x.operands.head
+      val args = if (x.operands.isEmpty) null else x.operands.head
       val command = x.command.name
       x.command match {
         case USE =>
