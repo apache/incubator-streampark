@@ -487,27 +487,29 @@ start() {
     com.streamxhub.streamx.console.StreamXConsole \
     >> "$APP_OUT" 2>&1 "&"
 
-  SLEEP_INTERVAL=5
-
-  STARTED=0
-  while [ $SLEEP_INTERVAL -ge 0 ]; do
-    # shellcheck disable=SC2236
-    if [ -f "$APP_PID" ]; then
-      if [ -s "$APP_PID" ]; then
-        echo_g "StreamX started. pid: `cat "$APP_PID"`"
-        STARTED=1
-        break
+   if [ $? -eq "0" ]; then
+      local SLEEP_INTERVAL=5
+      local STARTED=0
+      while [ $SLEEP_INTERVAL -ge 0 ]; do
+         # shellcheck disable=SC2236
+         if [ -f "$APP_PID" ]; then
+           if [ -s "$APP_PID" ]; then
+             echo_g "StreamX start successful. pid: `cat "$APP_PID"`"
+             STARTED=1
+             break
+           fi
+         fi
+         if [ $SLEEP_INTERVAL -gt 0 ]; then
+           sleep 1
+         fi
+         SLEEP_INTERVAL=`expr $SLEEP_INTERVAL - 1 `
+      done
+      if [ $STARTED -eq 0 ] ;then
+        echo_g "StreamX start successful."
       fi
-    fi
-    if [ $SLEEP_INTERVAL -gt 0 ]; then
-      sleep 1
-    fi
-    SLEEP_INTERVAL=`expr $SLEEP_INTERVAL - 1 `
-  done
-
-  if [ $STARTED -eq 1 ] ;then
-    echo_g "StreamX started."
-  fi
+   else
+      echo_r "StreamX start failed."
+   fi
 }
 
 # shellcheck disable=SC2120
