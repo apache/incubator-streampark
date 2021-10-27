@@ -432,7 +432,7 @@ start() {
   fi
 
   if [ "${HADOOP_HOME}"x == ""x ]; then
-    echo_r "ERROR: HADOOP_HOME is undefined on your system env,please check it."
+    echo_y "WARN: HADOOP_HOME is undefined on your system env,please check it."
   else
     echo_w "Using HADOOP_HOME:   ${HADOOP_HOME}"
   fi
