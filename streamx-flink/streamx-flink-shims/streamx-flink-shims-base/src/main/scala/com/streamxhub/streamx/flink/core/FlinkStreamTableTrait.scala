@@ -192,10 +192,6 @@ abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
 
   def $getStreamGraph: StreamGraph = this.streamEnv.getStreamGraph
 
-  def $getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
-
-  def $getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(jobName, clearTransformations)
-
   def $getWrappedStreamExecutionEnvironment: JavaStreamExecutionEnvironment = this.streamEnv.getWrappedStreamExecutionEnvironment
 
   def $registerCachedFile(filePath: String, name: String): Unit = this.streamEnv.registerCachedFile(filePath, name)
@@ -311,8 +307,6 @@ abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
   override def useDatabase(databaseName: String): Unit = tableEnv.useDatabase(databaseName)
 
   override def getConfig: TableConfig = tableEnv.getConfig
-
-  override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
 
 
   /**

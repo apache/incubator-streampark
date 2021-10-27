@@ -370,7 +370,7 @@ start() {
     APP_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
   fi
 
-  PARAM_CLI="com.streamxhub.streamx.flink.core.scala.conf.ParameterCli"
+  PARAM_CLI="com.streamxhub.streamx.flink.core.conf.ParameterCli"
   # shellcheck disable=SC2034
   # shellcheck disable=SC2006
   vmOption=`$RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.streamxhub.streamx</groupId>
+        <artifactId>streamx-flink-submit</artifactId>
+        <version>1.2.0</version>
+    </parent>
+
+    <artifactId>streamx-flink-submit-api</artifactId>
+    <name>StreamX : Flink Submit Api</name>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-repl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-proxy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-packer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-kubernetes</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <version>${hadoop.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+</project>

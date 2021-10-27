@@ -59,7 +59,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.streamxhub.streamx.common.conf.ConfigurationOptions.OPTION_DEFAULT_VALUE;
+import static com.streamxhub.streamx.common.conf.ConfigurationOptions.KUBERNETES_NAMESPACE_DEFAULT_VALUE;
 import static com.streamxhub.streamx.console.core.enums.FlinkAppState.of;
 
 /**
@@ -113,7 +113,7 @@ public class Application implements Serializable {
     /**
      * k8s部署下的namespace
      */
-    private String k8sNamespace = "default";
+    private String k8sNamespace = KUBERNETES_NAMESPACE_DEFAULT_VALUE;
 
 
     private Integer state;
@@ -249,7 +249,7 @@ public class Application implements Serializable {
     private transient String flinkRestUrl;
 
     public void setK8sNamespace(String k8sNamespace) {
-        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? OPTION_DEFAULT_VALUE : k8sNamespace;
+        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? KUBERNETES_NAMESPACE_DEFAULT_VALUE : k8sNamespace;
     }
 
     public K8sPodTemplates getK8sPodTemplates() {

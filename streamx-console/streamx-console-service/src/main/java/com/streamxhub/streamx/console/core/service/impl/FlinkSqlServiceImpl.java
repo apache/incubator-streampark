@@ -25,31 +25,26 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.common.util.ClassLoaderUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
-import com.streamxhub.streamx.common.util.ExceptionUtils;
 import com.streamxhub.streamx.console.core.dao.FlinkSqlMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
-import com.streamxhub.streamx.console.core.entity.FlinkVersion;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
-import com.streamxhub.streamx.console.core.service.FlinkVersionService;
+import com.streamxhub.streamx.console.core.service.FlinkEnvService;
+import com.streamxhub.streamx.flink.core.FlinkSqlHelper;
 import com.streamxhub.streamx.flink.core.SqlError;
-import com.streamxhub.streamx.flink.repl.shims.FlinkShimsClassLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Method;
 import java.util.List;
-import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 /**
  * @author benjobs
@@ -66,12 +61,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     private ApplicationBackUpService backUpService;
 
     @Autowired
-    private FlinkVersionService flinkVersionService;
-
-    private final Pattern shimsPattern = Pattern.compile(
-        "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-    );
+    private FlinkEnvService flinkEnvService;
 
     /**
      * @param appId
@@ -183,24 +173,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public SqlError verifySql(String sql, Long versionId) {
-        FlinkVersion flinkVersion = flinkVersionService.getById(versionId);
-        ClassLoader loader = FlinkShimsClassLoader.choiceFlinkShimsClassLoader(flinkVersion.toReplFlinkVersion(), true);
-        String error = ClassLoaderUtils.runAsClassLoader(loader, (Supplier<String>) () -> {
-            try {
-                Class<?> clazz = loader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
-                Method method = clazz.getDeclaredMethod("verifySql", String.class);
-                method.setAccessible(true);
-                Object sqlError = method.invoke(null, sql);
-                if (sqlError == null) {
-                    return null;
-                }
-                return sqlError.toString();
-            } catch (Throwable e) {
-                log.error("verifySql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
-            }
-            return null;
-        });
-        return SqlError.fromString(error);
+        FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
+        return FlinkSqlHelper.verifySql(flinkEnv.toFlinkVersion(), sql);
     }
 
     private boolean isFlinkSqlBacked(FlinkSql sql) {

@@ -40,9 +40,9 @@ import org.apache.flink.table.api.TableConfig
 
 import java.io.File
 import java.util.concurrent.TimeUnit
-import scala.collection.JavaConversions._
-import scala.collection.Map
-import scala.util.{Failure, Success, Try}
+import collection.JavaConversions._
+import collection.Map
+import util.{Failure, Success, Try}
 
 private[flink] object FlinkStreamingInitializer {
 

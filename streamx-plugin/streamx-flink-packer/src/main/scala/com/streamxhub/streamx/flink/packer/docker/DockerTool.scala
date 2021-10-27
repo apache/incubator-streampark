@@ -50,9 +50,7 @@ object DockerTool extends Logger {
     tryWithResourceException(DockerRetriever.newDockerClient()) {
       dockerClient =>
         // pull docker image
-        val pullImageCmd = dockerClient.pullImageCmd(dockerFileTemplate.flinkBaseImage)
-          .withRegistry(authConf.registerAddress)
-          .withAuthConfig(authConf.toDockerAuthConf)
+        val pullImageCmd = dockerClient.pullImageCmd(dockerFileTemplate.flinkBaseImage).withAuthConfig(authConf.toDockerAuthConf)
         pullImageCmd.start().awaitCompletion()
         logInfo(s"[streamx-packer] docker pull image ${formatTag(dockerFileTemplate.flinkBaseImage, authConf.registerAddress)} successfully.")
         // build docker image
@@ -110,10 +108,10 @@ object DockerTool extends Logger {
    * format image tag with namespace and remote address.
    *
    * e.g.
-   * tag     registry-1.docker.io -> registry-1.docker.io/library/tag
-   * tag/tag registry-1.docker.io -> registry-1.docker.io/tag/tag
+   * image:tag             registry-1.docker.io -> registry-1.docker.io/library/image:tag
+   * repository/image:tag  registry-1.docker.io -> registry-1.docker.io/repository/image:tag
    */
-  private def formatTag(tag: String, registerAddress: String): String = {
+  def formatTag(tag: String, registerAddress: String): String = {
     if (registerAddress.nonEmpty && !tag.startsWith(registerAddress)) {
       s"$registerAddress${if (tag.contains("/")) "/" else "/library/"}$tag"
     } else tag
