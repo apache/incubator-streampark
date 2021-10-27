@@ -37,8 +37,8 @@ import scala.collection.mutable.{ListBuffer, Map => MutableMap}
 
 object FlinkShimsProxy extends Logger {
 
-  private[this] val FLINK_PATTERN: Pattern = Pattern.compile(
-    "flink-(.*).jar",
+  private[this] val EXCLUDE_PATTERN: Pattern = Pattern.compile(
+    "(flink|scala)-(.*).jar",
     Pattern.CASE_INSENSITIVE | Pattern.DOTALL
   )
 
@@ -107,7 +107,7 @@ object FlinkShimsProxy extends Logger {
             if (majorVersion != null && majorVersion.equals(shimsMatcher.group(1))) {
               shimsUrls += jar.toURI.toURL
             }
-          } else if (!FLINK_PATTERN.matcher(jar.getName).matches()) {
+          } else if (!EXCLUDE_PATTERN.matcher(jar.getName).matches()) {
             shimsUrls += jar.toURI.toURL
           } else {
             logInfo(s"exclude ${jar.getName}")

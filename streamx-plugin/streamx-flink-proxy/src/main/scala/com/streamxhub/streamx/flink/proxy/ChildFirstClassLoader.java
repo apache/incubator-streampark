@@ -53,7 +53,6 @@ public final class ChildFirstClassLoader extends URLClassLoader {
     private static final List<String> PARENT_FIRST_PATTERNS = Arrays.asList(
         "java.",
         "javax.annotation.",
-        "scala.",
         "org.slf4j",
         "org.apache.log4j",
         "org.apache.logging",
@@ -61,12 +60,6 @@ public final class ChildFirstClassLoader extends URLClassLoader {
         "ch.qos.logback",
         "org.xml",
         "javax.xml"
-    );
-
-
-    private Pattern FLINK_PATTERN = Pattern.compile(
-        "flink-(.*).jar",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL
     );
 
     private final Consumer<Throwable> classLoadingExceptionHandler;
@@ -124,7 +117,7 @@ public final class ChildFirstClassLoader extends URLClassLoader {
             String spec = urlClassLoaderResource.getFile();
             String filename = new File(spec.substring(0, spec.indexOf("!/"))).getName();
 
-            if (FLINK_PATTERN.matcher(filename).matches() && !resourcePattern.matcher(filename).matches()) {
+            if (!resourcePattern.matcher(filename).matches()) {
                 return null;
             }
         }
