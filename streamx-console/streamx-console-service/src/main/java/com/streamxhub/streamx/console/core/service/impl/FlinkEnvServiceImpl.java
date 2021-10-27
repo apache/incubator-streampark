@@ -22,9 +22,9 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.console.core.dao.FlinkVersionMapper;
-import com.streamxhub.streamx.console.core.entity.FlinkVersion;
-import com.streamxhub.streamx.console.core.service.FlinkVersionService;
+import com.streamxhub.streamx.console.core.dao.FlinkEnvMapper;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
+import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -39,7 +39,7 @@ import java.util.Date;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class FlinkVersionServiceImpl extends ServiceImpl<FlinkVersionMapper, FlinkVersion> implements FlinkVersionService {
+public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> implements FlinkEnvService {
 
     /**
      * 需要校验两个地方:
@@ -50,18 +50,18 @@ public class FlinkVersionServiceImpl extends ServiceImpl<FlinkVersionMapper, Fli
      * @return
      */
     @Override
-    public boolean exists(FlinkVersion version) {
+    public boolean exists(FlinkEnv version) {
         //1) check name
-        LambdaQueryWrapper<FlinkVersion> nameQuery = new LambdaQueryWrapper<FlinkVersion>()
-                .eq(FlinkVersion::getFlinkName, version.getFlinkName());
+        LambdaQueryWrapper<FlinkEnv> nameQuery = new LambdaQueryWrapper<FlinkEnv>()
+                .eq(FlinkEnv::getFlinkName, version.getFlinkName());
         if (version.getId() != null) {
-            nameQuery.ne(FlinkVersion::getId, version.getId());
+            nameQuery.ne(FlinkEnv::getId, version.getId());
         }
         return this.count(nameQuery) == 0;
     }
 
     @Override
-    public boolean create(FlinkVersion version) {
+    public boolean create(FlinkEnv version) {
         int count = this.baseMapper.selectCount(null);
         if (count == 0) {
             version.setIsDefault(true);
@@ -78,17 +78,17 @@ public class FlinkVersionServiceImpl extends ServiceImpl<FlinkVersionMapper, Fli
     }
 
     @Override
-    public void update(FlinkVersion version) throws IOException {
-        FlinkVersion flinkVersion = super.getById(version.getId());
-        assert flinkVersion != null;
-        flinkVersion.setDescription(version.getDescription());
-        flinkVersion.setFlinkName(version.getFlinkName());
-        if (!version.getFlinkHome().equals(flinkVersion.getFlinkHome())) {
-            flinkVersion.setFlinkHome(version.getFlinkHome());
-            flinkVersion.doSetVersion();
-            flinkVersion.doSetFlinkConf();
+    public void update(FlinkEnv version) throws IOException {
+        FlinkEnv flinkEnv = super.getById(version.getId());
+        assert flinkEnv != null;
+        flinkEnv.setDescription(version.getDescription());
+        flinkEnv.setFlinkName(version.getFlinkName());
+        if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
+            flinkEnv.setFlinkHome(version.getFlinkHome());
+            flinkEnv.doSetVersion();
+            flinkEnv.doSetFlinkConf();
         }
-        updateById(flinkVersion);
+        updateById(flinkEnv);
     }
 
     @Override
@@ -97,30 +97,30 @@ public class FlinkVersionServiceImpl extends ServiceImpl<FlinkVersionMapper, Fli
     }
 
     @Override
-    public FlinkVersion getByAppId(Long appId) {
+    public FlinkEnv getByAppId(Long appId) {
         return this.baseMapper.getByAppId(appId);
     }
 
     @Override
-    public FlinkVersion getDefault() {
+    public FlinkEnv getDefault() {
         return this.baseMapper.selectOne(
-                new LambdaQueryWrapper<FlinkVersion>().eq(FlinkVersion::getIsDefault, true)
+                new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getIsDefault, true)
         );
     }
 
     @Override
-    public FlinkVersion getByIdOrDefault(Long id) {
-        FlinkVersion flinkVersion = getById(id);
-        if (flinkVersion == null) {
+    public FlinkEnv getByIdOrDefault(Long id) {
+        FlinkEnv flinkEnv = getById(id);
+        if (flinkEnv == null) {
             return getDefault();
         }
-        return flinkVersion;
+        return flinkEnv;
     }
 
     @Override
     public void syncConf(Long id) throws IOException {
-        FlinkVersion flinkVersion = getById(id);
-        flinkVersion.doSetFlinkConf();
-        updateById(flinkVersion);
+        FlinkEnv flinkEnv = getById(id);
+        flinkEnv.doSetFlinkConf();
+        updateById(flinkEnv);
     }
 }

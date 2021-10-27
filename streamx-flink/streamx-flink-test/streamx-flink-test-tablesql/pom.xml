@@ -13,14 +13,14 @@
 
     <properties>
         <flink.version>1.14.0</flink.version>
-        <shims.version>1.14</shims.version>
+        <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
     </properties>
 
     <dependencies>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims_flink-${shims.version}</artifactId>
+            <artifactId>streamx-flink-shims_flink-${streamx.flink.shims.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.console.core.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.streamxhub.streamx.console.core.entity.FlinkVersion;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -29,7 +29,7 @@ import org.apache.ibatis.annotations.Update;
 /**
  * @author benjobs
  */
-public interface FlinkVersionMapper extends BaseMapper<FlinkVersion> {
+public interface FlinkEnvMapper extends BaseMapper<FlinkEnv> {
 
     /**
      * 设置为默认
@@ -46,5 +46,5 @@ public interface FlinkVersionMapper extends BaseMapper<FlinkVersion> {
      * @return
      */
     @Select("select v.* from t_flink_version v inner join (select version_id from t_flink_app where id=#{appId}) as t on v.id = t.version_id")
-    FlinkVersion getByAppId(@Param("appId") Long appId);
+    FlinkEnv getByAppId(@Param("appId") Long appId);
 }

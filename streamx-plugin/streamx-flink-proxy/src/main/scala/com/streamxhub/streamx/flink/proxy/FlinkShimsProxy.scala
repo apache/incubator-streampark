@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.proxy
 
-import com.streamxhub.streamx.common.dto.FlinkVersionDTO
+import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.util.{ClassLoaderUtils, Logger, Utils}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, ObjectOutputStream}
@@ -64,7 +64,7 @@ object FlinkShimsProxy extends Logger {
    * @tparam T
    * @return
    */
-  def proxy[T](flinkVersion: FlinkVersionDTO, func: ClassLoader => T): T = {
+  def proxy[T](flinkVersion: FlinkVersion, func: ClassLoader => T): T = {
     val shimsClassLoader = getFlinkShimsClassLoader(flinkVersion)
     ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
@@ -78,14 +78,14 @@ object FlinkShimsProxy extends Logger {
    * @tparam T
    * @return
    */
-  def proxy[T](flinkVersion: FlinkVersionDTO, func: JavaFunc[ClassLoader, T]): T = {
+  def proxy[T](flinkVersion: FlinkVersion, func: JavaFunc[ClassLoader, T]): T = {
     val shimsClassLoader = getFlinkShimsClassLoader(flinkVersion)
     ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, new Supplier[T]() {
       override def get(): T = func.apply(shimsClassLoader)
     })
   }
 
-  private[this] def getFlinkShimsClassLoader(flinkVersion: FlinkVersionDTO): ClassLoader = {
+  private[this] def getFlinkShimsClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
     val majorVersion = flinkVersion.majorVersion
     logInfo(s"flink version: $flinkVersion, shims version: $majorVersion")
     var classLoader = SHIMS_CLASS_LOADER_CACHE.get(majorVersion)

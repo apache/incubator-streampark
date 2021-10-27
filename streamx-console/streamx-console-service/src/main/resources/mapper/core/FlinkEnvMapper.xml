@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.streamxhub.streamx.console.core.dao.FlinkVersionMapper">
-    <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.core.entity.FlinkVersion">
+<mapper namespace="com.streamxhub.streamx.console.core.dao.FlinkEnvMapper">
+    <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.core.entity.FlinkEnv">
         <id column="ID" jdbcType="BIGINT" property="id"/>
         <result column="FLINK_NAME" jdbcType="VARCHAR" property="flinkName"/>
         <result column="FLINK_HOME" jdbcType="VARCHAR" property="flinkHome"/>

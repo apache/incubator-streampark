@@ -21,17 +21,17 @@
 
 package com.streamxhub.streamx.flink.submit.domain
 
-import com.streamxhub.streamx.common.conf.ConfigurationOptions.OPTION_DEFAULT_VALUE
-import com.streamxhub.streamx.common.dto.FlinkVersionDTO
+import com.streamxhub.streamx.common.conf.ConfigurationOptions.KUBERNETES_NAMESPACE_DEFAULT_VALUE
+import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums.ExecutionMode
 
-case class StopRequest(flinkVersion: FlinkVersionDTO,
+case class StopRequest(flinkVersion: FlinkVersion,
                        executionMode: ExecutionMode,
                        clusterId: String,
                        jobId: String,
                        withSavePoint: Boolean,
                        withDrain: Boolean,
                        customSavePointPath: String,
-                       kubernetesNamespace: String = OPTION_DEFAULT_VALUE) {
+                       kubernetesNamespace: String = KUBERNETES_NAMESPACE_DEFAULT_VALUE) {
 
 }

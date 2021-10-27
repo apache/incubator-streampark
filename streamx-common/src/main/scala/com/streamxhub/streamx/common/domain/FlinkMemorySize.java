@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.common.conf;
+package com.streamxhub.streamx.common.domain;
 
 
 import com.streamxhub.streamx.common.util.AssertUtils;
@@ -27,7 +27,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static com.streamxhub.streamx.common.conf.FlinkMemorySize.MemoryUnit.*;
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.*;
 
 /**
  * MemorySize is a representation of a number of bytes, viewable in different units.

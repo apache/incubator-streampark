@@ -28,14 +28,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.console.core.dao.FlinkSqlMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
-import com.streamxhub.streamx.console.core.entity.FlinkVersion;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
-import com.streamxhub.streamx.console.core.service.FlinkVersionService;
+import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.flink.core.FlinkSqlHelper;
 import com.streamxhub.streamx.flink.core.SqlError;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +61,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     private ApplicationBackUpService backUpService;
 
     @Autowired
-    private FlinkVersionService flinkVersionService;
+    private FlinkEnvService flinkEnvService;
 
     /**
      * @param appId
@@ -173,8 +173,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public SqlError verifySql(String sql, Long versionId) {
-        FlinkVersion flinkVersion = flinkVersionService.getById(versionId);
-        return FlinkSqlHelper.verifySql(flinkVersion.toFlinkVersionDTO(), sql);
+        FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
+        return FlinkSqlHelper.verifySql(flinkEnv.toFlinkVersion(), sql);
     }
 
     private boolean isFlinkSqlBacked(FlinkSql sql) {

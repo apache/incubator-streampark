@@ -23,7 +23,7 @@
         <scala.binary.version>2.11</scala.binary.version>
         <junit.version>4.13.1</junit.version>
 
-        <streamx.shims.version>1.14</streamx.shims.version>
+        <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
         <frontend.project.name>streamx-console-webapp</frontend.project.name>
         <env>dev</env>
 
@@ -414,7 +414,7 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-submit-base</artifactId>
+            <artifactId>streamx-flink-submit-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -422,7 +422,7 @@
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-submit-core</artifactId>
             <version>${project.version}</version>
-           <scope>runtime</scope>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>

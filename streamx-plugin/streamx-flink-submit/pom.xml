@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>streamx-flink-submit-base</module>
+        <module>streamx-flink-submit-api</module>
         <module>streamx-flink-submit-core</module>
     </modules>
 

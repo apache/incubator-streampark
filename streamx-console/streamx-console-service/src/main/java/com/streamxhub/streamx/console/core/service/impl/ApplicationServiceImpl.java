@@ -30,8 +30,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.ConfigurationOptions;
-import com.streamxhub.streamx.common.conf.FlinkMemorySize;
 import com.streamxhub.streamx.common.conf.Workspace;
+import com.streamxhub.streamx.common.domain.FlinkMemorySize;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
@@ -120,7 +120,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private ApplicationBackUpService backUpService;
 
     @Autowired
-    private FlinkVersionService flinkVersionService;
+    private FlinkEnvService flinkEnvService;
 
     @Autowired
     private ApplicationConfigService configService;
@@ -375,18 +375,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Application application = getById(appParam.getId());
         FlinkAppState appState = FlinkAppState.of(application.getState());
         try {
-            FlinkVersion flinkVersion;
+            FlinkEnv flinkEnv;
             if (application.getVersionId() != null) {
-                flinkVersion = flinkVersionService.getByIdOrDefault(application.getVersionId());
+                flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
             } else {
                 //任务未指定flink version.则检查是否配置的默认的flink version
-                flinkVersion = flinkVersionService.getDefault();
+                flinkEnv = flinkEnvService.getDefault();
             }
-            if (flinkVersion == null) {
+            if (flinkEnv == null) {
                 return false;
             }
             updateState(application, FlinkAppState.INITIALIZING);
-            envInitializer.checkFlinkEnv(application.getStorageType(), flinkVersion);
+            envInitializer.checkFlinkEnv(application.getStorageType(), flinkEnv);
             envInitializer.storageInitialize(application.getStorageType());
             return true;
         } catch (Throwable e) {
@@ -938,7 +938,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         this.baseMapper.updateById(application);
         //此步骤可能会比较耗时,重新开启一个线程去执行
 
-        FlinkVersion flinkVersion = flinkVersionService.getById(application.getVersionId());
+        FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
 
         executorService.submit(() -> {
             try {
@@ -951,7 +951,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
                 }
                 StopRequest stopInfo = new StopRequest(
-                    flinkVersion.toFlinkVersionDTO(),
+                    flinkEnv.toFlinkVersion(),
                     ExecutionMode.of(application.getExecutionMode()),
                     application.getAppId(),
                     application.getJobId(),
@@ -1149,14 +1149,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.getK8sRestExposedTypeEnum()
         );
 
-        FlinkVersion flinkVersion = flinkVersionService.getByIdOrDefault(application.getVersionId());
-        if (flinkVersion == null) {
+        FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
+        if (flinkEnv == null) {
             throw new IllegalArgumentException("[StreamX] can no found flink version");
         }
 
         SubmitRequest submitRequest = new SubmitRequest(
-            flinkVersion.toFlinkVersionDTO(),
-            flinkVersion.getFlinkConf(),
+            flinkEnv.toFlinkVersion(),
+            flinkEnv.getFlinkConf(),
             flinkUserJar,
             DevelopmentMode.of(application.getJobType()),
             ExecutionMode.of(application.getExecutionMode()),

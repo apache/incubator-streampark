@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.submit.domain
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.{ConfigurationOptions, Workspace}
-import com.streamxhub.streamx.common.dto.FlinkVersionDTO
+import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums._
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
@@ -52,7 +52,7 @@ case class KubernetesSubmitParam(clusterId: String,
                                  @Nullable podTemplates: K8sPodTemplates,
                                  @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
 
-case class SubmitRequest(flinkVersion: FlinkVersionDTO,
+case class SubmitRequest(flinkVersion: FlinkVersion,
                          flinkYaml: String,
                          flinkUserJar: String,
                          developmentMode: DevelopmentMode,

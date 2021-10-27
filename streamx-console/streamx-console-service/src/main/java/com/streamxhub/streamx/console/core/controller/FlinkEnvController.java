@@ -18,8 +18,8 @@ package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
-import com.streamxhub.streamx.console.core.entity.FlinkVersion;
-import com.streamxhub.streamx.console.core.service.FlinkVersionService;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
+import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -37,51 +37,51 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("flink/version")
-public class FlinkVersionController {
+public class FlinkEnvController {
 
     @Autowired
-    private FlinkVersionService flinkVersionService;
+    private FlinkEnvService flinkEnvService;
 
     @PostMapping("list")
     public RestResponse list() {
-        List<FlinkVersion> list = flinkVersionService.list();
+        List<FlinkEnv> list = flinkEnvService.list();
         return RestResponse.create().data(list);
     }
 
     @PostMapping("exists")
-    public RestResponse exists(FlinkVersion version) {
-        boolean checked = flinkVersionService.exists(version);
+    public RestResponse exists(FlinkEnv version) {
+        boolean checked = flinkEnvService.exists(version);
         return RestResponse.create().data(checked);
     }
 
     @PostMapping("create")
-    public RestResponse create(FlinkVersion version) {
-        boolean success = flinkVersionService.create(version);
+    public RestResponse create(FlinkEnv version) {
+        boolean success = flinkEnvService.create(version);
         return RestResponse.create().data(success);
     }
 
     @PostMapping("get")
     public RestResponse get(Long id) throws Exception {
-        FlinkVersion flinkVersion = flinkVersionService.getById(id);
-        flinkVersion.unzipFlinkConf();
-        return RestResponse.create().data(flinkVersion);
+        FlinkEnv flinkEnv = flinkEnvService.getById(id);
+        flinkEnv.unzipFlinkConf();
+        return RestResponse.create().data(flinkEnv);
     }
 
     @PostMapping("sync")
     public RestResponse sync(Long id) throws Exception {
-        flinkVersionService.syncConf(id);
+        flinkEnvService.syncConf(id);
         return RestResponse.create();
     }
 
     @PostMapping("update")
-    public RestResponse update(FlinkVersion version) throws Exception {
-        flinkVersionService.update(version);
+    public RestResponse update(FlinkEnv version) throws Exception {
+        flinkEnvService.update(version);
         return RestResponse.create();
     }
 
     @PostMapping("default")
     public RestResponse setDefault(Long id) throws ServiceException {
-        flinkVersionService.setDefault(id);
+        flinkEnvService.setDefault(id);
         return RestResponse.create();
     }
 

@@ -18,7 +18,7 @@ package com.streamxhub.streamx.console.core.entity;
 
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.streamxhub.streamx.common.dto.FlinkVersionDTO;
+import com.streamxhub.streamx.common.domain.FlinkVersion;
 import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  */
 @Data
 @TableName("t_flink_version")
-public class FlinkVersion implements Serializable {
+public class FlinkEnv implements Serializable {
 
     private Long id;
 
@@ -136,8 +136,8 @@ public class FlinkVersion implements Serializable {
         return this.version.split("\\.")[2];
     }
 
-    public FlinkVersionDTO toFlinkVersionDTO() {
-        return new FlinkVersionDTO(this.version, this.flinkHome);
+    public FlinkVersion toFlinkVersion() {
+        return new FlinkVersion(this.version, this.flinkHome);
     }
 
 }

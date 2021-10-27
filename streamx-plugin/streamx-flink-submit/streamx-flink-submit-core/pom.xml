@@ -16,7 +16,7 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-submit-base</artifactId>
+            <artifactId>streamx-flink-submit-api</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -25,7 +25,7 @@
           so a full build dependencies is required. -->
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims_flink-${streamx.shims.version}</artifactId>
+            <artifactId>streamx-flink-shims_flink-${streamx.flink.shims.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

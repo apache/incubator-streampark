@@ -21,14 +21,14 @@
 package com.streamxhub.streamx.console.core.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.streamxhub.streamx.console.core.entity.FlinkVersion;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 
 import java.io.IOException;
 
 /**
  * @author benjobs
  */
-public interface FlinkVersionService extends IService<FlinkVersion> {
+public interface FlinkEnvService extends IService<FlinkEnv> {
 
     /**
      * check exists
@@ -36,7 +36,7 @@ public interface FlinkVersionService extends IService<FlinkVersion> {
      * @param version
      * @return
      */
-    boolean exists(FlinkVersion version);
+    boolean exists(FlinkEnv version);
 
     /**
      * create new
@@ -44,7 +44,7 @@ public interface FlinkVersionService extends IService<FlinkVersion> {
      * @param version
      * @throws IOException
      */
-    boolean create(FlinkVersion version);
+    boolean create(FlinkEnv version);
 
     /**
      * update
@@ -52,7 +52,7 @@ public interface FlinkVersionService extends IService<FlinkVersion> {
      * @param version
      * @throws IOException
      */
-    void update(FlinkVersion version) throws IOException;
+    void update(FlinkEnv version) throws IOException;
 
     /**
      * 根据appId获取flinkVersion
@@ -60,7 +60,7 @@ public interface FlinkVersionService extends IService<FlinkVersion> {
      * @param appId
      * @return
      */
-    FlinkVersion getByAppId(Long appId);
+    FlinkEnv getByAppId(Long appId);
 
     /**
      * 设置某个flink版本为默认版本
@@ -74,14 +74,14 @@ public interface FlinkVersionService extends IService<FlinkVersion> {
      *
      * @return
      */
-    FlinkVersion getDefault();
+    FlinkEnv getDefault();
 
     /**
      * 根据id获取 如果获取不到则使用默认的flink版本
      *
      * @return
      */
-    FlinkVersion getByIdOrDefault(Long id);
+    FlinkEnv getByIdOrDefault(Long id);
 
     /**
      * 同步配置文件

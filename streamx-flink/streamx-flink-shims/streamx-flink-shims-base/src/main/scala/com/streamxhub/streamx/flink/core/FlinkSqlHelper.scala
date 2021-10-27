@@ -1,12 +1,12 @@
 package com.streamxhub.streamx.flink.core
 
-import com.streamxhub.streamx.common.dto.FlinkVersionDTO
+import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy
 
 object FlinkSqlHelper extends Logger {
 
-  def verifySql(flinkVersion: FlinkVersionDTO, sql: String): SqlError = {
+  def verifySql(flinkVersion: FlinkVersion, sql: String): SqlError = {
     val error = FlinkShimsProxy.proxy(flinkVersion, (classLoader: ClassLoader) => {
       try {
         val clazz = classLoader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator")
