@@ -35,7 +35,7 @@ import scala.collection.JavaConversions._
  * @param version   Actual flink version number, like "1.13.2", "1.14.0"
  * @param flinkHome Autual flink home that must be a readable local path
  */
-class FlinkVersion(val flinkHome: String) {
+class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
 
   private[this] lazy val FLINK_VER_PATTERN = Pattern.compile("^(\\d+\\.\\d+)(\\.)?.*$")
 
