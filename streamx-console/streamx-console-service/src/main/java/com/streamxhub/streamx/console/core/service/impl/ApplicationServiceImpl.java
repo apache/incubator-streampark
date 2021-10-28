@@ -82,6 +82,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.jar.Manifest;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.Bridge.toTrkId;
@@ -1178,6 +1179,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         applicationLog.setStartTime(new Date());
 
         try {
+            if(!checkJobName(application.getJobName())){
+                throw new RuntimeException("The job name is irregular string. please check it again.");
+            }
 
             SubmitResponse submitResponse = FlinkSubmitHelper.submit(submitRequest);
 
@@ -1237,6 +1241,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             return false;
         }
+    }
+    private Boolean checkJobName(String jobName){
+        if(!StringUtils.isEmpty(jobName.trim())){
+            String pattern = "^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_—-]+$";
+            return Pattern.matches(pattern, jobName);
+        }
+        return false;
     }
 
     private String getSavePointed(Application appParam) {
