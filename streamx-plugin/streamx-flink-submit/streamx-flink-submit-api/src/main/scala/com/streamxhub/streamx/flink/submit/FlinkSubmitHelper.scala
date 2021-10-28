@@ -78,7 +78,7 @@ object FlinkSubmitHelper extends Logger {
           .filter(_ != null)
           .map(_.trim)
           .map(DYNAMIC_OPTION_ITEM_PATTERN.matcher(_))
-          .filter(m => m.matches())
+          .filter(_.matches())
           .map(m => m.group(2) -> m.group(3))
           .toMap
         ).getOrElse(Map.empty)
