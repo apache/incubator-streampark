@@ -52,6 +52,7 @@ public final class ChildFirstClassLoader extends URLClassLoader {
 
     private static final List<String> PARENT_FIRST_PATTERNS = Arrays.asList(
         "java.",
+        "javax.xml",
         "javax.annotation.",
         "org.slf4j",
         "org.apache.log4j",
@@ -59,7 +60,8 @@ public final class ChildFirstClassLoader extends URLClassLoader {
         "org.apache.commons.logging",
         "ch.qos.logback",
         "org.xml",
-        "javax.xml"
+        "org.w3c",
+        "org.apache.hadoop"
     );
 
     private final Consumer<Throwable> classLoadingExceptionHandler;
