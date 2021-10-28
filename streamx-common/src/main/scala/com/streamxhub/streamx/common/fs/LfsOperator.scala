@@ -33,10 +33,18 @@ import java.io.{File, FileInputStream}
  * Local File System (aka LFS) Operator
  */
 //noinspection DuplicatedCode
-object LFsOperator extends FsOperator with Logger {
+object LfsOperator extends FsOperator with Logger {
 
   override def exists(path: String): Boolean = {
     StringUtils.isNotBlank(path) && new File(path).exists()
+  }
+
+  /**
+   * Force delete directory and recreate it.
+   */
+  def mkCleanDirs(path: String): Unit = {
+    delete(path)
+    mkdirs(path)
   }
 
   override def mkdirs(path: String): Unit = {
