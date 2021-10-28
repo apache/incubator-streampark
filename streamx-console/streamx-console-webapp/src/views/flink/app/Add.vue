@@ -334,7 +334,8 @@
             type="text"
             allowClear
             placeholder="Please enter Main class"
-            v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]"/>
+            v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]">
+          </a-input>
         </a-form-item>
 
         <a-form-item
