@@ -99,14 +99,14 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
 
   override def toString: String =
     s"""
-       |-------------------------<<flinkVersion>>------------------------
-       | flinkHome    : $flinkHome
-       | distJarName  : ${flinkDistJar.getName}
-       | flinkVersion : $version
-       | majorVersion : $majorVersion
-       | scalaVersion : $scalaVersion
-       | shimsVersion : $shimsVersion
-       |__________________________________________________________________
+       |----------------------------------------- flink version -----------------------------------
+       |     flinkHome    : $flinkHome
+       |     distJarName  : ${flinkDistJar.getName}
+       |     flinkVersion : $version
+       |     majorVersion : $majorVersion
+       |     scalaVersion : $scalaVersion
+       |     shimsVersion : $shimsVersion
+       |-------------------------------------------------------------------------------------------
        |""".stripMargin
 
 }
