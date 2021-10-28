@@ -19,7 +19,6 @@ package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.streamxhub.streamx.common.domain.FlinkVersion;
-import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
 import lombok.Data;
@@ -29,19 +28,14 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author benjobs
  */
 @Data
-@TableName("t_flink_version")
+@TableName("t_flink_env")
 public class FlinkEnv implements Serializable {
 
     private Long id;
@@ -54,6 +48,8 @@ public class FlinkEnv implements Serializable {
 
     private String description;
 
+    private String scalaVersion;
+
     private String version;
 
     /**
@@ -63,39 +59,7 @@ public class FlinkEnv implements Serializable {
 
     private Date createTime;
 
-    @JsonIgnore
-    private transient final Pattern flinkVersionPattern = Pattern.compile("^Version: (.*), Commit ID: (.*)$");
-
-    @JsonIgnore
-    public String extractFlinkVersion(String path) {
-        assert path != null;
-        AtomicReference<String> flinkVersion = new AtomicReference<>();
-        if (path != null) {
-            String libPath = path.concat("/lib");
-            File[] distJar = new File(libPath).listFiles(x -> x.getName().matches("flink-dist_.*\\.jar"));
-            if (distJar == null || distJar.length == 0) {
-                throw new IllegalArgumentException("[StreamX] can no found flink-dist jar in " + libPath);
-            }
-            if (distJar.length > 1) {
-                throw new IllegalArgumentException("[StreamX] found multiple flink-dist jar in " + libPath);
-            }
-            List<String> cmd = Arrays.asList(
-                "cd ".concat(path),
-                String.format(
-                    "java -classpath %s org.apache.flink.client.cli.CliFrontend --version",
-                    distJar[0].getAbsolutePath()
-                )
-            );
-
-            CommandUtils.execute(cmd, versionInfo -> {
-                Matcher matcher = flinkVersionPattern.matcher(versionInfo);
-                if (matcher.find()) {
-                    flinkVersion.set(matcher.group(1));
-                }
-            });
-        }
-        return flinkVersion.get();
-    }
+    private transient FlinkVersion flinkVersion;
 
     public void doSetFlinkConf() throws IOException {
         assert this.flinkHome != null;
@@ -105,15 +69,24 @@ public class FlinkEnv implements Serializable {
         this.flinkConf = DeflaterUtils.zipString(flinkConf);
     }
 
-    public void doSetVersion() throws IOException {
+    public void doSetVersion() {
         assert this.flinkHome != null;
-        this.setVersion(this.extractFlinkVersion(this.getFlinkHome()));
+        this.setVersion(this.getFlinkVersion().version());
+        this.setScalaVersion(this.getFlinkVersion().scalaVersion());
     }
 
     @JsonIgnore
     public Map<String, String> convertFlinkYamlAsMap() {
         String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
         return PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
+    }
+
+    @JsonIgnore
+    public FlinkVersion getFlinkVersion() {
+        if (this.flinkVersion == null) {
+            this.flinkVersion = new FlinkVersion(this.flinkHome);
+        }
+        return this.flinkVersion;
     }
 
     public void unzipFlinkConf() {
@@ -136,8 +109,5 @@ public class FlinkEnv implements Serializable {
         return this.version.split("\\.")[2];
     }
 
-    public FlinkVersion toFlinkVersion() {
-        return new FlinkVersion(this.version, this.flinkHome);
-    }
 
 }

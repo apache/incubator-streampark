@@ -26,6 +26,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
+import com.streamxhub.streamx.common.util.ExceptionUtils;
 import com.streamxhub.streamx.console.core.dao.FlinkSqlMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
@@ -34,17 +35,19 @@ import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
-import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
-import com.streamxhub.streamx.flink.core.FlinkSqlHelper;
+import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.flink.core.SqlError;
+import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author benjobs
@@ -174,7 +177,22 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     @Override
     public SqlError verifySql(String sql, Long versionId) {
         FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
-        return FlinkSqlHelper.verifySql(flinkEnv.toFlinkVersion(), sql);
+        String error = FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), (Function<ClassLoader, String>) classLoader -> {
+            try {
+                Class<?> clazz = classLoader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
+                Method method = clazz.getDeclaredMethod("verifySql", String.class);
+                method.setAccessible(true);
+                Object sqlError = method.invoke(null, sql);
+                if (sqlError == null) {
+                    return null;
+                }
+                return sqlError.toString();
+            } catch (Throwable e) {
+                log.error("verifySql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
+            }
+            return null;
+        });
+        return SqlError.fromString(error);
     }
 
     private boolean isFlinkSqlBacked(FlinkSql sql) {

@@ -13,7 +13,6 @@
             <excludes>
                 <exclude>com.streamxhub.streamx:streamx-jvm-profiler</exclude>
                 <exclude>com.streamxhub.streamx:streamx-flink-sqlclient</exclude>
-                <exclude>com.streamxhub.streamx:streamx-flink-submit-core</exclude>
                 <exclude>javax.servlet:servlet-api</exclude>
             </excludes>
         </dependencySet>
@@ -22,7 +21,6 @@
             <includes>
                 <include>com.streamxhub.streamx:streamx-jvm-profiler</include>
                 <include>com.streamxhub.streamx:streamx-flink-sqlclient</include>
-                <include>com.streamxhub.streamx:streamx-flink-submit-core</include>
             </includes>
         </dependencySet>
     </dependencySets>

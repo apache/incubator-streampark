@@ -60,7 +60,7 @@
           v-decorator="[ 'versionId', {rules: [{ required: true, message: 'Flink Version is required' }] }]"
           @change="handleFlinkVersion">>
           <a-select-option
-            v-for="(v,index) in flinkVersions"
+            v-for="(v,index) in flinkEnvs"
             :key="`version_${index}`"
             :value="v.id">
             {{ v.flinkName }}
@@ -459,7 +459,7 @@ import { jars } from '@api/project'
 import { get, update, exists, main } from '@api/application'
 import { mapActions, mapGetters } from 'vuex'
 import configOptions from './Option'
-import {list as listVersion} from '@/api/flinkversion'
+import {list as listFlinkEnv} from '@/api/flinkenv'
 
 export default {
   name: 'EditFlink',
@@ -476,7 +476,7 @@ export default {
       defaultJar: null,
       configSource: [],
       jars: [],
-      flinkVersions: [],
+      flinkEnvs: [],
       validateAgain: false,
       resolveOrder: [
         { name: 'parent-first', order: 0 },
@@ -543,8 +543,8 @@ export default {
       this.optionsValueMapping.set(item.name, item.key)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
-    listVersion().then((resp)=>{
-      this.flinkVersions = resp.data
+    listFlinkEnv().then((resp)=>{
+      this.flinkEnvs = resp.data
     })
   },
 

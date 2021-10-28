@@ -53,7 +53,7 @@
         SELECT t.*,p.name as projectName,u.username,v.version as flinkVersion FROM t_flink_app t
         inner join t_user u
         on t.user_id = u.user_id
-        left join t_flink_version v
+        left join t_flink_env v
         on t.version_id = v.id
         left join t_flink_project p
         on t.project_id = p.id

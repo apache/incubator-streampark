@@ -25,10 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -51,13 +48,20 @@ public final class ChildFirstClassLoader extends URLClassLoader {
     public static final Consumer<Throwable> NOOP_EXCEPTION_HANDLER = classLoadingException -> {
     };
 
-    private static final String[] ALWAYS_PARENT_FIRST_LOADER_PATTERNS = "java.;scala.;org.apache.flink.;com.esotericsoftware.kryo;org.apache.hadoop.;javax.annotation.;org.slf4j;org.apache.log4j;org.apache.logging;org.apache.commons.logging;ch.qos.logback;org.xml;javax.xml;org.apache.xerces;org.w3c"
-        .split(";");
+    private final String JAR_PROTOCOL = "jar";
 
-
-    private Pattern FLINK_PATTERN = Pattern.compile(
-        "flink-(.*).jar",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+    private static final List<String> PARENT_FIRST_PATTERNS = Arrays.asList(
+        "java.",
+        "javax.xml",
+        "javax.annotation.",
+        "org.slf4j",
+        "org.apache.log4j",
+        "org.apache.logging",
+        "org.apache.commons.logging",
+        "ch.qos.logback",
+        "org.xml",
+        "org.w3c",
+        "org.apache.hadoop"
     );
 
     private final Consumer<Throwable> classLoadingExceptionHandler;
@@ -108,14 +112,14 @@ public final class ChildFirstClassLoader extends URLClassLoader {
 
 
     private URL filterFlinkShimsResource(URL urlClassLoaderResource) {
-        if (urlClassLoaderResource != null && "jar".equals(urlClassLoaderResource.getProtocol())) {
+        if (urlClassLoaderResource != null && JAR_PROTOCOL.equals(urlClassLoaderResource.getProtocol())) {
             /**
              * {@link java.net.JarURLConnection#parseSpecs}
              */
             String spec = urlClassLoaderResource.getFile();
             String filename = new File(spec.substring(0, spec.indexOf("!/"))).getName();
 
-            if (FLINK_PATTERN.matcher(filename).matches() && !resourcePattern.matcher(filename).matches()) {
+            if (!resourcePattern.matcher(filename).matches()) {
                 return null;
             }
         }
@@ -131,7 +135,6 @@ public final class ChildFirstClassLoader extends URLClassLoader {
                 result.add(urlClassLoaderResource);
             }
         }
-
         return result;
     }
 
@@ -170,8 +173,8 @@ public final class ChildFirstClassLoader extends URLClassLoader {
         if (c == null) {
             if (c == null) {
                 // check whether the class should go parent-first
-                for (String alwaysParentFirstPattern : ALWAYS_PARENT_FIRST_LOADER_PATTERNS) {
-                    if (name.startsWith(alwaysParentFirstPattern)) {
+                for (String parentFirstPattern : PARENT_FIRST_PATTERNS) {
+                    if (name.startsWith(parentFirstPattern)) {
                         return super.loadClass(name, resolve);
                     }
                 }

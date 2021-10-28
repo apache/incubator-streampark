@@ -36,45 +36,40 @@ object FlinkSubmitHelper extends Logger {
   // effective k-v regex pattern of submit.dynamicOption
   private val DYNAMIC_OPTION_ITEM_PATTERN = Pattern.compile("(-D)?(\\S+)=(\\S+)")
 
-  def submit(submitRequest: SubmitRequest): SubmitResponse = {
+  private[this] val FLINKSUBMIT_CLASS_NAME = "com.streamxhub.streamx.flink.submit.FlinkSubmit"
+
+  private[this] val SUBMITREQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.domain.SubmitRequest"
+
+  private[this] val STOPREQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.domain.StopRequest"
+
+  @throws[Throwable] def submit(submitRequest: SubmitRequest): SubmitResponse = {
     FlinkShimsProxy.proxy(submitRequest.flinkVersion, (classLoader: ClassLoader) => {
-      try {
-        val clazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.FlinkSubmit")
-        val submitRequestClazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.domain.SubmitRequest")
-        val method = clazz.getDeclaredMethod("submit", submitRequestClazz)
-        method.setAccessible(true)
-        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, submitRequest))
-        if (obj == null) null
-        else FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[SubmitResponse]
-      } catch {
-        case e: Throwable => logError("submit invocationTargetException", e)
-          null
-      }
+      val submitClass = classLoader.loadClass(FLINKSUBMIT_CLASS_NAME)
+      val requestClass = classLoader.loadClass(SUBMITREQUEST_CLASS_NAME)
+      val method = submitClass.getDeclaredMethod("submit", requestClass)
+      method.setAccessible(true)
+      val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, submitRequest))
+      require(obj != null)
+      FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[SubmitResponse]
     })
   }
 
-  def stop(stopRequest: StopRequest): StopResponse = {
+  @throws[Throwable] def stop(stopRequest: StopRequest): StopResponse = {
     FlinkShimsProxy.proxy(stopRequest.flinkVersion, (classLoader: ClassLoader) => {
-      try {
-        val clazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.FlinkSubmit")
-        val stopRequestClazz = classLoader.loadClass("com.streamxhub.streamx.flink.submit.domain.StopRequest")
-        val method = clazz.getDeclaredMethod("stop", stopRequestClazz)
-        method.setAccessible(true)
-        val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, stopRequest))
-        if (obj == null) null
-        else FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[StopResponse]
-      } catch {
-        case e: Throwable => logError("submit invocationTargetException", e)
-          null
-      }
+      val submitClass = classLoader.loadClass(FLINKSUBMIT_CLASS_NAME)
+      val requestClass = classLoader.loadClass(STOPREQUEST_CLASS_NAME)
+      val method = submitClass.getDeclaredMethod("stop", requestClass)
+      method.setAccessible(true)
+      val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, stopRequest))
+      require(obj != null)
+      FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[StopResponse]
     })
   }
 
   /**
    * extract flink configuration from submitRequest.dynamicOption
    */
-  @Nonnull
-  def extractDynamicOption(dynamicOption: Array[String]): Map[String, String] = {
+  @Nonnull def extractDynamicOption(dynamicOption: Array[String]): Map[String, String] = {
     dynamicOption match {
       case x if Utils.isEmpty(x) =>
         Map.empty
@@ -83,7 +78,7 @@ object FlinkSubmitHelper extends Logger {
           .filter(_ != null)
           .map(_.trim)
           .map(DYNAMIC_OPTION_ITEM_PATTERN.matcher(_))
-          .filter(m => m.matches())
+          .filter(_.matches())
           .map(m => m.group(2) -> m.group(3))
           .toMap
         ).getOrElse(Map.empty)
@@ -93,8 +88,7 @@ object FlinkSubmitHelper extends Logger {
   /**
    * extract flink configuration from application.dynamicOption
    */
-  @Nonnull
-  def extractDynamicOption(dynamicOptions: String): Map[String, String] = {
+  @Nonnull def extractDynamicOption(dynamicOptions: String): Map[String, String] = {
     if (StringUtils.isEmpty(dynamicOptions)) {
       Map.empty[String, String]
     } else {
@@ -102,8 +96,7 @@ object FlinkSubmitHelper extends Logger {
     }
   }
 
-  @Nonnull
-  def extractDynamicOptionAsJava(dynamicOptions: String): JavaMap[String, String] = extractDynamicOption(dynamicOptions).asJava
+  @Nonnull def extractDynamicOptionAsJava(dynamicOptions: String): JavaMap[String, String] = extractDynamicOption(dynamicOptions).asJava
 
 
 }

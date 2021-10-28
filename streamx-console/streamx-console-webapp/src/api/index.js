@@ -86,14 +86,14 @@ export default {
     HISTORY: '/flink/conf/history',
     DELETE: '/flink/conf/delete'
   },
-  FlinkVersion: {
-    LIST: '/flink/version/list',
-    CREATE:  '/flink/version/create',
-    EXISTS: '/flink/version/exists',
-    GET: '/flink/version/get',
-    SYNC: '/flink/version/sync',
-    UPDATE: '/flink/version/update',
-    DEFAULT: '/flink/version/default',
+  FlinkEnv: {
+    LIST: '/flink/env/list',
+    CREATE:  '/flink/env/create',
+    EXISTS: '/flink/env/exists',
+    GET: '/flink/env/get',
+    SYNC: '/flink/env/sync',
+    UPDATE: '/flink/env/update',
+    DEFAULT: '/flink/env/default',
   },
   FlinkSQL: {
     VERIFY: '/flink/sql/verify',

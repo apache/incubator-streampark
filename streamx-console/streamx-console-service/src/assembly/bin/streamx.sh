@@ -37,54 +37,73 @@
 #                   used
 # -----------------------------------------------------------------------------
 
-#echo color
-RED_COLOR="\E[1;31m";
-GREEN_COLOR="\E[1;32m";
-YELLOW_COLOR="\E[1;33m";
-BLUE_COLOR='\E[1;34m';
-WHITE_COLOR="\E[1;37m";
-RES="\E[0m";
+# Bugzilla 37848: When no TTY is available, don't output to console
+have_tty=0
+# shellcheck disable=SC2006
+if [[ "`tty`" != "not a tty" ]]; then
+    have_tty=1
+fi
 
-printf "\n\n"
-printf "${RED_COLOR}                .+.                                         ${RES}\n"
-printf "${RED_COLOR}          _____/ /_________  ____ _____ ___  _  __          ${RES}\n"
-printf "${RED_COLOR}         / ___/ __/ ___/ _ \/ __ \`/ __ \`__ \| |/_/        ${RES}\n"
-printf "${RED_COLOR}        (__  ) /_/ /  /  __/ /_/ / / / / / />   <           ${RES}\n"
-printf "${RED_COLOR}       /____/\__/_/   \___/\__,_/_/ /_/ /_/_/|_|            ${RES}\n"
-printf "${RED_COLOR}                                             |/             ${RES}\n"
-printf "${RED_COLOR}                                             .              ${RES}\n\n"
-printf "${BLUE_COLOR}       WebSite:  http://www.streamxhub.com                 ${RES}\n"
-printf "${BLUE_COLOR}       GitHub :  https://github.com/streamxhub/streamx     ${RES}\n"
-printf "${BLUE_COLOR}       Gitee  :  https://gitee.com/streamxhub/streamx      ${RES}\n\n"
-printf "${GREEN_COLOR}                ────────  Make Flink|Spark easier ô‿ô!     ${RES}\n\n\n"
+# Bugzilla 37848: When no TTY is available, don't output to console
+have_tty=0
+# shellcheck disable=SC2006
+if [[ "`tty`" != "not a tty" ]]; then
+    have_tty=1
+fi
 
+ # Only use colors if connected to a terminal
+if [[ ${have_tty} -eq 1 ]]; then
+  RAINBOW="
+    $(printf '\033[38;5;196m')
+    $(printf '\033[38;5;202m')
+    $(printf '\033[38;5;226m')
+    $(printf '\033[38;5;082m')
+    $(printf '\033[38;5;021m')
+    $(printf '\033[38;5;093m')
+    $(printf '\033[38;5;163m')
+  "
+  RED=$(printf '\033[31m')
+  GREEN=$(printf '\033[32m')
+  YELLOW=$(printf '\033[33m')
+  BLUE=$(printf '\033[34m')
+  BOLD=$(printf '\033[1m')
+  RESET=$(printf '\033[m')
+else
+  RAINBOW=""
+  RED=""
+  GREEN=""
+  YELLOW=""
+  BLUE=""
+  BOLD=""
+  RESET=""
+fi
 
 echo_r () {
     # Color red: Error, Failed
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}StreamX${RES}] ${RED_COLOR}$1${RES}\n"
+    printf "[${BLUE}StreamX${RES}] ${RED}$1${RES}\n"
 }
 
 echo_g () {
     # Color green: Success
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}StreamX${RES}] ${GREEN_COLOR}$1${RES}\n"
+    printf "[${BLUE}StreamX${RES}] ${GREEN}$1${RES}\n"
 }
 
 echo_y () {
     # Color yellow: Warning
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}StreamX${RES}] ${YELLOW_COLOR}$1${RES}\n"
+    printf "[${BLUE}StreamX${RES}] ${YELLOW}$1${RES}\n"
 }
 
 echo_w () {
     # Color yellow: White
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}StreamX${RES}] ${WHITE_COLOR}$1${RES}\n"
+    printf "[${BLUE}StreamX${RES}] ${WHITE}$1${RES}\n"
 }
 
 # OS specific support.  $var _must_ be set to either true or false.
@@ -215,20 +234,6 @@ if [[ ! -z "$CLASSPATH" ]] ; then
 fi
 CLASSPATH="$CLASSPATH"
 
-# Bugzilla 37848: When no TTY is available, don't output to console
-have_tty=0
-# shellcheck disable=SC2006
-if [[ "`tty`" != "not a tty" ]]; then
-    have_tty=1
-fi
-
-# Bugzilla 37848: When no TTY is available, don't output to console
-have_tty=0
-# shellcheck disable=SC2006
-if [[ "`tty`" != "not a tty" ]]; then
-    have_tty=1
-fi
-
 # For Cygwin, switch paths to Windows format before running java
 if ${cygwin}; then
   # shellcheck disable=SC2006
@@ -256,6 +261,88 @@ if [ "$USE_NOHUP" = "true" ]; then
 fi
 
 # ----- Execute The Requested Command -----------------------------------------
+
+supports_hyperlinks() {
+  # $FORCE_HYPERLINK must be set and be non-zero (this acts as a logic bypass)
+  if [ -n "$FORCE_HYPERLINK" ]; then
+    [ "$FORCE_HYPERLINK" != 0 ]
+    return $?
+  fi
+
+  # If stdout is not a tty, it doesn't support hyperlinks
+  [[ ${have_tty} -eq 1 ]] || return 1
+
+  # DomTerm terminal emulator (domterm.org)
+  if [ -n "$DOMTERM" ]; then
+    return 0
+  fi
+
+  # VTE-based terminals above v0.50 (Gnome Terminal, Guake, ROXTerm, etc)
+  if [ -n "$VTE_VERSION" ]; then
+    [ $VTE_VERSION -ge 5000 ]
+    return $?
+  fi
+
+  # If $TERM_PROGRAM is set, these terminals support hyperlinks
+  case "$TERM_PROGRAM" in
+  Hyper|iTerm.app|terminology|WezTerm) return 0 ;;
+  esac
+
+  # kitty supports hyperlinks
+  if [ "$TERM" = xterm-kitty ]; then
+    return 0
+  fi
+
+  # Windows Terminal or Konsole also support hyperlinks
+  if [ -n "$WT_SESSION" ] || [ -n "$KONSOLE_VERSION" ]; then
+    return 0
+  fi
+
+  return 1
+}
+
+fmt_link() {
+  # $1: text, $2: url, $3: fallback mode
+  if supports_hyperlinks; then
+    printf '\033]8;;%s\a%s\033]8;;\a\n' "$2" "$1"
+    return
+  fi
+
+  case "$3" in
+  --text) printf '%s\n' "$1" ;;
+  --url|*) fmt_underline "$2" ;;
+  esac
+}
+
+fmt_underline() {
+  [[ ${have_tty} -eq 1 ]] && printf '\033[4m%s\033[24m\n' "$*" || printf '%s\n' "$*"
+}
+
+# shellcheck disable=SC2016 # backtick in single-quote
+fmt_code() {
+  [[ ${have_tty} -eq 1 ]] && printf '`\033[2m%s\033[22m`\n' "$*" || printf '`%s`\n' "$*"
+}
+
+fmt_error() {
+  printf '%sError: %s%s\n' "$BOLD$RED" "$*" "$RESET" >&2
+}
+
+print_logo() {
+  printf '\n'
+  printf '%s           %s.+. %s   %s     %s     %s          %s                         %s\n' $RAINBOW $RESET
+  printf '%s     _____%s/ /_%s_____%s___  %s____ %s_____ ___ %s _  __                  %s\n' $RAINBOW $RESET
+  printf '%s    / ___/%s __%s/ ___%s/ _ \%s/ __ `%s/ __ `__ \%s| |/_/                  %s\n' $RAINBOW $RESET
+  printf '%s   (__  )%s /_%s/ /  %s/  __/%s /_/ %s/ / / / / /%s>   <                   %s\n' $RAINBOW $RESET
+  printf '%s  /____/%s\__%s/_/   %s\___/%s\__,_%s/_/ /_/ /_/%s_/|_|                    %s\n' $RAINBOW $RESET
+  printf '%s       %s    %s     %s      %s     %s           %s  |/                     %s\n' $RAINBOW $RESET
+  printf '%s      %s    %s    %s      %s     %s             %s  .                      %s\n' $RAINBOW $RESET
+  printf '%s\n'"  • WebSite:  $(fmt_link "@streamxhub" http://www.streamxhub.com)"
+  printf '%s\n'"  • GitHub :  $(fmt_link "GitHub" http://github.com/streamxhub/streamx)"
+  printf '%s\n'"  • Gitee  :  $(fmt_link "Gitee" http://gitee.com/streamxhub/streamx)"
+  printf '%s\n'"            ────────  Make Flink|Spark easier ô‿ô!"
+  printf '%s\n\n' $RESET
+
+}
 
 # shellcheck disable=SC2120
 running() {
@@ -344,7 +431,9 @@ start() {
     fi
   fi
 
-  if [ "${HADOOP_HOME}"x != ""x ]; then
+  if [ "${HADOOP_HOME}"x == ""x ]; then
+    echo_y "WARN: HADOOP_HOME is undefined on your system env,please check it."
+  else
     echo_w "Using HADOOP_HOME:   ${HADOOP_HOME}"
   fi
 
@@ -398,31 +487,33 @@ start() {
     com.streamxhub.streamx.console.StreamXConsole \
     >> "$APP_OUT" 2>&1 "&"
 
-  SLEEP_INTERVAL=5
-
-  STARTED=0
-  while [ $SLEEP_INTERVAL -ge 0 ]; do
-    # shellcheck disable=SC2236
-    if [ -f "$APP_PID" ]; then
-      if [ -s "$APP_PID" ]; then
-        echo_g "StreamX started. pid: `cat "$APP_PID"`"
-        STARTED=1
-        break
+   if [ $? -eq "0" ]; then
+      local SLEEP_INTERVAL=5
+      local STARTED=0
+      while [ $SLEEP_INTERVAL -ge 0 ]; do
+         # shellcheck disable=SC2236
+         if [ -f "$APP_PID" ]; then
+           if [ -s "$APP_PID" ]; then
+             echo_g "StreamX start successful. pid: `cat "$APP_PID"`"
+             STARTED=1
+             break
+           fi
+         fi
+         if [ $SLEEP_INTERVAL -gt 0 ]; then
+           sleep 1
+         fi
+         SLEEP_INTERVAL=`expr $SLEEP_INTERVAL - 1 `
+      done
+      if [ $STARTED -eq 0 ] ;then
+        echo_g "StreamX start successful."
       fi
-    fi
-    if [ $SLEEP_INTERVAL -gt 0 ]; then
-      sleep 1
-    fi
-    SLEEP_INTERVAL=`expr $SLEEP_INTERVAL - 1 `
-  done
-
-  if [ $STARTED -eq 0 ] ;then
-    echo_g "StreamX started."
-  fi
+   else
+      echo_r "StreamX start failed."
+   fi
 }
 
 # shellcheck disable=SC2120
-stop () {
+stop() {
   running
   # shellcheck disable=SC2181
   if [ $? -eq "0" ]; then
@@ -544,7 +635,7 @@ stop () {
 
 }
 
-status () {
+status() {
   running
   # shellcheck disable=SC2181
   if [ $? -eq "1" ]; then
@@ -555,36 +646,39 @@ status () {
   fi
 }
 
-restart () {
+restart() {
   # shellcheck disable=SC2119
   stop
   # shellcheck disable=SC2119
   start
 }
 
-case "$1" in
-  "start")
-      start
-      ;;
-  "stop")
-      stop
-      ;;
-  "status")
-      status
-      ;;
-  "restart")
-      restart
-      ;;
-  *)
-      echo_r "Unknown command: $1"
-      echo_w "Usage: streamx.sh ( commands ... )"
-      echo_w "commands:"
-      echo_w "  start \$conf               Start StreamX with application config."
-      echo_w "  stop n -force             Stop StreamX, wait up to n seconds and then use kill -KILL if still running"
-      echo_w "  status                    StreamX status"
-      echo_w "  restart \$conf             restart StreamX with application config."
-      exit 0
-      ;;
-esac
+main() {
+  print_logo
+  case "$1" in
+    "start")
+        start
+        ;;
+    "stop")
+        stop
+        ;;
+    "status")
+        status
+        ;;
+    "restart")
+        restart
+        ;;
+    *)
+        echo_r "Unknown command: $1"
+        echo_w "Usage: streamx.sh ( commands ... )"
+        echo_w "commands:"
+        echo_w "  start \$conf               Start StreamX with application config."
+        echo_w "  stop n -force             Stop StreamX, wait up to n seconds and then use kill -KILL if still running"
+        echo_w "  status                    StreamX status"
+        echo_w "  restart \$conf             restart StreamX with application config."
+        exit 0
+        ;;
+  esac
+}
 
-exit 0;
+main "$@"

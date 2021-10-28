@@ -22,29 +22,29 @@ import api from './index'
 import http from '@/utils/request'
 
 export function list(params) {
-  return http.post(api.FlinkVersion.LIST, params)
+  return http.post(api.FlinkEnv.LIST, params)
 }
 
 export function exists(params) {
-  return http.post(api.FlinkVersion.EXISTS, params)
+  return http.post(api.FlinkEnv.EXISTS, params)
 }
 
 export function get(params) {
-  return http.post(api.FlinkVersion.GET, params)
+  return http.post(api.FlinkEnv.GET, params)
 }
 
 export function sync(params) {
-  return http.post(api.FlinkVersion.SYNC, params)
+  return http.post(api.FlinkEnv.SYNC, params)
 }
 
 export function create(params) {
-  return http.post(api.FlinkVersion.CREATE, params)
+  return http.post(api.FlinkEnv.CREATE, params)
 }
 
 export function update(params) {
-  return http.post(api.FlinkVersion.UPDATE, params)
+  return http.post(api.FlinkEnv.UPDATE, params)
 }
 
 export function setDefault(params) {
-  return http.post(api.FlinkVersion.DEFAULT, params)
+  return http.post(api.FlinkEnv.DEFAULT, params)
 }

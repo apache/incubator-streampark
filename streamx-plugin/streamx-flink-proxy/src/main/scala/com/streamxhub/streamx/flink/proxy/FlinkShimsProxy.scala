@@ -25,10 +25,9 @@ import com.streamxhub.streamx.common.util.{ClassLoaderUtils, Logger, Utils}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, ObjectOutputStream}
 import java.net.URL
-import java.util.concurrent.ConcurrentHashMap
 import java.util.function.{Supplier, Function => JavaFunc}
 import java.util.regex.Pattern
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ListBuffer, Map => MutableMap}
 
 /**
  *
@@ -38,8 +37,8 @@ import scala.collection.mutable.ListBuffer
 
 object FlinkShimsProxy extends Logger {
 
-  private[this] val FLINK_PATTERN: Pattern = Pattern.compile(
-    "flink-(.*).jar",
+  private[this] val EXCLUDE_PATTERN: Pattern = Pattern.compile(
+    "(flink|scala)-(.*).jar",
     Pattern.CASE_INSENSITIVE | Pattern.DOTALL
   )
 
@@ -48,7 +47,7 @@ object FlinkShimsProxy extends Logger {
     Pattern.CASE_INSENSITIVE | Pattern.DOTALL
   )
 
-  private[this] val SHIMS_CLASS_LOADER_CACHE = new ConcurrentHashMap[String, ClassLoader]
+  private[this] val SHIMS_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
 
   private[this] def getFlinkShimsResourcePattern(flinkLargeVersion: String) =
     Pattern.compile(
@@ -87,51 +86,43 @@ object FlinkShimsProxy extends Logger {
 
   private[this] def getFlinkShimsClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
     val majorVersion = flinkVersion.majorVersion
-    logInfo(s"flink version: $flinkVersion, shims version: $majorVersion")
-    var classLoader = SHIMS_CLASS_LOADER_CACHE.get(majorVersion)
+    logInfo(flinkVersion.toString)
 
-    SHIMS_CLASS_LOADER_CACHE.get(majorVersion) match {
-      case null =>
-        //1) flink/lib
-        val libURL = getFlinkHomeLib(flinkVersion.flinkHome)
-        val shimsUrls = ListBuffer[URL](libURL: _*)
+    SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(s"${flinkVersion.fullVersion}", {
+      //1) flink/lib
+      val libURL = getFlinkHomeLib(flinkVersion.flinkHome)
+      val shimsUrls = ListBuffer[URL](libURL: _*)
 
-        //2) shims jar
-        val appHome = System.getProperty("app.home")
-        require(appHome != null)
+      //2) shims jar
+      val appHome = System.getProperty("app.home")
+      require(appHome != null)
 
-        val pluginsPath = new File(s"$appHome/plugins")
-        require(pluginsPath.exists())
+      val libPath = new File(s"$appHome/lib")
+      require(libPath.exists())
 
-        shimsUrls += pluginsPath.listFiles()
-          .find(_.getName.matches("streamx-flink-submit-core-(.*).jar"))
-          .get.toURI.toURL
-
-        val libPath = new File(s"$appHome/lib")
-        require(libPath.exists())
-
-        libPath.listFiles().foreach(jar => {
-          try {
-            val shimsMatcher = SHIMS_PATTERN.matcher(jar.getName)
-            if (shimsMatcher.matches()) {
-              if (majorVersion != null && majorVersion.equals(shimsMatcher.group(1))) {
-                shimsUrls += jar.toURI.toURL
-              }
-            } else if (!FLINK_PATTERN.matcher(jar.getName).matches()) {
+      libPath.listFiles().foreach(jar => {
+        try {
+          val shimsMatcher = SHIMS_PATTERN.matcher(jar.getName)
+          if (shimsMatcher.matches()) {
+            if (majorVersion != null && majorVersion.equals(shimsMatcher.group(1))) {
               shimsUrls += jar.toURI.toURL
-            } else {
-              logInfo(s"exclude ${jar.getName}")
             }
-          } catch {
-            case e: Exception => e.printStackTrace()
+          } else if (!EXCLUDE_PATTERN.matcher(jar.getName).matches()) {
+            shimsUrls += jar.toURI.toURL
+          } else {
+            logInfo(s"exclude ${jar.getName}")
           }
-        })
-        val urls = shimsUrls.toArray
-        classLoader = new ChildFirstClassLoader(urls, getFlinkShimsResourcePattern(majorVersion))
-        SHIMS_CLASS_LOADER_CACHE.put(majorVersion, classLoader)
-        classLoader
-      case c => c
-    }
+        } catch {
+          case e: Exception => e.printStackTrace()
+        }
+      })
+
+      new ChildFirstClassLoader(
+        shimsUrls.toArray,
+        Thread.currentThread().getContextClassLoader,
+        getFlinkShimsResourcePattern(majorVersion)
+      )
+    })
   }
 
   private[this] def getFlinkHomeLib(flinkHome: String): List[URL] = {

@@ -52,7 +52,7 @@
           v-decorator="[ 'versionId', {rules: [{ required: true, message: 'Flink Version is required' }] }]"
           @change="handleFlinkVersion">>
           <a-select-option
-            v-for="(v,index) in flinkVersions"
+            v-for="(v,index) in flinkEnvs"
             :key="`version_${index}`"
             :value="v.id">
             {{ v.flinkName }}
@@ -879,7 +879,7 @@
 import Ellipsis from '@/components/Ellipsis'
 import {jars, listConf, modules, select} from '@api/project'
 import {create, exists, main, name, readConf, upload} from '@api/application'
-import {list as listVersion} from '@api/flinkversion'
+import {list as listFlinkEnv} from '@/api/flinkenv'
 import {template} from '@api/config'
 import Mergely from './Mergely'
 import configOptions from './Option'
@@ -913,7 +913,7 @@ export default {
       versionId: null,
       module: null,
       moduleList: [],
-      flinkVersions: [],
+      flinkEnvs: [],
       jars: [],
       resolveOrder: [
         {name: 'parent-first', order: 0},
@@ -1132,9 +1132,9 @@ export default {
       this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
       this.form.getFieldDecorator('executionMode', {initialValue: 4})
       this.form.getFieldDecorator('restartSize', {initialValue: 0})
-      listVersion().then((resp)=>{
-        this.flinkVersions = resp.data
-        const v = this.flinkVersions.filter((v) => {return v.isDefault})[0]
+      listFlinkEnv().then((resp)=>{
+        this.flinkEnvs = resp.data
+        const v = this.flinkEnvs.filter((v) => {return v.isDefault})[0]
         this.form.getFieldDecorator('versionId', {initialValue: v.id})
         this.versionId = v.id
       })
