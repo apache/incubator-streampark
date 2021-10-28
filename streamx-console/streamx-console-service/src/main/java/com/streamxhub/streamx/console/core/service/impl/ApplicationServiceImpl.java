@@ -951,7 +951,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
                 }
                 StopRequest stopInfo = new StopRequest(
-                    flinkEnv.toFlinkVersion(),
+                    flinkEnv.getFlinkVersion(),
                     ExecutionMode.of(application.getExecutionMode()),
                     application.getAppId(),
                     application.getJobId(),
@@ -979,7 +979,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     savePoint.setCreateTime(now);
                     savePointService.save(savePoint);
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log.error("stop flink job fail.");
                 e.printStackTrace();
                 // 保持savepoint失败.则将之前的统统设置为过期
@@ -1155,7 +1155,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         SubmitRequest submitRequest = new SubmitRequest(
-            flinkEnv.toFlinkVersion(),
+            flinkEnv.getFlinkVersion(),
             flinkEnv.getFlinkConf(),
             flinkUserJar,
             DevelopmentMode.of(application.getJobType()),
@@ -1221,7 +1221,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //将savepoint设置为过期
             savePointService.obsolete(application.getId());
             return true;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             String exception = ExceptionUtils.stringifyException(e);
             applicationLog.setException(exception);
             applicationLog.setSuccess(false);

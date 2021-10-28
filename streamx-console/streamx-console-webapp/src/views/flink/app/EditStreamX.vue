@@ -49,7 +49,7 @@
           v-decorator="[ 'versionId', {rules: [{ required: true, message: 'Flink Version is required' }] }]"
           @change="handleFlinkVersion">>
           <a-select-option
-            v-for="(v,index) in flinkVersions"
+            v-for="(v,index) in flinkEnvs"
             :key="`flink_version_${index}`"
             :value="v.id">
             {{ v.flinkName }}
@@ -996,7 +996,7 @@ import {
 } from './AddEdit'
 
 import { toPomString } from './Pom'
-import {list as listVersion} from '@/api/flinkversion'
+import {list as listFlinkEnv} from '@/api/flinkenv'
 
 export default {
   name: 'EditStreamX',
@@ -1047,7 +1047,7 @@ export default {
       configOverride: null,
       configId: null,
       versionId: null,
-      flinkVersions: [],
+      flinkEnvs: [],
       configVersions: [],
       flinkSqlHistory: [],
       flinkSql: {},
@@ -1166,8 +1166,8 @@ export default {
       this.optionsValueMapping.set(item.name, item.key)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
-    listVersion().then((resp)=>{
-      this.flinkVersions = resp.data
+    listFlinkEnv().then((resp)=>{
+      this.flinkEnvs = resp.data
     })
   },
 

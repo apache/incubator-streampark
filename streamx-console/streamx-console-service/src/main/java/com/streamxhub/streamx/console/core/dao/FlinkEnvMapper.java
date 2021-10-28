@@ -36,7 +36,7 @@ public interface FlinkEnvMapper extends BaseMapper<FlinkEnv> {
      *
      * @param id
      */
-    @Update("update t_flink_version set is_default = case id when #{id} then 1 else 0 end")
+    @Update("update t_flink_env set is_default = case id when #{id} then 1 else 0 end")
     void setDefault(@Param("id") Long id);
 
     /**
@@ -45,6 +45,6 @@ public interface FlinkEnvMapper extends BaseMapper<FlinkEnv> {
      * @param appId
      * @return
      */
-    @Select("select v.* from t_flink_version v inner join (select version_id from t_flink_app where id=#{appId}) as t on v.id = t.version_id")
+    @Select("select v.* from t_flink_env v inner join (select version_id from t_flink_app where id=#{appId}) as t on v.id = t.version_id")
     FlinkEnv getByAppId(@Param("appId") Long appId);
 }
