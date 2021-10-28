@@ -137,6 +137,10 @@ public enum FlinkAppState implements Serializable {
     POS_TERMINATED (21),
 
     /**
+     *  job SUCCEEDED on yarn
+     */
+    SUCCEEDED(22),
+    /**
      * yarn 中检查到被killed
      */
     KILLED(-9);
