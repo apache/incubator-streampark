@@ -39,14 +39,6 @@ object LfsOperator extends FsOperator with Logger {
     StringUtils.isNotBlank(path) && new File(path).exists()
   }
 
-  /**
-   * Force delete directory and recreate it.
-   */
-  def mkCleanDirs(path: String): Unit = {
-    delete(path)
-    mkdirs(path)
-  }
-
   override def mkdirs(path: String): Unit = {
     if (!isAnyBank(path)) {
       FileUtils.forceMkdir(new File(path))
@@ -112,6 +104,24 @@ object LfsOperator extends FsOperator with Logger {
     require(path != null && path.nonEmpty)
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
+
+  /**
+   * Force delete directory and recreate it.
+   */
+  def mkCleanDirs(path: String): Unit = {
+    delete(path)
+    mkdirs(path)
+  }
+
+  /**
+   * list file under directory, one level of traversal only
+   */
+  def listDir(path: String): Array[File] = new File(path) match {
+    case f if !f.exists => Array()
+    case f if f.isFile => Array(f)
+    case f => f.listFiles()
+  }
+
 
 }
 
