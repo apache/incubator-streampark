@@ -48,12 +48,16 @@ public final class ChildFirstClassLoader extends URLClassLoader {
     public static final Consumer<Throwable> NOOP_EXCEPTION_HANDLER = classLoadingException -> {
     };
 
-    private final String JAR_PROTOCOL = "jar";
+    private static Pattern FLINK_PATTERN = Pattern.compile(
+        "flink-(.*).jar",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+    );
+
+    private static final String JAR_PROTOCOL = "jar";
 
     private static final List<String> PARENT_FIRST_PATTERNS = Arrays.asList(
         "java.",
         "javax.xml",
-        "javax.annotation.",
         "org.slf4j",
         "org.apache.log4j",
         "org.apache.logging",
@@ -66,23 +70,23 @@ public final class ChildFirstClassLoader extends URLClassLoader {
 
     private final Consumer<Throwable> classLoadingExceptionHandler;
 
-    private final Pattern resourcePattern;
+    private final Pattern flinkResourcePattern;
 
-    public ChildFirstClassLoader(URL[] urls, Pattern resourcePattern) {
-        this(urls, null, resourcePattern);
+    public ChildFirstClassLoader(URL[] urls, Pattern flinkResourcePattern) {
+        this(urls, null, flinkResourcePattern);
     }
 
-    public ChildFirstClassLoader(URL[] urls, ClassLoader parent, Pattern resourcePattern) {
-        this(urls, parent, resourcePattern, NOOP_EXCEPTION_HANDLER);
+    public ChildFirstClassLoader(URL[] urls, ClassLoader parent, Pattern flinkResourcePattern) {
+        this(urls, parent, flinkResourcePattern, NOOP_EXCEPTION_HANDLER);
     }
 
     public ChildFirstClassLoader(
         URL[] urls,
         ClassLoader parent,
-        Pattern resourcePattern,
+        Pattern flinkResourcePattern,
         Consumer<Throwable> classLoadingExceptionHandler) {
         super(urls, parent);
-        this.resourcePattern = resourcePattern;
+        this.flinkResourcePattern = flinkResourcePattern;
         this.classLoadingExceptionHandler = classLoadingExceptionHandler;
     }
 
@@ -110,7 +114,19 @@ public final class ChildFirstClassLoader extends URLClassLoader {
         return super.getResource(name);
     }
 
-
+    /**
+     * e.g.
+     * flinkResourcePattern: flink-1.12
+     *
+     * flink-1.12.jar/resource flink-1.14.jar/resource other.jar/resource
+     * =>
+     * after filterFlinkShimsResource
+     * =>
+     * flink-1.12.jar/resource other.jar/resource
+     *
+     * @param urlClassLoaderResource
+     * @return
+     */
     private URL filterFlinkShimsResource(URL urlClassLoaderResource) {
         if (urlClassLoaderResource != null && JAR_PROTOCOL.equals(urlClassLoaderResource.getProtocol())) {
             /**
@@ -119,7 +135,7 @@ public final class ChildFirstClassLoader extends URLClassLoader {
             String spec = urlClassLoaderResource.getFile();
             String filename = new File(spec.substring(0, spec.indexOf("!/"))).getName();
 
-            if (!resourcePattern.matcher(filename).matches()) {
+            if (FLINK_PATTERN.matcher(filename).matches() && !flinkResourcePattern.matcher(filename).matches()) {
                 return null;
             }
         }
