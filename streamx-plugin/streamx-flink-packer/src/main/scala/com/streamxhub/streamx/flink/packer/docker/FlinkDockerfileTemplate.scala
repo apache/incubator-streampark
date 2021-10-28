@@ -20,61 +20,74 @@
  */
 package com.streamxhub.streamx.flink.packer.docker
 
-import com.streamxhub.streamx.flink.packer.docker.FlinkDockerfileTemplate.{DEFAULT_DOCKER_FILE_NAME, DOCKER_FILE_TEMPLATE}
 import org.apache.commons.io.FileUtils
 
 import java.io.File
+import java.nio.file.{Path, Paths}
 
 /**
- * flink docker file image template.
+ * Base flink docker file image template.
  * @author Al-assad
  *
- * @param flinkBaseImage  flink base docker image name, see https://hub.docker.com/_/flink
- * @param flinkFatjarPath path of flink job fat jar
+ * @param workspacePath      Absolute path of dockerfile workspace.
+ * @param flinkBaseImage     Flink base docker image name, see https://hub.docker.com/_/flink.
+ * @param flinkFatjarPath    Absolute path or relative path to workspace of flink job fat jar
+ *                           which would copy to $FLINK_HOME/usrlib/.It should be under the
+ *                           workspacePath.
+ * @param flinkExtraLibsPath Absolute path or relative path of additional flink lib path which
+ *                           would copy to $FLINK_HOME/lib/.It should be under the workspacePath.
  */
-case class FlinkDockerfileTemplate(flinkBaseImage: String, flinkFatjarPath: String) {
+case class FlinkDockerfileTemplate(workspacePath: String,
+                                   flinkBaseImage: String,
+                                   flinkFatjarPath: String,
+                                   flinkExtraLibsPath: String) {
 
-  lazy val fatJarName: String = new File(flinkFatjarPath).getName
+  val DEFAULT_DOCKER_FILE_NAME = "Dockerfile"
+
+  protected val FLINK_HOME: String = "$FLINK_HOME"
+
+  protected val workspacePaths: Path = Paths.get(workspacePath)
 
   /**
-   * get content of DockerFile
+   * fatJar: relative path of fat-jar to workspace path
+   * fatJarName: file name of fat-jar
    */
-  def dockerfileContent: String = DOCKER_FILE_TEMPLATE.format(flinkBaseImage, fatJarName, fatJarName)
+  val (fatJar, fatJarName) = {
+    val jarPath = workspacePaths.relativize(Paths.get(flinkFatjarPath))
+    jarPath.toString -> jarPath.getFileName
+  }
+
+  /**
+   * relative path of extra jar lib to workspace path
+   */
+  lazy val extraLib: String = workspacePaths.relativize(Paths.get(flinkExtraLibsPath)).toString
+
+  /**
+   * file path of startup flink jar inner container
+   */
+  def startupJarFilePath: String = s"local:///opt/flink/usrlib/$fatJarName"
+
+  /**
+   * offer content of DockerFile
+   */
+  def offerDockerfileContent: String = {
+    s"""FROM ${flinkBaseImage}
+       |RUN mkdir -p $FLINK_HOME/usrlib
+       |COPY ${fatJar} $FLINK_HOME/usrlib/${fatJarName}
+       |COPY ${extraLib} $FLINK_HOME/lib/
+       |""".stripMargin
+  }
 
   /**
    * write content of DockerFile to outputPath.
    * If outputPath is directory, the default output file's name is "Dockerfile".
    *
-   * @param outputPath Dockerfile output path
    * @return File Object for actual output Dockerfile
    */
-  def writeDockerfile(outputPath: String): File = {
-    var output = new File(outputPath)
-    if (output.isDirectory) {
-      output = new File(output.getAbsolutePath.concat("/").concat(DEFAULT_DOCKER_FILE_NAME))
-    }
-    FileUtils.write(output, dockerfileContent, "UTF-8")
+  def writeDockerfile: File = {
+    val output = new File(s"$workspacePath/$DEFAULT_DOCKER_FILE_NAME")
+    FileUtils.write(output, offerDockerfileContent, "UTF-8")
     output
   }
-
-  /**
-   * get flink job jar such as local:///opt/flink/usrlib/flink-fatjar.jar
-   */
-  def getJobJar: String = s"local:///opt/flink/usrlib/$fatJarName"
-
-}
-
-object FlinkDockerfileTemplate {
-
-  val DEFAULT_DOCKER_FILE_NAME = "Dockerfile"
-
-  /**
-   * template of dockerfile
-   */
-  val DOCKER_FILE_TEMPLATE: String =
-    """FROM %s
-      |RUN mkdir -p $FLINK_HOME/usrlib
-      |COPY %s $FLINK_HOME/usrlib/%s
-      |""".stripMargin
 
 }

@@ -39,6 +39,8 @@ case class JarPackDeps(mavenArts: Set[MavenArtifact] = Set(),
   def merge(jarLibs: Set[String]): JarPackDeps =
     if (jarLibs != null) JarPackDeps(mavenArts, extJarLibs ++ jarLibs) else this.copy()
 
+  def clearExtJarLibs: (JarPackDeps, Set[String]) = JarPackDeps(mavenArts, Set()) -> extJarLibs
+
 }
 
 object JarPackDeps {

@@ -43,7 +43,7 @@ object DockerTool extends Logger {
       FileUtils.copyFile(flinkFatJar, new File(s"${projectDir.getAbsolutePath}/${flinkFatJar.getName}"))
     }
     // generate dockerfile
-    val dockerfile = dockerFileTemplate.writeDockerfile(projectBaseDir)
+    val dockerfile = dockerFileTemplate.writeDockerfile
     val tagName = compileTag(expectImageTag, authConf.registerAddress)
 
     // build and push docker image
