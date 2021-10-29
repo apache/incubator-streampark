@@ -613,8 +613,12 @@ export default {
             callback()
           } else if (exists === 1) {
             callback(new Error('application name must be unique. The application name already exists'))
-          } else {
+          } else if (exists === 2) {
             callback(new Error('The application name is already running in yarn,cannot be repeated. Please check'))
+          } else if (exists === 3){
+            callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
+          }else{
+            callback(new Error('The application name is invalid.Please input Chinese,English letters,characters like [ _ ],[ - ],[ — ],[ . ]  and so on.Please check'))
           }
         })
       }
