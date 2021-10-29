@@ -390,9 +390,12 @@ public class Application implements Serializable {
                 String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
                 return httpGetDoResult(url, AppInfo.class);
             } catch (IOException e) {
-                log.warn(e.getMessage());
-                String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                return httpGetDoResult(url, AppInfo.class);
+                try {
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
+                    return httpGetDoResult(url, AppInfo.class);
+                } catch (IOException e1) {
+                    throw e1;
+                }
             }
         }
         return null;
@@ -406,9 +409,12 @@ public class Application implements Serializable {
                 String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
                 return httpGetDoResult(url, JobsOverview.class);
             } catch (IOException e) {
-                log.warn(e.getMessage());
-                String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                return httpGetDoResult(url, JobsOverview.class);
+                try {
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
+                    return httpGetDoResult(url, JobsOverview.class);
+                } catch (Exception e1) {
+                    throw e1;
+                }
             }
         }
         return null;
@@ -421,9 +427,12 @@ public class Application implements Serializable {
             String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
             return httpGetDoResult(url, Overview.class);
         } catch (IOException e) {
-            log.warn(e.getMessage());
-            String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-            return httpGetDoResult(url, Overview.class);
+            try {
+                String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
+                return httpGetDoResult(url, Overview.class);
+            } catch (Exception e1) {
+                throw e1;
+            }
         }
     }
 
@@ -434,9 +443,12 @@ public class Application implements Serializable {
             String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId, jobId);
             return httpGetDoResult(url, CheckPoints.class);
         } catch (IOException e) {
-            log.warn(e.getMessage());
-            String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId, jobId);
-            return httpGetDoResult(url, CheckPoints.class);
+            try {
+                String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId, jobId);
+                return httpGetDoResult(url, CheckPoints.class);
+            } catch (Exception e1) {
+                throw e1;
+            }
         }
     }
 

@@ -963,11 +963,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 );
 
                 StopResponse stopResponse = FlinkSubmitHelper.stop(stopInfo);
-
-                assert stopResponse != null;
-
-                String savePointDir = stopResponse.savePointDir();
-                if (savePointDir != null) {
+                if (stopResponse != null && stopResponse.savePointDir() != null) {
+                    String savePointDir = stopResponse.savePointDir();
                     log.info("savePoint path:{}", savePointDir);
                     log.info("savePoint path:{}", savePointDir);
                     SavePoint savePoint = new SavePoint();

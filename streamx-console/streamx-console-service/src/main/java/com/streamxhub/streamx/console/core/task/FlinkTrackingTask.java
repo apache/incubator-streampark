@@ -525,6 +525,9 @@ public class FlinkTrackingTask {
                         cleanSavepoint(application);
                         application.setEndTime(new Date());
                     }
+                    if(FlinkAppState.SUCCEEDED.equals(flinkAppState)) {
+                        flinkAppState = FlinkAppState.FINISHED;
+                    }
                     application.setState(flinkAppState.getValue());
                     //能运行到这一步,说明到YARN REST api中成功查询到信息
                     cleanOptioning(optionState, application.getId());
