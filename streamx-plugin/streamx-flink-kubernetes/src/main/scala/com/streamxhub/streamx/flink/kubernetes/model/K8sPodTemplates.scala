@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.kubernetes.model
 /**
  * Pod template for flink k8s cluster
  *
- * author: Al-assad
+ * @author Al-assad
  */
 case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "", tmPodTemplate: String = "")
 

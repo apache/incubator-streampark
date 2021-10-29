@@ -23,6 +23,6 @@ package com.streamxhub.streamx.flink.kubernetes.event
 import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV}
 
 /**
- * author: Al-assad
+ * @author Al-assad
  */
 case class FlinkClusterMetricChangeEvent(clusterKey: ClusterKey, metrics: FlinkMetricCV) extends BuildInEvent

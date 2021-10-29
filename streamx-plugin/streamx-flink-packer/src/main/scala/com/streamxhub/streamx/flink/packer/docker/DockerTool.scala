@@ -11,7 +11,7 @@ import org.apache.commons.io.FileUtils
 import java.io.File
 
 /**
- * author: Al-assad
+ * @author Al-assad
  */
 //noinspection DuplicatedCode
 object DockerTool extends Logger {
@@ -19,7 +19,7 @@ object DockerTool extends Logger {
 
   /**
    * build and push docker image for flink fat-jar.
-   * author: Al-assad
+   * @author Al-assad
    *
    * @param authConf           authentication configuration of remote docker register
    * @param projectBaseDir     project workspace dir of flink job

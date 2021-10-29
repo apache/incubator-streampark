@@ -59,7 +59,7 @@ import scala.Enumeration;
  * future, both tracking-on-k8s and tracking-on-yarn will exist as plugins
  * for this unified implementation.
  * <p>
- * author: Al-assad
+ * @author Al-assad
  */
 @Configuration
 public class K8sFlinkTrkMonitorWrapper {

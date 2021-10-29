@@ -30,7 +30,7 @@ import java.io.File
 import scala.collection.mutable
 
 /**
- * author: Al-assad
+ * @author Al-assad
  */
 object PodTemplateTool {
 

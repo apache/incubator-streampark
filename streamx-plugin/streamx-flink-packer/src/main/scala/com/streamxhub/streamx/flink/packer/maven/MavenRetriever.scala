@@ -35,7 +35,7 @@ import org.eclipse.aether.{RepositorySystem, RepositorySystemSession}
 import java.util
 
 /**
- * author: Al-assad
+ * @author Al-assad
  */
 object MavenRetriever {
 
