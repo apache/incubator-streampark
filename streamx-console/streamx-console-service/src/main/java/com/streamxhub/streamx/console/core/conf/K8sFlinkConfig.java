@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * flink-k8s configuration from springboot properties, prefix = flink-k8s
- * author: Al-assad
+ * @author Al-assad
  */
 @Configuration
 @Data

@@ -52,7 +52,7 @@ import scala.Enumeration;
 
 /**
  * Event Listener for K8sFlinkTrkMonitor
- * author: Al-assad
+ * @author Al-assad
  */
 public class K8sFlinkChangeEventListener {
 

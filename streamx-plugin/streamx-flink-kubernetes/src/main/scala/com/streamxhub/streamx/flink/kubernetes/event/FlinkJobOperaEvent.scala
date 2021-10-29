@@ -27,7 +27,7 @@ import com.streamxhub.streamx.flink.kubernetes.model.TrkId
  * Notification of expecting changes to flink job state cache
  * held internally by K8sFlinkMonitor.
  *
- * author: Al-assad
+ * @author Al-assad
  */
 case class FlinkJobOperaEvent(trkId: TrkId, expectJobState: FlinkJobOpera) extends BuildInEvent {
   def this(trkId: TrkId, expectJobState: FlinkJobState.Value) = this(trkId, FlinkJobOpera(expectJobState, System.currentTimeMillis))

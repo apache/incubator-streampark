@@ -16,7 +16,7 @@ import scala.collection.JavaConversions._
 import scala.util.Try
 
 /**
- * author: Al-assad
+ * @author Al-assad
  */
 object MavenTool extends Logger {
 
