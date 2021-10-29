@@ -312,10 +312,6 @@ object ConfigConst {
   lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
 
-  lazy val JOBNAME_PATTERN: Pattern = Pattern.compile(
-    "^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_—-]+$",
-    Pattern.CASE_INSENSITIVE
-  )
 
   def printLogo(info: String): Unit = {
     println("\n\n                 .+.                                ")

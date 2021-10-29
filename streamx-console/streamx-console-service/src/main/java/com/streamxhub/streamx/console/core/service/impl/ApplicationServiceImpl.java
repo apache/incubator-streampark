@@ -114,6 +114,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         new ThreadPoolExecutor.AbortPolicy()
     );
 
+   private final Pattern JOBNAME_PATTERN  = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_—-]+$");
+
+
     @Autowired
     private ProjectService projectService;
 
@@ -1242,7 +1245,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
     private Boolean checkJobName(String jobName){
         if(!StringUtils.isEmpty(jobName.trim())){
-            return ConfigConst.JOBNAME_PATTERN().matcher(jobName).matches();
+            return JOBNAME_PATTERN.matcher(jobName).matches();
         }
         return false;
     }
