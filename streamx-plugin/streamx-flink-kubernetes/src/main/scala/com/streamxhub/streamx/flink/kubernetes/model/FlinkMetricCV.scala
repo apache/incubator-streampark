@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.kubernetes.model
 
 /**
  * flink cluster metric info
- * author: Al-assad
+ * @author Al-assad
  */
 case class FlinkMetricCV(totalJmMemory: Integer = 0,
                          totalTmMemory: Integer = 0,

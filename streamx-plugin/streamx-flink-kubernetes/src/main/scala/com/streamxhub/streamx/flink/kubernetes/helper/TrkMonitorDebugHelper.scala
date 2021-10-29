@@ -28,7 +28,7 @@ import scala.language.implicitConversions
 
 /**
  * Debug helper for FlinkTrkMonitor, only for streamx development, debugging scenarios.
- * author: Al-assad
+ * @author Al-assad
  */
 object TrkMonitorDebugHelper {
 

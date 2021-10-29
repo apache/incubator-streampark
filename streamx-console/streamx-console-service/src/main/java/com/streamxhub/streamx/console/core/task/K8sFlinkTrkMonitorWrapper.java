@@ -36,13 +36,16 @@ import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitorFactory;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import scala.Enumeration;
 
 /**
@@ -56,22 +59,25 @@ import scala.Enumeration;
  * future, both tracking-on-k8s and tracking-on-yarn will exist as plugins
  * for this unified implementation.
  * <p>
- * author: Al-assad
+ * @author Al-assad
  */
 @Configuration
 public class K8sFlinkTrkMonitorWrapper {
 
-    private final ApplicationService applicationService;
-    private final AlertService alertService;
-    private final K8sFlinkConfig k8sFlinkConfig;
+    @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+    @Lazy
+    @Autowired
+    private ApplicationService applicationService;
 
-    public K8sFlinkTrkMonitorWrapper(ApplicationService applicationService,
-                                     AlertService alertService,
-                                     K8sFlinkConfig k8sFlinkConfig) {
-        this.applicationService = applicationService;
-        this.k8sFlinkConfig = k8sFlinkConfig;
-        this.alertService = alertService;
-    }
+    @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+    @Lazy
+    @Autowired
+    private AlertService alertService;
+
+    @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+    @Lazy
+    @Autowired
+    private K8sFlinkConfig k8sFlinkConfig;
 
     /**
      * Register FlinkTrkMonitor bean for tracking flink job on kubernetes.
@@ -84,7 +90,7 @@ public class K8sFlinkTrkMonitorWrapper {
 
         /* Dev scaffold: watch flink k8s tracking cache,
            see com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper for items.
-           Exampl:
+           Example:
                TrkMonitorDebugHelper.watchTrkIdsCache(trkMonitor);
                TrkMonitorDebugHelper.watchJobStatusCache(trkMonitor);
                TrkMonitorDebugHelper.watchAggClusterMetricsCache(trkMonitor);

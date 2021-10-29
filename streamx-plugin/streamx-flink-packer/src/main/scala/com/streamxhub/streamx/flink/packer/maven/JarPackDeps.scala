@@ -24,7 +24,7 @@ import java.util.{List => JavaList}
 import scala.collection.JavaConverters._
 
 /**
- * author: Al-assad
+ * @author Al-assad
  *
  * @param mavenArts  collection of maven artifacts
  * @param extJarLibs collection of jar lib paths, which elements can be a directory or file path.

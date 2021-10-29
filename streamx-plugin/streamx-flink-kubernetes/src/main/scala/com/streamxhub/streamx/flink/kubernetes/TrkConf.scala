@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 /**
- * author: Al-assad
+ * @author Al-assad
  *
  * @param jobStatusWatcherConf configuration for flink job status tracking process
  * @param metricWatcherConf    configuration for flink metric tracking process

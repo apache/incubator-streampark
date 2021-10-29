@@ -30,9 +30,8 @@ import scala.collection.JavaConversions._
 
 
 /**
- * @author: Al-assad
+ * @author Al-assad
  * @author benjobs
- * @param version   Actual flink version number, like "1.13.2", "1.14.0"
  * @param flinkHome Autual flink home that must be a readable local path
  */
 class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
