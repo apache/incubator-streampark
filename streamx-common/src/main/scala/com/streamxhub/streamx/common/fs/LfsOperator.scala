@@ -78,25 +78,35 @@ object LfsOperator extends FsOperator with Logger {
   }
 
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
-    if (!isAnyBank(srcPath, dstPath)) {
-      val srcFile = new File(srcPath)
-      var dstFile = new File(dstPath)
-      if (dstFile.isDirectory) {
-        dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
-      }
-      if (overwrite && !dstFile.exists() && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        FileUtils.copyFile(srcFile, dstFile)
-      }
+    if (isAnyBank(srcPath, dstPath)) return
+    val srcFile = new File(srcPath)
+    if (!srcFile.exists) return
+    var dstFile = new File(dstPath)
+    if (dstFile.isDirectory) dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
+
+    val shouldCopy = {
+      if (overwrite || !dstFile.exists) true
+      else srcFile.getCanonicalPath != dstFile.getCanonicalPath
+    }
+    if (shouldCopy) {
+      FileUtils.copyFile(srcFile, dstFile)
+      if (delSrc) FileUtils.forceDelete(srcFile)
     }
   }
 
   override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
-    if (!isAnyBank(srcPath, dstPath)) {
-      val srcFile = new File(srcPath)
-      val dstFile = new File(dstPath)
-      if (overwrite && !dstFile.exists() && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        FileUtils.copyDirectory(new File(srcPath), new File(dstPath))
-      }
+    if (isAnyBank(srcPath, dstPath)) return
+    val srcFile = new File(srcPath)
+    if (!srcFile.exists) return
+    val dstFile = new File(dstPath)
+
+    val shouldCopy = {
+      if (overwrite || !dstFile.exists) true
+      else srcFile.getCanonicalPath != dstFile.getCanonicalPath
+    }
+    if (shouldCopy) {
+      FileUtils.copyDirectory(srcFile, dstFile)
+      if (delSrc) FileUtils.deleteDirectory(srcFile)
     }
   }
 
