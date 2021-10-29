@@ -454,6 +454,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      */
     @Override
     public AppExistsState checkExists(Application appParam) {
+
+        if(!checkJobName(appParam.getJobName())){
+            return AppExistsState.INVALID;
+        }
         boolean inDB = this.baseMapper.selectCount(
             new QueryWrapper<Application>().lambda()
                 .eq(Application::getJobName, appParam.getJobName())) > 0;
@@ -1179,9 +1183,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         applicationLog.setStartTime(new Date());
 
         try {
-            if(!checkJobName(application.getJobName())){
-                throw new RuntimeException("The job name is irregular string. please check it again.");
-            }
 
             SubmitResponse submitResponse = FlinkSubmitHelper.submit(submitRequest);
 
