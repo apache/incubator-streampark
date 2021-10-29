@@ -1271,7 +1271,7 @@ export default {
           } else if (exists === 3) {
             callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
           } else {
-            callback(new Error('The application name is invalid.just support Chinese,[A-Za-z],[_],[-],[—],and[.].Please check'))
+            callback(new Error('The application name is invalid.Please input Chinese,English letters,special characters like [ _ ],[ - ],[ — ],[ . ] and so on.'))
           }
         })
       }

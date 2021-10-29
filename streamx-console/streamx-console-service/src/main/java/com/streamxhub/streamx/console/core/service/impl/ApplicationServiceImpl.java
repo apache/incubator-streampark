@@ -1242,8 +1242,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
     private Boolean checkJobName(String jobName){
         if(!StringUtils.isEmpty(jobName.trim())){
-            String pattern = "^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_—-]+$";
-            return Pattern.matches(pattern, jobName);
+            return ConfigConst.JOBNAME_PATTERN().matcher(jobName).matches();
         }
         return false;
     }

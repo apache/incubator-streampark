@@ -22,6 +22,7 @@ package com.streamxhub.streamx.common.conf
 
 import com.streamxhub.streamx.common.util.SystemPropertyUtils
 import java.time.LocalDateTime
+import java.util.regex.Pattern
 
 object ConfigConst {
   /**
@@ -309,6 +310,12 @@ object ConfigConst {
   val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
 
   lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
+
+
+  lazy val JOBNAME_PATTERN: Pattern = Pattern.compile(
+    "^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_—-]+$",
+    Pattern.CASE_INSENSITIVE
+  )
 
   def printLogo(info: String): Unit = {
     println("\n\n                 .+.                                ")
