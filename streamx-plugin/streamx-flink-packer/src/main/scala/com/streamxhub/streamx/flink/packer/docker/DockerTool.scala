@@ -6,20 +6,17 @@ import com.google.common.collect.Sets
 import com.streamxhub.streamx.common.conf.ConfigConst.DOCKER_IMAGE_NAMESPACE
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.tryWithResourceException
-import org.apache.commons.io.FileUtils
 
 import java.io.File
 
 /**
  * @author Al-assad
  */
-//noinspection DuplicatedCode
 object DockerTool extends Logger {
 
 
   /**
    * build and push docker image for flink fat-jar.
-   * @author Al-assad
    *
    * @param authConf           authentication configuration of remote docker register
    * @param projectBaseDir     project workspace dir of flink job
@@ -30,20 +27,15 @@ object DockerTool extends Logger {
    */
   @throws[Exception] def buildFlinkImage(authConf: DockerAuthConf,
                                          projectBaseDir: String,
-                                         dockerFileTemplate: FlinkDockerfileTemplate,
+                                         dockerFileTemplate: FlinkDockerfileTemplateTrait,
                                          expectImageTag: String,
                                          push: Boolean = false): String = {
-    // organize project path and write docker file
+    // create projectDir when it's empty
     val projectDir = new File(projectBaseDir)
-    if (!projectDir.exists()) {
-      projectDir.mkdir()
-    }
-    val flinkFatJar = new File(dockerFileTemplate.flinkFatjarPath)
-    if (flinkFatJar.getParentFile.getAbsolutePath != projectDir.getAbsolutePath) {
-      FileUtils.copyFile(flinkFatJar, new File(s"${projectDir.getAbsolutePath}/${flinkFatJar.getName}"))
-    }
+    if (!projectDir.exists) projectDir.mkdir()
     // generate dockerfile
     val dockerfile = dockerFileTemplate.writeDockerfile
+    // complie image tag
     val tagName = compileTag(expectImageTag, authConf.registerAddress)
 
     // build and push docker image
