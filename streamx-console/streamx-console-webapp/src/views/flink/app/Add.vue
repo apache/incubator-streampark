@@ -334,7 +334,8 @@
             type="text"
             allowClear
             placeholder="Please enter Main class"
-            v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]"/>
+            v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]">
+          </a-input>
         </a-form-item>
 
         <a-form-item
@@ -1396,9 +1397,13 @@ export default {
           if (exists === 0) {
             callback()
           } else if (exists === 1) {
-            callback(new Error('Application Name must be unique. The application name already exists'))
+            callback(new Error('application name must be unique. The application name already exists'))
+          } else if (exists === 2) {
+            callback(new Error('The application name is already running in yarn,cannot be repeated. Please check'))
+          } else if (exists === 3) {
+            callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
           } else {
-            callback(new Error('The Application Name is already running in yarn,cannot be repeated. Please check'))
+            callback(new Error('The application name is invalid.Please input Chinese,English letters,characters like [ _ ],[ - ],[ — ],[ . ] and so on.Please check'))
           }
         })
       }

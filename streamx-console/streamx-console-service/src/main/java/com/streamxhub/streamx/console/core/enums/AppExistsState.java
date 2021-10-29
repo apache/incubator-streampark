@@ -45,7 +45,13 @@ public enum AppExistsState implements Serializable {
     /**
      * exists in remote kubernetes cluster.
      */
-    IN_KUBERNETES(3);
+    IN_KUBERNETES(3),
+
+    /**
+     * job name invalid because of special utf-8 character
+     *
+     */
+    INVALID(4);
 
     int value;
 

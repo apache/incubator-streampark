@@ -82,6 +82,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.jar.Manifest;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.Bridge.toTrkId;
@@ -112,6 +113,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         ThreadUtils.threadFactory("streamx-deploy-executor"),
         new ThreadPoolExecutor.AbortPolicy()
     );
+
+   private final Pattern JOBNAME_PATTERN  = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_—-]+$");
+
 
     @Autowired
     private ProjectService projectService;
@@ -453,6 +457,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      */
     @Override
     public AppExistsState checkExists(Application appParam) {
+
+        if(!checkJobName(appParam.getJobName())){
+            return AppExistsState.INVALID;
+        }
         boolean inDB = this.baseMapper.selectCount(
             new QueryWrapper<Application>().lambda()
                 .eq(Application::getJobName, appParam.getJobName())) > 0;
@@ -1234,6 +1242,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             return false;
         }
+    }
+    private Boolean checkJobName(String jobName){
+        if(!StringUtils.isEmpty(jobName.trim())){
+            return JOBNAME_PATTERN.matcher(jobName).matches();
+        }
+        return false;
     }
 
     private String getSavePointed(Application appParam) {
