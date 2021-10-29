@@ -205,6 +205,13 @@
             <artifactId>guava</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-resolver</artifactId>
+            <version>4.1.65.Final</version>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 
 
