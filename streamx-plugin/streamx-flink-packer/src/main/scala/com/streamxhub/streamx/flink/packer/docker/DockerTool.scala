@@ -35,16 +35,19 @@ object DockerTool extends Logger {
     if (!projectDir.exists) projectDir.mkdir()
     // generate dockerfile
     val dockerfile = dockerFileTemplate.writeDockerfile
-    // complie image tag
+    // compile image tag
     val tagName = compileTag(expectImageTag, authConf.registerAddress)
-
+    val flinkImageTag = dockerFileTemplate.flinkBaseImage
     // build and push docker image
     tryWithResourceException(DockerRetriever.newDockerClient()) {
       dockerClient =>
         // pull docker image
-        val pullImageCmd = dockerClient.pullImageCmd(dockerFileTemplate.flinkBaseImage).withAuthConfig(authConf.toDockerAuthConf)
+        val pullImageCmd = {
+          if (!flinkImageTag.startsWith(authConf.registerAddress)) dockerClient.pullImageCmd(flinkImageTag)
+          else dockerClient.pullImageCmd(flinkImageTag).withAuthConfig(authConf.toDockerAuthConf)
+        }
         pullImageCmd.start().awaitCompletion()
-        logInfo(s"[streamx-packer] docker pull image ${formatTag(dockerFileTemplate.flinkBaseImage, authConf.registerAddress)} successfully.")
+        logInfo(s"[streamx-packer] docker pull image ${flinkImageTag}.flinkBaseImage successfully.")
         // build docker image
         val buildImageCmd = dockerClient.buildImageCmd()
           .withBaseDirectory(projectDir)
@@ -93,21 +96,10 @@ object DockerTool extends Logger {
    * compile image tag with namespace and remote address.
    */
   private def compileTag(tag: String, registerAddress: String): String = {
-    formatTag(if (tag.contains("/")) tag else s"$DOCKER_IMAGE_NAMESPACE/$tag", registerAddress)
+    var tagName = if (tag.contains("/")) tag else s"$DOCKER_IMAGE_NAMESPACE/$tag"
+    if (registerAddress.nonEmpty && !tagName.startsWith(registerAddress))
+      tagName = s"$registerAddress/$tagName"
+    tagName
   }
-
-  /**
-   * format image tag with namespace and remote address.
-   *
-   * e.g.
-   * image:tag             registry-1.docker.io -> registry-1.docker.io/library/image:tag
-   * repository/image:tag  registry-1.docker.io -> registry-1.docker.io/repository/image:tag
-   */
-  def formatTag(tag: String, registerAddress: String): String = {
-    if (registerAddress.nonEmpty && !tag.startsWith(registerAddress)) {
-      s"$registerAddress${if (tag.contains("/")) "/" else "/library/"}$tag"
-    } else tag
-  }
-
 
 }

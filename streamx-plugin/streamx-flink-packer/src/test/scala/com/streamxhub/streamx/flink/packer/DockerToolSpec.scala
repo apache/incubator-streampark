@@ -45,13 +45,13 @@ class DockerToolSpec extends AnyWordSpec with BeforeAndAfter with Matchers {
     "build flink image without push" should {
       "when remote register is not set" in {
         val authConf = DockerAuthConf("", "", "")
-        val template = new FlinkDockerfileTemplate("flink:1.13.0-scala_2.11", path("flink/WordCountSQL.jar"))
+        val template = FlinkDockerfileTemplate(outputDir.getAbsolutePath, "flink:1.13.0-scala_2.11", path("flink/WordCountSQL.jar"),Set())
         val tag = DockerTool.buildFlinkImage(authConf, outputDir.getAbsolutePath, template, "myflink-job")
         tag mustBe s"$DOCKER_IMAGE_NAMESPACE/myflink-job"
       }
       "when remote register is set" in {
         val authConf = DockerAuthConf("registry.cn-hangzhou.aliyuncs.com", "user123", "123")
-        val template = new FlinkDockerfileTemplate("flink:1.13.0-scala_2.11", path("flink/WordCountSQL.jar"))
+        val template = FlinkDockerfileTemplate(outputDir.getAbsolutePath, "flink:1.13.0-scala_2.11", path("flink/WordCountSQL.jar"), Set())
         val tag = DockerTool.buildFlinkImage(authConf, outputDir.getAbsolutePath, template, "myflink-job")
         tag mustBe s"${authConf.registerAddress}/$DOCKER_IMAGE_NAMESPACE/myflink-job"
       }
