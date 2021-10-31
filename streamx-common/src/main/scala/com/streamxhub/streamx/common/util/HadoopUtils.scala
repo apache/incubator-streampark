@@ -23,7 +23,6 @@ package com.streamxhub.streamx.common.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import org.apache.commons.collections.CollectionUtils
-import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
@@ -48,7 +47,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.{Timer, TimerTask, HashMap => JavaHashMap}
 import javax.security.auth.kerberos.KerberosTicket
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.util.control.Breaks._
 import scala.util.{Failure, Success, Try}
 
@@ -59,7 +57,6 @@ object HadoopUtils extends Logger {
 
   private[this] lazy val HADOOP_HOME: String = "HADOOP_HOME"
   private[this] lazy val HADOOP_CONF_DIR: String = "HADOOP_CONF_DIR"
-  private[this] lazy val HIVE_CONF_DIR: String = "HIVE_CONF_DIR"
   private[this] lazy val CONF_SUFFIX: String = "/etc/hadoop"
 
   private val hadoopUserName: String = SystemPropertyUtils.get(KEY_HADOOP_USER_NAME, DEFAULT_HADOOP_USER_NAME)
@@ -93,10 +90,6 @@ object HadoopUtils extends Logger {
     case Failure(_) => FileUtils.resolvePath(FileUtils.getPathFromEnv(HADOOP_HOME), CONF_SUFFIX)
     case Success(value) => value
   }
-
-  def getSystemHadoopConfDir: String = Try(hadoopConfDir).getOrElse("")
-
-  def getSystemHiveConfDir: String = Try(FileUtils.getPathFromEnv(HIVE_CONF_DIR)).getOrElse("")
 
   def getConfigurationFromHadoopConfDir(confDir: String = hadoopConfDir): Configuration = {
     if (!configurationCache.containsKey(confDir)) {
@@ -390,39 +383,4 @@ object HadoopUtils extends Logger {
     fs.copyToLocalFile(sourcePath, destPath)
     new File(destPath.toString).getAbsolutePath
   }
-
-
-  /**
-   * Replace host information with ip of hadoop config file or hive config file.
-   * Such as core-site.xml, hdfs-site.xml, hive-site.xml.
-   */
-  def replaceHostWithIP(configFile: File): Unit = {
-    if (!configFile.exists || !configFile.isFile || !configFile.getName.endsWith(".xml"))
-      return
-    // get hosts from system
-    val hostsMap = HostsUtils.getSystemHosts
-    if (hostsMap.isEmpty)
-      return
-
-    def matchHost(line: String): Option[(String, String)] = hostsMap.find(e => line.contains(e._1))
-
-    // replace the host information in the configuration content
-    val lines = ApacheFileUtils.readLines(configFile).asScala.map {
-      case line if !line.trim.startsWith("<value>") => line
-      case line =>
-        var shot = matchHost(line)
-        var li = line
-        while (shot.nonEmpty) {
-          li = li.replace(shot.get._1, shot.get._2)
-          shot = matchHost(li)
-        }
-        li
-    }
-    // write content to original file
-    ApacheFileUtils.writeLines(configFile, lines)
-  }
-
-
-
-
 }
