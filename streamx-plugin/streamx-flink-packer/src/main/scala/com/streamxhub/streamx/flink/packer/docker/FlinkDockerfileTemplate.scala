@@ -27,7 +27,7 @@ import java.io.File
 
 /**
  * flink docker file image template.
- * author: Al-assad
+ * @author Al-assad
  *
  * @param flinkBaseImage  flink base docker image name, see https://hub.docker.com/_/flink
  * @param flinkFatjarPath path of flink job fat jar
