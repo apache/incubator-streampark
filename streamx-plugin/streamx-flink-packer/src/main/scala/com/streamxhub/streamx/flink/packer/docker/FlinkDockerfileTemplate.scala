@@ -26,18 +26,18 @@ package com.streamxhub.streamx.flink.packer.docker
  * @author Al-assad
  * @param workspacePath      Path of dockerfile workspace, it should be a directory.
  * @param flinkBaseImage     Flink base docker image name, see https://hub.docker.com/_/flink.
- * @param flinkMainjarPath   Path of flink job main jar which would copy to $FLINK_HOME/usrlib/
+ * @param flinkMainJarPath   Path of flink job main jar which would copy to $FLINK_HOME/usrlib/
  * @param flinkExtraLibPaths Path of additional flink lib path which would copy to $FLINK_HOME/lib/
  */
 case class FlinkDockerfileTemplate(workspacePath: String,
                                    flinkBaseImage: String,
-                                   flinkMainjarPath: String,
+                                   flinkMainJarPath: String,
                                    flinkExtraLibPaths: Set[String]) extends FlinkDockerfileTemplateTrait {
 
   /**
    * offer content of DockerFile
    */
-  def offerDockerfileContent: String = {
+  override def offerDockerfileContent: String = {
     s"""FROM $flinkBaseImage
        |RUN mkdir -p $FLINK_HOME/usrlib
        |COPY $mainJarName $FLINK_HOME/usrlib/$mainJarName

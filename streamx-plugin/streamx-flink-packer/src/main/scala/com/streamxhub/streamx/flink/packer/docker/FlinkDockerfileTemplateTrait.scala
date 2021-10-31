@@ -46,7 +46,7 @@ trait FlinkDockerfileTemplateTrait {
   /**
    * Path of flink job main jar which would copy to $FLINK_HOME/usrlib/
    */
-  def flinkMainjarPath: String
+  def flinkMainJarPath: String
 
   /**
    * Path of additional flink lib path which would copy to $FLINK_HOME/lib/
@@ -84,7 +84,7 @@ trait FlinkDockerfileTemplateTrait {
    * `workspacePath/mainJarName.jar`.
    */
   lazy val mainJarName: String = {
-    val mainJarPath = Paths.get(flinkMainjarPath).toAbsolutePath
+    val mainJarPath = Paths.get(flinkMainJarPath).toAbsolutePath
     if (mainJarPath.getParent != workspace)
       LfsOperator.copy(mainJarPath.toString, s"${workspace.toString}/${mainJarPath.getFileName.toString}")
     mainJarPath.getFileName.toString
@@ -95,6 +95,7 @@ trait FlinkDockerfileTemplateTrait {
    * into `FLINK_LIB_PATH`.
    */
   lazy val extraLibName: String = {
+    LfsOperator.mkCleanDirs(s"${workspace.toString}/$FLINK_LIB_PATH")
     flinkExtraLibPaths.map(new File(_))
       .filter(_.exists())
       .filter(_.getName.endsWith(".jar"))

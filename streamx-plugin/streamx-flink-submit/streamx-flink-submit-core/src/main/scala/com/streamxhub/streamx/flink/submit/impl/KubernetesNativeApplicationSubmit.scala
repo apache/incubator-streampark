@@ -24,7 +24,7 @@ import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.fs.LfsOperator
 import com.streamxhub.streamx.flink.kubernetes.PodTemplateTool
-import com.streamxhub.streamx.flink.packer.docker.{DockerTool, FlinkDockerfileTemplate}
+import com.streamxhub.streamx.flink.packer.docker.{DockerTool, FlinkDockerfileTemplate, FlinkHadoopDockerfileTemplate}
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
@@ -76,27 +76,26 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     logInfo(s"[flink-submit] already built flink job fat-jar. " +
       s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
 
-    // copy ext-jar files to independent directory
-    val extlibsDir = s"${buildWorkspace}/lib"
-    LfsOperator.mkCleanDirs(extlibsDir)
-    extJarLibs.foreach(LfsOperator.copy(_, extlibsDir))
-    logInfo(s"[flink-submit] already collected flink extra jar: " +
-      s"${LfsOperator.listDir(extlibsDir).map(_.getAbsolutePath).mkString(",")}")
-
-    logInfo(s"[flink-submit] start building flink job docker image. ${flinkConfIdentifierInfo(flinkConfig)}")
-
     // step-3: build and push flink application image
+    logInfo(s"[flink-submit] start building flink job docker image. ${flinkConfIdentifierInfo(flinkConfig)}")
     val dockerAuthConfig = submitRequest.k8sSubmitParam.dockerAuthConfig
-    val flinkBaseImage = DockerTool.formatTag(submitRequest.k8sSubmitParam.flinkBaseImage, dockerAuthConfig.registerAddress)
-    val dockerFileTemplate = FlinkDockerfileTemplate(
-      buildWorkspace,
-      flinkBaseImage,
-      fatJar.getAbsolutePath,
-      extlibsDir)
-    val tagName = s"flinkjob-${submitRequest.k8sSubmitParam.clusterId}"
+    // choose dockerfile template
+    val dockerFileTemplate = {
+      if (submitRequest.k8sSubmitParam.integrateWithHadoop)
+        FlinkHadoopDockerfileTemplate.fromSystemHadoopConf(buildWorkspace,
+          submitRequest.k8sSubmitParam.flinkBaseImage,
+          fatJar.getAbsolutePath,
+          extJarLibs)
+      else
+        FlinkDockerfileTemplate(buildWorkspace,
+          submitRequest.k8sSubmitParam.flinkBaseImage,
+          fatJar.getAbsolutePath,
+          extJarLibs)
+    }
+    val tagName = s"streamxflinkjob-${submitRequest.k8sSubmitParam.kubernetesNamespace}-${submitRequest.k8sSubmitParam.clusterId}"
     // add flink pipeline.jars configuration
-    flinkConfig.set(PipelineOptions.JARS, Lists.newArrayList(dockerFileTemplate.startupJarFilePath))
-    // add flink conf conciguration, mainly to set the log4j configuration
+    flinkConfig.set(PipelineOptions.JARS, Lists.newArrayList(dockerFileTemplate.innerMainJarPath))
+    // add flink conf configuration, mainly to set the log4j configuration
     if (!flinkConfig.contains(DeploymentOptionsInternal.CONF_DIR)) {
       flinkConfig.set(DeploymentOptionsInternal.CONF_DIR, s"${submitRequest.flinkVersion.flinkHome}/conf")
     }

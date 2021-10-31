@@ -1151,7 +1151,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 settingService.getDockerRegisterUser(),
                 settingService.getDockerRegisterPassword()),
             application.getK8sPodTemplates(),
-            application.getK8sRestExposedTypeEnum()
+            application.getK8sRestExposedTypeEnum(),
+            false
         );
 
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
