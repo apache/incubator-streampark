@@ -215,6 +215,11 @@ public class Application implements Serializable {
     private String k8sTmPodTemplate;
 
     /**
+     * flink-hadoop integration on flink-k8s mode
+     */
+    private Boolean k8sHadoopIntegration;
+
+    /**
      * running job
      */
     private transient JobsOverview.Task overview;

@@ -578,6 +578,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setK8sPodTemplate(appParam.getK8sPodTemplate());
             application.setK8sJmPodTemplate(appParam.getK8sJmPodTemplate());
             application.setK8sTmPodTemplate(appParam.getK8sTmPodTemplate());
+            application.setK8sHadoopIntegration(appParam.getK8sHadoopIntegration());
 
             //以下参数发生改变不影响正在运行的任务
             application.setDescription(appParam.getDescription());
@@ -1152,7 +1153,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 settingService.getDockerRegisterPassword()),
             application.getK8sPodTemplates(),
             application.getK8sRestExposedTypeEnum(),
-            false
+            application.getK8sHadoopIntegration() != null ? application.getK8sHadoopIntegration() : false
         );
 
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());

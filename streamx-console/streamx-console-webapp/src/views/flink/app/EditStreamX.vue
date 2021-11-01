@@ -275,9 +275,10 @@
         </a-form-item>
 
         <a-form-item
-          label="Application conf"
+          label="Application Conf"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+          v-show="(executionMode == null && app.executionMode !== 5 && app.executionMode !== 6) || (executionMode !== null && executionMode !== 5 && executionMode !== 6)">
           <a-switch
             checked-children="ON"
             un-checked-children="OFF"
@@ -445,6 +446,29 @@
           </a-input-group>
         </a-form-item>
       </template>
+
+      <a-form-item
+        label="System Hadoop Conf"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-switch
+          checked-children="ON"
+          un-checked-children="OFF"
+          v-model="useSysHadoopConf"
+          @change="handleUseSysHadoopConf"/>
+        <a-tooltip placement="right">
+          <template slot="title">
+            Automatically copy config files from system env params
+            (HADOOP_CONF_PATH, HIVE_CONF_PATH) to Flink Docker image
+          </template>
+          <a-icon
+            type="question-circle"
+            style="margin-left: 10px"
+            theme="twoTone"
+            two-tone-color="#4a9ff5"/>
+        </a-tooltip>
+      </a-form-item>
 
       <a-form-item
         label="Application Name"
@@ -1044,6 +1068,7 @@ export default {
       defaultFlinkSqlId: null,
       defaultOptions: {},
       isSetConfig: false,
+      useSysHadoopConf: false,
       configOverride: null,
       configId: null,
       versionId: null,
@@ -1617,6 +1642,7 @@ export default {
         params.k8sPodTemplate = this.podTemplate
         params.k8sJmPodTemplate = this.jmPodTemplate
         params.k8sTmPodTemplate = this.tmPodTemplate
+        params.k8sHadoopIntegration = this.useSysHadoopConf
       }
       this.handleUpdateApp(params)
     },
@@ -1669,6 +1695,7 @@ export default {
         params.k8sPodTemplate = this.podTemplate
         params.k8sJmPodTemplate = this.jmPodTemplate
         params.k8sTmPodTemplate = this.tmPodTemplate
+        params.k8sHadoopIntegration = this.useSysHadoopConf
       }
       this.handleUpdateApp(params)
     },
@@ -1849,6 +1876,7 @@ export default {
           this.jmPodTemplate = this.app.k8sJmPodTemplate
           this.tmPodTemplate = this.app.k8sTmPodTemplate
           initPodTemplateEditor(this)
+          this.useSysHadoopConf = this.app.k8sHadoopIntegration
         }
       })
 
@@ -1889,6 +1917,10 @@ export default {
       })
     }
 
+  },
+
+  handleUseSysHadoopConf(value) {
+    this.useSysHadoopConf = value
   },
 
   watch: {

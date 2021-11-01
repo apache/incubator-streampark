@@ -227,13 +227,13 @@
         </a-form-item>
 
         <a-form-item
-          label="Application conf"
+          label="Application Conf"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+          v-show="executionMode !== 5 && executionMode !== 6">
           <a-switch
             checked-children="ON"
             un-checked-children="OFF"
-            @click="handleSQLConf"
             v-model="isSetConfig"
             v-decorator="[ 'config' ]"/>
           <a-icon
@@ -363,6 +363,29 @@
           </a-tree-select>
         </a-form-item>
       </template>
+
+      <a-form-item
+        label="System Hadoop Conf"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="executionMode === 6">
+        <a-switch
+          checked-children="ON"
+          un-checked-children="OFF"
+          v-model="useSysHadoopConf"
+          @change="handleUseSysHadoopConf"/>
+        <a-tooltip placement="right">
+          <template slot="title">
+            Automatically copy config files from system env params
+            (HADOOP_CONF_PATH, HIVE_CONF_PATH) to Flink Docker image
+          </template>
+          <a-icon
+            type="question-circle"
+            style="margin-left: 10px"
+            theme="twoTone"
+            two-tone-color="#4a9ff5"/>
+        </a-tooltip>
+      </a-form-item>
 
       <a-form-item
         label="Application Name"
@@ -955,6 +978,7 @@ export default {
       switchDefaultValue: true,
       config: null,
       isSetConfig: false,
+      useSysHadoopConf: false,
       alert: true,
       alertTypes: [
         {name: 'E-mail', value: 1, disabled: false},
@@ -1560,6 +1584,7 @@ export default {
         params.k8sPodTemplate = this.podTemplate
         params.k8sJmPodTemplate = this.jmPodTemplate
         params.k8sTmPodTemplate = this.tmPodTemplate
+        params.k8sHadoopIntegration = this.useSysHadoopConf
       }
 
       if (this.appType === 1) {
@@ -1633,6 +1658,7 @@ export default {
         params.k8sPodTemplate = this.podTemplate
         params.k8sJmPodTemplate = this.jmPodTemplate
         params.k8sTmPodTemplate = this.tmPodTemplate
+        params.k8sHadoopIntegration = this.useSysHadoopConf
       }
       this.handleCreateApp(params)
     },
@@ -1690,6 +1716,10 @@ export default {
 
     handleGoBack() {
       this.$router.go(-1)
+    },
+
+    handleUseSysHadoopConf(value) {
+      this.useSysHadoopConf = value
     }
 
   }
