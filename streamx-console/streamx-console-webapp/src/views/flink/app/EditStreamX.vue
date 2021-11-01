@@ -1021,13 +1021,13 @@ export default {
         {name: 'NodePort', order: 2}
       ],
       executionModes: [
-        { mode: 'local', value: 0, disabled: true },
-        { mode: 'standalone', value: 1, disabled: true },
-        { mode: 'yarn pre-job', value: 2, disabled: true },
-        { mode: 'yarn session', value: 3, disabled: true },
-        { mode: 'yarn application', value: 4, disabled: false },
-        { mode: 'kubernetes session', value: 5, disabled: false },
-        { mode: 'kubernetes application', value: 6, disabled: false }
+        {mode: 'yarn application', value: 4, disabled: false},
+        {mode: 'kubernetes session', value: 5, disabled: false},
+        {mode: 'kubernetes application', value: 6, disabled: false},
+        {mode: 'local', value: 0, disabled: true},
+        {mode: 'standalone', value: 1, disabled: true},
+        {mode: 'yarn pre-job', value: 2, disabled: true},
+        {mode: 'yarn session', value: 3, disabled: true},
       ],
       cpTriggerAction: [
         { name: 'alert', value: 1 },
