@@ -57,7 +57,7 @@
         </a-select>
       </a-form-item>
 
-      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode === 5 || executionMode === 6)">
+      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode !== null && (executionMode === 5 || executionMode === 6))">
         <a-form-item
           label="Kubernetes Namespace"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -208,6 +208,24 @@
             <a-tab-pane
               key="jar"
               tab="Upload Jar">
+
+              <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode !== null && (executionMode === 5 || executionMode === 6))">
+                <a-select
+                  mode="multiple"
+                  placeholder="Search History Uploads"
+                  :value="selectedHistoryUploadJars"
+                  style="width: 100%;"
+                  :showArrow="true"
+                  @change="handleSearchHistoryUploadJars"
+                  @select="addHistoryUploadJar"
+                  @deselect="deleteHistoryUploadJar">
+                  <a-select-option v-for="item in filteredHistoryUploadJarsOptions" :key="item" :value="item">
+                    <a-icon slot="suffixIcon" type="file-done" />
+                    {{ item }}
+                  </a-select-option>
+                </a-select>
+              </template>
+
               <a-upload-dragger
                 name="file"
                 :multiple="true"
@@ -254,11 +272,11 @@
               type="info"
               @click="handleEditPom(value)">
               <template slot="message">
-                <span @click="handleEditPom(value)" class="tag-dependency-pom">
+                <a-space @click="handleEditPom(value)" class="tag-dependency-pom">
                   <a-tag class="tag-dependency" color="#2db7f5">POM</a-tag>
                   {{ value.artifactId }}-{{ value.version }}.jar
-                </span>
-                <a-icon type="close" class="icon-close" @click="handleRemovePom(value)" />
+                  <a-icon type="close" class="icon-close" @click="handleRemovePom(value)"/>
+                </a-space>
               </template>
             </a-alert>
             <a-alert
@@ -267,8 +285,11 @@
               :key="`jars_${index}`"
               type="info">
               <template slot="message">
-                <span><a-tag class="tag-dependency" color="#108ee9">JAR</a-tag>{{ value }}</span>
-                <a-icon type="close" class="icon-close" @click="handleRemoveJar(value)" />
+                <a-space>
+                  <a-tag class="tag-dependency" color="#108ee9">JAR</a-tag>
+                  {{ value }}
+                  <a-icon type="close" class="icon-close" @click="handleRemoveJar(value)"/>
+                </a-space>
               </template>
             </a-alert>
           </div>
@@ -452,22 +473,24 @@
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
         v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
-        <a-switch
-          checked-children="ON"
-          un-checked-children="OFF"
-          v-model="useSysHadoopConf"
-          @change="handleUseSysHadoopConf"/>
-        <a-tooltip placement="right">
-          <template slot="title">
-            Automatically copy config files from system env params
-            (HADOOP_CONF_PATH, HIVE_CONF_PATH) to Flink Docker image
-          </template>
-          <a-icon
-            type="question-circle"
-            style="margin-left: 10px"
-            theme="twoTone"
-            two-tone-color="#4a9ff5"/>
-        </a-tooltip>
+        <a-space>
+          <a-switch
+            checked-children="ON"
+            un-checked-children="OFF"
+            v-model="useSysHadoopConf"
+            @change="handleUseSysHadoopConf"/>
+          <a-popover title="Tips">
+            <template slot="content">
+              <p>Automatically copy configuration files from system environment parameters</p>
+              <p><b>HADOOP_CONF_PATH</b> and <b>HIVE_CONF_PATH</b> to Flink Docker image</p>
+            </template>
+            <a-icon
+              type="question-circle"
+              style="margin-left: 10px"
+              theme="twoTone"
+              two-tone-color="#4a9ff5"/>
+          </a-popover>
+        </a-space>
       </a-form-item>
 
       <a-form-item
@@ -997,7 +1020,7 @@
 <script>
 import Ellipsis from '@/components/Ellipsis'
 import { listConf } from '@api/project'
-import { get, update, exists, name, readConf, upload } from '@api/application'
+import { get, update, exists, name, readConf, upload, listUploads as uploadJarHistory} from '@api/application'
 import { history as confhistory, get as getVer, template } from '@api/config'
 import { get as getSQL, history as sqlhistory } from '@api/flinksql'
 import { mapActions, mapGetters } from 'vuex'
@@ -1150,8 +1173,9 @@ export default {
           error: null,
           defaultValue: ''
         }
-
-      }
+      },
+      selectedHistoryUploadJars: [],
+      historyUploadJars: []
     }
   },
 
@@ -1168,6 +1192,10 @@ export default {
     },
     myTheme() {
       return this.$store.state.app.theme
+    },
+    filteredHistoryUploadJarsOptions() {
+      return this.historyUploadJars.filter(o =>
+        !this.selectedHistoryUploadJars.includes(o) && !this.controller.dependency.jar.has(o))
     }
   },
 
@@ -1193,6 +1221,9 @@ export default {
     })
     listFlinkEnv().then((resp)=>{
       this.flinkEnvs = resp.data
+    })
+    uploadJarHistory().then((resp) => {
+      this.historyUploadJars = resp.data
     })
   },
 
@@ -1474,6 +1505,20 @@ export default {
       return true
     },
 
+    handleSearchHistoryUploadJars(selectedItems) {
+      this.selectedHistoryUploadJars = selectedItems
+    },
+
+    addHistoryUploadJar(item) {
+      this.controller.dependency.jar.set(item, item)
+      this.handleUpdateDependency()
+    },
+
+    deleteHistoryUploadJar(item){
+      this.controller.dependency.jar.delete(item)
+      this.handleUpdateDependency()
+    },
+
     handleCustomRequest(data) {
       const executionMode =  this.form.getFieldValue('executionMode') || null
       if (executionMode !== null) {
@@ -1505,6 +1550,7 @@ export default {
 
     handleRemoveJar(jar) {
       this.controller.dependency.jar.delete(jar)
+      this.selectedHistoryUploadJars.splice(this.selectedHistoryUploadJars.indexOf(jar), 1)
       this.handleUpdateDependency()
     },
 

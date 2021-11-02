@@ -42,6 +42,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -233,5 +234,12 @@ public class ApplicationController {
         return RestResponse.create().data(upload);
     }
 
+
+    @PostMapping("listUploads")
+    @RequiresPermissions("app:create")
+    public RestResponse listUploadJars() {
+        List<String> jars = applicationService.listUploadJars(StorageType.LFS);
+        return RestResponse.create().data(jars);
+    }
 
 }

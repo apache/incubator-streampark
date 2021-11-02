@@ -37,6 +37,7 @@ import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
+import com.streamxhub.streamx.common.fs.LfsOperator;
 import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -85,6 +86,7 @@ import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.streamxhub.streamx.common.enums.StorageType.LFS;
 import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.Bridge.toTrkId;
 import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.isKubernetesApp;
 
@@ -397,6 +399,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             log.error(ExceptionUtils.stringifyException(e));
             updateState(application, appState);
             return false;
+        }
+    }
+
+    @Override
+    public List<String> listUploadJars(StorageType storageType) {
+        switch (storageType) {
+            case LFS:
+                return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
+                    .filter(File::isFile)
+                    .map(File::getName)
+                    .filter(fn -> fn.endsWith(".jar"))
+                    .collect(Collectors.toList());
+            case HDFS:
+                // temporarily does not provide support for hdfs.
+            default:
+                return new ArrayList<>(0);
         }
     }
 

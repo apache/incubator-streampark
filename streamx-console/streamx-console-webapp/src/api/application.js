@@ -112,3 +112,7 @@ export function startLog (params) {
 export function checkJar(params) {
   return http.post(api.Application.CHECKJAR, params)
 }
+
+export function listUploads() {
+  return http.post(api.Application.LISTUPLOADS)
+}
