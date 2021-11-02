@@ -1131,6 +1131,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             : new String[0];
 
         Map<String, Object> optionMap = application.getOptionMap();
+        optionMap.put(ConfigConst.KEY_JOB_ID(), application.getId());
 
         JarPackDeps jarPackDeps;
         if (application.isCustomCodeJob()) {
@@ -1139,7 +1140,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
             jarPackDeps = Application.Dependency.jsonToDependency(flinkSql.getDependency()).toJarPackDeps();
             optionMap.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
-            optionMap.put(ConfigConst.KEY_JOB_ID(), application.getId());
         }
 
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
