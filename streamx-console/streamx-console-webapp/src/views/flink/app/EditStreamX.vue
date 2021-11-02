@@ -1020,7 +1020,7 @@
 <script>
 import Ellipsis from '@/components/Ellipsis'
 import { listConf } from '@api/project'
-import { get, update, exists, name, readConf, upload, listUploads as uploadJarHistory} from '@api/application'
+import { get, update, exists, name, readConf, upload } from '@api/application'
 import { history as confhistory, get as getVer, template } from '@api/config'
 import { get as getSQL, history as sqlhistory } from '@api/flinksql'
 import { mapActions, mapGetters } from 'vuex'
@@ -1028,6 +1028,7 @@ import Mergely from './Mergely'
 import Different from './Different'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
+import { uploadJars as histUploadJars } from '@api/flinkhistory'
 
 const Base64 = require('js-base64').Base64
 import {
@@ -1222,7 +1223,7 @@ export default {
     listFlinkEnv().then((resp)=>{
       this.flinkEnvs = resp.data
     })
-    uploadJarHistory().then((resp) => {
+    histUploadJars().then((resp) => {
       this.historyUploadJars = resp.data
     })
   },

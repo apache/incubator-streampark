@@ -924,12 +924,13 @@
 <script>
 import Ellipsis from '@/components/Ellipsis'
 import {jars, listConf, modules, select} from '@api/project'
-import {create, exists, main, name, readConf, upload, listUploads } from '@api/application'
+import {create, exists, main, name, readConf, upload} from '@api/application'
 import {list as listFlinkEnv} from '@/api/flinkenv'
 import {template} from '@api/config'
 import Mergely from './Mergely'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
+import { uploadJars as histUploadJars } from '@api/flinkhistory'
 
 import {
   applyPom,
@@ -1768,7 +1769,7 @@ export default {
 
     handleReloadHistoryUploads() {
       this.selectedHistoryUploadJars = []
-      listUploads().then((resp) => {
+      histUploadJars().then((resp) => {
         this.historyUploadJars = resp.data
       })
     }

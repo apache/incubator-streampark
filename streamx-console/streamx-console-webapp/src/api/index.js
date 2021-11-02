@@ -78,7 +78,6 @@ export default {
     REVOKE: '/flink/app/revoke',
     STARTLOG: '/flink/app/startlog',
     CHECKJAR: '/flink/app/checkjar',
-    LISTUPLOADS: '/flink/app/listUploads'
   },
   Config: {
     GET: '/flink/conf/get',
@@ -95,6 +94,9 @@ export default {
     SYNC: '/flink/env/sync',
     UPDATE: '/flink/env/update',
     DEFAULT: '/flink/env/default',
+  },
+  FlinkHistory: {
+    UPLOAD_JARS: '/flink/history/uploadJars'
   },
   FlinkSQL: {
     VERIFY: '/flink/sql/verify',

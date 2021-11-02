@@ -86,6 +86,4 @@ public interface ApplicationService extends IService<Application> {
     void restart(Application application) throws Exception;
 
     boolean checkEnv(Application app);
-
-    List<String> listUploadJars(StorageType storageType);
 }
