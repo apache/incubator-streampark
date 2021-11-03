@@ -114,7 +114,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         new ThreadPoolExecutor.AbortPolicy()
     );
 
-   private final Pattern JOBNAME_PATTERN  = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_—-]+$");
+    private final Pattern JOBNAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_—-]+$");
 
 
     @Autowired
@@ -458,7 +458,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public AppExistsState checkExists(Application appParam) {
 
-        if(!checkJobName(appParam.getJobName())){
+        if (!checkJobName(appParam.getJobName())) {
             return AppExistsState.INVALID;
         }
         boolean inDB = this.baseMapper.selectCount(
@@ -1131,12 +1131,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             : new String[0];
 
         Map<String, Object> optionMap = application.getOptionMap();
-        JarPackDeps jarPackDeps = JarPackDeps.empty();
-        if (application.isFlinkSqlJob()) {
+        optionMap.put(ConfigConst.KEY_JOB_ID(), application.getId());
+
+        JarPackDeps jarPackDeps;
+        if (application.isCustomCodeJob()) {
+            jarPackDeps = Application.Dependency.jsonToDependency(application.getDependency()).toJarPackDeps();
+        } else {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
             jarPackDeps = Application.Dependency.jsonToDependency(flinkSql.getDependency()).toJarPackDeps();
             optionMap.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
-            optionMap.put(ConfigConst.KEY_JOB_ID(), application.getId());
         }
 
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
@@ -1243,8 +1246,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             return false;
         }
     }
-    private Boolean checkJobName(String jobName){
-        if(!StringUtils.isEmpty(jobName.trim())){
+
+    private Boolean checkJobName(String jobName) {
+        if (!StringUtils.isEmpty(jobName.trim())) {
             return JOBNAME_PATTERN.matcher(jobName).matches();
         }
         return false;

@@ -506,7 +506,10 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public boolean isNeedRestartOnFailed() {
-        return this.restartSize != null && this.restartSize > 0 && this.restartCount <= this.restartSize;
+        if (this.restartSize != null && this.restartCount != null) {
+            return this.restartSize > 0 && this.restartCount <= this.restartSize;
+        }
+        return false;
     }
 
     /**
