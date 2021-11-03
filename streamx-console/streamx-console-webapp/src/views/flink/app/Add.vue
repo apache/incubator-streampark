@@ -430,11 +430,59 @@
             </template>
             <a-icon
               type="question-circle"
-              style="margin-left: 10px"
-              theme="twoTone"
-              two-tone-color="#4a9ff5"/>
+              style="margin-left: 10px"/>
           </a-popover>
+          <transition name="slide-fade">
+            <a-button
+              shape="circle"
+              icon="appstore"
+              size="small"
+              v-if="useSysHadoopConf == true"
+              @click="showSysHadoopConfDrawer"></a-button>
+          </transition>
         </a-space>
+
+        <a-drawer
+          title="System Hadoop Conifguration"
+          placement="right"
+          :width="800"
+          :closable="false"
+          item-layout="vertical"
+          :visible="hadoopConfDrawer.visual"
+          @close="closeSysHadoopConfDrawer">
+          <p style="color:gray">
+            <a-icon type="bulb"/>
+            <i> Streamx will automatically map the hostname values in the following config files to the corresponding ip.</i>
+          </p>
+          <a-tabs tabPosition="top">
+            <a-tab-pane key="hadoop" tab="Hadoop">
+              <template
+                v-if="hadoopConfDrawer.content.hadoop == null || Object.keys(hadoopConfDrawer.content.hadoop).length === 0 || hadoopConfDrawer.content.hadoop.size === 0">
+                <a-empty/>
+              </template>
+              <template v-else>
+                <a-tabs tabPosition="left">
+                  <a-tab-pane v-for="(content, fname) in hadoopConfDrawer.content.hadoop" :key="fname" :tab="fname">
+                    <pre style="font-size: 12px; margin-top: 20px; margin-bottom: 20px">{{ content }}</pre>
+                  </a-tab-pane>
+                </a-tabs>
+              </template>
+            </a-tab-pane>
+            <a-tab-pane key="hive" tab="Hive">
+              <template
+                v-if="hadoopConfDrawer.content.hive == null || Object.keys(hadoopConfDrawer.content.hive).length === 0 || hadoopConfDrawer.content.hive.size === 0">
+                <a-empty/>
+              </template>
+              <template v-else>
+                <a-tabs tabPosition="left">
+                  <a-tab-pane v-for="(content, fname) in hadoopConfDrawer.content.hive" :key="fname" :tab="fname">
+                    <pre style="font-size: 12px; margin-top: 20px; margin-bottom: 20px">{{ content }}</pre>
+                  </a-tab-pane>
+                </a-tabs>
+              </template>
+            </a-tab-pane>
+          </a-tabs>
+        </a-drawer>
       </a-form-item>
 
       <a-form-item
@@ -1055,6 +1103,7 @@ import {
   flinkJmPodTemplates as histJmPodTemplates,
   flinkTmPodTemplates as histTmPodTemplates
 } from '@api/flinkhistory'
+import { sysHadoopConf } from '@api/config'
 
 import {
   applyPom,
@@ -1217,6 +1266,10 @@ export default {
         ptVisual: false,
         jmPtVisual: false,
         tmPtVisual: false
+      },
+      hadoopConfDrawer: {
+        visual: false,
+        content: {}
       },
     }
   },
@@ -1937,21 +1990,21 @@ export default {
       this.podTemplateDrawer[visualType] = true
       switch (visualType) {
         case 'ptVisual':
-          if (this.historyRecord.podTemplate == null || this.historyRecord.podTemplate.length == 0) {
+          if (this.historyRecord.podTemplate == null || this.historyRecord.podTemplate.length === 0) {
             histPodTemplates().then((resp) => {
               this.historyRecord.podTemplate = resp.data
             })
           }
           break
         case 'jmPtVisual':
-          if (this.historyRecord.jmPodTemplate == null || this.historyRecord.jmPodTemplate.length == 0) {
+          if (this.historyRecord.jmPodTemplate == null || this.historyRecord.jmPodTemplate.length === 0) {
             histJmPodTemplates().then((resp) => {
               this.historyRecord.jmPodTemplate = resp.data
             })
           }
           break
         case 'tmPtVisual':
-          if (this.historyRecord.tmPodTemplate == null || this.historyRecord.tmPodTemplate.length == 0){
+          if (this.historyRecord.tmPodTemplate == null || this.historyRecord.tmPodTemplate.length === 0){
             histTmPodTemplates().then((resp) => {
               this.historyRecord.tmPodTemplate = resp.data
             })
@@ -1977,6 +2030,21 @@ export default {
           break
       }
       this.closePodTemplateDrawer(visualType)
+    },
+
+    showSysHadoopConfDrawer() {
+      this.hadoopConfDrawer.visual = true
+      if (this.hadoopConfDrawer.content == null
+        || Object.keys(this.hadoopConfDrawer.content).length === 0
+        || this.hadoopConfDrawer.content.size === 0) {
+        sysHadoopConf().then((resp) => {
+          this.hadoopConfDrawer.content = resp.data
+        })
+      }
+    },
+
+    closeSysHadoopConfDrawer(){
+      this.hadoopConfDrawer.visual = false
     },
 
   }

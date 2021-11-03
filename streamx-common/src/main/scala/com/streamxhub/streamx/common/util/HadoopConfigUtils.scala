@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.common.util
 
+import com.streamxhub.streamx.common.fs.LfsOperator
+
 import java.io.File
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 
@@ -27,6 +29,7 @@ import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
+import java.util.{Map => JavaMap}
 
 
 /**
@@ -102,5 +105,24 @@ object HadoopConfigUtils {
     // write content to original file
     ApacheFileUtils.writeLines(configFile, lines)
   }
+
+  /**
+   * Read system hadoop config to Map
+   */
+  def readSystemHadoopConf: JavaMap[String, String] =
+    LfsOperator.listDir(getSystemHadoopConfDir)
+      .filter(f => HADOOP_CLIENT_CONF_FILES.contains(f.getName))
+      .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
+      .toMap.asJava
+
+  /**
+   * Read system hive config to Map
+   */
+  def readSystemHiveConf: JavaMap[String, String] =
+    LfsOperator.listDir(getSystemHiveConfDir)
+      .filter(f => HIVE_CLIENT_CONF_FILES.contains(f.getName))
+      .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
+      .toMap.asJava
+
 
 }

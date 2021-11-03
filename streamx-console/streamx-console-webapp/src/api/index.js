@@ -84,7 +84,8 @@ export default {
     TEMPLATE: '/flink/conf/template',
     LIST: '/flink/conf/list',
     HISTORY: '/flink/conf/history',
-    DELETE: '/flink/conf/delete'
+    DELETE: '/flink/conf/delete',
+    SYS_HADOOP_CONF: '/flink/conf/sysHadoopConf'
   },
   FlinkEnv: {
     LIST: '/flink/env/list',
