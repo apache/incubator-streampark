@@ -21,10 +21,10 @@
 package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.enums.SqlErrorType
-import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.util.{Logger, SqlSplitter}
 import enumeratum.EnumEntry
-
 import java.util.regex.{Matcher, Pattern}
+
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 
@@ -33,7 +33,7 @@ object SqlCommandParser extends Logger {
   def parseSQL(sql: String): List[SqlCommandCall] = {
     val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
-    val lines = sql.split("\\n").filter(_ != null).filter(x => x.trim.nonEmpty && !x.trim.startsWith("--"))
+    val lines = SqlSplitter.splitSql(sql).filter(x => x != null && x.trim.nonEmpty)
     lines match {
       case x if x.isEmpty => throw new RuntimeException(sqlEmptyError)
       case x =>

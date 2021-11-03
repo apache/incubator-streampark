@@ -633,7 +633,7 @@ public class FlinkTrackingTask {
             // notes: k8s flink tracking monitor don't need to flush or refresh cache proactively.
             return callable.call();
         }
-        log.info("flinkTrackingTask flushing app,appId:{}", appId);
+        log.debug("flinkTrackingTask flushing app,appId:{}", appId);
         Application application = TRACKING_MAP.get(appId);
         if (application != null) {
             persistent(application);
