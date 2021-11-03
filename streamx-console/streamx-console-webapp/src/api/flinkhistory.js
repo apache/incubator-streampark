@@ -22,7 +22,29 @@ import api from './index'
 import http from '@/utils/request'
 
 export function uploadJars() {
-  return http.get(api.FlinkHistory.UPLOAD_JARS)
+  return http.post(api.FlinkHistory.UPLOAD_JARS)
 }
 
+export function k8sNamespaces(params) {
+  return http.post(api.FlinkHistory.K8S_NAMESPACES, params)
+}
 
+export function sessionClusterIds(params) {
+  return http.post(api.FlinkHistory.SESSION_CLUSTER_IDS, params)
+}
+
+export function flinkBaseImages(params) {
+  return http.post(api.FlinkHistory.FLINK_BASE_IMAGES, params)
+}
+
+export function flinkPodTemplates(params) {
+  return http.post(api.FlinkHistory.FLINK_POD_TEMPLATES, params)
+}
+
+export function flinkJmPodTemplates(params) {
+  return http.post(api.FlinkHistory.FLINK_JM_POD_TEMPLATES, params)
+}
+
+export function flinkTmPodTemplates(params) {
+  return http.post(api.FlinkHistory.FLINK_TM_POD_TEMPLATES, params)
+}

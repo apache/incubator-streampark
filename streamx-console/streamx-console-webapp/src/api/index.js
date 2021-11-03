@@ -96,7 +96,13 @@ export default {
     DEFAULT: '/flink/env/default',
   },
   FlinkHistory: {
-    UPLOAD_JARS: '/flink/history/uploadJars'
+    UPLOAD_JARS: '/flink/history/uploadJars',
+    K8S_NAMESPACES: '/flink/history/k8sNamespaces',
+    SESSION_CLUSTER_IDS: '/flink/history/sessionClusterIds',
+    FLINK_BASE_IMAGES: '/flink/history/flinkBaseImages',
+    FLINK_POD_TEMPLATES: '/flink/history/flinkPodTemplates',
+    FLINK_JM_POD_TEMPLATES: '/flink/history/flinkJmPodTemplates',
+    FLINK_TM_POD_TEMPLATES: '/flink/history/flinkTmPodTemplates'
   },
   FlinkSQL: {
     VERIFY: '/flink/sql/verify',
