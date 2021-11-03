@@ -67,6 +67,14 @@
             placeholder="default"
             allowClear
             v-decorator="[ 'k8sNamespace']">
+            <a-dropdown slot="addonAfter" placement="bottomRight">
+              <a-menu slot="overlay" trigger="['click', 'hover']">
+                <a-menu-item v-for="item in historyRecord.k8sNamespace" :key="item" @click="handleSelectHistoryK8sNamespace(item)" style="padding-right: 60px">
+                  <a-icon type="plus-circle"/>{{ item }}
+                </a-menu-item>
+              </a-menu>
+              <a-icon type="history"/>
+            </a-dropdown>
           </a-input>
         </a-form-item>
 
@@ -79,6 +87,16 @@
             placeholder="Please enter Kubernetes clusterId"
             allowClear
             v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
+            <template v-if="(executionMode == null && app.executionMode === 5) || (executionMode !== null && executionMode === 5)">
+              <a-dropdown slot="addonAfter" placement="bottomRight">
+                <a-menu slot="overlay" trigger="['click', 'hover']">
+                  <a-menu-item v-for="item in historyRecord.k8sSessionClusterId" :key="item" @click="handleSelectHistoryK8sSessionClusterId(item)" style="padding-right: 60px">
+                    <a-icon type="plus-circle"/>{{ item }}
+                  </a-menu-item>
+                </a-menu>
+                <a-icon type="history"/>
+              </a-dropdown>
+            </template>
           </a-input>
         </a-form-item>
       </template>
@@ -93,11 +111,17 @@
             placeholder="Please enter the tag of Flink base docker image"
             allowClear
             v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base Docker Image is required' }] }]">
+            <a-dropdown slot="addonAfter" placement="bottomRight">
+              <a-menu slot="overlay" trigger="['click', 'hover']">
+                <a-menu-item v-for="item in historyRecord.flinkImage" :key="item" @click="handleSelectHistoryFlinkImage(item)" style="padding-right: 60px">
+                  <a-icon type="plus-circle"/>{{ item }}
+                </a-menu-item>
+              </a-menu>
+              <a-icon type="history"/>
+            </a-dropdown>
           </a-input>
         </a-form-item>
-      </template>
 
-      <template v-if="(executionMode == null && app.executionMode === 6) || executionMode === 6">
         <a-form-item
           label="Rest-Service Exposed Type"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -1028,7 +1052,15 @@ import Mergely from './Mergely'
 import Different from './Different'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
-import { uploadJars as histUploadJars } from '@api/flinkhistory'
+import {
+  uploadJars as histUploadJars,
+  k8sNamespaces as histK8sNamespaces,
+  sessionClusterIds as histSessionClusterIds,
+  flinkBaseImages as histFlinkBaseImages,
+  flinkPodTemplates as histPodTemplates,
+  flinkJmPodTemplates as histJmPodTemplates,
+  flinkTmPodTemplates as histTmPodTemplates
+} from '@api/flinkhistory'
 
 const Base64 = require('js-base64').Base64
 import {
@@ -1176,7 +1208,15 @@ export default {
         }
       },
       selectedHistoryUploadJars: [],
-      historyUploadJars: []
+      historyRecord: {
+        uploadJars: [],
+        k8sNamespace: [],
+        k8sSessionClusterId: [],
+        flinkImage: [],
+        podTemplate:[],
+        jmPodTemplate:[],
+        tmPodTemplate:[]
+      },
     }
   },
 
@@ -1195,7 +1235,7 @@ export default {
       return this.$store.state.app.theme
     },
     filteredHistoryUploadJarsOptions() {
-      return this.historyUploadJars.filter(o =>
+      return this.historyRecord.uploadJars.filter(o =>
         !this.selectedHistoryUploadJars.includes(o) && !this.controller.dependency.jar.has(o))
     }
   },
@@ -1223,8 +1263,18 @@ export default {
     listFlinkEnv().then((resp)=>{
       this.flinkEnvs = resp.data
     })
+    // load history config records
     histUploadJars().then((resp) => {
-      this.historyUploadJars = resp.data
+      this.historyRecord.uploadJars = resp.data
+    })
+    histK8sNamespaces().then((resp) => {
+      this.historyRecord.k8sNamespace = resp.data
+    })
+    histSessionClusterIds({'executionMode': 5}).then((resp) => {
+      this.historyRecord.k8sSessionClusterId = resp.data
+    })
+    histFlinkBaseImages().then((resp) => {
+      this.historyRecord.flinkImage = resp.data
     })
   },
 
@@ -1892,6 +1942,22 @@ export default {
       })
     },
 
+    handleUseSysHadoopConf(value) {
+      this.useSysHadoopConf = value
+    },
+
+    handleSelectHistoryK8sNamespace(value) {
+      this.form.setFieldsValue({'k8sNamespace': value})
+    },
+
+    handleSelectHistoryK8sSessionClusterId(value) {
+      this.form.setFieldsValue({'clusterId': value})
+    },
+
+    handleSelectHistoryFlinkImage(value) {
+      this.form.setFieldsValue({'flinkImage': value})
+    },
+
     handleReset() {
       this.$nextTick(() => {
         this.form.setFieldsValue({
@@ -1918,6 +1984,7 @@ export default {
           initEditor(this,Base64.decode(this.flinkSql.sql))
           this.handleInitDependency()
         }
+        this.selectedHistoryUploadJars = []
         if (this.app.executionMode === 6) {
           this.podTemplate = this.app.k8sPodTemplate
           this.jmPodTemplate = this.app.k8sJmPodTemplate
@@ -1963,11 +2030,6 @@ export default {
         this.form.setFieldsValue(fieldValueOptions)
       })
     }
-
-  },
-
-  handleUseSysHadoopConf(value) {
-    this.useSysHadoopConf = value
   },
 
   watch: {

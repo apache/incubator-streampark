@@ -70,8 +70,17 @@
             placeholder="default"
             allowClear
             v-decorator="[ 'k8sNamespace']">
+            <a-dropdown slot="addonAfter" placement="bottomRight">
+              <a-menu slot="overlay" trigger="['click', 'hover']">
+                <a-menu-item v-for="item in historyRecord.k8sNamespace" :key="item" @click="handleSelectHistoryK8sNamespace(item)" style="padding-right: 60px">
+                  <a-icon type="plus-circle"/>{{ item }}
+                </a-menu-item>
+              </a-menu>
+              <a-icon type="history"/>
+            </a-dropdown>
           </a-input>
         </a-form-item>
+
         <a-form-item
           label="Kubernetes ClusterId"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -82,6 +91,16 @@
             @change="handleClusterId"
             allowClear
             v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
+            <template v-if="executionMode === 5">
+              <a-dropdown slot="addonAfter" placement="bottomRight">
+                <a-menu slot="overlay" trigger="['click', 'hover']">
+                  <a-menu-item v-for="item in historyRecord.k8sSessionClusterId" :key="item" @click="handleSelectHistoryK8sSessionClusterId(item)" style="padding-right: 60px">
+                    <a-icon type="plus-circle"/>{{ item }}
+                  </a-menu-item>
+                </a-menu>
+                <a-icon type="history"/>
+              </a-dropdown>
+            </template>
           </a-input>
         </a-form-item>
       </template>
@@ -96,8 +115,17 @@
             placeholder="Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8"
             allowClear
             v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base Docker Image is required' }] }]">
+            <a-dropdown slot="addonAfter" placement="bottomRight">
+              <a-menu slot="overlay" trigger="['click', 'hover']">
+                <a-menu-item v-for="item in historyRecord.flinkImage" :key="item" @click="handleSelectHistoryFlinkImage(item)" style="padding-right: 60px">
+                  <a-icon type="plus-circle"/>{{ item }}
+                </a-menu-item>
+              </a-menu>
+              <a-icon type="history"/>
+            </a-dropdown>
           </a-input>
         </a-form-item>
+
         <a-form-item
           label="Rest-Service Exposed Type"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -930,7 +958,15 @@ import {template} from '@api/config'
 import Mergely from './Mergely'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
-import { uploadJars as histUploadJars } from '@api/flinkhistory'
+import {
+  uploadJars as histUploadJars,
+  k8sNamespaces as histK8sNamespaces,
+  sessionClusterIds as histSessionClusterIds,
+  flinkBaseImages as histFlinkBaseImages,
+  flinkPodTemplates as histPodTemplates,
+  flinkJmPodTemplates as histJmPodTemplates,
+  flinkTmPodTemplates as histTmPodTemplates
+} from '@api/flinkhistory'
 
 import {
   applyPom,
@@ -1080,7 +1116,15 @@ export default {
         }
       },
       selectedHistoryUploadJars: [],
-      historyUploadJars: []
+      historyRecord: {
+        uploadJars: [],
+        k8sNamespace: [],
+        k8sSessionClusterId: [],
+        flinkImage: [],
+        podTemplate:[],
+        jmPodTemplate:[],
+        tmPodTemplate:[]
+      },
     }
   },
 
@@ -1119,7 +1163,7 @@ export default {
       return this.$store.state.app.theme
     },
     filteredHistoryUploadJarsOptions() {
-      return this.historyUploadJars.filter(o =>
+      return this.historyRecord.uploadJars.filter(o =>
         !this.selectedHistoryUploadJars.includes(o) && !this.controller.dependency.jar.has(o))
     }
   },
@@ -1192,7 +1236,17 @@ export default {
         this.form.getFieldDecorator('versionId', {initialValue: v.id})
         this.versionId = v.id
       })
+      // load history config records
       this.handleReloadHistoryUploads()
+      histK8sNamespaces().then((resp) => {
+        this.historyRecord.k8sNamespace = resp.data
+      })
+      histSessionClusterIds({'executionMode': 5}).then((resp) => {
+        this.historyRecord.k8sSessionClusterId = resp.data
+      })
+      histFlinkBaseImages().then((resp) => {
+        this.historyRecord.flinkImage = resp.data
+      })
     },
 
     handleChangeJobType(value) {
@@ -1770,8 +1824,20 @@ export default {
     handleReloadHistoryUploads() {
       this.selectedHistoryUploadJars = []
       histUploadJars().then((resp) => {
-        this.historyUploadJars = resp.data
+        this.historyRecord.uploadJars = resp.data
       })
+    },
+
+    handleSelectHistoryK8sNamespace(value) {
+      this.form.setFieldsValue({'k8sNamespace': value})
+    },
+
+    handleSelectHistoryK8sSessionClusterId(value) {
+      this.form.setFieldsValue({'clusterId': value})
+    },
+
+    handleSelectHistoryFlinkImage(value) {
+      this.form.setFieldsValue({'flinkImage': value})
     }
 
   }
