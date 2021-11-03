@@ -877,19 +877,105 @@
             key="pod-template"
             tab="Pod Template"
             forceRender>
-            <div class="pod-template-box syntax-true" style="height: 300px"></div>
+            <div class="pod-template-box syntax-true" style="height: 300px">
+              <a-button
+                type="primary"
+                icon="history"
+                class="pod-template-hist"
+                @click="showPodTemplateDrawer('ptVisual')">History</a-button>
+              <a-drawer
+                title="Pod Template History"
+                placement="right"
+                :width="700"
+                item-layout="vertical"
+                :closable="false"
+                :visible="this.podTemplateDrawer.ptVisual"
+                @close="closePodTemplateDrawer('ptVisual')">
+                <template>
+                  <a-empty v-if="historyRecord.podTemplate == null || historyRecord.podTemplate.length == 0"/>
+                  <a-card
+                    title="pod-template.yaml"
+                    size="small"
+                    hoverable
+                    style="margin-bottom: 8px"
+                    v-for="(item,index) in historyRecord.podTemplate"
+                    :key="index">
+                    <a slot="extra" @click="handleChoicePodTemplate('ptVisual', item)">Choice</a>
+                    <pre style="font-size: 12px">{{ item }}</pre>
+                  </a-card>
+                </template>
+              </a-drawer>
+            </div>
           </a-tab-pane>
+
           <a-tab-pane
             key="jm-pod-template"
             tab="JM Pod Template"
             forceRender>
-            <div class="jm-pod-template-box syntax-true" style="height: 300px"></div>
+            <div class="jm-pod-template-box syntax-true" style="height: 300px">
+              <a-button
+                type="primary"
+                icon="history"
+                class="pod-template-hist"
+                @click="showPodTemplateDrawer('jmPtVisual')">History</a-button>
+              <a-drawer
+                title="JobManager Pod Template History"
+                placement="right"
+                :width="700"
+                item-layout="vertical"
+                :closable="false"
+                :visible="this.podTemplateDrawer.jmPtVisual"
+                @close="closePodTemplateDrawer('jmPtVisual')">
+                <template>
+                  <a-empty v-if="historyRecord.jmPodTemplate == null || historyRecord.jmPodTemplate.length == 0"/>
+                  <a-card
+                    title="jm-pod-template.yaml"
+                    size="small"
+                    hoverable
+                    style="margin-bottom: 8px"
+                    v-for="(item,index) in historyRecord.jmPodTemplate"
+                    :key="index">
+                    <a slot="extra" @click="handleChoicePodTemplate('jmPtVisual', item)">Choice</a>
+                    <pre style="font-size: 12px">{{ item }}</pre>
+                  </a-card>
+                </template>
+              </a-drawer>
+            </div>
           </a-tab-pane>
+
           <a-tab-pane
             key="tm-pod-template"
             tab="TM Pod Template"
             forceRender>
-            <div class="tm-pod-template-box syntax-true" style="height: 300px"></div>
+            <div class="tm-pod-template-box syntax-true" style="height: 300px">
+              <a-button
+                type="primary"
+                icon="history"
+                class="pod-template-hist"
+                @click="showPodTemplateDrawer('tmPtVisual')">History</a-button>
+              <a-drawer
+                title="TaskManager Pod Template History"
+                placement="right"
+                :width="700"
+                item-layout="vertical"
+                :closable="false"
+                :visible="this.podTemplateDrawer.tmPtVisual"
+                @close="closePodTemplateDrawer('tmPtVisual')">
+                <template>
+                  <a-empty v-if="historyRecord.tmPodTemplate == null || historyRecord.tmPodTemplate.length == 0"/>
+                  <a-card
+                    title="tm-pod-template.yaml"
+                    size="small"
+                    hoverable
+                    style="margin-bottom: 8px"
+                    v-for="(item,index) in historyRecord.tmPodTemplate"
+                    :key="index">
+                    <a slot="extra" @click="handleChoicePodTemplate('tmPtVisual', item)">Choice</a>
+                    <pre style="font-size: 12px">{{ item }}</pre>
+                  </a-card>
+                </template>
+              </a-drawer>
+            </div>
           </a-tab-pane>
         </a-tabs>
       </a-form-item>
@@ -1216,6 +1302,11 @@ export default {
         podTemplate:[],
         jmPodTemplate:[],
         tmPodTemplate:[]
+      },
+      podTemplateDrawer: {
+        ptVisual: false,
+        jmPtVisual: false,
+        tmPtVisual: false
       },
     }
   },
@@ -1956,6 +2047,52 @@ export default {
 
     handleSelectHistoryFlinkImage(value) {
       this.form.setFieldsValue({'flinkImage': value})
+    },
+
+    showPodTemplateDrawer(visualType) {
+      this.podTemplateDrawer[visualType] = true
+      switch (visualType) {
+        case 'ptVisual':
+          if (this.historyRecord.podTemplate == null || this.historyRecord.podTemplate.length == 0) {
+            histPodTemplates().then((resp) => {
+              this.historyRecord.podTemplate = resp.data
+            })
+          }
+          break
+        case 'jmPtVisual':
+          if (this.historyRecord.jmPodTemplate == null || this.historyRecord.jmPodTemplate.length == 0) {
+            histJmPodTemplates().then((resp) => {
+              this.historyRecord.jmPodTemplate = resp.data
+            })
+          }
+          break
+        case 'tmPtVisual':
+          if (this.historyRecord.tmPodTemplate == null || this.historyRecord.tmPodTemplate.length == 0){
+            histTmPodTemplates().then((resp) => {
+              this.historyRecord.tmPodTemplate = resp.data
+            })
+          }
+          break
+      }
+    },
+
+    closePodTemplateDrawer(visualType) {
+      this.podTemplateDrawer[visualType] = false
+    },
+
+    handleChoicePodTemplate(visualType, content) {
+      switch (visualType) {
+        case 'ptVisual':
+          this.controller.editor.podTemplate.setValue(content)
+          break
+        case 'jmPtVisual':
+          this.controller.editor.jmPodTemplate.setValue(content)
+          break
+        case 'tmPtVisual':
+          this.controller.editor.tmPodTemplate.setValue(content)
+          break
+      }
+      this.closePodTemplateDrawer(visualType)
     },
 
     handleReset() {

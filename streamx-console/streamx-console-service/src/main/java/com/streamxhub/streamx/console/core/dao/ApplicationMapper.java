@@ -75,7 +75,7 @@ public interface ApplicationMapper extends BaseMapper<Application> {
     @Select("select k8s_pod_template from " +
         "(select k8s_pod_template, max(create_time) as ct from t_flink_app " +
         "where k8s_pod_template is not null and k8s_pod_template <> '' and execution_mode = 6 " +
-        "group by k8s_pod_template order by ct desc as pt " +
+        "group by k8s_pod_template order by ct desc) as pt " +
         "limit #{limitSize}")
     List<String> getRecentK8sPodTemplate(@Param("limitSize") int limit);
 
