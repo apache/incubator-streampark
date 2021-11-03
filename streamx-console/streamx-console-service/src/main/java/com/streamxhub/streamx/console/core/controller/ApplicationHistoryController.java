@@ -16,17 +16,20 @@
  */
 package com.streamxhub.streamx.console.core.controller;
 
+import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.service.ApplicationHistoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,19 +43,72 @@ public class ApplicationHistoryController {
 
     private final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
 
+    private final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
+
     @Autowired
     private ApplicationHistoryService applicationHistoryService;
 
-    @GetMapping("uploadJars")
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    private ApplicationMapper applicationMapper;
+
+    @PostMapping("uploadJars")
     @RequiresPermissions("app:create")
     public RestResponse listUploadJars() {
         List<String> jars = applicationHistoryService.listUploadJars(StorageType.LFS, DEFAULT_HISTORY_RECORD_LIMIT);
         return RestResponse.create().data(jars);
     }
 
+    @PostMapping("k8sNamespaces")
+    @RequiresPermissions("app:create")
+    public RestResponse listK8sNamespace() {
+        List<String> namespaces = applicationMapper.getRecentK8sNamespace(DEFAULT_HISTORY_RECORD_LIMIT);
+        return RestResponse.create().data(namespaces);
+    }
 
+    @PostMapping("sessionClusterIds")
+    @RequiresPermissions("app:create")
+    public RestResponse listSessionClusterId(int executionMode) {
+        List<String> clusterIds;
+        switch (ExecutionMode.of(executionMode)) {
+            case KUBERNETES_NATIVE_SESSION:
+            case YARN_SESSION:
+            case REMOTE:
+                clusterIds = applicationMapper.getRecentK8sClusterId(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
+                break;
+            default:
+                clusterIds = new ArrayList<>(0);
+                break;
+        }
+        return RestResponse.create().data(clusterIds);
+    }
 
+    @PostMapping("flinkBaseImages")
+    @RequiresPermissions("app:create")
+    public RestResponse listFlinkBaseImage() {
+        List<String> images = applicationMapper.getRecentFlinkBaseImage(DEFAULT_HISTORY_RECORD_LIMIT);
+        return RestResponse.create().data(images);
+    }
 
+    @PostMapping("flinkPodTemplates")
+    @RequiresPermissions("app:create")
+    public RestResponse listPodTemplate() {
+        List<String> templates = applicationMapper.getRecentK8sPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+        return RestResponse.create().data(templates);
+    }
 
+    @PostMapping("flinkJmPodTemplates")
+    @RequiresPermissions("app:create")
+    public RestResponse listJmPodTemplate() {
+        List<String> templates = applicationMapper.getRecentK8sJmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+        return RestResponse.create().data(templates);
+    }
+
+    @PostMapping("flinkTmPodTemplates")
+    @RequiresPermissions("app:create")
+    public RestResponse listTmPodTemplate() {
+        List<String> templates = applicationMapper.getRecentK8sTmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+        return RestResponse.create().data(templates);
+    }
 
 }

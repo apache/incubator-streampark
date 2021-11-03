@@ -57,10 +57,4 @@ public class ApplicationHistoryServiceImpl implements ApplicationHistoryService 
         }
     }
 
-//    @Override
-//    public List<String> listK8sNamespace(int limit) {
-//        return null;
-//    }
-
-
 }

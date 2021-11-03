@@ -23,12 +23,8 @@ import java.util.List;
 /**
  * @author Al-assad
  */
-@SuppressWarnings("AlibabaAbstractMethodOrInterfaceMethodMustUseJavadoc")
 public interface ApplicationHistoryService {
 
     List<String> listUploadJars(StorageType storageType, int limit);
-
-//    List<String> listK8sNamespace(int limit);
-
 
 }
