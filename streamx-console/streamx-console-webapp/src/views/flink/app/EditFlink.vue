@@ -42,7 +42,7 @@
           placeholder="Execution Mode"
           v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]">
           <a-select-option
-            v-for="(o,index) in executionMode"
+            v-for="(o,index) in executionModes"
             :key="`execution_mode_${index}`"
             :disabled="o.disabled"
             :value="o.value">
@@ -67,6 +67,64 @@
           </a-select-option>
         </a-select>
       </a-form-item>
+
+      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode === 5 || executionMode === 6)">
+        <a-form-item
+          label="Kubernetes Namespace"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="default"
+            allowClear
+            v-decorator="[ 'k8sNamespace']">
+          </a-input>
+        </a-form-item>
+
+        <a-form-item
+          label="Kubernetes ClusterId"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter Kubernetes clusterId"
+            allowClear
+            v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
+          </a-input>
+        </a-form-item>
+      </template>
+
+      <template v-if="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-form-item
+          label="Flink Base Docker Image"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter the tag of Flink base docker image"
+            allowClear
+            v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base Docker Image is required' }] }]">
+          </a-input>
+        </a-form-item>
+      </template>
+
+      <template v-if="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-form-item
+          label="Rest-Service Exposed Type"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            placeholder="kubernetes.rest-service.exposed.type"
+            v-decorator="[ 'k8sRestExposedType' ]">
+            <a-select-option
+              v-for="(o,index) in k8sRestExposedType"
+              :key="`k8s_rest_exposed_type_${index}`"
+              :value="o.order">
+              {{ o.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </template>
 
       <a-form-item
         label="Program Jar"
@@ -424,6 +482,33 @@
       </a-form-item>
 
       <a-form-item
+        label="Kubernetes Pod Template"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-tabs type="card" v-model="controller.podTemplateTab">
+          <a-tab-pane
+            key="pod-template"
+            tab="Pod Template"
+            forceRender>
+            <div class="pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="jm-pod-template"
+            tab="JM Pod Template"
+            forceRender>
+            <div class="jm-pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="tm-pod-template"
+            tab="TM Pod Template"
+            forceRender>
+            <div class="tm-pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-item>
+
+      <a-form-item
         label="Description"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -460,6 +545,7 @@ import { get, update, exists, main } from '@api/application'
 import { mapActions, mapGetters } from 'vuex'
 import configOptions from './Option'
 import {list as listFlinkEnv} from '@/api/flinkenv'
+import {initPodTemplateEditor} from './AddEdit'
 
 export default {
   name: 'EditFlink',
@@ -482,19 +568,27 @@ export default {
         { name: 'parent-first', order: 0 },
         { name: 'child-first', order: 1 }
       ],
-      executionMode: [
-        { mode: 'local', value: 0, disabled: true },
-        { mode: 'standalone', value: 1, disabled: true },
-        { mode: 'yarn pre-job', value: 2, disabled: true },
-        { mode: 'yarn session', value: 3, disabled: true },
-        { mode: 'yarn application', value: 4, disabled: false },
-        { mode: 'kubernetes session (comming soon)', value: 5, disabled: true },
-        { mode: 'kubernetes application (comming soon)', value: 6, disabled: true }
+      k8sRestExposedType: [
+        {name: 'LoadBalancer', order: 0},
+        {name: 'ClusterIP', order: 1},
+        {name: 'NodePort', order: 2}
+      ],
+      executionModes: [
+        {mode: 'yarn application', value: 4, disabled: false},
+        {mode: 'kubernetes session', value: 5, disabled: false},
+        {mode: 'kubernetes application', value: 6, disabled: false},
+        {mode: 'local (coming soon)', value: 0, disabled: true},
+        {mode: 'standalone (coming soon)', value: 1, disabled: true},
+        {mode: 'yarn session (coming soon)', value: 3, disabled: true},
+        {mode: 'yarn pre-job (deprecated, please use yarn-application mode)', value: 2, disabled: true}
       ],
       cpTriggerAction: [
         { name: 'alert', value: 1 },
         { name: 'restart', value: 2 }
       ],
+      podTemplate: null,
+      jmPodTemplate: null,
+      tmPodTemplate: null,
       configItems: [],
       jmMemoryItems: [],
       tmMemoryItems: [],
@@ -507,6 +601,14 @@ export default {
       submitting: false,
       confEdit: {
         visiable: false
+      },
+      controller: {
+        podTemplateTab: 'pod-template',
+        editor: {
+          podTemplate: null,
+          jmPodTemplate: null,
+          tmPodTemplate: null
+        }
       }
     }
   },
@@ -673,6 +775,12 @@ export default {
       }
     },
 
+    handleK8sPodTemplateEditor(){
+      this.$nextTick(() => {
+        initPodTemplateEditor(this)
+      })
+    },
+
     handleChangeJars(jar) {
       main({
         projectId: this.app.projectId,
@@ -710,7 +818,17 @@ export default {
               dynamicOptions: values.dynamicOptions,
               restartSize: values.restartSize,
               alertEmail: values.alertEmail || null,
-              description: values.description
+              description: values.description,
+              k8sRestExposedType: values.k8sRestExposedType,
+              k8sNamespace: values.k8sNamespace || null,
+              clusterId: values.clusterId || null,
+              flinkImage: values.flinkImage || null
+            }
+
+            if (params.executionMode === 6) {
+              params.k8sPodTemplate = this.podTemplate
+              params.k8sJmPodTemplate = this.jmPodTemplate
+              params.k8sTmPodTemplate = this.tmPodTemplate
             }
             this.handleUpdateApp(params)
           }
@@ -780,8 +898,19 @@ export default {
           'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
           'cpFailureRateInterval': this.app.cpFailureRateInterval,
           'cpFailureAction': this.app.cpFailureAction,
-          'versionId': this.app.versionId
+          'versionId': this.app.versionId,
+          'k8sRestExposedType': this.app.k8sRestExposedType,
+          'clusterId': this.app.clusterId,
+          'flinkImage': this.app.flinkImage,
+          'k8sNamespace': this.app.k8sNamespace
         })
+
+        if (this.app.executionMode === 6) {
+          this.podTemplate = this.app.k8sPodTemplate
+          this.jmPodTemplate = this.app.k8sJmPodTemplate
+          this.tmPodTemplate = this.app.k8sTmPodTemplate
+          this.initPodTemplateEditor(this)
+        }
       })
       let parallelism = null
       let slot = null
