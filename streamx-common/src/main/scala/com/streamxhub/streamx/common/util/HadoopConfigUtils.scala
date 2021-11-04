@@ -98,7 +98,7 @@ object HadoopConfigUtils {
         var li = line
         while (shot.nonEmpty) {
           li = li.replace(shot.get._1, shot.get._2)
-          shot = hostsMap.find(e => line.contains(e._1))
+          shot = hostsMap.find(e => li.contains(e._1))
         }
         li
     }
