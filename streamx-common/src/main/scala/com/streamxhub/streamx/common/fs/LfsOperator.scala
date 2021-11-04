@@ -48,9 +48,7 @@ object LfsOperator extends FsOperator with Logger {
   override def delete(path: String): Unit = {
     if (notEmpty(path)) {
       val file = new File(path)
-      if (!file.exists()) {
-        logWarn(s"delete file: file is no exists, $path")
-      } else {
+      if (file.exists()) {
         FileUtils.forceDelete(file)
       }
     }
