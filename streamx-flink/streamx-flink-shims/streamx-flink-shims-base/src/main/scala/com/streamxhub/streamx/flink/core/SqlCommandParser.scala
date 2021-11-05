@@ -41,11 +41,11 @@ object SqlCommandParser extends Logger {
         for (stmt <- stmts) {
           parseLine(stmt) match {
             case Some(x) => calls += x
-            case _ => throw new RuntimeException(SqlError(SqlErrorType.UNSUPPORTED_SQL, exception = s"unsupported sql", sql = stmt).toString)
+            case _ => throw new IllegalArgumentException(SqlError(SqlErrorType.UNSUPPORTED_SQL, exception = s"unsupported sql", sql = stmt).toString)
           }
         }
         calls.toList match {
-          case Nil => throw new RuntimeException(SqlError(SqlErrorType.SYNTAX_ERROR, exception = "no executable sql", sql = "").toString)
+          case Nil => throw new IllegalArgumentException(SqlError(SqlErrorType.SYNTAX_ERROR, exception = "no executable sql", sql = "").toString)
           case r => r
         }
     }
