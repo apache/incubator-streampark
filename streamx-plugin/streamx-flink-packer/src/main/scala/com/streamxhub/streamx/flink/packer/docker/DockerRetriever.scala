@@ -1,7 +1,7 @@
 package com.streamxhub.streamx.flink.packer.docker
 
 import com.github.dockerjava.api.DockerClient
-import com.github.dockerjava.core.{DefaultDockerClientConfig, DockerClientConfig, DockerClientImpl}
+import com.github.dockerjava.core.{DefaultDockerClientConfig, DockerClientConfig, HackDockerClient}
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 
 import java.time.Duration
@@ -35,7 +35,7 @@ object DockerRetriever {
    * get new DockerClient instance
    */
   def newDockerClient(): DockerClient = {
-    DockerClientImpl.getInstance(dockerClientConf, dockerHttpClientBuilder.build())
+    HackDockerClient.getInstance(dockerClientConf, dockerHttpClientBuilder.build())
   }
 
 
