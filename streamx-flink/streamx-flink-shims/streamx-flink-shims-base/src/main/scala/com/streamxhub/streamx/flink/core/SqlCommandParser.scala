@@ -35,7 +35,7 @@ object SqlCommandParser extends Logger {
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
     val lines = SqlSplitter.splitSql(sql)
     lines match {
-      case stmts if stmts.isEmpty => throw new RuntimeException(sqlEmptyError)
+      case stmts if stmts.isEmpty => throw new IllegalArgumentException(sqlEmptyError)
       case stmts =>
         val calls = new ArrayBuffer[SqlCommandCall]
         for (stmt <- stmts) {
