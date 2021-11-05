@@ -62,7 +62,7 @@ object SqlCommandParser extends Logger {
       for (i <- groups.indices) {
         groups(i) = matcher.group(i + 1)
       }
-      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlCommand, x))
+      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlCommand, x, sqlLine))
     }
   }
 
@@ -329,9 +329,9 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 /**
  * Call of SQL command with operands and command type.
  */
-case class SqlCommandCall(command: SqlCommand, operands: Array[String]) {
+case class SqlCommandCall(command: SqlCommand, operands: Array[String], originSql: String) {
   def this(command: SqlCommand) {
-    this(command, new Array[String](0))
+    this(command, new Array[String](0), null)
   }
 }
 
