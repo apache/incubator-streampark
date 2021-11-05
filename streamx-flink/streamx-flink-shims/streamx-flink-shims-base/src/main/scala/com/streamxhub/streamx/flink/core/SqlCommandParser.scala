@@ -35,17 +35,17 @@ object SqlCommandParser extends Logger {
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
     val lines = SqlSplitter.splitSql(sql)
     lines match {
-      case stmts if stmts.isEmpty => throw new RuntimeException(sqlEmptyError)
+      case stmts if stmts.isEmpty => throw new IllegalArgumentException(sqlEmptyError)
       case stmts =>
         val calls = new ArrayBuffer[SqlCommandCall]
         for (stmt <- stmts) {
           parseLine(stmt) match {
             case Some(x) => calls += x
-            case _ => throw new RuntimeException(SqlError(SqlErrorType.UNSUPPORTED_SQL, exception = s"unsupported sql", sql = stmt).toString)
+            case _ => throw new IllegalArgumentException(SqlError(SqlErrorType.UNSUPPORTED_SQL, exception = s"unsupported sql", sql = stmt).toString)
           }
         }
         calls.toList match {
-          case Nil => throw new RuntimeException(SqlError(SqlErrorType.SYNTAX_ERROR, exception = "no executable sql", sql = "").toString)
+          case Nil => throw new IllegalArgumentException(SqlError(SqlErrorType.SYNTAX_ERROR, exception = "no executable sql", sql = "").toString)
           case r => r
         }
     }
