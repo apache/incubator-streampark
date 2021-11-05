@@ -152,10 +152,10 @@ object FlinkSqlExecutor extends Logger {
           }
           callback(builder.toString())
         case EXPLAIN =>
-          val tableResult = context.executeSql(args)
+          val tableResult = context.executeSql(x.originSql)
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
-        case INSERT_INTO | INSERT_OVERWRITE => insertArray += args
+        case INSERT_INTO | INSERT_OVERWRITE => insertArray += x.originSql
         case SELECT =>
           throw new Exception(s"[StreamX] Unsupported SELECT in current version.")
         case INSERT_INTO | INSERT_OVERWRITE |
@@ -166,7 +166,7 @@ object FlinkSqlExecutor extends Logger {
              CREATE_DATABASE | DROP_DATABASE | ALTER_DATABASE =>
           try {
             lock.lock()
-            val result = context.executeSql(args)
+            val result = context.executeSql(x.originSql)
             logInfo(s"$command:$args")
           } finally {
             if (lock.isHeldByCurrentThread) {
