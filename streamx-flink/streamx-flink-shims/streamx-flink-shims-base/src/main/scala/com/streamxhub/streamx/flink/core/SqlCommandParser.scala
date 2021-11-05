@@ -33,33 +33,26 @@ object SqlCommandParser extends Logger {
   def parseSQL(sql: String): List[SqlCommandCall] = {
     val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
-    val lines = SqlSplitter.splitSql(sql).filter(x => x != null && x.trim.nonEmpty)
+    val lines = SqlSplitter.splitSql(sql)
     lines match {
-      case x if x.isEmpty => throw new RuntimeException(sqlEmptyError)
-      case x =>
+      case stmts if stmts.isEmpty => throw new IllegalArgumentException(sqlEmptyError)
+      case stmts =>
         val calls = new ArrayBuffer[SqlCommandCall]
-        val stmt = new StringBuilder
-        for (line <- x) {
-          stmt.append("\n").append(line)
-          if (line.trim.endsWith(";")) {
-            parseLine(stmt.toString.trim) match {
-              case Some(x) => calls += x
-              case _ => throw new RuntimeException(SqlError(SqlErrorType.UNSUPPORTED_SQL, exception = s"unsupported sql", sql = stmt.toString).toString)
-            }
-            // clear string builder
-            stmt.clear()
+        for (stmt <- stmts) {
+          parseLine(stmt) match {
+            case Some(x) => calls += x
+            case _ => throw new IllegalArgumentException(SqlError(SqlErrorType.UNSUPPORTED_SQL, exception = s"unsupported sql", sql = stmt).toString)
           }
         }
         calls.toList match {
-          case Nil => throw new RuntimeException(SqlError(SqlErrorType.ENDS_WITH, exception = "not ends with \";\"", sql = sql).toString)
+          case Nil => throw new IllegalArgumentException(SqlError(SqlErrorType.SYNTAX_ERROR, exception = "no executable sql", sql = "").toString)
           case r => r
         }
     }
   }
 
   private[this] def parseLine(sqlLine: String): Option[SqlCommandCall] = {
-    // remove ';' at the end
-    val stmt = sqlLine.trim.replaceFirst(";$", "")
+    val stmt = sqlLine.trim
     // parse
     val sqlCommands = SqlCommand.values.filter(_.matches(stmt))
     if (sqlCommands.isEmpty) None else {
