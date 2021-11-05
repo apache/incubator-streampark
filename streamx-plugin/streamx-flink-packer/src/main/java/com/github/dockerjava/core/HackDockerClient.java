@@ -26,7 +26,7 @@ import com.github.dockerjava.core.command.HackPushImageCmd;
 import com.github.dockerjava.transport.DockerHttpClient;
 
 /**
- * Enhanced of DockerClient to provide custom api with a hacked way.
+ * Enhancement of DockerClient to provide custom api with a hacked way.
  *
  * @author Al-assad
  */
