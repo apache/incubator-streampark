@@ -513,12 +513,14 @@
               style="margin-left: 10px"/>
           </a-popover>
           <transition name="slide-fade">
-            <a-button
-              shape="circle"
-              icon="appstore"
-              size="small"
-              v-if="useSysHadoopConf == true"
-              @click="showSysHadoopConfDrawer"></a-button>
+            <a-tooltip title="View">
+              <a-button
+                shape="circle"
+                icon="appstore"
+                size="small"
+                v-if="useSysHadoopConf == true"
+                @click="showSysHadoopConfDrawer"></a-button>
+            </a-tooltip>
           </transition>
         </a-space>
 
@@ -530,10 +532,6 @@
           item-layout="vertical"
           :visible="hadoopConfDrawer.visual"
           @close="closeSysHadoopConfDrawer">
-          <p style="color:gray">
-            <a-icon type="bulb"/>
-            <i> Streamx will automatically map the hostname values in the following config files to the corresponding ip.</i>
-          </p>
           <a-tabs tabPosition="top">
             <a-tab-pane key="hadoop" tab="Hadoop">
               <template
