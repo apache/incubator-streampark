@@ -22,6 +22,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const ThemeColorReplacer = require('webpack-theme-color-replacer')
 const {getThemeColors, modifyVars} = require('./src/utils/themeUtil')
@@ -65,6 +66,7 @@ module.exports = {
     },
 
     plugins: [
+      new BundleAnalyzerPlugin(),
       // Ignore all locale files of moment.js
       new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
       new webpack.ProvidePlugin({
@@ -135,3 +137,4 @@ module.exports = {
   publicPath: '/',
   productionSourceMap: false
 }
+
