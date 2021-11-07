@@ -260,6 +260,7 @@ public class ApplicationBackUpServiceImpl
                 break;
             case YARN_APPLICATION:
                 appHome = application.getAppHome();
+                break;
         }
 
         FsOperator fsOperator = application.getFsOperator();
