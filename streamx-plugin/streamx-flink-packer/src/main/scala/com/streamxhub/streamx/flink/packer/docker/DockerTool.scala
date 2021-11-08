@@ -44,7 +44,7 @@ object DockerTool extends Logger {
     }
     // generate dockerfile
     val dockerfile = dockerFileTemplate.writeDockerfile(projectBaseDir)
-    val tagName = compileTag(expectImageTag, authConf.registerAddress).toLowerCase
+    val tagName = compileTag(expectImageTag, authConf.registerAddress)
 
     // build and push docker image
     tryWithResourceException(DockerRetriever.newDockerClient()) {
