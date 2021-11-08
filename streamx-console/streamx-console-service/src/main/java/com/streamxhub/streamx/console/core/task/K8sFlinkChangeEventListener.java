@@ -93,8 +93,8 @@ public class K8sFlinkChangeEventListener {
         if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(mode)) {
             query.eq("job_id", jobStatus.jobId());
         }
-        query.orderByDesc("create_time").last("limit 1");
-        Application app = applicationService.getOne(query);
+        Application app = applicationService.getOne(
+            query.orderByDesc("create_time").last("limit 1"));
         if (app == null) {
             return;
         }
