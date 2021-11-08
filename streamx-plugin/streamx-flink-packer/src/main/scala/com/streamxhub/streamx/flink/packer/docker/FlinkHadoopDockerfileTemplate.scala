@@ -22,9 +22,7 @@ package com.streamxhub.streamx.flink.packer.docker
 
 import com.streamxhub.streamx.common.fs.LfsOperator
 import com.streamxhub.streamx.common.util.HadoopConfigUtils
-import com.streamxhub.streamx.common.util.HadoopConfigUtils.{HADOOP_CLIENT_CONF_FILES, HIVE_CLIENT_CONF_FILES}
 
-import java.io.File
 import java.nio.file.Paths
 import javax.annotation.Nullable
 
@@ -57,16 +55,21 @@ case class FlinkHadoopDockerfileTemplate(workspacePath: String,
     var dockerfile =
       s"""FROM $flinkBaseImage
          |RUN mkdir -p $FLINK_HOME/usrlib
-         |COPY $mainJarName $FLINK_HOME/usrlib/$mainJarName
-         |COPY $extraLibName $FLINK_HOME/lib/
          |""".stripMargin
     if (hadoopConfDir.nonEmpty) dockerfile +=
-      s"""COPY $hadoopConfDir /opt/hadoop-conf
+      s"""
+         |COPY $hadoopConfDir /opt/hadoop-conf
          |ENV HADOOP_CONF_DIR /opt/hadoop-conf
          |""".stripMargin
     if (hiveConfDir.nonEmpty) dockerfile +=
-      s"""COPY $hiveConfDir /opt/hive-conf
+      s"""
+         |COPY $hiveConfDir /opt/hive-conf
          |ENV HIVE_CONF_DIR /opt/hive-conf
+         |""".stripMargin
+    dockerfile +=
+      s"""
+         |COPY $extraLibName $FLINK_HOME/lib/
+         |COPY $mainJarName $FLINK_HOME/usrlib/$mainJarName
          |""".stripMargin
     dockerfile
   }
@@ -81,8 +84,7 @@ object FlinkHadoopDockerfileTemplate {
   def fromSystemHadoopConf(workspacePath: String,
                            flinkBaseImage: String,
                            flinkMainJarPath: String,
-                           flinkExtraLibPaths: Set[String],
-                           optimizeHadoopConf: Boolean = true): FlinkHadoopDockerfileTemplate = {
+                           flinkExtraLibPaths: Set[String]): FlinkHadoopDockerfileTemplate = {
     // get hadoop and hive config directory from system and copy to workspacePath
     val hadoopConfDir = HadoopConfigUtils.getSystemHadoopConfDir match {
       case hadoopConf if !LfsOperator.exists(hadoopConf) => ""
@@ -99,11 +101,6 @@ object FlinkHadoopDockerfileTemplate {
         LfsOperator.mkCleanDirs(dstDir)
         LfsOperator.copyDir(hiveConf, dstDir)
         dstDir
-    }
-    // optimize hadoop and hive config content
-    if (optimizeHadoopConf) {
-      if (hadoopConfDir.nonEmpty) HadoopConfigUtils.batchReplaceHostWithIP(new File(hadoopConfDir), HADOOP_CLIENT_CONF_FILES)
-      if (hiveConfDir.nonEmpty) HadoopConfigUtils.batchReplaceHostWithIP(new File(hiveConfDir), HIVE_CLIENT_CONF_FILES)
     }
     FlinkHadoopDockerfileTemplate(workspacePath, flinkBaseImage, flinkMainJarPath, flinkExtraLibPaths,
       hadoopConfDir, hiveConfDir)

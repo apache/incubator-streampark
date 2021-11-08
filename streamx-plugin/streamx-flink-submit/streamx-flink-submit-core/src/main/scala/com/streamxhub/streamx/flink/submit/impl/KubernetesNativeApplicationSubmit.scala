@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -101,10 +101,9 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     }
     // build docker image
     val flinkImageTag = DockerTool.buildFlinkImage(
-      dockerAuthConfig,
-      buildWorkspace,
       dockerFileTemplate,
       tagName,
+      dockerAuthConfig,
       push = true)
     // add flink container image tag to flink configuration
     flinkConfig.set(KubernetesConfigOptions.CONTAINER_IMAGE, flinkImageTag)

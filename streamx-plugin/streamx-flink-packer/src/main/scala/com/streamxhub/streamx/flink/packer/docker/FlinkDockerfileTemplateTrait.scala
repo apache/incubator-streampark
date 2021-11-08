@@ -75,7 +75,7 @@ trait FlinkDockerfileTemplateTrait {
    */
   lazy val workspace: Path = {
     val path = Paths.get(workspacePath).toAbsolutePath
-    LfsOperator.mkCleanDirs(FLINK_LIB_PATH)
+    if (!LfsOperator.exists(workspacePath)) LfsOperator.mkdirs(workspacePath)
     path
   }
 

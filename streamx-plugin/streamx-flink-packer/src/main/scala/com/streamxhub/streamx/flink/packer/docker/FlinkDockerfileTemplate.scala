@@ -40,8 +40,8 @@ case class FlinkDockerfileTemplate(workspacePath: String,
   override def offerDockerfileContent: String = {
     s"""FROM $flinkBaseImage
        |RUN mkdir -p $FLINK_HOME/usrlib
-       |COPY $mainJarName $FLINK_HOME/usrlib/$mainJarName
        |COPY $extraLibName $FLINK_HOME/lib/
+       |COPY $mainJarName $FLINK_HOME/usrlib/$mainJarName
        |""".stripMargin
   }
 
