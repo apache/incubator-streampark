@@ -46,7 +46,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Method;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.function.Function;
 
