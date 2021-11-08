@@ -86,7 +86,7 @@ object FlinkSqlExecutor extends Logger {
     //TODO registerHiveCatalog
     val insertArray = new ArrayBuffer[String]()
     SqlCommandParser.parseSQL(flinkSql).foreach(x => {
-      val args = x.operands.head
+      val args = if (x.operands.isEmpty) null else x.operands.head
       val command = x.command.name
       x.command match {
         case USE =>
@@ -120,18 +120,15 @@ object FlinkSqlExecutor extends Logger {
           if (!tableConfigOptions.containsKey(args)) {
             throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html")
           }
+          val operand = x.operands(1)
           if (TableConfigOptions.TABLE_SQL_DIALECT.key().equalsIgnoreCase(args)) {
-            val dialect = x.operands(1)
-            if (SqlDialect.HIVE.name().equalsIgnoreCase(dialect)) {
-              context.getConfig.setSqlDialect(SqlDialect.HIVE)
-              if (SqlDialect.DEFAULT.name().equalsIgnoreCase(dialect)) {
-                context.getConfig.setSqlDialect(SqlDialect.DEFAULT)
-              }
-            }
+            Try(SqlDialect.valueOf(operand.toUpperCase()))
+              .map(context.getConfig.setSqlDialect(_))
+              .getOrElse(throw new IllegalArgumentException(s"$operand is not a valid dialect"))
           } else {
-            context.getConfig.getConfiguration.setString(args, x.operands(1))
+            context.getConfig.getConfiguration.setString(args, operand)
           }
-          logInfo(s"$command: $args --> ${x.operands(1)}")
+          logInfo(s"$command: $args --> $operand")
         case RESET =>
           val confDataField = classOf[Configuration].getDeclaredField("confData")
           confDataField.setAccessible(true)
@@ -155,10 +152,10 @@ object FlinkSqlExecutor extends Logger {
           }
           callback(builder.toString())
         case EXPLAIN =>
-          val tableResult = context.executeSql(sql)
+          val tableResult = context.executeSql(x.originSql)
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
-        case INSERT_INTO | INSERT_OVERWRITE => insertArray += args
+        case INSERT_INTO | INSERT_OVERWRITE => insertArray += x.originSql
         case SELECT =>
           throw new Exception(s"[StreamX] Unsupported SELECT in current version.")
         case INSERT_INTO | INSERT_OVERWRITE |
@@ -169,7 +166,7 @@ object FlinkSqlExecutor extends Logger {
              CREATE_DATABASE | DROP_DATABASE | ALTER_DATABASE =>
           try {
             lock.lock()
-            val result = context.executeSql(args)
+            val result = context.executeSql(x.originSql)
             logInfo(s"$command:$args")
           } finally {
             if (lock.isHeldByCurrentThread) {

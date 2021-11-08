@@ -2,6 +2,7 @@ package com.streamxhub.streamx.flink.packer.maven
 
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.util.{Logger, Utils}
+import org.apache.maven.plugins.shade.resource.ServicesResourceTransformer
 import org.apache.maven.plugins.shade.{DefaultShader, ShadeRequest}
 import org.codehaus.plexus.logging.console.ConsoleLogger
 import org.codehaus.plexus.logging.{Logger => PlexusLog}
@@ -15,7 +16,7 @@ import scala.collection.JavaConversions._
 import scala.util.Try
 
 /**
- * author: Al-assad
+ * @author Al-assad
  */
 object MavenTool extends Logger {
 

@@ -7,7 +7,7 @@ import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import java.time.Duration
 
 /**
- * author: Al-assad
+ * @author Al-assad
  */
 object DockerRetriever {
 

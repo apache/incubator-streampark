@@ -41,9 +41,9 @@ import org.apache.flink.table.api.TableConfig
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.{HashMap => JavaHashMap}
-import scala.collection.JavaConversions._
-import scala.collection.Map
-import scala.util.Try
+import collection.JavaConversions._
+import collection.Map
+import util.Try
 
 private[flink] object FlinkStreamingInitializer {
 

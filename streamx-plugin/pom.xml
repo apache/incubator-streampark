@@ -14,7 +14,6 @@
     <packaging>pom</packaging>
 
     <properties>
-        <streamx.shims.version>1.14</streamx.shims.version>
         <scalatest.skiptests>true</scalatest.skiptests>
     </properties>
 
@@ -23,6 +22,7 @@
         <module>streamx-flink-sqlclient</module>
         <module>streamx-flink-udf</module>
         <module>streamx-flink-submit</module>
+        <module>streamx-flink-proxy</module>
         <module>streamx-jvm-profiler</module>
         <module>streamx-flink-packer</module>
         <module>streamx-flink-kubernetes</module>

@@ -61,14 +61,16 @@
 
     </distributionManagement>
 
-
     <properties>
         <project.build.jdk>1.8</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <flink.version>1.14.0</flink.version>
+        <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
+
         <spark.version>2.2.0</spark.version>
         <hive.version>2.3.4</hive.version>
-        <flink.version>1.13.0</flink.version>
         <async.client.version>2.0.39</async.client.version>
         <vertx.version>3.8.5</vertx.version>
         <hadoop.version>2.10.1</hadoop.version>
@@ -104,6 +106,13 @@
 
     <dependencies>
 
+        <!--jansi-->
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
+            <version>2.3.4</version>
+        </dependency>
+
         <!--scala-->
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -129,6 +138,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.beachape</groupId>
                 <artifactId>enumeratum_${scala.binary.version}</artifactId>
@@ -286,12 +301,6 @@
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-scala_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-runtime_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
             </dependency>
 

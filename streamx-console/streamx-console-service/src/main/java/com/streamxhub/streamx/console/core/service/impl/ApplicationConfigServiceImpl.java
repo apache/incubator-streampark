@@ -228,10 +228,12 @@ public class ApplicationConfigServiceImpl
         List<ApplicationConfig> configList = this.baseMapper.selectList(wrapper);
         ApplicationConfig effective = getEffective(application.getId());
 
-        for (ApplicationConfig config : configList) {
-            if (config.getId().equals(effective.getId())) {
-                config.setEffective(true);
-                break;
+        if (effective != null) {
+            for (ApplicationConfig config : configList) {
+                if (config.getId().equals(effective.getId())) {
+                    config.setEffective(true);
+                    break;
+                }
             }
         }
         return configList;

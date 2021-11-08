@@ -34,7 +34,7 @@
           v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]"
           @change="handleChangeMode">
           <a-select-option
-            v-for="(o,index) in executionModes[jobType]"
+            v-for="(o,index) in executionModes"
             :key="`execution_mode_${index}`"
             :disabled="o.disabled"
             :value="o.value">
@@ -52,7 +52,7 @@
           v-decorator="[ 'versionId', {rules: [{ required: true, message: 'Flink Version is required' }] }]"
           @change="handleFlinkVersion">>
           <a-select-option
-            v-for="(v,index) in flinkVersions"
+            v-for="(v,index) in flinkEnvs"
             :key="`version_${index}`"
             :value="v.id">
             {{ v.flinkName }}
@@ -334,7 +334,8 @@
             type="text"
             allowClear
             placeholder="Please enter Main class"
-            v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]"/>
+            v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]">
+          </a-input>
         </a-form-item>
 
         <a-form-item
@@ -879,7 +880,7 @@
 import Ellipsis from '@/components/Ellipsis'
 import {jars, listConf, modules, select} from '@api/project'
 import {create, exists, main, name, readConf, upload} from '@api/application'
-import {list as listVersion} from '@api/flinkversion'
+import {list as listFlinkEnv} from '@/api/flinkenv'
 import {template} from '@api/config'
 import Mergely from './Mergely'
 import configOptions from './Option'
@@ -913,7 +914,7 @@ export default {
       versionId: null,
       module: null,
       moduleList: [],
-      flinkVersions: [],
+      flinkEnvs: [],
       jars: [],
       resolveOrder: [
         {name: 'parent-first', order: 0},
@@ -924,26 +925,15 @@ export default {
         {name: 'ClusterIP', order: 1},
         {name: 'NodePort', order: 2}
       ],
-      executionModes: {
-        sql: [
-          {mode: 'local', value: 0, disabled: true},
-          {mode: 'standalone', value: 1, disabled: true},
-          {mode: 'yarn pre-job', value: 2, disabled: true},
-          {mode: 'yarn session', value: 3, disabled: true},
-          {mode: 'yarn application', value: 4, disabled: false},
-          {mode: 'kubernetes session', value: 5, disabled: false},
-          {mode: 'kubernetes application', value: 6, disabled: false}
-        ],
-        customcode: [
-          {mode: 'local', value: 0, disabled: true},
-          {mode: 'standalone', value: 1, disabled: true},
-          {mode: 'yarn pre-job', value: 2, disabled: true},
-          {mode: 'yarn session', value: 3, disabled: true},
-          {mode: 'yarn application', value: 4, disabled: false},
-          {mode: 'kubernetes session (comming soon)', value: 5, disabled: true},
-          {mode: 'kubernetes application (comming soon)', value: 6, disabled: true}
-        ],
-      },
+      executionModes: [
+        {mode: 'yarn application', value: 4, disabled: false},
+        {mode: 'kubernetes session', value: 5, disabled: false},
+        {mode: 'kubernetes application', value: 6, disabled: false},
+        {mode: 'local (coming soon)', value: 0, disabled: true},
+        {mode: 'standalone (coming soon)', value: 1, disabled: true},
+        {mode: 'yarn session (coming soon)', value: 3, disabled: true},
+        {mode: 'yarn pre-job (deprecated, please use yarn-application mode)', value: 2, disabled: true}
+      ],
       cpTriggerAction: [
         {name: 'alert', value: 1},
         {name: 'restart', value: 2}
@@ -1132,10 +1122,11 @@ export default {
       this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
       this.form.getFieldDecorator('executionMode', {initialValue: 4})
       this.form.getFieldDecorator('restartSize', {initialValue: 0})
-      listVersion().then((resp)=>{
-        this.flinkVersions = resp.data
-        const v = this.flinkVersions.filter((v) => {return v.isDefault})[0]
+      listFlinkEnv().then((resp)=>{
+        this.flinkEnvs = resp.data
+        const v = this.flinkEnvs.filter((v) => {return v.isDefault})[0]
         this.form.getFieldDecorator('versionId', {initialValue: v.id})
+        this.versionId = v.id
       })
     },
 
@@ -1395,9 +1386,13 @@ export default {
           if (exists === 0) {
             callback()
           } else if (exists === 1) {
-            callback(new Error('Application Name must be unique. The application name already exists'))
+            callback(new Error('application name must be unique. The application name already exists'))
+          } else if (exists === 2) {
+            callback(new Error('The application name is already running in yarn,cannot be repeated. Please check'))
+          } else if (exists === 3) {
+            callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
           } else {
-            callback(new Error('The Application Name is already running in yarn,cannot be repeated. Please check'))
+            callback(new Error('The application name is invalid.Please input Chinese,English letters,characters like [ _ ],[ - ],[ — ],[ . ] and so on.Please check'))
           }
         })
       }

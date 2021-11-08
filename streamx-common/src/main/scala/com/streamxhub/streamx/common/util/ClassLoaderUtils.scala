@@ -26,7 +26,7 @@ import java.util.function.Supplier
 
 object ClassLoaderUtils extends Logger {
 
-  private[this] lazy val originalClassLoader: ClassLoader = Thread.currentThread().getContextClassLoader
+  private[this] val originalClassLoader: ClassLoader = Thread.currentThread().getContextClassLoader
 
   /**
    * 指定 classLoader执行代码...

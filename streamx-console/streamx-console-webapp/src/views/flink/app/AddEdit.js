@@ -134,42 +134,44 @@ export function initPodTemplateEditor(vue) {
 
 export function verifySQL(vue) {
   const controller = vue.controller
-  const callback = arguments[1] || function (r) {
-  }
-  verify({
-    'sql': controller.flinkSql.value,
-    'versionId': vue.versionId
-  }).then((resp) => {
-    const success = resp.data === true || resp.data === 'true'
-    if (success) {
-      controller.flinkSql.success = true
-      controller.flinkSql.errorMsg = null
-      controller.flinkSql.errorStart = null
-      controller.flinkSql.errorEnd = null
-      syntaxError(vue)
-    } else {
-      controller.flinkSql.success = false
-      controller.flinkSql.errorLine = resp.line
-      controller.flinkSql.errorColumn = resp.column
-      controller.flinkSql.errorStart = resp.start
-      controller.flinkSql.errorEnd = resp.end
-      switch (resp.type) {
-        case 4:
-          controller.flinkSql.errorMsg = 'Unsupported sql'
-          break
-        case 5:
-          controller.flinkSql.errorMsg = 'SQL is not endWith \';\''
-          break
-        default:
-          controller.flinkSql.errorMsg = resp.message
-          break
-      }
-      syntaxError(vue)
+  if(vue.versionId != null) {
+    const callback = arguments[1] || function (r) {
     }
-    callback(success)
-  }).catch((error) => {
-    //vue.$message.error(error.message)
-  })
+    verify({
+      'sql': controller.flinkSql.value,
+      'versionId': vue.versionId
+    }).then((resp) => {
+      const success = resp.data === true || resp.data === 'true'
+      if (success) {
+        controller.flinkSql.success = true
+        controller.flinkSql.errorMsg = null
+        controller.flinkSql.errorStart = null
+        controller.flinkSql.errorEnd = null
+        syntaxError(vue)
+      } else {
+        controller.flinkSql.success = false
+        controller.flinkSql.errorLine = resp.line
+        controller.flinkSql.errorColumn = resp.column
+        controller.flinkSql.errorStart = resp.start
+        controller.flinkSql.errorEnd = resp.end
+        switch (resp.type) {
+          case 4:
+            controller.flinkSql.errorMsg = 'Unsupported sql'
+            break
+          case 5:
+            controller.flinkSql.errorMsg = 'SQL is not endWith \';\''
+            break
+          default:
+            controller.flinkSql.errorMsg = resp.message
+            break
+        }
+        syntaxError(vue)
+      }
+      callback(success)
+    }).catch((error) => {
+      //vue.$message.error(error.message)
+    })
+  }
 }
 
 export function syntaxError(vue) {

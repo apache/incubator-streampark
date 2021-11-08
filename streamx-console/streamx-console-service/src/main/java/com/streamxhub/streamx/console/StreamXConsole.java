@@ -21,11 +21,17 @@
 package com.streamxhub.streamx.console;
 
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.CrossOrigin;
+
+import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 
 /**
  * <pre>
@@ -55,12 +61,34 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @EnableScheduling
 public class StreamXConsole {
 
+    private static Logger logger = LoggerFactory.getLogger(StreamXConsole.class);
+
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(StreamXConsole.class);
         String pid = SystemPropertyUtils.get("pid");
         if (pid != null) {
             application.addListeners(new ApplicationPidFileWriter(pid));
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("[StreamX] application shutdown now, pid: " + getPid());
+            if (pid != null) {
+                File pidFile = new File(pid);
+                pidFile.delete();
+            }
+        }));
+
         application.run();
     }
+
+    private static Integer getPid() {
+        RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+        String name = runtime.getName();
+        try {
+            return Integer.parseInt(name.substring(0, name.indexOf('@')));
+        } catch (Exception e) {
+        }
+        return -1;
+    }
+
 }

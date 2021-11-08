@@ -30,13 +30,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.11</artifactId>
-            <version>${scalatest.version}</version>
-            <scope>test</scope>
-        </dependency>
-
         <!-- maven build tools -->
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
@@ -107,7 +100,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
     </dependencies>
 

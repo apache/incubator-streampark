@@ -32,10 +32,10 @@ import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.entity.FlinkVersion;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
-import com.streamxhub.streamx.console.core.service.FlinkVersionService;
+import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ import java.util.List;
 public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint> implements SavePointService {
 
     @Autowired
-    private FlinkVersionService flinkVersionService;
+    private FlinkEnvService flinkEnvService;
 
     @Override
     public void obsolete(Long appId) {
@@ -70,10 +70,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     private void expire(SavePoint entity) {
-        FlinkVersion flinkVersion = flinkVersionService.getByAppId(entity.getAppId());
-        assert flinkVersion != null;
+        FlinkEnv flinkEnv = flinkEnvService.getByAppId(entity.getAppId());
+        assert flinkEnv != null;
         int cpThreshold = Integer.parseInt(
-                flinkVersion.convertFlinkYamlAsMap()
+                flinkEnv.convertFlinkYamlAsMap()
                         .getOrDefault("state.checkpoints.num-retained", "1")
         );
 

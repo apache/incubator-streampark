@@ -283,6 +283,17 @@
         <template
           slot="customRender"
           slot-scope="text, record, index, column">
+          <span
+            class="app_type app_jar"
+            v-if="record['jobType'] === 1">
+            JAR
+          </span>
+          <span
+            class="app_type app_sql"
+            v-if="record['jobType'] === 2">
+            SQL
+          </span>
+
           <!--有条件搜索-->
           <template v-if="searchText && searchedColumn === column.dataIndex">
             <span
@@ -353,24 +364,6 @@
               </ellipsis>
             </span>
           </template>
-        </template>
-
-        <template
-          slot="jobType"
-          slot-scope="text, record">
-          <div
-            class="app_state">
-            <a-tag
-              color="#545454"
-              v-if="record['jobType'] === 1">
-              Custom Code
-            </a-tag>
-            <a-tag
-              color="#0C7EF2"
-              v-if="record['jobType'] === 2">
-              Flink SQL
-            </a-tag>
-          </div>
         </template>
 
         <template
@@ -965,7 +958,7 @@
       return [{
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 220,
+        width: 240,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -983,15 +976,6 @@
             }, 0)
           }
         },
-      }, {
-        title: 'Job Type',
-        dataIndex: 'jobType',
-        width: 120,
-        scopedSlots: {customRender: 'jobType'},
-        filters: [
-          {text: 'Custom Code', value: 1},
-          {text: 'Flink SQL', value: 2}
-        ]
       }, {
         title: 'Flink Version',
         dataIndex: 'flinkVersion',
@@ -1209,29 +1193,37 @@
     },
 
     handleStart(app) {
-      if (this.optionApps.starting.get(app.id) === undefined || app['optionState'] === 0) {
-        this.application = app
-        latest({
-          appId: this.application.id
-        }).then((resp) => {
-          this.latestSavePoint = resp.data || null
-          this.startVisible = true
-          this.executionMode = app.executionMode
-          if (!this.latestSavePoint) {
-            history({
-              appId: this.application.id,
-              pageNum: 1,
-              pageSize: 9999
-            }).then((resp) => {
-              this.historySavePoint = []
-              resp.data.records.forEach(x => {
-                if (x.path) {
-                  this.historySavePoint.push(x)
-                }
+      if (app.flinkVersion == null) {
+        this.$swal.fire(
+          'Failed',
+          'please set flink version first.',
+          'error'
+        )
+      } else {
+        if (this.optionApps.starting.get(app.id) === undefined || app['optionState'] === 0) {
+          this.application = app
+          latest({
+            appId: this.application.id
+          }).then((resp) => {
+            this.latestSavePoint = resp.data || null
+            this.startVisible = true
+            this.executionMode = app.executionMode
+            if (!this.latestSavePoint) {
+              history({
+                appId: this.application.id,
+                pageNum: 1,
+                pageSize: 9999
+              }).then((resp) => {
+                this.historySavePoint = []
+                resp.data.records.forEach(x => {
+                  if (x.path) {
+                    this.historySavePoint.push(x)
+                  }
+                })
               })
-            })
-          }
-        })
+            }
+          })
+        }
       }
     },
 
@@ -1257,35 +1249,36 @@
           this.optionApps.starting.set(id, new Date().getTime())
           this.handleMapUpdate('starting')
           this.handleStartCancel()
-          this.$swal.fire({
-            icon: 'success',
-            title: 'The current job is starting',
-            showConfirmButton: false,
-            timer: 2000
-          }).then((r) => {
-            start({
-              id: id,
-              savePointed: savePointed,
-              savePoint: savePoint,
-              flameGraph: flameGraph,
-              allowNonRestored: allowNonRestoredState
-            }).then((resp) => {
-              const code = parseInt(resp.data)
-              if (code === 0) {
-                this.$swal.fire(
+
+            this.$swal.fire({
+              icon: 'success',
+              title: 'The current job is starting',
+              showConfirmButton: false,
+              timer: 2000
+            }).then((r) => {
+              start({
+                id: id,
+                savePointed: savePointed,
+                savePoint: savePoint,
+                flameGraph: flameGraph,
+                allowNonRestored: allowNonRestoredState
+              }).then((resp) => {
+                const code = parseInt(resp.data)
+                if (code === 0) {
+                  this.$swal.fire(
                     'Failed',
                     'startup failed, please check the startup log :)',
                     'error'
-                )
-              } else if (code === -1) {
-                this.$swal.fire(
+                  )
+                } else if (code === -1) {
+                  this.$swal.fire(
                     'Failed',
                     'startup failed, Maybe FLINK_HOME undefined,please check :)',
                     'error'
-                )
-              }
+                  )
+                }
+              })
             })
-          })
         }
       })
     },

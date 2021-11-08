@@ -49,7 +49,7 @@
           v-decorator="[ 'versionId', {rules: [{ required: true, message: 'Flink Version is required' }] }]"
           @change="handleFlinkVersion">>
           <a-select-option
-            v-for="(v,index) in flinkVersions"
+            v-for="(v,index) in flinkEnvs"
             :key="`flink_version_${index}`"
             :value="v.id">
             {{ v.flinkName }}
@@ -996,7 +996,7 @@ import {
 } from './AddEdit'
 
 import { toPomString } from './Pom'
-import {list as listVersion} from '@/api/flinkversion'
+import {list as listFlinkEnv} from '@/api/flinkenv'
 
 export default {
   name: 'EditStreamX',
@@ -1021,13 +1021,13 @@ export default {
         {name: 'NodePort', order: 2}
       ],
       executionModes: [
-        { mode: 'local', value: 0, disabled: true },
-        { mode: 'standalone', value: 1, disabled: true },
-        { mode: 'yarn pre-job', value: 2, disabled: true },
-        { mode: 'yarn session', value: 3, disabled: true },
-        { mode: 'yarn application', value: 4, disabled: false },
-        { mode: 'kubernetes session', value: 5, disabled: false },
-        { mode: 'kubernetes application', value: 6, disabled: false }
+        {mode: 'yarn application', value: 4, disabled: false},
+        {mode: 'kubernetes session', value: 5, disabled: false},
+        {mode: 'kubernetes application', value: 6, disabled: false},
+        {mode: 'local (coming soon)', value: 0, disabled: true},
+        {mode: 'standalone (coming soon)', value: 1, disabled: true},
+        {mode: 'yarn session (coming soon)', value: 3, disabled: true},
+        {mode: 'yarn pre-job (deprecated, please use yarn-application mode)', value: 2, disabled: true}
       ],
       cpTriggerAction: [
         { name: 'alert', value: 1 },
@@ -1047,7 +1047,7 @@ export default {
       configOverride: null,
       configId: null,
       versionId: null,
-      flinkVersions: [],
+      flinkEnvs: [],
       configVersions: [],
       flinkSqlHistory: [],
       flinkSql: {},
@@ -1166,8 +1166,8 @@ export default {
       this.optionsValueMapping.set(item.name, item.key)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
-    listVersion().then((resp)=>{
-      this.flinkVersions = resp.data
+    listFlinkEnv().then((resp)=>{
+      this.flinkEnvs = resp.data
     })
   },
 
@@ -1266,8 +1266,12 @@ export default {
             callback()
           } else if (exists === 1) {
             callback(new Error('application name must be unique. The application name already exists'))
-          } else {
+          } else if (exists === 2) {
             callback(new Error('The application name is already running in yarn,cannot be repeated. Please check'))
+          } else if (exists === 3) {
+            callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
+          } else {
+            callback(new Error('The application name is invalid.Please input Chinese,English letters,special characters like [ _ ],[ - ],[ — ],[ . ] and so on.'))
           }
         })
       }

@@ -22,7 +22,6 @@ package com.streamxhub.streamx.flink.kubernetes
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.common.util.Utils.tryWithResource
 import com.streamxhub.streamx.flink.kubernetes.model._
 
 import java.util.concurrent.TimeUnit
@@ -110,13 +109,10 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
   /**
    * refresh flink jobmanager rest url from remote flink cluster, and cache it.
    */
-  def refreshClusterRestUrl(clusterKey: ClusterKey): Option[String] = tryWithResource(
-    Try(KubernetesRetriever.newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode))
-      .getOrElse(return None)) {
-    client =>
-      val url = Try(client.getWebInterfaceURL).filter(_.nonEmpty).getOrElse(return None)
-      clusterRestUrls.put(clusterKey, url)
-      Some(url)
+  def refreshClusterRestUrl(clusterKey: ClusterKey): Option[String] = {
+    val restUrl = KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
+    if (restUrl.nonEmpty) clusterRestUrls.put(clusterKey, restUrl.get)
+    restUrl
   }
 
 }

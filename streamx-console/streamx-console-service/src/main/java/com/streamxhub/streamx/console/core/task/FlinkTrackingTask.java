@@ -60,21 +60,6 @@ import java.util.concurrent.*;
  *  事了拂衣去
  *  深藏身与名
  * </b></pre>
- * <br>
- * <strong>
- * NOTE:未曾想该类竟然是改动最多的
- * 最容易出问题的<br>
- * 看似一个简单的功能<br>
- * 每个状态的处理<br>
- * 每个操作<br>
- * 都是经过反复的思考<br>
- * 反复的测试<br>
- * 反复的修改<br>
- * 重要的事情说三遍:<br>
- * 魔鬼在细节中<br>
- * 魔鬼在细节中<br>
- * 魔鬼在细节中...<br>
- * </strong>
  *
  * This implementation is currently only used for tracing flink job on yarn
  *
@@ -525,6 +510,9 @@ public class FlinkTrackingTask {
                         cleanSavepoint(application);
                         application.setEndTime(new Date());
                     }
+                    if(FlinkAppState.SUCCEEDED.equals(flinkAppState)) {
+                        flinkAppState = FlinkAppState.FINISHED;
+                    }
                     application.setState(flinkAppState.getValue());
                     //能运行到这一步,说明到YARN REST api中成功查询到信息
                     cleanOptioning(optionState, application.getId());
@@ -630,7 +618,7 @@ public class FlinkTrackingTask {
             // notes: k8s flink tracking monitor don't need to flush or refresh cache proactively.
             return callable.call();
         }
-        log.info("flinkTrackingTask flushing app,appId:{}", appId);
+        log.debug("flinkTrackingTask flushing app,appId:{}", appId);
         Application application = TRACKING_MAP.get(appId);
         if (application != null) {
             persistent(application);

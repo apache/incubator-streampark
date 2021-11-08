@@ -1,6 +1,7 @@
 package com.streamxhub.streamx.flink.packer.docker
 
 import com.github.dockerjava.api.command.PushImageCmd
+import com.github.dockerjava.api.exception.InternalServerErrorException
 import com.google.common.collect.Sets
 import com.streamxhub.streamx.common.conf.ConfigConst.DOCKER_IMAGE_NAMESPACE
 import com.streamxhub.streamx.common.util.Logger
@@ -10,7 +11,7 @@ import org.apache.commons.io.FileUtils
 import java.io.File
 
 /**
- * author: Al-assad
+ * @author Al-assad
  */
 //noinspection DuplicatedCode
 object DockerTool extends Logger {
@@ -18,7 +19,7 @@ object DockerTool extends Logger {
 
   /**
    * build and push docker image for flink fat-jar.
-   * author: Al-assad
+   * @author Al-assad
    *
    * @param authConf           authentication configuration of remote docker register
    * @param projectBaseDir     project workspace dir of flink job
@@ -48,23 +49,31 @@ object DockerTool extends Logger {
     // build and push docker image
     tryWithResourceException(DockerRetriever.newDockerClient()) {
       dockerClient =>
+        // pull docker image
+        val pullImageCmd = dockerClient.pullImageCmd(dockerFileTemplate.flinkBaseImage).withAuthConfig(authConf.toDockerAuthConf)
+        pullImageCmd.start().awaitCompletion()
+        logInfo(s"[streamx-packer] docker pull image ${formatTag(dockerFileTemplate.flinkBaseImage, authConf.registerAddress)} successfully.")
         // build docker image
         val buildImageCmd = dockerClient.buildImageCmd()
-          .withPull(true)
           .withBaseDirectory(projectDir)
           .withDockerfile(dockerfile)
           .withTags(Sets.newHashSet(tagName))
-        buildImageCmd.start().awaitCompletion()
-        logInfo(s"[streamx-packer] docker image built successfully, tag=${tagName}")
+        val imageId = buildImageCmd.start().awaitImageId()
+        logInfo(s"[streamx-packer] docker image built successfully, imageId=${imageId}, tag=${tagName}")
         // push docker image
         if (push) {
           val pushCmd: PushImageCmd = dockerClient.pushImageCmd(tagName).withAuthConfig(authConf.toDockerAuthConf)
           pushCmd.start().awaitCompletion()
           logInfo(s"[streamx-packer] docker image push successfully, tag=${tagName}, registerAddr=${authConf.registerAddress}")
         }
-    }(
-      exception => throw new Exception("[streamx-packer] build and push flink job docker image fail", exception)
-    )
+    } {
+      case cause: InternalServerErrorException =>
+        logError(s"[streamx] pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}", cause)
+        throw new Exception(s"[streamx] pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}", cause)
+      case cause =>
+        logError("[streamx-packer] build and push flink job docker image failed.", cause)
+        throw new Exception("[streamx-packer] build and push flink job docker image failed.", cause)
+    }
     tagName
   }
 
@@ -88,15 +97,24 @@ object DockerTool extends Logger {
     }
   }
 
-
   /**
    * compile image tag with namespace and remote address.
    */
   private def compileTag(tag: String, registerAddress: String): String = {
-    var tagName = if (tag.contains("/")) tag else s"$DOCKER_IMAGE_NAMESPACE/$tag"
-    if (registerAddress.nonEmpty && !tagName.startsWith(registerAddress))
-      tagName = s"$registerAddress/$tagName"
-    tagName
+    formatTag(if (tag.contains("/")) tag else s"$DOCKER_IMAGE_NAMESPACE/$tag", registerAddress)
+  }
+
+  /**
+   * format image tag with namespace and remote address.
+   *
+   * e.g.
+   * image:tag             registry-1.docker.io -> registry-1.docker.io/library/image:tag
+   * repository/image:tag  registry-1.docker.io -> registry-1.docker.io/repository/image:tag
+   */
+  def formatTag(tag: String, registerAddress: String): String = {
+    if (registerAddress.nonEmpty && !tag.startsWith(registerAddress)) {
+      s"$registerAddress${if (tag.contains("/")) "/" else "/library/"}$tag"
+    } else tag
   }
 
 

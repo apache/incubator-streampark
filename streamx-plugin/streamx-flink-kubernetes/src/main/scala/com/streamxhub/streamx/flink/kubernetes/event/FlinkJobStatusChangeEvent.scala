@@ -25,6 +25,6 @@ import com.streamxhub.streamx.flink.kubernetes.model.{JobStatusCV, TrkId}
 /**
  * Notification of flink job state changes from k8s clusters.
  *
- * author: Al-assad
+ * @author Al-assad
  */
 case class FlinkJobStatusChangeEvent(trkId: TrkId, jobStatus: JobStatusCV) extends BuildInEvent

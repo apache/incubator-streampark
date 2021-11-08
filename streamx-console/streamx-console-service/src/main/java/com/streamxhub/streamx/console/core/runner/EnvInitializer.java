@@ -27,7 +27,7 @@ import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
-import com.streamxhub.streamx.console.core.entity.FlinkVersion;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -59,7 +59,7 @@ public class EnvInitializer implements ApplicationRunner {
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
 
     private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
-            "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -84,6 +84,14 @@ public class EnvInitializer implements ApplicationRunner {
         if (initialized.get(storageType) == null) {
             FsOperator fsOperator = FsOperator.of(storageType);
             Workspace workspace = Workspace.of(storageType);
+
+            if (storageType.equals(LFS)) {
+                String localDist = workspace.APP_LOCAL_DIST();
+                if (!fsOperator.exists(localDist)) {
+                    log.info("mkdir {} starting ...", localDist);
+                    fsOperator.mkdirs(localDist);
+                }
+            }
 
             String appUploads = workspace.APP_UPLOADS();
             if (!fsOperator.exists(appUploads)) {
@@ -159,8 +167,8 @@ public class EnvInitializer implements ApplicationRunner {
         }
     }
 
-    public void checkFlinkEnv(StorageType storageType, FlinkVersion flinkVersion) {
-        String flinkLocalHome = flinkVersion.getFlinkHome();
+    public void checkFlinkEnv(StorageType storageType, FlinkEnv flinkEnv) {
+        String flinkLocalHome = flinkEnv.getFlinkHome();
         if (flinkLocalHome == null) {
             throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
         }
@@ -175,7 +183,7 @@ public class EnvInitializer implements ApplicationRunner {
         String flinkHome = appFlink.concat("/").concat(flinkName);
         if (!fsOperator.exists(flinkHome)) {
             log.info("{} is not exists,upload beginning....", flinkHome);
-            fsOperator.upload(flinkLocalHome, flinkHome, false, false);
+            fsOperator.upload(flinkLocalHome, flinkHome, false, true);
         }
     }
 

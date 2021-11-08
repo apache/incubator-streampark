@@ -11,6 +11,10 @@
     <artifactId>streamx-flink-test-datastream</artifactId>
     <name>StreamX : Flink Test DataStream</name>
 
+    <properties>
+        <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -27,7 +31,7 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
+            <artifactId>streamx-flink-shims_flink-${streamx.flink.shims.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -187,7 +191,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.16</version>
+            <version>1.18.20</version>
             <scope>provided</scope>
         </dependency>
 
@@ -223,10 +227,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.1</version>
             </plugin>
         </plugins>
     </build>

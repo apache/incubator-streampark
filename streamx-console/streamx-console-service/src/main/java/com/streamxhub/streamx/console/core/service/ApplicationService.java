@@ -84,5 +84,5 @@ public interface ApplicationService extends IService<Application> {
 
     void restart(Application application) throws Exception;
 
-    boolean checkStart(Application app);
+    boolean checkEnv(Application app);
 }
