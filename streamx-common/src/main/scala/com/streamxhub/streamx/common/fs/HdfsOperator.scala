@@ -57,6 +57,9 @@ object HdfsOperator extends FsOperator with Logger {
     }
   }
 
+  override def download(srcPath: String, dstPath: String, delSrc: Boolean, useRawLocalFileSystem:Boolean): Unit=
+    HdfsUtils.download(toHdfsPath(srcPath),dstPath,delSrc,useRawLocalFileSystem)
+
 }
 
 
