@@ -67,7 +67,7 @@ object HadoopConfigUtils {
     if (!configFile.exists || !configFile.isFile || !configFile.getName.endsWith(".xml"))
       return
     // get hosts from system
-    val hostsMap = HostsUtils.getSystemHosts
+    val hostsMap = HostsUtils.getSortSystemHosts
     if (hostsMap.isEmpty)
       return
     rewriteHostIpMapper(configFile, hostsMap)
@@ -81,7 +81,7 @@ object HadoopConfigUtils {
       replaceHostWithIP(configDir)
       return
     }
-    val hostsMap = HostsUtils.getSystemHosts
+    val hostsMap = HostsUtils.getSortSystemHosts
     if (hostsMap.isEmpty)
       return
     configDir.listFiles
