@@ -45,6 +45,9 @@ object HdfsOperator extends FsOperator with Logger {
   override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit =
     HdfsUtils.copyHdfsDir(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
 
+  override def download(srcPath: String, dstPath: String, delSrc: Boolean, useRawLocalFileSystem:Boolean):Unit=
+    HdfsUtils.download(toHdfsPath(srcPath),dstPath,delSrc,useRawLocalFileSystem)
+
   override def fileMd5(path: String): String = {
     require(path != null && path.nonEmpty)
     HdfsUtils.fileMd5(toHdfsPath(path))
@@ -56,6 +59,7 @@ object HdfsOperator extends FsOperator with Logger {
       case p => HdfsUtils.getDefaultFS.concat(p)
     }
   }
+
 
 }
 
