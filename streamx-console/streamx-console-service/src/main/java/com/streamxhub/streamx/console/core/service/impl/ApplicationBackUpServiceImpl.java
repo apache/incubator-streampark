@@ -222,7 +222,7 @@ public class ApplicationBackUpServiceImpl
                 fsOperator.delete(appHome);
                 try {
                     // 5)将备份的文件copy到有效项目目录下.
-                    fsOperator.download(backUp.getPath(),appHome,false,false);
+                    fsOperator.copyDir(backUp.getPath(), appHome);
                 } catch (Exception e) {
                     throw e;
                 }

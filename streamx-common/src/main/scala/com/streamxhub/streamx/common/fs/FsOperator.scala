@@ -63,6 +63,4 @@ abstract class FsOperator {
 
   def fileMd5(path: String): String
 
-  def download(srcPath: String, dstPath: String, delSrc: Boolean, useRawLocalFileSystem:Boolean): Unit
-
 }

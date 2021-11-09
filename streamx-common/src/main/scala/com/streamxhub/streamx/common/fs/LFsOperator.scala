@@ -105,9 +105,6 @@ object LFsOperator extends FsOperator with Logger {
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
 
-  override def download(srcPath: String, dstPath: String, delSrc: Boolean, useRawLocalFileSystem: Boolean): Unit =
-    copyDir(srcPath, dstPath)
-
 }
 
 
