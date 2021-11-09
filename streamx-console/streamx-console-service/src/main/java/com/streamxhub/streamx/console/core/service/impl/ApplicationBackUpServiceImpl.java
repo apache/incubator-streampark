@@ -199,14 +199,32 @@ public class ApplicationBackUpServiceImpl
         try {
             FlinkTrackingTask.refreshTracking(backUp.getAppId(), () -> {
                 // 回滚 config 和 sql
+                // 此处需要验证
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
-
+                String appHome = "";
+                switch (application.getExecutionModeEnum()) {
+                    case KUBERNETES_NATIVE_APPLICATION:
+                    case KUBERNETES_NATIVE_SESSION:
+                    case YARN_PRE_JOB:
+                    case YARN_SESSION:
+                    case LOCAL:
+                        if (application.isFlinkSqlJob()) {
+                            appHome = application.getLocalFlinkSqlHome().getAbsolutePath();
+                        } else {
+                            appHome = application.getDistHome();
+                        }
+                        break;
+                    case YARN_APPLICATION:
+                        appHome = application.getAppHome();
+                        break;
+                }
                 // 2) 删除当前项目
-                fsOperator.delete(application.getAppHome());
+                fsOperator.delete(appHome);
                 try {
                     // 5)将备份的文件copy到有效项目目录下.
-                    fsOperator.copyDir(backUp.getPath(), application.getAppHome());
+//                    fsOperator.copyDir(backUp.getPath(), appHome);
+                    fsOperator.download(backUp.getPath(),appHome,false,false);
                 } catch (Exception e) {
                     throw e;
                 }
