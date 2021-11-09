@@ -174,7 +174,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             //回滚历史版本的任务
             backUpService.rollbackFlinkSql(application, sql);
         } catch (Exception e) {
-            log.error("[streamx]Backup and Roll back FlinkSql before start failed.");
+            log.error("Backup and Roll back FlinkSql before start failed.");
             throw new RuntimeException(e.getMessage());
         }
     }
