@@ -113,8 +113,8 @@ object DockerTool extends Logger {
    */
   def formatTag(tag: String, registerAddress: String): String = {
     if (registerAddress.nonEmpty && !tag.startsWith(registerAddress)) {
-      s"$registerAddress${if (tag.contains("/")) "/" else "/library/"}$tag"
-    } else tag
+      s"$registerAddress${if (tag.contains("/")) "/" else "/library/"}$tag".toLowerCase
+    } else tag.toLowerCase
   }
 
 
