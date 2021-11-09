@@ -1049,143 +1049,140 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         //1) 真正执行启动相关的操作..
         String appConf, flinkUserJar;
-
-        //回滚任务.
-        if (application.isNeedRollback()) {
-            if (application.isFlinkSqlJob()) {
-                flinkSqlService.rollback(application);
-            }
-        }
-
-        //2) 将lastst的设置为Effective的,(此时才真正变成当前生效的)
-        this.toEffective(application);
-
-        //获取一个最新的Effective的配置
-        ApplicationConfig applicationConfig = configService.getEffective(application.getId());
-        ExecutionMode executionMode = ExecutionMode.of(application.getExecutionMode());
-
-        if (application.isCustomCodeJob()) {
-            assert executionMode != null;
-            switch (application.getApplicationType()) {
-                case STREAMX_FLINK:
-                    String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
-                    appConf = String.format("%s://%s", format, applicationConfig.getContent());
-                    flinkUserJar = String.format("%s/lib/%s", application.getAppHome(), application.getModule().concat(".jar"));
-                    break;
-                case APACHE_FLINK:
-                    appConf = String.format("json://{\"%s\":\"%s\"}",
-                        ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
-                        application.getMainClass()
-                    );
-                    flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
-                    break;
-                default:
-                    throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
-            }
-        } else if (application.isFlinkSqlJob()) {
-            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-            assert flinkSql != null;
-            this.flinkSqlService.cleanCandidate(flinkSql.getId());
-
-            //1) dist_userJar
-            File localPlugins = new File(WebUtils.getAppDir("plugins"));
-            assert localPlugins.exists();
-            List<String> jars =
-                Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
-                    .collect(Collectors.toList());
-            if (jars.isEmpty()) {
-                throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localPlugins);
-            }
-            if (jars.size() > 1) {
-                throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localPlugins);
-            }
-            String sqlDistJar = jars.get(0);
-            //2) appConfig
-            appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
-            assert executionMode != null;
-            //3) plugin
-            switch (executionMode) {
-                case YARN_PRE_JOB:
-                case KUBERNETES_NATIVE_SESSION:
-                case KUBERNETES_NATIVE_APPLICATION:
-                    flinkUserJar = Workspace.local().APP_PLUGINS().concat("/").concat(sqlDistJar);
-                    break;
-                case YARN_APPLICATION:
-                    String pluginPath = Workspace.remote().APP_PLUGINS();
-                    flinkUserJar = String.format("%s/%s", pluginPath, sqlDistJar);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unsupported..." + executionMode);
-            }
-        } else {
-            throw new UnsupportedOperationException("Unsupported...");
-        }
-
-        StringBuilder option = new StringBuilder();
-        if (appParam.getAllowNonRestored()) {
-            option.append(" -n ");
-        }
-
-        String[] dynamicOption = CommonUtils.notEmpty(application.getDynamicOptions())
-            ? application.getDynamicOptions().split("\\s+")
-            : new String[0];
-
-        Map<String, Object> optionMap = application.getOptionMap();
-        optionMap.put(ConfigConst.KEY_JOB_ID(), application.getId());
-
-        JarPackDeps jarPackDeps;
-        if (application.isCustomCodeJob()) {
-            jarPackDeps = Application.Dependency.jsonToDependency(application.getDependency()).toJarPackDeps();
-        } else {
-            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-            jarPackDeps = Application.Dependency.jsonToDependency(flinkSql.getDependency()).toJarPackDeps();
-            optionMap.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
-        }
-
-        ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
-
-        KubernetesSubmitParam kubernetesSubmitParam = new KubernetesSubmitParam(
-            application.getClusterId(),
-            application.getFlinkImage(),
-            application.getK8sNamespace(),
-            jarPackDeps,
-            new DockerAuthConf(
-                settingService.getDockerRegisterAddress(),
-                settingService.getDockerRegisterUser(),
-                settingService.getDockerRegisterPassword()),
-            application.getK8sPodTemplates(),
-            application.getK8sRestExposedTypeEnum()
-        );
-
-        FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
-        if (flinkEnv == null) {
-            throw new IllegalArgumentException("[StreamX] can no found flink version");
-        }
-
-        SubmitRequest submitRequest = new SubmitRequest(
-            flinkEnv.getFlinkVersion(),
-            flinkEnv.getFlinkConf(),
-            flinkUserJar,
-            DevelopmentMode.of(application.getJobType()),
-            ExecutionMode.of(application.getExecutionMode()),
-            resolveOrder,
-            application.getJobName(),
-            appConf,
-            application.getApplicationType().getName(),
-            getSavePointed(appParam),
-            appParam.getFlameGraph() ? getFlameGraph(application) : null,
-            option.toString(),
-            optionMap,
-            dynamicOption,
-            application.getArgs(),
-            kubernetesSubmitParam
-        );
-
         ApplicationLog applicationLog = new ApplicationLog();
         applicationLog.setAppId(application.getId());
         applicationLog.setStartTime(new Date());
 
         try {
+            //回滚任务.
+            if (application.isNeedRollback()) {
+                if (application.isFlinkSqlJob()) {
+                    flinkSqlService.rollback(application);
+                }
+            }
+
+            //2) 将lastst的设置为Effective的,(此时才真正变成当前生效的)
+            this.toEffective(application);
+
+            //获取一个最新的Effective的配置
+            ApplicationConfig applicationConfig = configService.getEffective(application.getId());
+            ExecutionMode executionMode = ExecutionMode.of(application.getExecutionMode());
+
+            if (application.isCustomCodeJob()) {
+                assert executionMode != null;
+                switch (application.getApplicationType()) {
+                    case STREAMX_FLINK:
+                        String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
+                        appConf = String.format("%s://%s", format, applicationConfig.getContent());
+                        flinkUserJar = String.format("%s/lib/%s", application.getAppHome(), application.getModule().concat(".jar"));
+                        break;
+                    case APACHE_FLINK:
+                        appConf = String.format("json://{\"%s\":\"%s\"}",
+                            ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
+                            application.getMainClass()
+                        );
+                        flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+                        break;
+                    default:
+                        throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
+                }
+            } else if (application.isFlinkSqlJob()) {
+                FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+                assert flinkSql != null;
+
+                //1) dist_userJar
+                File localPlugins = new File(WebUtils.getAppDir("plugins"));
+                assert localPlugins.exists();
+                List<String> jars =
+                    Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
+                        .collect(Collectors.toList());
+                if (jars.isEmpty()) {
+                    throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localPlugins);
+                }
+                if (jars.size() > 1) {
+                    throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localPlugins);
+                }
+                String sqlDistJar = jars.get(0);
+                //2) appConfig
+                appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
+                assert executionMode != null;
+                //3) plugin
+                switch (executionMode) {
+                    case YARN_PRE_JOB:
+                    case KUBERNETES_NATIVE_SESSION:
+                    case KUBERNETES_NATIVE_APPLICATION:
+                        flinkUserJar = Workspace.local().APP_PLUGINS().concat("/").concat(sqlDistJar);
+                        break;
+                    case YARN_APPLICATION:
+                        String pluginPath = Workspace.remote().APP_PLUGINS();
+                        flinkUserJar = String.format("%s/%s", pluginPath, sqlDistJar);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("Unsupported..." + executionMode);
+                }
+            } else {
+                throw new UnsupportedOperationException("Unsupported...");
+            }
+
+            StringBuilder option = new StringBuilder();
+            if (appParam.getAllowNonRestored()) {
+                option.append(" -n ");
+            }
+
+            String[] dynamicOption = CommonUtils.notEmpty(application.getDynamicOptions())
+                ? application.getDynamicOptions().split("\\s+")
+                : new String[0];
+
+            Map<String, Object> optionMap = application.getOptionMap();
+            optionMap.put(ConfigConst.KEY_JOB_ID(), application.getId());
+
+            JarPackDeps jarPackDeps;
+            if (application.isCustomCodeJob()) {
+                jarPackDeps = Application.Dependency.jsonToDependency(application.getDependency()).toJarPackDeps();
+            } else {
+                FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+                jarPackDeps = Application.Dependency.jsonToDependency(flinkSql.getDependency()).toJarPackDeps();
+                optionMap.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
+            }
+
+            ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
+
+            KubernetesSubmitParam kubernetesSubmitParam = new KubernetesSubmitParam(
+                application.getClusterId(),
+                application.getFlinkImage(),
+                application.getK8sNamespace(),
+                jarPackDeps,
+                new DockerAuthConf(
+                    settingService.getDockerRegisterAddress(),
+                    settingService.getDockerRegisterUser(),
+                    settingService.getDockerRegisterPassword()),
+                application.getK8sPodTemplates(),
+                application.getK8sRestExposedTypeEnum()
+            );
+
+            FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
+            if (flinkEnv == null) {
+                throw new IllegalArgumentException("[StreamX] can no found flink version");
+            }
+
+            SubmitRequest submitRequest = new SubmitRequest(
+                flinkEnv.getFlinkVersion(),
+                flinkEnv.getFlinkConf(),
+                flinkUserJar,
+                DevelopmentMode.of(application.getJobType()),
+                ExecutionMode.of(application.getExecutionMode()),
+                resolveOrder,
+                application.getJobName(),
+                appConf,
+                application.getApplicationType().getName(),
+                getSavePointed(appParam),
+                appParam.getFlameGraph() ? getFlameGraph(application) : null,
+                option.toString(),
+                optionMap,
+                dynamicOption,
+                application.getArgs(),
+                kubernetesSubmitParam
+            );
 
             SubmitResponse submitResponse = FlinkSubmitHelper.submit(submitRequest);
 
