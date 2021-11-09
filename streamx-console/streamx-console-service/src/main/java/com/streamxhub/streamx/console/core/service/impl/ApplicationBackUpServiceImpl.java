@@ -201,7 +201,7 @@ public class ApplicationBackUpServiceImpl
                 // 回滚 config 和 sql
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
-                String appHome = "";
+                String appHome = null;
                 switch (application.getExecutionModeEnum()) {
                     case KUBERNETES_NATIVE_APPLICATION:
                     case KUBERNETES_NATIVE_SESSION:
