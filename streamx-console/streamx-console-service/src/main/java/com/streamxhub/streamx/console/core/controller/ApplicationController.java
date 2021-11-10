@@ -192,7 +192,8 @@ public class ApplicationController {
 
     @PostMapping("rollback")
     public RestResponse rollback(ApplicationBackUp backUp) {
-        backUpService.rollback(backUp);
+        //TODO: next version implementation
+        //backUpService.rollback(backUp);
         return RestResponse.create();
     }
 

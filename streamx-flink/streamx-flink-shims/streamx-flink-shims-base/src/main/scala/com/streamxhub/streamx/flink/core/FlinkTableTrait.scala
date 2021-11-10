@@ -61,11 +61,7 @@ abstract class FlinkTableTrait(val parameter: ParameterTool,
     tableEnv.execute(jobName)
   }
 
-  /**
-   *
-   * @param sql 配置文件中的sql名称,或者一段sql
-   */
-  def sql(sql: String = null)(implicit callback: String => Unit = null): Unit = FlinkSqlExecutor.executeSql(sql, parameter, this)
+  def sql(sql: String = null): Unit = FlinkSqlExecutor.executeSql(sql, parameter, this)
 
   private[flink] def sqlWithCallBack(sql: String = null)(implicit callback: Unit => String = null): Unit = FlinkSqlExecutor.executeSql(sql, parameter, this)
 

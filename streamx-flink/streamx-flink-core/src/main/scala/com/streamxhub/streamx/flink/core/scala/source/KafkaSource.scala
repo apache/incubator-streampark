@@ -32,7 +32,6 @@ import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, KafkaDes
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 
 import java.io
-import java.nio.charset.StandardCharsets
 import java.util.Properties
 import java.util.regex.Pattern
 import scala.annotation.meta.param
@@ -195,10 +194,8 @@ class KafkaRecord[T: TypeInformation](
 
 class KafkaDeserializer[T: TypeInformation](deserializer: KafkaDeserializationSchema[T]) extends KafkaDeserializationSchema[KafkaRecord[T]] {
 
-  private val charset = StandardCharsets.UTF_8
-
   override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaRecord[T] = {
-    val key = if (record.key() == null) null else new String(record.key(), charset)
+    val key = if (record.key() == null) null else new String(record.key(), "UTF-8")
     val value = deserializer.deserialize(record)
     val offset = record.offset()
     val partition = record.partition()
@@ -215,11 +212,9 @@ class KafkaDeserializer[T: TypeInformation](deserializer: KafkaDeserializationSc
 
 class KafkaStringDeserializationSchema extends KafkaDeserializationSchema[String] {
 
-  private val charset = StandardCharsets.UTF_8
-
   override def isEndOfStream(nextElement: String): Boolean = false
 
-  override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): String = new String(record.value(), charset)
+  override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): String = new String(record.value(), "UTF-8")
 
   override def getProducedType: TypeInformation[String] = BasicTypeInfo.STRING_TYPE_INFO
 

@@ -157,27 +157,32 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW,rollbackFor = Exception.class)
     public void rollback(Application application) {
         FlinkSql sql = getCandidate(application.getId(), CandidateType.HISTORY);
         assert sql != null;
-
-        //检查并备份当前的任务.
-        FlinkSql effectiveSql = getEffective(application.getId(), false);
-        assert effectiveSql != null;
-        if (!isFlinkSqlBacked(effectiveSql)) {
-            log.info("current job version:{}, Backing up...", sql.getVersion());
-            backUpService.backup(application);
-        } else {
-            log.info("current job version:{}, already backed", sql.getVersion());
+        try {
+            //检查并备份当前的任务.
+            FlinkSql effectiveSql = getEffective(application.getId(), false);
+            assert effectiveSql != null;
+            if (!isFlinkSqlBacked(effectiveSql)) {
+                log.info("current job version:{}, Backing up...", sql.getVersion());
+                backUpService.backup(application);
+            } else {
+                log.info("current job version:{}, already backed", sql.getVersion());
+            }
+            //回滚历史版本的任务
+            backUpService.rollbackFlinkSql(application, sql);
+        } catch (Exception e) {
+            log.error("Backup and Roll back FlinkSql before start failed.");
+            throw new RuntimeException(e.getMessage());
         }
-        //回滚历史版本的任务
-        backUpService.rollbackFlinkSql(application, sql);
     }
 
     @Override
     public SqlError verifySql(String sql, Long versionId) {
         FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
-        String error = FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), (Function<ClassLoader, String>) classLoader -> {
+        return FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), (Function<ClassLoader, SqlError>) classLoader -> {
             try {
                 Class<?> clazz = classLoader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
                 Method method = clazz.getDeclaredMethod("verifySql", String.class);
@@ -186,13 +191,12 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
                 if (sqlError == null) {
                     return null;
                 }
-                return sqlError.toString();
+                return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), sqlError);
             } catch (Throwable e) {
                 log.error("verifySql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
             }
             return null;
         });
-        return SqlError.fromString(error);
     }
 
     private boolean isFlinkSqlBacked(FlinkSql sql) {

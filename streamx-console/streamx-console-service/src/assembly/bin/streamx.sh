@@ -301,19 +301,6 @@ supports_hyperlinks() {
   return 1
 }
 
-fmt_link() {
-  # $1: text, $2: url, $3: fallback mode
-  if supports_hyperlinks; then
-    printf '\033]8;;%s\a%s\033]8;;\a\n' "$2" "$1"
-    return
-  fi
-
-  case "$3" in
-  --text) printf '%s\n' "$1" ;;
-  --url|*) fmt_underline "$2" ;;
-  esac
-}
-
 fmt_underline() {
   [[ ${have_tty} -eq 1 ]] && printf '\033[4m%s\033[24m\n' "$*" || printf '%s\n' "$*"
 }
@@ -336,10 +323,10 @@ print_logo() {
   printf '%s  /____/%s\__%s/_/   %s\___/%s\__,_%s/_/ /_/ /_/%s_/|_|                    %s\n' $RAINBOW $RESET
   printf '%s       %s    %s     %s      %s     %s           %s  |/                     %s\n' $RAINBOW $RESET
   printf '%s      %s    %s    %s      %s     %s             %s  .                      %s\n' $RAINBOW $RESET
-  printf '%s\n'"  • WebSite:  $(fmt_link "@streamxhub" http://www.streamxhub.com)"
-  printf '%s\n'"  • GitHub :  $(fmt_link "GitHub" http://github.com/streamxhub/streamx)"
-  printf '%s\n'"  • Gitee  :  $(fmt_link "Gitee" http://gitee.com/streamxhub/streamx)"
-  printf '%s\n'"            ────────  Make Flink|Spark easier ô‿ô!"
+  printf '%s\n  • WebSite:  http://www.streamxhub.com'
+  printf '%s\n  • GitHub :  http://github.com/streamxhub/streamx'
+  printf '%s\n  • Gitee  :  http://gitee.com/streamxhub/streamx'
+  printf '%s\n             ────────  Make Flink|Spark easier ô‿ô!'
   printf '%s\n\n' $RESET
 
 }

@@ -50,7 +50,7 @@ object FlinkSubmitHelper extends Logger {
       method.setAccessible(true)
       val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, submitRequest))
       require(obj != null)
-      FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[SubmitResponse]
+      FlinkShimsProxy.getObject[SubmitResponse](this.getClass.getClassLoader, obj)
     })
   }
 
@@ -62,7 +62,7 @@ object FlinkSubmitHelper extends Logger {
       method.setAccessible(true)
       val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, stopRequest))
       if (obj == null) null; else {
-        FlinkShimsProxy.getObject(this.getClass.getClassLoader, obj).asInstanceOf[StopResponse]
+        FlinkShimsProxy.getObject[StopResponse](this.getClass.getClassLoader, obj)
       }
     })
   }
