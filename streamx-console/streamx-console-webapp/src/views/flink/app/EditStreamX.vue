@@ -684,7 +684,7 @@
                   <p class="conf-desc">
                     <span class="note-info" style="margin-bottom: 12px">
                     <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
-                    Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
                     </span>
                   </p>
                 </a-row>
@@ -793,7 +793,7 @@
                   <p class="conf-desc">
                     <span class="note-info" style="margin-bottom: 12px">
                     <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
-                    Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
                     </span>
                   </p>
                 </a-row>
@@ -902,7 +902,7 @@
                   <p class="conf-desc">
                     <span class="note-info" style="margin-bottom: 12px">
                     <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
-                    Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
                     </span>
                   </p>
                 </a-row>
