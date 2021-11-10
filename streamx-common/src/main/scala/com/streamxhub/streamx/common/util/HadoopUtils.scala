@@ -320,7 +320,6 @@ object HadoopUtils extends Logger {
             }
             require(activeRMId != null, "[StreamX] can not found yarn active node")
             logInfo(s"current activeRMHAId: $activeRMId")
-//            HAUtil.addSuffix(addressPrefix, activeRMId)
             val appActiveRMKey = HAUtil.addSuffix(addressPrefix, activeRMId)
             val hostnameActiveRMKey = HAUtil.addSuffix(YarnConfiguration.RM_HOSTNAME, activeRMId)
             if (null == HAUtil.getConfValueForRMInstance(appActiveRMKey, yarnConf) && null != HAUtil.getConfValueForRMInstance(hostnameActiveRMKey, yarnConf)) {
