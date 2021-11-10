@@ -281,8 +281,8 @@ object HadoopUtils extends Logger {
           }
 
           val name = if (!HAUtil.isHAEnabled(conf)) addressPrefix else {
+            val yarnConf = new YarnConfiguration(conf)
             val activeRMId = {
-              val yarnConf = new YarnConfiguration(conf)
               Option(RMHAUtils.findActiveRMHAId(yarnConf)) match {
                 case Some(x) =>
                   logInfo("findActiveRMHAId successful")
@@ -320,7 +320,15 @@ object HadoopUtils extends Logger {
             }
             require(activeRMId != null, "[StreamX] can not found yarn active node")
             logInfo(s"current activeRMHAId: $activeRMId")
-            HAUtil.addSuffix(addressPrefix, activeRMId)
+            val appActiveRMKey = HAUtil.addSuffix(addressPrefix, activeRMId)
+            val hostnameActiveRMKey = HAUtil.addSuffix(YarnConfiguration.RM_HOSTNAME, activeRMId)
+            if (null == HAUtil.getConfValueForRMInstance(appActiveRMKey, yarnConf) && null != HAUtil.getConfValueForRMInstance(hostnameActiveRMKey, yarnConf)) {
+              logInfo(s"Find rm web address by : $hostnameActiveRMKey")
+              hostnameActiveRMKey
+            } else {
+              logInfo(s"Find rm web address by : $appActiveRMKey")
+              appActiveRMKey
+            }
           }
 
           val inetSocketAddress = conf.getSocketAddr(name, s"0.0.0.0:$defaultPort", defaultPort.toInt)
