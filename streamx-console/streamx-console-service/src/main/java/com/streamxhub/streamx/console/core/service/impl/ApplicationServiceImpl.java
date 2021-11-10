@@ -855,16 +855,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             fsOperator.upload(jobLocalHome.getAbsolutePath(), application.getWorkspace().APP_WORKSPACE());
 
-            //4) upload jar by uploadJar
-            List<String> jars = application.getDependencyObject().getJar();
-            String APP_UPLOADS = application.getWorkspace().APP_UPLOADS();
-            if (Utils.notEmpty(jars)) {
-                jars.forEach(jar -> {
-                    String src = APP_UPLOADS.concat("/").concat(jar);
-                    fsOperator.copy(src, application.getAppHome().concat("/lib"), false, true);
-                });
+        }
+        //4) upload jar by uploadJar
+        List<String> jars = application.getDependencyObject().getJar();
+        String APP_UPLOADS = application.getWorkspace().APP_UPLOADS();
+        if (Utils.notEmpty(jars)) {
+            FsOperator fsOperator = application.getFsOperator();
+            if(!fsOperator.exists(application.getAppHome().concat("/lib"))){
+                fsOperator.mkdirs(application.getAppHome().concat("/lib"));
             }
-
+            jars.forEach(jar -> {
+                String src = APP_UPLOADS.concat("/").concat(jar);
+                fsOperator.copy(src, application.getAppHome().concat("/lib"), false, true);
+            });
         }
     }
 
