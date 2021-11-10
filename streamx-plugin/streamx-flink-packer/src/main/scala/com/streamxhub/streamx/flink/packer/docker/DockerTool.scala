@@ -114,7 +114,7 @@ object DockerTool extends Logger {
     var tagName = if (tag.contains("/")) tag else s"$DOCKER_IMAGE_NAMESPACE/$tag"
     if (registerAddress.nonEmpty && !tagName.startsWith(registerAddress))
       tagName = s"$registerAddress/$tagName"
-    tagName
+    tagName.toLowerCase
   }
 
 }
