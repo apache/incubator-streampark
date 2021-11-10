@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableMap
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+import scala.collection.JavaConverters._
+
 /**
  * @author Al-assad
  */
@@ -118,6 +120,7 @@ class PodTemplateParserTest {
     }
   }
 
+
   @Test
   def testHostAliasSpecToPodTemplate(): Unit = {
     val hostMap = ImmutableMap.of(
@@ -129,24 +132,24 @@ class PodTemplateParserTest {
     )
     val expected = Map(
       "" ->
-      """apiVersion: v1
-        |kind: Pod
-        |metadata:
-        |  name: pod-template
-        |spec:
-        |  hostAliases:
-        |  - ip: 192.168.3.114
-        |    hostnames:
-        |    - hdp01.assad.site
-        |    - hdp01
-        |  - ip: 192.168.3.116
-        |    hostnames:
-        |    - hdp03.assad.site
-        |  - ip: 192.168.3.115
-        |    hostnames:
-        |    - hdp02.assad.site
-        |    - hdp02
-        |""".stripMargin,
+        """apiVersion: v1
+          |kind: Pod
+          |metadata:
+          |  name: pod-template
+          |spec:
+          |  hostAliases:
+          |  - ip: 192.168.3.114
+          |    hostnames:
+          |    - hdp01.assad.site
+          |    - hdp01
+          |  - ip: 192.168.3.116
+          |    hostnames:
+          |    - hdp03.assad.site
+          |  - ip: 192.168.3.115
+          |    hostnames:
+          |    - hdp02.assad.site
+          |    - hdp02
+          |""".stripMargin,
 
       """apiVersion: v1
         |kind: Pod
@@ -260,6 +263,118 @@ class PodTemplateParserTest {
     }
   }
 
+
+  @Test
+  def testExtractHostAliasMapFromPodTemplate(): Unit = {
+    val expected = Map(
+      """apiVersion: v1
+        |kind: Pod
+        |metadata:
+        |  name: pod-template
+        |spec:
+        |  containers:
+        |  - name: flink-main-container
+        |    volumeMounts:
+        |    - name: checkpoint-pvc
+        |      mountPath: /opt/flink/checkpoints
+        |    - name: savepoint-pvc
+        |      mountPath: /opt/flink/savepoints
+        |  volumes:
+        |  - name: checkpoint-pvc
+        |    persistentVolumeClaim:
+        |      claimName: flink-checkpoint
+        |  - name: savepoint-pvc
+        |    persistentVolumeClaim:
+        |      claimName: flink-savepoint
+        |  hostAliases:
+        |  - ip: 192.168.3.114
+        |    hostnames:
+        |    - hdp01.assad.site
+        |    - hdp01
+        |  - ip: 192.168.3.116
+        |    hostnames:
+        |    - hdp03.assad.site
+        |  - ip: 192.168.3.115
+        |    hostnames:
+        |    - hdp02.assad.site
+        |    - hdp02
+        |""".stripMargin
+        ->
+        Map("hdp01.assad.site" -> "192.168.3.114",
+          "hdp01" -> "192.168.3.114",
+          "hdp03.assad.site" -> "192.168.3.116",
+          "hdp02.assad.site" -> "192.168.3.115",
+          "hdp02" -> "192.168.3.115"
+        ),
+      """apiVersion: v1
+        |kind: Pod
+        |metadata:
+        |  name: pod-template
+        |spec:
+        |  containers:
+        |  - name: flink-main-container
+        |    volumeMounts:
+        |    - name: checkpoint-pvc
+        |      mountPath: /opt/flink/checkpoints
+        |    - name: savepoint-pvc
+        |      mountPath: /opt/flink/savepoints
+        |  volumes:
+        |  - name: checkpoint-pvc
+        |    persistentVolumeClaim:
+        |      claimName: flink-checkpoint
+        |  - name: savepoint-pvc
+        |    persistentVolumeClaim:
+        |      claimName: flink-savepoint
+        |  hostAliases:
+        |""".stripMargin
+        ->
+        Map(),
+      """apiVersion: v1
+        |kind: Pod
+        |metadata:
+        |  name: pod-template
+        |spec:
+        |  hostAliases:
+        |  - ip:
+        |    hostnames:
+        |    - hdp01.assad.site
+        |    - hdp01
+        |  - ip: 192.168.3.116
+        |    hostname:
+        |    - hdp03.assad.site
+        |  - ip: 192.168.3.115
+        |    hostnames:
+        |    - hdp02.assad.site
+        |  - ip: 192.168.3.115
+        |    hostname: hdp02.assad.site
+        |""".stripMargin
+        -> Map(),
+      """apiVersion: v1
+        |kind: Pod
+        |metadata:
+        |  name: pod-template
+        |spec: 2333
+        |""".stripMargin
+        -> Map()
+    )
+
+    for (expect <- expected) {
+      val hostsMap = PodTemplateParser.extractHostAliasMap(expect._1).asScala
+      assertEquals(hostsMap, expect._2)
+    }
+  }
+
+  @Test
+  def testPreviewHostAliasSpec(): Unit = {
+    val hosts = Map("hdp01.assad.site" -> "192.168.3.114",
+      "hdp01" -> "192.168.3.114",
+      "hdp03.assad.site" -> "192.168.3.116",
+      "hdp02.assad.site" -> "192.168.3.115",
+      "hdp02" -> "192.168.3.115"
+    )
+    val hostAlias = PodTemplateParser.previewHostAliasSpec(hosts.asJava)
+    println(hostAlias)
+  }
 
 
 }

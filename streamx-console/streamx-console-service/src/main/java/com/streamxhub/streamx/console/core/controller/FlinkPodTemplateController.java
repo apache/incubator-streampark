@@ -20,12 +20,17 @@ import com.streamxhub.streamx.common.util.HostsUtils;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.flink.kubernetes.PodTemplateParser;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Al-assad
@@ -40,7 +45,8 @@ public class FlinkPodTemplateController {
     public RestResponse getHosts() {
         // hostname -> ipv4
         Map<String, String> hostMap = HostsUtils.getSystemHostsAsJava(true);
-        return RestResponse.create().data(hostMap);
+        List<String> friendlyHosts = hostMap.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).collect(Collectors.toList());
+        return RestResponse.create().data(friendlyHosts);
     }
 
     @PostMapping("init")
@@ -49,12 +55,43 @@ public class FlinkPodTemplateController {
     }
 
     /**
-     * @param hosts hostname -> ipv4
+     * @param hosts hostname:ipv4,hostname:ipv4,hostname:ipv4...
      */
     @PostMapping("compHostAlias")
-    public RestResponse completeHostAlias(Map<String, String> hosts, String podTemplate) {
-        String completedPodTemplate = PodTemplateParser.completeHostAliasSpec(hosts, podTemplate);
+    public RestResponse completeHostAlias(String hosts, String podTemplate) {
+        Map<String, String> hostMap = covertHostsParamToMap(hosts);
+        String completedPodTemplate = PodTemplateParser.completeHostAliasSpec(hostMap, podTemplate);
         return RestResponse.create().data(completedPodTemplate);
+    }
+
+    private Map<String, String> covertHostsParamToMap(String hosts) {
+        if (StringUtils.isEmpty(hosts)) {
+            return new HashMap<>(0);
+        } else {
+            return Arrays.stream(hosts.split(","))
+                .filter(StringUtils::isNotBlank)
+                .map(String::trim)
+                .map(e -> e.split(":"))
+                .filter(arr -> arr.length == 2 && StringUtils.isNotBlank(arr[0]) && StringUtils.isNotBlank(arr[1]))
+                .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
+        }
+    }
+
+    @PostMapping("extractHostAlias")
+    public RestResponse extractHostAlias(String podTemplate) {
+        Map<String, String> hosts = PodTemplateParser.extractHostAliasMap(podTemplate);
+        List<String> friendlyHosts = hosts.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).collect(Collectors.toList());
+        return RestResponse.create().data(friendlyHosts);
+    }
+
+    /**
+     * @param hosts hostname:ipv4,hostname:ipv4,hostname:ipv4...
+     */
+    @PostMapping("previewHostAlias")
+    public RestResponse previewHostAlias(String hosts) {
+        Map<String, String> hostMap = covertHostsParamToMap(hosts);
+        String podTemplate = PodTemplateParser.previewHostAliasSpec(hostMap);
+        return RestResponse.create().data(podTemplate);
     }
 
 
