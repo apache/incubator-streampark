@@ -59,12 +59,15 @@ object LFsOperator extends FsOperator with Logger {
   override def move(srcPath: String, dstPath: String): Unit = {
     if (!isAnyBank(srcPath, dstPath)) {
       val srcFile = new File(srcPath)
-      var dstFile = new File(dstPath)
-      if (dstFile.isDirectory) {
-        dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
-      }
+      val dstFile = new File(dstPath)
+      require(srcFile.exists(), "Source must be exists")
+      require(dstFile.exists() && dstFile.isDirectory, "Destination must be directory")
       if (srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        FileUtils.moveFile(srcFile, dstFile)
+        if (srcFile.isDirectory) {
+          FileUtils.moveDirectory(srcFile, dstFile)
+        } else {
+          FileUtils.moveFile(srcFile, dstFile)
+        }
       }
     }
   }
@@ -80,11 +83,10 @@ object LFsOperator extends FsOperator with Logger {
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
     if (!isAnyBank(srcPath, dstPath)) {
       val srcFile = new File(srcPath)
-      var dstFile = new File(dstPath)
-      if (dstFile.isDirectory) {
-        dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
-      }
-      if (overwrite && !dstFile.exists() && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
+      val dstFile = new File(dstPath)
+      require(srcFile.exists(), "Source must be exists")
+      require(dstFile.exists() && dstFile.isDirectory, "Destination must be directory")
+      if (overwrite && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
         FileUtils.copyFile(srcFile, dstFile)
       }
     }
@@ -94,8 +96,10 @@ object LFsOperator extends FsOperator with Logger {
     if (!isAnyBank(srcPath, dstPath)) {
       val srcFile = new File(srcPath)
       val dstFile = new File(dstPath)
-      if (overwrite && !dstFile.exists() && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        FileUtils.copyDirectory(new File(srcPath), new File(dstPath))
+      require(srcFile.exists(), "Source must be exists")
+      require(dstFile.exists() && dstFile.isDirectory, "Destination must be directory")
+      if (overwrite && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
+        FileUtils.copyDirectory(srcFile, dstFile)
       }
     }
   }
