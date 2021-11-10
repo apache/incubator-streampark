@@ -11,10 +11,18 @@
   }
 }
 
-.sql-box,.pom-box,.pod-template-box,.jm-pod-template-box,.tm-pod-template-box {
+.sql-box,.pom-box {
   height: 550px;
   width: 100%;
   overflow: hidden;
+}
+
+.pod-template-box,.jm-pod-template-box,.tm-pod-template-box {
+  resize: vertical;
+  outline: none;
+  height: 350px;
+  width: 100%;
+  overflow: auto;
 }
 
 .syntax-true {
@@ -82,15 +90,17 @@
 
 }
 
-.pod-template-hist {
+.pod-template-tool {
   z-index: 99;
   position: absolute;
   bottom: 20px;
   float: right;
-  right: 20px;
+  right: 22px;
   cursor: pointer;
   height: 26px;
   padding: 0 10px;
+}
+.pod-template-tool-item{
   font-size: 12px;
 }
 
