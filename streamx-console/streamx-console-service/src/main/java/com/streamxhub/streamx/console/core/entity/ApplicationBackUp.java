@@ -69,6 +69,7 @@ public class ApplicationBackUp {
                     application.getId(),
                     createTime.getTime()
                 );
+                break;
             case YARN_APPLICATION:
                 this.path = String.format(
                     "%s/%d/%d",
@@ -76,6 +77,7 @@ public class ApplicationBackUp {
                     application.getId(),
                     createTime.getTime()
                 );
+                break;
             default:
                 throw new UnsupportedOperationException("unsupported executionMode ".concat(application.getExecutionModeEnum().getName()));
         }

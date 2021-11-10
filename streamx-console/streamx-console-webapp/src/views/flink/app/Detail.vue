@@ -333,7 +333,7 @@
               </template>
               <template
                 slot="operation"
-                v-if="1 === 1"
+                v-if="1 === 2"
                 slot-scope="text, record">
                 <svg-icon
                   name="rollback"
