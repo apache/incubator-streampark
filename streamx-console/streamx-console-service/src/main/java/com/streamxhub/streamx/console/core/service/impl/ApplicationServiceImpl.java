@@ -580,6 +580,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setK8sJmPodTemplate(appParam.getK8sJmPodTemplate());
             application.setK8sTmPodTemplate(appParam.getK8sTmPodTemplate());
             application.setK8sHadoopIntegration(appParam.getK8sHadoopIntegration());
+            application.setK8sHostAlias(appParam.getK8sHostAlias());
 
             //以下参数发生改变不影响正在运行的任务
             application.setDescription(appParam.getDescription());

@@ -255,7 +255,7 @@ class PodTemplateParserTest {
           |""".stripMargin
     )
     for (expect <- expected) {
-      val result = PodTemplateParser.mergeHostAliasSpecToPodTemplate(hostMap, expect._1)
+      val result = PodTemplateParser.completeHostAliasSpec(hostMap, expect._1)
       assertEquals(result.trim, expect._2.trim)
     }
   }

@@ -50,6 +50,7 @@ import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -220,6 +221,11 @@ public class Application implements Serializable {
     private Boolean k8sHadoopIntegration;
 
     /**
+     * hostAlias of k8s pod template
+     */
+    private String k8sHostAlias;
+
+    /**
      * running job
      */
     private transient JobsOverview.Task overview;
@@ -248,6 +254,8 @@ public class Application implements Serializable {
     private transient String createTimeTo;
     private transient String backUpDescription;
 
+    private transient Map<String, String> k8sHostAliasMap;
+
     /**
      * Flink Web UI Url
      */
@@ -259,6 +267,33 @@ public class Application implements Serializable {
 
     public K8sPodTemplates getK8sPodTemplates() {
         return K8sPodTemplates.of(k8sPodTemplate, k8sJmPodTemplate, k8sTmPodTemplate);
+    }
+
+
+    public void setK8sHostAlias(String k8sHostAlias) {
+        this.k8sHostAlias = k8sHostAlias;
+        if (StringUtils.isEmpty(this.k8sHostAlias)) {
+            this.k8sHostAliasMap = new HashMap<>(0);
+        } else {
+            this.k8sHostAliasMap = Arrays.stream(this.k8sHostAlias.split(","))
+                .map(e -> e.split(":"))
+                .filter(e -> e.length == 2)
+                .collect(Collectors.toMap(e -> e[0], e -> e[1]));
+        }
+    }
+
+    /**
+     * @param hostAlias hostname -> ipv4
+     */
+    public void setK8sHostAliasMap(Map<String, String> hostAlias) {
+        this.k8sHostAliasMap = hostAlias;
+        if (MapUtils.isEmpty(hostAlias)) {
+            this.k8sHostAlias = "";
+        } else {
+            this.k8sHostAlias = hostAlias.entrySet().stream()
+                .map(e -> e.getKey() + ":" + e.getValue())
+                .collect(Collectors.joining(","));
+        }
     }
 
     public void setState(Integer state) {

@@ -81,7 +81,7 @@ object PodTemplateParser {
    * @param podTemplateContent pod template content
    * @return pod template content
    */
-  def mergeHostAliasSpecToPodTemplate(hosts: JMap[String, String], podTemplateContent: String): String = {
+  def completeHostAliasSpec(hosts: JMap[String, String], podTemplateContent: String): String = {
     if (hosts.isEmpty) return podTemplateContent
     val content = completeInitPodTemplate(podTemplateContent)
 
