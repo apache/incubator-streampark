@@ -105,6 +105,13 @@ export default {
     FLINK_JM_POD_TEMPLATES: '/flink/history/flinkJmPodTemplates',
     FLINK_TM_POD_TEMPLATES: '/flink/history/flinkTmPodTemplates'
   },
+  FlinkPodTemplate: {
+    SYS_HOSTS: '/flink/podtmpl/sysHosts',
+    INIT: '/flink/podtmpl/init',
+    COMP_HOST_ALIAS: '/flink/podtmpl/compHostAlias',
+    EXTRACT_HOST_ALIAS: '/flink/podtmpl/extractHostAlias',
+    PREVIEW_HOST_ALIAS: '/flink/podtmpl/previewHostAlias',
+  },
   FlinkSQL: {
     VERIFY: '/flink/sql/verify',
     GET: '/flink/sql/get',

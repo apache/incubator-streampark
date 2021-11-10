@@ -244,7 +244,7 @@
                   @select="addHistoryUploadJar"
                   @deselect="deleteHistoryUploadJar">
                   <a-select-option v-for="item in filteredHistoryUploadJarsOptions" :key="item" :value="item">
-                    <a-icon slot="suffixIcon" type="file-done" />
+                    <a-icon slot="suffixIcon" type="file-done"/>
                     {{ item }}
                   </a-select-option>
                 </a-select>
@@ -493,7 +493,7 @@
       </template>
 
       <a-form-item
-        label="System Hadoop Conf"
+        label="Use System Hadoop Conf"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
         v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
@@ -513,14 +513,11 @@
               style="margin-left: 10px"/>
           </a-popover>
           <transition name="slide-fade">
-            <a-tooltip title="View">
-              <a-button
-                shape="circle"
-                icon="appstore"
-                size="small"
-                v-if="useSysHadoopConf == true"
-                @click="showSysHadoopConfDrawer"></a-button>
-            </a-tooltip>
+            <a-button
+              icon="eye"
+              size="small"
+              v-if="useSysHadoopConf == true"
+              @click="showSysHadoopConfDrawer">view</a-button>
           </transition>
         </a-space>
 
@@ -612,10 +609,345 @@
       </a-form-item>
 
       <a-form-item
+        label="Kubernetes Pod Template"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-tabs type="card" v-model="controller.podTemplateTab">
+          <a-tab-pane
+            key="pod-template"
+            tab="Pod Template"
+            forceRender>
+            <a-button-group class="pod-template-tool">
+              <a-button
+                size="small"
+                type="primary"
+                icon="history"
+                class="pod-template-tool-item"
+                @click="showPodTemplateDrawer('ptVisual')">History
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="copy"
+                class="pod-template-tool-item"
+                @click="handleGetInitPodTemplate('ptVisual')">Init Content
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="share-alt"
+                class="pod-template-tool-item"
+                @click="showTemplateHostAliasDrawer('ptVisual')">Host Alias
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="hdd"
+                disabled
+                ghost
+                class="pod-template-tool-item">PVC
+              </a-button>
+            </a-button-group>
+            <a-drawer
+              title="Pod Template History"
+              placement="right"
+              :width="700"
+              item-layout="vertical"
+              :closable="false"
+              :visible="this.podTemplateDrawer.ptVisual"
+              @close="closePodTemplateDrawer('ptVisual')">
+              <template>
+                <a-empty v-if="historyRecord.podTemplate == null || historyRecord.podTemplate.length == 0"/>
+                <a-card
+                  title="pod-template.yaml"
+                  size="small"
+                  hoverable
+                  style="margin-bottom: 8px"
+                  v-for="(item,index) in historyRecord.podTemplate"
+                  :key="index">
+                  <a slot="extra" @click="handleChoicePodTemplate('ptVisual', item)">Choice</a>
+                  <pre style="font-size: 12px">{{ item }}</pre>
+                </a-card>
+              </template>
+            </a-drawer>
+            <a-drawer
+              title="Pod Template HostAlias"
+              placement="right"
+              :width="500"
+              item-layout="vertical"
+              :closable="false"
+              :visible="podTemplateHostAliasDrawer.ptVisual"
+              @close="closeTemplateHostAliasDrawer('ptVisual')">
+              <template>
+                <a-row>
+                  <p class="conf-desc">
+                    <span class="note-info" style="margin-bottom: 12px">
+                    <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                    Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                    </span>
+                  </p>
+                </a-row>
+                <a-row>
+                  <a-select
+                    mode="multiple"
+                    placeholder="Search System Hosts"
+                    :value="selectedPodTemplateHostAlias"
+                    style="width: 100%;"
+                    :showArrow="true"
+                    @change="handleSelectedTemplateHostAlias">
+                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
+                      <a-icon slot="suffixIcon" type="plus-circle"/>
+                      {{ item }}
+                    </a-select-option>
+                  </a-select>
+                </a-row>
+                <a-row style="margin-top: 30px">
+                  <a-card
+                    title="preview"
+                    size="small"
+                    hoverable>
+                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
+                  </a-card>
+                </a-row>
+              </template>
+              <div class="pod-template-tool-drawer-submit-cancel">
+                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('ptVisual')">
+                  Cancel
+                </a-button>
+                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('ptVisual')">
+                  Submit
+                </a-button>
+              </div>
+            </a-drawer>
+            <div class="pod-template-box syntax-true" />
+          </a-tab-pane>
+
+          <a-tab-pane
+            key="jm-pod-template"
+            tab="JM Pod Template"
+            forceRender>
+            <a-button-group class="pod-template-tool">
+              <a-button
+                size="small"
+                type="primary"
+                icon="history"
+                class="pod-template-tool-item"
+                @click="showPodTemplateDrawer('jmPtVisual')">History
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="copy"
+                class="pod-template-tool-item"
+                @click="handleGetInitPodTemplate('jmPtVisual')">Init Content
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="share-alt"
+                class="pod-template-tool-item"
+                @click="showTemplateHostAliasDrawer('jmPtVisual')">Host Alias
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="hdd"
+                disabled
+                ghost
+                class="pod-template-tool-item">PVC
+              </a-button>
+            </a-button-group>
+            <a-drawer
+              title="JobManager Pod Template History"
+              placement="right"
+              :width="700"
+              item-layout="vertical"
+              :closable="false"
+              :visible="this.podTemplateDrawer.jmPtVisual"
+              @close="closePodTemplateDrawer('jmPtVisual')">
+              <template>
+                <a-empty v-if="historyRecord.jmPodTemplate == null || historyRecord.jmPodTemplate.length == 0"/>
+                <a-card
+                  title="jm-pod-template.yaml"
+                  size="small"
+                  hoverable
+                  style="margin-bottom: 8px"
+                  v-for="(item,index) in historyRecord.jmPodTemplate"
+                  :key="index">
+                  <a slot="extra" @click="handleChoicePodTemplate('jmPtVisual', item)">Choice</a>
+                  <pre style="font-size: 12px">{{ item }}</pre>
+                </a-card>
+              </template>
+            </a-drawer>
+            <a-drawer
+              title="JM Pod Template HostAlias"
+              placement="right"
+              :width="500"
+              item-layout="vertical"
+              :closable="false"
+              :visible="podTemplateHostAliasDrawer.jmPtVisual"
+              @close="closeTemplateHostAliasDrawer('jmPtVisual')">
+              <template>
+                <a-row>
+                  <p class="conf-desc">
+                    <span class="note-info" style="margin-bottom: 12px">
+                    <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                    Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                    </span>
+                  </p>
+                </a-row>
+                <a-row>
+                  <a-select
+                    mode="multiple"
+                    placeholder="Search System Hosts"
+                    :value="selectedPodTemplateHostAlias"
+                    style="width: 100%;"
+                    :showArrow="true"
+                    @change="handleSelectedTemplateHostAlias">
+                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
+                      <a-icon slot="suffixIcon" type="plus-circle"/>
+                      {{ item }}
+                    </a-select-option>
+                  </a-select>
+                </a-row>
+                <a-row style="margin-top: 30px">
+                  <a-card
+                    title="preview"
+                    size="small"
+                    hoverable>
+                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
+                  </a-card>
+                </a-row>
+              </template>
+              <div class="pod-template-tool-drawer-submit-cancel">
+                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('jmPtVisual')">
+                  Cancel
+                </a-button>
+                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('jmPtVisual')">
+                  Submit
+                </a-button>
+              </div>
+            </a-drawer>
+            <div class="jm-pod-template-box syntax-true" />
+          </a-tab-pane>
+
+          <a-tab-pane
+            key="tm-pod-template"
+            tab="TM Pod Template"
+            forceRender>
+            <a-button-group class="pod-template-tool">
+              <a-button
+                size="small"
+                type="primary"
+                icon="history"
+                class="pod-template-tool-item"
+                @click="showPodTemplateDrawer('tmPtVisual')">History
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="copy"
+                class="pod-template-tool-item"
+                @click="handleGetInitPodTemplate('tmPtVisual')">Init Content
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="share-alt"
+                class="pod-template-tool-item"
+                @click="showTemplateHostAliasDrawer('tmPtVisual')">Host Alias
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="hdd"
+                disabled
+                ghost
+                class="pod-template-tool-item">PVC
+              </a-button>
+            </a-button-group>
+            <a-drawer
+              title="TaskManager Pod Template History"
+              placement="right"
+              :width="700"
+              item-layout="vertical"
+              :closable="false"
+              :visible="this.podTemplateDrawer.tmPtVisual"
+              @close="closePodTemplateDrawer('tmPtVisual')">
+              <template>
+                <a-empty v-if="historyRecord.tmPodTemplate == null || historyRecord.tmPodTemplate.length == 0"/>
+                <a-card
+                  title="tm-pod-template.yaml"
+                  size="small"
+                  hoverable
+                  style="margin-bottom: 8px"
+                  v-for="(item,index) in historyRecord.tmPodTemplate"
+                  :key="index">
+                  <a slot="extra" @click="handleChoicePodTemplate('tmPtVisual', item)">Choice</a>
+                  <pre style="font-size: 12px">{{ item }}</pre>
+                </a-card>
+              </template>
+            </a-drawer>
+            <a-drawer
+              title="Pod Template HostAlias"
+              placement="right"
+              :width="500"
+              item-layout="vertical"
+              :closable="false"
+              :visible="podTemplateHostAliasDrawer.tmPtVisual"
+              @close="closeTemplateHostAliasDrawer('tmPtVisual')">
+              <template>
+                <a-row>
+                  <p class="conf-desc">
+                    <span class="note-info" style="margin-bottom: 12px">
+                    <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                    Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                    </span>
+                  </p>
+                </a-row>
+                <a-row>
+                  <a-select
+                    mode="multiple"
+                    placeholder="Search System Hosts"
+                    :value="selectedPodTemplateHostAlias"
+                    style="width: 100%;"
+                    :showArrow="true"
+                    @change="handleSelectedTemplateHostAlias">
+                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
+                      <a-icon slot="suffixIcon" type="plus-circle"/>
+                      {{ item }}
+                    </a-select-option>
+                  </a-select>
+                </a-row>
+                <a-row style="margin-top: 30px">
+                  <a-card
+                    title="preview"
+                    size="small"
+                    hoverable>
+                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
+                  </a-card>
+                </a-row>
+              </template>
+              <div class="pod-template-tool-drawer-submit-cancel">
+                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('tmPtVisual')">
+                  Cancel
+                </a-button>
+                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('tmPtVisual')">
+                  Submit
+                </a-button>
+              </div>
+            </a-drawer>
+            <div class="tm-pod-template-box syntax-true" />
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-item>
+
+      <a-form-item
         label="Fault Restart Size"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-        v-show="executionMode !== 5 && executionMode !== 6">
+        v-show="(executionMode === null && app.executionMode !== 5 && app.executionMode !== 6) || (executionMode !== null && executionMode !== 5 && executionMode !== 6)">
         <a-input-number
           :min="1"
           :step="1"
@@ -627,7 +959,7 @@
         label="CheckPoint Failure Options"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-        v-show="executionMode !== 5 && executionMode !== 6">
+        v-show="(executionMode === null && app.executionMode !== 5 && app.executionMode !== 6) || (executionMode !== null && executionMode !== 5 && executionMode !== 6)">
         <a-input-group compact>
           <a-input-number
             :min="1"
@@ -914,119 +1246,6 @@
       </a-form-item>
 
       <a-form-item
-        label="Kubernetes Pod Template"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
-        <a-tabs type="card" v-model="controller.podTemplateTab">
-          <a-tab-pane
-            key="pod-template"
-            tab="Pod Template"
-            forceRender>
-            <div class="pod-template-box syntax-true" style="height: 300px">
-              <a-button
-                type="primary"
-                icon="history"
-                class="pod-template-hist"
-                @click="showPodTemplateDrawer('ptVisual')">History</a-button>
-              <a-drawer
-                title="Pod Template History"
-                placement="right"
-                :width="700"
-                item-layout="vertical"
-                :closable="false"
-                :visible="this.podTemplateDrawer.ptVisual"
-                @close="closePodTemplateDrawer('ptVisual')">
-                <template>
-                  <a-empty v-if="historyRecord.podTemplate == null || historyRecord.podTemplate.length == 0"/>
-                  <a-card
-                    title="pod-template.yaml"
-                    size="small"
-                    hoverable
-                    style="margin-bottom: 8px"
-                    v-for="(item,index) in historyRecord.podTemplate"
-                    :key="index">
-                    <a slot="extra" @click="handleChoicePodTemplate('ptVisual', item)">Choice</a>
-                    <pre style="font-size: 12px">{{ item }}</pre>
-                  </a-card>
-                </template>
-              </a-drawer>
-            </div>
-          </a-tab-pane>
-
-          <a-tab-pane
-            key="jm-pod-template"
-            tab="JM Pod Template"
-            forceRender>
-            <div class="jm-pod-template-box syntax-true" style="height: 300px">
-              <a-button
-                type="primary"
-                icon="history"
-                class="pod-template-hist"
-                @click="showPodTemplateDrawer('jmPtVisual')">History</a-button>
-              <a-drawer
-                title="JobManager Pod Template History"
-                placement="right"
-                :width="700"
-                item-layout="vertical"
-                :closable="false"
-                :visible="this.podTemplateDrawer.jmPtVisual"
-                @close="closePodTemplateDrawer('jmPtVisual')">
-                <template>
-                  <a-empty v-if="historyRecord.jmPodTemplate == null || historyRecord.jmPodTemplate.length == 0"/>
-                  <a-card
-                    title="jm-pod-template.yaml"
-                    size="small"
-                    hoverable
-                    style="margin-bottom: 8px"
-                    v-for="(item,index) in historyRecord.jmPodTemplate"
-                    :key="index">
-                    <a slot="extra" @click="handleChoicePodTemplate('jmPtVisual', item)">Choice</a>
-                    <pre style="font-size: 12px">{{ item }}</pre>
-                  </a-card>
-                </template>
-              </a-drawer>
-            </div>
-          </a-tab-pane>
-
-          <a-tab-pane
-            key="tm-pod-template"
-            tab="TM Pod Template"
-            forceRender>
-            <div class="tm-pod-template-box syntax-true" style="height: 300px">
-              <a-button
-                type="primary"
-                icon="history"
-                class="pod-template-hist"
-                @click="showPodTemplateDrawer('tmPtVisual')">History</a-button>
-              <a-drawer
-                title="TaskManager Pod Template History"
-                placement="right"
-                :width="700"
-                item-layout="vertical"
-                :closable="false"
-                :visible="this.podTemplateDrawer.tmPtVisual"
-                @close="closePodTemplateDrawer('tmPtVisual')">
-                <template>
-                  <a-empty v-if="historyRecord.tmPodTemplate == null || historyRecord.tmPodTemplate.length == 0"/>
-                  <a-card
-                    title="tm-pod-template.yaml"
-                    size="small"
-                    hoverable
-                    style="margin-bottom: 8px"
-                    v-for="(item,index) in historyRecord.tmPodTemplate"
-                    :key="index">
-                    <a slot="extra" @click="handleChoicePodTemplate('tmPtVisual', item)">Choice</a>
-                    <pre style="font-size: 12px">{{ item }}</pre>
-                  </a-card>
-                </template>
-              </a-drawer>
-            </div>
-          </a-tab-pane>
-        </a-tabs>
-      </a-form-item>
-
-      <a-form-item
         label="Description"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -1209,6 +1428,7 @@ import {
 
 import { toPomString } from './Pom'
 import {list as listFlinkEnv} from '@/api/flinkenv'
+import { sysHosts, initPodTemplate, completeHostAliasToPodTemplate, extractHostAliasFromPodTemplate, previewHostAlias } from '@api/flinkpodtmpl'
 
 export default {
   name: 'EditStreamX',
@@ -1354,10 +1574,18 @@ export default {
         jmPtVisual: false,
         tmPtVisual: false
       },
+      podTemplateHostAliasDrawer: {
+        ptVisual: false,
+        jmPtVisual: false,
+        tmPtVisual: false,
+      },
       hadoopConfDrawer: {
         visual: false,
         content: {}
       },
+      sysHostsAlias: [],
+      selectedPodTemplateHostAlias: [],
+      hostAliasPreview: '',
     }
   },
 
@@ -1378,7 +1606,11 @@ export default {
     filteredHistoryUploadJarsOptions() {
       return this.historyRecord.uploadJars.filter(o =>
         !this.selectedHistoryUploadJars.includes(o) && !this.controller.dependency.jar.has(o))
+    },
+    filteredPodTemplateHostAliasOptions() {
+      return this.sysHostsAlias.filter(o => !this.selectedPodTemplateHostAlias.includes(o))
     }
+
   },
 
   mounted() {
@@ -2133,12 +2365,15 @@ export default {
     handleChoicePodTemplate(visualType, content) {
       switch (visualType) {
         case 'ptVisual':
+          this.podTemplate = content
           this.controller.editor.podTemplate.setValue(content)
           break
         case 'jmPtVisual':
+          this.jmPodTemplate = content
           this.controller.editor.jmPodTemplate.setValue(content)
           break
         case 'tmPtVisual':
+          this.tmPodTemplate = content
           this.controller.editor.tmPodTemplate.setValue(content)
           break
       }
@@ -2158,6 +2393,116 @@ export default {
 
     closeSysHadoopConfDrawer(){
       this.hadoopConfDrawer.visual = false
+    },
+
+    handleGetInitPodTemplate(visualType) {
+      initPodTemplate().then((resp) => {
+        const content = resp.data
+        if (content != null && content !== '') {
+          switch (visualType) {
+            case 'ptVisual':
+              this.podTemplate = content
+              this.controller.editor.podTemplate.setValue(content)
+              break
+            case 'jmPtVisual':
+              this.jmPodTemplate = content
+              this.controller.editor.jmPodTemplate.setValue(content)
+              break
+            case 'tmPtVisual':
+              this.tmPodTemplate = content
+              this.controller.editor.tmPodTemplate.setValue(content)
+              break
+          }
+        }
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+    },
+
+    showTemplateHostAliasDrawer(visualType) {
+      this.podTemplateHostAliasDrawer[visualType] = true
+      sysHosts().then((resp) => {
+        this.sysHostsAlias = resp.data
+      })
+      let tmplContent = ''
+      switch (visualType) {
+        case 'ptVisual':
+          tmplContent = this.podTemplate
+          break
+        case 'jmPtVisual':
+          tmplContent = this.jmPodTemplate
+          break
+        case 'tmPtVisual':
+          tmplContent = this.tmPodTemplate
+          break
+      }
+      if (tmplContent !== '') {
+        const param = {}
+        param['podTemplate'] = tmplContent
+        extractHostAliasFromPodTemplate(param).then((resp) => {
+          this.selectedPodTemplateHostAlias = resp.data
+          this.handleRefreshHostAliasPreview()
+        }).catch(err => {
+          this.selectedPodTemplateHostAlias = []
+        })
+      }
+    },
+
+    closeTemplateHostAliasDrawer(visualType) {
+      this.podTemplateHostAliasDrawer[visualType] = false
+      this.selectedPodTemplateHostAlias = []
+      this.hostAliasPreview = ''
+    },
+
+    handleSelectedTemplateHostAlias(items) {
+      this.selectedPodTemplateHostAlias = items
+      this.handleRefreshHostAliasPreview()
+    },
+
+    handleSubmitHostAliasToPodTemplate(visualType) {
+      const param = {
+        hosts: this.selectedPodTemplateHostAlias.join(','),
+      }
+      switch (visualType) {
+        case 'ptVisual':
+          param['podTemplate'] = this.podTemplate
+          break
+        case 'jmPtVisual':
+          param['podTemplate'] = this.jmPodTemplate
+          break
+        case 'tmPtVisual':
+          param['podTemplate'] = this.tmPodTemplate
+          break
+      }
+      completeHostAliasToPodTemplate(param).then((resp) => {
+        const content = resp.data
+        if (content != null && content !== '') {
+          switch (visualType) {
+            case 'ptVisual':
+              this.podTemplate = content
+              this.controller.editor.podTemplate.setValue(content)
+              break
+            case 'jmPtVisual':
+              this.jmPodTemplate = content
+              this.controller.editor.jmPodTemplate.setValue(content)
+              break
+            case 'tmPtVisual':
+              this.tmPodTemplate = content
+              this.controller.editor.tmPodTemplate.setValue(content)
+              break
+          }
+        }
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+      this.closeTemplateHostAliasDrawer(visualType)
+    },
+
+    handleRefreshHostAliasPreview() {
+      previewHostAlias({hosts: this.selectedPodTemplateHostAlias.join(',')})
+        .then((resp) => {
+          this.hostAliasPreview = resp.data
+        })
     },
 
     handleReset() {
