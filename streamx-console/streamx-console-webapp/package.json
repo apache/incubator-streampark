@@ -44,7 +44,6 @@
     "vue-cropper": "0.4.4",
     "vue-ls": "^3.2.0",
     "vue-router": "^3.0.1",
-    "vue-simplemde": "^2.0.0",
     "vue-stomp": "0.0.5",
     "vue-svg-component-runtime": "^1.0.1",
     "vue-sweetalert2": "^4.2.0",

@@ -63,7 +63,7 @@ object LFsOperator extends FsOperator with Logger {
       require(srcFile.exists(), "[StreamX] LFsOperator.move: Source must be exists")
       if (srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
         if (dstFile.isDirectory) {
-          FileUtils.moveToDirectory(srcFile, dstFile,true)
+          FileUtils.moveToDirectory(srcFile, dstFile, true)
         } else {
           if (dstFile.exists()) {
             dstFile.delete()
@@ -110,7 +110,7 @@ object LFsOperator extends FsOperator with Logger {
   }
 
   override def fileMd5(path: String): String = {
-    require(path != null && path.nonEmpty,s"[StreamX] LFsOperator.fileMd5: file must not be null.")
+    require(path != null && path.nonEmpty, s"[StreamX] LFsOperator.fileMd5: file must not be null.")
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
 
