@@ -41,7 +41,7 @@ object FlinkClientUtils {
    * @return
    */
   @throws[ProgramInvocationException] def getExecutionPlan(packagedProgram: PackagedProgram): String = {
-    require(packagedProgram != null)
+    require(packagedProgram != null, "[StreamX] FlinkClientUtils.getExecutionPlan: packagedProgram must not be null")
     val address: InetAddress = InetAddress.getLocalHost
     val jmAddress = new InetSocketAddress(address, new ServerSocket(0).getLocalPort)
 
@@ -52,7 +52,7 @@ object FlinkClientUtils {
     val optimizer = new Optimizer(new DataStatistics, new DefaultCostEstimator, config)
     val plan: Plan = PackagedProgramUtils.getPipelineFromProgram(packagedProgram, config, -1, true).asInstanceOf[Plan]
     val optimizedPlan: OptimizedPlan = optimizer.compile(plan)
-    require(optimizedPlan != null)
+    require(optimizedPlan != null, "[StreamX] FlinkClientUtils.getExecutionPlan: optimizedPlan is null")
 
     val dumper = new PlanJSONDumpGenerator
     dumper.setEncodeForHTML(true)

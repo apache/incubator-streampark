@@ -49,7 +49,6 @@ object FlinkSubmitHelper extends Logger {
       val method = submitClass.getDeclaredMethod("submit", requestClass)
       method.setAccessible(true)
       val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, submitRequest))
-      require(obj != null)
       FlinkShimsProxy.getObject[SubmitResponse](this.getClass.getClassLoader, obj)
     })
   }

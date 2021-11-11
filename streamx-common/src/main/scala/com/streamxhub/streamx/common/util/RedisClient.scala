@@ -21,8 +21,8 @@
 
 package com.streamxhub.streamx.common.util
 
-import redis.clients.jedis.exceptions.JedisConnectionException
 import redis.clients.jedis._
+import redis.clients.jedis.exceptions.JedisConnectionException
 
 import java.util.concurrent.ConcurrentHashMap
 import scala.annotation.meta.getter
@@ -48,7 +48,7 @@ object RedisClient extends Logger {
    */
   @tailrec
   def connect(endpoints: Array[RedisEndpoint]): Jedis = {
-    require(endpoints.length > 0, "The RedisEndpoint array is empty!!!")
+    require(endpoints.length > 0, "[StreamX] The RedisEndpoint array is empty!!!")
     val index = Random.nextInt().abs % endpoints.length
     try {
       connect(endpoints(index))
@@ -115,7 +115,7 @@ object RedisClient extends Logger {
   }
 
   def connectCluster(res: RedisEndpoint*): JedisCluster = {
-    require(res.nonEmpty, "The RedisEndpoint array is empty!!!")
+    require(res.nonEmpty, "[StreamX] The RedisEndpoint array is empty!!!")
     val head = res.head
     val cluster = clusters.getOrElseUpdate(head, {
       val hostPorts = res.map(r => new HostAndPort(r.host, r.port)).toSet
