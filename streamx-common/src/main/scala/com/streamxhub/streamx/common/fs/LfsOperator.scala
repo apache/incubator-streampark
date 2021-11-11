@@ -59,11 +59,13 @@ object LfsOperator extends FsOperator with Logger {
       val srcFile = new File(srcPath)
       val dstFile = new File(dstPath)
       require(srcFile.exists(), "Source must be exists")
-      require(dstFile.exists() && dstFile.isDirectory, "Destination must be directory")
       if (srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        if (srcFile.isDirectory) {
-          FileUtils.moveDirectory(srcFile, dstFile)
+        if (dstFile.isDirectory) {
+          FileUtils.moveToDirectory(srcFile, dstFile,true)
         } else {
+          if (dstFile.exists()) {
+            dstFile.delete()
+          }
           FileUtils.moveFile(srcFile, dstFile)
         }
       }
