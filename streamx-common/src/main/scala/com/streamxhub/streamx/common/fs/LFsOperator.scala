@@ -104,7 +104,7 @@ object LFsOperator extends FsOperator with Logger {
       val dstFile = new File(dstPath)
       require(srcFile.exists(), "Source must be exists")
       if (overwrite && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        FileUtils.copyDirectory(srcFile, dstFile.getParentFile)
+        FileUtils.copyDirectory(srcFile, dstFile)
       }
     }
   }
