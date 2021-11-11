@@ -201,6 +201,7 @@ public class ApplicationBackUpServiceImpl
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
                 String appHome = null;
+                String backUpPath = null;
                 switch (application.getExecutionModeEnum()) {
                     case KUBERNETES_NATIVE_APPLICATION:
                     case KUBERNETES_NATIVE_SESSION:
@@ -212,16 +213,18 @@ public class ApplicationBackUpServiceImpl
                         } else {
                             appHome = application.getDistHome();
                         }
+                        backUpPath = backUp.getPath() + "/" + application.getId();
                         break;
                     case YARN_APPLICATION:
                         appHome = application.getAppHome();
+                        backUpPath = backUp.getPath();
                         break;
                 }
                 // 2) 删除当前项目
                 fsOperator.delete(appHome);
                 try {
                     // 5)将备份的文件copy到有效项目目录下.
-                    fsOperator.copyDir(backUp.getPath(), appHome);
+                    fsOperator.copyDir(backUpPath, appHome);
                 } catch (Exception e) {
                     throw e;
                 }
