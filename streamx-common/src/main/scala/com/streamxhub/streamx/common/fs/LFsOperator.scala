@@ -63,7 +63,7 @@ object LFsOperator extends FsOperator with Logger {
       require(srcFile.exists(), "Source must be exists")
       if (srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
         if (dstFile.isDirectory) {
-          FileUtils.moveToDirectory(srcFile, dstFile,true)
+          FileUtils.moveToDirectory(srcFile, dstFile, true)
         } else {
           if (dstFile.exists()) {
             dstFile.delete()
