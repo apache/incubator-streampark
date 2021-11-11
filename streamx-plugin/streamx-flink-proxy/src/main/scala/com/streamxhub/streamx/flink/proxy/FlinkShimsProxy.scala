@@ -95,7 +95,7 @@ object FlinkShimsProxy extends Logger {
 
       //2) shims jar
       val appHome = System.getProperty("app.home")
-      require(appHome != null)
+      require(appHome != null,"app.home is not found on System env.")
 
       val libPath = new File(s"$appHome/lib")
       require(libPath.exists())
