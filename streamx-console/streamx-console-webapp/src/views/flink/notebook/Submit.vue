@@ -245,5 +245,4 @@ export default {
 
 <style lang="less">
 @import "Submit";
-@import '~simplemde/dist/simplemde.min.css';
 </style>
