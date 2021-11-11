@@ -61,11 +61,13 @@ object LFsOperator extends FsOperator with Logger {
       val srcFile = new File(srcPath)
       val dstFile = new File(dstPath)
       require(srcFile.exists(), "Source must be exists")
-      require(dstFile.exists() && dstFile.isDirectory, "Destination must be directory")
       if (srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        if (srcFile.isDirectory) {
-          FileUtils.moveDirectory(srcFile, dstFile)
+        if (dstFile.isDirectory) {
+          FileUtils.moveToDirectory(srcFile, dstFile,true)
         } else {
+          if (dstFile.exists()) {
+            dstFile.delete()
+          }
           FileUtils.moveFile(srcFile, dstFile)
         }
       }
@@ -85,9 +87,13 @@ object LFsOperator extends FsOperator with Logger {
       val srcFile = new File(srcPath)
       val dstFile = new File(dstPath)
       require(srcFile.exists(), "Source must be exists")
-      require(dstFile.exists() && dstFile.isDirectory, "Destination must be directory")
+      require(dstFile.exists(), "Destination must be exists")
       if (overwrite && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        FileUtils.copyFile(srcFile, dstFile)
+        if (dstFile.isDirectory) {
+          FileUtils.copyFileToDirectory(srcFile, dstFile)
+        } else {
+          FileUtils.copyFile(srcFile, dstFile)
+        }
       }
     }
   }
@@ -97,9 +103,8 @@ object LFsOperator extends FsOperator with Logger {
       val srcFile = new File(srcPath)
       val dstFile = new File(dstPath)
       require(srcFile.exists(), "Source must be exists")
-      require(dstFile.exists() && dstFile.isDirectory, "Destination must be directory")
       if (overwrite && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        FileUtils.copyDirectory(srcFile, dstFile)
+        FileUtils.copyDirectory(srcFile, dstFile.getParentFile)
       }
     }
   }
