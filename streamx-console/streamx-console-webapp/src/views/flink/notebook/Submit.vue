@@ -69,15 +69,10 @@
         <div class="code-box"></div>
       </a-col>
     </a-row>
-    <vue-simplemde
-      v-if="tutorial && showTutorial"
-      v-model="tutorial" @input="handleInput" />
   </a-card>
 </template>
 
 <script>
-import VueSimplemde from 'vue-simplemde'
-
 
 import * as monaco from 'monaco-editor'
 import {submit} from '@api/notebook'
@@ -86,7 +81,6 @@ import storage from '@/utils/storage'
 
 export default {
   name: 'Submit',
-  components: {VueSimplemde},
   data() {
     return {
       code: '',
@@ -239,6 +233,7 @@ export default {
     handleIntroduction() {
       const env = this.envs.filter((x) => x.env === this.env)[0]
       this.introduction = env.introduction()
+      console.log(this.introduction)
     },
     handleChangeEnv(env) {
       this.env = env
