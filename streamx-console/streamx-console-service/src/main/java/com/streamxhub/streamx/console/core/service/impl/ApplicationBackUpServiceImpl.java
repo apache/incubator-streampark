@@ -306,7 +306,7 @@ public class ApplicationBackUpServiceImpl
 
             this.save(applicationBackUp);
             fsOperator.mkdirs(applicationBackUp.getPath());
-            fsOperator.move(appHome, applicationBackUp.getPath());
+            fsOperator.copyDir(appHome, applicationBackUp.getPath());
         }
     }
 
