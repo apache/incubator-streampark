@@ -126,7 +126,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
                                          activeCustomCommandLine: CustomCommandLine,
                                          commandLine: CommandLine): Configuration = {
 
-    require(activeCustomCommandLine != null,"YarnSubmitTrait.applyConfiguration: activeCustomCommandLine must not be null.")
+    require(activeCustomCommandLine != null, "YarnSubmitTrait.applyConfiguration: activeCustomCommandLine must not be null.")
     val executorConfig = activeCustomCommandLine.toConfiguration(commandLine)
     val customConfiguration = new Configuration(executorConfig)
     val configuration = new Configuration()

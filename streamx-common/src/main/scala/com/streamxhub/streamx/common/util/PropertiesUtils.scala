@@ -163,7 +163,7 @@ object PropertiesUtils extends Logger {
    * @return
    */
   def loadFlinkConfYaml(file: File): JavaMap[String, String] = {
-    require(file != null && file.exists() && file.isFile,"[StreamX] loadFlinkConfYaml: file must not be null")
+    require(file != null && file.exists() && file.isFile, "[StreamX] loadFlinkConfYaml: file must not be null")
     loadFlinkConfYaml(org.apache.commons.io.FileUtils.readFileToString(file))
   }
 

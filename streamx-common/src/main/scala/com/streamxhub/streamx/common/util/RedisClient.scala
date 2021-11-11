@@ -21,8 +21,8 @@
 
 package com.streamxhub.streamx.common.util
 
-import redis.clients.jedis.exceptions.JedisConnectionException
 import redis.clients.jedis._
+import redis.clients.jedis.exceptions.JedisConnectionException
 
 import java.util.concurrent.ConcurrentHashMap
 import scala.annotation.meta.getter

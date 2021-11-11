@@ -375,7 +375,7 @@ object HadoopUtils extends Logger {
   }
 
   def toApplicationId(appId: String): ApplicationId = {
-    require(appId != null,"[StreamX] HadoopUtils.toApplicationId: applicationId muse not be null")
+    require(appId != null, "[StreamX] HadoopUtils.toApplicationId: applicationId muse not be null")
     val timestampAndId = appId.split("_")
     ApplicationId.newInstance(timestampAndId(1).toLong, timestampAndId.last.toInt)
   }
