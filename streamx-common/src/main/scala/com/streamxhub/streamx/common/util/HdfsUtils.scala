@@ -70,7 +70,7 @@ object HdfsUtils extends Logger {
    */
   def create(fileName: String, content: String): Unit = {
     val path: Path = getPath(fileName)
-    require(HadoopUtils.hdfs.exists(path), s"[StreamX] hdfs $fileName is exists!! ")
+    require(HadoopUtils.hdfs.exists(path), s"[StreamX] HdfsUtils.create $fileName is exists!! ")
     val outputStream: FSDataOutputStream = HadoopUtils.hdfs.create(path)
     outputStream.writeUTF(content)
     outputStream.flush()
@@ -81,7 +81,7 @@ object HdfsUtils extends Logger {
 
   def read(fileName: String): String = {
     val path: Path = getPath(fileName)
-    require(HadoopUtils.hdfs.exists(path) && !HadoopUtils.hdfs.isDirectory(path), s"[StreamX] path:$fileName not exists or isDirectory ")
+    require(HadoopUtils.hdfs.exists(path) && !HadoopUtils.hdfs.isDirectory(path), s"[StreamX] HdfsUtils.read: path($fileName) not exists or isDirectory ")
     val in = HadoopUtils.hdfs.open(path)
     val out = new ByteArrayOutputStream()
     IOUtils.copyBytes(in, out, 4096, false)

@@ -22,6 +22,7 @@ package com.streamxhub.streamx.common.enums;
 
 
 import com.google.common.collect.Lists;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -110,7 +111,7 @@ public enum ExecutionMode implements Serializable {
         return isKubernetesMode(of(value));
     }
 
-    public static List<Integer> getKubernetesMode(){
+    public static List<Integer> getKubernetesMode() {
         return Lists.newArrayList(KUBERNETES_NATIVE_SESSION.getMode(), KUBERNETES_NATIVE_APPLICATION.getMode());
     }
 
