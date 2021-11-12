@@ -44,20 +44,20 @@ object PackerResourceGC extends Logger {
   def startGc(expiredHours: Integer): Unit = {
     val appWorkspace = new File(appWorkspacePath)
     if (!appWorkspace.exists()) return
-    val evicitedBarrier = System.currentTimeMillis - expiredHours * 3600 * 1000
+    val evictedBarrier = System.currentTimeMillis - expiredHours * 3600 * 1000
 
-    // find flink building path that should be evicited, which are based on pattern
+    // find flink building path that should be evicted, which are based on pattern
     // matching of filename.
-    val evicitedFiles = appWorkspace.listFiles
+    val evictedFiles = appWorkspace.listFiles
       .filter(_.isDirectory)
       .filter(_.getName.contains("@"))
       .flatMap(findLastModifiedOfSubFile)
-      .filter(_._2 < evicitedBarrier)
+      .filter(_._2 < evictedBarrier)
       .map(_._1)
 
-    if (evicitedFiles.isEmpty) return
-    logInfo(s"[streamx-packer] Delete expired building resources, ${evicitedFiles.mkString(", ")}")
-    evicitedFiles.foreach(path => Try(FileUtils.deleteDirectory(path)))
+    if (evictedFiles.isEmpty) return
+    logInfo(s"Delete expired building resources, ${evictedFiles.mkString(", ")}")
+    evictedFiles.foreach(path => Try(FileUtils.deleteDirectory(path)))
   }
 
 

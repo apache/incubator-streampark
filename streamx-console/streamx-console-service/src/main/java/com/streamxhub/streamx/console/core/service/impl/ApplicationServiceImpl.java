@@ -1061,7 +1061,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             }
 
-            //2) 将lastst的设置为Effective的,(此时才真正变成当前生效的)
+            //2) 将latest的设置为Effective的,(此时才真正变成当前生效的)
             this.toEffective(application);
 
             //获取一个最新的Effective的配置
