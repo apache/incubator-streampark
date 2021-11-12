@@ -79,7 +79,11 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
           val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
           MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
         case DevelopmentMode.CUSTOMCODE =>
-          val providedLibs = Set(submitRequest.flinkUserJar)
+          val providedLibs = Set(
+            workspace.APP_JARS,
+            workspace.APP_PLUGINS,
+            submitRequest.flinkUserJar
+          )
           val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
           MavenTool.buildFatJar(jarPackDeps.merge(providedLibs), fatJarOutputPath)
       }
