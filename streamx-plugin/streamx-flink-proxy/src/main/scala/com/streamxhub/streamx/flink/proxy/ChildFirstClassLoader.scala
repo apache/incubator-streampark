@@ -104,7 +104,9 @@ class ChildFirstClassLoader(urls: Array[URL],
     if (urlClassLoaderResource != null && JAR_PROTOCOL == urlClassLoaderResource.getProtocol) {
       val spec = urlClassLoaderResource.getFile
       val filename = new File(spec.substring(0, spec.indexOf("!/"))).getName
-      if (FLINK_PATTERN.matcher(filename).matches && !flinkResourcePattern.matcher(filename).matches) return null
+      if (FLINK_PATTERN.matcher(filename).matches && !flinkResourcePattern.matcher(filename).matches) {
+        return null
+      }
     }
     urlClassLoaderResource
   }
@@ -112,7 +114,9 @@ class ChildFirstClassLoader(urls: Array[URL],
   private def addResources(result: util.List[URL], resources: util.Enumeration[URL]) = {
     while (resources.hasMoreElements) {
       val urlClassLoaderResource = filterFlinkShimsResource(resources.nextElement)
-      if (urlClassLoaderResource != null) result.add(urlClassLoaderResource)
+      if (urlClassLoaderResource != null) {
+        result.add(urlClassLoaderResource)
+      }
     }
     result
   }
