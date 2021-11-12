@@ -55,6 +55,7 @@
           @click="handleReplSubmit"
           style="padding-left: 10px;"/>
         <a-icon
+          v-if="1 === 2"
           type="read"
           two-tone-color="#4a9ff5"
           @click="showTutorial = !showTutorial"
@@ -68,34 +69,27 @@
         <div class="code-box"></div>
       </a-col>
     </a-row>
-    <mavon-editor
-      v-if="tutorial && showTutorial"
-      v-model="tutorial"
-      :toolbars-flag="false"
-      :subfield="false"
-      :ishljs="true"
-      :preview="true"
-      style="margin-top: 10px;z-index: 5"
-      default-open="preview"/>
   </a-card>
 </template>
 
 <script>
-import {mavonEditor} from 'mavon-editor'
+
 import * as monaco from 'monaco-editor'
 import {submit} from '@api/notebook'
-import 'mavon-editor/dist/css/index.css'
 import {get} from '@api/tutorial'
 import storage from '@/utils/storage'
 
 export default {
   name: 'Submit',
-  components: {mavonEditor},
   data() {
     return {
-      editor: null,
       code: '',
       form: null,
+      content: '',
+      configs: {
+        status: false, // disable the status bar at the bottom
+        spellChecker: false, // disable spell check
+      },
       envs: [
         {
           env: 'flink',
@@ -239,6 +233,7 @@ export default {
     handleIntroduction() {
       const env = this.envs.filter((x) => x.env === this.env)[0]
       this.introduction = env.introduction()
+      console.log(this.introduction)
     },
     handleChangeEnv(env) {
       this.env = env

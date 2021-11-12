@@ -60,10 +60,10 @@ object LFsOperator extends FsOperator with Logger {
     if (!isAnyBank(srcPath, dstPath)) {
       val srcFile = new File(srcPath)
       val dstFile = new File(dstPath)
-      require(srcFile.exists(), "Source must be exists")
+      require(srcFile.exists(), "[StreamX] LFsOperator.move: Source must be exists")
       if (srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
         if (dstFile.isDirectory) {
-          FileUtils.moveToDirectory(srcFile, dstFile,true)
+          FileUtils.moveToDirectory(srcFile, dstFile, true)
         } else {
           if (dstFile.exists()) {
             dstFile.delete()
@@ -86,8 +86,8 @@ object LFsOperator extends FsOperator with Logger {
     if (!isAnyBank(srcPath, dstPath)) {
       val srcFile = new File(srcPath)
       val dstFile = new File(dstPath)
-      require(srcFile.exists(), "Source must be exists")
-      require(dstFile.exists(), "Destination must be exists")
+      require(srcFile.exists(), "[StreamX] LFsOperator.copy:  Source must be exists")
+      require(dstFile.exists(), "[StreamX] LFsOperator.copy:  Destination must be exists")
       if (overwrite && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
         if (dstFile.isDirectory) {
           FileUtils.copyFileToDirectory(srcFile, dstFile)
@@ -102,7 +102,7 @@ object LFsOperator extends FsOperator with Logger {
     if (!isAnyBank(srcPath, dstPath)) {
       val srcFile = new File(srcPath)
       val dstFile = new File(dstPath)
-      require(srcFile.exists(), "Source must be exists")
+      require(srcFile.exists(), "[StreamX] LFsOperator.copyDir: Source must be exists")
       if (overwrite && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
         FileUtils.copyDirectory(srcFile, dstFile)
       }
@@ -110,7 +110,7 @@ object LFsOperator extends FsOperator with Logger {
   }
 
   override def fileMd5(path: String): String = {
-    require(path != null && path.nonEmpty)
+    require(path != null && path.nonEmpty, s"[StreamX] LFsOperator.fileMd5: file must not be null.")
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
 
