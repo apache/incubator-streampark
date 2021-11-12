@@ -166,25 +166,23 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       }
     }
 
-    val configOption = Map(
-      //yarn.provided.lib.dirs
-      YarnConfigOptions.PROVIDED_LIB_DIRS -> providedLibs.asJava,
-      //yarn application name
-      YarnConfigOptions.APPLICATION_NAME -> submitRequest.effectiveAppName,
-      //yarn application Type
-      YarnConfigOptions.APPLICATION_TYPE -> submitRequest.applicationType,
-      //flinkDistJar
-      YarnConfigOptions.FLINK_DIST_JAR -> submitRequest.hdfsWorkspace.flinkDistJar,
-      //pipeline.jars
-      PipelineOptions.JARS -> Collections.singletonList(submitRequest.flinkUserJar),
-      //execution.target
-      DeploymentOptions.TARGET -> YarnDeploymentTarget.APPLICATION.getName,
-      //arguments...
-      ApplicationConfiguration.APPLICATION_ARGS -> programArgs.toList.asJava,
-      //state.checkpoints.num-retained
-      CheckpointingOptions.MAX_RETAINED_CHECKPOINTS -> flinkDefaultConfiguration.get(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS)
-    )
-    configOption.foreach(c => effectiveConfiguration.set(c._1, c._2))
+    //yarn.provided.lib.dirs
+    effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
+    //flinkDistJar
+    effectiveConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.hdfsWorkspace.flinkDistJar)
+    //pipeline.jars
+    effectiveConfiguration.set(PipelineOptions.JARS, Collections.singletonList(submitRequest.flinkUserJar))
+    //execution.target
+    effectiveConfiguration.set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
+    //yarn application name
+    effectiveConfiguration.set(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
+    //yarn application Type
+    effectiveConfiguration.set(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType)
+    //arguments...
+    effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
+    //state.checkpoints.num-retained
+    val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
+    effectiveConfiguration.set(retainedOption, flinkDefaultConfiguration.get(retainedOption))
 
     logInfo(
       s"""
