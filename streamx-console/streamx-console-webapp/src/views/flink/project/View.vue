@@ -185,7 +185,6 @@
 </template>
 <script>
 import { build, list,remove,closebuild } from '@api/project'
-import { check } from '@api/setting'
 import Ellipsis from '@comp/Ellipsis'
 import SockJS from 'sockjs-client'
 import Stomp from 'webstomp-client'
@@ -246,40 +245,18 @@ export default {
     },
 
     handleBuild (record) {
-      check().then((resp) => {
-        const success = resp.data == true || resp.data == 'true'
-        if (success) {
-          this.$swal.fire({
-            icon: 'success',
-            title: 'The current project is building',
-            showConfirmButton: false,
-            timer: 2000
-          }).then((r)=> {
-            build({id: record.id})
-          })
-        } else {
-          this.$swal.fire(
-            'Failed',
-            'Please check "StreamX Console Workspace" is defined and make sure have read and write permissions',
-            'error'
-          )
-        }
+      this.$swal.fire({
+        icon: 'success',
+        title: 'The current project is building',
+        showConfirmButton: false,
+        timer: 2000
+      }).then((r)=> {
+        build({id: record.id})
       })
     },
 
     handleAdd () {
-      check().then((resp) => {
-        const success = resp.data == true || resp.data == 'true'
-        if (success) {
-          this.$router.push({ 'path': '/flink/project/add' })
-        } else {
-          this.$swal.fire(
-            'Failed',
-            'Please check "StreamX Console Workspace" is defined and make sure have read and write permissions',
-            'error'
-          )
-        }
-      })
+      this.$router.push({ 'path': '/flink/project/add' })
     },
 
     handleDelete(item) {
