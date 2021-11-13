@@ -44,7 +44,7 @@ object MavenTool extends Logger {
         case libFile if libFile.isDirectory => libFile.listFiles.filter(isJarFile).foreach(jarSet.add)
         case _ =>
       }
-    logInfo(s"[streamx-packer] start shaded fat-jar: ${jarLibs.mkString(",")}")
+    logInfo(s"start shaded fat-jar: ${jarLibs.mkString(",")}")
     // shade jars
     val shadeRequest = {
       val req = new ShadeRequest
@@ -59,7 +59,7 @@ object MavenTool extends Logger {
     val shader = new DefaultShader()
     shader.enableLogging(plexusLog)
     shader.shade(shadeRequest)
-    logInfo(s"[streamx-packer] finish build fat-jar: ${uberJar.getAbsolutePath}")
+    logInfo(s"finish build fat-jar: ${uberJar.getAbsolutePath}")
     uberJar
   }
 
@@ -92,7 +92,7 @@ object MavenTool extends Logger {
     if (mavenArtifacts == null) Set.empty[File]; else {
       val (repoSystem, session) = MavenRetriever.retrieve()
       val artifacts = mavenArtifacts.map(e => new DefaultArtifact(e.groupId, e.artifactId, "jar", e.version))
-      logInfo(s"[streamx-packer] start resolving dependencies: ${artifacts.mkString}")
+      logInfo(s"start resolving dependencies: ${artifacts.mkString}")
 
       // read relevant artifact descriptor info
       // plz don't simplify the following lambda syntax to maintain the readability of the code.
@@ -104,7 +104,7 @@ object MavenTool extends Logger {
         .map(_.getArtifact)
 
       val mergedArtifacts = artifacts ++ resolvedArtifacts
-      logInfo(s"[streamx-packer] resolved dependencies: ${mergedArtifacts.mkString}")
+      logInfo(s"resolved dependencies: ${mergedArtifacts.mkString}")
 
       // download artifacts
       val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos, null))
