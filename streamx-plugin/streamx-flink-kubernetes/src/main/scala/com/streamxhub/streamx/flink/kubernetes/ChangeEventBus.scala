@@ -34,9 +34,9 @@ class ChangeEventBus {
   private val execPool = new ThreadPoolExecutor(6, 12,
     0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue[Runnable](10000))
 
-  private[kubernetes] val asyncEventBus = new AsyncEventBus("[streamx][flink-k8s]AsyncEventBus", execPool)
+  private[kubernetes] val asyncEventBus = new AsyncEventBus("[StreamX][flink-k8s]AsyncEventBus", execPool)
 
-  private[kubernetes] val syncEventBus = new EventBus("[streamx][flink-k8s]SyncEventBus")
+  private[kubernetes] val syncEventBus = new EventBus("[StreamX][flink-k8s]SyncEventBus")
 
   def postAsync(event: AnyRef): Unit = asyncEventBus.post(event)
 
