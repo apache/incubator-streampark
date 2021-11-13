@@ -90,7 +90,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
 
     // step-3: build and push flink application image
     val dockerAuthConfig = submitRequest.k8sSubmitParam.dockerAuthConfig
-    val flinkBaseImage = DockerTool.formatTag(submitRequest.k8sSubmitParam.flinkBaseImage, dockerAuthConfig.registerAddress)
+    val flinkBaseImage = submitRequest.k8sSubmitParam.flinkBaseImage
     val dockerFileTemplate = new FlinkDockerfileTemplate(flinkBaseImage, fatJar.getAbsolutePath)
     val tagName = s"flinkjob-${submitRequest.k8sSubmitParam.clusterId}"
     // add flink pipeline.jars configuration
