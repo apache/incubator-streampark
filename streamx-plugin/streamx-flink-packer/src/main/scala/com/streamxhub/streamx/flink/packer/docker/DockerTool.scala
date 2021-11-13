@@ -1,7 +1,6 @@
 package com.streamxhub.streamx.flink.packer.docker
 
 import com.github.dockerjava.api.command.PushImageCmd
-import com.github.dockerjava.api.exception.InternalServerErrorException
 import com.google.common.collect.Sets
 import com.streamxhub.streamx.common.conf.ConfigConst.DOCKER_IMAGE_NAMESPACE
 import com.streamxhub.streamx.common.util.Logger
@@ -13,7 +12,6 @@ import java.io.File
 /**
  * @author Al-assad
  */
-//noinspection DuplicatedCode
 object DockerTool extends Logger {
 
 
@@ -46,13 +44,25 @@ object DockerTool extends Logger {
     val dockerfile = dockerFileTemplate.writeDockerfile(projectBaseDir)
     val tagName = compileTag(expectImageTag, authConf.registerAddress)
 
-    // build and push docker image
-    tryWithResourceException(DockerRetriever.newDockerClient()) {
+    // pull flink base image
+    usingDockerClient {
       dockerClient =>
-        // pull docker image
-        val pullImageCmd = dockerClient.pullImageCmd(dockerFileTemplate.flinkBaseImage).withAuthConfig(authConf.toDockerAuthConf)
-        pullImageCmd.start().awaitCompletion()
-        logInfo(s"docker pull image ${formatTag(dockerFileTemplate.flinkBaseImage, authConf.registerAddress)} successfully.")
+        val pullImageCmd = {
+          if (!tagName.startsWith(authConf.registerAddress)) dockerClient.pullImageCmd(tagName)
+          else dockerClient.pullImageCmd(tagName).withAuthConfig(authConf.toDockerAuthConf)
+        }
+        pullImageCmd.start.awaitCompletion()
+        logInfo(s"[streamx-packer] docker pull image ${tagName} successfully.")
+    } {
+      err =>
+        val msg = s"[streamx] pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}"
+        logError(msg, err)
+        throw new Exception(msg, err)
+    }
+
+    // build flink image
+    usingDockerClient {
+      dockerClient =>
         // build docker image
         val buildImageCmd = dockerClient.buildImageCmd()
           .withBaseDirectory(projectDir)
@@ -60,19 +70,26 @@ object DockerTool extends Logger {
           .withTags(Sets.newHashSet(tagName))
         val imageId = buildImageCmd.start().awaitImageId()
         logInfo(s"docker image built successfully, imageId=${imageId}, tag=${tagName}")
-        // push docker image
-        if (push) {
+    }{
+      err =>
+        val msg = "[streamx-packer] build flink job docker image failed."
+        logError(msg, err)
+        throw new Exception(msg, err)
+    }
+
+    // push flink image
+    if (push) {
+      usingDockerClient {
+        dockerClient =>
           val pushCmd: PushImageCmd = dockerClient.pushImageCmd(tagName).withAuthConfig(authConf.toDockerAuthConf)
-          pushCmd.start().awaitCompletion()
-          logInfo(s"docker image push successfully, tag=${tagName}, registerAddr=${authConf.registerAddress}")
-        }
-    } {
-      case cause: InternalServerErrorException =>
-        logError(s"pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}", cause)
-        throw new Exception(s"[streamx-packer] pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}", cause)
-      case cause =>
-        logError("build and push flink job docker image failed.", cause)
-        throw new Exception("[streamx-packer] build and push flink job docker image failed.", cause)
+          pushCmd.start.awaitCompletion
+          logInfo(s"[streamx-packer] docker image push successfully, tag=${tagName}, registerAddr=${authConf.registerAddress}")
+      } {
+        err =>
+          val msg = "[streamx-packer] push flink job docker image failed."
+          logError(msg, err)
+          throw new Exception(msg, err)
+      }
     }
     tagName
   }
