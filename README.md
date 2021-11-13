@@ -16,7 +16,6 @@
   <img src="https://img.shields.io/github/v/release/streamxhub/streamx.svg">
   <img src="https://img.shields.io/github/stars/streamxhub/streamx">
   <img src="https://img.shields.io/github/forks/streamxhub/streamx">
-  <img src="https://img.shields.io/github/downloads/streamxhub/streamx/total">
   <img src="https://img.shields.io/github/languages/count/streamxhub/streamx">
 </p>
 
@@ -55,7 +54,8 @@ data laker.
 * Support maven compilation
 * Configuration
 * Multi version flick support(1.12.x,1.13.x,1.14.x)
-* Kubernetes deployment (k8s-native-session,k8s-application)
+* on Kubernetes deployment (`K8s-Native-Application`/`K8s-Native-Session`)
+* on YARN deployment (`YARN-Application`/`YARN-Pre-Job`)
 * Support `Applicaion` and `Yarn-Per-Job` mode
 * `start`, `stop`, `savepoint`, resume from `savepoint`
 * Flame graph

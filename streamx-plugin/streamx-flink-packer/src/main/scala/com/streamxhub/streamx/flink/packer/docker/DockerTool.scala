@@ -1,3 +1,23 @@
+/*
+ * Copyright (c) 2021 The StreamX Project
+ * <p>
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.streamxhub.streamx.flink.packer.docker
 
 import com.github.dockerjava.api.command.PushImageCmd
@@ -52,10 +72,10 @@ object DockerTool extends Logger {
           else dockerClient.pullImageCmd(tagName).withAuthConfig(authConf.toDockerAuthConf)
         }
         pullImageCmd.start.awaitCompletion()
-        logInfo(s"[streamx-packer] docker pull image ${tagName} successfully.")
+        logInfo(s"streamx-packer: docker pull image ${tagName} successfully.")
     } {
       err =>
-        val msg = s"[streamx] pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}"
+        val msg = s"streamx-packer: pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}"
         logError(msg, err)
         throw new Exception(msg, err)
     }
@@ -69,10 +89,10 @@ object DockerTool extends Logger {
           .withDockerfile(dockerfile)
           .withTags(Sets.newHashSet(tagName))
         val imageId = buildImageCmd.start().awaitImageId()
-        logInfo(s"docker image built successfully, imageId=${imageId}, tag=${tagName}")
-    }{
+        logInfo(s"docker image built successfully, imageId=$imageId, tag=$tagName")
+    } {
       err =>
-        val msg = "[streamx-packer] build flink job docker image failed."
+        val msg = "streamx-packer: build flink job docker image failed."
         logError(msg, err)
         throw new Exception(msg, err)
     }
@@ -83,10 +103,10 @@ object DockerTool extends Logger {
         dockerClient =>
           val pushCmd: PushImageCmd = dockerClient.pushImageCmd(tagName).withAuthConfig(authConf.toDockerAuthConf)
           pushCmd.start.awaitCompletion
-          logInfo(s"[streamx-packer] docker image push successfully, tag=${tagName}, registerAddr=${authConf.registerAddress}")
+          logInfo(s"streamx-packer: docker image push successfully, tag=$tagName, registerAddress=${authConf.registerAddress}")
       } {
         err =>
-          val msg = "[streamx-packer] push flink job docker image failed."
+          val msg = "streamx-packer: push flink job docker image failed."
           logError(msg, err)
           throw new Exception(msg, err)
       }
