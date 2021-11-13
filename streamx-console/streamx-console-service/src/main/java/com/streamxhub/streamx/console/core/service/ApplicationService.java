@@ -47,6 +47,8 @@ public interface ApplicationService extends IService<Application> {
 
     boolean start(Application app, boolean auto) throws Exception;
 
+    void restart(Application application) throws Exception;
+
     String getYarnName(Application app);
 
     AppExistsState checkExists(Application app);
@@ -82,7 +84,5 @@ public interface ApplicationService extends IService<Application> {
 
     Boolean delete(Application app);
 
-    void restart(Application application) throws Exception;
-
-    boolean checkEnv(Application app);
+    boolean checkEnv(Application app) throws Exception;
 }
