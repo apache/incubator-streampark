@@ -342,6 +342,12 @@ export default {
                   if(resp.data) {
                     this.flinkFormVisible = false
                     this.handleFlinkAll()
+                  } else {
+                    this.$swal.fire(
+                        'Failed',
+                        resp['message'].replaceAll(/\[StreamX]/g,''),
+                        'error'
+                    )
                   }
                 })
               } else {

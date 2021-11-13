@@ -52,26 +52,26 @@ object DockerTool extends Logger {
         // pull docker image
         val pullImageCmd = dockerClient.pullImageCmd(dockerFileTemplate.flinkBaseImage).withAuthConfig(authConf.toDockerAuthConf)
         pullImageCmd.start().awaitCompletion()
-        logInfo(s"[streamx-packer] docker pull image ${formatTag(dockerFileTemplate.flinkBaseImage, authConf.registerAddress)} successfully.")
+        logInfo(s"docker pull image ${formatTag(dockerFileTemplate.flinkBaseImage, authConf.registerAddress)} successfully.")
         // build docker image
         val buildImageCmd = dockerClient.buildImageCmd()
           .withBaseDirectory(projectDir)
           .withDockerfile(dockerfile)
           .withTags(Sets.newHashSet(tagName))
         val imageId = buildImageCmd.start().awaitImageId()
-        logInfo(s"[streamx-packer] docker image built successfully, imageId=${imageId}, tag=${tagName}")
+        logInfo(s"docker image built successfully, imageId=${imageId}, tag=${tagName}")
         // push docker image
         if (push) {
           val pushCmd: PushImageCmd = dockerClient.pushImageCmd(tagName).withAuthConfig(authConf.toDockerAuthConf)
           pushCmd.start().awaitCompletion()
-          logInfo(s"[streamx-packer] docker image push successfully, tag=${tagName}, registerAddr=${authConf.registerAddress}")
+          logInfo(s"docker image push successfully, tag=${tagName}, registerAddr=${authConf.registerAddress}")
         }
     } {
       case cause: InternalServerErrorException =>
-        logError(s"[streamx] pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}", cause)
-        throw new Exception(s"[streamx] pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}", cause)
+        logError(s"pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}", cause)
+        throw new Exception(s"[streamx-packer] pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}", cause)
       case cause =>
-        logError("[streamx-packer] build and push flink job docker image failed.", cause)
+        logError("build and push flink job docker image failed.", cause)
         throw new Exception("[streamx-packer] build and push flink job docker image failed.", cause)
     }
     tagName
@@ -91,7 +91,7 @@ object DockerTool extends Logger {
         true
     } {
       exception =>
-        logError(s"[streamx-packer] push docker image fail, tag=$imageTag, registerAddress=${authConf.registerAddress}," +
+        logError(s"push docker image fail, tag=$imageTag, registerAddress=${authConf.registerAddress}," +
           s" exception=${exception.getMessage}")
         false
     }

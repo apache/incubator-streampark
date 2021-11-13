@@ -19,6 +19,7 @@ package com.streamxhub.streamx.flink.proxy
 
 import java.io.{IOException, InputStream, ObjectInputStream, ObjectStreamClass}
 import java.lang.reflect.Proxy
+import scala.util.Try
 
 /**
  * A special ObjectInputStream that loads a class based on a specified
@@ -41,11 +42,10 @@ class ClassLoaderObjectInputStream(classLoader: ClassLoader, inputStream: InputS
    */
   @throws[IOException]
   @throws[ClassNotFoundException]
-  override protected def resolveClass(objectStreamClass: ObjectStreamClass): Class[_] = try Class.forName(objectStreamClass.getName, false, classLoader)
-  catch {
-    case _: ClassNotFoundException =>
-      // delegate to super class loader which can resolve primitives
-      super.resolveClass(objectStreamClass)
+  override protected def resolveClass(objectStreamClass: ObjectStreamClass): Class[_] = {
+    // delegate to super class loader which can resolve primitives
+    Try(Class.forName(objectStreamClass.getName, false, classLoader))
+      .getOrElse(super.resolveClass(objectStreamClass))
   }
 
   /**
@@ -66,10 +66,8 @@ class ClassLoaderObjectInputStream(classLoader: ClassLoader, inputStream: InputS
     for (i <- interfaces.indices) {
       interfaceClasses(i) = Class.forName(interfaces(i), false, classLoader)
     }
-    try Proxy.getProxyClass(classLoader, interfaceClasses: _*) catch {
-      case _: IllegalArgumentException =>
-        super.resolveProxyClass(interfaces)
-    }
+    Try(Proxy.getProxyClass(classLoader, interfaceClasses: _*))
+      .getOrElse(super.resolveProxyClass(interfaces))
   }
 
 }

@@ -26,6 +26,7 @@ import java.net.{URL, URLClassLoader}
 import java.util
 import java.util.function.Consumer
 import java.util.regex.Pattern
+import scala.util.Try
 
 /**
  * A variant of the URLClassLoader that first loads from the URLs and only after that from the
@@ -140,24 +141,21 @@ class ChildFirstClassLoader(urls: Array[URL],
 
   @throws[ClassNotFoundException] private def loadClassWithoutExceptionHandling(name: String, resolve: Boolean): Class[_] = {
     // First, check if the class has already been loaded
-    var c = super.findLoadedClass(name)
-    if (c == null) {
-      // check whether the class should go parent-first
-      for (parentFirstPattern <- PARENT_FIRST_PATTERNS) {
-        if (name.startsWith(parentFirstPattern)) {
-          return super.loadClass(name, resolve)
+    super.findLoadedClass(name) match {
+      case null =>
+        // check whether the class should go parent-first
+        for (parentFirstPattern <- PARENT_FIRST_PATTERNS) {
+          if (name.startsWith(parentFirstPattern)) {
+            return super.loadClass(name, resolve)
+          }
         }
-      }
-      try {
-        // check the URLs
-        c = findClass(name)
-      } catch {
-        case _: ClassNotFoundException =>
-          // let URLClassLoader do it, which will eventually call the parent
-          c = super.loadClass(name, resolve)
-      }
-    } else if (resolve) resolveClass(c)
-    c
+        Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
+      case c =>
+        if (resolve) {
+          resolveClass(c)
+        }
+        c
+    }
   }
 
 }
