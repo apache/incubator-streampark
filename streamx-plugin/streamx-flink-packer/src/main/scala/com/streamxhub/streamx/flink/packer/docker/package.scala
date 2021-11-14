@@ -18,34 +18,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.kubernetes
+package com.streamxhub.streamx.flink.packer
 
-
-import com.google.common.eventbus.{AsyncEventBus, EventBus}
-
-import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
+import com.github.dockerjava.api.DockerClient
+import com.streamxhub.streamx.common.util.Utils.tryWithResourceException
 
 /**
  * @author Al-assad
  */
-// noinspection UnstableApiUsage
-class ChangeEventBus {
+package object docker {
 
-  private val execPool = new ThreadPoolExecutor(6, 12,
-    0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue[Runnable](10000))
-
-  private[kubernetes] val asyncEventBus = new AsyncEventBus("[StreamX][flink-k8s]AsyncEventBus", execPool)
-
-  private[kubernetes] val syncEventBus = new EventBus("[StreamX][flink-k8s]SyncEventBus")
-
-  def postAsync(event: AnyRef): Unit = asyncEventBus.post(event)
-
-  def postSync(event: AnyRef): Unit = syncEventBus.post(event)
-
-  def registerListener(listener: AnyRef): Unit = {
-    asyncEventBus.register(listener)
-    syncEventBus.register(listener)
-  }
-
+  def usingDockerClient[R](process: DockerClient => R)(handleException: Throwable => R): R =
+    tryWithResourceException(DockerRetriever.newDockerClient())(process)(handleException)
 
 }

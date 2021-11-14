@@ -58,7 +58,8 @@ public class ProjectController {
     @PostMapping("build")
     @RequiresPermissions("project:build")
     public RestResponse build(Long id) throws Exception {
-        return projectService.build(id);
+        projectService.build(id);
+        return RestResponse.create();
     }
 
     @PostMapping("closebuild")

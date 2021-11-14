@@ -86,7 +86,7 @@ public class StreamXConsole {
         String name = runtime.getName();
         try {
             return Integer.parseInt(name.substring(0, name.indexOf('@')));
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         return -1;
     }

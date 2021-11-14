@@ -56,8 +56,12 @@ public class FlinkEnvController {
 
     @PostMapping("create")
     public RestResponse create(FlinkEnv version) {
-        boolean success = flinkEnvService.create(version);
-        return RestResponse.create().data(success);
+        try {
+            flinkEnvService.create(version);
+        } catch (Exception e) {
+            return RestResponse.create().data(false).message(e.getMessage());
+        }
+        return RestResponse.create().data(true);
     }
 
     @PostMapping("get")

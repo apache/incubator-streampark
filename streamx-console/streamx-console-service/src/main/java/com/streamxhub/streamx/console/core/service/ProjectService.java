@@ -41,7 +41,7 @@ public interface ProjectService extends IService<Project> {
 
     IPage<Project> page(Project project, RestRequest restRequest);
 
-    RestResponse build(Long id) throws Exception;
+    void build(Long id) throws Exception;
 
     void tailBuildLog(Long id);
 
