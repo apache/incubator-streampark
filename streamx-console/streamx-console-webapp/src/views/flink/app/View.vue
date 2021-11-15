@@ -863,7 +863,6 @@
   import {baseUrl} from '@/api/baseUrl'
   import Stomp from 'webstomp-client'
   import SvgIcon from '@/components/SvgIcon'
-  import {check} from '@/api/setting'
 
   export default {
   components: {Ellipsis, State, SvgIcon},
@@ -1539,18 +1538,7 @@
     },
 
     handleAdd() {
-      check().then((resp) => {
-        const success = resp.data === true || resp.data === 'true'
-        if (success) {
-          this.$router.push({'path': '/flink/app/add'})
-        } else {
-          this.$swal.fire(
-              'Failed',
-              'Please check "StreamX Console Workspace" is defined and make sure have read and write permissions',
-              'error'
-          )
-        }
-      })
+      this.$router.push({'path': '/flink/app/add'})
     },
 
     handleEdit(app) {
