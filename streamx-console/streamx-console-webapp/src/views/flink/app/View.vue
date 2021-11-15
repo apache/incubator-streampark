@@ -1128,7 +1128,13 @@
               allowNonRestored: allowNonRestoredState,
               backUpDescription: description
             }).then((resp) => {
-              if (!restart) {
+              if(!resp.data) {
+                this.$swal.fire(
+                    'Failed',
+                    'deploy failed,' + resp.message.replaceAll(/\[StreamX]/g,''),
+                    'error'
+                )
+              } else if(!restart) {
                 this.optionApps.deploy.delete(id)
                 this.handleMapUpdate('deploy')
               }
@@ -1263,17 +1269,10 @@
                 flameGraph: flameGraph,
                 allowNonRestored: allowNonRestoredState
               }).then((resp) => {
-                const code = parseInt(resp.data)
-                if (code === 0) {
+                if (!resp.data) {
                   this.$swal.fire(
                     'Failed',
-                    'startup failed, please check the startup log :)',
-                    'error'
-                  )
-                } else if (code === -1) {
-                  this.$swal.fire(
-                    'Failed',
-                    'startup failed, Maybe FLINK_HOME undefined,please check :)',
+                    'startup failed,' + resp.message.replaceAll(/\[StreamX]/g,''),
                     'error'
                   )
                 }

@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.common.util
 
 import scala.collection.mutable.ListBuffer
-import util.control.Breaks._
+import scala.util.control.Breaks._
 
 /**
  * Split text into multiple sql statements.
@@ -37,23 +37,24 @@ object SqlSplitter {
   /**
    * Split whole text into multiple sql statements.
    * Two Steps:
-   *   Step 1, split the whole text into multiple sql statements.
-   *   Step 2, refine the results. Replace the preceding sql statements with empty lines, so that
-   *           we can get the correct line number in the parsing error message.
+   * Step 1, split the whole text into multiple sql statements.
+   * Step 2, refine the results. Replace the preceding sql statements with empty lines, so that
+   * we can get the correct line number in the parsing error message.
    * e.g:
-   *  select a from table_1;
-   *  select a from table_2;
-   *  select a from table_3;
+   * select a from table_1;
+   * select a from table_2;
+   * select a from table_3;
    * The above text will be splitted into:
-   *   sql_1: select a from table_1
-   *   sql_2: \nselect a from table_2
-   *   sql_3: \n\nselect a from table_3
+   * sql_1: select a from table_1
+   * sql_2: \nselect a from table_2
+   * sql_3: \n\nselect a from table_3
+   *
    * @param sql
    * @return
    */
   def splitSql(sql: String): List[String] = {
     val queries = ListBuffer[String]()
-    val lastIdx = if (sql != null && sql.nonEmpty) sql.length -1 else 0
+    val lastIdx = if (sql != null && sql.nonEmpty) sql.length - 1 else 0
     var query = new StringBuilder
 
     var multiLineComment = false
@@ -160,6 +161,7 @@ object SqlSplitter {
 
   /**
    * extract line breaks
+   *
    * @param text
    * @return
    */
@@ -179,6 +181,7 @@ object SqlSplitter {
 
   /**
    * check single-line comment
+   *
    * @param curChar
    * @param nextChar
    * @return

@@ -36,28 +36,27 @@ object FlinkSubmitHelper extends Logger {
   // effective k-v regex pattern of submit.dynamicOption
   private val DYNAMIC_OPTION_ITEM_PATTERN = Pattern.compile("(-D)?(\\S+)=(\\S+)")
 
-  private[this] val FLINKSUBMIT_CLASS_NAME = "com.streamxhub.streamx.flink.submit.FlinkSubmit"
+  private[this] val FLINK_SUBMIT_CLASS_NAME = "com.streamxhub.streamx.flink.submit.FlinkSubmit"
 
-  private[this] val SUBMITREQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.domain.SubmitRequest"
+  private[this] val SUBMIT_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.domain.SubmitRequest"
 
-  private[this] val STOPREQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.domain.StopRequest"
+  private[this] val STOP_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.domain.StopRequest"
 
-  @throws[Throwable] def submit(submitRequest: SubmitRequest): SubmitResponse = {
+  @throws[Exception] def submit(submitRequest: SubmitRequest): SubmitResponse = {
     FlinkShimsProxy.proxy(submitRequest.flinkVersion, (classLoader: ClassLoader) => {
-      val submitClass = classLoader.loadClass(FLINKSUBMIT_CLASS_NAME)
-      val requestClass = classLoader.loadClass(SUBMITREQUEST_CLASS_NAME)
+      val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
+      val requestClass = classLoader.loadClass(SUBMIT_REQUEST_CLASS_NAME)
       val method = submitClass.getDeclaredMethod("submit", requestClass)
       method.setAccessible(true)
       val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, submitRequest))
-      require(obj != null)
       FlinkShimsProxy.getObject[SubmitResponse](this.getClass.getClassLoader, obj)
     })
   }
 
-  @throws[Throwable] def stop(stopRequest: StopRequest): StopResponse = {
+  @throws[Exception] def stop(stopRequest: StopRequest): StopResponse = {
     FlinkShimsProxy.proxy(stopRequest.flinkVersion, (classLoader: ClassLoader) => {
-      val submitClass = classLoader.loadClass(FLINKSUBMIT_CLASS_NAME)
-      val requestClass = classLoader.loadClass(STOPREQUEST_CLASS_NAME)
+      val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
+      val requestClass = classLoader.loadClass(STOP_REQUEST_CLASS_NAME)
       val method = submitClass.getDeclaredMethod("stop", requestClass)
       method.setAccessible(true)
       val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, stopRequest))

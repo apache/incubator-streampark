@@ -69,16 +69,16 @@ object ClassLoaderUtils extends Logger {
 
   def loadJar(jarFilePath: String): Unit = {
     val jarFile = new File(jarFilePath)
-    require(jarFile.exists, s"[StreamX] jarFilePath:$jarFilePath is not exists")
-    require(jarFile.isFile, s"[StreamX] jarFilePath:$jarFilePath is not file")
+    require(jarFile.exists, s"[StreamX] ClassLoaderUtils.loadJar: jarFilePath $jarFilePath is not exists")
+    require(jarFile.isFile, s"[StreamX] ClassLoaderUtils.loadJar: jarFilePath $jarFilePath is not file")
     loadPath(jarFile.getAbsolutePath, List(".jar", ".zip"))
   }
 
   def loadJars(path: String): Unit = {
     val jarDir = new File(path)
-    require(jarDir.exists, s"[StreamX] jarPath: $path is not exists")
-    require(jarDir.isDirectory, s"[StreamX] jarPath: $path is not directory")
-    require(jarDir.listFiles.length > 0, s"[StreamX] have not jar in path:$path")
+    require(jarDir.exists, s"[StreamX] ClassLoaderUtils.loadJars: jarPath $path is not exists")
+    require(jarDir.isDirectory, s"[StreamX] ClassLoaderUtils.loadJars: jarPath $path is not directory")
+    require(jarDir.listFiles.length > 0, s"[StreamX] ClassLoaderUtils.loadJars: have not jar in path:$path")
     jarDir.listFiles.foreach { x =>
       loadPath(x.getAbsolutePath, List(".jar", ".zip"))
     }

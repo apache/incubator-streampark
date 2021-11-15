@@ -36,6 +36,7 @@ import scala.collection.JavaConversions._
  */
 class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
 
+
   private[this] lazy val FLINK_VER_PATTERN = Pattern.compile("^(\\d+\\.\\d+)(\\.)?.*$")
 
   private[this] lazy val FLINK_VERSION_PATTERN = Pattern.compile("^Version: (.*), Commit ID: (.*)$")
@@ -51,9 +52,10 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
   lazy val fullVersion: String = s"${version}_$scalaVersion"
 
   lazy val flinkLib: File = {
-    require(flinkHome != null)
+    require(flinkHome != null, "[StreamX] flinkHome must not be null.")
+    require(new File(flinkHome).exists(), "[StreamX] flinkHome must be exists.")
     val lib = new File(s"$flinkHome/lib")
-    require(lib.exists() && lib.isDirectory)
+    require(lib.exists() && lib.isDirectory, s"[StreamX] $flinkHome/lib must be exists and must be directory.")
     lib
   }
 
