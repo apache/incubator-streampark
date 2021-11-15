@@ -66,6 +66,7 @@ public class EnvInitializer implements ApplicationRunner {
         overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_LOCAL(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
         overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_REMOTE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
         overrideSystemProp(ConfigConst.KEY_DOCKER_IMAGE_NAMESPACE(), ConfigConst.DOCKER_IMAGE_NAMESPACE_DEFAULT());
+        overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), ConfigConst.DEFAULT_HADOOP_USER_NAME());
         //automatic in local
         storageInitialize(LFS);
     }
