@@ -487,6 +487,9 @@ public class SqlToOperationConverter {
     }
 
     private Map<String, Object> parseFunctionParameter(SqlCharStringLiteral functionParamter) {
+        if (functionParamter == null) {
+            return null;
+        }
         return Arrays.stream(functionParamter.getValueAs(String.class).split(","))
                 .map(entry -> entry.split("="))
                 .collect(Collectors.toMap(entry -> entry[0].trim(), entry -> entry[1].trim()));
