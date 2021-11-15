@@ -41,11 +41,6 @@ export function sync () {
   return http.post(api.SETTING.SYNC, {})
 }
 
-
-export function check () {
-  return http.post(api.SETTING.CHECK)
-}
-
 export function update (params) {
   return http.post(api.SETTING.UPDATE, params)
 }
