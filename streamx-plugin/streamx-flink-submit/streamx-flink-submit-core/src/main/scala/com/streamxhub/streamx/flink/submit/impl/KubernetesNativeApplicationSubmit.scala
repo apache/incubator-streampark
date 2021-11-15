@@ -65,7 +65,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     }
 
     // step-2: build fat-jar and handle extra jars
-    // fat-jar output file name: streamx-flinkjob_<jobamme>.jar, like "streamx-flinkjob_myjob-test.jar"
+    // fat-jar output file name: streamx-flinkjob_<jobname>.jar, like "streamx-flinkjob_myjob-test.jar"
     val (fatJar, extJarLibs) = {
       val fatJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}.jar"
       submitRequest.developmentMode match {
