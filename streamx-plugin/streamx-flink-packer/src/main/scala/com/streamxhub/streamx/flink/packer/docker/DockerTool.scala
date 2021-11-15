@@ -37,8 +37,8 @@ object DockerTool extends Logger {
 
   /**
    * build and push docker image for flink fat-jar.
-   * @author Al-assad
    *
+   * @author Al-assad
    * @param authConf           authentication configuration of remote docker register
    * @param projectBaseDir     project workspace dir of flink job
    * @param dockerFileTemplate flink jar docker build template
@@ -68,11 +68,11 @@ object DockerTool extends Logger {
     usingDockerClient {
       dockerClient =>
         val pullImageCmd = {
-          if (!tagName.startsWith(authConf.registerAddress)) dockerClient.pullImageCmd(tagName)
-          else dockerClient.pullImageCmd(tagName).withAuthConfig(authConf.toDockerAuthConf)
+          if (!dockerFileTemplate.flinkBaseImage.startsWith(authConf.registerAddress)) dockerClient.pullImageCmd(dockerFileTemplate.flinkBaseImage)
+          else dockerClient.pullImageCmd(dockerFileTemplate.flinkBaseImage).withAuthConfig(authConf.toDockerAuthConf)
         }
         pullImageCmd.start.awaitCompletion()
-        logInfo(s"streamx-packer: docker pull image ${tagName} successfully.")
+        logInfo(s"streamx-packer: docker pull image ${dockerFileTemplate.flinkBaseImage} successfully.")
     } {
       err =>
         val msg = s"streamx-packer: pull flink base docker image failed, imageTag=${dockerFileTemplate.flinkBaseImage}"
