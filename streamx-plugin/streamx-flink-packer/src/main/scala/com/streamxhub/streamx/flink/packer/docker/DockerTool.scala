@@ -68,7 +68,7 @@ object DockerTool extends Logger {
     usingDockerClient {
       dockerClient =>
         val pullImageCmd = {
-          if (!tagName.startsWith(authConf.registerAddress)) dockerClient.pullImageCmd(dockerFileTemplate.flinkBaseImage)
+          if (!dockerFileTemplate.flinkBaseImage.startsWith(authConf.registerAddress)) dockerClient.pullImageCmd(dockerFileTemplate.flinkBaseImage)
           else dockerClient.pullImageCmd(dockerFileTemplate.flinkBaseImage).withAuthConfig(authConf.toDockerAuthConf)
         }
         pullImageCmd.start.awaitCompletion()
