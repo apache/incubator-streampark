@@ -68,9 +68,20 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     // step-2: build fat-jar, output file name: streamx-flinkjob_<jobamme>.jar, like "streamx-flinkjob_myjob-test.jar"
     val fatJar = {
       val fatJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}.jar"
-      val flinkLibs = extractProvidedLibs(submitRequest)
-      val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
-      MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
+      submitRequest.developmentMode match {
+        case DevelopmentMode.FLINKSQL =>
+          val flinkLibs = extractProvidedLibs(submitRequest)
+          val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
+          MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
+        case DevelopmentMode.CUSTOMCODE =>
+          val providedLibs = Set(
+            workspace.APP_JARS,
+            workspace.APP_PLUGINS,
+            submitRequest.flinkUserJar
+          )
+          val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
+          MavenTool.buildFatJar(jarPackDeps.merge(providedLibs), fatJarOutputPath)
+      }
     }
     logInfo(s"[flink-submit] already built flink job fat-jar. " +
       s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")

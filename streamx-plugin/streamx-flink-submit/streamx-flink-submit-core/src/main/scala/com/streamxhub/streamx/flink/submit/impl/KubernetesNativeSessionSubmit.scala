@@ -72,10 +72,21 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
 
     // build fat-jar, output file name: streamx-flinkjob_<job-name>_<timespamp>, like: streamx-flinkjob_myjobtest_20211024134822
     val fatJar = {
-      val fatJarOutputPath = s"${buildWorkspace}/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}_${DateUtils.now(fullCompact)}.jar"
-      val flinkLibs = extractProvidedLibs(submitRequest)
-      val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
-      MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
+      val fatJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}_${DateUtils.now(fullCompact)}.jar"
+      submitRequest.developmentMode match {
+        case DevelopmentMode.FLINKSQL =>
+          val flinkLibs = extractProvidedLibs(submitRequest)
+          val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
+          MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
+        case DevelopmentMode.CUSTOMCODE =>
+          val providedLibs = Set(
+            workspace.APP_JARS,
+            workspace.APP_PLUGINS,
+            submitRequest.flinkUserJar
+          )
+          val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
+          MavenTool.buildFatJar(jarPackDeps.merge(providedLibs), fatJarOutputPath)
+      }
     }
     logInfo(s"[flink-submit] already built flink job fat-jar. " +
       s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
