@@ -59,7 +59,7 @@ object HadoopUtils extends Logger {
   private[this] lazy val HADOOP_CONF_DIR: String = "HADOOP_CONF_DIR"
   private[this] lazy val CONF_SUFFIX: String = "/etc/hadoop"
 
-  private val hadoopUserName: String = SystemPropertyUtils.get(KEY_HADOOP_USER_NAME, DEFAULT_HADOOP_USER_NAME)
+  private lazy val hadoopUserName: String = SystemPropertyUtils.get(KEY_HADOOP_USER_NAME, DEFAULT_HADOOP_USER_NAME)
 
   private[this] var ugi: UserGroupInformation = _
 
