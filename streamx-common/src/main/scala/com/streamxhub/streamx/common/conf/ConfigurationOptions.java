@@ -40,7 +40,7 @@ public class ConfigurationOptions {
     /**
      * ref KubernetesConfigOptions.NAMESPACE.defaultValue()
      */
-    public static String KUBERNETES_NAMESPACE_DEFAULT_VALUE = "default";
+    public static String KUBERNETES
 
 
 }
