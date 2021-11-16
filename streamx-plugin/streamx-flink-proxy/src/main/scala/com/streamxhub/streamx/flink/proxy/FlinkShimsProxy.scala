@@ -91,7 +91,7 @@ object FlinkShimsProxy extends Logger {
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(s"${flinkVersion.fullVersion}", {
       //1) flink/lib
       val libURL = getFlinkHomeLib(flinkVersion.flinkHome)
-      val shimsUrls = ListBuffer[URL](libURL: _*)
+      val shimsUrls = ListBuffer[URL]()
 
       //2) shims jar
       val appHome = System.getProperty("app.home")
@@ -116,7 +116,7 @@ object FlinkShimsProxy extends Logger {
           case e: Exception => e.printStackTrace()
         }
       })
-
+      shimsUrls.appendAll(libURL)
       new ChildFirstClassLoader(
         shimsUrls.toArray,
         Thread.currentThread().getContextClassLoader,
