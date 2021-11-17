@@ -40,6 +40,7 @@ import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileSystemUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -242,17 +243,7 @@ public class ApplicationConfigServiceImpl
     @Override
     public synchronized String readTemplate() {
         if (flinkConfTemplate == null) {
-            String[] activeProfiles = context.getEnvironment().getActiveProfiles();
-            String path;
-            if (ArrayUtils.isNotEmpty(activeProfiles) && activeProfiles[0].equals(PROD_ENV_NAME)) {
-                //生产环境部署读取conf/flink-application.template
-                path = WebUtils.getAppDir("conf").concat("/flink-application.template");
-            } else {
-                URL url = Thread.currentThread().getContextClassLoader().getResource("flink-application.template");
-                assert url != null;
-                path = url.getPath();
-            }
-            File file = new File(path);
+            File file = new File(WebUtils.getAppDir("conf").concat("/flink-application.template"));
             try {
                 String conf = FileUtils.readFileToString(file);
                 this.flinkConfTemplate = Base64.getEncoder().encodeToString(conf.getBytes());
