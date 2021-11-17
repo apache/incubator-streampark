@@ -243,11 +243,13 @@ public class ApplicationConfigServiceImpl
     @Override
     public synchronized String readTemplate() {
         if (flinkConfTemplate == null) {
-            File file = new File(WebUtils.getAppDir("conf").concat("/flink-application.template"));
+
             try {
+                File file = new File(WebUtils.getAppDir("conf").concat("/flink-application.template"));
                 String conf = FileUtils.readFileToString(file);
                 this.flinkConfTemplate = Base64.getEncoder().encodeToString(conf.getBytes());
             } catch (IOException e) {
+                log.error("Read conf/flink-application.template failed, please check your deploy");
                 e.printStackTrace();
             }
         }
