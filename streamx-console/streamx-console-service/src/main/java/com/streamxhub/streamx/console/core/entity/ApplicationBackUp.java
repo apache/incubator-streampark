@@ -57,11 +57,29 @@ public class ApplicationBackUp {
         this.configId = application.getConfigId();
         this.description = application.getBackUpDescription();
         this.createTime = new Date();
-        this.path = String.format(
-            "%s/%d/%d",
-            Workspace.remote(),
-            application.getId(),
-            createTime.getTime()
-        );
+        switch (application.getExecutionModeEnum()) {
+            case KUBERNETES_NATIVE_APPLICATION:
+            case KUBERNETES_NATIVE_SESSION:
+            case YARN_PRE_JOB:
+            case YARN_SESSION:
+            case LOCAL:
+                this.path = String.format(
+                    "%s/%d/%d",
+                    Workspace.local().APP_BACKUPS(),
+                    application.getId(),
+                    createTime.getTime()
+                );
+                break;
+            case YARN_APPLICATION:
+                this.path = String.format(
+                    "%s/%d/%d",
+                    Workspace.remote().APP_BACKUPS(),
+                    application.getId(),
+                    createTime.getTime()
+                );
+                break;
+            default:
+                throw new UnsupportedOperationException("unsupported executionMode ".concat(application.getExecutionModeEnum().getName()));
+        }
     }
 }

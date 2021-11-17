@@ -63,7 +63,7 @@ object CommandUtils extends Logger {
 
   def execute(commands: JavaIter[String], consumer: Consumer[String]): Unit = {
     Try {
-      require(commands != null && commands.nonEmpty)
+      require(commands != null && commands.nonEmpty, "[StreamX] CommandUtils.execute: commands must not be null.")
       logDebug(s"Command execute:\n${commands.mkString("\n")} ")
       val process = Utils.isWindows match {
         case x if x => Runtime.getRuntime.exec("cmd /k ", null, null)

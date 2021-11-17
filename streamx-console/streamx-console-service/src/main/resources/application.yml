@@ -68,6 +68,8 @@ mybatis-plus:
     banner: false
 
 streamx:
+  # HADOOP_USER_NAME
+  hadoop-user-name: hdfs
   # 本地的工作空间,用于存放项目源码,构建的目录等.
   workspace:
     local: ~/streamx_workspace
@@ -88,6 +90,13 @@ streamx:
       polling-interval-sec:
         job-status: 2
         cluster-metric: 3
+
+  # packer garbage resources collection configuration
+  packer-gc:
+    # maximum retention time for temporary build resources
+    max-resource-expired-hours: 120
+    # gc task running interval hours
+    exec-cron: 0 0 0/6 * * ?
 
   shiro:
     # token有效期，单位秒

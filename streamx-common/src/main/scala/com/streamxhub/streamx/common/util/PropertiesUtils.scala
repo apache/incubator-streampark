@@ -36,8 +36,8 @@ object PropertiesUtils extends Logger {
 
   def readFile(filename: String): String = {
     val file = new File(filename)
-    require(file.exists(), s"file $file does not exist")
-    require(file.isFile, s"file $file is not a normal file")
+    require(file.exists(), s"[StreamX] readFile: file $file does not exist")
+    require(file.isFile, s"[StreamX] readFile: file $file is not a normal file")
     val scanner = new Scanner(file)
     val buffer = new StringBuilder
     while (scanner.hasNextLine) {
@@ -94,8 +94,8 @@ object PropertiesUtils extends Logger {
   /** Load Yaml present in the given file. */
   def fromYamlFile(filename: String): Map[String, String] = {
     val file = new File(filename)
-    require(file.exists(), s"Yaml file $file does not exist")
-    require(file.isFile, s"Yaml file $file is not a normal file")
+    require(file.exists(), s"[StreamX] fromYamlFile: Yaml file $file does not exist")
+    require(file.isFile, s"[StreamX] fromYamlFile: Yaml file $file is not a normal file")
     val inputStream: InputStream = new FileInputStream(file)
     try {
       val map = MutableMap[String, String]()
@@ -113,8 +113,8 @@ object PropertiesUtils extends Logger {
   /** Load properties present in the given file. */
   def fromPropertiesFile(filename: String): Map[String, String] = {
     val file = new File(filename)
-    require(file.exists(), s"Properties file $file does not exist")
-    require(file.isFile, s"Properties file $file is not a normal file")
+    require(file.exists(), s"[StreamX] fromPropertiesFile: Properties file $file does not exist")
+    require(file.isFile, s"[StreamX] fromPropertiesFile: Properties file $file is not a normal file")
 
     val inReader = new InputStreamReader(new FileInputStream(file), "UTF-8")
     try {
@@ -130,7 +130,7 @@ object PropertiesUtils extends Logger {
 
   /** Load Yaml present in the given file. */
   def fromYamlFile(inputStream: InputStream): Map[String, String] = {
-    require(inputStream != null, s"Properties inputStream  must not be null")
+    require(inputStream != null, s"[StreamX] fromYamlFile: Properties inputStream  must not be null")
     try {
       val map = MutableMap[String, String]()
       new Yaml()
@@ -146,13 +146,13 @@ object PropertiesUtils extends Logger {
 
   /** Load properties present in the given file. */
   def fromPropertiesFile(inputStream: InputStream): Map[String, String] = {
-    require(inputStream != null, s"Properties inputStream  must not be null")
+    require(inputStream != null, s"[StreamX] fromPropertiesFile: Properties inputStream  must not be null")
     try {
       val properties = new Properties()
       properties.load(inputStream)
       properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from inputStream", e)
+      case e: IOException => throw new IllegalArgumentException(s"[StreamX] Failed when loading properties from inputStream", e)
     }
   }
 
@@ -163,12 +163,12 @@ object PropertiesUtils extends Logger {
    * @return
    */
   def loadFlinkConfYaml(file: File): JavaMap[String, String] = {
-    require(file != null && file.exists() && file.isFile)
+    require(file != null && file.exists() && file.isFile, "[StreamX] loadFlinkConfYaml: file must not be null")
     loadFlinkConfYaml(org.apache.commons.io.FileUtils.readFileToString(file))
   }
 
   def loadFlinkConfYaml(yaml: String): JavaMap[String, String] = {
-    require(yaml != null && yaml.nonEmpty)
+    require(yaml != null && yaml.nonEmpty, "[StreamX] loadFlinkConfYaml: yaml must not be null")
     val flinkConf = new JavaMap[String, String]()
     val scanner: Scanner = new Scanner(yaml)
     val lineNo: AtomicInteger = new AtomicInteger(0)

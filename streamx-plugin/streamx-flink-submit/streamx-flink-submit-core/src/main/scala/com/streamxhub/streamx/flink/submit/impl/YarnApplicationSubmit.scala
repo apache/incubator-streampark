@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.DevelopmentMode
-import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils}
+import com.streamxhub.streamx.common.util.HdfsUtils
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.cli.CommandLine
@@ -36,7 +36,6 @@ import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTar
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
-import java.lang.{Boolean => JavaBool}
 import java.util.concurrent.Callable
 import java.util.{Collections, List => JavaList}
 import scala.collection.JavaConverters._
