@@ -21,7 +21,6 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.DevelopmentMode
-import com.streamxhub.streamx.common.util.DeflaterUtils
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.cli.CommandLine
@@ -30,16 +29,15 @@ import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration.DeploymentOptions
+import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
 import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.fs.{Path => HadoopPath}
 import org.apache.hadoop.yarn.api.records.ApplicationId
+
 import java.io.File
 import java.lang.{Boolean => JavaBool}
-
-import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
-
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}

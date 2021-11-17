@@ -1,3 +1,23 @@
+/*
+ * Copyright (c) 2021 The StreamX Project
+ * <p>
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.streamxhub.streamx.flink.packer.maven
 
 import com.google.common.collect.Lists
@@ -34,7 +54,7 @@ object MavenTool extends Logger {
   @throws[Exception] def buildFatJar(@Nonnull jarLibs: Set[String], @Nonnull outFatJarPath: String): File = {
     // check userJarPath
     val uberJar = new File(outFatJarPath)
-    require(outFatJarPath.endsWith(".jar") && !uberJar.isDirectory, s"[streamx-packer] outFatJarPath($outFatJarPath) should be a JAR file.")
+    require(outFatJarPath.endsWith(".jar") && !uberJar.isDirectory, s"[StreamX] streamx-packer: outFatJarPath($outFatJarPath) should be a JAR file.")
     // resolve all jarLibs
     val jarSet = new util.HashSet[File]
     jarLibs.map(lib => new File(lib))
@@ -44,7 +64,7 @@ object MavenTool extends Logger {
         case libFile if libFile.isDirectory => libFile.listFiles.filter(isJarFile).foreach(jarSet.add)
         case _ =>
       }
-    logInfo(s"[streamx-packer] start shaded fat-jar: ${jarLibs.mkString(",")}")
+    logInfo(s"start shaded fat-jar: ${jarLibs.mkString(",")}")
     // shade jars
     val shadeRequest = {
       val req = new ShadeRequest
@@ -59,7 +79,7 @@ object MavenTool extends Logger {
     val shader = new DefaultShader()
     shader.enableLogging(plexusLog)
     shader.shade(shadeRequest)
-    logInfo(s"[streamx-packer] finish build fat-jar: ${uberJar.getAbsolutePath}")
+    logInfo(s"finish build fat-jar: ${uberJar.getAbsolutePath}")
     uberJar
   }
 
@@ -73,7 +93,7 @@ object MavenTool extends Logger {
     val jarLibs = jarPackDeps.extJarLibs
     val arts = jarPackDeps.mavenArts
     if (jarLibs.isEmpty && arts.isEmpty) {
-      throw new Exception(s"[streamx-packer] empty artifacts.")
+      throw new Exception(s"[StreamX] streamx-packer: empty artifacts.")
     }
     val artFilePaths = resolveArtifacts(arts).map(_.getAbsolutePath)
     buildFatJar(jarLibs ++ artFilePaths, outFatJarPath)
@@ -92,7 +112,7 @@ object MavenTool extends Logger {
     if (mavenArtifacts == null) Set.empty[File]; else {
       val (repoSystem, session) = MavenRetriever.retrieve()
       val artifacts = mavenArtifacts.map(e => new DefaultArtifact(e.groupId, e.artifactId, "jar", e.version))
-      logInfo(s"[streamx-packer] start resolving dependencies: ${artifacts.mkString}")
+      logInfo(s"start resolving dependencies: ${artifacts.mkString}")
 
       // read relevant artifact descriptor info
       // plz don't simplify the following lambda syntax to maintain the readability of the code.
@@ -104,7 +124,7 @@ object MavenTool extends Logger {
         .map(_.getArtifact)
 
       val mergedArtifacts = artifacts ++ resolvedArtifacts
-      logInfo(s"[streamx-packer] resolved dependencies: ${mergedArtifacts.mkString}")
+      logInfo(s"resolved dependencies: ${mergedArtifacts.mkString}")
 
       // download artifacts
       val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos, null))

@@ -79,21 +79,6 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
-    public boolean checkWorkspace() {
-        String workspace = Workspace.local().WORKSPACE();
-        if (Utils.isEmpty(workspace)) {
-            return false;
-        }
-        File file = new File(workspace);
-        if (!file.exists()) {
-            if (!file.mkdirs()) {
-                return false;
-            }
-        }
-        return file.canRead() && file.canWrite();
-    }
-
-    @Override
     public SenderEmail getSenderEmail() {
         try {
             String host = settings.get(SettingService.KEY_ALERT_EMAIL_HOST).getValue();

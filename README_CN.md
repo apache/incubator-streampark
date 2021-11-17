@@ -16,14 +16,13 @@
   <img src="https://img.shields.io/github/v/release/streamxhub/streamx.svg">
   <img src="https://img.shields.io/github/stars/streamxhub/streamx">
   <img src="https://img.shields.io/github/forks/streamxhub/streamx">
-  <img src="https://img.shields.io/github/downloads/streamxhub/streamx/total">
   <img src="https://img.shields.io/github/languages/count/streamxhub/streamx">
 </p>
 
 <div align="center">
 
 **[官网](http://www.streamxhub.com)** |
-**[更变日志](#)** |
+**[更新日志](#)** |
 **[使用文档](http://www.streamxhub.com/zh/doc)**
 
 </div>
@@ -57,8 +56,8 @@ Make Flink|Spark easier!!!
 * 支持项目编译功能(maven 编译)
 * 在线参数配置
 * 多版本flink支持(1.12.x,1.13.x,1.14.x)
-* Kubernetes部署支持(k8s-native-session,k8s-application)
-* 支持 `Applicaion` 模式， `Yarn-Per-Job` 模式启动
+* on Kubernetes部署模式支持(`K8s-Native-Application`/`K8s-Native-Session`)
+* on YARN部署模式支持(`YARN-Application`/`YARN-Pre-Job`)
 * 快捷的日常操作(任务`启动`、`停止`、`savepoint`，从`savepoint`恢复)
 * 支持火焰图
 * 支持 `notebook` (在线任务开发)

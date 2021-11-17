@@ -91,19 +91,19 @@ object DependencyUtils {
       val splits = p.replace("/", ":").split(":")
       require(
         splits.length == 3,
-        s"Provided Maven Coordinates must be in the form 'groupId:artifactId:version'. The coordinate provided is: $p"
+        s"[StreamX] DependencyUtils.extractMavenCoordinates: Provided Maven Coordinates must be in the form 'groupId:artifactId:version'. The coordinate provided is: $p"
       )
       require(
         splits(0) != null && splits(0).trim.nonEmpty,
-        s"The groupId cannot be null or be whitespace. The groupId provided is: ${splits(0)}"
+        s"[StreamX] DependencyUtils.extractMavenCoordinates: The groupId cannot be null or be whitespace. The groupId provided is: ${splits(0)}"
       )
       require(
         splits(1) != null && splits(1).trim.nonEmpty,
-        s"The artifactId cannot be null or be whitespace. The artifactId provided is: ${splits(1)}"
+        s"[StreamX] DependencyUtils.extractMavenCoordinates: The artifactId cannot be null or be whitespace. The artifactId provided is: ${splits(1)}"
       )
       require(
         splits(2) != null && splits(2).trim.nonEmpty,
-        s"The version cannot be null or be whitespace. The version provided is: ${splits(2)}"
+        s"[StreamX] DependencyUtils.extractMavenCoordinates: The version cannot be null or be whitespace. The version provided is: ${splits(2)}"
       )
       MavenCoordinate(splits(0), splits(1), splits(2))
     }
@@ -243,14 +243,14 @@ object DependencyUtils {
                        outCallback: Consumer[String]
                      ): IvySettings = {
     val file = new File(settingsFile)
-    require(file.exists(), s"Ivy settings file $file does not exist")
-    require(file.isFile, s"Ivy settings file $file is not a normal file")
+    require(file.exists(), s"[StreamX] DependencyUtils.loadIvySettings: Ivy settings file $file does not exist")
+    require(file.isFile, s"[StreamX] DependencyUtils.loadIvySettings: Ivy settings file $file is not a normal file")
     val ivySettings: IvySettings = new IvySettings
     try {
       ivySettings.load(file)
     } catch {
       case e@(_: IOException | _: ParseException) =>
-        throw new RuntimeException(s"Failed when loading Ivy settings from $settingsFile", e)
+        throw new RuntimeException(s"DependencyUtils.loadIvySettings: Failed when loading Ivy settings from $settingsFile", e)
     }
     processIvyPathArg(ivySettings, ivyPath)
     processRemoteRepoArg(ivySettings, remoteRepos, outCallback)

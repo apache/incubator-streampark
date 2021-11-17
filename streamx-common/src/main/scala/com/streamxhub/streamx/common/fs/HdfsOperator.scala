@@ -46,7 +46,7 @@ object HdfsOperator extends FsOperator with Logger {
     HdfsUtils.copyHdfsDir(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
 
   override def fileMd5(path: String): String = {
-    require(path != null && path.nonEmpty)
+    require(path != null && path.nonEmpty, "[StreamX] HdfsOperator.fileMd5: file must not be null.")
     HdfsUtils.fileMd5(toHdfsPath(path))
   }
 

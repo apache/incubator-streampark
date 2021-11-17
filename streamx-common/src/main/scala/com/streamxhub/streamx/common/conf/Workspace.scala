@@ -45,14 +45,14 @@ case class Workspace(storageType: StorageType) {
     storageType match {
       case StorageType.LFS =>
         val path = SystemPropertyUtils.get(KEY_STREAMX_WORKSPACE_LOCAL)
-        require(path != null)
+        require(path != null, "[StreamX] streamx.workspace.local must not be null")
         path
       case StorageType.HDFS =>
         SystemPropertyUtils.get(KEY_STREAMX_WORKSPACE_REMOTE) match {
           case null =>
             s"${HdfsUtils.getDefaultFS}$STREAMX_WORKSPACE_DEFAULT"
           case p =>
-            require(p.startsWith("hdfs://"))
+            require(p.startsWith("hdfs://"), "")
             val path = p.replaceFirst("^hdfs://((.*):\\d+/+|/+|)", "/")
             s"${HdfsUtils.getDefaultFS}$path"
         }

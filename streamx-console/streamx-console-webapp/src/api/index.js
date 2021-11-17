@@ -104,7 +104,6 @@ export default {
     GET: '/flink/setting/get',
     WEBURL: '/flink/setting/weburl',
     ALL: '/flink/setting/all',
-    CHECK: '/flink/setting/check',
     GETFLINK: '/flink/setting/getflink',
     SYNC: '/flink/setting/sync',
     UPDATE: '/flink/setting/update'

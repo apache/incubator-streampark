@@ -59,7 +59,7 @@ object HadoopUtils extends Logger {
   private[this] lazy val HADOOP_CONF_DIR: String = "HADOOP_CONF_DIR"
   private[this] lazy val CONF_SUFFIX: String = "/etc/hadoop"
 
-  private val hadoopUserName: String = SystemPropertyUtils.get(KEY_HADOOP_USER_NAME, DEFAULT_HADOOP_USER_NAME)
+  private lazy val hadoopUserName: String = SystemPropertyUtils.get(KEY_HADOOP_USER_NAME, DEFAULT_HADOOP_USER_NAME)
 
   private[this] var ugi: UserGroupInformation = _
 
@@ -281,8 +281,8 @@ object HadoopUtils extends Logger {
           }
 
           val name = if (!HAUtil.isHAEnabled(conf)) addressPrefix else {
+            val yarnConf = new YarnConfiguration(conf)
             val activeRMId = {
-              val yarnConf = new YarnConfiguration(conf)
               Option(RMHAUtils.findActiveRMHAId(yarnConf)) match {
                 case Some(x) =>
                   logInfo("findActiveRMHAId successful")
@@ -318,9 +318,17 @@ object HadoopUtils extends Logger {
                   rmId
               }
             }
-            require(activeRMId != null, "[StreamX] can not found yarn active node")
+            require(activeRMId != null, "[StreamX] HadoopUtils.getRMWebAppURL: can not found yarn active node")
             logInfo(s"current activeRMHAId: $activeRMId")
-            HAUtil.addSuffix(addressPrefix, activeRMId)
+            val appActiveRMKey = HAUtil.addSuffix(addressPrefix, activeRMId)
+            val hostnameActiveRMKey = HAUtil.addSuffix(YarnConfiguration.RM_HOSTNAME, activeRMId)
+            if (null == HAUtil.getConfValueForRMInstance(appActiveRMKey, yarnConf) && null != HAUtil.getConfValueForRMInstance(hostnameActiveRMKey, yarnConf)) {
+              logInfo(s"Find rm web address by : $hostnameActiveRMKey")
+              hostnameActiveRMKey
+            } else {
+              logInfo(s"Find rm web address by : $appActiveRMKey")
+              appActiveRMKey
+            }
           }
 
           val inetSocketAddress = conf.getSocketAddr(name, s"0.0.0.0:$defaultPort", defaultPort.toInt)
@@ -367,7 +375,7 @@ object HadoopUtils extends Logger {
   }
 
   def toApplicationId(appId: String): ApplicationId = {
-    require(appId != null)
+    require(appId != null, "[StreamX] HadoopUtils.toApplicationId: applicationId muse not be null")
     val timestampAndId = appId.split("_")
     ApplicationId.newInstance(timestampAndId(1).toLong, timestampAndId.last.toInt)
   }

@@ -60,8 +60,6 @@ public interface SettingService extends IService<Setting> {
 
     String getMavenRepository();
 
-    boolean checkWorkspace();
-
     SenderEmail getSenderEmail();
 
     String getDockerRegisterAddress();

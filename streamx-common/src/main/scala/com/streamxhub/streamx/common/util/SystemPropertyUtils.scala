@@ -41,7 +41,7 @@ object SystemPropertyUtils extends Logger {
   def get(key: String): String = get(key, null)
 
   def get(key: String, default: String): String = {
-    require(key != null, "key must not be null.")
+    require(key != null, "[StreamX] key must not be null.")
     key match {
       case empty if empty.isEmpty => throw new IllegalArgumentException("key must not be empty.")
       case other =>

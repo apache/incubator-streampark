@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,29 +18,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import api from './index'
-import http from '@/utils/request'
+package com.streamxhub.streamx.flink.packer
 
-export function get (params) {
-  return http.post(api.SETTING.GET, params)
-}
+import com.github.dockerjava.api.DockerClient
+import com.streamxhub.streamx.common.util.Utils.tryWithResourceException
 
-export function weburl() {
-  return http.post(api.SETTING.WEBURL, {})
-}
+/**
+ * @author Al-assad
+ */
+package object docker {
 
-export function all (params) {
-  return http.post(api.SETTING.ALL, params)
-}
+  def usingDockerClient[R](process: DockerClient => R)(handleException: Throwable => R): R =
+    tryWithResourceException(DockerRetriever.newDockerClient())(process)(handleException)
 
-export function getFlink () {
-  return http.post(api.SETTING.GETFLINK, {})
-}
-
-export function sync () {
-  return http.post(api.SETTING.SYNC, {})
-}
-
-export function update (params) {
-  return http.post(api.SETTING.UPDATE, params)
 }

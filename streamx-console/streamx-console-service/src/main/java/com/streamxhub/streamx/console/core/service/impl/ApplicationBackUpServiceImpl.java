@@ -47,7 +47,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -201,12 +200,31 @@ public class ApplicationBackUpServiceImpl
                 // 回滚 config 和 sql
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
-
+                String appHome = null;
+                String backUpPath = null;
+                switch (application.getExecutionModeEnum()) {
+                    case KUBERNETES_NATIVE_APPLICATION:
+                    case KUBERNETES_NATIVE_SESSION:
+                    case YARN_PRE_JOB:
+                    case YARN_SESSION:
+                    case LOCAL:
+                        if (application.isFlinkSqlJob()) {
+                            appHome = application.getLocalFlinkSqlHome().getAbsolutePath();
+                        } else {
+                            appHome = application.getDistHome();
+                        }
+                        backUpPath = backUp.getPath() + "/" + application.getId();
+                        break;
+                    case YARN_APPLICATION:
+                        appHome = application.getAppHome();
+                        backUpPath = backUp.getPath();
+                        break;
+                }
                 // 2) 删除当前项目
-                fsOperator.delete(application.getAppHome());
+                fsOperator.delete(appHome);
                 try {
                     // 5)将备份的文件copy到有效项目目录下.
-                    fsOperator.copyDir(backUp.getPath(), application.getAppHome());
+                    fsOperator.copyDir(backUpPath, appHome);
                 } catch (Exception e) {
                     throw e;
                 }
@@ -246,7 +264,24 @@ public class ApplicationBackUpServiceImpl
     @Transactional(rollbackFor = {Exception.class})
     public void backup(Application application) {
         //1) 基础的配置文件备份
-        String appHome = application.getAppHome();
+        String appHome = null;
+        switch (application.getExecutionModeEnum()) {
+            case KUBERNETES_NATIVE_APPLICATION:
+            case KUBERNETES_NATIVE_SESSION:
+            case YARN_PRE_JOB:
+            case YARN_SESSION:
+            case LOCAL:
+                if (application.isFlinkSqlJob()) {
+                    appHome = application.getLocalFlinkSqlHome().getAbsolutePath();
+                } else {
+                    appHome = application.getDistHome();
+                }
+                break;
+            case YARN_APPLICATION:
+                appHome = application.getAppHome();
+                break;
+        }
+
         FsOperator fsOperator = application.getFsOperator();
         if (fsOperator.exists(appHome)) {
             // 3) 需要备份的做备份,移动文件到备份目录...
@@ -271,7 +306,7 @@ public class ApplicationBackUpServiceImpl
 
             this.save(applicationBackUp);
             fsOperator.mkdirs(applicationBackUp.getPath());
-            fsOperator.move(appHome, applicationBackUp.getPath());
+            fsOperator.copyDir(appHome, applicationBackUp.getPath());
         }
     }
 

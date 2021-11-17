@@ -61,7 +61,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
     }
 
     @Override
-    public boolean create(FlinkEnv version) {
+    public boolean create(FlinkEnv version) throws Exception {
         int count = this.baseMapper.selectCount(null);
         if (count == 0) {
             version.setIsDefault(true);
@@ -72,8 +72,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
             version.doSetFlinkConf();
             return save(version);
         } catch (Exception e) {
-            log.error(e.getMessage());
-            return false;
+            throw e;
         }
     }
 
