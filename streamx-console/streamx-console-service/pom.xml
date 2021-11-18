@@ -1,15 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.3.8.RELEASE</version>
-        <relativePath/>
+        <relativePath />
     </parent>
     <artifactId>streamx-console-service</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <name>StreamX : Console Service</name>
 
     <!-- 定义统一版本号-->
@@ -489,28 +489,28 @@
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.12</artifactId>
-                            <version>1.2.0</version>
+                            <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.13 support-->
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.13</artifactId>
-                            <version>1.2.0</version>
+                            <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.14 support-->
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.14</artifactId>
-                            <version>1.2.0</version>
+                            <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink-submit-core -->
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-submit-core</artifactId>
-                            <version>1.2.0</version>
+                            <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
                         </dependency>
                     </artifactItems>
