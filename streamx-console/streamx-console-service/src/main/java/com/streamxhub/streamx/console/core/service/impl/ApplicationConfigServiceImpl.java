@@ -244,7 +244,7 @@ public class ApplicationConfigServiceImpl
                 String conf = FileUtils.readFileToString(file);
                 this.flinkConfTemplate = Base64.getEncoder().encodeToString(conf.getBytes());
             } catch (Exception e) {
-                log.error("Read conf/flink-application.template failed, please check your deploy");
+                log.error("Read conf/flink-application.template failed, please check your deployment");
                 e.printStackTrace();
             }
         }
