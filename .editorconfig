@@ -19,7 +19,7 @@ indent_size = 2
 indent_size = 2
 
 [*.py]
-indent_size = 2
+indent_size = 4
 
 [*.sh]
 indent_size = 2
