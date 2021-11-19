@@ -72,7 +72,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
 
     // build fat-jar, output file name: streamx-flinkjob_<job-name>_<timespamp>, like: streamx-flinkjob_myjobtest_20211024134822
     val fatJar = {
-      val fatJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}_${DateUtils.now(fullCompact)}.jar"
+      val fatJarOutputPath = s"${buildWorkspace}/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}_${DateUtils.now(fullCompact)}.jar"
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINKSQL =>
           val flinkLibs = extractProvidedLibs(submitRequest)
