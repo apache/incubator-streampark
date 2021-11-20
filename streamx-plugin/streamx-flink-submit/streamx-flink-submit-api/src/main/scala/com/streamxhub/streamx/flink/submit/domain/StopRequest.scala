@@ -25,6 +25,8 @@ import com.streamxhub.streamx.common.conf.ConfigurationOptions.KUBERNETES_NAMESP
 import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums.ExecutionMode
 
+import javax.annotation.Nullable
+
 case class StopRequest(flinkVersion: FlinkVersion,
                        executionMode: ExecutionMode,
                        clusterId: String,
@@ -32,6 +34,6 @@ case class StopRequest(flinkVersion: FlinkVersion,
                        withSavePoint: Boolean,
                        withDrain: Boolean,
                        customSavePointPath: String,
-                       kubernetesNamespace: String = KUBERNETES_NAMESPACE_DEFAULT_VALUE) {
-
+                       kubernetesNamespace: String = KUBERNETES_NAMESPACE_DEFAULT_VALUE,
+                       @Nullable dynamicOption:String) {
 }

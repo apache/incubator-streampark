@@ -115,4 +115,12 @@ public enum ExecutionMode implements Serializable {
         return Lists.newArrayList(KUBERNETES_NATIVE_SESSION.getMode(), KUBERNETES_NATIVE_APPLICATION.getMode());
     }
 
+    public static boolean isRemoteMode(Integer value) {
+        return isRemoteMode(of(value));
+    }
+
+    public static boolean isRemoteMode(ExecutionMode mode) {
+        return REMOTE.equals(mode);
+    }
+
 }

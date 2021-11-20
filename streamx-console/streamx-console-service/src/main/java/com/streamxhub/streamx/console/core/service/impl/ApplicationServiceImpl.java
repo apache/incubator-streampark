@@ -966,7 +966,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         appParam.getSavePointed(),
                         appParam.getDrain(),
                         customSavepoint,
-                        application.getK8sNamespace()
+                        application.getK8sNamespace(),
+                        application.getDynamicOptions()
                 );
 
                 StopResponse stopResponse = FlinkSubmitHelper.stop(stopInfo);
@@ -1108,14 +1109,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 assert executionMode != null;
                 //3) plugin
                 switch (executionMode) {
+                    case REMOTE:
                     case YARN_PRE_JOB:
-                    case KUBERNETES_NATIVE_SESSION:
-                    case KUBERNETES_NATIVE_APPLICATION:
-                        flinkUserJar = Workspace.local().APP_PLUGINS().concat("/").concat(sqlDistJar);
-                        break;
                     case YARN_APPLICATION:
                         String pluginPath = Workspace.remote().APP_PLUGINS();
                         flinkUserJar = String.format("%s/%s", pluginPath, sqlDistJar);
+                        break;
+                    case KUBERNETES_NATIVE_SESSION:
+                    case KUBERNETES_NATIVE_APPLICATION:
+                        flinkUserJar = Workspace.local().APP_PLUGINS().concat("/").concat(sqlDistJar);
                         break;
                     default:
                         throw new UnsupportedOperationException("Unsupported..." + executionMode);
