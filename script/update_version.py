@@ -19,7 +19,7 @@ project_path = '../'
 
 if len(sys.argv) >= 2:
     expect_ver = sys.argv[1]
-if len(sys.arg) >= 3:
+if len(sys.argv) >= 3:
     project_path = sys.argv[2]
 
 # find all pom.xml in project
