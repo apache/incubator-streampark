@@ -45,9 +45,8 @@ Make Flink|Spark easier!!!
 
 [![StreamX video](http://assets.streamxhub.com/streamx_player.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
-![](http://assets.streamxhub.com/streamx-main.png?12345)
 
-![](http://assets.streamxhub.com/streamx-sql.png?12345)
+![](http://assets.streamxhub.com/gvp2021.png)
 
 ## 🎉 Features
 
@@ -69,6 +68,11 @@ Make Flink|Spark easier!!!
 * 支持 Catalog、Hive
 * 从任务`开发`阶段到`部署管理`全链路支持
 * ...
+
+
+![](http://assets.streamxhub.com/streamx-main.png?12345)
+
+![](http://assets.streamxhub.com/streamx-sql.png?12345)
 
 ## 🏳‍🌈 组成部分
 

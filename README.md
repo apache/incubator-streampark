@@ -43,9 +43,8 @@ data laker.
 
 [![StreamX video](http://assets.streamxhub.com/streamx_player.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
-![](http://assets.streamxhub.com/streamx-main.png?12345)
 
-![](http://assets.streamxhub.com/streamx-sql.png?12345)
+![](http://assets.streamxhub.com/gvp2021.png)
 
 ## 🎉 Features
 
@@ -68,6 +67,13 @@ data laker.
 * Catalog、Hive
 * Full support from task `development` to `deployment`
 * ...
+
+![](http://assets.streamxhub.com/streamx-main.png?12345)
+
+
+![](http://assets.streamxhub.com/streamx-sql.png?12345)
+
+
 
 ## 🏳‍🌈 Components
 
