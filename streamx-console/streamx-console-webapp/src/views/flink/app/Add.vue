@@ -1367,7 +1367,7 @@ export default {
         formData.append('file', data.file)
         formData.append('executionMode',executionMode)
         upload(formData).then((resp) => {
-          if(resp.status != 'success') {
+          if(resp.status == 'error') {
             this.$swal.fire({
               title: 'Failed',
               icon: 'error',
