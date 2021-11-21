@@ -20,24 +20,22 @@
  */
 package com.streamxhub.streamx.flink.submit.impl
 
+import com.google.common.collect.Lists
+import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
+import com.streamxhub.streamx.common.util.DateUtils
+import com.streamxhub.streamx.common.util.DateUtils.fullCompact
+import com.streamxhub.streamx.flink.packer.maven.MavenTool
+import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.`trait`.RemoteSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.deployment.{StandaloneClusterDescriptor, StandaloneClusterId}
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
-import org.apache.flink.configuration.{Configuration, CoreOptions, DeploymentOptions, JobManagerOptions, PipelineOptions}
+import org.apache.flink.configuration._
 import org.apache.flink.util.IOUtils
-import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.conf.Workspace
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
-import com.streamxhub.streamx.common.util.DateUtils
-import com.streamxhub.streamx.common.util.DateUtils.fullCompact
-import com.streamxhub.streamx.flink.packer.maven.MavenTool
-import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 
 import java.io.File
-import scala.util.Try
 import scala.collection.JavaConversions._
 
 
@@ -50,7 +48,6 @@ object RemoteSubmit extends RemoteSubmitTrait {
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
 
     // require parameters with standalone remote
-    assert(Try(submitRequest.flinkVersion.flinkHome.isEmpty).getOrElse(false))
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
 
     val buildWorkspace = s"${workspace.APP_WORKSPACE}" + s"/${flinkConfig.getString(PipelineOptions.NAME)}"
@@ -82,7 +79,7 @@ object RemoteSubmit extends RemoteSubmitTrait {
     extractDynamicOption(stopRequest.dynamicOption)
       .foreach(e => flinkConfig.setString(e._1, e._2))
     flinkConfig.set(DeploymentOptions.TARGET, ExecutionMode.REMOTE.getName)
-    checkAndReplaceJobManagerOptions(flinkConfig)
+    checkAndReplaceRestOptions(flinkConfig)
     val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
     var client: ClusterClient[StandaloneClusterId] = null
     try {
@@ -150,7 +147,7 @@ object RemoteSubmit extends RemoteSubmitTrait {
       client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
       val submitResult = client.submitJob(jobGraph)
       val jobId = submitResult.get().toString
-      val result = SubmitResponse(client.getClusterId.toString, flinkConfig.toMap, jobId)
+      val result = SubmitResponse("Standalone-" + flinkConfig.getString(JobManagerOptions.ADDRESS), flinkConfig.toMap, jobId)
       result
     } catch {
       case e: Exception =>

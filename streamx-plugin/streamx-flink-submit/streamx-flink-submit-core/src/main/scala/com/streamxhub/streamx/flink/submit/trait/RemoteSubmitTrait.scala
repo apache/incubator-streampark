@@ -31,14 +31,13 @@ import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, Su
 import org.apache.commons.collections.MapUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
-import org.apache.flink.configuration.{Configuration, CoreOptions, DeploymentOptions, GlobalConfiguration, JobManagerOptions, PipelineOptions}
+import org.apache.flink.configuration._
 
 import javax.annotation.Nonnull
 import scala.collection.JavaConversions.mapAsScalaMap
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
-import scala.collection.JavaConverters._
-import scala.collection.JavaConversions._
 
 /**
  * @Description Remote Submit
@@ -84,7 +83,7 @@ trait RemoteSubmitTrait extends FlinkSubmitTrait {
     extractDynamicOption(submitRequest.dynamicOption)
       .foreach(e => flinkConfig.setString(e._1, e._2))
     // if not set jm address and port, use the default set jm address and warn
-    checkAndReplaceJobManagerOptions(flinkConfig)
+    checkAndReplaceRestOptions(flinkConfig)
     // copy from submitRequest.property
     if (MapUtils.isNotEmpty(submitRequest.property)) {
       submitRequest.property
@@ -125,14 +124,14 @@ trait RemoteSubmitTrait extends FlinkSubmitTrait {
     programArgs
   }
 
-  private[submit] def checkAndReplaceJobManagerOptions(flinkConfig: Configuration): Unit ={
-    if (flinkConfig.getString(JobManagerOptions.ADDRESS).isEmpty) {
-      logWarn("JobManagerOptions Address is not set,use default value : localhost to replace it")
-      flinkConfig.setString(JobManagerOptions.ADDRESS,StandaloneUtils.DEFAULT_JM_ADDRESS)
+  private[submit] def checkAndReplaceRestOptions(flinkConfig: Configuration): Unit = {
+    if (!flinkConfig.getOptional(RestOptions.ADDRESS).isPresent) {
+      logWarn("RestOptions Address is not set,use default value : localhost to replace it")
+      flinkConfig.setString(RestOptions.ADDRESS, StandaloneUtils.DEFAULT_REST_ADDRESS)
     }
-    if (flinkConfig.getInteger(JobManagerOptions.PORT).isNaN) {
-      logWarn("JobManagerOptions port is not set,use default value : 8080 to replace it")
-      flinkConfig.setInteger(JobManagerOptions.PORT,StandaloneUtils.DEFAULT_JM_PORT)
+    if (!flinkConfig.getOptional(RestOptions.PORT).isPresent) {
+      logWarn("RestOptions port is not set,use default value : 8081 to replace it")
+      flinkConfig.setInteger(RestOptions.PORT, StandaloneUtils.DEFAULT_REST_PORT)
     }
   }
 

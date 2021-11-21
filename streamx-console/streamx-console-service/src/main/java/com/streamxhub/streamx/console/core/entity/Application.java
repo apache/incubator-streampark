@@ -406,10 +406,10 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public JobsOverview httpJobsOverview() throws Exception {
+    public JobsOverview httpJobsOverview(FlinkEnv env) throws Exception {
         final String flinkUrl = "jobs/overview";
         if (appId != null) {
-            if (ExecutionMode.isYarnMode(executionMode)){
+            if (ExecutionMode.isYarnMode(executionMode)) {
                 String format = "%s/proxy/%s/" + flinkUrl;
                 try {
                     String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
@@ -423,7 +423,8 @@ public class Application implements Serializable {
                     }
                 }
             }else{
-                String remoteUrl = StandaloneUtils.getRMWebAppURL(FlinkSubmitHelper.extractDynamicOption(dynamicOptions),flinkUrl);
+                String remoteUrl = StandaloneUtils.getJMWebAppURL(env.convertFlinkYamlAsMap(),
+                    FlinkSubmitHelper.extractDynamicOption(dynamicOptions), flinkUrl);
                 try{
                     return httpGetDoResult(remoteUrl, JobsOverview.class);
                 }catch (Exception e){
@@ -435,7 +436,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public Overview httpOverview() throws IOException {
+    public Overview httpOverview(FlinkEnv env) throws IOException {
         final String flinkUrl = "overview";
         if (appId != null) {
             if (ExecutionMode.isYarnMode(executionMode)) {
@@ -452,7 +453,7 @@ public class Application implements Serializable {
                     }
                 }
             } else {
-                String remoteUrl = StandaloneUtils.getRMWebAppURL(FlinkSubmitHelper.extractDynamicOption(dynamicOptions), flinkUrl);
+                String remoteUrl = StandaloneUtils.getJMWebAppURL(env.convertFlinkYamlAsMap(), FlinkSubmitHelper.extractDynamicOption(dynamicOptions), flinkUrl);
                 try {
                     return httpGetDoResult(remoteUrl, Overview.class);
                 } catch (Exception e) {
@@ -464,7 +465,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public CheckPoints httpCheckpoints() throws IOException {
+    public CheckPoints httpCheckpoints(FlinkEnv env) throws IOException {
         final String flinkUrl = "jobs/%s/checkpoints";
         if (appId != null) {
             if (ExecutionMode.isYarnMode(executionMode)) {
@@ -481,7 +482,8 @@ public class Application implements Serializable {
                     }
                 }
             } else {
-                String remoteUrl = StandaloneUtils.getRMWebAppURL(FlinkSubmitHelper.extractDynamicOption(dynamicOptions), String.format(flinkUrl,jobId));
+                String remoteUrl = StandaloneUtils.getJMWebAppURL(env.convertFlinkYamlAsMap(), FlinkSubmitHelper.extractDynamicOption(dynamicOptions)
+                    , String.format(flinkUrl, jobId));
                 try {
                     return httpGetDoResult(remoteUrl, CheckPoints.class);
                 } catch (Exception e) {

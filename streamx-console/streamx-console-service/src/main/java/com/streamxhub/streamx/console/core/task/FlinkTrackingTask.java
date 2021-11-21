@@ -20,14 +20,13 @@
  */
 package com.streamxhub.streamx.console.core.task;
 
-import static com.streamxhub.streamx.common.enums.ExecutionMode.isKubernetesMode;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.enums.*;
 import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
@@ -36,6 +35,7 @@ import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +52,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
+
+import static com.streamxhub.streamx.common.enums.ExecutionMode.isKubernetesMode;
 
 /**
  * <pre><b>
@@ -107,6 +109,14 @@ public class FlinkTrackingTask {
 
     @Autowired
     private AlertService alertService;
+
+    @Autowired
+    private FlinkEnvService flinkEnvService;
+
+    /**
+     * 常用版本更新
+     */
+    private static final Map<String, FlinkEnv> flinkVersions = new ConcurrentHashMap<>(0);
 
     private static ApplicationService applicationService;
 
@@ -247,12 +257,17 @@ public class FlinkTrackingTask {
      * @throws Exception
      */
     private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
-        JobsOverview jobsOverview = application.httpJobsOverview();
+        FlinkEnv flinkEnv = flinkVersions.get(application.getFlinkVersion());
+        if (flinkEnv == null) {
+            flinkEnv = flinkEnvService.getByAppId(application.getId());
+            flinkVersions.put(application.getFlinkVersion(), flinkEnv);
+        }
+        JobsOverview jobsOverview = application.httpJobsOverview(flinkEnv);
         Optional<JobsOverview.Job> optional;
-        if (ExecutionMode.isYarnMode(application.getExecutionMode())){
+        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
             optional = jobsOverview.getJobs().stream().findFirst();
         } else {
-            optional = jobsOverview.getJobs().stream().filter(x->x.getId().equals(application.getJobId())).findFirst();
+            optional = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).findFirst();
         }
         if (optional.isPresent()) {
 
@@ -308,7 +323,12 @@ public class FlinkTrackingTask {
 
         // 3) overview,刚启动第一次获取Overview信息.
         if (STARTING_CACHE.getIfPresent(application.getId()) != null) {
-            Overview override = application.httpOverview();
+            FlinkEnv flinkEnv = flinkVersions.get(application.getFlinkVersion());
+            if (flinkEnv == null) {
+                flinkEnv = flinkEnvService.getByAppId(application.getId());
+                flinkVersions.put(application.getFlinkVersion(), flinkEnv);
+            }
+            Overview override = application.httpOverview(flinkEnv);
             if (override.getSlotsTotal() > 0) {
                 STARTING_CACHE.invalidate(application.getId());
                 application.setTotalTM(override.getTaskmanagers());
@@ -325,7 +345,12 @@ public class FlinkTrackingTask {
      * @throws IOException
      */
     private void handleCheckPoints(Application application) throws Exception {
-        CheckPoints checkPoints = application.httpCheckpoints();
+        FlinkEnv flinkEnv = flinkVersions.get(application.getFlinkVersion());
+        if (flinkEnv == null) {
+            flinkEnv = flinkEnvService.getByAppId(application.getId());
+            flinkVersions.put(application.getFlinkVersion(), flinkEnv);
+        }
+        CheckPoints checkPoints = application.httpCheckpoints(flinkEnv);
         if (checkPoints != null) {
             CheckPoints.Latest latest = checkPoints.getLatest();
             if (latest != null) {
@@ -695,5 +720,7 @@ public class FlinkTrackingTask {
         Application app = TRACKING_MAP.get(appId);
         return K8sFlinkTrkMonitorWrapper.isKubernetesApp(app);
     }
+
+
 
 }
