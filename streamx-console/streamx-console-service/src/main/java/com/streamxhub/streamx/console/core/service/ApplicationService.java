@@ -73,7 +73,7 @@ public interface ApplicationService extends IService<Application> {
 
     void tailMvnDownloading(Long id);
 
-    boolean upload(MultipartFile file, StorageType storageType) throws Exception;
+    String upload(MultipartFile file, StorageType storageType) throws Exception;
 
     /**
      * 将 latest的设置为Effective的,(此时才真正变成当前生效的)

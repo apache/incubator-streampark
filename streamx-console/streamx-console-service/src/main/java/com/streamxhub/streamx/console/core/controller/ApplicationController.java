@@ -234,8 +234,8 @@ public class ApplicationController {
     @RequiresPermissions("app:create")
     public RestResponse upload(MultipartFile file, Integer executionMode) throws Exception {
         StorageType storageType = Application.getStorageType(executionMode);
-        boolean upload = applicationService.upload(file, storageType);
-        return RestResponse.create().data(upload);
+        String uploadPath = applicationService.upload(file, storageType);
+        return RestResponse.create().data(uploadPath);
     }
 
 

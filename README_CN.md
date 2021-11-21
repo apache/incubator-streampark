@@ -2,7 +2,7 @@
     <br/>
     <h1>
         <a href="http://www.streamxhub.com" target="_blank" rel="noopener noreferrer">
-        <img width="500" src="http://assets.streamxhub.com/streamx-log2.png" alt="StreamX logo">
+        <img width="500" src="https://user-images.githubusercontent.com/13284744/142753483-4e96eb33-01ee-469d-ad7c-387e1bf95ee1.png" alt="StreamX logo">
         </a>
     </h1>
     <strong>Make Flink|Spark easier!!!</strong>

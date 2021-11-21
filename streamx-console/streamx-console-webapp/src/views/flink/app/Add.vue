@@ -164,7 +164,7 @@
                 :multiple="true"
                 @change="handleUploadJar"
                 :showUploadList="loading"
-                :customRequest="handleCustomRequest"
+                :customRequest="handleCustomDepsRequest"
                 :beforeUpload="handleBeforeUpload">
                 <div style="height: 266px">
                   <p
@@ -248,120 +248,200 @@
 
       <template v-else>
         <a-form-item
-          label="Project"
+          label="Source Type"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
-            show-search
-            option-filter-prop="children"
-            :filter-option="filterOption"
-            placeholder="Please select Project"
-            @change="handleChangeProject"
-            v-decorator="[ 'project', {rules: [{ required: true }]} ]">
-            <a-select-option
-              v-for="p in projectList"
-              :key="p.id"
-              :value="p.id">
-              {{ p.name }}
+            placeholder="Please select Source Type"
+            @change="handleChangeSourceType"
+            v-decorator="[ 'sourceType' , {rules: [{ required: true, message: 'Source Type is required' }]} ]">
+            <a-select-option value="csv">
+              <svg-icon role="img" name="github"/>
+              build from CSV
+            </a-select-option>
+            <a-select-option value="upload">
+              <svg-icon role="img" name="upload"/>
+              upload local job
             </a-select-option>
           </a-select>
         </a-form-item>
 
-        <a-form-item
-          label="Module"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-          <a-select
+        <template v-if="sourceType === 'upload'">
+          <a-form-item
+            label="Upload Job Jar"
+            :label-col="{lg: {span: 5}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+            <a-upload-dragger
+              name="file"
+              :multiple="true"
+              @change="handleUploadJob"
+              :showUploadList="loading"
+              :customRequest="handleCustomJobRequest"
+              :beforeUpload="handleBeforeUpload">
+              <div style="height: 266px">
+                <p
+                  class="ant-upload-drag-icon"
+                  style="padding-top: 40px">
+                  <a-icon
+                    type="inbox"
+                    :style="{ fontSize: '70px' }"/>
+                </p>
+                <p
+                  class="ant-upload-text"
+                  style="height: 45px">
+                  Click or drag jar to this area to upload
+                </p>
+                <p
+                  class="ant-upload-hint"
+                  style="height: 45px">
+                  Support for a single upload. You can upload a local jar here to support for current Job.
+                </p>
+              </div>
+            </a-upload-dragger>
+
+            <a-alert
+              v-show="uploadJar"
+              class="uploadjar-box"
+              type="info">
+              <template slot="message">
+                  <span class="tag-dependency-pom">
+                    {{ uploadJar }}
+                  </span>
+              </template>
+            </a-alert>
+
+          </a-form-item>
+
+          <a-form-item
+            label="Program Main"
+            :label-col="{lg: {span: 5}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+            <a-input
+              type="text"
+              allowClear
+              placeholder="Please enter Main class"
+              v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]">
+            </a-input>
+          </a-form-item>
+        </template>
+        <template v-else>
+          <a-form-item
+            label="Project"
+            :label-col="{lg: {span: 5}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+            <a-select
+              show-search
+              option-filter-prop="children"
+              :filter-option="filterOption"
+              placeholder="Please select Project"
+              @change="handleChangeProject"
+              v-decorator="[ 'project', {rules: [{ required: true }]} ]">
+              <a-select-option
+                v-for="p in projectList"
+                :key="p.id"
+                :value="p.id">
+                {{ p.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+
+          <a-form-item
             label="Module"
-            show-search
-            option-filter-prop="children"
-            :filter-option="filterOption"
-            placeholder="Please select module of this project"
-            @change="handleChangeModule"
-            v-decorator="[ 'module', {rules: [{ required: true }]} ]">
-            <a-select-option
-              v-for="name in moduleList"
-              :key="name"
-              :value="name">
-              {{ name }}
-            </a-select-option>
-          </a-select>
-        </a-form-item>
+            :label-col="{lg: {span: 5}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+            <a-select
+              label="Module"
+              show-search
+              option-filter-prop="children"
+              :filter-option="filterOption"
+              placeholder="Please select module of this project"
+              @change="handleChangeModule"
+              v-decorator="[ 'module', {rules: [{ required: true }]} ]">
+              <a-select-option
+                v-for="name in moduleList"
+                :key="name"
+                :value="name">
+                {{ name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
 
-        <a-form-item
-          label="Application Type"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-          <a-select
-            placeholder="Please select Application type"
-            @change="handleChangeAppType"
-            v-decorator="[ 'appType', {rules: [{ required: true, message: 'Application Type is required'}]} ]">
-            <a-select-option
-              value="1">
-              StreamX Flink
-            </a-select-option>
-            <a-select-option
-              value="2">
-              Apache Flink
-            </a-select-option>
-          </a-select>
-        </a-form-item>
+          <a-form-item
+            label="Application Type"
+            :label-col="{lg: {span: 5}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+            <a-select
+              placeholder="Please select Application type"
+              @change="handleChangeAppType"
+              v-decorator="[ 'appType', {rules: [{ required: true, message: 'Application Type is required'}]} ]">
+              <a-select-option
+                value="1">
+                StreamX Flink
+              </a-select-option>
+              <a-select-option
+                value="2">
+                Apache Flink
+              </a-select-option>
+            </a-select>
+          </a-form-item>
 
-        <a-form-item
-          v-if="appType === 2"
-          label="Program Jar"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-          <a-select
-            placeholder="Please select Program Jar"
-            @change="handleChangeJars"
-            v-decorator="[ 'jar', {rules: [{ required: true,message: 'Program Jar is required' }] }]">
-            <a-select-option
-              v-for="(jar,index) in jars"
-              :key="`program_jar_${index}`"
-              :value="jar">
-              {{ jar }}
-            </a-select-option>
-          </a-select>
-        </a-form-item>
+          <a-form-item
+            v-if="appType === 2"
+            label="Program Jar"
+            :label-col="{lg: {span: 5}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+            <a-select
+              placeholder="Please select Program Jar"
+              @change="handleChangeJars"
+              v-decorator="[ 'jar', {rules: [{ required: true,message: 'Program Jar is required' }] }]">
+              <a-select-option
+                v-for="(jar,index) in jars"
+                :key="`program_jar_${index}`"
+                :value="jar">
+                {{ jar }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
 
-        <a-form-item
-          v-if="appType === 2"
-          label="Program Main"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-          <a-input
-            type="text"
-            allowClear
-            placeholder="Please enter Main class"
-            v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]">
-          </a-input>
-        </a-form-item>
+          <a-form-item
+            v-if="appType === 2"
+            label="Program Main"
+            :label-col="{lg: {span: 5}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+            <a-input
+              type="text"
+              allowClear
+              placeholder="Please enter Main class"
+              v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]">
+            </a-input>
+          </a-form-item>
 
-        <a-form-item
-          v-if="appType === 1"
-          label="Application conf"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-          <a-tree-select
-            :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-            :tree-data="configSource"
-            placeholder="Please select config"
-            tree-default-expand-all
-            @change="handleJobName"
-            v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckConfig }]} ]">
-            <template
-              slot="suffixIcon"
-              v-if="this.form.getFieldValue('config')">
-              <a-icon
-                type="setting"
-                theme="twoTone"
-                two-tone-color="#4a9ff5"
-                @click.stop="handleEditConfig()"
-                title="edit config"/>
-            </template>
-          </a-tree-select>
-        </a-form-item>
+          <a-form-item
+            v-if="appType === 1"
+            label="Application conf"
+            :label-col="{lg: {span: 5}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+            <a-tree-select
+              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+              :tree-data="configSource"
+              placeholder="Please select config"
+              tree-default-expand-all
+              @change="handleJobName"
+              v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckConfig }]} ]">
+              <template
+                slot="suffixIcon"
+                v-if="this.form.getFieldValue('config')">
+                <a-icon
+                  type="setting"
+                  theme="twoTone"
+                  two-tone-color="#4a9ff5"
+                  @click.stop="handleEditConfig()"
+                  title="edit config"/>
+              </template>
+            </a-tree-select>
+          </a-form-item>
+
+        </template>
       </template>
 
       <a-form-item
@@ -908,10 +988,12 @@ export default {
   data() {
     return {
       jobType: 'sql',
+      sourceType: 'csv',
       tableEnv: 1,
       projectList: [],
       projectId: null,
       versionId: null,
+      uploadJar: null,
       module: null,
       moduleList: [],
       flinkEnvs: [],
@@ -1122,11 +1204,13 @@ export default {
       this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
       this.form.getFieldDecorator('executionMode', {initialValue: 4})
       this.form.getFieldDecorator('restartSize', {initialValue: 0})
-      listFlinkEnv().then((resp)=>{
-        this.flinkEnvs = resp.data
-        const v = this.flinkEnvs.filter((v) => {return v.isDefault})[0]
-        this.form.getFieldDecorator('versionId', {initialValue: v.id})
-        this.versionId = v.id
+      listFlinkEnv().then((resp)=> {
+        if(resp.data.length > 0) {
+          this.flinkEnvs = resp.data
+          const v = this.flinkEnvs.filter((v) => {return v.isDefault})[0]
+          this.form.getFieldDecorator('versionId', {initialValue: v.id})
+          this.versionId = v.id
+        }
       })
     },
 
@@ -1137,9 +1221,14 @@ export default {
         this.handleInitSQLMode()
       } else {
         this.form.getFieldDecorator('jobType', {initialValue: 'customcode'})
+        this.form.getFieldDecorator('sourceType', {initialValue: 'csv'})
         this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.defaultValue)
       }
       this.handleK8sPodTemplateEditor()
+    },
+
+    handleChangeSourceType(value) {
+      this.sourceType = value
     },
 
     handleInitSQLMode() {
@@ -1249,16 +1338,6 @@ export default {
       this.editor.pom.getModel().setValue(pomString)
     },
 
-    handleUploadJar(info) {
-      const status = info.file.status
-      if (status === 'done') {
-        this.loading = false
-      } else if (status === 'error') {
-        this.loading = false
-        this.$message.error(`${info.file.name} file upload failed.`)
-      }
-    },
-
     handleBeforeUpload(file) {
       if (file.type !== 'application/java-archive') {
         if (!/\.(jar|JAR)$/.test(file.name)) {
@@ -1271,7 +1350,67 @@ export default {
       return true
     },
 
-    handleCustomRequest(data) {
+    handleUploadJob(info) {
+      const status = info.file.status
+      if (status === 'done') {
+        this.loading = false
+      } else if (status === 'error') {
+        this.loading = false
+        this.$message.error(`${info.file.name} file upload failed.`)
+      }
+    },
+
+    handleCustomJobRequest(data) {
+      const executionMode =  this.form.getFieldValue('executionMode') || null
+      if (executionMode !== null) {
+        const formData = new FormData()
+        formData.append('file', data.file)
+        formData.append('executionMode',executionMode)
+        upload(formData).then((resp) => {
+          if(resp.status != 'success') {
+            this.$swal.fire({
+              title: 'Failed',
+              icon: 'error',
+              width: 800,
+              html: '<pre style="font-size: 10px">' + resp['exception'] + '</pre>',
+              focusConfirm: false
+            })
+          } else {
+            this.loading = false
+            const path = resp.data
+            this.uploadJar = data.file.name
+            main({
+              jar: path
+            }).then((resp) => {
+              this.form.setFieldsValue({'mainClass': resp.data})
+            }).catch((error) => {
+              this.$message.error(error.message)
+            })
+          }
+        }).catch((error) => {
+          this.$message.error(error.message)
+          this.loading = false
+        })
+      } else {
+        this.$swal.fire(
+          'Failed',
+          'Please select "execution Mode" first',
+          'error'
+        )
+      }
+    },
+
+    handleUploadJar(info) {
+      const status = info.file.status
+      if (status === 'done') {
+        this.loading = false
+      } else if (status === 'error') {
+        this.loading = false
+        this.$message.error(`${info.file.name} file upload failed.`)
+      }
+    },
+
+    handleCustomDepsRequest(data) {
       const executionMode =  this.form.getFieldValue('executionMode') || null
       if (executionMode !== null) {
         const formData = new FormData()
@@ -1526,9 +1665,9 @@ export default {
         jobType: 1,
         executionMode: values.executionMode,
         versionId: values.versionId,
-        projectId: values.project,
-        module: values.module,
-        appType: this.appType,
+        projectId: values.project || null,
+        module: values.module || null,
+        appType: this.appType || null,
         jobName: values.jobName,
         args: values.args,
         options: JSON.stringify(options),
