@@ -28,6 +28,7 @@ import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.`trait`.RemoteSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.deployment.{StandaloneClusterDescriptor, StandaloneClusterId}
@@ -69,8 +70,10 @@ object RemoteSubmit extends RemoteSubmitTrait {
       }
     }
 
+    restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
+
     // old submit plan
-    jobGraphSubmitPlan(submitRequest, flinkConfig, fatJar)
+//    jobGraphSubmitPlan(submitRequest, flinkConfig, fatJar)
   }
 
   override def doStop(stopRequest: StopRequest): StopResponse = {
@@ -110,8 +113,22 @@ object RemoteSubmit extends RemoteSubmitTrait {
   // noinspection DuplicatedCode
   @throws[Exception]
   private def restApiSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
-    //TODO Support Rest API TO Submit Job
-    ???
+    // retrieve standalone session cluster and submit flink job on session mode
+    var clusterDescriptor: StandaloneClusterDescriptor = null;
+    var client: ClusterClient[StandaloneClusterId] = null
+    try{
+      val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
+      clusterDescriptor = standAloneDescriptor._2
+      client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
+      logInfo(s"standalone submit WebInterfaceURL ${client.getWebInterfaceURL}")
+      val jobId = FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
+      SubmitResponse(jobId, flinkConfig.toMap, jobId)
+    }catch {
+      case e: Exception =>
+        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
+        e.printStackTrace()
+        throw e
+    }
   }
 
 
@@ -147,7 +164,7 @@ object RemoteSubmit extends RemoteSubmitTrait {
       client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
       val submitResult = client.submitJob(jobGraph)
       val jobId = submitResult.get().toString
-      val result = SubmitResponse("Standalone-" + flinkConfig.getString(JobManagerOptions.ADDRESS), flinkConfig.toMap, jobId)
+      val result = SubmitResponse(jobId, flinkConfig.toMap, jobId)
       result
     } catch {
       case e: Exception =>
