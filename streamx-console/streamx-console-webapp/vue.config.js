@@ -37,16 +37,7 @@ function resolve (dir) {
 module.exports = {
 
   devServer: {
-    // development server port 8000
-    port: 10000,
-    proxy: {
-      '/api/!*': {
-        target: 'http://test-hadoop-1:10000',
-        ws: false,
-        changeOrigin: true,
-        pathRewrite: { '^/api': '' }
-      }
-    }
+    port: 10000
   },
 
   pluginOptions: {

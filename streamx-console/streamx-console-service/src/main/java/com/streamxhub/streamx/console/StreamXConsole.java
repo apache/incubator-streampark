@@ -71,7 +71,7 @@ public class StreamXConsole {
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.info("[StreamX] application shutdown now, pid: " + getPid());
+            logger.info("application shutdown now, pid: " + getPid());
             if (pid != null) {
                 File pidFile = new File(pid);
                 pidFile.delete();
