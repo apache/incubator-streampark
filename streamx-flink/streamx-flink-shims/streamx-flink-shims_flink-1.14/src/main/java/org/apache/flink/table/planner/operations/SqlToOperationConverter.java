@@ -18,6 +18,8 @@
 
 package org.apache.flink.table.planner.operations;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.hint.HintStrategyTable;
 import org.apache.calcite.rel.hint.RelHint;
@@ -88,7 +90,7 @@ public class SqlToOperationConverter {
      * @param sqlNode SqlNode to execute on
      */
     public static Optional<Operation> convert(
-            FlinkPlannerImpl flinkPlanner, CatalogManager catalogManager, SqlNode sqlNode) {
+            FlinkPlannerImpl flinkPlanner, CatalogManager catalogManager, SqlNode sqlNode) throws JsonProcessingException {
         // validate the query
         final SqlNode validated = flinkPlanner.validate(sqlNode);
         SqlToOperationConverter converter =
@@ -363,19 +365,13 @@ public class SqlToOperationConverter {
         }
     }
 
-    private Map<String, Object> parseFunctionParameter(SqlCharStringLiteral functionParamter) {
+    private Map<String, Object> parseFunctionParameter(SqlCharStringLiteral functionParamter) throws JsonProcessingException {
         if (functionParamter == null) {
             return null;
         }
-        return Arrays.stream(functionParamter.getValueAs(String.class).split(","))
-                .map(entry -> entry.split("="))
-                .collect(Collectors.toMap(entry -> {
-                    String key = entry[0].trim();
-                    return key.substring(1,key.length()-1);
-                }, entry -> {
-                    String value = entry[1].trim();
-                    return value.substring(1,value.length()-1);
-                }));
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(functionParamter.getValueAs(String.class), Map.class);
+
     }
 
     private Operation convertAlterTableOptions(
@@ -428,7 +424,7 @@ public class SqlToOperationConverter {
     }
 
     /** Convert CREATE FUNCTION statement. */
-    private Operation convertCreateFunction(SqlCreateFunction sqlCreateFunction) {
+    private Operation convertCreateFunction(SqlCreateFunction sqlCreateFunction) throws JsonProcessingException {
         UnresolvedIdentifier unresolvedIdentifier =
                 UnresolvedIdentifier.of(sqlCreateFunction.getFunctionIdentifier());
 
@@ -518,7 +514,7 @@ public class SqlToOperationConverter {
     }
 
     /** Convert insert into statement. */
-    private Operation convertSqlInsert(RichSqlInsert insert) {
+    private Operation convertSqlInsert(RichSqlInsert insert) throws JsonProcessingException {
         // Get sink table name.
         List<String> targetTablePath = ((SqlIdentifier) insert.getTargetTableID()).names;
         // Get sink table hints.
@@ -838,7 +834,7 @@ public class SqlToOperationConverter {
     }
 
     /** Convert RICH EXPLAIN statement. */
-    private Operation convertRichExplain(SqlRichExplain sqlExplain) {
+    private Operation convertRichExplain(SqlRichExplain sqlExplain) throws JsonProcessingException {
         Operation operation;
         SqlNode sqlNode = sqlExplain.getStatement();
         Set<String> explainDetails = sqlExplain.getExplainDetails();
