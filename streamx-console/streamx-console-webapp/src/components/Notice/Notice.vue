@@ -172,8 +172,8 @@ export default {
       this.$swal.fire({
         title: message.title,
         icon: 'error',
-        width: 800,
-        html: '<pre style="font-size: 10px">' + message.context + '</pre>',
+        width: this.exceptionPropWidth(),
+        html: '<pre class="propException">' + message.context + '</pre>',
         focusConfirm: false,
       })
     },

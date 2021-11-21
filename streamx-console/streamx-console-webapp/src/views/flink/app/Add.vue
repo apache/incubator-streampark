@@ -1371,8 +1371,8 @@ export default {
             this.$swal.fire({
               title: 'Failed',
               icon: 'error',
-              width: 800,
-              html: '<pre style="font-size: 10px">' + resp['exception'] + '</pre>',
+              width: this.exceptionPropWidth(),
+              html: '<pre class="propException">' + resp['exception'] + '</pre>',
               focusConfirm: false
             })
           } else {
