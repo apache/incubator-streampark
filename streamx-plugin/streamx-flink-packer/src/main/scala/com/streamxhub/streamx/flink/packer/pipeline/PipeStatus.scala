@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.packer.pipeline
 
 /**
  * Status of building pipeline instance
+ *
  * @author Al-assad
  */
 //noinspection TypeAnnotation
@@ -29,11 +30,29 @@ object PipeStatus extends Enumeration {
 
   type PipeStatus = Value
 
-  val waiting = Value(1)
+  val ready = Value(1)
   val running = Value(2)
   val success = Value(3)
   val fail = Value(4)
 
   def isEnd(status: PipeStatus): Boolean = status == success || status == fail
+}
 
+/**
+ * Status of per step of building pipeline
+ *
+ * @author Al-assad
+ */
+//noinspection TypeAnnotation
+object StepStatus extends Enumeration {
+
+  type StepStatus = Value
+
+  val waiting = Value(1)
+  val running = Value(2)
+  val success = Value(3)
+  val fail = Value(4)
+  val skip = Value(5)
+
+  def isEnd(status: StepStatus): Boolean = status == success || status == fail || status == skip
 }
