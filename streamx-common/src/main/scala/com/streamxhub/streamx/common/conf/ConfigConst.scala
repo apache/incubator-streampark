@@ -308,6 +308,7 @@ object ConfigConst {
   val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
 
   val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
+  val STREAMX_HADOOP_USER_NAME = "streamx.hadoop-user-name"
 
   lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
