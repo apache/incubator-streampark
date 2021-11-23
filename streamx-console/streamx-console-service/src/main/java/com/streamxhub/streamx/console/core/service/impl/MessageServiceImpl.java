@@ -33,8 +33,8 @@ import com.streamxhub.streamx.console.core.dao.MessageMapper;
 import com.streamxhub.streamx.console.core.entity.Message;
 import com.streamxhub.streamx.console.core.enums.NoticeType;
 import com.streamxhub.streamx.console.core.service.MessageService;
+import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +51,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
     @Override
     public void push(Message message) {
         save(message);
-        //simpMessageSendingOperations.convertAndSend("/resp/notice", message);
+        WebSocketEndpoint.pushNotice(message);
     }
 
     @Override

@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.console.core.websocket;
 
+import com.streamxhub.streamx.console.core.entity.Message;
 import io.undertow.util.CopyOnWriteMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,7 @@ import java.util.Map;
 @ServerEndpoint(value = "/websocket/{id}")
 public class WebSocketEndpoint {
 
-    public static Map<String, Session> socketSessions = new CopyOnWriteMap<>();
+    private static Map<String, Session> socketSessions = new CopyOnWriteMap<>();
 
     @Getter
     private String id;
@@ -77,6 +78,17 @@ public class WebSocketEndpoint {
                 session.getBasicRemote().sendText(message);
             }
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void pushNotice(Message message) {
+        try {
+            Session session = socketSessions.get(message.getUserId().toString());
+            if (session != null) {
+                session.getBasicRemote().sendObject(message);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
