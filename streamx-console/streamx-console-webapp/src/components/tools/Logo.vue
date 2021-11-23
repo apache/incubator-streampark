@@ -2,10 +2,11 @@
   <div
     class="logo">
     <router-link
+      style="display: flex;justify-content: center;"
       :to="{path:'/flink/app'}">
       <img
         :src="logoImg"
-
+        style="transform: scale(0.8)"
         alt="logo">
     </router-link>
   </div>
@@ -29,7 +30,7 @@ export default {
   },
   data () {
     return {
-      logoImg: require('@/assets/imgs/logo2.svg')
+      logoImg: require('@/assets/imgs/logo2.png')
     }
   },
   methods: {
@@ -40,7 +41,7 @@ export default {
         },50)
       } else {
         setTimeout(()=>{
-          this.logoImg = require('@/assets/imgs/logo2.svg')
+          this.logoImg = require('@/assets/imgs/logo2.png')
         },50)
       }
     }

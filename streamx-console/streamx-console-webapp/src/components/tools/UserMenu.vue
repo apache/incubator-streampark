@@ -3,7 +3,7 @@
     class="user-wrapper">
 
     <div class="slogan">
-      <span class="slogan-streamx">Botech </span>, &nbsp;
+      <span class="slogan-streamx">Botech</span>&nbsp;
       <span class="slogan-action">
         <span class="slogan-make">Streaming</span>&nbsp;
         <span class="slogan-target">System</span>&nbsp;
