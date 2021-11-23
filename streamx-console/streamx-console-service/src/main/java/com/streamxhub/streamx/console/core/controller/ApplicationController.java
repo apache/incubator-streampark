@@ -109,14 +109,14 @@ public class ApplicationController {
 
     @PostMapping("deploy")
     @RequiresPermissions("app:deploy")
-    public RestResponse deploy(Application app) {
+    public RestResponse deploy(Application app, String socketId) {
         Application application = applicationService.getById(app.getId());
         assert application != null;
         try {
             applicationService.checkEnv(app);
             application.setBackUp(true);
             application.setBackUpDescription(app.getBackUpDescription());
-            applicationService.deploy(application);
+            applicationService.deploy(application, socketId);
             return RestResponse.create().data(true);
         } catch (Exception e) {
             return RestResponse.create().data(false).message(e.getMessage());
@@ -236,6 +236,12 @@ public class ApplicationController {
         StorageType storageType = Application.getStorageType(executionMode);
         String uploadPath = applicationService.upload(file, storageType);
         return RestResponse.create().data(uploadPath);
+    }
+
+    @PostMapping("downlog")
+    public RestResponse downlog(Long id) throws Exception {
+        applicationService.tailMvnDownloading(id);
+        return RestResponse.create();
     }
 
 

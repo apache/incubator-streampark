@@ -57,8 +57,15 @@ public class ProjectController {
 
     @PostMapping("build")
     @RequiresPermissions("project:build")
-    public RestResponse build(Long id) throws Exception {
-        projectService.build(id);
+    public RestResponse build(Long id, String socketId) throws Exception {
+        projectService.build(id, socketId);
+        return RestResponse.create();
+    }
+
+    @PostMapping("buildlog")
+    @RequiresPermissions("project:build")
+    public RestResponse buildLog(Long id) throws Exception {
+        projectService.tailBuildLog(id);
         return RestResponse.create();
     }
 

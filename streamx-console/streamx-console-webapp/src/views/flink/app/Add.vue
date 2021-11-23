@@ -979,6 +979,7 @@ import {
 } from './AddEdit'
 
 import {toPomString} from './Pom'
+import storage from "@/utils/storage"
 
 const Base64 = require('js-base64').Base64
 
@@ -1804,6 +1805,9 @@ export default {
           param[k] = v
         }
       }
+      const socketId = this.uuid()
+      storage.set('DOWN_SOCKET_ID',socketId)
+      param.socketId = socketId
       create(param).then((resp) => {
         const created = resp.data
         this.submitting = false

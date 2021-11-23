@@ -41,12 +41,12 @@ import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
+import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,9 +74,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Autowired
     private ApplicationMapper applicationMapper;
-
-    @Autowired
-    private SimpMessageSendingOperations simpMessageSendingOperations;
 
     private ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
@@ -135,7 +132,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public void build(Long id) throws Exception {
+    public void build(Long id, String socketId) throws Exception {
         Project project = getById(id);
         this.baseMapper.startBuild(project);
         StringBuilder builder = new StringBuilder();
@@ -143,7 +140,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         boolean cloneSuccess = cloneSourceCode(project);
         if (cloneSuccess) {
             executorService.execute(() -> {
-                boolean build = projectBuild(project);
+                boolean build = projectBuild(project, socketId);
                 if (build) {
                     this.baseMapper.successBuild(project);
                     // 发布到apps下
@@ -415,7 +412,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
      * @param project
      * @return
      */
-    private boolean projectBuild(Project project) {
+    private boolean projectBuild(Project project, String socketId) {
         StringBuilder builder = tailBuffer.get(project.getId());
         AtomicBoolean success = new AtomicBoolean(false);
         CommandUtils.execute(project.getMavenBuildCmd(), (line) -> {
@@ -427,9 +424,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 if (tailBeginning.containsKey(project.getId())) {
                     tailBeginning.remove(project.getId());
                     Arrays.stream(builder.toString().split("\n"))
-                        .forEach(out -> simpMessageSendingOperations.convertAndSend("/resp/build", out));
+                        .forEach(out -> WebSocketEndpoint.writeMessage(socketId, out));
                 }
-                simpMessageSendingOperations.convertAndSend("/resp/build", line);
+                WebSocketEndpoint.writeMessage(socketId, line);
             }
         });
         closeBuildLog(project.getId());
@@ -449,5 +446,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         tailOutMap.remove(id);
         tailBeginning.remove(id);
     }
+
 
 }

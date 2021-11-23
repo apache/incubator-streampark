@@ -238,6 +238,7 @@ public class Application implements Serializable {
     private transient Boolean savePointed = false;
     private transient Boolean drain = false;
     private transient Boolean allowNonRestored = false;
+    private transient String socketId;
     private transient String projectName;
     private transient String createTimeFrom;
     private transient String createTimeTo;

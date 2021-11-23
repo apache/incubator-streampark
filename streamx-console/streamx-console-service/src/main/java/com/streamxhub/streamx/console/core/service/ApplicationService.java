@@ -53,7 +53,7 @@ public interface ApplicationService extends IService<Application> {
 
     AppExistsState checkExists(Application app);
 
-    void deploy(Application app);
+    void deploy(Application app, String socketId);
 
     void cancel(Application app);
 

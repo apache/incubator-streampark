@@ -52,6 +52,7 @@ import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.runner.EnvInitializer;
 import com.streamxhub.streamx.console.core.service.*;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
+import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
 import com.streamxhub.streamx.console.system.authentication.ServerComponent;
 import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
@@ -68,7 +69,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -152,9 +152,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private EnvInitializer envInitializer;
-
-    @Autowired
-    private SimpMessageSendingOperations simpMessageSendingOperations;
 
     @Autowired
     private K8sFlinkTrkMonitor k8sFlinkTrkMonitor;
@@ -532,7 +529,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 configService.create(appParam, true);
             }
             assert appParam.getId() != null;
-            deploy(appParam);
+            deploy(appParam, appParam.getSocketId());
             return true;
         }
         return false;
@@ -670,7 +667,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void deploy(Application application) {
+    public void deploy(Application application, String socketId) {
         executorService.submit(() -> {
             try {
                 FlinkTrackingTask.refreshTracking(application.getId(), () -> {
@@ -711,7 +708,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
                             assert flinkSql != null;
                             application.setDependency(flinkSql.getDependency());
-                            downloadDependency(application);
+                            downloadDependency(application, socketId);
                         }
                         // 4) 更新发布状态,需要重启的应用则重新启动...
                         if (application.getRestart()) {
@@ -761,7 +758,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         });
     }
 
-    private void downloadDependency(Application application) throws Exception {
+    private void downloadDependency(Application application, String socketId) throws Exception {
         //1) init.
         File jobLocalHome = application.getLocalFlinkSqlHome();
         if (jobLocalHome.exists()) {
@@ -819,16 +816,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             if (tailBeginning.containsKey(id)) {
                                 tailBeginning.remove(id);
                                 Arrays.stream(logBuilder.toString().split("\n"))
-                                    .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/mvn", x));
+                                    .forEach(x -> WebSocketEndpoint.writeMessage(socketId, x));
                             } else {
-                                simpMessageSendingOperations.convertAndSend("/resp/mvn", out);
+                                WebSocketEndpoint.writeMessage(socketId, out);
                             }
                         }
                         logBuilder.append(out).append("\n");
                     }
                 ));
             } catch (Exception e) {
-                simpMessageSendingOperations.convertAndSend("/resp/mvn", "[Exception] ".concat(e.getMessage()));
+                WebSocketEndpoint.writeMessage(socketId, "[Exception] ".concat(e.getMessage()));
                 throw new ServiceException("downloadDependency error: " + e.getMessage());
             } finally {
                 tailOutMap.remove(id);
