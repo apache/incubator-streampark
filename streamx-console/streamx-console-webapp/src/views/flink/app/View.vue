@@ -299,22 +299,29 @@
             <span
               :class="{pointer: record.state === 6 || record.state === 7 || record['optionState'] === 4 }"
               @click="handleView(record)">
-              <template
-                v-if="record.deploy === 0"
-                v-for="(fragment, i) in text
-                  .toString()
-                  .substr(0,(text.length > 30 ? 30: text.length ))
-                  .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                <mark
-                  v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                  :key="i"
-                  class="highlight">
-                  {{ fragment }}
-                </mark>
-                <template v-else>
-                  {{ fragment }}
-                </template>
-              </template>
+              <tempalte
+                v-if="record.deploy === 0">
+                <a-tooltip placement="top">
+                  <template slot="title">
+                    {{ text }}
+                  </template>
+                  <template
+                      v-for="(fragment, i) in text
+                      .toString()
+                      .substr(0,(text.length > 30 ? 30: text.length ))
+                      .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                    <mark
+                      v-if="fragment.toLowerCase() === searchText.toLowerCase()"
+                      :key="i"
+                      class="highlight">
+                      {{ fragment }}
+                    </mark>
+                    <template v-else>
+                      {{ fragment }}
+                    </template>
+                  </template>
+                </a-tooltip>
+              </tempalte>
               <template v-else>
                 <a-tooltip placement="top">
                   <template slot="title">
