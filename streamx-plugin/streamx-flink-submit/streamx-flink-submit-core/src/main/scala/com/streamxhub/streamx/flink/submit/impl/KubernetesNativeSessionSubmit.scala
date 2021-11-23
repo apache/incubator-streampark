@@ -43,14 +43,14 @@ import org.apache.flink.util.IOUtils
 
 import java.io.File
 import scala.collection.JavaConversions._
-import scala.util.Try
+import scala.language.postfixOps
+import scala.util.{Failure, Success, Try}
 
 /**
  * kubernetes native session mode submit
  */
 object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Logger {
 
-  // noinspection DuplicatedCode
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
@@ -70,7 +70,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     FsOperator.lfs.delete(buildWorkspace)
     FsOperator.lfs.mkdirs(buildWorkspace)
 
-    // build fat-jar, output file name: streamx-flinkjob_<job-name>_<timespamp>, like: streamx-flinkjob_myjobtest_20211024134822
+    // build fat-jar, output file name: streamx-flinkjob_<job-name>_<timestamp>, like: streamx-flinkjob_myjobtest_20211024134822
     val fatJar = {
       val fatJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}_${DateUtils.now(fullCompact)}.jar"
       submitRequest.developmentMode match {
@@ -91,11 +91,17 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     logInfo(s"[flink-submit] already built flink job fat-jar. " +
       s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
 
-    // rest api submit plan
-    restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
+    // Prioritize using JobGraph submit plan while using Rest API submit plan as backup
+    Try(jobGraphSubmitPlan(submitRequest, flinkConfig, jobID, fatJar))
+      .recover {
+        case _ =>
+          logInfo(s"[flink-submit] JobGraph Submit Plan failed, try Rest API Submit Plan now.")
+          restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
+      } match {
+      case Success(submitResponse) => submitResponse
+      case Failure(ex) => throw ex
+    }
 
-    // old submit plan
-    // jobGraphSubmitPlan(submitRequest, flinkConfig, jobID, fatJar)
   }
 
   /**
