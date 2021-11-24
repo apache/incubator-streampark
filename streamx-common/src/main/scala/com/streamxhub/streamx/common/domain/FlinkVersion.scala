@@ -78,9 +78,12 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
 
   // flink major version, like "1.13", "1.14"
   lazy val majorVersion: String = {
-    val matcher = FLINK_VER_PATTERN.matcher(version)
-    matcher.matches()
-    matcher.group(1)
+    if (version != null) {
+      val matcher = FLINK_VER_PATTERN.matcher(version)
+      matcher.matches()
+      matcher.group(1)
+    }
+    null
   }
 
   lazy val flinkDistJar: File = {

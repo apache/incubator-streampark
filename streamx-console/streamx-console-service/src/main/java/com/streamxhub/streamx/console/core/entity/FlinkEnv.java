@@ -24,6 +24,7 @@ import com.streamxhub.streamx.common.util.PropertiesUtils;
 import lombok.Data;
 import net.minidev.json.annotate.JsonIgnore;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,8 +72,19 @@ public class FlinkEnv implements Serializable {
 
     public void doSetVersion() {
         assert this.flinkHome != null;
-        this.setVersion(this.getFlinkVersion().version());
+        String version = this.getFlinkVersion().version();
+        doCheckVersion(version);
+        this.setVersion(version);
         this.setScalaVersion(this.getFlinkVersion().scalaVersion());
+    }
+
+    private void doCheckVersion(String version) {
+        if (StringUtils.isEmpty(version)) {
+            throw new IllegalArgumentException("[StreamX] parse flink version failed.");
+        }
+        if (version.split("\\.").length != 3) {
+            throw new IllegalArgumentException("[StreamX] parse illegal version.");
+        }
     }
 
     @JsonIgnore
