@@ -20,8 +20,16 @@
  */
 package com.streamxhub.streamx.flink.packer.pipeline
 
+import scala.language.postfixOps
+
 /**
- * Status of building pipeline instance
+ * Status of building pipeline instance.
+ * state machine:
+ * ┌───────────────────────────────────┐
+ * │                      ┌─► success  │
+ * │  pending ─► running ─┤            │
+ * │                      └─► failure  │
+ * └───────────────────────────────────┘
  *
  * @author Al-assad
  */
@@ -30,16 +38,32 @@ object PipeStatus extends Enumeration {
 
   type PipeStatus = Value
 
-  val ready = Value(1)
+  val pending = Value(1)
   val running = Value(2)
   val success = Value(3)
-  val fail = Value(4)
+  val failure = Value(4)
 
-  def isEnd(status: PipeStatus): Boolean = status == success || status == fail
+  def isEnd(status: PipeStatus): Boolean = status == success || status == failure
+
+  def copy(status: PipeStatus): PipeStatus = status match {
+    case pending => pending
+    case success => success
+    case running => running
+    case failure => failure
+  }
 }
 
 /**
- * Status of per step of building pipeline
+ * Status of per step of building pipeline.
+ * state machine:
+ * ┌──────────────────────────────────┐
+ * │                     ┌─► success  │
+ * │ pending ─► running ─┤            │
+ * │              │      └─► failure  │
+ * │              │             │     │
+ * │              │             ▼     │
+ * │              └────────► skipped  │
+ * └──────────────────────────────────┘
  *
  * @author Al-assad
  */
@@ -51,8 +75,17 @@ object StepStatus extends Enumeration {
   val waiting = Value(1)
   val running = Value(2)
   val success = Value(3)
-  val fail = Value(4)
-  val skip = Value(5)
+  val failure = Value(4)
+  val skipped = Value(5)
 
-  def isEnd(status: StepStatus): Boolean = status == success || status == fail || status == skip
+  def isEnd(status: StepStatus): Boolean = status == success || status == failure || status == skipped
+
+  def copy(status: StepStatus): StepStatus = status match {
+    case waiting => waiting
+    case running => running
+    case success => success
+    case failure => failure
+    case skipped => skipped
+  }
+
 }

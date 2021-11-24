@@ -21,6 +21,8 @@
 package com.streamxhub.streamx.flink.packer.pipeline
 
 /**
+ * Building pipeline type.
+ *
  * @author Al-assad
  * @param name  name of pipeline used as the identifier of it.
  * @param desc  short description of pipeline.
@@ -36,55 +38,62 @@ sealed abstract class PipeType(val name: String,
 }
 
 /**
- * Enum of Building Pipeline
+ * Enum of building pipeline type.
  *
  * @author Al-assad
  */
 object PipeType {
 
+  /**
+   * flink kubernetes-native session mode
+   */
   case object FlinkNativeK8sSession extends PipeType(
     name = "flink_native_k8s_session",
     desc = "flink native kubernetes session mode task building pipeline",
     steps = Seq(
       1 -> "create building workspace",
-      2 -> "output flink kubernetes pod template",
-      3 -> "build shaded flink app jar"
+      2 -> "build shaded flink app jar"
     )
   )
 
+  /**
+   * flink kubernetes-native application mode
+   */
   case object FlinkNativeK8sApplication extends PipeType(
     name = "flink_native_k8s_application",
     desc = "flink native kubernetes session mode task building pipeline",
     steps = Seq(
       1 -> "create building workspace",
-      2 -> "output kubernetes pod template",
+      2 -> "export kubernetes pod template",
       3 -> "build shaded flink app jar",
-      4 -> "copy extra flink libraries",
-      5 -> "output flink app dockerfile",
-      6 -> "pull flink app base docker image",
-      7 -> "build flink app docker image",
-      8 -> "push flink app docker image"
+      4 -> "export flink app dockerfile",
+      5 -> "pull flink app base docker image",
+      6 -> "build flink app docker image",
+      7 -> "push flink app docker image"
     )
   )
 
-  // TODO case object FlinkYarnApplication extends PipelineType
+  // case object FlinkYarnApplication extends PipelineType
 
-  // TODO case object FlinkYarnSession extends PipelineType
+  // case object FlinkYarnSession extends PipelineType
 
-  // TODO case object FlinkStandalone extends PipelineType
+  // case object FlinkStandalone extends PipelineType
 
+  /**
+   * unknown type
+   */
   case object Unknown extends PipeType("Unknown", "Unknown", Seq.empty)
 
   /**
-   * Get all pipeline types.
+   * get all pipeline types.
    */
   val allTypes: Seq[PipeType] = Seq(FlinkNativeK8sSession, FlinkNativeK8sApplication)
 
   /**
-   * Get PipelineType with name, when not found, return Unknown type.
+   * get PipelineType with name.
    *
-   * @param name name of pipeline
-   * @return PipelineType
+   * @param name name of building pipeline type
+   * @return When not found would return Unknown type.
    */
   def withName(name: String): PipeType = allTypes.find(_.name == name).getOrElse(Unknown)
 

@@ -20,20 +20,28 @@
  */
 package com.streamxhub.streamx.flink.packer.pipeline
 
+import javax.annotation.Nullable
+
 /**
  * Error details of building pipeline.
  *
- * @author Al-assad
- * @param summary summary of error.
- * @param details details information of details such as Exception Stack or Exception message.
+ * @param summary   summary of error.
+ * @param exception exception stack.
  */
-case class PipeErr(summary: String, details: String) {
+case class PipeErr(summary: String, @Nullable exception: Throwable) {
   def isEmpty: Boolean = false
+
+  def exceptStackTraceContent: String = if (exception == null) "" else exception.getStackTrace.mkString("\n")
+}
+
+
+object PipeErr {
+  def empty(): PipeErr = EmptyPipeErr()
 }
 
 /**
  * empty error
  */
-case class EmptyPipeErr() extends PipeErr("", "") {
+case class EmptyPipeErr() extends PipeErr("", null) {
   override def isEmpty: Boolean = true
 }
