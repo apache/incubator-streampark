@@ -61,12 +61,15 @@ public class EnvInitializer implements ApplicationRunner {
     private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
         "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+    private static final String MKDIR_LOG = "mkdir {} starting ...";
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_LOCAL(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
         overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_REMOTE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
         overrideSystemProp(ConfigConst.KEY_DOCKER_IMAGE_NAMESPACE(), ConfigConst.DOCKER_IMAGE_NAMESPACE_DEFAULT());
-        overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), ConfigConst.DEFAULT_HADOOP_USER_NAME());
+        String hadoopUserName = context.getEnvironment().getProperty(ConfigConst.STREAMX_HADOOP_USER_NAME(), ConfigConst.DEFAULT_HADOOP_USER_NAME());
+        overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
         //automatic in local
         storageInitialize(LFS);
     }
@@ -79,9 +82,8 @@ public class EnvInitializer implements ApplicationRunner {
 
     /**
      * @param storageType
-     * @throws Exception
      */
-    public synchronized void storageInitialize(StorageType storageType) throws Exception {
+    public synchronized void storageInitialize(StorageType storageType) {
         if (initialized.get(storageType) == null) {
             FsOperator fsOperator = FsOperator.of(storageType);
             Workspace workspace = Workspace.of(storageType);
@@ -89,38 +91,38 @@ public class EnvInitializer implements ApplicationRunner {
             if (storageType.equals(LFS)) {
                 String localDist = workspace.APP_LOCAL_DIST();
                 if (!fsOperator.exists(localDist)) {
-                    log.info("mkdir {} starting ...", localDist);
+                    log.info(MKDIR_LOG, localDist);
                     fsOperator.mkdirs(localDist);
                 }
             }
 
             String appUploads = workspace.APP_UPLOADS();
             if (!fsOperator.exists(appUploads)) {
-                log.info("mkdir {} starting ...", appUploads);
+                log.info(MKDIR_LOG, appUploads);
                 fsOperator.mkdirs(appUploads);
             }
 
             String appWorkspace = workspace.APP_WORKSPACE();
             if (!fsOperator.exists(appWorkspace)) {
-                log.info("mkdir {} starting ...", appWorkspace);
+                log.info(MKDIR_LOG, appWorkspace);
                 fsOperator.mkdirs(appWorkspace);
             }
 
             String appBackups = workspace.APP_BACKUPS();
             if (!fsOperator.exists(appBackups)) {
-                log.info("mkdir {} starting ...", appBackups);
+                log.info(MKDIR_LOG, appBackups);
                 fsOperator.mkdirs(appBackups);
             }
 
             String appSavePoints = workspace.APP_SAVEPOINTS();
             if (!fsOperator.exists(appSavePoints)) {
-                log.info("mkdir {} starting ...", appSavePoints);
+                log.info(MKDIR_LOG, appSavePoints);
                 fsOperator.mkdirs(appSavePoints);
             }
 
             String appJars = workspace.APP_JARS();
             if (!fsOperator.exists(appJars)) {
-                log.info("mkdir {} starting ...", appJars);
+                log.info(MKDIR_LOG, appJars);
                 fsOperator.mkdirs(appJars);
             }
 
@@ -177,7 +179,7 @@ public class EnvInitializer implements ApplicationRunner {
         String appFlink = workspace.APP_FLINK();
         FsOperator fsOperator = FsOperator.of(storageType);
         if (!fsOperator.exists(appFlink)) {
-            log.info("mkdir {} starting ...", appFlink);
+            log.info(MKDIR_LOG, appFlink);
             fsOperator.mkdirs(appFlink);
         }
         String flinkName = new File(flinkLocalHome).getName();
