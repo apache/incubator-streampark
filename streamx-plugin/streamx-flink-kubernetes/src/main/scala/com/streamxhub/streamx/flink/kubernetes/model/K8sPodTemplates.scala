@@ -25,7 +25,14 @@ package com.streamxhub.streamx.flink.kubernetes.model
  *
  * @author Al-assad
  */
-case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "", tmPodTemplate: String = "")
+case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "", tmPodTemplate: String = "") {
+
+  def nonEmpty: Boolean = Option(podTemplate).exists(_.trim.nonEmpty) ||
+    Option(jmPodTemplate).exists(_.trim.nonEmpty) ||
+    Option(tmPodTemplate).exists(_.trim.nonEmpty)
+
+  def isEmpty: Boolean = !nonEmpty
+}
 
 object K8sPodTemplates {
 
