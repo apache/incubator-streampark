@@ -21,15 +21,14 @@
 package com.streamxhub.streamx.common.util
 
 import com.streamxhub.streamx.common.fs.LfsOperator
-
-import java.io.File
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 
-import scala.util.{Failure, Success, Try}
+import java.io.File
+import java.util.{Map => JavaMap}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
-import java.util.{Map => JavaMap}
+import scala.util.Try
 
 
 /**
@@ -46,13 +45,11 @@ object HadoopConfigUtils {
   /**
    * Get Hadoop configuration directory path from system.
    */
-  def getSystemHadoopConfDir: String =
-    Try(
-      Try(FileUtils.getPathFromEnv("HADOOP_CONF_DIR")) match {
-        case Success(value) => value
-        case Failure(_) => FileUtils.resolvePath(FileUtils.getPathFromEnv("HADOOP_HOME"), "/etc/hadoop")
-      }
-    ).getOrElse("")
+  def getSystemHadoopConfDir: String = {
+    Try(FileUtils.getPathFromEnv("HADOOP_CONF_DIR"))
+      .recover { case _ => FileUtils.resolvePath(FileUtils.getPathFromEnv("HADOOP_HOME"), "/etc/hadoop") }
+      .getOrElse("")
+  }
 
   /**
    * Get Hive configuration directory path from system.
@@ -64,13 +61,13 @@ object HadoopConfigUtils {
    * Such as core-site.xml, hdfs-site.xml, hive-site.xml.
    */
   def replaceHostWithIP(configFile: File): Unit = {
-    if (!configFile.exists || !configFile.isFile || !configFile.getName.endsWith(".xml"))
-      return
-    // get hosts from system
-    val hostsMap = HostsUtils.getSortSystemHosts
-    if (hostsMap.isEmpty)
-      return
-    rewriteHostIpMapper(configFile, hostsMap)
+    if (configFile.exists && configFile.isFile && configFile.getName.endsWith(".xml")) {
+      // get hosts from system
+      val hostsMap = HostsUtils.getSortSystemHosts
+      if (hostsMap.nonEmpty) {
+        rewriteHostIpMapper(configFile, hostsMap)
+      }
+    }
   }
 
   /**
