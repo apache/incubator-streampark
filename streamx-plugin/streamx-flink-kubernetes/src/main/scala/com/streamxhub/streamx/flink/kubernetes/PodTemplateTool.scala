@@ -69,7 +69,9 @@ object PodTemplateTool {
 
 }
 
-
+/**
+ * @param tmplFiles key of flink pod template configuration -> absolute file path of pod template
+ */
 case class K8sPodTemplateFiles(tmplFiles: Map[String, String]) {
 
   /**
