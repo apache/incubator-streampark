@@ -21,6 +21,7 @@
 package com.streamxhub.streamx.common.domain
 
 import com.streamxhub.streamx.common.util.CommandUtils
+import org.apache.commons.lang.StringUtils
 
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
@@ -73,17 +74,30 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
         }
       }
     })
-    flinkVersion.get
+    val version = flinkVersion.get
+    doCheckVersion(version)
+    version
+  }
+
+  // flink version, like "1.13.0", "1.14.0"
+  def doCheckVersion(version: String): Unit = {
+    if (StringUtils.isEmpty(version)) {
+      throw new IllegalArgumentException("[StreamX] parse flink version failed.");
+    }
+    if (version.split("\\.").length != 3) {
+      throw new IllegalArgumentException("[StreamX] parse illegal version.");
+    }
   }
 
   // flink major version, like "1.13", "1.14"
   lazy val majorVersion: String = {
-    if (version != null) {
+    if (version == null) {
+      null
+    } else {
       val matcher = FLINK_VER_PATTERN.matcher(version)
       matcher.matches()
       matcher.group(1)
     }
-    null
   }
 
   lazy val flinkDistJar: File = {
