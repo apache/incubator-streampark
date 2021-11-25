@@ -16,10 +16,12 @@
           v-decorator="[ 'jobType' , {rules: [{ required: true, message: 'Job Type is required' }]} ]">
           <a-select-option
             value="customcode">
+            <a-icon type="code" style="color: #108ee9"/>
             Custom Code
           </a-select-option>
           <a-select-option
             value="sql">
+            <svg-icon name="fql" style="color: #108ee9"/>
             Flink SQL
           </a-select-option>
         </a-select>
@@ -248,25 +250,25 @@
 
       <template v-else>
         <a-form-item
-          label="Source Type"
+          label="Resource Form"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
-            placeholder="Please select Source Type"
-            @change="handleChangeSourceType"
-            v-decorator="[ 'sourceType' , {rules: [{ required: true, message: 'Source Type is required' }]} ]">
+            placeholder="Please select resource from"
+            @change="handleChangeResourceForm"
+            v-decorator="[ 'resource' , {rules: [{ required: true, message: 'resource from Type is required' }]} ]">
             <a-select-option value="csv">
               <svg-icon role="img" name="github"/>
-              build from CSV
+              CICD <span class="gray">(build from CSV)</span>
             </a-select-option>
             <a-select-option value="upload">
               <svg-icon role="img" name="upload"/>
-              upload local job
+              Upload  <span class="gray">(upload local job)</span>
             </a-select-option>
           </a-select>
         </a-form-item>
 
-        <template v-if="sourceType === 'upload'">
+        <template v-if="resource === 'upload'">
           <a-form-item
             label="Upload Job Jar"
             :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -979,7 +981,7 @@ import {
 } from './AddEdit'
 
 import {toPomString} from './Pom'
-import storage from "@/utils/storage"
+import storage from '@/utils/storage'
 
 const Base64 = require('js-base64').Base64
 
@@ -989,7 +991,7 @@ export default {
   data() {
     return {
       jobType: 'sql',
-      sourceType: 'csv',
+      resource: 'csv',
       tableEnv: 1,
       projectList: [],
       projectId: null,
@@ -1222,14 +1224,14 @@ export default {
         this.handleInitSQLMode()
       } else {
         this.form.getFieldDecorator('jobType', {initialValue: 'customcode'})
-        this.form.getFieldDecorator('sourceType', {initialValue: 'csv'})
+        this.form.getFieldDecorator('resource', {initialValue: 'csv'})
         this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.defaultValue)
       }
       this.handleK8sPodTemplateEditor()
     },
 
-    handleChangeSourceType(value) {
-      this.sourceType = value
+    handleChangeResourceForm(value) {
+      this.resource = value
     },
 
     handleInitSQLMode() {
