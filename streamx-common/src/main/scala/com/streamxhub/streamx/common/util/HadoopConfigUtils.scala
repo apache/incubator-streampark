@@ -20,11 +20,12 @@
  */
 package com.streamxhub.streamx.common.util
 
+import com.google.common.collect.Maps
 import com.streamxhub.streamx.common.fs.LfsOperator
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 
 import java.io.File
-import java.util.{Map => JavaMap}
+import java.util.{Map => JavaMap, Optional => JOption}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
@@ -45,16 +46,20 @@ object HadoopConfigUtils {
   /**
    * Get Hadoop configuration directory path from system.
    */
-  def getSystemHadoopConfDir: String = {
+  def getSystemHadoopConfDir: Option[String] = {
     Try(FileUtils.getPathFromEnv("HADOOP_CONF_DIR"))
       .recover { case _ => FileUtils.resolvePath(FileUtils.getPathFromEnv("HADOOP_HOME"), "/etc/hadoop") }
-      .getOrElse("")
+      .toOption
   }
+
+  def getSystemHadoopConfDirAsJava: JOption[String] = JOption.ofNullable(getSystemHadoopConfDir.orNull)
 
   /**
    * Get Hive configuration directory path from system.
    */
-  def getSystemHiveConfDir: String = Try(FileUtils.getPathFromEnv("HIVE_CONF_DIR")).getOrElse("")
+  def getSystemHiveConfDir: Option[String] = Try(FileUtils.getPathFromEnv("HIVE_CONF_DIR")).toOption
+
+  def getSystemHiveConfDirAsJava: JOption[String] = JOption.ofNullable(getSystemHiveConfDir.orNull)
 
   /**
    * Replace host information with ip of hadoop config file or hive config file.
@@ -107,19 +112,27 @@ object HadoopConfigUtils {
    * Read system hadoop config to Map
    */
   def readSystemHadoopConf: JavaMap[String, String] =
-    LfsOperator.listDir(getSystemHadoopConfDir)
-      .filter(f => HADOOP_CLIENT_CONF_FILES.contains(f.getName))
-      .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
-      .toMap.asJava
+    getSystemHadoopConfDir
+      .map(confDir =>
+        LfsOperator.listDir(confDir)
+          .filter(f => HADOOP_CLIENT_CONF_FILES.contains(f.getName))
+          .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
+          .toMap.asJava)
+      .getOrElse(Maps.newHashMap)
 
   /**
    * Read system hive config to Map
    */
-  def readSystemHiveConf: JavaMap[String, String] =
-    LfsOperator.listDir(getSystemHiveConfDir)
-      .filter(f => HIVE_CLIENT_CONF_FILES.contains(f.getName))
-      .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
-      .toMap.asJava
+  def readSystemHiveConf: JavaMap[String, String] = {
+    getSystemHiveConfDir.map(
+      confDir =>
+        LfsOperator.listDir(confDir)
+          .filter(f => HIVE_CLIENT_CONF_FILES.contains(f.getName))
+          .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
+          .toMap.asJava)
+      .getOrElse(Maps.newHashMap)
+
+  }
 
 
 }

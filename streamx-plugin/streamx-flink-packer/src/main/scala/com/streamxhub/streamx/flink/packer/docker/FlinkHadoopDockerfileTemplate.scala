@@ -87,19 +87,21 @@ object FlinkHadoopDockerfileTemplate {
                            flinkExtraLibPaths: Set[String]): FlinkHadoopDockerfileTemplate = {
     // get hadoop and hive config directory from system and copy to workspacePath
     val hadoopConfDir = HadoopConfigUtils.getSystemHadoopConfDir match {
-      case hadoopConf if !LfsOperator.exists(hadoopConf) => ""
+      case None => ""
+      case hadoopConf if !LfsOperator.exists(hadoopConf.get) => ""
       case hadoopConf =>
         val dstDir = s"${workspacePath}/hadoop-conf"
         LfsOperator.mkCleanDirs(dstDir)
-        LfsOperator.copyDir(hadoopConf, dstDir)
+        LfsOperator.copyDir(hadoopConf.get, dstDir)
         dstDir
     }
     val hiveConfDir = HadoopConfigUtils.getSystemHiveConfDir match {
-      case hiveConf if !LfsOperator.exists(hiveConf) => ""
+      case None => ""
+      case hiveConf if !LfsOperator.exists(hiveConf.get) => ""
       case hiveConf =>
         val dstDir = s"${workspacePath}/hive-conf"
         LfsOperator.mkCleanDirs(dstDir)
-        LfsOperator.copyDir(hiveConf, dstDir)
+        LfsOperator.copyDir(hiveConf.get, dstDir)
         dstDir
     }
     FlinkHadoopDockerfileTemplate(workspacePath, flinkBaseImage, flinkMainJarPath, flinkExtraLibPaths,
