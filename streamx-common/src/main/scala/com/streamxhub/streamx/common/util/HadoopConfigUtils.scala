@@ -118,7 +118,7 @@ object HadoopConfigUtils {
           .filter(f => HADOOP_CLIENT_CONF_FILES.contains(f.getName))
           .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
           .toMap.asJava)
-      .getOrElse(Maps.newHashMap)
+      .getOrElse(Maps.newHashMap[String, String])
 
   /**
    * Read system hive config to Map
@@ -130,7 +130,7 @@ object HadoopConfigUtils {
           .filter(f => HIVE_CLIENT_CONF_FILES.contains(f.getName))
           .map(f => f.getName -> ApacheFileUtils.readFileToString(f, "UTF-8"))
           .toMap.asJava)
-      .getOrElse(Maps.newHashMap)
+      .getOrElse(Maps.newHashMap[String, String])
 
   }
 
