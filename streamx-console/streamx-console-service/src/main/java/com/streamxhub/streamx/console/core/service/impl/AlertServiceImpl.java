@@ -25,6 +25,7 @@ import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
+import com.streamxhub.streamx.console.core.entity.SenderSMS;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.metrics.flink.MailTemplate;
@@ -56,6 +57,8 @@ public class AlertServiceImpl implements AlertService {
     private SettingService settingService;
 
     private SenderEmail senderEmail;
+
+    private SenderSMS senderSMS;
 
     @PostConstruct
     public void initConfig() throws Exception {
@@ -89,6 +92,9 @@ public class AlertServiceImpl implements AlertService {
     public void alert(Application application, FlinkAppState appState) {
         if (this.senderEmail == null) {
             this.senderEmail = settingService.getSenderEmail();
+        }
+        if (this.senderSMS == null) {
+            this.senderSMS = settingService.getSenderSMS();
         }
         if (this.senderEmail != null && Utils.notEmpty(application.getAlertEmail())) {
             MailTemplate mail = getMailTemplate(application);

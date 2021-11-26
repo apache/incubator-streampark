@@ -26,6 +26,7 @@ import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
+import com.streamxhub.streamx.console.core.entity.SenderSMS;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
@@ -142,5 +143,19 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         return settings.get(SettingService.KEY_MAVEN_REPOSITORY).getValue();
     }
 
+    @Override
+    public SenderSMS getSenderSMS() {
+        try {
+            String number = settings.get(SettingService.KEY_ALERT_PHONE_NUMBER).getValue();
+            String message = settings.get(SettingService.KEY_ALERT_PHONE_MESSAGE).getValue();
 
+            SenderSMS senderSMS = new SenderSMS();
+            senderSMS.setPhoneNumber(number);
+            senderSMS.setPhoneMessage(message);
+            return senderSMS;
+        } catch (Exception e) {
+            log.warn("Fault Alert SMS is not set.");
+        }
+        return null;
+    }
 }
