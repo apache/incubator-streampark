@@ -129,10 +129,13 @@ object LfsOperator extends FsOperator with Logger {
   /**
    * list file under directory, one level of traversal only
    */
-  def listDir(path: String): Array[File] = new File(path) match {
-    case f if !f.exists => Array()
-    case f if f.isFile => Array(f)
-    case f => f.listFiles()
+  def listDir(path: String): Array[File] = {
+    if (path == null || path.trim.isEmpty) Array.empty
+    else new File(path) match {
+      case f if !f.exists => Array()
+      case f if f.isFile => Array(f)
+      case f => f.listFiles()
+    }
   }
 
 
