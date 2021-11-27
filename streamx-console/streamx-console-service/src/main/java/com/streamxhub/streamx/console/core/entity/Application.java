@@ -215,6 +215,12 @@ public class Application implements Serializable {
     private String k8sTmPodTemplate;
 
     /**
+     * 1: cicd (build from csv)
+     * 2: upload (upload local jar job)
+     */
+    private Integer resourceFrom;
+
+    /**
      * running job
      */
     private transient JobsOverview.Task overview;

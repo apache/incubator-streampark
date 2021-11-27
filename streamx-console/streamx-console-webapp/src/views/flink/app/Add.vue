@@ -256,19 +256,19 @@
           <a-select
             placeholder="Please select resource from"
             @change="handleChangeResourceForm"
-            v-decorator="[ 'resource' , {rules: [{ required: true, message: 'resource from Type is required' }]} ]">
-            <a-select-option value="csv">
+            v-decorator="[ 'resourceFrom' , {rules: [{ required: true, message: 'resource from Type is required' }]} ]">
+            <a-select-option value="cvs">
               <svg-icon role="img" name="github"/>
-              CICD <span class="gray">(build from CSV)</span>
+              CICD <span class="gray">(build from CVS)</span>
             </a-select-option>
             <a-select-option value="upload">
               <svg-icon role="img" name="upload"/>
-              Upload  <span class="gray">(upload local job)</span>
+              Upload <span class="gray">(upload local job)</span>
             </a-select-option>
           </a-select>
         </a-form-item>
 
-        <template v-if="resource === 'upload'">
+        <template v-if="resourceFrom === 'upload'">
           <a-form-item
             label="Upload Job Jar"
             :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -552,7 +552,7 @@
             <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
             Operation after checkpoint failure, e.g:<br>
             Within <span class="note-elem">5 minutes</span>(checkpoint failure rate interval), if the number of checkpoint failures reaches <span
-              class="note-elem">10</span> (max failures per interval),action will be triggered(alert or restart job)
+            class="note-elem">10</span> (max failures per interval),action will be triggered(alert or restart job)
           </span>
         </p>
       </a-form-item>
@@ -717,7 +717,8 @@
         <p class="conf-desc" style="margin-top: -3px">
           <span class="note-info">
             <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
-            Explicitly configuring both <span class="note-elem">total process memory</span> and <span class="note-elem">total Flink memory</span> is not recommended. It may lead to deployment failures due to potential memory configuration conflicts. Configuring other memory components also requires caution as it can produce further configuration conflicts,
+            Explicitly configuring both <span class="note-elem">total process memory</span> and <span
+            class="note-elem">total Flink memory</span> is not recommended. It may lead to deployment failures due to potential memory configuration conflicts. Configuring other memory components also requires caution as it can produce further configuration conflicts,
             The easiest way is to set <span class="note-elem">total process memory</span>
           </span>
         </p>
@@ -992,7 +993,7 @@ export default {
   data() {
     return {
       jobType: 'sql',
-      resource: 'csv',
+      resourceFrom: null,
       tableEnv: 1,
       projectList: [],
       projectId: null,
@@ -1207,10 +1208,12 @@ export default {
       this.form.getFieldDecorator('resolveOrder', {initialValue: 0})
       this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
       this.form.getFieldDecorator('restartSize', {initialValue: 0})
-      listFlinkEnv().then((resp)=> {
-        if(resp.data.length > 0) {
+      listFlinkEnv().then((resp) => {
+        if (resp.data.length > 0) {
           this.flinkEnvs = resp.data
-          const v = this.flinkEnvs.filter((v) => {return v.isDefault})[0]
+          const v = this.flinkEnvs.filter((v) => {
+            return v.isDefault
+          })[0]
           this.form.getFieldDecorator('versionId', {initialValue: v.id})
           this.versionId = v.id
         }
@@ -1224,14 +1227,14 @@ export default {
         this.handleInitSQLMode()
       } else {
         this.form.getFieldDecorator('jobType', {initialValue: 'customcode'})
-        this.form.getFieldDecorator('resource', {initialValue: 'csv'})
+        this.form.getFieldDecorator('resourceFrom', {initialValue: 'cvs'})
         this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.defaultValue)
       }
       this.handleK8sPodTemplateEditor()
     },
 
     handleChangeResourceForm(value) {
-      this.resource = value
+      this.resourceFrom = value
     },
 
     handleInitSQLMode() {
@@ -1242,7 +1245,7 @@ export default {
       })
     },
 
-    handleK8sPodTemplateEditor(){
+    handleK8sPodTemplateEditor() {
       this.$nextTick(() => {
         initPodTemplateEditor(this)
       })
@@ -1295,7 +1298,7 @@ export default {
     },
 
     handleClusterId(value) {
-      if (this.executionMode === 6){
+      if (this.executionMode === 6) {
         this.form.setFieldsValue({jobName: value.target.value})
       }
     },
@@ -1367,7 +1370,7 @@ export default {
       const formData = new FormData()
       formData.append('file', data.file)
       upload(formData).then((resp) => {
-        if(resp.status == 'error') {
+        if (resp.status == 'error') {
           this.$swal.fire({
             title: 'Failed',
             icon: 'error',
@@ -1661,7 +1664,6 @@ export default {
 
     handleSubmitCustomJob(values) {
       const options = this.handleFormValue(values)
-      // common params...
       const params = {
         jobType: 1,
         executionMode: values.executionMode,
@@ -1691,26 +1693,40 @@ export default {
         params.k8sTmPodTemplate = this.tmPodTemplate
       }
 
-      if (this.appType === 1) {
-        const configVal = this.form.getFieldValue('config')
-        params['format'] = configVal.endsWith('.properties') ? 2 : 1
-        if (this.configOverride == null) {
-          readConf({
-            config: configVal
-          }).then((resp) => {
-            params['config'] = resp.data
+      // common params...
+      let resourceFrom = values.resourceFrom
+      if (resourceFrom != null) {
+        if (resourceFrom === 'cvs') {
+          params['resourceFrom'] = 1
+          //streamx flink
+          if (this.appType === 1) {
+            const configVal = this.form.getFieldValue('config')
+            params['format'] = configVal.endsWith('.properties') ? 2 : 1
+            if (this.configOverride == null) {
+              readConf({
+                config: configVal
+              }).then((resp) => {
+                params['config'] = resp.data
+                this.handleCreateApp(params)
+              }).catch((error) => {
+                this.$message.error(error.message)
+              })
+            } else {
+              params['config'] = Base64.encode(this.configOverride)
+              this.handleCreateApp(params)
+            }
+          } else {
+            params['jar'] = this.form.getFieldValue('jar') || null
+            params['mainClass'] = this.form.getFieldValue('mainClass') || null
             this.handleCreateApp(params)
-          }).catch((error) => {
-            this.$message.error(error.message)
-          })
+          }
         } else {
-          params['config'] = Base64.encode(this.configOverride)
+          // from upload
+          params['resourceFrom'] = 2
+          params['jar'] = this.uploadJar
+          params['mainClass'] = this.form.getFieldValue('mainClass') || null
           this.handleCreateApp(params)
         }
-      } else {
-        params['jar'] = this.form.getFieldValue('jar') || null
-        params['mainClass'] = this.form.getFieldValue('mainClass') || null
-        this.handleCreateApp(params)
       }
     },
 
@@ -1806,7 +1822,7 @@ export default {
         }
       }
       const socketId = this.uuid()
-      storage.set('DOWN_SOCKET_ID',socketId)
+      storage.set('DOWN_SOCKET_ID', socketId)
       param.socketId = socketId
       create(param).then((resp) => {
         const created = resp.data

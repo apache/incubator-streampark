@@ -680,8 +680,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             FsOperator fsOperator = application.getFsOperator();
                             fsOperator.delete(appHome);
                             //本地编译路径
-                            String distHome = application.getDistHome();
-                            fsOperator.upload(distHome, appHome);
+                            ResourceFrom resourceFrom = ResourceFrom.of(application.getResourceFrom());
+                            if (resourceFrom.equals(ResourceFrom.CICD)) {
+                                fsOperator.upload(application.getDistHome(), appHome);
+                            } else {
+                                String APP_UPLOADS = application.getWorkspace().APP_UPLOADS();
+                                String temp = WebUtils.getAppDir("temp");
+                                File localJar = new File(temp, application.getJar());
+                                String targetJar = APP_UPLOADS.concat("/").concat(application.getJar());
+                                checkOrElseUploadJar(application, localJar, targetJar);
+                                //2) 将upload jar 上传到app/lib下.
+                                fsOperator.copy(targetJar, appHome.concat("/lib"), false, true);
+                            }
                         } else {
                             log.info("FlinkSqlJob deploying...");
                             FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
@@ -841,23 +851,30 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             jars.forEach(jar -> {
                 File localJar = new File(temp, jar);
                 String targetJar = APP_UPLOADS.concat("/").concat(jar);
-                //1)检查文件是否存在,md5是否一致.
-                if (fsOperator.exists(targetJar)) {
-                    try (InputStream inputStream = new FileInputStream(localJar)) {
-                        String md5 = DigestUtils.md5Hex(inputStream);
-                        //2) md5不一致,则需重新上传.将本地temp/下的文件上传到upload目录下
-                        if (!md5.equals(fsOperator.fileMd5(targetJar))) {
-                            fsOperator.upload(localJar.getAbsolutePath(), APP_UPLOADS, false, true);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+                checkOrElseUploadJar(application, localJar, targetJar);
                 //3) 将upload目录下的文件上传到app/lib下.
                 fsOperator.copy(targetJar, application.getAppHome().concat("/lib"), false, true);
             });
         }
     }
+
+    private void checkOrElseUploadJar(Application application, File localJar, String targetJar) {
+        FsOperator fsOperator = application.getFsOperator();
+        String APP_UPLOADS = application.getWorkspace().APP_UPLOADS();
+        //1)检查文件是否存在,md5是否一致.
+        if (fsOperator.exists(targetJar)) {
+            try (InputStream inputStream = new FileInputStream(localJar)) {
+                String md5 = DigestUtils.md5Hex(inputStream);
+                //2) md5不一致,则需重新上传.将本地temp/下的文件上传到upload目录下
+                if (!md5.equals(fsOperator.fileMd5(targetJar))) {
+                    fsOperator.upload(localJar.getAbsolutePath(), APP_UPLOADS, false, true);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     @Override
     @RefreshCache
@@ -1063,24 +1080,32 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //获取一个最新的Effective的配置
             ApplicationConfig applicationConfig = configService.getEffective(application.getId());
             ExecutionMode executionMode = ExecutionMode.of(application.getExecutionMode());
-
             if (application.isCustomCodeJob()) {
                 assert executionMode != null;
-                switch (application.getApplicationType()) {
-                    case STREAMX_FLINK:
-                        String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
-                        appConf = String.format("%s://%s", format, applicationConfig.getContent());
-                        flinkUserJar = String.format("%s/lib/%s", application.getAppHome(), application.getModule().concat(".jar"));
-                        break;
-                    case APACHE_FLINK:
-                        appConf = String.format("json://{\"%s\":\"%s\"}",
-                            ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
-                            application.getMainClass()
-                        );
-                        flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
-                        break;
-                    default:
-                        throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
+                ResourceFrom resourceFrom = ResourceFrom.of(application.getResourceFrom());
+                if (resourceFrom.equals(ResourceFrom.UPLOAD)) {
+                    appConf = String.format("json://{\"%s\":\"%s\"}",
+                        ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
+                        application.getMainClass()
+                    );
+                    flinkUserJar = String.format("%s/lib/%s", application.getAppHome(), application.getJar());
+                } else {
+                    switch (application.getApplicationType()) {
+                        case STREAMX_FLINK:
+                            String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
+                            appConf = String.format("%s://%s", format, applicationConfig.getContent());
+                            flinkUserJar = String.format("%s/lib/%s", application.getAppHome(), application.getModule().concat(".jar"));
+                            break;
+                        case APACHE_FLINK:
+                            appConf = String.format("json://{\"%s\":\"%s\"}",
+                                ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
+                                application.getMainClass()
+                            );
+                            flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+                            break;
+                        default:
+                            throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
+                    }
                 }
             } else if (application.isFlinkSqlJob()) {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);

@@ -28,7 +28,7 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           placeholder="Execution Mode"
-          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]"
+          v-decorator="[ 'executionMode', {rules: [{ required: true, validator: handleCheckExecMode }] }]"
           @change="handleChangeMode">
           <a-select-option
             v-for="(o,index) in executionModes"
@@ -53,6 +53,25 @@
             :key="`flink_version_${index}`"
             :value="v.id">
             {{ v.flinkName }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        label="Resource Form"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          placeholder="Please select resource from"
+          v-decorator="[ 'resource']"
+          disabled>
+          <a-select-option value="csv">
+            <svg-icon role="img" name="github"/>
+            CICD <span class="gray">(build from CSV)</span>
+          </a-select-option>
+          <a-select-option value="upload">
+            <svg-icon role="img" name="upload"/>
+            Upload  <span class="gray">(upload local job)</span>
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -997,6 +1016,7 @@ import {
 
 import { toPomString } from './Pom'
 import {list as listFlinkEnv} from '@/api/flinkenv'
+import {checkHadoop} from '@/api/setting'
 
 export default {
   name: 'EditStreamX',
@@ -1251,6 +1271,24 @@ export default {
       }).catch((error) => {
         this.$message.error(error.message)
       })
+    },
+
+    handleCheckExecMode(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Execution Mode is required'))
+      } else {
+        if (value === 2 || value === 3 || value === 4) {
+          checkHadoop().then((resp) => {
+            if (resp.data) {
+              callback()
+            } else {
+              callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+            }
+          }).catch((err) => {
+            callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+          })
+        }
+      }
     },
 
     handleCheckJobName(rule, value, callback) {
@@ -1827,6 +1865,7 @@ export default {
           'clusterId': this.app.clusterId,
           'flinkImage': this.app.flinkImage,
           'k8sNamespace': this.app.k8sNamespace,
+          'resource': this.app.resourceFrom
         })
         if (this.app.jobType === 2) {
           this.flinkSql.sql = this.app.flinkSql || null
