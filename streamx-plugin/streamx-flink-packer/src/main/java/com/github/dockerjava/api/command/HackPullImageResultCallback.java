@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,29 +18,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import api from './index'
-import http from '@/utils/request'
+package com.github.dockerjava.api.command;
 
-export function get (params) {
-  return http.post(api.Config.GET, params)
-}
+import com.github.dockerjava.api.listener.PullImageCallbackListener;
+import com.github.dockerjava.api.model.PullResponseItem;
+import org.apache.commons.lang3.tuple.Pair;
 
-export function template (params) {
-  return http.post(api.Config.TEMPLATE, params)
-}
+/**
+ * @author Al-assad
+ */
+public class HackPullImageResultCallback extends PullImageResultCallback {
 
-export function list (params) {
-  return http.post(api.Config.LIST, params)
-}
+    private final PullImageCallbackListener listener;
 
-export function history (params) {
-  return http.post(api.Config.HISTORY, params)
-}
+    public HackPullImageResultCallback(PullImageCallbackListener listener) {
+        this.listener = listener;
+    }
 
-export function remove (params) {
-  return http.post(api.Config.DELETE, params)
-}
+    @Override
+    public void onNext(PullResponseItem item) {
+        super.onNext(item);
+        if (item.getProgressDetail() != null && item.getId() != null){
+            listener.watchPullProcess(Pair.of(item.getId(), item));
+        }
+    }
 
-export function sysHadoopConf (params) {
-  return http.post(api.Config.SYS_HADOOP_CONF, params)
+
+
+
 }

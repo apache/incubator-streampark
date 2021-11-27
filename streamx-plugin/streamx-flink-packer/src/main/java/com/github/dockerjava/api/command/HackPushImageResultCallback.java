@@ -18,34 +18,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.packer.maven
+package com.github.dockerjava.api.command;
 
-import java.util.{List => JavaList}
-import scala.collection.JavaConverters._
+import com.github.dockerjava.api.listener.PushImageCallbackListener;
+import com.github.dockerjava.api.model.PushResponseItem;
+import com.github.dockerjava.core.command.PushImageResultCallback;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @author Al-assad
- *
- * @param mavenArts  collection of maven artifacts
- * @param extJarLibs collection of jar lib paths, which elements can be a directory or file path.
  */
-case class JarPackDeps(mavenArts: Set[MavenArtifact] = Set(),
-                       extJarLibs: Set[String] = Set()) {
+@SuppressWarnings("deprecation")
+public class HackPushImageResultCallback extends PushImageResultCallback {
 
-  def this(mavenArts: JavaList[MavenArtifact], extJarLibs: JavaList[String]) {
-    this(mavenArts.asScala.toSet, extJarLibs.asScala.toSet)
-  }
+    private final PushImageCallbackListener listener;
 
-  def merge(jarLibs: Set[String]): JarPackDeps =
-    if (jarLibs != null) JarPackDeps(mavenArts, extJarLibs ++ jarLibs) else this.copy()
+    public HackPushImageResultCallback(PushImageCallbackListener listener) {
+        this.listener = listener;
+    }
 
-  def clearExtJarLibs: (JarPackDeps, Set[String]) = JarPackDeps(mavenArts, Set()) -> extJarLibs
+    @Override
+    public void onNext(PushResponseItem item) {
+        super.onNext(item);
+        if (item.getStatus() != null && item.getId() != null) {
+            listener.watchPushProcess(Pair.of(item.getId(), item));
+        }
+    }
 
 }
-
-object JarPackDeps {
-  def empty: JarPackDeps = new JarPackDeps()
-}
-
-
-

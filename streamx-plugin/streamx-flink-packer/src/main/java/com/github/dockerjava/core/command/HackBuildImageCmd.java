@@ -18,34 +18,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.packer.maven
+package com.github.dockerjava.core.command;
 
-import java.util.{List => JavaList}
-import scala.collection.JavaConverters._
+import com.github.dockerjava.api.command.HackBuildImageResultCallback;
+import com.github.dockerjava.api.listener.BuildImageCallbackListener;
+
+import java.io.File;
+import java.io.InputStream;
 
 /**
- * @author Al-assad
+ * Listenable BuildImageCmdImpl
  *
- * @param mavenArts  collection of maven artifacts
- * @param extJarLibs collection of jar lib paths, which elements can be a directory or file path.
+ * @author Al-assad
  */
-case class JarPackDeps(mavenArts: Set[MavenArtifact] = Set(),
-                       extJarLibs: Set[String] = Set()) {
+public class HackBuildImageCmd extends BuildImageCmdImpl {
 
-  def this(mavenArts: JavaList[MavenArtifact], extJarLibs: JavaList[String]) {
-    this(mavenArts.asScala.toSet, extJarLibs.asScala.toSet)
-  }
+    public HackBuildImageCmd(Exec exec) {
+        super(exec);
+    }
 
-  def merge(jarLibs: Set[String]): JarPackDeps =
-    if (jarLibs != null) JarPackDeps(mavenArts, extJarLibs ++ jarLibs) else this.copy()
+    public HackBuildImageCmd(Exec exec, File dockerFileOrFolder) {
+        super(exec, dockerFileOrFolder);
+    }
 
-  def clearExtJarLibs: (JarPackDeps, Set[String]) = JarPackDeps(mavenArts, Set()) -> extJarLibs
+    public HackBuildImageCmd(Exec exec, InputStream tarInputStream) {
+        super(exec, tarInputStream);
+    }
+
+    public HackBuildImageResultCallback start(BuildImageCallbackListener listener) {
+        return exec(new HackBuildImageResultCallback(listener));
+    }
 
 }
-
-object JarPackDeps {
-  def empty: JarPackDeps = new JarPackDeps()
-}
-
-
-

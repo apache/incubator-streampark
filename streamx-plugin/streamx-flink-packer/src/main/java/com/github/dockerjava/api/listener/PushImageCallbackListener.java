@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,29 +18,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import api from './index'
-import http from '@/utils/request'
+package com.github.dockerjava.api.listener;
 
-export function get (params) {
-  return http.post(api.Config.GET, params)
-}
+import com.github.dockerjava.api.model.PushResponseItem;
+import org.apache.commons.lang3.tuple.Pair;
 
-export function template (params) {
-  return http.post(api.Config.TEMPLATE, params)
-}
+/**
+ * @author Al-assad
+ */
+public interface PushImageCallbackListener {
 
-export function list (params) {
-  return http.post(api.Config.LIST, params)
-}
+    /**
+     * Watch push image process information form docker rest api.
+     *
+     * @param processDetail key=PushResponseItem.id
+     */
+    void watchPushProcess(Pair<String, PushResponseItem> processDetail);
 
-export function history (params) {
-  return http.post(api.Config.HISTORY, params)
-}
-
-export function remove (params) {
-  return http.post(api.Config.DELETE, params)
-}
-
-export function sysHadoopConf (params) {
-  return http.post(api.Config.SYS_HADOOP_CONF, params)
 }

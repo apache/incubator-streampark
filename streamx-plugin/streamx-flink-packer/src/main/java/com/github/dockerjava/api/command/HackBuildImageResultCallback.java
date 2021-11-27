@@ -18,34 +18,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.packer.maven
+package com.github.dockerjava.api.command;
 
-import java.util.{List => JavaList}
-import scala.collection.JavaConverters._
+import com.github.dockerjava.api.listener.BuildImageCallbackListener;
+import com.github.dockerjava.api.model.BuildResponseItem;
 
 /**
  * @author Al-assad
- *
- * @param mavenArts  collection of maven artifacts
- * @param extJarLibs collection of jar lib paths, which elements can be a directory or file path.
  */
-case class JarPackDeps(mavenArts: Set[MavenArtifact] = Set(),
-                       extJarLibs: Set[String] = Set()) {
+public class HackBuildImageResultCallback extends BuildImageResultCallback {
 
-  def this(mavenArts: JavaList[MavenArtifact], extJarLibs: JavaList[String]) {
-    this(mavenArts.asScala.toSet, extJarLibs.asScala.toSet)
-  }
+    private final BuildImageCallbackListener listener;
 
-  def merge(jarLibs: Set[String]): JarPackDeps =
-    if (jarLibs != null) JarPackDeps(mavenArts, extJarLibs ++ jarLibs) else this.copy()
+    private final static String STEP_PREFIX = "Step";
 
-  def clearExtJarLibs: (JarPackDeps, Set[String]) = JarPackDeps(mavenArts, Set()) -> extJarLibs
+    public HackBuildImageResultCallback(BuildImageCallbackListener listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public void onNext(BuildResponseItem item) {
+        super.onNext(item);
+        String stream = item.getStream();
+        if (item.isErrorIndicated()) {
+            listener.watchBuildStep(item.getErrorDetail().getMessage());
+        } else if (stream != null && stream.startsWith(STEP_PREFIX)){
+            listener.watchBuildStep(stream);
+        }
+    }
+
 
 }
-
-object JarPackDeps {
-  def empty: JarPackDeps = new JarPackDeps()
-}
-
-
-
