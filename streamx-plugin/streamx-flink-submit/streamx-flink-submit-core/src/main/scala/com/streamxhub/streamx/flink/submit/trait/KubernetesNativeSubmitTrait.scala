@@ -211,7 +211,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
   private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): Set[String] = {
     val providedLibs = ArrayBuffer(
-      // flinkLib,
       workspace.APP_JARS,
       workspace.APP_PLUGINS,
       submitRequest.flinkUserJar

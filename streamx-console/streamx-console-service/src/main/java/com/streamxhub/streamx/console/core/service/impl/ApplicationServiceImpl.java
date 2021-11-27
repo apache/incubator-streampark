@@ -37,6 +37,7 @@ import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
+import com.streamxhub.streamx.common.fs.LfsOperator;
 import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -578,6 +579,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setK8sPodTemplate(appParam.getK8sPodTemplate());
             application.setK8sJmPodTemplate(appParam.getK8sJmPodTemplate());
             application.setK8sTmPodTemplate(appParam.getK8sTmPodTemplate());
+            application.setK8sHadoopIntegration(appParam.getK8sHadoopIntegration());
 
             //以下参数发生改变不影响正在运行的任务
             application.setDescription(appParam.getDescription());
@@ -1157,7 +1159,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             settingService.getDockerRegisterUser(),
                             settingService.getDockerRegisterPassword()),
                     application.getK8sPodTemplates(),
-                    application.getK8sRestExposedTypeEnum()
+                application.getK8sRestExposedTypeEnum(),
+                application.getK8sHadoopIntegration() != null ? application.getK8sHadoopIntegration() : false
             );
 
             FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
