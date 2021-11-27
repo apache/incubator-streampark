@@ -233,7 +233,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                             jar = targetFile;
                         } else {
                             // 可能存在会找到多个jar,这种情况下,选择体积最大的那个jar返回...(不要问我为什么.)
-                            if (targetFile.getTotalSpace() > jar.getTotalSpace()) {
+                            if (targetFile.length() > jar.length()) {
                                 jar = targetFile;
                             }
                         }
