@@ -50,6 +50,7 @@ import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -213,6 +214,11 @@ public class Application implements Serializable {
     private String k8sPodTemplate;
     private String k8sJmPodTemplate;
     private String k8sTmPodTemplate;
+
+    /**
+     * flink-hadoop integration on flink-k8s mode
+     */
+    private Boolean k8sHadoopIntegration;
 
     /**
      * running job

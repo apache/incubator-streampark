@@ -43,6 +43,7 @@ import scala.collection.JavaConversions._
  * @param dockerAuthConfig     docker authentication configuration.
  * @param podTemplates         custom flink k8s pod-template content.
  * @param flinkRestExposedType flink rest-service exposed type on k8s cluster.
+ * @param integrateWithHadoop  whether integrate with hadoop.
  */
 case class KubernetesSubmitParam(clusterId: String,
                                  flinkBaseImage: String,
@@ -50,7 +51,8 @@ case class KubernetesSubmitParam(clusterId: String,
                                  jarPackDeps: JarPackDeps,
                                  @Nullable dockerAuthConfig: DockerAuthConf,
                                  @Nullable podTemplates: K8sPodTemplates,
-                                 @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
+                                 @Nullable flinkRestExposedType: FlinkK8sRestExposedType,
+                                 integrateWithHadoop: Boolean = false)
 
 case class SubmitRequest(flinkVersion: FlinkVersion,
                          flinkYaml: String,

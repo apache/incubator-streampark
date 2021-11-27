@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -21,26 +21,22 @@
 import api from './index'
 import http from '@/utils/request'
 
-export function get (params) {
-  return http.post(api.Config.GET, params)
+export function sysHosts(params) {
+  return http.post(api.FlinkPodTemplate.SYS_HOSTS, params)
 }
 
-export function template (params) {
-  return http.post(api.Config.TEMPLATE, params)
+export function initPodTemplate(params) {
+  return http.post(api.FlinkPodTemplate.INIT, params)
 }
 
-export function list (params) {
-  return http.post(api.Config.LIST, params)
+export function completeHostAliasToPodTemplate(params) {
+  return http.post(api.FlinkPodTemplate.COMP_HOST_ALIAS, params)
 }
 
-export function history (params) {
-  return http.post(api.Config.HISTORY, params)
+export function extractHostAliasFromPodTemplate(params) {
+  return http.post(api.FlinkPodTemplate.EXTRACT_HOST_ALIAS, params)
 }
 
-export function remove (params) {
-  return http.post(api.Config.DELETE, params)
-}
-
-export function sysHadoopConf (params) {
-  return http.post(api.Config.SYS_HADOOP_CONF, params)
+export function previewHostAlias(params) {
+  return http.post(api.FlinkPodTemplate.PREVIEW_HOST_ALIAS, params)
 }
