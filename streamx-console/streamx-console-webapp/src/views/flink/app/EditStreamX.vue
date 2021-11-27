@@ -1450,26 +1450,16 @@ export default {
     },
 
     handleCustomRequest(data) {
-      const executionMode =  this.form.getFieldValue('executionMode') || null
-      if (executionMode !== null) {
-        const formData = new FormData()
-        formData.append('file', data.file)
-        formData.append('executionMode',executionMode)
-        upload(formData).then((response) => {
-          this.loading = false
-          this.controller.dependency.jar.set(data.file.name, data.file.name)
-          this.handleUpdateDependency()
-        }).catch((error) => {
-          this.$message.error(error.message)
-          this.loading = false
-        })
-      } else {
-        this.$swal.fire(
-            'Failed',
-            'Please select "execution Mode" first',
-            'error'
-        )
-      }
+      const formData = new FormData()
+      formData.append('file', data.file)
+      upload(formData).then((response) => {
+        this.loading = false
+        this.controller.dependency.jar.set(data.file.name, data.file.name)
+        this.handleUpdateDependency()
+      }).catch((error) => {
+        this.$message.error(error.message)
+        this.loading = false
+      })
     },
 
     handleRemovePom(pom) {

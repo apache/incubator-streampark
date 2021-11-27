@@ -107,7 +107,7 @@ export default {
     GET: '/flink/setting/get',
     WEBURL: '/flink/setting/weburl',
     ALL: '/flink/setting/all',
-    GETFLINK: '/flink/setting/getflink',
+    CHECK_HADOOP: '/flink/setting/checkHadoop',
     SYNC: '/flink/setting/sync',
     UPDATE: '/flink/setting/update'
   },

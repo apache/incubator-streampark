@@ -33,7 +33,7 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           placeholder="Execution Mode"
-          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]"
+          v-decorator="[ 'executionMode', {rules: [{ required: true, validator: handleCheckExecMode }] }]"
           @change="handleChangeMode">
           <a-select-option
             v-for="(o,index) in executionModes"
@@ -964,6 +964,7 @@ import {jars, listConf, modules, select} from '@api/project'
 import {create, exists, main, name, readConf, upload} from '@api/application'
 import {list as listFlinkEnv} from '@/api/flinkenv'
 import {template} from '@api/config'
+import {checkHadoop} from '@api/setting'
 import Mergely from './Mergely'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
@@ -1205,7 +1206,6 @@ export default {
       })
       this.form.getFieldDecorator('resolveOrder', {initialValue: 0})
       this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
-      this.form.getFieldDecorator('executionMode', {initialValue: 4})
       this.form.getFieldDecorator('restartSize', {initialValue: 0})
       listFlinkEnv().then((resp)=> {
         if(resp.data.length > 0) {
@@ -1364,43 +1364,33 @@ export default {
     },
 
     handleCustomJobRequest(data) {
-      const executionMode =  this.form.getFieldValue('executionMode') || null
-      if (executionMode !== null) {
-        const formData = new FormData()
-        formData.append('file', data.file)
-        formData.append('executionMode',executionMode)
-        upload(formData).then((resp) => {
-          if(resp.status == 'error') {
-            this.$swal.fire({
-              title: 'Failed',
-              icon: 'error',
-              width: this.exceptionPropWidth(),
-              html: '<pre class="propException">' + resp['exception'] + '</pre>',
-              focusConfirm: false
-            })
-          } else {
-            this.loading = false
-            const path = resp.data
-            this.uploadJar = data.file.name
-            main({
-              jar: path
-            }).then((resp) => {
-              this.form.setFieldsValue({'mainClass': resp.data})
-            }).catch((error) => {
-              this.$message.error(error.message)
-            })
-          }
-        }).catch((error) => {
-          this.$message.error(error.message)
+      const formData = new FormData()
+      formData.append('file', data.file)
+      upload(formData).then((resp) => {
+        if(resp.status == 'error') {
+          this.$swal.fire({
+            title: 'Failed',
+            icon: 'error',
+            width: this.exceptionPropWidth(),
+            html: '<pre class="propException">' + resp['exception'] + '</pre>',
+            focusConfirm: false
+          })
+        } else {
           this.loading = false
-        })
-      } else {
-        this.$swal.fire(
-          'Failed',
-          'Please select "execution Mode" first',
-          'error'
-        )
-      }
+          const path = resp.data
+          this.uploadJar = data.file.name
+          main({
+            jar: path
+          }).then((resp) => {
+            this.form.setFieldsValue({'mainClass': resp.data})
+          }).catch((error) => {
+            this.$message.error(error.message)
+          })
+        }
+      }).catch((error) => {
+        this.$message.error(error.message)
+        this.loading = false
+      })
     },
 
     handleUploadJar(info) {
@@ -1414,26 +1404,16 @@ export default {
     },
 
     handleCustomDepsRequest(data) {
-      const executionMode =  this.form.getFieldValue('executionMode') || null
-      if (executionMode !== null) {
-        const formData = new FormData()
-        formData.append('file', data.file)
-        formData.append('executionMode',executionMode)
-        upload(formData).then((resp) => {
-          this.loading = false
-          this.controller.dependency.jar.set(data.file.name, data.file.name)
-          this.handleUpdateDependency()
-        }).catch((error) => {
-          this.$message.error(error.message)
-          this.loading = false
-        })
-      } else {
-        this.$swal.fire(
-            'Failed',
-            'Please select "execution Mode" first',
-            'error'
-        )
-      }
+      const formData = new FormData()
+      formData.append('file', data.file)
+      upload(formData).then((resp) => {
+        this.loading = false
+        this.controller.dependency.jar.set(data.file.name, data.file.name)
+        this.handleUpdateDependency()
+      }).catch((error) => {
+        this.$message.error(error.message)
+        this.loading = false
+      })
     },
 
     handleRemovePom(pom) {
@@ -1517,6 +1497,24 @@ export default {
       }).catch((error) => {
         this.$message.error(error.message)
       })
+    },
+
+    handleCheckExecMode(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Execution Mode is required'))
+      } else {
+        if (value === 2 || value === 3 || value === 4) {
+          checkHadoop().then((resp) => {
+            if (resp.data) {
+              callback()
+            } else {
+              callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+            }
+          }).catch((err) => {
+            callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+          })
+        }
+      }
     },
 
     handleCheckJobName(rule, value, callback) {
