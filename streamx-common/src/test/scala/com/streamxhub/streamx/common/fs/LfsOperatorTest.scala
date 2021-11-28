@@ -159,6 +159,11 @@ class LfsOperatorTest {
     assertDoesNotThrow(LfsOperator.delete(s"$outputDir/114514"))
   }
 
+  //noinspection TypeAnnotation
+  val md5Hex = (f: File) => DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(f)))
+  //noinspection TypeAnnotation
+  val sameFilesHex = (f1: Seq[File], f2: Seq[File]) =>
+    f1.map(_.getName).sorted == f2.map(_.getName).sorted && f1.map(md5Hex).sorted == f2.map(md5Hex).sorted
 
   @Test
   def testCopy(): Unit = {
@@ -200,7 +205,6 @@ class LfsOperatorTest {
     }
 
     // overwritten or non-overwritten copy
-    val md5Hex = (f: File) => DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(f)))
     val file = genRandomFile(outputDir, "114514-233.dat")
     // overwritten
     assertDoesNotThrow {
@@ -227,15 +231,40 @@ class LfsOperatorTest {
   @Test
   def testCopyDir(): Unit = {
     // copy dir
-
+    assertDoesNotThrow {
+      val sourceDir = genRandomDir(s"$outputDir/in-1")._1
+      val target = s"$outputDir/out-1"
+      LfsOperator.copyDir(sourceDir.getAbsolutePath, target)
+      val targetDir = new File(target)
+      assertTrue(targetDir.exists)
+      assertTrue(targetDir.isDirectory)
+      assertTrue(sameFilesHex(sourceDir.listFiles, targetDir.listFiles))
+    }
 
     // copy directory that not exists
+    assertDoesNotThrow {
+      LfsOperator.copyDir(s"$outputDir/in-2", s"$outputDir/out-2")
+      assertFalse(new File(s"$outputDir/out-2").exists)
+      LfsOperator.copyDir("", s"$outputDir/out-2")
+      LfsOperator.copyDir(null, s"$outputDir/out-2")
+    }
 
     // copy file
+    assertThrows(
+      classOf[IllegalArgumentException],
+      LfsOperator.copyDir(genRandomFile(outputDir).getAbsolutePath, s"$outputDir/out-3")
+    )
 
     // delete or not delete the original dir
-
-    // overwritten or non-overwritten copy
+    assertDoesNotThrow {
+      // not delete origin dir
+      val sourceDir = genRandomDir(s"$outputDir/in-4")._1
+      LfsOperator.copyDir(sourceDir.getAbsolutePath, s"$outputDir/out-4", delSrc = false)
+      assertTrue(sourceDir.exists)
+      // delete origin dir
+      LfsOperator.copyDir(sourceDir.getAbsolutePath, s"$outputDir/out-5", delSrc = true)
+      assertFalse(sourceDir.exists)
+    }
 
   }
 
@@ -293,6 +322,15 @@ class LfsOperatorTest {
       assertEquals(new File(s"$target/tmp-5").listFiles.length, 3)
     }
   }
+
+
+  @Test
+  def testfileMd5(): Unit = {
+    assertThrows(classOf[IllegalArgumentException], LfsOperator.fileMd5(null))
+    assertThrows(classOf[IllegalArgumentException], LfsOperator.fileMd5(""))
+    assertThrows(classOf[IllegalArgumentException], LfsOperator.fileMd5("ttt/144514.dat"))
+  }
+
 
 }
 

@@ -32,9 +32,10 @@ import scala.util.Random
  */
 package object fs {
 
-  implicit def funcToExecutable(func: => Unit): Executable = new Executable() {
+  implicit def funcToExecutable[R](func: => R): Executable = new Executable() {
     override def execute(): Unit = func
   }
+
 
   /**
    * generate a random binary file
