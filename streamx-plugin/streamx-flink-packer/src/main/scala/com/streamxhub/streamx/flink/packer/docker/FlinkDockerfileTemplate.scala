@@ -20,61 +20,29 @@
  */
 package com.streamxhub.streamx.flink.packer.docker
 
-import com.streamxhub.streamx.flink.packer.docker.FlinkDockerfileTemplate.{DEFAULT_DOCKER_FILE_NAME, DOCKER_FILE_TEMPLATE}
-import org.apache.commons.io.FileUtils
-
-import java.io.File
-
 /**
- * flink docker file image template.
- * @author Al-assad
+ * Base flink docker file image template.
  *
- * @param flinkBaseImage  flink base docker image name, see https://hub.docker.com/_/flink
- * @param flinkFatjarPath path of flink job fat jar
+ * @author Al-assad
+ * @param workspacePath      Path of dockerfile workspace, it should be a directory.
+ * @param flinkBaseImage     Flink base docker image name, see https://hub.docker.com/_/flink.
+ * @param flinkMainJarPath   Path of flink job main jar which would copy to $FLINK_HOME/usrlib/
+ * @param flinkExtraLibPaths Path of additional flink lib path which would copy to $FLINK_HOME/lib/
  */
-case class FlinkDockerfileTemplate(flinkBaseImage: String, flinkFatjarPath: String) {
-
-  lazy val fatJarName: String = new File(flinkFatjarPath).getName
-
-  /**
-   * get content of DockerFile
-   */
-  def dockerfileContent: String = DOCKER_FILE_TEMPLATE.format(flinkBaseImage, fatJarName, fatJarName)
+case class FlinkDockerfileTemplate(workspacePath: String,
+                                   flinkBaseImage: String,
+                                   flinkMainJarPath: String,
+                                   flinkExtraLibPaths: Set[String]) extends FlinkDockerfileTemplateTrait {
 
   /**
-   * write content of DockerFile to outputPath.
-   * If outputPath is directory, the default output file's name is "Dockerfile".
-   *
-   * @param outputPath Dockerfile output path
-   * @return File Object for actual output Dockerfile
+   * offer content of DockerFile
    */
-  def writeDockerfile(outputPath: String): File = {
-    var output = new File(outputPath)
-    if (output.isDirectory) {
-      output = new File(output.getAbsolutePath.concat("/").concat(DEFAULT_DOCKER_FILE_NAME))
-    }
-    FileUtils.write(output, dockerfileContent, "UTF-8")
-    output
+  override def offerDockerfileContent: String = {
+    s"""FROM $flinkBaseImage
+       |RUN mkdir -p $FLINK_HOME/usrlib
+       |COPY $extraLibName $FLINK_HOME/lib/
+       |COPY $mainJarName $FLINK_HOME/usrlib/$mainJarName
+       |""".stripMargin
   }
-
-  /**
-   * get flink job jar such as local:///opt/flink/usrlib/flink-fatjar.jar
-   */
-  def getJobJar: String = s"local:///opt/flink/usrlib/$fatJarName"
-
-}
-
-object FlinkDockerfileTemplate {
-
-  val DEFAULT_DOCKER_FILE_NAME = "Dockerfile"
-
-  /**
-   * template of dockerfile
-   */
-  val DOCKER_FILE_TEMPLATE: String =
-    """FROM %s
-      |RUN mkdir -p $FLINK_HOME/usrlib
-      |COPY %s $FLINK_HOME/usrlib/%s
-      |""".stripMargin
 
 }

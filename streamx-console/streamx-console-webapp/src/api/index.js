@@ -77,14 +77,15 @@ export default {
     ROLLBACK: '/flink/app/rollback',
     REVOKE: '/flink/app/revoke',
     STARTLOG: '/flink/app/startlog',
-    CHECKJAR: '/flink/app/checkjar'
+    CHECKJAR: '/flink/app/checkjar',
   },
   Config: {
     GET: '/flink/conf/get',
     TEMPLATE: '/flink/conf/template',
     LIST: '/flink/conf/list',
     HISTORY: '/flink/conf/history',
-    DELETE: '/flink/conf/delete'
+    DELETE: '/flink/conf/delete',
+    SYS_HADOOP_CONF: '/flink/conf/sysHadoopConf'
   },
   FlinkEnv: {
     LIST: '/flink/env/list',
@@ -94,6 +95,22 @@ export default {
     SYNC: '/flink/env/sync',
     UPDATE: '/flink/env/update',
     DEFAULT: '/flink/env/default',
+  },
+  FlinkHistory: {
+    UPLOAD_JARS: '/flink/history/uploadJars',
+    K8S_NAMESPACES: '/flink/history/k8sNamespaces',
+    SESSION_CLUSTER_IDS: '/flink/history/sessionClusterIds',
+    FLINK_BASE_IMAGES: '/flink/history/flinkBaseImages',
+    FLINK_POD_TEMPLATES: '/flink/history/flinkPodTemplates',
+    FLINK_JM_POD_TEMPLATES: '/flink/history/flinkJmPodTemplates',
+    FLINK_TM_POD_TEMPLATES: '/flink/history/flinkTmPodTemplates'
+  },
+  FlinkPodTemplate: {
+    SYS_HOSTS: '/flink/podtmpl/sysHosts',
+    INIT: '/flink/podtmpl/init',
+    COMP_HOST_ALIAS: '/flink/podtmpl/compHostAlias',
+    EXTRACT_HOST_ALIAS: '/flink/podtmpl/extractHostAlias',
+    PREVIEW_HOST_ALIAS: '/flink/podtmpl/previewHostAlias',
   },
   FlinkSQL: {
     VERIFY: '/flink/sql/verify',
