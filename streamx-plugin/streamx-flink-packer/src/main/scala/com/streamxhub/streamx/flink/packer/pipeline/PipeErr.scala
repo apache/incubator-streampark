@@ -18,35 +18,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.kubernetes.model
+package com.streamxhub.streamx.flink.packer.pipeline
+
+import javax.annotation.Nullable
 
 /**
- * Pod template for flink k8s cluster
+ * Error details of building pipeline.
  *
- * @author Al-assad
+ * @param summary   summary of error.
+ * @param exception exception stack.
  */
-case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "", tmPodTemplate: String = "") {
+case class PipeErr(summary: String, @Nullable exception: Throwable) {
+  def isEmpty: Boolean = false
 
-  def nonEmpty: Boolean = Option(podTemplate).exists(_.trim.nonEmpty) ||
-    Option(jmPodTemplate).exists(_.trim.nonEmpty) ||
-    Option(tmPodTemplate).exists(_.trim.nonEmpty)
-
-  def isEmpty: Boolean = !nonEmpty
+  def exceptStackTraceContent: String = if (exception == null) "" else exception.getStackTrace.mkString("\n")
 }
 
-object K8sPodTemplates {
 
-  def empty: K8sPodTemplates = new K8sPodTemplates()
+object PipeErr {
+  def empty(): PipeErr = EmptyPipeErr()
+}
 
-  def of(podTemplate: String, jmPodTemplate: String, tmPodTemplate: String): K8sPodTemplates =
-    K8sPodTemplates(safeGet(podTemplate), safeGet(jmPodTemplate), safeGet(tmPodTemplate))
-
-  private[this] def safeGet(content: String) = {
-    content match {
-      case null => ""
-      case x if x.trim.isEmpty => ""
-      case x => x
-    }
-  }
-
+/**
+ * empty error
+ */
+case class EmptyPipeErr() extends PipeErr("", null) {
+  override def isEmpty: Boolean = true
 }
