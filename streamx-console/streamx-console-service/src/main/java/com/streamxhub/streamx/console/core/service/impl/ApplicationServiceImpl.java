@@ -851,32 +851,32 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String APP_UPLOADS = application.getWorkspace().APP_UPLOADS();
         String temp = WebUtils.getAppDir("temp");
         if (Utils.notEmpty(jars)) {
-            jars.forEach(jar -> {
+            for (String jar : jars) {
                 File localJar = new File(temp, jar);
                 String targetJar = APP_UPLOADS.concat("/").concat(jar);
                 checkOrElseUploadJar(application, localJar, targetJar);
                 //3) 将upload目录下的文件上传到app/lib下.
                 fsOperator.copy(targetJar, application.getAppLib(), false, true);
-            });
+            }
         }
     }
 
-    private void checkOrElseUploadJar(Application application, File localJar, String targetJar) {
+    private void checkOrElseUploadJar(Application application, File localJar, String targetJar) throws IOException {
         FsOperator fsOperator = application.getFsOperator();
         String APP_UPLOADS = application.getWorkspace().APP_UPLOADS();
         //1)检查文件是否存在,md5是否一致.
-        if (fsOperator.exists(targetJar)) {
+        if (!fsOperator.exists(targetJar)) {
+            fsOperator.upload(localJar.getAbsolutePath(), APP_UPLOADS, false, true);
+        } else {
             try (InputStream inputStream = new FileInputStream(localJar)) {
                 String md5 = DigestUtils.md5Hex(inputStream);
                 //2) md5不一致,则需重新上传.将本地temp/下的文件上传到upload目录下
                 if (!md5.equals(fsOperator.fileMd5(targetJar))) {
                     fsOperator.upload(localJar.getAbsolutePath(), APP_UPLOADS, false, true);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                throw e;
             }
-        } else {
-            fsOperator.upload(localJar.getAbsolutePath(), APP_UPLOADS, false, true);
         }
     }
 
