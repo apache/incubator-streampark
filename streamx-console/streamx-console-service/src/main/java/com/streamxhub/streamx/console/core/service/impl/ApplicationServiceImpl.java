@@ -35,11 +35,13 @@ import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
 import com.streamxhub.streamx.common.fs.FsOperator;
+import com.streamxhub.streamx.common.fs.LFsOperator;
 import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
+import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.annotation.RefreshCache;
@@ -496,6 +498,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setState(FlinkAppState.CREATED.getValue());
         appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
+        if (appParam.getResourceFrom().equals(ResourceFrom.UPLOAD.getValue())) {
+            String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
+            appParam.setJarCheckSum(LFsOperator.fileMd5(jarPath));
+        }
         boolean saved = save(appParam);
         if (saved) {
             if (appParam.isFlinkSqlJob()) {
@@ -518,23 +524,45 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean update(Application appParam) {
         try {
             Application application = getById(appParam.getId());
-            //检查任务相关的参数是否发生变化,发生变化则设置需要重启的状态
-            if (!appParam.eqJobParam(application)) {
-                application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
-            } else if (application.isStreamXJob()) {
-                ApplicationConfig config = configService.getEffective(application.getId());
-                if (config != null) {
-                    if (appParam.getConfigId() == null || !appParam.getConfigId().equals(config.getId())) {
-                        application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
-                    } else {
-                        String decode = new String(Base64.getDecoder().decode(appParam.getConfig()));
-                        String encode = DeflaterUtils.zipString(decode.trim());
-                        if (!config.getContent().equals(encode)) {
+
+            boolean needDeploy = false;
+
+            if (application.getResourceFrom() == ResourceFrom.UPLOAD.getValue()) {
+                if (!ObjectUtils.safeEquals(application.getJar(), application.getJar())) {
+                    application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
+                    needDeploy = true;
+                }
+                String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
+                File jarFile = new File(jarPath);
+                if (jarFile.exists()) {
+                    String jarCheckSum = LFsOperator.fileMd5(jarPath);
+                    if (!application.getJarCheckSum().equals(jarCheckSum)) {
+                        application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
+                        needDeploy = true;
+                    }
+                }
+            }
+
+            if (!needDeploy) {
+                //检查任务相关的参数是否发生变化,发生变化则设置需要重启的状态
+                if (!appParam.eqJobParam(application)) {
+                    application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+                } else if (application.isStreamXJob()) {
+                    ApplicationConfig config = configService.getEffective(application.getId());
+                    if (config != null) {
+                        if (appParam.getConfigId() == null || !appParam.getConfigId().equals(config.getId())) {
                             application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+                        } else {
+                            String decode = new String(Base64.getDecoder().decode(appParam.getConfig()));
+                            String encode = DeflaterUtils.zipString(decode.trim());
+                            if (!config.getContent().equals(encode)) {
+                                application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+                            }
                         }
                     }
                 }
             }
+
             //从db中补全jobType到appParam
             appParam.setJobType(application.getJobType());
             //以下参数发生变化,需要重新任务才能生效
@@ -864,10 +892,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private void checkOrElseUploadJar(Application application, File localJar, String targetJar) throws IOException {
         FsOperator fsOperator = application.getFsOperator();
         String APP_UPLOADS = application.getWorkspace().APP_UPLOADS();
-        //1)检查文件是否存在,md5是否一致.
+        //1)文件不存直接上传
         if (!fsOperator.exists(targetJar)) {
             fsOperator.upload(localJar.getAbsolutePath(), APP_UPLOADS, false, true);
         } else {
+            //2) 文件已经存在则检查md5是否一致.不一致则重新上传
             try (InputStream inputStream = new FileInputStream(localJar)) {
                 String md5 = DigestUtils.md5Hex(inputStream);
                 //2) md5不一致,则需重新上传.将本地temp/下的文件上传到upload目录下
@@ -907,8 +936,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
             flinkSql.setToApplication(application);
         } else {
-            String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
-            application.setConfPath(path);
+            ResourceFrom from = ResourceFrom.of(application.getResourceFrom());
+            if (from.equals(ResourceFrom.CICD)) {
+                String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
+                application.setConfPath(path);
+            }
         }
         // add flink web url info for k8s-mode
         if (isKubernetesApp(application)) {

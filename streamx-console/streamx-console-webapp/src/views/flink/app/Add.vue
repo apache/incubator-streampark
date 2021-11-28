@@ -1693,7 +1693,7 @@ export default {
       }
 
       // common params...
-      let resourceFrom = values.resourceFrom
+      const resourceFrom = values.resourceFrom
       if (resourceFrom != null) {
         if (resourceFrom === 'cvs') {
           params['resourceFrom'] = 1
@@ -1723,7 +1723,7 @@ export default {
         } else {
           // from upload
           params['resourceFrom'] = 2
-          params['appType'] = 2
+          params['appType'] = 1
           params['jar'] = this.uploadJar
           params['mainClass'] = this.form.getFieldValue('mainClass') || null
           this.handleCreateApp(params)

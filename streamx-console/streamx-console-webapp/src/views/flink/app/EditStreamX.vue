@@ -12,14 +12,21 @@
         label="Development Mode"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+
         <a-alert
           v-if="app['jobType'] === 1"
-          message="customcode"
-          type="info" />
+          type="info" >
+          <template slot="message">
+            <a-icon type="code" style="color: #108ee9"/>&nbsp;Custom Code
+          </template>
+        </a-alert>
         <a-alert
           v-else
-          message="flinkSql"
-          type="info" />
+          type="info">
+          <template slot="message">
+            <svg-icon name="fql" style="color: #108ee9"/>&nbsp;Flink SQL
+          </template>
+        </a-alert>
       </a-form-item>
 
       <a-form-item
@@ -28,7 +35,8 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           placeholder="Execution Mode"
-          v-decorator="[ 'executionMode', {rules: [{ required: true, validator: handleCheckExecMode }] }]"
+          disabled
+          v-decorator="[ 'executionMode' ]"
           @change="handleChangeMode">
           <a-select-option
             v-for="(o,index) in executionModes"
@@ -53,25 +61,6 @@
             :key="`flink_version_${index}`"
             :value="v.id">
             {{ v.flinkName }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-
-      <a-form-item
-        label="Resource Form"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-select
-          placeholder="Please select resource from"
-          v-decorator="[ 'resource']"
-          disabled>
-          <a-select-option value="csv">
-            <svg-icon role="img" name="github"/>
-            CICD <span class="gray">(build from CSV)</span>
-          </a-select-option>
-          <a-select-option value="upload">
-            <svg-icon role="img" name="upload"/>
-            Upload  <span class="gray">(upload local job)</span>
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -114,9 +103,7 @@
             v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base Docker Image is required' }] }]">
           </a-input>
         </a-form-item>
-      </template>
 
-      <template v-if="(executionMode == null && app.executionMode === 6) || executionMode === 6">
         <a-form-item
           label="Rest-Service Exposed Type"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -133,7 +120,6 @@
           </a-select>
         </a-form-item>
       </template>
-
 
       <template v-if="app.jobType === 2">
 
@@ -1220,7 +1206,7 @@ export default {
           this.configOverride = Base64.decode(this.app.config)
           this.isSetConfig = true
         }
-        this.defaultOptions = JSON.parse(this.app.options)
+        this.defaultOptions = JSON.parse(this.app.options || '{}')
         this.configId = this.app.configId
         this.versionId = this.app.versionId
         this.defaultFlinkSqlId = this.app['sqlId'] || null

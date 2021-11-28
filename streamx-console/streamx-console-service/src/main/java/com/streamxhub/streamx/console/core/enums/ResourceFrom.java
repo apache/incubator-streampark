@@ -48,4 +48,7 @@ public enum ResourceFrom {
         return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
     }
 
+    public int getValue() {
+        return value;
+    }
 }
