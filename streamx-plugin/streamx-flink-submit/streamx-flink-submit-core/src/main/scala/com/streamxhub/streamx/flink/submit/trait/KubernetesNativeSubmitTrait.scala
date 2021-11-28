@@ -23,7 +23,6 @@ package com.streamxhub.streamx.flink.submit.`trait`
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType}
-import com.streamxhub.streamx.common.fs.FsOperator
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.collections.MapUtils
@@ -162,7 +161,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     extractDynamicOption(submitRequest.dynamicOption)
       .foreach(e => flinkConfig.setString(e._1, e._2))
 
-    // set parallism
+    // set parallelism
     if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
       flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
         Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString))
@@ -208,30 +207,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     }
     programArgs
   }
-
-  private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): Set[String] = {
-    val providedLibs = ArrayBuffer(
-      workspace.APP_JARS,
-      workspace.APP_PLUGINS,
-      submitRequest.flinkUserJar
-    )
-    providedLibs += {
-      val version = submitRequest.flinkVersion.version.split("\\.").map(_.trim.toInt)
-      version match {
-        case Array(1, 12, _) => s"${workspace.APP_SHIMS}/flink-1.12"
-        case Array(1, 13, _) => s"${workspace.APP_SHIMS}/flink-1.13"
-        case Array(1, 14, _) => s"${workspace.APP_SHIMS}/flink-1.14"
-        case _ => throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
-      }
-    }
-    val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
-    if (FsOperator.lfs.exists(jobLib)) {
-      providedLibs += jobLib
-    }
-    val libSet = providedLibs.toSet
-    libSet
-  }
-
 
   protected def flinkConfIdentifierInfo(@Nonnull conf: Configuration): String =
     s"executionMode=${conf.get(DeploymentOptions.TARGET)}, clusterId=${conf.get(KubernetesConfigOptions.CLUSTER_ID)}, " +

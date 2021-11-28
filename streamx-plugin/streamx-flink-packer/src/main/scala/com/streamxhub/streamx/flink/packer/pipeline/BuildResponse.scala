@@ -27,6 +27,8 @@ package com.streamxhub.streamx.flink.packer.pipeline
  */
 sealed trait BuildResult {
   def isPass: Boolean = true
+
+  def error: PipeErr
 }
 
 sealed trait FlinkBuildResult extends BuildResult {
@@ -42,12 +44,15 @@ case class ErrorResult(error: PipeErr) extends BuildResult {
 }
 
 case class FlinkK8sSessionBuildResponse(workspacePath: String,
-                                        flinkShadedJarPath: String) extends FlinkSessionBuildResult
+                                        flinkShadedJarPath: String,
+                                        error: PipeErr) extends FlinkSessionBuildResult
+
 
 case class FlinkK8sApplicationBuildResponse(workspacePath: String,
                                             flinkImageTag: String,
                                             podTemplatePaths: Map[String, String],
-                                            dockerInnerMainJarPath: String) extends FlinkBuildResult
+                                            dockerInnerMainJarPath: String,
+                                            error: PipeErr) extends FlinkBuildResult
 
 // case class FlinkYarnSessionBuildResponse(workspacePath: String, flinkShadedJarPath: String) extends FlinkSessionBuildResult
 

@@ -21,14 +21,13 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
-import com.streamxhub.streamx.common.fs.FsOperator
-import com.streamxhub.streamx.common.util.DateUtils.fullCompact
-import com.streamxhub.streamx.common.util.{DateUtils, Logger}
+import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
-import com.streamxhub.streamx.flink.packer.maven.MavenTool
+import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline
+import com.streamxhub.streamx.flink.packer.pipeline.{FlinkK8sSessionBuildRequest, FlinkK8sSessionBuildResponse}
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
@@ -62,34 +61,22 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // extract flink configuration
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
 
-    // sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/job-name/
-    // in streamx, flink job-name under the specified clusterId/namespace must be unique.
-    val buildWorkspace = s"${workspace.APP_WORKSPACE}" +
-      s"/${flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)}@${flinkConfig.getString(KubernetesConfigOptions.NAMESPACE)}" +
-      s"/${flinkConfig.getString(PipelineOptions.NAME)}"
-    FsOperator.lfs.delete(buildWorkspace)
-    FsOperator.lfs.mkdirs(buildWorkspace)
-
-    // build fat-jar, output file name: streamx-flinkjob_<job-name>_<timestamp>, like: streamx-flinkjob_myjobtest_20211024134822
-    val fatJar = {
-      val fatJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}_${DateUtils.now(fullCompact)}.jar"
-      submitRequest.developmentMode match {
-        case DevelopmentMode.FLINKSQL =>
-          val flinkLibs = extractProvidedLibs(submitRequest)
-          val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
-          MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
-        case DevelopmentMode.CUSTOMCODE =>
-          val providedLibs = Set(
-            workspace.APP_JARS,
-            workspace.APP_PLUGINS,
-            submitRequest.flinkUserJar
-          )
-          val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
-          MavenTool.buildFatJar(jarPackDeps.merge(providedLibs), fatJarOutputPath)
-      }
-    }
-    logInfo(s"[flink-submit] already built flink job fat-jar. " +
-      s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
+    // todo template code: building pipeline
+    val buildParam = FlinkK8sSessionBuildRequest(
+      "tmp-id",
+      flinkConfig.getString(PipelineOptions.NAME),
+      submitRequest.executionMode,
+      submitRequest.developmentMode,
+      submitRequest.flinkVersion,
+      submitRequest.k8sSubmitParam.jarPackDeps,
+      submitRequest.flinkUserJar,
+      submitRequest.k8sSubmitParam.clusterId,
+      submitRequest.k8sSubmitParam.kubernetesNamespace
+    )
+    val pipeline = new FlinkK8sSessionBuildPipeline(buildParam)
+    val buildResult = pipeline.launch().asInstanceOf[FlinkK8sSessionBuildResponse]
+    if (!buildResult.isPass) throw pipeline.getError.exception
+    val fatJar = new File(buildResult.flinkShadedJarPath)
 
     // Prioritize using JobGraph submit plan while using Rest API submit plan as backup
     Try(jobGraphSubmitPlan(submitRequest, flinkConfig, jobID, fatJar))
@@ -107,7 +94,6 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   /**
    * Submit flink session job via rest api.
    */
-  // noinspection DuplicatedCode
   @throws[Exception]
   private def restApiSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     try {

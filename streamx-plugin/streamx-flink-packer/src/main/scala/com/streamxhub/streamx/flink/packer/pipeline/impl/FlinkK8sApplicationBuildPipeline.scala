@@ -170,7 +170,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
       }(err => throw new Exception(s"push docker image failed. tag=${pushImageTag}", err))
     }.getOrElse(throw getError.exception)
 
-    FlinkK8sApplicationBuildResponse(buildWorkspace, pushImageTag, podTemplatePaths, dockerFileTemplate.innerMainJarPath)
+    FlinkK8sApplicationBuildResponse(buildWorkspace, pushImageTag, podTemplatePaths, dockerFileTemplate.innerMainJarPath, getError)
   }
 
 
