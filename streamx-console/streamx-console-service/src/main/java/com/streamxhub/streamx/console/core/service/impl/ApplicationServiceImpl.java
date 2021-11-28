@@ -23,7 +23,6 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -653,29 +652,26 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     if (application.getRestart()) {
                         this.cancel(application);
                     }
-                    FlinkTrackingTask.refreshTracking(application.getId(), () -> {
-                        baseMapper.update(
-                            application,
-                            new UpdateWrapper<Application>()
-                                .lambda()
-                                .eq(Application::getId, application.getId())
-                                .set(Application::getDeploy, DeployState.DEPLOYING.get())
 
-                        );
+                    //2) update deployState
+                    FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                        application.setDeploy(DeployState.DEPLOYING.get());
+                        this.updateDeploy(application);
                         return null;
                     });
 
-                    // 2) backup
+                    // 3) backup
                     if (application.getBackUp()) {
                         this.backUpService.backup(application);
                     }
 
+                    //4) deploy action
                     LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
                     updateWrapper.eq(Application::getId, application.getId());
                     try {
                         if (application.isCustomCodeJob()) {
                             log.info("CustomCodeJob deploying...");
-                            // 3) deploying...
+                            // 4.1) deploying...
                             String appHome = application.getAppHome();
                             FsOperator fsOperator = application.getFsOperator();
                             fsOperator.delete(appHome);
@@ -689,8 +685,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                 File localJar = new File(temp, application.getJar());
                                 String targetJar = APP_UPLOADS.concat("/").concat(application.getJar());
                                 checkOrElseUploadJar(application, localJar, targetJar);
-                                //2) 将upload jar 上传到app/lib下.
-                                fsOperator.copy(targetJar, appHome.concat("/lib"), false, true);
+                                //4.2 ) 将upload jar 上传到appHome下.
+                                fsOperator.mkdirs(appHome);
+                                fsOperator.copy(targetJar, appHome, false, true);
                             }
                         } else {
                             log.info("FlinkSqlJob deploying...");
@@ -700,7 +697,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             Collection<String> dependencyJars = downloadDependency(application, socketId);
                             uploadDependency(application, dependencyJars);
                         }
-                        // 4) 更新发布状态,需要重启的应用则重新启动...
+
+                        // 4.3) 更新发布状态,需要重启的应用则重新启动...
                         if (application.getRestart()) {
                             application.setSavePointed(true);
                             // 重新启动.
@@ -746,6 +744,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 e.printStackTrace();
             }
         });
+    }
+
+    @Override
+    public void updateDeploy(Application application) {
+        baseMapper.updateDeploy(application);
     }
 
     private Collection<String> downloadDependency(Application application, String socketId) throws Exception {
@@ -853,7 +856,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String targetJar = APP_UPLOADS.concat("/").concat(jar);
                 checkOrElseUploadJar(application, localJar, targetJar);
                 //3) 将upload目录下的文件上传到app/lib下.
-                fsOperator.copy(targetJar, application.getAppHome().concat("/lib"), false, true);
+                fsOperator.copy(targetJar, application.getAppLib(), false, true);
             });
         }
     }
@@ -872,6 +875,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else {
+            fsOperator.upload(localJar.getAbsolutePath(), APP_UPLOADS, false, true);
         }
     }
 
@@ -1088,13 +1093,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
                         application.getMainClass()
                     );
-                    flinkUserJar = String.format("%s/lib/%s", application.getAppHome(), application.getJar());
+                    flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
                 } else {
                     switch (application.getApplicationType()) {
                         case STREAMX_FLINK:
                             String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
                             appConf = String.format("%s://%s", format, applicationConfig.getContent());
-                            flinkUserJar = String.format("%s/lib/%s", application.getAppHome(), application.getModule().concat(".jar"));
+                            flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getModule().concat(".jar"));
                             break;
                         case APACHE_FLINK:
                             appConf = String.format("json://{\"%s\":\"%s\"}",

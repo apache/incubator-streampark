@@ -1670,7 +1670,6 @@ export default {
         versionId: values.versionId,
         projectId: values.project || null,
         module: values.module || null,
-        appType: this.appType || null,
         jobName: values.jobName,
         args: values.args,
         options: JSON.stringify(options),
@@ -1698,6 +1697,7 @@ export default {
       if (resourceFrom != null) {
         if (resourceFrom === 'cvs') {
           params['resourceFrom'] = 1
+          params['appType'] = this.appType
           //streamx flink
           if (this.appType === 1) {
             const configVal = this.form.getFieldValue('config')
@@ -1723,6 +1723,7 @@ export default {
         } else {
           // from upload
           params['resourceFrom'] = 2
+          params['appType'] = 2
           params['jar'] = this.uploadJar
           params['mainClass'] = this.form.getFieldValue('mainClass') || null
           this.handleCreateApp(params)

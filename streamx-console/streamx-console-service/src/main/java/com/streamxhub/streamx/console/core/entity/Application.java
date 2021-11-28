@@ -380,6 +380,11 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
+    public String getAppLib() {
+        return getAppHome().concat("/lib");
+    }
+
+    @JsonIgnore
     public File getLocalFlinkSqlHome() {
         File flinkSql = new File(Workspace.local().APP_WORKSPACE(), "flinksql");
         if (!flinkSql.exists()) {
