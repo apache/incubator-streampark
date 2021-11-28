@@ -42,11 +42,11 @@ package object fs {
    * @param dir  parent directory
    * @param size file size
    */
-  def genRandomFile(dir: String, size: Int = 256): File = {
+  def genRandomFile(dir: String, name: String = s"${java.util.UUID.randomUUID().toString}.dat", size: Int = 256): File = {
     val random = new Random()
     val c = new Array[Byte](size)
     random.nextBytes(c)
-    val f = new File(dir, s"${java.util.UUID.randomUUID().toString}.dat")
+    val f = new File(dir, name)
     FileUtils.writeByteArrayToFile(f, c)
     f
   }

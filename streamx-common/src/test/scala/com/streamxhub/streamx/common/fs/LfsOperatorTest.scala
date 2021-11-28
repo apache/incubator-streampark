@@ -24,7 +24,7 @@ package com.streamxhub.streamx.common.fs
 import com.streamxhub.streamx.common.fs.LfsOperatorTest.outputDir
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.{FileUtils, IOUtils}
-import org.junit.jupiter.api.Assertions.{assertDoesNotThrow, assertEquals, assertFalse, assertThrows, assertTrue}
+import org.junit.jupiter.api.Assertions._
 import org.junit.jupiter.api.{AfterAll, AfterEach, BeforeEach, Test}
 
 import java.io.{File, FileInputStream}
@@ -38,9 +38,9 @@ object LfsOperatorTest {
   val outputDir = "LfsOperatorTest-output/"
 
   @AfterAll
-  def cleanTmpResource(): Unit = {
+  def removeOutputDir(): Unit = {
     val dir = new File(outputDir)
-    if (dir.exists()) FileUtils.deleteDirectory(dir)
+    if (dir.exists) FileUtils.deleteDirectory(dir)
   }
 
 }
@@ -50,13 +50,13 @@ class LfsOperatorTest {
   @BeforeEach
   def createOutputDir(): Unit = {
     val dir = new File(outputDir)
-    if (!dir.exists()) dir.mkdirs() else FileUtils.forceDelete(dir)
+    if (!dir.exists) dir.mkdirs else FileUtils.forceDelete(dir)
   }
 
   @AfterEach
-  def removeOutputDir(): Unit = {
+  def cleanOutputDir(): Unit = {
     val dir = new File(outputDir)
-    if (dir.exists()) FileUtils.deleteDirectory(dir)
+    if (dir.exists) FileUtils.deleteDirectory(dir)
   }
 
 
@@ -147,14 +147,12 @@ class LfsOperatorTest {
       LfsOperator.delete(dir)
       new File(dir).exists
     }
-
     // delete file
     assertFalse {
       val file = genRandomFile(outputDir)
       LfsOperator.delete(file.getAbsolutePath)
       file.exists
     }
-
     // path that does not exists
     assertDoesNotThrow(LfsOperator.delete(null))
     assertDoesNotThrow(LfsOperator.delete(""))
@@ -164,7 +162,7 @@ class LfsOperatorTest {
 
   @Test
   def testCopy(): Unit = {
-    // copy to file / to directory
+    // copy file to file path or directory path
     assertDoesNotThrow {
       val file = genRandomFile(outputDir)
 
@@ -192,17 +190,52 @@ class LfsOperatorTest {
 
     // delete or not delete the original file
     assertDoesNotThrow {
+      // not delete origin file
       val file = genRandomFile(outputDir)
-
+      LfsOperator.copy(file.getAbsolutePath, s"$outputDir/out-7", delSrc = false)
+      assertTrue(file.exists)
+      // delete origin file
+      LfsOperator.copy(file.getAbsolutePath, s"$outputDir/out-8", delSrc = true)
+      assertFalse(file.exists)
     }
 
-    // non-overwritten or non-overwritten copy
+    // overwritten or non-overwritten copy
+    val md5Hex = (f: File) => DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(f)))
+    val file = genRandomFile(outputDir, "114514-233.dat")
+    // overwritten
+    assertDoesNotThrow {
+      val out = genRandomFile(s"$outputDir/out-9", "114514-233.dat")
+      val md5Before = md5Hex(out)
+      LfsOperator.copy(file.getAbsolutePath, out.getAbsolutePath, overwrite = true)
+      val md5After = md5Hex(new File(out.getAbsolutePath))
+      assertNotEquals(md5Before, md5After)
+      assertEquals(md5After, md5Hex(file))
+    }
+    // non-overwritten
+    assertDoesNotThrow {
+      val out = genRandomFile(s"$outputDir/out-10", "114514-233.dat")
+      val md5Before = md5Hex(out)
+      LfsOperator.copy(file.getAbsolutePath, out.getAbsolutePath, overwrite = false)
+      val md5After = md5Hex(new File(out.getAbsolutePath))
+      assertEquals(md5Before, md5After)
+      assertNotEquals(md5After, md5Hex(file))
+    }
 
   }
 
 
   @Test
   def testCopyDir(): Unit = {
+    // copy dir
+
+
+    // copy directory that not exists
+
+    // copy file
+
+    // delete or not delete the original dir
+
+    // overwritten or non-overwritten copy
 
   }
 
