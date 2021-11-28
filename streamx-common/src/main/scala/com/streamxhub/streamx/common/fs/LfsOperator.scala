@@ -28,7 +28,6 @@ import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.commons.lang.StringUtils
 
 import java.io.{File, FileInputStream}
-import java.nio.file.Paths
 
 /**
  * Local File System (aka LFS) Operator
@@ -91,14 +90,13 @@ object LfsOperator extends FsOperator with Logger {
       val inferDstIsDir = {
         if (dst.exists && dst.isDirectory) true
         else
-          Paths.get(srcPath).getFileName.toString -> Paths.get(dstPath).getFileName.toString match {
+          srcFile.getName -> dst.getName match {
             case (src, dst) if src == dst => false
             case (src, dst) if getSuffix(src) == getSuffix(dst) => false
             case _ => true
           }
       }
-      if (inferDstIsDir) new File(dstPath, srcFile.getName)
-      else dst
+      if (inferDstIsDir) new File(dstPath, srcFile.getName) else dst
     }
 
     val shouldCopy = if (!overwrite && dstFile.exists) false else true
@@ -133,8 +131,9 @@ object LfsOperator extends FsOperator with Logger {
   }
 
   override def fileMd5(path: String): String = {
-    // todo
     require(path != null && path.nonEmpty, s"[streamx] LFsOperator.fileMd5: file must not be null.")
+    val file = new File(path)
+    require(file.exists, s"[streamx] LFsOperator.fileMd5: file must exists.")
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
 
