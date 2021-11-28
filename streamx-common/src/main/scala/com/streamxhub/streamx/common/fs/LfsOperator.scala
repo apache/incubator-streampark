@@ -81,31 +81,30 @@ object LfsOperator extends FsOperator with Logger {
    */
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
     if (isAnyBank(srcPath, dstPath)) return
+
     val srcFile = new File(srcPath)
     if (!srcFile.exists) return
     require(srcFile.isFile, s"[streamx] $srcPath must be a file.")
 
-    var dstFile = new File(dstPath)
-    if (dstFile.isDirectory) dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
-
-    val shouldCopy = {
-      if (overwrite || !dstFile.exists) true
-      else srcFile.getCanonicalPath != dstFile.getCanonicalPath
+    val dstFile = {
+      val dst = new File(dstPath)
+      val inferDstIsDir = {
+        if (dst.exists && dst.isDirectory) true
+        else
+          Paths.get(srcPath).getFileName.toString -> Paths.get(dstPath).getFileName.toString match {
+            case (src, dst) if src == dst => false
+            case (src, dst) if getSuffix(src) == getSuffix(dst) => false
+            case _ => true
+          }
+      }
+      if (inferDstIsDir) new File(dstPath, srcFile.getName)
+      else dst
     }
+
+    val shouldCopy = if (!overwrite && dstFile.exists) false else true
     if (!shouldCopy) return
 
-    val isCopyToDir = {
-      if (dstFile.exists && dstFile.isDirectory) true
-      else
-        Paths.get(srcPath).getFileName.toString -> Paths.get(dstPath).getFileName.toString match {
-          case (src, dst) if src == dst => false
-          case (src, dst) if getSuffix(src) == getSuffix(dst) => false
-          case _ => true
-        }
-    }
-
-    if (isCopyToDir) FileUtils.copyFileToDirectory(srcFile, dstFile)
-    else FileUtils.copyFile(srcFile, dstFile)
+    FileUtils.copyFile(srcFile, dstFile)
     if (delSrc) FileUtils.forceDelete(srcFile)
   }
 
