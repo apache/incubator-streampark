@@ -29,19 +29,14 @@ import javax.annotation.Nullable
  * @param exception exception stack.
  */
 case class PipeErr(summary: String, @Nullable exception: Throwable) {
-  def isEmpty: Boolean = false
+
+  val nonEmpty: Boolean = (summary != null && summary.nonEmpty) || exception != null
+  val isEmpty: Boolean = !nonEmpty
 
   def exceptStackTraceContent: String = if (exception == null) "" else exception.getStackTrace.mkString("\n")
 }
 
 
 object PipeErr {
-  def empty(): PipeErr = EmptyPipeErr()
-}
-
-/**
- * empty error
- */
-case class EmptyPipeErr() extends PipeErr("", null) {
-  override def isEmpty: Boolean = true
+  def empty(): PipeErr = PipeErr("", null)
 }
