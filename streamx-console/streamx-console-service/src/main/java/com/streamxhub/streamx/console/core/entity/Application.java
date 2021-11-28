@@ -51,6 +51,7 @@ import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -226,6 +227,11 @@ public class Application implements Serializable {
      * 2: upload (upload local jar job)
      */
     private Integer resourceFrom;
+
+   /**
+     * flink-hadoop integration on flink-k8s mode
+     */
+    private Boolean k8sHadoopIntegration;
 
     /**
      * running job

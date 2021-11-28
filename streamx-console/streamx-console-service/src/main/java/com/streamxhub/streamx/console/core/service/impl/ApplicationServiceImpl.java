@@ -35,7 +35,7 @@ import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.fs.LFsOperator;
+import com.streamxhub.streamx.common.fs.LfsOperator;
 import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -500,7 +500,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setCreateTime(new Date());
         if (appParam.getResourceFrom().equals(ResourceFrom.UPLOAD.getValue())) {
             String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
-            appParam.setJarCheckSum(LFsOperator.fileMd5(jarPath));
+            appParam.setJarCheckSum(LfsOperator.fileMd5(jarPath));
         }
         boolean saved = save(appParam);
         if (saved) {
@@ -535,7 +535,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
                 File jarFile = new File(jarPath);
                 if (jarFile.exists()) {
-                    String jarCheckSum = LFsOperator.fileMd5(jarPath);
+                    String jarCheckSum = LfsOperator.fileMd5(jarPath);
                     if (!application.getJarCheckSum().equals(jarCheckSum)) {
                         application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
                         needDeploy = true;
@@ -580,6 +580,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setK8sPodTemplate(appParam.getK8sPodTemplate());
             application.setK8sJmPodTemplate(appParam.getK8sJmPodTemplate());
             application.setK8sTmPodTemplate(appParam.getK8sTmPodTemplate());
+            application.setK8sHadoopIntegration(appParam.getK8sHadoopIntegration());
 
             //以下参数发生改变不影响正在运行的任务
             application.setDescription(appParam.getDescription());
@@ -1211,11 +1212,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.getK8sNamespace(),
                 jarPackDeps,
                 new DockerAuthConf(
-                    settingService.getDockerRegisterAddress(),
-                    settingService.getDockerRegisterUser(),
-                    settingService.getDockerRegisterPassword()),
+                        settingService.getDockerRegisterAddress(),
+                        settingService.getDockerRegisterUser(),
+                        settingService.getDockerRegisterPassword()),
                 application.getK8sPodTemplates(),
-                application.getK8sRestExposedTypeEnum()
+                application.getK8sRestExposedTypeEnum(),
+                application.getK8sHadoopIntegration() != null ? application.getK8sHadoopIntegration() : false
             );
 
             FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());

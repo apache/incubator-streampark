@@ -93,18 +93,22 @@ public class FlinkEnv implements Serializable {
         this.flinkConf = DeflaterUtils.unzipString(this.flinkConf);
     }
 
+    @JsonIgnore
     public String getLargeVersion() {
         return this.version.substring(0, this.version.lastIndexOf("."));
     }
 
+    @JsonIgnore
     public String getVersionOfFirst() {
         return this.version.split("\\.")[0];
     }
 
+    @JsonIgnore
     public String getVersionOfMiddle() {
         return this.version.split("\\.")[1];
     }
 
+    @JsonIgnore
     public String getVersionOfLast() {
         return this.version.split("\\.")[2];
     }

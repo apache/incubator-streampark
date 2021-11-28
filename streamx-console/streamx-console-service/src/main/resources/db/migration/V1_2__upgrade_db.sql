@@ -6,7 +6,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `t_flink_env`;
 CREATE TABLE `t_flink_env` (
 `ID` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
-`FLINK_NAME` varchar(255) NOT NULL COMMENT 'Flink实例名称',
+`FLINK_NAME` varchar(128) NOT NULL COMMENT 'Flink实例名称',
 `FLINK_HOME` varchar(255) NOT NULL COMMENT 'Flink Home路径',
 `VERSION` varchar(50) NOT NULL COMMENT 'Flink对应的版本号',
 `SCALA_VERSION` varchar(50) NOT NULL COMMENT 'Flink对应的scala版本号',

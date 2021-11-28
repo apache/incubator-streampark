@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,29 +18,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import api from './index'
-import http from '@/utils/request'
+package com.github.dockerjava.api.listener;
 
-export function get (params) {
-  return http.post(api.Config.GET, params)
-}
+/**
+ * @author Al-assad
+ */
+public interface BuildImageCallbackListener {
 
-export function template (params) {
-  return http.post(api.Config.TEMPLATE, params)
-}
+    /**
+     * Watch build step message and error message.
+     *
+     * @param buildStepMsg build step msg from docker rest api.
+     */
+    void watchBuildStep(String buildStepMsg);
 
-export function list (params) {
-  return http.post(api.Config.LIST, params)
-}
-
-export function history (params) {
-  return http.post(api.Config.HISTORY, params)
-}
-
-export function remove (params) {
-  return http.post(api.Config.DELETE, params)
-}
-
-export function sysHadoopConf (params) {
-  return http.post(api.Config.SYS_HADOOP_CONF, params)
 }
