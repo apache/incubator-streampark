@@ -64,7 +64,7 @@ public class SqlCreateFunction extends SqlCreate {
         super(OPERATOR, pos, false, ifNotExists);
         this.functionIdentifier = requireNonNull(functionIdentifier);
         this.functionClassName = requireNonNull(functionClassName);
-        this.functionParamter = requireNonNull(functionParamter);
+        this.functionParamter = functionParamter;
         this.isSystemFunction = isSystemFunction;
         this.isTemporary = isTemporary;
         this.functionLanguage = functionLanguage;

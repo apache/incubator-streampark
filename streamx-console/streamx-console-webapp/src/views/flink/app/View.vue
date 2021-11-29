@@ -299,22 +299,29 @@
             <span
               :class="{pointer: record.state === 6 || record.state === 7 || record['optionState'] === 4 }"
               @click="handleView(record)">
-              <template
-                v-if="record.deploy === 0"
-                v-for="(fragment, i) in text
-                  .toString()
-                  .substr(0,(text.length > 30 ? 30: text.length ))
-                  .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                <mark
-                  v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                  :key="i"
-                  class="highlight">
-                  {{ fragment }}
-                </mark>
-                <template v-else>
-                  {{ fragment }}
-                </template>
-              </template>
+              <tempalte
+                v-if="record.deploy === 0">
+                <a-tooltip placement="top">
+                  <template slot="title">
+                    {{ text }}
+                  </template>
+                  <template
+                      v-for="(fragment, i) in text
+                      .toString()
+                      .substr(0,(text.length > 30 ? 30: text.length ))
+                      .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                    <mark
+                      v-if="fragment.toLowerCase() === searchText.toLowerCase()"
+                      :key="i"
+                      class="highlight">
+                      {{ fragment }}
+                    </mark>
+                    <template v-else>
+                      {{ fragment }}
+                    </template>
+                  </template>
+                </a-tooltip>
+              </tempalte>
               <template v-else>
                 <a-tooltip placement="top">
                   <template slot="title">
@@ -863,7 +870,6 @@
   import {baseUrl} from '@/api/baseUrl'
   import Stomp from 'webstomp-client'
   import SvgIcon from '@/components/SvgIcon'
-  import {check} from '@/api/setting'
 
   export default {
   components: {Ellipsis, State, SvgIcon},
@@ -1128,7 +1134,13 @@
               allowNonRestored: allowNonRestoredState,
               backUpDescription: description
             }).then((resp) => {
-              if (!restart) {
+              if(!resp.data) {
+                this.$swal.fire(
+                    'Failed',
+                    'deploy failed,' + resp.message.replaceAll(/\[StreamX]/g,''),
+                    'error'
+                )
+              } else if(!restart) {
                 this.optionApps.deploy.delete(id)
                 this.handleMapUpdate('deploy')
               }
@@ -1263,17 +1275,10 @@
                 flameGraph: flameGraph,
                 allowNonRestored: allowNonRestoredState
               }).then((resp) => {
-                const code = parseInt(resp.data)
-                if (code === 0) {
+                if (!resp.data) {
                   this.$swal.fire(
                     'Failed',
-                    'startup failed, please check the startup log :)',
-                    'error'
-                  )
-                } else if (code === -1) {
-                  this.$swal.fire(
-                    'Failed',
-                    'startup failed, Maybe FLINK_HOME undefined,please check :)',
+                    'startup failed,' + resp.message.replaceAll(/\[StreamX]/g,''),
                     'error'
                   )
                 }
@@ -1540,18 +1545,7 @@
     },
 
     handleAdd() {
-      check().then((resp) => {
-        const success = resp.data === true || resp.data === 'true'
-        if (success) {
-          this.$router.push({'path': '/flink/app/add'})
-        } else {
-          this.$swal.fire(
-              'Failed',
-              'Please check "StreamX Console Workspace" is defined and make sure have read and write permissions',
-              'error'
-          )
-        }
-      })
+      this.$router.push({'path': '/flink/app/add'})
     },
 
     handleEdit(app) {

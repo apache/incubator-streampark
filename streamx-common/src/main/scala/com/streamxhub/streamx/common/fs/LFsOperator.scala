@@ -59,12 +59,17 @@ object LFsOperator extends FsOperator with Logger {
   override def move(srcPath: String, dstPath: String): Unit = {
     if (!isAnyBank(srcPath, dstPath)) {
       val srcFile = new File(srcPath)
-      var dstFile = new File(dstPath)
-      if (dstFile.isDirectory) {
-        dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
-      }
+      val dstFile = new File(dstPath)
+      require(srcFile.exists(), "[StreamX] LFsOperator.move: Source must be exists")
       if (srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        FileUtils.moveFile(srcFile, dstFile)
+        if (dstFile.isDirectory) {
+          FileUtils.moveToDirectory(srcFile, dstFile, true)
+        } else {
+          if (dstFile.exists()) {
+            dstFile.delete()
+          }
+          FileUtils.moveFile(srcFile, dstFile)
+        }
       }
     }
   }
@@ -80,12 +85,15 @@ object LFsOperator extends FsOperator with Logger {
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
     if (!isAnyBank(srcPath, dstPath)) {
       val srcFile = new File(srcPath)
-      var dstFile = new File(dstPath)
-      if (dstFile.isDirectory) {
-        dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
-      }
-      if (overwrite && !dstFile.exists() && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        FileUtils.copyFile(srcFile, dstFile)
+      val dstFile = new File(dstPath)
+      require(srcFile.exists(), "[StreamX] LFsOperator.copy:  Source must be exists")
+      require(dstFile.exists(), "[StreamX] LFsOperator.copy:  Destination must be exists")
+      if (overwrite && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
+        if (dstFile.isDirectory) {
+          FileUtils.copyFileToDirectory(srcFile, dstFile)
+        } else {
+          FileUtils.copyFile(srcFile, dstFile)
+        }
       }
     }
   }
@@ -94,14 +102,15 @@ object LFsOperator extends FsOperator with Logger {
     if (!isAnyBank(srcPath, dstPath)) {
       val srcFile = new File(srcPath)
       val dstFile = new File(dstPath)
-      if (overwrite && !dstFile.exists() && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        FileUtils.copyDirectory(new File(srcPath), new File(dstPath))
+      require(srcFile.exists(), "[StreamX] LFsOperator.copyDir: Source must be exists")
+      if (overwrite && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
+        FileUtils.copyDirectory(srcFile, dstFile)
       }
     }
   }
 
   override def fileMd5(path: String): String = {
-    require(path != null && path.nonEmpty)
+    require(path != null && path.nonEmpty, s"[StreamX] LFsOperator.fileMd5: file must not be null.")
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
 

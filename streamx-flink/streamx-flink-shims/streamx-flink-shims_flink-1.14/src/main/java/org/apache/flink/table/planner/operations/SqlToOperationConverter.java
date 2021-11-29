@@ -18,153 +18,30 @@
 
 package org.apache.flink.table.planner.operations;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.hint.HintStrategyTable;
 import org.apache.calcite.rel.hint.RelHint;
-import org.apache.calcite.sql.SqlCharStringLiteral;
-import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.SqlIdentifier;
-import org.apache.calcite.sql.SqlKind;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlNodeList;
-import org.apache.calcite.sql.SqlUtil;
+import org.apache.calcite.sql.*;
 import org.apache.calcite.sql.dialect.CalciteSqlDialect;
 import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.flink.sql.parser.ddl.SqlAddJar;
-import org.apache.flink.sql.parser.ddl.SqlAddPartitions;
-import org.apache.flink.sql.parser.ddl.SqlAddReplaceColumns;
-import org.apache.flink.sql.parser.ddl.SqlAlterDatabase;
-import org.apache.flink.sql.parser.ddl.SqlAlterFunction;
-import org.apache.flink.sql.parser.ddl.SqlAlterTable;
-import org.apache.flink.sql.parser.ddl.SqlAlterTableAddConstraint;
-import org.apache.flink.sql.parser.ddl.SqlAlterTableDropConstraint;
-import org.apache.flink.sql.parser.ddl.SqlAlterTableOptions;
-import org.apache.flink.sql.parser.ddl.SqlAlterTableRename;
-import org.apache.flink.sql.parser.ddl.SqlAlterTableReset;
-import org.apache.flink.sql.parser.ddl.SqlAlterView;
-import org.apache.flink.sql.parser.ddl.SqlAlterViewAs;
-import org.apache.flink.sql.parser.ddl.SqlAlterViewProperties;
-import org.apache.flink.sql.parser.ddl.SqlAlterViewRename;
-import org.apache.flink.sql.parser.ddl.SqlChangeColumn;
-import org.apache.flink.sql.parser.ddl.SqlCreateCatalog;
-import org.apache.flink.sql.parser.ddl.SqlCreateDatabase;
-import org.apache.flink.sql.parser.ddl.SqlCreateFunction;
-import org.apache.flink.sql.parser.ddl.SqlCreateTable;
-import org.apache.flink.sql.parser.ddl.SqlCreateView;
-import org.apache.flink.sql.parser.ddl.SqlDropCatalog;
-import org.apache.flink.sql.parser.ddl.SqlDropDatabase;
-import org.apache.flink.sql.parser.ddl.SqlDropFunction;
-import org.apache.flink.sql.parser.ddl.SqlDropPartitions;
-import org.apache.flink.sql.parser.ddl.SqlDropTable;
-import org.apache.flink.sql.parser.ddl.SqlDropView;
-import org.apache.flink.sql.parser.ddl.SqlRemoveJar;
-import org.apache.flink.sql.parser.ddl.SqlReset;
-import org.apache.flink.sql.parser.ddl.SqlSet;
-import org.apache.flink.sql.parser.ddl.SqlTableOption;
-import org.apache.flink.sql.parser.ddl.SqlUseCatalog;
-import org.apache.flink.sql.parser.ddl.SqlUseDatabase;
-import org.apache.flink.sql.parser.ddl.SqlUseModules;
+import org.apache.flink.sql.parser.ddl.*;
 import org.apache.flink.sql.parser.ddl.constraint.SqlTableConstraint;
 import org.apache.flink.sql.parser.dml.RichSqlInsert;
 import org.apache.flink.sql.parser.dml.SqlBeginStatementSet;
 import org.apache.flink.sql.parser.dml.SqlEndStatementSet;
-import org.apache.flink.sql.parser.dql.SqlLoadModule;
-import org.apache.flink.sql.parser.dql.SqlRichDescribeTable;
-import org.apache.flink.sql.parser.dql.SqlRichExplain;
-import org.apache.flink.sql.parser.dql.SqlShowCatalogs;
-import org.apache.flink.sql.parser.dql.SqlShowCreateTable;
-import org.apache.flink.sql.parser.dql.SqlShowCurrentCatalog;
-import org.apache.flink.sql.parser.dql.SqlShowCurrentDatabase;
-import org.apache.flink.sql.parser.dql.SqlShowDatabases;
-import org.apache.flink.sql.parser.dql.SqlShowFunctions;
-import org.apache.flink.sql.parser.dql.SqlShowJars;
-import org.apache.flink.sql.parser.dql.SqlShowModules;
-import org.apache.flink.sql.parser.dql.SqlShowPartitions;
-import org.apache.flink.sql.parser.dql.SqlShowTables;
-import org.apache.flink.sql.parser.dql.SqlShowViews;
-import org.apache.flink.sql.parser.dql.SqlUnloadModule;
+import org.apache.flink.sql.parser.dql.*;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.TableException;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.ValidationException;
-import org.apache.flink.table.catalog.Catalog;
-import org.apache.flink.table.catalog.CatalogBaseTable;
-import org.apache.flink.table.catalog.CatalogDatabase;
-import org.apache.flink.table.catalog.CatalogDatabaseImpl;
-import org.apache.flink.table.catalog.CatalogFunction;
-import org.apache.flink.table.catalog.CatalogFunctionImpl;
-import org.apache.flink.table.catalog.CatalogManager;
-import org.apache.flink.table.catalog.CatalogPartition;
-import org.apache.flink.table.catalog.CatalogPartitionImpl;
-import org.apache.flink.table.catalog.CatalogPartitionSpec;
-import org.apache.flink.table.catalog.CatalogTable;
-import org.apache.flink.table.catalog.CatalogView;
-import org.apache.flink.table.catalog.CatalogViewImpl;
-import org.apache.flink.table.catalog.FunctionLanguage;
-import org.apache.flink.table.catalog.ObjectIdentifier;
-import org.apache.flink.table.catalog.ResolvedSchema;
-import org.apache.flink.table.catalog.UnresolvedIdentifier;
+import org.apache.flink.table.catalog.*;
 import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
-import org.apache.flink.table.operations.BeginStatementSetOperation;
-import org.apache.flink.table.operations.CatalogSinkModifyOperation;
-import org.apache.flink.table.operations.DescribeTableOperation;
-import org.apache.flink.table.operations.EndStatementSetOperation;
-import org.apache.flink.table.operations.ExplainOperation;
-import org.apache.flink.table.operations.LoadModuleOperation;
-import org.apache.flink.table.operations.Operation;
-import org.apache.flink.table.operations.ShowCatalogsOperation;
-import org.apache.flink.table.operations.ShowCreateTableOperation;
-import org.apache.flink.table.operations.ShowCurrentCatalogOperation;
-import org.apache.flink.table.operations.ShowCurrentDatabaseOperation;
-import org.apache.flink.table.operations.ShowDatabasesOperation;
-import org.apache.flink.table.operations.ShowFunctionsOperation;
+import org.apache.flink.table.operations.*;
 import org.apache.flink.table.operations.ShowFunctionsOperation.FunctionScope;
-import org.apache.flink.table.operations.ShowModulesOperation;
-import org.apache.flink.table.operations.ShowPartitionsOperation;
-import org.apache.flink.table.operations.ShowTablesOperation;
-import org.apache.flink.table.operations.ShowViewsOperation;
-import org.apache.flink.table.operations.UnloadModuleOperation;
-import org.apache.flink.table.operations.UseCatalogOperation;
-import org.apache.flink.table.operations.UseDatabaseOperation;
-import org.apache.flink.table.operations.UseModulesOperation;
-import org.apache.flink.table.operations.command.AddJarOperation;
-import org.apache.flink.table.operations.command.RemoveJarOperation;
-import org.apache.flink.table.operations.command.ResetOperation;
-import org.apache.flink.table.operations.command.SetOperation;
-import org.apache.flink.table.operations.command.ShowJarsOperation;
-import org.apache.flink.table.operations.ddl.AddPartitionsOperation;
-import org.apache.flink.table.operations.ddl.AlterCatalogFunctionOperation;
-import org.apache.flink.table.operations.ddl.AlterDatabaseOperation;
-import org.apache.flink.table.operations.ddl.AlterPartitionPropertiesOperation;
-import org.apache.flink.table.operations.ddl.AlterTableAddConstraintOperation;
-import org.apache.flink.table.operations.ddl.AlterTableDropConstraintOperation;
-import org.apache.flink.table.operations.ddl.AlterTableOptionsOperation;
-import org.apache.flink.table.operations.ddl.AlterTableRenameOperation;
-import org.apache.flink.table.operations.ddl.AlterViewAsOperation;
-import org.apache.flink.table.operations.ddl.AlterViewPropertiesOperation;
-import org.apache.flink.table.operations.ddl.AlterViewRenameOperation;
-import org.apache.flink.table.operations.ddl.CreateCatalogFunctionOperation;
-import org.apache.flink.table.operations.ddl.CreateCatalogOperation;
-import org.apache.flink.table.operations.ddl.CreateDatabaseOperation;
-import org.apache.flink.table.operations.ddl.CreateTempSystemFunctionOperation;
-import org.apache.flink.table.operations.ddl.CreateViewOperation;
-import org.apache.flink.table.operations.ddl.DropCatalogFunctionOperation;
-import org.apache.flink.table.operations.ddl.DropCatalogOperation;
-import org.apache.flink.table.operations.ddl.DropDatabaseOperation;
-import org.apache.flink.table.operations.ddl.DropPartitionsOperation;
-import org.apache.flink.table.operations.ddl.DropTableOperation;
-import org.apache.flink.table.operations.ddl.DropTempSystemFunctionOperation;
-import org.apache.flink.table.operations.ddl.DropViewOperation;
+import org.apache.flink.table.operations.command.*;
+import org.apache.flink.table.operations.ddl.*;
 import org.apache.flink.table.planner.calcite.FlinkPlannerImpl;
 import org.apache.flink.table.planner.hint.FlinkHints;
 import org.apache.flink.table.planner.utils.Expander;
@@ -172,6 +49,8 @@ import org.apache.flink.table.planner.utils.OperationConverterUtils;
 import org.apache.flink.table.utils.TableSchemaUtils;
 import org.apache.flink.util.StringUtils;
 
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Mix-in tool class for {@code SqlNode} that allows DDL commands to be converted to {@link
@@ -211,7 +90,7 @@ public class SqlToOperationConverter {
      * @param sqlNode SqlNode to execute on
      */
     public static Optional<Operation> convert(
-            FlinkPlannerImpl flinkPlanner, CatalogManager catalogManager, SqlNode sqlNode) {
+            FlinkPlannerImpl flinkPlanner, CatalogManager catalogManager, SqlNode sqlNode) throws JsonProcessingException {
         // validate the query
         final SqlNode validated = flinkPlanner.validate(sqlNode);
         SqlToOperationConverter converter =
@@ -486,10 +365,13 @@ public class SqlToOperationConverter {
         }
     }
 
-    private Map<String, Object> parseFunctionParameter(SqlCharStringLiteral functionParamter) {
-        return Arrays.stream(functionParamter.getValueAs(String.class).split(","))
-                .map(entry -> entry.split("="))
-                .collect(Collectors.toMap(entry -> entry[0].trim(), entry -> entry[1].trim()));
+    private Map<String, Object> parseFunctionParameter(SqlCharStringLiteral functionParamter) throws JsonProcessingException {
+        if (functionParamter == null) {
+            return null;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(functionParamter.getValueAs(String.class), Map.class);
+
     }
 
     private Operation convertAlterTableOptions(
@@ -542,7 +424,7 @@ public class SqlToOperationConverter {
     }
 
     /** Convert CREATE FUNCTION statement. */
-    private Operation convertCreateFunction(SqlCreateFunction sqlCreateFunction) {
+    private Operation convertCreateFunction(SqlCreateFunction sqlCreateFunction) throws JsonProcessingException {
         UnresolvedIdentifier unresolvedIdentifier =
                 UnresolvedIdentifier.of(sqlCreateFunction.getFunctionIdentifier());
 
@@ -632,7 +514,7 @@ public class SqlToOperationConverter {
     }
 
     /** Convert insert into statement. */
-    private Operation convertSqlInsert(RichSqlInsert insert) {
+    private Operation convertSqlInsert(RichSqlInsert insert) throws JsonProcessingException {
         // Get sink table name.
         List<String> targetTablePath = ((SqlIdentifier) insert.getTargetTableID()).names;
         // Get sink table hints.
@@ -952,7 +834,7 @@ public class SqlToOperationConverter {
     }
 
     /** Convert RICH EXPLAIN statement. */
-    private Operation convertRichExplain(SqlRichExplain sqlExplain) {
+    private Operation convertRichExplain(SqlRichExplain sqlExplain) throws JsonProcessingException {
         Operation operation;
         SqlNode sqlNode = sqlExplain.getStatement();
         Set<String> explainDetails = sqlExplain.getExplainDetails();

@@ -119,7 +119,7 @@ trait FlinkSubmitTrait extends Logger {
       submitRequest.appOption.filter(x => {
         //验证参数是否合法...
         val verify = commandLineOptions.hasOption(x._1)
-        if (!verify) logWarn(s"[StreamX] param:${x._1} is error,skip it.")
+        if (!verify) logWarn(s"param:${x._1} is error,skip it.")
         verify
       }).foreach(x => {
         val opt = commandLineOptions.getOption(x._1.trim).getOpt
