@@ -20,23 +20,36 @@
  */
 package com.streamxhub.streamx.flink.packer.pipeline
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+
 import javax.annotation.Nullable
 
 /**
  * Error details of building pipeline.
  *
- * @param summary   summary of error.
- * @param exception exception stack.
+ * @param summary   summary of error
+ * @param exception exception stack
+ * @author Al-assad
  */
-case class PipeErr(summary: String, @Nullable exception: Throwable) {
+case class PipeErr(summary: String,
+                   @Nullable exception: Throwable) {
 
-  val nonEmpty: Boolean = (summary != null && summary.nonEmpty) || exception != null
-  val isEmpty: Boolean = !nonEmpty
+  lazy val nonEmpty: Boolean = Option(summary).exists(_.nonEmpty) || exception != null
+  lazy val isEmpty: Boolean = !nonEmpty
+  lazy val exceptStackTraceContent: String = if (exception == null) "" else exception.getStackTrace.mkString("\n")
 
-  def exceptStackTraceContent: String = if (exception == null) "" else exception.getStackTrace.mkString("\n")
+  def toSerializable: SerPipeErr = SerPipeErr(summary, exceptStackTraceContent)
 }
-
 
 object PipeErr {
   def empty(): PipeErr = PipeErr("", null)
 }
+
+/**
+ * Serializable PipeErr
+ */
+case class SerPipeErr(summary: String, exceptContent: String) {
+  @JsonIgnore
+  def isEmpty: Boolean = Option(summary).exists(_.nonEmpty) || Option(summary).exists(_.nonEmpty)
+}
+

@@ -30,6 +30,7 @@ import scala.collection.JavaConverters._
  * see com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline
  *
  * @param emitTime snapshot interception time
+ * @author Al-assad
  */
 case class PipeSnapshot(appName: String,
                         pipeType: PipeType,
