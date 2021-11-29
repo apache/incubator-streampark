@@ -33,7 +33,7 @@ import java.io.{File, FileInputStream}
  * Local File System (aka LFS) Operator
  */
 //noinspection DuplicatedCode
-object LFsOperator extends FsOperator with Logger {
+object LfsOperator extends FsOperator with Logger {
 
   override def exists(path: String): Boolean = {
     StringUtils.isNotBlank(path) && new File(path).exists()
@@ -48,9 +48,7 @@ object LFsOperator extends FsOperator with Logger {
   override def delete(path: String): Unit = {
     if (notEmpty(path)) {
       val file = new File(path)
-      if (!file.exists()) {
-        logWarn(s"delete file: file is no exists, $path")
-      } else {
+      if (file.exists()) {
         FileUtils.forceDelete(file)
       }
     }
@@ -83,29 +81,35 @@ object LFsOperator extends FsOperator with Logger {
   }
 
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
-    if (!isAnyBank(srcPath, dstPath)) {
-      val srcFile = new File(srcPath)
-      val dstFile = new File(dstPath)
-      require(srcFile.exists(), "[StreamX] LFsOperator.copy:  Source must be exists")
-      require(dstFile.exists(), "[StreamX] LFsOperator.copy:  Destination must be exists")
-      if (overwrite && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        if (dstFile.isDirectory) {
-          FileUtils.copyFileToDirectory(srcFile, dstFile)
-        } else {
-          FileUtils.copyFile(srcFile, dstFile)
-        }
-      }
+    if (isAnyBank(srcPath, dstPath)) return
+    val srcFile = new File(srcPath)
+    if (!srcFile.exists) return
+    var dstFile = new File(dstPath)
+    if (dstFile.isDirectory) dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
+
+    val shouldCopy = {
+      if (overwrite || !dstFile.exists) true
+      else srcFile.getCanonicalPath != dstFile.getCanonicalPath
+    }
+    if (shouldCopy) {
+      FileUtils.copyFile(srcFile, dstFile)
+      if (delSrc) FileUtils.forceDelete(srcFile)
     }
   }
 
   override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
-    if (!isAnyBank(srcPath, dstPath)) {
-      val srcFile = new File(srcPath)
-      val dstFile = new File(dstPath)
-      require(srcFile.exists(), "[StreamX] LFsOperator.copyDir: Source must be exists")
-      if (overwrite && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        FileUtils.copyDirectory(srcFile, dstFile)
-      }
+    if (isAnyBank(srcPath, dstPath)) return
+    val srcFile = new File(srcPath)
+    if (!srcFile.exists) return
+    val dstFile = new File(dstPath)
+
+    val shouldCopy = {
+      if (overwrite || !dstFile.exists) true
+      else srcFile.getCanonicalPath != dstFile.getCanonicalPath
+    }
+    if (shouldCopy) {
+      FileUtils.copyDirectory(srcFile, dstFile)
+      if (delSrc) FileUtils.deleteDirectory(srcFile)
     }
   }
 
@@ -113,6 +117,24 @@ object LFsOperator extends FsOperator with Logger {
     require(path != null && path.nonEmpty, s"[StreamX] LFsOperator.fileMd5: file must not be null.")
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
+
+  /**
+   * Force delete directory and recreate it.
+   */
+  def mkCleanDirs(path: String): Unit = {
+    delete(path)
+    mkdirs(path)
+  }
+
+  /**
+   * list file under directory, one level of traversal only
+   */
+  def listDir(path: String): Array[File] = new File(path) match {
+    case f if !f.exists => Array()
+    case f if f.isFile => Array(f)
+    case f => f.listFiles()
+  }
+
 
 }
 
