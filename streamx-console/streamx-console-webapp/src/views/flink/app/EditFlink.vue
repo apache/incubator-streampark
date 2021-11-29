@@ -274,6 +274,19 @@
       </a-form-item>
 
       <a-form-item
+        label="Alert SMS List"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input
+          type="text"
+          placeholder="Please enter phone number,separate multiple phone number with comma(,)"
+          allowClear
+          v-decorator="[ 'alertPhoneNumber' ]">
+          <svg-icon name="phone" slot="prefix"/>
+        </a-input>
+      </a-form-item>
+
+      <a-form-item
         class="conf-item"
         v-for="(conf,index) in hasOptions(configItems)"
         :key="`config_items_${index}`"
@@ -818,6 +831,7 @@ export default {
               dynamicOptions: values.dynamicOptions,
               restartSize: values.restartSize,
               alertEmail: values.alertEmail || null,
+              alertPhoneNumber: values.alertPhoneNumber || null,
               description: values.description,
               k8sRestExposedType: values.k8sRestExposedType,
               k8sNamespace: values.k8sNamespace || null,
@@ -895,6 +909,7 @@ export default {
           'executionMode': this.app.executionMode,
           'restartSize': this.app.restartSize,
           'alertEmail': this.app.alertEmail,
+          'alertPhoneNumber': this.app.alertPhoneNumber,
           'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
           'cpFailureRateInterval': this.app.cpFailureRateInterval,
           'cpFailureAction': this.app.cpFailureAction,

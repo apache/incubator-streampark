@@ -45,6 +45,7 @@
     <docker v-if="name==='docker'"></docker>
     <auth v-if="name==='auth'"></auth>
     <password v-if="name==='password'"></password>
+    <phone v-if="name==='phone'"></phone>
   </span>
 </template>
 
@@ -94,7 +95,8 @@ import {
   user,
   docker,
   auth,
-  password
+  password,
+  phone
 } from '@/core/icons'
 
 export default {
@@ -144,7 +146,8 @@ export default {
     user,
     docker,
     auth,
-    password
+    password,
+    phone
   },
   props: {
     name: {

@@ -132,10 +132,10 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     public SenderSMS getSenderSMS() {
         try {
             String number = settings.get(SettingService.KEY_ALERT_PHONE_NUMBER).getValue();
-            String message = settings.get(SettingService.KEY_ALERT_PHONE_MESSAGE).getValue();
+            //String message = settings.get(SettingService.KEY_ALERT_PHONE_MESSAGE).getValue();
             SenderSMS senderSMS = new SenderSMS();
             senderSMS.setPhoneNumber(number);
-            senderSMS.setPhoneMessage(message);
+            //senderSMS.setPhoneMessage(message);
             return senderSMS;
         } catch (Exception e) {
             log.warn("Fault Alert SMS is not set.");
