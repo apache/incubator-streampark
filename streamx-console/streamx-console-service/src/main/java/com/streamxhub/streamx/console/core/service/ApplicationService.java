@@ -25,7 +25,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.AppExistsState;
-import com.streamxhub.streamx.console.core.enums.DeployState;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
