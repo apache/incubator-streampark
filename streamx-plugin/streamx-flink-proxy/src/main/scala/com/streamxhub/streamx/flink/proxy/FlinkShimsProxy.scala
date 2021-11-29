@@ -51,7 +51,7 @@ object FlinkShimsProxy extends Logger {
 
   private[this] def getFlinkShimsResourcePattern(flinkLargeVersion: String) =
     Pattern.compile(
-      "flink-(.*)-" + flinkLargeVersion + "(.*).jar",
+      s"flink-(.*)-$flinkLargeVersion(.*).jar",
       Pattern.CASE_INSENSITIVE | Pattern.DOTALL
     )
 
@@ -95,7 +95,7 @@ object FlinkShimsProxy extends Logger {
 
       //2) shims jar
       val appHome = System.getProperty("app.home")
-      require(appHome != null,"app.home is not found on System env.")
+      require(appHome != null, "app.home is not found on System env.")
 
       val libPath = new File(s"$appHome/lib")
       require(libPath.exists())
