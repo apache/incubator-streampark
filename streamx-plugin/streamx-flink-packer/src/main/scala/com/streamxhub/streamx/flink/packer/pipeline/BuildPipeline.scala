@@ -34,12 +34,24 @@ import scala.util.{Failure, Success, Try}
  */
 trait BuildPipelineProcess {
 
+  /**
+   * the type of pipeline
+   */
   val pipeType: PipeType
 
+  /**
+   * the actual build process.
+   * the effective steps progress should be implemented in
+   * multiple BuildPipeline.execStep() functions.
+   */
   @throws[Throwable] protected def buildProcess(): BuildResult
 
+  /**
+   * the build params of build process
+   */
   protected def offerBuildParam: BuildParam
 }
+
 
 /**
  * Callable methods exposed by BuildPipeline to the outside.
@@ -48,18 +60,37 @@ trait BuildPipelineProcess {
  */
 trait BuildPipelineExpose {
 
+  /**
+   * get current state of the pipeline instance
+   */
   def getPipeStatus: PipeStatus
 
+  /**
+   * get error of pipeline instance
+   */
   def getError: PipeErr
 
+  /**
+   * get all of the steps status
+   */
   def getStepsStatus: mutable.ListMap[Int, StepStatus]
 
+  /**
+   * get current build step index
+   */
   def getCurStep: Int
 
+  /**
+   * get count of all build steps
+   */
   val allSteps: Int
 
+  /**
+   * launch the pipeline instance
+   */
   def launch(): BuildResult
 }
+
 
 /**
  * Building pipeline trait.
@@ -80,24 +111,34 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
   /**
    * use to identify the log record that belongs to which pipeline instance
    */
-  protected val logSuffix: String = s"appId=${offerBuildParam.appId}, appName=${offerBuildParam.appName}"
+  protected val logSuffix: String = s"appName=${offerBuildParam.appName}"
+
+  protected var watcher: BuildPipelineWatcher = new SilentPipeWatcherTrait
+
+  def registerWatcher(watcher: BuildPipelineWatcher): BuildPipeline = {
+    this.watcher = watcher
+    this
+  }
 
   protected def execStep[R](seq: Int)(process: => R): Option[R] = {
     Try {
       curStep = seq
       stepsStatus(seq) = StepStatus.running
       logInfo(s"building pipeline step[$seq/$allSteps] running => ${pipeType.stepsMap(seq)}")
+      watcher.onStepStateChange(snapshot)
       process
     } match {
       case Success(result) =>
         stepsStatus(seq) = StepStatus.success
         logInfo(s"building pipeline step[$seq/$allSteps] success")
+        watcher.onStepStateChange(snapshot)
         Some(result)
       case Failure(cause) =>
         stepsStatus(seq) = StepStatus.failure
         pipeStatus = PipeStatus.failure
         error = PipeErr(cause.getMessage, cause)
         logInfo(s"building pipeline step[$seq/$allSteps] failure => ${pipeType.stepsMap(seq)}")
+        watcher.onStepStateChange(snapshot)
         None
     }
   }
@@ -106,6 +147,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
     curStep = seq
     stepsStatus(seq) = StepStatus.skipped
     logInfo(s"building pipeline step[$seq/$allSteps] skipped => ${pipeType.stepsMap(seq)}")
+    watcher.onStepStateChange(snapshot)
   }
 
   /**
@@ -114,18 +156,22 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
   override def launch(): BuildResult = {
     logInfo(s"building pipeline is launching, params=${offerBuildParam.toString}")
     pipeStatus = PipeStatus.running
+    watcher.onStart(snapshot)
 
     Try(buildProcess()) match {
       case Success(result) =>
         pipeStatus = PipeStatus.success
         logInfo(s"building pipeline has finished successfully.")
+        watcher.onFinish(snapshot, result)
         result
       case Failure(cause) =>
         pipeStatus = PipeStatus.failure
         error = PipeErr(cause.getMessage, cause)
         // log and print error trace stack
         logError(s"building pipeline has failed.", cause)
-        ErrorResult(error)
+        val result = ErrorResult(error)
+        watcher.onFinish(snapshot, result)
+        result
     }
   }
 
@@ -144,5 +190,19 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
   override def logError(msg: => String): Unit = super.logError(s"[streamx-packer] $msg | $logSuffix")
 
   override def logError(msg: => String, throwable: Throwable): Unit = super.logError(s"[streamx-packer] $msg | $logSuffix", throwable)
+
+  /**
+   * intercept snapshot
+   */
+  def snapshot: PipeSnapshot = PipeSnapshot(
+    offerBuildParam.appName,
+    pipeType,
+    getPipeStatus,
+    getCurStep,
+    allSteps,
+    getStepsStatus,
+    getError,
+    System.currentTimeMillis
+  )
 
 }

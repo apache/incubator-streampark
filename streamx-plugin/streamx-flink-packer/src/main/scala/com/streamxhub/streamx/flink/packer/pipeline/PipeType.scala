@@ -73,11 +73,11 @@ object PipeType {
     )
   )
 
-  // case object FlinkYarnApplication extends PipelineType
+  // todo case object FlinkYarnApplication extends PipelineType
 
-  // case object FlinkYarnSession extends PipelineType
+  // todo case object FlinkYarnSession extends PipelineType
 
-  // case object FlinkStandalone extends PipelineType
+  // todo case object FlinkStandalone extends PipelineType
 
   /**
    * unknown type

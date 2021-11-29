@@ -32,8 +32,6 @@ import com.streamxhub.streamx.flink.packer.maven.JarPackDeps
  * @author Al-assad
  */
 sealed trait BuildParam {
-  def appId: String
-
   def appName: String
 }
 
@@ -57,8 +55,7 @@ sealed trait FlinkK8sBuildParam extends FlinkBuildParam {
   def k8sNamespace: String
 }
 
-case class FlinkK8sSessionBuildRequest(appId: String,
-                                       appName: String,
+case class FlinkK8sSessionBuildRequest(appName: String,
                                        executionMode: ExecutionMode,
                                        developmentMode: DevelopmentMode,
                                        flinkVersion: FlinkVersion,
@@ -68,8 +65,7 @@ case class FlinkK8sSessionBuildRequest(appId: String,
                                        k8sNamespace: String
                                       ) extends FlinkK8sBuildParam
 
-case class FlinkK8sApplicationBuildRequest(appId: String,
-                                           appName: String,
+case class FlinkK8sApplicationBuildRequest(appName: String,
                                            executionMode: ExecutionMode,
                                            developmentMode: DevelopmentMode,
                                            flinkVersion: FlinkVersion,
@@ -84,9 +80,9 @@ case class FlinkK8sApplicationBuildRequest(appId: String,
                                           ) extends FlinkK8sBuildParam
 
 
-// case class FlinkYarnApplicationBuildRequest() extends FlinkBuildParam
+// todo case class FlinkYarnApplicationBuildRequest() extends FlinkBuildParam
 
-// case class FlinkYarnSessionBuildRequest() extends FlinkBuildParam
+// todo case class FlinkYarnSessionBuildRequest() extends FlinkBuildParam
 
-// case class FlinkStandaloneBuildRequest() extends FlinkBuildParam
+// todo case class FlinkStandaloneBuildRequest() extends FlinkBuildParam
 
