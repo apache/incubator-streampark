@@ -65,9 +65,9 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
         s"${flinkConfIdentifierInfo(flinkConfig)}, k8sPodTemplateFile=${k8sPodTmplConf.tmplFiles}")
     }
 
-    // step-2: build fat-jar, output file name: streamx-flinkjob_<jobamme>.jar, like "streamx-flinkjob_myjob-test.jar"
+    // step-2: build fat-jar, output file name: _streamx-flinkjob_<jobamme>.jar, like "_streamx-flinkjob_myjob-test.jar"
     val fatJar = {
-      val fatJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}.jar"
+      val fatJarOutputPath = s"$buildWorkspace/_streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}.jar"
       submitRequest.developmentMode match {
         case DevelopmentMode.FLINKSQL =>
           val flinkLibs = extractProvidedLibs(submitRequest)

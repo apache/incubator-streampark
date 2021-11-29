@@ -58,9 +58,9 @@ case class FlinkDockerfileTemplate(flinkBaseImage: String, flinkFatjarPath: Stri
   }
 
   /**
-   * get flink job jar such as local:///opt/flink/usrlib/flink-fatjar.jar
+   * get flink job jar such as local:///opt/flink/lib/flink-fatjar.jar
    */
-  def getJobJar: String = s"local:///opt/flink/usrlib/$fatJarName"
+  def getJobJar: String = s"local:///opt/flink/lib/$fatJarName"
 
 }
 
@@ -74,7 +74,7 @@ object FlinkDockerfileTemplate {
   val DOCKER_FILE_TEMPLATE: String =
     """FROM %s
       |RUN mkdir -p $FLINK_HOME/usrlib
-      |COPY %s $FLINK_HOME/usrlib/%s
+      |COPY %s $FLINK_HOME/lib/%s
       |""".stripMargin
 
 }
