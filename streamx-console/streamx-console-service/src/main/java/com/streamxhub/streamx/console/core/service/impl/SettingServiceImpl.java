@@ -148,7 +148,6 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         try {
             String number = settings.get(SettingService.KEY_ALERT_PHONE_NUMBER).getValue();
             String message = settings.get(SettingService.KEY_ALERT_PHONE_MESSAGE).getValue();
-
             SenderSMS senderSMS = new SenderSMS();
             senderSMS.setPhoneNumber(number);
             senderSMS.setPhoneMessage(message);
