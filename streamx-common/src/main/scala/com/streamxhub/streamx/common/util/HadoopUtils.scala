@@ -238,7 +238,7 @@ object HadoopUtils extends Logger {
           }
           fs
         case Failure(e) =>
-          throw new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
+          throw new IllegalArgumentException(s"[StreamX] access hdfs error: $e")
       }
       reusableHdfs
     }
