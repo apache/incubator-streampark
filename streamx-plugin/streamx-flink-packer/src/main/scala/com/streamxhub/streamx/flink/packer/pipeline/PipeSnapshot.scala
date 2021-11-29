@@ -20,10 +20,10 @@
  */
 package com.streamxhub.streamx.flink.packer.pipeline
 
-import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus.PipeStatus
-import com.streamxhub.streamx.flink.packer.pipeline.StepStatus.StepStatus
+import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper.calPercent
 
-import scala.collection.mutable
+import java.util.{Map => JMap}
+import scala.collection.JavaConverters._
 
 /**
  * Snapshot for a BuildPipeline instance.
@@ -36,6 +36,11 @@ case class PipeSnapshot(appName: String,
                         pipeStatus: PipeStatus,
                         curStep: Int,
                         allSteps: Int,
-                        stepStatus: mutable.ListMap[Int, StepStatus],
+                        stepStatus: Map[Int, PipeStepStatus],
                         error: PipeErr,
-                        emitTime: Long)
+                        emitTime: Long) {
+
+  def percent(): Double = calPercent(curStep, allSteps)
+
+  def stepStatusAsJava: JMap[Int, PipeStepStatus] = stepStatus.asJava
+}

@@ -41,7 +41,7 @@ import java.io.File
  */
 class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) extends BuildPipeline {
 
-  override val pipeType: PipeType = PipeType.FlinkNativeK8sApplication
+  override val pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_APPLICATION
 
   override protected def offerBuildParam: FlinkK8sApplicationBuildRequest = params
 

@@ -44,7 +44,7 @@ trait PipeWatcher {
   def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit
 }
 
-class SilentPipeWatcherTrait extends PipeWatcher {
+class SilentPipeWatcher extends PipeWatcher {
 
   override def onStart(snapshot: PipeSnapshot): Unit = {}
 

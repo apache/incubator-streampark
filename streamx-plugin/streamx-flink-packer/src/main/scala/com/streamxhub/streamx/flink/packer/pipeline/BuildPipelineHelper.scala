@@ -31,7 +31,7 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @author Al-assad
  */
-private[pipeline] object BuildPipelineHelper {
+object BuildPipelineHelper {
 
   private[this] val localWorkspace = Workspace.local
 

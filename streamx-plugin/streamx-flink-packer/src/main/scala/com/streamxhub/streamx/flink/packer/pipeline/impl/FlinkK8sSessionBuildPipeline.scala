@@ -25,7 +25,6 @@ import com.streamxhub.streamx.common.fs.LfsOperator
 import com.streamxhub.streamx.common.util.DateUtils
 import com.streamxhub.streamx.common.util.DateUtils.fullCompact
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
-import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper
 import com.streamxhub.streamx.flink.packer.pipeline._
 
 /**
@@ -35,7 +34,7 @@ import com.streamxhub.streamx.flink.packer.pipeline._
  */
 class FlinkK8sSessionBuildPipeline(params: FlinkK8sSessionBuildRequest) extends BuildPipeline {
 
-  override val pipeType: PipeType = PipeType.FlinkNativeK8sSession
+  override val pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_SESSION
 
   override def offerBuildParam: FlinkK8sSessionBuildRequest = params
 

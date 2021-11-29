@@ -21,11 +21,12 @@
 package com.streamxhub.streamx.flink.packer.pipeline
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus.PipeStatus
-import com.streamxhub.streamx.flink.packer.pipeline.StepStatus.StepStatus
 
+import java.util
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
+import java.util.{Map => JMap}
 
 /**
  * Behavior that BuildPipeline subclasses must inherit to implement.
@@ -73,7 +74,12 @@ trait BuildPipelineExpose {
   /**
    * get all of the steps status
    */
-  def getStepsStatus: mutable.ListMap[Int, StepStatus]
+  def getStepsStatus: Map[Int, PipeStepStatus]
+
+  /**
+   * get all of the steps status
+   */
+  def getStepsStatusAsJava: JMap[Int, PipeStepStatus]
 
   /**
    * get current build step index
@@ -105,15 +111,15 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
 
   protected var curStep: Int = 0
 
-  protected val stepsStatus: mutable.ListMap[Int, StepStatus] = mutable.ListMap(pipeType.steps.map(
-    step => (step._1, StepStatus.waiting)): _*)
+  protected val stepsStatus: mutable.Map[Int, PipeStepStatus] =
+    mutable.Map(pipeType.getSteps.asScala.map(e => e._1.toInt -> PipeStepStatus.waiting).toSeq: _*)
 
   /**
    * use to identify the log record that belongs to which pipeline instance
    */
   protected val logSuffix: String = s"appName=${offerBuildParam.appName}"
 
-  protected var watcher: BuildPipelineWatcher = new SilentPipeWatcherTrait
+  protected var watcher: PipeWatcher = new SilentPipeWatcher
 
   def registerWatcher(watcher: BuildPipelineWatcher): BuildPipeline = {
     this.watcher = watcher
@@ -123,21 +129,21 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
   protected def execStep[R](seq: Int)(process: => R): Option[R] = {
     Try {
       curStep = seq
-      stepsStatus(seq) = StepStatus.running
-      logInfo(s"building pipeline step[$seq/$allSteps] running => ${pipeType.stepsMap(seq)}")
+      stepsStatus(seq) = PipeStepStatus.running
+      logInfo(s"building pipeline step[$seq/$allSteps] running => ${pipeType.getSteps.get(seq)}")
       watcher.onStepStateChange(snapshot)
       process
     } match {
       case Success(result) =>
-        stepsStatus(seq) = StepStatus.success
+        stepsStatus(seq) = PipeStepStatus.success
         logInfo(s"building pipeline step[$seq/$allSteps] success")
         watcher.onStepStateChange(snapshot)
         Some(result)
       case Failure(cause) =>
-        stepsStatus(seq) = StepStatus.failure
+        stepsStatus(seq) = PipeStepStatus.failure
         pipeStatus = PipeStatus.failure
         error = PipeErr(cause.getMessage, cause)
-        logInfo(s"building pipeline step[$seq/$allSteps] failure => ${pipeType.stepsMap(seq)}")
+        logInfo(s"building pipeline step[$seq/$allSteps] failure => ${pipeType.getSteps.get(seq)}")
         watcher.onStepStateChange(snapshot)
         None
     }
@@ -145,8 +151,8 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
 
   protected def skipStep(seq: Int): Unit = {
     curStep = seq
-    stepsStatus(seq) = StepStatus.skipped
-    logInfo(s"building pipeline step[$seq/$allSteps] skipped => ${pipeType.stepsMap(seq)}")
+    stepsStatus(seq) = PipeStepStatus.skipped
+    logInfo(s"building pipeline step[$seq/$allSteps] skipped => ${pipeType.getSteps.get(seq)}")
     watcher.onStepStateChange(snapshot)
   }
 
@@ -175,15 +181,17 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
     }
   }
 
-  override def getPipeStatus: PipeStatus = PipeStatus.copy(pipeStatus)
+  override def getPipeStatus: PipeStatus = pipeStatus
 
   override def getError: PipeErr = error.copy()
 
-  override def getStepsStatus: mutable.ListMap[Int, StepStatus] = stepsStatus.clone()
+  override def getStepsStatus: Map[Int, PipeStepStatus] = stepsStatus.toMap
+
+  override def getStepsStatusAsJava: util.Map[Int, PipeStepStatus] = getStepsStatus.asJava
 
   override def getCurStep: Int = curStep
 
-  override val allSteps: Int = pipeType.steps.size
+  override val allSteps: Int = pipeType.getSteps.size
 
   override def logInfo(msg: => String): Unit = super.logInfo(s"[streamx-packer] $msg | $logSuffix")
 
