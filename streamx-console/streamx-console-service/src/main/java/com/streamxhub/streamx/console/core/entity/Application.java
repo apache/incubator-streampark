@@ -139,6 +139,11 @@ public class Application implements Serializable {
      */
     private String alertEmail;
 
+    /**
+     * 失败告警的通知短信
+     */
+    private String alertPhoneNumber;
+
     private String args;
     /**
      * 应用程序模块

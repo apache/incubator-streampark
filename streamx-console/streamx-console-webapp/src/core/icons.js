@@ -51,6 +51,7 @@ import user from '@/assets/icons/user.svg?inline'
 import docker from '@/assets/icons/docker.svg?inline'
 import auth from '@/assets/icons/auth.svg?inline'
 import password from '@/assets/icons/password.svg?inline'
+import phone from '@/assets/icons/phone.svg?inline'
 
 export {
   analyse,
@@ -97,5 +98,6 @@ export {
   user,
   docker,
   auth,
-  password
+  password,
+  phone
 }

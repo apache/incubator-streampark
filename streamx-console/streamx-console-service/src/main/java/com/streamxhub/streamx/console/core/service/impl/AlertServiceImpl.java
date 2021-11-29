@@ -20,14 +20,17 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
+import com.streamxhub.streamx.console.core.entity.SenderSMS;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.metrics.flink.MailTemplate;
+import com.streamxhub.streamx.console.core.metrics.flink.SMSTemplate;
 import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import freemarker.template.Configuration;
@@ -35,8 +38,20 @@ import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.mail.HtmlEmail;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Map;
+import java.util.Objects;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.StringWriter;
@@ -57,6 +72,10 @@ public class AlertServiceImpl implements AlertService {
 
     private SenderEmail senderEmail;
 
+    private SenderSMS senderSMS;
+
+    @Value("${streamx.alert.sms-url}")
+    private String smsUrl;
     @PostConstruct
     public void initConfig() throws Exception {
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
@@ -100,6 +119,19 @@ public class AlertServiceImpl implements AlertService {
             String[] emails = application.getAlertEmail().split(",");
             sendEmail(mail, subject, emails);
         }
+        if (this.senderSMS == null) {
+            this.senderSMS = settingService.getSenderSMS();
+        }
+        if (this.senderSMS != null && Utils.notEmpty(application.getAlertPhoneNumber())) {
+            SMSTemplate sms = getSMSTemplate(application);
+            sms.setType(1);
+            sms.setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()));
+            sms.setStatus(appState.name());
+
+            String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
+            String phoneNumber = application.getAlertPhoneNumber();
+            sendSMS(sms, subject, phoneNumber);
+        }
     }
 
     @Override
@@ -117,6 +149,19 @@ public class AlertServiceImpl implements AlertService {
             String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
             String[] emails = application.getAlertEmail().split(",");
             sendEmail(mail, subject, emails);
+        }
+        if (this.senderSMS == null) {
+            this.senderSMS = settingService.getSenderSMS();
+        }
+        if (this.senderSMS != null && Utils.notEmpty(application.getAlertPhoneNumber())) {
+            SMSTemplate smsTemplate = getSMSTemplate(application);
+            smsTemplate.setType(2);
+            smsTemplate.setCpFailureRateInterval(DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));
+            smsTemplate.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
+            smsTemplate.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
+            String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
+            String phoneNumber = application.getAlertPhoneNumber();
+            sendSMS(smsTemplate, subject, phoneNumber);
         }
     }
 
@@ -150,6 +195,49 @@ public class AlertServiceImpl implements AlertService {
             e.printStackTrace();
         }
     }
+    private String sendSMS(SMSTemplate sms, String subject, String mobile) {
+        log.info(subject);
+        String response = null;
+        String jobName = sms.getJobName();
+        String startTime = sms.getStartTime();
+        String endTime = sms.getEndTime();
+        String link = sms.getLink();
+        String alertMessage = subject + "\\r\\n"
+            + jobName + " start from " + startTime
+            + "end in " + endTime + ";\\r\\n"
+            + "Please Visit the Hadoop process link to see why" + "\\r\\n"
+            + link;
+        try {
+            CloseableHttpClient httpclient = null;
+            CloseableHttpResponse httpresponse = null;
+            try {
+                httpclient = HttpClients.createDefault();
+                HttpPost httppost = new HttpPost(smsUrl);
+                JSONObject jsonData = new JSONObject();
+                jsonData.put("mobile",mobile);
+                jsonData.put("content",alertMessage);
+                jsonData.put("system","streamx");
+                jsonData.put("businessKey",jobName);
+                StringEntity stringentity = new StringEntity(jsonData.toJSONString(), ContentType.create("application/json", "UTF-8"));
+                httppost.setEntity(stringentity);
+                //发post请求
+                httpresponse = httpclient.execute(httppost);
+                //utf-8参数防止中文乱码
+                response = EntityUtils.toString(httpresponse.getEntity(), "utf-8");
+            } finally {
+                if (httpclient != null) {
+                    httpclient.close();
+                }
+                if (httpresponse != null) {
+                    httpresponse.close();
+                }
+            }
+        } catch (Exception e) {
+            log.error("sms send post http is error!",e);
+            e.printStackTrace();
+        }
+        return response;
+    }
 
     private MailTemplate getMailTemplate(Application application) {
         long duration;
@@ -163,6 +251,31 @@ public class AlertServiceImpl implements AlertService {
         String url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
 
         MailTemplate template = new MailTemplate();
+        template.setJobName(application.getJobName());
+        template.setLink(url);
+        template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+        template.setEndTime(DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+        template.setDuration(DateUtils.toRichTimeDuration(duration));
+        boolean needRestart = application.isNeedRestartOnFailed() && application.getRestartCount() > 0;
+        template.setRestart(needRestart);
+        if (needRestart) {
+            template.setRestartIndex(application.getRestartCount());
+            template.setTotalRestart(application.getRestartSize());
+        }
+        return template;
+    }
+    private SMSTemplate getSMSTemplate(Application application) {
+        long duration;
+        if (application.getEndTime() == null) {
+            duration = System.currentTimeMillis() - application.getStartTime().getTime();
+        } else {
+            duration = application.getEndTime().getTime() - application.getStartTime().getTime();
+        }
+        duration = duration / 1000 / 60;
+        String format = "%s/proxy/%s/";
+        String url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
+
+        SMSTemplate template = new SMSTemplate();
         template.setJobName(application.getJobName());
         template.setLink(url);
         template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));

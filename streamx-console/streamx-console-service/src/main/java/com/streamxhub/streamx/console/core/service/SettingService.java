@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.core.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
+import com.streamxhub.streamx.console.core.entity.SenderSMS;
 import com.streamxhub.streamx.console.core.entity.Setting;
 
 
@@ -43,6 +44,9 @@ public interface SettingService extends IService<Setting> {
     String KEY_DOCKER_REGISTER_ADDRESS = "docker.register.address";
     String KEY_DOCKER_REGISTER_USER = "docker.register.user";
     String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
+
+    String KEY_ALERT_PHONE_NUMBER = "alert.phone.number";
+    String KEY_ALERT_PHONE_MESSAGE = "alert.phone.message";
 
     /**
      * @param key
@@ -68,4 +72,5 @@ public interface SettingService extends IService<Setting> {
 
     String getDockerRegisterPassword();
 
+    SenderSMS getSenderSMS();
 }
