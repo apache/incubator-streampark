@@ -120,15 +120,19 @@ public class AlertServiceImpl implements AlertService {
         if (this.senderSMS == null) {
             this.senderSMS = settingService.getSenderSMS();
         }
-        if (this.senderSMS != null && Utils.notEmpty(application.getAlertPhoneNumber())) {
+        if (Utils.notEmpty(this.senderSMS.getPhoneHost()) &&
+            (Utils.notEmpty(this.senderSMS.getPhoneNumber()) || Utils.notEmpty(application.getAlertPhoneNumber()))) {
             String phoneHost = this.senderSMS.getPhoneHost();
             SMSTemplate sms = getSMSTemplate(application);
             sms.setType(1);
             sms.setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()));
             sms.setStatus(appState.name());
-
             String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
-            String phoneNumber = application.getAlertPhoneNumber();
+            String phoneNumber = this.senderSMS.getAlertPhoneNumber();
+            if(Utils.notEmpty(application.getAlertPhoneNumber()))
+            {
+                phoneNumber = application.getAlertPhoneNumber();
+            }
             sendSMS(sms, subject, phoneNumber,phoneHost);
         }
     }
@@ -152,7 +156,8 @@ public class AlertServiceImpl implements AlertService {
         if (this.senderSMS == null) {
             this.senderSMS = settingService.getSenderSMS();
         }
-        if (this.senderSMS != null && Utils.notEmpty(application.getAlertPhoneNumber())) {
+        if (Utils.notEmpty(this.senderSMS.getPhoneHost()) &&
+            (Utils.notEmpty(this.senderSMS.getPhoneNumber()) || Utils.notEmpty(application.getAlertPhoneNumber()))) {
             String phoneHost = this.senderSMS.getPhoneHost();
             SMSTemplate smsTemplate = getSMSTemplate(application);
             smsTemplate.setType(2);
@@ -160,7 +165,11 @@ public class AlertServiceImpl implements AlertService {
             smsTemplate.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
             smsTemplate.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
             String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
-            String phoneNumber = application.getAlertPhoneNumber();
+            String phoneNumber = this.senderSMS.getAlertPhoneNumber();
+            if(Utils.notEmpty(application.getAlertPhoneNumber()))
+            {
+                phoneNumber = application.getAlertPhoneNumber();
+            }
             sendSMS(smsTemplate, subject, phoneNumber,phoneHost);
         }
     }
@@ -202,11 +211,12 @@ public class AlertServiceImpl implements AlertService {
         String startTime = sms.getStartTime();
         String endTime = sms.getEndTime();
         String link = sms.getLink();
-        String alertMessage = subject + "\\r\\n"
+        String alertMessage = subject + "\r\n"
             + jobName + " start from " + startTime
-            + "end in " + endTime + ";\\r\\n"
-            + "Please Visit the Hadoop process link to see why" + "\\r\\n"
+            + "end in " + endTime + ";\r\n"
+            + "Please Visit the Hadoop process link to see why" + "\r\n"
             + link;
+        log.info("alertMessage = " + alertMessage);
         try {
             CloseableHttpClient httpclient = null;
             CloseableHttpResponse httpresponse = null;
@@ -217,7 +227,7 @@ public class AlertServiceImpl implements AlertService {
                 jsonData.put("mobile",mobile);
                 jsonData.put("content",alertMessage);
                 jsonData.put("system","streamx");
-                jsonData.put("businessKey",jobName);
+                jsonData.put("businessKey",jobName+"_"+startTime);
                 StringEntity stringentity = new StringEntity(jsonData.toJSONString(), ContentType.create("application/json", "UTF-8"));
                 httppost.setEntity(stringentity);
                 //发post请求
