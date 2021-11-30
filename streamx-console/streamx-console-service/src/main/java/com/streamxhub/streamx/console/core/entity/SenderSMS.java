@@ -26,6 +26,6 @@ import lombok.Data;
 public class SenderSMS {
 
     private String phoneNumber;
-    private String phoneMessage;
+    private String phoneHost;
 
 }

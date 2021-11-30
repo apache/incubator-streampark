@@ -74,8 +74,6 @@ public class AlertServiceImpl implements AlertService {
 
     private SenderSMS senderSMS;
 
-    @Value("${streamx.alert.sms-url}")
-    private String smsUrl;
     @PostConstruct
     public void initConfig() throws Exception {
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
@@ -123,6 +121,7 @@ public class AlertServiceImpl implements AlertService {
             this.senderSMS = settingService.getSenderSMS();
         }
         if (this.senderSMS != null && Utils.notEmpty(application.getAlertPhoneNumber())) {
+            String phoneHost = this.senderSMS.getPhoneHost();
             SMSTemplate sms = getSMSTemplate(application);
             sms.setType(1);
             sms.setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()));
@@ -130,7 +129,7 @@ public class AlertServiceImpl implements AlertService {
 
             String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
             String phoneNumber = application.getAlertPhoneNumber();
-            sendSMS(sms, subject, phoneNumber);
+            sendSMS(sms, subject, phoneNumber,phoneHost);
         }
     }
 
@@ -154,6 +153,7 @@ public class AlertServiceImpl implements AlertService {
             this.senderSMS = settingService.getSenderSMS();
         }
         if (this.senderSMS != null && Utils.notEmpty(application.getAlertPhoneNumber())) {
+            String phoneHost = this.senderSMS.getPhoneHost();
             SMSTemplate smsTemplate = getSMSTemplate(application);
             smsTemplate.setType(2);
             smsTemplate.setCpFailureRateInterval(DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));
@@ -161,7 +161,7 @@ public class AlertServiceImpl implements AlertService {
             smsTemplate.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
             String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
             String phoneNumber = application.getAlertPhoneNumber();
-            sendSMS(smsTemplate, subject, phoneNumber);
+            sendSMS(smsTemplate, subject, phoneNumber,phoneHost);
         }
     }
 
@@ -195,7 +195,7 @@ public class AlertServiceImpl implements AlertService {
             e.printStackTrace();
         }
     }
-    private String sendSMS(SMSTemplate sms, String subject, String mobile) {
+    private String sendSMS(SMSTemplate sms, String subject, String mobile,String phoneHost) {
         log.info(subject);
         String response = null;
         String jobName = sms.getJobName();
@@ -212,7 +212,7 @@ public class AlertServiceImpl implements AlertService {
             CloseableHttpResponse httpresponse = null;
             try {
                 httpclient = HttpClients.createDefault();
-                HttpPost httppost = new HttpPost(smsUrl);
+                HttpPost httppost = new HttpPost(phoneHost);
                 JSONObject jsonData = new JSONObject();
                 jsonData.put("mobile",mobile);
                 jsonData.put("content",alertMessage);

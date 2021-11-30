@@ -52,6 +52,7 @@ import docker from '@/assets/icons/docker.svg?inline'
 import auth from '@/assets/icons/auth.svg?inline'
 import password from '@/assets/icons/password.svg?inline'
 import phone from '@/assets/icons/phone.svg?inline'
+import smsHost from '@/assets/icons/sms-host.svg?inline'
 
 export {
   analyse,
@@ -99,5 +100,6 @@ export {
   docker,
   auth,
   password,
-  phone
+  phone,
+  smsHost
 }

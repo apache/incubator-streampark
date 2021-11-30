@@ -46,6 +46,7 @@
     <auth v-if="name==='auth'"></auth>
     <password v-if="name==='password'"></password>
     <phone v-if="name==='phone'"></phone>
+    <smsHost v-if="name==='smsHost'"></smsHost>
   </span>
 </template>
 
@@ -96,7 +97,8 @@ import {
   docker,
   auth,
   password,
-  phone
+  phone,
+  smsHost
 } from '@/core/icons'
 
 export default {
@@ -147,7 +149,8 @@ export default {
     docker,
     auth,
     password,
-    phone
+    phone,
+    smsHost
   },
   props: {
     name: {

@@ -68,8 +68,6 @@ mybatis-plus:
     banner: false
 
 streamx:
-  alert:
-    sms-url: http://172.16.4.106:6060/sendMessage/sendPhone
   # 本地的工作空间,用于存放项目源码,构建的目录等.
   workspace:
     local: ~/streamx_workspace

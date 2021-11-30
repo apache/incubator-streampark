@@ -19,7 +19,7 @@
                 <svg-icon class="avatar" name="docker" size="large" slot="avatar" v-if="item.key === 'docker.register.address'"></svg-icon>
                 <svg-icon class="avatar" name="auth" size="large" slot="avatar" v-if="item.key === 'docker.register.user'"></svg-icon>
                 <svg-icon class="avatar" name="password" size="large" slot="avatar" v-if="item.key === 'docker.register.password'"></svg-icon>
-<!--                <svg-icon class="avatar" name="message" size="large" slot="avatar" v-if="item.key === 'alert.phone.message'"></svg-icon>-->
+                <svg-icon class="avatar" name="smsHost" size="large" slot="avatar" v-if="item.key === 'alert.phone.host'"></svg-icon>
                 <svg-icon class="avatar" name="phone" size="large" slot="avatar" v-if="item.key === 'alert.phone.number'"></svg-icon>
                 <span slot="title">{{ item.title }}</span>
                 <span slot="description">{{ item.description }}</span>

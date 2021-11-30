@@ -46,7 +46,7 @@ public interface SettingService extends IService<Setting> {
     String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
 
     String KEY_ALERT_PHONE_NUMBER = "alert.phone.number";
-    String KEY_ALERT_PHONE_MESSAGE = "alert.phone.message";
+    String KEY_ALERT_PHONE_HOST = "alert.phone.host";
 
     /**
      * @param key
