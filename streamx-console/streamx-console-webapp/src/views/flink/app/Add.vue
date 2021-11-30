@@ -2244,7 +2244,7 @@ export default {
         } else {
           // from upload
           params['resourceFrom'] = 2
-          params['appType'] = 1
+          params['appType'] = 2
           params['jar'] = this.uploadJar
           params['mainClass'] = this.form.getFieldValue('mainClass') || null
           this.handleCreateApp(params)

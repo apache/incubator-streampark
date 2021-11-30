@@ -4,7 +4,7 @@ ALTER TABLE `t_flink_app` ADD COLUMN `K8S_HADOOP_INTEGRATION` tinyint(1) default
 
 ALTER TABLE `t_flink_app` ADD COLUMN `RESOURCE_FROM` tinyint(1) NULL AFTER `EXECUTION_MODE`;
 
-ALTER TABLE `t_flink_app` ADD COLUMN `JAR_CHECK_SUM` varchar(64) NULL AFTER `JAR`;
+ALTER TABLE `t_flink_app` ADD COLUMN `JAR_CHECK_SUM` bigint NULL AFTER `JAR`;
 
 update `t_flink_app` set `RESOURCE_FROM` = 1 where `JOB_TYPE` = 1;
 

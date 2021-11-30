@@ -35,7 +35,6 @@ import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.fs.LfsOperator;
 import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -500,7 +499,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setCreateTime(new Date());
         if (appParam.getResourceFrom().equals(ResourceFrom.UPLOAD.getValue())) {
             String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
-            appParam.setJarCheckSum(LfsOperator.fileMd5(jarPath));
+            appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
         }
         boolean saved = save(appParam);
         if (saved) {
@@ -525,25 +524,27 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         try {
             Application application = getById(appParam.getId());
 
-            boolean needDeploy = false;
+            boolean localJarChanged = false;
 
-            if (application.getResourceFrom() == ResourceFrom.UPLOAD.getValue()) {
-                if (!ObjectUtils.safeEquals(application.getJar(), application.getJar())) {
-                    application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
-                    needDeploy = true;
-                }
-                String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
-                File jarFile = new File(jarPath);
-                if (jarFile.exists()) {
-                    String jarCheckSum = LfsOperator.fileMd5(jarPath);
-                    if (!application.getJarCheckSum().equals(jarCheckSum)) {
+            if (application.getJobType().equals(DevelopmentMode.CUSTOMCODE.getValue())) {
+                if (application.getResourceFrom() == ResourceFrom.UPLOAD.getValue()) {
+                    if (!ObjectUtils.safeEquals(application.getJar(), application.getJar())) {
                         application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
-                        needDeploy = true;
+                        localJarChanged = true;
+                    }
+                    String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
+                    File jarFile = new File(jarPath);
+                    if (jarFile.exists()) {
+                        long checkSum = FileUtils.checksumCRC32(jarFile);
+                        if (!ObjectUtils.safeEquals(checkSum, application.getJarCheckSum())) {
+                            application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
+                            localJarChanged = true;
+                        }
                     }
                 }
             }
 
-            if (!needDeploy) {
+            if (!localJarChanged) {
                 //检查任务相关的参数是否发生变化,发生变化则设置需要重启的状态
                 if (!appParam.eqJobParam(application)) {
                     application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
@@ -1212,9 +1213,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.getK8sNamespace(),
                 jarPackDeps,
                 new DockerAuthConf(
-                        settingService.getDockerRegisterAddress(),
-                        settingService.getDockerRegisterUser(),
-                        settingService.getDockerRegisterPassword()),
+                    settingService.getDockerRegisterAddress(),
+                    settingService.getDockerRegisterUser(),
+                    settingService.getDockerRegisterPassword()),
                 application.getK8sPodTemplates(),
                 application.getK8sRestExposedTypeEnum(),
                 application.getK8sHadoopIntegration() != null ? application.getK8sHadoopIntegration() : false

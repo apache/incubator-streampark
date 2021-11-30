@@ -164,7 +164,7 @@ public class Application implements Serializable {
     /**
      * 针对upload 类型任务,需要记录checkSum,用于判断更新修改之后是否需要重新发布.
      */
-    private String jarCheckSum;
+    private Long jarCheckSum;
 
     private String mainClass;
 
