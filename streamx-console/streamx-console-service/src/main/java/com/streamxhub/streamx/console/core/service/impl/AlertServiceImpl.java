@@ -213,7 +213,7 @@ public class AlertServiceImpl implements AlertService {
         String link = sms.getLink();
         String alertMessage = subject + "\r\n"
             + jobName + " start from " + startTime
-            + "end in " + endTime + ";\r\n"
+            + ",end in " + endTime + ";\r\n"
             + "Please Visit the Hadoop process link to see why" + "\r\n"
             + link;
         log.info("alertMessage = " + alertMessage);
