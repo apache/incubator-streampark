@@ -51,7 +51,6 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
 
     // todo template code: building pipeline
     val buildParam = FlinkK8sApplicationBuildRequest(
-      "tmp-id",
       flinkConfig.getString(PipelineOptions.NAME),
       submitRequest.executionMode,
       submitRequest.developmentMode,
@@ -67,7 +66,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     )
     val pipeline = new FlinkK8sApplicationBuildPipeline(buildParam)
     val buildResult = pipeline.launch().asInstanceOf[FlinkK8sApplicationBuildResponse]
-    if (!buildResult.isPass) throw buildResult.error.exception
+    if (!buildResult.pass) throw pipeline.getError.exception
 
     // add flink pipeline.jars configuration
     flinkConfig.set(PipelineOptions.JARS, Lists.newArrayList(buildResult.dockerInnerMainJarPath))

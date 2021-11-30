@@ -63,7 +63,6 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
 
     // todo template code: building pipeline
     val buildParam = FlinkK8sSessionBuildRequest(
-      "tmp-id",
       flinkConfig.getString(PipelineOptions.NAME),
       submitRequest.executionMode,
       submitRequest.developmentMode,
@@ -75,7 +74,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     )
     val pipeline = new FlinkK8sSessionBuildPipeline(buildParam)
     val buildResult = pipeline.launch().asInstanceOf[FlinkK8sSessionBuildResponse]
-    if (!buildResult.isPass) throw buildResult.error.exception
+    if (!buildResult.pass) throw pipeline.getError.exception
     val fatJar = new File(buildResult.flinkShadedJarPath)
 
     // Prioritize using JobGraph submit plan while using Rest API submit plan as backup
