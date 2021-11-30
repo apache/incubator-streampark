@@ -291,6 +291,26 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
+    public DeployState getDeployState() {
+        return DeployState.of(state);
+    }
+
+    @JsonIgnore
+    public void setDeployState(DeployState deployState) {
+        this.deploy = deployState.get();
+    }
+
+    @JsonIgnore
+    public DevelopmentMode getDevelopmentMode() {
+        return DevelopmentMode.of(jobType);
+    }
+
+    @JsonIgnore
+    public void setDevelopmentMode(DevelopmentMode mode) {
+        this.jobType = mode.getValue();
+    }
+
+    @JsonIgnore
     public FlinkAppState getFlinkAppStateEnum() {
         return FlinkAppState.of(state);
     }
@@ -498,6 +518,11 @@ public class Application implements Serializable {
     @SneakyThrows
     public Dependency getDependencyObject() {
         return Dependency.jsonToDependency(this.dependency);
+    }
+
+    @JsonIgnore
+    public JarPackDeps getJarPackDeps() {
+        return Application.Dependency.jsonToDependency(getDependency()).toJarPackDeps();
     }
 
     @JsonIgnore

@@ -1140,25 +1140,25 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             JarPackDeps jarPackDeps;
             if (application.isCustomCodeJob()) {
-                jarPackDeps = Application.Dependency.jsonToDependency(application.getDependency()).toJarPackDeps();
+                jarPackDeps = application.getJarPackDeps();
             } else {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-                jarPackDeps = Application.Dependency.jsonToDependency(flinkSql.getDependency()).toJarPackDeps();
+                jarPackDeps = application.getJarPackDeps();
                 optionMap.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
             }
 
             ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
 
             KubernetesSubmitParam kubernetesSubmitParam = new KubernetesSubmitParam(
-                    application.getClusterId(),
-                    application.getFlinkImage(),
-                    application.getK8sNamespace(),
-                    jarPackDeps,
-                    new DockerAuthConf(
-                            settingService.getDockerRegisterAddress(),
-                            settingService.getDockerRegisterUser(),
-                            settingService.getDockerRegisterPassword()),
-                    application.getK8sPodTemplates(),
+                application.getClusterId(),
+                application.getFlinkImage(),
+                application.getK8sNamespace(),
+                jarPackDeps,
+                DockerAuthConf.of(
+                    settingService.getDockerRegisterAddress(),
+                    settingService.getDockerRegisterUser(),
+                    settingService.getDockerRegisterPassword()),
+                application.getK8sPodTemplates(),
                 application.getK8sRestExposedTypeEnum(),
                 application.getK8sHadoopIntegration() != null ? application.getK8sHadoopIntegration() : false
             );
