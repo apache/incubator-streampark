@@ -67,8 +67,10 @@ class FlinkK8sSessionBuildPipeline(params: FlinkK8sSessionBuildRequest) extends 
       output
     }.getOrElse(throw getError.exception)
 
-    FlinkK8sSessionBuildResponse(buildWorkspace, shadedJar.getAbsolutePath, getError)
+    FlinkK8sSessionBuildResponse(buildWorkspace, shadedJar.getAbsolutePath)
   }
+}
 
-
+object FlinkK8sSessionBuildPipeline {
+  def of(params: FlinkK8sSessionBuildRequest): FlinkK8sSessionBuildPipeline = new FlinkK8sSessionBuildPipeline(params)
 }

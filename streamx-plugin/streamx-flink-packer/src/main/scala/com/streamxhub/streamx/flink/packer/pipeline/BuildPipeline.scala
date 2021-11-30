@@ -79,7 +79,7 @@ trait BuildPipelineExpose {
   /**
    * get all of the steps status
    */
-  def getStepsStatusAsJava: JMap[Int, PipeStepStatus]
+  def getStepsStatusAsJava: JMap[Integer, PipeStepStatus]
 
   /**
    * get current build step index
@@ -95,6 +95,8 @@ trait BuildPipelineExpose {
    * launch the pipeline instance
    */
   def launch(): BuildResult
+
+  def as[T <: BuildPipeline](clz: Class[T]): T = this.asInstanceOf[T]
 }
 
 
@@ -142,7 +144,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
       case Failure(cause) =>
         stepsStatus(seq) = PipeStepStatus.failure
         pipeStatus = PipeStatus.failure
-        error = PipeErr(cause.getMessage, cause)
+        error = PipeErr.of(cause.getMessage, cause)
         logInfo(s"building pipeline step[$seq/$allSteps] failure => ${pipeType.getSteps.get(seq)}")
         watcher.onStepStateChange(snapshot)
         None
@@ -172,10 +174,10 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
         result
       case Failure(cause) =>
         pipeStatus = PipeStatus.failure
-        error = PipeErr(cause.getMessage, cause)
+        error = PipeErr.of(cause.getMessage, cause)
         // log and print error trace stack
         logError(s"building pipeline has failed.", cause)
-        val result = ErrorResult(error)
+        val result = ErrorResult()
         watcher.onFinish(snapshot, result)
         result
     }
@@ -187,7 +189,8 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
 
   override def getStepsStatus: Map[Int, PipeStepStatus] = stepsStatus.toMap
 
-  override def getStepsStatusAsJava: util.Map[Int, PipeStepStatus] = getStepsStatus.asJava
+  override def getStepsStatusAsJava: util.Map[Integer, PipeStepStatus] =
+    getStepsStatus.toSeq.map(e => new Integer(e._1) -> e._2).toMap.asJava
 
   override def getCurStep: Int = curStep
 

@@ -27,5 +27,4 @@ package com.streamxhub.streamx.flink.packer.pipeline;
  * @author Al-assad
  */
 public abstract class BuildPipelineWatcher implements PipeWatcher {
-
 }

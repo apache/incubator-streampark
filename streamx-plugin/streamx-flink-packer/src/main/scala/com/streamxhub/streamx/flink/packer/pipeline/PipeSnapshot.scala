@@ -43,5 +43,5 @@ case class PipeSnapshot(appName: String,
 
   def percent(): Double = calPercent(curStep, allSteps)
 
-  def stepStatusAsJava: JMap[Int, PipeStepStatus] = stepStatus.asJava
+  def stepStatusAsJava: JMap[Integer, PipeStepStatus] = stepStatus.toSeq.map(e => new Integer(e._1) -> e._2).toMap.asJava
 }

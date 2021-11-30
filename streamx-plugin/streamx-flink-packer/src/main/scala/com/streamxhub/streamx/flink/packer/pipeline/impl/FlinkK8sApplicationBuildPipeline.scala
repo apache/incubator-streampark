@@ -152,7 +152,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
           // todo watch build progress
           val buildCmdCallback = buildImageCmd.asInstanceOf[HackBuildImageCmd]
             .start(watchDockerBuildStep(buildStep =>
-              logInfo(s"building docker image ${pushImageTag} => ${buildStep}" )
+              logInfo(s"building docker image ${pushImageTag} => ${buildStep}")
             ))
           val imageId = buildCmdCallback.awaitImageId
           logInfo(s"built docker image, imageId=$imageId, imageTag=$pushImageTag")
@@ -170,7 +170,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
       }(err => throw new Exception(s"push docker image failed. tag=${pushImageTag}", err))
     }.getOrElse(throw getError.exception)
 
-    FlinkK8sApplicationBuildResponse(buildWorkspace, pushImageTag, podTemplatePaths, dockerFileTemplate.innerMainJarPath, getError)
+    FlinkK8sApplicationBuildResponse(buildWorkspace, pushImageTag, podTemplatePaths, dockerFileTemplate.innerMainJarPath)
   }
 
 
@@ -184,4 +184,8 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
     tagName.toLowerCase
   }
 
+}
+
+object FlinkK8sApplicationBuildPipeline {
+  def of(params: FlinkK8sApplicationBuildRequest): FlinkK8sApplicationBuildPipeline = new FlinkK8sApplicationBuildPipeline(params)
 }

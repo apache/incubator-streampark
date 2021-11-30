@@ -36,7 +36,7 @@ public enum PipeType {
     /**
      * unknown type
      */
-    UNKNOWN(0, "", ImmutableMap.of()),
+    UNKNOWN(0, "", ImmutableMap.of(), null),
 
     /**
      * flink native kubernetes session mode
@@ -47,7 +47,8 @@ public enum PipeType {
         ImmutableMap.<Integer, String>builder()
             .put(1, "create building workspace")
             .put(2, "build shaded flink app jar")
-            .build()
+            .build(),
+        FlinkK8sSessionBuildResponse.class
     ),
 
     /**
@@ -64,7 +65,8 @@ public enum PipeType {
             .put(5, "pull flink app base docker image")
             .put(6, "build flink app docker image")
             .put(7, "push flink app docker image")
-            .build()
+            .build(),
+        FlinkK8sApplicationBuildResponse.class
     ),
 
     // todo FLINK_YARN_APPLICATION(),
@@ -82,11 +84,16 @@ public enum PipeType {
      * building steps of pipeline, element => [sorted seq -> step desc].
      */
     private final Map<Integer, String> steps;
+    /**
+     * type of result
+     */
+    private final Class<? extends BuildResult> resultType;
 
-    PipeType(Integer code, String desc, Map<Integer, String> steps) {
+    PipeType(Integer code, String desc, Map<Integer, String> steps, Class<? extends BuildResult> resultType) {
         this.code = code;
         this.desc = desc;
         this.steps = steps;
+        this.resultType = resultType;
     }
 
     @JsonCreator
@@ -115,6 +122,10 @@ public enum PipeType {
 
     public Map<Integer, String> getSteps() {
         return steps;
+    }
+
+    public Class<? extends BuildResult> getResultType() {
+        return resultType;
     }
 
     public boolean isUnknown() {

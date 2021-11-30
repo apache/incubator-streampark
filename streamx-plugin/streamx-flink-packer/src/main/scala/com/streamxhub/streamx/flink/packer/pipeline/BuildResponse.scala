@@ -20,15 +20,21 @@
  */
 package com.streamxhub.streamx.flink.packer.pipeline
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
 /**
  * Result of a BuildPipeline instance.
  *
  * @author Al-assad
  */
 sealed trait BuildResult {
-  def isPass: Boolean = true
 
-  def error: PipeErr
+  /**
+   * is pass aka is successfully
+   */
+  def pass: Boolean
+
+  def as[T <: BuildResult](clz: Class[T]): T = this.asInstanceOf[T]
 }
 
 sealed trait FlinkBuildResult extends BuildResult {
@@ -39,26 +45,28 @@ sealed trait FlinkSessionBuildResult extends FlinkBuildResult {
   def flinkShadedJarPath: String
 }
 
-case class ErrorResult(error: PipeErr) extends BuildResult {
-  override def isPass: Boolean = false
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+case class ErrorResult(pass: Boolean = false) extends BuildResult {
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 case class FlinkK8sSessionBuildResponse(workspacePath: String,
                                         flinkShadedJarPath: String,
-                                        error: PipeErr) extends FlinkSessionBuildResult
+                                        pass: Boolean = true) extends FlinkSessionBuildResult
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 case class FlinkK8sApplicationBuildResponse(workspacePath: String,
                                             flinkImageTag: String,
                                             podTemplatePaths: Map[String, String],
                                             dockerInnerMainJarPath: String,
-                                            error: PipeErr) extends FlinkBuildResult
+                                            pass: Boolean = true) extends FlinkBuildResult
 
-// case class FlinkYarnSessionBuildResponse(workspacePath: String, flinkShadedJarPath: String) extends FlinkSessionBuildResult
+// todo case class FlinkYarnSessionBuildResponse(workspacePath: String, flinkShadedJarPath: String) extends FlinkSessionBuildResult
 
-// case class FlinkYarnApplicationBuildResponse() extends BuildResult
+// todo case class FlinkYarnApplicationBuildResponse() extends BuildResult
 
-// case class FlinkStandaloneBuildResponse(workspacePath: String, flinkShadedJarPath: String) extends FlinkSessionBuildResult
+// todo case class FlinkStandaloneBuildResponse(workspacePath: String, flinkShadedJarPath: String) extends FlinkSessionBuildResult
 
 
 
