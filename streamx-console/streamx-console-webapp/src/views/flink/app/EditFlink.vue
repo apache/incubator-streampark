@@ -35,8 +35,8 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           placeholder="Execution Mode"
-          disabled
-          v-decorator="[ 'executionMode' ]">
+          v-decorator="[ 'executionMode' ]"
+          @change="handleChangeMode">
           <a-select-option
             v-for="(o,index) in executionModes"
             :key="`execution_mode_${index}`"
@@ -66,7 +66,7 @@
         <a-alert
           type="info">
           <template slot="message" v-if="this.resourceFrom === 1">
-            <svg-icon  name="github" style="color: #108ee9"/>&nbsp;&nbsp;CICD (build from CSV)
+            <svg-icon name="github" style="color: #108ee9"/>&nbsp;&nbsp;CICD (build from CSV)
           </template>
           <template slot="message" v-if="this.resourceFrom === 2">
             <svg-icon name="upload" style="color: #108ee9"/>&nbsp;&nbsp;Upload (upload local job)
@@ -222,9 +222,9 @@
             class="uploadjar-box"
             type="info">
             <template slot="message">
-                <span class="tag-dependency-pom">
-                  {{ uploadJar }}
-                </span>
+              <span class="tag-dependency-pom">
+                {{ uploadJar }}
+              </span>
             </template>
           </a-alert>
 
@@ -663,6 +663,7 @@ export default {
       resourceFrom: null,
       defaultJar: null,
       uploadJar: null,
+      executionMode: null,
       configSource: [],
       jars: [],
       flinkEnvs: [],
@@ -800,6 +801,10 @@ export default {
 
     handleChangeTmMemory(item) {
       this.tmMemoryItems = item
+    },
+
+    handleChangeMode(mode) {
+      this.executionMode = mode
     },
 
     handleChangeProcess(item) {

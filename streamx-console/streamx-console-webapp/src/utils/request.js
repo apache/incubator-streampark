@@ -50,16 +50,16 @@ http.interceptors.request.use(config => {
   }
   config.transformRequest = [function (data) {
     // 在请求之前对data传参进行格式转换
-    if (data.sortField && data.sortOrder) {
-      data.sortOrder = data.sortOrder === 'descend' ? 'desc' : 'asc'
-    } else {
-      delete data.sortField
-      delete data.sortOrder
+    if (config.method === 'get' || config.method === 'post') {
+      if (data.sortField && data.sortOrder) {
+        data.sortOrder = data.sortOrder === 'descend' ? 'desc' : 'asc'
+      } else {
+        delete data.sortField
+        delete data.sortOrder
+      }
     }
     if (config.method === 'get') {
       data = {params: data}
-    } else if (config.method === 'delete') {
-      data = {data: $qs.stringify(data)}
     } else if (config.headers['Content-Type'] !== 'multipart/form-data') {
       data = $qs.stringify(data)
     }
@@ -137,8 +137,8 @@ export default {
   put(url, data = {}) {
     return http.put(url, data)
   },
-  delete(url, params = {}) {
-    return http.delete(url, params)
+  delete(url, data = {}) {
+    return http.delete(url, { data: data })
   },
   patch(url, data = {}) {
     return http.patch(url, data)

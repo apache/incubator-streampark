@@ -147,7 +147,7 @@ import UserEdit from './UserEdit'
 import RangeDate from '@/components/DateTime/RangeDate'
 import SvgIcon from '@/components/SvgIcon'
 
-import { list, remove, reset as resetPassword } from '@/api/user'
+import { list, deleteUser, reset as resetPassword } from '@/api/user'
 import storage from '@/utils/storage'
 import {USER_NAME} from '@/store/mutation-types'
 
@@ -271,7 +271,7 @@ export default {
       }
     },
     handleDelete (record) {
-      remove({
+      deleteUser({
         userId: record.userId
       }).then((resp) => {
         if (resp.status === 'success') {
