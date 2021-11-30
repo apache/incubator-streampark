@@ -212,8 +212,8 @@ public class AlertServiceImpl implements AlertService {
         String endTime = sms.getEndTime();
         String link = sms.getLink();
         String alertMessage = subject + "\r\n"
-             +"实时任务结束于 " + endTime + ",\r\n"
-            + "任务详情请查看" + "\r\n"
+             +"实时任务结束于 " + endTime
+            + ",任务详情请查看" + "\r\n"
             + link;
         log.info("alertMessage = " + alertMessage);
         try {
