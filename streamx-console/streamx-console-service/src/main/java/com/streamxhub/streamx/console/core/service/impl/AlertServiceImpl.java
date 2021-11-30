@@ -128,7 +128,7 @@ public class AlertServiceImpl implements AlertService {
             sms.setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()));
             sms.setStatus(appState.name());
             String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
-            String phoneNumber = this.senderSMS.getAlertPhoneNumber();
+            String phoneNumber = this.senderSMS.getPhoneNumber();
             if(Utils.notEmpty(application.getAlertPhoneNumber()))
             {
                 phoneNumber = application.getAlertPhoneNumber();
@@ -165,7 +165,7 @@ public class AlertServiceImpl implements AlertService {
             smsTemplate.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
             smsTemplate.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
             String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
-            String phoneNumber = this.senderSMS.getAlertPhoneNumber();
+            String phoneNumber = this.senderSMS.getPhoneNumber();
             if(Utils.notEmpty(application.getAlertPhoneNumber()))
             {
                 phoneNumber = application.getAlertPhoneNumber();
