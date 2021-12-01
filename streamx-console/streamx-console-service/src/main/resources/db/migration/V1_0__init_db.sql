@@ -229,8 +229,10 @@ PRIMARY KEY (`ROLE_ID`) USING BTREE
 -- ----------------------------
 DROP TABLE IF EXISTS `t_role_menu`;
 CREATE TABLE `t_role_menu` (
+`ID` bigint NOT NULL AUTO_INCREMENT,
 `ROLE_ID` bigint NOT NULL,
-`MENU_ID` bigint NOT NULL
+`MENU_ID` bigint NOT NULL,
+PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -277,8 +279,10 @@ UNIQUE KEY `UN_USERNAME` (`NICK_NAME`) USING BTREE
 -- ----------------------------
 DROP TABLE IF EXISTS `t_user_role`;
 CREATE TABLE `t_user_role` (
+`ID` bigint NOT NULL AUTO_INCREMENT,
 `USER_ID` bigint DEFAULT NULL COMMENT '用户ID',
-`ROLE_ID` bigint DEFAULT NULL COMMENT '角色ID'
+`ROLE_ID` bigint DEFAULT NULL COMMENT '角色ID',
+PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
