@@ -32,7 +32,7 @@ object FsOperator {
   def of(storageType: StorageType): FsOperator = {
     storageType match {
       case StorageType.HDFS => HdfsOperator
-      case StorageType.LFS => LFsOperator
+      case StorageType.LFS => LfsOperator
       case _ => throw new UnsupportedOperationException(s"Unsupported storageType:$storageType")
     }
   }

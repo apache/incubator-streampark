@@ -1549,7 +1549,11 @@
     handleEdit(app) {
       this.SetAppId(app.id)
       if (app.appType === 1) {
-        this.$router.push({'path': '/flink/app/edit_streamx'})
+        if(app.resourceForm === 1) {
+          this.$router.push({'path': '/flink/app/edit_streamx'})
+        } else {
+          this.$router.push({'path': '/flink/app/edit_flink'})
+        }
       } else {
         this.$router.push({'path': '/flink/app/edit_flink'})
       }

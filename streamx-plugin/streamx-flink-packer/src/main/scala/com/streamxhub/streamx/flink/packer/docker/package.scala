@@ -21,12 +21,30 @@
 package com.streamxhub.streamx.flink.packer
 
 import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.api.listener.{BuildImageCallbackListener, PullImageCallbackListener, PushImageCallbackListener}
+import com.github.dockerjava.api.model.{PullResponseItem, PushResponseItem}
 import com.streamxhub.streamx.common.util.Utils.tryWithResourceException
+import org.apache.commons.lang3.tuple.Pair
 
 /**
  * @author Al-assad
  */
 package object docker {
+
+  def watchDockerBuildStep(func: String => Unit): BuildImageCallbackListener =
+    new BuildImageCallbackListener() {
+      def watchBuildStep(buildStepMsg: String): Unit = func(buildStepMsg)
+    }
+
+  def watchDockerPullProcess(func: Pair[String, PullResponseItem] => Unit): PullImageCallbackListener =
+    new PullImageCallbackListener {
+      override def watchPullProcess(processDetail: Pair[String, PullResponseItem]): Unit = func(processDetail)
+    }
+
+  def watchDockerPushProcess(func: Pair[String, PushResponseItem] => Unit): PushImageCallbackListener =
+    new PushImageCallbackListener {
+      override def watchPushProcess(processDetail: Pair[String, PushResponseItem]): Unit = func(processDetail)
+    }
 
   def usingDockerClient[R](process: DockerClient => R)(handleException: Throwable => R): R =
     tryWithResourceException(DockerRetriever.newDockerClient())(process)(handleException)

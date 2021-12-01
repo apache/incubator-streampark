@@ -30,14 +30,17 @@ import com.streamxhub.streamx.console.core.enums.NoticeType;
  * @author benjobs
  */
 public interface MessageService extends IService<Message> {
+
     /**
-     * @param id
-     * @param info
-     * @param noticeType
+     *
+     * @param message
      */
     void push(Message message);
 
     /**
+     *
+     * @param noticeType
+     * @param request
      * @return
      */
     IPage<Message> getUnRead(NoticeType noticeType, RestRequest request);

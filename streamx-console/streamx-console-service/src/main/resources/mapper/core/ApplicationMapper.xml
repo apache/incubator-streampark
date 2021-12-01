@@ -15,9 +15,11 @@
         <result column="K8S_NAMESPACE" jdbcType="VARCHAR" property="k8sNamespace"/>
         <result column="APP_TYPE" jdbcType="INTEGER" property="appType"/>
         <result column="JOB_TYPE" jdbcType="INTEGER" property="jobType"/>
+        <result column="RESOURCE_FROM" jdbcType="INTEGER" property="resourceFrom"/>
         <result column="EXECUTION_MODE" jdbcType="INTEGER" property="executionMode"/>
         <result column="TRACKING" jdbcType="INTEGER" property="tracking"/>
         <result column="JAR" jdbcType="VARCHAR" property="jar"/>
+        <result column="JAR_CHECK_SUM" jdbcType="VARCHAR" property="jarCheckSum"/>
         <result column="MAIN_CLASS" jdbcType="VARCHAR" property="mainClass"/>
         <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
         <result column="USER_ID" jdbcType="BIGINT" property="userId"/>
@@ -47,6 +49,7 @@
         <result column="K8S_POD_TEMPLATE" jdbcType="LONGVARCHAR" property="k8sPodTemplate"/>
         <result column="K8S_JM_POD_TEMPLATE" jdbcType="LONGVARCHAR" property="k8sJmPodTemplate"/>
         <result column="K8S_TM_POD_TEMPLATE" jdbcType="LONGVARCHAR" property="k8sTmPodTemplate"/>
+        <result column="K8S_HADOOP_INTEGRATION" jdbcType="TINYINT" property="k8sHadoopIntegration"/>
     </resultMap>
 
     <select id="page" resultType="application" parameterType="application">

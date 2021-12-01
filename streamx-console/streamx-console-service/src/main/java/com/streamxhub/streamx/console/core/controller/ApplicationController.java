@@ -79,12 +79,8 @@ public class ApplicationController {
     @PostMapping("update")
     @RequiresPermissions("app:update")
     public RestResponse update(Application app) {
-        try {
-            applicationService.update(app);
-            return RestResponse.create().data(true);
-        } catch (Exception e) {
-            return RestResponse.create().data(false);
-        }
+        applicationService.update(app);
+        return RestResponse.create().data(true);
     }
 
     @PostMapping("dashboard")
@@ -232,9 +228,8 @@ public class ApplicationController {
 
     @PostMapping("upload")
     @RequiresPermissions("app:create")
-    public RestResponse upload(MultipartFile file, Integer executionMode) throws Exception {
-        StorageType storageType = Application.getStorageType(executionMode);
-        String uploadPath = applicationService.upload(file, storageType);
+    public RestResponse upload(MultipartFile file) throws Exception {
+        String uploadPath = applicationService.upload(file);
         return RestResponse.create().data(uploadPath);
     }
 
@@ -243,6 +238,5 @@ public class ApplicationController {
         applicationService.tailMvnDownloading(id);
         return RestResponse.create();
     }
-
 
 }

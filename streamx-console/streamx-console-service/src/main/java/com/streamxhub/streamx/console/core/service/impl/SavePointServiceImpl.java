@@ -73,8 +73,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         FlinkEnv flinkEnv = flinkEnvService.getByAppId(entity.getAppId());
         assert flinkEnv != null;
         int cpThreshold = Integer.parseInt(
-                flinkEnv.convertFlinkYamlAsMap()
-                        .getOrDefault("state.checkpoints.num-retained", "1")
+            flinkEnv.convertFlinkYamlAsMap()
+                .getOrDefault("state.checkpoints.num-retained", "1")
         );
 
         if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
@@ -86,10 +86,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         } else {
             LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
             queryWrapper.select(SavePoint::getTriggerTime)
-                    .eq(SavePoint::getAppId, entity.getAppId())
-                    .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
-                    .orderByDesc(SavePoint::getTriggerTime)
-                    .last("limit 0," + cpThreshold + 1);
+                .eq(SavePoint::getAppId, entity.getAppId())
+                .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
+                .orderByDesc(SavePoint::getTriggerTime)
+                .last("limit 0," + cpThreshold + 1);
 
             List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
             if (!savePointList.isEmpty() && savePointList.size() > cpThreshold) {

@@ -12,14 +12,21 @@
         label="Development Mode"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+
         <a-alert
           v-if="app['jobType'] === 1"
-          message="customcode"
-          type="info" />
+          type="info" >
+          <template slot="message">
+            <a-icon type="code" style="color: #108ee9"/>&nbsp;Custom Code
+          </template>
+        </a-alert>
         <a-alert
           v-else
-          message="flinkSql"
-          type="info" />
+          type="info">
+          <template slot="message">
+            <svg-icon name="fql" style="color: #108ee9"/>&nbsp;Flink SQL
+          </template>
+        </a-alert>
       </a-form-item>
 
       <a-form-item
@@ -28,7 +35,7 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           placeholder="Execution Mode"
-          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]"
+          v-decorator="[ 'executionMode' ]"
           @change="handleChangeMode">
           <a-select-option
             v-for="(o,index) in executionModes"
@@ -57,7 +64,7 @@
         </a-select>
       </a-form-item>
 
-      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode === 5 || executionMode === 6)">
+      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode !== null && (executionMode === 5 || executionMode === 6))">
         <a-form-item
           label="Kubernetes Namespace"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -67,6 +74,14 @@
             placeholder="default"
             allowClear
             v-decorator="[ 'k8sNamespace']">
+            <a-dropdown slot="addonAfter" placement="bottomRight">
+              <a-menu slot="overlay" trigger="['click', 'hover']">
+                <a-menu-item v-for="item in historyRecord.k8sNamespace" :key="item" @click="handleSelectHistoryK8sNamespace(item)" style="padding-right: 60px">
+                  <a-icon type="plus-circle"/>{{ item }}
+                </a-menu-item>
+              </a-menu>
+              <a-icon type="history"/>
+            </a-dropdown>
           </a-input>
         </a-form-item>
 
@@ -79,6 +94,16 @@
             placeholder="Please enter Kubernetes clusterId"
             allowClear
             v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
+            <template v-if="(executionMode == null && app.executionMode === 5) || (executionMode !== null && executionMode === 5)">
+              <a-dropdown slot="addonAfter" placement="bottomRight">
+                <a-menu slot="overlay" trigger="['click', 'hover']">
+                  <a-menu-item v-for="item in historyRecord.k8sSessionClusterId" :key="item" @click="handleSelectHistoryK8sSessionClusterId(item)" style="padding-right: 60px">
+                    <a-icon type="plus-circle"/>{{ item }}
+                  </a-menu-item>
+                </a-menu>
+                <a-icon type="history"/>
+              </a-dropdown>
+            </template>
           </a-input>
         </a-form-item>
       </template>
@@ -93,11 +118,17 @@
             placeholder="Please enter the tag of Flink base docker image"
             allowClear
             v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base Docker Image is required' }] }]">
+            <a-dropdown slot="addonAfter" placement="bottomRight">
+              <a-menu slot="overlay" trigger="['click', 'hover']">
+                <a-menu-item v-for="item in historyRecord.flinkImage" :key="item" @click="handleSelectHistoryFlinkImage(item)" style="padding-right: 60px">
+                  <a-icon type="plus-circle"/>{{ item }}
+                </a-menu-item>
+              </a-menu>
+              <a-icon type="history"/>
+            </a-dropdown>
           </a-input>
         </a-form-item>
-      </template>
 
-      <template v-if="(executionMode == null && app.executionMode === 6) || executionMode === 6">
         <a-form-item
           label="Rest-Service Exposed Type"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -114,7 +145,6 @@
           </a-select>
         </a-form-item>
       </template>
-
 
       <template v-if="app.jobType === 2">
 
@@ -208,6 +238,24 @@
             <a-tab-pane
               key="jar"
               tab="Upload Jar">
+
+              <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode !== null && (executionMode === 5 || executionMode === 6))">
+                <a-select
+                  mode="multiple"
+                  placeholder="Search History Uploads"
+                  :value="selectedHistoryUploadJars"
+                  style="width: 100%;"
+                  :showArrow="true"
+                  @change="handleSearchHistoryUploadJars"
+                  @select="addHistoryUploadJar"
+                  @deselect="deleteHistoryUploadJar">
+                  <a-select-option v-for="item in filteredHistoryUploadJarsOptions" :key="item" :value="item">
+                    <a-icon slot="suffixIcon" type="file-done"/>
+                    {{ item }}
+                  </a-select-option>
+                </a-select>
+              </template>
+
               <a-upload-dragger
                 name="file"
                 :multiple="true"
@@ -254,11 +302,11 @@
               type="info"
               @click="handleEditPom(value)">
               <template slot="message">
-                <span @click="handleEditPom(value)" class="tag-dependency-pom">
+                <a-space @click="handleEditPom(value)" class="tag-dependency-pom">
                   <a-tag class="tag-dependency" color="#2db7f5">POM</a-tag>
                   {{ value.artifactId }}-{{ value.version }}.jar
-                </span>
-                <a-icon type="close" class="icon-close" @click="handleRemovePom(value)" />
+                  <a-icon type="close" class="icon-close" @click="handleRemovePom(value)"/>
+                </a-space>
               </template>
             </a-alert>
             <a-alert
@@ -267,17 +315,21 @@
               :key="`jars_${index}`"
               type="info">
               <template slot="message">
-                <span><a-tag class="tag-dependency" color="#108ee9">JAR</a-tag>{{ value }}</span>
-                <a-icon type="close" class="icon-close" @click="handleRemoveJar(value)" />
+                <a-space>
+                  <a-tag class="tag-dependency" color="#108ee9">JAR</a-tag>
+                  {{ value }}
+                  <a-icon type="close" class="icon-close" @click="handleRemoveJar(value)"/>
+                </a-space>
               </template>
             </a-alert>
           </div>
         </a-form-item>
 
         <a-form-item
-          label="Application conf"
+          label="Application Conf"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+          v-show="(executionMode == null && app.executionMode !== 5 && app.executionMode !== 6) || (executionMode !== null && executionMode !== 5 && executionMode !== 6)">
           <a-switch
             checked-children="ON"
             un-checked-children="OFF"
@@ -447,6 +499,74 @@
       </template>
 
       <a-form-item
+        label="Use System Hadoop Conf"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-space>
+          <a-switch
+            checked-children="ON"
+            un-checked-children="OFF"
+            v-model="useSysHadoopConf"
+            @change="handleUseSysHadoopConf"/>
+          <a-popover title="Tips">
+            <template slot="content">
+              <p>Automatically copy configuration files from system environment parameters</p>
+              <p><b>HADOOP_CONF_PATH</b> and <b>HIVE_CONF_PATH</b> to Flink Docker image</p>
+            </template>
+            <a-icon
+              type="question-circle"
+              style="margin-left: 10px"/>
+          </a-popover>
+          <transition name="slide-fade">
+            <a-button
+              icon="eye"
+              size="small"
+              v-if="useSysHadoopConf == true"
+              @click="showSysHadoopConfDrawer">view</a-button>
+          </transition>
+        </a-space>
+
+        <a-drawer
+          title="System Hadoop Conifguration"
+          placement="right"
+          :width="800"
+          :closable="false"
+          item-layout="vertical"
+          :visible="hadoopConfDrawer.visual"
+          @close="closeSysHadoopConfDrawer">
+          <a-tabs tabPosition="top">
+            <a-tab-pane key="hadoop" tab="Hadoop">
+              <template
+                v-if="hadoopConfDrawer.content.hadoop == null || Object.keys(hadoopConfDrawer.content.hadoop).length === 0 || hadoopConfDrawer.content.hadoop.size === 0">
+                <a-empty/>
+              </template>
+              <template v-else>
+                <a-tabs tabPosition="left">
+                  <a-tab-pane v-for="(content, fname) in hadoopConfDrawer.content.hadoop" :key="fname" :tab="fname">
+                    <pre style="font-size: 12px; margin-top: 20px; margin-bottom: 20px">{{ content }}</pre>
+                  </a-tab-pane>
+                </a-tabs>
+              </template>
+            </a-tab-pane>
+            <a-tab-pane key="hive" tab="Hive">
+              <template
+                v-if="hadoopConfDrawer.content.hive == null || Object.keys(hadoopConfDrawer.content.hive).length === 0 || hadoopConfDrawer.content.hive.size === 0">
+                <a-empty/>
+              </template>
+              <template v-else>
+                <a-tabs tabPosition="left">
+                  <a-tab-pane v-for="(content, fname) in hadoopConfDrawer.content.hive" :key="fname" :tab="fname">
+                    <pre style="font-size: 12px; margin-top: 20px; margin-bottom: 20px">{{ content }}</pre>
+                  </a-tab-pane>
+                </a-tabs>
+              </template>
+            </a-tab-pane>
+          </a-tabs>
+        </a-drawer>
+      </a-form-item>
+
+      <a-form-item
         label="Application Name"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -495,10 +615,345 @@
       </a-form-item>
 
       <a-form-item
+        label="Kubernetes Pod Template"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-tabs type="card" v-model="controller.podTemplateTab">
+          <a-tab-pane
+            key="pod-template"
+            tab="Pod Template"
+            forceRender>
+            <a-button-group class="pod-template-tool">
+              <a-button
+                size="small"
+                type="primary"
+                icon="history"
+                class="pod-template-tool-item"
+                @click="showPodTemplateDrawer('ptVisual')">History
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="copy"
+                class="pod-template-tool-item"
+                @click="handleGetInitPodTemplate('ptVisual')">Init Content
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="share-alt"
+                class="pod-template-tool-item"
+                @click="showTemplateHostAliasDrawer('ptVisual')">Host Alias
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="hdd"
+                disabled
+                ghost
+                class="pod-template-tool-item">PVC
+              </a-button>
+            </a-button-group>
+            <a-drawer
+              title="Pod Template History"
+              placement="right"
+              :width="700"
+              item-layout="vertical"
+              :closable="false"
+              :visible="this.podTemplateDrawer.ptVisual"
+              @close="closePodTemplateDrawer('ptVisual')">
+              <template>
+                <a-empty v-if="historyRecord.podTemplate == null || historyRecord.podTemplate.length == 0"/>
+                <a-card
+                  title="pod-template.yaml"
+                  size="small"
+                  hoverable
+                  style="margin-bottom: 8px"
+                  v-for="(item,index) in historyRecord.podTemplate"
+                  :key="index">
+                  <a slot="extra" @click="handleChoicePodTemplate('ptVisual', item)">Choice</a>
+                  <pre style="font-size: 12px">{{ item }}</pre>
+                </a-card>
+              </template>
+            </a-drawer>
+            <a-drawer
+              title="Pod Template HostAlias"
+              placement="right"
+              :width="500"
+              item-layout="vertical"
+              :closable="false"
+              :visible="podTemplateHostAliasDrawer.ptVisual"
+              @close="closeTemplateHostAliasDrawer('ptVisual')">
+              <template>
+                <a-row>
+                  <p class="conf-desc">
+                    <span class="note-info" style="margin-bottom: 12px">
+                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                    </span>
+                  </p>
+                </a-row>
+                <a-row>
+                  <a-select
+                    mode="multiple"
+                    placeholder="Search System Hosts"
+                    :value="selectedPodTemplateHostAlias"
+                    style="width: 100%;"
+                    :showArrow="true"
+                    @change="handleSelectedTemplateHostAlias">
+                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
+                      <a-icon slot="suffixIcon" type="plus-circle"/>
+                      {{ item }}
+                    </a-select-option>
+                  </a-select>
+                </a-row>
+                <a-row style="margin-top: 30px">
+                  <a-card
+                    title="preview"
+                    size="small"
+                    hoverable>
+                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
+                  </a-card>
+                </a-row>
+              </template>
+              <div class="pod-template-tool-drawer-submit-cancel">
+                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('ptVisual')">
+                  Cancel
+                </a-button>
+                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('ptVisual')">
+                  Submit
+                </a-button>
+              </div>
+            </a-drawer>
+            <div class="pod-template-box syntax-true" />
+          </a-tab-pane>
+
+          <a-tab-pane
+            key="jm-pod-template"
+            tab="JM Pod Template"
+            forceRender>
+            <a-button-group class="pod-template-tool">
+              <a-button
+                size="small"
+                type="primary"
+                icon="history"
+                class="pod-template-tool-item"
+                @click="showPodTemplateDrawer('jmPtVisual')">History
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="copy"
+                class="pod-template-tool-item"
+                @click="handleGetInitPodTemplate('jmPtVisual')">Init Content
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="share-alt"
+                class="pod-template-tool-item"
+                @click="showTemplateHostAliasDrawer('jmPtVisual')">Host Alias
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="hdd"
+                disabled
+                ghost
+                class="pod-template-tool-item">PVC
+              </a-button>
+            </a-button-group>
+            <a-drawer
+              title="JobManager Pod Template History"
+              placement="right"
+              :width="700"
+              item-layout="vertical"
+              :closable="false"
+              :visible="this.podTemplateDrawer.jmPtVisual"
+              @close="closePodTemplateDrawer('jmPtVisual')">
+              <template>
+                <a-empty v-if="historyRecord.jmPodTemplate == null || historyRecord.jmPodTemplate.length == 0"/>
+                <a-card
+                  title="jm-pod-template.yaml"
+                  size="small"
+                  hoverable
+                  style="margin-bottom: 8px"
+                  v-for="(item,index) in historyRecord.jmPodTemplate"
+                  :key="index">
+                  <a slot="extra" @click="handleChoicePodTemplate('jmPtVisual', item)">Choice</a>
+                  <pre style="font-size: 12px">{{ item }}</pre>
+                </a-card>
+              </template>
+            </a-drawer>
+            <a-drawer
+              title="JM Pod Template HostAlias"
+              placement="right"
+              :width="500"
+              item-layout="vertical"
+              :closable="false"
+              :visible="podTemplateHostAliasDrawer.jmPtVisual"
+              @close="closeTemplateHostAliasDrawer('jmPtVisual')">
+              <template>
+                <a-row>
+                  <p class="conf-desc">
+                    <span class="note-info" style="margin-bottom: 12px">
+                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                    </span>
+                  </p>
+                </a-row>
+                <a-row>
+                  <a-select
+                    mode="multiple"
+                    placeholder="Search System Hosts"
+                    :value="selectedPodTemplateHostAlias"
+                    style="width: 100%;"
+                    :showArrow="true"
+                    @change="handleSelectedTemplateHostAlias">
+                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
+                      <a-icon slot="suffixIcon" type="plus-circle"/>
+                      {{ item }}
+                    </a-select-option>
+                  </a-select>
+                </a-row>
+                <a-row style="margin-top: 30px">
+                  <a-card
+                    title="preview"
+                    size="small"
+                    hoverable>
+                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
+                  </a-card>
+                </a-row>
+              </template>
+              <div class="pod-template-tool-drawer-submit-cancel">
+                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('jmPtVisual')">
+                  Cancel
+                </a-button>
+                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('jmPtVisual')">
+                  Submit
+                </a-button>
+              </div>
+            </a-drawer>
+            <div class="jm-pod-template-box syntax-true" />
+          </a-tab-pane>
+
+          <a-tab-pane
+            key="tm-pod-template"
+            tab="TM Pod Template"
+            forceRender>
+            <a-button-group class="pod-template-tool">
+              <a-button
+                size="small"
+                type="primary"
+                icon="history"
+                class="pod-template-tool-item"
+                @click="showPodTemplateDrawer('tmPtVisual')">History
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="copy"
+                class="pod-template-tool-item"
+                @click="handleGetInitPodTemplate('tmPtVisual')">Init Content
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="share-alt"
+                class="pod-template-tool-item"
+                @click="showTemplateHostAliasDrawer('tmPtVisual')">Host Alias
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="hdd"
+                disabled
+                ghost
+                class="pod-template-tool-item">PVC
+              </a-button>
+            </a-button-group>
+            <a-drawer
+              title="TaskManager Pod Template History"
+              placement="right"
+              :width="700"
+              item-layout="vertical"
+              :closable="false"
+              :visible="this.podTemplateDrawer.tmPtVisual"
+              @close="closePodTemplateDrawer('tmPtVisual')">
+              <template>
+                <a-empty v-if="historyRecord.tmPodTemplate == null || historyRecord.tmPodTemplate.length == 0"/>
+                <a-card
+                  title="tm-pod-template.yaml"
+                  size="small"
+                  hoverable
+                  style="margin-bottom: 8px"
+                  v-for="(item,index) in historyRecord.tmPodTemplate"
+                  :key="index">
+                  <a slot="extra" @click="handleChoicePodTemplate('tmPtVisual', item)">Choice</a>
+                  <pre style="font-size: 12px">{{ item }}</pre>
+                </a-card>
+              </template>
+            </a-drawer>
+            <a-drawer
+              title="Pod Template HostAlias"
+              placement="right"
+              :width="500"
+              item-layout="vertical"
+              :closable="false"
+              :visible="podTemplateHostAliasDrawer.tmPtVisual"
+              @close="closeTemplateHostAliasDrawer('tmPtVisual')">
+              <template>
+                <a-row>
+                  <p class="conf-desc">
+                    <span class="note-info" style="margin-bottom: 12px">
+                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                    </span>
+                  </p>
+                </a-row>
+                <a-row>
+                  <a-select
+                    mode="multiple"
+                    placeholder="Search System Hosts"
+                    :value="selectedPodTemplateHostAlias"
+                    style="width: 100%;"
+                    :showArrow="true"
+                    @change="handleSelectedTemplateHostAlias">
+                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
+                      <a-icon slot="suffixIcon" type="plus-circle"/>
+                      {{ item }}
+                    </a-select-option>
+                  </a-select>
+                </a-row>
+                <a-row style="margin-top: 30px">
+                  <a-card
+                    title="preview"
+                    size="small"
+                    hoverable>
+                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
+                  </a-card>
+                </a-row>
+              </template>
+              <div class="pod-template-tool-drawer-submit-cancel">
+                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('tmPtVisual')">
+                  Cancel
+                </a-button>
+                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('tmPtVisual')">
+                  Submit
+                </a-button>
+              </div>
+            </a-drawer>
+            <div class="tm-pod-template-box syntax-true" />
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-item>
+
+      <a-form-item
         label="Fault Restart Size"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-        v-show="executionMode !== 5 && executionMode !== 6">
+        v-show="(executionMode === null && app.executionMode !== 5 && app.executionMode !== 6) || (executionMode !== null && executionMode !== 5 && executionMode !== 6)">
         <a-input-number
           :min="1"
           :step="1"
@@ -510,7 +965,7 @@
         label="CheckPoint Failure Options"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-        v-show="executionMode !== 5 && executionMode !== 6">
+        v-show="(executionMode === null && app.executionMode !== 5 && app.executionMode !== 6) || (executionMode !== null && executionMode !== 5 && executionMode !== 6)">
         <a-input-group compact>
           <a-input-number
             :min="1"
@@ -797,33 +1252,6 @@
       </a-form-item>
 
       <a-form-item
-        label="Kubernetes Pod Template"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
-        <a-tabs type="card" v-model="controller.podTemplateTab">
-          <a-tab-pane
-            key="pod-template"
-            tab="Pod Template"
-            forceRender>
-            <div class="pod-template-box syntax-true" style="height: 300px"></div>
-          </a-tab-pane>
-          <a-tab-pane
-            key="jm-pod-template"
-            tab="JM Pod Template"
-            forceRender>
-            <div class="jm-pod-template-box syntax-true" style="height: 300px"></div>
-          </a-tab-pane>
-          <a-tab-pane
-            key="tm-pod-template"
-            tab="TM Pod Template"
-            forceRender>
-            <div class="tm-pod-template-box syntax-true" style="height: 300px"></div>
-          </a-tab-pane>
-        </a-tabs>
-      </a-form-item>
-
-      <a-form-item
         label="Description"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -974,13 +1402,22 @@
 import Ellipsis from '@/components/Ellipsis'
 import { listConf } from '@api/project'
 import { get, update, exists, name, readConf, upload } from '@api/application'
-import { history as confhistory, get as getVer, template } from '@api/config'
+import { history as confhistory, get as getVer, template, sysHadoopConf  } from '@api/config'
 import { get as getSQL, history as sqlhistory } from '@api/flinksql'
 import { mapActions, mapGetters } from 'vuex'
 import Mergely from './Mergely'
 import Different from './Different'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
+import {
+  uploadJars as histUploadJars,
+  k8sNamespaces as histK8sNamespaces,
+  sessionClusterIds as histSessionClusterIds,
+  flinkBaseImages as histFlinkBaseImages,
+  flinkPodTemplates as histPodTemplates,
+  flinkJmPodTemplates as histJmPodTemplates,
+  flinkTmPodTemplates as histTmPodTemplates
+} from '@api/flinkhistory'
 
 const Base64 = require('js-base64').Base64
 import {
@@ -997,6 +1434,8 @@ import {
 
 import { toPomString } from './Pom'
 import {list as listFlinkEnv} from '@/api/flinkenv'
+import {checkHadoop} from '@/api/setting'
+import { sysHosts, initPodTemplate, completeHostAliasToPodTemplate, extractHostAliasFromPodTemplate, previewHostAlias } from '@api/flinkpodtmpl'
 
 export default {
   name: 'EditStreamX',
@@ -1044,6 +1483,7 @@ export default {
       defaultFlinkSqlId: null,
       defaultOptions: {},
       isSetConfig: false,
+      useSysHadoopConf: false,
       configOverride: null,
       configId: null,
       versionId: null,
@@ -1125,8 +1565,34 @@ export default {
           error: null,
           defaultValue: ''
         }
-
-      }
+      },
+      selectedHistoryUploadJars: [],
+      historyRecord: {
+        uploadJars: [],
+        k8sNamespace: [],
+        k8sSessionClusterId: [],
+        flinkImage: [],
+        podTemplate:[],
+        jmPodTemplate:[],
+        tmPodTemplate:[]
+      },
+      podTemplateDrawer: {
+        ptVisual: false,
+        jmPtVisual: false,
+        tmPtVisual: false
+      },
+      podTemplateHostAliasDrawer: {
+        ptVisual: false,
+        jmPtVisual: false,
+        tmPtVisual: false,
+      },
+      hadoopConfDrawer: {
+        visual: false,
+        content: {}
+      },
+      sysHostsAlias: [],
+      selectedPodTemplateHostAlias: [],
+      hostAliasPreview: '',
     }
   },
 
@@ -1143,7 +1609,15 @@ export default {
     },
     myTheme() {
       return this.$store.state.app.theme
+    },
+    filteredHistoryUploadJarsOptions() {
+      return this.historyRecord.uploadJars.filter(o =>
+        !this.selectedHistoryUploadJars.includes(o) && !this.controller.dependency.jar.has(o))
+    },
+    filteredPodTemplateHostAliasOptions() {
+      return this.sysHostsAlias.filter(o => !this.selectedPodTemplateHostAlias.includes(o))
     }
+
   },
 
   mounted() {
@@ -1168,6 +1642,19 @@ export default {
     })
     listFlinkEnv().then((resp)=>{
       this.flinkEnvs = resp.data
+    })
+    // load history config records
+    histUploadJars().then((resp) => {
+      this.historyRecord.uploadJars = resp.data
+    })
+    histK8sNamespaces().then((resp) => {
+      this.historyRecord.k8sNamespace = resp.data
+    })
+    histSessionClusterIds({'executionMode': 5}).then((resp) => {
+      this.historyRecord.k8sSessionClusterId = resp.data
+    })
+    histFlinkBaseImages().then((resp) => {
+      this.historyRecord.flinkImage = resp.data
     })
   },
 
@@ -1200,7 +1687,7 @@ export default {
           this.configOverride = Base64.decode(this.app.config)
           this.isSetConfig = true
         }
-        this.defaultOptions = JSON.parse(this.app.options)
+        this.defaultOptions = JSON.parse(this.app.options || '{}')
         this.configId = this.app.configId
         this.versionId = this.app.versionId
         this.defaultFlinkSqlId = this.app['sqlId'] || null
@@ -1251,6 +1738,24 @@ export default {
       }).catch((error) => {
         this.$message.error(error.message)
       })
+    },
+
+    handleCheckExecMode(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Execution Mode is required'))
+      } else {
+        if (value === 2 || value === 3 || value === 4) {
+          checkHadoop().then((resp) => {
+            if (resp.data) {
+              callback()
+            } else {
+              callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+            }
+          }).catch((err) => {
+            callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+          })
+        }
+      }
     },
 
     handleCheckJobName(rule, value, callback) {
@@ -1449,27 +1954,31 @@ export default {
       return true
     },
 
+    handleSearchHistoryUploadJars(selectedItems) {
+      this.selectedHistoryUploadJars = selectedItems
+    },
+
+    addHistoryUploadJar(item) {
+      this.controller.dependency.jar.set(item, item)
+      this.handleUpdateDependency()
+    },
+
+    deleteHistoryUploadJar(item){
+      this.controller.dependency.jar.delete(item)
+      this.handleUpdateDependency()
+    },
+
     handleCustomRequest(data) {
-      const executionMode =  this.form.getFieldValue('executionMode') || null
-      if (executionMode !== null) {
-        const formData = new FormData()
-        formData.append('file', data.file)
-        formData.append('executionMode',executionMode)
-        upload(formData).then((response) => {
-          this.loading = false
-          this.controller.dependency.jar.set(data.file.name, data.file.name)
-          this.handleUpdateDependency()
-        }).catch((error) => {
-          this.$message.error(error.message)
-          this.loading = false
-        })
-      } else {
-        this.$swal.fire(
-            'Failed',
-            'Please select "execution Mode" first',
-            'error'
-        )
-      }
+      const formData = new FormData()
+      formData.append('file', data.file)
+      upload(formData).then((response) => {
+        this.loading = false
+        this.controller.dependency.jar.set(data.file.name, data.file.name)
+        this.handleUpdateDependency()
+      }).catch((error) => {
+        this.$message.error(error.message)
+        this.loading = false
+      })
     },
 
     handleRemovePom(pom) {
@@ -1480,6 +1989,7 @@ export default {
 
     handleRemoveJar(jar) {
       this.controller.dependency.jar.delete(jar)
+      this.selectedHistoryUploadJars.splice(this.selectedHistoryUploadJars.indexOf(jar), 1)
       this.handleUpdateDependency()
     },
 
@@ -1617,6 +2127,7 @@ export default {
         params.k8sPodTemplate = this.podTemplate
         params.k8sJmPodTemplate = this.jmPodTemplate
         params.k8sTmPodTemplate = this.tmPodTemplate
+        params.k8sHadoopIntegration = this.useSysHadoopConf
       }
       this.handleUpdateApp(params)
     },
@@ -1669,6 +2180,7 @@ export default {
         params.k8sPodTemplate = this.podTemplate
         params.k8sJmPodTemplate = this.jmPodTemplate
         params.k8sTmPodTemplate = this.tmPodTemplate
+        params.k8sHadoopIntegration = this.useSysHadoopConf
       }
       this.handleUpdateApp(params)
     },
@@ -1818,6 +2330,196 @@ export default {
       })
     },
 
+    handleUseSysHadoopConf(value) {
+      this.useSysHadoopConf = value
+    },
+
+    handleSelectHistoryK8sNamespace(value) {
+      this.form.setFieldsValue({'k8sNamespace': value})
+    },
+
+    handleSelectHistoryK8sSessionClusterId(value) {
+      this.form.setFieldsValue({'clusterId': value})
+    },
+
+    handleSelectHistoryFlinkImage(value) {
+      this.form.setFieldsValue({'flinkImage': value})
+    },
+
+    showPodTemplateDrawer(visualType) {
+      this.podTemplateDrawer[visualType] = true
+      switch (visualType) {
+        case 'ptVisual':
+          if (this.historyRecord.podTemplate == null || this.historyRecord.podTemplate.length === 0) {
+            histPodTemplates().then((resp) => {
+              this.historyRecord.podTemplate = resp.data
+            })
+          }
+          break
+        case 'jmPtVisual':
+          if (this.historyRecord.jmPodTemplate == null || this.historyRecord.jmPodTemplate.length === 0) {
+            histJmPodTemplates().then((resp) => {
+              this.historyRecord.jmPodTemplate = resp.data
+            })
+          }
+          break
+        case 'tmPtVisual':
+          if (this.historyRecord.tmPodTemplate == null || this.historyRecord.tmPodTemplate.length === 0){
+            histTmPodTemplates().then((resp) => {
+              this.historyRecord.tmPodTemplate = resp.data
+            })
+          }
+          break
+      }
+    },
+
+    closePodTemplateDrawer(visualType) {
+      this.podTemplateDrawer[visualType] = false
+    },
+
+    handleChoicePodTemplate(visualType, content) {
+      switch (visualType) {
+        case 'ptVisual':
+          this.podTemplate = content
+          this.controller.editor.podTemplate.setValue(content)
+          break
+        case 'jmPtVisual':
+          this.jmPodTemplate = content
+          this.controller.editor.jmPodTemplate.setValue(content)
+          break
+        case 'tmPtVisual':
+          this.tmPodTemplate = content
+          this.controller.editor.tmPodTemplate.setValue(content)
+          break
+      }
+      this.closePodTemplateDrawer(visualType)
+    },
+
+    showSysHadoopConfDrawer() {
+      this.hadoopConfDrawer.visual = true
+      if (this.hadoopConfDrawer.content == null
+        || Object.keys(this.hadoopConfDrawer.content).length === 0
+        || this.hadoopConfDrawer.content.size === 0) {
+        sysHadoopConf().then((resp) => {
+          this.hadoopConfDrawer.content = resp.data
+        })
+      }
+    },
+
+    closeSysHadoopConfDrawer(){
+      this.hadoopConfDrawer.visual = false
+    },
+
+    handleGetInitPodTemplate(visualType) {
+      initPodTemplate().then((resp) => {
+        const content = resp.data
+        if (content != null && content !== '') {
+          switch (visualType) {
+            case 'ptVisual':
+              this.podTemplate = content
+              this.controller.editor.podTemplate.setValue(content)
+              break
+            case 'jmPtVisual':
+              this.jmPodTemplate = content
+              this.controller.editor.jmPodTemplate.setValue(content)
+              break
+            case 'tmPtVisual':
+              this.tmPodTemplate = content
+              this.controller.editor.tmPodTemplate.setValue(content)
+              break
+          }
+        }
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+    },
+
+    showTemplateHostAliasDrawer(visualType) {
+      this.podTemplateHostAliasDrawer[visualType] = true
+      sysHosts().then((resp) => {
+        this.sysHostsAlias = resp.data
+      })
+      let tmplContent = ''
+      switch (visualType) {
+        case 'ptVisual':
+          tmplContent = this.podTemplate
+          break
+        case 'jmPtVisual':
+          tmplContent = this.jmPodTemplate
+          break
+        case 'tmPtVisual':
+          tmplContent = this.tmPodTemplate
+          break
+      }
+      if (tmplContent !== '') {
+        const param = {}
+        param['podTemplate'] = tmplContent
+        extractHostAliasFromPodTemplate(param).then((resp) => {
+          this.selectedPodTemplateHostAlias = resp.data
+          this.handleRefreshHostAliasPreview()
+        }).catch(err => {
+          this.selectedPodTemplateHostAlias = []
+        })
+      }
+    },
+
+    closeTemplateHostAliasDrawer(visualType) {
+      this.podTemplateHostAliasDrawer[visualType] = false
+      this.selectedPodTemplateHostAlias = []
+      this.hostAliasPreview = ''
+    },
+
+    handleSelectedTemplateHostAlias(items) {
+      this.selectedPodTemplateHostAlias = items
+      this.handleRefreshHostAliasPreview()
+    },
+
+    handleSubmitHostAliasToPodTemplate(visualType) {
+      const param = {
+        hosts: this.selectedPodTemplateHostAlias.join(','),
+      }
+      switch (visualType) {
+        case 'ptVisual':
+          param['podTemplate'] = this.podTemplate
+          break
+        case 'jmPtVisual':
+          param['podTemplate'] = this.jmPodTemplate
+          break
+        case 'tmPtVisual':
+          param['podTemplate'] = this.tmPodTemplate
+          break
+      }
+      completeHostAliasToPodTemplate(param).then((resp) => {
+        const content = resp.data
+        if (content != null && content !== '') {
+          switch (visualType) {
+            case 'ptVisual':
+              this.podTemplate = content
+              this.controller.editor.podTemplate.setValue(content)
+              break
+            case 'jmPtVisual':
+              this.jmPodTemplate = content
+              this.controller.editor.jmPodTemplate.setValue(content)
+              break
+            case 'tmPtVisual':
+              this.tmPodTemplate = content
+              this.controller.editor.tmPodTemplate.setValue(content)
+              break
+          }
+        }
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+      this.closeTemplateHostAliasDrawer(visualType)
+    },
+
+    handleRefreshHostAliasPreview() {
+      previewHostAlias({hosts: this.selectedPodTemplateHostAlias.join(',')})
+        .then((resp) => {
+          this.hostAliasPreview = resp.data
+        })
+    },
+
     handleReset() {
       this.$nextTick(() => {
         this.form.setFieldsValue({
@@ -1837,6 +2539,7 @@ export default {
           'clusterId': this.app.clusterId,
           'flinkImage': this.app.flinkImage,
           'k8sNamespace': this.app.k8sNamespace,
+          'resource': this.app.resourceFrom
         })
         if (this.app.jobType === 2) {
           this.flinkSql.sql = this.app.flinkSql || null
@@ -1844,11 +2547,13 @@ export default {
           initEditor(this,Base64.decode(this.flinkSql.sql))
           this.handleInitDependency()
         }
+        this.selectedHistoryUploadJars = []
         if (this.app.executionMode === 6) {
           this.podTemplate = this.app.k8sPodTemplate
           this.jmPodTemplate = this.app.k8sJmPodTemplate
           this.tmPodTemplate = this.app.k8sTmPodTemplate
           initPodTemplateEditor(this)
+          this.useSysHadoopConf = this.app.k8sHadoopIntegration
         }
       })
 
@@ -1888,7 +2593,6 @@ export default {
         this.form.setFieldsValue(fieldValueOptions)
       })
     }
-
   },
 
   watch: {

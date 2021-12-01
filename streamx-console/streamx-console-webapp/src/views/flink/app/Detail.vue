@@ -912,7 +912,7 @@ export default {
       get({ id: appId }).then((resp) => {
         if (!this.app) {
           this.app = resp.data
-          this.options = JSON.parse(this.app.options)
+          this.options = JSON.parse(this.app.options || '{}')
           if (this.app.executionMode === 2 || this.app.executionMode === 3 || this.app.executionMode === 4) {
             this.handleYarn()
           }
