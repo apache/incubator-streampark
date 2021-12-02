@@ -27,12 +27,17 @@ import com.streamxhub.streamx.common.conf.ConfigConst.DOCKER_IMAGE_NAMESPACE
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.fs.LfsOperator
+import com.streamxhub.streamx.common.util.ThreadUtils
 import com.streamxhub.streamx.flink.kubernetes.PodTemplateTool
-import com.streamxhub.streamx.flink.packer.docker.{FlinkDockerfileTemplate, FlinkHadoopDockerfileTemplate, usingDockerClient, watchDockerBuildStep, watchDockerPullProcess, watchDockerPushProcess}
+import com.streamxhub.streamx.flink.packer.docker._
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.packer.pipeline._
+import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline.execContext
 
 import java.io.File
+import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
+import scala.async.Async.async
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 import scala.language.postfixOps
 
 /**
@@ -149,7 +154,9 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
             .start(watchDockerPullProcess {
               pullRsp =>
                 dockerProcess.pull.update(pullRsp)
-                dockerProcessWatcher.onDockerPullProgressChange(dockerProcess.pull.snapshot)
+                async {
+                  dockerProcessWatcher.onDockerPullProgressChange(dockerProcess.pull.snapshot)
+                }
             })
           pullCmdCallback.awaitCompletion
           logInfo(s"already pulled docker image from remote register, imageTag=$baseImageTag")
@@ -169,7 +176,9 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
             .start(watchDockerBuildStep {
               buildStep =>
                 dockerProcess.build.update(buildStep)
-                dockerProcessWatcher.onDockerBuildProgressChange(dockerProcess.build.snapshot)
+                async {
+                  dockerProcessWatcher.onDockerBuildProgressChange(dockerProcess.build.snapshot)
+                }
             })
           val imageId = buildCmdCallback.awaitImageId
           logInfo(s"built docker image, imageId=$imageId, imageTag=$pushImageTag")
@@ -188,7 +197,9 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
             .start(watchDockerPushProcess {
               pushRsp =>
                 dockerProcess.push.update(pushRsp)
-                dockerProcessWatcher.onDockerPushProgressChange(dockerProcess.push.snapshot)
+                async {
+                  dockerProcessWatcher.onDockerPushProgressChange(dockerProcess.push.snapshot)
+                }
             })
           pushCmdCallback.awaitCompletion
           logInfo(s"already pushed docker image, imageTag=$pushImageTag")
@@ -212,5 +223,19 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
 }
 
 object FlinkK8sApplicationBuildPipeline {
+
+  private lazy val execPool = new ThreadPoolExecutor(
+    Runtime.getRuntime.availableProcessors * 2,
+    300,
+    60L,
+    TimeUnit.SECONDS,
+    new LinkedBlockingQueue[Runnable](2048),
+    ThreadUtils.threadFactory("streamx-docker-progress-watcher-executor"),
+    new ThreadPoolExecutor.DiscardOldestPolicy
+  )
+
+  private lazy implicit val execContext: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(execPool)
+
   def of(params: FlinkK8sApplicationBuildRequest): FlinkK8sApplicationBuildPipeline = new FlinkK8sApplicationBuildPipeline(params)
+
 }
