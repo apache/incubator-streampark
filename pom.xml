@@ -76,6 +76,7 @@
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <scalatest.version>3.2.9</scalatest.version>
+        <scala-async.version>0.9.7</scala-async.version>
         <junit.version>5.6.3</junit.version>
         <zkclient.version>0.11</zkclient.version>
         <curator.version>4.2.0</curator.version>
@@ -131,6 +132,12 @@
             <artifactId>scala-reflect</artifactId>
             <version>${scala.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang.modules</groupId>
+            <artifactId>scala-async_${scala.binary.version}</artifactId>
+            <version>${scala-async.version}</version>
         </dependency>
     </dependencies>
 
@@ -225,7 +232,6 @@
                 <artifactId>jackson-core</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
-
 
             <dependency>
                 <groupId>com.fasterxml.jackson.module</groupId>
@@ -524,6 +530,9 @@
                         <addScalacArgs>-target:jvm-${project.build.jdk}</addScalacArgs>
                         <target>${project.build.jdk}</target>
                         <source>${project.build.jdk}</source>
+                        <args>
+                            <arg>-Xasync</arg>
+                        </args>
                     </configuration>
                     <executions>
                         <execution>
