@@ -21,18 +21,19 @@
 package com.streamxhub.streamx.flink.packer.pipeline.impl
 
 import com.github.dockerjava.api.command.PushImageCmd
-import com.github.dockerjava.core.command.HackBuildImageCmd
+import com.github.dockerjava.core.command.{HackBuildImageCmd, HackPullImageCmd, HackPushImageCmd}
 import com.google.common.collect.Sets
 import com.streamxhub.streamx.common.conf.ConfigConst.DOCKER_IMAGE_NAMESPACE
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.fs.LfsOperator
 import com.streamxhub.streamx.flink.kubernetes.PodTemplateTool
-import com.streamxhub.streamx.flink.packer.docker.{FlinkDockerfileTemplate, FlinkHadoopDockerfileTemplate, usingDockerClient, watchDockerBuildStep}
+import com.streamxhub.streamx.flink.packer.docker.{FlinkDockerfileTemplate, FlinkHadoopDockerfileTemplate, usingDockerClient, watchDockerBuildStep, watchDockerPullProcess, watchDockerPushProcess}
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.packer.pipeline._
 
 import java.io.File
+import scala.language.postfixOps
 
 /**
  * Building pipeline for flink kubernetes-native application mode
@@ -43,7 +44,16 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
 
   override val pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_APPLICATION
 
+  private var dockerProcessWatcher: DockerProgressWatcher = new SilentDockerProgressWatcher()
+
+  // non-thread-safe
+  private val dockerProcess = new DockerResolveProgress(DockerPullProgress.empty(), DockerBuildProgress.empty(), DockerPushProgress.empty())
+
   override protected def offerBuildParam: FlinkK8sApplicationBuildRequest = params
+
+  def registerDockerProgressWatcher(watcher: DockerProgressWatcher): Unit = {
+    dockerProcessWatcher = watcher
+  }
 
   @throws[Throwable]
   override protected def buildProcess(): FlinkK8sApplicationBuildResponse = {
@@ -135,8 +145,13 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
             else
               dockerClient.pullImageCmd(baseImageTag).withAuthConfig(authConf.toDockerAuthConf)
           }
-          // todo watch pull progress
-          pullImageCmd.start.awaitCompletion()
+          val pullCmdCallback = pullImageCmd.asInstanceOf[HackPullImageCmd]
+            .start(watchDockerPullProcess {
+              pullRsp =>
+                dockerProcess.pull.update(pullRsp)
+                dockerProcessWatcher.onDockerPullProgressChange(dockerProcess.pull.snapshot)
+            })
+          pullCmdCallback.awaitCompletion
           logInfo(s"already pulled docker image from remote register, imageTag=$baseImageTag")
       }(err => throw new Exception(s"pull docker image failed, imageTag=$baseImageTag", err))
     }.getOrElse(throw getError.exception)
@@ -149,11 +164,13 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
             .withBaseDirectory(new File(buildWorkspace))
             .withDockerfile(dockerfile)
             .withTags(Sets.newHashSet(pushImageTag))
-          // todo watch build progress
+
           val buildCmdCallback = buildImageCmd.asInstanceOf[HackBuildImageCmd]
-            .start(watchDockerBuildStep(buildStep =>
-              logInfo(s"building docker image ${pushImageTag} => ${buildStep}")
-            ))
+            .start(watchDockerBuildStep {
+              buildStep =>
+                dockerProcess.build.update(buildStep)
+                dockerProcessWatcher.onDockerBuildProgressChange(dockerProcess.build.snapshot)
+            })
           val imageId = buildCmdCallback.awaitImageId
           logInfo(s"built docker image, imageId=$imageId, imageTag=$pushImageTag")
       }(err => throw new Exception(s"build docker image failed. tag=${pushImageTag}", err))
@@ -163,9 +180,17 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
     execStep(7) {
       usingDockerClient {
         dockerClient =>
-          val pushCmd: PushImageCmd = dockerClient.pushImageCmd(pushImageTag).withAuthConfig(authConf.toDockerAuthConf)
-          // todo watch push progress
-          pushCmd.start.awaitCompletion
+          val pushCmd: PushImageCmd = dockerClient
+            .pushImageCmd(pushImageTag)
+            .withAuthConfig(authConf.toDockerAuthConf)
+
+          val pushCmdCallback = pushCmd.asInstanceOf[HackPushImageCmd]
+            .start(watchDockerPushProcess {
+              pushRsp =>
+                dockerProcess.push.update(pushRsp)
+                dockerProcessWatcher.onDockerPushProgressChange(dockerProcess.push.snapshot)
+            })
+          pushCmdCallback.awaitCompletion
           logInfo(s"already pushed docker image, imageTag=$pushImageTag")
       }(err => throw new Exception(s"push docker image failed. tag=${pushImageTag}", err))
     }.getOrElse(throw getError.exception)

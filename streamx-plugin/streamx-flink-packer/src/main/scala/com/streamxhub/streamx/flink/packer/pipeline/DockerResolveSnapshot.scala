@@ -21,6 +21,8 @@
 package com.streamxhub.streamx.flink.packer.pipeline
 
 import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper.calPercent
+import java.util.{List => JList}
+import scala.collection.JavaConverters._
 
 /**
  * Snapshot for docker resolved progress
@@ -31,45 +33,34 @@ import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper.calPerce
 /**
  * snapshot for pulling docker image progress.
  */
-case class DockerPullSnapshot(detail: Seq[DockerLayerProgress],
-                              error: String,
-                              emitTime: Long,
-                              percent: Double)
-
-object DockerPullSnapshot {
-  def apply(detail: Seq[DockerLayerProgress], error: String, emitTime: Long): DockerPullSnapshot =
-    DockerPullSnapshot(detail, error, emitTime, calPercent(detail.map(_.current).sum, detail.map(_.total).sum))
+case class DockerPullSnapshot(detail: Seq[DockerLayerProgress], error: String, emitTime: Long, percent: Double) {
+  def detailAsJava: JList[DockerLayerProgress] = detail.asJava
 }
 
 /**
  * snapshot for building docker image progress.
  */
-case class DockerBuildSnapshot(detail: Seq[String],
-                               error: String,
-                               emitTime: Long)
+case class DockerBuildSnapshot(detail: Seq[String], emitTime: Long) {
+  def detailAsJava: JList[String] = detail.asJava
+}
 
 /**
  * snapshot for pushing docker image progress.
  */
-case class DockerPushSnapshot(detail: Seq[DockerLayerProgress],
-                              error: String,
-                              emitTime: Long,
-                              percent: Double)
+case class DockerPushSnapshot(detail: Seq[DockerLayerProgress], error: String, emitTime: Long, percent: Double) {
+  def detailAsJava: JList[DockerLayerProgress] = detail.asJava
+}
+
+object DockerPullSnapshot {
+  def of(detail: Seq[DockerLayerProgress], error: String, emitTime: Long): DockerPullSnapshot =
+    DockerPullSnapshot(detail, error, emitTime, calPercent(detail.map(_.current).sum, detail.map(_.total).sum))
+}
 
 object DockerPushSnapshot {
-  def apply(detail: Seq[DockerLayerProgress], error: String, emitTime: Long): DockerPushSnapshot =
+  def of(detail: Seq[DockerLayerProgress], error: String, emitTime: Long): DockerPushSnapshot =
     DockerPushSnapshot(detail, error, emitTime, calPercent(detail.map(_.current).sum, detail.map(_.total).sum))
 }
 
-/**
- * push/pull progress of per docker layer.
- */
-case class DockerLayerProgress(layerId: String, current: Long, total: Long, percent: Double)
-
-object DockerLayerProgress {
-  def apply(layerId: String, current: Long, total: Long): DockerLayerProgress =
-    DockerLayerProgress(layerId, current, total, calPercent(current, total))
-}
 
 
 
