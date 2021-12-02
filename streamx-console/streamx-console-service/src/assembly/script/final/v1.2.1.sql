@@ -110,7 +110,7 @@ KEY `INX_TRACK` (`TRACKING`) USING BTREE
 -- Records of t_flink_app
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_app` VALUES (1401710007170375681, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', 1, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '2', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-12-02 17:54:49', 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+INSERT INTO `t_flink_app` VALUES (1401710007170375681, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', 1, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '2', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 COMMIT;
 
 -- ----------------------------
@@ -152,7 +152,7 @@ UNIQUE KEY `UN_INX` (`APP_ID`,`TARGET_TYPE`) USING BTREE
 -- Records of t_flink_effective
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_effective` VALUES (1401710007468171265, 1401710007170375681, 2, 1401710007208124417, '2021-12-02 17:54:49');
+INSERT INTO `t_flink_effective` VALUES (1401710007468171265, 1401710007170375681, 2, 1401710007208124417, NOW());
 COMMIT;
 
 -- ----------------------------
@@ -224,7 +224,7 @@ PRIMARY KEY (`ID`) USING BTREE
 -- Records of t_flink_project
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_project` VALUES (1, 'streamx-quickstart', 'https://gitee.com/streamxhub/streamx-quickstart.git', 'main', NULL, NULL, NULL, 1, 1, '2021-12-02 17:54:49', NULL, 'streamx-quickstart', 1);
+INSERT INTO `t_flink_project` VALUES (1, 'streamx-quickstart', 'https://gitee.com/streamxhub/streamx-quickstart.git', 'main', NULL, NULL, NULL, 1, 1, NOW(), NULL, 'streamx-quickstart', 1);
 COMMIT;
 
 -- ----------------------------
@@ -267,7 +267,7 @@ PRIMARY KEY (`ID`) USING BTREE
 -- Records of t_flink_sql
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_sql` VALUES (1401710007208124417, 1401710007170375681, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94AaVqGxSSPZIKgxrY2mxrdGfb4GS3c0+LnJo6Mz36syapkmZQpk8vKbQMMt2KOFmAe5rK4Nf3yhrhCwvA1/TTDaqO61UxmooSprlT1PDGkgKEKpmwvIOjWVdP3W2zpG+JfQFHjfU46xxrVvYZuWztye1khJrqzSBFRCfjUwSYQiqt1xJJvyPcbWJp9WPCXvUoUEn0ZAVufcs0nIUjYn2L4s++YiY75eBLr+2Dnl3GYKTWRyfQKYRRR2XZxXmNvu9yh9GHAmUO/sxyMRkGNly4c714RZ7zaWtLHsX+N9NjvVrWxm99jmyvEhpOUhujmIYFI5zkCOYzYIj11a7QH7Tyz+nE8bw', NULL, 1, 0, '2021-12-02 17:54:49');
+INSERT INTO `t_flink_sql` VALUES (1401710007208124417, 1401710007170375681, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94AaVqGxSSPZIKgxrY2mxrdGfb4GS3c0+LnJo6Mz36syapkmZQpk8vKbQMMt2KOFmAe5rK4Nf3yhrhCwvA1/TTDaqO61UxmooSprlT1PDGkgKEKpmwvIOjWVdP3W2zpG+JfQFHjfU46xxrVvYZuWztye1khJrqzSBFRCfjUwSYQiqt1xJJvyPcbWJp9WPCXvUoUEn0ZAVufcs0nIUjYn2L4s++YiY75eBLr+2Dnl3GYKTWRyfQKYRRR2XZxXmNvu9yh9GHAmUO/sxyMRkGNly4c714RZ7zaWtLHsX+N9NjvVrWxm99jmyvEhpOUhujmIYFI5zkCOYzYIj11a7QH7Tyz+nE8bw', NULL, 1, 0, NOW());
 COMMIT;
 
 -- ----------------------------
@@ -287,7 +287,7 @@ PRIMARY KEY (`ID`) USING BTREE
 -- Records of t_flink_tutorial
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_tutorial` VALUES (1, 1, 'repl', '### Introduction\n\n[Apache Flink](https://flink.apache.org/) is a framework and distributed processing engine for stateful computations over unbounded and bounded data streams. This is Flink tutorial for running classical wordcount in both batch and streaming mode.\n\nThere\'re 3 things you need to do before using flink in StreamX Notebook.\n\n* Download [Flink 1.11](https://flink.apache.org/downloads.html) for scala 2.11 (Only scala-2.11 is supported, scala-2.12 is not supported yet in StreamX Notebook), unpack it and set `FLINK_HOME` in flink interpreter setting to this location.\n* Copy flink-python_2.11–1.11.1.jar from flink opt folder to flink lib folder (it is used by pyflink which is supported)\n* If you want to run yarn mode, you need to set `HADOOP_CONF_DIR` in flink interpreter setting. And make sure `hadoop` is in your `PATH`, because internally flink will call command `hadoop classpath` and put all the hadoop related jars in the classpath of flink interpreter process.\n\nThere\'re 6 sub interpreters in flink interpreter, each is used for different purpose. However they are in the the JVM and share the same ExecutionEnviroment/StremaExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment.\n\n* `flink`	- Creates ExecutionEnvironment/StreamExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment and provides a Scala environment\n* `pyflink`	- Provides a python environment\n* `ipyflink`	- Provides an ipython environment\n* `ssql`	 - Provides a stream sql environment\n* `bsql`	- Provides a batch sql environment\n', '2021-12-02 17:54:49');
+INSERT INTO `t_flink_tutorial` VALUES (1, 1, 'repl', '### Introduction\n\n[Apache Flink](https://flink.apache.org/) is a framework and distributed processing engine for stateful computations over unbounded and bounded data streams. This is Flink tutorial for running classical wordcount in both batch and streaming mode.\n\nThere\'re 3 things you need to do before using flink in StreamX Notebook.\n\n* Download [Flink 1.11](https://flink.apache.org/downloads.html) for scala 2.11 (Only scala-2.11 is supported, scala-2.12 is not supported yet in StreamX Notebook), unpack it and set `FLINK_HOME` in flink interpreter setting to this location.\n* Copy flink-python_2.11–1.11.1.jar from flink opt folder to flink lib folder (it is used by pyflink which is supported)\n* If you want to run yarn mode, you need to set `HADOOP_CONF_DIR` in flink interpreter setting. And make sure `hadoop` is in your `PATH`, because internally flink will call command `hadoop classpath` and put all the hadoop related jars in the classpath of flink interpreter process.\n\nThere\'re 6 sub interpreters in flink interpreter, each is used for different purpose. However they are in the the JVM and share the same ExecutionEnviroment/StremaExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment.\n\n* `flink`	- Creates ExecutionEnvironment/StreamExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment and provides a Scala environment\n* `pyflink`	- Provides a python environment\n* `ipyflink`	- Provides an ipython environment\n* `ssql`	 - Provides a stream sql environment\n* `bsql`	- Provides a batch sql environment\n', NOW());
 COMMIT;
 
 -- ----------------------------
@@ -314,42 +314,42 @@ PRIMARY KEY (`MENU_ID`) USING BTREE
 -- Records of t_menu
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_menu` VALUES (1, 0, 'System', '/system', 'PageView', NULL, 'desktop', '0', '1', 1, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (2, 1, 'User Management', '/system/user', 'system/user/User', 'user:view', 'user', '0', '1', 1, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (3, 1, 'Role Management', '/system/role', 'system/role/Role', 'role:view', 'smile', '0', '1', 2, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (4, 1, 'Router Management', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', '1', 3, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (5, 2, 'add', NULL, NULL, 'user:add', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (6, 2, 'update', NULL, NULL, 'user:update', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (7, 2, 'delete', NULL, NULL, 'user:delete', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (8, 3, 'add', NULL, NULL, 'role:add', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (9, 3, 'update', NULL, NULL, 'role:update', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (10, 3, 'delete', NULL, NULL, 'role:delete', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (11, 4, 'add', NULL, NULL, 'menu:add', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (12, 4, 'update', NULL, NULL, 'menu:update', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (13, 2, 'reset', NULL, NULL, 'user:reset', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (14, 0, 'StreamX', '/flink', 'PageView', NULL, 'build', '0', '1', 2, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (15, 14, 'Project', '/flink/project', 'flink/project/View', 'project:view', 'github', '0', '1', 1, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (16, 14, 'Application', '/flink/app', 'flink/app/View', 'app:view', 'mobile', '0', '1', 2, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (17, 14, 'Add Application', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', '0', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (18, 14, 'Add Project', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', '0', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (19, 14, 'App Detail', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', '0', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (20, 14, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', '1', 3, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (21, 14, 'Edit Flink App', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', '0', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (22, 14, 'Edit StreamX App', '/flink/app/edit_streamx', 'flink/app/EditStreamX', 'app:update', '', '0', '0', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (23, 15, 'build', NULL, NULL, 'project:build', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (24, 15, 'delete', NULL, NULL, 'project:delete', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (25, 16, 'mapping', NULL, NULL, 'app:mapping', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (26, 16, 'deploy', NULL, NULL, 'app:deploy', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (27, 16, 'start', NULL, NULL, 'app:start', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (28, 16, 'clean', NULL, NULL, 'app:clean', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (29, 16, 'cancel', NULL, NULL, 'app:cancel', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (30, 16, 'savepoint delete', NULL, NULL, 'savepoint:delete', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (31, 16, 'backup rollback', NULL, NULL, 'backup:rollback', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (32, 16, 'backup delete', NULL, NULL, 'backup:delete', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (33, 16, 'conf delete', NULL, NULL, 'conf:delete', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (34, 16, 'flame Graph', NULL, NULL, 'app:flameGraph', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (35, 14, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', '1', 4, '2021-12-02 17:54:49', NULL);
-INSERT INTO `t_menu` VALUES (36, 35, 'Setting Update', NULL, NULL, 'setting:update', NULL, '1', '1', NULL, '2021-12-02 17:54:49', NULL);
+INSERT INTO `t_menu` VALUES (1, 0, 'System', '/system', 'PageView', NULL, 'desktop', '0', '1', 1, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (2, 1, 'User Management', '/system/user', 'system/user/User', 'user:view', 'user', '0', '1', 1, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (3, 1, 'Role Management', '/system/role', 'system/role/Role', 'role:view', 'smile', '0', '1', 2, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (4, 1, 'Router Management', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', '1', 3, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (5, 2, 'add', NULL, NULL, 'user:add', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (6, 2, 'update', NULL, NULL, 'user:update', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (7, 2, 'delete', NULL, NULL, 'user:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (8, 3, 'add', NULL, NULL, 'role:add', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (9, 3, 'update', NULL, NULL, 'role:update', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (10, 3, 'delete', NULL, NULL, 'role:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (11, 4, 'add', NULL, NULL, 'menu:add', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (12, 4, 'update', NULL, NULL, 'menu:update', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (13, 2, 'reset', NULL, NULL, 'user:reset', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (14, 0, 'StreamX', '/flink', 'PageView', NULL, 'build', '0', '1', 2, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (15, 14, 'Project', '/flink/project', 'flink/project/View', 'project:view', 'github', '0', '1', 1, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (16, 14, 'Application', '/flink/app', 'flink/app/View', 'app:view', 'mobile', '0', '1', 2, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (17, 14, 'Add Application', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', '0', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (18, 14, 'Add Project', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', '0', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (19, 14, 'App Detail', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', '0', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (20, 14, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', '1', 3, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (21, 14, 'Edit Flink App', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', '0', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (22, 14, 'Edit StreamX App', '/flink/app/edit_streamx', 'flink/app/EditStreamX', 'app:update', '', '0', '0', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (23, 15, 'build', NULL, NULL, 'project:build', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (24, 15, 'delete', NULL, NULL, 'project:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (25, 16, 'mapping', NULL, NULL, 'app:mapping', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (26, 16, 'deploy', NULL, NULL, 'app:deploy', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (27, 16, 'start', NULL, NULL, 'app:start', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (28, 16, 'clean', NULL, NULL, 'app:clean', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (29, 16, 'cancel', NULL, NULL, 'app:cancel', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (30, 16, 'savepoint delete', NULL, NULL, 'savepoint:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (31, 16, 'backup rollback', NULL, NULL, 'backup:rollback', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (32, 16, 'backup delete', NULL, NULL, 'backup:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (33, 16, 'conf delete', NULL, NULL, 'conf:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (34, 16, 'flame Graph', NULL, NULL, 'app:flameGraph', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (35, 14, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', '1', 4, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (36, 35, 'Setting Update', NULL, NULL, 'setting:update', NULL, '1', '1', NULL, NOW(), NULL);
 COMMIT;
 
 -- ----------------------------
@@ -393,8 +393,8 @@ PRIMARY KEY (`ROLE_ID`) USING BTREE
 -- Records of t_role
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_role` VALUES (1, 'admin', 'admin', '2021-12-02 17:54:49', NULL, 'admin');
-INSERT INTO `t_role` VALUES (2, 'developer', 'developer', '2021-12-02 17:54:49', NULL, NULL);
+INSERT INTO `t_role` VALUES (1, 'admin', 'admin', NOW(), NULL, NULL);
+INSERT INTO `t_role` VALUES (2, 'developer', 'developer', NOW(), NULL, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -509,7 +509,6 @@ CREATE TABLE `t_user` (
 `NICK_NAME` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '昵称',
 `SALT` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '密码加盐',
 `PASSWORD` varchar(128) COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码',
-`DEPT_ID` bigint DEFAULT NULL COMMENT '部门ID',
 `EMAIL` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '邮箱',
 `MOBILE` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '联系电话',
 `STATUS` char(1) COLLATE utf8mb4_general_ci NOT NULL COMMENT '状态 0锁定 1有效',
@@ -517,18 +516,16 @@ CREATE TABLE `t_user` (
 `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
 `LAST_LOGIN_TIME` datetime DEFAULT NULL COMMENT '最近访问时间',
 `SEX` char(1) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '性别 0男 1女 2保密',
-`DESCRIPTION` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述',
 `AVATAR` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '用户头像',
-`USER_TYPE` char(1) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '2' COMMENT '用户类型 1内部用户 2外部用户',
+`DESCRIPTION` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述',
 PRIMARY KEY (`USER_ID`) USING BTREE,
 UNIQUE KEY `UN_USERNAME` (`NICK_NAME`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_user` VALUES (1, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', 1, 'benjobs@qq.com', '13800000000', '1', '2021-12-02 17:54:49', NULL, NULL, '0', 'author。', 'ubnKSIfAJTxIgXOKlciN.png', '1');
+INSERT INTO `t_user` VALUES (1, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', 'benjobs@qq.com', '13800000000', '1', NOW(), NULL,NULL,NULL,NULL,NULL );
 COMMIT;
 
 -- ----------------------------
