@@ -205,7 +205,7 @@ public class ApplicationBackUpServiceImpl
                 switch (application.getExecutionModeEnum()) {
                     case KUBERNETES_NATIVE_APPLICATION:
                     case KUBERNETES_NATIVE_SESSION:
-                    case YARN_PRE_JOB:
+                    case YARN_PER_JOB:
                     case YARN_SESSION:
                     case LOCAL:
                         if (application.isFlinkSqlJob()) {
@@ -268,7 +268,7 @@ public class ApplicationBackUpServiceImpl
         switch (application.getExecutionModeEnum()) {
             case KUBERNETES_NATIVE_APPLICATION:
             case KUBERNETES_NATIVE_SESSION:
-            case YARN_PRE_JOB:
+            case YARN_PER_JOB:
             case YARN_SESSION:
             case LOCAL:
                 if (application.isFlinkSqlJob()) {

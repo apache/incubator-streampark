@@ -49,6 +49,7 @@
     "vue-sweetalert2": "^4.2.0",
     "vuex": "^3.6.0",
     "webstomp-client": "^1.2.6",
+    "ws": "^8.2.3",
     "xterm": "^4.9.0",
     "xterm-addon-fit": "^0.4.0"
   },

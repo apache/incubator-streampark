@@ -2,8 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.streamxhub.streamx.console.system.dao.MenuMapper">
     <resultMap id="menu" type="com.streamxhub.streamx.console.system.entity.Menu">
-        <id column="MENU_ID" jdbcType="DECIMAL" property="menuId"/>
-        <result column="PARENT_ID" jdbcType="DECIMAL" property="parentId"/>
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <id column="MENU_ID" jdbcType="BIGINT" property="menuId"/>
+        <result column="PARENT_ID" jdbcType="BIGINT" property="parentId"/>
         <result column="MENU_NAME" jdbcType="VARCHAR" property="menuName"/>
         <result column="PATH" jdbcType="VARCHAR" property="path"/>
         <result column="COMPONENT" jdbcType="VARCHAR" property="component"/>

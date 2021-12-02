@@ -22,7 +22,6 @@ package com.streamxhub.streamx.console.core.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.AppExistsState;
@@ -30,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,7 +52,7 @@ public interface ApplicationService extends IService<Application> {
 
     AppExistsState checkExists(Application app);
 
-    void deploy(Application app);
+    void deploy(Application app, String socketId);
 
     void cancel(Application app);
 
@@ -74,7 +72,7 @@ public interface ApplicationService extends IService<Application> {
 
     void tailMvnDownloading(Long id);
 
-    boolean upload(MultipartFile file, StorageType storageType) throws Exception;
+    String upload(MultipartFile file) throws Exception;
 
     /**
      * 将 latest的设置为Effective的,(此时才真正变成当前生效的)
@@ -86,4 +84,6 @@ public interface ApplicationService extends IService<Application> {
     Boolean delete(Application app);
 
     boolean checkEnv(Application app) throws Exception;
+
+    void updateDeploy(Application application);
 }
