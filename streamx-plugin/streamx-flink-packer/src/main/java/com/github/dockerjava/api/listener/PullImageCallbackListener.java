@@ -30,9 +30,7 @@ public interface PullImageCallbackListener {
 
     /**
      * Watch pull image process information form docker rest api.
-     *
-     * @param processDetail key=PullResponseItem.id
      */
-    void watchPullProcess(Pair<String, PullResponseItem> processDetail);
+    void watchPullProcess(PullResponseItem processDetail);
 
 }
