@@ -31,6 +31,8 @@ public class RoleMenu implements Serializable {
 
     private static final long serialVersionUID = -7573904024872252113L;
 
+    private Long id;
+
     private Long roleId;
 
     private Long menuId;

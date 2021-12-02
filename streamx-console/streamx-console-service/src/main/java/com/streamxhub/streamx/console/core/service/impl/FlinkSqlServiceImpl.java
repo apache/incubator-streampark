@@ -157,7 +157,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW,rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void rollback(Application application) {
         FlinkSql sql = getCandidate(application.getId(), CandidateType.HISTORY);
         assert sql != null;

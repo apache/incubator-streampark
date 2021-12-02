@@ -67,7 +67,6 @@ import java.util.concurrent.*;
  */
 @Slf4j
 @Component
-@DependsOn({"flyway", "flywayInitializer"})
 public class FlinkTrackingTask {
 
     /**

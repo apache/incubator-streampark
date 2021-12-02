@@ -14,6 +14,30 @@ Vue.prototype.randomNum = function (minNum, maxNum) {
   }
 }
 
+Vue.prototype.exceptionPropWidth = function () {
+  const width = document.documentElement.clientWidth || document.body.clientWidth
+  if (width > 1200) {
+    return 1080
+  }
+  return width * 0.96
+}
+
+
+Vue.prototype.clientWidth = function () {
+  return document.documentElement.clientWidth || document.body.clientWidth
+}
+
+Vue.prototype.uuid = function () {
+  const temp_url = URL.createObjectURL(new Blob())
+  const uuid = temp_url.toString()
+  URL.revokeObjectURL(temp_url)
+  return uuid.substr(uuid.lastIndexOf('/') + 1)
+}
+
+Vue.prototype.clientHeight = function () {
+  return document.documentElement.clientHeight || document.body.clientHeight
+}
+
 Vue.prototype.ideTheme = function () {
   return storage.get(DEFAULT_THEME) === 'dark' ? 'vs-dark' : 'vs'
 }

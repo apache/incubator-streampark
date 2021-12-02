@@ -45,6 +45,10 @@ export function build (params) {
   return http.post(api.Project.BUILD, params)
 }
 
+export function buildlog (params) {
+  return http.post(api.Project.BUILDLOG, params)
+}
+
 export function closebuild(params) {
   return http.post(api.Project.CLOSEBUILD, params)
 }

@@ -79,12 +79,8 @@ public class ApplicationController {
     @PostMapping("update")
     @RequiresPermissions("app:update")
     public RestResponse update(Application app) {
-        try {
-            applicationService.update(app);
-            return RestResponse.create().data(true);
-        } catch (Exception e) {
-            return RestResponse.create().data(false);
-        }
+        applicationService.update(app);
+        return RestResponse.create().data(true);
     }
 
     @PostMapping("dashboard")
@@ -109,14 +105,14 @@ public class ApplicationController {
 
     @PostMapping("deploy")
     @RequiresPermissions("app:deploy")
-    public RestResponse deploy(Application app) {
+    public RestResponse deploy(Application app, String socketId) {
         Application application = applicationService.getById(app.getId());
         assert application != null;
         try {
             applicationService.checkEnv(app);
             application.setBackUp(true);
             application.setBackUpDescription(app.getBackUpDescription());
-            applicationService.deploy(application);
+            applicationService.deploy(application, socketId);
             return RestResponse.create().data(true);
         } catch (Exception e) {
             return RestResponse.create().data(false).message(e.getMessage());
@@ -232,10 +228,15 @@ public class ApplicationController {
 
     @PostMapping("upload")
     @RequiresPermissions("app:create")
-    public RestResponse upload(MultipartFile file, Integer executionMode) throws Exception {
-        StorageType storageType = Application.getStorageType(executionMode);
-        boolean upload = applicationService.upload(file, storageType);
-        return RestResponse.create().data(upload);
+    public RestResponse upload(MultipartFile file) throws Exception {
+        String uploadPath = applicationService.upload(file);
+        return RestResponse.create().data(uploadPath);
+    }
+
+    @PostMapping("downlog")
+    public RestResponse downlog(Long id) throws Exception {
+        applicationService.tailMvnDownloading(id);
+        return RestResponse.create();
     }
 
 }

@@ -22,8 +22,6 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.common.conf.Workspace;
-import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
@@ -35,7 +33,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,7 +43,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-@DependsOn({"flyway", "flywayInitializer"})
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     implements SettingService {
 

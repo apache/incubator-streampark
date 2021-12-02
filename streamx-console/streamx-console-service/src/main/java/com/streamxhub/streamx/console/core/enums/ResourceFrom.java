@@ -18,19 +18,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.base.config;
+package com.streamxhub.streamx.console.core.enums;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.server.standard.ServerEndpointExporter;
+import java.util.Arrays;
 
 /**
  * @author benjobs
  */
-@Configuration
-public class WebSocketConfig {
-    @Bean
-    public ServerEndpointExporter serverEndpointExporter() {
-        return new ServerEndpointExporter();
+
+public enum ResourceFrom {
+
+    /**
+     * cicd(build from cvs)
+     */
+    CICD(1),
+
+    /**
+     * upload local jar
+     */
+    UPLOAD(2);
+
+    int value;
+
+    ResourceFrom(int value) {
+        this.value = value;
+    }
+
+    public static ResourceFrom of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+    }
+
+    public int getValue() {
+        return value;
     }
 }
