@@ -1167,7 +1167,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 assert executionMode != null;
                 //3) plugin
                 switch (executionMode) {
-                    case YARN_PRE_JOB:
+                    case YARN_PER_JOB:
                     case KUBERNETES_NATIVE_SESSION:
                     case KUBERNETES_NATIVE_APPLICATION:
                         flinkUserJar = Workspace.local().APP_PLUGINS().concat("/").concat(sqlDistJar);

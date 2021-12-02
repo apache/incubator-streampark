@@ -313,13 +313,13 @@
 
       <template v-else>
         <a-form-item
-          label="Resource Form"
+          label="Resource From"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
             placeholder="Please select resource from"
             @change="handleChangeResourceForm"
-            v-decorator="[ 'resourceFrom' , {rules: [{ required: true, message: 'resource from Type is required' }]} ]">
+            v-decorator="[ 'resourceFrom' , {rules: [{ required: true, message: 'resource from is required' }]} ]">
             <a-select-option value="cvs">
               <svg-icon role="img" name="github"/>
               CICD <span class="gray">(build from CVS)</span>
