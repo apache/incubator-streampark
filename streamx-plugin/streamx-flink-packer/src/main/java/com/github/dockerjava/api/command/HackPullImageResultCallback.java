@@ -22,7 +22,6 @@ package com.github.dockerjava.api.command;
 
 import com.github.dockerjava.api.listener.PullImageCallbackListener;
 import com.github.dockerjava.api.model.PullResponseItem;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @author Al-assad
@@ -39,7 +38,7 @@ public class HackPullImageResultCallback extends PullImageResultCallback {
     public void onNext(PullResponseItem item) {
         super.onNext(item);
         if (item.getProgressDetail() != null && item.getId() != null){
-            listener.watchPullProcess(Pair.of(item.getId(), item));
+            listener.watchPullProcess(item);
         }
     }
 
