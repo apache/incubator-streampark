@@ -228,8 +228,8 @@ export default {
     roleAddVisiable () {
       if (this.roleAddVisiable) {
         getMenu().then((r) => {
-          this.menuTreeData = r.rows.children
-          this.allTreeKeys = r.ids
+          this.menuTreeData = r.data.rows.children
+          this.allTreeKeys = r.data.ids
         })
       }
     }
