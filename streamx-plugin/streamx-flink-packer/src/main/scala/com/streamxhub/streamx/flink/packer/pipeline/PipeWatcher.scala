@@ -44,6 +44,9 @@ trait PipeWatcher {
   def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit
 }
 
+/**
+ * silent watcher
+ */
 class SilentPipeWatcher extends PipeWatcher {
 
   override def onStart(snapshot: PipeSnapshot): Unit = {}
@@ -51,4 +54,5 @@ class SilentPipeWatcher extends PipeWatcher {
   override def onStepStateChange(snapshot: PipeSnapshot): Unit = {}
 
   override def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit = {}
+
 }
