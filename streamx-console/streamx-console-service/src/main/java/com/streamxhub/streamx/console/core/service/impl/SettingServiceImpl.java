@@ -43,7 +43,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-@DependsOn({"flyway", "flywayInitializer"})
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     implements SettingService {
 

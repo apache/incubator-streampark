@@ -375,13 +375,6 @@
             <version>2.5.0</version>
         </dependency>
 
-        <!-- flyway -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>5.2.4</version>
-        </dependency>
-
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-common</artifactId>

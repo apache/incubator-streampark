@@ -91,7 +91,6 @@ import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-@DependsOn({"flyway", "flywayInitializer"})
 public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Application>
     implements ApplicationService {
 
