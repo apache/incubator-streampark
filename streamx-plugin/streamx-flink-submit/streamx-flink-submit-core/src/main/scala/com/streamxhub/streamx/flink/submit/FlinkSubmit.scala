@@ -29,7 +29,7 @@ object FlinkSubmit {
   def submit(submitInfo: SubmitRequest): SubmitResponse = {
     submitInfo.executionMode match {
       case ExecutionMode.YARN_APPLICATION => YarnApplicationSubmit.submit(submitInfo)
-      case ExecutionMode.YARN_PRE_JOB => YarnPreJobSubmit.submit(submitInfo)
+      case ExecutionMode.YARN_PER_JOB => YarnPreJobSubmit.submit(submitInfo)
       case ExecutionMode.LOCAL => LocalSubmit.submit(submitInfo)
       case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.submit(submitInfo)
       case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationSubmit.submit(submitInfo)
@@ -40,7 +40,7 @@ object FlinkSubmit {
   def stop(stopInfo: StopRequest): StopResponse = {
     stopInfo.executionMode match {
       case ExecutionMode.YARN_APPLICATION => YarnApplicationSubmit.stop(stopInfo)
-      case ExecutionMode.YARN_PRE_JOB | ExecutionMode.YARN_SESSION => YarnPreJobSubmit.stop(stopInfo)
+      case ExecutionMode.YARN_PER_JOB | ExecutionMode.YARN_SESSION => YarnPreJobSubmit.stop(stopInfo)
       case ExecutionMode.LOCAL => LocalSubmit.stop(stopInfo)
       case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.stop(stopInfo)
       case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationSubmit.stop(stopInfo)

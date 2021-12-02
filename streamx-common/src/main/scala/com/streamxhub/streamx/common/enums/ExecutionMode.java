@@ -41,9 +41,9 @@ public enum ExecutionMode implements Serializable {
      */
     REMOTE(1, "remote"),
     /**
-     * yarn-pre-job mode
+     * yarn-per-job mode
      */
-    YARN_PRE_JOB(2, "yarn-pre-job"),
+    YARN_PER_JOB(2, "yarn-per-job"),
     /**
      * yarn session
      */
@@ -96,7 +96,7 @@ public enum ExecutionMode implements Serializable {
     }
 
     public static boolean isYarnMode(ExecutionMode mode) {
-        return YARN_PRE_JOB.equals(mode) || YARN_APPLICATION.equals(mode) || YARN_SESSION.equals(mode);
+        return YARN_PER_JOB.equals(mode) || YARN_APPLICATION.equals(mode) || YARN_SESSION.equals(mode);
     }
 
     public static boolean isYarnMode(Integer value) {

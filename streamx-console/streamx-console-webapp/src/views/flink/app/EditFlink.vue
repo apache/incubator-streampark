@@ -60,7 +60,7 @@
       </a-form-item>
 
       <a-form-item
-        label="Resource Form"
+        label="Resource From"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-alert

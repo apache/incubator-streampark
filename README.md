@@ -52,7 +52,7 @@ data laker.
 * Out-of-the-box connectors
 * Support maven compilation
 * Configuration
-* Multi version flick support(1.12.x,1.13.x,1.14.x)
+* Multi version flink support(1.12.x,1.13.x,1.14.x)
 * on Kubernetes deployment (`K8s-Native-Application`/`K8s-Native-Session`)
 * on YARN deployment (`YARN-Application`/`YARN-Per-Job`)
 * Support `Applicaion` and `Yarn-Per-Job` mode

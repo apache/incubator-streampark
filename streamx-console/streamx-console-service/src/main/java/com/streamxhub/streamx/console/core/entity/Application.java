@@ -381,7 +381,7 @@ public class Application implements Serializable {
         switch (this.getExecutionModeEnum()) {
             case KUBERNETES_NATIVE_APPLICATION:
             case KUBERNETES_NATIVE_SESSION:
-            case YARN_PRE_JOB:
+            case YARN_PER_JOB:
             case YARN_SESSION:
             case LOCAL:
                 return getLocalAppHome();
@@ -620,7 +620,7 @@ public class Application implements Serializable {
         switch (Objects.requireNonNull(executionMode)) {
             case YARN_APPLICATION:
                 return StorageType.HDFS;
-            case YARN_PRE_JOB:
+            case YARN_PER_JOB:
             case YARN_SESSION:
             case KUBERNETES_NATIVE_SESSION:
             case KUBERNETES_NATIVE_APPLICATION:
