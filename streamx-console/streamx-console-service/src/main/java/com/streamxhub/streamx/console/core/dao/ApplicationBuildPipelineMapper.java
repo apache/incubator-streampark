@@ -21,12 +21,12 @@
 package com.streamxhub.streamx.console.core.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.streamxhub.streamx.console.core.entity.ApplicationBuildPipeline;
+import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 
 /**
  * @author Al-assad
  */
-public interface ApplicationBuildPipelineMapper extends BaseMapper<ApplicationBuildPipeline> {
+public interface ApplicationBuildPipelineMapper extends BaseMapper<AppBuildPipeline> {
 
 
 }

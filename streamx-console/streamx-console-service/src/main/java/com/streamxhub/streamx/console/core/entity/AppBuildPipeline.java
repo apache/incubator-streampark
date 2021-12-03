@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Slf4j
-public class ApplicationBuildPipeline {
+public class AppBuildPipeline {
 
     @TableId(value = "app_id")
     private Long appId;
@@ -91,7 +91,7 @@ public class ApplicationBuildPipeline {
     }
 
     @JsonIgnore
-    public ApplicationBuildPipeline setPipeType(@Nonnull PipeType pipeType) {
+    public AppBuildPipeline setPipeType(@Nonnull PipeType pipeType) {
         this.pipeTypeName = pipeType.name();
         return this;
     }
@@ -103,7 +103,7 @@ public class ApplicationBuildPipeline {
     }
 
     @JsonIgnore
-    public ApplicationBuildPipeline setPipeStatus(@Nonnull PipeStatus pipeStatus) {
+    public AppBuildPipeline setPipeStatus(@Nonnull PipeStatus pipeStatus) {
         this.pipeStatusCode = pipeStatus.getCode();
         return this;
     }
@@ -124,7 +124,7 @@ public class ApplicationBuildPipeline {
     }
 
     @JsonIgnore
-    public ApplicationBuildPipeline setStepStatus(@Nonnull Map<Integer, PipeStepStatus> stepStatus) {
+    public AppBuildPipeline setStepStatus(@Nonnull Map<Integer, PipeStepStatus> stepStatus) {
         try {
             this.stepStatusJson = JsonUtils.MAPPER.writeValueAsString(stepStatus);
         } catch (JsonProcessingException e) {
@@ -150,7 +150,7 @@ public class ApplicationBuildPipeline {
 
 
     @JsonIgnore
-    public ApplicationBuildPipeline setError(@Nonnull PipeErr error) {
+    public AppBuildPipeline setError(@Nonnull PipeErr error) {
         try {
             this.errorJson = JsonUtils.MAPPER.writeValueAsString(error);
         } catch (JsonProcessingException e) {
@@ -160,7 +160,7 @@ public class ApplicationBuildPipeline {
     }
 
     @JsonIgnore
-    public <R extends BuildResult> ApplicationBuildPipeline setBuildResult(@Nonnull R result) {
+    public <R extends BuildResult> AppBuildPipeline setBuildResult(@Nonnull R result) {
         try {
             this.buildResultJson = JsonUtils.MAPPER.writeValueAsString(result);
         } catch (JsonProcessingException e) {
@@ -190,8 +190,8 @@ public class ApplicationBuildPipeline {
     }
 
 
-    public static ApplicationBuildPipeline initFromPipeline(@Nonnull BuildPipeline pipeline) {
-        return new ApplicationBuildPipeline()
+    public static AppBuildPipeline initFromPipeline(@Nonnull BuildPipeline pipeline) {
+        return new AppBuildPipeline()
             .setPipeType(pipeline.pipeType())
             .setPipeStatus(pipeline.pipeStatus())
             .setTotalStep(pipeline.allSteps())
@@ -200,8 +200,8 @@ public class ApplicationBuildPipeline {
             .setUpdateTime(new Date());
     }
 
-    public static ApplicationBuildPipeline fromPipeSnapshot(@Nonnull PipeSnapshot snapshot) {
-        return new ApplicationBuildPipeline()
+    public static AppBuildPipeline fromPipeSnapshot(@Nonnull PipeSnapshot snapshot) {
+        return new AppBuildPipeline()
             .setPipeType(snapshot.pipeType())
             .setPipeStatus(snapshot.pipeStatus())
             .setTotalStep(snapshot.allSteps())
