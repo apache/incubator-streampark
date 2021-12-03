@@ -32,19 +32,19 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author benjobs
  */
 public class ClassMethodArgumentMetricBuffer {
-  private volatile ConcurrentHashMap<ClassAndMethodMetricKey, AtomicLong> metrics =
-      new ConcurrentHashMap<>();
+    private volatile ConcurrentHashMap<ClassAndMethodMetricKey, AtomicLong> metrics =
+        new ConcurrentHashMap<>();
 
-  public void appendValue(String className, String methodName, String argument) {
-    ClassAndMethodMetricKey methodMetricKey =
-        new ClassAndMethodMetricKey(className, methodName, argument);
-    AtomicLong counter = metrics.computeIfAbsent(methodMetricKey, key -> new AtomicLong(0));
-    counter.incrementAndGet();
-  }
+    public void appendValue(String className, String methodName, String argument) {
+        ClassAndMethodMetricKey methodMetricKey =
+            new ClassAndMethodMetricKey(className, methodName, argument);
+        AtomicLong counter = metrics.computeIfAbsent(methodMetricKey, key -> new AtomicLong(0));
+        counter.incrementAndGet();
+    }
 
-  public Map<ClassAndMethodMetricKey, AtomicLong> reset() {
-    ConcurrentHashMap<ClassAndMethodMetricKey, AtomicLong> oldCopy = metrics;
-    metrics = new ConcurrentHashMap<>();
-    return oldCopy;
-  }
+    public Map<ClassAndMethodMetricKey, AtomicLong> reset() {
+        ConcurrentHashMap<ClassAndMethodMetricKey, AtomicLong> oldCopy = metrics;
+        metrics = new ConcurrentHashMap<>();
+        return oldCopy;
+    }
 }

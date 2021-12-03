@@ -18,14 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.core.enums;
 
+package com.streamxhub.streamx.console.core.enums;
 
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import lombok.Getter;
+import scala.Enumeration;
 
 import java.io.Serializable;
-import scala.Enumeration;
 
 /**
  * @author benjobs
@@ -134,10 +134,10 @@ public enum FlinkAppState implements Serializable {
     /**
      * Flink job has terminated vaguely, maybe FINISHED, CACNELED or FAILED
      */
-    POS_TERMINATED (21),
+    POS_TERMINATED(21),
 
     /**
-     *  job SUCCEEDED on yarn
+     * job SUCCEEDED on yarn
      */
     SUCCEEDED(22),
     /**
@@ -168,7 +168,6 @@ public enum FlinkAppState implements Serializable {
         }
         return FlinkAppState.OTHER;
     }
-
 
     /**
      * type conversion bridging

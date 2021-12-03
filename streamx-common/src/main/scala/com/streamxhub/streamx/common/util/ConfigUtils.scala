@@ -23,7 +23,7 @@ package com.streamxhub.streamx.common.util
 import com.streamxhub.streamx.common.conf.ConfigConst._
 
 import java.util.{Properties, Map => JavaMap}
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.immutable.{Map => ScalaMap}
 import scala.util.Try
 
@@ -48,13 +48,13 @@ object ConfigUtils {
       param.foreach(x => kafkaProperty.put(x._1, x._2.trim))
       val _topic = topic match {
         case SIGN_EMPTY =>
-          val top = kafkaProperty.getOrElse(KEY_KAFKA_TOPIC, null)
+          val top = kafkaProperty.asScala.getOrElse(KEY_KAFKA_TOPIC, null)
           if (top == null || top.split(",|\\s+").length > 1) {
             throw new IllegalArgumentException(s"Can't find a unique topic!!!,you must be input a topic")
           } else top
         case t => t
       }
-      val hasTopic = !kafkaProperty.toMap.exists(x => x._1 == KEY_KAFKA_TOPIC && x._2.split(",|\\s+").toSet.contains(_topic))
+      val hasTopic = !kafkaProperty.asScala.toMap.exists(x => x._1 == KEY_KAFKA_TOPIC && x._2.split(",|\\s+").toSet.contains(_topic))
       if (hasTopic) {
         throw new IllegalArgumentException(s"Can't find a topic of:${_topic}!!!")
       } else {
@@ -76,10 +76,10 @@ object ConfigUtils {
       case "" | null => KEY_JDBC_PREFIX
       case other => s"$KEY_JDBC_PREFIX$other".replaceFirst("\\.+$|$", ".")
     }
-    val driver = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_DRIVER", null)
-    val url = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_URL", null)
-    val user = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_USER", null)
-    val password = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_PASSWORD", null)
+    val driver = parameter.asScala.toMap.getOrElse(s"$prefix$KEY_JDBC_DRIVER", null)
+    val url = parameter.asScala.toMap.getOrElse(s"$prefix$KEY_JDBC_URL", null)
+    val user = parameter.asScala.toMap.getOrElse(s"$prefix$KEY_JDBC_USER", null)
+    val password = parameter.asScala.toMap.getOrElse(s"$prefix$KEY_JDBC_PASSWORD", null)
 
     (driver, url, user, password) match {
       case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"Jdbc instance:$prefix error,[driver|url] must not be null")
@@ -96,7 +96,7 @@ object ConfigUtils {
   }
 
   private[this] def filterParam(parameter: JavaMap[String, String], fix: String): ScalaMap[String, String] = {
-    parameter
+    parameter.asScala
       .toMap
       .filter(x => x._1.startsWith(fix) && Try(x._2 != null).getOrElse(false))
       .flatMap(x =>

@@ -192,9 +192,7 @@ object DependencyUtils {
       val ri = ModuleRevisionId.newInstance(mvn.groupId, mvn.artifactId, mvn.version)
       val dd = new DefaultDependencyDescriptor(ri, false, false)
       dd.addDependencyConfiguration(ivyConfName, ivyConfName + "(runtime)")
-      // scalastyle:off println
       outCallback.accept(s"${dd.getDependencyId} added as a dependency")
-      // scalastyle:on println
       md.addDependency(dd)
     }
   }
@@ -280,9 +278,7 @@ object DependencyUtils {
         brr.setRoot(repo)
         brr.setName(s"repo-${i + 1}")
         cr.add(brr)
-        // scalastyle:off println
         outCallback.accept(s"$repo added as a remote repository with the name: ${brr.getName}")
-        // scalastyle:on println
       }
       ivySettings.addResolver(cr)
       ivySettings.setDefaultResolver(cr.getName)
@@ -335,10 +331,8 @@ object DependencyUtils {
         // To prevent ivy from logging to system out
         val artifacts = extractMavenCoordinates(coordinates)
         val packagesDirectory: File = new File(ivySettings.getDefaultIvyUserDir, "jars")
-        // scalastyle:off println
         outCallback.accept(s"Ivy Default Cache set to: ${ivySettings.getDefaultCache.getAbsolutePath}")
         outCallback.accept(s"The jars for the packages stored in: $packagesDirectory")
-        // scalastyle:on println
         val ivy = Ivy.newInstance(ivySettings)
         // Set resolve options to download transitive dependencies as well
         val resolveOptions = new ResolveOptions

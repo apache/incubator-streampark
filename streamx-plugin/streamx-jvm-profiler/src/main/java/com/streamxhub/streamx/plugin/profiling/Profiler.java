@@ -21,14 +21,22 @@
 
 package com.streamxhub.streamx.plugin.profiling;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public interface Profiler {
-  /** @return */
-  long getInterval();
+    /**
+     * @return
+     */
+    long getInterval();
 
-  /** @param reporter */
-  void setReporter(Reporter reporter);
+    /**
+     * @param reporter
+     */
+    void setReporter(Reporter reporter);
 
-  /** */
-  void profile();
+    /**
+     *
+     */
+    void profile();
 }

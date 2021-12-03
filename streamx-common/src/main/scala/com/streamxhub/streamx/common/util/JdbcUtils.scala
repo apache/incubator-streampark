@@ -234,7 +234,7 @@ object JdbcUtils {
       lock.lock()
       val ds: HikariDataSource = Try(Option(dataSourceHolder(alias))).getOrElse(None) match {
         case None =>
-          //创建一个数据源对象
+          // 创建一个数据源对象
           val jdbcConfig = new HikariConfig()
           prop.filter(x => x._1 != KEY_ALIAS && x._1 != KEY_SEMANTIC).foreach(x => {
             Try(Option(jdbcConfig.getClass.getDeclaredField(x._1))).getOrElse(None) match {
@@ -270,7 +270,7 @@ object JdbcUtils {
           ds
         case Some(x) => x
       }
-      //返回连接...
+      // 返回连接...
       ds.getConnection()
     } finally {
       lock.unlock()

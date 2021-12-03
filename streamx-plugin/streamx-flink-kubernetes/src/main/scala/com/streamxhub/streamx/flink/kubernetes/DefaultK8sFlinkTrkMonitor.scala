@@ -111,10 +111,11 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
   }
 
   override def postEvent(event: BuildInEvent, sync: Boolean): Unit = {
-    if (sync)
+    if (sync) {
       eventBus.postSync(event)
-    else
+    } else {
       eventBus.postAsync(event)
+    }
   }
 
   @Nullable override def getRemoteRestUrl(trkId: TrkId): String = trkCache.clusterRestUrls.getIfPresent(ClusterKey.of(trkId))

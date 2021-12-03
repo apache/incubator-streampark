@@ -30,19 +30,20 @@ import org.apache.flink.types.Row
 object TableExt {
 
   class Table(val table: FlinkTable) {
-    def ->(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
+    // ->
+    def rightArrow(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
   }
 
   class TableConversions(table: FlinkTable) extends FlinkTableConversions(table) {
-
-    def \\ : DataStream[Row] = toDataStream
-
-    def >>[T: TypeInformation](implicit context: StreamTableContext): DataStream[T] = {
+    // \\
+    def doubleSlash : DataStream[Row] = toDataStream
+    // >>
+    def doubleRightArrow[T: TypeInformation](implicit context: StreamTableContext): DataStream[T] = {
       context.isConvertedToDataStream = true
       super.toAppendStream
     }
-
-    def <<[T: TypeInformation](implicit context: StreamTableContext): DataStream[(Boolean, T)] = {
+    // <<
+    def doubleLeftArrow[T: TypeInformation](implicit context: StreamTableContext): DataStream[(Boolean, T)] = {
       context.isConvertedToDataStream = true
       super.toRetractStream
     }

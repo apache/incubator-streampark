@@ -21,58 +21,60 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class ClassAndMethod {
-  private final String className;
-  private final String methodName;
+    private final String className;
+    private final String methodName;
 
-  public ClassAndMethod(String className, String methodName) {
-    if (className == null) {
-      throw new NullPointerException("className");
+    public ClassAndMethod(String className, String methodName) {
+        if (className == null) {
+            throw new NullPointerException("className");
+        }
+
+        if (methodName == null) {
+            throw new NullPointerException("methodName");
+        }
+
+        this.className = className;
+        this.methodName = methodName;
     }
 
-    if (methodName == null) {
-      throw new NullPointerException("methodName");
+    public String getClassName() {
+        return className;
     }
 
-    this.className = className;
-    this.methodName = methodName;
-  }
-
-  public String getClassName() {
-    return className;
-  }
-
-  public String getMethodName() {
-    return methodName;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    public String getMethodName() {
+        return methodName;
     }
 
-    ClassAndMethod that = (ClassAndMethod) o;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-    if (className != null ? !className.equals(that.className) : that.className != null){
-      return false;
+        ClassAndMethod that = (ClassAndMethod) o;
+
+        if (className != null ? !className.equals(that.className) : that.className != null) {
+            return false;
+        }
+        return methodName != null ? methodName.equals(that.methodName) : that.methodName == null;
     }
-    return methodName != null ? methodName.equals(that.methodName) : that.methodName == null;
-  }
 
-  @Override
-  public int hashCode() {
-    int result = className != null ? className.hashCode() : 0;
-    result = 31 * result + (methodName != null ? methodName.hashCode() : 0);
-    return result;
-  }
+    @Override
+    public int hashCode() {
+        int result = className != null ? className.hashCode() : 0;
+        result = 31 * result + (methodName != null ? methodName.hashCode() : 0);
+        return result;
+    }
 
-  @Override
-  public String toString() {
-    return className + '.' + methodName;
-  }
+    @Override
+    public String toString() {
+        return className + '.' + methodName;
+    }
 }

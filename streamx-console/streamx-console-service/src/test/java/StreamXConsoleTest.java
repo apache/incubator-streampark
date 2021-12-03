@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import com.streamxhub.streamx.console.StreamXConsole;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
@@ -43,7 +44,7 @@ public class StreamXConsoleTest {
         application.setSavePointed(false);
         application.setAllowNonRestored(false);
 
-        boolean status = applicationService.start(application,false);
+        boolean status = applicationService.start(application, false);
         System.out.println(status);
     }
 

@@ -25,7 +25,7 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.{isAnyBank, notEmpty}
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.{FileUtils, IOUtils}
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 
 import java.io.{File, FileInputStream}
 

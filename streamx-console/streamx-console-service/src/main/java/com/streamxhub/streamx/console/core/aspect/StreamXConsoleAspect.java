@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.aspect;
 
 import com.streamxhub.streamx.common.util.ExceptionUtils;
@@ -49,7 +50,6 @@ public class StreamXConsoleAspect {
     )
     public void response() {
     }
-
 
     @Pointcut("@annotation(com.streamxhub.streamx.console.core.annotation.RefreshCache)")
     public void refreshCache() {

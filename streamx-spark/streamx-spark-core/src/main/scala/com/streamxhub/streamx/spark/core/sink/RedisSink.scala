@@ -74,8 +74,8 @@ class RedisSink[T <: scala.Product : ClassTag : TypeTag](@transient override val
 }
 
 object RedisSink {
-  def apply(sc: SparkContext) = new RedisSink[(String, String)](sc)
+  def apply(sc: SparkContext): RedisSink[(String, String)] = new RedisSink[(String, String)](sc)
 
-  def apply[T <: scala.Product : ClassTag : TypeTag](rdd: RDD[T]) = new RedisSink[T](rdd.sparkContext)
+  def apply[T <: scala.Product : ClassTag : TypeTag](rdd: RDD[T]): RedisSink[T] = new RedisSink[T](rdd.sparkContext)
 }
 

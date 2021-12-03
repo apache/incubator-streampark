@@ -112,8 +112,9 @@ object DockerTool extends Logger {
    */
   private[this] def compileTag(tag: String, registerAddress: String): String = {
     var tagName = if (tag.contains("/")) tag else s"$DOCKER_IMAGE_NAMESPACE/$tag"
-    if (registerAddress.nonEmpty && !tagName.startsWith(registerAddress))
+    if (registerAddress.nonEmpty && !tagName.startsWith(registerAddress)) {
       tagName = s"$registerAddress/$tagName"
+    }
     tagName.toLowerCase
   }
 

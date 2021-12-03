@@ -34,92 +34,94 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-/** This class reads the stacktraces from the given buffer and send out via given reporter. */
+/**
+ * This class reads the stacktraces from the given buffer and send out via given reporter.
+ */
 public class StacktraceReporterProfiler extends ProfilerBase implements Profiler {
-  public static final String PROFILER_NAME = "Stacktrace";
+    public static final String PROFILER_NAME = "Stacktrace";
 
-  private StacktraceMetricBuffer buffer;
+    private StacktraceMetricBuffer buffer;
 
-  private Reporter reporter = new ConsoleOutputReporter();
+    private Reporter reporter = new ConsoleOutputReporter();
 
-  private long interval = Constants.DEFAULT_METRIC_INTERVAL;
+    private long interval = Constants.DEFAULT_METRIC_INTERVAL;
 
-  public StacktraceReporterProfiler(StacktraceMetricBuffer buffer, Reporter reporter) {
-    this.buffer = buffer;
-    this.reporter = reporter;
-  }
-
-  @Override
-  public long getInterval() {
-    return interval;
-  }
-
-  public void setInterval(long interval) {
-    this.interval = interval;
-  }
-
-  @Override
-  public void setReporter(Reporter reporter) {
-    this.reporter = reporter;
-  }
-
-  @Override
-  public void profile() {
-    if (buffer == null) {
-      return;
+    public StacktraceReporterProfiler(StacktraceMetricBuffer buffer, Reporter reporter) {
+        this.buffer = buffer;
+        this.reporter = reporter;
     }
 
-    if (reporter == null) {
-      return;
+    @Override
+    public long getInterval() {
+        return interval;
     }
 
-    long startEpoch = buffer.getLastResetMillis();
+    public void setInterval(long interval) {
+        this.interval = interval;
+    }
 
-    Map<Stacktrace, AtomicLong> metrics = buffer.reset();
+    @Override
+    public void setReporter(Reporter reporter) {
+        this.reporter = reporter;
+    }
 
-    long endEpoch = buffer.getLastResetMillis();
-
-    for (Map.Entry<Stacktrace, AtomicLong> entry : metrics.entrySet()) {
-      Map<String, Object> map = new HashMap<>();
-
-      map.put("startEpoch", startEpoch);
-      map.put("endEpoch", endEpoch);
-
-      map.put("host", getHostName());
-      map.put("name", getProcessName());
-      map.put("processUuid", getProcessUuid());
-      map.put("appId", getAppId());
-
-      if (getTag() != null) {
-        map.put("tag", getTag());
-      }
-
-      if (getCluster() != null) {
-        map.put("cluster", getCluster());
-      }
-
-      if (getRole() != null) {
-        map.put("role", getRole());
-      }
-
-      Stacktrace stacktrace = entry.getKey();
-
-      map.put("threadName", stacktrace.getThreadName());
-      map.put("threadState", stacktrace.getThreadState());
-
-      ClassAndMethod[] classAndMethodArray = stacktrace.getStack();
-      if (classAndMethodArray != null) {
-        List<String> stackArray = new ArrayList<>(classAndMethodArray.length);
-        for (int i = 0; i < classAndMethodArray.length; i++) {
-          ClassAndMethod classAndMethod = classAndMethodArray[i];
-          stackArray.add(classAndMethod.getClassName() + "." + classAndMethod.getMethodName());
+    @Override
+    public void profile() {
+        if (buffer == null) {
+            return;
         }
-        map.put("stacktrace", stackArray);
-      }
 
-      map.put("count", entry.getValue().get());
+        if (reporter == null) {
+            return;
+        }
 
-      reporter.report(PROFILER_NAME, map);
+        long startEpoch = buffer.getLastResetMillis();
+
+        Map<Stacktrace, AtomicLong> metrics = buffer.reset();
+
+        long endEpoch = buffer.getLastResetMillis();
+
+        for (Map.Entry<Stacktrace, AtomicLong> entry : metrics.entrySet()) {
+            Map<String, Object> map = new HashMap<>();
+
+            map.put("startEpoch", startEpoch);
+            map.put("endEpoch", endEpoch);
+
+            map.put("host", getHostName());
+            map.put("name", getProcessName());
+            map.put("processUuid", getProcessUuid());
+            map.put("appId", getAppId());
+
+            if (getTag() != null) {
+                map.put("tag", getTag());
+            }
+
+            if (getCluster() != null) {
+                map.put("cluster", getCluster());
+            }
+
+            if (getRole() != null) {
+                map.put("role", getRole());
+            }
+
+            Stacktrace stacktrace = entry.getKey();
+
+            map.put("threadName", stacktrace.getThreadName());
+            map.put("threadState", stacktrace.getThreadState());
+
+            ClassAndMethod[] classAndMethodArray = stacktrace.getStack();
+            if (classAndMethodArray != null) {
+                List<String> stackArray = new ArrayList<>(classAndMethodArray.length);
+                for (int i = 0; i < classAndMethodArray.length; i++) {
+                    ClassAndMethod classAndMethod = classAndMethodArray[i];
+                    stackArray.add(classAndMethod.getClassName() + "." + classAndMethod.getMethodName());
+                }
+                map.put("stacktrace", stackArray);
+            }
+
+            map.put("count", entry.getValue().get());
+
+            reporter.report(PROFILER_NAME, map);
+        }
     }
-  }
 }

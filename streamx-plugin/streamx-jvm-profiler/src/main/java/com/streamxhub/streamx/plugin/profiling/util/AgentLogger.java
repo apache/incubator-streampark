@@ -23,87 +23,93 @@ package com.streamxhub.streamx.plugin.profiling.util;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class AgentLogger {
-  private static boolean debug = false;
-  private static ErrorLogReporter errorLogReporter;
 
-  private String prefix;
+    private static boolean DEBUG = false;
+    private static ErrorLogReporter ERROR_LOG_REPORTER;
 
-  public static AgentLogger getLogger(String name) {
-    return new AgentLogger(name);
-  }
+    private String prefix;
 
-  public static void setDebug(boolean enableDebug) {
-    debug = enableDebug;
-  }
-
-  public static void setErrorLogReporter(ErrorLogReporter reporter) {
-    errorLogReporter = reporter;
-  }
-
-  public AgentLogger(String name) {
-    if (name == null) {
-      this.prefix = "";
-    } else {
-      this.prefix = name + ": ";
+    public AgentLogger() {
     }
-  }
 
-  public void log(String msg) {
-    info(msg);
-  }
-
-  public void info(String msg) {
-    System.out.println(System.currentTimeMillis() + " " + prefix + msg);
-  }
-
-  public void debug(String msg) {
-    if (AgentLogger.debug) {
-      info(msg);
+    public static AgentLogger getLogger(String name) {
+        return new AgentLogger(name);
     }
-  }
 
-  public void warn(String msg) {
-    try {
-      System.out.println("[WARNING] " + System.currentTimeMillis() + " " + prefix + msg);
-
-      if (AgentLogger.errorLogReporter != null) {
-        AgentLogger.errorLogReporter.report(msg, null);
-      }
-    } catch (Throwable ex) {
-      ex.printStackTrace();
+    public static void setDebug(boolean enableDebug) {
+        DEBUG = enableDebug;
     }
-  }
 
-  public void warn(String msg, Throwable ex) {
-    try {
-      System.out.println(
-          "[WARNING] "
-              + System.currentTimeMillis()
-              + " "
-              + prefix
-              + msg
-              + " "
-              + ExceptionUtils.getStackTrace(ex));
-
-      if (AgentLogger.errorLogReporter != null) {
-        AgentLogger.errorLogReporter.report(msg, ex);
-      }
-    } catch (Throwable executionException) {
-      executionException.printStackTrace();
+    public static void setErrorLogReporter(ErrorLogReporter reporter) {
+        ERROR_LOG_REPORTER = reporter;
     }
-  }
 
-  // Handle log specially when shutdown, since we should not depend on other kafka to log these
-  // messages
-  public void logShutdownMessage(String msg) {
-    // Sometime spark log in console output seems not fully collected, thus log to error output as
-    // well to make sure
-    // we capture this shutdown hook execution. This is to help debug some issue when shutdown hook
-    // seems not executed.
-    String log = System.currentTimeMillis() + " " + prefix + msg;
-    System.out.println(log);
-    System.err.println(log);
-  }
+    public AgentLogger(String name) {
+        if (name == null) {
+            this.prefix = "";
+        } else {
+            this.prefix = name + ": ";
+        }
+    }
+
+    public void log(String msg) {
+        info(msg);
+    }
+
+    public void info(String msg) {
+        System.out.println(System.currentTimeMillis() + " " + prefix + msg);
+    }
+
+    public void debug(String msg) {
+        if (AgentLogger.DEBUG) {
+            info(msg);
+        }
+    }
+
+    public void warn(String msg) {
+        try {
+            System.out.println("[WARNING] " + System.currentTimeMillis() + " " + prefix + msg);
+
+            if (AgentLogger.ERROR_LOG_REPORTER != null) {
+                AgentLogger.ERROR_LOG_REPORTER.report(msg, null);
+            }
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void warn(String msg, Throwable ex) {
+        try {
+            System.out.println(
+                "[WARNING] "
+                    + System.currentTimeMillis()
+                    + " "
+                    + prefix
+                    + msg
+                    + " "
+                    + ExceptionUtils.getStackTrace(ex));
+
+            if (AgentLogger.ERROR_LOG_REPORTER != null) {
+                AgentLogger.ERROR_LOG_REPORTER.report(msg, ex);
+            }
+        } catch (Throwable executionException) {
+            executionException.printStackTrace();
+        }
+    }
+
+    // Handle log specially when shutdown, since we should not depend on other kafka to log these
+    // messages
+    public void logShutdownMessage(String msg) {
+        // Sometime spark log in console output seems not fully collected, thus log to error output as
+        // well to make sure
+        // we capture this shutdown hook execution. This is to help debug some issue when shutdown hook
+        // seems not executed.
+        String log = System.currentTimeMillis() + " " + prefix + msg;
+        System.out.println(log);
+        System.err.println(log);
+    }
 }

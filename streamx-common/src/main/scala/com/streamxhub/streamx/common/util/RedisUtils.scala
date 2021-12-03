@@ -24,11 +24,9 @@ import redis.clients.jedis.{Jedis, JedisCluster, Pipeline, ScanParams}
 
 import java.lang.{Integer => JInt}
 import java.util.Set
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.util.{Failure, Success, Try}
-
 
 /**
  *
@@ -118,7 +116,6 @@ object RedisUtils extends Logger {
    */
   def get(key: String)(implicit endpoint: RedisEndpoint): String = doRedis(_.get(key))
 
-
   def hget(key: String, field: String)(implicit endpoint: RedisEndpoint): String = doRedis(_.hget(key, field))
 
   /**
@@ -176,7 +173,6 @@ object RedisUtils extends Logger {
    */
   def mget(keys: Array[String])(implicit endpoint: RedisEndpoint): Array[String] = doRedis(_.mget(keys: _*).asScala.toArray)
 
-
   /**
    * del
    *
@@ -233,7 +229,7 @@ object RedisUtils extends Logger {
    * @param endpoint
    * @return
    */
-  def hmget(key: String, fields: String*)(implicit endpoint: RedisEndpoint): List[String] = doRedis(_.hmget(key, fields: _*).toList)
+  def hmget(key: String, fields: String*)(implicit endpoint: RedisEndpoint): List[String] = doRedis(_.hmget(key, fields: _*).asScala.toList)
 
   /**
    *
@@ -241,7 +237,7 @@ object RedisUtils extends Logger {
    * @param endpoint
    * @return
    */
-  def hgetAll(key: String)(implicit endpoint: RedisEndpoint): Map[String, String] = doRedis(_.hgetAll(key).toMap)
+  def hgetAll(key: String)(implicit endpoint: RedisEndpoint): Map[String, String] = doRedis(_.hgetAll(key).asScala.toMap)
 
   /**
    *
@@ -297,7 +293,6 @@ object RedisUtils extends Logger {
     }
     v
   }, func)
-
 
   def hincrBy(key: String, field: String, value: Long, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
     val reply = x.hincrBy(key, field, value)
@@ -363,9 +358,9 @@ object RedisUtils extends Logger {
     System.currentTimeMillis() - start
   }, func)
 
-  def expire(key: String, s: Int)(implicit endpoint: RedisEndpoint) = doRedis(_.expire(key, s))
+  def expire(key: String, s: Int)(implicit endpoint: RedisEndpoint): Long = doRedis(_.expire(key, s))
 
-  def delByPattern(key: String, func: () => Unit = null)(implicit endpoint: RedisEndpoint) = doRedis(r => {
+  def delByPattern(key: String, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Any = doRedis(r => {
     /**
      * 采用 scan 的方式,一次删除10000条记录,循环删除,防止一次加载的记录太多,内存撑爆
      */
@@ -376,7 +371,7 @@ object RedisUtils extends Logger {
     do {
       val scanResult = r.scan(cursor, scanParams)
       cursor = scanResult.getCursor
-      val keys = scanResult.getResult.toList
+      val keys = scanResult.getResult.asScala.toList
       if (keys.nonEmpty) {
         r.del(keys: _*)
       }
@@ -390,7 +385,7 @@ object RedisUtils extends Logger {
     val result = func match {
       case null => f(redis)
       case _ =>
-        //确保redis的操作和用户的操作在用一个redis事务里...
+        // 确保redis的操作和用户的操作在用一个redis事务里...
         val transaction = redis.multi()
         val r = f(redis)
         func()
@@ -429,6 +424,5 @@ object RedisUtils extends Logger {
     }
     result
   }
-
 
 }

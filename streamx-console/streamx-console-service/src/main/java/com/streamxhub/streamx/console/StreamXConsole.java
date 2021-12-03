@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console;
 
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
@@ -61,7 +62,7 @@ import java.lang.management.RuntimeMXBean;
 @EnableScheduling
 public class StreamXConsole {
 
-    private static Logger logger = LoggerFactory.getLogger(StreamXConsole.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(StreamXConsole.class);
 
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(StreamXConsole.class);
@@ -71,7 +72,7 @@ public class StreamXConsole {
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.info("application shutdown now, pid: " + getPid());
+            LOGGER.info("application shutdown now, pid: " + getPid());
             if (pid != null) {
                 File pidFile = new File(pid);
                 pidFile.delete();
@@ -87,6 +88,7 @@ public class StreamXConsole {
         try {
             return Integer.parseInt(name.substring(0, name.indexOf('@')));
         } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
         return -1;
     }

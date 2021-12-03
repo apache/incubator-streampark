@@ -239,7 +239,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
     }
     //调用invoke插入过数据....
     transaction.invoked = true
-    transaction + sql
+    transaction plus sql
   }
 
   /**
@@ -326,7 +326,7 @@ class Jdbc2PCOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFu
 }
 
 case class Transaction(transactionId: String = Utils.uuid(), sql: mutable.MutableList[String] = mutable.MutableList.empty[String], var insertMode: Boolean = true, var invoked: Boolean = false) extends Serializable {
-  def +(text: String): Unit = sql += text
+  def plus(text: String): Unit = sql += text
 
   override def toString: String = s"(transactionId:$transactionId,size:${sql.size},insertMode:$insertMode,invoked:$invoked)"
 }

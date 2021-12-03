@@ -18,14 +18,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.plugin.profiling.profiler;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class Constants {
-  public static final long DEFAULT_METRIC_INTERVAL = 60000;
+    public static final long DEFAULT_METRIC_INTERVAL = 60000;
 
-  public static final int MAX_STRING_LENGTH = 800000;
+    public static final int MAX_STRING_LENGTH = 800000;
 
-  public static final String EXECUTOR_ROLE = "executor";
-  public static final String DRIVER_ROLE = "driver";
+    public static final String EXECUTOR_ROLE = "executor";
+    public static final String DRIVER_ROLE = "driver";
 }

@@ -22,17 +22,21 @@
 package com.streamxhub.streamx.plugin.profiling.reporter;
 
 import com.streamxhub.streamx.plugin.profiling.Reporter;
+import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
 import com.streamxhub.streamx.plugin.profiling.util.Utils;
 
 import java.util.Map;
 
 public class ConsoleOutputReporter implements Reporter {
-  @Override
-  public void report(String profilerName, Map<String, Object> metrics) {
-    System.out.println(
-        String.format("ConsoleOutputReporter - %s: %s", profilerName, Utils.toJsonString(metrics)));
-  }
 
-  @Override
-  public void close() {}
+    private static final AgentLogger LOGGER = AgentLogger.getLogger(ConsoleOutputReporter.class.getName());
+
+    @Override
+    public void report(String profilerName, Map<String, Object> metrics) {
+        LOGGER.info(String.format("ConsoleOutputReporter - %s: %s", profilerName, Utils.toJsonString(metrics)));
+    }
+
+    @Override
+    public void close() {
+    }
 }

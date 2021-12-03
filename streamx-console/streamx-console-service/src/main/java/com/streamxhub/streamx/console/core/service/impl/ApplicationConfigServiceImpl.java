@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -64,7 +65,7 @@ public class ApplicationConfigServiceImpl
 
     private String flinkConfTemplate = null;
 
-    private String PROD_ENV_NAME = "prod";
+    private String prodEnvName = "prod";
 
     @Autowired
     private ApplicationContext context;

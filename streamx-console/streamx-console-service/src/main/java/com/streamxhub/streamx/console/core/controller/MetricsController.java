@@ -14,6 +14,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.streamxhub.streamx.console.core.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -51,7 +52,7 @@ import java.util.Date;
 @RequestMapping("metrics")
 public class MetricsController {
 
-    private final String STACKTRACE_PROFILER_NAME = "Stacktrace";
+    private final String stacktraceProfilerName = "Stacktrace";
 
     @Autowired
     private FlameGraphService flameGraphService;
@@ -74,7 +75,7 @@ public class MetricsController {
     @PostMapping("report")
     public RestResponse report(@RequestBody JvmProfiler jvmProfiler) {
         try {
-            if (jvmProfiler != null && jvmProfiler.getProfiler().equals(STACKTRACE_PROFILER_NAME)) {
+            if (jvmProfiler != null && jvmProfiler.getProfiler().equals(stacktraceProfilerName)) {
                 log.info("id:{},token:{},type:{}", jvmProfiler.getId(), jvmProfiler.getToken(), jvmProfiler.getType());
                 FlameGraph flameGraph = new FlameGraph();
                 flameGraph.setAppId(jvmProfiler.getId());

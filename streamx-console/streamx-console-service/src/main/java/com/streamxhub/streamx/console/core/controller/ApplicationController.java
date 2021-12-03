@@ -14,10 +14,10 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.streamxhub.streamx.console.core.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -188,7 +188,6 @@ public class ApplicationController {
         IPage<ApplicationBackUp> backups = backUpService.page(backUp, request);
         return RestResponse.create().data(backups);
     }
-
 
     @PostMapping("rollback")
     public RestResponse rollback(ApplicationBackUp backUp) {

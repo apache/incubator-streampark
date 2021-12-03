@@ -75,7 +75,6 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
     builder.build()
   }
 
-  @Override
   def sink[T](stream: DataStream[T], mapper: RedisMapper[T], ttl: Int = Int.MaxValue): DataStreamSink[T] = {
     val sinkFun = ttl match {
       case Int.MaxValue => new RSink[T](config, mapper)
@@ -126,7 +125,7 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
 
   override def invoke(transaction: RedisTransaction[T], value: T, context: SinkFunction.Context): Unit = {
     transaction.invoked = true
-    transaction + (mapper, value, ttl)
+    transaction plus (mapper, value, ttl)
   }
 
   override def preCommit(transaction: RedisTransaction[T]): Unit = {
@@ -175,7 +174,7 @@ case class RedisTransaction[T](
                                 transactionId: String = Utils.uuid(),
                                 mapper: mutable.MutableList[(RedisMapper[T], T, Int)] = mutable.MutableList.empty[(RedisMapper[T], T, Int)],
                                 var invoked: Boolean = false) extends Serializable {
-  def +(redisMapper: (RedisMapper[T], T, Int)): Unit = mapper += redisMapper
+  def plus(redisMapper: (RedisMapper[T], T, Int)): Unit = mapper += redisMapper
 
   override def toString: String = s"(transactionId:$transactionId,size:${mapper.size},invoked:$invoked)"
 }

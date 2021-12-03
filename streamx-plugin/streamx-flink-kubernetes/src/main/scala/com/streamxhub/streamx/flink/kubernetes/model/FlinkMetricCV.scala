@@ -35,7 +35,7 @@ case class FlinkMetricCV(totalJmMemory: Integer = 0,
                          failedJob: Integer = 0,
                          pollAckTime: Long) {
 
-  def +(another: FlinkMetricCV): FlinkMetricCV = {
+  def plus(another: FlinkMetricCV): FlinkMetricCV = {
     this.copy(
       totalJmMemory + another.totalJmMemory,
       totalTmMemory + another.totalTmMemory,

@@ -84,8 +84,9 @@ object HadoopConfigUtils {
       return
     }
     val hostsMap = HostsUtils.getSortSystemHosts
-    if (hostsMap.isEmpty)
+    if (hostsMap.isEmpty) {
       return
+    }
     configDir.listFiles
       .filter(_.isFile).filter(e => filter.contains(e.getName))
       .foreach(rewriteHostIpMapper(_, hostsMap))

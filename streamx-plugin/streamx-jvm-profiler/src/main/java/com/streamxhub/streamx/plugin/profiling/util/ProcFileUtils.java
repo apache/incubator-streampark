@@ -25,14 +25,19 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author benjobs
  */
 // See http://man7.org/linux/man-pages/man5/proc.5.html for /proc file details
 public class ProcFileUtils {
-    private static final AgentLogger logger = AgentLogger.getLogger(ProcFileUtils.class.getName());
+    private static final AgentLogger LOGGER = AgentLogger.getLogger(ProcFileUtils.class.getName());
 
     private static final String PROC_SELF_STATUS_FILE = "/proc/self/status";
     private static final String PROC_SELF_IO_FILE = "/proc/self/io";
@@ -73,7 +78,7 @@ public class ProcFileUtils {
             }
             return result;
         } catch (Throwable ex) {
-            logger.warn("Failed to read file " + filePath, ex);
+            LOGGER.warn("Failed to read file " + filePath, ex);
             return Collections.emptyMap();
         }
     }
@@ -92,7 +97,7 @@ public class ProcFileUtils {
             }
             return result;
         } catch (Throwable ex) {
-            logger.warn("Failed to read file " + filePath, ex);
+            LOGGER.warn("Failed to read file " + filePath, ex);
             return Collections.emptyList();
         }
     }
@@ -165,7 +170,7 @@ public class ProcFileUtils {
             cmdline = cmdline.replace((char) 0, ' ');
             return cmdline;
         } catch (Throwable ex) {
-            logger.warn("Failed to read file " + PROC_SELF_CMDLINE_FILE, ex);
+            LOGGER.warn("Failed to read file " + PROC_SELF_CMDLINE_FILE, ex);
             return null;
         }
     }

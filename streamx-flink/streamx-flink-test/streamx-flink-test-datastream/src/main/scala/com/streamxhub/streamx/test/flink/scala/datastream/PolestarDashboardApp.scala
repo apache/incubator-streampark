@@ -101,7 +101,7 @@ case class OrderEntity(ymd: String,
     Serialization.write(map)
   }
 
-  def +(OrderEntity: OrderEntity): OrderEntity = {
+  def plus(OrderEntity: OrderEntity): OrderEntity = {
     this.copy(
       gmv = this.gmv + OrderEntity.gmv,
       profit = this.profit + OrderEntity.profit,

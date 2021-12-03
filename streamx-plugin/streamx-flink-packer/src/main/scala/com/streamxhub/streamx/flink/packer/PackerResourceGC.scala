@@ -27,14 +27,12 @@ import org.apache.commons.io.FileUtils
 import java.io.File
 import scala.util.Try
 
-
 /**
  * Garbage resource collector during packing.
  */
 object PackerResourceGC extends Logger {
 
   val appWorkspacePath: String = Workspace.local.APP_WORKSPACE
-
 
   /**
    * Start a building legacy resources collection process.
@@ -60,15 +58,14 @@ object PackerResourceGC extends Logger {
     evictedFiles.foreach(path => Try(FileUtils.deleteDirectory(path)))
   }
 
-
   private def findLastModifiedOfSubFile(file: File): Array[(File, Long)] = {
     val isApplicationMode = file.listFiles.map(_.getName).exists(_.contains(".jar"))
-    if (isApplicationMode)
+    if (isApplicationMode) {
       Array(file -> file.listFiles.map(_.lastModified).max)
-    else
+    } else {
       file.listFiles.filter(_.isDirectory)
         .map(subFile => subFile -> subFile.listFiles.map(_.lastModified).max)
+    }
   }
-
 
 }

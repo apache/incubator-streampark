@@ -114,7 +114,6 @@ public class K8sFlinkChangeEventListener {
         }
     }
 
-
     private Application updateApplicationWithJobStatusCV(Application app, JobStatusCV jobStatus) {
         // infer the final flink job state
         Enumeration.Value state = jobStatus.jobState();
@@ -182,6 +181,5 @@ public class K8sFlinkChangeEventListener {
 
         applicationService.update(update);
     }
-
 
 }

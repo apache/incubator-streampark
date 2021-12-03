@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
@@ -40,7 +41,6 @@ import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.core.enums.ApplicationType;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
-import com.streamxhub.streamx.console.core.enums.ResourceFrom;
 import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
@@ -51,14 +51,18 @@ import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.streamxhub.streamx.common.conf.ConfigurationOptions.KUBERNETES_NAMESPACE_DEFAULT_VALUE;
@@ -228,7 +232,7 @@ public class Application implements Serializable {
      */
     private Integer resourceFrom;
 
-   /**
+    /**
      * flink-hadoop integration on flink-k8s mode
      */
     private Boolean k8sHadoopIntegration;
@@ -405,7 +409,6 @@ public class Application implements Serializable {
         }
         return new File(flinkSql, id.toString());
     }
-
 
     @JsonIgnore
     public AppInfo httpYarnAppInfo() throws Exception {
@@ -721,7 +724,6 @@ public class Application implements Serializable {
         private String getGav() {
             return this.groupId + ":" + this.artifactId + ":" + this.version;
         }
-
 
         private String getGa() {
             return this.groupId + ":" + this.artifactId;

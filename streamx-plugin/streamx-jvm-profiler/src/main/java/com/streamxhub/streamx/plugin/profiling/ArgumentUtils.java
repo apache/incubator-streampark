@@ -25,33 +25,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class ArgumentUtils {
 
-  public static boolean needToUpdateArg(String argValue) {
-    return argValue != null && !argValue.isEmpty();
-  }
-
-  public static String getArgumentSingleValue(
-      Map<String, List<String>> parsedArgs, String argName) {
-    List<String> list = parsedArgs.get(argName);
-    if (list == null) {
-      return null;
+    public static boolean needToUpdateArg(String argValue) {
+        return argValue != null && !argValue.isEmpty();
     }
 
-    if (list.isEmpty()) {
-      return "";
+    public static String getArgumentSingleValue(
+        Map<String, List<String>> parsedArgs, String argName) {
+        List<String> list = parsedArgs.get(argName);
+        if (list == null) {
+            return null;
+        }
+
+        if (list.isEmpty()) {
+            return "";
+        }
+
+        return list.get(list.size() - 1);
     }
 
-    return list.get(list.size() - 1);
-  }
-
-  public static List<String> getArgumentMultiValues(
-      Map<String, List<String>> parsedArgs, String argName) {
-    List<String> list = parsedArgs.get(argName);
-    if (list == null) {
-      return new ArrayList<>();
+    public static List<String> getArgumentMultiValues(
+        Map<String, List<String>> parsedArgs, String argName) {
+        List<String> list = parsedArgs.get(argName);
+        if (list == null) {
+            return new ArrayList<>();
+        }
+        return list;
     }
-    return list;
-  }
 }

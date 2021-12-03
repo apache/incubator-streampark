@@ -35,53 +35,53 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MethodProfilerStaticProxyTest {
-  private ClassMethodArgumentMetricBuffer buffer;
+    private ClassMethodArgumentMetricBuffer buffer;
 
-  @Before
-  public void before() {
-    buffer = new ClassMethodArgumentMetricBuffer();
-    MethodArgumentCollector collector = new MethodArgumentCollector(buffer);
-    MethodProfilerStaticProxy.setArgumentCollector(collector);
-  }
-
-  @After
-  public void after() {
-    MethodProfilerStaticProxy.setCollector(null);
-  }
-
-  @Test
-  public void collectMethodArgument_nullValue() {
-    MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, null);
-    MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, null);
-
-    Map<ClassAndMethodMetricKey, AtomicLong> metrics = buffer.reset();
-    Assert.assertEquals(1, metrics.size());
-    ClassAndMethodMetricKey key = metrics.keySet().iterator().next();
-    Assert.assertEquals("class1", key.getClassName());
-    Assert.assertEquals("method1", key.getMethodName());
-    Assert.assertEquals("arg.1.null", key.getMetricName());
-    Assert.assertEquals(2, metrics.get(key).intValue());
-  }
-
-  @Test
-  public void collectMethodArgument_veryLongValue() {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < Constants.MAX_STRING_LENGTH; i++) {
-      sb.append('a');
+    @Before
+    public void before() {
+        buffer = new ClassMethodArgumentMetricBuffer();
+        MethodArgumentCollector collector = new MethodArgumentCollector(buffer);
+        MethodProfilerStaticProxy.setArgumentCollector(collector);
     }
-    sb.append('b');
-    String veryLongValue = sb.toString();
 
-    MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, veryLongValue);
-    MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, veryLongValue);
+    @After
+    public void after() {
+        MethodProfilerStaticProxy.setCollector(null);
+    }
 
-    Map<ClassAndMethodMetricKey, AtomicLong> metrics = buffer.reset();
-    Assert.assertEquals(1, metrics.size());
-    ClassAndMethodMetricKey key = metrics.keySet().iterator().next();
-    Assert.assertEquals("class1", key.getClassName());
-    Assert.assertEquals("method1", key.getMethodName());
-    Assert.assertEquals(Constants.MAX_STRING_LENGTH, key.getMetricName().length());
-    Assert.assertTrue(key.getMetricName().startsWith("arg.1."));
-    Assert.assertEquals(2, metrics.get(key).intValue());
-  }
+    @Test
+    public void collectMethodArgument_nullValue() {
+        MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, null);
+        MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, null);
+
+        Map<ClassAndMethodMetricKey, AtomicLong> metrics = buffer.reset();
+        Assert.assertEquals(1, metrics.size());
+        ClassAndMethodMetricKey key = metrics.keySet().iterator().next();
+        Assert.assertEquals("class1", key.getClassName());
+        Assert.assertEquals("method1", key.getMethodName());
+        Assert.assertEquals("arg.1.null", key.getMetricName());
+        Assert.assertEquals(2, metrics.get(key).intValue());
+    }
+
+    @Test
+    public void collectMethodArgument_veryLongValue() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < Constants.MAX_STRING_LENGTH; i++) {
+            sb.append('a');
+        }
+        sb.append('b');
+        String veryLongValue = sb.toString();
+
+        MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, veryLongValue);
+        MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, veryLongValue);
+
+        Map<ClassAndMethodMetricKey, AtomicLong> metrics = buffer.reset();
+        Assert.assertEquals(1, metrics.size());
+        ClassAndMethodMetricKey key = metrics.keySet().iterator().next();
+        Assert.assertEquals("class1", key.getClassName());
+        Assert.assertEquals("method1", key.getMethodName());
+        Assert.assertEquals(Constants.MAX_STRING_LENGTH, key.getMetricName().length());
+        Assert.assertTrue(key.getMetricName().startsWith("arg.1."));
+        Assert.assertEquals(2, metrics.get(key).intValue());
+    }
 }

@@ -93,16 +93,17 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     val dockerAuthConfig = submitRequest.k8sSubmitParam.dockerAuthConfig
     // choose dockerfile template
     val dockerFileTemplate = {
-      if (submitRequest.k8sSubmitParam.integrateWithHadoop)
+      if (submitRequest.k8sSubmitParam.integrateWithHadoop) {
         FlinkHadoopDockerfileTemplate.fromSystemHadoopConf(buildWorkspace,
           submitRequest.k8sSubmitParam.flinkBaseImage,
           fatJar.getAbsolutePath,
           extJarLibs)
-      else
+      } else {
         FlinkDockerfileTemplate(buildWorkspace,
           submitRequest.k8sSubmitParam.flinkBaseImage,
           fatJar.getAbsolutePath,
           extJarLibs)
+      }
     }
     val tagName = s"streamxflinkjob-${submitRequest.k8sSubmitParam.kubernetesNamespace}-${submitRequest.k8sSubmitParam.clusterId}"
     // add flink pipeline.jars configuration

@@ -31,43 +31,44 @@ import java.util.List;
 import java.util.Map;
 
 public class CpuAndMemoryProfilerTest {
-  @Test
-  public void profile() {
-    final List<String> nameList = new ArrayList<>();
-    final List<Map<String, Object>> metricList = new ArrayList<>();
+    @Test
+    public void profile() {
+        final List<String> nameList = new ArrayList<>();
+        final List<Map<String, Object>> metricList = new ArrayList<>();
 
-    CpuAndMemoryProfiler profiler =
-        new CpuAndMemoryProfiler(
-            new Reporter() {
-              @Override
-              public void report(String profilerName, Map<String, Object> metrics) {
-                nameList.add(profilerName);
-                metricList.add(metrics);
-              }
+        CpuAndMemoryProfiler profiler =
+            new CpuAndMemoryProfiler(
+                new Reporter() {
+                    @Override
+                    public void report(String profilerName, Map<String, Object> metrics) {
+                        nameList.add(profilerName);
+                        metricList.add(metrics);
+                    }
 
-              @Override
-              public void close() {}
-            });
+                    @Override
+                    public void close() {
+                    }
+                });
 
-    profiler.setInterval(123);
-    Assert.assertEquals(123L, profiler.getInterval());
+        profiler.setInterval(123);
+        Assert.assertEquals(123L, profiler.getInterval());
 
-    profiler.profile();
-    profiler.profile();
+        profiler.profile();
+        profiler.profile();
 
-    Assert.assertEquals(2, nameList.size());
-    Assert.assertEquals(CpuAndMemoryProfiler.PROFILER_NAME, nameList.get(0));
+        Assert.assertEquals(2, nameList.size());
+        Assert.assertEquals(CpuAndMemoryProfiler.PROFILER_NAME, nameList.get(0));
 
-    Assert.assertEquals(2, metricList.size());
-    Assert.assertTrue(metricList.get(0).containsKey("processUuid"));
-    Assert.assertTrue(metricList.get(0).containsKey("processCpuLoad"));
-    Assert.assertTrue(metricList.get(0).containsKey("heapMemoryTotalUsed"));
-    Assert.assertTrue(metricList.get(0).containsKey("gc"));
+        Assert.assertEquals(2, metricList.size());
+        Assert.assertTrue(metricList.get(0).containsKey("processUuid"));
+        Assert.assertTrue(metricList.get(0).containsKey("processCpuLoad"));
+        Assert.assertTrue(metricList.get(0).containsKey("heapMemoryTotalUsed"));
+        Assert.assertTrue(metricList.get(0).containsKey("gc"));
 
-    Object obj = metricList.get(0).get("gc");
-    Assert.assertTrue(obj instanceof List);
+        Object obj = metricList.get(0).get("gc");
+        Assert.assertTrue(obj instanceof List);
 
-    List<Map<String, Object>> gcMetrics = (List<Map<String, Object>>) obj;
-    Assert.assertTrue(gcMetrics.size() >= 1);
-  }
+        List<Map<String, Object>> gcMetrics = (List<Map<String, Object>>) obj;
+        Assert.assertTrue(gcMetrics.size() >= 1);
+    }
 }

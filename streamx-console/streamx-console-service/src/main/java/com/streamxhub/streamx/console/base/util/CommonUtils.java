@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.base.util;
 
 import com.streamxhub.streamx.common.util.AssertUtils;
@@ -27,7 +28,19 @@ import org.springframework.cglib.beans.BeanMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 public class CommonUtils implements Serializable {
@@ -284,6 +297,7 @@ public class CommonUtils implements Serializable {
                 throw new UnsupportedOperationException("Not supported");
             }
         }
+
         return new EnumerationIterator<E>(enumeration);
     }
 

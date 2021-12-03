@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.base.util;
 
 import javax.crypto.Cipher;
@@ -26,7 +27,7 @@ import java.security.Key;
 public class EncryptUtils {
 
     // 设置默认密匙
-    private static String strDefaultKey = "defaultKey";
+    private static String STR_DEFAULT_KEY = "defaultKey";
     // 加密
     private Cipher encryptCipher = null;
     // 解密
@@ -61,7 +62,7 @@ public class EncryptUtils {
     }
 
     public EncryptUtils() throws Exception {
-        this(strDefaultKey);
+        this(STR_DEFAULT_KEY);
     }
 
     EncryptUtils(String strKey) throws Exception {

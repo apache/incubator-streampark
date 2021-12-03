@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.task;
 
 import com.streamxhub.streamx.console.base.util.WebUtils;
@@ -28,7 +29,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Objects;
+import java.util.TimeZone;
 
 /**
  * @author benjobs
@@ -40,7 +45,7 @@ public class MetricsTask {
     @Autowired
     private FlameGraphService flameGraphService;
 
-    private final String FLAMEGRAPH_FILE_REGEXP = "\\d+_\\d+\\.json|\\d+_\\d+\\.folded|\\d+_\\d+\\.svg";
+    private final String flameGraphFileRegexp = "\\d+_\\d+\\.json|\\d+_\\d+\\.folded|\\d+_\\d+\\.svg";
 
     /**
      * hour.
@@ -51,7 +56,7 @@ public class MetricsTask {
         String tempPath = WebUtils.getAppDir("temp");
         File temp = new File(tempPath);
         Arrays.stream(Objects.requireNonNull(temp.listFiles()))
-            .filter(x -> x.getName().matches(FLAMEGRAPH_FILE_REGEXP))
+            .filter(x -> x.getName().matches(flameGraphFileRegexp))
             .forEach(File::delete);
 
         // 2 clean date

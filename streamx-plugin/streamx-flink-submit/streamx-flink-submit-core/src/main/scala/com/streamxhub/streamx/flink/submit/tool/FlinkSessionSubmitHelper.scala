@@ -61,8 +61,9 @@ object FlinkSessionSubmitHelper extends Logger {
       .execute.returnContent().asString(StandardCharsets.UTF_8)
       .fromJson[JarUploadRsp]
 
-    if (!uploadResult.isSuccessful)
+    if (!uploadResult.isSuccessful) {
       throw new Exception(s"[flink-submit] upload flink jar to flink session cluster failed, jmRestUrl=$jmRestUrl, response=$uploadResult")
+    }
 
     // run flink job
     val jarRunRsp = Request.post(s"$jmRestUrl/jars/${uploadResult.jarId}/run")

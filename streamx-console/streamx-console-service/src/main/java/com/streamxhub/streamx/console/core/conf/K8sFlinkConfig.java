@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class K8sFlinkConfig {
 
-    final private FlinkTrkConf defaultTrkConf = FlinkTrkConf.defaultConf();
+    private final FlinkTrkConf defaultTrkConf = FlinkTrkConf.defaultConf();
 
     @Value("${streamx.flink-k8s.tracking.polling-task-timeout-sec.job-status:}")
     private Long sglJobStatusTrkTaskTimeoutSec = defaultTrkConf.jobStatusWatcherConf().sglTrkTaskTimeoutSec();

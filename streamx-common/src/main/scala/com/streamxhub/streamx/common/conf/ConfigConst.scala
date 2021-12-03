@@ -100,15 +100,15 @@ object ConfigConst {
   val KEY_SPARK_BATCH_DURATION = "spark.batch.duration"
 
   // flink
-  def KEY_APP_CONF(prefix: String = null): String = if (prefix == null) "conf" else s"${prefix}conf"
+  def keyAppConf(prefix: String = null): String = if (prefix == null) "conf" else s"${prefix}conf"
 
-  def KEY_FLINK_CONF(prefix: String = null): String = if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
+  def keyFlinkConf(prefix: String = null): String = if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
 
-  def KEY_APP_NAME(prefix: String = null): String = if (prefix == null) "app.name" else s"${prefix}app.name"
+  def keyAppName(prefix: String = null): String = if (prefix == null) "app.name" else s"${prefix}app.name"
 
-  def KEY_FLINK_SQL(prefix: String = null): String = if (prefix == null) "sql" else s"${prefix}sql"
+  def keyFlinkSql(prefix: String = null): String = if (prefix == null) "sql" else s"${prefix}sql"
 
-  def KEY_FLINK_PARALLELISM(prefix: String = null): String = if (prefix == null) "parallelism.default" else s"${prefix}parallelism.default"
+  def keyFlinkParallelism(prefix: String = null): String = if (prefix == null) "parallelism.default" else s"${prefix}parallelism.default"
 
   val KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX = "flink.deployment.property."
 

@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -49,7 +50,6 @@ public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole>
     public void deleteUserRolesByUserId(String[] userIds) {
         Arrays.stream(userIds).forEach(id -> baseMapper.deleteByUserId(Long.valueOf(id)));
     }
-
 
     @Override
     public List<String> findUserIdsByRoleId(String[] roleIds) {

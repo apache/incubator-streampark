@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.flink.core.java.source;
 
 import com.streamxhub.streamx.common.util.Utils;
@@ -29,7 +30,6 @@ import com.streamxhub.streamx.flink.core.scala.source.HBaseSourceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
 import java.util.Properties;
-
 
 /**
  * @author benjobs
