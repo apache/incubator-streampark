@@ -49,14 +49,14 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
 
   override val pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_APPLICATION
 
-  private var dockerProcessWatcher: DockerProgressWatcher = new SilentDockerProgressWatcher()
+  private var dockerProcessWatcher: DockerProgressWatcherTrait = new SilentDockerProgressWatcher()
 
   // non-thread-safe
   private val dockerProcess = new DockerResolveProgress(DockerPullProgress.empty(), DockerBuildProgress.empty(), DockerPushProgress.empty())
 
   override protected def offerBuildParam: FlinkK8sApplicationBuildRequest = params
 
-  def registerDockerProgressWatcher(watcher: DockerProgressWatcher): Unit = {
+  def registerDockerProgressWatcher(watcher: DockerProgressWatcherTrait): Unit = {
     dockerProcessWatcher = watcher
   }
 

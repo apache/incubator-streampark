@@ -18,41 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.packer.pipeline
+package com.streamxhub.streamx.flink.packer.pipeline;
 
 /**
- * Trait for watching a BuildPipeline instance
+ * DockerProgressWatcherTrait interface for Java
+ * see {@link com.streamxhub.streamx.flink.packer.pipeline.DockerProgressWatcherTrait}
  *
  * @author Al-assad
  */
-trait PipeWatcher {
-
-  /**
-   * called when the pipeline is launched.
-   */
-  def onStart(snapshot: PipeSnapshot): Unit
-
-  /**
-   * called when the any status of building step is changed.
-   */
-  def onStepStateChange(snapshot: PipeSnapshot): Unit
-
-  /**
-   * called when the pipeline is finished, or you can get the
-   * results directly from the BuildPipeline.launch() synchronously.
-   */
-  def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit
-}
-
-/**
- * silent watcher
- */
-class SilentPipeWatcher extends PipeWatcher {
-
-  override def onStart(snapshot: PipeSnapshot): Unit = {}
-
-  override def onStepStateChange(snapshot: PipeSnapshot): Unit = {}
-
-  override def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit = {}
+public interface DockerResolveWatcher extends DockerProgressWatcherTrait {
 
 }

@@ -121,7 +121,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
    */
   protected val logSuffix: String = s"appName=${offerBuildParam.appName}"
 
-  protected var watcher: PipeWatcher = new SilentPipeWatcher
+  protected var watcher: PipeWatcherTrait = new SilentPipeWatcher
 
   def registerWatcher(watcher: BuildPipelineWatcher): BuildPipeline = {
     this.watcher = watcher
