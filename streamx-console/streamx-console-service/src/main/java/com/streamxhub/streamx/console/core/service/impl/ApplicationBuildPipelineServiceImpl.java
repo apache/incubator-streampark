@@ -21,13 +21,15 @@
 package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationBuildPipelineMapper;
+import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.entity.ApplicationBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.service.ApplicationBuildPipelineService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
@@ -47,6 +49,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -64,23 +67,47 @@ import static com.streamxhub.streamx.common.enums.ExecutionMode.KUBERNETES_NATIV
 @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class ApplicationBuildPipelineServiceImpl
-    extends ServiceImpl<ApplicationBuildPipelineMapper, ApplicationBuildPipeline> implements ApplicationBuildPipelineService {
-
-    private final ExecutorService executorService = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() * 2,
-        200,
-        60L,
-        TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(1024),
-        ThreadUtils.threadFactory("streamx-deploy-executor"),
-        new ThreadPoolExecutor.AbortPolicy()
-    );
+    extends ServiceImpl<ApplicationBuildPipelineMapper, AppBuildPipeline> implements ApplicationBuildPipelineService {
 
     @Autowired
     private FlinkEnvService flinkEnvService;
 
     @Autowired
     private SettingService settingService;
+
+    private final ExecutorService executorService = new ThreadPoolExecutor(
+        Runtime.getRuntime().availableProcessors() * 2,
+        300,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(2048),
+        ThreadUtils.threadFactory("streamx-build-pipeline-executor"),
+        new ThreadPoolExecutor.AbortPolicy()
+    );
+
+    private final Cache<Long, DockerPullSnapshot> dockerPullPgSnapshots =
+        Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
+
+    private final Cache<Long, DockerBuildSnapshot> dockerBuildPgSnapshots =
+        Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
+
+    private final Cache<Long, DockerPushSnapshot> dockerPushPgSnapshots =
+        Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
+
+
+    @Override
+    public Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId) {
+        return Optional.ofNullable(getById(appId));
+    }
+
+
+    @Override
+    public DockerResolvedSnapshot getDockerProgressDetailSnapshot(@Nonnull Long appId) {
+        return new DockerResolvedSnapshot(
+            dockerPullPgSnapshots.getIfPresent(appId),
+            dockerBuildPgSnapshots.getIfPresent(appId),
+            dockerPushPgSnapshots.getIfPresent(appId));
+    }
 
 
     @Override
@@ -93,31 +120,49 @@ public class ApplicationBuildPipelineServiceImpl
         pipeline.registerWatcher(new BuildPipelineWatcher() {
             @Override
             public void onStart(PipeSnapshot snapshot) {
-                ApplicationBuildPipeline pipePo = ApplicationBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
+                AppBuildPipeline pipePo = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
                 save(pipePo);
             }
 
             @Override
             public void onStepStateChange(PipeSnapshot snapshot) {
-                ApplicationBuildPipeline pipePo = ApplicationBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
+                AppBuildPipeline pipePo = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
                 save(pipePo);
             }
 
             @Override
             public void onFinish(PipeSnapshot snapshot, BuildResult result) {
-                ApplicationBuildPipeline pipePo = ApplicationBuildPipeline.fromPipeSnapshot(snapshot)
+                AppBuildPipeline pipePo = AppBuildPipeline.fromPipeSnapshot(snapshot)
                     .setAppId(app.getId())
                     .setBuildResult(result);
                 save(pipePo);
             }
         });
+        // save docker resolve progress detail to cache, only for flink-k8s application mode.
+        if (PipeType.FLINK_NATIVE_K8S_APPLICATION == pipeline.pipeType()) {
+            pipeline.as(FlinkK8sApplicationBuildPipeline.class).registerDockerProgressWatcher(new DockerResolveWatcher() {
+                @Override
+                public void onDockerPullProgressChange(DockerPullSnapshot snapshot) {
+                    dockerPullPgSnapshots.put(app.getId(), snapshot);
+                }
+
+                @Override
+                public void onDockerBuildProgressChange(DockerBuildSnapshot snapshot) {
+                    dockerBuildPgSnapshots.put(app.getId(), snapshot);
+                }
+
+                @Override
+                public void onDockerPushProgressChange(DockerPushSnapshot snapshot) {
+                    dockerPushPgSnapshots.put(app.getId(), snapshot);
+                }
+            });
+        }
         // save pipeline instance snapshot to db before launch it.
-        ApplicationBuildPipeline pipePo = ApplicationBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
+        AppBuildPipeline pipePo = AppBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
         save(pipePo);
         // async launch pipeline
         executorService.submit((Runnable) pipeline::launch);
     }
-
 
     /**
      * create building pipeline instance

@@ -21,18 +21,36 @@
 package com.streamxhub.streamx.console.core.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.entity.ApplicationBuildPipeline;
+import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
+import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  * @author Al-assad
  */
-public interface ApplicationBuildPipelineService extends IService<ApplicationBuildPipeline> {
+public interface ApplicationBuildPipelineService extends IService<AppBuildPipeline> {
 
 
+    /**
+     * Get current build pipeline instance of specified application
+     *
+     * @param appId application id
+     * @return ApplicationBuildPipeline instance
+     */
+    Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId);
+
+    /**
+     * Get Docker resolved snapshot of specified application.
+     */
+    DockerResolvedSnapshot getDockerProgressDetailSnapshot(@Nonnull Long appId);
+
+    /**
+     * Build application.
+     * This is an async call method.
+     */
     void buildApplication(@Nonnull Application app);
 
 
