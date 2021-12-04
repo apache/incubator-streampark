@@ -34,7 +34,7 @@ public class ProfilerRunner implements Runnable {
     private static final int MAX_ERROR_COUNT_TO_LOG = 100;
 
     private final Profiler profiler;
-    private final AtomicLong errorCounter = new AtomicLong(0);
+    private static final AtomicLong ERROR_COUNTER = new AtomicLong(0);
 
     public ProfilerRunner(Profiler profiler) {
         this.profiler = profiler;
@@ -45,7 +45,7 @@ public class ProfilerRunner implements Runnable {
         try {
             profiler.profile();
         } catch (Throwable e) {
-            long errorCountValue = errorCounter.incrementAndGet();
+            long errorCountValue = ERROR_COUNTER.incrementAndGet();
             if (errorCountValue <= MAX_ERROR_COUNT_TO_LOG) {
                 LOGGER.warn("Failed to run profile: " + profiler, e);
             } else {

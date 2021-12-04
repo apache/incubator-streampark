@@ -42,9 +42,9 @@ import java.util.List;
 @RequestMapping("flink/history")
 public class ApplicationHistoryController {
 
-    private final int defaultHistoryRecordLimit = 25;
+    private static final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
 
-    private final int defaultHistoryPodTmplRecordLimit = 5;
+    private static final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
 
     @Autowired
     private ApplicationHistoryService applicationHistoryService;
@@ -56,14 +56,14 @@ public class ApplicationHistoryController {
     @PostMapping("uploadJars")
     @RequiresPermissions("app:create")
     public RestResponse listUploadJars() {
-        List<String> jars = applicationHistoryService.listUploadJars(StorageType.LFS, defaultHistoryRecordLimit);
+        List<String> jars = applicationHistoryService.listUploadJars(StorageType.LFS, DEFAULT_HISTORY_RECORD_LIMIT);
         return RestResponse.create().data(jars);
     }
 
     @PostMapping("k8sNamespaces")
     @RequiresPermissions("app:create")
     public RestResponse listK8sNamespace() {
-        List<String> namespaces = applicationMapper.getRecentK8sNamespace(defaultHistoryRecordLimit);
+        List<String> namespaces = applicationMapper.getRecentK8sNamespace(DEFAULT_HISTORY_RECORD_LIMIT);
         return RestResponse.create().data(namespaces);
     }
 
@@ -75,7 +75,7 @@ public class ApplicationHistoryController {
             case KUBERNETES_NATIVE_SESSION:
             case YARN_SESSION:
             case REMOTE:
-                clusterIds = applicationMapper.getRecentK8sClusterId(executionMode, defaultHistoryRecordLimit);
+                clusterIds = applicationMapper.getRecentK8sClusterId(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
                 break;
             default:
                 clusterIds = new ArrayList<>(0);
@@ -87,28 +87,28 @@ public class ApplicationHistoryController {
     @PostMapping("flinkBaseImages")
     @RequiresPermissions("app:create")
     public RestResponse listFlinkBaseImage() {
-        List<String> images = applicationMapper.getRecentFlinkBaseImage(defaultHistoryRecordLimit);
+        List<String> images = applicationMapper.getRecentFlinkBaseImage(DEFAULT_HISTORY_RECORD_LIMIT);
         return RestResponse.create().data(images);
     }
 
     @PostMapping("flinkPodTemplates")
     @RequiresPermissions("app:create")
     public RestResponse listPodTemplate() {
-        List<String> templates = applicationMapper.getRecentK8sPodTemplate(defaultHistoryPodTmplRecordLimit);
+        List<String> templates = applicationMapper.getRecentK8sPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
         return RestResponse.create().data(templates);
     }
 
     @PostMapping("flinkJmPodTemplates")
     @RequiresPermissions("app:create")
     public RestResponse listJmPodTemplate() {
-        List<String> templates = applicationMapper.getRecentK8sJmPodTemplate(defaultHistoryPodTmplRecordLimit);
+        List<String> templates = applicationMapper.getRecentK8sJmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
         return RestResponse.create().data(templates);
     }
 
     @PostMapping("flinkTmPodTemplates")
     @RequiresPermissions("app:create")
     public RestResponse listTmPodTemplate() {
-        List<String> templates = applicationMapper.getRecentK8sTmPodTemplate(defaultHistoryPodTmplRecordLimit);
+        List<String> templates = applicationMapper.getRecentK8sTmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
         return RestResponse.create().data(templates);
     }
 

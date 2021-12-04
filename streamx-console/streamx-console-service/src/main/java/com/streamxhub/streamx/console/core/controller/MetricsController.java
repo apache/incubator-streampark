@@ -52,7 +52,7 @@ import java.util.Date;
 @RequestMapping("metrics")
 public class MetricsController {
 
-    private final String stacktraceProfilerName = "Stacktrace";
+    private static final String STACKTRACE_PROFILER_NAME = "Stacktrace";
 
     @Autowired
     private FlameGraphService flameGraphService;
@@ -75,7 +75,7 @@ public class MetricsController {
     @PostMapping("report")
     public RestResponse report(@RequestBody JvmProfiler jvmProfiler) {
         try {
-            if (jvmProfiler != null && jvmProfiler.getProfiler().equals(stacktraceProfilerName)) {
+            if (jvmProfiler != null && jvmProfiler.getProfiler().equals(STACKTRACE_PROFILER_NAME)) {
                 log.info("id:{},token:{},type:{}", jvmProfiler.getId(), jvmProfiler.getToken(), jvmProfiler.getType());
                 FlameGraph flameGraph = new FlameGraph();
                 flameGraph.setAppId(jvmProfiler.getId());

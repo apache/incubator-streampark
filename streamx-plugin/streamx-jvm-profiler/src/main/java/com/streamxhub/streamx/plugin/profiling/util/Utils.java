@@ -18,17 +18,17 @@ import java.util.zip.Deflater;
  */
 public class Utils {
 
-    protected static ObjectMapper MAPPER = new ObjectMapper();
+    protected static ObjectMapper mapper = new ObjectMapper();
 
     static {
-        MAPPER.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        MAPPER.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        MAPPER.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public static ObjectMapper getMapper() {
-        return MAPPER;
+        return mapper;
     }
 
     public static String toJsonString(Object obj) {
@@ -36,7 +36,7 @@ public class Utils {
             return "";
         }
         try {
-            return MAPPER.writeValueAsString(obj);
+            return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(
                 String.format("Failed to serialize %s (%s)", obj, obj.getClass()), e);

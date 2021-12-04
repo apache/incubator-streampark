@@ -28,27 +28,27 @@ import com.streamxhub.streamx.plugin.profiling.profiler.MethodDurationCollector;
  * @author benjobs
  */
 public class MethodProfilerStaticProxy {
-    private static MethodDurationCollector COLLECTOR_SINGLETON;
-    private static MethodArgumentCollector ARGUMENT_COLLECTOR_SINGLETON;
+    private static MethodDurationCollector collectorSingleton;
+    private static MethodArgumentCollector argumentCollectorSingleton;
 
     private MethodProfilerStaticProxy() {
     }
 
     public static void setCollector(MethodDurationCollector collector) {
-        COLLECTOR_SINGLETON = collector;
+        collectorSingleton = collector;
     }
 
     public static void setArgumentCollector(MethodArgumentCollector collector) {
-        ARGUMENT_COLLECTOR_SINGLETON = collector;
+        argumentCollectorSingleton = collector;
     }
 
     public static void collectMethodDuration(String className, String methodName, long metricValue) {
-        if (COLLECTOR_SINGLETON == null) {
+        if (collectorSingleton == null) {
             return;
         }
 
         try {
-            COLLECTOR_SINGLETON.collectLongMetric(className, methodName, "duration", metricValue);
+            collectorSingleton.collectLongMetric(className, methodName, "duration", metricValue);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -56,13 +56,13 @@ public class MethodProfilerStaticProxy {
 
     public static void collectMethodArgument(
         String className, String methodName, int argIndex, Object argValue) {
-        if (ARGUMENT_COLLECTOR_SINGLETON == null) {
+        if (argumentCollectorSingleton == null) {
             return;
         }
 
         try {
             String argument = "arg." + argIndex + "." + String.valueOf(argValue);
-            ARGUMENT_COLLECTOR_SINGLETON.collectMetric(className, methodName, argument);
+            argumentCollectorSingleton.collectMetric(className, methodName, argument);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

@@ -125,7 +125,7 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
 
   override def invoke(transaction: RedisTransaction[T], value: T, context: SinkFunction.Context): Unit = {
     transaction.invoked = true
-    transaction plus (mapper, value, ttl)
+    transaction + (mapper, value, ttl)
   }
 
   override def preCommit(transaction: RedisTransaction[T]): Unit = {
@@ -174,7 +174,7 @@ case class RedisTransaction[T](
                                 transactionId: String = Utils.uuid(),
                                 mapper: mutable.MutableList[(RedisMapper[T], T, Int)] = mutable.MutableList.empty[(RedisMapper[T], T, Int)],
                                 var invoked: Boolean = false) extends Serializable {
-  def plus(redisMapper: (RedisMapper[T], T, Int)): Unit = mapper += redisMapper
+  def +(redisMapper: (RedisMapper[T], T, Int)): Unit = mapper += redisMapper
 
   override def toString: String = s"(transactionId:$transactionId,size:${mapper.size},invoked:$invoked)"
 }

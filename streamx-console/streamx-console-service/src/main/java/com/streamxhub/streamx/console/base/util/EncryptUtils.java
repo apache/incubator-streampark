@@ -27,7 +27,7 @@ import java.security.Key;
 public class EncryptUtils {
 
     // 设置默认密匙
-    private static String STR_DEFAULT_KEY = "defaultKey";
+    private static String strDefaultKey = "defaultKey";
     // 加密
     private Cipher encryptCipher = null;
     // 解密
@@ -62,7 +62,7 @@ public class EncryptUtils {
     }
 
     public EncryptUtils() throws Exception {
-        this(STR_DEFAULT_KEY);
+        this(strDefaultKey);
     }
 
     EncryptUtils(String strKey) throws Exception {

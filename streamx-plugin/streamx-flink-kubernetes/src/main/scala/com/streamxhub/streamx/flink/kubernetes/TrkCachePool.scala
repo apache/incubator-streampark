@@ -95,7 +95,7 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
           case m if m.isEmpty => FlinkMetricCV.empty
           case m =>
             // aggregate metrics
-            m.values.fold(FlinkMetricCV.empty)((x, y) => x plus y)
+            m.values.fold(FlinkMetricCV.empty)((x, y) => x + y)
         }
     }
   }

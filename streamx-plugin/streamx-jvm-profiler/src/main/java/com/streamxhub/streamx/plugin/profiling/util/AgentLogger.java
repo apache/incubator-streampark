@@ -28,8 +28,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
  */
 public class AgentLogger {
 
-    private static boolean DEBUG = false;
-    private static ErrorLogReporter ERROR_LOG_REPORTER;
+    private static boolean debug = false;
+    private static ErrorLogReporter errorLogReporter;
 
     private String prefix;
 
@@ -41,11 +41,11 @@ public class AgentLogger {
     }
 
     public static void setDebug(boolean enableDebug) {
-        DEBUG = enableDebug;
+        debug = enableDebug;
     }
 
     public static void setErrorLogReporter(ErrorLogReporter reporter) {
-        ERROR_LOG_REPORTER = reporter;
+        errorLogReporter = reporter;
     }
 
     public AgentLogger(String name) {
@@ -65,7 +65,7 @@ public class AgentLogger {
     }
 
     public void debug(String msg) {
-        if (AgentLogger.DEBUG) {
+        if (AgentLogger.debug) {
             info(msg);
         }
     }
@@ -74,8 +74,8 @@ public class AgentLogger {
         try {
             System.out.println("[WARNING] " + System.currentTimeMillis() + " " + prefix + msg);
 
-            if (AgentLogger.ERROR_LOG_REPORTER != null) {
-                AgentLogger.ERROR_LOG_REPORTER.report(msg, null);
+            if (AgentLogger.errorLogReporter != null) {
+                AgentLogger.errorLogReporter.report(msg, null);
             }
         } catch (Throwable ex) {
             ex.printStackTrace();
@@ -93,8 +93,8 @@ public class AgentLogger {
                     + " "
                     + ExceptionUtils.getStackTrace(ex));
 
-            if (AgentLogger.ERROR_LOG_REPORTER != null) {
-                AgentLogger.ERROR_LOG_REPORTER.report(msg, ex);
+            if (AgentLogger.errorLogReporter != null) {
+                AgentLogger.errorLogReporter.report(msg, ex);
             }
         } catch (Throwable executionException) {
             executionException.printStackTrace();

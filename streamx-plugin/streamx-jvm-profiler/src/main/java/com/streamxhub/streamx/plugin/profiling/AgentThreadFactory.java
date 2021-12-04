@@ -30,11 +30,11 @@ import java.util.concurrent.ThreadFactory;
 public class AgentThreadFactory implements ThreadFactory {
     public static final String NAME_PREFIX = "uber_java_agent";
 
-    private final ThreadFactory defaultThreadFactory = Executors.defaultThreadFactory();
+    private static final ThreadFactory DEFAULT_THREAD_FACTORY = Executors.defaultThreadFactory();
 
     @Override
     public Thread newThread(Runnable r) {
-        Thread thread = defaultThreadFactory.newThread(r);
+        Thread thread = DEFAULT_THREAD_FACTORY.newThread(r);
         if (thread != null) {
             thread.setDaemon(true);
             thread.setName(String.format("%s-%s", NAME_PREFIX, thread.getName()));
