@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.core.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
@@ -72,6 +73,16 @@ public class SettingController {
     public RestResponse update(Setting setting) {
         boolean updated = settingService.update(setting);
         return RestResponse.create().data(updated);
+    }
+
+    @PostMapping("checkHadoop")
+    public RestResponse checkHadoop() {
+        try {
+            HadoopUtils.hdfs().getStatus();
+            return RestResponse.create().data(true);
+        } catch (Exception e) {
+            return RestResponse.create().data(false).message(e.getMessage());
+        }
     }
 
 }

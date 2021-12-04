@@ -60,7 +60,7 @@ public class ApplicationBackUp {
         switch (application.getExecutionModeEnum()) {
             case KUBERNETES_NATIVE_APPLICATION:
             case KUBERNETES_NATIVE_SESSION:
-            case YARN_PRE_JOB:
+            case YARN_PER_JOB:
             case YARN_SESSION:
             case LOCAL:
                 this.path = String.format(

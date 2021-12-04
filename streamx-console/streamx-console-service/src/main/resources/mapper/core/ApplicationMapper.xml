@@ -15,9 +15,11 @@
         <result column="K8S_NAMESPACE" jdbcType="VARCHAR" property="k8sNamespace"/>
         <result column="APP_TYPE" jdbcType="INTEGER" property="appType"/>
         <result column="JOB_TYPE" jdbcType="INTEGER" property="jobType"/>
+        <result column="RESOURCE_FROM" jdbcType="INTEGER" property="resourceFrom"/>
         <result column="EXECUTION_MODE" jdbcType="INTEGER" property="executionMode"/>
         <result column="TRACKING" jdbcType="INTEGER" property="tracking"/>
         <result column="JAR" jdbcType="VARCHAR" property="jar"/>
+        <result column="JAR_CHECK_SUM" jdbcType="VARCHAR" property="jarCheckSum"/>
         <result column="MAIN_CLASS" jdbcType="VARCHAR" property="mainClass"/>
         <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
         <result column="USER_ID" jdbcType="BIGINT" property="userId"/>
