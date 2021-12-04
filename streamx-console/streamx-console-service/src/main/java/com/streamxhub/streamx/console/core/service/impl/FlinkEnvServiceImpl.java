@@ -89,7 +89,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
             flinkEnv.doSetFlinkConf();
         }
         updateById(flinkEnv);
-        FlinkTrackingTask.getFlinkVersions().put(flinkEnv.getId(),version);
+        FlinkTrackingTask.getFlinkEnvMap().put(flinkEnv.getId(),version);
     }
 
     @Override

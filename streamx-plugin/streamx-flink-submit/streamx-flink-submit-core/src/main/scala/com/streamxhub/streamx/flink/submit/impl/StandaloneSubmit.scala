@@ -26,7 +26,7 @@ import com.streamxhub.streamx.common.util.DateUtils
 import com.streamxhub.streamx.common.util.DateUtils.fullCompact
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
-import com.streamxhub.streamx.flink.submit.`trait`.RemoteSubmitTrait
+import com.streamxhub.streamx.flink.submit.`trait`.StandaloneSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
 import org.apache.flink.api.common.JobID
@@ -43,7 +43,7 @@ import scala.collection.JavaConversions._
 /**
  * Submit Job to Remote Session Cluster
  */
-object RemoteSubmit extends RemoteSubmitTrait {
+object StandaloneSubmit extends StandaloneSubmitTrait {
 
 
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
@@ -51,7 +51,7 @@ object RemoteSubmit extends RemoteSubmitTrait {
     // require parameters with standalone remote
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
 
-    val buildWorkspace = s"${workspace.APP_WORKSPACE}" + s"/${flinkConfig.getString(PipelineOptions.NAME)}"
+    val buildWorkspace = s"${workspace.APP_WORKSPACE}/${flinkConfig.getString(PipelineOptions.NAME)}"
 
     // build fat-jar, output file name: streamx-flinkjob_<job-name>_<timespamp>, like: streamx-flinkjob_myjobtest_20211024134822
     val fatJar = {
@@ -70,6 +70,7 @@ object RemoteSubmit extends RemoteSubmitTrait {
       }
     }
 
+    // new submit plan with rest api
     restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
 
     // old submit plan
@@ -81,7 +82,7 @@ object RemoteSubmit extends RemoteSubmitTrait {
     //get standalone jm to dynamicOption
     extractDynamicOption(stopRequest.dynamicOption)
       .foreach(e => flinkConfig.setString(e._1, e._2))
-    flinkConfig.set(DeploymentOptions.TARGET, ExecutionMode.REMOTE.getName)
+    flinkConfig.set(DeploymentOptions.TARGET, ExecutionMode.STANDALONE.getName)
     checkAndReplaceRestOptions(flinkConfig)
     val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
     var client: ClusterClient[StandaloneClusterId] = null
@@ -125,7 +126,7 @@ object RemoteSubmit extends RemoteSubmitTrait {
       SubmitResponse(jobId, flinkConfig.toMap, jobId)
     }catch {
       case e: Exception =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
+        logError(s"submit flink job fail in ${submitRequest.executionMode} with standalone mode")
         e.printStackTrace()
         throw e
     }

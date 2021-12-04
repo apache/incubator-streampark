@@ -67,6 +67,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.configuration.JobManagerOptions;
+import org.apache.flink.configuration.RestOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -1111,7 +1113,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 assert executionMode != null;
                 //3) plugin
                 switch (executionMode) {
-                    case REMOTE:
+                    case STANDALONE:
                     case YARN_PRE_JOB:
                     case YARN_APPLICATION:
                         String pluginPath = Workspace.remote().APP_PLUGINS();
@@ -1202,6 +1204,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (tmMemory != null) {
                     application.setTmMemory(FlinkMemorySize.parse(tmMemory).getMebiBytes());
                 }
+            }
+            if (ExecutionMode.isStandaloneMode(application.getExecutionModeEnum())){
+                Optional<String> restUrl = Optional.ofNullable(submitResponse.flinkConfig().get(RestOptions.ADDRESS.key()));
+                application.setRestUrl(restUrl.orElseGet(()->submitResponse.flinkConfig().getOrDefault(JobManagerOptions.ADDRESS.key(), null)));
+                application.setRestPort(Integer.valueOf(submitResponse.flinkConfig().getOrDefault(RestOptions.PORT.key(),null)));
             }
             application.setAppId(submitResponse.clusterId());
             if (StringUtils.isNoneEmpty(submitResponse.jobId())) {

@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.common.util
 
-import org.apache.flink.configuration.RestOptions
+import org.apache.flink.configuration.{JobManagerOptions, RestOptions}
 
 import java.util
 import scala.collection.immutable.Map
@@ -39,22 +39,30 @@ object StandaloneUtils {
    * @return
    */
 
-  def getJMWebAppURL(flinkConf: util.Map[String, String],
-                     dynamicOptions: Map[String, String],
-                     flinkUrl: String): String = {
-    val address = dynamicOptions.getOrElse(RestOptions.ADDRESS.key, getJMAddressByFlinkConf(flinkConf))
-    val port = dynamicOptions.getOrElse(RestOptions.PORT.key, getJMPortByFlinkConf(flinkConf))
-    "http://" + address + ":" + port + "/" + flinkUrl
-  }
-
-  def getJMAddressByFlinkConf(flinkConf: util.Map[String, String]): String = {
-    if (flinkConf.get(RestOptions.ADDRESS) != null) {
-      flinkConf.get(RestOptions.ADDRESS)
+  def getRestWebAppURL(flinkConf: util.Map[String, String],
+                       address:String,
+                       port:Integer,
+                       flinkUrl: String): String = {
+    var lastAddress = address
+    var lastPort = port
+    if (address.isEmpty){
+      lastAddress = getRestAddress(flinkConf)
+    } else if (port == null){
+      lastPort = getRestPort(flinkConf)
     }
-    DEFAULT_REST_ADDRESS
+    "http://" + lastAddress + ":" + lastPort + "/" + flinkUrl
   }
 
-  def getJMPortByFlinkConf(flinkConf: util.Map[String, String]): Integer = {
+  def getRestAddress(flinkConf: util.Map[String, String]): String = {
+    val address: Option[String] = Some(flinkConf.get(flinkConf.get(RestOptions.ADDRESS)))
+    if (address.isEmpty){
+      flinkConf.getOrDefault(JobManagerOptions.ADDRESS,DEFAULT_REST_ADDRESS)
+    }else{
+      address.get
+    }
+  }
+
+  def getRestPort(flinkConf: util.Map[String, String]): Integer = {
     if (flinkConf.get(RestOptions.PORT) != null) {
       flinkConf.get(RestOptions.PORT).toInt
     }

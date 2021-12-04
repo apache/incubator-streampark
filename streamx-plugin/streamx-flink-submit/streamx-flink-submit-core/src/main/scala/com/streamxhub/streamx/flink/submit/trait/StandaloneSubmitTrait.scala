@@ -42,7 +42,7 @@ import scala.util.Try
 /**
  * @Description Remote Submit
  */
-trait RemoteSubmitTrait extends FlinkSubmitTrait {
+trait StandaloneSubmitTrait extends FlinkSubmitTrait {
 
   lazy val workspace: Workspace = Workspace.local
 
@@ -125,7 +125,7 @@ trait RemoteSubmitTrait extends FlinkSubmitTrait {
   }
 
   private[submit] def checkAndReplaceRestOptions(flinkConfig: Configuration): Unit = {
-    if (!flinkConfig.getOptional(RestOptions.ADDRESS).isPresent) {
+    if (!flinkConfig.getOptional(JobManagerOptions.ADDRESS).isPresent && !flinkConfig.getOptional(RestOptions.ADDRESS).isPresent) {
       logWarn("RestOptions Address is not set,use default value : localhost to replace it")
       flinkConfig.setString(RestOptions.ADDRESS, StandaloneUtils.DEFAULT_REST_ADDRESS)
     }

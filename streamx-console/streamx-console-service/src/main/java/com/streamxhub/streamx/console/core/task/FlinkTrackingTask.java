@@ -116,7 +116,7 @@ public class FlinkTrackingTask {
     /**
      * 常用版本更新
      */
-    private static final Map<Long, FlinkEnv> flinkVersions = new ConcurrentHashMap<>(0);
+    private static final Map<Long, FlinkEnv> FLINK_ENV_MAP = new ConcurrentHashMap<>(0);
 
     private static ApplicationService applicationService;
 
@@ -710,16 +710,16 @@ public class FlinkTrackingTask {
     }
 
     private FlinkEnv getFlinkEnvCache(Application application) {
-        FlinkEnv flinkEnv = flinkVersions.get(application.getVersionId());
+        FlinkEnv flinkEnv = FLINK_ENV_MAP.get(application.getVersionId());
         if (flinkEnv == null) {
             flinkEnv = flinkEnvService.getByAppId(application.getId());
-            flinkVersions.put(flinkEnv.getId(), flinkEnv);
+            FLINK_ENV_MAP.put(flinkEnv.getId(), flinkEnv);
         }
         return flinkEnv;
     }
 
-    public static Map<Long, FlinkEnv> getFlinkVersions() {
-        return flinkVersions;
+    public static Map<Long, FlinkEnv> getFlinkEnvMap() {
+        return FLINK_ENV_MAP;
     }
 
 }

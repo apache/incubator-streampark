@@ -48,11 +48,9 @@ import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates;
 import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
 import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
-import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -200,6 +198,14 @@ public class Application implements Serializable {
     private Integer jmMemory;
     private Integer tmMemory;
     private Integer totalTask;
+
+    /**
+     * web url
+     */
+    @TableField("REST_URL")
+    private String restUrl;
+    @TableField("REST_PORT")
+    private Integer restPort;
 
     private String description;
 
@@ -373,7 +379,7 @@ public class Application implements Serializable {
             case YARN_SESSION:
             case LOCAL:
                 return getLocalAppHome();
-            case REMOTE:
+            case STANDALONE:
                 return getLocalAppHome();
             case YARN_APPLICATION:
                 return getRemoteAppHome();
@@ -428,12 +434,12 @@ public class Application implements Serializable {
                         throw e1;
                     }
                 }
-            }else{
-                String remoteUrl = StandaloneUtils.getJMWebAppURL(env.convertFlinkYamlAsMap(),
-                    FlinkSubmitHelper.extractDynamicOption(dynamicOptions), flinkUrl);
-                try{
+            } else {
+                String remoteUrl = StandaloneUtils.getRestWebAppURL(env.convertFlinkYamlAsMap(),
+                    restUrl, restPort, flinkUrl);
+                try {
                     return httpGetDoResult(remoteUrl, JobsOverview.class);
-                }catch (Exception e){
+                } catch (Exception e) {
                     throw e;
                 }
             }
@@ -459,7 +465,7 @@ public class Application implements Serializable {
                     }
                 }
             } else {
-                String remoteUrl = StandaloneUtils.getJMWebAppURL(env.convertFlinkYamlAsMap(), FlinkSubmitHelper.extractDynamicOption(dynamicOptions), flinkUrl);
+                String remoteUrl = StandaloneUtils.getRestWebAppURL(env.convertFlinkYamlAsMap(), restUrl, restPort, flinkUrl);
                 try {
                     return httpGetDoResult(remoteUrl, Overview.class);
                 } catch (Exception e) {
@@ -488,8 +494,8 @@ public class Application implements Serializable {
                     }
                 }
             } else {
-                String remoteUrl = StandaloneUtils.getJMWebAppURL(env.convertFlinkYamlAsMap(), FlinkSubmitHelper.extractDynamicOption(dynamicOptions)
-                    , String.format(flinkUrl, jobId));
+                String remoteUrl = StandaloneUtils.getRestWebAppURL(env.convertFlinkYamlAsMap(), restUrl, restPort,
+                    String.format(flinkUrl, jobId));
                 try {
                     return httpGetDoResult(remoteUrl, CheckPoints.class);
                 } catch (Exception e) {
@@ -646,7 +652,7 @@ public class Application implements Serializable {
             case KUBERNETES_NATIVE_SESSION:
             case KUBERNETES_NATIVE_APPLICATION:
                 return StorageType.LFS;
-            case REMOTE:
+            case STANDALONE:
                 return StorageType.LFS;
             default:
                 throw new UnsupportedOperationException("Unsupported ".concat(executionMode.getName()));
