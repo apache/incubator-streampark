@@ -933,7 +933,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
             flinkSql.setToApplication(application);
         } else {
-            if (!application.isCICDJob()) {
+            if (application.isCICDJob()) {
                 String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
                 application.setConfPath(path);
             }
