@@ -67,7 +67,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -496,7 +495,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setState(FlinkAppState.CREATED.getValue());
         appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
-        if (appParam.getResourceFrom().equals(ResourceFrom.UPLOAD.getValue())) {
+        if (appParam.isUploadJob()) {
             String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
             appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
         }
@@ -525,20 +524,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             boolean localJarChanged = false;
 
-            if (application.getJobType().equals(DevelopmentMode.CUSTOMCODE.getValue())) {
-                if (application.getResourceFrom() == ResourceFrom.UPLOAD.getValue()) {
-                    if (!ObjectUtils.safeEquals(application.getJar(), application.getJar())) {
+            if (application.isUploadJob()) {
+                if (!ObjectUtils.safeEquals(application.getJar(), application.getJar())) {
+                    application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
+                    localJarChanged = true;
+                }
+                String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
+                File jarFile = new File(jarPath);
+                if (jarFile.exists()) {
+                    long checkSum = FileUtils.checksumCRC32(jarFile);
+                    if (!ObjectUtils.safeEquals(checkSum, application.getJarCheckSum())) {
                         application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
                         localJarChanged = true;
-                    }
-                    String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
-                    File jarFile = new File(jarPath);
-                    if (jarFile.exists()) {
-                        long checkSum = FileUtils.checksumCRC32(jarFile);
-                        if (!ObjectUtils.safeEquals(checkSum, application.getJarCheckSum())) {
-                            application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
-                            localJarChanged = true;
-                        }
                     }
                 }
             }
@@ -704,11 +701,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             String appHome = application.getAppHome();
                             FsOperator fsOperator = application.getFsOperator();
                             fsOperator.delete(appHome);
-                            //本地编译路径
-                            ResourceFrom resourceFrom = ResourceFrom.of(application.getResourceFrom());
-                            if (resourceFrom.equals(ResourceFrom.CICD)) {
-                                fsOperator.upload(application.getDistHome(), appHome);
-                            } else {
+
+                            if (application.isUploadJob()) {
                                 String APP_UPLOADS = application.getWorkspace().APP_UPLOADS();
                                 String temp = WebUtils.getAppDir("temp");
                                 File localJar = new File(temp, application.getJar());
@@ -717,6 +711,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                 //4.2 ) 将upload jar 上传到appHome下.
                                 fsOperator.mkdirs(appHome);
                                 fsOperator.copy(targetJar, appHome, false, true);
+                            } else {
+                                fsOperator.upload(application.getDistHome(), appHome);
                             }
                         } else {
                             log.info("FlinkSqlJob deploying...");
@@ -937,8 +933,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
             flinkSql.setToApplication(application);
         } else {
-            ResourceFrom from = ResourceFrom.of(application.getResourceFrom());
-            if (from.equals(ResourceFrom.CICD)) {
+            if (!application.isCICDJob()) {
                 String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
                 application.setConfPath(path);
             }
@@ -1120,8 +1115,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             ExecutionMode executionMode = ExecutionMode.of(application.getExecutionMode());
             if (application.isCustomCodeJob()) {
                 assert executionMode != null;
-                ResourceFrom resourceFrom = ResourceFrom.of(application.getResourceFrom());
-                if (resourceFrom.equals(ResourceFrom.UPLOAD)) {
+                if (application.isUploadJob()) {
                     appConf = String.format("json://{\"%s\":\"%s\"}",
                         ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS,
                         application.getMainClass()

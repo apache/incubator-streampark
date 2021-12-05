@@ -859,7 +859,6 @@
   import {weburl} from '@api/setting'
   import {Terminal} from 'xterm'
   import 'xterm/css/xterm.css'
-  import SockJS from 'sockjs-client'
   import {baseUrl} from '@/api/baseUrl'
   import SvgIcon from '@/components/SvgIcon'
   import storage from '@/utils/storage'
@@ -1614,15 +1613,7 @@
       this.terminal.open(container, true)
 
       const url = baseUrl().concat('/websocket/' + this.handleGetSocketId())
-
-      window.WebSocket = window.WebSocket || window.MozWebSocket
-      let socket = null
-
-      if (window.WebSocket) {
-        socket = new WebSocket(url.replace('http:','ws:'))
-      } else {
-        socket = new SockJS(url)
-      }
+      const socket = this.getSocket(url)
 
       socket.onopen = () => {
         downLog({id: app.id})

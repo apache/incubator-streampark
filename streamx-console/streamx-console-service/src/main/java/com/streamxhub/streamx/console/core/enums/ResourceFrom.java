@@ -38,9 +38,9 @@ public enum ResourceFrom {
      */
     UPLOAD(2);
 
-    int value;
+    Integer value;
 
-    ResourceFrom(int value) {
+    ResourceFrom(Integer value) {
         this.value = value;
     }
 
@@ -48,7 +48,7 @@ public enum ResourceFrom {
         return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
     }
 
-    public int getValue() {
+    public Integer getValue() {
         return value;
     }
 }
