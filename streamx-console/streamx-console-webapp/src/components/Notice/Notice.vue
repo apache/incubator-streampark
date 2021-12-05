@@ -84,7 +84,6 @@
 </template>
 
 <script>
-import SockJS from 'sockjs-client'
 import {baseUrl} from '@/api/baseUrl'
 import {notice,delnotice} from '@api/metrics'
 import store from '@/store'
@@ -152,13 +151,8 @@ export default {
 
     handleWebSocket() {
       const url = baseUrl().concat('/websocket/' + store.getters.userInfo.userId)
-      window.WebSocket = window.WebSocket || window.MozWebSocket
-      let socket = null
-      if (window.WebSocket) {
-          socket = new WebSocket(url.replace('http:','ws:'))
-      } else {
-        socket = new SockJS(url)
-      }
+
+      const socket = this.getSocket(url)
 
       socket.onmessage = (event) => {
         const message = JSON.parse(event.data)

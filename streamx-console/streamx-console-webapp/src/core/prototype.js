@@ -2,6 +2,7 @@ import Vue from 'vue'
 import storage from '@/utils/storage'
 
 import {DEFAULT_THEME} from '@/store/mutation-types'
+import SockJS from 'sockjs-client'
 
 Vue.prototype.randomNum = function (minNum, maxNum) {
   switch (arguments.length) {
@@ -20,6 +21,15 @@ Vue.prototype.exceptionPropWidth = function () {
     return 1080
   }
   return width * 0.96
+}
+
+Vue.prototype.getSocket = function (url) {
+  window.WebSocket = window.WebSocket || window.MozWebSocket
+  if (window.WebSocket) {
+    return new WebSocket(url.replace('http:', 'ws:'))
+  } else {
+    return new SockJS(url)
+  }
 }
 
 

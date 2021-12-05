@@ -51,7 +51,6 @@ import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -228,7 +227,7 @@ public class Application implements Serializable {
      */
     private Integer resourceFrom;
 
-   /**
+    /**
      * flink-hadoop integration on flink-k8s mode
      */
     private Boolean k8sHadoopIntegration;
@@ -507,6 +506,16 @@ public class Application implements Serializable {
     @JsonIgnore
     public boolean isCustomCodeJob() {
         return DevelopmentMode.CUSTOMCODE.getValue().equals(this.getJobType());
+    }
+
+    @JsonIgnore
+    public boolean isUploadJob() {
+        return isCustomCodeJob() && ResourceFrom.UPLOAD.getValue().equals(this.getResourceFrom());
+    }
+
+    @JsonIgnore
+    public boolean isCICDJob() {
+        return isCustomCodeJob() && ResourceFrom.CICD.getValue().equals(this.getResourceFrom());
     }
 
     public boolean isStreamXJob() {
