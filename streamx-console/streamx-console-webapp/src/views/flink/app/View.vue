@@ -1547,11 +1547,19 @@
 
     handleEdit(app) {
       this.SetAppId(app.id)
+      //appType         STREAMX_FLINK(1, "StreamX Flink"), APACHE_FLINK(2, "Apache Flink"),
+      //jobType         CUSTOMCODE("Custom Code", 1), FLINKSQL("Flink SQL", 2)
+      //ResourceFrom    CICD(1),UPLOAD(2)
       if (app.appType === 1) {
-        if(app.resourceForm === 1) {
-          this.$router.push({'path': '/flink/app/edit_streamx'})
+        this.$router.push({'path': '/flink/app/edit_streamx'})
+        if (app.jobType === 1) {
+          if (app.resourceForm === 1) {
+            this.$router.push({'path': '/flink/app/edit_streamx'})
+          } else {
+            this.$router.push({'path': '/flink/app/edit_flink'})
+          }
         } else {
-          this.$router.push({'path': '/flink/app/edit_flink'})
+          this.$router.push({'path': '/flink/app/edit_streamx'})
         }
       } else {
         this.$router.push({'path': '/flink/app/edit_flink'})
