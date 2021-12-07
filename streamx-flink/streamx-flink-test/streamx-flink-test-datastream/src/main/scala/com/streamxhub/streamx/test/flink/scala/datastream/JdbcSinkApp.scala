@@ -72,7 +72,7 @@ object JdbcSinkApp extends FlinkStreaming {
           .withUrl("jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true")
           .withDriverName("com.mysql.jdbc.Driver")
           .withUsername("root")
-          .withPassword("123322242")
+          .withPassword("123456")
           .build()))
 
     }
