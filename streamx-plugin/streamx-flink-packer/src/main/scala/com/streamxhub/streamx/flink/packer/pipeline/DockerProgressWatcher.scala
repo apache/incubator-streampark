@@ -26,7 +26,7 @@ package com.streamxhub.streamx.flink.packer.pipeline
  *
  * @author Al-assad
  */
-trait DockerProgressWatcherTrait {
+trait DockerProgressWatcher {
 
   /**
    * async call when pulling docker image progress is changed.
@@ -48,7 +48,7 @@ trait DockerProgressWatcherTrait {
 /**
  * silent watcher
  */
-class SilentDockerProgressWatcher extends DockerProgressWatcherTrait {
+class SilentDockerProgressWatcher extends DockerProgressWatcher {
 
   override def onDockerPullProgressChange(snapshot: DockerPullSnapshot): Unit = {}
 

@@ -38,7 +38,7 @@ trait BuildPipelineProcess {
   /**
    * the type of pipeline
    */
-  val pipeType: PipeType
+  def pipeType: PipeType
 
   /**
    * the actual build process.
@@ -89,7 +89,7 @@ trait BuildPipelineExpose {
   /**
    * get count of all build steps
    */
-  val allSteps: Int
+  def allSteps: Int
 
   /**
    * launch the pipeline instance
@@ -121,9 +121,9 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
    */
   protected val logSuffix: String = s"appName=${offerBuildParam.appName}"
 
-  protected var watcher: PipeWatcherTrait = new SilentPipeWatcher
+  protected var watcher: PipeWatcher = new SilentPipeWatcher
 
-  def registerWatcher(watcher: BuildPipelineWatcher): BuildPipeline = {
+  def registerWatcher(watcher: PipeWatcher): BuildPipeline = {
     this.watcher = watcher
     this
   }
@@ -194,7 +194,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
 
   override def getCurStep: Int = curStep
 
-  override val allSteps: Int = pipeType.getSteps.size
+  override def allSteps: Int = pipeType.getSteps.size
 
   override def logInfo(msg: => String): Unit = super.logInfo(s"[streamx-packer] $msg | $logSuffix")
 

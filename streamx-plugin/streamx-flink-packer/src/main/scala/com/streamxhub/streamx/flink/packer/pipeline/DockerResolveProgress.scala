@@ -35,34 +35,54 @@ class DockerResolveProgress(val pull: DockerPullProgress, val build: DockerBuild
 class DockerPullProgress(layers: mutable.Map[String, DockerLayerProgress], var error: String, var lastTime: Long) {
   //noinspection DuplicatedCode
   def update(pullRsp: PullResponseItem): Unit = {
-    layers += pullRsp.getId -> DockerLayerProgress(
-      pullRsp.getId,
-      pullRsp.getProgressDetail.getCurrent,
-      pullRsp.getProgressDetail.getTotal)
-    error = pullRsp.getErrorDetail.getMessage
-    lastTime = System.currentTimeMillis
+    if (pullRsp != null || pullRsp.getId != null || pullRsp.getStatus != null)
+      return
+    if (pullRsp.getStatus.contains("complete")) {
+      layers += pullRsp.getId -> DockerLayerProgress(pullRsp.getId, pullRsp.getStatus, 1, 1)
+      lastTime = System.currentTimeMillis
+    } else {
+      layers += pullRsp.getId -> DockerLayerProgress(
+        pullRsp.getId,
+        pullRsp.getStatus,
+        Option(pullRsp.getProgressDetail.getCurrent).map(_.toLong).getOrElse(0L),
+        Option(pullRsp.getProgressDetail.getTotal).map(_.toLong).getOrElse(0L))
+      error = Option(pullRsp.getErrorDetail).map(_.getMessage).getOrElse("")
+      lastTime = System.currentTimeMillis
+    }
   }
+
   def snapshot: DockerPullSnapshot = DockerPullSnapshot.of(layers.values.toSeq, error, lastTime)
 }
 
 class DockerBuildProgress(steps: mutable.Seq[String], var lastTime: Long) {
-  def update(buildStep: String): Unit = {
-    steps + buildStep
-    lastTime = System.currentTimeMillis
-  }
+  def update(buildStep: String): Unit =
+    if (Option(buildStep).exists(_.nonEmpty)) {
+      steps + buildStep
+      lastTime = System.currentTimeMillis
+    }
+
   def snapshot: DockerBuildSnapshot = DockerBuildSnapshot(steps, lastTime)
 }
 
 class DockerPushProgress(layers: mutable.Map[String, DockerLayerProgress], var error: String, var lastTime: Long) {
   //noinspection DuplicatedCode
   def update(pushRsp: PushResponseItem): Unit = {
-    layers += pushRsp.getId -> DockerLayerProgress(
-      pushRsp.getId,
-      pushRsp.getProgressDetail.getCurrent,
-      pushRsp.getProgressDetail.getTotal)
-    error = pushRsp.getErrorDetail.getMessage
-    lastTime = System.currentTimeMillis
+    if (pushRsp != null || pushRsp.getId != null || pushRsp.getStatus != null)
+      return
+    if (pushRsp.getStatus.contains("complete")) {
+      layers += pushRsp.getId -> DockerLayerProgress(pushRsp.getId, pushRsp.getStatus, 1, 1)
+      lastTime = System.currentTimeMillis
+    } else {
+      layers += pushRsp.getId -> DockerLayerProgress(
+        pushRsp.getId,
+        pushRsp.getStatus,
+        Option(pushRsp.getProgressDetail.getCurrent).map(_.toLong).getOrElse(0L),
+        Option(pushRsp.getProgressDetail.getTotal).map(_.toLong).getOrElse(0L))
+      error = Option(pushRsp.getErrorDetail).map(_.getMessage).getOrElse("")
+      lastTime = System.currentTimeMillis
+    }
   }
+
   def snapshot: DockerPushSnapshot = DockerPushSnapshot.of(layers.values.toSeq, error, lastTime)
 }
 
@@ -84,11 +104,11 @@ object DockerPushProgress {
  * @param current already download size (byte)
  * @param total   layer size (byte)
  */
-case class DockerLayerProgress(layerId: String, current: Long, total: Long) {
+case class DockerLayerProgress(layerId: String, status: String, current: Long, total: Long) {
 
   def percent: Double = calPercent(current, total)
 
-  def currentMb: Double = (current.toDouble / (1024 * 1024)).formatted("%.2f").toDouble
+  def currentMb: Double = if (current == 0) 0 else (current.toDouble / (1024 * 1024)).formatted("%.2f").toDouble
 
-  def totalMb: Double = (total.toDouble / (1024 * 1024)).formatted("%.2f").toDouble
+  def totalMb: Double = if (total == 0) 0 else (total.toDouble / (1024 * 1024)).formatted("%.2f").toDouble
 }

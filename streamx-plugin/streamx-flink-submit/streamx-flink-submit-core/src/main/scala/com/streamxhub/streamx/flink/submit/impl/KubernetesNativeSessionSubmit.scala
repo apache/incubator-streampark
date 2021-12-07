@@ -73,8 +73,11 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       submitRequest.k8sSubmitParam.kubernetesNamespace
     )
     val pipeline = new FlinkK8sSessionBuildPipeline(buildParam)
-    val buildResult = pipeline.launch().asInstanceOf[FlinkK8sSessionBuildResponse]
-    if (!buildResult.pass) throw pipeline.getError.exception
+    val buildResult = {
+      val r = pipeline.launch()
+      if (!r.pass) throw pipeline.getError.exception
+      r.asInstanceOf[FlinkK8sSessionBuildResponse]
+    }
     val fatJar = new File(buildResult.flinkShadedJarPath)
 
     // Prioritize using JobGraph submit plan while using Rest API submit plan as backup

@@ -34,7 +34,7 @@ import com.streamxhub.streamx.flink.packer.pipeline._
  */
 class FlinkK8sSessionBuildPipeline(params: FlinkK8sSessionBuildRequest) extends BuildPipeline {
 
-  override val pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_SESSION
+  override def pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_SESSION
 
   override def offerBuildParam: FlinkK8sSessionBuildRequest = params
 

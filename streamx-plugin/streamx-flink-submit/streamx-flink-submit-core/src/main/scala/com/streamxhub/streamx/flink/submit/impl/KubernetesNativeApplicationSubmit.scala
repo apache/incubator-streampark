@@ -65,8 +65,11 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
       submitRequest.k8sSubmitParam.dockerAuthConfig
     )
     val pipeline = new FlinkK8sApplicationBuildPipeline(buildParam)
-    val buildResult = pipeline.launch().asInstanceOf[FlinkK8sApplicationBuildResponse]
-    if (!buildResult.pass) throw pipeline.getError.exception
+    val buildResult = {
+      val r = pipeline.launch()
+      if (!r.pass) throw pipeline.getError.exception
+      r.asInstanceOf[FlinkK8sApplicationBuildResponse]
+    }
 
     // add flink pipeline.jars configuration
     flinkConfig.set(PipelineOptions.JARS, Lists.newArrayList(buildResult.dockerInnerMainJarPath))

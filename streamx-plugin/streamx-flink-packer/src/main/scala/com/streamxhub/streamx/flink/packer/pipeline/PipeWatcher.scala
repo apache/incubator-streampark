@@ -25,7 +25,7 @@ package com.streamxhub.streamx.flink.packer.pipeline
  *
  * @author Al-assad
  */
-trait PipeWatcherTrait {
+trait PipeWatcher {
 
   /**
    * called when the pipeline is launched.
@@ -44,15 +44,13 @@ trait PipeWatcherTrait {
   def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit
 }
 
-/**
- * silent watcher
- */
-class SilentPipeWatcher extends PipeWatcherTrait {
+
+class SilentPipeWatcher extends PipeWatcher {
 
   override def onStart(snapshot: PipeSnapshot): Unit = {}
 
   override def onStepStateChange(snapshot: PipeSnapshot): Unit = {}
 
   override def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit = {}
-
 }
+

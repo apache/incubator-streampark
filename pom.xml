@@ -530,9 +530,6 @@
                         <addScalacArgs>-target:jvm-${project.build.jdk}</addScalacArgs>
                         <target>${project.build.jdk}</target>
                         <source>${project.build.jdk}</source>
-                        <args>
-                            <arg>-Xasync</arg>
-                        </args>
                     </configuration>
                     <executions>
                         <execution>

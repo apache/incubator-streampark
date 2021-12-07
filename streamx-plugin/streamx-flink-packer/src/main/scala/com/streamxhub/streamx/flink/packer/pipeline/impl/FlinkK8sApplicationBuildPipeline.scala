@@ -32,12 +32,11 @@ import com.streamxhub.streamx.flink.kubernetes.PodTemplateTool
 import com.streamxhub.streamx.flink.packer.docker._
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.packer.pipeline._
-import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline.execContext
+import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline.executor
 
 import java.io.File
 import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
-import scala.async.Async.async
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
 /**
@@ -47,16 +46,16 @@ import scala.language.postfixOps
  */
 class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) extends BuildPipeline {
 
-  override val pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_APPLICATION
+  override def pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_APPLICATION
 
-  private var dockerProcessWatcher: DockerProgressWatcherTrait = new SilentDockerProgressWatcher()
+  private var dockerProcessWatcher: DockerProgressWatcher = new SilentDockerProgressWatcher
 
   // non-thread-safe
   private val dockerProcess = new DockerResolveProgress(DockerPullProgress.empty(), DockerBuildProgress.empty(), DockerPushProgress.empty())
 
   override protected def offerBuildParam: FlinkK8sApplicationBuildRequest = params
 
-  def registerDockerProgressWatcher(watcher: DockerProgressWatcherTrait): Unit = {
+  def registerDockerProgressWatcher(watcher: DockerProgressWatcher): Unit = {
     dockerProcessWatcher = watcher
   }
 
@@ -154,9 +153,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
             .start(watchDockerPullProcess {
               pullRsp =>
                 dockerProcess.pull.update(pullRsp)
-                async {
-                  dockerProcessWatcher.onDockerPullProgressChange(dockerProcess.pull.snapshot)
-                }
+                Future(dockerProcessWatcher.onDockerPullProgressChange(dockerProcess.pull.snapshot))
             })
           pullCmdCallback.awaitCompletion
           logInfo(s"already pulled docker image from remote register, imageTag=$baseImageTag")
@@ -176,9 +173,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
             .start(watchDockerBuildStep {
               buildStep =>
                 dockerProcess.build.update(buildStep)
-                async {
-                  dockerProcessWatcher.onDockerBuildProgressChange(dockerProcess.build.snapshot)
-                }
+                Future(dockerProcessWatcher.onDockerBuildProgressChange(dockerProcess.build.snapshot))
             })
           val imageId = buildCmdCallback.awaitImageId
           logInfo(s"built docker image, imageId=$imageId, imageTag=$pushImageTag")
@@ -197,9 +192,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
             .start(watchDockerPushProcess {
               pushRsp =>
                 dockerProcess.push.update(pushRsp)
-                async {
-                  dockerProcessWatcher.onDockerPushProgressChange(dockerProcess.push.snapshot)
-                }
+                Future(dockerProcessWatcher.onDockerPushProgressChange(dockerProcess.push.snapshot))
             })
           pushCmdCallback.awaitCompletion
           logInfo(s"already pushed docker image, imageTag=$pushImageTag")
@@ -224,7 +217,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
 
 object FlinkK8sApplicationBuildPipeline {
 
-  private lazy val execPool = new ThreadPoolExecutor(
+  val execPool = new ThreadPoolExecutor(
     Runtime.getRuntime.availableProcessors * 2,
     300,
     60L,
@@ -234,7 +227,7 @@ object FlinkK8sApplicationBuildPipeline {
     new ThreadPoolExecutor.DiscardOldestPolicy
   )
 
-  private lazy implicit val execContext: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(execPool)
+  implicit val executor: ExecutionContext = ExecutionContext.fromExecutorService(execPool)
 
   def of(params: FlinkK8sApplicationBuildRequest): FlinkK8sApplicationBuildPipeline = new FlinkK8sApplicationBuildPipeline(params)
 
