@@ -20,13 +20,15 @@
  */
 package com.streamxhub.streamx.flink.packer.pipeline
 
-import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.util.{Logger, ThreadUtils}
 
 import java.util
+import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
+import java.util.{Map => JMap}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
-import java.util.{Map => JMap}
 
 /**
  * Behavior that BuildPipeline subclasses must inherit to implement.
@@ -215,5 +217,21 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
     getError,
     System.currentTimeMillis
   )
+
+}
+
+object BuildPipeline {
+
+  val execPool = new ThreadPoolExecutor(
+    Runtime.getRuntime.availableProcessors * 2,
+    300,
+    60L,
+    TimeUnit.SECONDS,
+    new LinkedBlockingQueue[Runnable](2048),
+    ThreadUtils.threadFactory("streamx-pipeline-watcher-executor"),
+    new ThreadPoolExecutor.AbortPolicy
+  )
+
+  implicit val executor: ExecutionContext = ExecutionContext.fromExecutorService(execPool)
 
 }
