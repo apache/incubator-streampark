@@ -24,15 +24,23 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
+import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
  * @author Al-assad
  */
-public interface ApplicationBuildPipelineService extends IService<AppBuildPipeline> {
+public interface AppBuildPipeService extends IService<AppBuildPipeline> {
 
+    /**
+     * Build application.
+     * This is an async call method.
+     */
+    boolean buildApplication(@Nonnull Application app);
 
     /**
      * Get current build pipeline instance of specified application
@@ -48,10 +56,15 @@ public interface ApplicationBuildPipelineService extends IService<AppBuildPipeli
     DockerResolvedSnapshot getDockerProgressDetailSnapshot(@Nonnull Long appId);
 
     /**
-     * Build application.
-     * This is an async call method.
+     * Whether the application can currently start a new building progress
      */
-    void buildApplication(@Nonnull Application app);
+    boolean allowToBuildNow(@Nonnull Long appId);
+
+    /**
+     * list pipeline status on application id list
+     */
+    Map<Long, PipeStatus> listPipelineStatus(List<Long> appIds);
+
 
 
 }

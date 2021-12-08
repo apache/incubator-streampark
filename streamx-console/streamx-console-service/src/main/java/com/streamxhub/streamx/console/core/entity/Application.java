@@ -249,10 +249,18 @@ public class Application implements Serializable {
     private transient String createTimeTo;
     private transient String backUpDescription;
 
+
     /**
      * Flink Web UI Url
      */
     private transient String flinkRestUrl;
+
+    /**
+     * refer to {@link com.streamxhub.streamx.flink.packer.pipeline.PipeStatus}
+     */
+    private transient Integer buildStatus;
+    private transient AppControl appControl;
+
 
     public void setK8sNamespace(String k8sNamespace) {
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? KUBERNETES_NAMESPACE_DEFAULT_VALUE : k8sNamespace;
@@ -288,6 +296,9 @@ public class Application implements Serializable {
             default:
                 return 1;
         }
+    }
+    public boolean shouldBeTrack() {
+        return shouldTracking(FlinkAppState.of(getState())) == 1;
     }
 
     @JsonIgnore

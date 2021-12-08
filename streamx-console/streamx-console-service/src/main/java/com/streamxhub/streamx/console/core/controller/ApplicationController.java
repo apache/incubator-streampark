@@ -23,13 +23,16 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.core.entity.AppControl;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
 import com.streamxhub.streamx.console.core.entity.ApplicationLog;
 import com.streamxhub.streamx.console.core.enums.AppExistsState;
+import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationLogService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +45,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author benjobs
@@ -61,6 +66,9 @@ public class ApplicationController {
 
     @Autowired
     private ApplicationLogService applicationLogService;
+
+    @Autowired
+    private AppBuildPipeService appBuildPipeService;
 
     @PostMapping("get")
     @RequiresPermissions("app:detail")
@@ -97,6 +105,27 @@ public class ApplicationController {
     @RequiresPermissions("app:view")
     public RestResponse list(Application app, RestRequest request) {
         IPage<Application> applicationList = applicationService.page(app, request);
+
+        List<Application> appRecords = applicationList.getRecords();
+        List<Long> appIds = appRecords.stream().map(Application::getId).collect(Collectors.toList());
+        Map<Long, PipeStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
+
+        // add building pipeline status info and app control info
+        appRecords = appRecords.stream()
+            .peek(e -> {
+                if (pipeStates.containsKey(e.getId())) {
+                    e.setBuildStatus(pipeStates.get(e.getId()).getCode());
+                }
+            })
+            .peek(e -> e.setAppControl(
+                new AppControl()
+                    .setAllowBuild(e.getBuildStatus() == null || !PipeStatus.running.getCode().equals(e.getBuildStatus()))
+                    .setAllowStart(PipeStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack())
+                    .setAllowStop(e.isRunning()))
+            )
+            .collect(Collectors.toList());
+
+        applicationList.setRecords(appRecords);
         return RestResponse.create().data(applicationList);
     }
 

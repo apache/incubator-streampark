@@ -28,5 +28,4 @@ import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
  */
 public interface ApplicationBuildPipelineMapper extends BaseMapper<AppBuildPipeline> {
 
-
 }

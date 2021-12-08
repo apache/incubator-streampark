@@ -20,9 +20,11 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.collect.Maps;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.ThreadUtils;
@@ -31,7 +33,7 @@ import com.streamxhub.streamx.console.core.dao.ApplicationBuildPipelineMapper;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
-import com.streamxhub.streamx.console.core.service.ApplicationBuildPipelineService;
+import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf;
@@ -39,6 +41,7 @@ import com.streamxhub.streamx.flink.packer.pipeline.*;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -46,10 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -66,8 +66,8 @@ import static com.streamxhub.streamx.common.enums.ExecutionMode.KUBERNETES_NATIV
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
-public class ApplicationBuildPipelineServiceImpl
-    extends ServiceImpl<ApplicationBuildPipelineMapper, AppBuildPipeline> implements ApplicationBuildPipelineService {
+public class ApplBuildPipeServiceImpl
+    extends ServiceImpl<ApplicationBuildPipelineMapper, AppBuildPipeline> implements AppBuildPipeService {
 
     @Autowired
     private FlinkEnvService flinkEnvService;
@@ -96,38 +96,23 @@ public class ApplicationBuildPipelineServiceImpl
 
 
     @Override
-    public Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId) {
-        return Optional.ofNullable(getById(appId));
-    }
-
-
-    @Override
-    public DockerResolvedSnapshot getDockerProgressDetailSnapshot(@Nonnull Long appId) {
-        return new DockerResolvedSnapshot(
-            dockerPullPgSnapshots.getIfPresent(appId),
-            dockerBuildPgSnapshots.getIfPresent(appId),
-            dockerPushPgSnapshots.getIfPresent(appId));
-    }
-
-
-    @Override
-    public void buildApplication(@Nonnull Application app) {
+    public boolean buildApplication(@Nonnull Application app) {
         // create pipeline instance
         BuildPipeline pipeline = createPipelineInstance(app);
 
         // register pipeline progress event watcher.
         // save snapshot of pipeline to db when status of pipeline was changed.
-        pipeline.registerWatcher(new BuildPipelineWatcher() {
+        pipeline.registerWatcher(new PipeWatcher() {
             @Override
             public void onStart(PipeSnapshot snapshot) {
                 AppBuildPipeline pipePo = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
-                save(pipePo);
+                saveEntity(pipePo);
             }
 
             @Override
             public void onStepStateChange(PipeSnapshot snapshot) {
                 AppBuildPipeline pipePo = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
-                save(pipePo);
+                saveEntity(pipePo);
             }
 
             @Override
@@ -135,12 +120,12 @@ public class ApplicationBuildPipelineServiceImpl
                 AppBuildPipeline pipePo = AppBuildPipeline.fromPipeSnapshot(snapshot)
                     .setAppId(app.getId())
                     .setBuildResult(result);
-                save(pipePo);
+                saveEntity(pipePo);
             }
         });
         // save docker resolve progress detail to cache, only for flink-k8s application mode.
         if (PipeType.FLINK_NATIVE_K8S_APPLICATION == pipeline.pipeType()) {
-            pipeline.as(FlinkK8sApplicationBuildPipeline.class).registerDockerProgressWatcher(new DockerResolveWatcher() {
+            pipeline.as(FlinkK8sApplicationBuildPipeline.class).registerDockerProgressWatcher(new DockerProgressWatcher() {
                 @Override
                 public void onDockerPullProgressChange(DockerPullSnapshot snapshot) {
                     dockerPullPgSnapshots.put(app.getId(), snapshot);
@@ -159,9 +144,10 @@ public class ApplicationBuildPipelineServiceImpl
         }
         // save pipeline instance snapshot to db before launch it.
         AppBuildPipeline pipePo = AppBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
-        save(pipePo);
+        boolean saved = saveEntity(pipePo);
         // async launch pipeline
         executorService.submit((Runnable) pipeline::launch);
+        return saved;
     }
 
     /**
@@ -259,5 +245,51 @@ public class ApplicationBuildPipelineServiceImpl
         return jars.get(0);
     }
 
+
+    @Override
+    public Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId) {
+        return Optional.ofNullable(getById(appId));
+    }
+
+    @Override
+    public DockerResolvedSnapshot getDockerProgressDetailSnapshot(@Nonnull Long appId) {
+        return new DockerResolvedSnapshot(
+            dockerPullPgSnapshots.getIfPresent(appId),
+            dockerBuildPgSnapshots.getIfPresent(appId),
+            dockerPushPgSnapshots.getIfPresent(appId));
+    }
+
+    @Override
+    public boolean allowToBuildNow(@Nonnull Long appId) {
+        return getCurrentBuildPipeline(appId)
+            .map(pipeline -> PipeStatus.running != pipeline.getPipeStatus())
+            .orElse(true);
+    }
+
+    @Override
+    public Map<Long, PipeStatus> listPipelineStatus(List<Long> appIds) {
+        if (CollectionUtils.isEmpty(appIds)) {
+            return Maps.newHashMap();
+        }
+        QueryWrapper<AppBuildPipeline> query = new QueryWrapper<>();
+        query.select("app_id", "pipe_status").in("app_id", appIds);
+        List<Map<String, Object>> rMaps = baseMapper.selectMaps(query);
+        if (CollectionUtils.isEmpty(rMaps)) {
+            return Maps.newHashMap();
+        }
+        return rMaps.stream().collect(Collectors.toMap(
+            e -> (Long) e.get("app_id"),
+            e -> PipeStatus.of((Integer) e.get("pipe_status"))));
+    }
+
+
+    public boolean saveEntity (AppBuildPipeline pipe) {
+        AppBuildPipeline old = getById(pipe.getAppId());
+        if (old == null) {
+            return save(pipe);
+        } else {
+            return updateById(pipe);
+        }
+    }
 
 }

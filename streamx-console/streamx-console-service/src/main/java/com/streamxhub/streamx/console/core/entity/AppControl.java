@@ -18,14 +18,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.packer.pipeline;
+package com.streamxhub.streamx.console.core.entity;
+
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
- * DockerProgressWatcherTrait interface for Java
- * see {@link com.streamxhub.streamx.flink.packer.pipeline.DockerProgressWatcherTrait}
- *
  * @author Al-assad
  */
-public interface DockerResolveWatcher extends DockerProgressWatcherTrait {
+@Data
+@Accessors(chain = true)
+public class AppControl {
+
+    /**
+     * allow to start the application
+     */
+    private boolean allowStart;
+
+    /**
+     * allow to stop the application
+     */
+    private boolean allowStop;
+
+    /**
+     * allow to build the application
+     */
+    private boolean allowBuild;
 
 }

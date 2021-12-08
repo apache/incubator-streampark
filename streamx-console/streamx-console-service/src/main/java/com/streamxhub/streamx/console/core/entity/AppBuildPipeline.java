@@ -61,7 +61,7 @@ public class AppBuildPipeline {
     private Long appId;
 
     @TableField(value = "pipe_type")
-    private String pipeTypeName;
+    private Integer pipeTypeCode;
 
     @TableField(value = "pipe_status")
     private Integer pipeStatusCode;
@@ -87,12 +87,12 @@ public class AppBuildPipeline {
     @Nonnull
     @JsonIgnore
     public PipeType getPipeType() {
-        return PipeType.ofName(pipeTypeName);
+        return PipeType.of(pipeTypeCode);
     }
 
     @JsonIgnore
     public AppBuildPipeline setPipeType(@Nonnull PipeType pipeType) {
-        this.pipeTypeName = pipeType.name();
+        this.pipeTypeCode = pipeType.getCode();
         return this;
     }
 
