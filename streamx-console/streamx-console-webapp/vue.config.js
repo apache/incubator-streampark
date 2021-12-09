@@ -40,8 +40,8 @@ module.exports = {
     // development server port 8000
     port: 10000,
     proxy: {
-      '/api/!*': {
-        target: 'http://test-hadoop-1:10000',
+      '/api': {
+        target: 'http://172.16.1.192:10000/',
         ws: false,
         changeOrigin: true,
         pathRewrite: { '^/api': '' }
