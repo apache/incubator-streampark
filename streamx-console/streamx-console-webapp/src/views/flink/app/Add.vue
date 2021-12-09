@@ -2036,7 +2036,7 @@ export default {
           }).catch((err) => {
             callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
           })
-        }else{
+        } else {
           callback()
         }
       }
