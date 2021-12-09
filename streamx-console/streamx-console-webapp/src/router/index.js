@@ -33,15 +33,15 @@ const constRouter = [
       'component': PageView,
       'children': [{
         'path': '/iframe/system/user',
-        'name': 'User Management',
+        // 'name': 'User Management',
         'component': resolveView('system/user/User'),
       }, {
         'path': '/iframe/system/role',
-        'name': 'Role Management',
+        // 'name': 'Role Management',
         'component': resolveView('system/role/Role'),
       }, {
         'path': '/iframe/system/menu',
-        'name': 'Router Management',
+        // 'name': 'Router Management',
         'component': resolveView('system/menu/Menu'),
       }]
     }, {
@@ -50,39 +50,39 @@ const constRouter = [
       'component': PageView,
       'children': [{
         'path': '/iframe/flink/app/edit_streamx',
-        'name': 'Edit StreamX App',
+        // 'name': 'Edit StreamX App',
         'component': resolveView('flink/app/EditStreamX'),
       }, {
         'path': '/iframe/flink/app/add',
-        'name': 'Add Application',
+        // 'name': 'Add Application',
         'component': resolveView('flink/app/Add'),
       }, {
         'path': '/iframe/flink/app/detail',
-        'name': 'App Detail',
+        // 'name': 'App Detail',
         'component': resolveView('flink/app/Detail'),
       }, {
         'path': '/iframe/flink/app/edit_flink',
-        'name': 'Edit Flink App',
+        // 'name': 'Edit Flink App',
         'component': resolveView('flink/app/EditFlink'),
       }, {
         'path': '/iframe/flink/project/add',
-        'name': 'Add Project',
+        // 'name': 'Add Project',
         'component': resolveView('flink/project/Add'),
       }, {
         'path': '/iframe/flink/project',
-        'name': 'Project',
+        // 'name': 'Project',
         'component': resolveView('flink/project/View'),
       }, {
         'path': '/iframe/flink/app',
-        'name': 'Application',
+        // 'name': 'Application',
         'component': resolveView('flink/app/View'),
       }, {
         'path': '/iframe/flink/notebook/view',
-        'name': 'Notebook',
+        // 'name': 'Notebook',
         'component': resolveView('flink/notebook/Submit'),
       }, {
         'path': '/iframe/flink/setting',
-        'name': 'Setting',
+        // 'name': 'Setting',
         'component': resolveView('flink/setting/View'),
       }]
     }]
