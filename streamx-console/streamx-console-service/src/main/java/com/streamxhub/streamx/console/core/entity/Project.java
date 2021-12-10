@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -39,7 +40,12 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author benjobs
@@ -167,6 +173,7 @@ public class Project implements Serializable {
             }
             return branchList;
         } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
         return Collections.emptyList();
     }

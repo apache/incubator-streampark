@@ -48,8 +48,9 @@ object PodTemplateTool {
    */
   def preparePodTemplateFiles(buildWorkspace: String, podTemplates: K8sPodTemplates): K8sPodTemplateFiles = {
     val workspaceDir = new File(buildWorkspace)
-    if (!workspaceDir.exists())
+    if (!workspaceDir.exists()) {
       workspaceDir.mkdir()
+    }
 
     val podTempleMap = mutable.Map[String, String]()
     val outputTmplContent = (tmplContent: String, podTmpl: PodTemplateType) => {

@@ -94,7 +94,7 @@ class HBaseSink[T <: Mutation : ClassTag](@transient override val sc: SparkConte
 }
 
 object HBaseSink {
-  def apply(sc: SparkContext) = new HBaseSink[Put](sc)
+  def apply(sc: SparkContext): HBaseSink[Put] = new HBaseSink[Put](sc)
 
-  def apply[T <: Mutation : ClassTag](rdd: RDD[T]) = new HBaseSink[T](rdd.sparkContext)
+  def apply[T <: Mutation : ClassTag](rdd: RDD[T]): HBaseSink[T] = new HBaseSink[T](rdd.sparkContext)
 }

@@ -14,6 +14,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.streamxhub.streamx.console.core.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -51,7 +52,7 @@ import java.util.Date;
 @RequestMapping("metrics")
 public class MetricsController {
 
-    private final String STACKTRACE_PROFILER_NAME = "Stacktrace";
+    private static final String STACKTRACE_PROFILER_NAME = "Stacktrace";
 
     @Autowired
     private FlameGraphService flameGraphService;

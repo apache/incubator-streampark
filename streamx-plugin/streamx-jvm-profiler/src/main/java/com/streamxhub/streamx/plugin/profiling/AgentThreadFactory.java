@@ -24,20 +24,22 @@ package com.streamxhub.streamx.plugin.profiling;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class AgentThreadFactory implements ThreadFactory {
-  public static final String NAME_PREFIX = "uber_java_agent";
+    public static final String NAME_PREFIX = "uber_java_agent";
 
-  private final ThreadFactory defaultThreadFactory = Executors.defaultThreadFactory();
+    private static final ThreadFactory DEFAULT_THREAD_FACTORY = Executors.defaultThreadFactory();
 
-  @Override
-  public Thread newThread(Runnable r) {
-    Thread thread = defaultThreadFactory.newThread(r);
-    if (thread != null) {
-      thread.setDaemon(true);
-      thread.setName(String.format("%s-%s", NAME_PREFIX, thread.getName()));
+    @Override
+    public Thread newThread(Runnable r) {
+        Thread thread = DEFAULT_THREAD_FACTORY.newThread(r);
+        if (thread != null) {
+            thread.setDaemon(true);
+            thread.setName(String.format("%s-%s", NAME_PREFIX, thread.getName()));
+        }
+
+        return thread;
     }
-
-    return thread;
-  }
 }

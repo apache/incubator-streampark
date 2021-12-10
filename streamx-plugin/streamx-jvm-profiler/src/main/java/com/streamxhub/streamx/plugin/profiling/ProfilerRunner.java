@@ -25,30 +25,32 @@ import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class ProfilerRunner implements Runnable {
-  private static final AgentLogger logger = AgentLogger.getLogger(ProfilerRunner.class.getName());
+    private static final AgentLogger LOGGER = AgentLogger.getLogger(ProfilerRunner.class.getName());
 
-  private static final int MAX_ERROR_COUNT_TO_LOG = 100;
+    private static final int MAX_ERROR_COUNT_TO_LOG = 100;
 
-  private final Profiler profiler;
-  private final AtomicLong errorCounter = new AtomicLong(0);
+    private final Profiler profiler;
+    private static final AtomicLong ERROR_COUNTER = new AtomicLong(0);
 
-  public ProfilerRunner(Profiler profiler) {
-    this.profiler = profiler;
-  }
-
-  @Override
-  public void run() {
-    try {
-      profiler.profile();
-    } catch (Throwable e) {
-      long errorCountValue = errorCounter.incrementAndGet();
-      if (errorCountValue <= MAX_ERROR_COUNT_TO_LOG) {
-        logger.warn("Failed to run profile: " + profiler, e);
-      } else {
-        e.printStackTrace();
-      }
+    public ProfilerRunner(Profiler profiler) {
+        this.profiler = profiler;
     }
-  }
+
+    @Override
+    public void run() {
+        try {
+            profiler.profile();
+        } catch (Throwable e) {
+            long errorCountValue = ERROR_COUNTER.incrementAndGet();
+            if (errorCountValue <= MAX_ERROR_COUNT_TO_LOG) {
+                LOGGER.warn("Failed to run profile: " + profiler, e);
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
 }

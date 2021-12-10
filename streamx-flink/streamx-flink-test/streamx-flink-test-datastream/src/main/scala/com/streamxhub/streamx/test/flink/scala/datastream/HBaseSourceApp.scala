@@ -25,7 +25,7 @@ import com.streamxhub.streamx.flink.core.java.wrapper.HBaseQuery
 import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import com.streamxhub.streamx.flink.core.scala.request.HBaseRequest
 import com.streamxhub.streamx.flink.core.scala.source.HBaseSource
-import org.apache.flink.api.scala._
+import org.apache.flink.api.scala.createTypeInformation
 import org.apache.hadoop.hbase.CellUtil
 import org.apache.hadoop.hbase.client.{Get, Scan}
 import org.apache.hadoop.hbase.util.Bytes
@@ -46,8 +46,7 @@ object HBaseSourceApp extends FlinkStreaming {
         //TODO 从上一条记录中获取便宜量,决定下次查询的条件...
         new HBaseQuery("person", new Scan())
       }
-    }, r => new String(r.getRow),null)
-
+    }, r => new String(r.getRow), null)
 
     HBaseRequest(id).requestOrdered(x => {
       new HBaseQuery("person", new Get(x.getBytes()))
@@ -71,8 +70,6 @@ object HBaseSourceApp extends FlinkStreaming {
       }
       map.toString
     }).print("Async")
-
-
   }
 
 }

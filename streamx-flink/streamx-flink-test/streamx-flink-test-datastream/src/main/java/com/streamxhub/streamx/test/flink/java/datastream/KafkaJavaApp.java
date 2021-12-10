@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.test.flink.java.datastream;
 
 import com.streamxhub.streamx.flink.core.StreamEnvConfig;
@@ -74,6 +75,5 @@ public class KafkaJavaApp {
 
         context.start();
     }
-
 
 }

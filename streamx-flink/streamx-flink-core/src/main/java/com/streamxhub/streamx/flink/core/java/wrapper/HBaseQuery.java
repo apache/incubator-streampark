@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.flink.core.java.wrapper;
 
 import com.streamxhub.streamx.common.util.HBaseClient;

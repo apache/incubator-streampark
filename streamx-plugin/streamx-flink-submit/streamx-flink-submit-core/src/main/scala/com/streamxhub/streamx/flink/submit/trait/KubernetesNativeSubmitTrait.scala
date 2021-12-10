@@ -27,7 +27,7 @@ import com.streamxhub.streamx.common.fs.FsOperator
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.collections.MapUtils
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -163,16 +163,17 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .foreach(e => flinkConfig.setString(e._1, e._2))
 
     // set parallism
-    if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
+    if (submitRequest.property.containsKey(keyFlinkParallelism())) {
       flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
-        Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString))
+        Integer.valueOf(submitRequest.property.get(keyFlinkParallelism()).toString))
     } else {
       flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
         CoreOptions.DEFAULT_PARALLELISM.defaultValue())
     }
 
-    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty)
+    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) {
       flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
+    }
 
     flinkConfig
   }

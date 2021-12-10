@@ -23,7 +23,7 @@ package com.streamxhub.streamx.common.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import org.apache.commons.collections.CollectionUtils
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
 import org.apache.hadoop.hdfs.DistributedFileSystem
@@ -227,7 +227,9 @@ object HadoopUtils extends Logger {
     Option(reusableHdfs).getOrElse {
       reusableHdfs = Try {
         ugi.doAs[FileSystem](new PrivilegedAction[FileSystem]() {
+          // scalastyle:off FileSystemGet
           override def run(): FileSystem = FileSystem.get(hadoopConf)
+          // scalastyle:on FileSystemGet
         })
       } match {
         case Success(fs) =>

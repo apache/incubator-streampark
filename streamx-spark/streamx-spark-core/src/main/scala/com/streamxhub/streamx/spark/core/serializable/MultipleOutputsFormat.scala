@@ -93,7 +93,7 @@ abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
    * @return a { @link RecordWriter} to write the output for the job.
    * @throws IOException
    */
-  override def getRecordWriter(context: TaskAttemptContext) =
+  override def getRecordWriter(context: TaskAttemptContext): RecordWriter[(String, K), V] =
     new RecordWriter[(String, K), V] {
 
       val job: Job = Job.getInstance(context.getConfiguration)

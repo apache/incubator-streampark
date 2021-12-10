@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.github.dockerjava.api.command;
 
 import com.github.dockerjava.api.listener.PullImageCallbackListener;
@@ -42,8 +43,5 @@ public class HackPullImageResultCallback extends PullImageResultCallback {
             listener.watchPullProcess(Pair.of(item.getId(), item));
         }
     }
-
-
-
 
 }

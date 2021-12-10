@@ -11,7 +11,7 @@ import java.util.Map;
 public class YarnTest {
 
     @Test
-    public void vCore() throws IOException, YarnException {
+    public void vcore() throws IOException, YarnException {
         int numYarnMaxVcores = HadoopUtils.yarnClient().getNodeReports(NodeState.RUNNING)
             .stream()
             .mapToInt(report -> report.getCapability().getVirtualCores())
@@ -30,7 +30,6 @@ public class YarnTest {
         System.out.println(url);
     }
 
-
     @Test
     public void loadFlinkYaml() {
         String path = System.getenv("FLINK_HOME").concat("/conf/flink-conf.yaml");
@@ -38,6 +37,5 @@ public class YarnTest {
         Map<String, String> map = PropertiesUtils.loadFlinkConfYaml(yaml);
         System.out.println(map.size());
     }
-
 
 }

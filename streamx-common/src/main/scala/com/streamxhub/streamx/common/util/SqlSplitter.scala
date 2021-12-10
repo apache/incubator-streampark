@@ -187,18 +187,19 @@ object SqlSplitter {
    * @return
    */
   private[streamx] def isSingleLineComment(curChar: Char, nextChar: Char): Boolean = {
+    var flag = false
     for (singleCommentPrefix <- singleLineCommentPrefixList) {
       if (singleCommentPrefix.length == 1) {
         if (curChar == singleCommentPrefix.charAt(0)) {
-          return true
+          flag = true
         }
       }
       if (singleCommentPrefix.length == 2) {
         if (curChar == singleCommentPrefix.charAt(0) && nextChar == singleCommentPrefix.charAt(1)) {
-          return true
+          flag = true
         }
       }
     }
-    false
+    flag
   }
 }

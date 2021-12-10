@@ -135,19 +135,23 @@ object PodTemplateParser {
    */
   def extractHostAliasMap(podTemplateContent: String): JMap[String, String] = {
     val hosts = new util.LinkedHashMap[String, String](0)
-    if (podTemplateContent == null || podTemplateContent.isEmpty)
+    if (podTemplateContent == null || podTemplateContent.isEmpty) {
       return hosts
+    }
     try {
       val yaml = new Yaml
       val root = yaml.load(podTemplateContent).asInstanceOf[JMap[String, Any]]
-      if (!root.containsKey("spec"))
+      if (!root.containsKey("spec")) {
         return hosts
+      }
       val spec = root.get("spec").asInstanceOf[JMap[String, Any]]
-      if (!spec.containsKey("hostAliases"))
+      if (!spec.containsKey("hostAliases")) {
         return hosts
+      }
       val hostAliases = spec.get("hostAliases").asInstanceOf[JList[JMap[String, Any]]]
-      if (CollectionUtils.isEmpty(hostAliases))
+      if (CollectionUtils.isEmpty(hostAliases)) {
         return hosts
+      }
       for (hostAlias <- hostAliases.asScala) {
         breakable {
           if (!hostAlias.containsKey("ip") && !hostAlias.containsKey("hostnames")) break

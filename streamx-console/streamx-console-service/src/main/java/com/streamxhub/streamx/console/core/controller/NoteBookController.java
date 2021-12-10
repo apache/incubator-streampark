@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.console.core.entity.Note;
@@ -42,12 +43,12 @@ public class NoteBookController {
     private NoteBookService noteBookService;
 
     @PostMapping("submit")
-    public void submit(Note Note) {
-        noteBookService.submit(Note);
+    public void submit(Note note) {
+        noteBookService.submit(note);
     }
 
     @PostMapping("submit2")
-    public void submit2(Note Note) {
-        noteBookService.submit2(Note);
+    public void submit2(Note note) {
+        noteBookService.submit2(note);
     }
 }

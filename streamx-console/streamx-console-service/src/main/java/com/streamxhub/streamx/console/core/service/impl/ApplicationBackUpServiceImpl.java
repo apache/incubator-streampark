@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -39,7 +40,11 @@ import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
-import com.streamxhub.streamx.console.core.service.*;
+import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
+import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
+import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.EffectiveService;
+import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +88,6 @@ public class ApplicationBackUpServiceImpl
         ThreadUtils.threadFactory("streamx-rollback-executor"),
         new ThreadPoolExecutor.AbortPolicy()
     );
-
 
     @Override
     public IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request) {
@@ -219,6 +223,7 @@ public class ApplicationBackUpServiceImpl
                         appHome = application.getAppHome();
                         backUpPath = backUp.getPath();
                         break;
+                    default:
                 }
                 // 2) 删除当前项目
                 fsOperator.delete(appHome);
@@ -280,6 +285,7 @@ public class ApplicationBackUpServiceImpl
             case YARN_APPLICATION:
                 appHome = application.getAppHome();
                 break;
+            default:
         }
 
         FsOperator fsOperator = application.getFsOperator();

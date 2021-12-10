@@ -24,44 +24,47 @@ package com.streamxhub.streamx.plugin.profiling.transformer;
 import com.streamxhub.streamx.plugin.profiling.profiler.MethodArgumentCollector;
 import com.streamxhub.streamx.plugin.profiling.profiler.MethodDurationCollector;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class MethodProfilerStaticProxy {
-  private static MethodDurationCollector collectorSingleton;
-  private static MethodArgumentCollector argumentCollectorSingleton;
+    private static MethodDurationCollector collectorSingleton;
+    private static MethodArgumentCollector argumentCollectorSingleton;
 
-  private MethodProfilerStaticProxy() {}
-
-  public static void setCollector(MethodDurationCollector collector) {
-    collectorSingleton = collector;
-  }
-
-  public static void setArgumentCollector(MethodArgumentCollector collector) {
-    argumentCollectorSingleton = collector;
-  }
-
-  public static void collectMethodDuration(String className, String methodName, long metricValue) {
-    if (collectorSingleton == null) {
-      return;
+    private MethodProfilerStaticProxy() {
     }
 
-    try {
-      collectorSingleton.collectLongMetric(className, methodName, "duration", metricValue);
-    } catch (Throwable ex) {
-      ex.printStackTrace();
-    }
-  }
-
-  public static void collectMethodArgument(
-      String className, String methodName, int argIndex, Object argValue) {
-    if (argumentCollectorSingleton == null) {
-      return;
+    public static void setCollector(MethodDurationCollector collector) {
+        collectorSingleton = collector;
     }
 
-    try {
-      String argument = "arg." + argIndex + "." + String.valueOf(argValue);
-      argumentCollectorSingleton.collectMetric(className, methodName, argument);
-    } catch (Throwable ex) {
-      ex.printStackTrace();
+    public static void setArgumentCollector(MethodArgumentCollector collector) {
+        argumentCollectorSingleton = collector;
     }
-  }
+
+    public static void collectMethodDuration(String className, String methodName, long metricValue) {
+        if (collectorSingleton == null) {
+            return;
+        }
+
+        try {
+            collectorSingleton.collectLongMetric(className, methodName, "duration", metricValue);
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static void collectMethodArgument(
+        String className, String methodName, int argIndex, Object argValue) {
+        if (argumentCollectorSingleton == null) {
+            return;
+        }
+
+        try {
+            String argument = "arg." + argIndex + "." + String.valueOf(argValue);
+            argumentCollectorSingleton.collectMetric(className, methodName, argument);
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
+    }
 }

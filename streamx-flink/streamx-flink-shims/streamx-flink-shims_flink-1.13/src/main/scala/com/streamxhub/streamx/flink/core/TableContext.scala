@@ -49,6 +49,6 @@ class TableContext(override val parameter: ParameterTool,
 
   override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
 
-  @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
+  @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
 
 }

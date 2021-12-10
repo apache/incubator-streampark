@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.flink.core;
 
 import org.apache.flink.api.java.utils.ParameterTool;

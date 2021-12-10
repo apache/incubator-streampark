@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.common.domain
 
 import com.streamxhub.streamx.common.util.CommandUtils
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference

@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.github.dockerjava.core;
 
 import com.github.dockerjava.core.command.HackBuildImageCmd;
@@ -52,7 +53,6 @@ public class HackDockerClient extends DockerClientImpl {
     public HackBuildImageCmd buildImageCmd() {
         return new HackBuildImageCmd(dockerCmdExecFactory.createBuildImageCmdExec());
     }
-
 
     @Override
     public HackPullImageCmd pullImageCmd(String repository) {

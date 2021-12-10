@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.flink.kubernetes.kubeclient.resources;
 
 import io.fabric8.kubernetes.api.model.apps.Deployment;

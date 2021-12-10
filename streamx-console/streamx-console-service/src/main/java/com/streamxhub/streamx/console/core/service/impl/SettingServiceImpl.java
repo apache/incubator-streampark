@@ -18,8 +18,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.core.service.impl;
 
+package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
@@ -27,7 +27,6 @@ import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +57,6 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         List<Setting> settingList = super.list();
         settingList.forEach(x -> settings.put(x.getKey(), x));
     }
-
 
     @Override
     public boolean update(Setting setting) {
@@ -122,6 +120,5 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     public String getMavenRepository() {
         return settings.get(SettingService.KEY_MAVEN_REPOSITORY).getValue();
     }
-
 
 }

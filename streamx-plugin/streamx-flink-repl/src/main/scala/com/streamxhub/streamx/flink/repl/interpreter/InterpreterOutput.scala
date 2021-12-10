@@ -56,7 +56,7 @@ class InterpreterOutput(flushListener: FlushListener) extends OutputStream {
     if (this.flushListener != null) flushLine()
   }
 
-  override def toString = new String(toByteArray)
+  override def toString: String = new String(toByteArray)
 
   def flushLine(): Unit = synchronized {
     val line = new String(lineBuffer.toArray)
@@ -97,7 +97,7 @@ private[interpreter] class InterpreterOutputStream(logger: Logger) extends LogOu
 
   @throws[IOException] override def write(b: Array[Byte], off: Int, len: Int): Unit = for (i <- off until len) write(b(i))
 
-  @Override def processLine(s: String, i: Int): Unit = {
+  override def processLine(s: String, i: Int): Unit = {
     logger.debug("Interpreter output:" + s)
   }
 

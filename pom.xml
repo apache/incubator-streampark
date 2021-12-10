@@ -85,15 +85,14 @@
         <protobuf.version>2.5.0</protobuf.version>
         <slf4j.version>1.7.32</slf4j.version>
         <logback.version>1.2.6</logback.version>
-        <spotless.version>2.9.0</spotless.version>
         <grpc.version>1.15.0</grpc.version>
         <jackson.version>2.12.1</jackson.version>
         <gson.version>2.8.5</gson.version>
         <guava.version>30.0-jre</guava.version>
         <caffeine.version>2.8.6</caffeine.version>
 
-        <checkstyle.version>2.17</checkstyle.version>
-        <puppycrawl.version>8.29</puppycrawl.version>
+        <checkstyle.version>3.1.2</checkstyle.version>
+        <puppycrawl.version>9.2</puppycrawl.version>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
@@ -485,17 +484,59 @@
                             <version>${puppycrawl.version}</version>
                         </dependency>
                     </dependencies>
+                    <configuration>
+                        <configLocation>${maven.multiModuleProjectDirectory}/tools/checkstyle/checkstyle.xml</configLocation>
+                        <encoding>UTF-8</encoding>
+                        <consoleOutput>true</consoleOutput>
+                        <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                        <failOnViolation>true</failOnViolation>
+                        <sourceDirectories>
+                            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                            <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
+                        </sourceDirectories>
+                        <resourceIncludes>
+                            **/*.properties,
+                            **/*.sh,
+                            **/*.bat,
+                            **/*.yml,
+                            **/*.yaml,
+                            **/*.xml
+                        </resourceIncludes>
+                        <resourceExcludes>
+                            **/.asf.yaml,
+                            **/.github/**
+                        </resourceExcludes>
+                        <excludes>
+                        </excludes>
+                    </configuration>
                     <executions>
                         <execution>
-                            <id>check-style</id>
-                            <phase>validate</phase>
-                            <configuration>
-                                <configLocation>dev/checkstyle.xml</configLocation>
-                                <suppressionsLocation>dev/checkstyle-suppression.xml</suppressionsLocation>
-                                <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                                <consoleOutput>true</consoleOutput>
-                                <failsOnError>true</failsOnError>
-                            </configuration>
+                            <id>validate</id>
+                            <phase>process-sources</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.scalastyle</groupId>
+                    <artifactId>scalastyle-maven-plugin</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <verbose>false</verbose>
+                        <failOnViolation>true</failOnViolation>
+                        <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                        <failOnWarning>false</failOnWarning>
+                        <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
+                        <testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
+                        <configLocation>${maven.multiModuleProjectDirectory}/scalastyle-config.xml</configLocation>
+                        <outputFile>${project.build.directory}/target/scalastyle-output.xml</outputFile>
+                        <inputEncoding>UTF-8</inputEncoding>
+                        <outputEncoding>UTF-8</outputEncoding>
+                    </configuration>
+                    <executions>
+                        <execution>
                             <goals>
                                 <goal>check</goal>
                             </goals>
@@ -714,6 +755,14 @@
              </plugin>
              -->
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.scalastyle</groupId>
+                <artifactId>scalastyle-maven-plugin</artifactId>
+            </plugin>
         </plugins>
 
     </build>

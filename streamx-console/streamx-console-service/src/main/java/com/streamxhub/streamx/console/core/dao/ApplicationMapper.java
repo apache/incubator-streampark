@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -52,7 +53,6 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
     @Update("update t_flink_app set option_state=0")
     void resetOptionState();
-
 
     @Select("select k8s_namespace from " +
         "(select k8s_namespace, max(create_time) as ct from t_flink_app " +
@@ -92,7 +92,5 @@ public interface ApplicationMapper extends BaseMapper<Application> {
         "group by k8s_tm_pod_template order by ct desc) as pt " +
         "limit #{limitSize}")
     List<String> getRecentK8sTmPodTemplate(@Param("limitSize") int limit);
-
-
 
 }

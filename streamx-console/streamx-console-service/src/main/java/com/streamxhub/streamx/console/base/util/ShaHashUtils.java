@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.base.util;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;

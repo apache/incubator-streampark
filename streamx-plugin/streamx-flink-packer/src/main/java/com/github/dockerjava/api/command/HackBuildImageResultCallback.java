@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.github.dockerjava.api.command;
 
 import com.github.dockerjava.api.listener.BuildImageCallbackListener;
@@ -30,7 +31,7 @@ public class HackBuildImageResultCallback extends BuildImageResultCallback {
 
     private final BuildImageCallbackListener listener;
 
-    private final static String STEP_PREFIX = "Step";
+    private static final String STEP_PREFIX = "Step";
 
     public HackBuildImageResultCallback(BuildImageCallbackListener listener) {
         this.listener = listener;
@@ -46,6 +47,5 @@ public class HackBuildImageResultCallback extends BuildImageResultCallback {
             listener.watchBuildStep(stream);
         }
     }
-
 
 }

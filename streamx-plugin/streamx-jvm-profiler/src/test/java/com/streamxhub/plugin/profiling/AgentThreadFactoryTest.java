@@ -28,23 +28,23 @@ import org.junit.Test;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AgentThreadFactoryTest {
-  @Test
-  public void newThread() throws InterruptedException {
-    final AtomicInteger i = new AtomicInteger(10);
+    @Test
+    public void newThread() throws InterruptedException {
+        final AtomicInteger i = new AtomicInteger(10);
 
-    AgentThreadFactory threadFactory = new AgentThreadFactory();
-    Thread thread =
-        threadFactory.newThread(
-            new Runnable() {
-              @Override
-              public void run() {
-                i.incrementAndGet();
-              }
-            });
+        AgentThreadFactory threadFactory = new AgentThreadFactory();
+        Thread thread =
+            threadFactory.newThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        i.incrementAndGet();
+                    }
+                });
 
-    thread.start();
-    thread.join();
+        thread.start();
+        thread.join();
 
-    Assert.assertEquals(11, i.get());
-  }
+        Assert.assertEquals(11, i.get());
+    }
 }

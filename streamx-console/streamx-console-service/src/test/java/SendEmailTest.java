@@ -36,7 +36,11 @@ import org.junit.Test;
 import java.io.File;
 import java.io.StringWriter;
 import java.net.URL;
-import java.util.*;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 public class SendEmailTest {
 
@@ -78,7 +82,6 @@ public class SendEmailTest {
         senderEmail.setSmtpHost("smtp.exmail.qq.com");
     }
 
-
     @Test
     public void alert() {
         Application application = new Application();
@@ -104,8 +107,8 @@ public class SendEmailTest {
                 mail.setStatus(appState.name());
 
                 StringWriter writer = new StringWriter();
-                Map<String,MailTemplate> out = new HashMap<String,MailTemplate>();
-                out.put("mail",mail);
+                Map<String, MailTemplate> out = new HashMap<String, MailTemplate>();
+                out.put("mail", mail);
 
                 template.process(out, writer);
                 String html = writer.toString();

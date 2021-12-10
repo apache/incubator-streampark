@@ -30,6 +30,7 @@ import org.apache.flink.table.api.{Table => FlinkTable}
 object TableExt {
 
   class Table(val table: FlinkTable) {
+
     def ->(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
   }
 

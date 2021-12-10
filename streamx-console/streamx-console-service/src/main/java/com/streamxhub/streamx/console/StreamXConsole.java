@@ -18,11 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console;
 
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
@@ -56,12 +56,11 @@ import java.lang.management.RuntimeMXBean;
  *
  * @author benjobs
  */
+@Slf4j
 @CrossOrigin
 @SpringBootApplication
 @EnableScheduling
 public class StreamXConsole {
-
-    private static Logger logger = LoggerFactory.getLogger(StreamXConsole.class);
 
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(StreamXConsole.class);
@@ -71,7 +70,7 @@ public class StreamXConsole {
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.info("application shutdown now, pid: " + getPid());
+            log.info("application shutdown now, pid: " + getPid());
             if (pid != null) {
                 File pidFile = new File(pid);
                 pidFile.delete();
@@ -87,6 +86,7 @@ public class StreamXConsole {
         try {
             return Integer.parseInt(name.substring(0, name.indexOf('@')));
         } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
         return -1;
     }
