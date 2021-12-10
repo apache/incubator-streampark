@@ -85,8 +85,9 @@ trait FlinkDockerfileTemplateTrait {
    */
   lazy val mainJarName: String = {
     val mainJarPath = Paths.get(flinkMainJarPath).toAbsolutePath
-    if (mainJarPath.getParent != workspace)
+    if (mainJarPath.getParent != workspace) {
       LfsOperator.copy(mainJarPath.toString, s"${workspace.toString}/${mainJarPath.getFileName.toString}")
+    }
     mainJarPath.getFileName.toString
   }
 

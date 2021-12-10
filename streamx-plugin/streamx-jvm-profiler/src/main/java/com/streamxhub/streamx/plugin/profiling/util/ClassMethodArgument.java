@@ -21,83 +21,85 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class ClassMethodArgument {
-  private final String className;
-  private final String methodName;
-  private final int argumentIndex;
+    private final String className;
+    private final String methodName;
+    private final int argumentIndex;
 
-  public ClassMethodArgument(String className, String methodName, int argumentIndex) {
-    if (className == null) {
-      throw new NullPointerException("className");
+    public ClassMethodArgument(String className, String methodName, int argumentIndex) {
+        if (className == null) {
+            throw new NullPointerException("className");
+        }
+
+        if (methodName == null) {
+            throw new NullPointerException("methodName");
+        }
+
+        if (argumentIndex < 0) {
+            throw new IllegalArgumentException(
+                "argumentIndex (must equal or greater than 0: 0 means not collecting argument value, 1 means collecting first argument value)");
+        }
+
+        this.className = className;
+        this.methodName = methodName;
+        this.argumentIndex = argumentIndex;
     }
 
-    if (methodName == null) {
-      throw new NullPointerException("methodName");
+    public String getClassName() {
+        return className;
     }
 
-    if (argumentIndex < 0) {
-      throw new IllegalArgumentException(
-          "argumentIndex (must equal or greater than 0: 0 means not collecting argument value, 1 means collecting first argument value)");
+    public String getMethodName() {
+        return methodName;
     }
 
-    this.className = className;
-    this.methodName = methodName;
-    this.argumentIndex = argumentIndex;
-  }
-
-  public String getClassName() {
-    return className;
-  }
-
-  public String getMethodName() {
-    return methodName;
-  }
-
-  public int getArgumentIndex() {
-    return argumentIndex;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    public int getArgumentIndex() {
+        return argumentIndex;
     }
 
-    ClassMethodArgument that = (ClassMethodArgument) o;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-    if (argumentIndex != that.argumentIndex) {
-      return false;
+        ClassMethodArgument that = (ClassMethodArgument) o;
+
+        if (argumentIndex != that.argumentIndex) {
+            return false;
+        }
+        if (className != null ? !className.equals(that.className) : that.className != null) {
+            return false;
+        }
+        return methodName != null ? methodName.equals(that.methodName) : that.methodName == null;
     }
-    if (className != null ? !className.equals(that.className) : that.className != null) {
-      return false;
+
+    @Override
+    public int hashCode() {
+        int result = className != null ? className.hashCode() : 0;
+        result = 31 * result + (methodName != null ? methodName.hashCode() : 0);
+        result = 31 * result + argumentIndex;
+        return result;
     }
-    return methodName != null ? methodName.equals(that.methodName) : that.methodName == null;
-  }
 
-  @Override
-  public int hashCode() {
-    int result = className != null ? className.hashCode() : 0;
-    result = 31 * result + (methodName != null ? methodName.hashCode() : 0);
-    result = 31 * result + argumentIndex;
-    return result;
-  }
-
-  @Override
-  public String toString() {
-    return "{"
-        + "className='"
-        + className
-        + '\''
-        + ", methodName='"
-        + methodName
-        + '\''
-        + ", argumentIndex='"
-        + argumentIndex
-        + '\''
-        + '}';
-  }
+    @Override
+    public String toString() {
+        return "{"
+            + "className='"
+            + className
+            + '\''
+            + ", methodName='"
+            + methodName
+            + '\''
+            + ", argumentIndex='"
+            + argumentIndex
+            + '\''
+            + '}';
+    }
 }

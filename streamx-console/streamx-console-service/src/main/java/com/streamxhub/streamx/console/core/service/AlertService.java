@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.service;
 
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -36,8 +37,6 @@ public interface AlertService {
      */
     void alert(Application application, CheckPointStatus checkPointStatus);
 
-
     void alert(Application application, FlinkAppState appState);
-
 
 }

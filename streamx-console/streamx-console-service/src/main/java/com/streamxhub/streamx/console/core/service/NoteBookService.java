@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.service;
 
 import com.streamxhub.streamx.console.core.entity.Note;

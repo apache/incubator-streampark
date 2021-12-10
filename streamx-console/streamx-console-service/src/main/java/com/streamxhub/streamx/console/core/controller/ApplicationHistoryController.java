@@ -14,6 +14,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.common.enums.ExecutionMode;
@@ -41,9 +42,9 @@ import java.util.List;
 @RequestMapping("flink/history")
 public class ApplicationHistoryController {
 
-    private final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
+    private static final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
 
-    private final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
+    private static final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
 
     @Autowired
     private ApplicationHistoryService applicationHistoryService;

@@ -34,63 +34,64 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MethodArgumentProfilerTest {
-  @Test
-  public void profile() {
-    final List<String> nameList = new ArrayList<>();
-    final List<Map<String, Object>> metricList = new ArrayList<>();
+    @Test
+    public void profile() {
+        final List<String> nameList = new ArrayList<>();
+        final List<Map<String, Object>> metricList = new ArrayList<>();
 
-    ClassMethodArgumentMetricBuffer buffer = new ClassMethodArgumentMetricBuffer();
+        ClassMethodArgumentMetricBuffer buffer = new ClassMethodArgumentMetricBuffer();
 
-    MethodArgumentCollector collector = new MethodArgumentCollector(buffer);
+        MethodArgumentCollector collector = new MethodArgumentCollector(buffer);
 
-    Reporter reporter =
-        new Reporter() {
-          @Override
-          public void report(String profilerName, Map<String, Object> metrics) {
-            nameList.add(profilerName);
-            metricList.add(metrics);
-          }
+        Reporter reporter =
+            new Reporter() {
+                @Override
+                public void report(String profilerName, Map<String, Object> metrics) {
+                    nameList.add(profilerName);
+                    metricList.add(metrics);
+                }
 
-          @Override
-          public void close() {}
-        };
+                @Override
+                public void close() {
+                }
+            };
 
-    MethodArgumentProfiler profiler = new MethodArgumentProfiler(buffer, reporter);
+        MethodArgumentProfiler profiler = new MethodArgumentProfiler(buffer, reporter);
 
-    profiler.setInterval(123);
-    Assert.assertEquals(123L, profiler.getInterval());
+        profiler.setInterval(123);
+        Assert.assertEquals(123L, profiler.getInterval());
 
-    collector.collectMetric("class1", "method1", "arg1");
-    collector.collectMetric("class1", "method1", "arg1");
-    collector.collectMetric("class2", "method2", "arg2");
+        collector.collectMetric("class1", "method1", "arg1");
+        collector.collectMetric("class1", "method1", "arg1");
+        collector.collectMetric("class2", "method2", "arg2");
 
-    profiler.profile();
+        profiler.profile();
 
-    Assert.assertEquals(2, nameList.size());
-    Assert.assertEquals(MethodArgumentProfiler.PROFILER_NAME, nameList.get(0));
+        Assert.assertEquals(2, nameList.size());
+        Assert.assertEquals(MethodArgumentProfiler.PROFILER_NAME, nameList.get(0));
 
-    Assert.assertEquals(2, metricList.size());
+        Assert.assertEquals(2, metricList.size());
 
-    List<Map<String, Object>> metricsToCheck =
-        metricList.stream()
-            .filter(
-                t ->
-                    t.get("className").equals("class1")
-                        && t.get("methodName").equals("method1")
-                        && t.get("metricName").equals("arg1"))
-            .collect(Collectors.toList());
-    Assert.assertEquals(1, metricsToCheck.size());
-    Assert.assertEquals(2.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
+        List<Map<String, Object>> metricsToCheck =
+            metricList.stream()
+                .filter(
+                    t ->
+                        t.get("className").equals("class1")
+                            && t.get("methodName").equals("method1")
+                            && t.get("metricName").equals("arg1"))
+                .collect(Collectors.toList());
+        Assert.assertEquals(1, metricsToCheck.size());
+        Assert.assertEquals(2.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
 
-    metricsToCheck =
-        metricList.stream()
-            .filter(
-                t ->
-                    t.get("className").equals("class2")
-                        && t.get("methodName").equals("method2")
-                        && t.get("metricName").equals("arg2"))
-            .collect(Collectors.toList());
-    Assert.assertEquals(1, metricsToCheck.size());
-    Assert.assertEquals(1.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
-  }
+        metricsToCheck =
+            metricList.stream()
+                .filter(
+                    t ->
+                        t.get("className").equals("class2")
+                            && t.get("methodName").equals("method2")
+                            && t.get("metricName").equals("arg2"))
+                .collect(Collectors.toList());
+        Assert.assertEquals(1, metricsToCheck.size());
+        Assert.assertEquals(1.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
+    }
 }

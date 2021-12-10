@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.metrics.flink;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

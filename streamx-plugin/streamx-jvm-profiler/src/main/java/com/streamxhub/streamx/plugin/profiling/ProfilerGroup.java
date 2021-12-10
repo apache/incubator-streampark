@@ -24,21 +24,23 @@ package com.streamxhub.streamx.plugin.profiling;
 import java.util.ArrayList;
 import java.util.List;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class ProfilerGroup {
-  private List<Profiler> oneTimeProfilers;
-  private List<Profiler> periodicProfilers;
+    private List<Profiler> oneTimeProfilers;
+    private List<Profiler> periodicProfilers;
 
-  public ProfilerGroup(List<Profiler> oneTimeProfilers, List<Profiler> periodicProfilers) {
-    this.oneTimeProfilers = new ArrayList<>(oneTimeProfilers);
-    this.periodicProfilers = new ArrayList<>(periodicProfilers);
-  }
+    public ProfilerGroup(List<Profiler> oneTimeProfilers, List<Profiler> periodicProfilers) {
+        this.oneTimeProfilers = new ArrayList<>(oneTimeProfilers);
+        this.periodicProfilers = new ArrayList<>(periodicProfilers);
+    }
 
-  public List<Profiler> getOneTimeProfilers() {
-    return oneTimeProfilers;
-  }
+    public List<Profiler> getOneTimeProfilers() {
+        return oneTimeProfilers;
+    }
 
-  public List<Profiler> getPeriodicProfilers() {
-    return periodicProfilers;
-  }
+    public List<Profiler> getPeriodicProfilers() {
+        return periodicProfilers;
+    }
 }

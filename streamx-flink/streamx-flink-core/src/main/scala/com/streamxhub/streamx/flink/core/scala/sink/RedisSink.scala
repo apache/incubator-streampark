@@ -75,7 +75,6 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
     builder.build()
   }
 
-  @Override
   def sink[T](stream: DataStream[T], mapper: RedisMapper[T], ttl: Int = Int.MaxValue): DataStreamSink[T] = {
     val sinkFun = ttl match {
       case Int.MaxValue => new RSink[T](config, mapper)

@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.base.config;
 
 import com.p6spy.engine.spy.appender.MessageFormattingStrategy;

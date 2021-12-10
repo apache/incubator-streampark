@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.test.flink.java.datastream;
 
 import com.streamxhub.streamx.flink.core.StreamEnvConfig;
@@ -32,20 +33,19 @@ import org.apache.flink.streaming.api.datastream.DataStream;
  */
 public class KafkaSimpleJavaApp {
 
-     public static void main(String[] args) {
+    public static void main(String[] args) {
 
-          StreamEnvConfig envConfig = new StreamEnvConfig(args, null);
+        StreamEnvConfig envConfig = new StreamEnvConfig(args, null);
 
-          StreamingContext context = new StreamingContext(envConfig);
+        StreamingContext context = new StreamingContext(envConfig);
 
-          DataStream<String> source = new KafkaSource<String>(context)
-                  .getDataStream()
-                  .map((MapFunction<KafkaRecord<String>, String>) KafkaRecord::value);
+        DataStream<String> source = new KafkaSource<String>(context)
+            .getDataStream()
+            .map((MapFunction<KafkaRecord<String>, String>) KafkaRecord::value);
 
-          source.print();
+        source.print();
 
-          context.start();
-     }
-
+        context.start();
+    }
 
 }

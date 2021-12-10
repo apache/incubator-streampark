@@ -101,11 +101,11 @@ class StreamTableContext(override val parameter: ParameterTool,
 
   override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
 
-  @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
+  @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
 
-  def $getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
+  def getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
 
-  def $getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(jobName, clearTransformations)
+  def getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(jobName, clearTransformations)
 
   override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
 

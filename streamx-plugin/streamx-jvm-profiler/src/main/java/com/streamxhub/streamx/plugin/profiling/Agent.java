@@ -21,23 +21,30 @@
 
 package com.streamxhub.streamx.plugin.profiling;
 
+import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
+
 import java.lang.instrument.Instrumentation;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public final class Agent {
 
-  private static AgentImpl agentImpl = new AgentImpl();
+    private static final AgentLogger LOGGER = AgentLogger.getLogger(Agent.class.getName());
 
-  private Agent() {}
+    private static AgentImpl agentImpl = new AgentImpl();
 
-  public static void agentmain(final String args, final Instrumentation instrumentation) {
-    premain(args, instrumentation);
-  }
+    private Agent() {
+    }
 
-  public static void premain(final String args, final Instrumentation instrumentation) {
-    System.out.println("Java Agent " + AgentImpl.VERSION + " premain args: " + args);
-    Arguments arguments = Arguments.parseArgs(args);
-    arguments.runConfigProvider();
-    agentImpl.run(arguments, instrumentation, null);
-  }
+    public static void agentmain(final String args, final Instrumentation instrumentation) {
+        premain(args, instrumentation);
+    }
+
+    public static void premain(final String args, final Instrumentation instrumentation) {
+        LOGGER.info("Java Agent " + AgentImpl.VERSION + " premain args: " + args);
+        Arguments arguments = Arguments.parseArgs(args);
+        arguments.runConfigProvider();
+        agentImpl.run(arguments, instrumentation, null);
+    }
 }

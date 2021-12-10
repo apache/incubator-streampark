@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -60,7 +61,6 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     public void obsolete(Long appId) {
         this.baseMapper.obsolete(appId);
     }
-
 
     @Override
     public boolean save(SavePoint entity) {

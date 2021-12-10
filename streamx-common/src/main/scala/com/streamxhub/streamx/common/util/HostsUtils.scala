@@ -25,7 +25,7 @@ import io.netty.resolver.HostsFileParser
 
 import java.net.InetAddress
 import java.util.{Map => JavaMap}
-import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.collection.immutable.ListMap
 
 /**
@@ -38,7 +38,7 @@ object HostsUtils {
    * The elements are sorted in reverse order by the length of the hostname.
    */
   def getSortSystemHosts: ListMap[String, String] = {
-    val ipMap = HostsFileParser.parse.inet4Entries.asScala.map(e => e._1 -> e._2.getHostAddress)
+    val ipMap = HostsFileParser.parse.inet4Entries.map(e => e._1 -> e._2.getHostAddress)
     ListMap(ipMap.toSeq.sortWith(_._1.length > _._1.length): _*)
   }
 
@@ -47,7 +47,7 @@ object HostsUtils {
    * Scala api.
    */
   def getSystemHosts(excludeLocalHost: Boolean = false): Map[String, String] = {
-    var map = HostsFileParser.parse.inet4Entries.asScala.map(e => e._1 -> e._2.getHostAddress).toMap
+    var map = HostsFileParser.parse.inet4Entries.map(e => e._1 -> e._2.getHostAddress).toMap
     if (excludeLocalHost) {
       val localHostName = InetAddress.getLocalHost.getHostName
       map = map.filter(!_._1.equals("localhost"))
@@ -61,7 +61,6 @@ object HostsUtils {
    * Get hosts info from system, entry of return Map [hostname -> ipv4].
    * Java api.
    */
-  def getSystemHostsAsJava(excludeLocalHost: Boolean): JavaMap[String, String] = getSystemHosts(excludeLocalHost).asJava
-
+  def getSystemHostsAsJava(excludeLocalHost: Boolean): JavaMap[String, String] = getSystemHosts(excludeLocalHost)
 
 }

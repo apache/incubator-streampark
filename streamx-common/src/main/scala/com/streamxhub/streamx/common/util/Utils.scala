@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.common.util
 
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 
 import java.io.{BufferedInputStream, File, FileInputStream, IOException}
 import java.net.URL
@@ -50,8 +50,9 @@ object Utils {
   def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 
   def require(requirement: Boolean, message: String): Unit = {
-    if (!requirement)
+    if (!requirement) {
       throw new IllegalArgumentException(s"requirement failed: $message")
+    }
   }
 
   @throws[IOException] def checkJarFile(jar: URL): Unit = {

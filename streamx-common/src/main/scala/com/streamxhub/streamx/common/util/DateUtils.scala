@@ -87,7 +87,7 @@ object DateUtils {
 
 
   //日期加减...
-  def +-(i: Int, date: Date = new Date, timeZone: TimeZone = TimeZone.getDefault): Date = {
+  def addAndSubtract(i: Int, date: Date = new Date, timeZone: TimeZone = TimeZone.getDefault): Date = {
     val cal = Calendar.getInstance
     cal.setTimeZone(timeZone)
     cal.setTime(date)
@@ -199,10 +199,6 @@ object DateUtils {
     val sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US)
     val d = sdf.parse(date)
     DateUtils.getDateFormat(d, format)
-  }
-
-  def main(args: Array[String]): Unit = {
-    println(DateUtils.+-(-1))
   }
 
 }

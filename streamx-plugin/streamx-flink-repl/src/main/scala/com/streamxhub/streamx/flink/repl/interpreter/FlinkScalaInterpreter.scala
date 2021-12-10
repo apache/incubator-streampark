@@ -524,13 +524,13 @@ class FlinkScalaInterpreter(properties: Properties) {
     new URLClassLoader(userJars.map(e => new File(e).toURI.toURL).toArray)
   }
 
-  def getConfiguration = this.configuration
+  def getConfiguration: Configuration = this.configuration
 
   def getCluster: Option[ClusterClient[_]] = cluster
 
-  def getFlinkILoop = flinkILoop
+  def getFlinkILoop: FlinkILoop = flinkILoop
 
-  def getFlinkShims = flinkShims
+  def getFlinkShims: FlinkShims = flinkShims
 
   def replaceYarnAddress(webURL: String, yarnAddress: String): String = {
     val pattern = "(https?://.*:\\d+)(.*)".r

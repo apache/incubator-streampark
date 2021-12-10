@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.system.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;

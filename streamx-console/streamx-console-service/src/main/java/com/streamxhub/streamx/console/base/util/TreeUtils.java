@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.base.util;
 
 import com.streamxhub.streamx.console.base.domain.router.RouterTree;

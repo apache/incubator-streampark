@@ -24,7 +24,11 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.streamxhub.streamx.common.util.DateUtils;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Date;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class RefreshCacheTest {
@@ -35,8 +39,8 @@ public class RefreshCacheTest {
     public void cache() throws Exception {
         if (caffeine == null) {
             caffeine = Caffeine.newBuilder()
-                    .refreshAfterWrite(10, TimeUnit.SECONDS)
-                    .build(this::refresh);
+                .refreshAfterWrite(10, TimeUnit.SECONDS)
+                .build(this::refresh);
         }
         caffeine.put("config", "hadoop");
         while (true) {

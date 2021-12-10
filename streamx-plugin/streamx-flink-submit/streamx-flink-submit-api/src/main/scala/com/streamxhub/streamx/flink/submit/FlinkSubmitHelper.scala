@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.submit
 import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy
 import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 
 import java.util.regex.Pattern
 import java.util.{Map => JavaMap}

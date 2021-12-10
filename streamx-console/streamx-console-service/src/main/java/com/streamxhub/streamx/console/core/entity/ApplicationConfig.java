@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
@@ -64,7 +65,6 @@ public class ApplicationConfig {
     private Boolean latest;
 
     private transient boolean effective = false;
-
 
     public void setToApplication(Application application) {
         String unzipString = DeflaterUtils.unzipString(content);

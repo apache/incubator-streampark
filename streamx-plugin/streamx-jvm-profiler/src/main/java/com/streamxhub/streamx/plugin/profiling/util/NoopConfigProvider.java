@@ -28,17 +28,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class NoopConfigProvider implements ConfigProvider {
-  @Override
-  public Map<String, Map<String, List<String>>> getConfig() {
-    Map<String, Map<String, List<String>>> configMap = new HashMap<>();
+    @Override
+    public Map<String, Map<String, List<String>>> getConfig() {
+        Map<String, Map<String, List<String>>> configMap = new HashMap<>();
 
-    Map<String, List<String>> values = new HashMap<>();
-    values.put("noop", Arrays.asList("true"));
+        Map<String, List<String>> values = new HashMap<>();
+        values.put("noop", Arrays.asList("true"));
 
-    configMap.put("", values);
+        configMap.put("", values);
 
-    return configMap;
-  }
+        return configMap;
+    }
 }

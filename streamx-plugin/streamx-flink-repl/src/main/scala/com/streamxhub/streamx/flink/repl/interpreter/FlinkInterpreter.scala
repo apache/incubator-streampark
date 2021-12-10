@@ -24,7 +24,6 @@ import com.streamxhub.streamx.common.util.{ClassLoaderUtils, Logger}
 
 import java.util.Properties
 
-
 /**
  * Interpreter for flink scala. It delegates all the function to FlinkScalaInterpreter.
  */
@@ -36,7 +35,9 @@ class FlinkInterpreter(properties: Properties) extends Logger {
     val scalaVersion = scala.util.Properties.versionString
     logInfo("Using Scala: " + scalaVersion)
     if (!scalaVersion.contains("version 2.11")) {
+      // scalastyle:off throwerror
       throw new ExceptionInInitializerError(s"Unsupported scala version: $scalaVersion Only scala 2.11 is supported")
+      // scalastyle:on throwerror
     }
   }
 

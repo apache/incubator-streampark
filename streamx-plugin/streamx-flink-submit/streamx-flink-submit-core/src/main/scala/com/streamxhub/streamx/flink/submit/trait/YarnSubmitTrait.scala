@@ -106,8 +106,8 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
   }
 
   private[submit] def getParallelism(submitRequest: SubmitRequest): Integer = {
-    if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
-      Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString)
+    if (submitRequest.property.containsKey(keyFlinkParallelism())) {
+      Integer.valueOf(submitRequest.property.get(keyFlinkParallelism()).toString)
     } else {
       val parallelism = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome).getInteger(CoreOptions.DEFAULT_PARALLELISM, -1)
       if (parallelism == -1) null else parallelism

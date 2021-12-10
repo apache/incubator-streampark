@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.packer.maven
 
 import java.util.{List => JavaList}
-import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 
 /**
  * @author Al-assad
@@ -33,7 +33,7 @@ case class JarPackDeps(mavenArts: Set[MavenArtifact] = Set(),
                        extJarLibs: Set[String] = Set()) {
 
   def this(mavenArts: JavaList[MavenArtifact], extJarLibs: JavaList[String]) {
-    this(mavenArts.asScala.toSet, extJarLibs.asScala.toSet)
+    this(mavenArts.toSet, extJarLibs.toSet)
   }
 
   def merge(jarLibs: Set[String]): JarPackDeps =

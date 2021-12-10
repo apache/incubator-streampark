@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.console.system.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;

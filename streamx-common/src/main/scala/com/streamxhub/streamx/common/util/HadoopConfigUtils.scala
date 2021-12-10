@@ -84,8 +84,9 @@ object HadoopConfigUtils {
       return
     }
     val hostsMap = HostsUtils.getSortSystemHosts
-    if (hostsMap.isEmpty)
+    if (hostsMap.isEmpty) {
       return
+    }
     configDir.listFiles
       .filter(_.isFile).filter(e => filter.contains(e.getName))
       .foreach(rewriteHostIpMapper(_, hostsMap))
@@ -93,7 +94,7 @@ object HadoopConfigUtils {
 
   private[this] def rewriteHostIpMapper(configFile: File, hostsMap: ListMap[String, String]): Unit = {
     // replace the host information in the configuration content
-    val lines = ApacheFileUtils.readLines(configFile).asScala.map {
+    val lines = ApacheFileUtils.readLines(configFile).map {
       case line if !line.trim.startsWith("<value>") => line
       case line =>
         var shot = hostsMap.find(e => line.contains(e._1))
