@@ -24,69 +24,70 @@ const constRouter = [
     path: '/index',
     name: 'home',
     redirect: '/home'
-  },{
-    path: '/iframe',
-    component: EmptyView,
-    children: [{
-      'path': '/iframe/system',
-      'name': 'System',
-      'component': PageView,
-      'children': [{
-        'path': '/iframe/system/user',
-        // 'name': 'User Management',
-        'component': resolveView('system/user/User'),
-      }, {
-        'path': '/iframe/system/role',
-        // 'name': 'Role Management',
-        'component': resolveView('system/role/Role'),
-      }, {
-        'path': '/iframe/system/menu',
-        // 'name': 'Router Management',
-        'component': resolveView('system/menu/Menu'),
-      }]
-    }, {
-      'path': '/iframe/flink',
-      'name': 'StreamX',
-      'component': PageView,
-      'children': [{
-        'path': '/iframe/flink/app/edit_streamx',
-        // 'name': 'Edit StreamX App',
-        'component': resolveView('flink/app/EditStreamX'),
-      }, {
-        'path': '/iframe/flink/app/add',
-        // 'name': 'Add Application',
-        'component': resolveView('flink/app/Add'),
-      }, {
-        'path': '/iframe/flink/app/detail',
-        // 'name': 'App Detail',
-        'component': resolveView('flink/app/Detail'),
-      }, {
-        'path': '/iframe/flink/app/edit_flink',
-        // 'name': 'Edit Flink App',
-        'component': resolveView('flink/app/EditFlink'),
-      }, {
-        'path': '/iframe/flink/project/add',
-        // 'name': 'Add Project',
-        'component': resolveView('flink/project/Add'),
-      }, {
-        'path': '/iframe/flink/project',
-        // 'name': 'Project',
-        'component': resolveView('flink/project/View'),
-      }, {
-        'path': '/iframe/flink/app',
-        // 'name': 'Application',
-        'component': resolveView('flink/app/View'),
-      }, {
-        'path': '/iframe/flink/notebook/view',
-        // 'name': 'Notebook',
-        'component': resolveView('flink/notebook/Submit'),
-      }, {
-        'path': '/iframe/flink/setting',
-        // 'name': 'Setting',
-        'component': resolveView('flink/setting/View'),
-      }]
-    }]
   }
+  // ,{
+  //   path: '/iframe',
+  //   component: EmptyView,
+  //   children: [{
+  //     'path': '/iframe/system',
+  //     'name': 'System',
+  //     'component': PageView,
+  //     'children': [{
+  //       'path': '/iframe/system/user',
+  //       // 'name': 'User Management',
+  //       'component': resolveView('system/user/User'),
+  //     }, {
+  //       'path': '/iframe/system/role',
+  //       // 'name': 'Role Management',
+  //       'component': resolveView('system/role/Role'),
+  //     }, {
+  //       'path': '/iframe/system/menu',
+  //       // 'name': 'Router Management',
+  //       'component': resolveView('system/menu/Menu'),
+  //     }]
+  //   }, {
+  //     'path': '/iframe/flink',
+  //     'name': 'StreamX',
+  //     'component': PageView,
+  //     'children': [{
+  //       'path': '/iframe/flink/app/edit_streamx',
+  //       // 'name': 'Edit StreamX App',
+  //       'component': resolveView('flink/app/EditStreamX'),
+  //     }, {
+  //       'path': '/iframe/flink/app/add',
+  //       // 'name': 'Add Application',
+  //       'component': resolveView('flink/app/Add'),
+  //     }, {
+  //       'path': '/iframe/flink/app/detail',
+  //       // 'name': 'App Detail',
+  //       'component': resolveView('flink/app/Detail'),
+  //     }, {
+  //       'path': '/iframe/flink/app/edit_flink',
+  //       // 'name': 'Edit Flink App',
+  //       'component': resolveView('flink/app/EditFlink'),
+  //     }, {
+  //       'path': '/iframe/flink/project/add',
+  //       // 'name': 'Add Project',
+  //       'component': resolveView('flink/project/Add'),
+  //     }, {
+  //       'path': '/iframe/flink/project',
+  //       // 'name': 'Project',
+  //       'component': resolveView('flink/project/View'),
+  //     }, {
+  //       'path': '/iframe/flink/app',
+  //       // 'name': 'Application',
+  //       'component': resolveView('flink/app/View'),
+  //     }, {
+  //       'path': '/iframe/flink/notebook/view',
+  //       // 'name': 'Notebook',
+  //       'component': resolveView('flink/notebook/Submit'),
+  //     }, {
+  //       'path': '/iframe/flink/setting',
+  //       // 'name': 'Setting',
+  //       'component': resolveView('flink/setting/View'),
+  //     }]
+  //   }]
+  // }
 ]
 
 const router = new Router({
@@ -107,6 +108,7 @@ router.beforeEach((to, from, next) => {
   }
   const token = storage.get(TOKEN)
   if (token) {
+    console.log(11111)
     if (!asyncRouter) {
       // 如果用户路由不存在
       const routers = store.getters.routers
@@ -128,9 +130,7 @@ router.beforeEach((to, from, next) => {
           }).then(()=>{
             location.reload()  
           })
-          // store.dispatch('SignOut').then(() => {
-
-            
+          // store.dispatch('SignOut').then(() => { 
           //   //正常跳转登录
           //   // next({ path: '/user/signin', query: { redirect: to.fullPath } })
           // })
@@ -170,10 +170,11 @@ function buildRouter (routes) {
     if (route.path === '/') {
       route.redirect = '/flink/app'
     }
+    console.log(process.env.NODE_ENV)
     if (route.component) {
       switch (route.component) {
         case 'BasicView':
-          route.component = BasicView
+          route.component = process.env.NODE_ENV!='development'?EmptyView:BasicView
           break
         case 'RouteView':
           route.component = RouteView
