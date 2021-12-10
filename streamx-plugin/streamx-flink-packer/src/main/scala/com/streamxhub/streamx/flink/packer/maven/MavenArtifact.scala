@@ -25,13 +25,13 @@ import java.util.regex.Pattern
 case class MavenArtifact(groupId: String, artifactId: String, version: String)
 
 object MavenArtifact {
-  private val p = Pattern.compile("([^: ]+):([^: ]+):([^: ]+)")
+  private lazy val PATTERN = Pattern.compile("([^: ]+):([^: ]+):([^: ]+)")
 
   /**
    * build from coords
    */
   def of(coords: String): MavenArtifact = {
-    p.matcher(coords) match {
+    PATTERN.matcher(coords) match {
       case m if m.matches() =>
         val groupId = m.group(1)
         val artifactId = m.group(2)

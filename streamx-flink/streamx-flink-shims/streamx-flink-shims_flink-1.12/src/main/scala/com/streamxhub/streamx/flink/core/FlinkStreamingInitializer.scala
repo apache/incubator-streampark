@@ -92,7 +92,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   private[this] var localStreamEnv: StreamExecutionEnvironment = _
 
   private[this] lazy val defaultFlinkConf: Map[String, String] = {
-    parameter.get(keyFlinkConf(), null) match {
+    parameter.get(KEY_FLINK_CONF(), null) match {
       case null =>
         //通过脚本启动..
         val flinkHome = System.getenv("FLINK_HOME")
@@ -142,7 +142,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
-    val config = argsMap.get(keyAppConf(), null) match {
+    val config = argsMap.get(KEY_APP_CONF(), null) match {
       // scalastyle:off throwerror
       case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--conf $path \" in main arguments")
       // scalastyle:on throwerror
@@ -167,7 +167,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   def initStreamEnv(): Unit = {
     localStreamEnv = StreamExecutionEnvironment.getExecutionEnvironment
     //init env...
-    Try(parameter.get(keyFlinkParallelism()).toInt).getOrElse {
+    Try(parameter.get(KEY_FLINK_PARALLELISM()).toInt).getOrElse {
       Try(parameter.get(CoreOptions.DEFAULT_PARALLELISM.key()).toInt).getOrElse(CoreOptions.DEFAULT_PARALLELISM.defaultValue().toInt)
     } match {
       case p if p > 0 => localStreamEnv.setParallelism(p)

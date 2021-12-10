@@ -41,11 +41,11 @@ import scala.util.{Failure, Success, Try}
 
 trait FlinkSubmitTrait extends Logger {
 
-  private[submit] lazy val PARAM_KEY_FLINK_CONF = keyFlinkConf("--")
-  private[submit] lazy val PARAM_KEY_FLINK_SQL = keyFlinkSql("--")
-  private[submit] lazy val PARAM_KEY_APP_CONF = keyAppConf("--")
-  private[submit] lazy val PARAM_KEY_APP_NAME = keyAppName("--")
-  private[submit] lazy val PARAM_KEY_FLINK_PARALLELISM = keyFlinkParallelism("--")
+  private[submit] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF("--")
+  private[submit] lazy val PARAM_KEY_FLINK_SQL = KEY_FLINK_SQL("--")
+  private[submit] lazy val PARAM_KEY_APP_CONF = KEY_APP_CONF("--")
+  private[submit] lazy val PARAM_KEY_APP_NAME = KEY_APP_NAME("--")
+  private[submit] lazy val PARAM_KEY_FLINK_PARALLELISM = KEY_FLINK_PARALLELISM("--")
 
   @throws[Exception] def submit(submitRequest: SubmitRequest): SubmitResponse = {
     logInfo(
@@ -165,7 +165,7 @@ trait FlinkSubmitTrait extends Logger {
       //页面定义的参数优先级大于app配置文件,属性参数...
       if (submitRequest.property != null && submitRequest.property.nonEmpty) {
         submitRequest.property
-          .filter(_._1 != keyFlinkSql())
+          .filter(_._1 != KEY_FLINK_SQL())
           .filter(_._1 != KEY_JOB_ID)
           .foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
       }
