@@ -67,7 +67,6 @@ import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.NoticeType;
 import com.streamxhub.streamx.console.core.enums.OptionState;
-import com.streamxhub.streamx.console.core.enums.ResourceFrom;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.runner.EnvInitializer;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
@@ -752,7 +751,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             FsOperator fsOperator = application.getFsOperator();
                             fsOperator.delete(appHome);
                             if (application.isUploadJob()) {
-                                String APP_UPLOADS = application.getWorkspace().APP_UPLOADS();
+                                String appUploads = application.getWorkspace().APP_UPLOADS();
                                 String temp = WebUtils.getAppDir("temp");
                                 File localJar = new File(temp, application.getJar());
                                 String targetJar = appUploads.concat("/").concat(application.getJar());
@@ -1241,7 +1240,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             } else {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
                 jarPackDeps = Application.Dependency.jsonToDependency(flinkSql.getDependency()).toJarPackDeps();
-                optionMap.put(ConfigConst.keyFlinkSql(null), flinkSql.getSql());
+                optionMap.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
             }
 
             ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
