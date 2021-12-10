@@ -318,7 +318,7 @@
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
             placeholder="Please select resource from"
-            @change="handleChangeResourceForm"
+            @change="handleChangeResourceFrom"
             v-decorator="[ 'resourceFrom' , {rules: [{ required: true, message: 'resource from is required' }]} ]">
             <a-select-option value="cvs">
               <svg-icon role="img" name="github"/>
@@ -1738,7 +1738,7 @@ export default {
       this.handleK8sPodTemplateEditor()
     },
 
-    handleChangeResourceForm(value) {
+    handleChangeResourceFrom(value) {
       this.resourceFrom = value
     },
 
@@ -2036,6 +2036,8 @@ export default {
           }).catch((err) => {
             callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
           })
+        } else {
+          callback()
         }
       }
     },

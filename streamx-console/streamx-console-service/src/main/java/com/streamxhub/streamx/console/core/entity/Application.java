@@ -512,6 +512,16 @@ public class Application implements Serializable {
         return DevelopmentMode.CUSTOMCODE.getValue().equals(this.getJobType());
     }
 
+    @JsonIgnore
+    public boolean isUploadJob() {
+        return isCustomCodeJob() && ResourceFrom.UPLOAD.getValue().equals(this.getResourceFrom());
+    }
+
+    @JsonIgnore
+    public boolean isCICDJob() {
+        return isCustomCodeJob() && ResourceFrom.CICD.getValue().equals(this.getResourceFrom());
+    }
+
     public boolean isStreamXJob() {
         return this.getAppType() == ApplicationType.STREAMX_FLINK.getType();
     }

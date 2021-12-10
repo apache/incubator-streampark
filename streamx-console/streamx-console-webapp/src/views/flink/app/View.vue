@@ -859,7 +859,6 @@
   import {weburl} from '@api/setting'
   import {Terminal} from 'xterm'
   import 'xterm/css/xterm.css'
-  import SockJS from 'sockjs-client'
   import {baseUrl} from '@/api/baseUrl'
   import SvgIcon from '@/components/SvgIcon'
   import storage from '@/utils/storage'
@@ -1548,11 +1547,19 @@
 
     handleEdit(app) {
       this.SetAppId(app.id)
+      //appType         STREAMX_FLINK(1, "StreamX Flink"), APACHE_FLINK(2, "Apache Flink"),
+      //jobType         CUSTOMCODE("Custom Code", 1), FLINKSQL("Flink SQL", 2)
+      //ResourceFrom    CICD(1),UPLOAD(2)
       if (app.appType === 1) {
-        if(app.resourceForm === 1) {
-          this.$router.push({'path': '/flink/app/edit_streamx'})
+        this.$router.push({'path': '/flink/app/edit_streamx'})
+        if (app.jobType === 1) {
+          if (app.resourceForm === 1) {
+            this.$router.push({'path': '/flink/app/edit_streamx'})
+          } else {
+            this.$router.push({'path': '/flink/app/edit_flink'})
+          }
         } else {
-          this.$router.push({'path': '/flink/app/edit_flink'})
+          this.$router.push({'path': '/flink/app/edit_streamx'})
         }
       } else {
         this.$router.push({'path': '/flink/app/edit_flink'})
@@ -1614,15 +1621,7 @@
       this.terminal.open(container, true)
 
       const url = baseUrl().concat('/websocket/' + this.handleGetSocketId())
-
-      window.WebSocket = window.WebSocket || window.MozWebSocket
-      let socket = null
-
-      if (window.WebSocket) {
-        socket = new WebSocket(url.replace('http:','ws:'))
-      } else {
-        socket = new SockJS(url)
-      }
+      const socket = this.getSocket(url)
 
       socket.onopen = () => {
         downLog({id: app.id})
