@@ -61,7 +61,7 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
   def start(): JobExecutionResult = execute()
 
   @deprecated override def execute(): JobExecutionResult = {
-    val appName = (parameter.get(keyAppName(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
+    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
       case (appName: String, _) => appName
       case (null, appName: String) => appName
       case _ => ""
