@@ -63,6 +63,13 @@ public class EnvInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        String appHome = WebUtils.getAppHome();
+        if (appHome == null) {
+            throw new ExceptionInInitializerError("[StreamX] System initialization check failed," +
+                " The system initialization check failed. If started local for development and debugging," +
+                " please ensure the -Dapp.home parameter is clearly specified," +
+                " more detail: http://www.streamxhub.com/zh/doc/console/deployment");
+        }
         overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_LOCAL(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
         overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_REMOTE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
         overrideSystemProp(ConfigConst.KEY_DOCKER_IMAGE_NAMESPACE(), ConfigConst.DOCKER_IMAGE_NAMESPACE_DEFAULT());

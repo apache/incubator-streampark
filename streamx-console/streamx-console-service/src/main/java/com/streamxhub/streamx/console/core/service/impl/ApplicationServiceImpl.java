@@ -987,6 +987,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (isKubernetesApp(application)) {
             String restUrl = k8sFlinkTrkMonitor.getRemoteRestUrl(toTrkId(application));
             application.setFlinkRestUrl(restUrl);
+
+            // set duration
+            long now = System.currentTimeMillis();
+            if (application.getTracking() == 1 && application.getStartTime() != null && application.getStartTime().getTime() > 0) {
+                application.setDuration(now - application.getStartTime().getTime());
+            }
         }
 
         return application;
