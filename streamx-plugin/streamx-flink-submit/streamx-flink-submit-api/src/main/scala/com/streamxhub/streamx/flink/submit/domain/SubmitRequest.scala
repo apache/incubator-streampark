@@ -78,7 +78,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
 
   lazy val effectiveAppName: String = if (this.appName == null) appProperties(KEY_FLINK_APP_NAME) else this.appName
 
-  lazy val flinkSQL: String = property.remove(keyFlinkSql()).toString
+  lazy val flinkSQL: String = property.remove(KEY_FLINK_SQL()).toString
 
   lazy val jobID: String = property.remove(KEY_JOB_ID).toString
 

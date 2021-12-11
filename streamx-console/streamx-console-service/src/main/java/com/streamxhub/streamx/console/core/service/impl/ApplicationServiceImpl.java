@@ -1244,7 +1244,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             } else {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
                 jarPackDeps = Application.Dependency.jsonToDependency(flinkSql.getDependency()).toJarPackDeps();
-                optionMap.put(ConfigConst.keyFlinkSql(null), flinkSql.getSql());
+                optionMap.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
             }
 
             ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());

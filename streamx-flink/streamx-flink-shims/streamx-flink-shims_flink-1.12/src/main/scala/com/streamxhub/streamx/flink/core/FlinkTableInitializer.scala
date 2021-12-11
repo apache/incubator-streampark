@@ -131,7 +131,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
    */
   override def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
-    val parameter = argsMap.get(keyAppConf(), null) match {
+    val parameter = argsMap.get(KEY_APP_CONF(), null) match {
       case null | "" =>
         logWarn("Usage:can't fond config,you can set \"--conf $path \" in main arguments")
         ParameterTool.fromSystemProperties().mergeWith(argsMap)
@@ -140,12 +140,12 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         //显示指定的优先级 > 项目配置文件 > 系统配置文件...
         ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(configArgs)).mergeWith(argsMap)
     }
-    parameter.get(keyFlinkSql()) match {
+    parameter.get(KEY_FLINK_SQL()) match {
       case null => parameter
       case param =>
         //for streamx-console
         Try(DeflaterUtils.unzipString(param)) match {
-          case Success(value) => parameter.mergeWith(ParameterTool.fromMap(Map(keyFlinkSql() -> value)))
+          case Success(value) => parameter.mergeWith(ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value)))
           case Failure(_) =>
             val sqlFile = new File(param)
             Try(PropertiesUtils.fromYamlFile(sqlFile.getAbsolutePath)) match {
@@ -216,7 +216,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         }
         localStreamTableEnv = StreamTableEnvironment.create(streamEnvironment, setting)
     }
-    val appName = (parameter.get(keyAppName(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
+    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
       case (appName: String, _) => appName
       case (null, appName: String) => appName
       case _ => null

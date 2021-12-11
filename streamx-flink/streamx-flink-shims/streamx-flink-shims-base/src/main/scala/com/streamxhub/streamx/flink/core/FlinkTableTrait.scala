@@ -46,7 +46,7 @@ abstract class FlinkTableTrait(val parameter: ParameterTool,
    * @return
    */
   def start(): JobExecutionResult = {
-    val appName = (parameter.get(keyAppName(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
+    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
       case (appName: String, _) => appName
       case (null, appName: String) => appName
       case _ => ""

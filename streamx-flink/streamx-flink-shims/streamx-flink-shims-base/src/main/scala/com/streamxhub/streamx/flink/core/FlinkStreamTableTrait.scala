@@ -74,7 +74,7 @@ abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
   def start(name: String = null): JobExecutionResult = {
     val appName = name match {
       case null =>
-        (parameter.get(keyAppName(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
+        (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
           case (appName: String, _) => appName
           case (null, appName: String) => appName
           case _ => ""
