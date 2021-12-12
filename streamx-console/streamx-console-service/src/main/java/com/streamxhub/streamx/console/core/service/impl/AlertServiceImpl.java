@@ -110,10 +110,10 @@ public class AlertServiceImpl implements AlertService {
         if (this.senderEmail != null && Utils.notEmpty(application.getAlertEmail())) {
             MailTemplate mail = getMailTemplate(application);
             mail.setType(1);
-            mail.setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()));
+            mail.setTitle(String.format("通知:%s已经%s", application.getJobName(), appState.name()));
             mail.setStatus(appState.name());
 
-            String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
+            String subject = String.format("实时计算任务:%s已经%s", application.getJobName(), appState.name());
             String[] emails = application.getAlertEmail().split(",");
             sendEmail(mail, subject, emails);
         }
@@ -125,9 +125,9 @@ public class AlertServiceImpl implements AlertService {
             String phoneHost = this.senderSMS.getPhoneHost();
             SMSTemplate sms = getSMSTemplate(application);
             sms.setType(1);
-            sms.setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()));
+            sms.setTitle(String.format("通知:%s已经%s", application.getJobName(), appState.name()));
             sms.setStatus(appState.name());
-            String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
+            String subject = String.format("实时计算任务:%s已经%s", application.getJobName(), appState.name());
             String phoneNumber = this.senderSMS.getPhoneNumber();
             if(Utils.notEmpty(application.getAlertPhoneNumber()))
             {
@@ -147,9 +147,9 @@ public class AlertServiceImpl implements AlertService {
             mail.setType(2);
             mail.setCpFailureRateInterval(DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));
             mail.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
-            mail.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
+            mail.setTitle(String.format("通知: %s checkpoint 失败", application.getJobName()));
 
-            String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
+            String subject = String.format("实时计算任务: %s, checkPoint 失败", application.getJobName());
             String[] emails = application.getAlertEmail().split(",");
             sendEmail(mail, subject, emails);
         }
@@ -163,8 +163,8 @@ public class AlertServiceImpl implements AlertService {
             smsTemplate.setType(2);
             smsTemplate.setCpFailureRateInterval(DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));
             smsTemplate.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
-            smsTemplate.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
-            String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
+            smsTemplate.setTitle(String.format("通知: %s checkpoint 失败", application.getJobName()));
+            String subject = String.format("实时计算任务: %s, checkPoint 失败", application.getJobName());
             String phoneNumber = this.senderSMS.getPhoneNumber();
             if(Utils.notEmpty(application.getAlertPhoneNumber()))
             {
@@ -212,9 +212,8 @@ public class AlertServiceImpl implements AlertService {
         String endTime = sms.getEndTime();
         String link = sms.getLink();
         String alertMessage = subject + "\r\n"
-            + jobName + " start from " + startTime
-            + ",end in " + endTime + ";\r\n"
-            + "Please Visit the Hadoop process link to see why" + "\r\n"
+             +"实时任务结束于 " + endTime
+            + ",任务详情请查看" + "\r\n"
             + link;
         log.info("alertMessage = " + alertMessage);
         try {

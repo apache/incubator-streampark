@@ -26,9 +26,12 @@ export function baseUrl() {
     case 'production':
       url = (arguments[0] || null) ? (location.protocol + '//' + location.host) : '/'
       break
+    case 'dev':
+      url = '/api'
+      break
     //开发测试阶段采用前后端分离,这里配置后端的请求URI
     case 'development':
-      url = 'http://localhost:10000'
+      url = '/api'
       break
   }
   return url

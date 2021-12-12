@@ -3,9 +3,10 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service --mode=dev serve",
     "build": "vue-cli-service build",
-    "build:dev": "vue-cli-service --mode=development build",
+    "build:development": "vue-cli-service --mode=development build",
+    "build:dev": "vue-cli-service --mode=dev build",
     "build:prod": "vue-cli-service --mode=production build",
     "build:detached": "vue-cli-service --mode=detached build",
     "lint": "vue-cli-service lint",
