@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -101,5 +102,12 @@ public class FlinkSqlController {
         List<FlinkSql> sqlList = flinkSqlService.history(application);
         return RestResponse.create().data(sqlList);
     }
+
+    @PostMapping("lineage")
+    public Map<String,List<Map<String, String>>> lineage(String sql, Long versionId) {
+        return flinkSqlService.lineageSql(sql, versionId);
+    }
+
+
 
 }

@@ -27,6 +27,7 @@ import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.flink.core.SqlError;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author benjobs
@@ -79,4 +80,6 @@ public interface FlinkSqlService extends IService<FlinkSql> {
     void rollback(Application application);
 
     SqlError verifySql(String sql, Long versionId);
+
+    Map<String,List<Map<String, String>>> lineageSql(String sql, Long versionId);
 }

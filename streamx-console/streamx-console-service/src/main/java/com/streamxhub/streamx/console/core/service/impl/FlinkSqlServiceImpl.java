@@ -37,6 +37,7 @@ import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
+import com.streamxhub.streamx.flink.core.FlinkSqlLineage;
 import com.streamxhub.streamx.flink.core.SqlError;
 import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -194,6 +196,21 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
                 return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), sqlError);
             } catch (Throwable e) {
                 log.error("verifySql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
+            }
+            return null;
+        });
+    }
+    @Override
+    public Map<String,List<Map<String, String>>> lineageSql(String sql, Long versionId) {
+        FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
+        return FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), (Function<ClassLoader, Map<String,List<Map<String, String>>>>) classLoader -> {
+            try {
+                Class<?> clazz = classLoader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlLineage");
+                Method method = clazz.getDeclaredMethod("lineageSql", String.class);
+                method.setAccessible(true);
+                return (Map<String, List<Map<String, String>>>) method.invoke(null, sql);
+            } catch (Throwable e) {
+                log.error("lineageSql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
             }
             return null;
         });
