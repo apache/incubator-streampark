@@ -22,6 +22,8 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.StorageType
 import com.streamxhub.streamx.common.util.{HdfsUtils, SystemPropertyUtils}
 
+import java.net.URI
+
 /**
  * @author benjobs
  * @param storageType
@@ -50,9 +52,17 @@ case class Workspace(storageType: StorageType) {
           case null =>
             s"${HdfsUtils.getDefaultFS}$STREAMX_WORKSPACE_DEFAULT"
           case p =>
-            require(p.startsWith("hdfs://"), "")
-            val path = p.replaceFirst("^hdfs://((.*):\\d+/+|/+|)", "/")
-            s"${HdfsUtils.getDefaultFS}$path"
+            var defaultFs = HdfsUtils.getDefaultFS
+            if (p.startsWith("hdfs://")) {
+              if (p.startsWith(defaultFs)) {
+                p
+              } else {
+                var path = URI.create(p).getPath
+                s"${HdfsUtils.getDefaultFS}$path"
+              }
+            } else {
+              s"${HdfsUtils.getDefaultFS}$p"
+            }
         }
     }
   }
