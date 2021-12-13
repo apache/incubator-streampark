@@ -170,11 +170,10 @@ function buildRouter (routes) {
     if (route.path === '/') {
       route.redirect = '/flink/app'
     }
-    console.log(process.env.NODE_ENV)
     if (route.component) {
       switch (route.component) {
         case 'BasicView':
-          route.component = process.env.NODE_ENV!='development'?EmptyView:BasicView
+          route.component = process.env.NODE_VIEW=='empty'?EmptyView:BasicView
           break
         case 'RouteView':
           route.component = RouteView

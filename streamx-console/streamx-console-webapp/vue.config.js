@@ -28,6 +28,7 @@ const {getThemeColors, modifyVars} = require('./src/utils/themeUtil')
 const {resolveCss} = require('./src/utils/theme-color-replacer-extend')
 const isProd = process.env.NODE_ENV === 'production'
 
+console.log(process.env.NODE_VIEW)
 
 function resolve (dir) {
   return path.join(__dirname, dir)
@@ -78,7 +79,10 @@ module.exports = {
         matchColors: getThemeColors(),
         injectCss: true,
         resolveCss
-      })
+      }),
+      new webpack.DefinePlugin({
+        'process.env.NODE_VIEW': JSON.stringify(process.env.NODE_VIEW)
+    })
     ]
   },
 
