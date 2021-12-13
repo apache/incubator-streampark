@@ -45,8 +45,8 @@ public enum PipeType {
         1,
         "flink native kubernetes session mode task building pipeline",
         ImmutableMap.<Integer, String>builder()
-            .put(1, "create building workspace")
-            .put(2, "build shaded flink app jar")
+            .put(1, "Create building workspace")
+            .put(2, "Build shaded flink app jar")
             .build(),
         FlinkK8sSessionBuildResponse.class
     ),
@@ -58,13 +58,13 @@ public enum PipeType {
         2,
         "flink native kubernetes session mode task building pipeline",
         ImmutableMap.<Integer, String>builder()
-            .put(1, "create building workspace")
-            .put(2, "export kubernetes pod template")
-            .put(3, "build shaded flink app jar")
-            .put(4, "export flink app dockerfile")
-            .put(5, "pull flink app base docker image")
-            .put(6, "build flink app docker image")
-            .put(7, "push flink app docker image")
+            .put(1, "Create building workspace")
+            .put(2, "Export kubernetes pod template")
+            .put(3, "Build shaded flink app jar")
+            .put(4, "Export flink app dockerfile")
+            .put(5, "Pull flink app base docker image")
+            .put(6, "Build flink app docker image")
+            .put(7, "Push flink app docker image")
             .build(),
         FlinkK8sApplicationBuildResponse.class
     ),

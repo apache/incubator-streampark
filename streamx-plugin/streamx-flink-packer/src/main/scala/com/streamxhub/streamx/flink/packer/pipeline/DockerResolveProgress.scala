@@ -24,6 +24,7 @@ import com.github.dockerjava.api.model.{PullResponseItem, PushResponseItem}
 import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper.calPercent
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * cache storage for docker resolved progress
@@ -32,20 +33,22 @@ import scala.collection.mutable
  */
 class DockerResolveProgress(val pull: DockerPullProgress, val build: DockerBuildProgress, val push: DockerPushProgress)
 
-class DockerPullProgress(layers: mutable.Map[String, DockerLayerProgress], var error: String, var lastTime: Long) {
+class DockerPullProgress(val layers: mutable.Map[String, DockerLayerProgress], var error: String, var lastTime: Long) {
   //noinspection DuplicatedCode
   def update(pullRsp: PullResponseItem): Unit = {
-    if (pullRsp != null || pullRsp.getId != null || pullRsp.getStatus != null)
+    if (pullRsp == null || pullRsp.getId == null || pullRsp.getStatus == null)
       return
     if (pullRsp.getStatus.contains("complete")) {
       layers += pullRsp.getId -> DockerLayerProgress(pullRsp.getId, pullRsp.getStatus, 1, 1)
       lastTime = System.currentTimeMillis
     } else {
-      layers += pullRsp.getId -> DockerLayerProgress(
-        pullRsp.getId,
-        pullRsp.getStatus,
-        Option(pullRsp.getProgressDetail.getCurrent).map(_.toLong).getOrElse(0L),
-        Option(pullRsp.getProgressDetail.getTotal).map(_.toLong).getOrElse(0L))
+      val cur =
+        if (pullRsp.getProgressDetail == null || pullRsp.getProgressDetail.getCurrent == null) 0
+        else pullRsp.getProgressDetail.getCurrent.toLong
+      val total =
+        if (pullRsp.getProgressDetail == null || pullRsp.getProgressDetail.getTotal == null) 0
+        else pullRsp.getProgressDetail.getTotal.toLong
+      layers += pullRsp.getId -> DockerLayerProgress(pullRsp.getId, pullRsp.getStatus, cur, total)
       error = Option(pullRsp.getErrorDetail).map(_.getMessage).getOrElse("")
       lastTime = System.currentTimeMillis
     }
@@ -54,30 +57,33 @@ class DockerPullProgress(layers: mutable.Map[String, DockerLayerProgress], var e
   def snapshot: DockerPullSnapshot = DockerPullSnapshot.of(layers.values.toSeq, error, lastTime)
 }
 
-class DockerBuildProgress(steps: mutable.Seq[String], var lastTime: Long) {
-  def update(buildStep: String): Unit =
-    if (Option(buildStep).exists(_.nonEmpty)) {
-      steps + buildStep
+class DockerBuildProgress(val steps: ArrayBuffer[String], var lastTime: Long) {
+  def update(buildStep: String): Unit = {
+    if (buildStep != null && buildStep.nonEmpty) {
+      steps += buildStep
       lastTime = System.currentTimeMillis
     }
+  }
 
   def snapshot: DockerBuildSnapshot = DockerBuildSnapshot(steps, lastTime)
 }
 
-class DockerPushProgress(layers: mutable.Map[String, DockerLayerProgress], var error: String, var lastTime: Long) {
+class DockerPushProgress(val layers: mutable.Map[String, DockerLayerProgress], var error: String, var lastTime: Long) {
   //noinspection DuplicatedCode
   def update(pushRsp: PushResponseItem): Unit = {
-    if (pushRsp != null || pushRsp.getId != null || pushRsp.getStatus != null)
+    if (pushRsp == null || pushRsp.getId == null || pushRsp.getStatus == null)
       return
     if (pushRsp.getStatus.contains("complete")) {
       layers += pushRsp.getId -> DockerLayerProgress(pushRsp.getId, pushRsp.getStatus, 1, 1)
       lastTime = System.currentTimeMillis
     } else {
-      layers += pushRsp.getId -> DockerLayerProgress(
-        pushRsp.getId,
-        pushRsp.getStatus,
-        Option(pushRsp.getProgressDetail.getCurrent).map(_.toLong).getOrElse(0L),
-        Option(pushRsp.getProgressDetail.getTotal).map(_.toLong).getOrElse(0L))
+      val cur =
+        if (pushRsp.getProgressDetail == null || pushRsp.getProgressDetail.getCurrent == null) 0L
+        else pushRsp.getProgressDetail.getCurrent.toLong
+      val total =
+        if (pushRsp.getProgressDetail == null || pushRsp.getProgressDetail.getTotal == null) 0L
+        else pushRsp.getProgressDetail.getTotal.toLong
+      layers += pushRsp.getId -> DockerLayerProgress(pushRsp.getId, pushRsp.getStatus, cur, total)
       error = Option(pushRsp.getErrorDetail).map(_.getMessage).getOrElse("")
       lastTime = System.currentTimeMillis
     }
@@ -91,7 +97,7 @@ object DockerPullProgress {
 }
 
 object DockerBuildProgress {
-  def empty(): DockerBuildProgress = new DockerBuildProgress(mutable.Seq(), System.currentTimeMillis)
+  def empty(): DockerBuildProgress = new DockerBuildProgress(ArrayBuffer(), System.currentTimeMillis)
 }
 
 object DockerPushProgress {

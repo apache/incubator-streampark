@@ -31,8 +31,8 @@ import com.streamxhub.streamx.common.util.ThreadUtils
 import com.streamxhub.streamx.flink.kubernetes.PodTemplateTool
 import com.streamxhub.streamx.flink.packer.docker._
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
+import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline.executor
 import com.streamxhub.streamx.flink.packer.pipeline._
-import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline.executor
 
 import java.io.File
 import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}

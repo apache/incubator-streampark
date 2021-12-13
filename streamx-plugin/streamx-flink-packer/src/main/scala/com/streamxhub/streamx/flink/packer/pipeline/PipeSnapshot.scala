@@ -22,14 +22,16 @@ package com.streamxhub.streamx.flink.packer.pipeline
 
 import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper.calPercent
 
-import java.util.{Map => JMap}
+import java.util.{Map => JavaMap}
+import java.lang.{Long => JavaLong}
 import scala.collection.JavaConverters._
 
 /**
  * Snapshot for a BuildPipeline instance.
  * see com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline
  *
- * @param emitTime snapshot interception time
+ * @param emitTime   snapshot interception time
+ * @param stepStatus StepSeq -> (PipeStepStatus -> status update timestamp)
  * @author Al-assad
  */
 case class PipeSnapshot(appName: String,
@@ -37,11 +39,22 @@ case class PipeSnapshot(appName: String,
                         pipeStatus: PipeStatus,
                         curStep: Int,
                         allSteps: Int,
-                        stepStatus: Map[Int, PipeStepStatus],
+                        stepStatus: Map[Int, (PipeStepStatus, Long)],
                         error: PipeErr,
                         emitTime: Long) {
 
   def percent(): Double = calPercent(curStep, allSteps)
 
-  def stepStatusAsJava: JMap[Integer, PipeStepStatus] = stepStatus.toSeq.map(e => new Integer(e._1) -> e._2).toMap.asJava
+  def stepStatusAsJava: JavaMap[Integer, (PipeStepStatus, JavaLong)] = {
+    stepStatus.toSeq.map(e => new Integer(e._1) -> (e._2._1 -> new JavaLong(e._2._2))).toMap.asJava
+  }
+
+  def pureStepStatusAsJava: JavaMap[Integer, PipeStepStatus] = {
+    stepStatus.toSeq.map(e => new Integer(e._1) -> e._2._1).toMap.asJava
+  }
+
+  def stepStatusTimestampAsJava: JavaMap[Integer, JavaLong] = {
+    stepStatus.toSeq.map(e => new Integer(e._1) -> new JavaLong(e._2._2)).toMap.asJava
+  }
+
 }
