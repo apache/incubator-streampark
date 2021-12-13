@@ -52,7 +52,7 @@ case class Workspace(storageType: StorageType) {
           case null =>
             s"${HdfsUtils.getDefaultFS}$STREAMX_WORKSPACE_DEFAULT"
           case p =>
-            var defaultFs = ${HdfsUtils.getDefaultFS}
+            var defaultFs = HdfsUtils.getDefaultFS
             if (p.startsWith("hdfs://")) {
               if (p.startsWith(defaultFs)) {
                 p
