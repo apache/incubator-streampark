@@ -106,7 +106,7 @@ public class K8sFlinkChangeEventListener {
 
         // email alerts when necessary
         FlinkAppState state = FlinkAppState.of(app.getState());
-        if (FlinkAppState.FAILED.equals(state) || FlinkAppState.LOST.equals(state)){
+        if (FlinkAppState.FAILED.equals(state) || FlinkAppState.LOST.equals(state)) {
             Application finalApp = app;
             executor.execute(() -> alertService.alert(finalApp, state));
         }
@@ -144,7 +144,7 @@ public class K8sFlinkChangeEventListener {
             }
         }
         app.setStartTime(new Date(startTime > 0 ? startTime : 0));
-        app.setEndTime(new Date(endTime > 0 && endTime >= startTime ? endTime : 0));
+        app.setEndTime(endTime > 0 && endTime >= startTime ? new Date(endTime) : null);
         app.setDuration(duration > 0 ? duration : 0);
 
         return app;
