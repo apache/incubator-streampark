@@ -4,7 +4,7 @@ import SignInView from '@/views/user/SignIn'
 import { BasicView, RouteView, EmptyView, PageView,BasicViewIframe } from '@/layouts'
 import store from '@/store'
 import storage from '@/utils/storage'
-
+import themeUtil from '@/utils/themeUtil'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 import notification from 'ant-design-vue/es/notification'
@@ -166,6 +166,9 @@ function go (to, next) {
 }
 
 function buildRouter (routes) {
+  if( process.env.NODE_VIEW=='empty'){
+    themeUtil.changeThemeColor(null, 'dark').then()
+  }
   return routes.filter((route) => {
     if (route.path === '/') {
       route.redirect = '/flink/app'
