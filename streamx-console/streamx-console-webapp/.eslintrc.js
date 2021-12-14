@@ -35,7 +35,7 @@ module.exports = {
       'multiline': 'never'
     }],
     'vue/no-parsing-error': 0,
-    'no-console': 0,
+    // 'no-console': 0,
     'no-tabs': 0,
     'quotes': [
       2,

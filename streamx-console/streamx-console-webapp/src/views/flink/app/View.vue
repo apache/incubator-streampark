@@ -306,7 +306,7 @@
                     {{ text }}
                   </template>
                   <template
-                      v-for="(fragment, i) in text
+                    v-for="(fragment, i) in text
                       .toString()
                       .substr(0,(text.length > 30 ? 30: text.length ))
                       .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
@@ -487,7 +487,11 @@
             v-permit="'app:flameGraph'"
             @click.native="handleFlameGraph(record)"
             title="Detail"/>
-
+          <svg-icon 
+            name="shareAlt"
+            border
+            title="拓扑图"
+            @click.native="handleTp(record)"/>
           <template v-if="handleCanDelete(record)">
             <a-popconfirm
               title="Are you sure delete this job ?"
@@ -949,6 +953,7 @@
   computed: {
     innerColumns() {
       return [
+        
         {title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 280},
         {title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory'},
         {title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory'},
@@ -982,7 +987,13 @@
             }, 0)
           }
         },
-      }, {
+      },{
+        title: 'Name', 
+        dataIndex: 'Name',
+        key: 'Name',
+        width: 180
+        },
+       {
         title: 'Flink Version',
         dataIndex: 'flinkVersion',
         width: 120
@@ -1070,7 +1081,12 @@
         $this.dashBigScreen = (document.documentElement.offsetWidth || document.body.offsetWidth) >= 1500
       }
     },
-
+    handleTp(){
+      //jobName
+      window.parent.postMessage({
+        action:'handleFlinkClick'
+      },'*')
+    },
     handleDeploy(app) {
       if (this.optionApps.deploy.get(app.id) === undefined || app['optionState'] === 0) {
         this.deployVisible = true

@@ -167,7 +167,7 @@ function go (to, next) {
 
 function buildRouter (routes) {
   if( process.env.NODE_VIEW=='empty'){
-    themeUtil.changeThemeColor(null, 'dark').then()
+    themeUtil.changeThemeColor(null, 'dark').then(()=>{})
   }
   return routes.filter((route) => {
     if (route.path === '/') {

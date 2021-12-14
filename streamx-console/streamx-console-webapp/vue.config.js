@@ -82,7 +82,7 @@ module.exports = {
       }),
       new webpack.DefinePlugin({
         'process.env.NODE_VIEW': JSON.stringify(process.env.NODE_VIEW)
-    })
+      }),
     ]
   },
 

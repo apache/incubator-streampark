@@ -47,6 +47,7 @@
     <password v-if="name==='password'"></password>
     <phone v-if="name==='phone'"></phone>
     <smsHost v-if="name==='smsHost'"></smsHost>
+    <a-icon type="share-alt" v-if="name==='shareAlt'" style="color:#1890ff"/>
   </span>
 </template>
 
@@ -98,9 +99,8 @@ import {
   auth,
   password,
   phone,
-  smsHost
+  smsHost,
 } from '@/core/icons'
-
 export default {
   name: 'SvgIcon',
   components: {
@@ -150,7 +150,7 @@ export default {
     auth,
     password,
     phone,
-    smsHost
+    smsHost,
   },
   props: {
     name: {
