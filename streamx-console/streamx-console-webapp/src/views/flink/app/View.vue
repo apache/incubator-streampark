@@ -446,8 +446,7 @@
 
           <a-tooltip title="Building Progress Detail">
             <a-button
-              v-if="(record.executionMode === 5 || record.executionMode === 6)"
-              :disabled="record.buildStatus == null"
+              v-if="(record.executionMode === 5 || record.executionMode === 6) && record.buildStatus != null"
               @click.native="openBuildProgressDetailDrawer(record)"
               shape="circle"
               size="small"
