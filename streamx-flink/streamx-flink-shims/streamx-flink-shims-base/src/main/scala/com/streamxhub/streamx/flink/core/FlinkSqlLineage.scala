@@ -23,9 +23,10 @@ package com.streamxhub.streamx.flink.core
 import com.streamxhub.streamx.common.enums.SqlErrorType
 import com.streamxhub.streamx.common.util.{ExceptionUtils, Logger, SqlSplitter}
 import org.apache.calcite.config.Lex
-import org.apache.calcite.sql.SqlSelect
+import org.apache.calcite.sql.{SqlIdentifier, SqlJoin, SqlNode, SqlSelect}
 import org.apache.calcite.sql.parser.SqlParser
-import org.apache.flink.sql.parser.ddl.{SqlCreateTable, SqlCreateView, SqlTableOption}
+import org.apache.flink.sql.parser.ddl.SqlTableColumn.SqlRegularColumn
+import org.apache.flink.sql.parser.ddl.{SqlCreateTable, SqlCreateView, SqlTableColumn, SqlTableOption}
 import org.apache.flink.sql.parser.dml.RichSqlInsert
 import org.apache.flink.sql.parser.validate.FlinkSqlConformance
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
@@ -38,6 +39,7 @@ import org.apache.flink.table.planner.utils.TableConfigUtils
 
 import java.{lang, util}
 import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 object FlinkSqlLineage extends Logger {
 
@@ -74,9 +76,9 @@ object FlinkSqlLineage extends Logger {
 
   def  lineageSql(sql: String): Any = {
       val lines = SqlSplitter.splitSql(sql)
-      var allTables: List[Map[String, String]] = List()
-      var outputTables:List[Map[String, String]]  = List()
-      var inputTables:List[Map[String, String]]  = List()
+      var allTables: List[Map[String, Object]] = List()
+      var outputTables:List[Map[String, Object]]  = List()
+      var inputTables:List[Map[String, Object]]  = List()
       for (sqlLine <- lines) {
         val sqlNode = parser.parse(sqlLine)
         sqlNode match {
@@ -88,7 +90,7 @@ object FlinkSqlLineage extends Logger {
               val tableOption = it.next().asInstanceOf[SqlTableOption]
               properties += (tableOption.getKeyString -> tableOption.getValueString)
             }
-            var map: Map[String, String] = Map()
+            var map: Map[String, Object] = Map()
             map += ("connector" -> properties("connector"))
             map += ("flinkTable" -> flinkTable.getTableName.toString)
             properties("connector") match {
@@ -117,33 +119,49 @@ object FlinkSqlLineage extends Logger {
                 map += ("table" -> properties("table-name"))
               case _ =>
             }
-            allTables :+= map;
-          case table: SqlCreateView =>
-            val inputTable = table.getQuery.asInstanceOf[SqlSelect].getFrom.toString
-            allTables.foreach(map =>{
-              if (map("flinkTable").equals(inputTable)) {
-                inputTables :+= map
+            var columnList:List[Map[String,Object]] = List()
+            flinkTable.getColumnList.getList.asScala.foreach(col =>{
+              col match {
+                case column:SqlRegularColumn =>
+                  var filedsMap:Map[String,Object] = Map()
+                  filedsMap += ("name" -> column.getName.toString )
+                  filedsMap += ("type" -> column.getType.getTypeName.toString)
+                  columnList :+= filedsMap
               }
             })
-          case table: RichSqlInsert =>
-            val inputTable = table.getSource.asInstanceOf[SqlSelect].getFrom.toString
-            val outputTable = table.getTargetTable.toString
+            map += ("fields" -> columnList)
+            allTables :+= map;
+          case table: SqlCreateView =>
+            val tables = ListBuffer[String]()
+            getTableNameFromSqlNode(table.getQuery,tables)
             allTables.foreach(map =>{
-              if (map("flinkTable").equals(outputTable)) {
+              tables.foreach(table =>
+                if(map("flinkTable").equals(table)){
+                  inputTables :+= map
+                }
+              )
+            })
+          case table: RichSqlInsert =>
+            val tables = ListBuffer[String]()
+            getTableNameFromSqlNode(table.getSource,tables)
+            allTables.foreach(map =>{
+              if (map("flinkTable").equals(table.getTargetTable.toString)) {
                 outputTables :+= map
               }
-              if (map("flinkTable").equals(inputTable)) {
-                inputTables :+= map
-              }
+              tables.foreach(table =>
+                if(map("flinkTable").equals(table)){
+                  inputTables :+= map
+                }
+              )
             }
 
         )
           case _ =>
         }
       }
-      inputTables = outputTables.map(table => table - ("flinkTable"))
+      inputTables = inputTables.map(table => table - ("flinkTable"))
       outputTables = outputTables.map(table => table - ("flinkTable"))
-      var result:Map[String,List[Map[String, String]]] = Map()
+      var result:Map[String,List[Map[String, Object]]] = Map()
       result += ("inputTables" -> inputTables)
       result += ("outputTables" -> outputTables)
       deepAsJava(result)
@@ -153,6 +171,19 @@ object FlinkSqlLineage extends Logger {
     case m: Map[_, _] => m.map { case (k, v) => (k, deepAsJava(v)) }.asJava
     case x => x
   }
+  def getTableNameFromSqlNode(sqlNode:SqlNode,tables:ListBuffer[String]){
+    sqlNode match{
+      case sqlNode:SqlSelect =>
+        sqlNode.getFrom match{
+          case from: SqlIdentifier =>
+            tables.append(from.toString)
+          case from:SqlJoin =>
+            getTableNameFromSqlNode(from.getLeft,tables)
+            getTableNameFromSqlNode(from.getRight,tables)
 
-
+        }
+      case sqlNode:SqlIdentifier =>
+        tables.append(sqlNode.toString)
+    }
+  }
 }

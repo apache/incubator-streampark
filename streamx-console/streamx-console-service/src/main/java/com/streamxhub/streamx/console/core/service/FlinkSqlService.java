@@ -81,5 +81,5 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
     SqlError verifySql(String sql, Long versionId);
 
-    Map<String,List<Map<String, String>>> lineageSql(String sql, Long versionId);
+    Map lineageSql(String sql, Long versionId);
 }
