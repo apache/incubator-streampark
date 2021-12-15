@@ -85,13 +85,13 @@ public class ApplBuildPipeServiceImpl
         new ThreadPoolExecutor.AbortPolicy()
     );
 
-    private final Cache<Long, DockerPullSnapshot> dockerPullPgSnapshots =
+    private final static Cache<Long, DockerPullSnapshot> dockerPullPgSnapshots =
         Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
-    private final Cache<Long, DockerBuildSnapshot> dockerBuildPgSnapshots =
+    private final static Cache<Long, DockerBuildSnapshot> dockerBuildPgSnapshots =
         Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
-    private final Cache<Long, DockerPushSnapshot> dockerPushPgSnapshots =
+    private final static Cache<Long, DockerPushSnapshot> dockerPushPgSnapshots =
         Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
 
@@ -145,6 +145,9 @@ public class ApplBuildPipeServiceImpl
         // save pipeline instance snapshot to db before launch it.
         AppBuildPipeline pipePo = AppBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
         boolean saved = saveEntity(pipePo);
+        dockerPullPgSnapshots.invalidate(app.getId());
+        dockerBuildPgSnapshots.invalidate(app.getId());
+        dockerPushPgSnapshots.invalidate(app.getId());
         // async launch pipeline
         executorService.submit((Runnable) pipeline::launch);
         return saved;
