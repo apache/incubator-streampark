@@ -19,6 +19,7 @@
 package com.streamxhub.streamx.common.domain
 
 import com.streamxhub.streamx.common.util.CommandUtils
+import org.apache.commons.io.FileUtils.isSymlink
 import org.apache.commons.lang3.StringUtils
 
 import java.io.File
@@ -50,7 +51,9 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
 
   lazy val flinkLib: File = {
     require(flinkHome != null, "[StreamX] flinkHome must not be null.")
-    require(new File(flinkHome).exists(), "[StreamX] flinkHome must be exists.")
+    val home = new File(flinkHome)
+    require(home.exists(), "[StreamX] flinkHome must be exists.")
+    require(!isSymlink(home), "[StreamX] flinkHome must not be soft link.")
     val lib = new File(s"$flinkHome/lib")
     require(lib.exists() && lib.isDirectory, s"[StreamX] $flinkHome/lib must be exists and must be directory.")
     lib
