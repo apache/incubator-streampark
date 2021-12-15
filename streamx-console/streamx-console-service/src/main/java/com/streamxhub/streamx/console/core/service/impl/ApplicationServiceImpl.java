@@ -160,6 +160,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Autowired
     private K8sFlinkTrkMonitor k8sFlinkTrkMonitor;
 
+    @Autowired
+    private AppBuildPipeService appBuildPipeService;
+
     @PostConstruct
     public void resetOptionState() {
         this.baseMapper.resetOptionState();
@@ -1138,12 +1141,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             Map<String, Object> optionMap = application.getOptionMap();
             optionMap.put(ConfigConst.KEY_JOB_ID(), application.getId());
 
-            JarPackDeps jarPackDeps;
-            if (application.isCustomCodeJob()) {
-                jarPackDeps = application.getJarPackDeps();
-            } else {
+            if (application.isFlinkSqlJob()) {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-                jarPackDeps = application.getJarPackDeps();
                 optionMap.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
             }
 
@@ -1151,22 +1150,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             KubernetesSubmitParam kubernetesSubmitParam = new KubernetesSubmitParam(
                 application.getClusterId(),
-                application.getFlinkImage(),
                 application.getK8sNamespace(),
-                jarPackDeps,
-                DockerAuthConf.of(
-                    settingService.getDockerRegisterAddress(),
-                    settingService.getDockerRegisterUser(),
-                    settingService.getDockerRegisterPassword()),
-                application.getK8sPodTemplates(),
-                application.getK8sRestExposedTypeEnum(),
-                application.getK8sHadoopIntegration() != null ? application.getK8sHadoopIntegration() : false
-            );
+                application.getK8sRestExposedTypeEnum());
 
             FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
             if (flinkEnv == null) {
                 throw new IllegalArgumentException("[StreamX] can no found flink version");
             }
+
+            AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
 
             SubmitRequest submitRequest = new SubmitRequest(
                     flinkEnv.getFlinkVersion(),
@@ -1184,6 +1176,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     optionMap,
                     dynamicOption,
                     application.getArgs(),
+                    buildPipeline == null ? null : buildPipeline.getBuildResult(),
                     kubernetesSubmitParam
             );
 

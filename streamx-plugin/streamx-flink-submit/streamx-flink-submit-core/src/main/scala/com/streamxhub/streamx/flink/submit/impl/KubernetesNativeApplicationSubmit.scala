@@ -22,8 +22,7 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.ExecutionMode
-import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline
-import com.streamxhub.streamx.flink.packer.pipeline.{FlinkK8sApplicationBuildRequest, FlinkK8sApplicationBuildResponse}
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -41,35 +40,17 @@ import scala.util.Try
 object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
 
   // noinspection DuplicatedCode
+  @throws[Exception]
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
-    assert(Try(submitRequest.k8sSubmitParam.flinkBaseImage.nonEmpty).getOrElse(false))
+
+    // check the last building result
+    checkBuildResult(submitRequest)
+    val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
 
     // extract flink config
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
-
-    // todo template code: building pipeline
-    val buildParam = FlinkK8sApplicationBuildRequest(
-      flinkConfig.getString(PipelineOptions.NAME),
-      submitRequest.executionMode,
-      submitRequest.developmentMode,
-      submitRequest.flinkVersion,
-      submitRequest.k8sSubmitParam.jarPackDeps,
-      submitRequest.flinkUserJar,
-      submitRequest.k8sSubmitParam.clusterId,
-      submitRequest.k8sSubmitParam.kubernetesNamespace,
-      submitRequest.k8sSubmitParam.flinkBaseImage,
-      submitRequest.k8sSubmitParam.podTemplates,
-      submitRequest.k8sSubmitParam.integrateWithHadoop,
-      submitRequest.k8sSubmitParam.dockerAuthConfig
-    )
-    val pipeline = new FlinkK8sApplicationBuildPipeline(buildParam)
-    val buildResult = {
-      val r = pipeline.launch()
-      if (!r.pass) throw pipeline.getError.exception
-      r.asInstanceOf[FlinkK8sApplicationBuildResponse]
-    }
 
     // add flink pipeline.jars configuration
     flinkConfig.set(PipelineOptions.JARS, Lists.newArrayList(buildResult.dockerInnerMainJarPath))

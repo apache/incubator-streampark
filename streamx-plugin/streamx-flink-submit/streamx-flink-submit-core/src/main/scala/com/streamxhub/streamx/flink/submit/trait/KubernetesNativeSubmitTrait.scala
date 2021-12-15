@@ -57,6 +57,18 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
 
+  @throws[Exception]
+  protected def checkBuildResult(submitRequest: SubmitRequest): Unit = {
+    val result = submitRequest.buildResult
+    if (result == null)
+      throw new Exception("[flink-submit] current flink app was not yet built, buildResult is empty" +
+        s",clusterId=${submitRequest.k8sSubmitParam.clusterId}," +
+        s",namespace=${submitRequest.k8sSubmitParam.kubernetesNamespace}")
+    if (!result.pass)
+      throw new Exception(s"[flink-submit] current flink app build failed, clusterId" +
+        s",clusterId=${submitRequest.k8sSubmitParam.clusterId}," +
+        s",namespace=${submitRequest.k8sSubmitParam.kubernetesNamespace}")
+  }
 
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
   @throws[Exception] protected def doStop(@Nonnull executeMode: ExecutionMode,
@@ -132,7 +144,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
       .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
       .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
-      .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkBaseImage)
       .safeSet(PipelineOptions.NAME, submitRequest.appName)
       .safeSet(CoreOptions.CLASSLOADER_RESOLVE_ORDER, submitRequest.resolveOrder.getName)
       .set(KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE, covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType))

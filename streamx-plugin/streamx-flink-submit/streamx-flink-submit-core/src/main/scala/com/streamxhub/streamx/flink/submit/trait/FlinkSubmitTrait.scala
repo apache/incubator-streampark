@@ -57,7 +57,7 @@ trait FlinkSubmitTrait extends Logger {
          |    devMode          : ${submitRequest.developmentMode.name()}
          |    execMode         : ${submitRequest.executionMode.name()}
          |    k8sNamespace     : ${submitRequest.k8sSubmitParam.kubernetesNamespace}
-         |    flinkDockerImage : ${submitRequest.k8sSubmitParam.flinkBaseImage}
+         |    flinkExposedType : ${submitRequest.k8sSubmitParam.flinkRestExposedType}
          |    clusterId        : ${submitRequest.k8sSubmitParam.clusterId}
          |    resolveOrder     : ${submitRequest.resolveOrder.getName}
          |    applicationType  : ${submitRequest.applicationType}
@@ -69,6 +69,7 @@ trait FlinkSubmitTrait extends Logger {
          |    dynamicOption    : ${submitRequest.dynamicOption.mkString(" ")}
          |    args             : ${submitRequest.args}
          |    appConf          : ${submitRequest.appConf}
+         |    flinkBuildResult : ${submitRequest.buildResult}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
     doSubmit(submitRequest)
@@ -90,8 +91,10 @@ trait FlinkSubmitTrait extends Logger {
     doStop(stopRequest)
   }
 
+  @throws[Exception]
   def doSubmit(submitRequest: SubmitRequest): SubmitResponse
 
+  @throws[Exception]
   def doStop(stopRequest: StopRequest): StopResponse
 
   private[submit] def getJobID(jobId: String) = Try(JobID.fromHexString(jobId)) match {

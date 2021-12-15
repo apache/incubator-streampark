@@ -26,8 +26,7 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
-import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline
-import com.streamxhub.streamx.flink.packer.pipeline.{FlinkK8sSessionBuildRequest, FlinkK8sSessionBuildResponse}
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
@@ -50,9 +49,14 @@ import scala.util.{Failure, Success, Try}
  */
 object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Logger {
 
+  @throws[Exception]
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
+
+    // check the last building result
+    checkBuildResult(submitRequest)
+    val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sSessionBuildResponse]
 
     val jobID = {
       if (StringUtils.isNotBlank(submitRequest.jobID)) new JobID()
@@ -61,25 +65,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // extract flink configuration
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
 
-    // todo template code: building pipeline
-    val buildParam = FlinkK8sSessionBuildRequest(
-      flinkConfig.getString(PipelineOptions.NAME),
-      submitRequest.executionMode,
-      submitRequest.developmentMode,
-      submitRequest.flinkVersion,
-      submitRequest.k8sSubmitParam.jarPackDeps,
-      submitRequest.flinkUserJar,
-      submitRequest.k8sSubmitParam.clusterId,
-      submitRequest.k8sSubmitParam.kubernetesNamespace
-    )
-    val pipeline = new FlinkK8sSessionBuildPipeline(buildParam)
-    val buildResult = {
-      val r = pipeline.launch()
-      if (!r.pass) throw pipeline.getError.exception
-      r.asInstanceOf[FlinkK8sSessionBuildResponse]
-    }
     val fatJar = new File(buildResult.flinkShadedJarPath)
-
     // Prioritize using JobGraph submit plan while using Rest API submit plan as backup
     Try(jobGraphSubmitPlan(submitRequest, flinkConfig, jobID, fatJar))
       .recover {

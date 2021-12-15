@@ -26,9 +26,7 @@ import com.streamxhub.streamx.common.conf.{ConfigurationOptions, Workspace}
 import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums._
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
-import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
-import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf
-import com.streamxhub.streamx.flink.packer.maven.JarPackDeps
+import com.streamxhub.streamx.flink.packer.pipeline.BuildResult
 
 import java.io.File
 import java.util.{Map => JavaMap}
@@ -46,13 +44,8 @@ import scala.collection.JavaConversions._
  * @param integrateWithHadoop  whether integrate with hadoop.
  */
 case class KubernetesSubmitParam(clusterId: String,
-                                 flinkBaseImage: String,
                                  kubernetesNamespace: String,
-                                 jarPackDeps: JarPackDeps,
-                                 @Nullable dockerAuthConfig: DockerAuthConf,
-                                 @Nullable podTemplates: K8sPodTemplates,
-                                 @Nullable flinkRestExposedType: FlinkK8sRestExposedType,
-                                 integrateWithHadoop: Boolean = false)
+                                 @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
 
 case class SubmitRequest(flinkVersion: FlinkVersion,
                          flinkYaml: String,
@@ -69,6 +62,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
                          property: JavaMap[String, Any],
                          dynamicOption: Array[String],
                          args: String,
+                         @Nullable buildResult: BuildResult,
                          @Nullable k8sSubmitParam: KubernetesSubmitParam) {
 
   lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
