@@ -39,6 +39,14 @@
   line-height: 1.8
 }
 
+.control-button {
+  margin-right: 3px;
+}
+
+.ctl-btn-color {
+  background: #f8f9f9;
+}
+
 .gutter-box {
   padding: 10px 15px;
   background: @component-background;
@@ -147,3 +155,20 @@
   }
 
 }
+
+
+.running-tag {
+  animation: running-tag-color 800ms ease-out infinite alternate;
+}
+
+@keyframes running-tag-color {
+  0% {
+    border-color: #3da9f2;
+    box-shadow: 0 0 1px #3da9f2, inset 0 0 2px #3da9f2;
+  }
+  100% {
+    border-color: #3da9f2;
+    box-shadow: 0 0 10px #3da9f2, inset 0 0 5px #3da9f2;
+  }
+}
+

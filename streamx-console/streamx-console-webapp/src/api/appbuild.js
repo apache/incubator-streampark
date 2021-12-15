@@ -18,13 +18,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.packer.pipeline;
+import api from './index'
+import http from '@/utils/request'
 
-/**
- * PipeWatcherTrait interface for Java
- * see {@link com.streamxhub.streamx.flink.packer.pipeline.PipeWatcherTrait}
- *
- * @author Al-assad
- */
-public abstract class BuildPipelineWatcher implements PipeWatcherTrait {
+export function build(params) {
+  return http.post(api.AppBuild.BUILD, params)
+}
+
+export function detail(params) {
+  return http.post(api.AppBuild.DETAIL, params)
 }
