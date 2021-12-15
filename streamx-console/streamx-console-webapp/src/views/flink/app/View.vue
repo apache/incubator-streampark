@@ -1081,10 +1081,11 @@
         $this.dashBigScreen = (document.documentElement.offsetWidth || document.body.offsetWidth) >= 1500
       }
     },
-    handleTp(){
+    handleTp(record){
       //jobName
       window.parent.postMessage({
-        action:'handleFlinkClick'
+        action:'handleFlinkClick',
+        data:record.jobName
       },'*')
     },
     handleDeploy(app) {
