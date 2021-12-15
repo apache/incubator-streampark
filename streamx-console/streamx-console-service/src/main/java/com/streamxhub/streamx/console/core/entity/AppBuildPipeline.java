@@ -38,9 +38,7 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -72,8 +70,13 @@ public class AppBuildPipeline {
     @TableField(value = "total_step")
     private Integer totalStep;
 
+    // step status map: (stepSeq -> stepStatus)
     @TableField(value = "steps_status")
     private String stepStatusJson;
+
+    // step status update timestamp map: (stepSeq -> update timestamp)
+    @TableField(value = "steps_status_ts")
+    private String stepStatusTimestampJson;
 
     @TableField(value = "error")
     private String errorJson;
@@ -83,6 +86,7 @@ public class AppBuildPipeline {
 
     @TableField(value = "update_time")
     private Date updateTime;
+
 
     @Nonnull
     @JsonIgnore
@@ -136,6 +140,32 @@ public class AppBuildPipeline {
 
     @Nonnull
     @JsonIgnore
+    public Map<Integer, Long> getStepStatusTimestamp() {
+        if (StringUtils.isBlank(stepStatusTimestampJson)) {
+            return Maps.newHashMap();
+        }
+        try {
+            return JsonUtils.MAPPER.readValue(stepStatusTimestampJson, new TypeReference<HashMap<Integer, Long>>() {
+            });
+        } catch (JsonProcessingException e) {
+            log.error("[streamx] json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusTimestampJson, e);
+            return Maps.newHashMap();
+        }
+    }
+
+    @JsonIgnore
+    public AppBuildPipeline setStepStatusTimestamp(@Nonnull Map<Integer, Long> stepStatusSt) {
+        try {
+            this.stepStatusTimestampJson = JsonUtils.MAPPER.writeValueAsString(stepStatusSt);
+        } catch (JsonProcessingException e) {
+            log.error("[streamx] json parse error on ApplicationBuildPipeline, stepStatusSt=({})",
+                stepStatusSt.entrySet().stream().map(et -> et.getKey() + "->" + et.getValue()).collect(Collectors.joining(",")), e);
+        }
+        return this;
+    }
+
+    @Nonnull
+    @JsonIgnore
     public PipeErr getError() {
         if (StringUtils.isBlank(errorJson)) {
             return PipeErr.empty();
@@ -169,6 +199,17 @@ public class AppBuildPipeline {
         return this;
     }
 
+    public long calCostSecond() {
+        // max timestamp - min timestamp in stepStatusTimestamp
+        Map<Integer, Long> st = getStepStatusTimestamp();
+        if (st.isEmpty()) {
+            return 0;
+        }
+        long max = st.values().stream().max(Long::compareTo).orElse(0L);
+        long min = st.values().stream().min(Long::compareTo).orElse(0L);
+        return (max - min) / 1000;
+    }
+
     /**
      * Only return null when getPipeType() = UNKNOWN or json covert error,
      * The return class type depend on PipeType.ResultType.
@@ -189,25 +230,98 @@ public class AppBuildPipeline {
         }
     }
 
-
+    /**
+     * Initialize from BuildPipeline
+     */
     public static AppBuildPipeline initFromPipeline(@Nonnull BuildPipeline pipeline) {
-        return new AppBuildPipeline()
-            .setPipeType(pipeline.pipeType())
-            .setPipeStatus(pipeline.pipeStatus())
-            .setTotalStep(pipeline.allSteps())
-            .setCurStep(pipeline.curStep())
-            .setStepStatus(pipeline.getStepsStatusAsJava())
-            .setUpdateTime(new Date());
+        return fromPipeSnapshot(pipeline.snapshot());
     }
 
+    /**
+     * Create object from PipeSnapshot
+     */
     public static AppBuildPipeline fromPipeSnapshot(@Nonnull PipeSnapshot snapshot) {
         return new AppBuildPipeline()
             .setPipeType(snapshot.pipeType())
             .setPipeStatus(snapshot.pipeStatus())
             .setTotalStep(snapshot.allSteps())
             .setCurStep(snapshot.curStep())
-            .setStepStatus(snapshot.stepStatusAsJava())
+            .setStepStatus(snapshot.pureStepStatusAsJava())
+            .setStepStatusTimestamp(snapshot.stepStatusTimestampAsJava())
             .setError(snapshot.error())
             .setUpdateTime(new Date(snapshot.emitTime()));
+    }
+
+    /**
+     * Covert to view object
+     */
+    public View toView() {
+        return View.of(this);
+    }
+
+
+
+    /**
+     * View object of AppBuildPipeline
+     */
+    @Data
+    @Accessors(chain = true)
+    @NoArgsConstructor
+    public static class View {
+        private Long appId;
+        private Integer pipeType;
+        private Integer pipeStatus;
+        private Integer curStep;
+        private Integer totalStep;
+        private Double percent;
+        private Long costSec;
+        private List<Step> steps;
+        private Boolean isErr;
+        private String errSummary;
+        private String errStack;
+        private Date updateTime;
+
+
+        public static View of(@Nonnull AppBuildPipeline pipe) {
+            // combine step info
+            Map<Integer, String> stepDesc = pipe.getPipeType().getSteps();
+            Map<Integer, PipeStepStatus> stepStatus = pipe.getStepStatus();
+            Map<Integer, Long> stepTs = pipe.getStepStatusTimestamp();
+            List<Step> steps = new ArrayList<>(stepDesc.size());
+            for (int i = 1; i <= pipe.getPipeType().getSteps().size(); i++) {
+                Step step = new Step()
+                    .setSeq(i)
+                    .setDesc(stepDesc.getOrDefault(i, "unknown step"))
+                    .setStatus(stepStatus.getOrDefault(i, PipeStepStatus.unknown).getCode());
+                Long st = stepTs.get(i);
+                if (st != null) {
+                    step.setTs(new Date(st));
+                }
+                steps.add(step);
+            }
+            return new View()
+                .setAppId(pipe.getAppId())
+                .setPipeType(pipe.getPipeTypeCode())
+                .setPipeStatus(pipe.getPipeStatusCode())
+                .setCurStep(pipe.getCurStep())
+                .setTotalStep(pipe.getTotalStep())
+                .setPercent(BuildPipelineHelper.calPercent(pipe.getCurStep(), pipe.getTotalStep()))
+                .setCostSec(pipe.calCostSecond())
+                .setSteps(steps)
+                .setIsErr(pipe.getError().nonEmpty())
+                .setErrSummary(pipe.getError().summary())
+                .setErrStack(pipe.getError().exceptionStack())
+                .setUpdateTime(pipe.getUpdateTime());
+        }
+    }
+
+    @Data
+    @Accessors(chain = true)
+    @NoArgsConstructor
+    public static class Step {
+        private Integer seq;
+        private String desc;
+        private Integer status;
+        private Date ts;
     }
 }

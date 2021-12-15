@@ -21,6 +21,7 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.core.entity.AppBuildDockerResolvedDetail;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
@@ -88,14 +89,14 @@ public class ApplicationBuildPipelineController {
     public RestResponse getBuildProgressDetail(Long appId) {
         Map<String, Object> details = new HashMap<>();
         Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
-        details.put("pipeline", pipeline.orElse(null));
+        details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
+
         if (pipeline.isPresent() && PipeType.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
             DockerResolvedSnapshot dockerProgress = appBuildPipeService.getDockerProgressDetailSnapshot(appId);
-            details.put("docker", dockerProgress);
+            details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));
         }
         return RestResponse.create().data(details);
     }
-
 
 
 }
