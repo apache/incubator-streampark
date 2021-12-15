@@ -212,7 +212,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
           programArgs += submitRequest.appConf
         }
       case _ =>
-        // Custom Code 必传配置文件...
         programArgs += PARAM_KEY_APP_CONF
         programArgs += submitRequest.appConf
     }
