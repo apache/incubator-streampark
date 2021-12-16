@@ -46,8 +46,6 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
-  flyway:
-    enabled: true
   main:
     banner-mode: off
 
@@ -73,7 +71,7 @@ streamx:
   # 本地的工作空间,用于存放项目源码,构建的目录等.
   workspace:
     local: ~/streamx_workspace
-    remote: hdfs://streamx
+    remote: hdfs:///streamx   # support hdfs:///streamx/ 、 /streamx 、hdfs://host:ip/streamx/
 
   # remote docker register namepsace for streamx
   docker:

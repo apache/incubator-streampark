@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package com.streamxhub.streamx.test.flink.java.tablesql;
 
 import com.streamxhub.streamx.flink.core.StreamTableContext;
@@ -33,46 +34,46 @@ import java.util.Arrays;
 
 public class JavaStreamTableApp {
 
-     public static void main(String[] args) {
-          StreamTableEnvConfig javaConfig = new StreamTableEnvConfig(args, (environment, parameterTool) -> {
-               environment.getConfig().enableForceAvro();
-          }, (tableConfig, parameterTool) -> {
-               tableConfig.setLocalTimeZone(ZoneId.of("Asia/Shanghai"));
-          });
+    public static void main(String[] args) {
+        StreamTableEnvConfig javaConfig = new StreamTableEnvConfig(args, (environment, parameterTool) -> {
+            environment.getConfig().enableForceAvro();
+        }, (tableConfig, parameterTool) -> {
+            tableConfig.setLocalTimeZone(ZoneId.of("Asia/Shanghai"));
+        });
 
-          StreamTableContext context = new StreamTableContext(javaConfig);
+        StreamTableContext context = new StreamTableContext(javaConfig);
 
-          SingleOutputStreamOperator<JavaEntity> source = context.getJavaEnv().fromCollection(
-                  Arrays.asList(
-                          "flink,apapche flink",
-                          "kafka,apapche kafka",
-                          "spark,spark",
-                          "zookeeper,apapche zookeeper",
-                          "hadoop,apapche hadoop"
-                  )
-          ).map((MapFunction<String, JavaEntity>) JavaEntity::new);
+        SingleOutputStreamOperator<JavaEntity> source = context.getJavaEnv().fromCollection(
+            Arrays.asList(
+                "flink,apapche flink",
+                "kafka,apapche kafka",
+                "spark,spark",
+                "zookeeper,apapche zookeeper",
+                "hadoop,apapche hadoop"
+            )
+        ).map((MapFunction<String, JavaEntity>) JavaEntity::new);
 
-          context.createTemporaryView("mySource", new DataStream<>(source));
+        context.createTemporaryView("mySource", new DataStream<>(source));
 
-          Table table = context.from("mySource");
-          context.toAppendStream(table, TypeInformation.of(JavaEntity.class)).print();
+        Table table = context.from("mySource");
+        context.toAppendStream(table, TypeInformation.of(JavaEntity.class)).print();
 
-          context.start("Flink SQl Job");
-     }
+        context.start("Flink SQl Job");
+    }
 
-     public static class JavaEntity {
-          public String id;
-          public String name;
+    public static class JavaEntity {
+        public String id;
+        public String name;
 
-          public JavaEntity() {
-          }
+        public JavaEntity() {
+        }
 
-          public JavaEntity(String str) {
-               String[] array = str.split(",");
-               this.id = array[0];
-               this.name = array[1];
-          }
-     }
+        public JavaEntity(String str) {
+            String[] array = str.split(",");
+            this.id = array[0];
+            this.name = array[1];
+        }
+    }
 
 }
 

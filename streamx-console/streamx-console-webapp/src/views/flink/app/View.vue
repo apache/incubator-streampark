@@ -1145,17 +1145,16 @@
   import Ellipsis from '@/components/Ellipsis'
   import State from './State'
   import {mapActions} from 'vuex'
-  import {cancel, clean, dashboard, deploy, list, mapping, remove, revoke, start, yarn} from '@api/application'
+  import {cancel, clean, dashboard, deploy, list, mapping, remove, revoke, start, yarn, downLog} from '@api/application'
   import {history, latest} from '@api/savepoint'
   import {flamegraph} from '@api/metrics'
   import {weburl} from '@api/setting'
   import {build, detail as buildDetail} from '@api/appbuild'
   import {Terminal} from 'xterm'
   import 'xterm/css/xterm.css'
-  import SockJS from 'sockjs-client'
   import {baseUrl} from '@/api/baseUrl'
-  import Stomp from 'webstomp-client'
   import SvgIcon from '@/components/SvgIcon'
+  import storage from '@/utils/storage'
 
   export default {
   components: {Ellipsis, State, SvgIcon},
@@ -1229,6 +1228,8 @@
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
       },
+      socketId: null,
+      storageKey: 'DOWN_SOCKET_ID',
       appBuildDetail: {
         pipeline: null,
         docker: null,
@@ -1423,12 +1424,15 @@
             showConfirmButton: false,
             timer: 2000
           }).then((r) => {
+            this.socketId = this.uuid()
+            storage.set(this.storageKey,this.socketId)
             deploy({
               id: id,
               restart: restart,
               savePointed: savePoint,
               allowNonRestored: allowNonRestoredState,
-              backUpDescription: description
+              backUpDescription: description,
+              socketId: this.socketId
             }).then((resp) => {
               if(!resp.data) {
                 this.$swal.fire(
@@ -2011,8 +2015,20 @@
 
     handleEdit(app) {
       this.SetAppId(app.id)
+      //appType         STREAMX_FLINK(1, "StreamX Flink"), APACHE_FLINK(2, "Apache Flink"),
+      //jobType         CUSTOMCODE("Custom Code", 1), FLINKSQL("Flink SQL", 2)
+      //ResourceFrom    CICD(1),UPLOAD(2)
       if (app.appType === 1) {
         this.$router.push({'path': '/flink/app/edit_streamx'})
+        if (app.jobType === 1) {
+          if (app.resourceForm === 1) {
+            this.$router.push({'path': '/flink/app/edit_streamx'})
+          } else {
+            this.$router.push({'path': '/flink/app/edit_flink'})
+          }
+        } else {
+          this.$router.push({'path': '/flink/app/edit_streamx'})
+        }
       } else {
         this.$router.push({'path': '/flink/app/edit_flink'})
       }
@@ -2071,23 +2087,33 @@
       })
       const container = document.getElementById('terminal')
       this.terminal.open(container, true)
-      const socket = new SockJS(baseUrl(true).concat('/websocket'))
-      this.stompClient = Stomp.over(socket)
-      this.stompClient.connect({}, (success) => {
-        this.stompClient.subscribe(
-            '/resp/mvn',
-            (msg) => {
-              if (msg.body.startsWith('[Exception]')) {
-                this.$swal.fire(
-                    'Failed',
-                    msg.body,
-                    'error'
-                )
-              }
-              this.terminal.writeln(msg.body)
-            })
-        this.stompClient.send('/req/mvn/' + app.id)
-      })
+
+      const url = baseUrl().concat('/websocket/' + this.handleGetSocketId())
+      const socket = this.getSocket(url)
+
+      socket.onopen = () => {
+        downLog({id: app.id})
+      }
+
+      socket.onmessage = (event) => {
+        if (event.data.startsWith('[Exception]')) {
+          this.$swal.fire({
+            title: 'Failed',
+            icon: 'error',
+            width: this.exceptionPropWidth(),
+            html: '<pre class="propException">' + event.data + '</pre>',
+            focusConfirm: false,
+          })
+        } else {
+          this.terminal.writeln(event.data)
+        }
+      }
+
+      socket.onclose = () => {
+        this.socketId = null
+        storage.rm(this.storageKey)
+      }
+
     },
 
     handleCloseWS() {
@@ -2096,7 +2122,14 @@
       this.terminal.clear()
       this.terminal.clearSelection()
       this.terminal = null
-    }
+    },
+
+    handleGetSocketId() {
+      if (this.socketId == null) {
+        return storage.get(this.storageKey) || null
+      }
+      return this.socketId
+    },
 
   }
 }

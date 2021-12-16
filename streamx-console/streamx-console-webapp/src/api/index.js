@@ -30,6 +30,7 @@ export default {
     EXISTS: '/flink/project/exists',
     CREATE: '/flink/project/create',
     BUILD: '/flink/project/build',
+    BUILDLOG: '/flink/project/buildlog',
     CLOSEBUILD: '/flink/project/closebuild',
     LIST: '/flink/project/list',
     FILELIST: '/flink/project/filelist',
@@ -78,7 +79,8 @@ export default {
     ROLLBACK: '/flink/app/rollback',
     REVOKE: '/flink/app/revoke',
     STARTLOG: '/flink/app/startlog',
-    CHECKJAR: '/flink/app/checkjar',
+    DOWNLOG: '/flink/app/downlog',
+    CHECKJAR: '/flink/app/checkjar'
   },
   Config: {
     GET: '/flink/conf/get',
@@ -126,7 +128,7 @@ export default {
     GET: '/flink/setting/get',
     WEBURL: '/flink/setting/weburl',
     ALL: '/flink/setting/all',
-    GETFLINK: '/flink/setting/getflink',
+    CHECK_HADOOP: '/flink/setting/checkHadoop',
     SYNC: '/flink/setting/sync',
     UPDATE: '/flink/setting/update'
   },

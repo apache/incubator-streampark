@@ -1,23 +1,22 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -39,7 +38,11 @@ import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
-import com.streamxhub.streamx.console.core.service.*;
+import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
+import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
+import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.EffectiveService;
+import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +86,6 @@ public class ApplicationBackUpServiceImpl
         ThreadUtils.threadFactory("streamx-rollback-executor"),
         new ThreadPoolExecutor.AbortPolicy()
     );
-
 
     @Override
     public IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request) {
@@ -205,7 +207,7 @@ public class ApplicationBackUpServiceImpl
                 switch (application.getExecutionModeEnum()) {
                     case KUBERNETES_NATIVE_APPLICATION:
                     case KUBERNETES_NATIVE_SESSION:
-                    case YARN_PRE_JOB:
+                    case YARN_PER_JOB:
                     case YARN_SESSION:
                     case LOCAL:
                         if (application.isFlinkSqlJob()) {
@@ -219,6 +221,7 @@ public class ApplicationBackUpServiceImpl
                         appHome = application.getAppHome();
                         backUpPath = backUp.getPath();
                         break;
+                    default:
                 }
                 // 2) 删除当前项目
                 fsOperator.delete(appHome);
@@ -268,7 +271,7 @@ public class ApplicationBackUpServiceImpl
         switch (application.getExecutionModeEnum()) {
             case KUBERNETES_NATIVE_APPLICATION:
             case KUBERNETES_NATIVE_SESSION:
-            case YARN_PRE_JOB:
+            case YARN_PER_JOB:
             case YARN_SESSION:
             case LOCAL:
                 if (application.isFlinkSqlJob()) {
@@ -280,6 +283,7 @@ public class ApplicationBackUpServiceImpl
             case YARN_APPLICATION:
                 appHome = application.getAppHome();
                 break;
+            default:
         }
 
         FsOperator fsOperator = application.getFsOperator();
