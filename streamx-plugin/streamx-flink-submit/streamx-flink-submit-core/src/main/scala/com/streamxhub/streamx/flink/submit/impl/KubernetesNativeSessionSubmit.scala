@@ -41,7 +41,7 @@ import org.apache.flink.util.IOUtils
 import java.io.File
 import scala.collection.JavaConversions._
 import scala.language.postfixOps
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 /**
  * kubernetes native session mode submit
@@ -65,8 +65,11 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
 
     val fatJar = new File(buildResult.flinkShadedJarPath)
+    // use api submit plan
+    restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
+
     // Prioritize using JobGraph submit plan while using Rest API submit plan as backup
-    Try(jobGraphSubmitPlan(submitRequest, flinkConfig, jobID, fatJar))
+/*    Try(jobGraphSubmitPlan(submitRequest, flinkConfig, jobID, fatJar))
       .recover {
         case _ =>
           logInfo(s"[flink-submit] JobGraph Submit Plan failed, try Rest API Submit Plan now.")
@@ -74,8 +77,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       } match {
       case Success(submitResponse) => submitResponse
       case Failure(ex) => throw ex
-    }
-
+    }*/
   }
 
   /**
