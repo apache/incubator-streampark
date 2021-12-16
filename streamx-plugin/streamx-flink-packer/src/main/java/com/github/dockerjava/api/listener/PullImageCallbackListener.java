@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,7 +20,6 @@
 package com.github.dockerjava.api.listener;
 
 import com.github.dockerjava.api.model.PullResponseItem;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @author Al-assad
