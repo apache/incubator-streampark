@@ -108,7 +108,6 @@ router.beforeEach((to, from, next) => {
   }
   const token = storage.get(TOKEN)
   if (token) {
-    console.log(11111)
     if (!asyncRouter) {
       // 如果用户路由不存在
       const routers = store.getters.routers
@@ -121,37 +120,37 @@ router.beforeEach((to, from, next) => {
           asyncRouter.push(...resp)
           go(to, next)
         }).catch(() => {
-          // notification.error({
-          //   message: 'Request failed, please try again'
-          // })
-          store.dispatch('SignIn',{
-            username: 'admin',
-            password: 'streamx'
-          }).then(()=>{
-            location.reload()  
+          notification.error({
+            message: 'Request failed, please try again'
           })
-          // store.dispatch('SignOut').then(() => { 
-          //   //正常跳转登录
-          //   // next({ path: '/user/signin', query: { redirect: to.fullPath } })
+          // store.dispatch('SignIn',{
+          //   username: 'admin',
+          //   password: 'streamx'
+          // }).then(()=>{
+          //   location.reload()  
           // })
+          store.dispatch('SignOut').then(() => { 
+            //正常跳转登录
+            next({ path: '/user/signin', query: { redirect: to.fullPath } })
+          })
         })
       }
     } else {
       next()
     }
   } else {
-    store.dispatch('SignIn',{
-      username: 'admin',
-      password: 'streamx'
-    }).then(()=>{
-      location.reload()  
-    })
-    // if (whiteList.includes(to.name)) {
-    //   next()
-    // } else {
-    //   next({ name: 'signin', query: { redirect: to.fullPath } })
-    //   NProgress.done()
-    // }
+    // store.dispatch('SignIn',{
+    //   username: 'admin',
+    //   password: 'streamx'
+    // }).then(()=>{
+    //   location.reload()  
+    // })
+    if (whiteList.includes(to.name)) {
+      next()
+    } else {
+      next({ name: 'signin', query: { redirect: to.fullPath } })
+      NProgress.done()
+    }
   }
 })
 
@@ -176,7 +175,7 @@ function buildRouter (routes) {
     if (route.component) {
       switch (route.component) {
         case 'BasicView':
-          route.component = process.env.NODE_VIEW=='empty'?EmptyView:BasicView
+          route.component = BasicView
           break
         case 'RouteView':
           route.component = RouteView
