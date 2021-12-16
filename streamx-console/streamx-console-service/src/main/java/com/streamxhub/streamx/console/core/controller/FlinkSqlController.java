@@ -104,7 +104,7 @@ public class FlinkSqlController {
     }
 
     @PostMapping("lineage")
-    public Map<String,List<Map<String, String>>> lineage(String sql, Long versionId) {
+    public Map lineage(String sql, Long versionId) {
         return flinkSqlService.lineageSql(sql, versionId);
     }
 

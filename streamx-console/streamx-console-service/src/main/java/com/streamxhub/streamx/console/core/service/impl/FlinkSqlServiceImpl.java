@@ -201,14 +201,14 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         });
     }
     @Override
-    public Map<String,List<Map<String, String>>> lineageSql(String sql, Long versionId) {
+    public Map lineageSql(String sql, Long versionId) {
         FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
-        return FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), (Function<ClassLoader, Map<String,List<Map<String, String>>>>) classLoader -> {
+        return FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), (Function<ClassLoader, Map>) classLoader -> {
             try {
                 Class<?> clazz = classLoader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlLineage");
                 Method method = clazz.getDeclaredMethod("lineageSql", String.class);
                 method.setAccessible(true);
-                return (Map<String, List<Map<String, String>>>) method.invoke(null, sql);
+                return (Map) method.invoke(null, sql);
             } catch (Throwable e) {
                 log.error("lineageSql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
             }

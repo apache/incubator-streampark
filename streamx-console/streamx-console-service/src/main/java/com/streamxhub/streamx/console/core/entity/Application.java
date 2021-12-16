@@ -89,6 +89,8 @@ public class Application implements Serializable {
      */
     private String jobName;
 
+    private String name;
+
     @TableField(strategy = FieldStrategy.IGNORED)
     private String appId;
 
