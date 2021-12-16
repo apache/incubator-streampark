@@ -266,7 +266,6 @@ public class Application implements Serializable {
     private transient String createTimeTo;
     private transient String backUpDescription;
 
-
     /**
      * Flink Web UI Url
      */

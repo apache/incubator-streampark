@@ -64,6 +64,4 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
      */
     Map<Long, PipeStatus> listPipelineStatus(List<Long> appIds);
 
-
-
 }

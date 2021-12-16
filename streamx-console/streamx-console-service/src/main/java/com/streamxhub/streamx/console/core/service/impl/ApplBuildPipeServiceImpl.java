@@ -36,7 +36,19 @@ import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf;
-import com.streamxhub.streamx.flink.packer.pipeline.*;
+import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline;
+import com.streamxhub.streamx.flink.packer.pipeline.BuildResult;
+import com.streamxhub.streamx.flink.packer.pipeline.DockerBuildSnapshot;
+import com.streamxhub.streamx.flink.packer.pipeline.DockerProgressWatcher;
+import com.streamxhub.streamx.flink.packer.pipeline.DockerPullSnapshot;
+import com.streamxhub.streamx.flink.packer.pipeline.DockerPushSnapshot;
+import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildRequest;
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildRequest;
+import com.streamxhub.streamx.flink.packer.pipeline.PipeSnapshot;
+import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
+import com.streamxhub.streamx.flink.packer.pipeline.PipeType;
+import com.streamxhub.streamx.flink.packer.pipeline.PipeWatcher;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +60,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -84,15 +100,14 @@ public class ApplBuildPipeServiceImpl
         new ThreadPoolExecutor.AbortPolicy()
     );
 
-    private final static Cache<Long, DockerPullSnapshot> dockerPullPgSnapshots =
+    private static final Cache<Long, DockerPullSnapshot> DOCKER_PULL_PG_SNAPSHOTS =
         Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
-    private final static Cache<Long, DockerBuildSnapshot> dockerBuildPgSnapshots =
+    private static final Cache<Long, DockerBuildSnapshot> DOCKER_BUILD_PG_SNAPSHOTS =
         Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
-    private final static Cache<Long, DockerPushSnapshot> dockerPushPgSnapshots =
+    private static final Cache<Long, DockerPushSnapshot> DOCKER_PUSH_PG_SNAPSHOTS =
         Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
-
 
     @Override
     public boolean buildApplication(@Nonnull Application app) {
@@ -127,26 +142,26 @@ public class ApplBuildPipeServiceImpl
             pipeline.as(FlinkK8sApplicationBuildPipeline.class).registerDockerProgressWatcher(new DockerProgressWatcher() {
                 @Override
                 public void onDockerPullProgressChange(DockerPullSnapshot snapshot) {
-                    dockerPullPgSnapshots.put(app.getId(), snapshot);
+                    DOCKER_PULL_PG_SNAPSHOTS.put(app.getId(), snapshot);
                 }
 
                 @Override
                 public void onDockerBuildProgressChange(DockerBuildSnapshot snapshot) {
-                    dockerBuildPgSnapshots.put(app.getId(), snapshot);
+                    DOCKER_BUILD_PG_SNAPSHOTS.put(app.getId(), snapshot);
                 }
 
                 @Override
                 public void onDockerPushProgressChange(DockerPushSnapshot snapshot) {
-                    dockerPushPgSnapshots.put(app.getId(), snapshot);
+                    DOCKER_PUSH_PG_SNAPSHOTS.put(app.getId(), snapshot);
                 }
             });
         }
         // save pipeline instance snapshot to db before launch it.
         AppBuildPipeline pipePo = AppBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
         boolean saved = saveEntity(pipePo);
-        dockerPullPgSnapshots.invalidate(app.getId());
-        dockerBuildPgSnapshots.invalidate(app.getId());
-        dockerPushPgSnapshots.invalidate(app.getId());
+        DOCKER_PULL_PG_SNAPSHOTS.invalidate(app.getId());
+        DOCKER_BUILD_PG_SNAPSHOTS.invalidate(app.getId());
+        DOCKER_PUSH_PG_SNAPSHOTS.invalidate(app.getId());
         // async launch pipeline
         executorService.submit((Runnable) pipeline::launch);
         return saved;
@@ -198,7 +213,6 @@ public class ApplBuildPipeServiceImpl
         }
     }
 
-
     /**
      * copy from {@link ApplicationServiceImpl#start(Application, boolean)}
      * todo needs to be refactored.
@@ -247,7 +261,6 @@ public class ApplBuildPipeServiceImpl
         return jars.get(0);
     }
 
-
     @Override
     public Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId) {
         return Optional.ofNullable(getById(appId));
@@ -256,9 +269,9 @@ public class ApplBuildPipeServiceImpl
     @Override
     public DockerResolvedSnapshot getDockerProgressDetailSnapshot(@Nonnull Long appId) {
         return new DockerResolvedSnapshot(
-            dockerPullPgSnapshots.getIfPresent(appId),
-            dockerBuildPgSnapshots.getIfPresent(appId),
-            dockerPushPgSnapshots.getIfPresent(appId));
+            DOCKER_PULL_PG_SNAPSHOTS.getIfPresent(appId),
+            DOCKER_BUILD_PG_SNAPSHOTS.getIfPresent(appId),
+            DOCKER_PUSH_PG_SNAPSHOTS.getIfPresent(appId));
     }
 
     @Override
@@ -284,8 +297,7 @@ public class ApplBuildPipeServiceImpl
             e -> PipeStatus.of((Integer) e.get("pipe_status"))));
     }
 
-
-    public boolean saveEntity (AppBuildPipeline pipe) {
+    public boolean saveEntity(AppBuildPipeline pipe) {
         AppBuildPipeline old = getById(pipe.getAppId());
         if (old == null) {
             return save(pipe);

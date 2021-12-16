@@ -40,11 +40,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -183,7 +187,6 @@ public class AppBuildPipeline {
         }
     }
 
-
     @JsonIgnore
     public AppBuildPipeline setError(@Nonnull PipeErr error) {
         try {
@@ -285,7 +288,6 @@ public class AppBuildPipeline {
         private String errSummary;
         private String errStack;
         private Date updateTime;
-
 
         public static View of(@Nonnull AppBuildPipeline pipe) {
             // combine step info
