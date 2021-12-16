@@ -650,14 +650,16 @@
                 <template v-if="appBuildDetail.pipeline.pipeType === 2 && appBuildDetail.docker !== null">
                   <template v-if="item.seq === 5 && appBuildDetail.docker.pull !== null && appBuildDetail.docker.pull.layers !== null">
                     <template v-for="layer in appBuildDetail.docker.pull.layers">
-                      <a-space :key="layer.layerId" size="small">
-                        <a-icon type="arrow-right"/>
-                        <a-tag color="blue"> {{ layer.layerId }}</a-tag>
-                        <a-tag>{{ layer.status }}</a-tag>
-                        <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                          <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
-                        </template>
-                      </a-space>
+                      <a-row :key="layer.layerId" style="margin-bottom: 5px;">
+                        <a-space size="small">
+                          <a-icon type="arrow-right"/>
+                          <a-tag color="blue"> {{ layer.layerId }}</a-tag>
+                          <a-tag>{{ layer.status }}</a-tag>
+                          <template v-if="layer.totalMb != null && layer.totalMb !== 0">
+                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
+                          </template>
+                        </a-space>
+                      </a-row>
                       <template v-if="layer.totalMb != null && layer.totalMb !== 0">
                         <a-row :key="layer.layerId" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
                           <a-progress
@@ -684,14 +686,16 @@
 
                   <template v-else-if="item.seq === 7 && appBuildDetail.docker.push !== null && appBuildDetail.docker.push.layers !== null">
                     <template v-for="layer in appBuildDetail.docker.push.layers">
-                      <a-space :key="layer.layerId" size="small">
-                        <a-icon type="arrow-right"/>
-                        <a-tag color="blue"> {{ layer.layerId }}</a-tag>
-                        <a-tag>{{ layer.status }}</a-tag>
-                        <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                          <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
-                        </template>
-                      </a-space>
+                      <a-row :key="layer.layerId" style="margin-bottom: 5px;">
+                        <a-space size="small">
+                          <a-icon type="arrow-right"/>
+                          <a-tag color="blue"> {{ layer.layerId }}</a-tag>
+                          <a-tag>{{ layer.status }}</a-tag>
+                          <template v-if="layer.totalMb != null && layer.totalMb !== 0">
+                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
+                          </template>
+                        </a-space>
+                      </a-row>
                       <template v-if="layer.totalMb != null && layer.totalMb !== 0">
                         <a-row :key="layer.layerId" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
                           <a-progress
