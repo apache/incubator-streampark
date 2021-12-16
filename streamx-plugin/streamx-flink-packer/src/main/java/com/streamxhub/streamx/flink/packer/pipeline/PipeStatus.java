@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 The StreamX Project
+ * Copyright (c) 2019 The StreamX Project
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -21,7 +21,6 @@ package com.streamxhub.streamx.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.google.inject.internal.Nullable;
 
 /**
  * Status of building pipeline instance.
