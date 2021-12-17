@@ -34,12 +34,12 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import java.time.Duration
 import javax.annotation.Nullable
 import scala.collection.JavaConverters._
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
  * author:Al-assad
  */
-object KubernetesRetriever extends Logger{
+object KubernetesRetriever extends Logger {
 
   // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}
   val FLINK_CLIENT_TIMEOUT_SEC = 30L
@@ -91,18 +91,17 @@ object KubernetesRetriever extends Logger{
     val clusterProvider: KubernetesClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
       .asInstanceOf[KubernetesClusterDescriptor]
 
-    var flinkClient: ClusterClient[String] = null
-    try{
-         flinkClient = clusterProvider
+    Try {
+      clusterProvider
         .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
         .getClusterClient
-    } catch {
-      case ex: Exception => {
-        logError(s"Get flinkClient error.the error is:$ex")
-      }
+    } match {
+      case Success(v) => v
+      case Failure(e) =>
+        logError(s"Get flinkClient error.the error is:$e")
+        null
     }
 
-    flinkClient
   }
 
 
