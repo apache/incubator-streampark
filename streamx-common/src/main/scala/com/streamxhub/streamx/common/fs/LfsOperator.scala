@@ -87,12 +87,13 @@ object LfsOperator extends FsOperator with Logger {
       val dst = new File(dstPath)
       val inferDstIsDir = {
         if (dst.exists && dst.isDirectory) true
-        else
+        else {
           srcFile.getName -> dst.getName match {
             case (src, dst) if src == dst => false
             case (src, dst) if getSuffix(src) == getSuffix(dst) => false
             case _ => true
           }
+        }
       }
       if (inferDstIsDir) new File(dstPath, srcFile.getName) else dst
     }
