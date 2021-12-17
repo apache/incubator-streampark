@@ -115,7 +115,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
   }
 
   /**
-   * 页面定义参数优先级 > flink-conf.yaml中配置优先级
+   * 页面定义参数优先级 > appConf > flink-conf.yaml中配置优先级
    *
    * @param submitRequest
    * @param activeCustomCommandLine
@@ -138,6 +138,11 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
         case _ =>
       }
     })
+    val appConf = new Configuration()
+    submitRequest.appProperties.foreach( v => {
+      appConf.setString(v._1,v._2)
+    })
+    configuration.addAll(appConf)
     configuration.addAll(customConfiguration)
     //main class
     if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
