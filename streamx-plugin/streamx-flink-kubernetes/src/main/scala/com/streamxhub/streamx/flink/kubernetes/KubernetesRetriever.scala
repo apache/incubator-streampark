@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.flink.kubernetes
 
+import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.{tryWithResource, tryWithResourceException}
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
@@ -38,7 +39,7 @@ import scala.util.Try
 /**
  * author:Al-assad
  */
-object KubernetesRetriever {
+object KubernetesRetriever extends Logger{
 
   // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}
   val FLINK_CLIENT_TIMEOUT_SEC = 30L
@@ -89,9 +90,18 @@ object KubernetesRetriever {
     val clientFactory: ClusterClientFactory[String] = clusterClientServiceLoader.getClusterClientFactory(flinkConfig)
     val clusterProvider: KubernetesClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
       .asInstanceOf[KubernetesClusterDescriptor]
-    val flinkClient: ClusterClient[String] = clusterProvider
-      .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
-      .getClusterClient
+
+    var flinkClient: ClusterClient[String] = null
+    try{
+         flinkClient = clusterProvider
+        .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+        .getClusterClient
+    } catch {
+      case ex: Exception => {
+        logError(s"Get flinkClient error.the error is:$ex")
+      }
+    }
+
     flinkClient
   }
 
