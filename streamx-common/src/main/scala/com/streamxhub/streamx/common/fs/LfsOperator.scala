@@ -53,21 +53,14 @@ object LfsOperator extends FsOperator with Logger {
   }
 
   override def move(srcPath: String, dstPath: String): Unit = {
-    if (!isAnyBank(srcPath, dstPath)) {
-      val srcFile = new File(srcPath)
-      val dstFile = new File(dstPath)
-      require(srcFile.exists(), "[StreamX] LFsOperator.move: Source must be exists")
-      if (srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
-        if (dstFile.isDirectory) {
-          FileUtils.moveToDirectory(srcFile, dstFile, true)
-        } else {
-          if (dstFile.exists()) {
-            dstFile.delete()
-          }
-          FileUtils.moveFile(srcFile, dstFile)
-        }
-      }
-    }
+    if (isAnyBank(srcPath, dstPath)) return
+    val srcFile = new File(srcPath)
+    val dstFile = new File(dstPath)
+
+    if (!srcFile.exists) return
+    if (srcFile.getCanonicalPath == dstFile.getCanonicalPath) return
+
+    FileUtils.moveToDirectory(srcFile, dstFile, true)
   }
 
   override def upload(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
@@ -78,29 +71,53 @@ object LfsOperator extends FsOperator with Logger {
     }
   }
 
+  /**
+   * When the suffixes of srcPath and dstPath are the same,
+   * or the file names are the same, copy to the file,
+   * otherwise copy to the directory.
+   */
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
     if (isAnyBank(srcPath, dstPath)) return
+
     val srcFile = new File(srcPath)
     if (!srcFile.exists) return
-    var dstFile = new File(dstPath)
-    if (dstFile.isDirectory) dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
+    require(srcFile.isFile, s"[streamx] $srcPath must be a file.")
 
-    val shouldCopy = {
-      if (overwrite || !dstFile.exists) true
-      else srcFile.getCanonicalPath != dstFile.getCanonicalPath
+    val dstFile = {
+      val dst = new File(dstPath)
+      val inferDstIsDir = {
+        if (dst.exists && dst.isDirectory) true
+        else
+          srcFile.getName -> dst.getName match {
+            case (src, dst) if src == dst => false
+            case (src, dst) if getSuffix(src) == getSuffix(dst) => false
+            case _ => true
+          }
+      }
+      if (inferDstIsDir) new File(dstPath, srcFile.getName) else dst
     }
-    if (shouldCopy) {
-      FileUtils.copyFile(srcFile, dstFile)
-      if (delSrc) FileUtils.forceDelete(srcFile)
-    }
+
+    val shouldCopy = if (!overwrite && dstFile.exists) false else true
+    if (!shouldCopy) return
+
+    FileUtils.copyFile(srcFile, dstFile)
+    if (delSrc) FileUtils.forceDelete(srcFile)
   }
+
+
+  private[this] def getSuffix(filename: String): String = {
+    if (filename.contains(".")) filename.substring(filename.lastIndexOf("."), filename.length).toLowerCase
+    else filename
+  }
+
 
   override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
     if (isAnyBank(srcPath, dstPath)) return
     val srcFile = new File(srcPath)
     if (!srcFile.exists) return
-    val dstFile = new File(dstPath)
+    require(srcFile.isDirectory, s"[streamx] $srcPath must be a directory.")
 
+    val dstFile = new File(dstPath)
     val shouldCopy = {
       if (overwrite || !dstFile.exists) true
       else srcFile.getCanonicalPath != dstFile.getCanonicalPath
@@ -112,7 +129,9 @@ object LfsOperator extends FsOperator with Logger {
   }
 
   override def fileMd5(path: String): String = {
-    require(path != null && path.nonEmpty, s"[StreamX] LFsOperator.fileMd5: file must not be null.")
+    require(path != null && path.nonEmpty, s"[streamx] LFsOperator.fileMd5: file must not be null.")
+    val file = new File(path)
+    require(file.exists, s"[streamx] LFsOperator.fileMd5: file must exists.")
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
 
@@ -127,10 +146,13 @@ object LfsOperator extends FsOperator with Logger {
   /**
    * list file under directory, one level of traversal only
    */
-  def listDir(path: String): Array[File] = new File(path) match {
-    case f if !f.exists => Array()
-    case f if f.isFile => Array(f)
-    case f => f.listFiles()
+  def listDir(path: String): Array[File] = {
+    if (path == null || path.trim.isEmpty) Array.empty
+    else new File(path) match {
+      case f if !f.exists => Array()
+      case f if f.isFile => Array(f)
+      case f => f.listFiles()
+    }
   }
 
 
