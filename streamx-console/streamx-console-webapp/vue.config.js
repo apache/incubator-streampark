@@ -28,7 +28,6 @@ const {getThemeColors, modifyVars} = require('./src/utils/themeUtil')
 const {resolveCss} = require('./src/utils/theme-color-replacer-extend')
 const isProd = process.env.NODE_ENV === 'production'
 
-
 function resolve (dir) {
   return path.join(__dirname, dir)
 }
@@ -37,7 +36,7 @@ function resolve (dir) {
 module.exports = {
 
   devServer: {
-    port: 10000
+    port: process.env['VUE_APP_PORT']
   },
 
   pluginOptions: {
