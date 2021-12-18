@@ -24,7 +24,7 @@ export function baseUrl() {
   let url = ''
   switch (process.env.NODE_ENV) {
     case 'mixin':
-      url = (arguments[0] || null) ? (location.protocol + '//' + location.host) : '/'
+      url = `'${location.protocol}//${location.host}'`
       break
     case 'production':
       url = process.env['VUE_APP_BASE_URL']
