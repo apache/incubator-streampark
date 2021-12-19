@@ -53,7 +53,6 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
     require(flinkHome != null, "[StreamX] flinkHome must not be null.")
     val home = new File(flinkHome)
     require(home.exists(), "[StreamX] flinkHome must be exists.")
-    require(!isSymlink(home), "[StreamX] flinkHome must not be soft link.")
     val lib = new File(s"$flinkHome/lib")
     require(lib.exists() && lib.isDirectory, s"[StreamX] $flinkHome/lib must be exists and must be directory.")
     lib
