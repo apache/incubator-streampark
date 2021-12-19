@@ -51,8 +51,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
 
   lazy val flinkLib: File = {
     require(flinkHome != null, "[StreamX] flinkHome must not be null.")
-    val home = new File(flinkHome)
-    require(home.exists(), "[StreamX] flinkHome must be exists.")
+    require(new File(flinkHome).exists(), "[StreamX] flinkHome must be exists.")
     val lib = new File(s"$flinkHome/lib")
     require(lib.exists() && lib.isDirectory, s"[StreamX] $flinkHome/lib must be exists and must be directory.")
     lib
