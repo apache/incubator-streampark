@@ -28,6 +28,7 @@ import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesU
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf
 import com.streamxhub.streamx.flink.packer.maven.JarPackDeps
+import org.apache.commons.io.FileUtils
 
 import java.io.File
 import java.util.{Map => JavaMap}
@@ -122,7 +123,12 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
      */
     val workspace = Workspace.remote
     val flinkHome = flinkVersion.flinkHome
-    val flinkName = new File(flinkHome).getName
+    val flinkHomeDir = new File(flinkHome)
+    val flinkName = if (FileUtils.isSymlink(flinkHomeDir)) {
+      flinkHomeDir.getCanonicalFile.getName
+    } else {
+      flinkHomeDir.getName
+    }
     val flinkHdfsHome = s"${workspace.APP_FLINK}/$flinkName"
     HdfsWorkspace(
       flinkName,
