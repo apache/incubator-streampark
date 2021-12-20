@@ -17,22 +17,30 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.service;
-
-import java.util.List;
+package com.streamxhub.streamx.console.core.entity;
 
 /**
- * @author Whojohn
- * @time 2021.12.20
+ * 用于维护一个以出现词频正序排列的 TreeSet 排序对象
  */
-public interface SqlComplete {
-    /**
-     * 功能：
-     * 1. 传入一个完整 sql 语句(推荐传入截断的字符)，只对最后一词联想
-     * 2. 最后一个词的定义是非空格字符
-     *
-     * @param sql 输入一个需要联想的 sql
-     * @return 返回一个潜在词列表
-     */
-    public List<String> getComplete(String sql);
+class WordWithFrequency implements Comparable<WordWithFrequency> {
+    String word;
+    Integer cou;
+
+    public WordWithFrequency(String word, int cou) {
+        this.word = word;
+        this.cou = cou;
+    }
+
+    @Override
+    public int compareTo(WordWithFrequency o) {
+        int num = this.cou - o.cou;
+
+        // * -1 是为了升序输出
+        if (num == 0) {
+            //这步非常关键，没有判定.计数相同名字不同 ，那set集合就默认是相同元素，就会被覆盖掉
+            return this.word.compareTo(o.word) * -1;
+        } else {
+            return num * -1;
+        }
+    }
 }

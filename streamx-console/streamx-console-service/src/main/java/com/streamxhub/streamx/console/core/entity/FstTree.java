@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2019 The StreamX Project
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.streamxhub.streamx.console.core.entity;
 
 import com.streamxhub.streamx.console.base.util.WebUtils;
@@ -9,7 +28,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -23,24 +47,23 @@ import java.util.stream.Collectors;
 @Component
 public class FstTree {
     // 符号提示
-    private final static String CHARACTER_NOTICE = "()\t<>\t\"\"\t''\t{}";
+    private static final String CHARACTER_NOTICE = "()\t<>\t\"\"\t''\t{}";
     // 词频文件，保留词文件，所有词典相关的分割符
-    private final static String SPLIT_CHAR = "\t";
+    private static final String SPLIT_CHAR = "\t";
     // 词频文件
-    private final static String STATIS_PATH = "/sql-statistics.txt";
+    private static final String STATIS_PATH = "/sql-statistics.txt";
     // Flink 保留词典
-    private final static String REV_PATH = "/sql-rev.txt";
-    private final static String SQL_CONF_HOME = "conf";
+    private static final String REV_PATH = "/sql-rev.txt";
+    private static final String SQL_CONF_HOME = "conf";
 
-    private final String FLINK_RESERVED_WORD;
-    private final TreeNode readFromHead = new TreeNode(' ');
-    private final TreeNode readFromTail = new TreeNode(' ');
+    private static final TreeNode READ_FROM_HEAD = new TreeNode(' ');
+    private static final TreeNode READ_FROM_TAIL = new TreeNode(' ');
 
     public FstTree() throws IOException {
         File filPath = new File(WebUtils.getAppDir(SQL_CONF_HOME).concat(REV_PATH));
-        FLINK_RESERVED_WORD = FileUtils.readFileToString(filPath);
+        String revWord = FileUtils.readFileToString(filPath);
         log.debug("FstTree get FLINK_RESERVED_WORD as :" + filPath);
-        Arrays.stream(FLINK_RESERVED_WORD.split(SPLIT_CHAR)).map(e -> e.trim().toLowerCase()).forEach(
+        Arrays.stream(revWord.split(SPLIT_CHAR)).map(e -> e.trim().toLowerCase()).forEach(
             e -> this.initSearchTree(e, 1)
         );
         Arrays.stream(CHARACTER_NOTICE.split(SPLIT_CHAR)).map(e -> e.trim().toLowerCase()).forEach(
@@ -80,8 +103,8 @@ public class FstTree {
      * @param cou  词出现频率
      */
     public void initSearchTree(String word, int cou) {
-        this.buildTree(word, cou, this.readFromHead);
-        this.buildTree(new StringBuffer(word).reverse().toString(), cou, this.readFromTail);
+        this.buildTree(word, cou, READ_FROM_HEAD);
+        this.buildTree(new StringBuffer(word).reverse().toString(), cou, READ_FROM_TAIL);
     }
 
     /**
@@ -153,7 +176,6 @@ public class FstTree {
         }
     }
 
-
     private SortedSet<WordWithFrequency> tryComplicate(String word, TreeNode tree, Single passLength) {
         List<WordWithFrequency> temp = new ArrayList<>();
         List<WordWithFrequency> tempNPreview = new ArrayList<>();
@@ -209,11 +231,11 @@ public class FstTree {
         Single serarchFromHeadPassLength = new Single();
         Single serarchFromReversePassLength = new Single();
 
-        SortedSet<WordWithFrequency> head = tryComplicate(word, this.readFromHead, serarchFromHeadPassLength);
+        SortedSet<WordWithFrequency> head = tryComplicate(word, READ_FROM_HEAD, serarchFromHeadPassLength);
 
         // 倒序搜索用于纠错。普通场景没有意义，比如 sel ，倒序会返回 l 倒序的数据(因为没有 les 的字符)
         SortedSet<WordWithFrequency> tail = tryComplicate(
-            new StringBuffer(word).reverse().toString(), this.readFromTail, serarchFromReversePassLength)
+            new StringBuffer(word).reverse().toString(), READ_FROM_HEAD, serarchFromReversePassLength)
             .stream()
             .map(e -> new WordWithFrequency(new StringBuffer(e.word).reverse().toString(), e.cou))
             .collect(Collectors.toCollection(TreeSet::new));
@@ -234,74 +256,5 @@ public class FstTree {
         return returnSource.stream().map(e -> e.word).collect(Collectors.toList());
     }
 
-
 }
 
-class TreeNode {
-    private final Character step;
-    private boolean stop = false;
-    private int cou = 0;
-    private final Map<Character, TreeNode> next;
-
-    /**
-     * 根节点必须初始化为 ' ' , 否则只能有一个字符作为起始节点。
-     *
-     * @param step 当前节点的字符
-     */
-    public TreeNode(Character step) {
-        this.step = step;
-        this.next = new HashMap<>();
-    }
-
-
-    public void setCou(int cou) {
-        this.cou += cou;
-    }
-
-    public void setStop() {
-        this.stop = true;
-    }
-
-    public int getCou() {
-        return cou;
-    }
-
-    public boolean isStop() {
-        return stop;
-    }
-
-    public Character getStep() {
-        return step;
-    }
-
-    public Map<Character, TreeNode> getNext() {
-        return next;
-    }
-}
-
-/**
- * 用于维护一个以出现词频正序排列的 TreeSet 排序对象
- */
-class WordWithFrequency implements Comparable<WordWithFrequency> {
-    String word;
-    Integer cou;
-
-    public WordWithFrequency(String word, int cou) {
-        this.word = word;
-        this.cou = cou;
-    }
-
-
-    @Override
-    public int compareTo(WordWithFrequency o) {
-        int num = this.cou - o.cou;
-
-        // * -1 是为了升序输出
-        if (num == 0) {
-            //这步非常关键，没有判定.计数相同名字不同 ，那set集合就默认是相同元素，就会被覆盖掉
-            return this.word.compareTo(o.word) * -1;
-        } else {
-            return num * -1;
-        }
-    }
-}

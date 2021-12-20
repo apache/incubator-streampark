@@ -47,7 +47,6 @@ public class NoteBookController {
     @Autowired
     private SqlComplete sqlComplete;
 
-
     @PostMapping("submit")
     public void submit(Note note) {
         noteBookService.submit(note);
