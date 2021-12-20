@@ -254,7 +254,7 @@ public class FlinkTrackingTask {
      */
     private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
         JobsOverview jobsOverview = application.httpJobsOverview();
-        Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
+        Optional<JobsOverview.Job> optional = jobsOverview.getJobs().size() > 1 ? jobsOverview.getJobs().stream().filter(a -> StringUtils.equals(application.getJobId(), a.getId())).findFirst() : jobsOverview.getJobs().stream().findFirst();
 
         if (optional.isPresent()) {
 
