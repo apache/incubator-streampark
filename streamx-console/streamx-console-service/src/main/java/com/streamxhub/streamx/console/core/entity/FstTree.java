@@ -1,10 +1,14 @@
 package com.streamxhub.streamx.console.core.entity;
 
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -13,23 +17,29 @@ import java.util.stream.Collectors;
  * 这里只考虑匹配和纠错相关的问题。如何提示提示， 什么时候激活提示，由上层调用方解决，这里不解决业务问题。
  *
  * @author john
+ * @time 2021.12.20
  */
 @Slf4j
 @Component
 public class FstTree {
+    // 符号提示
     private final static String CHARACTER_NOTICE = "()\t<>\t\"\"\t''\t{}";
+    // 词频文件，保留词文件，所有词典相关的分割符
     private final static String SPLIT_CHAR = "\t";
-    private final static String STATIS_PATH = "sql-statistics.txt";
-    private final static String REV_PATH = "sql-rev.txt";
+    // 词频文件
+    private final static String STATIS_PATH = "/sql-statistics.txt";
+    // Flink 保留词典
+    private final static String REV_PATH = "/sql-rev.txt";
+    private final static String SQL_CONF_HOME = "conf";
 
     private final String FLINK_RESERVED_WORD;
     private final TreeNode readFromHead = new TreeNode(' ');
     private final TreeNode readFromTail = new TreeNode(' ');
 
     public FstTree() throws IOException {
-        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(REV_PATH);
-        FLINK_RESERVED_WORD = IOUtils.toString(inputStream);
-        log.debug("FstTree get FLINK_RESERVED_WORD as :" + Thread.currentThread().getContextClassLoader().getResource(REV_PATH));
+        File filPath = new File(WebUtils.getAppDir(SQL_CONF_HOME).concat(REV_PATH));
+        FLINK_RESERVED_WORD = FileUtils.readFileToString(filPath);
+        log.debug("FstTree get FLINK_RESERVED_WORD as :" + filPath);
         Arrays.stream(FLINK_RESERVED_WORD.split(SPLIT_CHAR)).map(e -> e.trim().toLowerCase()).forEach(
             e -> this.initSearchTree(e, 1)
         );
@@ -37,11 +47,10 @@ public class FstTree {
             e -> this.initSearchTree(e, 1)
         );
 
-        String filPath = Thread.currentThread().getContextClassLoader().getResource(STATIS_PATH).getFile();
+        filPath = new File(WebUtils.getAppDir(SQL_CONF_HOME).concat(STATIS_PATH));
         log.debug("FstTree frequency file path:" + filPath);
-        File dic = new File(filPath);
-        if (dic.exists()) {
-            try (FileReader fr = new FileReader(dic); BufferedReader bf = new BufferedReader(fr)) {
+        if (filPath.exists()) {
+            try (FileReader fr = new FileReader(filPath); BufferedReader bf = new BufferedReader(fr)) {
                 String temp = bf.readLine();
                 while (temp != null) {
                     String[] line = temp.split(SPLIT_CHAR);
@@ -49,7 +58,7 @@ public class FstTree {
                     temp = bf.readLine();
                 }
             } catch (Exception e) {
-                log.info("Error while FstTree ini");
+                log.info("Error while FstTree ini.");
             }
         } else {
             log.info("FstTree frequency file missing.");
