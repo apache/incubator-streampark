@@ -11,10 +11,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @author john
+ * @time 2021.12.20
+ */
 @Slf4j
 @Service
 public class SqlCompleteImpl implements SqlComplete {
-    private static final Set<Character> blackSet = new HashSet<Character>() {{
+    private static final Set<Character> BLACK_SET = new HashSet<Character>() {{
         add(' ');
         add(';');
     }};
@@ -25,7 +29,7 @@ public class SqlCompleteImpl implements SqlComplete {
     @Override
     public List<String> getComplete(String sql) {
         // 空格不需要提示
-        if (sql.length() > 0 && blackSet.contains(sql.charAt(sql.length() - 1))) {
+        if (sql.length() > 0 && BLACK_SET.contains(sql.charAt(sql.length() - 1))) {
             return new ArrayList<>();
         }
         String[] temp = sql.split("\\s");
