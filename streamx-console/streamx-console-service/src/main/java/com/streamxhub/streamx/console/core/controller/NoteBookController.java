@@ -49,4 +49,5 @@ public class NoteBookController {
     public void submit2(Note note) {
         noteBookService.submit2(note);
     }
+
 }
