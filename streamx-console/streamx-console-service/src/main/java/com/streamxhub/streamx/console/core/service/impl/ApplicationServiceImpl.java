@@ -48,6 +48,7 @@ import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.annotation.RefreshCache;
 import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
+import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
 import com.streamxhub.streamx.console.core.entity.ApplicationLog;
@@ -67,6 +68,7 @@ import com.streamxhub.streamx.console.core.enums.NoticeType;
 import com.streamxhub.streamx.console.core.enums.OptionState;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.runner.EnvInitializer;
+import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.ApplicationLogService;
@@ -85,8 +87,6 @@ import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
-import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf;
-import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper;
 import com.streamxhub.streamx.flink.submit.domain.KubernetesSubmitParam;
 import com.streamxhub.streamx.flink.submit.domain.StopRequest;
@@ -197,6 +197,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private K8sFlinkTrkMonitor k8sFlinkTrkMonitor;
+
+    @Autowired
+    private AppBuildPipeService appBuildPipeService;
 
     @PostConstruct
     public void resetOptionState() {
@@ -1238,12 +1241,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             Map<String, Object> optionMap = application.getOptionMap();
             optionMap.put(ConfigConst.KEY_JOB_ID(), application.getId());
 
-            JarPackDeps jarPackDeps;
-            if (application.isCustomCodeJob()) {
-                jarPackDeps = Application.Dependency.jsonToDependency(application.getDependency()).toJarPackDeps();
-            } else {
+            if (application.isFlinkSqlJob()) {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-                jarPackDeps = Application.Dependency.jsonToDependency(flinkSql.getDependency()).toJarPackDeps();
                 optionMap.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
             }
 
@@ -1251,40 +1250,34 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             KubernetesSubmitParam kubernetesSubmitParam = new KubernetesSubmitParam(
                 application.getClusterId(),
-                application.getFlinkImage(),
                 application.getK8sNamespace(),
-                jarPackDeps,
-                new DockerAuthConf(
-                    settingService.getDockerRegisterAddress(),
-                    settingService.getDockerRegisterUser(),
-                    settingService.getDockerRegisterPassword()),
-                application.getK8sPodTemplates(),
-                application.getK8sRestExposedTypeEnum(),
-                application.getK8sHadoopIntegration() != null ? application.getK8sHadoopIntegration() : false
-            );
+                application.getK8sRestExposedTypeEnum());
 
             FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
             if (flinkEnv == null) {
                 throw new IllegalArgumentException("[StreamX] can no found flink version");
             }
 
+            AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
+
             SubmitRequest submitRequest = new SubmitRequest(
-                flinkEnv.getFlinkVersion(),
-                flinkEnv.getFlinkConf(),
-                flinkUserJar,
-                DevelopmentMode.of(application.getJobType()),
-                ExecutionMode.of(application.getExecutionMode()),
-                resolveOrder,
-                application.getJobName(),
-                appConf,
-                application.getApplicationType().getName(),
-                getSavePointed(appParam),
-                appParam.getFlameGraph() ? getFlameGraph(application) : null,
-                option.toString(),
-                optionMap,
-                dynamicOption,
-                application.getArgs(),
-                kubernetesSubmitParam
+                    flinkEnv.getFlinkVersion(),
+                    flinkEnv.getFlinkConf(),
+                    flinkUserJar,
+                    DevelopmentMode.of(application.getJobType()),
+                    ExecutionMode.of(application.getExecutionMode()),
+                    resolveOrder,
+                    application.getJobName(),
+                    appConf,
+                    application.getApplicationType().getName(),
+                    getSavePointed(appParam),
+                    appParam.getFlameGraph() ? getFlameGraph(application) : null,
+                    option.toString(),
+                    optionMap,
+                    dynamicOption,
+                    application.getArgs(),
+                    buildPipeline == null ? null : buildPipeline.getBuildResult(),
+                    kubernetesSubmitParam
             );
 
             SubmitResponse submitResponse = FlinkSubmitHelper.submit(submitRequest);

@@ -17,28 +17,39 @@
  * limitations under the License.
  */
 
-package com.github.dockerjava.api.command;
-
-import com.github.dockerjava.api.listener.PullImageCallbackListener;
-import com.github.dockerjava.api.model.PullResponseItem;
+package com.streamxhub.streamx.flink.packer.pipeline
 
 /**
+ * Trait for watching a BuildPipeline instance
+ *
  * @author Al-assad
  */
-public class HackPullImageResultCallback extends PullImageResultCallback {
+trait PipeWatcher {
 
-    private final PullImageCallbackListener listener;
+  /**
+   * called when the pipeline is launched.
+   */
+  def onStart(snapshot: PipeSnapshot): Unit
 
-    public HackPullImageResultCallback(PullImageCallbackListener listener) {
-        this.listener = listener;
-    }
+  /**
+   * called when the any status of building step is changed.
+   */
+  def onStepStateChange(snapshot: PipeSnapshot): Unit
 
-    @Override
-    public void onNext(PullResponseItem item) {
-        super.onNext(item);
-        if (item.getStatus() != null && item.getId() != null){
-            listener.watchPullProcess(item);
-        }
-    }
-
+  /**
+   * called when the pipeline is finished, or you can get the
+   * results directly from the BuildPipeline.launch() synchronously.
+   */
+  def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit
 }
+
+
+class SilentPipeWatcher extends PipeWatcher {
+
+  override def onStart(snapshot: PipeSnapshot): Unit = {}
+
+  override def onStepStateChange(snapshot: PipeSnapshot): Unit = {}
+
+  override def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit = {}
+}
+

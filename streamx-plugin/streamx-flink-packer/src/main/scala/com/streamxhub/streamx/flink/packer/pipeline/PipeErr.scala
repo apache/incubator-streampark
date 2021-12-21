@@ -17,28 +17,35 @@
  * limitations under the License.
  */
 
-package com.github.dockerjava.api.command;
+package com.streamxhub.streamx.flink.packer.pipeline
 
-import com.github.dockerjava.api.listener.PullImageCallbackListener;
-import com.github.dockerjava.api.model.PullResponseItem;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+import javax.annotation.Nullable
 
 /**
+ * Error details of building pipeline.
+ *
+ * @param summary   summary of error
+ * @param exception exception stack
  * @author Al-assad
  */
-public class HackPullImageResultCallback extends PullImageResultCallback {
+@JsonIgnoreProperties(ignoreUnknown = true, value = Array("exception"))
+case class PipeErr(summary: String,
+                   @Nullable exception: Throwable,
+                   @Nullable exceptionStack: String) {
 
-    private final PullImageCallbackListener listener;
+  def nonEmpty: Boolean = Option(summary).exists(_.nonEmpty) || exception != null
 
-    public HackPullImageResultCallback(PullImageCallbackListener listener) {
-        this.listener = listener;
-    }
-
-    @Override
-    public void onNext(PullResponseItem item) {
-        super.onNext(item);
-        if (item.getStatus() != null && item.getId() != null){
-            listener.watchPullProcess(item);
-        }
-    }
-
+  def isEmpty: Boolean = !nonEmpty
 }
+
+object PipeErr {
+
+  def empty(): PipeErr = of("", null)
+
+  def of(summary: String, @Nullable exception: Throwable): PipeErr =
+    PipeErr(summary, exception, if (exception == null) "" else exception.getStackTrace.mkString("\n"))
+}
+
+

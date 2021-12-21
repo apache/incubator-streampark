@@ -17,28 +17,31 @@
  * limitations under the License.
  */
 
-package com.github.dockerjava.api.command;
+package com.streamxhub.streamx.console.core.entity;
 
-import com.github.dockerjava.api.listener.PullImageCallbackListener;
-import com.github.dockerjava.api.model.PullResponseItem;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * @author Al-assad
  */
-public class HackPullImageResultCallback extends PullImageResultCallback {
+@Data
+@Accessors(chain = true)
+public class AppControl {
 
-    private final PullImageCallbackListener listener;
+    /**
+     * allow to start the application
+     */
+    private boolean allowStart;
 
-    public HackPullImageResultCallback(PullImageCallbackListener listener) {
-        this.listener = listener;
-    }
+    /**
+     * allow to stop the application
+     */
+    private boolean allowStop;
 
-    @Override
-    public void onNext(PullResponseItem item) {
-        super.onNext(item);
-        if (item.getStatus() != null && item.getId() != null){
-            listener.watchPullProcess(item);
-        }
-    }
+    /**
+     * allow to build the application
+     */
+    private boolean allowBuild;
 
 }

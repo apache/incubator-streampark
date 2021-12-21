@@ -20,7 +20,6 @@
 package com.github.dockerjava.api.listener;
 
 import com.github.dockerjava.api.model.PullResponseItem;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @author Al-assad
@@ -29,9 +28,7 @@ public interface PullImageCallbackListener {
 
     /**
      * Watch pull image process information form docker rest api.
-     *
-     * @param processDetail key=PullResponseItem.id
      */
-    void watchPullProcess(Pair<String, PullResponseItem> processDetail);
+    void watchPullProcess(PullResponseItem processDetail);
 
 }

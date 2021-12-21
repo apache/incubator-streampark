@@ -17,28 +17,14 @@
  * limitations under the License.
  */
 
-package com.github.dockerjava.api.command;
+package com.streamxhub.streamx.console.core.dao;
 
-import com.github.dockerjava.api.listener.PullImageCallbackListener;
-import com.github.dockerjava.api.model.PullResponseItem;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 
 /**
  * @author Al-assad
  */
-public class HackPullImageResultCallback extends PullImageResultCallback {
-
-    private final PullImageCallbackListener listener;
-
-    public HackPullImageResultCallback(PullImageCallbackListener listener) {
-        this.listener = listener;
-    }
-
-    @Override
-    public void onNext(PullResponseItem item) {
-        super.onNext(item);
-        if (item.getStatus() != null && item.getId() != null){
-            listener.watchPullProcess(item);
-        }
-    }
+public interface ApplicationBuildPipelineMapper extends BaseMapper<AppBuildPipeline> {
 
 }

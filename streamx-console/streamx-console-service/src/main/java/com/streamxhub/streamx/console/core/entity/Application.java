@@ -271,6 +271,12 @@ public class Application implements Serializable {
      */
     private transient String flinkRestUrl;
 
+    /**
+     * refer to {@link com.streamxhub.streamx.flink.packer.pipeline.PipeStatus}
+     */
+    private transient Integer buildStatus;
+    private transient AppControl appControl;
+
     public void setK8sNamespace(String k8sNamespace) {
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? KUBERNETES_NAMESPACE_DEFAULT_VALUE : k8sNamespace;
     }
@@ -305,6 +311,30 @@ public class Application implements Serializable {
             default:
                 return 1;
         }
+    }
+
+    public boolean shouldBeTrack() {
+        return shouldTracking(FlinkAppState.of(getState())) == 1;
+    }
+
+    @JsonIgnore
+    public DeployState getDeployState() {
+        return DeployState.of(state);
+    }
+
+    @JsonIgnore
+    public void setDeployState(DeployState deployState) {
+        this.deploy = deployState.get();
+    }
+
+    @JsonIgnore
+    public DevelopmentMode getDevelopmentMode() {
+        return DevelopmentMode.of(jobType);
+    }
+
+    @JsonIgnore
+    public void setDevelopmentMode(DevelopmentMode mode) {
+        this.jobType = mode.getValue();
     }
 
     @JsonIgnore
@@ -529,6 +559,11 @@ public class Application implements Serializable {
     @SneakyThrows
     public Dependency getDependencyObject() {
         return Dependency.jsonToDependency(this.dependency);
+    }
+
+    @JsonIgnore
+    public JarPackDeps getJarPackDeps() {
+        return Application.Dependency.jsonToDependency(getDependency()).toJarPackDeps();
     }
 
     @JsonIgnore

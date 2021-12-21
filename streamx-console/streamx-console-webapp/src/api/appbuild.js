@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,33 +18,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import api from './index'
+import http from '@/utils/request'
 
-package com.streamxhub.streamx.flink
+export function build(params) {
+  return http.post(api.AppBuild.BUILD, params)
+}
 
-import org.codehaus.plexus.util.IOUtil
-
-import java.io.{IOException, InputStream}
-import java.util
-import java.util.jar.JarFile
-
-package object packer {
-
-  def path: String => String = (path: String) => getClass.getClassLoader.getResource(path).getFile
-
-  def jarEquals(jar1: JarFile, jar2: JarFile, entry: String): Boolean = {
-    var s1: InputStream = null
-    var s2: InputStream = null
-    try {
-      s1 = jar1.getInputStream(jar1.getJarEntry(entry))
-      s2 = jar2.getInputStream(jar2.getJarEntry(entry))
-      util.Arrays.equals(IOUtil.toByteArray(s1), IOUtil.toByteArray(s2))
-    } catch {
-      case e: IOException => false
-    } finally {
-      if (s1 != null) s1.close()
-      if (s2 != null) s2.close()
-    }
-  }
-
-
+export function detail(params) {
+  return http.post(api.AppBuild.DETAIL, params)
 }
