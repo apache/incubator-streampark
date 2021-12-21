@@ -26,14 +26,6 @@ import java.util.List;
  * @time 2021.12.20
  */
 public interface SqlCompleteService {
-    /**
-     * 功能：
-     * 1. 请传入一个完整 sql 语句，只对最后一词联想。(传入完整 sql ，是为了后续解析上下文的关键字使用。该版本暂无实现)
-     * 2. 最后一个词的定义是非空格字符
-     *
-     * @param sql 输入一个需要联想的 sql
-     * @return 返回一个潜在词列表
-     */
 
     /**
      *

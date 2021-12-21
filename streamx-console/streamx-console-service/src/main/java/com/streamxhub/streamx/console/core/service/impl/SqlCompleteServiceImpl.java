@@ -22,13 +22,11 @@ package com.streamxhub.streamx.console.core.service.impl;
 import com.google.common.collect.Sets;
 import com.streamxhub.streamx.console.core.service.SqlCompleteService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,11 +49,11 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
 
     private static final Set<Character> BLACK_SET = Sets.newHashSet(' ', ';');
 
-    private static FstTree fstTree;
+    private static SqlCompleteFstTree completeFstTree;
 
     @PostConstruct
     public void initialize() {
-        fstTree = new FstTree();
+        completeFstTree = new SqlCompleteFstTree();
     }
 
     @Override
@@ -64,7 +62,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
             return new ArrayList<>();
         }
         String[] temp = sql.split("\\s");
-        return fstTree.getComplicate(temp[temp.length - 1]);
+        return completeFstTree.getComplicate(temp[temp.length - 1]);
     }
 
     /**
@@ -93,7 +91,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         }
     }
 
-    private static class FstTree {
+    private static class SqlCompleteFstTree {
 
 
         // symbol reminder
@@ -104,12 +102,17 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         private static final TreeNode READ_FROM_HEAD = new TreeNode(' ');
         private static final TreeNode READ_FROM_TAIL = new TreeNode(' ');
 
-        public FstTree() {
+        public SqlCompleteFstTree() {
             try {
                 Resource resource = new ClassPathResource("sql-rev.dict");
-                String revWord = FileUtils.readFileToString(resource.getFile());
-                log.debug("FstTree get reserved word path as : {}", resource.getFile());
-                Arrays.stream(revWord.split(SPLIT_CHAR)).map(e -> e.trim().toLowerCase()).forEach(e -> this.initSearchTree(e, 1));
+                Scanner scanner = new Scanner(resource.getInputStream());
+                StringBuffer stringBuffer = new StringBuffer();
+                while (scanner.hasNextLine()) {
+                    stringBuffer.append(scanner.nextLine()).append(SPLIT_CHAR);
+                }
+                scanner.close();
+                String dict = stringBuffer.toString();
+                Arrays.stream(dict.split(SPLIT_CHAR)).map(e -> e.trim().toLowerCase()).forEach(e -> this.initSearchTree(e, 1));
             } catch (IOException e) {
                 log.error("FstTree require reserved word init fail,{}", e);
             }
@@ -118,11 +121,8 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
 
             try {
                 Resource resource = new ClassPathResource("sql-statistics.dict");
-                File file = resource.getFile();
-                assert file != null;
-                log.debug("FstTree frequency file path: {} ", file.getPath());
-                Scanner scanner = new Scanner(file);
-                while (scanner.hasNext()) {
+                Scanner scanner = new Scanner(resource.getInputStream());
+                while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
                     String[] sqlStat = line.split(SPLIT_CHAR);
                     this.initSearchTree(sqlStat[0], Integer.parseInt(sqlStat[1].trim()));
@@ -183,7 +183,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
          * @param breakLoc  Incoming variables, recording the depth of recursion, used to measure the effectiveness of the association
          * @return return the last potential node traversed
          */
-        private List<TreeNode> getMaybeNodeList(String word, TreeNode searchWay, FstTree.Single breakLoc) {
+        private List<TreeNode> getMaybeNodeList(String word, TreeNode searchWay, SqlCompleteFstTree.Single breakLoc) {
             int loc = 0;
             Map<Character, TreeNode> nowStep = searchWay.getNext();
             while (loc < word.length()) {
@@ -216,11 +216,11 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
             }
         }
 
-        private SortedSet<WordWithFrequency> tryComplicate(String word, TreeNode tree, FstTree.Single passLength) {
+        private SortedSet<WordWithFrequency> tryComplicate(String word, TreeNode tree, SqlCompleteFstTree.Single passLength) {
             List<WordWithFrequency> temp = new ArrayList<>();
             List<WordWithFrequency> tempNPreview = new ArrayList<>();
             SortedSet<WordWithFrequency> returnSource;
-            FstTree.Single breLoc = new FstTree.Single();
+            SqlCompleteFstTree.Single breLoc = new SqlCompleteFstTree.Single();
             this.getMaybeNodeList(word, tree, breLoc).forEach(each -> this.getDFSWord(temp, "", each));
             returnSource = temp.stream().map(e -> new WordWithFrequency(word.substring(0, breLoc.loc) + e.word, e.count)).collect(Collectors.toCollection(TreeSet::new));
 
@@ -263,8 +263,8 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         public List<String> getComplicate(String word) {
 
             word = word.toLowerCase();
-            FstTree.Single searchFromHeadPassLength = new FstTree.Single();
-            FstTree.Single searchFromReversePassLength = new FstTree.Single();
+            SqlCompleteFstTree.Single searchFromHeadPassLength = new SqlCompleteFstTree.Single();
+            SqlCompleteFstTree.Single searchFromReversePassLength = new SqlCompleteFstTree.Single();
 
             SortedSet<WordWithFrequency> head = tryComplicate(word, READ_FROM_HEAD, searchFromHeadPassLength);
 

@@ -69,8 +69,7 @@ public class AlertServiceImpl implements AlertService {
             if (!urls.hasMoreElements()) {
                 urls = Thread.currentThread().getContextClassLoader().getResources(template);
             }
-        }
-        if (urls != null) {
+
             if (urls.hasMoreElements()) {
                 URL url = urls.nextElement();
                 if (url.getPath().contains(".jar")) {
