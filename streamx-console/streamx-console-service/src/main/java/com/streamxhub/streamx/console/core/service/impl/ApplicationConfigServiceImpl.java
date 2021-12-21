@@ -31,7 +31,6 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.util.SortUtils;
-import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationConfigMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
@@ -39,17 +38,17 @@ import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * @author benjobs
@@ -63,10 +62,8 @@ public class ApplicationConfigServiceImpl
 
     private String flinkConfTemplate = null;
 
-    private String prodEnvName = "prod";
-
     @Autowired
-    private ApplicationContext context;
+    private ResourceLoader resourceLoader;
 
     @Autowired
     private EffectiveService effectiveService;
@@ -239,9 +236,16 @@ public class ApplicationConfigServiceImpl
     public synchronized String readTemplate() {
         if (flinkConfTemplate == null) {
             try {
-                File file = new File(WebUtils.getAppDir("conf").concat("/flink-application.template"));
-                String conf = FileUtils.readFileToString(file);
-                this.flinkConfTemplate = Base64.getEncoder().encodeToString(conf.getBytes());
+                Resource resource = resourceLoader.getResource("classpath:flink-application.template");
+                Scanner scanner = new Scanner(resource.getInputStream());
+                StringBuffer stringBuffer = new StringBuffer();
+                while (scanner.hasNextLine()) {
+                    stringBuffer.append(scanner.nextLine())
+                        .append(System.lineSeparator());
+                }
+                scanner.close();
+                String template = stringBuffer.toString();
+                this.flinkConfTemplate = Base64.getEncoder().encodeToString(template.getBytes());
             } catch (Exception e) {
                 log.error("Read conf/flink-application.template failed, please check your deployment");
                 e.printStackTrace();
