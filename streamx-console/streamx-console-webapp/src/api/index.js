@@ -99,6 +99,10 @@ export default {
     UPDATE: '/flink/env/update',
     DEFAULT: '/flink/env/default',
   },
+  AppBuild: {
+    BUILD: '/flink/pipe/build',
+    DETAIL: '/flink/pipe/detail',
+  },
   FlinkHistory: {
     UPLOAD_JARS: '/flink/history/uploadJars',
     K8S_NAMESPACES: '/flink/history/k8sNamespaces',

@@ -50,5 +50,8 @@ object DockerAuthConf {
    */
   def withDockerHubRegister(registerUsername: String, registerPassword: String): DockerAuthConf =
     DockerAuthConf("", registerUsername, registerPassword)
+
+  def of(@Nullable registerAddress: String, registerUsername: String, registerPassword: String): DockerAuthConf =
+    DockerAuthConf(registerAddress, registerUsername, registerPassword)
 }
 

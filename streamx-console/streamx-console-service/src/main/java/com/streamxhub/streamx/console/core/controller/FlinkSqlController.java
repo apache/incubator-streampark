@@ -25,6 +25,7 @@ import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
+import com.streamxhub.streamx.console.core.service.SqlComplete;
 import com.streamxhub.streamx.flink.core.SqlError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -46,6 +48,9 @@ public class FlinkSqlController {
 
     @Autowired
     private FlinkSqlService flinkSqlService;
+
+    @Autowired
+    private SqlComplete sqlComplete;
 
     @PostMapping("verify")
     public RestResponse verify(String sql, Long versionId) {
@@ -102,6 +107,11 @@ public class FlinkSqlController {
     public RestResponse sqlhistory(Application application) {
         List<FlinkSql> sqlList = flinkSqlService.history(application);
         return RestResponse.create().data(sqlList);
+    }
+
+    @PostMapping("sqlComplete")
+    public RestResponse getSqlComplete(@NotNull(message = "{required}") String sql) {
+        return RestResponse.create().put("word", sqlComplete.getComplete(sql));
     }
 
 }

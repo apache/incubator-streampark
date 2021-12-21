@@ -22,7 +22,6 @@ package com.github.dockerjava.api.command;
 import com.github.dockerjava.api.listener.PushImageCallbackListener;
 import com.github.dockerjava.api.model.PushResponseItem;
 import com.github.dockerjava.core.command.PushImageResultCallback;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @author Al-assad
@@ -40,7 +39,7 @@ public class HackPushImageResultCallback extends PushImageResultCallback {
     public void onNext(PushResponseItem item) {
         super.onNext(item);
         if (item.getStatus() != null && item.getId() != null) {
-            listener.watchPushProcess(Pair.of(item.getId(), item));
+            listener.watchPushProcess(item);
         }
     }
 
