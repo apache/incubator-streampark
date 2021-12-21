@@ -131,7 +131,7 @@ public class AppBuildPipeline {
             return JsonUtils.read(stepStatusJson, new TypeReference<HashMap<Integer, PipeStepStatus>>() {
             });
         } catch (JsonProcessingException e) {
-            log.error("[streamx] json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusJson, e);
+            log.error("json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusJson, e);
             return Maps.newHashMap();
         }
     }
@@ -141,7 +141,7 @@ public class AppBuildPipeline {
         try {
             this.stepStatusJson = JsonUtils.write(stepStatus);
         } catch (JsonProcessingException e) {
-            log.error("[streamx] json parse error on ApplicationBuildPipeline, stepStatusMap=({})",
+            log.error("json parse error on ApplicationBuildPipeline, stepStatusMap=({})",
                 stepStatus.entrySet().stream().map(et -> et.getKey() + "->" + et.getValue()).collect(Collectors.joining(",")), e);
         }
         return this;
@@ -157,7 +157,7 @@ public class AppBuildPipeline {
             return JsonUtils.read(stepStatusTimestampJson, new TypeReference<HashMap<Integer, Long>>() {
             });
         } catch (JsonProcessingException e) {
-            log.error("[streamx] json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusTimestampJson, e);
+            log.error("json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusTimestampJson, e);
             return Maps.newHashMap();
         }
     }
@@ -167,7 +167,7 @@ public class AppBuildPipeline {
         try {
             this.stepStatusTimestampJson = JsonUtils.write(stepStatusSt);
         } catch (JsonProcessingException e) {
-            log.error("[streamx] json parse error on ApplicationBuildPipeline, stepStatusSt=({})",
+            log.error("json parse error on ApplicationBuildPipeline, stepStatusSt=({})",
                 stepStatusSt.entrySet().stream().map(et -> et.getKey() + "->" + et.getValue()).collect(Collectors.joining(",")), e);
         }
         return this;
@@ -182,7 +182,7 @@ public class AppBuildPipeline {
         try {
             return JsonUtils.read(errorJson, PipeErr.class);
         } catch (JsonProcessingException e) {
-            log.error("[streamx] json parse error on ApplicationBuildPipeline, errorJson={}", errorJson, e);
+            log.error("json parse error on ApplicationBuildPipeline, errorJson={}", errorJson, e);
             return PipeErr.empty();
         }
     }
@@ -192,7 +192,7 @@ public class AppBuildPipeline {
         try {
             this.errorJson = JsonUtils.write(error);
         } catch (JsonProcessingException e) {
-            log.error("[streamx] json parse error on ApplicationBuildPipeline, error={}", error, e);
+            log.error("json parse error on ApplicationBuildPipeline, error={}", error, e);
         }
         return this;
     }
@@ -202,7 +202,7 @@ public class AppBuildPipeline {
         try {
             this.buildResultJson = JsonUtils.write(result);
         } catch (JsonProcessingException e) {
-            log.error("[streamx] json parse error on ApplicationBuildPipeline, buildResult={}", result, e);
+            log.error("json parse error on ApplicationBuildPipeline, buildResult={}", result, e);
         }
         return this;
     }
@@ -233,7 +233,7 @@ public class AppBuildPipeline {
         try {
             return (R) JsonUtils.read(buildResultJson, pipeType.getResultType());
         } catch (JsonProcessingException e) {
-            log.error("[streamx] json parse error on ApplicationBuildPipeline, buildResultJson={}", buildResultJson, e);
+            log.error("json parse error on ApplicationBuildPipeline, buildResultJson={}", buildResultJson, e);
             return null;
         }
     }
