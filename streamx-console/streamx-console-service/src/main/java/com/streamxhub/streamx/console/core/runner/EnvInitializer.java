@@ -35,6 +35,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -175,7 +177,7 @@ public class EnvInitializer implements ApplicationRunner {
         }
     }
 
-    public void checkFlinkEnv(StorageType storageType, FlinkEnv flinkEnv) {
+    public void checkFlinkEnv(StorageType storageType, FlinkEnv flinkEnv) throws IOException {
         String flinkLocalHome = flinkEnv.getFlinkHome();
         if (flinkLocalHome == null) {
             throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
@@ -187,7 +189,11 @@ public class EnvInitializer implements ApplicationRunner {
             log.info(MKDIR_LOG, appFlink);
             fsOperator.mkdirs(appFlink);
         }
-        String flinkName = new File(flinkLocalHome).getName();
+        File flinkLocalDir = new File(flinkLocalHome);
+        if (Files.isSymbolicLink(flinkLocalDir.toPath())) {
+            flinkLocalDir = flinkLocalDir.getCanonicalFile();
+        }
+        String flinkName = flinkLocalDir.getName();
         String flinkHome = appFlink.concat("/").concat(flinkName);
         if (!fsOperator.exists(flinkHome)) {
             log.info("{} is not exists,upload beginning....", flinkHome);

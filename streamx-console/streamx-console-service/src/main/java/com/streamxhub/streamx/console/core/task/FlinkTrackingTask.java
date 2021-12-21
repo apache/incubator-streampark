@@ -40,6 +40,7 @@ import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -254,7 +255,7 @@ public class FlinkTrackingTask {
      */
     private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
         JobsOverview jobsOverview = application.httpJobsOverview();
-        Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
+        Optional<JobsOverview.Job> optional = jobsOverview.getJobs().size() > 1 ? jobsOverview.getJobs().stream().filter(a -> StringUtils.equals(application.getJobId(), a.getId())).findFirst() : jobsOverview.getJobs().stream().findFirst();
 
         if (optional.isPresent()) {
 

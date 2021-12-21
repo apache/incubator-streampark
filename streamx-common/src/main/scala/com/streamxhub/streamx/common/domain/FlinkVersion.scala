@@ -19,6 +19,7 @@
 package com.streamxhub.streamx.common.domain
 
 import com.streamxhub.streamx.common.util.CommandUtils
+import org.apache.commons.io.FileUtils.isSymlink
 import org.apache.commons.lang3.StringUtils
 
 import java.io.File

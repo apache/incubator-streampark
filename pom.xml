@@ -506,7 +506,8 @@
                             **/*.bat,
                             **/*.yml,
                             **/*.yaml,
-                            **/*.xml
+                            **/*.xml,
+                            **/*.txt
                         </resourceIncludes>
                         <resourceExcludes>
                             **/.asf.yaml,

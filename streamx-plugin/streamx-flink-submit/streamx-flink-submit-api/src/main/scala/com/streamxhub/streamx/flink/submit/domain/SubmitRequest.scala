@@ -26,6 +26,7 @@ import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums._
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
 import com.streamxhub.streamx.flink.packer.pipeline.BuildResult
+import org.apache.commons.io.FileUtils
 
 import java.io.File
 import java.util.{Map => JavaMap}
@@ -34,13 +35,8 @@ import scala.collection.JavaConversions._
 
 /**
  * @param clusterId            flink cluster id in k8s cluster.
- * @param flinkBaseImage       tag name of base flink docker image.
  * @param kubernetesNamespace  k8s namespace.
- * @param jarPackDeps          additional dependencies info for flink job.
- * @param dockerAuthConfig     docker authentication configuration.
- * @param podTemplates         custom flink k8s pod-template content.
  * @param flinkRestExposedType flink rest-service exposed type on k8s cluster.
- * @param integrateWithHadoop  whether integrate with hadoop.
  */
 case class KubernetesSubmitParam(clusterId: String,
                                  kubernetesNamespace: String,
@@ -116,7 +112,12 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
      */
     val workspace = Workspace.remote
     val flinkHome = flinkVersion.flinkHome
-    val flinkName = new File(flinkHome).getName
+    val flinkHomeDir = new File(flinkHome)
+    val flinkName = if (FileUtils.isSymlink(flinkHomeDir)) {
+      flinkHomeDir.getCanonicalFile.getName
+    } else {
+      flinkHomeDir.getName
+    }
     val flinkHdfsHome = s"${workspace.APP_FLINK}/$flinkName"
     HdfsWorkspace(
       flinkName,

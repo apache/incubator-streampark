@@ -17,14 +17,22 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.test.flink.java.bean;
+package com.streamxhub.streamx.console.core.service;
 
-import lombok.Data;
+import java.util.List;
 
-@Data
-public class OrderInfo {
-    private String orderId;
-    private String marketId;
-    private Double price;
-    private Long timestamp;
+/**
+ * @author Whojohn
+ * @time 2021.12.20
+ */
+public interface SqlComplete {
+    /**
+     * 功能：
+     * 1. 请传入一个完整 sql 语句，只对最后一词联想。(传入完整 sql ，是为了后续解析上下文的关键字使用。该版本暂无实现)
+     * 2. 最后一个词的定义是非空格字符
+     *
+     * @param sql 输入一个需要联想的 sql
+     * @return 返回一个潜在词列表
+     */
+    public List<String> getComplete(String sql);
 }
