@@ -25,7 +25,7 @@ import java.util.List;
  * @author Whojohn
  * @time 2021.12.20
  */
-public interface SqlComplete {
+public interface SqlCompleteService {
     /**
      * 功能：
      * 1. 请传入一个完整 sql 语句，只对最后一词联想。(传入完整 sql ，是为了后续解析上下文的关键字使用。该版本暂无实现)
@@ -33,6 +33,12 @@ public interface SqlComplete {
      *
      * @param sql 输入一个需要联想的 sql
      * @return 返回一个潜在词列表
+     */
+
+    /**
+     *
+     * @param sql
+     * @return
      */
     public List<String> getComplete(String sql);
 }
