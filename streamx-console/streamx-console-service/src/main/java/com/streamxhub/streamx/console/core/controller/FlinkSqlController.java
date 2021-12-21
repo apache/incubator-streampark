@@ -25,7 +25,7 @@ import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
-import com.streamxhub.streamx.console.core.service.SqlComplete;
+import com.streamxhub.streamx.console.core.service.SqlCompleteService;
 import com.streamxhub.streamx.flink.core.SqlError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class FlinkSqlController {
     private FlinkSqlService flinkSqlService;
 
     @Autowired
-    private SqlComplete sqlComplete;
+    private SqlCompleteService sqlComplete;
 
     @PostMapping("verify")
     public RestResponse verify(String sql, Long versionId) {

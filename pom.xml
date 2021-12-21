@@ -507,7 +507,7 @@
                             **/*.yml,
                             **/*.yaml,
                             **/*.xml,
-                            **/*.txt
+                            **/*.dict
                         </resourceIncludes>
                         <resourceExcludes>
                             **/.asf.yaml,
