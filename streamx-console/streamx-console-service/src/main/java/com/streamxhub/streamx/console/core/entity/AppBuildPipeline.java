@@ -128,7 +128,7 @@ public class AppBuildPipeline {
             return Maps.newHashMap();
         }
         try {
-            return JsonUtils.MAPPER.readValue(stepStatusJson, new TypeReference<HashMap<Integer, PipeStepStatus>>() {
+            return JsonUtils.read(stepStatusJson, new TypeReference<HashMap<Integer, PipeStepStatus>>() {
             });
         } catch (JsonProcessingException e) {
             log.error("[streamx] json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusJson, e);
@@ -139,7 +139,7 @@ public class AppBuildPipeline {
     @JsonIgnore
     public AppBuildPipeline setStepStatus(@Nonnull Map<Integer, PipeStepStatus> stepStatus) {
         try {
-            this.stepStatusJson = JsonUtils.MAPPER.writeValueAsString(stepStatus);
+            this.stepStatusJson = JsonUtils.write(stepStatus);
         } catch (JsonProcessingException e) {
             log.error("[streamx] json parse error on ApplicationBuildPipeline, stepStatusMap=({})",
                 stepStatus.entrySet().stream().map(et -> et.getKey() + "->" + et.getValue()).collect(Collectors.joining(",")), e);
@@ -154,7 +154,7 @@ public class AppBuildPipeline {
             return Maps.newHashMap();
         }
         try {
-            return JsonUtils.MAPPER.readValue(stepStatusTimestampJson, new TypeReference<HashMap<Integer, Long>>() {
+            return JsonUtils.read(stepStatusTimestampJson, new TypeReference<HashMap<Integer, Long>>() {
             });
         } catch (JsonProcessingException e) {
             log.error("[streamx] json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusTimestampJson, e);
@@ -165,7 +165,7 @@ public class AppBuildPipeline {
     @JsonIgnore
     public AppBuildPipeline setStepStatusTimestamp(@Nonnull Map<Integer, Long> stepStatusSt) {
         try {
-            this.stepStatusTimestampJson = JsonUtils.MAPPER.writeValueAsString(stepStatusSt);
+            this.stepStatusTimestampJson = JsonUtils.write(stepStatusSt);
         } catch (JsonProcessingException e) {
             log.error("[streamx] json parse error on ApplicationBuildPipeline, stepStatusSt=({})",
                 stepStatusSt.entrySet().stream().map(et -> et.getKey() + "->" + et.getValue()).collect(Collectors.joining(",")), e);
@@ -180,7 +180,7 @@ public class AppBuildPipeline {
             return PipeErr.empty();
         }
         try {
-            return JsonUtils.MAPPER.readValue(errorJson, PipeErr.class);
+            return JsonUtils.read(errorJson, PipeErr.class);
         } catch (JsonProcessingException e) {
             log.error("[streamx] json parse error on ApplicationBuildPipeline, errorJson={}", errorJson, e);
             return PipeErr.empty();
@@ -190,7 +190,7 @@ public class AppBuildPipeline {
     @JsonIgnore
     public AppBuildPipeline setError(@Nonnull PipeErr error) {
         try {
-            this.errorJson = JsonUtils.MAPPER.writeValueAsString(error);
+            this.errorJson = JsonUtils.write(error);
         } catch (JsonProcessingException e) {
             log.error("[streamx] json parse error on ApplicationBuildPipeline, error={}", error, e);
         }
@@ -200,7 +200,7 @@ public class AppBuildPipeline {
     @JsonIgnore
     public <R extends BuildResult> AppBuildPipeline setBuildResult(@Nonnull R result) {
         try {
-            this.buildResultJson = JsonUtils.MAPPER.writeValueAsString(result);
+            this.buildResultJson = JsonUtils.write(result);
         } catch (JsonProcessingException e) {
             log.error("[streamx] json parse error on ApplicationBuildPipeline, buildResult={}", result, e);
         }
@@ -231,7 +231,7 @@ public class AppBuildPipeline {
             return null;
         }
         try {
-            return (R) JsonUtils.MAPPER.readValue(buildResultJson, pipeType.getResultType());
+            return (R) JsonUtils.read(buildResultJson, pipeType.getResultType());
         } catch (JsonProcessingException e) {
             log.error("[streamx] json parse error on ApplicationBuildPipeline, buildResultJson={}", buildResultJson, e);
             return null;

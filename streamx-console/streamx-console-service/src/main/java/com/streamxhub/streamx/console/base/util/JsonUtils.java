@@ -32,7 +32,7 @@ import java.text.SimpleDateFormat;
 
 public class JsonUtils {
 
-    public static final ObjectMapper MAPPER;
+    private static final ObjectMapper MAPPER;
 
     static {
         MAPPER = new ObjectMapper();
@@ -50,6 +50,10 @@ public class JsonUtils {
 
     public static <T> T read(String json, TypeReference<T> typeReference) throws JsonProcessingException {
         return MAPPER.readValue(json, typeReference);
+    }
+
+    public static String write(Object object) throws JsonProcessingException {
+        return MAPPER.writeValueAsString(object);
     }
 
 }
