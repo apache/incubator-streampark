@@ -41,8 +41,7 @@ public enum PipeStatus {
     pending(1),
     running(2),
     success(3),
-    failure(4),
-    ;
+    failure(4);
 
     private final Integer code;
 
