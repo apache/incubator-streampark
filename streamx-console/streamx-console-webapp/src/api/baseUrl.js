@@ -27,11 +27,11 @@ export function baseUrl() {
       url = `'${location.protocol}//${location.host}'`
       break
     case 'production':
-      url = process.env['VUE_APP_BASE_URL']
+      url = process.env['VUE_APP_BASE_API']
       break
     //开发测试阶段采用前后端分离,这里配置后端的请求URI
     case 'development':
-      url = process.env['VUE_APP_BASE_URL']
+      url = process.env['VUE_APP_BASE_API']
       break
   }
   return url
