@@ -56,4 +56,9 @@ object K8sFlinkConfig {
     classType = classOf[java.lang.Long],
     description = "retained tracking time for SILENT state flink tasks")
 
+  /**
+   * kubernetes default namespace
+   */
+  val DEFAULT_KUBERNETES_NAMESPACE = "default"
+
 }

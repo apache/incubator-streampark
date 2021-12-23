@@ -35,9 +35,5 @@ public class ConfigurationOptions {
     public static String KEY_JVM_HEAP_MEMORY = "jobmanager.memory.heap.size";
 
     public static String KEY_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size";
-    /**
-     * ref KubernetesConfigOptions.NAMESPACE.defaultValue()
-     */
-    public static String KUBERNETES_NAMESPACE_DEFAULT_VALUE = "default";
 
 }
