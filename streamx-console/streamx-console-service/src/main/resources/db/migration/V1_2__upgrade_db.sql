@@ -25,7 +25,7 @@ INSERT INTO `t_setting` VALUES (13, 'docker.register.password', null, 'Docker Re
 INSERT INTO `t_setting` VALUES (14, 'alert.phone.host',null,'Alert Phone Host','用来发送告警服务中心地址',1);
 INSERT INTO `t_setting` VALUES (15, 'alert.phone.number',null,'Alert Phone Number','用来发送告警短信号码',1);
 
-ALTER TABLE `t_flink_app` ADD COLUMN `NAME` varchar(255) NULL AFTER `JOB_NAME`;
+ALTER TABLE `t_flink_app`    ADD COLUMN `NAME` varchar(255) NULL AFTER `JOB_NAME`;
 ALTER TABLE `t_flink_app` ADD COLUMN `VERSION_ID` bigint NULL AFTER `JOB_ID`;
 ALTER TABLE `t_flink_app` ADD COLUMN `CLUSTER_ID` varchar(255) NULL AFTER `VERSION_ID`;
 ALTER TABLE `t_flink_app` ADD COLUMN `K8S_NAMESPACE` varchar(255) NULL AFTER `CLUSTER_ID`;
