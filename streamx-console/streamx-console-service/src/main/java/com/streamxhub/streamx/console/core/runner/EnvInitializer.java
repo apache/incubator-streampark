@@ -76,11 +76,15 @@ public class EnvInitializer implements ApplicationRunner {
                 " more detail: http://www.streamxhub.com/zh/doc/console/deployment");
         }
         overrideSystemProp(ConfigConst.KEY_DOCKER_IMAGE_NAMESPACE(), ConfigConst.DOCKER_IMAGE_NAMESPACE_DEFAULT());
-        String hadoopUserName = context.getEnvironment().getProperty(ConfigConst.STREAMX_HADOOP_USER_NAME(), ConfigConst.DEFAULT_HADOOP_USER_NAME());
-        overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
+
         // init ConfigHub
         initConfigHub(context.getEnvironment());
-        // automatic in local
+
+        // overwrite system variable HADOOP_USER_NAME
+        String hadoopUserName = ConfigHub.get(ConfigConst.KEY_HADOOP_USER_NAME());
+        overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
+
+        // initialize local file system resources
         storageInitialize(LFS);
     }
 

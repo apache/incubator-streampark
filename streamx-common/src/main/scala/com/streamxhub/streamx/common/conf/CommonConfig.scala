@@ -35,6 +35,9 @@ object CommonConfig {
     defaultValue = "/streamx",
     classType = classOf[java.lang.String])
 
-
+  val STREAMX_HADOOP_USER_NAME: ConfigOption = ConfigOption(
+    key = "streamx.hadoop-user-name",
+    defaultValue = "hdfs",
+    classType = classOf[java.lang.String])
 
 }
