@@ -21,7 +21,7 @@ package com.streamxhub.streamx.common.conf;
 /**
  * @author benjobs
  */
-public class ConfigurationOptions {
+public class FlinkConfigKeyConst {
 
 
     public static String KEY_APPLICATION_ARGS = "$internal.application.program-args";
