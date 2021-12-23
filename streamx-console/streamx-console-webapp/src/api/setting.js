@@ -33,8 +33,8 @@ export function all (params) {
   return http.post(api.SETTING.ALL, params)
 }
 
-export function getFlink () {
-  return http.post(api.SETTING.GETFLINK, {})
+export function checkHadoop () {
+  return http.post(api.SETTING.CHECK_HADOOP, {})
 }
 
 export function sync () {

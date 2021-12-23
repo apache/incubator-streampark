@@ -1,23 +1,22 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.console.base.util;
 
 import com.streamxhub.streamx.common.util.AssertUtils;
@@ -27,14 +26,26 @@ import org.springframework.cglib.beans.BeanMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 public class CommonUtils implements Serializable {
 
     private static final long serialVersionUID = 6458428317155311192L;
 
-    private static String OS = System.getProperty("os.name").toLowerCase();
+    private static String os = System.getProperty("os.name").toLowerCase();
 
     /**
      * 非空判断
@@ -284,80 +295,81 @@ public class CommonUtils implements Serializable {
                 throw new UnsupportedOperationException("Not supported");
             }
         }
+
         return new EnumerationIterator<E>(enumeration);
     }
 
     // 获取系统名字
     public static String getOsName() {
-        return OS;
+        return os;
     }
 
     public static boolean isLinux() {
-        return OS.indexOf("linux") >= 0;
+        return os.indexOf("linux") >= 0;
     }
 
     public static boolean isMacOS() {
-        return OS.indexOf("mac") >= 0 && OS.indexOf("os") > 0 && OS.indexOf("x") < 0;
+        return os.indexOf("mac") >= 0 && os.indexOf("os") > 0 && os.indexOf("x") < 0;
     }
 
     public static boolean isMacOSX() {
-        return OS.indexOf("mac") >= 0 && OS.indexOf("os") > 0 && OS.indexOf("x") > 0;
+        return os.indexOf("mac") >= 0 && os.indexOf("os") > 0 && os.indexOf("x") > 0;
     }
 
     public static boolean isWindows() {
-        return OS.indexOf("windows") >= 0;
+        return os.indexOf("windows") >= 0;
     }
 
     public static boolean isOS2() {
-        return OS.indexOf("os/2") >= 0;
+        return os.indexOf("os/2") >= 0;
     }
 
     public static boolean isSolaris() {
-        return OS.indexOf("solaris") >= 0;
+        return os.indexOf("solaris") >= 0;
     }
 
     public static boolean isSunOS() {
-        return OS.indexOf("sunos") >= 0;
+        return os.indexOf("sunos") >= 0;
     }
 
     public static boolean isMPEiX() {
-        return OS.indexOf("mpe/ix") >= 0;
+        return os.indexOf("mpe/ix") >= 0;
     }
 
     public static boolean isHPUX() {
-        return OS.indexOf("hp-ux") >= 0;
+        return os.indexOf("hp-ux") >= 0;
     }
 
     public static boolean isAix() {
-        return OS.indexOf("aix") >= 0;
+        return os.indexOf("aix") >= 0;
     }
 
     public static boolean isOS390() {
-        return OS.indexOf("os/390") >= 0;
+        return os.indexOf("os/390") >= 0;
     }
 
     public static boolean isFreeBSD() {
-        return OS.indexOf("freebsd") >= 0;
+        return os.indexOf("freebsd") >= 0;
     }
 
     public static boolean isIrix() {
-        return OS.indexOf("irix") >= 0;
+        return os.indexOf("irix") >= 0;
     }
 
     public static boolean isDigitalUnix() {
-        return OS.indexOf("digital") >= 0 && OS.indexOf("unix") > 0;
+        return os.indexOf("digital") >= 0 && os.indexOf("unix") > 0;
     }
 
     public static boolean isNetWare() {
-        return OS.indexOf("netware") >= 0;
+        return os.indexOf("netware") >= 0;
     }
 
     public static boolean isOSF1() {
-        return OS.indexOf("osf1") >= 0;
+        return os.indexOf("osf1") >= 0;
     }
 
     public static boolean isOpenVMS() {
-        return OS.indexOf("openvms") >= 0;
+        return os.indexOf("openvms") >= 0;
     }
 
     public static boolean isUnix() {

@@ -1,23 +1,22 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -41,20 +40,31 @@ import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
+import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -74,9 +84,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Autowired
     private ApplicationMapper applicationMapper;
-
-    @Autowired
-    private SimpMessageSendingOperations simpMessageSendingOperations;
 
     private ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
@@ -135,7 +142,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public void build(Long id) throws Exception {
+    public void build(Long id, String socketId) throws Exception {
         Project project = getById(id);
         this.baseMapper.startBuild(project);
         StringBuilder builder = new StringBuilder();
@@ -143,7 +150,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         boolean cloneSuccess = cloneSourceCode(project);
         if (cloneSuccess) {
             executorService.execute(() -> {
-                boolean build = projectBuild(project);
+                boolean build = projectBuild(project, socketId);
                 if (build) {
                     this.baseMapper.successBuild(project);
                     // 发布到apps下
@@ -218,7 +225,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             // 定位到target目录下:
             if (file.isDirectory() && "target".equals(file.getName())) {
                 // 在target路径下找tar.gz的文件或者jar文件,注意:两者只选其一,不能同时满足,
-                File tar = null, jar = null;
+                File tar = null;
+                File jar = null;
                 for (File targetFile : Objects.requireNonNull(file.listFiles())) {
                     // 1) 一旦找到tar.gz文件则退出.
                     if (targetFile.getName().endsWith("tar.gz")) {
@@ -233,7 +241,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                             jar = targetFile;
                         } else {
                             // 可能存在会找到多个jar,这种情况下,选择体积最大的那个jar返回...(不要问我为什么.)
-                            if (targetFile.getTotalSpace() > jar.getTotalSpace()) {
+                            if (targetFile.length() > jar.length()) {
                                 jar = targetFile;
                             }
                         }
@@ -415,7 +423,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
      * @param project
      * @return
      */
-    private boolean projectBuild(Project project) {
+    private boolean projectBuild(Project project, String socketId) {
         StringBuilder builder = tailBuffer.get(project.getId());
         AtomicBoolean success = new AtomicBoolean(false);
         CommandUtils.execute(project.getMavenBuildCmd(), (line) -> {
@@ -427,9 +435,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 if (tailBeginning.containsKey(project.getId())) {
                     tailBeginning.remove(project.getId());
                     Arrays.stream(builder.toString().split("\n"))
-                        .forEach(out -> simpMessageSendingOperations.convertAndSend("/resp/build", out));
+                        .forEach(out -> WebSocketEndpoint.writeMessage(socketId, out));
                 }
-                simpMessageSendingOperations.convertAndSend("/resp/build", line);
+                WebSocketEndpoint.writeMessage(socketId, line);
             }
         });
         closeBuildLog(project.getId());

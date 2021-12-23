@@ -57,11 +57,17 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
+            <directory>src/assembly/script</directory>
+            <outputDirectory>script</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
             <directory>src/main/resources</directory>
             <outputDirectory>conf</outputDirectory>
             <fileMode>0755</fileMode>
             <includes>
-                <include>*.*</include>
+                <include>*.yml</include>
+                <include>*.properties</include>
             </includes>
         </fileSet>
     </fileSets>

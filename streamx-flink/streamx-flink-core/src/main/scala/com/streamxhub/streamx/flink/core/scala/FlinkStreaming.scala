@@ -1,23 +1,22 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.flink.core.scala
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
@@ -60,7 +59,7 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
    */
   def start(): JobExecutionResult = execute()
 
-  @Deprecated override def execute(): JobExecutionResult = {
+  @deprecated override def execute(): JobExecutionResult = {
     val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
       case (appName: String, _) => appName
       case (null, appName: String) => appName
@@ -69,7 +68,7 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
     execute(appName)
   }
 
-  @Deprecated override def execute(jobName: String): JobExecutionResult = {
+  @deprecated override def execute(jobName: String): JobExecutionResult = {
     printLogo(s"FlinkStreaming $jobName Starting...")
     super.execute(jobName)
   }
