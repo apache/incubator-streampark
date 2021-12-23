@@ -37,7 +37,9 @@ server.all('*', function (req, res, next) {
   }
 })
 
-server.listen(10000, () => {
-  console.log('正在监听10000端口')
+const serverPort = 1000
+
+server.listen(serverPort, () => {
+  console.log('listening ' + serverPort)
 })
 server.use(express.static('./dist'))

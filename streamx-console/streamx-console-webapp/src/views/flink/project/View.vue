@@ -184,15 +184,14 @@
   </div>
 </template>
 <script>
-import { build, list,remove,closebuild } from '@api/project'
+import { build, buildlog, list,remove,closebuild } from '@api/project'
 import Ellipsis from '@comp/Ellipsis'
-import SockJS from 'sockjs-client'
-import Stomp from 'webstomp-client'
 import { Terminal } from 'xterm'
 import 'xterm/css/xterm.css'
 
 import SvgIcon from '@/components/SvgIcon'
 import {baseUrl} from '@/api/baseUrl'
+import storage from '@/utils/storage'
 
 export default {
   components: { Ellipsis, SvgIcon },
@@ -206,6 +205,8 @@ export default {
       stompClient: null,
       terminal: null,
       projectId: null,
+      socketId: null,
+      storageKey: 'BUILD_SOCKET_ID',
       controller: {
         ellipsis: 100,
         modalStyle: {
@@ -251,7 +252,12 @@ export default {
         showConfirmButton: false,
         timer: 2000
       }).then((r)=> {
-        build({id: record.id})
+        this.socketId = this.uuid()
+        storage.set(this.storageKey,this.socketId)
+        build({
+          id: record.id,
+          socketId: this.socketId
+        })
       })
     },
 
@@ -316,13 +322,31 @@ export default {
       })
       const container = document.getElementById('terminal')
       this.terminal.open(container, true)
-      const url = baseUrl().concat('/websocket')
-      const socket = new SockJS( url, null, { timeout: 15000} )
-      this.stompClient = Stomp.over(socket)
-      this.stompClient.connect({}, (success) => {
-        this.stompClient.subscribe('/resp/build', (msg) => this.terminal.writeln(msg.body))
-        this.stompClient.send('/req/build/' + this.projectId)
-      })
+
+      const url = baseUrl().concat('/websocket/' + this.handleGetSocketId())
+
+      const socket = this.getSocket(url)
+
+      socket.onopen = () => {
+        buildlog({id:project.id})
+      }
+
+      socket.onmessage = (event) => {
+        this.terminal.writeln(event.data)
+      }
+
+      socket.onclose = () => {
+        this.socketId = null
+        storage.rm(this.storageKey)
+      }
+
+    },
+
+    handleGetSocketId() {
+      if (this.socketId == null) {
+        return storage.get(this.storageKey) || null
+      }
+      return this.socketId
     },
 
     handleClose () {

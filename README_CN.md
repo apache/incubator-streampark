@@ -2,7 +2,7 @@
     <br/>
     <h1>
         <a href="http://www.streamxhub.com" target="_blank" rel="noopener noreferrer">
-        <img width="500" src="http://assets.streamxhub.com/streamx-log2.png" alt="StreamX logo">
+        <img width="500" src="https://user-images.githubusercontent.com/13284744/142753483-4e96eb33-01ee-469d-ad7c-387e1bf95ee1.png" alt="StreamX logo">
         </a>
     </h1>
     <strong>Make Flink|Spark easier!!!</strong>
@@ -43,11 +43,10 @@ Make Flink|Spark easier!!!
 规范了项目的配置，鼓励函数式编程，定义了最佳的编程方式，提供了一系列开箱即用的 `Connectors` ，标准化了配置、开发、测试、部署、监控、运维的整个过程， 提供 `Scala` 和 `Java` 两套api，
 其最终目的是打造一个一站式大数据平台，流批一体，湖仓一体的解决方案
 
-[![StreamX video](http://assets.streamxhub.com/streamx_player.png)](http://assets.streamxhub.com/streamx-video.mp4)
+[![StreamX video](https://user-images.githubusercontent.com/13284744/142747056-d220d69b-7f2a-447d-aeca-bc5435c8e29b.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
-![](http://assets.streamxhub.com/streamx-main.png?12345)
 
-![](http://assets.streamxhub.com/streamx-sql.png?12345)
+![](https://user-images.githubusercontent.com/13284744/142746797-85ebf7b4-4105-4b5b-a023-0689c7fd1d2d.png)
 
 ## 🎉 Features
 
@@ -57,7 +56,7 @@ Make Flink|Spark easier!!!
 * 在线参数配置
 * 多版本flink支持(1.12.x,1.13.x,1.14.x)
 * on Kubernetes部署模式支持(`K8s-Native-Application`/`K8s-Native-Session`)
-* on YARN部署模式支持(`YARN-Application`/`YARN-Pre-Job`)
+* on YARN部署模式支持(`YARN-Application`/`YARN-Per-Job`)
 * 快捷的日常操作(任务`启动`、`停止`、`savepoint`，从`savepoint`恢复)
 * 支持火焰图
 * 支持 `notebook` (在线任务开发)
@@ -70,11 +69,15 @@ Make Flink|Spark easier!!!
 * 从任务`开发`阶段到`部署管理`全链路支持
 * ...
 
+![](https://user-images.githubusercontent.com/13284744/142746863-856ef1cd-fa0e-4010-b359-c16ca2ad2fb7.png)
+
+![](https://user-images.githubusercontent.com/13284744/142746864-d807d728-423f-41c3-b90d-45ce2c21936b.png)
+
 ## 🏳‍🌈 组成部分
 
 `Streamx` 由三部分组成，分别是 `streamx-core`，`streamx-pump` 和 `streamx-console`
 
-![](http://assets.streamxhub.com/streamx1.png)
+![](https://user-images.githubusercontent.com/13284744/142746859-f6a4dedc-ec42-4ed5-933b-c27d559b9988.png)
 
 ### 1️⃣ streamx-core
 
@@ -161,7 +164,7 @@ StreamX现在离这个目标还有一段距离，还需持续投入，相应的�
 
 | 微信支付 | 支付宝 |
 |:----------|:----------|
-| <img src="http://assets.streamxhub.com/1617938114478.jpg?123456" alt="Buy Me A Coffee" width="150"> | <img src="http://assets.streamxhub.com/1617938216431.jpg?123456" alt="Buy Me A Coffee" width="150"> |
+| <img src="https://user-images.githubusercontent.com/13284744/142746857-35e7f823-7160-4505-be3f-e748a2d0a233.png" alt="Buy Me A Coffee" width="150"> | <img src="https://user-images.githubusercontent.com/13284744/142746860-e14a8183-d973-44ca-83bf-e5f9d4da1510.png" alt="Buy Me A Coffee" width="150"> |
 
 > 所有赞助人将在赞助人名单中显示。
 
@@ -205,7 +208,6 @@ StreamX现在离这个目标还有一段距离，还需持续投入，相应的�
 </div>
 
 <div align="center">
-    <img src="http://assets.streamxhub.com/benjobs.jpeg?123456" alt="Join the Group" width="200"><br>
-    <span>扫微信二维码加群讨论(验证信息:"StreamX")</span>
+    <img src="https://user-images.githubusercontent.com/13284744/142746862-42e9e2d8-b574-4253-8aea-bf4d96c56088.jpeg" alt="关注我们" height="250px"><br>
 </div>
 

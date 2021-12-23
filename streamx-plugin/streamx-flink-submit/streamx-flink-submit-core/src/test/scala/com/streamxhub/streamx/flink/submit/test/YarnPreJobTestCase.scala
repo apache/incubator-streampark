@@ -71,7 +71,7 @@ object YarnPreJobTestCase extends Logger {
   /**
    * 运行指定的option参数
    */
-  val option = "-e yarn-pre-job -p 2 -n"
+  val option = "-e yarn-per-job -p 2 -n"
 
   lazy val flinkDefaultConfiguration: Configuration = {
     require(FLINK_HOME != null)

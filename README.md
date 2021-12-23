@@ -2,7 +2,7 @@
     <br/>
     <h1>
         <a href="http://www.streamxhub.com" target="_blank" rel="noopener noreferrer">
-        <img width="500" src="http://assets.streamxhub.com/streamx-log2.png" alt="StreamX logo">
+        <img width="500" src="https://user-images.githubusercontent.com/13284744/142753483-4e96eb33-01ee-469d-ad7c-387e1bf95ee1.png" alt="StreamX logo">
         </a>
     </h1>
     <strong>Make Flink|Spark easier!!!</strong>
@@ -41,11 +41,10 @@ The original intention of `StreamX` is to make the development of `Flink` easier
 and tasks. Our ultimate goal is to build a one-stop big data solution integrating stream processing, batch processing, data warehouse and
 data laker.
 
-[![StreamX video](http://assets.streamxhub.com/streamx_player.png)](http://assets.streamxhub.com/streamx-video.mp4)
+[![StreamX video](https://user-images.githubusercontent.com/13284744/142747056-d220d69b-7f2a-447d-aeca-bc5435c8e29b.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
-![](http://assets.streamxhub.com/streamx-main.png?12345)
 
-![](http://assets.streamxhub.com/streamx-sql.png?12345)
+![](https://user-images.githubusercontent.com/13284744/142746797-85ebf7b4-4105-4b5b-a023-0689c7fd1d2d.png)
 
 ## 🎉 Features
 
@@ -53,9 +52,9 @@ data laker.
 * Out-of-the-box connectors
 * Support maven compilation
 * Configuration
-* Multi version flick support(1.12.x,1.13.x,1.14.x)
+* Multi version flink support(1.12.x,1.13.x,1.14.x)
 * on Kubernetes deployment (`K8s-Native-Application`/`K8s-Native-Session`)
-* on YARN deployment (`YARN-Application`/`YARN-Pre-Job`)
+* on YARN deployment (`YARN-Application`/`YARN-Per-Job`)
 * Support `Applicaion` and `Yarn-Per-Job` mode
 * `start`, `stop`, `savepoint`, resume from `savepoint`
 * Flame graph
@@ -69,11 +68,18 @@ data laker.
 * Full support from task `development` to `deployment`
 * ...
 
+![](https://user-images.githubusercontent.com/13284744/142746863-856ef1cd-fa0e-4010-b359-c16ca2ad2fb7.png)
+
+
+![](https://user-images.githubusercontent.com/13284744/142746864-d807d728-423f-41c3-b90d-45ce2c21936b.png)
+
+
+
 ## 🏳‍🌈 Components
 
 `Streamx` consists of three parts,`streamx-core`,`streamx-pump` and `streamx-console`
 
-![](http://assets.streamxhub.com/streamx1.png)
+![](https://user-images.githubusercontent.com/13284744/142746859-f6a4dedc-ec42-4ed5-933b-c27d559b9988.png)
 
 ### 1️⃣ streamx-core
 
@@ -168,7 +174,7 @@ If you like this framework, and appreciate the work done for it to exist, you ca
 
 | WeChat Pay | Alipay |
 |:----------|:----------|
-| <img src="http://assets.streamxhub.com/1617938114478.jpg?12345" alt="Buy Me A Coffee" width="150"> | <img src="http://assets.streamxhub.com/1617938216431.jpg?12345" alt="Buy Me A Coffee" width="150"> |
+| <img src="https://user-images.githubusercontent.com/13284744/142746857-35e7f823-7160-4505-be3f-e748a2d0a233.png" alt="Buy Me A Coffee" width="150"> | <img src="https://user-images.githubusercontent.com/13284744/142746860-e14a8183-d973-44ca-83bf-e5f9d4da1510.png" alt="Buy Me A Coffee" width="150"> |
 
 ## 🏆 My sponsors (Coffee Suppliers)
 
@@ -214,8 +220,7 @@ Thank you to all our backers!
 </div>
 
 <div align="center">
-    <img src="http://assets.streamxhub.com/benjobs.jpeg?1234" alt="Join the Group" width="200"><br>
-    <span>join us (verification information: "StreamX")</span>
+    <img src="https://user-images.githubusercontent.com/13284744/142746862-42e9e2d8-b574-4253-8aea-bf4d96c56088.jpeg" alt="Join the Group" height="250px"><br>
 </div>
 
 
