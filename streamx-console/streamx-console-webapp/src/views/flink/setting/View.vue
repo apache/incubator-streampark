@@ -357,7 +357,7 @@ export default {
                   flinkHome: values.flinkHome,
                   description: values.description || null
                 }).then((resp)=>{
-                  if(resp.data) {
+                  if (resp.data) {
                     this.flinkFormVisible = false
                     this.$swal.fire({
                       icon: 'success',
@@ -366,10 +366,10 @@ export default {
                       timer: 2000
                     })
                     this.handleFlinkAll()
-                  }else {
+                  } else {
                     this.$swal.fire(
                       'Failed',
-                      resp['message'].replaceAll(/\[StreamX]/g,''),
+                      resp['message'].replaceAll(/\[StreamX]/g, ''),
                       'error'
                     )
                   }
