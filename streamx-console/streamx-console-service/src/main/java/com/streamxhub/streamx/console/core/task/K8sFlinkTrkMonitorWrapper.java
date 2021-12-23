@@ -24,11 +24,11 @@ import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.toK
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
-import com.streamxhub.streamx.console.core.conf.K8sFlinkConfig;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.flink.kubernetes.FlinkTrkConf;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitorFactory;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
@@ -72,18 +72,13 @@ public class K8sFlinkTrkMonitorWrapper {
     @Autowired
     private AlertService alertService;
 
-    @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
-    @Lazy
-    @Autowired
-    private K8sFlinkConfig k8sFlinkConfig;
-
     /**
      * Register FlinkTrkMonitor bean for tracking flink job on kubernetes.
      */
     @Bean(destroyMethod = "close")
     public K8sFlinkTrkMonitor registerFlinkTrackingMonitor() {
         // lazy start tracking monitor
-        K8sFlinkTrkMonitor trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(k8sFlinkConfig.toFlinkTrkConf(), true);
+        K8sFlinkTrkMonitor trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.fromConfigHub(), true);
         initK8sFlinkTrkMonitor(trkMonitor);
 
         /* Dev scaffold: watch flink k8s tracking cache,
