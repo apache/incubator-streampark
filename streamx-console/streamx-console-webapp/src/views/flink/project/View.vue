@@ -186,7 +186,6 @@
 <script>
 import { build, buildlog, list,remove,closebuild } from '@api/project'
 import Ellipsis from '@comp/Ellipsis'
-import SockJS from 'sockjs-client'
 import { Terminal } from 'xterm'
 import 'xterm/css/xterm.css'
 
@@ -326,14 +325,7 @@ export default {
 
       const url = baseUrl().concat('/websocket/' + this.handleGetSocketId())
 
-      window.WebSocket = window.WebSocket || window.MozWebSocket
-      let socket = null
-
-      if (window.WebSocket) {
-        socket = new WebSocket(url.replace('http:','ws:'))
-      } else {
-        socket = new SockJS(url)
-      }
+      const socket = this.getSocket(url)
 
       socket.onopen = () => {
         buildlog({id:project.id})

@@ -1,22 +1,20 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.streamxhub.streamx.common.util
 
@@ -28,7 +26,6 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.util.{Failure, Success, Try}
-
 
 /**
  *
@@ -118,7 +115,6 @@ object RedisUtils extends Logger {
    */
   def get(key: String)(implicit endpoint: RedisEndpoint): String = doRedis(_.get(key))
 
-
   def hget(key: String, field: String)(implicit endpoint: RedisEndpoint): String = doRedis(_.hget(key, field))
 
   /**
@@ -175,7 +171,6 @@ object RedisUtils extends Logger {
    * @return
    */
   def mget(keys: Array[String])(implicit endpoint: RedisEndpoint): Array[String] = doRedis(_.mget(keys: _*).asScala.toArray)
-
 
   /**
    * del
@@ -298,7 +293,6 @@ object RedisUtils extends Logger {
     v
   }, func)
 
-
   def hincrBy(key: String, field: String, value: Long, ttl: JInt = null, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
     val reply = x.hincrBy(key, field, value)
     if (ttl != null) {
@@ -363,9 +357,9 @@ object RedisUtils extends Logger {
     System.currentTimeMillis() - start
   }, func)
 
-  def expire(key: String, s: Int)(implicit endpoint: RedisEndpoint) = doRedis(_.expire(key, s))
+  def expire(key: String, s: Int)(implicit endpoint: RedisEndpoint): Long = doRedis(_.expire(key, s))
 
-  def delByPattern(key: String, func: () => Unit = null)(implicit endpoint: RedisEndpoint) = doRedis(r => {
+  def delByPattern(key: String, func: () => Unit = null)(implicit endpoint: RedisEndpoint): Any = doRedis(r => {
     /**
      * 采用 scan 的方式,一次删除10000条记录,循环删除,防止一次加载的记录太多,内存撑爆
      */
@@ -390,7 +384,7 @@ object RedisUtils extends Logger {
     val result = func match {
       case null => f(redis)
       case _ =>
-        //确保redis的操作和用户的操作在用一个redis事务里...
+        // 确保redis的操作和用户的操作在用一个redis事务里...
         val transaction = redis.multi()
         val r = f(redis)
         func()
@@ -429,6 +423,5 @@ object RedisUtils extends Logger {
     }
     result
   }
-
 
 }

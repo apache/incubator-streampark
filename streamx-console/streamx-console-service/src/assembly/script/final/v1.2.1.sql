@@ -547,4 +547,25 @@ BEGIN;
 INSERT INTO `t_user_role` VALUES (1, 1, 1);
 COMMIT;
 
+-- ----------------------------
+-- Table of t_app_build_pipe
+-- ----------------------------
+DROP TABLE IF EXISTS `t_app_build_pipe`;
+CREATE TABLE `t_app_build_pipe`
+(
+    `APP_ID`          BIGINT PRIMARY KEY,
+    `PIPE_TYPE`       TINYINT,
+    `PIPE_STATUS`     TINYINT,
+    `CUR_STEP`        SMALLINT,
+    `TOTAL_STEP`      SMALLINT,
+    `STEPS_STATUS`    TEXT,
+    `STEPS_STATUS_TS` TEXT,
+    `ERROR`           TEXT,
+    `BUILD_RESULT`    TEXT,
+    `UPDATE_TIME`     DATETIME
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
+
+
 SET FOREIGN_KEY_CHECKS = 1;

@@ -1,23 +1,22 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
@@ -51,14 +50,18 @@ import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.streamxhub.streamx.common.conf.ConfigurationOptions.KUBERNETES_NAMESPACE_DEFAULT_VALUE;
@@ -228,7 +231,7 @@ public class Application implements Serializable {
      */
     private Integer resourceFrom;
 
-   /**
+    /**
      * flink-hadoop integration on flink-k8s mode
      */
     private Boolean k8sHadoopIntegration;
@@ -268,6 +271,12 @@ public class Application implements Serializable {
      */
     private transient String flinkRestUrl;
 
+    /**
+     * refer to {@link com.streamxhub.streamx.flink.packer.pipeline.PipeStatus}
+     */
+    private transient Integer buildStatus;
+    private transient AppControl appControl;
+
     public void setK8sNamespace(String k8sNamespace) {
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? KUBERNETES_NAMESPACE_DEFAULT_VALUE : k8sNamespace;
     }
@@ -302,6 +311,30 @@ public class Application implements Serializable {
             default:
                 return 1;
         }
+    }
+
+    public boolean shouldBeTrack() {
+        return shouldTracking(FlinkAppState.of(getState())) == 1;
+    }
+
+    @JsonIgnore
+    public DeployState getDeployState() {
+        return DeployState.of(state);
+    }
+
+    @JsonIgnore
+    public void setDeployState(DeployState deployState) {
+        this.deploy = deployState.get();
+    }
+
+    @JsonIgnore
+    public DevelopmentMode getDevelopmentMode() {
+        return DevelopmentMode.of(jobType);
+    }
+
+    @JsonIgnore
+    public void setDevelopmentMode(DevelopmentMode mode) {
+        this.jobType = mode.getValue();
     }
 
     @JsonIgnore
@@ -406,7 +439,6 @@ public class Application implements Serializable {
         return new File(flinkSql, id.toString());
     }
 
-
     @JsonIgnore
     public AppInfo httpYarnAppInfo() throws Exception {
         if (appId != null) {
@@ -509,6 +541,16 @@ public class Application implements Serializable {
         return DevelopmentMode.CUSTOMCODE.getValue().equals(this.getJobType());
     }
 
+    @JsonIgnore
+    public boolean isUploadJob() {
+        return isCustomCodeJob() && ResourceFrom.UPLOAD.getValue().equals(this.getResourceFrom());
+    }
+
+    @JsonIgnore
+    public boolean isCICDJob() {
+        return isCustomCodeJob() && ResourceFrom.CICD.getValue().equals(this.getResourceFrom());
+    }
+
     public boolean isStreamXJob() {
         return this.getAppType() == ApplicationType.STREAMX_FLINK.getType();
     }
@@ -517,6 +559,11 @@ public class Application implements Serializable {
     @SneakyThrows
     public Dependency getDependencyObject() {
         return Dependency.jsonToDependency(this.dependency);
+    }
+
+    @JsonIgnore
+    public JarPackDeps getJarPackDeps() {
+        return Application.Dependency.jsonToDependency(getDependency()).toJarPackDeps();
     }
 
     @JsonIgnore
@@ -721,7 +768,6 @@ public class Application implements Serializable {
         private String getGav() {
             return this.groupId + ":" + this.artifactId + ":" + this.version;
         }
-
 
         private String getGa() {
             return this.groupId + ":" + this.artifactId;

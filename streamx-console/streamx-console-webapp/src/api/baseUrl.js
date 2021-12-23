@@ -19,16 +19,19 @@
  * under the License.
  */
 
+
 export function baseUrl() {
   let url = ''
   switch (process.env.NODE_ENV) {
-    //混合打包(production,不用配置,maven编译项目阶段-Denv=prod自动将环境参数透传到这里)
+    case 'mixin':
+      url = `'${location.protocol}//${location.host}'`
+      break
     case 'production':
-      url = (arguments[0] || null) ? (location.protocol + '//' + location.host) : '/'
+      url = process.env['VUE_APP_BASE_API']
       break
     //开发测试阶段采用前后端分离,这里配置后端的请求URI
     case 'development':
-      url = 'http://localhost:10000'
+      url = process.env['VUE_APP_BASE_API']
       break
   }
   return url

@@ -1,23 +1,22 @@
 /*
- * Copyright (c) 2021 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>œ
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright (c) 2019 The StreamX Project
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.flink.kubernetes
 
 import org.apache.commons.collections.CollectionUtils
@@ -135,19 +134,23 @@ object PodTemplateParser {
    */
   def extractHostAliasMap(podTemplateContent: String): JMap[String, String] = {
     val hosts = new util.LinkedHashMap[String, String](0)
-    if (podTemplateContent == null || podTemplateContent.isEmpty)
+    if (podTemplateContent == null || podTemplateContent.isEmpty) {
       return hosts
+    }
     try {
       val yaml = new Yaml
       val root = yaml.load(podTemplateContent).asInstanceOf[JMap[String, Any]]
-      if (!root.containsKey("spec"))
+      if (!root.containsKey("spec")) {
         return hosts
+      }
       val spec = root.get("spec").asInstanceOf[JMap[String, Any]]
-      if (!spec.containsKey("hostAliases"))
+      if (!spec.containsKey("hostAliases")) {
         return hosts
+      }
       val hostAliases = spec.get("hostAliases").asInstanceOf[JList[JMap[String, Any]]]
-      if (CollectionUtils.isEmpty(hostAliases))
+      if (CollectionUtils.isEmpty(hostAliases)) {
         return hosts
+      }
       for (hostAlias <- hostAliases.asScala) {
         breakable {
           if (!hostAlias.containsKey("ip") && !hostAlias.containsKey("hostnames")) break

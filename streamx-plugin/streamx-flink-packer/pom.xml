@@ -25,7 +25,12 @@
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-common</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-kubernetes</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- maven build tools -->
