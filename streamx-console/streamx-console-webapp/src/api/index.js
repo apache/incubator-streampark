@@ -36,7 +36,8 @@ export default {
     LISTCONF: '/flink/project/listconf',
     JARS: '/flink/project/jars',
     DELETE: '/flink/project/delete',
-    SELECT: '/flink/project/select'
+    SELECT: '/flink/project/select',
+    PROJAR:'/flink/project/upload'
   },
   Tutorial: {
     GET: '/tutorial/get'
