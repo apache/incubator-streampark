@@ -289,12 +289,6 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
-  val KEY_STREAMX_WORKSPACE_LOCAL = "streamx.workspace.local"
-
-  val KEY_STREAMX_WORKSPACE_REMOTE = "streamx.workspace.remote"
-
-  val STREAMX_WORKSPACE_DEFAULT = "/streamx"
-
   /**
    * maven repository used for built-in compilation
    */

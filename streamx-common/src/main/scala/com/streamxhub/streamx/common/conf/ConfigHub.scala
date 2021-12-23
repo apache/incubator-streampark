@@ -51,7 +51,7 @@ object ConfigHub extends Logger {
    * Initialize the ConfigHub.
    */
   def init(): Unit = {
-    Seq(K8sFlinkConfig)
+    Seq(CommonConfig, K8sFlinkConfig)
   }
 
   /**

@@ -75,8 +75,6 @@ public class EnvInitializer implements ApplicationRunner {
                 " please ensure the -Dapp.home parameter is clearly specified," +
                 " more detail: http://www.streamxhub.com/zh/doc/console/deployment");
         }
-        overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_LOCAL(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
-        overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_REMOTE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
         overrideSystemProp(ConfigConst.KEY_DOCKER_IMAGE_NAMESPACE(), ConfigConst.DOCKER_IMAGE_NAMESPACE_DEFAULT());
         String hadoopUserName = context.getEnvironment().getProperty(ConfigConst.STREAMX_HADOOP_USER_NAME(), ConfigConst.DEFAULT_HADOOP_USER_NAME());
         overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
