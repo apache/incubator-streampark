@@ -58,71 +58,119 @@
           </a-select-option>
         </a-select>
       </a-form-item>
+      <div v-if="repository!=3">
+        <a-form-item
+          label="Repository URL"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="The Repository URL for this project"
+            @change="handleSchema"
+            @blur="handleBranches"
+            v-decorator="['url',{ rules: [{ required: true, message: 'Repository URL is required'} ]}]" />
+        </a-form-item>
 
+        <a-form-item
+          label="UserName"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="UserName for this project"
+            @blur="handleBranches"
+            v-decorator="['username']" />
+        </a-form-item>
+
+        <a-form-item
+          label="Password"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="password"
+            @blur="handleBranches"
+            placeholder="Password for this project"
+            v-decorator="['password']" />
+        </a-form-item>
+
+        <a-form-item
+          label="Branches"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            show-search
+            placeholder="Select a branche"
+            option-filter-prop="children"
+            :filter-option="filterOption"
+            allow-clear
+            v-decorator="['branches',{ rules: [{ required: true } ]}]">
+            <a-select-option
+              v-for="(k ,i) in brancheList"
+              :key="i"
+              :value="k">
+              {{ k }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      
+        <a-form-item
+          label="POM"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xml"
+            v-decorator="['pom',{ rules: [{ message: 'Specifies the module to compile pom.xml If it is not specified, it is found under the root path pom.xml' } ]}]" />
+        </a-form-item>
+      </div>
       <a-form-item
-        label="Repository URL"
+        label="Jar"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-input
-          type="text"
-          placeholder="The Repository URL for this project"
-          @change="handleSchema"
-          @blur="handleBranches"
-          v-decorator="['url',{ rules: [{ required: true, message: 'Repository URL is required'} ]}]" />
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-if="repository==3">
+        <a-upload-dragger
+          name="file"
+          :multiple="true"
+          @change="handleUploadJar"
+          :showUploadList="loading"
+          :customRequest="handleCustomRequest"
+          :beforeUpload="handleBeforeUpload">
+          <div style="height: 266px">
+            <p
+              class="ant-upload-drag-icon"
+              style="padding-top: 40px">
+              <a-icon
+                type="inbox"
+                :style="{ fontSize: '70px' }"/>
+            </p>
+            <p
+              class="ant-upload-text"
+              style="height: 45px">
+              Click or drag jar to this area to upload
+            </p>
+            <p
+              class="ant-upload-hint"
+              style="height: 45px">
+              Support for a single or bulk upload. You can upload a local jar here to support for current Job.
+            </p>
+          </div>
+        </a-upload-dragger>
+        <div
+          v-if="uploadJars.length > 0"
+          class="dependency-box">
+          <a-alert
+            class="dependency-item"
+            v-for="(value, index) in uploadJars"
+            :key="`upload_jars_${index}`"
+            type="info"
+            closable>
+            <template slot="message">
+              <span><a-tag class="tag-dependency" color="#108ee9">JAR</a-tag>{{ value }}</span>
+              <a-icon type="close" class="icon-close" @click="handleRemoveJar(value)"/>
+            </template>
+          </a-alert>
+        </div>
       </a-form-item>
-
-      <a-form-item
-        label="UserName"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-input
-          type="text"
-          placeholder="UserName for this project"
-          @blur="handleBranches"
-          v-decorator="['username']" />
-      </a-form-item>
-
-      <a-form-item
-        label="Password"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-input
-          type="password"
-          @blur="handleBranches"
-          placeholder="Password for this project"
-          v-decorator="['password']" />
-      </a-form-item>
-
-      <a-form-item
-        label="Branches"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-select
-          show-search
-          placeholder="Select a branche"
-          option-filter-prop="children"
-          :filter-option="filterOption"
-          allow-clear
-          v-decorator="['branches',{ rules: [{ required: true } ]}]">
-          <a-select-option
-            v-for="(k ,i) in brancheList"
-            :key="i"
-            :value="k">
-            {{ k }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-
-      <a-form-item
-        label="POM"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-input
-          type="text"
-          placeholder="By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xml"
-          v-decorator="['pom',{ rules: [{ message: 'Specifies the module to compile pom.xml If it is not specified, it is found under the root path pom.xml' } ]}]" />
-      </a-form-item>
-
       <a-form-item
         label="Description"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -155,17 +203,22 @@
 <script>
 
 import { create,branches,gitcheck,exists } from '@api/project'
-
+import { uploadAddProject} from '@api/application'
 export default {
   name: 'BaseForm',
   data () {
     return {
       brancheList: [],
       searchBranche: false,
+      cvs:'',
+      uploadJars:[],
+      dependencyJar:new Map(),
+      loading:false,
       options: {
         repository: [
           { id: 1, name: 'GitHub/GitLab', default: true },
-          { id: 2, name: 'Subversion', default: false }
+          { id: 2, name: 'Subversion', default: false },
+          { id: 3, name: 'Jar', default: false }
         ],
         types: [
           {id: 1, name: 'apache flink',default: true },
@@ -179,7 +232,53 @@ export default {
     this.form = this.$form.createForm(this)
   },
   methods: {
-
+    handleRemoveJar(jar) {
+      this.dependencyJar.delete(jar)
+      const jars=[]
+      this.dependencyJar.forEach((v, k, item) => {
+        jars.push(v)
+      })
+      this.uploadJars = jars
+    },
+    handleUploadJar(info) {
+      const status = info.file.status
+      if (status === 'done') {
+        this.loading = false
+      } else if (status === 'error') {
+        this.loading = false
+        this.$message.error(`${info.file.name} file upload failed.`)
+      }
+    },
+    handleCustomRequest(data) {
+        const formData = new FormData()
+        formData.append('file', data.file)
+        uploadAddProject(formData).then((resp) => {
+          this.loading = false
+          if(resp.status=='success'){
+            this.dependencyJar.set(data.file.name, data.file.name)
+            const jars=[]
+            this.dependencyJar.forEach((v, k, item) => {
+              jars.push(v)
+            })
+            this.uploadJars = jars
+          }
+          
+        }).catch((error) => {
+          this.$message.error(error.message)
+          this.loading = false
+        })
+    },
+    handleBeforeUpload(file) {
+      if (file.type !== 'application/java-archive') {
+        if (!/\.(jar|JAR)$/.test(file.name)) {
+          this.loading = false
+          this.$message.error('Only jar files can be uploaded! please check your file.')
+          return false
+        }
+      }
+      this.loading = true
+      return true
+    },
     filterOption (input, option) {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
