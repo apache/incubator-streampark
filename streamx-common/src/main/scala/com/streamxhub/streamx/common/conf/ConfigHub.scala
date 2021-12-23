@@ -35,7 +35,7 @@ import scala.language.postfixOps
  */
 object ConfigHub extends Logger {
 
-  private val initialCapacity = 30
+  private val initialCapacity = 45
 
   /**
    * configuration values storage (key -> value)
@@ -128,7 +128,6 @@ object ConfigHub extends Logger {
     map.keySet()
   }
 
-
   /**
    * Overwritten configuration value.
    *
@@ -158,9 +157,8 @@ object ConfigHub extends Logger {
     val keys = allRegisteredKeys().asScala
     logInfo(
       s"""registered configs:
-         |configs count: ${keys.size}
-         |  ${keys.map(key => s"$key = ${get(key)}").mkString("\n  ")}
-         |""".stripMargin)
+         |ConfigHub collected configs: ${keys.size}
+         |  ${keys.map(key => s"$key = ${get(key)}").mkString("\n  ")}""".stripMargin)
   }
 
 }
@@ -172,7 +170,7 @@ object ConfigHub extends Logger {
  *
  * @param key          key of configuration that consistent with the spring config.
  * @param defaultValue default value of configuration that <b>should not be null</b>.
- * @param classType    the class type of value.
+ * @param classType    the class type of value. <b>please use java class type</b>.
  * @param description  description of configuration.
  * @author Al-assad
  */

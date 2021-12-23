@@ -40,7 +40,7 @@ case class MetricWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: 
  *
  * @param sglTrkTaskTimeoutSec          run timeout of single tracking task
  * @param sglTrkTaskIntervalSec         interval seconds between two single tracking task
- * @param silentStateJobKeepTrackingSec SILENT flink state job keep tracking seconds
+ * @param silentStateJobKeepTrackingSec retained tracking time for SILENT state flink tasks
  */
 case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long,
                                 sglTrkTaskIntervalSec: Long,
