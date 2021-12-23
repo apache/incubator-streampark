@@ -20,6 +20,8 @@
 package com.streamxhub.streamx.console.core.runner;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.conf.ConfigHub;
+import com.streamxhub.streamx.common.conf.ConfigOption;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
@@ -32,6 +34,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -77,8 +80,22 @@ public class EnvInitializer implements ApplicationRunner {
         overrideSystemProp(ConfigConst.KEY_DOCKER_IMAGE_NAMESPACE(), ConfigConst.DOCKER_IMAGE_NAMESPACE_DEFAULT());
         String hadoopUserName = context.getEnvironment().getProperty(ConfigConst.STREAMX_HADOOP_USER_NAME(), ConfigConst.DEFAULT_HADOOP_USER_NAME());
         overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
-        //automatic in local
+        // init ConfigHub
+        initConfigHub(context.getEnvironment());
+        // automatic in local
         storageInitialize(LFS);
+    }
+
+    private void initConfigHub(Environment springEnv) {
+        ConfigHub.init();
+        // override config from spring application.yaml
+        ConfigHub.allRegisteredKeys().stream()
+            .filter(springEnv::containsProperty)
+            .forEach(key -> {
+                ConfigOption config = ConfigHub.getRegisteredConfig(key);
+                ConfigHub.overwritten(config, springEnv.getProperty(key, config.classType()));
+            });
+        ConfigHub.logAllConfigs();
     }
 
     private void overrideSystemProp(String key, String defaultValue) {
