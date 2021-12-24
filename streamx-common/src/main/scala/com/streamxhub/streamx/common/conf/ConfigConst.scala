@@ -288,17 +288,17 @@ object ConfigConst {
   /**
    * flink config key
    */
-  var KEY_FLINK_APPLICATION_ARGS = "$internal.application.program-args"
+  val KEY_FLINK_APPLICATION_ARGS = "$internal.application.program-args"
 
-  var KEY_FLINK_APPLICATION_MAIN_CLASS = "$internal.application.main"
+  val KEY_FLINK_APPLICATION_MAIN_CLASS = "$internal.application.main"
 
-  var KEY_FLINK_TOTAL_PROCESS_MEMORY = "jobmanager.memory.process.size"
+  val KEY_FLINK_TOTAL_PROCESS_MEMORY = "jobmanager.memory.process.size"
 
-  var KEY_FLINK_TOTAL_MEMORY = "jobmanager.memory.flink.size"
+  val KEY_FLINK_TOTAL_MEMORY = "jobmanager.memory.flink.size"
 
-  var KEY_FLINK_JVM_HEAP_MEMORY = "jobmanager.memory.heap.size"
+  val KEY_FLINK_JVM_HEAP_MEMORY = "jobmanager.memory.heap.size"
 
-  var KEY_FLINK_JVM_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size"
+  val KEY_FLINK_JVM_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size"
 
 
   def printLogo(info: String): Unit = {
