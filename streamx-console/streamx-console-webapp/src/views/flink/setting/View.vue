@@ -357,14 +357,22 @@ export default {
                   flinkHome: values.flinkHome,
                   description: values.description || null
                 }).then((resp)=>{
-                  this.flinkFormVisible = false
-                  this.$swal.fire({
-                    icon: 'success',
-                    title: values.flinkName.concat(' update successful!'),
-                    showConfirmButton: false,
-                    timer: 2000
-                  })
-                  this.handleFlinkAll()
+                  if (resp.data) {
+                    this.flinkFormVisible = false
+                    this.$swal.fire({
+                      icon: 'success',
+                      title: values.flinkName.concat(' update successful!'),
+                      showConfirmButton: false,
+                      timer: 2000
+                    })
+                    this.handleFlinkAll()
+                  } else {
+                    this.$swal.fire(
+                      'Failed',
+                      resp['message'].replaceAll(/\[StreamX]/g, ''),
+                      'error'
+                    )
+                  }
                 })
               }
             } else {

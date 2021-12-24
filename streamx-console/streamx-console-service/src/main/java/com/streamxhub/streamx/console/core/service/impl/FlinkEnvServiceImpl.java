@@ -78,7 +78,9 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
     @Override
     public void update(FlinkEnv version) throws IOException {
         FlinkEnv flinkEnv = super.getById(version.getId());
-        assert flinkEnv != null;
+        if (flinkEnv == null){
+            throw new RuntimeException("flink home message lost, please check database status!");
+        }
         flinkEnv.setDescription(version.getDescription());
         flinkEnv.setFlinkName(version.getFlinkName());
         if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
