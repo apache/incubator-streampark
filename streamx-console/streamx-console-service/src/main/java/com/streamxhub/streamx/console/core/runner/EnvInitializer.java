@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.runner;
 
+import com.streamxhub.streamx.common.conf.CommonConfig;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.ConfigHub;
 import com.streamxhub.streamx.common.conf.ConfigOption;
@@ -79,7 +80,7 @@ public class EnvInitializer implements ApplicationRunner {
         // init ConfigHub
         initConfigHub(context.getEnvironment());
         // overwrite system variable HADOOP_USER_NAME
-        String hadoopUserName = ConfigHub.get(ConfigConst.KEY_HADOOP_USER_NAME());
+        String hadoopUserName = ConfigHub.get(CommonConfig.STREAMX_HADOOP_USER_NAME());
         overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
         // initialize local file system resources
         storageInitialize(LFS);
