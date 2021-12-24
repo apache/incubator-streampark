@@ -36,16 +36,7 @@ function resolve (dir) {
 module.exports = {
 
   devServer: {
-    // development server port 8000
-    port: 10000,
-    proxy: {
-      '/api': {
-        target: 'http://172.16.1.192:10000/',
-        ws: false,
-        changeOrigin: true,
-        pathRewrite: { '^/api': '' }
-      }
-    }
+    port: process.env['VUE_APP_PORT']
   },
 
   pluginOptions: {
@@ -65,7 +56,11 @@ module.exports = {
 
     plugins: [
       // Ignore all locale files of moment.js
-      new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^\.\/locale$/,
+        contextRegExp: /moment$/
+      }),
+
       new webpack.ProvidePlugin({
         $: 'jquery',
         jQuery: 'jquery',
@@ -77,10 +72,7 @@ module.exports = {
         matchColors: getThemeColors(),
         injectCss: true,
         resolveCss
-      }),
-      new webpack.DefinePlugin({
-        'process.env.NODE_VIEW': JSON.stringify(process.env.NODE_VIEW)
-      }),
+      })
     ]
   },
 
@@ -137,3 +129,4 @@ module.exports = {
   publicPath: '/',
   productionSourceMap: false
 }
+

@@ -60,6 +60,14 @@
           ]}]" />
       </a-form-item>
       <a-form-item
+        label="Description"
+        v-bind="formItemLayout">
+        <a-input
+          v-decorator="['description',{rules: [
+            { max: 100, message: '长度不能超过100个字符'}
+          ]}]" />
+      </a-form-item>
+      <a-form-item
         label="Role"
         v-bind="formItemLayout">
         <a-select

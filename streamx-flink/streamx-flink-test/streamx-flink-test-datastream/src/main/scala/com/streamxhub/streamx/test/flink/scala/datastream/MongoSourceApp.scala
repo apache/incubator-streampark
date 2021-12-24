@@ -24,9 +24,9 @@ import com.mongodb.BasicDBObject
 import com.streamxhub.streamx.common.util.{DateUtils, JsonUtils}
 import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import com.streamxhub.streamx.flink.core.scala.source.MongoSource
-import org.apache.flink.api.scala._
+import org.apache.flink.api.scala.createTypeInformation
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConversions.asScalaIterator
 
 object MongoSourceApp extends FlinkStreaming {
 
@@ -46,7 +46,7 @@ object MongoSourceApp extends FlinkStreaming {
         val cond = new BasicDBObject().append("updateTime", new BasicDBObject("$gte", DateUtils.parse(offset)))
         d.find(cond)
       },
-      _.toList.map(_.toJson()),null
+      _.toList.map(_.toJson()), null
     ).print()
   }
 

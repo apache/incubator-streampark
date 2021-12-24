@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 The StreamX Project
+ * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -21,7 +21,6 @@
 package com.streamxhub.streamx.flink.packer
 
 import com.streamxhub.streamx.flink.packer.docker.FlinkDockerfileTemplate
-import com.streamxhub.streamx.flink.packer.docker.FlinkDockerfileTemplate.DEFAULT_DOCKER_FILE_NAME
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.must.Matchers
@@ -49,24 +48,24 @@ class FlinkDockerfileTemplateSpec extends AnyWordSpec with BeforeAndAfter with M
   "FlinkDockerfileTemplate" when {
 
     "create dockerfile" should {
-      val template = new FlinkDockerfileTemplate("1.13-scala_2.11", path("flink/WordCountSQL.jar"))
+      val template = FlinkDockerfileTemplate(outputDir.getAbsolutePath, "1.13-scala_2.11", path("flink/WordCountSQL.jar"), Set())
       val assertDockerFileContent =
         """FROM 1.13-scala_2.11
           |RUN mkdir -p $FLINK_HOME/usrlib
           |COPY /WordCountSQL.jar $FLINK_HOME/usrlib/WordCountSQL.jar
+          |COPY lib $FLINK_HOME/lib/
           |""".stripMargin
-
       "build Dockerfile content" in {
-        template.dockerfileContent mustBe assertDockerFileContent
+        template.offerDockerfileContent mustBe assertDockerFileContent
       }
       "write Dockerfile to file" in {
-        val output = outputDir.getAbsolutePath + "/my-dockerfile"
-        val outFile = template.writeDockerfile(output)
+        val outFile = template.writeDockerfile
+        outFile.getName mustBe "dockerfile"
         FileUtils.readFileToString(outFile, "UTF-8") mustBe assertDockerFileContent
       }
-      "write Dockerfile to directory" in {
-        val outFile = template.writeDockerfile(outputDir.getAbsolutePath)
-        outFile.getName mustBe DEFAULT_DOCKER_FILE_NAME
+      "write Dockerfile with special name" in {
+        val outFile = template.writeDockerfile("Dockerfile")
+        outFile.getName mustBe "my-dockerfile"
         FileUtils.readFileToString(outFile, "UTF-8") mustBe assertDockerFileContent
       }
     }

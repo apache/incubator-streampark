@@ -1,30 +1,27 @@
 /*
- * Copyright (c) 2021 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>œ
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright (c) 2019 The StreamX Project
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
 import org.apache.commons.io.FileUtils
-import org.apache.flink.configuration.ConfigOptions.key
-import org.apache.flink.configuration.{ConfigOption, Configuration}
-import scala.collection.JavaConverters
+import org.apache.flink.configuration.Configuration
 
 import java.io.File
 import scala.collection.mutable
@@ -34,22 +31,12 @@ import scala.collection.mutable
  */
 object PodTemplateTool {
 
-  val KUBERNETES_POD_TEMPLATE_FILE: ConfigOption[String] = key("kubernetes.pod-template-file")
-    .stringType()
-    .noDefaultValue()
+  val KUBERNETES_POD_TEMPLATE: PodTemplateType = PodTemplateType("kubernetes.pod-template-file", "pod-template.yaml")
 
-  val KUBERNETES_POD_TEMPLATE_FILE_JOBMANAGER: ConfigOption[String] = key("kubernetes.pod-template-file.jobmanager")
-    .stringType()
-    .noDefaultValue()
+  val KUBERNETES_JM_POD_TEMPLATE: PodTemplateType = PodTemplateType("kubernetes.pod-template-file.jobmanager", "jm-pod-template.yaml")
 
-  val KUBERNETES_POD_TEMPLATE_FILE_TASKMANAGER: ConfigOption[String] = key("kubernetes.pod-template-file.taskmanager")
-    .stringType()
-    .noDefaultValue()
+  val KUBERNETES_TM_POD_TEMPLATE: PodTemplateType = PodTemplateType("kubernetes.pod-template-file.taskmanager", "tm-pod-template.yaml")
 
-  val K8S_POD_TEMPLATE_DEFAULT_FILE_NAME: Map[ConfigOption[String], String] = Map(
-    KUBERNETES_POD_TEMPLATE_FILE -> "pod-template.yaml",
-    KUBERNETES_POD_TEMPLATE_FILE_JOBMANAGER -> "jm-pod-template.yaml",
-    KUBERNETES_POD_TEMPLATE_FILE_TASKMANAGER -> "tm-pod-template.yaml")
 
   /**
    * Prepare kubernetes pod template file to buildWorkspace direactory.
@@ -60,35 +47,41 @@ object PodTemplateTool {
    */
   def preparePodTemplateFiles(buildWorkspace: String, podTemplates: K8sPodTemplates): K8sPodTemplateFiles = {
     val workspaceDir = new File(buildWorkspace)
-    if (!workspaceDir.exists())
+    if (!workspaceDir.exists()) {
       workspaceDir.mkdir()
+    }
 
-    val podTempleMap = mutable.Map[ConfigOption[String], String]()
-    val outputTmplContent = (tmplContent: String, tmplOption: ConfigOption[String]) => {
+    val podTempleMap = mutable.Map[String, String]()
+    val outputTmplContent = (tmplContent: String, podTmpl: PodTemplateType) => {
       if (tmplContent.nonEmpty) {
-        val outputPath = s"${buildWorkspace}/${K8S_POD_TEMPLATE_DEFAULT_FILE_NAME(tmplOption)}"
+        val outputPath = s"${buildWorkspace}/${podTmpl.fileName}"
         val outputFile = new File(outputPath)
         FileUtils.write(outputFile, tmplContent, "UTF-8")
-        podTempleMap += (tmplOption -> outputPath)
+        podTempleMap += (podTmpl.key -> outputPath)
       }
     }
 
-    outputTmplContent(podTemplates.podTemplate, KUBERNETES_POD_TEMPLATE_FILE)
-    outputTmplContent(podTemplates.jmPodTemplate, KUBERNETES_POD_TEMPLATE_FILE_JOBMANAGER)
-    outputTmplContent(podTemplates.tmPodTemplate, KUBERNETES_POD_TEMPLATE_FILE_TASKMANAGER)
+    outputTmplContent(podTemplates.podTemplate, KUBERNETES_POD_TEMPLATE)
+    outputTmplContent(podTemplates.jmPodTemplate, KUBERNETES_JM_POD_TEMPLATE)
+    outputTmplContent(podTemplates.tmPodTemplate, KUBERNETES_TM_POD_TEMPLATE)
     K8sPodTemplateFiles(podTempleMap.toMap)
   }
 
-
 }
 
-
-case class K8sPodTemplateFiles(tmplFiles: Map[ConfigOption[String], String]) {
+/**
+ * @param tmplFiles key of flink pod template configuration -> absolute file path of pod template
+ */
+case class K8sPodTemplateFiles(tmplFiles: Map[String, String]) {
 
   /**
-   * merge k8s pod template configuration to Flink Cnfiguartion
+   * merge k8s pod template configuration to Flink Configuration
    */
   def mergeToFlinkConf(flinkConf: Configuration): Unit =
-    tmplFiles.filter(_._2.nonEmpty).foreach(e => flinkConf.set(e._1, e._2))
+    tmplFiles
+      .filter(_._2.nonEmpty)
+      .foreach(e => flinkConf.setString(e._1, e._2))
 
 }
+
+case class PodTemplateType(key: String, fileName: String)

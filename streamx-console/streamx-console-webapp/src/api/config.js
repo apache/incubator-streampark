@@ -40,3 +40,7 @@ export function history (params) {
 export function remove (params) {
   return http.post(api.Config.DELETE, params)
 }
+
+export function sysHadoopConf (params) {
+  return http.post(api.Config.SYS_HADOOP_CONF, params)
+}
