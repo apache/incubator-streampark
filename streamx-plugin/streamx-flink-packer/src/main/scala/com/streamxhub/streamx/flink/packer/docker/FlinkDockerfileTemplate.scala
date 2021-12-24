@@ -44,24 +44,4 @@ case class FlinkDockerfileTemplate(workspacePath: String,
        |""".stripMargin
   }
 
-  /**
-   * get flink job jar such as local:///opt/flink/lib/flink-fatjar.jar
-   */
-  def getJobJar: String = s"local:///opt/flink/lib/$fatJarName"
-
-}
-
-object FlinkDockerfileTemplate {
-
-  val DEFAULT_DOCKER_FILE_NAME = "Dockerfile"
-
-  /**
-   * template of dockerfile
-   */
-  val DOCKER_FILE_TEMPLATE: String =
-    """FROM %s
-      |RUN mkdir -p $FLINK_HOME/usrlib
-      |COPY %s $FLINK_HOME/lib/%s
-      |""".stripMargin
-
 }
