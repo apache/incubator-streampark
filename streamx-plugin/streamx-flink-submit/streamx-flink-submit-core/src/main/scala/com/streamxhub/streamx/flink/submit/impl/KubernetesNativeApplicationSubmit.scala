@@ -51,34 +51,6 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     // extract flink config
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
 
-    // step-2: build fat-jar, output file name: _streamx-flinkjob_<jobamme>.jar, like "_streamx-flinkjob_myjob-test.jar"
-    val fatJar = {
-      val fatJarOutputPath = s"$buildWorkspace/_streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}.jar"
-      submitRequest.developmentMode match {
-        case DevelopmentMode.FLINKSQL =>
-          val flinkLibs = extractProvidedLibs(submitRequest)
-          val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
-          MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
-        case DevelopmentMode.CUSTOMCODE =>
-          val providedLibs = Set(
-            workspace.APP_JARS,
-            workspace.APP_PLUGINS,
-            submitRequest.flinkUserJar
-          )
-          val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
-          MavenTool.buildFatJar(jarPackDeps.merge(providedLibs), fatJarOutputPath)
-      }
-    }
-    logInfo(s"[flink-submit] already built flink job fat-jar. " +
-      s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
-
-    logInfo(s"[flink-submit] start building flink job docker image. ${flinkConfIdentifierInfo(flinkConfig)}")
-
-    // step-3: build and push flink application image
-    val dockerAuthConfig = submitRequest.k8sSubmitParam.dockerAuthConfig
-    val flinkBaseImage = submitRequest.k8sSubmitParam.flinkBaseImage
-    val dockerFileTemplate = new FlinkDockerfileTemplate(flinkBaseImage, fatJar.getAbsolutePath)
-    val tagName = s"flinkjob-${submitRequest.k8sSubmitParam.clusterId}"
     // add flink pipeline.jars configuration
     flinkConfig.set(PipelineOptions.JARS, Lists.newArrayList(buildResult.dockerInnerMainJarPath))
     // add flink conf configuration, mainly to set the log4j configuration
