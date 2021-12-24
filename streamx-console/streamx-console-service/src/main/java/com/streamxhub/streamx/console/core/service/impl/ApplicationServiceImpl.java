@@ -26,7 +26,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.conf.ConfigConst;
-import com.streamxhub.streamx.common.conf.FlinkConfigKeyConst;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.domain.FlinkMemorySize;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
@@ -1171,7 +1170,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 assert executionMode != null;
                 if (application.isUploadJob()) {
                     appConf = String.format("json://{\"%s\":\"%s\"}",
-                        FlinkConfigKeyConst.KEY_APPLICATION_MAIN_CLASS,
+                        ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
                         application.getMainClass()
                     );
                     flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
@@ -1184,7 +1183,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             break;
                         case APACHE_FLINK:
                             appConf = String.format("json://{\"%s\":\"%s\"}",
-                                FlinkConfigKeyConst.KEY_APPLICATION_MAIN_CLASS,
+                                ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
                                 application.getMainClass()
                             );
                             flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
@@ -1285,11 +1284,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             assert submitResponse != null;
 
             if (submitResponse.flinkConfig() != null) {
-                String jmMemory = submitResponse.flinkConfig().get(FlinkConfigKeyConst.KEY_TOTAL_PROCESS_MEMORY);
+                String jmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_TOTAL_PROCESS_MEMORY());
                 if (jmMemory != null) {
                     application.setJmMemory(FlinkMemorySize.parse(jmMemory).getMebiBytes());
                 }
-                String tmMemory = submitResponse.flinkConfig().get(FlinkConfigKeyConst.KEY_TOTAL_PROCESS_MEMORY);
+                String tmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_TOTAL_PROCESS_MEMORY());
                 if (tmMemory != null) {
                     application.setTmMemory(FlinkMemorySize.parse(tmMemory).getMebiBytes());
                 }
