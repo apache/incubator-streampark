@@ -18,8 +18,6 @@
  */
 package com.streamxhub.streamx.common.conf
 
-import com.streamxhub.streamx.common.util.SystemPropertyUtils
-
 import java.time.LocalDateTime
 
 object ConfigConst {
@@ -286,20 +284,6 @@ object ConfigConst {
   val KEY_ES_BULK_PREFIX = "bulk.flush."
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
-
-  /**
-   * maven repository used for built-in compilation
-   */
-  val DEFAULT_MAVEN_REMOTE_URL = "https://repo1.maven.org/maven2/"
-
-  /**
-   * namespace for docker image used in docker build env and image register
-   */
-  val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
-
-  val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
-
-  lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
 
   def printLogo(info: String): Unit = {

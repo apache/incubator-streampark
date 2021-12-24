@@ -40,4 +40,16 @@ object CommonConfig {
     defaultValue = "hdfs",
     classType = classOf[java.lang.String])
 
+  val DOCKER_IMAGE_NAMESPACE: ConfigOption = ConfigOption(
+    key = "streamx.docker.register.image-namespace",
+    defaultValue = "streamx",
+    classType = classOf[java.lang.String],
+    description = "namespace for docker image used in docker building env and target image register")
+
+  val MAVEN_REMOTE_URL: ConfigOption = ConfigOption(
+    key = "streamx.maven.remote-url",
+    defaultValue = "https://repo1.maven.org/maven2/",
+    classType = classOf[java.lang.String],
+    description = "maven repository used for built-in compilation")
+
 }
