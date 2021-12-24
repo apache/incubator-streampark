@@ -151,7 +151,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         {
             // 发布到apps下
             try {
-                this.deploy(project);
+                this.syncApption(project);
                 // 更新application的发布状态.
                 List<Application> applications = getApplications(project);
                 // 更新部署状态
@@ -203,7 +203,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     private void deploy(Project project) throws Exception {
-        File path = project.getUploadSource();
+        File path = project.getAppSource();
         List<File> apps = new ArrayList<>();
         // 在项目路径下寻找编译完成的tar.gz(StreamX项目)文件或jar(普通,官方标准的flink工程)...
         findTarOrJar(apps, path);
@@ -289,11 +289,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         Project project = getById(id);
         File appHome = project.getDistHome();
         List<String> list = new ArrayList<>();
-        if (project.getRepository() == 3)
-        {
-            list.add("jar");
-            return list;
-        }
         Arrays.stream(Objects.requireNonNull(appHome.listFiles())).forEach((x) -> list.add(x.getName()));
         return list;
     }
@@ -488,6 +483,41 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         tailBeginning.remove(id);
     }
 
+    private void syncApption(Project project) throws Exception {
+        File app = project.getUploadSource();
+        String appPath = app.getAbsolutePath();
+        // 1). tar.gz文件....
+        if (appPath.endsWith("tar.gz")) {
+            File deployPath = project.getDistHome();
+            if (!deployPath.exists()) {
+                deployPath.mkdirs();
+            }
+            // 将项目解包到app下.
+            if (app.exists()) {
+                String cmd = String.format(
+                    "tar -xzvf %s -C %s",
+                    app.getAbsolutePath(),
+                    deployPath.getAbsolutePath()
+                );
+                CommandUtils.execute(cmd);
+            }
+        } else {
+            try {
+                // 2) .jar文件(普通,官方标准的flink工程)
+                String moduleName = app.getName().replace(".jar", "");
+                File appBase = project.getDistHome();
+                File targetDir = new File(appBase, moduleName);
+                if (!targetDir.exists()) {
+                    targetDir.mkdirs();
+                }
+                File targetJar = new File(targetDir, "");
+                app.renameTo(targetJar);
+            } catch (Exception e) {
+                throw e;
+            }
+        }
+    }
+
     @Override
     public boolean upload(MultipartFile file, StorageType storageType, String name) throws Exception {
         envInitializer.storageInitialize(storageType);
@@ -507,7 +537,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         if (sourcePath.isFile()) {
             throw new IllegalArgumentException("[StreamX] uploadPath must be directory");
         }
-        String path = String.format("%s/%s/%s/", sourcePath.getAbsolutePath(), name, "target");
+        String path = String.format("%s/%s/", sourcePath.getAbsolutePath(), name);
         //String temp = workspace + name +"/target/";
         //String temp = WebUtils.getAppDir(name);
         File saveFile = new File(path, file.getOriginalFilename());
@@ -519,7 +549,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         // save file to temp dir
         FileUtils.writeByteArrayToFile(saveFile, file.getBytes());
         //3) 从本地目录上传到hdfs
-        fsOperator.upload(saveFile.getAbsolutePath(), APP_UPLOADS, true, true);
+        fsOperator.upload(saveFile.getAbsolutePath(), APP_UPLOADS, false, true);
         return true;
     }
 

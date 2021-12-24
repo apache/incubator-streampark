@@ -149,7 +149,7 @@ public class Project implements Serializable {
         if (sourcePath.isFile()) {
             throw new IllegalArgumentException("[StreamX] uploadPath must be directory");
         }
-        String path = String.format("%s/%s/%s/", sourcePath.getAbsolutePath(), getName(), "target");
+        String path = String.format("%s/%s/", sourcePath.getAbsolutePath(), getName());
         return new File(path);
     }
     @JsonIgnore
