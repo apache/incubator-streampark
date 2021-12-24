@@ -251,7 +251,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             // 定位到target目录下:
             if (file.isDirectory() && "target".equals(file.getName())) {
                 // 在target路径下找tar.gz的文件或者jar文件,注意:两者只选其一,不能同时满足,
-                File tar = null, jar = null;
+                File tar = null;
+                File jar = null;
                 for (File targetFile : Objects.requireNonNull(file.listFiles())) {
                     // 1) 一旦找到tar.gz文件则退出.
                     if (targetFile.getName().endsWith("tar.gz")) {
@@ -266,7 +267,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                             jar = targetFile;
                         } else {
                             // 可能存在会找到多个jar,这种情况下,选择体积最大的那个jar返回...(不要问我为什么.)
-                            if (targetFile.getTotalSpace() > jar.getTotalSpace()) {
+                            if (targetFile.length() > jar.length()) {
                                 jar = targetFile;
                             }
                         }
@@ -284,6 +285,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             }
         }
     }
+
 
     @Override
     public List<String> modules(Long id) {
