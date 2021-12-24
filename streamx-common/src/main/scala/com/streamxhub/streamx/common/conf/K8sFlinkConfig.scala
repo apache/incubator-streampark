@@ -52,8 +52,8 @@ object K8sFlinkConfig {
 
   val silentStateJobKeepTrackingSec: ConfigOption = ConfigOption(
     key = "streamx.flink-k8s.tracking.silent-state-keep-sec",
-    defaultValue = 60L,
-    classType = classOf[java.lang.Long],
+    defaultValue = 60,
+    classType = classOf[java.lang.Integer],
     description = "retained tracking time for SILENT state flink tasks")
 
   /**
