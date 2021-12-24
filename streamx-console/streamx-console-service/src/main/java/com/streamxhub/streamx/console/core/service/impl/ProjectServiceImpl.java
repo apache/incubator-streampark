@@ -46,6 +46,7 @@ import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.runner.EnvInitializer;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
+import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -146,7 +147,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public void build(Long id) throws Exception {
+    public void build(Long id, String socketId) throws Exception {
         Project project = getById(id);
         this.baseMapper.startBuild(project);
         if (project.getRepository() == 3)
@@ -175,7 +176,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         boolean cloneSuccess = cloneSourceCode(project);
         if (cloneSuccess) {
             executorService.execute(() -> {
-                boolean build = projectBuild(project);
+                boolean build = projectBuild(project, socketId);
                 if (build) {
                     this.baseMapper.successBuild(project);
                     // 发布到apps下
@@ -452,7 +453,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
      * @param project
      * @return
      */
-    private boolean projectBuild(Project project) {
+    private boolean projectBuild(Project project, String socketId) {
         StringBuilder builder = tailBuffer.get(project.getId());
         AtomicBoolean success = new AtomicBoolean(false);
         CommandUtils.execute(project.getMavenBuildCmd(), (line) -> {
@@ -464,9 +465,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 if (tailBeginning.containsKey(project.getId())) {
                     tailBeginning.remove(project.getId());
                     Arrays.stream(builder.toString().split("\n"))
-                        .forEach(out -> simpMessageSendingOperations.convertAndSend("/resp/build", out));
+                        .forEach(out -> WebSocketEndpoint.writeMessage(socketId, out));
                 }
-                simpMessageSendingOperations.convertAndSend("/resp/build", line);
+                WebSocketEndpoint.writeMessage(socketId, line);
             }
         });
         closeBuildLog(project.getId());
@@ -474,6 +475,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         tailBuffer.remove(project.getId());
         return success.get();
     }
+
 
     @Override
     public void tailBuildLog(Long id) {
