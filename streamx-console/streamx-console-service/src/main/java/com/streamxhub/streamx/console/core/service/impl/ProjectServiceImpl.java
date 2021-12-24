@@ -128,7 +128,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             return false;
         }
         try {
-            project.delete();
+            if (project.getRepository() != 3)
+            {
+                project.delete();
+            }
             removeById(id);
             return true;
         } catch (IOException e) {
