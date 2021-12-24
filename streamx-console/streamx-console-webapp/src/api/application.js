@@ -114,5 +114,5 @@ export function checkJar(params) {
 }
 
 export function uploadAddProject(params) {
-  return http.post(api.Project.PROJAR, params)
+  return http.upload(api.Project.PROJAR, params)
 }

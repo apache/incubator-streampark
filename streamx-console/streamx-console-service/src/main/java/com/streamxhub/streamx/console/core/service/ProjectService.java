@@ -22,10 +22,12 @@ package com.streamxhub.streamx.console.core.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -58,5 +60,7 @@ public interface ProjectService extends IService<Project> {
     List<Application> getApplications(Project project);
 
     boolean checkExists(Project project);
+
+    boolean upload(MultipartFile file, StorageType storageType, String name) throws Exception;
 
 }

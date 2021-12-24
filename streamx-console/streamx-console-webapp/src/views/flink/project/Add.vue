@@ -112,7 +112,7 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-      
+
         <a-form-item
           label="POM"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -252,6 +252,8 @@ export default {
     handleCustomRequest(data) {
         const formData = new FormData()
         formData.append('file', data.file)
+        formData.append('repository', this.repository)
+        formData.append('name', this.form.getFieldValue('name'))
         uploadAddProject(formData).then((resp) => {
           this.loading = false
           if(resp.status=='success'){
@@ -262,7 +264,7 @@ export default {
             })
             this.uploadJars = jars
           }
-          
+
         }).catch((error) => {
           this.$message.error(error.message)
           this.loading = false
@@ -315,6 +317,33 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
+          if(this.repository==3){
+            create({
+              name: values.name,
+              url: values.url,
+              repository: values.repository,
+              type: values.type,
+              branches: values.branches,
+              username: values.username,
+              password: values.password,
+              pom: values.pom,
+              description: values.description
+            }).then((resp) => {
+              const created = resp.data
+              if (created) {
+                this.$router.push({ path: '/flink/project' })
+              } else {
+                this.$swal.fire(
+                  'Failed',
+                  'Project save failed ..>﹏<.. <br><br>' + resp['message'],
+                  'error'
+                )
+              }
+            }).catch((error) => {
+              this.$message.error(error.message)
+            })
+            return
+          }
           gitcheck({
             url: values.url,
             branches: values.branches,

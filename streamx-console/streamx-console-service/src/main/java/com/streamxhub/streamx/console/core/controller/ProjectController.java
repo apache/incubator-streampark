@@ -21,8 +21,10 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.ProjectService;
@@ -33,6 +35,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -90,7 +93,11 @@ public class ProjectController {
     }
 
     @PostMapping("gitcheck")
-    public RestResponse gitCheck(Project project) {
+    public RestResponse gitCheck(Project project,Integer repository) {
+        if (repository == 3)
+        {
+            return RestResponse.create().data(0);
+        }
         GitAuthorizedError error = project.gitCheck();
         return RestResponse.create().data(error.getType());
     }
@@ -122,5 +129,13 @@ public class ProjectController {
     @PostMapping("select")
     public RestResponse select() {
         return RestResponse.create().data(projectService.list());
+    }
+
+    @PostMapping("upload")
+    @RequiresPermissions("project:create")
+    public RestResponse upload(MultipartFile file, Integer repository, String name) throws Exception {
+        StorageType storageType = Project.getStorageType(repository);
+        boolean upload = projectService.upload(file, storageType, name);
+        return RestResponse.create().data(upload);
     }
 }

@@ -25,6 +25,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.conf.Workspace;
+import com.streamxhub.streamx.common.enums.StorageType;
+import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -34,14 +37,18 @@ import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.GZipUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.runner.EnvInitializer;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -50,6 +57,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +82,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Autowired
     private ApplicationMapper applicationMapper;
+
+    @Autowired
+    private EnvInitializer envInitializer;
 
     @Autowired
     private SimpMessageSendingOperations simpMessageSendingOperations;
@@ -138,6 +149,27 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public void build(Long id) throws Exception {
         Project project = getById(id);
         this.baseMapper.startBuild(project);
+        if (project.getRepository() == 3)
+        {
+            // 发布到apps下
+            try {
+                this.deploy(project);
+                // 更新application的发布状态.
+                List<Application> applications = getApplications(project);
+                // 更新部署状态
+                FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
+                    log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
+                    app.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
+                    this.applicationMapper.updateDeploy(app);
+                }));
+                this.baseMapper.successBuild(project);
+                return;
+            } catch (Exception e) {
+                this.baseMapper.failureBuild(project);
+                log.error(String.format("deploy error, project name: %s ", project.getName()), e);
+                return;
+            }
+        }
         StringBuilder builder = new StringBuilder();
         tailBuffer.put(id, builder.append(project.getLog4BuildStart()));
         boolean cloneSuccess = cloneSourceCode(project);
@@ -173,7 +205,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     private void deploy(Project project) throws Exception {
-        File path = project.getAppSource();
+        File path = project.getUploadSource();
         List<File> apps = new ArrayList<>();
         // 在项目路径下寻找编译完成的tar.gz(StreamX项目)文件或jar(普通,官方标准的flink工程)...
         findTarOrJar(apps, path);
@@ -257,6 +289,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         Project project = getById(id);
         File appHome = project.getDistHome();
         List<String> list = new ArrayList<>();
+        if (project.getRepository() == 3)
+        {
+            list.add("jar");
+            return list;
+        }
         Arrays.stream(Objects.requireNonNull(appHome.listFiles())).forEach((x) -> list.add(x.getName()));
         return list;
     }
@@ -448,6 +485,41 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public void closeBuildLog(Long id) {
         tailOutMap.remove(id);
         tailBeginning.remove(id);
+    }
+
+    @Override
+    public boolean upload(MultipartFile file, StorageType storageType, String name) throws Exception {
+        envInitializer.storageInitialize(storageType);
+        String APP_UPLOADS = Workspace.of(storageType).APP_UPLOADS();
+        String uploadFile = APP_UPLOADS.concat("/").concat(Objects.requireNonNull(file.getOriginalFilename()));
+        FsOperator fsOperator = FsOperator.of(storageType);
+        //1)检查文件是否存在,存在并且同名仍删除.
+        if (fsOperator.exists(uploadFile)) {
+            fsOperator.delete(uploadFile);
+        }
+        //2) 确定需要上传,先上传到本地临时目录
+        String workspace = Workspace.local().PROJECT_LOCAL_DIR();
+        File sourcePath = new File(workspace);
+        if (!sourcePath.exists()) {
+            sourcePath.mkdirs();
+        }
+        if (sourcePath.isFile()) {
+            throw new IllegalArgumentException("[StreamX] uploadPath must be directory");
+        }
+        String path = String.format("%s/%s/%s/", sourcePath.getAbsolutePath(), name, "target");
+        //String temp = workspace + name +"/target/";
+        //String temp = WebUtils.getAppDir(name);
+        File saveFile = new File(path, file.getOriginalFilename());
+        // delete when exsit
+        if (saveFile.exists()) {
+            saveFile.delete();
+        }
+
+        // save file to temp dir
+        FileUtils.writeByteArrayToFile(saveFile, file.getBytes());
+        //3) 从本地目录上传到hdfs
+        fsOperator.upload(saveFile.getAbsolutePath(), APP_UPLOADS, true, true);
+        return true;
     }
 
 }

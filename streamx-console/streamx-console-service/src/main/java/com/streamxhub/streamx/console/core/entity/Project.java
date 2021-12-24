@@ -26,6 +26,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.streamxhub.streamx.common.conf.Workspace;
+import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.enums.ProjectRepository;
+import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.SettingService;
@@ -66,7 +69,7 @@ public class Project implements Serializable {
 
     private String password;
     /**
-     * 1:git 2:svn
+     * 1:git 2:svn 3:jar
      */
     private Integer repository;
 
@@ -124,7 +127,26 @@ public class Project implements Serializable {
         String path = String.format("%s/%s/%s", sourcePath.getAbsolutePath(), getName(), fullName);
         return new File(path);
     }
-
+    /**
+     * 获取项目上传路径
+     *
+     * @return
+     */
+    @JsonIgnore
+    public File getUploadSource() {
+        if (appSource == null) {
+            appSource = Workspace.local().PROJECT_LOCAL_DIR();
+        }
+        File sourcePath = new File(appSource);
+        if (!sourcePath.exists()) {
+            sourcePath.mkdirs();
+        }
+        if (sourcePath.isFile()) {
+            throw new IllegalArgumentException("[StreamX] uploadPath must be directory");
+        }
+        String path = String.format("%s/%s/%s/", sourcePath.getAbsolutePath(), getName(), "target");
+        return new File(path);
+    }
     @JsonIgnore
     public File getDistHome() {
         return new File(Workspace.local().APP_LOCAL_DIST(), id.toString());
@@ -246,6 +268,18 @@ public class Project implements Serializable {
     @JsonIgnore
     private String getLogHeader(String header) {
         return "---------------------------------[ " + header + " ]---------------------------------\n";
+    }
+
+    public static StorageType getStorageType(Integer repository) {
+        ProjectRepository projectRepository = ProjectRepository.of(repository);
+        switch (Objects.requireNonNull(projectRepository)) {
+            case JAR:
+                return StorageType.HDFS;
+            case GIT:
+            case SVN:
+            default:
+                throw new UnsupportedOperationException("Unsupported ".concat(projectRepository.getName()));
+        }
     }
 
 }
