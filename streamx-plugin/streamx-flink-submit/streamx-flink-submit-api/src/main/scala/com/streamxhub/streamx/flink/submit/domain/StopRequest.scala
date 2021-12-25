@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.flink.submit.domain
 
-import com.streamxhub.streamx.common.conf.ConfigurationOptions.KUBERNETES_NAMESPACE_DEFAULT_VALUE
+import com.streamxhub.streamx.common.conf.K8sFlinkConfig
 import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums.ExecutionMode
 
@@ -30,6 +30,6 @@ case class StopRequest(flinkVersion: FlinkVersion,
                        withSavePoint: Boolean,
                        withDrain: Boolean,
                        customSavePointPath: String,
-                       kubernetesNamespace: String = KUBERNETES_NAMESPACE_DEFAULT_VALUE) {
+                       kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE) {
 
 }
