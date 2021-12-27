@@ -128,7 +128,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             return false;
         }
         try {
-            if (project.getRepository() != 3)
+            if (project.getRepository() != null && project.getRepository() != 3)
             {
                 project.delete();
             }
@@ -150,7 +150,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public void build(Long id, String socketId) throws Exception {
         Project project = getById(id);
         this.baseMapper.startBuild(project);
-        if (project.getRepository() == 3)
+        if (project.getRepository() != null && project.getRepository() == 3)
         {
             // 发布到apps下
             try {
