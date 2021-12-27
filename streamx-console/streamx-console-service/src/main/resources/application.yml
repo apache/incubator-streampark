@@ -6,7 +6,6 @@ server:
     threads:
       io: 4
       worker: 20
-
 logging:
   level:
     root: info
