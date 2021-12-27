@@ -208,7 +208,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
    * compile image tag with namespace and remote address.
    */
   private[this] def compileTag(tag: String, registerAddress: String): String = {
-    val imgNamespace = ConfigHub.get(DOCKER_IMAGE_NAMESPACE)
+    val imgNamespace: String = ConfigHub.get(DOCKER_IMAGE_NAMESPACE)
     var tagName = if (tag.contains("/")) tag else s"$imgNamespace/$tag"
     if (registerAddress.nonEmpty && !tagName.startsWith(registerAddress)) {
       tagName = s"$registerAddress/$tagName"
