@@ -18,9 +18,8 @@
  */
 package com.streamxhub.streamx.common.conf
 
-import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.StorageType
-import com.streamxhub.streamx.common.util.{HdfsUtils, SystemPropertyUtils}
+import com.streamxhub.streamx.common.util.HdfsUtils
 
 import java.net.URI
 
@@ -44,15 +43,16 @@ case class Workspace(storageType: StorageType) {
   lazy val WORKSPACE: String = {
     storageType match {
       case StorageType.LFS =>
-        val path = SystemPropertyUtils.get(KEY_STREAMX_WORKSPACE_LOCAL)
+        val path: String = ConfigHub.get(CommonConfig.STREAMX_WORKSPACE_LOCAL)
         require(path != null, "[StreamX] streamx.workspace.local must not be null")
         path
       case StorageType.HDFS =>
-        SystemPropertyUtils.get(KEY_STREAMX_WORKSPACE_REMOTE) match {
-          case null =>
-            s"${HdfsUtils.getDefaultFS}$STREAMX_WORKSPACE_DEFAULT"
+        val path: String = ConfigHub.get(CommonConfig.STREAMX_WORKSPACE_REMOTE)
+        path match {
+          case p if p.isEmpty =>
+            s"${HdfsUtils.getDefaultFS}${CommonConfig.STREAMX_WORKSPACE_REMOTE.defaultValue}"
           case p =>
-            var defaultFs = HdfsUtils.getDefaultFS
+            val defaultFs = HdfsUtils.getDefaultFS
             if (p.startsWith("hdfs://")) {
               if (p.startsWith(defaultFs)) {
                 p

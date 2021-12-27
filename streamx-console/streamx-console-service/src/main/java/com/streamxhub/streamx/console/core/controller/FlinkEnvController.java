@@ -81,8 +81,12 @@ public class FlinkEnvController {
 
     @PostMapping("update")
     public RestResponse update(FlinkEnv version) throws Exception {
-        flinkEnvService.update(version);
-        return RestResponse.create();
+        try {
+            flinkEnvService.update(version);
+        } catch (Exception e) {
+            return RestResponse.create().data(false).message(e.getMessage());
+        }
+        return RestResponse.create().data(true);
     }
 
     @PostMapping("default")

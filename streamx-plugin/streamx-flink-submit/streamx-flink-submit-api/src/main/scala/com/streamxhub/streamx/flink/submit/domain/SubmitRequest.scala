@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.submit.domain
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.conf.{ConfigurationOptions, Workspace}
+import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums._
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
@@ -64,7 +64,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
 
   lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX)
 
-  lazy val appMain: String = appProperties(ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS)
+  lazy val appMain: String = appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
 
   lazy val effectiveAppName: String = if (this.appName == null) appProperties(KEY_FLINK_APP_NAME) else this.appName
 

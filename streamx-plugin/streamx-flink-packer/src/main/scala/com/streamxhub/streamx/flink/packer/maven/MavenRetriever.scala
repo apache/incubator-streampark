@@ -20,8 +20,8 @@
 package com.streamxhub.streamx.flink.packer.maven
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.conf.ConfigConst.DEFAULT_MAVEN_REMOTE_URL
-import com.streamxhub.streamx.common.conf.Workspace
+import com.streamxhub.streamx.common.conf.CommonConfig.MAVEN_REMOTE_URL
+import com.streamxhub.streamx.common.conf.{ConfigHub, Workspace}
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory
 import org.eclipse.aether.repository.{LocalRepository, RemoteRepository}
@@ -41,8 +41,9 @@ object MavenRetriever {
   /**
    * default maven remote center repository
    */
-  lazy val remoteCenterRepo: RemoteRepository =
-    new RemoteRepository.Builder("central", "default", DEFAULT_MAVEN_REMOTE_URL).build()
+  lazy val remoteCenterRepo: RemoteRepository = {
+    new RemoteRepository.Builder("central", "default", ConfigHub.get(MAVEN_REMOTE_URL)).build()
+  }
 
   /**
    * maven remote repository lists

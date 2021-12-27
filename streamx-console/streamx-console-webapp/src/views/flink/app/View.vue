@@ -517,7 +517,7 @@
               shape="circle"
               size="small"
               class="control-button ctl-btn-color">
-              <a-icon type="cloud-sync"/>
+              <a-icon type="pause-circle"/>
             </a-button>
           </a-tooltip>
 

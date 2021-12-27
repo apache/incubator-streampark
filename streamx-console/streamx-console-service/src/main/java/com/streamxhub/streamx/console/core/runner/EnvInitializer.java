@@ -19,7 +19,10 @@
 
 package com.streamxhub.streamx.console.core.runner;
 
+import com.streamxhub.streamx.common.conf.CommonConfig;
 import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.conf.ConfigHub;
+import com.streamxhub.streamx.common.conf.ConfigOption;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
@@ -32,6 +35,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -72,13 +76,26 @@ public class EnvInitializer implements ApplicationRunner {
                 " please ensure the -Dapp.home parameter is clearly specified," +
                 " more detail: http://www.streamxhub.com/zh/doc/console/deployment");
         }
-        overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_LOCAL(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
-        overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_REMOTE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
-        overrideSystemProp(ConfigConst.KEY_DOCKER_IMAGE_NAMESPACE(), ConfigConst.DOCKER_IMAGE_NAMESPACE_DEFAULT());
-        String hadoopUserName = context.getEnvironment().getProperty(ConfigConst.STREAMX_HADOOP_USER_NAME(), ConfigConst.DEFAULT_HADOOP_USER_NAME());
+
+        // init ConfigHub
+        initConfigHub(context.getEnvironment());
+        // overwrite system variable HADOOP_USER_NAME
+        String hadoopUserName = ConfigHub.get(CommonConfig.STREAMX_HADOOP_USER_NAME());
         overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
-        //automatic in local
+        // initialize local file system resources
         storageInitialize(LFS);
+    }
+
+    private void initConfigHub(Environment springEnv) {
+        ConfigHub.init();
+        // override config from spring application.yaml
+        ConfigHub.allRegisteredKeys().stream()
+            .filter(springEnv::containsProperty)
+            .forEach(key -> {
+                ConfigOption config = ConfigHub.getRegisteredConfig(key);
+                ConfigHub.overwritten(config, springEnv.getProperty(key, config.classType()));
+            });
+        ConfigHub.logAllConfigs();
     }
 
     private void overrideSystemProp(String key, String defaultValue) {
