@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.packer.docker
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.core.{DefaultDockerClientConfig, DockerClientConfig, HackDockerClient}
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
+import com.streamxhub.streamx.common.conf.{CommonConfig, ConfigHub}
 
 import java.time.Duration
 
@@ -46,9 +47,9 @@ object DockerRetriever {
   lazy val dockerHttpClientBuilder: ApacheDockerHttpClient.Builder = new ApacheDockerHttpClient.Builder()
     .dockerHost(dockerClientConf.getDockerHost)
     .sslConfig(dockerClientConf.getSSLConfig)
-    .maxConnections(100)
-    .connectionTimeout(Duration.ofSeconds(30))
-    .responseTimeout(Duration.ofSeconds(45))
+    .maxConnections(ConfigHub.get(CommonConfig.DOCKER_MAX_CONNECTIONS))
+    .connectionTimeout(Duration.ofSeconds(ConfigHub.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT)))
+    .responseTimeout(Duration.ofSeconds(ConfigHub.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT)))
 
   /**
    * get new DockerClient instance

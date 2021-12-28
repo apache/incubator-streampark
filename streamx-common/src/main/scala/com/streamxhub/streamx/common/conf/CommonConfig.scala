@@ -46,6 +46,24 @@ object CommonConfig {
     classType = classOf[java.lang.String],
     description = "namespace for docker image used in docker building env and target image register")
 
+  val DOCKER_MAX_CONNECTIONS: ConfigOption = ConfigOption(
+    key = "streamx.docker.max-connections",
+    defaultValue = "100",
+    classType = classOf[java.lang.Integer],
+    description = "instantiating max connections for DockerHttpClient")
+
+  val DOCKER_CONNECTION_TIMEOUT: ConfigOption = ConfigOption(
+    key = "streamx.docker.connection-timeout",
+    defaultValue = "100", // The unit is seconds
+    classType = classOf[java.lang.Long],
+    description = "instantiating connection timeout for DockerHttpClient")
+
+  val DOCKER_RESPONSE_TIMEOUT: ConfigOption = ConfigOption(
+    key = "streamx.docker.response-timeout",
+    defaultValue = "120", // The unit is seconds
+    classType = classOf[java.lang.Long],
+    description = "instantiating connection timeout for DockerHttpClient")
+
   val MAVEN_REMOTE_URL: ConfigOption = ConfigOption(
     key = "streamx.maven.remote-url",
     defaultValue = "https://repo1.maven.org/maven2/",
