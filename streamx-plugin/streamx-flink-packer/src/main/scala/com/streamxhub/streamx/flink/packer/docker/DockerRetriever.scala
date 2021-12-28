@@ -48,8 +48,8 @@ object DockerRetriever {
     .dockerHost(dockerClientConf.getDockerHost)
     .sslConfig(dockerClientConf.getSSLConfig)
     .maxConnections(ConfigHub.get(CommonConfig.DOCKER_MAX_CONNECTIONS))
-    .connectionTimeout(Duration.ofSeconds(ConfigHub.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT)))
-    .responseTimeout(Duration.ofSeconds(ConfigHub.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT)))
+    .connectionTimeout(Duration.ofSeconds(ConfigHub.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC)))
+    .responseTimeout(Duration.ofSeconds(ConfigHub.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT_SEC)))
 
   /**
    * get new DockerClient instance
