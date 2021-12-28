@@ -108,7 +108,7 @@ object FlinkSqlLineage extends Logger {
               case "jdbc" =>
                 properties("url") match {
                   case url if url.startsWith("jdbc:clickhouse:") => map += ("connector" -> "clickhouse")
-                  case url if url.startsWithj("jdbc:mysql:") => map += ("connector" -> "mysql")
+                  case url if url.startsWith("jdbc:mysql:") => map += ("connector" -> "mysql")
                   case url if url.startsWith("jdbc:postgresql:") => map += ("connector" -> "postgresql")
                   case url if url.startsWith("jdbc:oracle:") => map += ("connector" -> "oracle")
                   case _ => None
