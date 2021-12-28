@@ -77,7 +77,7 @@ streamx:
   docker:
     register:
       image-namespace: streamx
-      # instantiating DockerHttpClient
+    # instantiating DockerHttpClient
     http-client:
       max-connections: 100
       connection-timeout-sec: 100
