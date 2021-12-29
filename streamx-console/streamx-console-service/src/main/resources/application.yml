@@ -77,6 +77,11 @@ streamx:
   docker:
     register:
       image-namespace: streamx
+    # instantiating DockerHttpClient
+    http-client:
+      max-connections: 100
+      connection-timeout-sec: 100
+      response-timeout-sec: 120
 
   # flink-k8s tracking configuration
   flink-k8s:
