@@ -73,7 +73,7 @@ streamx:
     local: ~/streamx_workspace
     remote: hdfs:///streamx   # support hdfs:///streamx/ 、 /streamx 、hdfs://host:ip/streamx/
 
-  # remote docker register namepsace for streamx
+  # remote docker register namespace for streamx
   docker:
     register:
       image-namespace: streamx

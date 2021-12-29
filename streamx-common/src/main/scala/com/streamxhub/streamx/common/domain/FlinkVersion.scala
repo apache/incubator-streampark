@@ -19,7 +19,6 @@
 package com.streamxhub.streamx.common.domain
 
 import com.streamxhub.streamx.common.util.CommandUtils
-import org.apache.commons.io.FileUtils.isSymlink
 import org.apache.commons.lang3.StringUtils
 
 import java.io.File
@@ -29,9 +28,8 @@ import java.util.regex.Pattern
 import scala.collection.JavaConversions._
 
 /**
- * @author Al-assad
+ * @param flinkHome actual flink home that must be a readable local path
  * @author benjobs
- * @param flinkHome Autual flink home that must be a readable local path
  */
 class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
 
