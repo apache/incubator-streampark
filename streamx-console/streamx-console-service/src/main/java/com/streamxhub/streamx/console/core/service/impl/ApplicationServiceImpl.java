@@ -926,6 +926,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         List<String> jars = application.getDependencyObject().getJar();
         String appUploads = application.getWorkspace().APP_UPLOADS();
         String temp = WebUtils.getAppDir("temp");
+        if(!fsOperator.exists(application.getAppHome().concat("/lib"))){
+            fsOperator.mkdirs(application.getAppHome().concat("/lib"));
+        }
         if (Utils.notEmpty(jars)) {
             for (String jar : jars) {
                 File localJar = new File(temp, jar);
