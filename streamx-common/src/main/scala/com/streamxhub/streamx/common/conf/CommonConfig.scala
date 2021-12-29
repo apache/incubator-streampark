@@ -48,19 +48,19 @@ object CommonConfig {
 
   val DOCKER_MAX_CONNECTIONS: ConfigOption = ConfigOption(
     key = "streamx.docker.http-client.max-connections",
-    defaultValue = 100,
-    classType = classOf[java.lang.Integer],
+    defaultValue = 100L,
+    classType = classOf[java.lang.Long],
     description = "instantiating max connections for DockerHttpClient")
 
   val DOCKER_CONNECTION_TIMEOUT_SEC: ConfigOption = ConfigOption(
     key = "streamx.docker.http-client.connection-timeout-sec",
-    defaultValue = 100,
+    defaultValue = 100L,
     classType = classOf[java.lang.Long],
     description = "instantiating connection timeout for DockerHttpClient")
 
   val DOCKER_RESPONSE_TIMEOUT_SEC: ConfigOption = ConfigOption(
     key = "streamx.docker.http-client.response-timeout-sec",
-    defaultValue = 120,
+    defaultValue = 120L,
     classType = classOf[java.lang.Long],
     description = "instantiating connection timeout for DockerHttpClient")
 
