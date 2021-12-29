@@ -106,7 +106,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
     }
   }
 
-  private[submit] lazy val hdfsWorkspace = {
+  private[submit]  val hdfsWorkspace = {
     /**
      * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
      */
@@ -129,7 +129,9 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
         case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
       },
       appJars = workspace.APP_JARS,
-      appPlugins = workspace.APP_PLUGINS
+      appPlugins = workspace.APP_PLUGINS,
+      appShims = workspace.APP_SHIMS,
+      appWorkSpace = workspace.APP_WORKSPACE
     )
   }
 
@@ -150,4 +152,6 @@ case class HdfsWorkspace(flinkName: String,
                          flinkDistJar: String,
                          flinkLib: String,
                          appJars: String,
-                         appPlugins: String)
+                         appPlugins: String,
+                         appShims: String,
+                         appWorkSpace: String)
