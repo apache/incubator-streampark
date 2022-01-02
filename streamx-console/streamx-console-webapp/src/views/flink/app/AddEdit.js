@@ -101,34 +101,28 @@ export function initPodTemplateEditor(vue) {
   basePodTmplOption.minimap = {enabled: false}
 
   // pod template
-  if (!controller.editor.podTemplate) {
     const podTmplOption = Object.assign({}, basePodTmplOption)
     podTmplOption.value = vue.podTemplate
     controller.editor.podTemplate = monaco.editor.create(document.querySelector('.pod-template-box'), podTmplOption)
     controller.editor.podTemplate.onDidChangeModelContent(() => {
       vue.podTemplate = controller.editor.podTemplate.getValue()
     })
-  }
 
   // jm pod template
-  if (!controller.editor.jmPodTemplate) {
     const jmPodTmplOption = Object.assign({}, basePodTmplOption)
     jmPodTmplOption.value = vue.jmPodTemplate
     controller.editor.jmPodTemplate = monaco.editor.create(document.querySelector('.jm-pod-template-box'), jmPodTmplOption)
     controller.editor.jmPodTemplate.onDidChangeModelContent(() => {
       vue.jmPodTemplate = controller.editor.jmPodTemplate.getValue()
     })
-  }
 
   // tm pod template
-  if (!controller.editor.tmPodTemplate) {
     const tmPodTmplOption = Object.assign({}, basePodTmplOption)
     tmPodTmplOption.value = vue.tmPodTemplate
     controller.editor.tmPodTemplate = monaco.editor.create(document.querySelector('.tm-pod-template-box'), tmPodTmplOption)
     controller.editor.tmPodTemplate.onDidChangeModelContent(() => {
       vue.tmPodTemplate = controller.editor.tmPodTemplate.getValue()
     })
-  }
 
 }
 
