@@ -84,10 +84,9 @@
 </template>
 
 <script>
-import SockJS from 'sockjs-client'
-import Stomp from 'webstomp-client'
 import {baseUrl} from '@/api/baseUrl'
 import {notice,delnotice} from '@api/metrics'
+import store from '@/store'
 
 export default {
   name: 'Notice',
@@ -151,29 +150,29 @@ export default {
     },
 
     handleWebSocket() {
-      const socket = new SockJS(baseUrl(true).concat('/websocket'))
-      this.stompClient = Stomp.over(socket)
-      this.stompClient.connect({}, (success) => {
-        this.stompClient.subscribe('/resp/notice', (resp) => {
-          const message = JSON.parse(resp.body)
-          if (this.noticeType === 1) {
-            this.exceptions.push(message)
-            this.total1 += 1
-          } else {
-            this.message.push(message)
-            this.total2 += 1
-          }
-          this.handleAlert(message)
-        })
-      })
+      const url = baseUrl().concat('/websocket/' + store.getters.userInfo.userId)
+
+      const socket = this.getSocket(url)
+
+      socket.onmessage = (event) => {
+        const message = JSON.parse(event.data)
+        if (this.noticeType === 1) {
+          this.exceptions.push(message)
+          this.total1 += 1
+        } else {
+          this.message.push(message)
+          this.total2 += 1
+        }
+        this.handleAlert(message)
+      }
     },
 
     handleAlert(message) {
       this.$swal.fire({
         title: message.title,
         icon: 'error',
-        width: 800,
-        html: '<pre style="font-size: 10px">' + message.context + '</pre>',
+        width: this.exceptionPropWidth(),
+        html: '<pre class="propException">' + message.context + '</pre>',
         focusConfirm: false,
       })
     },

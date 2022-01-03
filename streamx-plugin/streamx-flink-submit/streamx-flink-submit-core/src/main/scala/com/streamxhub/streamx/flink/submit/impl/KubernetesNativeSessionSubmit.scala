@@ -1,34 +1,31 @@
 /*
- * Copyright (c) 2021 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright (c) 2019 The StreamX Project
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
-import com.streamxhub.streamx.common.fs.FsOperator
-import com.streamxhub.streamx.common.util.DateUtils.fullCompact
-import com.streamxhub.streamx.common.util.{DateUtils, Logger}
+import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
-import com.streamxhub.streamx.flink.packer.maven.MavenTool
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
@@ -43,6 +40,7 @@ import org.apache.flink.util.IOUtils
 
 import java.io.File
 import scala.collection.JavaConversions._
+import scala.language.postfixOps
 import scala.util.Try
 
 /**
@@ -50,10 +48,14 @@ import scala.util.Try
  */
 object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Logger {
 
-  // noinspection DuplicatedCode
+  @throws[Exception]
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
+
+    // check the last building result
+    checkBuildResult(submitRequest)
+    val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sSessionBuildResponse]
 
     val jobID = {
       if (StringUtils.isNotBlank(submitRequest.jobID)) new JobID()
@@ -62,46 +64,25 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // extract flink configuration
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
 
-    // sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/job-name/
-    // in streamx, flink job-name under the specified clusterId/namespace must be unique.
-    val buildWorkspace = s"${workspace.APP_WORKSPACE}" +
-      s"/${flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)}@${flinkConfig.getString(KubernetesConfigOptions.NAMESPACE)}" +
-      s"/${flinkConfig.getString(PipelineOptions.NAME)}"
-    FsOperator.lfs.delete(buildWorkspace)
-    FsOperator.lfs.mkdirs(buildWorkspace)
-
-    // build fat-jar, output file name: streamx-flinkjob_<job-name>_<timespamp>, like: streamx-flinkjob_myjobtest_20211024134822
-    val fatJar = {
-      val fatJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}_${DateUtils.now(fullCompact)}.jar"
-      submitRequest.developmentMode match {
-        case DevelopmentMode.FLINKSQL =>
-          val flinkLibs = extractProvidedLibs(submitRequest)
-          val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
-          MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
-        case DevelopmentMode.CUSTOMCODE =>
-          val providedLibs = Set(
-            workspace.APP_JARS,
-            workspace.APP_PLUGINS,
-            submitRequest.flinkUserJar
-          )
-          val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
-          MavenTool.buildFatJar(jarPackDeps.merge(providedLibs), fatJarOutputPath)
-      }
-    }
-    logInfo(s"[flink-submit] already built flink job fat-jar. " +
-      s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
-
-    // rest api submit plan
+    val fatJar = new File(buildResult.flinkShadedJarPath)
+    // use api submit plan
     restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
 
-    // old submit plan
-    // jobGraphSubmitPlan(submitRequest, flinkConfig, jobID, fatJar)
+    // Prioritize using JobGraph submit plan while using Rest API submit plan as backup
+/*    Try(jobGraphSubmitPlan(submitRequest, flinkConfig, jobID, fatJar))
+      .recover {
+        case _ =>
+          logInfo(s"[flink-submit] JobGraph Submit Plan failed, try Rest API Submit Plan now.")
+          restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
+      } match {
+      case Success(submitResponse) => submitResponse
+      case Failure(ex) => throw ex
+    }*/
   }
 
   /**
    * Submit flink session job via rest api.
    */
-  // noinspection DuplicatedCode
   @throws[Exception]
   private def restApiSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     try {

@@ -12,14 +12,21 @@
         label="Development Mode"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+
         <a-alert
           v-if="app['jobType'] === 1"
-          message="customcode"
-          type="info" />
+          type="info" >
+          <template slot="message">
+            <a-icon type="code" style="color: #108ee9"/>&nbsp;Custom Code
+          </template>
+        </a-alert>
         <a-alert
           v-else
-          message="flinkSql"
-          type="info" />
+          type="info">
+          <template slot="message">
+            <svg-icon name="fql" style="color: #108ee9"/>&nbsp;Flink SQL
+          </template>
+        </a-alert>
       </a-form-item>
 
       <a-form-item
@@ -28,7 +35,7 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           placeholder="Execution Mode"
-          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]"
+          v-decorator="[ 'executionMode' ]"
           @change="handleChangeMode">
           <a-select-option
             v-for="(o,index) in executionModes"
@@ -138,7 +145,6 @@
           </a-select>
         </a-form-item>
       </template>
-
 
       <template v-if="app.jobType === 2">
 
@@ -683,7 +689,7 @@
                 <a-row>
                   <p class="conf-desc">
                     <span class="note-info" style="margin-bottom: 12px">
-                    <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
                       Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
                     </span>
                   </p>
@@ -792,7 +798,7 @@
                 <a-row>
                   <p class="conf-desc">
                     <span class="note-info" style="margin-bottom: 12px">
-                    <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
                       Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
                     </span>
                   </p>
@@ -901,7 +907,7 @@
                 <a-row>
                   <p class="conf-desc">
                     <span class="note-info" style="margin-bottom: 12px">
-                    <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
                       Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
                     </span>
                   </p>
@@ -1428,6 +1434,7 @@ import {
 
 import { toPomString } from './Pom'
 import {list as listFlinkEnv} from '@/api/flinkenv'
+import {checkHadoop} from '@/api/setting'
 import { sysHosts, initPodTemplate, completeHostAliasToPodTemplate, extractHostAliasFromPodTemplate, previewHostAlias } from '@api/flinkpodtmpl'
 
 export default {
@@ -1680,7 +1687,7 @@ export default {
           this.configOverride = Base64.decode(this.app.config)
           this.isSetConfig = true
         }
-        this.defaultOptions = JSON.parse(this.app.options)
+        this.defaultOptions = JSON.parse(this.app.options || '{}')
         this.configId = this.app.configId
         this.versionId = this.app.versionId
         this.defaultFlinkSqlId = this.app['sqlId'] || null
@@ -1731,6 +1738,24 @@ export default {
       }).catch((error) => {
         this.$message.error(error.message)
       })
+    },
+
+    handleCheckExecMode(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Execution Mode is required'))
+      } else {
+        if (value === 2 || value === 3 || value === 4) {
+          checkHadoop().then((resp) => {
+            if (resp.data) {
+              callback()
+            } else {
+              callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+            }
+          }).catch((err) => {
+            callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+          })
+        }
+      }
     },
 
     handleCheckJobName(rule, value, callback) {
@@ -1944,26 +1969,16 @@ export default {
     },
 
     handleCustomRequest(data) {
-      const executionMode =  this.form.getFieldValue('executionMode') || null
-      if (executionMode !== null) {
-        const formData = new FormData()
-        formData.append('file', data.file)
-        formData.append('executionMode',executionMode)
-        upload(formData).then((response) => {
-          this.loading = false
-          this.controller.dependency.jar.set(data.file.name, data.file.name)
-          this.handleUpdateDependency()
-        }).catch((error) => {
-          this.$message.error(error.message)
-          this.loading = false
-        })
-      } else {
-        this.$swal.fire(
-            'Failed',
-            'Please select "execution Mode" first',
-            'error'
-        )
-      }
+      const formData = new FormData()
+      formData.append('file', data.file)
+      upload(formData).then((response) => {
+        this.loading = false
+        this.controller.dependency.jar.set(data.file.name, data.file.name)
+        this.handleUpdateDependency()
+      }).catch((error) => {
+        this.$message.error(error.message)
+        this.loading = false
+      })
     },
 
     handleRemovePom(pom) {
@@ -2524,6 +2539,7 @@ export default {
           'clusterId': this.app.clusterId,
           'flinkImage': this.app.flinkImage,
           'k8sNamespace': this.app.k8sNamespace,
+          'resource': this.app.resourceFrom
         })
         if (this.app.jobType === 2) {
           this.flinkSql.sql = this.app.flinkSql || null

@@ -32,7 +32,7 @@ object HBaseTestApp extends FlinkStreaming {
   override def handle(): Unit = {
     implicit val conf = ConfigUtils.getHBaseConfig(context.parameter.toMap)
     //one topic
-    val source = context.fromCollection(Seq("123322242", "1111", "222"))
+    val source = context.fromCollection(Seq("123456", "1111", "222"))
 
     source.print("source:>>>")
 

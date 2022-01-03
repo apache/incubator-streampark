@@ -1,23 +1,22 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
@@ -26,6 +25,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.streamxhub.streamx.common.conf.K8sFlinkConfig;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
@@ -41,6 +41,7 @@ import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.core.enums.ApplicationType;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.enums.ResourceFrom;
 import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
@@ -57,10 +58,14 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.streamxhub.streamx.common.conf.ConfigurationOptions.KUBERNETES_NAMESPACE_DEFAULT_VALUE;
 import static com.streamxhub.streamx.console.core.enums.FlinkAppState.of;
 
 /**
@@ -114,7 +119,7 @@ public class Application implements Serializable {
     /**
      * k8s部署下的namespace
      */
-    private String k8sNamespace = KUBERNETES_NAMESPACE_DEFAULT_VALUE;
+    private String k8sNamespace = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE();
 
 
     private Integer state;
@@ -159,6 +164,12 @@ public class Application implements Serializable {
     private Integer tracking;
 
     private String jar;
+
+    /**
+     * 针对upload 类型任务,需要记录checkSum,用于判断更新修改之后是否需要重新发布.
+     */
+    private Long jarCheckSum;
+
     private String mainClass;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -224,6 +235,12 @@ public class Application implements Serializable {
     private String k8sTmPodTemplate;
 
     /**
+     * 1: cicd (build from csv)
+     * 2: upload (upload local jar job)
+     */
+    private Integer resourceFrom;
+
+    /**
      * flink-hadoop integration on flink-k8s mode
      */
     private Boolean k8sHadoopIntegration;
@@ -252,6 +269,7 @@ public class Application implements Serializable {
     private transient Boolean savePointed = false;
     private transient Boolean drain = false;
     private transient Boolean allowNonRestored = false;
+    private transient String socketId;
     private transient String projectName;
     private transient String createTimeFrom;
     private transient String createTimeTo;
@@ -262,8 +280,14 @@ public class Application implements Serializable {
      */
     private transient String flinkRestUrl;
 
+    /**
+     * refer to {@link com.streamxhub.streamx.flink.packer.pipeline.PipeStatus}
+     */
+    private transient Integer buildStatus;
+    private transient AppControl appControl;
+
     public void setK8sNamespace(String k8sNamespace) {
-        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? KUBERNETES_NAMESPACE_DEFAULT_VALUE : k8sNamespace;
+        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE() : k8sNamespace;
     }
 
     public K8sPodTemplates getK8sPodTemplates() {
@@ -296,6 +320,30 @@ public class Application implements Serializable {
             default:
                 return 1;
         }
+    }
+
+    public boolean shouldBeTrack() {
+        return shouldTracking(FlinkAppState.of(getState())) == 1;
+    }
+
+    @JsonIgnore
+    public DeployState getDeployState() {
+        return DeployState.of(state);
+    }
+
+    @JsonIgnore
+    public void setDeployState(DeployState deployState) {
+        this.deploy = deployState.get();
+    }
+
+    @JsonIgnore
+    public DevelopmentMode getDevelopmentMode() {
+        return DevelopmentMode.of(jobType);
+    }
+
+    @JsonIgnore
+    public void setDevelopmentMode(DevelopmentMode mode) {
+        this.jobType = mode.getValue();
     }
 
     @JsonIgnore
@@ -375,7 +423,7 @@ public class Application implements Serializable {
         switch (this.getExecutionModeEnum()) {
             case KUBERNETES_NATIVE_APPLICATION:
             case KUBERNETES_NATIVE_SESSION:
-            case YARN_PRE_JOB:
+            case YARN_PER_JOB:
             case YARN_SESSION:
             case LOCAL:
                 return getLocalAppHome();
@@ -389,6 +437,11 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
+    public String getAppLib() {
+        return getAppHome().concat("/lib");
+    }
+
+    @JsonIgnore
     public File getLocalFlinkSqlHome() {
         File flinkSql = new File(Workspace.local().APP_WORKSPACE(), "flinksql");
         if (!flinkSql.exists()) {
@@ -396,7 +449,6 @@ public class Application implements Serializable {
         }
         return new File(flinkSql, id.toString());
     }
-
 
     @JsonIgnore
     public AppInfo httpYarnAppInfo() throws Exception {
@@ -538,6 +590,16 @@ public class Application implements Serializable {
         return DevelopmentMode.CUSTOMCODE.getValue().equals(this.getJobType());
     }
 
+    @JsonIgnore
+    public boolean isUploadJob() {
+        return isCustomCodeJob() && ResourceFrom.UPLOAD.getValue().equals(this.getResourceFrom());
+    }
+
+    @JsonIgnore
+    public boolean isCICDJob() {
+        return isCustomCodeJob() && ResourceFrom.CICD.getValue().equals(this.getResourceFrom());
+    }
+
     public boolean isStreamXJob() {
         return this.getAppType() == ApplicationType.STREAMX_FLINK.getType();
     }
@@ -546,6 +608,11 @@ public class Application implements Serializable {
     @SneakyThrows
     public Dependency getDependencyObject() {
         return Dependency.jsonToDependency(this.dependency);
+    }
+
+    @JsonIgnore
+    public JarPackDeps getJarPackDeps() {
+        return Application.Dependency.jsonToDependency(getDependency()).toJarPackDeps();
     }
 
     @JsonIgnore
@@ -575,13 +642,14 @@ public class Application implements Serializable {
     @JsonIgnore
     public boolean eqJobParam(Application other) {
         //1) Resolve Order 是否发生变化
-        //2) Execution Mode 是否发生变化
-        //3) Parallelism 是否发生变化
-        //4) Task Slots 是否发生变化
-        //5) Options 是否发生变化
-        //6) Dynamic Option 是否发生变化
-        //7) Program Args 是否发生变化
-        //8) Flink Version  是否发生变化
+        //2) flink Version是否发生变化
+        //3) Execution Mode 是否发生变化
+        //4) Parallelism 是否发生变化
+        //5) Task Slots 是否发生变化
+        //6) Options 是否发生变化
+        //7) Dynamic Option 是否发生变化
+        //8) Program Args 是否发生变化
+        //9) Flink Version  是否发生变化
 
         if (!ObjectUtils.safeEquals(this.getVersionId(), other.getVersionId())) {
             return false;
@@ -635,6 +703,7 @@ public class Application implements Serializable {
         } else {
             return other.getArgs() == null;
         }
+
     }
 
     @JsonIgnore
@@ -647,7 +716,7 @@ public class Application implements Serializable {
         switch (Objects.requireNonNull(executionMode)) {
             case YARN_APPLICATION:
                 return StorageType.HDFS;
-            case YARN_PRE_JOB:
+            case YARN_PER_JOB:
             case YARN_SESSION:
             case KUBERNETES_NATIVE_SESSION:
             case KUBERNETES_NATIVE_APPLICATION:
@@ -750,7 +819,6 @@ public class Application implements Serializable {
         private String getGav() {
             return this.groupId + ":" + this.artifactId + ":" + this.version;
         }
-
 
         private String getGa() {
             return this.groupId + ":" + this.artifactId;

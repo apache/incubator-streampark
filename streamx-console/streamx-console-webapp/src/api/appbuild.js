@@ -18,28 +18,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.common.conf;
+import api from './index'
+import http from '@/utils/request'
 
-/**
- * @author benjobs
- */
-public class ConfigurationOptions {
+export function build(params) {
+  return http.post(api.AppBuild.BUILD, params)
+}
 
-
-    public static String KEY_APPLICATION_ARGS = "$internal.application.program-args";
-
-    public static String KEY_APPLICATION_MAIN_CLASS = "$internal.application.main";
-
-    public static String KEY_TOTAL_PROCESS_MEMORY = "jobmanager.memory.process.size";
-
-    public static String KEY_TOTAL_FLINK_MEMORY = "jobmanager.memory.flink.size";
-
-    public static String KEY_JVM_HEAP_MEMORY = "jobmanager.memory.heap.size";
-
-    public static String KEY_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size";
-    /**
-     * ref KubernetesConfigOptions.NAMESPACE.defaultValue()
-     */
-    public static String KUBERNETES_NAMESPACE_DEFAULT_VALUE = "default";
-
+export function detail(params) {
+  return http.post(api.AppBuild.DETAIL, params)
 }

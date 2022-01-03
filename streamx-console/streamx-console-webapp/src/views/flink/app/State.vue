@@ -111,6 +111,24 @@
       v-if="data['deploy'] > 3"
       color="#fa8c16">NEED RESTART</a-tag>
   </span>
+  <span v-else-if="option === 'build'" class="app_state">
+    <a-tag
+      v-if="data['buildStatus'] === 0"
+      color="#99A3A4">BUILD-UNKNOWN</a-tag>
+    <a-tag
+      v-if="data['buildStatus'] === 1"
+      color="#F5B041">BUILD-PENDING</a-tag>
+    <a-tag
+      v-if="data['buildStatus'] === 2"
+      color="#3498DB"
+      class="status-processing-deploying">BUILD-RUNNING</a-tag>
+    <a-tag
+      v-if="data['buildStatus'] === 3"
+      color="#2ECC71">BUILD-SUCCESS</a-tag>
+    <a-tag
+      v-if="data['buildStatus'] === 4"
+      color="#E74C3C">BUILD-FAILURE</a-tag>
+  </span>
   <span v-else>
     <div
       class="task-tag"

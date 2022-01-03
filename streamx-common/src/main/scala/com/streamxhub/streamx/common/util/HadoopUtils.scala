@@ -1,29 +1,28 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.streamxhub.streamx.common.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
+import com.streamxhub.streamx.common.conf.{CommonConfig, ConfigHub}
 import org.apache.commons.collections.CollectionUtils
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
 import org.apache.hadoop.hdfs.DistributedFileSystem
@@ -59,21 +58,21 @@ object HadoopUtils extends Logger {
   private[this] lazy val HADOOP_CONF_DIR: String = "HADOOP_CONF_DIR"
   private[this] lazy val CONF_SUFFIX: String = "/etc/hadoop"
 
-  private lazy val hadoopUserName: String = SystemPropertyUtils.get(KEY_HADOOP_USER_NAME, DEFAULT_HADOOP_USER_NAME)
-
-  private[this] var ugi: UserGroupInformation = _
-
   private[this] var reusableYarnClient: YarnClient = _
 
   private[this] var reusableConf: Configuration = _
 
   private[this] var reusableHdfs: FileSystem = _
 
+  private[this] var tgt: KerberosTicket = _
+
   private[this] var rmHttpURL: String = _
+
+  private lazy val hadoopUserName: String = ConfigHub.get(CommonConfig.STREAMX_HADOOP_USER_NAME)
 
   private[this] lazy val configurationCache: util.Map[String, Configuration] = new ConcurrentHashMap[String, Configuration]()
 
-  lazy val kerberosConf: Map[String, String] = SystemPropertyUtils.get("app.home", null) match {
+  private[this] lazy val kerberosConf: Map[String, String] = SystemPropertyUtils.get("app.home", null) match {
     case null =>
       getClass.getResourceAsStream("/kerberos.yml") match {
         case x if x != null => PropertiesUtils.fromYamlFile(x)
@@ -86,9 +85,33 @@ object HadoopUtils extends Logger {
       } else null
   }
 
+  private[this] lazy val ugi: UserGroupInformation = {
+    val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
+    val kerberosEnable = Try(enableString.trim.toBoolean).getOrElse(false)
+    if (kerberosEnable) {
+      kerberosLogin(reusableConf)
+    } else {
+      UserGroupInformation.createRemoteUser(hadoopUserName)
+    }
+  }
+
   private[this] lazy val hadoopConfDir: String = Try(FileUtils.getPathFromEnv(HADOOP_CONF_DIR)) match {
     case Failure(_) => FileUtils.resolvePath(FileUtils.getPathFromEnv(HADOOP_HOME), CONF_SUFFIX)
     case Success(value) => value
+  }
+
+  private[this] lazy val tgtRefreshTime: Long = {
+    val user = UserGroupInformation.getLoginUser
+    val method = classOf[UserGroupInformation].getDeclaredMethod("getTGT")
+    method.setAccessible(true)
+    tgt = method.invoke(user).asInstanceOf[KerberosTicket]
+    Option(tgt) match {
+      case Some(value) =>
+        val start = value.getStartTime.getTime
+        val end = value.getEndTime.getTime
+        ((end - start) * 0.90f).toLong
+      case _ => 0
+    }
   }
 
   def getConfigurationFromHadoopConfDir(confDir: String = hadoopConfDir): Configuration = {
@@ -114,138 +137,112 @@ object HadoopUtils extends Logger {
    * 推荐第二种方法,不用copy配置文件.<br>
    * </pre>
    */
-  def hadoopConf: Configuration = {
-
-    var tgt: KerberosTicket = null
-
-    def initHadoopConf(): Configuration = {
-      val conf = getConfigurationFromHadoopConfDir(hadoopConfDir)
-      //add hadoopConfDir to classpath...you know why???
-      ClassLoaderUtils.loadResource(hadoopConfDir)
-
-      if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
-        conf.set("hadoop.tmp.dir", "/tmp")
-      }
-      if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
-        conf.set("hbase.fs.tmp.dir", "/tmp")
-      }
-      // disable timeline service as we only query yarn app here.
-      // Otherwise we may hit this kind of ERROR:
-      // java.lang.ClassNotFoundException: com.sun.jersey.api.client.config.ClientConfig
-      conf.set("yarn.timeline-service.enabled", "false")
-      conf.set("fs.hdfs.impl", classOf[DistributedFileSystem].getName)
-      conf.set("fs.file.impl", classOf[LocalFileSystem].getName)
-      conf.set("fs.hdfs.impl.disable.cache", "true")
-      conf
-    }
-
-    def closeHadoop(): Unit = {
-      if (tgt != null && !tgt.isDestroyed) {
-        tgt.destroy()
-      }
-      if (reusableYarnClient != null) {
-        reusableYarnClient.close()
-        reusableYarnClient = null
-      }
-      if (reusableHdfs != null) {
-        reusableHdfs.close()
-        reusableHdfs = null
-      }
-    }
-
-    def kerberosLogin(conf: Configuration): UserGroupInformation = {
-      logInfo("kerberos login starting....")
-      val principal = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim
-      val keytab = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KEYTAB, "").trim
-      require(
-        principal.nonEmpty && keytab.nonEmpty,
-        s"$KEY_SECURITY_KERBEROS_PRINCIPAL and $KEY_SECURITY_KERBEROS_KEYTAB must not be empty"
-      )
-
-      val krb5 = kerberosConf.getOrElse(
-        KEY_SECURITY_KERBEROS_KRB5_CONF,
-        kerberosConf.getOrElse(KEY_JAVA_SECURITY_KRB5_CONF, "")
-      ).trim
-
-      if (krb5.nonEmpty) {
-        System.setProperty("java.security.krb5.conf", krb5)
-        System.setProperty("java.security.krb5.conf.path", krb5)
-      }
-      System.setProperty("sun.security.spnego.debug", "true")
-      System.setProperty("sun.security.krb5.debug", "true")
-      conf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
-      try {
-        UserGroupInformation.setConfiguration(conf)
-        val ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(principal, keytab)
-        logInfo("kerberos authentication successful")
-        ugi
-      } catch {
-        case e: IOException =>
-          logError(s"kerberos login failed,${ExceptionUtils.stringifyException(e)}")
-          throw e
-      }
-    }
-
-    def getRefreshTime: Long = {
-      val user = UserGroupInformation.getLoginUser
-      val method = classOf[UserGroupInformation].getDeclaredMethod("getTGT")
-      method.setAccessible(true)
-      tgt = method.invoke(user).asInstanceOf[KerberosTicket]
-      Option(tgt) match {
-        case Some(value) =>
-          val start = value.getStartTime.getTime
-          val end = value.getEndTime.getTime
-          ((end - start) * 0.90f).toLong
-        case _ => 0
-      }
-    }
-
-    def reLoginKerberos(): Unit = {
-      val timer = new Timer()
-      val refreshTime = getRefreshTime
-      timer.schedule(new TimerTask {
-        override def run(): Unit = {
-          /*
-          closeHadoop()
-          reusableConf = initHadoopConf()
-          kerberosLogin(reusableConf)
-          */
-          UserGroupInformation.getLoginUser.checkTGTAndReloginFromKeytab()
-          logInfo(s"Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: ${DateUtils.format()}")
-        }
-      }, refreshTime, refreshTime)
-    }
-
-    if (reusableConf == null) {
-      reusableConf = initHadoopConf()
-      if (kerberosConf != null) {
-        val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
-        val kerberosEnable = Try(enableString.trim.toBoolean).getOrElse(false)
-        if (kerberosEnable) {
-          ugi = kerberosLogin(reusableConf)
-          reLoginKerberos()
-        } else {
-          ugi = UserGroupInformation.createRemoteUser(hadoopUserName)
-        }
-      }
-    }
+  def hadoopConf: Configuration = Option(reusableConf).getOrElse {
+    reusableConf = initHadoopConf()
     reusableConf
   }
 
+  private[this] def initHadoopConf(): Configuration = {
+    val conf = getConfigurationFromHadoopConfDir(hadoopConfDir)
+    //add hadoopConfDir to classpath...you know why???
+    ClassLoaderUtils.loadResource(hadoopConfDir)
+
+    if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
+      conf.set("hadoop.tmp.dir", "/tmp")
+    }
+    if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
+      conf.set("hbase.fs.tmp.dir", "/tmp")
+    }
+    // disable timeline service as we only query yarn app here.
+    // Otherwise we may hit this kind of ERROR:
+    // java.lang.ClassNotFoundException: com.sun.jersey.api.client.config.ClientConfig
+    conf.set("yarn.timeline-service.enabled", "false")
+    conf.set("fs.hdfs.impl", classOf[DistributedFileSystem].getName)
+    conf.set("fs.file.impl", classOf[LocalFileSystem].getName)
+    conf.set("fs.hdfs.impl.disable.cache", "true")
+    conf
+  }
+
+  private[this] def closeHadoop(): Unit = {
+    if (tgt != null && !tgt.isDestroyed) {
+      tgt.destroy()
+    }
+    if (reusableYarnClient != null) {
+      reusableYarnClient.close()
+      reusableYarnClient = null
+    }
+    if (reusableHdfs != null) {
+      reusableHdfs.close()
+      reusableHdfs = null
+    }
+  }
+
+  private[this] def kerberosLogin(conf: Configuration): UserGroupInformation = {
+    logInfo("kerberos login starting....")
+    val principal = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim
+    val keytab = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KEYTAB, "").trim
+    require(
+      principal.nonEmpty && keytab.nonEmpty,
+      s"$KEY_SECURITY_KERBEROS_PRINCIPAL and $KEY_SECURITY_KERBEROS_KEYTAB must not be empty"
+    )
+
+    val krb5 = kerberosConf.getOrElse(
+      KEY_SECURITY_KERBEROS_KRB5_CONF,
+      kerberosConf.getOrElse(KEY_JAVA_SECURITY_KRB5_CONF, "")
+    ).trim
+
+    if (krb5.nonEmpty) {
+      System.setProperty("java.security.krb5.conf", krb5)
+      System.setProperty("java.security.krb5.conf.path", krb5)
+    }
+    System.setProperty("sun.security.spnego.debug", "true")
+    System.setProperty("sun.security.krb5.debug", "true")
+    conf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
+    try {
+      UserGroupInformation.setConfiguration(conf)
+      val ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(principal, keytab)
+      logInfo("kerberos authentication successful")
+      ugi
+    } catch {
+      case e: IOException =>
+        logError(s"kerberos login failed,${ExceptionUtils.stringifyException(e)}")
+        throw e
+    }
+  }
+
+  private[this] def reLoginKerberos(): Unit = {
+    val timer = new Timer()
+    timer.schedule(new TimerTask {
+      override def run(): Unit = {
+        closeHadoop()
+        reusableConf = initHadoopConf()
+        kerberosLogin(reusableConf)
+        logInfo(s"Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: ${DateUtils.format()}")
+      }
+    }, tgtRefreshTime, tgtRefreshTime)
+  }
 
   def hdfs: FileSystem = {
-    if (reusableHdfs == null) {
+    Option(reusableHdfs).getOrElse {
       reusableHdfs = Try {
         ugi.doAs[FileSystem](new PrivilegedAction[FileSystem]() {
-          override def run(): FileSystem = FileSystem.get(reusableConf)
+          // scalastyle:off FileSystemGet
+          override def run(): FileSystem = FileSystem.get(hadoopConf)
+          // scalastyle:on FileSystemGet
         })
       } match {
-        case Success(fs) => fs
+        case Success(fs) =>
+          val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
+          val kerberosEnable = Try(enableString.trim.toBoolean).getOrElse(false)
+          if (kerberosEnable) {
+            reLoginKerberos()
+          }
+          fs
         case Failure(e) =>
-          throw new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
+          throw new IllegalArgumentException(s"[StreamX] access hdfs error: $e")
       }
+      reusableHdfs
     }
-    reusableHdfs
   }
 
   def yarnClient: YarnClient = {
@@ -257,7 +254,6 @@ object HadoopUtils extends Logger {
     }
     reusableYarnClient
   }
-
 
   /**
    * <pre>

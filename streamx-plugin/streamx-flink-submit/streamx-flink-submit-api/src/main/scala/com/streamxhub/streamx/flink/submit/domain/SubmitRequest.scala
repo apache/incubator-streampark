@@ -1,34 +1,32 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.flink.submit.domain
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.conf.{ConfigurationOptions, Workspace}
+import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums._
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
-import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
-import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf
-import com.streamxhub.streamx.flink.packer.maven.JarPackDeps
+import com.streamxhub.streamx.flink.packer.pipeline.BuildResult
+import org.apache.commons.io.FileUtils
 
 import java.io.File
 import java.util.{Map => JavaMap}
@@ -37,22 +35,12 @@ import scala.collection.JavaConversions._
 
 /**
  * @param clusterId            flink cluster id in k8s cluster.
- * @param flinkBaseImage       tag name of base flink docker image.
  * @param kubernetesNamespace  k8s namespace.
- * @param jarPackDeps          additional dependencies info for flink job.
- * @param dockerAuthConfig     docker authentication configuration.
- * @param podTemplates         custom flink k8s pod-template content.
  * @param flinkRestExposedType flink rest-service exposed type on k8s cluster.
- * @param integrateWithHadoop  whether integrate with hadoop.
  */
 case class KubernetesSubmitParam(clusterId: String,
-                                 flinkBaseImage: String,
                                  kubernetesNamespace: String,
-                                 jarPackDeps: JarPackDeps,
-                                 @Nullable dockerAuthConfig: DockerAuthConf,
-                                 @Nullable podTemplates: K8sPodTemplates,
-                                 @Nullable flinkRestExposedType: FlinkK8sRestExposedType,
-                                 integrateWithHadoop: Boolean = false)
+                                 @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
 
 case class SubmitRequest(flinkVersion: FlinkVersion,
                          flinkYaml: String,
@@ -69,13 +57,14 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
                          property: JavaMap[String, Any],
                          dynamicOption: Array[String],
                          args: String,
+                         @Nullable buildResult: BuildResult,
                          @Nullable k8sSubmitParam: KubernetesSubmitParam) {
 
   lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
 
   lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX)
 
-  lazy val appMain: String = appProperties(ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS)
+  lazy val appMain: String = appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
 
   lazy val effectiveAppName: String = if (this.appName == null) appProperties(KEY_FLINK_APP_NAME) else this.appName
 
@@ -123,7 +112,12 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
      */
     val workspace = Workspace.remote
     val flinkHome = flinkVersion.flinkHome
-    val flinkName = new File(flinkHome).getName
+    val flinkHomeDir = new File(flinkHome)
+    val flinkName = if (FileUtils.isSymlink(flinkHomeDir)) {
+      flinkHomeDir.getCanonicalFile.getName
+    } else {
+      flinkHomeDir.getName
+    }
     val flinkHdfsHome = s"${workspace.APP_FLINK}/$flinkName"
     HdfsWorkspace(
       flinkName,

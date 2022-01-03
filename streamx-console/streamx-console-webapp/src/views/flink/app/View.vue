@@ -391,10 +391,17 @@
         <template
           slot="deployState"
           slot-scope="text, record">
-          <State
-            option="deploy"
-            :title="handleDeployTitle(record.deploy)"
-            :data="record"/>
+          <a-space size="small">
+            <State
+              option="deploy"
+              :title="handleDeployTitle(record.deploy)"
+              :data="record"/>
+            <State
+              v-if="record.executionMode === 5 || record.executionMode === 6"
+              option="build"
+              click="openBuildProgressDetailDrawer(record)"
+              :data="record"/>
+          </a-space>
         </template>
 
         <template
@@ -412,74 +419,135 @@
         <template
           slot="operation"
           slot-scope="text, record">
-          <svg-icon
-            name="mapping"
-            border
-            v-if="record.state !== 7
-              && optionApps.deploy.get(record.id) === undefined
-              && optionApps.stoping.get(record.id) === undefined
-              && optionApps.starting.get(record.id) === undefined
-              && record['optionState'] === 0
-              && (record['executionMode'] === 2 || record['executionMode'] === 3 || record['executionMode'] === 4)"
-            v-permit="'app:mapping'"
-            @click.native="handleMapping(record)"/>
-          <svg-icon
-            name="deploy"
-            border
-            v-show="(record.deploy === 2 || record.deploy === 3) && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record['optionState'] === 0)"
-            v-permit="'app:deploy'"
-            class="pointer"
-            @click.native="handleDeploy(record)"/>
-          <!--已经发布完的项目,不允许再次编辑-->
-          <svg-icon
-            name="edit"
-            border
-            v-if="record.deploy !== 6"
-            v-permit="'app:update'"
-            type="setting"
-            theme="twoTone"
-            two-tone-color="#4a9ff5"
-            @click.native="handleEdit(record)"
-            title="Update application"/>
-          <svg-icon
-            name="rollback"
-            border
-            v-if="record.deploy === 6"
-            v-permit="'app:update'"
-            @click.native="handleRevoke(record)"
-            title="Revoke Deploy"/>
-          <a-icon
-            v-if="record.state === 1 || record['deploy'] === 1"
-            type="sync"
-            style="color:#4a9ff5"
-            spin
-            @click="handleSeeLog(record)"/>
-          <svg-icon
-            name="play"
-            border
-            v-show="handleIsStart(record)"
-            v-permit="'app:start'"
-            @click.native="handleStart(record)"/>
-          <svg-icon
-            name="shutdown"
-            border
-            title="Cancel this application"
-            v-permit="'app:cancel'"
-            v-show="record.state === 7 && record['optionState'] === 0"
-            @click.native="handleCancel(record)"/>
-          <svg-icon
-            name="see"
-            border
-            v-permit="'app:detail'"
-            @click.native="handleDetail(record)"
-            title="Detail"/>
-          <svg-icon
-            name="flame"
-            border
-            v-if="record.flameGraph"
-            v-permit="'app:flameGraph'"
-            @click.native="handleFlameGraph(record)"
-            title="Detail"/>
+
+          <a-tooltip title="Edit Application">
+            <a-button
+              v-if="record.deploy !== 6"
+              v-permit="'app:update'"
+              @click.native="handleEdit(record)"
+              shape="circle"
+              size="small"
+              style="margin-left: 10px"
+              class="control-button ctl-btn-color">
+              <a-icon type="edit"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="Build Application">
+            <a-button
+              v-if="record.executionMode === 5 || record.executionMode === 6"
+              @click.native="handleCheckBuildApp(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="gold"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="Building Progress Detail">
+            <a-button
+              v-if="(record.executionMode === 5 || record.executionMode === 6) && record.buildStatus != null"
+              @click.native="openBuildProgressDetailDrawer(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="container"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="Deploy Application">
+            <a-button
+              v-show="(record.executionMode === 2 || record.executionMode === 3 || record.executionMode === 4) && (record.deploy === 2 || record.deploy === 3) && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record['optionState'] === 0)"
+              v-permit="'app:deploy'"
+              @click.native="handleDeploy(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="build"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="Revoke Deploy">
+            <a-button
+              v-if="(record.executionMode === 2 || record.executionMode === 3 || record.executionMode === 4) && record.deploy === 6"
+              v-permit="'app:update'"
+              @click.native="handleRevoke(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="rollback"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="Sync Application State">
+            <a-button
+              v-if="record.state === 1 || record['deploy'] === 1"
+              click="handleSeeLog(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="cloud-sync"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="Run Application">
+            <a-button
+              v-show="handleIsStart(record)"
+              v-permit="'app:start'"
+              @click.native="handleAppCheckStart(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="play-circle"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="Stop Application">
+            <a-button
+              v-show="record.state === 7 && record['optionState'] === 0"
+              v-permit="'app:cancel'"
+              @click.native="handleCancel(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="pause-circle"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="View Application Detail">
+            <a-button
+              v-permit="'app:detail'"
+              @click.native="handleDetail(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="eye"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="View FlameGraph">
+            <a-button
+              v-if="record.flameGraph"
+              v-permit="'app:flameGraph'"
+              @click.native="handleFlameGraph(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="fire"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="Remapping Application">
+            <a-button
+              v-if="record.state !== 7 && optionApps.deploy.get(record.id) === undefined && optionApps.stoping.get(record.id) === undefined && optionApps.starting.get(record.id) === undefined && record['optionState'] === 0 && (record['executionMode'] === 2 || record['executionMode'] === 3 || record['executionMode'] === 4)"
+              v-permit="'app:mapping'"
+              @click.native="handleMapping(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="fork"/>
+            </a-button>
+          </a-tooltip>
 
           <template v-if="handleCanDelete(record)">
             <a-popconfirm
@@ -487,13 +555,241 @@
               cancel-text="No"
               ok-text="Yes"
               @confirm="handleDelete(record)">
-              <svg-icon name="remove" border/>
+              <a-button
+                type="danger"
+                shape="circle"
+                size="small"
+                class="control-button">
+                <a-icon type="delete"/>
+              </a-button>
             </a-popconfirm>
           </template>
 
         </template>
 
       </a-table>
+
+      <!-- app building progress detail-->
+      <template>
+        <a-drawer
+          title="Application Building Progress"
+          placement="right"
+          width="500"
+          :closable="true"
+          :visible="appBuildDrawerVisual"
+          @close="closeBuildProgressDrawer">
+          <!-- status and cost time -->
+          <h3>
+            <a-icon type="dashboard"/>
+            Summary
+          </h3>
+          <template v-if="appBuildDetail.pipeline != null">
+            <a-row>
+              <a-progress
+                v-if="appBuildDetail.pipeline.isErr"
+                :percent="appBuildDetail.pipeline.percent"
+                status="exception"/>
+              <a-progress
+                v-else-if="appBuildDetail.pipeline.percent < 100"
+                :percent="appBuildDetail.pipeline.percent"
+                status="active"/>
+              <a-progress
+                v-else
+                :percent="appBuildDetail.pipeline.percent"/>
+            </a-row>
+            <a-row style="margin-top: 10px">
+              <template v-if="appBuildDetail.pipeline.pipeStatus == 2">
+                <a-tag :color="handleAppBuildStatusColor(appBuildDetail.pipeline.pipeStatus)" class="running-tag">
+                  {{ handleAppBuildStatueText(appBuildDetail.pipeline.pipeStatus) }}
+                </a-tag>
+              </template>
+              <template v-else>
+                <a-tag :color="handleAppBuildStatusColor(appBuildDetail.pipeline.pipeStatus)">
+                  {{ handleAppBuildStatueText(appBuildDetail.pipeline.pipeStatus) }}
+                </a-tag>
+              </template>
+              cost {{ appBuildDetail.pipeline.costSec }} seconds
+            </a-row>
+          </template>
+          <template v-else>
+            <a-empty/>
+          </template>
+          <a-divider/>
+
+          <!-- step detail -->
+          <h3>
+            <a-icon type="project"/>
+            Steps Detail
+          </h3>
+          <template v-if="appBuildDetail.pipeline != null">
+            <a-timeline style="margin-top: 20px">
+              <a-timeline-item
+                v-for="item in appBuildDetail.pipeline.steps"
+                :key="item.seq"
+                :color="handleAppBuildStepTimelineColor(item)">
+                <!-- step status, desc -->
+                <p>
+                  <tempalte v-if="item.status == 2">
+                    <a-tag :color="handleAppBuildStepTimelineColor(item)" class="running-tag">
+                      {{ handleAppBuildStepText(item.status) }}
+                    </a-tag>
+                    <b>Step-{{ item.seq }}</b> {{ item.desc }}
+                  </tempalte>
+                  <template v-else>
+                    <a-tag :color="handleAppBuildStepTimelineColor(item)">
+                      {{ handleAppBuildStepText(item.status) }}
+                    </a-tag>
+                    <b>Step-{{ item.seq }}</b> {{ item.desc }}
+                  </template>
+                </p>
+                <!-- step info update time --->
+                <template v-if="item.status !== 0 && item.status !== 1">
+                  <p style="color: gray; font-size: 12px">{{ item.ts }}</p>
+                </template>
+                <!-- docker resolved detail --->
+                <template v-if="appBuildDetail.pipeline.pipeType === 2 && appBuildDetail.docker !== null">
+                  <template v-if="item.seq === 5 && appBuildDetail.docker.pull !== null && appBuildDetail.docker.pull.layers !== null">
+                    <template v-for="layer in appBuildDetail.docker.pull.layers">
+                      <a-row :key="layer.layerId" style="margin-bottom: 5px;">
+                        <a-space size="small">
+                          <a-icon type="arrow-right"/>
+                          <a-tag color="blue"> {{ layer.layerId }}</a-tag>
+                          <a-tag>{{ layer.status }}</a-tag>
+                          <template v-if="layer.totalMb != null && layer.totalMb !== 0">
+                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
+                          </template>
+                        </a-space>
+                      </a-row>
+                      <template v-if="layer.totalMb != null && layer.totalMb !== 0">
+                        <a-row :key="layer.layerId" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
+                          <a-progress
+                            :percent="layer.percent"
+                            status="active"/>
+                        </a-row>
+                      </template>
+                    </template>
+                  </template>
+
+                  <template v-else-if="item.seq === 6 && appBuildDetail.docker.build !== null && appBuildDetail.docker.build.steps != null">
+                    <a-list
+                      bordered
+                      :data-source="appBuildDetail.docker.build.steps"
+                      size="small">
+                      <a-list-item slot="renderItem" slot-scope="step">
+                        <a-space>
+                          <a-icon type="arrow-right" />
+                          <span style="font-size: 12px">{{ step }}</span>
+                        </a-space>
+                      </a-list-item>
+                    </a-list>
+                  </template>
+
+                  <template v-else-if="item.seq === 7 && appBuildDetail.docker.push !== null && appBuildDetail.docker.push.layers !== null">
+                    <template v-for="layer in appBuildDetail.docker.push.layers">
+                      <a-row :key="layer.layerId" style="margin-bottom: 5px;">
+                        <a-space size="small">
+                          <a-icon type="arrow-right"/>
+                          <a-tag color="blue"> {{ layer.layerId }}</a-tag>
+                          <a-tag>{{ layer.status }}</a-tag>
+                          <template v-if="layer.totalMb != null && layer.totalMb !== 0">
+                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
+                          </template>
+                        </a-space>
+                      </a-row>
+                      <template v-if="layer.totalMb != null && layer.totalMb !== 0">
+                        <a-row :key="layer.layerId" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
+                          <a-progress
+                            :percent="layer.percent"
+                            status="active"/>
+                        </a-row>
+                      </template>
+                    </template>
+                  </template>
+
+                </template>
+              </a-timeline-item>
+            </a-timeline>
+          </template>
+          <template v-else>
+            <a-empty/>
+          </template>
+
+          <!-- error log drawer-->
+          <a-drawer
+            title="Error Log"
+            placement="right"
+            width="800"
+            :closable="true"
+            :visible="appBuildErrorLogDrawerVisual"
+            @close="closeBuildErrorLogDrawer">
+            <template v-if="appBuildDetail.pipeline != null && (appBuildDetail.pipeline.errSummary != null || appBuildDetail.pipeline.errStack != null)">
+              <h3>Error Summary</h3>
+              <br/>
+              <p>{{ appBuildDetail.pipeline.errSummary }}</p>
+              <a-divider/>
+              <h3>Error Stack</h3>
+              <br/>
+              <pre style="font-size: 12px">{{ appBuildDetail.pipeline.errStack }}</pre>
+            </template>
+            <template v-else>
+              <a-empty/>
+            </template>
+          </a-drawer>
+
+          <!-- bottom tools -->
+          <div
+            :style="{
+              position: 'absolute',
+              bottom: 0,
+              width: '100%',
+              borderTop: '1px solid #e8e8e8',
+              padding: '10px 16px',
+              textAlign: 'right',
+              left: 0,
+              background: '#fff',
+              borderRadius: '0 0 4px 4px'}">
+            <a-button type="primary" @click="openBuildErrorLogDrawer">
+              <a-icon type="warning"/>
+              Error Log
+            </a-button>
+          </div>
+        </a-drawer>
+
+      </template>
+
+      <a-modal
+        title="WARNING"
+        okType="danger"
+        okText="Yes"
+        cancelText="Cancel"
+        :visible="forceBuildAppModalVisual"
+        @ok="handleBuildApp(application, true)"
+        @cancel="closeCheckForceBuildModel">
+        <p>The current build of the application is in progress.</p>
+        <p>are you sure you want to force another build?</p>
+      </a-modal>
+
+      <a-modal
+        title="WARNING"
+        okType="danger"
+        okText="Yes"
+        cancelText="Cancel"
+        :visible="forceStartAppModalVisual"
+        @ok="handleStart(application)"
+        @cancel="closeForceStartAppModal">
+        <template v-if="appBuildDetail.pipeline == null">
+          <p>No build record exists for the current application.</p>
+        </template>
+        <template v-else>
+          <p>The current build state of the application is
+            <a-tag color="orange">
+              {{ handleAppBuildStatueText(appBuildDetail.pipeline.pipeStatus) }}
+            </a-tag>
+          </p>
+        </template>
+        <p>Are you sure to force the application to run?</p>
+      </a-modal>
+
       <a-modal
         v-model="deployVisible"
         on-ok="handleDeployOk">
@@ -853,16 +1149,16 @@
   import Ellipsis from '@/components/Ellipsis'
   import State from './State'
   import {mapActions} from 'vuex'
-  import {cancel, clean, dashboard, deploy, list, mapping, remove, revoke, start, yarn} from '@api/application'
+  import {cancel, clean, dashboard, deploy, list, mapping, remove, revoke, start, yarn, downLog} from '@api/application'
   import {history, latest} from '@api/savepoint'
   import {flamegraph} from '@api/metrics'
   import {weburl} from '@api/setting'
+  import {build, detail as buildDetail} from '@api/appbuild'
   import {Terminal} from 'xterm'
   import 'xterm/css/xterm.css'
-  import SockJS from 'sockjs-client'
   import {baseUrl} from '@/api/baseUrl'
-  import Stomp from 'webstomp-client'
   import SvgIcon from '@/components/SvgIcon'
+  import storage from '@/utils/storage'
 
   export default {
   components: {Ellipsis, State, SvgIcon},
@@ -935,7 +1231,18 @@
         showQuickJumper: true,
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
-      }
+      },
+      socketId: null,
+      storageKey: 'DOWN_SOCKET_ID',
+      appBuildDetail: {
+        pipeline: null,
+        docker: null,
+      },
+      appBuildDrawerVisual: false,
+      appBuildErrorLogDrawerVisual: false,
+      appBuildDtlReqTimer: null,
+      forceBuildAppModalVisual: false,
+      forceStartAppModalVisual: false,
     }
   },
 
@@ -965,86 +1272,87 @@
         },
         onFilter: (value, record) =>
             record.jobName
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus()
-            }, 0)
-          }
-        },
-      }, {
-        title: 'Flink Version',
-        dataIndex: 'flinkVersion',
-        width: 120
-      }, {
-        title: 'Start Time',
-        dataIndex: 'startTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
-        width: 180
-      }, {
-        title: 'Duration',
-        dataIndex: 'duration',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
-        scopedSlots: {customRender: 'duration'},
-        width: 150
-      }, {
-        title: 'Task',
-        dataIndex: 'task',
-        width: 120
-      }, {
-        title: 'Run Status',
-        dataIndex: 'state',
-        width: 120,
-        scopedSlots: {customRender: 'state'},
-        filters: [
-          {text: 'ADDED', value: 0},
-          {text: 'DEPLOYING', value: 1},
-          {text: 'DEPLOYED', value: 2},
-          {text: 'CREATED', value: 4},
-          {text: 'STARTING', value: 5},
-          {text: 'RUNNING', value: 7},
-          {text: 'FAILED', value: 9},
-          {text: 'CANCELED', value: 11},
-          {text: 'FINISHED', value: 12},
-          {text: 'SUSPENDED', value: 13},
-          {text: 'LOST', value: 15},
-          {text: 'SILENT', value: 19},
-          {text: 'TERMINATED', value: 20},
-          {text: 'FINISHED', value: 21},
-        ]
-      }, {
-        title: 'Deploy Status',
-        dataIndex: 'deploy',
-        width: 130,
-        scopedSlots: {customRender: 'deployState'}
-      }, {
-        dataIndex: 'operation',
-        key: 'operation',
-        fixed: 'right',
-        scopedSlots: {customRender: 'operation'},
-        slots: {title: 'customOperation'},
-        width: 200
-      }]
-    }
-  },
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: visible => {
+            if (visible) {
+              setTimeout(() => {
+                this.searchInput.focus()
+              }, 0)
+            }
+          },
+        }, {
+          title: 'Flink Version',
+          dataIndex: 'flinkVersion',
+          width: 120
+        }, {
+          title: 'Start Time',
+          dataIndex: 'startTime',
+          sorter: true,
+          sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
+          width: 180
+        }, {
+          title: 'Duration',
+          dataIndex: 'duration',
+          sorter: true,
+          sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
+          scopedSlots: {customRender: 'duration'},
+          width: 150
+        }, {
+          title: 'Task',
+          dataIndex: 'task',
+          width: 100,
+        }, {
+          title: 'Run Status',
+          dataIndex: 'state',
+          width: 120,
+          scopedSlots: {customRender: 'state'},
+          filters: [
+            {text: 'ADDED', value: 0},
+            {text: 'DEPLOYING', value: 1},
+            {text: 'DEPLOYED', value: 2},
+            {text: 'CREATED', value: 4},
+            {text: 'STARTING', value: 5},
+            {text: 'RUNNING', value: 7},
+            {text: 'FAILED', value: 9},
+            {text: 'CANCELED', value: 11},
+            {text: 'FINISHED', value: 12},
+            {text: 'SUSPENDED', value: 13},
+            {text: 'LOST', value: 15},
+            {text: 'SILENT', value: 19},
+            {text: 'TERMINATED', value: 20},
+            {text: 'FINISHED', value: 21},
+          ]
+        }, {
+          title: 'Deploy | Build Status',
+          dataIndex: 'deploy',
+          width: 250,
+          scopedSlots: {customRender: 'deployState'}
+        }, {
+          dataIndex: 'operation',
+          key: 'operation',
+          fixed: 'right',
+          scopedSlots: {customRender: 'operation'},
+          slots: {title: 'customOperation'},
+          width: 200
+        }]
+      }
+    },
 
-  mounted() {
-    this.handleDashboard()
-    this.handleFetch(true)
-    const timer = window.setInterval(() => {
+    mounted() {
       this.handleDashboard()
-      this.handleFetch(false)
-    }, this.queryInterval)
-    this.$once('hook:beforeDestroy', () => {
-      clearInterval(timer)
-    })
-    this.handleResize()
-  },
+      this.handleFetch(true)
+      const timer = window.setInterval(() => {
+        this.handleDashboard()
+        this.handleFetch(false)
+      }, this.queryInterval)
+      this.$once('hook:beforeDestroy', () => {
+        clearInterval(timer)
+        clearInterval(this.appBuildDtlReqTimer)
+      })
+      this.handleResize()
+    },
 
   beforeMount() {
     this.formDeploy = this.$form.createForm(this)
@@ -1120,12 +1428,15 @@
             showConfirmButton: false,
             timer: 2000
           }).then((r) => {
+            this.socketId = this.uuid()
+            storage.set(this.storageKey,this.socketId)
             deploy({
               id: id,
               restart: restart,
               savePointed: savePoint,
               allowNonRestored: allowNonRestoredState,
-              backUpDescription: description
+              backUpDescription: description,
+              socketId: this.socketId
             }).then((resp) => {
               if(!resp.data) {
                 this.$swal.fire(
@@ -1181,8 +1492,152 @@
       }, 1000)
     },
 
-    handleIsStart(app) {
-      const status = app.state === 0 ||
+    showCheckForceBuildModel() {
+      this.forceBuildAppModalVisual = true
+    },
+
+    closeCheckForceBuildModel() {
+      this.forceBuildAppModalVisual = false
+    },
+
+    handleCheckBuildApp(app) {
+      this.application = app
+      if (app['appControl']['allowBuild'] === true) {
+        this.handleBuildApp(app, false)
+      } else {
+        this.showCheckForceBuildModel()
+      }
+    },
+
+    handleBuildApp(app, force) {
+      this.closeCheckForceBuildModel()
+      this.$swal.fire({
+        icon: 'success',
+        title: 'Current Application is Building',
+        showConfirmButton: false,
+        timer: 2000
+      }).then((e) =>
+        build({
+          appId: app.id,
+          forceBuild: force
+        }).then((resp) => {
+          if (!resp.data) {
+            this.$swal.fire(
+              'Failed',
+              'build application failed, ' + resp.message.replaceAll(/\[StreamX]/g, ''),
+              'error'
+            )
+          }
+        })
+      )
+    },
+
+    handleFetchBuildDetail(app) {
+      buildDetail({
+        appId: app.id
+      }).then((resp) => {
+        this.appBuildDetail.pipeline = resp.data.pipeline
+        this.appBuildDetail.docker = resp.data.docker
+      })
+    },
+
+    openBuildProgressDetailDrawer(app) {
+      this.appBuildDrawerVisual = true
+      clearInterval(this.appBuildDtlReqTimer)
+      this.appBuildDtlReqTimer = window.setInterval(
+        () => this.handleFetchBuildDetail(app),
+        this.queryInterval)
+    },
+
+    closeBuildProgressDrawer() {
+      this.appBuildDrawerVisual = false
+      clearInterval(this.appBuildDtlReqTimer)
+      this.appBuildDetail.pipeline = null
+      this.appBuildDetail.docker = null
+    },
+
+    openBuildErrorLogDrawer() {
+      this.appBuildErrorLogDrawerVisual = true
+    },
+
+    closeBuildErrorLogDrawer() {
+      this.appBuildErrorLogDrawerVisual = false
+    },
+
+    handleAppBuildStatusColor(statusCode) {
+      switch (statusCode) {
+        case 0:
+          return '#99A3A4'
+        case 1:
+          return '#F5B041'
+        case 2:
+          return '#3498DB'
+        case 3:
+          return '#2ECC71'
+        case 4:
+          return '#E74C3C'
+        default:
+          return '#99A3A4'
+      }
+    },
+
+    handleAppBuildStatueText(statusCode) {
+      switch (statusCode) {
+        case 0:
+          return 'UNKNOWN'
+        case 1:
+          return 'PENDING'
+        case 2:
+          return 'RUNNING'
+        case 3:
+          return 'SUCCESS'
+        case 4:
+          return 'FAILURE'
+        default:
+          return 'UNKNOWN'
+      }
+    },
+
+    handleAppBuildStepTimelineColor(step) {
+      if (step == null) {
+        return 'gray'
+      }
+      switch (step.status) {
+        case 0:
+        case 1:
+          return '#99A3A4'
+        case 2:
+          return '#3498DB'
+        case 3:
+          return '#2ECC71'
+        case 4:
+          return '#E74C3C'
+        case  5:
+          return '#F5B041'
+        default:
+          return '#99A3A4'
+      }
+    },
+
+    handleAppBuildStepText(stepStatus) {
+      switch (stepStatus) {
+        case 0:
+          return 'UNKNOWN'
+        case 1:
+          return 'WAITING'
+        case 2:
+          return 'RUNNING'
+        case 3:
+          return 'SUCCESS'
+        case 4:
+          return 'FAILURE'
+        case 5:
+          return 'SKIPPED'
+      }
+    },
+
+      handleIsStart(app) {
+        const status = app.state === 0 ||
           app.state === 2 ||
           app.state === 9 ||
           app.state === 11 ||
@@ -1197,7 +1652,28 @@
       return status && optionState
     },
 
+
+    showForceStartAppModal() {
+      this.forceStartAppModalVisual = true
+    },
+
+    closeForceStartAppModal() {
+      this.forceStartAppModalVisual = false
+    },
+
+    handleAppCheckStart(app) {
+      // when then app is building, show forced starting modal
+      if ((app.executionMode === 5 || app.executionMode === 6) && app['appControl']['allowStart'] === false) {
+        this.application = app
+        this.handleFetchBuildDetail(app)
+        this.showForceStartAppModal()
+      } else {
+        this.handleStart(app)
+      }
+    },
+
     handleStart(app) {
+      this.closeForceStartAppModal()
       if (app.flinkVersion == null) {
         this.$swal.fire(
           'Failed',
@@ -1543,8 +2019,20 @@
 
     handleEdit(app) {
       this.SetAppId(app.id)
+      //appType         STREAMX_FLINK(1, "StreamX Flink"), APACHE_FLINK(2, "Apache Flink"),
+      //jobType         CUSTOMCODE("Custom Code", 1), FLINKSQL("Flink SQL", 2)
+      //ResourceFrom    CICD(1),UPLOAD(2)
       if (app.appType === 1) {
         this.$router.push({'path': '/flink/app/edit_streamx'})
+        if (app.jobType === 1) {
+          if (app.resourceForm === 1) {
+            this.$router.push({'path': '/flink/app/edit_streamx'})
+          } else {
+            this.$router.push({'path': '/flink/app/edit_flink'})
+          }
+        } else {
+          this.$router.push({'path': '/flink/app/edit_streamx'})
+        }
       } else {
         this.$router.push({'path': '/flink/app/edit_flink'})
       }
@@ -1603,23 +2091,33 @@
       })
       const container = document.getElementById('terminal')
       this.terminal.open(container, true)
-      const socket = new SockJS(baseUrl(true).concat('/websocket'))
-      this.stompClient = Stomp.over(socket)
-      this.stompClient.connect({}, (success) => {
-        this.stompClient.subscribe(
-            '/resp/mvn',
-            (msg) => {
-              if (msg.body.startsWith('[Exception]')) {
-                this.$swal.fire(
-                    'Failed',
-                    msg.body,
-                    'error'
-                )
-              }
-              this.terminal.writeln(msg.body)
-            })
-        this.stompClient.send('/req/mvn/' + app.id)
-      })
+
+      const url = baseUrl().concat('/websocket/' + this.handleGetSocketId())
+      const socket = this.getSocket(url)
+
+      socket.onopen = () => {
+        downLog({id: app.id})
+      }
+
+      socket.onmessage = (event) => {
+        if (event.data.startsWith('[Exception]')) {
+          this.$swal.fire({
+            title: 'Failed',
+            icon: 'error',
+            width: this.exceptionPropWidth(),
+            html: '<pre class="propException">' + event.data + '</pre>',
+            focusConfirm: false,
+          })
+        } else {
+          this.terminal.writeln(event.data)
+        }
+      }
+
+      socket.onclose = () => {
+        this.socketId = null
+        storage.rm(this.storageKey)
+      }
+
     },
 
     handleCloseWS() {
@@ -1628,7 +2126,14 @@
       this.terminal.clear()
       this.terminal.clearSelection()
       this.terminal = null
-    }
+    },
+
+    handleGetSocketId() {
+      if (this.socketId == null) {
+        return storage.get(this.storageKey) || null
+      }
+      return this.socketId
+    },
 
   }
 }

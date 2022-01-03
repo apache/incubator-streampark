@@ -1,28 +1,28 @@
 /*
- * Copyright (c) 2021 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright (c) 2019 The StreamX Project
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.flink.kubernetes
+
+import com.streamxhub.streamx.common.conf.{ConfigHub, K8sFlinkConfig}
 
 /**
  * @author Al-assad
- *
  * @param jobStatusWatcherConf configuration for flink job status tracking process
  * @param metricWatcherConf    configuration for flink metric tracking process
  */
@@ -41,7 +41,7 @@ case class MetricWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: 
  *
  * @param sglTrkTaskTimeoutSec          run timeout of single tracking task
  * @param sglTrkTaskIntervalSec         interval seconds between two single tracking task
- * @param silentStateJobKeepTrackingSec SILENT flink state job keep tracking seconds
+ * @param silentStateJobKeepTrackingSec retained tracking time for SILENT state flink tasks
  */
 case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long,
                                 sglTrkTaskIntervalSec: Long,
@@ -55,6 +55,22 @@ object FlinkTrkConf {
   def debugConf: FlinkTrkConf = FlinkTrkConf(
     JobStatusWatcherConf.debugConf,
     MetricWatcherConf.debugConf)
+
+  /**
+   * create from ConfigHub
+   */
+  def fromConfigHub: FlinkTrkConf = FlinkTrkConf(
+    JobStatusWatcherConf(
+      ConfigHub.get(K8sFlinkConfig.jobStatusTrkTaskTimeoutSec),
+      ConfigHub.get(K8sFlinkConfig.jobStatueTrkTaskIntervalSec),
+      ConfigHub.get(K8sFlinkConfig.silentStateJobKeepTrackingSec)
+    ),
+    MetricWatcherConf(
+      ConfigHub.get(K8sFlinkConfig.metricTrkTaskTimeoutSec),
+      ConfigHub.get(K8sFlinkConfig.metricTrkTaskIntervalSec)
+    )
+  )
+
 }
 
 object JobStatusWatcherConf {

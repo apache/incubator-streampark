@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.streamxhub.streamx.console.system.dao.UserMapper">
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.system.entity.User">
-        <id column="USER_ID" jdbcType="DECIMAL" property="userId"/>
+        <id column="USER_ID" jdbcType="BIGINT" property="userId"/>
         <result column="USERNAME" jdbcType="VARCHAR" property="username"/>
         <result column="NICK_NAME" jdbcType="VARCHAR" property="nickName"/>
         <result column="PASSWORD" jdbcType="VARCHAR" property="password"/>
