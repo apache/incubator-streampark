@@ -54,14 +54,14 @@ object CommonConfig {
 
   val DOCKER_CONNECTION_TIMEOUT_SEC: ConfigOption = ConfigOption(
     key = "streamx.docker.http-client.connection-timeout-sec",
-    defaultValue = 100,
-    classType = classOf[java.lang.Integer],
+    defaultValue = 100L,
+    classType = classOf[java.lang.Long],
     description = "instantiating connection timeout for DockerHttpClient")
 
   val DOCKER_RESPONSE_TIMEOUT_SEC: ConfigOption = ConfigOption(
     key = "streamx.docker.http-client.response-timeout-sec",
-    defaultValue = 120,
-    classType = classOf[java.lang.Integer],
+    defaultValue = 120L,
+    classType = classOf[java.lang.Long],
     description = "instantiating connection timeout for DockerHttpClient")
 
   val MAVEN_REMOTE_URL: ConfigOption = ConfigOption(
