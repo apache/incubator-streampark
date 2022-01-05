@@ -31,8 +31,8 @@ public class DingTest {
     public void initDingding(){
         dingdingProperties = new DingdingProperties();
         dingdingProperties.setEnabled(true);
-        dingdingProperties.setSecret("SEC4de69b930206bc25cc1e697a2db3ed777c66f71e0937289eddc4b25575450cf8");
-        dingdingProperties.setAccessToken("338bebec1e3344a9d0567394d41dd581dc979db5f152e8c0dbb0ebb407911400");
+        dingdingProperties.setSecret("");
+        dingdingProperties.setAccessToken("");
         dingdingProperties.setUrl("https://oapi.dingtalk.com/robot/send?access_token=%s&timestamp=%s&sign=%s");
     }
 
