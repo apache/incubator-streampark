@@ -48,7 +48,12 @@ import java.io.File;
 import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.Base64;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * @author benjobs
