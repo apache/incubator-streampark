@@ -112,10 +112,10 @@ object KafkaSource {
             topic match {
               case null => startFrom.toList
               case x: String => startFrom.filter(_.topic == x).toList
-              case x: Array[String] =>
+              case x: Array[_] =>
                 val topics = if (topic == null) top.split(",|\\s+").toList else x.toList
                 startFrom.filter(s => topics.contains(s.topic)).toList
-              case x: List[String] =>
+              case x: List[_] =>
                 val topics = if (topic == null) top.split(",|\\s+").toList else x
                 startFrom.filter(s => topics.contains(s.topic)).toList
               case _ => List.empty[StartFrom]

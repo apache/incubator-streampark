@@ -1085,7 +1085,7 @@ export default {
           this.podTemplate = this.app.k8sPodTemplate
           this.jmPodTemplate = this.app.k8sJmPodTemplate
           this.tmPodTemplate = this.app.k8sTmPodTemplate
-          this.initPodTemplateEditor(this)
+          initPodTemplateEditor(this)
         }
       })
       let parallelism = null

@@ -19,9 +19,10 @@
 
 package com.streamxhub.streamx.flink.kubernetes
 
+import com.streamxhub.streamx.common.conf.{ConfigHub, K8sFlinkConfig}
+
 /**
  * @author Al-assad
- *
  * @param jobStatusWatcherConf configuration for flink job status tracking process
  * @param metricWatcherConf    configuration for flink metric tracking process
  */
@@ -40,7 +41,7 @@ case class MetricWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: 
  *
  * @param sglTrkTaskTimeoutSec          run timeout of single tracking task
  * @param sglTrkTaskIntervalSec         interval seconds between two single tracking task
- * @param silentStateJobKeepTrackingSec SILENT flink state job keep tracking seconds
+ * @param silentStateJobKeepTrackingSec retained tracking time for SILENT state flink tasks
  */
 case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long,
                                 sglTrkTaskIntervalSec: Long,
@@ -54,6 +55,22 @@ object FlinkTrkConf {
   def debugConf: FlinkTrkConf = FlinkTrkConf(
     JobStatusWatcherConf.debugConf,
     MetricWatcherConf.debugConf)
+
+  /**
+   * create from ConfigHub
+   */
+  def fromConfigHub: FlinkTrkConf = FlinkTrkConf(
+    JobStatusWatcherConf(
+      ConfigHub.get(K8sFlinkConfig.jobStatusTrkTaskTimeoutSec),
+      ConfigHub.get(K8sFlinkConfig.jobStatueTrkTaskIntervalSec),
+      ConfigHub.get(K8sFlinkConfig.silentStateJobKeepTrackingSec)
+    ),
+    MetricWatcherConf(
+      ConfigHub.get(K8sFlinkConfig.metricTrkTaskTimeoutSec),
+      ConfigHub.get(K8sFlinkConfig.metricTrkTaskIntervalSec)
+    )
+  )
+
 }
 
 object JobStatusWatcherConf {

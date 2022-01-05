@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.streamxhub.streamx.common.conf.K8sFlinkConfig;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
@@ -64,7 +65,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.streamxhub.streamx.common.conf.ConfigurationOptions.KUBERNETES_NAMESPACE_DEFAULT_VALUE;
 import static com.streamxhub.streamx.console.core.enums.FlinkAppState.of;
 
 /**
@@ -118,7 +118,7 @@ public class Application implements Serializable {
     /**
      * k8s部署下的namespace
      */
-    private String k8sNamespace = KUBERNETES_NAMESPACE_DEFAULT_VALUE;
+    private String k8sNamespace = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE();
 
 
     private Integer state;
@@ -278,7 +278,7 @@ public class Application implements Serializable {
     private transient AppControl appControl;
 
     public void setK8sNamespace(String k8sNamespace) {
-        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? KUBERNETES_NAMESPACE_DEFAULT_VALUE : k8sNamespace;
+        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE() : k8sNamespace;
     }
 
     public K8sPodTemplates getK8sPodTemplates() {

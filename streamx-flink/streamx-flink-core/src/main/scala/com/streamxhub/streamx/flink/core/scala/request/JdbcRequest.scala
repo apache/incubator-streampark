@@ -94,7 +94,7 @@ class JdbcASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T 
     clientConfig.put("provider_class", classOf[HikariCPDataSourceProvider].getName)
     val vertxOpts = new VertxOptions()
     val vertx = Vertx.vertx(vertxOpts)
-    client = JDBCClient.createNonShared(vertx, clientConfig)
+    client = JDBCClient.createShared(vertx, clientConfig)
   }
 
   override def close(): Unit = {

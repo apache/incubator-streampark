@@ -73,10 +73,15 @@ streamx:
     local: ~/streamx_workspace
     remote: hdfs:///streamx   # support hdfs:///streamx/ 、 /streamx 、hdfs://host:ip/streamx/
 
-  # remote docker register namepsace for streamx
+  # remote docker register namespace for streamx
   docker:
     register:
       image-namespace: streamx
+    # instantiating DockerHttpClient
+    http-client:
+      max-connections: 100
+      connection-timeout-sec: 100
+      response-timeout-sec: 120
 
   # flink-k8s tracking configuration
   flink-k8s:

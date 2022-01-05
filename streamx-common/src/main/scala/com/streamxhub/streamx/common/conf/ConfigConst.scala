@@ -18,8 +18,6 @@
  */
 package com.streamxhub.streamx.common.conf
 
-import com.streamxhub.streamx.common.util.SystemPropertyUtils
-
 import java.time.LocalDateTime
 
 object ConfigConst {
@@ -65,8 +63,6 @@ object ConfigConst {
   val KEY_KERBEROS = "kerberos"
 
   val KEY_HADOOP_USER_NAME = "HADOOP_USER_NAME"
-
-  val DEFAULT_HADOOP_USER_NAME = "hdfs"
 
   /**
    * hadoop.security.authentication
@@ -289,27 +285,20 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
-  val KEY_STREAMX_WORKSPACE_LOCAL = "streamx.workspace.local"
-
-  val KEY_STREAMX_WORKSPACE_REMOTE = "streamx.workspace.remote"
-
-  val STREAMX_WORKSPACE_DEFAULT = "/streamx"
-
   /**
-   * maven repository used for built-in compilation
+   * flink config key
    */
-  val DEFAULT_MAVEN_REMOTE_URL = "https://repo1.maven.org/maven2/"
+  val KEY_FLINK_APPLICATION_ARGS = "$internal.application.program-args"
 
-  /**
-   * namespace for docker image used in docker build env and image register
-   */
-  val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
+  val KEY_FLINK_APPLICATION_MAIN_CLASS = "$internal.application.main"
 
-  val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
+  val KEY_FLINK_TOTAL_PROCESS_MEMORY = "jobmanager.memory.process.size"
 
-  val STREAMX_HADOOP_USER_NAME = "streamx.hadoop-user-name"
+  val KEY_FLINK_TOTAL_MEMORY = "jobmanager.memory.flink.size"
 
-  lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
+  val KEY_FLINK_JVM_HEAP_MEMORY = "jobmanager.memory.heap.size"
+
+  val KEY_FLINK_JVM_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size"
 
 
   def printLogo(info: String): Unit = {

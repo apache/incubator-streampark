@@ -97,7 +97,7 @@
             placeholder="Please enter Kubernetes clusterId"
             @change="handleClusterId"
             allowClear
-            v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
+            v-decorator="[ 'clusterId', {rules: [{ required: true, validator: handleChecKubernetesClusterId }] }]">
             <template v-if="executionMode === 5">
               <a-dropdown slot="addonAfter" placement="bottomRight">
                 <a-menu slot="overlay" trigger="['click', 'hover']">
@@ -2036,6 +2036,19 @@ export default {
           }).catch((err) => {
             callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
           })
+        } else {
+          callback()
+        }
+      }
+    },
+
+    handleChecKubernetesClusterId(rule, value, callback) {
+      const clusterIdReg = /^[a-z]([-a-z0-9]*[a-z0-9])?$/
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Kubernetes clusterId is required'))
+      } else {
+        if (!clusterIdReg.test(value)) {
+          callback(new Error("Kubernetes clusterId is invalid, clusterId must consist of lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character.Please check"))
         } else {
           callback()
         }
