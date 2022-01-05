@@ -1,26 +1,22 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.streamxhub.streamx.common.conf
-
-import com.streamxhub.streamx.common.util.SystemPropertyUtils
 
 import java.time.LocalDateTime
 
@@ -67,8 +63,6 @@ object ConfigConst {
   val KEY_KERBEROS = "kerberos"
 
   val KEY_HADOOP_USER_NAME = "HADOOP_USER_NAME"
-
-  val DEFAULT_HADOOP_USER_NAME = "hdfs"
 
   /**
    * hadoop.security.authentication
@@ -291,25 +285,20 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
-  val KEY_STREAMX_WORKSPACE_LOCAL = "streamx.workspace.local"
-
-  val KEY_STREAMX_WORKSPACE_REMOTE = "streamx.workspace.remote"
-
-  val STREAMX_WORKSPACE_DEFAULT = "/streamx"
-
   /**
-   * maven repository used for built-in compilation
+   * flink config key
    */
-  val DEFAULT_MAVEN_REMOTE_URL = "https://repo1.maven.org/maven2/"
+  val KEY_FLINK_APPLICATION_ARGS = "$internal.application.program-args"
 
-  /**
-   * namespace for docker image used in docker build env and image register
-   */
-  val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
+  val KEY_FLINK_APPLICATION_MAIN_CLASS = "$internal.application.main"
 
-  val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
+  val KEY_FLINK_TOTAL_PROCESS_MEMORY = "jobmanager.memory.process.size"
 
-  lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
+  val KEY_FLINK_TOTAL_MEMORY = "jobmanager.memory.flink.size"
+
+  val KEY_FLINK_JVM_HEAP_MEMORY = "jobmanager.memory.heap.size"
+
+  val KEY_FLINK_JVM_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size"
 
 
   def printLogo(info: String): Unit = {
@@ -323,7 +312,7 @@ object ConfigConst {
     println("\n       WebSite:  http://www.streamxhub.com            ")
     println("       GitHub :  https://github.com/streamxhub/streamx  ")
     println("       Gitee  :  https://gitee.com/streamxhub/streamx   ")
-    println("       Ver    :  1.2.0                                  ")
+    println("       Ver    :  1.2.1                                  ")
     println(s"       Info   :  $info                                 ")
     println(s"       Time   :  ${LocalDateTime.now}              \n\n")
   }

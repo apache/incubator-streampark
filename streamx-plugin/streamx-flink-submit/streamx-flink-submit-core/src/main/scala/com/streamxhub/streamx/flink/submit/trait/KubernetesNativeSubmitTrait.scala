@@ -1,33 +1,31 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType}
-import com.streamxhub.streamx.common.fs.FsOperator
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.collections.MapUtils
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -58,6 +56,20 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
 
+  @throws[Exception]
+  protected def checkBuildResult(submitRequest: SubmitRequest): Unit = {
+    val result = submitRequest.buildResult
+    if (result == null) {
+      throw new Exception("[flink-submit] current flink app was not yet built, buildResult is empty" +
+        s",clusterId=${submitRequest.k8sSubmitParam.clusterId}," +
+        s",namespace=${submitRequest.k8sSubmitParam.kubernetesNamespace}")
+    }
+    if (!result.pass) {
+      throw new Exception(s"[flink-submit] current flink app build failed, clusterId" +
+        s",clusterId=${submitRequest.k8sSubmitParam.clusterId}," +
+        s",namespace=${submitRequest.k8sSubmitParam.kubernetesNamespace}")
+    }
+  }
 
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
   @throws[Exception] protected def doStop(@Nonnull executeMode: ExecutionMode,
@@ -133,7 +145,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
       .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
       .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
-      .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkBaseImage)
       .safeSet(PipelineOptions.NAME, submitRequest.appName)
       .safeSet(CoreOptions.CLASSLOADER_RESOLVE_ORDER, submitRequest.resolveOrder.getName)
       .set(KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE, covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType))
@@ -162,7 +173,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     extractDynamicOption(submitRequest.dynamicOption)
       .foreach(e => flinkConfig.setString(e._1, e._2))
 
-    // set parallism
+    // set parallelism
     if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
       flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
         Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString))
@@ -171,8 +182,9 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
         CoreOptions.DEFAULT_PARALLELISM.defaultValue())
     }
 
-    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty)
+    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) {
       flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
+    }
 
     flinkConfig
   }
@@ -202,37 +214,11 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
           programArgs += submitRequest.appConf
         }
       case _ =>
-        // Custom Code 必传配置文件...
         programArgs += PARAM_KEY_APP_CONF
         programArgs += submitRequest.appConf
     }
     programArgs
   }
-
-  private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): Set[String] = {
-    val providedLibs = ArrayBuffer(
-      // flinkLib,
-      workspace.APP_JARS,
-      workspace.APP_PLUGINS,
-      submitRequest.flinkUserJar
-    )
-    providedLibs += {
-      val version = submitRequest.flinkVersion.version.split("\\.").map(_.trim.toInt)
-      version match {
-        case Array(1, 12, _) => s"${workspace.APP_SHIMS}/flink-1.12"
-        case Array(1, 13, _) => s"${workspace.APP_SHIMS}/flink-1.13"
-        case Array(1, 14, _) => s"${workspace.APP_SHIMS}/flink-1.14"
-        case _ => throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
-      }
-    }
-    val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
-    if (FsOperator.lfs.exists(jobLib)) {
-      providedLibs += jobLib
-    }
-    val libSet = providedLibs.toSet
-    libSet
-  }
-
 
   protected def flinkConfIdentifierInfo(@Nonnull conf: Configuration): String =
     s"executionMode=${conf.get(DeploymentOptions.TARGET)}, clusterId=${conf.get(KubernetesConfigOptions.CLUSTER_ID)}, " +

@@ -2,5 +2,5 @@
 node_modules/
 dist/
 node/
-
+streamx-hb/
 package-lock.json

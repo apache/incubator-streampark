@@ -25,6 +25,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.conf.Workspace;
+import com.streamxhub.streamx.common.enums.StorageType;
+import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -34,22 +37,27 @@ import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.GZipUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.runner.EnvInitializer;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
+import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +84,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     private ApplicationMapper applicationMapper;
 
     @Autowired
-    private SimpMessageSendingOperations simpMessageSendingOperations;
+    private EnvInitializer envInitializer;
+
 
     private ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
@@ -119,7 +128,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             return false;
         }
         try {
-            project.delete();
+            if (project.getRepository() != null && project.getRepository() != 3)
+            {
+                project.delete();
+            }
             removeById(id);
             return true;
         } catch (IOException e) {
@@ -135,15 +147,36 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public void build(Long id) throws Exception {
+    public void build(Long id, String socketId) throws Exception {
         Project project = getById(id);
         this.baseMapper.startBuild(project);
+        if (project.getRepository() != null && project.getRepository() == 3)
+        {
+            // 发布到apps下
+            try {
+                this.syncApption(project);
+                // 更新application的发布状态.
+                List<Application> applications = getApplications(project);
+                // 更新部署状态
+                FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
+                    log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
+                    app.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
+                    this.applicationMapper.updateDeploy(app);
+                }));
+                this.baseMapper.successBuild(project);
+                return;
+            } catch (Exception e) {
+                this.baseMapper.failureBuild(project);
+                log.error(String.format("deploy error, project name: %s ", project.getName()), e);
+                return;
+            }
+        }
         StringBuilder builder = new StringBuilder();
         tailBuffer.put(id, builder.append(project.getLog4BuildStart()));
         boolean cloneSuccess = cloneSourceCode(project);
         if (cloneSuccess) {
             executorService.execute(() -> {
-                boolean build = projectBuild(project);
+                boolean build = projectBuild(project, socketId);
                 if (build) {
                     this.baseMapper.successBuild(project);
                     // 发布到apps下
@@ -218,7 +251,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             // 定位到target目录下:
             if (file.isDirectory() && "target".equals(file.getName())) {
                 // 在target路径下找tar.gz的文件或者jar文件,注意:两者只选其一,不能同时满足,
-                File tar = null, jar = null;
+                File tar = null;
+                File jar = null;
                 for (File targetFile : Objects.requireNonNull(file.listFiles())) {
                     // 1) 一旦找到tar.gz文件则退出.
                     if (targetFile.getName().endsWith("tar.gz")) {
@@ -233,7 +267,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                             jar = targetFile;
                         } else {
                             // 可能存在会找到多个jar,这种情况下,选择体积最大的那个jar返回...(不要问我为什么.)
-                            if (targetFile.getTotalSpace() > jar.getTotalSpace()) {
+                            if (targetFile.length() > jar.length()) {
                                 jar = targetFile;
                             }
                         }
@@ -251,6 +285,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             }
         }
     }
+
 
     @Override
     public List<String> modules(Long id) {
@@ -415,7 +450,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
      * @param project
      * @return
      */
-    private boolean projectBuild(Project project) {
+    private boolean projectBuild(Project project, String socketId) {
         StringBuilder builder = tailBuffer.get(project.getId());
         AtomicBoolean success = new AtomicBoolean(false);
         CommandUtils.execute(project.getMavenBuildCmd(), (line) -> {
@@ -427,9 +462,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 if (tailBeginning.containsKey(project.getId())) {
                     tailBeginning.remove(project.getId());
                     Arrays.stream(builder.toString().split("\n"))
-                        .forEach(out -> simpMessageSendingOperations.convertAndSend("/resp/build", out));
+                        .forEach(out -> WebSocketEndpoint.writeMessage(socketId, out));
                 }
-                simpMessageSendingOperations.convertAndSend("/resp/build", line);
+                WebSocketEndpoint.writeMessage(socketId, line);
             }
         });
         closeBuildLog(project.getId());
@@ -437,6 +472,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         tailBuffer.remove(project.getId());
         return success.get();
     }
+
 
     @Override
     public void tailBuildLog(Long id) {
@@ -448,6 +484,76 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public void closeBuildLog(Long id) {
         tailOutMap.remove(id);
         tailBeginning.remove(id);
+    }
+
+    private void syncApption(Project project) throws Exception {
+        File app = project.getUploadSource();
+        String appPath = app.getAbsolutePath();
+        // 1). tar.gz文件....
+        if (appPath.endsWith("tar.gz")) {
+            File deployPath = project.getDistHome();
+            if (!deployPath.exists()) {
+                deployPath.mkdirs();
+            }
+            // 将项目解包到app下.
+            if (app.exists()) {
+                String cmd = String.format(
+                    "tar -xzvf %s -C %s",
+                    app.getAbsolutePath(),
+                    deployPath.getAbsolutePath()
+                );
+                CommandUtils.execute(cmd);
+            }
+        } else {
+            try {
+                // 2) .jar文件(普通,官方标准的flink工程)
+                String moduleName = app.getName().replace(".jar", "");
+                File appBase = project.getDistHome();
+                File targetDir = new File(appBase, moduleName);
+                if (!targetDir.exists()) {
+                    targetDir.mkdirs();
+                }
+                File targetJar = new File(targetDir, "");
+                app.renameTo(targetJar);
+            } catch (Exception e) {
+                throw e;
+            }
+        }
+    }
+
+    @Override
+    public boolean upload(MultipartFile file, StorageType storageType, String name) throws Exception {
+        envInitializer.storageInitialize(storageType);
+        String APP_UPLOADS = Workspace.of(storageType).APP_UPLOADS();
+        String uploadFile = APP_UPLOADS.concat("/").concat(Objects.requireNonNull(file.getOriginalFilename()));
+        FsOperator fsOperator = FsOperator.of(storageType);
+        //1)检查文件是否存在,存在并且同名仍删除.
+        if (fsOperator.exists(uploadFile)) {
+            fsOperator.delete(uploadFile);
+        }
+        //2) 确定需要上传,先上传到本地临时目录
+        String workspace = Workspace.local().PROJECT_LOCAL_DIR();
+        File sourcePath = new File(workspace);
+        if (!sourcePath.exists()) {
+            sourcePath.mkdirs();
+        }
+        if (sourcePath.isFile()) {
+            throw new IllegalArgumentException("[StreamX] uploadPath must be directory");
+        }
+        String path = String.format("%s/%s/", sourcePath.getAbsolutePath(), name);
+        //String temp = workspace + name +"/target/";
+        //String temp = WebUtils.getAppDir(name);
+        File saveFile = new File(path, file.getOriginalFilename());
+        // delete when exsit
+        if (saveFile.exists()) {
+            saveFile.delete();
+        }
+
+        // save file to temp dir
+        FileUtils.writeByteArrayToFile(saveFile, file.getBytes());
+        //3) 从本地目录上传到hdfs
+        fsOperator.upload(saveFile.getAbsolutePath(), APP_UPLOADS, false, true);
+        return true;
     }
 
 }

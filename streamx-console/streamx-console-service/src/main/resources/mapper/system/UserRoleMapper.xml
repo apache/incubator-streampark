@@ -4,8 +4,9 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.system.entity.UserRole">
-        <id column="user_id" property="userId"/>
-        <result column="role_id" property="roleId"/>
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <id column="USER_ID" property="userId"/>
+        <result column="ROLE_ID" property="roleId"/>
     </resultMap>
 
     <!--根据用户Id删除该用户的角色关系-->

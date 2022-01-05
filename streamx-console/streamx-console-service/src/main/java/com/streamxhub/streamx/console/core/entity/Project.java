@@ -1,23 +1,22 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -26,9 +25,13 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.streamxhub.streamx.common.conf.Workspace;
+import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.enums.ProjectRepository;
+import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.SettingService;
+import java.util.Objects;
 import lombok.Data;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
@@ -39,7 +42,12 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author benjobs
@@ -66,7 +74,7 @@ public class Project implements Serializable {
 
     private String password;
     /**
-     * 1:git 2:svn
+     * 1:git 2:svn 3:jar
      */
     private Integer repository;
 
@@ -124,7 +132,26 @@ public class Project implements Serializable {
         String path = String.format("%s/%s/%s", sourcePath.getAbsolutePath(), getName(), fullName);
         return new File(path);
     }
-
+    /**
+     * 获取项目上传路径
+     *
+     * @return
+     */
+    @JsonIgnore
+    public File getUploadSource() {
+        if (appSource == null) {
+            appSource = Workspace.local().PROJECT_LOCAL_DIR();
+        }
+        File sourcePath = new File(appSource);
+        if (!sourcePath.exists()) {
+            sourcePath.mkdirs();
+        }
+        if (sourcePath.isFile()) {
+            throw new IllegalArgumentException("[StreamX] uploadPath must be directory");
+        }
+        String path = String.format("%s/%s/", sourcePath.getAbsolutePath(), getName());
+        return new File(path);
+    }
     @JsonIgnore
     public File getDistHome() {
         return new File(Workspace.local().APP_LOCAL_DIST(), id.toString());
@@ -167,6 +194,7 @@ public class Project implements Serializable {
             }
             return branchList;
         } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
         return Collections.emptyList();
     }
@@ -246,6 +274,18 @@ public class Project implements Serializable {
     @JsonIgnore
     private String getLogHeader(String header) {
         return "---------------------------------[ " + header + " ]---------------------------------\n";
+    }
+
+    public static StorageType getStorageType(Integer repository) {
+        ProjectRepository projectRepository = ProjectRepository.of(repository);
+        switch (Objects.requireNonNull(projectRepository)) {
+            case JAR:
+                return StorageType.HDFS;
+            case GIT:
+            case SVN:
+            default:
+                throw new UnsupportedOperationException("Unsupported ".concat(projectRepository.getName()));
+        }
     }
 
 }

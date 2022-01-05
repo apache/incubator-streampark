@@ -109,10 +109,14 @@ export function startLog (params) {
   return http.post(api.Application.STARTLOG, params)
 }
 
+export function downLog (params) {
+  return http.post(api.Application.DOWNLOG, params)
+}
+
 export function checkJar(params) {
   return http.post(api.Application.CHECKJAR, params)
 }
 
 export function uploadAddProject(params) {
-  return http.post(api.Project.PROJAR, params)
+  return http.upload(api.Project.PROJAR, params)
 }

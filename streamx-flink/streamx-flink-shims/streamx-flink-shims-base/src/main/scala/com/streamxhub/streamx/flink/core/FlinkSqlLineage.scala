@@ -1,22 +1,20 @@
 /*
  * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.streamxhub.streamx.flink.core
 
@@ -37,7 +35,6 @@ import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 import org.apache.flink.table.planner.parse.CalciteParser
 import org.apache.flink.table.planner.utils.TableConfigUtils
 
-import java.{lang, util}
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
@@ -77,8 +74,8 @@ object FlinkSqlLineage extends Logger {
   def  lineageSql(sql: String): Any = {
       val lines = SqlSplitter.splitSql(sql)
       var allTables: List[Map[String, Object]] = List()
-      var outputTables:List[Map[String, Object]]  = List()
-      var inputTables:List[Map[String, Object]]  = List()
+      var outputTables: List[Map[String, Object]] = List()
+      var inputTables: List[Map[String, Object]] = List()
       for (sqlLine <- lines) {
         val sqlNode = parser.parse(sqlLine)
         sqlNode match {
@@ -119,37 +116,38 @@ object FlinkSqlLineage extends Logger {
                 map += ("table" -> properties("table-name"))
               case _ =>
             }
-            var columnList:List[Map[String,Object]] = List()
-            flinkTable.getColumnList.getList.asScala.foreach(col =>{
+            var columnList: List[Map[String, Object]] = List()
+            flinkTable.getColumnList.getList.asScala.foreach(col => {
               col match {
-                case column:SqlRegularColumn =>
-                  var filedsMap:Map[String,Object] = Map()
+                case column: SqlRegularColumn =>
+                  var filedsMap: Map[String, Object] = Map()
                   filedsMap += ("name" -> column.getName.toString )
                   filedsMap += ("type" -> column.getType.getTypeName.toString)
                   columnList :+= filedsMap
+                case _ =>
               }
             })
             map += ("fields" -> columnList)
             allTables :+= map;
           case table: SqlCreateView =>
             val tables = ListBuffer[String]()
-            getTableNameFromSqlNode(table.getQuery,tables)
-            allTables.foreach(map =>{
+            getTableNameFromSqlNode(table.getQuery, tables)
+            allTables.foreach(map => {
               tables.foreach(table =>
-                if(map("flinkTable").equals(table)){
-                  inputTables :+= map
+                if (map("flinkTable").equals(table)) {
+                  inputTables:+= map
                 }
               )
             })
           case table: RichSqlInsert =>
             val tables = ListBuffer[String]()
-            getTableNameFromSqlNode(table.getSource,tables)
-            allTables.foreach(map =>{
+            getTableNameFromSqlNode(table.getSource, tables)
+            allTables.foreach(map => {
               if (map("flinkTable").equals(table.getTargetTable.toString)) {
                 outputTables :+= map
               }
               tables.foreach(table =>
-                if(map("flinkTable").equals(table)){
+                if (map("flinkTable").equals(table)) {
                   inputTables :+= map
                 }
               )
@@ -161,7 +159,7 @@ object FlinkSqlLineage extends Logger {
       }
       inputTables = inputTables.map(table => table - ("flinkTable"))
       outputTables = outputTables.map(table => table - ("flinkTable"))
-      var result:Map[String,List[Map[String, Object]]] = Map()
+      var result: Map[String, List[Map[String, Object]]] = Map()
       result += ("inputTables" -> inputTables)
       result += ("outputTables" -> outputTables)
       deepAsJava(result)
@@ -171,18 +169,18 @@ object FlinkSqlLineage extends Logger {
     case m: Map[_, _] => m.map { case (k, v) => (k, deepAsJava(v)) }.asJava
     case x => x
   }
-  def getTableNameFromSqlNode(sqlNode:SqlNode,tables:ListBuffer[String]){
-    sqlNode match{
-      case sqlNode:SqlSelect =>
-        sqlNode.getFrom match{
+  def getTableNameFromSqlNode(sqlNode: SqlNode, tables: ListBuffer[String]) {
+    sqlNode match {
+      case sqlNode: SqlSelect =>
+        sqlNode.getFrom match {
           case from: SqlIdentifier =>
             tables.append(from.toString)
-          case from:SqlJoin =>
-            getTableNameFromSqlNode(from.getLeft,tables)
-            getTableNameFromSqlNode(from.getRight,tables)
+          case from: SqlJoin =>
+            getTableNameFromSqlNode(from.getLeft, tables)
+            getTableNameFromSqlNode(from.getRight, tables)
 
         }
-      case sqlNode:SqlIdentifier =>
+      case sqlNode: SqlIdentifier =>
         tables.append(sqlNode.toString)
     }
   }

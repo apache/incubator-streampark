@@ -57,10 +57,6 @@ export function getRouter (queryParam) {
   return http.post(api.Menu.ROUTER, queryParam)
 }
 
-export function $export (queryParam) {
-  return http.export(api.User.EXPORT, queryParam)
-}
-
-export function remove (queryParam) {
+export function deleteUser (queryParam) {
   return http.delete(api.User.DELETE, queryParam)
 }
