@@ -194,10 +194,11 @@ public class AlertServiceImpl implements AlertService {
 
     /**
      * dingding  alert
+     *
      * @param application
      * @throws Exception
      */
-    private void sendDing(Application application){
+    private void sendDing(Application application) {
         try {
             if (dingdingProperties.isEnabled() && application != null) {
                 String msg = "StreamX >>>>>>>>> ID: %s,JOB NAME: %s FAIL,SavePointed: %s ,SavePoint: %s";
@@ -225,7 +226,7 @@ public class AlertServiceImpl implements AlertService {
             } else {
                 log.info("Send dingding  enabled is false,Please set streamx.dingding.enabled is true if you want to send dingding alert msg !");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
     }
