@@ -105,7 +105,8 @@
             <div
               class="list-content-item"
               style="width: 180px">
-              <span>Last Build</span>
+              <span v-if="item.repository !=3">Last Build</span>
+              <span v-if="item.repository ==3">Last Deploy</span>
               <p v-if="item.lastBuild">
                 {{ item.lastBuild }}
               </p>
@@ -116,7 +117,8 @@
             <div
               class="list-content-item"
               style="width: 150px">
-              <span>Build State</span>
+              <span v-if="item.repository !=3">Build State</span>
+              <span v-if="item.repository ==3">Deploy State</span>
               <p v-if="item.buildState === -1">
                 <a-tag color="#C0C0C0">NOT BUILD</a-tag>
               </p>
@@ -423,9 +425,9 @@ export default {
 }
 
 .avatar {
-  border-radius: 50%;
-  background-color: #ebebeb;
-  border: 6px solid #ebebeb;
+  // border-radius: 50%;
+  // background-color: #ebebeb;
+  // border: 6px solid #ebebeb;
 }
 
 .status-processing-building {
