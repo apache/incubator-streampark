@@ -57,15 +57,8 @@ public class DingTest {
     private void sendDing(Application application){
         try {
             if (dingdingProperties.isEnabled()) {
-                StringBuffer stringBuffer = new StringBuffer("StreamX >>>>>>>>> ID: ");
-                stringBuffer.append(application.getId());
-                stringBuffer.append(",JOB NAME: ");
-                stringBuffer.append(application.getJobName());
-                stringBuffer.append(" FAIL,SavePointed: ");
-                stringBuffer.append(application.getSavePointed());
-                stringBuffer.append(",SavePoint: ");
-                stringBuffer.append(application.getSavePoint());
-                String content = stringBuffer.toString();
+                String msg = "StreamX >>>>>>>>> ID: %s,JOB NAME: %s FAIL,SavePointed: %s ,SavePoint: %s";
+                String content = String.format(msg, application.getId(),application.getJobName(),application.getSavePointed(),application.getSavePoint());
                 Long timestamp = System.currentTimeMillis();
                 String secret = dingdingProperties.getSecret();
                 String stringToSign = timestamp + "\n" + secret;
