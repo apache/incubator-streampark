@@ -23,6 +23,7 @@
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <junit.version>4.13.1</junit.version>
+        <dingding.version>2.0.0</dingding.version>
 
         <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
         <frontend.project.name>streamx-console-webapp</frontend.project.name>
@@ -409,7 +410,12 @@
             <artifactId>streamx-flink-sqlclient</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/com.aliyun/alibaba-dingtalk-service-sdk -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>alibaba-dingtalk-service-sdk</artifactId>
+            <version>${dingding.version}</version>
+        </dependency>
     </dependencies>
 
     <profiles>

@@ -40,7 +40,7 @@ spring:
           username: root
           password: 123456
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+          url: jdbc:mysql://10.14.41.73:3306/test?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
   aop.proxy-target-class: true
   messages.encoding: utf-8
   jackson:
@@ -123,4 +123,9 @@ streamx:
       /*.jpg,
       /*.less,
       /
+  dingding:
+    enabled: false
+    secret:
+    accessToken:
+    url: https://oapi.dingtalk.com/robot/send?access_token=%s&timestamp=%s&sign=%s
 

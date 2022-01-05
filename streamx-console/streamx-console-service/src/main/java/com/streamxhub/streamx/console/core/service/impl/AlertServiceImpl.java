@@ -19,9 +19,14 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.dingtalk.api.DefaultDingTalkClient;
+import com.dingtalk.api.DingTalkClient;
+import com.dingtalk.api.request.OapiRobotSendRequest;
+import com.dingtalk.api.response.OapiRobotSendResponse;
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.console.base.properties.DingdingProperties;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
@@ -37,14 +42,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.StringWriter;
 import java.net.URL;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * @author benjobs
@@ -52,6 +56,8 @@ import java.util.TimeZone;
 @Slf4j
 @Service
 public class AlertServiceImpl implements AlertService {
+    @Autowired
+    private static DingdingProperties dingdingProperties;
 
     private Template template;
 
@@ -89,6 +95,7 @@ public class AlertServiceImpl implements AlertService {
 
     @Override
     public void alert(Application application, FlinkAppState appState) {
+        sendDing(application);
         if (this.senderEmail == null) {
             this.senderEmail = settingService.getSenderEmail();
         }
@@ -106,6 +113,7 @@ public class AlertServiceImpl implements AlertService {
 
     @Override
     public void alert(Application application, CheckPointStatus checkPointStatus) {
+        sendDing(application);
         if (this.senderEmail == null) {
             this.senderEmail = settingService.getSenderEmail();
         }
@@ -177,6 +185,43 @@ public class AlertServiceImpl implements AlertService {
             template.setTotalRestart(application.getRestartSize());
         }
         return template;
+    }
+
+    /**
+     * dingding  alert
+     * @param application
+     * @throws Exception
+     */
+    private void sendDing(Application application){
+        try {
+            if (dingdingProperties.isEnabled()) {
+                String content ="StreamX >>>>>>>>> ID:"+application.getId()+",JOB NAME:"+application.getJobName()+"执行失败！"+"SavePointed:"+application.getSavePointed()+" SavePoint:"+application.getSavePoint();
+                Long timestamp = System.currentTimeMillis();
+                String secret = dingdingProperties.getSecret();
+                String stringToSign = timestamp + "\n" + secret;
+                Mac mac = Mac.getInstance("HmacSHA256");
+                mac.init(new SecretKeySpec(secret.getBytes("UTF-8"), "HmacSHA256"));
+                byte[] signData = mac.doFinal(stringToSign.getBytes("UTF-8"));
+                String sign = URLEncoder.encode(Base64.getEncoder().encodeToString(signData), "UTF-8");
+                String url = String.format(dingdingProperties.getUrl(), dingdingProperties.getAccessToken(), timestamp, sign);
+                DingTalkClient client = new DefaultDingTalkClient(url);
+                OapiRobotSendRequest request = new OapiRobotSendRequest();
+                request.setMsgtype("text");
+                OapiRobotSendRequest.Text text = new OapiRobotSendRequest.Text();
+                text.setContent(content);
+                request.setText(text);
+                OapiRobotSendResponse response = client.execute(request);
+                if (response.isSuccess()) {
+                    log.info("Send dingding success, msg = {}", content);
+                } else {
+                    log.error("Send dingding fail , errorMsg = {},content = {}", response.getErrmsg(), content);
+                }
+            } else {
+                log.info("Send dingding  enabled is false,Please set streamx.dingding.enabled is true if you want to send dingding alert msg !");
+            }
+        }catch (Exception e){
+            log.error(e.getMessage());
+        }
     }
 
 }
