@@ -195,14 +195,14 @@ public class AlertServiceImpl implements AlertService {
     private void sendDing(Application application){
         try {
             if (dingdingProperties.isEnabled() && application != null) {
-                StringBuffer stringBuffer = new StringBuffer("StreamX >>>>>>>>> ID:");
+                StringBuffer stringBuffer = new StringBuffer("StreamX >>>>>>>>> ID: ");
                 stringBuffer.append(application.getId());
-                stringBuffer.append(",JOB NAME:");
+                stringBuffer.append(",JOB NAME: ");
                 stringBuffer.append(application.getJobName());
-                stringBuffer.append("FAIL,SavePointed");
+                stringBuffer.append("FAIL,SavePointed: ");
                 stringBuffer.append(application.getSavePointed());
-                stringBuffer.append(",SavePoint");
-                stringBuffer.append("application.getSavePoint()");
+                stringBuffer.append(",SavePoint: ");
+                stringBuffer.append(application.getSavePoint());
                 String content = stringBuffer.toString();
                 Long timestamp = System.currentTimeMillis();
                 String secret = dingdingProperties.getSecret();
