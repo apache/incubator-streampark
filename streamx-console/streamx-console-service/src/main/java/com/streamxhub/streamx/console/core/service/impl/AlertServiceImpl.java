@@ -199,7 +199,7 @@ public class AlertServiceImpl implements AlertService {
                 stringBuffer.append(application.getId());
                 stringBuffer.append(",JOB NAME: ");
                 stringBuffer.append(application.getJobName());
-                stringBuffer.append("FAIL,SavePointed: ");
+                stringBuffer.append(" FAIL,SavePointed: ");
                 stringBuffer.append(application.getSavePointed());
                 stringBuffer.append(",SavePoint: ");
                 stringBuffer.append(application.getSavePoint());
