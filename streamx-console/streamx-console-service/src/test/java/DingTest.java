@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2019 The StreamX Project
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiRobotSendRequest;
@@ -23,7 +42,7 @@ public class DingTest {
     private DingdingProperties dingdingProperties;
 
     @Before
-    public void initDingding(){
+    public void initDingding() {
         dingdingProperties = new DingdingProperties();
         dingdingProperties.setEnabled(true);
         dingdingProperties.setSecret("");
@@ -49,11 +68,11 @@ public class DingTest {
         sendDing(application);
     }
 
-    private void sendDing(Application application){
+    private void sendDing(Application application) {
         try {
             if (dingdingProperties.isEnabled()) {
                 String msg = "StreamX >>>>>>>>> ID: %s,JOB NAME: %s FAIL,SavePointed: %s ,SavePoint: %s";
-                String content = String.format(msg, application.getId(),application.getJobName(),application.getSavePointed(),application.getSavePoint());
+                String content = String.format(msg, application.getId(), application.getJobName(), application.getSavePointed(), application.getSavePoint());
                 Long timestamp = System.currentTimeMillis();
                 String secret = dingdingProperties.getSecret();
                 String stringToSign = timestamp + "\n" + secret;
@@ -77,7 +96,7 @@ public class DingTest {
             } else {
                 log.info("Send dingding  enabled is false,Please set streamx.dingding.enabled is true if you want to send dingding alert msg !");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
     }
