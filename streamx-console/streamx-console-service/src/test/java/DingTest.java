@@ -31,8 +31,8 @@ public class DingTest {
     public void initDingding(){
         dingdingProperties = new DingdingProperties();
         dingdingProperties.setEnabled(true);
-        dingdingProperties.setSecret("");
-        dingdingProperties.setAccessToken("");
+        dingdingProperties.setSecret("SEC4de69b930206bc25cc1e697a2db3ed777c66f71e0937289eddc4b25575450cf8");
+        dingdingProperties.setAccessToken("338bebec1e3344a9d0567394d41dd581dc979db5f152e8c0dbb0ebb407911400");
         dingdingProperties.setUrl("https://oapi.dingtalk.com/robot/send?access_token=%s&timestamp=%s&sign=%s");
     }
 
@@ -57,7 +57,15 @@ public class DingTest {
     private void sendDing(Application application){
         try {
             if (dingdingProperties.isEnabled()) {
-                String content ="StreamX >>>>>>>>> ID:"+application.getId()+",JOB NAME:"+application.getJobName()+"执行失败！"+"SavePointed:"+application.getSavePointed()+" SavePoint:"+application.getSavePoint();
+                StringBuffer stringBuffer = new StringBuffer("StreamX >>>>>>>>> ID: ");
+                stringBuffer.append(application.getId());
+                stringBuffer.append(",JOB NAME: ");
+                stringBuffer.append(application.getJobName());
+                stringBuffer.append(" FAIL,SavePointed: ");
+                stringBuffer.append(application.getSavePointed());
+                stringBuffer.append(",SavePoint: ");
+                stringBuffer.append(application.getSavePoint());
+                String content = stringBuffer.toString();
                 Long timestamp = System.currentTimeMillis();
                 String secret = dingdingProperties.getSecret();
                 String stringToSign = timestamp + "\n" + secret;
