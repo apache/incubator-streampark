@@ -201,7 +201,7 @@ public class AlertServiceImpl implements AlertService {
         try {
             if (dingdingProperties.isEnabled() && application != null) {
                 String msg = "StreamX >>>>>>>>> ID: %s,JOB NAME: %s FAIL,SavePointed: %s ,SavePoint: %s";
-                String content = String.format(msg, application.getId(),application.getJobName(),application.getSavePointed(),application.getSavePoint());
+                String content = String.format(msg, application.getId(), application.getJobName(), application.getSavePointed(), application.getSavePoint());
                 Long timestamp = System.currentTimeMillis();
                 String secret = dingdingProperties.getSecret();
                 String stringToSign = timestamp + "\n" + secret;
