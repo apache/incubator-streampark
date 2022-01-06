@@ -62,7 +62,7 @@ import java.util.TimeZone;
 @Service
 public class AlertServiceImpl implements AlertService {
     @Autowired
-    private static DingdingProperties dingdingProperties;
+    private DingdingProperties dingdingProperties;
 
     private Template template;
 
@@ -228,6 +228,7 @@ public class AlertServiceImpl implements AlertService {
             }
         } catch (Exception e) {
             log.error(e.getMessage());
+            e.printStackTrace();
         }
     }
 
