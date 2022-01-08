@@ -535,7 +535,7 @@ public class Application implements Serializable {
             if (ExecutionMode.isYarnMode(executionMode)) {
                 String format = "%s/proxy/%s/" + flinkUrl;
                 try {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId , jobId);
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId, jobId);
                     return httpGetDoResult(url, CheckPoints.class);
                 } catch (IOException e) {
                     try {

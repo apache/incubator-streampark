@@ -121,6 +121,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -1227,10 +1228,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     case KUBERNETES_NATIVE_APPLICATION:
                         flinkUserJar = Workspace.local().APP_PLUGINS().concat("/").concat(sqlDistJar);
                         break;
-                    case YARN_APPLICATION:
-                        String pluginPath = Workspace.remote().APP_PLUGINS();
-                        flinkUserJar = String.format("%s/%s", pluginPath, sqlDistJar);
-                        break;
                     default:
                         throw new UnsupportedOperationException("Unsupported..." + executionMode);
                 }
@@ -1301,10 +1298,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     application.setTmMemory(FlinkMemorySize.parse(tmMemory).getMebiBytes());
                 }
             }
-            if (ExecutionMode.isStandaloneMode(application.getExecutionModeEnum())){
+            if (ExecutionMode.isStandaloneMode(application.getExecutionModeEnum())) {
                 Optional<String> restUrl = Optional.ofNullable(submitResponse.flinkConfig().get(RestOptions.ADDRESS.key()));
-                application.setRestUrl(restUrl.orElseGet(()->submitResponse.flinkConfig().getOrDefault(JobManagerOptions.ADDRESS.key(), null)));
-                application.setRestPort(Integer.valueOf(submitResponse.flinkConfig().getOrDefault(RestOptions.PORT.key(),null)));
+                application.setRestUrl(restUrl.orElseGet(() -> submitResponse.flinkConfig().getOrDefault(JobManagerOptions.ADDRESS.key(),
+                    null)));
+                application.setRestPort(Integer.valueOf(submitResponse.flinkConfig().getOrDefault(RestOptions.PORT.key(), null)));
             }
             application.setAppId(submitResponse.clusterId());
             if (StringUtils.isNoneEmpty(submitResponse.jobId())) {

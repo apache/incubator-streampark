@@ -1,26 +1,26 @@
 /*
- * Copyright (c) 2021 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright (c) 2019 The StreamX Project
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
+import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
 import com.streamxhub.streamx.common.util.DateUtils
 import com.streamxhub.streamx.common.util.DateUtils.fullCompact
@@ -51,7 +51,7 @@ object StandaloneSubmit extends StandaloneSubmitTrait {
     // require parameters with standalone remote
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
 
-    val buildWorkspace = s"${workspace.APP_WORKSPACE}/${flinkConfig.getString(PipelineOptions.NAME)}"
+    val buildWorkspace = s"${Workspace.local.APP_WORKSPACE}/${flinkConfig.getString(PipelineOptions.NAME)}"
 
     // build fat-jar, output file name: streamx-flinkjob_<job-name>_<timespamp>, like: streamx-flinkjob_myjobtest_20211024134822
     val fatJar = {
@@ -74,7 +74,7 @@ object StandaloneSubmit extends StandaloneSubmitTrait {
     restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
 
     // old submit plan
-//    jobGraphSubmitPlan(submitRequest, flinkConfig, fatJar)
+    // jobGraphSubmitPlan(submitRequest, flinkConfig, fatJar)
   }
 
   override def doStop(stopRequest: StopRequest): StopResponse = {
@@ -117,14 +117,14 @@ object StandaloneSubmit extends StandaloneSubmitTrait {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
     var client: ClusterClient[StandaloneClusterId] = null
-    try{
+    try {
       val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
       clusterDescriptor = standAloneDescriptor._2
       client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
       logInfo(s"standalone submit WebInterfaceURL ${client.getWebInterfaceURL}")
       val jobId = FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
       SubmitResponse(jobId, flinkConfig.toMap, jobId)
-    }catch {
+    } catch {
       case e: Exception =>
         logError(s"submit flink job fail in ${submitRequest.executionMode} with standalone mode")
         e.printStackTrace()
@@ -176,5 +176,4 @@ object StandaloneSubmit extends StandaloneSubmitTrait {
       IOUtils.closeAll(client, packageProgram, clusterDescriptor)
     }
   }
-
 }

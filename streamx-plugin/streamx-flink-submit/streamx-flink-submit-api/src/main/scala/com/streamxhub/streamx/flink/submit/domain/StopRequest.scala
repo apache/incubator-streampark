@@ -33,6 +33,6 @@ case class StopRequest(flinkVersion: FlinkVersion,
                        withDrain: Boolean,
                        customSavePointPath: String,
                        kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
-                       @Nullable dynamicOption:String) {
+                       @Nullable dynamicOption: String ) {
 
 }
