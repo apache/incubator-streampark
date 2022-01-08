@@ -1702,6 +1702,7 @@ export default {
       this.form.getFieldDecorator('resolveOrder', {initialValue: 0})
       this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
       this.form.getFieldDecorator('restartSize', {initialValue: 0})
+      this.executionMode = null
       listFlinkEnv().then((resp) => {
         if (resp.data.length > 0) {
           this.flinkEnvs = resp.data

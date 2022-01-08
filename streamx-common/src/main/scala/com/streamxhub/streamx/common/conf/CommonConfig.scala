@@ -48,8 +48,8 @@ object CommonConfig {
 
   val DOCKER_MAX_CONNECTIONS: ConfigOption = ConfigOption(
     key = "streamx.docker.http-client.max-connections",
-    defaultValue = 100L,
-    classType = classOf[java.lang.Long],
+    defaultValue = 100,
+    classType = classOf[java.lang.Integer],
     description = "instantiating max connections for DockerHttpClient")
 
   val DOCKER_CONNECTION_TIMEOUT_SEC: ConfigOption = ConfigOption(
