@@ -269,6 +269,8 @@ export function bigScreenClose(vue) {
 export function applyPom(vue) {
   const controller = vue.controller
   const pom = controller.pom.value
+  const versionId = vue.versionId
+  const scalaVersion = vue.flinkEnvs.find(v => v.id === versionId).scalaVersion
   if (pom == null || pom.trim() === '') {
     return
   }
@@ -276,13 +278,20 @@ export function applyPom(vue) {
   const artifactExp = /<artifactId>([\s\S]*?)<\/artifactId>/
   const versionExp = /<version>([\s\S]*?)<\/version>/
   const exclusionsExp = /<exclusions>([\s\S]*?)<\/exclusions>/
-
+  const invalidDep = []
   pom.split('</dependency>').filter(x => x.replace(/\\s+/, '') !== '').forEach(dep => {
     const groupId = dep.match(groupExp) ? (groupExp.exec(dep)[1]).trim() : null
     const artifactId = dep.match(artifactExp) ? (artifactExp.exec(dep)[1]).trim() : null
     const version = dep.match(versionExp) ? (versionExp.exec(dep)[1]).trim() : null
     const exclusion = dep.match(exclusionsExp) ? (exclusionsExp.exec(dep)[1]).trim() : null
     if (groupId != null && artifactId != null && version != null) {
+      if(/flink-(.*)_(.*)/.test(artifactId)) {
+        const depScalaVersion = artifactId.substring(artifactId.lastIndexOf('_') + 1)
+        if (scalaVersion !== depScalaVersion) {
+          invalidDep.push(artifactId)
+          return
+        }
+      }
       const id = groupId + '_' + artifactId
       const mvnPom = {
         'groupId': groupId,
@@ -310,6 +319,10 @@ export function applyPom(vue) {
       console.error('dependency error...')
     }
   })
+  if (invalidDep.length > 0) {
+    vue.$message.error(`invalid pom dependency(${invalidDep}), [StreamX] only support ${scalaVersion} scala version`)
+    return
+  }
   updateDependency(vue)
   controller.editor.pom.getModel().setValue(controller.pom.defaultValue)
 }
