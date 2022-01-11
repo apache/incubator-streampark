@@ -20,11 +20,8 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.conf.Workspace
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
-import com.streamxhub.streamx.common.util.DateUtils
-import com.streamxhub.streamx.common.util.DateUtils.fullCompact
-import com.streamxhub.streamx.flink.packer.maven.MavenTool
+import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.`trait`.StandaloneSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
@@ -45,31 +42,13 @@ import scala.collection.JavaConversions._
  */
 object StandaloneSubmit extends StandaloneSubmitTrait {
 
-
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
-
     // require parameters with standalone remote
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
-
-    val buildWorkspace = s"${Workspace.local.APP_WORKSPACE}/${flinkConfig.getString(PipelineOptions.NAME)}"
-
-    // build fat-jar, output file name: streamx-flinkjob_<job-name>_<timespamp>, like: streamx-flinkjob_myjobtest_20211024134822
-    val fatJar = {
-      val fatJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${flinkConfig.getString(PipelineOptions.NAME)}_${DateUtils.now(fullCompact)}.jar"
-      submitRequest.developmentMode match {
-        case DevelopmentMode.FLINKSQL =>
-          val flinkLibs = extractProvidedLibs(submitRequest)
-          MavenTool.buildFatJar(flinkLibs, fatJarOutputPath)
-        case DevelopmentMode.CUSTOMCODE =>
-          val providedLibs = Set(
-            workspace.APP_JARS,
-            workspace.APP_PLUGINS,
-            submitRequest.flinkUserJar
-          )
-          MavenTool.buildFatJar(providedLibs, fatJarOutputPath)
-      }
-    }
-
+    // get build result
+    val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
+    // build fat-jar
+    val fatJar = new File(buildResult.flinkShadedJarPath)
     // new submit plan with rest api
     restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
 

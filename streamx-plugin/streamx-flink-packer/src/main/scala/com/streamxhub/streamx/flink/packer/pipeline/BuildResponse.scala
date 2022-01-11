@@ -61,11 +61,16 @@ case class FlinkK8sApplicationBuildResponse(workspacePath: String,
                                             dockerInnerMainJarPath: String,
                                             pass: Boolean = true) extends FlinkBuildResult
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+case class FlinkStandaloneBuildResponse(workspacePath: String,
+                                        flinkShadedJarPath: String,
+                                        pass: Boolean = true) extends FlinkSessionBuildResult
+
 // todo case class FlinkYarnSessionBuildResponse(workspacePath: String, flinkShadedJarPath: String) extends FlinkSessionBuildResult
 
 // todo case class FlinkYarnApplicationBuildResponse() extends BuildResult
 
-// todo case class FlinkStandaloneBuildResponse(workspacePath: String, flinkShadedJarPath: String) extends FlinkSessionBuildResult
+
 
 
 

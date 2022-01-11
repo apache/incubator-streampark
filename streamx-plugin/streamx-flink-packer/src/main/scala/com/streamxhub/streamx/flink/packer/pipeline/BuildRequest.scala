@@ -78,10 +78,14 @@ case class FlinkK8sApplicationBuildRequest(appName: String,
                                            dockerAuthConfig: DockerAuthConf
                                           ) extends FlinkK8sBuildParam
 
+case class FlinkStandaloneBuildRequest(appName: String,
+                                       executionMode: ExecutionMode,
+                                       developmentMode: DevelopmentMode,
+                                       flinkVersion: FlinkVersion,
+                                       jarPackDeps: JarPackDeps,
+                                       customFlinkUsrJarPath: String) extends FlinkBuildParam
 
 // todo case class FlinkYarnApplicationBuildRequest() extends FlinkBuildParam
 
 // todo case class FlinkYarnSessionBuildRequest() extends FlinkBuildParam
-
-// todo case class FlinkStandaloneBuildRequest() extends FlinkBuildParam
 
