@@ -31,7 +31,7 @@ English | [中文](README_CN.md)
 
 # StreamX
 
-Make Flink|Spark easier
+Make stream processing easier
 
 > A magical framework that make stream processing easier!
 
