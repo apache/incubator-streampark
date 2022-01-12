@@ -33,11 +33,11 @@ English | [中文](README_CN.md)
 
 Make Flink|Spark easier
 
-> A magical framework that makes Flink development easier
+> A magical framework that make stream processing easier!
 
 ## 🚀 Introduction
 
-The original intention of `StreamX` is to make the development of `Flink` easier. `StreamX` focuses on the management of development phases
+The original intention of `StreamX` is to make stream processing easier. `StreamX` focuses on the management of development phases
 and tasks. Our ultimate goal is to build a one-stop big data solution integrating stream processing, batch processing, data warehouse and
 data laker.
 
