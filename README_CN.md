@@ -31,7 +31,7 @@
 
 # StreamX
 
-Make stream processing easier!!!
+Make stream processing easier
 
 > 一个神奇的框架，让流处理更简单
 
