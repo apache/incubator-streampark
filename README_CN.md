@@ -33,7 +33,7 @@
 
 Make Flink|Spark easier!!!
 
-> 一个神奇的框架，让 Flink|Spark 开发更简单
+> 一个神奇的框架，让流处理更简单
 
 ## 🚀 什么是StreamX
 

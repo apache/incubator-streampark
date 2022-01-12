@@ -74,7 +74,7 @@ public class EnvInitializer implements ApplicationRunner {
             throw new ExceptionInInitializerError("[StreamX] System initialization check failed," +
                 " The system initialization check failed. If started local for development and debugging," +
                 " please ensure the -Dapp.home parameter is clearly specified," +
-                " more detail: http://www.streamxhub.com/zh/doc/console/deployment");
+                " more detail: http://www.streamxhub.com/docs/user-guide/development");
         }
 
         // init ConfigHub
