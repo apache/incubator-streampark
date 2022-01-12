@@ -19,7 +19,10 @@
 
 package com.streamxhub.streamx.flink.proxy
 
+import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.domain.FlinkVersion
+import com.streamxhub.streamx.common.enums.StorageType
+import com.streamxhub.streamx.common.fs.FsOperator
 import com.streamxhub.streamx.common.util.{ClassLoaderUtils, Logger, Utils}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, ObjectOutputStream}
@@ -83,16 +86,21 @@ object FlinkShimsProxy extends Logger {
     })
   }
 
+  def proxy[T](flinkVersion: FlinkVersion, jars: String, func: JavaFunc[ClassLoader, T]): T = {
+    val shimsClassLoader = getFlinkShimsClassLoader(flinkVersion, jars)
+    ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, new Supplier[T]() {
+      override def get(): T = func.apply(shimsClassLoader)
+    })
+  }
+
   private[this] def getFlinkShimsClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
     val majorVersion = flinkVersion.majorVersion
     logInfo(flinkVersion.toString)
 
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(s"${flinkVersion.fullVersion}", {
-      //1) flink/lib
-      val libURL = getFlinkHomeLib(flinkVersion.flinkHome)
       val shimsUrls = ListBuffer[URL]()
 
-      //2) shims jar
+      //1) shims jar
       val appHome = System.getProperty("app.home")
       require(appHome != null, "app.home is not found on System env.")
 
@@ -115,6 +123,8 @@ object FlinkShimsProxy extends Logger {
           case e: Exception => e.printStackTrace()
         }
       })
+      //2) flink/lib
+      val libURL = getFlinkHomeLib(flinkVersion.flinkHome)
       shimsUrls.appendAll(libURL)
       new ChildFirstClassLoader(
         shimsUrls.toArray,
@@ -122,6 +132,56 @@ object FlinkShimsProxy extends Logger {
         getFlinkShimsResourcePattern(majorVersion)
       )
     })
+  }
+
+  private[this] def getFlinkShimsClassLoader(flinkVersion: FlinkVersion, jars: String): ClassLoader = {
+    val majorVersion = flinkVersion.majorVersion
+    logInfo(flinkVersion.toString)
+
+      val shimsUrls = ListBuffer[URL]()
+      val appHome = System.getProperty("app.home")
+      require(appHome != null, "app.home is not found on System env.")
+    //1) shims jar
+    val libPath = new File(s"$appHome/lib")
+    require(libPath.exists())
+
+    libPath.listFiles().foreach(jar => {
+      try {
+        val shimsMatcher = SHIMS_PATTERN.matcher(jar.getName)
+        if (shimsMatcher.matches()) {
+          if (majorVersion != null && majorVersion.equals(shimsMatcher.group(1))) {
+            shimsUrls += jar.toURI.toURL
+          }
+        } else if (!EXCLUDE_PATTERN.matcher(jar.getName).matches()) {
+          shimsUrls += jar.toURI.toURL
+        } else {
+          logInfo(s"exclude ${jar.getName}")
+        }
+      } catch {
+        case e: Exception => e.printStackTrace()
+      }
+    })
+
+    //2) flink/lib
+      val libURL = getFlinkHomeLib(flinkVersion.flinkHome)
+      shimsUrls.appendAll(libURL)
+
+    //2) user jar
+    jars.split(",").foreach(jarName => {
+      val jarFile = new File(s"$appHome/temp/" + jarName)
+      if(!jarFile.exists()) {
+        FsOperator.of(StorageType.HDFS).download(Workspace.remote.APP_UPLOADS + "/" + jarName, jarFile.getPath())
+      }
+      shimsUrls.append(jarFile.toURI.toURL)
+    })
+
+
+      new ChildFirstClassLoader(
+        shimsUrls.toArray,
+        Thread.currentThread().getContextClassLoader,
+        getFlinkShimsResourcePattern(majorVersion)
+      )
+
   }
 
   private[this] def getFlinkHomeLib(flinkHome: String): List[URL] = {

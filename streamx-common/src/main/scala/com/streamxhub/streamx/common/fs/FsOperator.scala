@@ -47,11 +47,15 @@ abstract class FsOperator {
 
   def upload(srcPath: String, dstPath: String): Unit = upload(srcPath, dstPath, delSrc = false, overwrite = true)
 
+  def download(srcPath: String, dstPath: String): Unit = download(srcPath, dstPath, delSrc = false)
+
   def copy(srcPath: String, dstPath: String): Unit = copy(srcPath, dstPath, delSrc = false, overwrite = true)
 
   def copyDir(srcPath: String, dstPath: String): Unit = copyDir(srcPath, dstPath, delSrc = false, overwrite = true)
 
   def upload(srcPath: String, dstPath: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit
+
+  def download(srcPath: String, dstPath: String, delSrc: Boolean = false): Unit
 
   def copy(srcPath: String, dstPath: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit
 

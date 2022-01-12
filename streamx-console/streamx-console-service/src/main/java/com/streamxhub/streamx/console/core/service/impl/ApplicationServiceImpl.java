@@ -86,6 +86,7 @@ import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
+import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy;
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper;
 import com.streamxhub.streamx.flink.submit.domain.KubernetesSubmitParam;
 import com.streamxhub.streamx.flink.submit.domain.StopRequest;
@@ -287,12 +288,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public String upload(MultipartFile file) throws Exception {
         String temp = WebUtils.getAppDir("temp");
         File saveFile = new File(temp, file.getOriginalFilename());
-        // delete when exists
         if (saveFile.exists()) {
-            saveFile.delete();
+                // md5不一致,则需删除重新上传
+                if (!DigestUtils.md5Hex(file.getBytes()).equals(DigestUtils.md5Hex(new FileInputStream(saveFile)))) {
+                    saveFile.delete();
+                    FileUtils.writeByteArrayToFile(saveFile, file.getBytes());
+                }
+        }else{
+            FileUtils.writeByteArrayToFile(saveFile, file.getBytes());
         }
-        // save file to temp dir
-        FileUtils.writeByteArrayToFile(saveFile, file.getBytes());
         return saveFile.getAbsolutePath();
     }
 

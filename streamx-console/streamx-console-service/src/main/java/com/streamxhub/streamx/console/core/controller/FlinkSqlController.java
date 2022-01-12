@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -111,8 +112,8 @@ public class FlinkSqlController {
     }
 
     @PostMapping("lineage")
-    public Map lineage(String sql, Long versionId) {
-        return flinkSqlService.lineageSql(sql, versionId);
+    public String lineage(String sql, Long versionId, String jars)  {
+        return flinkSqlService.lineageSql(sql, versionId, jars);
     }
 
 

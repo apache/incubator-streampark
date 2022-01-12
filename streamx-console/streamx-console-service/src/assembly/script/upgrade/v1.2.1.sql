@@ -29,3 +29,4 @@ CREATE TABLE `t_app_build_pipe`
   COLLATE = utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
+alter table t_flink_app add column name varchar(255);

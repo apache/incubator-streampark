@@ -32,11 +32,7 @@ import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
-import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
-import com.streamxhub.streamx.console.core.service.EffectiveService;
-import com.streamxhub.streamx.console.core.service.FlinkEnvService;
-import com.streamxhub.streamx.console.core.service.FlinkSqlService;
-import com.streamxhub.streamx.flink.core.FlinkSqlLineage;
+import com.streamxhub.streamx.console.core.service.*;
 import com.streamxhub.streamx.flink.core.SqlError;
 import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -199,17 +194,23 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             return null;
         });
     }
+
     @Override
-    public Map lineageSql(String sql, Long versionId) {
+    public String lineageSql(String sql, Long versionId, String jars) {
         FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
-        return FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), (Function<ClassLoader, Map>) classLoader -> {
+        return FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), jars, (Function<ClassLoader, String>) classLoader -> {
             try {
                 Class<?> clazz = classLoader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlLineage");
                 Method method = clazz.getDeclaredMethod("lineageSql", String.class);
                 method.setAccessible(true);
-                return (Map) method.invoke(null, sql);
+                Object sqlError = method.invoke(null, sql);
+                if (sqlError == null) {
+                    return null;
+                }
+                return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), sqlError);
             } catch (Throwable e) {
-                log.error("lineageSql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
+                e.printStackTrace();
+                log.error("verifySql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
             }
             return null;
         });

@@ -156,7 +156,9 @@ object LfsOperator extends FsOperator with Logger {
     }
   }
 
-
+  override def download(srcPath: String, dstPath: String, delSrc: Boolean): Unit = {
+    throw new Exception("local filesystem not support download")
+  }
 }
 
 

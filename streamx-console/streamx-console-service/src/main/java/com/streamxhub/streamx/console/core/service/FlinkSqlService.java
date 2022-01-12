@@ -25,6 +25,8 @@ import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.flink.core.SqlError;
 
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
@@ -81,5 +83,5 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
     SqlError verifySql(String sql, Long versionId);
 
-    Map lineageSql(String sql, Long versionId);
+    String lineageSql(String sql, Long versionId, String jars) ;
 }
