@@ -26,7 +26,7 @@ function resolveCss(output, srcArr) {
     // 转换为 css 对象
     const cssObj = parseCssObj(text)
     // 根据selector匹配配置，匹配成功，则按配置处理 css
-    if (cssResolve[cssObj.selector] != undefined) {
+    if (cssResolve[cssObj.selector] !== undefined) {
       const cfg = cssResolve[cssObj.selector]
       if (cfg) {
         outArr.push(cfg.resolve(text, cssObj))
@@ -43,7 +43,7 @@ function resolveCss(output, srcArr) {
         // 未匹配到正则，则设置 cssText 为默认的 css（即不处理）
         cssText = text
       }
-      if (cssText != '') {
+      if (cssText !== '') {
         outArr.push(cssText)
       }
     }

@@ -606,8 +606,10 @@ import { history, remove as removeSp } from '@api/savepoint'
 import Mergely from './Mergely'
 import Different from './Different'
 import notification from 'ant-design-vue/lib/notification'
-import monaco from '@/views/flink/app/Monaco.log'
+import * as monaco from 'monaco-editor'
 import SvgIcon from '@/components/SvgIcon'
+import storage from '@/utils/storage'
+import {DEFAULT_THEME} from '@/store/mutation-types'
 
 const Base64 = require('js-base64').Base64
 configOptions.push(
@@ -886,9 +888,11 @@ export default {
     filterNotCurrConfig() {
       return this.allConfigVersions.filter(x => x.version !== this.compare.version)
     },
+
     myTheme() {
-      return this.ideTheme()
+      return this.$store.state.app.theme
     }
+
   },
 
   mounted() {
@@ -975,20 +979,24 @@ export default {
         this.pager.config.loading = false
       })
     },
+
     handleYarn() {
       yarn({}).then((resp) => {
         this.yarn = resp.data
       })
     },
+
     handleView(appId) {
       if (this.yarn !== null) {
         const url = this.yarn + '/proxy/' + appId + '/'
         window.open(url)
       }
     },
+
     handleFlinkWebUiView() {
       window.open(this.app.flinkRestUrl)
     },
+
     handleSavePoint() {
       const params = {
         appId: this.app.id
@@ -1210,6 +1218,7 @@ export default {
       this.execOption.visible = true
       this.execOption.content = record.exception
       this.$nextTick(() => {
+        this.handleLogMonaco()
         this.editor.exception = monaco.editor.create(document.querySelector('#startExp'), {
           theme: 'log',
           value: this.execOption.content,
@@ -1279,15 +1288,46 @@ export default {
       for (const k in this.pager) {
         this.pager[k]['loading'] = this.pager[k]['key'] === this.activeTab
       }
+    },
+
+    handleLogMonaco() {
+      monaco.languages.register({ id: 'log' })
+      monaco.languages.setMonarchTokensProvider('log', {
+        tokenizer: {
+          root: [
+            [/.*Exception.*/,'log-error'],
+            [/.*Caused\s+by:.*/,'log-error'],
+            [/\s+at\s+.*/, 'log-info'],
+            [/\[[a-zA-Z 0-9:]+]/, 'log-date'],
+          ]
+        }
+      })
+
+      monaco.editor.defineTheme('log', {
+        base: storage.get(DEFAULT_THEME) === 'dark' ? 'vs-dark' : 'vs',
+        inherit: false,
+        rules: [
+          { token: 'log-info', foreground: '808080' },
+          { token: 'log-error', foreground: 'ff0000', fontStyle: 'bold' },
+          { token: 'log-notice', foreground: 'FFA500' },
+          { token: 'log-date', foreground: '008800' },
+        ]
+      })
     }
+
   },
 
   watch: {
     myTheme() {
       this.$refs.confEdit.theme()
       this.$refs.different.theme()
-      if(this.editor.exception !== null) {
+      if (this.editor.exception !== null) {
         this.editor.exception.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      if (this.editor.flinkSql != null) {
+        this.editor.flinkSql.updateOptions({
           theme: this.ideTheme()
         })
       }
