@@ -57,6 +57,7 @@ import org.apache.calcite.jdbc.CalciteSchemaBuilder.asRootSchema
 import org.apache.calcite.plan.{RelTrait, RelTraitDef}
 import org.apache.calcite.rel.RelNode
 import org.apache.calcite.rel.hint.RelHint
+import org.apache.calcite.rex.RexInputRef
 import org.apache.calcite.tools.FrameworkConfig
 
 import java.lang.{Long => JLong}
@@ -69,6 +70,7 @@ import org.apache.flink.table.planner.plan.metadata.FlinkRelMetadataQuery
 import org.apache.flink.table.planner.plan.schema.TableSourceTable
 import org.json4s.NoTypeHints
 import org.json4s.jackson.Serialization
+
 import scala.collection.JavaConverters._
 
 /**
@@ -455,25 +457,24 @@ abstract class PlannerBase(
         case operation: ModifyOperation =>
           val sinkRelNode = translateToRel(operation)
           val tableName = sinkRelNode.asInstanceOf[LogicalSink].tableIdentifier.asSummaryString()
-
           val queryRelNode = getRelBuilder.queryOperation(operation.getChild).build()
           val mq = FlinkRelMetadataQuery.reuseOrCreate(queryRelNode.getCluster.getMetadataQuery)
           val fieldList = queryRelNode.getRowType.getFieldList
           for (i <- 0 until fieldList.size()) {
-            val colOrigin = mq.getColumnOrigin(queryRelNode, i)
-            if (colOrigin != null) {
-              val originColOrdinal = colOrigin.getOriginColumnOrdinal
-              val originTable = colOrigin.getOriginTable.asInstanceOf[TableSourceTable]
-              val originTableName = originTable.tableIdentifier.asSummaryString
-              val originFieldList = originTable.getRowType.getFieldList
-              val originField = originFieldList.get(originColOrdinal)
-              relationList += Map("srcTable" -> tableName,
-                "tgtTable" -> originTableName,
-                "srcTableColName" -> fieldList.get(i).getName,
-                "tgtTableColName" -> originField.getName
-              )
-              println("table " + tableName + " " + fieldList.get(i).getName + " origin from table " + originTableName + " " + originField.getName)
-
+            val colOrigins = mq.getColumnOrigins(queryRelNode, i)
+            if (colOrigins != null) {
+              colOrigins.foreach(colOrigin => {
+                val originColOrdinal = colOrigin.getOriginColumnOrdinal
+                val originTable = colOrigin.getOriginTable.asInstanceOf[TableSourceTable]
+                val originTableName = originTable.tableIdentifier.asSummaryString
+                val originField = originTable.getRowType.getFieldList.get(originColOrdinal)
+                relationList += Map("srcTable" -> originTableName,
+                  "tgtTable" -> tableName,
+                  "srcTableColName" -> originField.getName,
+                  "tgtTableColName" -> fieldList.get(i).getName
+                )
+                println("table " + tableName + " " + fieldList.get(i).getName + " origin from table " + originTableName + " " + originField.getName)
+              })
             }
           }
         case _ =>

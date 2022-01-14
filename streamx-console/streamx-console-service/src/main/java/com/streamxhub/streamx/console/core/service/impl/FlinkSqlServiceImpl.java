@@ -203,16 +203,13 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
                 Class<?> clazz = classLoader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlLineage");
                 Method method = clazz.getDeclaredMethod("lineageSql", String.class);
                 method.setAccessible(true);
-                Object sqlError = method.invoke(null, sql);
-                if (sqlError == null) {
-                    return null;
-                }
-                return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), sqlError);
+                Object sqlLineage = method.invoke(null, sql);
+                return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), sqlLineage);
             } catch (Throwable e) {
-                e.printStackTrace();
-                log.error("verifySql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
+                String exception = ExceptionUtils.stringifyException(e);
+                log.error("lineageSql invocationTargetException: {}", exception);
+                return exception;
             }
-            return null;
         });
     }
 
