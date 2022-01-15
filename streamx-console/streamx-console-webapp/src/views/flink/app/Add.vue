@@ -1442,7 +1442,7 @@ import { sysHosts, initPodTemplate, completeHostAliasToPodTemplate, extractHostA
 import {
   applyPom,
   bigScreenOk,
-  bigScreenOpen,
+  bigScreenOpen, checkPomScalaVersion,
   formatSql,
   initEditor,
   initPodTemplateEditor,
@@ -1466,6 +1466,7 @@ export default {
       projectList: [],
       projectId: null,
       versionId: null,
+      scalaVersion: null,
       uploadJar: null,
       module: null,
       moduleList: [],
@@ -1721,6 +1722,7 @@ export default {
           })[0]
           this.form.getFieldDecorator('versionId', {initialValue: v.id})
           this.versionId = v.id
+          this.scalaVersion = v.scalaVersion
         }
       })
       // load history config records
@@ -1788,6 +1790,8 @@ export default {
 
     handleFlinkVersion(id) {
       this.versionId = id
+      this.scalaVersion = this.flinkEnvs.find(v => v.id === id).scalaVersion
+      this.handleCheckPomScalaVersion()
     },
 
     handleChangeJmMemory(value) {
@@ -1848,6 +1852,10 @@ export default {
         this.configOverride = null
         this.isSetConfig = false
       }
+    },
+
+    handleCheckPomScalaVersion() {
+      checkPomScalaVersion(this)
     },
 
     handleApplyPom() {

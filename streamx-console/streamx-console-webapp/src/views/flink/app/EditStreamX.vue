@@ -1439,7 +1439,7 @@ import {
   bigScreenOk,
   applyPom,
   formatSql,
-  updateDependency
+  updateDependency, checkPomScalaVersion
 } from './AddEdit'
 
 import { toPomString } from './Pom'
@@ -1712,6 +1712,8 @@ export default {
 
     handleFlinkVersion(id) {
       this.versionId = id
+      this.scalaVersion = this.flinkEnvs.find(v => v.id === id).scalaVersion
+      this.handleCheckPomScalaVersion()
     },
 
     handleChangeMode(mode) {
@@ -1866,6 +1868,10 @@ export default {
       this.controller.dependency.pom = new Map()
       this.handleDependencyJsonToPom(this.flinkSql.dependency,this.controller.dependency.pom,this.controller.dependency.jar)
       this.handleUpdateDependency()
+    },
+
+    handleCheckPomScalaVersion() {
+      checkPomScalaVersion(this)
     },
 
     handleDependencyJsonToPom (json,pomMap,jarMap) {
