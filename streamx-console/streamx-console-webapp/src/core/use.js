@@ -2,7 +2,6 @@ import Vue from 'vue'
 
 // base library
 import Antd from 'ant-design-vue'
-import Viser from 'viser-vue'
 import VueCropper from 'vue-cropper'
 import 'ant-design-vue/dist/antd.less'
 
@@ -13,7 +12,6 @@ import './directives/permission'
 
 // VueParticles
 import VueParticles from 'vue-particles'
-import VueApexCharts from 'vue-apexcharts'
 import http from '@/utils/request'
 import util from '@/utils/util'
 //sweetalert
@@ -23,9 +21,7 @@ import 'sweetalert2/dist/sweetalert2.min.css'
 VueClipboard.config.autoSetContainer = true
 
 Vue.use(Antd)
-Vue.use(Viser)
 Vue.use(VueParticles)
-Vue.component('apexchart', VueApexCharts)
 Vue.use(VueClipboard)
 Vue.use(PermissionHelper)
 Vue.use(VueCropper)

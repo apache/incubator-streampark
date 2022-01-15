@@ -65,17 +65,16 @@ export function initEditor(vue) {
   vue.$nextTick(() => {
     const formatSql = document.querySelector('.format-sql')
     const bigScreen = document.querySelector('.big-screen')
+    const verifySql = document.querySelector('.verify-sql')
     const editorEl = document.querySelector('#flink-sql>.monaco-editor')
     editorEl.appendChild(formatSql)
     editorEl.appendChild(bigScreen)
+    editorEl.appendChild(verifySql)
   })
 
   //输入事件触发...
   controller.editor.flinkSql.onDidChangeModelContent(() => {
     controller.flinkSql.value = controller.editor.flinkSql.getValue()
-    if (sqlNotEmpty(vue)) {
-      verifySQL(vue)
-    }
   })
 
   //pom
@@ -128,6 +127,12 @@ export function initPodTemplateEditor(vue) {
 
 export function verifySQL(vue) {
   const controller = vue.controller
+  if (!sqlNotEmpty(vue)) {
+    controller.flinkSql.success = false
+    controller.flinkSql.errorMsg = 'empty sql'
+    return
+  }
+  controller.flinkSql.verified = true
   if(vue.versionId != null) {
     const callback = arguments[1] || function (r) {
     }
@@ -220,13 +225,8 @@ export function bigScreenOpen(vue) {
       if (value.trim() !== '') {
         controller.flinkSql.value = value
         controller.editor.flinkSql.getModel().setValue(value)
-        verifySQL(vue)
       }
     })
-
-    if (sqlNotEmpty(vue)) {
-      verifySQL(vue)
-    }
   })
 }
 
@@ -247,22 +247,12 @@ export function sqlNotEmpty(vue) {
 export function bigScreenOk(vue, callback) {
   const controller = vue.controller
   if (sqlNotEmpty(vue)) {
-    verifySQL(vue, (success) => {
-      if (success) {
-        //销毁
-        controller.editor.bigScreen.dispose()
-        controller.visiable.bigScreen = false
-        if (callback) {
-          callback()
-        }
-      }
-    })
-  }
-}
-
-export function bigScreenClose(vue) {
-  if (sqlNotEmpty(vue)) {
-    verifySQL(vue)
+    //销毁
+    controller.editor.bigScreen.dispose()
+    controller.visiable.bigScreen = false
+    if (callback) {
+      callback()
+    }
   }
 }
 

@@ -173,7 +173,9 @@
               {{ controller.flinkSql.errorMsg }}
             </span>
             <span v-else class="sql-desc" style="color: green">
-              successful
+              <span v-if="controller.flinkSql.verified">
+                successful
+              </span>
             </span>
           </p>
           <a-icon
@@ -188,6 +190,14 @@
             title="Full Screen"
             two-tone-color="#4a9ff5"
             @click="handleBigScreenOpen()"/>
+
+          <a-button
+              type="primary"
+              class="verify-sql"
+              @click="handleVerifySql()">
+            Verify
+          </a-button>
+
         </a-form-item>
 
         <a-form-item
@@ -1431,7 +1441,6 @@ import { sysHosts, initPodTemplate, completeHostAliasToPodTemplate, extractHostA
 
 import {
   applyPom,
-  bigScreenClose,
   bigScreenOk,
   bigScreenOpen,
   formatSql,
@@ -1556,6 +1565,7 @@ export default {
           errorMsg: null,
           errorStart: null,
           errorEnd: null,
+          verified: false,
           success: true
         },
         dependency: {
@@ -1959,6 +1969,10 @@ export default {
       formatSql(this)
     },
 
+    handleVerifySql() {
+      verifySQL(this)
+    },
+
     handleBigScreenOpen() {
       bigScreenOpen(this)
     },
@@ -1971,7 +1985,6 @@ export default {
     },
 
     handleBigScreenClose() {
-      bigScreenClose(this)
     },
 
     handleChangeModule(module) {

@@ -1278,6 +1278,9 @@ export default {
       this.$nextTick(()=>{
         if (this.activeTab === '3') {
           this.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), this.editor.option)
+          this.editor.flinkSql.updateOptions({
+            theme: this.ideTheme()
+          })
         } else if (this.editor.flinkSql) {
           this.editor.flinkSql.dispose()
         }
@@ -1295,9 +1298,13 @@ export default {
       monaco.languages.setMonarchTokensProvider('log', {
         tokenizer: {
           root: [
-            [/.*Exception.*/,'log-error'],
+            [/.*\.Exception.*/,'log-error'],
             [/.*Caused\s+by:.*/,'log-error'],
             [/\s+at\s+.*/, 'log-info'],
+            [/http:\/\/(.*):\d+(.*)\/application_\d+_\d+/, 'yarn-info'],
+            [/Container\s+id:\s+container_\d+_\d+_\d+_\d+/, 'yarn-info'],
+            [/yarn\s+logs\s+-applicationId\s+application_\d+_\d+/ , 'yarn-info'],
+            [/\[20\d+-\d+-\d+\s+\d+:\d+:\d+\d+|.\d+]/, 'log-date'],
             [/\[[a-zA-Z 0-9:]+]/, 'log-date'],
           ]
         }
@@ -1305,11 +1312,12 @@ export default {
 
       monaco.editor.defineTheme('log', {
         base: storage.get(DEFAULT_THEME) === 'dark' ? 'vs-dark' : 'vs',
-        inherit: false,
+        inherit: true,
         rules: [
           { token: 'log-info', foreground: '808080' },
           { token: 'log-error', foreground: 'ff0000', fontStyle: 'bold' },
           { token: 'log-notice', foreground: 'FFA500' },
+          { token: 'yarn-info', foreground: '0066FF', fontStyle: 'bold'},
           { token: 'log-date', foreground: '008800' },
         ]
       })
