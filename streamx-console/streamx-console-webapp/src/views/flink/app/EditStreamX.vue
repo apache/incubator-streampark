@@ -206,7 +206,9 @@
               {{ controller.flinkSql.errorMsg }}
             </span>
             <span v-else class="sql-desc" style="color: green">
-              successful
+              <span v-if="controller.flinkSql.verified">
+                successful
+              </span>
             </span>
           </p>
 
@@ -222,6 +224,14 @@
             title="Full Screen"
             two-tone-color="#4a9ff5"
             @click="handleBigScreenOpen()" />
+
+          <a-button
+              type="primary"
+              class="verify-sql"
+              @click="handleVerifySql()">
+            Verify
+          </a-button>
+
         </a-form-item>
 
         <a-form-item
@@ -285,6 +295,7 @@
               </a-upload-dragger>
             </a-tab-pane>
           </a-tabs>
+
           <a-button
             type="primary"
             class="apply-pom"
@@ -1426,7 +1437,6 @@ import {
   verifySQL,
   bigScreenOpen,
   bigScreenOk,
-  bigScreenClose,
   applyPom,
   formatSql,
   updateDependency
@@ -1554,6 +1564,7 @@ export default {
           errorMsg: null,
           errorStart: null,
           errorEnd: null,
+          verified: false,
           success: true
         },
         dependency: {
@@ -1835,6 +1846,10 @@ export default {
       formatSql(this)
     },
 
+    handleVerifySql() {
+      verifySQL(this)
+    },
+
     handleBigScreenOpen() {
       bigScreenOpen(this)
     },
@@ -1844,7 +1859,6 @@ export default {
     },
 
     handleBigScreenClose() {
-      bigScreenClose(this)
     },
 
     handleInitDependency() {
