@@ -17,8 +17,8 @@
         <a-button
           type="danger"
           icon="cloud"
-          @click="handleFlinkWebUiView"
-          :disabled="this.app.flinkRestUrl === null"
+          @click="handleView"
+          :disabled="this.yarn === null && this.app.flinkRestUrl === null"
           style="float: right;margin-top: -8px;margin-right: 20px">Flink Web UI</a-button>
         <a-divider
           style="margin-top: 5px;margin-bottom: -5px" />
@@ -986,15 +986,15 @@ export default {
       })
     },
 
-    handleView(appId) {
-      if (this.yarn !== null) {
-        const url = this.yarn + '/proxy/' + appId + '/'
-        window.open(url)
+    handleView() {
+      if (this.app.executionMode === 2 || this.app.executionMode === 3 || this.app.executionMode === 4) {
+        if (this.yarn !== null) {
+          const url = this.yarn + '/proxy/' + this.app.appId + '/'
+          window.open(url)
+        }
+      } else {
+        window.open(this.app.flinkRestUrl)
       }
-    },
-
-    handleFlinkWebUiView() {
-      window.open(this.app.flinkRestUrl)
     },
 
     handleSavePoint() {
