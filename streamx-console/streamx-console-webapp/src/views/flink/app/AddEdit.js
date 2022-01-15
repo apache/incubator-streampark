@@ -266,6 +266,26 @@ export function bigScreenClose(vue) {
   }
 }
 
+export function checkPomScalaVersion(vue) {
+  const scalaVersion = vue.scalaVersion
+  const pom = vue.controller.dependency.pom
+  if (pom != null && pom.size > 0) {
+    const invalidDep = []
+    pom.forEach(function (v, k) {
+      const artifactId = v.artifactId
+      if (/flink-(.*)_(.*)/.test(artifactId)) {
+        const depScalaVersion = artifactId.substring(artifactId.lastIndexOf('_') + 1)
+        if (scalaVersion !== depScalaVersion) {
+          invalidDep.push(artifactId)
+        }
+      }
+    })
+    if (invalidDep.length > 0) {
+      vue.$message.error(`Please check invalid pom dependencies(${invalidDep}), [StreamX] only support ${scalaVersion} scala version in current flink version.`)
+    }
+  }
+}
+
 export function applyPom(vue) {
   const controller = vue.controller
   const pom = controller.pom.value
@@ -320,7 +340,7 @@ export function applyPom(vue) {
     }
   })
   if (invalidDep.length > 0) {
-    vue.$message.error(`invalid pom dependency(${invalidDep}), [StreamX] only support ${scalaVersion} scala version`)
+    vue.$message.error(`Please check invalid pom dependencies(${invalidDep}), [StreamX] only support ${scalaVersion} scala version in current flink version.`)
     return
   }
   updateDependency(vue)
