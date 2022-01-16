@@ -89,7 +89,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
     val (shadedJar, extJarLibs) =
     execStep(3) {
       val appName = BuildPipelineHelper.letAppNameSafe(params.appName)
-      val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${appName}.jar"
+      val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_$appName.jar"
 
       val (shadedJar, extJarLibs) = params.developmentMode match {
         case DevelopmentMode.FLINKSQL =>

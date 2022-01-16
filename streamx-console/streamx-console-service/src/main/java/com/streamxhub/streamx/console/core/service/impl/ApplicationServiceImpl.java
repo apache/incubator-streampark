@@ -32,12 +32,7 @@ import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.util.DeflaterUtils;
-import com.streamxhub.streamx.common.util.DependencyUtils;
-import com.streamxhub.streamx.common.util.ExceptionUtils;
-import com.streamxhub.streamx.common.util.ThreadUtils;
-import com.streamxhub.streamx.common.util.Utils;
-import com.streamxhub.streamx.common.util.YarnUtils;
+import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
@@ -47,38 +42,11 @@ import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.annotation.RefreshCache;
 import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
-import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
-import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
-import com.streamxhub.streamx.console.core.entity.ApplicationLog;
-import com.streamxhub.streamx.console.core.entity.FlinkEnv;
-import com.streamxhub.streamx.console.core.entity.FlinkSql;
-import com.streamxhub.streamx.console.core.entity.Message;
-import com.streamxhub.streamx.console.core.entity.Project;
-import com.streamxhub.streamx.console.core.entity.SavePoint;
-import com.streamxhub.streamx.console.core.enums.AppExistsState;
-import com.streamxhub.streamx.console.core.enums.ApplicationType;
-import com.streamxhub.streamx.console.core.enums.CandidateType;
-import com.streamxhub.streamx.console.core.enums.ChangedType;
-import com.streamxhub.streamx.console.core.enums.CheckPointType;
-import com.streamxhub.streamx.console.core.enums.DeployState;
-import com.streamxhub.streamx.console.core.enums.FlinkAppState;
-import com.streamxhub.streamx.console.core.enums.NoticeType;
-import com.streamxhub.streamx.console.core.enums.OptionState;
+import com.streamxhub.streamx.console.core.entity.*;
+import com.streamxhub.streamx.console.core.enums.*;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.runner.EnvInitializer;
-import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
-import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
-import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
-import com.streamxhub.streamx.console.core.service.ApplicationLogService;
-import com.streamxhub.streamx.console.core.service.ApplicationService;
-import com.streamxhub.streamx.console.core.service.EffectiveService;
-import com.streamxhub.streamx.console.core.service.FlinkEnvService;
-import com.streamxhub.streamx.console.core.service.FlinkSqlService;
-import com.streamxhub.streamx.console.core.service.MessageService;
-import com.streamxhub.streamx.console.core.service.ProjectService;
-import com.streamxhub.streamx.console.core.service.SavePointService;
-import com.streamxhub.streamx.console.core.service.SettingService;
+import com.streamxhub.streamx.console.core.service.*;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
 import com.streamxhub.streamx.console.system.authentication.ServerComponent;
@@ -87,11 +55,7 @@ import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper;
-import com.streamxhub.streamx.flink.submit.domain.KubernetesSubmitParam;
-import com.streamxhub.streamx.flink.submit.domain.StopRequest;
-import com.streamxhub.streamx.flink.submit.domain.StopResponse;
-import com.streamxhub.streamx.flink.submit.domain.SubmitRequest;
-import com.streamxhub.streamx.flink.submit.domain.SubmitResponse;
+import com.streamxhub.streamx.flink.submit.domain.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -105,25 +69,9 @@ import org.springframework.web.multipart.MultipartFile;
 import scala.collection.JavaConversions;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -138,7 +86,7 @@ import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Application>
-    implements ApplicationService {
+        implements ApplicationService {
 
     private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
 
@@ -147,16 +95,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private final Map<Long, Boolean> tailBeginning = new ConcurrentHashMap<>();
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() * 2,
-        200,
-        60L,
-        TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(1024),
-        ThreadUtils.threadFactory("streamx-deploy-executor"),
-        new ThreadPoolExecutor.AbortPolicy()
+            Runtime.getRuntime().availableProcessors() * 2,
+            200,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("streamx-deploy-executor"),
+            new ThreadPoolExecutor.AbortPolicy()
     );
 
-    private static final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_—-]+$");
+    private static final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_\\-\\s]+$");
+
+    private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("^[^\\s]+(\\s[^\\s]+)*$");
 
     @Autowired
     private ProjectService projectService;
@@ -484,8 +434,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             return AppExistsState.INVALID;
         }
         boolean inDB = this.baseMapper.selectCount(
-            new QueryWrapper<Application>().lambda()
-                .eq(Application::getJobName, appParam.getJobName())) > 0;
+                new QueryWrapper<Application>().lambda()
+                        .eq(Application::getJobName, appParam.getJobName())) > 0;
 
         if (appParam.getId() != null) {
             Application app = getById(appParam.getId());
@@ -500,20 +450,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkAppState state = FlinkAppState.of(app.getState());
             //当前任务已停止的状态
             if (state.equals(FlinkAppState.ADDED) ||
-                state.equals(FlinkAppState.DEPLOYED) ||
-                state.equals(FlinkAppState.CREATED) ||
-                state.equals(FlinkAppState.FAILED) ||
-                state.equals(FlinkAppState.CANCELED) ||
-                state.equals(FlinkAppState.LOST) ||
-                state.equals(FlinkAppState.KILLED)) {
+                    state.equals(FlinkAppState.DEPLOYED) ||
+                    state.equals(FlinkAppState.CREATED) ||
+                    state.equals(FlinkAppState.FAILED) ||
+                    state.equals(FlinkAppState.CANCELED) ||
+                    state.equals(FlinkAppState.LOST) ||
+                    state.equals(FlinkAppState.KILLED)) {
                 // check whether jobName exists on yarn
                 if (ExecutionMode.isYarnMode(appParam.getExecutionMode())
-                    && YarnUtils.isContains(appParam.getJobName())) {
+                        && YarnUtils.isContains(appParam.getJobName())) {
                     return AppExistsState.IN_YARN;
                 }
                 // check whether clusterId, namespace, jobId on kubernetes
                 else if (ExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-                    && k8sFlinkTrkMonitor.checkIsInRemoteCluster(toTrkId(appParam))) {
+                        && k8sFlinkTrkMonitor.checkIsInRemoteCluster(toTrkId(appParam))) {
                     return AppExistsState.IN_KUBERNETES;
                 }
             }
@@ -524,12 +474,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             // check whether jobName exists on yarn
             if (ExecutionMode.isYarnMode(appParam.getExecutionMode())
-                && YarnUtils.isContains(appParam.getJobName())) {
+                    && YarnUtils.isContains(appParam.getJobName())) {
                 return AppExistsState.IN_YARN;
             }
             // check whether clusterId, namespace, jobId on kubernetes
             else if (ExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-                && k8sFlinkTrkMonitor.checkIsInRemoteCluster(toTrkId(appParam))) {
+                    && k8sFlinkTrkMonitor.checkIsInRemoteCluster(toTrkId(appParam))) {
                 return AppExistsState.IN_KUBERNETES;
             }
         }
@@ -790,11 +740,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         }
                     } catch (Throwable e) {
                         Message message = new Message(
-                            serverComponent.getUser().getUserId(),
-                            application.getId(),
-                            application.getJobName().concat(" deploy failed"),
-                            ExceptionUtils.stringifyException(e),
-                            NoticeType.EXCEPTION
+                                serverComponent.getUser().getUserId(),
+                                application.getId(),
+                                application.getJobName().concat(" deploy failed"),
+                                ExceptionUtils.stringifyException(e),
+                                NoticeType.EXCEPTION
                         );
                         messageService.push(message);
                         updateWrapper.set(Application::getState, FlinkAppState.ADDED.getValue());
@@ -856,9 +806,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
              */
             builder.setLength(0);
             builder.append("org.apache.flink:force-shading,")
-                .append("com.google.code.findbugs:jsr305,")
-                .append("org.slf4j:*,")
-                .append("org.apache.logging.log4j:*,");
+                    .append("com.google.code.findbugs:jsr305,")
+                    .append("org.slf4j:*,")
+                    .append("org.apache.logging.log4j:*,");
             /*
              * 用户指定需要排除的依赖.
              */
@@ -872,23 +822,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             StringBuilder logBuilder = this.tailBuffer.getOrDefault(id, new StringBuilder());
             try {
                 dependencyJars = JavaConversions.asJavaCollection(DependencyUtils.resolveMavenDependencies(
-                    exclusions,
-                    packages,
-                    null,
-                    null,
-                    null,
-                    out -> {
-                        if (tailOutMap.containsKey(id)) {
-                            if (tailBeginning.containsKey(id)) {
-                                tailBeginning.remove(id);
-                                Arrays.stream(logBuilder.toString().split("\n"))
-                                    .forEach(x -> WebSocketEndpoint.writeMessage(socketId, x));
-                            } else {
-                                WebSocketEndpoint.writeMessage(socketId, out);
+                        exclusions,
+                        packages,
+                        null,
+                        null,
+                        null,
+                        out -> {
+                            if (tailOutMap.containsKey(id)) {
+                                if (tailBeginning.containsKey(id)) {
+                                    tailBeginning.remove(id);
+                                    Arrays.stream(logBuilder.toString().split("\n"))
+                                            .forEach(x -> WebSocketEndpoint.writeMessage(socketId, x));
+                                } else {
+                                    WebSocketEndpoint.writeMessage(socketId, out);
+                                }
                             }
+                            logBuilder.append(out).append("\n");
                         }
-                        logBuilder.append(out).append("\n");
-                    }
                 ));
             } catch (Exception e) {
                 WebSocketEndpoint.writeMessage(socketId, "[Exception] ".concat(e.getMessage()));
@@ -1053,19 +1003,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String customSavepoint = "";
                 if (isKubernetesApp(application)) {
                     customSavepoint = StringUtils.isNotBlank(appParam.getSavePoint()) ? appParam.getSavePoint() :
-                        FlinkSubmitHelper
-                            .extractDynamicOptionAsJava(application.getDynamicOptions())
-                            .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
+                            FlinkSubmitHelper
+                                    .extractDynamicOptionAsJava(application.getDynamicOptions())
+                                    .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
                 }
                 StopRequest stopInfo = new StopRequest(
-                    flinkEnv.getFlinkVersion(),
-                    ExecutionMode.of(application.getExecutionMode()),
-                    application.getAppId(),
-                    application.getJobId(),
-                    appParam.getSavePointed(),
-                    appParam.getDrain(),
-                    customSavepoint,
-                    application.getK8sNamespace()
+                        flinkEnv.getFlinkVersion(),
+                        ExecutionMode.of(application.getExecutionMode()),
+                        application.getAppId(),
+                        application.getJobId(),
+                        appParam.getSavePointed(),
+                        appParam.getDrain(),
+                        customSavepoint,
+                        application.getK8sNamespace()
                 );
 
                 StopResponse stopResponse = FlinkSubmitHelper.stop(stopInfo);
@@ -1170,8 +1120,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 assert executionMode != null;
                 if (application.isUploadJob()) {
                     appConf = String.format("json://{\"%s\":\"%s\"}",
-                        ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
-                        application.getMainClass()
+                            ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
+                            application.getMainClass()
                     );
                     flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
                 } else {
@@ -1183,8 +1133,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             break;
                         case APACHE_FLINK:
                             appConf = String.format("json://{\"%s\":\"%s\"}",
-                                ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
-                                application.getMainClass()
+                                    ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
+                                    application.getMainClass()
                             );
                             flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
                             break;
@@ -1200,8 +1150,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 File localPlugins = new File(WebUtils.getAppDir("plugins"));
                 assert localPlugins.exists();
                 List<String> jars =
-                    Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
-                        .collect(Collectors.toList());
+                        Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
+                                .collect(Collectors.toList());
                 if (jars.isEmpty()) {
                     throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localPlugins);
                 }
@@ -1248,9 +1198,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
 
             KubernetesSubmitParam kubernetesSubmitParam = new KubernetesSubmitParam(
-                application.getClusterId(),
-                application.getK8sNamespace(),
-                application.getK8sRestExposedTypeEnum());
+                    application.getClusterId(),
+                    application.getK8sNamespace(),
+                    application.getK8sRestExposedTypeEnum());
 
             FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
             if (flinkEnv == null) {
@@ -1341,7 +1291,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     private Boolean checkJobName(String jobName) {
         if (!StringUtils.isEmpty(jobName.trim())) {
-            return JOB_NAME_PATTERN.matcher(jobName).matches();
+            return JOB_NAME_PATTERN.matcher(jobName).matches() && SINGLE_SPACE_PATTERN.matcher(jobName).matches();
         }
         return false;
     }

@@ -1425,7 +1425,7 @@
 <script>
 import Ellipsis from '@/components/Ellipsis'
 import {jars, listConf, modules, select} from '@api/project'
-import {create, exists, main, name, readConf, upload} from '@api/application'
+import {create, checkName, main, name, readConf, upload} from '@api/application'
 import {list as listFlinkEnv} from '@/api/flinkenv'
 import {template} from '@api/config'
 import {checkHadoop} from '@api/setting'
@@ -2095,7 +2095,7 @@ export default {
       if (value === null || value === undefined || value === '') {
         callback(new Error('Application Name is required'))
       } else {
-        exists({jobName: value}).then((resp) => {
+        checkName({jobName: value}).then((resp) => {
           const exists = parseInt(resp.data)
           if (exists === 0) {
             callback()
@@ -2106,7 +2106,7 @@ export default {
           } else if (exists === 3) {
             callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
           } else {
-            callback(new Error('The application name is invalid.Please input Chinese,English letters,characters like [ _ ],[ - ],[ — ],[ . ] and so on.Please check'))
+            callback(new Error('The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check'))
           }
         })
       }

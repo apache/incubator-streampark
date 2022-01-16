@@ -1419,7 +1419,7 @@
 <script>
 import Ellipsis from '@/components/Ellipsis'
 import { listConf } from '@api/project'
-import { get, update, exists, name, readConf, upload } from '@api/application'
+import { get, update, checkName, name, readConf, upload } from '@api/application'
 import { history as confhistory, get as getVer, template, sysHadoopConf  } from '@api/config'
 import { get as getSQL, history as sqlhistory } from '@api/flinksql'
 import { mapActions, mapGetters } from 'vuex'
@@ -1782,7 +1782,7 @@ export default {
       if (!value) {
         callback(new Error('application name is required'))
       } else {
-        exists({
+        checkName({
           id: this.app.id,
           jobName: value
         }).then((resp) => {
@@ -1796,7 +1796,7 @@ export default {
           } else if (exists === 3) {
             callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
           } else {
-            callback(new Error('The application name is invalid.Please input Chinese,English letters,special characters like [ _ ],[ - ],[ — ],[ . ] and so on.'))
+            callback(new Error('The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check'))
           }
         })
       }
