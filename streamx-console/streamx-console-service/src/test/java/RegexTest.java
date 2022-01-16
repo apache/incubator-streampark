@@ -110,11 +110,11 @@ public class RegexTest {
 
     @Test
     public void jobName() {
-        final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_\\-\\s]+$");
+        final Pattern jobNamePattern = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_\\-\\s]+$");
         String jobName = "flink-sql demo";
-        if(JOB_NAME_PATTERN.matcher(jobName).matches()) {
-            final Pattern NAME_PATTERN = Pattern.compile("^[^\\s]+(\\s[^\\s]+)*$");
-            if(NAME_PATTERN.matcher(jobName).matches()) {
+        if (jobNamePattern.matcher(jobName).matches()) {
+            final Pattern namePattern = Pattern.compile("^[^\\s]+(\\s[^\\s]+)*$");
+            if (namePattern.matcher(jobName).matches()) {
                 System.out.println("passed");
             }
         }
