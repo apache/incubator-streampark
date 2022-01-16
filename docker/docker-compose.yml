@@ -16,13 +16,15 @@ services:
     container_name: stream-service-docker
     image: streamx/streamx-console-service:${v_num}
     volumes:
-     - conf:/opt/streamx/conf
+      - conf:/opt/streamx/conf
     ports:
       - "10000:10000"
     environment:
       TZ: Asia/Shanghai     # 指定时区
     stdin_open: true
     tty: true
+    depends_on:
+      - "mysql-db"
 
 volumes:
   conf:

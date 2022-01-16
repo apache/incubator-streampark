@@ -23,8 +23,8 @@ sh build.sh v1.2.1-beta.1
 - 第三步
 
 ```
-docker-compose up
+v_num=1.2.1 docker-compose up
 ```
-
+**PS 这个版本号只需要 数字.数字.数字 即可，与Git Tag 数字保持一致**
 
 
