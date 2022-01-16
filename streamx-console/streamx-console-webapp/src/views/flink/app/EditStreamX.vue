@@ -1249,6 +1249,13 @@
           name="dynamicOptions"
           placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
           v-decorator="['dynamicOptions']" />
+        <p class="conf-desc">
+          <span class="note-info">
+            <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+            It works the same as <span class="note-elem">-D$property=$value</span> in CLI mode, e.g: <span class="note-elem">yarn.application.queue=flink</span>, Allows specifying multiple generic configuration options. The available options can be found
+            <a href="https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html" target="_blank">here</a>
+          </span>
+        </p>
       </a-form-item>
 
       <a-form-item
