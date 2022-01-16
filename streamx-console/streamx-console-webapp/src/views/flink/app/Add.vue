@@ -192,9 +192,9 @@
             @click="handleBigScreenOpen()"/>
 
           <a-button
-              type="primary"
-              class="verify-sql"
-              @click="handleVerifySql()">
+            type="primary"
+            class="verify-sql"
+            @click="handleVerifySql()">
             Verify
           </a-button>
 
@@ -1427,6 +1427,8 @@ import {checkHadoop} from '@api/setting'
 import Mergely from './Mergely'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
+import { sysHadoopConf } from '@api/config'
+
 import {
   uploadJars as histUploadJars,
   k8sNamespaces as histK8sNamespaces,
@@ -1436,13 +1438,20 @@ import {
   flinkJmPodTemplates as histJmPodTemplates,
   flinkTmPodTemplates as histTmPodTemplates
 } from '@api/flinkhistory'
-import { sysHadoopConf } from '@api/config'
-import { sysHosts, initPodTemplate, completeHostAliasToPodTemplate, extractHostAliasFromPodTemplate, previewHostAlias } from '@api/flinkpodtmpl'
+
+import {
+  sysHosts,
+  initPodTemplate,
+  completeHostAliasToPodTemplate,
+  extractHostAliasFromPodTemplate,
+  previewHostAlias
+} from '@api/flinkpodtmpl'
 
 import {
   applyPom,
   bigScreenOk,
-  bigScreenOpen, checkPomScalaVersion,
+  bigScreenOpen,
+  checkPomScalaVersion,
   formatSql,
   initEditor,
   initPodTemplateEditor,

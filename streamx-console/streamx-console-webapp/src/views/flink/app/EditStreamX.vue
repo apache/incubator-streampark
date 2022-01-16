@@ -226,9 +226,9 @@
             @click="handleBigScreenOpen()" />
 
           <a-button
-              type="primary"
-              class="verify-sql"
-              @click="handleVerifySql()">
+            type="primary"
+            class="verify-sql"
+            @click="handleVerifySql()">
             Verify
           </a-button>
 
