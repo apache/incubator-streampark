@@ -413,9 +413,8 @@
               class="detail-table">
               <template
                 slot="yarnAppId"
-                slot-scope="text, record"
-                class="pointer">
-                <span @click="handleView(record.yarnAppId)">{{ record.yarnAppId }}</span>
+                slot-scope="text, record">
+                <span class="pointer" @click="handleView(record.yarnAppId)">{{ record.yarnAppId }}</span>
               </template>
               <template
                 slot="startTime"

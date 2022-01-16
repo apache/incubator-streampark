@@ -1249,6 +1249,13 @@
           name="dynamicOptions"
           placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
           v-decorator="['dynamicOptions']" />
+        <p class="conf-desc">
+          <span class="note-info">
+            <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+            It works the same as <span class="note-elem">-D$property=$value</span> in CLI mode, e.g: <span class="note-elem">yarn.application.queue=flink</span>, Allows specifying multiple generic configuration options. The available options can be found
+            <a href="https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html" target="_blank">here</a>
+          </span>
+        </p>
       </a-form-item>
 
       <a-form-item
@@ -1412,7 +1419,7 @@
 <script>
 import Ellipsis from '@/components/Ellipsis'
 import { listConf } from '@api/project'
-import { get, update, exists, name, readConf, upload } from '@api/application'
+import { get, update, checkName, name, readConf, upload } from '@api/application'
 import { history as confhistory, get as getVer, template, sysHadoopConf  } from '@api/config'
 import { get as getSQL, history as sqlhistory } from '@api/flinksql'
 import { mapActions, mapGetters } from 'vuex'
@@ -1775,7 +1782,7 @@ export default {
       if (!value) {
         callback(new Error('application name is required'))
       } else {
-        exists({
+        checkName({
           id: this.app.id,
           jobName: value
         }).then((resp) => {
@@ -1789,7 +1796,7 @@ export default {
           } else if (exists === 3) {
             callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
           } else {
-            callback(new Error('The application name is invalid.Please input Chinese,English letters,special characters like [ _ ],[ - ],[ — ],[ . ] and so on.'))
+            callback(new Error('The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check'))
           }
         })
       }

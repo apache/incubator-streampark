@@ -68,7 +68,7 @@ export default {
     DASHBOARD: '/flink/app/dashboard',
     MAIN: '/flink/app/main',
     NAME: '/flink/app/name',
-    EXISTS: '/flink/app/exists',
+    CHECKNAME: '/flink/app/checkName',
     CANCEL: '/flink/app/cancel',
     DELETE: '/flink/app/delete',
     DELETEBAK: '/flink/app/deletebak',
