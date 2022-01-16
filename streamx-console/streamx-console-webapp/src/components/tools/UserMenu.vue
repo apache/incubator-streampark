@@ -17,7 +17,7 @@
       </a>
 
       <a
-        href="http://www.streamxhub.com/zh/doc/"
+        href="http://www.streamxhub.com/docs/user-guide/quick-start"
         title="How to use"
         target="_blank">
         <svg-icon name="question" size="small" class="icon"></svg-icon>
