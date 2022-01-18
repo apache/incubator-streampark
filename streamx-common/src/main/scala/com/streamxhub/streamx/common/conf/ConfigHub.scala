@@ -19,11 +19,12 @@
 
 package com.streamxhub.streamx.common.conf
 
-import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
+
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.{Nonnull, Nullable}
-import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.language.postfixOps
 
 /**
@@ -57,7 +58,7 @@ object ConfigHub extends Logger {
   /**
    * Register the ConfigOption
    */
-  private[common] def register(@Nonnull conf: ConfigOption): Unit = {
+  private[common] def set(@Nonnull conf: ConfigOption): Unit = {
     confOptions.put(conf.key, conf)
     confData.put(conf.key, conf.defaultValue)
   }
@@ -77,7 +78,11 @@ object ConfigHub extends Logger {
   @Nonnull
   def get[T](@Nonnull conf: ConfigOption): T = {
     confData.get(conf.key) match {
-      case null => conf.defaultValue.asInstanceOf[T]
+      case null =>
+        SystemPropertyUtils.get(conf.key) match {
+          case v if v != null => Converter.convert[T](v, conf.classType)
+          case _ => conf.defaultValue.asInstanceOf[T]
+        }
       case v: T => v
     }
   }
@@ -101,7 +106,12 @@ object ConfigHub extends Logger {
     confData.get(key) match {
       case null =>
         confOptions.get(key) match {
-          case null => throw new IllegalArgumentException(s"config key has not been registered: $key")
+          case null =>
+            val config = getConfig(key)
+            SystemPropertyUtils.get(key) match {
+              case v if v != null => Converter.convert[T](v, config.classType)
+              case _ => throw new IllegalArgumentException(s"config key has not been registered: $key")
+            }
           case conf: ConfigOption => conf.defaultValue.asInstanceOf[T]
         }
       case v: T => v
@@ -114,7 +124,7 @@ object ConfigHub extends Logger {
    * @return nullable
    */
   @Nullable
-  def getRegisteredConfig(key: String): ConfigOption = {
+  def getConfig(key: String): ConfigOption = {
     confOptions.get(key)
   }
 
@@ -122,8 +132,8 @@ object ConfigHub extends Logger {
    * Get keys of all registered ConfigOption.
    */
   @Nonnull
-  def allRegisteredKeys(): util.Set[String] = {
-    val map = new util.HashMap[String, ConfigOption](initialCapacity)
+  def keys(): util.Set[String] = {
+    val map = new util.HashMap[String, ConfigOption](confOptions.size())
     map.putAll(confOptions)
     map.keySet()
   }
@@ -137,7 +147,7 @@ object ConfigHub extends Logger {
    *                                  or the value type is not same as conf.classType.
    */
   @throws[IllegalArgumentException]
-  def overwritten(@Nonnull conf: ConfigOption, value: Any): Unit = {
+  def set(@Nonnull conf: ConfigOption, value: Any): Unit = {
     if (!confOptions.containsKey(conf.key)) {
       throw new IllegalArgumentException(s"config key has not been registered: $conf")
     }
@@ -146,19 +156,36 @@ object ConfigHub extends Logger {
       case v if conf.classType != v.getClass =>
         throw new IllegalArgumentException(
           s"config value type is not match of ${conf.key}, required: ${conf.classType}, actual: ${v.getClass}")
-      case v => confData.put(conf.key, v)
+      case v =>
+        SystemPropertyUtils.set(conf.key, v.toString)
+        confData.put(conf.key, v)
     }
   }
 
   /**
    * log the current configuration info.
    */
-  def logAllConfigs(): Unit = {
-    val keys = allRegisteredKeys().asScala
+  def log(): Unit = {
+    val configKeys = keys()
     logInfo(
       s"""registered configs:
-         |ConfigHub collected configs: ${keys.size}
-         |  ${keys.map(key => s"$key = ${get(key)}").mkString("\n  ")}""".stripMargin)
+         |ConfigHub collected configs: ${configKeys.size}
+         |  ${configKeys.map(key => s"$key = ${get(key)}").mkString("\n  ")}""".stripMargin)
+  }
+
+  private object Converter {
+
+    def convert[T](v: String, classType: Class[_]): T = {
+      classType match {
+        case c if c == classOf[java.lang.Integer] => java.lang.Integer.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[java.lang.Long] => java.lang.Long.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[java.lang.Boolean] => java.lang.Boolean.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[java.lang.Float] => java.lang.Float.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[java.lang.Double] => java.lang.Double.valueOf(v).asInstanceOf[T]
+        case _ =>
+          throw new IllegalArgumentException(s"Unsupported type: $classType")
+      }
+    }
   }
 
 }
@@ -180,7 +207,7 @@ case class ConfigOption(key: String,
                         description: String = "") {
   {
     // register conf to ConfigHub
-    ConfigHub.register(this)
+    ConfigHub.set(this)
   }
 }
 

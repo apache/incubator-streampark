@@ -89,13 +89,16 @@ public class EnvInitializer implements ApplicationRunner {
     private void initConfigHub(Environment springEnv) {
         ConfigHub.init();
         // override config from spring application.yaml
-        ConfigHub.allRegisteredKeys().stream()
+        ConfigHub
+            .keys()
+            .stream()
             .filter(springEnv::containsProperty)
             .forEach(key -> {
-                ConfigOption config = ConfigHub.getRegisteredConfig(key);
-                ConfigHub.overwritten(config, springEnv.getProperty(key, config.classType()));
+                ConfigOption config = ConfigHub.getConfig(key);
+                ConfigHub.set(config, springEnv.getProperty(key, config.classType()));
             });
-        ConfigHub.logAllConfigs();
+
+        ConfigHub.log();
     }
 
     private void overrideSystemProp(String key, String defaultValue) {
