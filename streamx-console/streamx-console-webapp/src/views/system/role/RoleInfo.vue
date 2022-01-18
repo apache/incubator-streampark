@@ -9,28 +9,28 @@
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <template slot="title">
       <a-icon type="smile" />
-      角色信息
+      Role Info
     </template>
     <p>
       <a-icon
-        type="crown" />&nbsp;&nbsp;角色名称：{{ roleInfoData.roleName }}
+        type="crown" />&nbsp;&nbsp;Role Name：{{ roleInfoData.roleName }}
     </p>
     <p
       :title="roleInfoData.remark">
       <a-icon
-        type="book" />&nbsp;&nbsp;角色描述：{{ roleInfoData.remark }}
+        type="book" />&nbsp;&nbsp;Description：{{ roleInfoData.remark }}
     </p>
     <p>
       <a-icon
-        type="clock-circle" />&nbsp;&nbsp;创建时间：{{ roleInfoData.createTime }}
+        type="clock-circle" />&nbsp;&nbsp;Create Time：{{ roleInfoData.createTime }}
     </p>
     <p>
       <a-icon
-        type="clock-circle" />&nbsp;&nbsp;修改时间：{{ roleInfoData.modifyTime? roleInfoData.modifyTime : '暂未修改' }}
+        type="clock-circle" />&nbsp;&nbsp;Update Time：{{ roleInfoData.modifyTime? roleInfoData.modifyTime : '暂未修改' }}
     </p>
     <p>
       <a-icon
-        type="trophy" />&nbsp;&nbsp;所拥有的权限：
+        type="trophy" />&nbsp;&nbsp;Permission：
       <a-tree
         :key="key"
         :check-strictly="false"
