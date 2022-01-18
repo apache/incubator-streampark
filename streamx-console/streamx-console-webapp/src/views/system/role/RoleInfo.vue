@@ -33,7 +33,7 @@
         type="trophy" />&nbsp;&nbsp;所拥有的权限：
       <a-tree
         :key="key"
-        :check-strictly="true"
+        :check-strictly="false"
         :checkable="true"
         :default-checked-keys="checkedKeys[0]"
         :default-expanded-keys="checkedKeys[0]"
@@ -64,25 +64,44 @@ export default {
       key: +new Date(),
       loading: true,
       checkedKeys: [],
-      menuTreeData: []
+      menuTreeData: [],
+      selectedKeysAndHalfCheckedKeys:[],
+      leftNodes: []
     }
   },
   methods: {
     close () {
       this.$emit('close')
       this.checkedKeys = []
+    },
+    // 默认父节点为 "/"
+    deepList(data) {
+      data.map((item) => {
+        if (item.children && item.children.length >0) {
+          this.deepList(item.children)
+        } else {
+          // 存放所有叶子节点
+          this.leftNodes.push (item.id)
+        }
+      })
     }
   },
   watch: {
     roleInfoVisiable () {
       if (this.roleInfoVisiable) {
-        getMenu().then((resp) => {
-          this.menuTreeData = resp.data.rows.children
+        getMenu().then((r) => {
+          // 得到所有叶子节点
+          this.deepList(r.data.rows.children)
+          this.menuTreeData = r.data.rows.children
           roleMenu({
             roleId: this.roleInfoData.roleId
           }).then((resp) => {
+            // 后台返回的数据与叶子节点做交集,得到选中的子节点
+            const result = [...new Set(this.leftNodes)].filter((item) => new Set(eval(resp.data)).has(item))
+            //将结果赋值给v-model绑定的属性
+            const selectedKey = [...result]
             const length = this.checkedKeys.length
-            this.checkedKeys.splice(0, length, resp.data)
+            this.checkedKeys.splice(0, length, selectedKey)
             this.key = +new Date()
           })
         })

@@ -66,7 +66,7 @@
             @click="closeAll">
             合并所有
           </a-menu-item>
-          <a-menu-item
+          <!-- <a-menu-item
             key="3"
             @click="enableRelate">
             父子关联
@@ -75,7 +75,7 @@
             key="4"
             @click="disableRelate">
             取消关联
-          </a-menu-item>
+          </a-menu-item> -->
         </a-menu>
         <a-button>
           树操作
@@ -133,7 +133,9 @@ export default {
       checkedKeys: [],
       defaultCheckedKeys: [],
       expandedKeys: [],
-      checkStrictly: true
+      checkStrictly: false,
+      selectedKeysAndHalfCheckedKeys:[],
+      leftNodes: []
     }
   },
   methods: {
@@ -162,7 +164,9 @@ export default {
     disableRelate () {
       this.checkStrictly = true
     },
-    handleCheck (checkedKeys) {
+    handleCheck (checkedKeys,info) {
+      // 半选中的父节点不参与校验
+      this.selectedKeysAndHalfCheckedKeys =  checkedKeys.concat(info.halfCheckedKeys)
       this.checkedKeys = checkedKeys
       const checkedArr = Object.is(checkedKeys.checked, undefined) ? checkedKeys : checkedKeys.checked
       if (checkedArr.length) {
@@ -188,7 +192,7 @@ export default {
       })
     },
     handleSubmit () {
-      const checkedArr = Object.is(this.checkedKeys.checked, undefined) ? this.checkedKeys : this.checkedKeys.checked
+      const checkedArr = this.selectedKeysAndHalfCheckedKeys
       if (checkedArr.length === 0) {
         this.menuSelectStatus = 'error'
         this.menuSelectHelp = '请选择相应的权限'
@@ -214,19 +218,36 @@ export default {
           }
         })
       }
+    },
+    // 默认父节点为 "/"
+    deepList(data) {
+      data.map((item) => {
+        if (item.children && item.children.length >0) {
+          this.deepList(item.children)
+        } else {
+          // 存放所有叶子节点
+          this.leftNodes.push (item.id)
+        }
+      })
     }
   },
   watch: {
     roleEditVisiable () {
       if (this.roleEditVisiable) {
         getMenu().then((r) => {
+          // 得到所有叶子节点
+          this.deepList(r.data.rows.children)
           const data = r.data
           this.menuTreeData = data.rows.children
           this.allTreeKeys = data.ids
           roleMenu({
             roleId: this.roleInfoData.roleId
           }).then((resp) => {
-            const data = resp.data
+            // 后台返回的数据与叶子节点做交集,得到选中的子节点
+            const result = [...new Set(this.leftNodes)].filter((item) => new Set(eval(resp.data)).has(item))
+            //将结果赋值给v-model绑定的属性
+            this.checkedKeys = [...result]
+            const data = this.checkedKeys
             this.defaultCheckedKeys.splice(0, this.defaultCheckedKeys.length, data)
             this.checkedKeys = data
             this.expandedKeys = data

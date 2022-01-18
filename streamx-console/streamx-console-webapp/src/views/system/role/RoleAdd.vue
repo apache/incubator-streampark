@@ -67,7 +67,7 @@
             @click="closeAll">
             合并所有
           </a-menu-item>
-          <a-menu-item
+          <!-- <a-menu-item
             key="3"
             @click="enableRelate">
             父子关联
@@ -76,7 +76,7 @@
             key="4"
             @click="disableRelate">
             取消关联
-          </a-menu-item>
+          </a-menu-item> -->
         </a-menu>
         <a-button>
           树操作
@@ -128,7 +128,8 @@ export default {
       expandedKeys: [],
       menuTreeData: [],
       allTreeKeys: [],
-      checkStrictly: true
+      checkStrictly: false,
+      selectedKeysAndHalfCheckedKeys: [],
     }
   },
   methods: {
@@ -155,7 +156,9 @@ export default {
     disableRelate () {
       this.checkStrictly = true
     },
-    handleCheck (checkedKeys) {
+    handleCheck (checkedKeys, info) {
+      // 半选中的父节点不参与校验
+      this.selectedKeysAndHalfCheckedKeys = checkedKeys.concat(info.halfCheckedKeys)
       this.checkedKeys = checkedKeys
       const checkedArr = Object.is(checkedKeys.checked, undefined) ? checkedKeys : checkedKeys.checked
       if (checkedArr.length) {
@@ -170,7 +173,7 @@ export default {
       this.expandedKeys = expandedKeys
     },
     handleSubmit () {
-      const checkedArr = Object.is(this.checkedKeys.checked, undefined) ? this.checkedKeys : this.checkedKeys.checked
+      const checkedArr = this.selectedKeysAndHalfCheckedKeys
       if (this.validateStatus !== 'success') {
         this.handleRoleNameBlur()
       } else if (checkedArr.length === 0) {
