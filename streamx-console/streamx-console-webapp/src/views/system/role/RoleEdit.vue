@@ -51,38 +51,6 @@
     </a-form>
     <div
       class="drawer-bootom-button">
-      <a-dropdown
-        :trigger="['click']"
-        placement="topCenter">
-        <a-menu
-          slot="overlay">
-          <a-menu-item
-            key="1"
-            @click="expandAll">
-            展开所有
-          </a-menu-item>
-          <a-menu-item
-            key="2"
-            @click="closeAll">
-            合并所有
-          </a-menu-item>
-          <!-- <a-menu-item
-            key="3"
-            @click="enableRelate">
-            父子关联
-          </a-menu-item>
-          <a-menu-item
-            key="4"
-            @click="disableRelate">
-            取消关联
-          </a-menu-item> -->
-        </a-menu>
-        <a-button>
-          树操作
-          <a-icon
-            type="up" />
-        </a-button>
-      </a-dropdown>
       <a-button
         @click="onClose">
         取消
