@@ -9,12 +9,12 @@
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <template slot="title">
       <a-icon type="smile" />
-      新增角色
+      Add New Role
     </template>
     <a-form
       :form="form">
       <a-form-item
-        label="角色名称"
+        label="Role Name"
         v-bind="formItemLayout"
         :validate-status="validateStatus"
         :help="help">
@@ -23,7 +23,7 @@
           v-decorator="['roleName']" />
       </a-form-item>
       <a-form-item
-        label="角色描述"
+        label="Description"
         v-bind="formItemLayout">
         <a-textarea
           :rows="4"
@@ -34,7 +34,7 @@
             ]}]" />
       </a-form-item>
       <a-form-item
-        label="权限选择"
+        label="Permission"
         style="margin-bottom: 2rem"
         :validate-status="menuSelectStatus"
         :help="menuSelectHelp"
@@ -55,13 +55,13 @@
       <a-button
         style="margin-right: .8rem"
         @click="onClose">
-        取消
+        Cancel
       </a-button>
       <a-button
         @click="handleSubmit"
         type="primary"
         :loading="loading">
-        提交
+        Submit
       </a-button>
     </div>
   </a-drawer>
@@ -71,7 +71,7 @@ import { list as getMenu } from '@/api/menu'
 import { checkName, post } from '@/api/role'
 
 const formItemLayout = {
-  labelCol: { span: 3 },
+  labelCol: { span: 4 },
   wrapperCol: { span: 18 }
 }
 export default {
