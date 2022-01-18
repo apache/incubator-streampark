@@ -50,12 +50,18 @@ object ClickHouseSinkApp extends FlinkStreaming {
       index += 1
       s"""http://www.qq.com?id=$index"""
     })
+    source.print()
+    //    HttpSink(context).getSink(httpDs).setParallelism(1)
 
-    //HttpSink(context).getSink(httpDs).setParallelism(1)
-
-    ClickHouseSink().sink[TestEntity](source, "test.orders")(x => {
-      s"${x.userId},${x.siteId}"
+    // 异步写入
+    ClickHouseSink().sink[TestEntity](source)(x => {
+      s"(${x.userId},${x.siteId})"
     }).setParallelism(1)
+
+    // jdbc同步写入写入
+    //    ClickHouseSink().syncSink[TestEntity](source)(x => {
+    //      s"(${x.userId},${x.siteId})"
+    //    }).setParallelism(1)
   }
 
 }
