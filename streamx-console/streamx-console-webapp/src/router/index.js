@@ -54,8 +54,16 @@ router.beforeEach((to, from, next) => {
       } else {
         // 获取当前这个用户所在角色可访问的全部路由
         store.dispatch('GetRouter', {}).then((resp) => {
-          asyncRouter = resp
-          go(to, next)
+          // 校验菜单权限
+          if (resp.length === 1 && resp[0].children.length === 0) {
+            store.commit('SET_ROUTERS', null)
+            notification.error({
+              message: 'No permission, please contact the administrator'
+            })
+          } else {
+            asyncRouter = resp
+            go(to, next)
+          }
         }).catch(() => {
           notification.error({
             message: 'Request failed, please try again'
