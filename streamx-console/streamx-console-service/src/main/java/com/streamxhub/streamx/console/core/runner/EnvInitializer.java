@@ -87,7 +87,6 @@ public class EnvInitializer implements ApplicationRunner {
     }
 
     private void initConfigHub(Environment springEnv) {
-        ConfigHub.init();
         // override config from spring application.yaml
         ConfigHub
             .keys()
