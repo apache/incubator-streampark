@@ -19,9 +19,6 @@
 
 package com.streamxhub.streamx.console.core.task;
 
-import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.fromK8sFlinkJobState;
-import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.common.eventbus.Subscribe;
@@ -30,8 +27,8 @@ import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.OptionState;
-import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.alert.AlertService;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkClusterMetricChangeEvent;
@@ -41,12 +38,16 @@ import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
+import scala.Enumeration;
+
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import scala.Enumeration;
+
+import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.fromK8sFlinkJobState;
+import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
 
 /**
  * Event Listener for K8sFlinkTrkMonitor

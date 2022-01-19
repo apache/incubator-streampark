@@ -17,24 +17,35 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.service;
+package com.streamxhub.streamx.console.core.entity.alert;
 
-import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
-import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 
 /**
- * @author benjobs
+ * @author weijinglun
+ * @date 2022.01.14
  */
-public interface AlertService {
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class HttpCallbackParams implements Serializable {
+    @NotBlank(message = "The url of alert must not be empty")
+    private String url;
+    /**
+     * http request method, default is  POST
+     */
+    private String method = "POST";
 
     /**
-     * alert
-     *
-     * @param application
+     * http request contentType, default is application/json
      */
-    void alert(Application application, CheckPointStatus checkPointStatus);
+    private String contentType;
 
-    void alert(Application application, FlinkAppState appState);
-
+    /**
+     * use freemarker replace the params
+     */
+    private String requestTemplate;
 }

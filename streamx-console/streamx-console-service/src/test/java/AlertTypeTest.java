@@ -17,20 +17,26 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.base.exception;
+import com.streamxhub.streamx.console.core.enums.AlertType;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * 系统内部异常
+ * @author weijinglun
+ * @date 2022.01.14
  */
-public class ServiceException extends Exception {
-
-    private static final long serialVersionUID = -994962710559017255L;
-
-    public ServiceException(String message) {
-        super(message);
+public class AlertTypeTest {
+    @Test
+    void decodeTest() {
+        List<AlertType> notifyTypes = AlertType.decode(5);
+        System.out.println(notifyTypes);
     }
 
-    public ServiceException(String message, Throwable cause) {
-        super(message, cause);
+    @Test
+    void encodeTest() {
+        int level = AlertType.encode(Arrays.asList(AlertType.dingTalk, AlertType.email));
+        System.out.println(level);
     }
 }

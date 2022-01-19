@@ -17,20 +17,29 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.base.exception;
+package com.streamxhub.streamx.console.core.service.alert;
+
+import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
+import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
+import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 
 /**
- * 系统内部异常
+ * @author benjobs
  */
-public class ServiceException extends Exception {
+public interface AlertService {
 
-    private static final long serialVersionUID = -994962710559017255L;
+    /**
+     * alert
+     *
+     * @param application
+     */
+    void alert(Application application, CheckPointStatus checkPointStatus);
 
-    public ServiceException(String message) {
-        super(message);
-    }
+    void alert(Application application, FlinkAppState appState);
 
-    public ServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    void alert(Application application, AlertTemplate alertTemplate);
+
+    boolean alert(AlertConfigWithParams params, AlertTemplate alertTemplate);
 }

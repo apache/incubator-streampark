@@ -17,20 +17,14 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.base.exception;
+package com.streamxhub.streamx.console.core.dao;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
 
 /**
- * 系统内部异常
+ * @author weijinglun
+ * @date 2022.01.14
  */
-public class ServiceException extends Exception {
-
-    private static final long serialVersionUID = -994962710559017255L;
-
-    public ServiceException(String message) {
-        super(message);
-    }
-
-    public ServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public interface AlertConfigMapper extends BaseMapper<AlertConfig> {
 }

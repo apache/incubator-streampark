@@ -17,20 +17,18 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.base.exception;
+package com.streamxhub.streamx.console.core.service.alert;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
+import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 
 /**
- * 系统内部异常
+ * @author weijinglun
+ * @date 2022.01.14
  */
-public class ServiceException extends Exception {
-
-    private static final long serialVersionUID = -994962710559017255L;
-
-    public ServiceException(String message) {
-        super(message);
-    }
-
-    public ServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public interface AlertConfigService extends IService<AlertConfig> {
+    IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request);
 }

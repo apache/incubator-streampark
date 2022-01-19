@@ -17,20 +17,25 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.base.exception;
+package com.streamxhub.streamx.console.base.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 /**
- * 系统内部异常
+ * @author weijinglun
+ * @date 2022.01.17
  */
-public class ServiceException extends Exception {
-
-    private static final long serialVersionUID = -994962710559017255L;
-
-    public ServiceException(String message) {
-        super(message);
-    }
-
-    public ServiceException(String message, Throwable cause) {
-        super(message, cause);
+@Configuration
+public class AlertRestTemplateConfig {
+    /**
+     * Create a RestTemplate client for the alarm notification service
+     *
+     * @return RestTemplate
+     */
+    @Bean(name = "alertRestTemplate")
+    public RestTemplate alertRestTemplate() {
+        return new RestTemplate();
     }
 }

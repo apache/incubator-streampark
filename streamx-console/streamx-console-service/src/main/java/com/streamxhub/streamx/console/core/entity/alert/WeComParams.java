@@ -17,20 +17,21 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.base.exception;
+package com.streamxhub.streamx.console.core.entity.alert;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 
 /**
- * 系统内部异常
+ * @author weijinglun
+ * @date 2022.01.14
  */
-public class ServiceException extends Exception {
-
-    private static final long serialVersionUID = -994962710559017255L;
-
-    public ServiceException(String message) {
-        super(message);
-    }
-
-    public ServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class WeComParams implements Serializable {
+    @NotBlank(message = "The access token of WeCom must not be empty")
+    private String token;
 }

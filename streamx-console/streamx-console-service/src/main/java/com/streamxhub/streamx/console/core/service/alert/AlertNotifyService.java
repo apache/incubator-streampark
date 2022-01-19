@@ -17,20 +17,21 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.base.exception;
+package com.streamxhub.streamx.console.core.service.alert;
+
+import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 
 /**
- * 系统内部异常
+ * @author weijinglun
+ * @date 2022.01.14
  */
-public class ServiceException extends Exception {
+public interface AlertNotifyService {
+    /**
+     * alert
+     *
+     * @param template
+     */
+    boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template);
 
-    private static final long serialVersionUID = -994962710559017255L;
-
-    public ServiceException(String message) {
-        super(message);
-    }
-
-    public ServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }
