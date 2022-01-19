@@ -227,7 +227,7 @@ public class AlertServiceImpl implements AlertService {
                 log.info("Send dingding  enabled is false,Please set streamx.dingding.enabled is true if you want to send dingding alert msg !");
             }
         } catch (Exception e) {
-            log.error("Send dingding exception,exception msg :{} ",e.getMessage());
+            log.error("Send dingding exception,exception msg :{} ", e.getMessage());
         }
     }
 
