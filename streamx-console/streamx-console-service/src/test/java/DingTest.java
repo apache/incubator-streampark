@@ -65,10 +65,10 @@ public class DingTest {
         application.setCpFailureAction(1);
         application.setCpFailureRateInterval(30);
         application.setCpMaxFailureInterval(5);
-        sendDing(application);
+        sendDingTest(application);
     }
 
-    private void sendDing(Application application) {
+    private void sendDingTest(Application application) {
         try {
             if (dingdingProperties.isEnabled()) {
                 String msg = "StreamX >>>>>>>>> ID: %s,JOB NAME: %s FAIL,SavePointed: %s ,SavePoint: %s";
