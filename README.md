@@ -5,7 +5,7 @@
         <img width="500" src="https://user-images.githubusercontent.com/13284744/142753483-4e96eb33-01ee-469d-ad7c-387e1bf95ee1.png" alt="StreamX logo">
         </a>
     </h1>
-    <strong>Make Flink|Spark easier!!!</strong>
+    <strong>Make stream processing easier!!!</strong>
 </div>
 
 <br/>
@@ -31,13 +31,13 @@ English | [中文](README_CN.md)
 
 # StreamX
 
-Make Flink|Spark easier
+Make stream processing easier
 
-> A magical framework that makes Flink development easier
+> A magical framework that make stream processing easier!
 
 ## 🚀 Introduction
 
-The original intention of `StreamX` is to make the development of `Flink` easier. `StreamX` focuses on the management of development phases
+The original intention of `StreamX` is to make stream processing easier. `StreamX` focuses on the management of development phases
 and tasks. Our ultimate goal is to build a one-stop big data solution integrating stream processing, batch processing, data warehouse and
 data laker.
 

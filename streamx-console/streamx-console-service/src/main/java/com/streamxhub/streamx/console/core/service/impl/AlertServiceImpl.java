@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -36,6 +35,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.mail.HtmlEmail;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -229,7 +229,7 @@ public class AlertServiceImpl implements AlertService {
                 jsonData.put("content",alertMessage);
                 jsonData.put("system","streamx");
                 jsonData.put("businessKey",jobName+"_"+startTime);
-                StringEntity stringentity = new StringEntity(jsonData.toJSONString(), ContentType.create("application/json", "UTF-8"));
+                StringEntity stringentity = new StringEntity(jsonData.toString(), ContentType.create("application/json", "UTF-8"));
                 httppost.setEntity(stringentity);
                 //发post请求
                 httpresponse = httpclient.execute(httppost);

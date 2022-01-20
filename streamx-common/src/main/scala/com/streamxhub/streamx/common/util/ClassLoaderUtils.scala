@@ -69,7 +69,7 @@ object ClassLoaderUtils extends Logger {
     val jarFile = new File(jarFilePath)
     require(jarFile.exists, s"[StreamX] ClassLoaderUtils.loadJar: jarFilePath $jarFilePath is not exists")
     require(jarFile.isFile, s"[StreamX] ClassLoaderUtils.loadJar: jarFilePath $jarFilePath is not file")
-    loadPath(jarFile.getAbsolutePath, List(".jar", ".zip"))
+    loadPath(jarFile.getAbsolutePath)
   }
 
   def loadJars(path: String): Unit = {
@@ -78,7 +78,7 @@ object ClassLoaderUtils extends Logger {
     require(jarDir.isDirectory, s"[StreamX] ClassLoaderUtils.loadJars: jarPath $path is not directory")
     require(jarDir.listFiles.length > 0, s"[StreamX] ClassLoaderUtils.loadJars: have not jar in path:$path")
     jarDir.listFiles.foreach { x =>
-      loadPath(x.getAbsolutePath, List(".jar", ".zip"))
+      loadPath(x.getAbsolutePath)
     }
   }
 
@@ -93,7 +93,7 @@ object ClassLoaderUtils extends Logger {
     loopDirs(file)
   }
 
-  private[this] def loadPath(filepath: String, ext: List[String]): Unit = {
+  private[this] def loadPath(filepath: String, ext: List[String] = List(".jar", ".zip")): Unit = {
     val file = new File(filepath)
     loopFiles(file, ext)
   }

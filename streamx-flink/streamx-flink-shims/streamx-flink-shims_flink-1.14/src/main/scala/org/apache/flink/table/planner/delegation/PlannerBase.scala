@@ -1,13 +1,14 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Copyright (c) 2019 The StreamX Project
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.flink.table.planner.delegation
 
 import org.apache.flink.annotation.VisibleForTesting
@@ -73,20 +73,7 @@ import org.json4s.jackson.Serialization
 
 import scala.collection.JavaConverters._
 
-/**
- * Implementation of a [[Planner]]. It supports only streaming use cases.
- * (The new [[org.apache.flink.table.sources.InputFormatTableSource]] should work, but will be
- * handled as streaming sources, and no batch specific optimizations will be applied).
- *
- * @param executor        instance of [[Executor]], needed to extract
- *                        [[StreamExecutionEnvironment]] for
- *                        [[org.apache.flink.table.sources.StreamTableSource.getDataStream]]
- * @param config          mutable configuration passed from corresponding [[TableEnvironment]]
- * @param functionCatalog catalog of functions
- * @param catalogManager  manager of catalog meta objects such as tables, views, databases etc.
- * @param isStreamingMode Determines if the planner should work in a batch (false}) or
- *                        streaming (true) mode.
- */
+
 abstract class PlannerBase(
                             executor: Executor,
                             config: TableConfig,

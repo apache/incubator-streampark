@@ -67,7 +67,8 @@ if [[ ${have_tty} -eq 1 ]]; then
   YELLOW=$(printf '\033[33m')
   BLUE=$(printf '\033[34m')
   BOLD=$(printf '\033[1m')
-  RESET=$(printf '\033[m')
+  RESET=$(printf '\033[0m')
+
 else
   RAINBOW=""
   RED=""
@@ -82,28 +83,28 @@ echo_r () {
     # Color red: Error, Failed
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE}StreamX${RES}] ${RED}$1${RES}\n"
+    printf "[%sStreamX%s] %s$1%s\n"  $BLUE $RESET $RED $RESET
 }
 
 echo_g () {
     # Color green: Success
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE}StreamX${RES}] ${GREEN}$1${RES}\n"
+    printf "[%sStreamX%s] %s$1%s\n"  $BLUE $RESET $GREEN $RESET
 }
 
 echo_y () {
     # Color yellow: Warning
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE}StreamX${RES}] ${YELLOW}$1${RES}\n"
+    printf "[%sStreamX%s] %s$1%s\n"  $BLUE $RESET $YELLOW $RESET
 }
 
 echo_w () {
     # Color yellow: White
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE}StreamX${RES}] ${WHITE}$1${RES}\n"
+    printf "[%sStreamX%s] %s$1%s\n"  $BLUE $RESET $WHITE $RESET
 }
 
 # OS specific support.  $var _must_ be set to either true or false.
@@ -323,12 +324,10 @@ print_logo() {
   printf '%s  /____/%s\__%s/_/   %s\___/%s\__,_%s/_/ /_/ /_/%s_/|_|                    %s\n' $RAINBOW $RESET
   printf '%s       %s    %s     %s      %s     %s           %s  |/                     %s\n' $RAINBOW $RESET
   printf '%s      %s    %s    %s      %s     %s             %s  .                      %s\n' $RAINBOW $RESET
-  printf '%s\n  • WebSite:  http://www.streamxhub.com'
-  printf '%s\n  • GitHub :  http://github.com/streamxhub/streamx'
-  printf '%s\n  • Gitee  :  http://gitee.com/streamxhub/streamx'
-  printf '%s\n             ────────  Make Flink|Spark easier ô‿ô!'
-  printf '%s\n\n' $RESET
-
+  printf '  • WebSite: %s http://www.streamxhub.com%s\n'                              $BLUE   $RESET
+  printf '  • GitHub : %s http://github.com/streamxhub/streamx%s\n'                   $BLUE   $RESET
+  printf '  • Gitee  : %s http://gitee.com/streamxhub/streamx%s\n'                    $BLUE   $RESET
+  printf '          %s ────────  Make stream processing easier ô‿ô!%s\n\n'            $GREEN  $RESET
 }
 
 # shellcheck disable=SC2120

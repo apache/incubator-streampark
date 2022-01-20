@@ -184,7 +184,6 @@ public class ApplicationController {
         return RestResponse.create();
     }
 
-    // fixme to adapte for kubernetes-only scenarios
     @PostMapping("yarn")
     public RestResponse yarn() {
         return RestResponse.create().data(HadoopUtils.getRMWebAppURL(false));
@@ -196,8 +195,8 @@ public class ApplicationController {
         return RestResponse.create().data(yarnName);
     }
 
-    @PostMapping("exists")
-    public RestResponse exists(Application app) {
+    @PostMapping("checkName")
+    public RestResponse checkName(Application app) {
         AppExistsState exists = applicationService.checkExists(app);
         return RestResponse.create().data(exists.get());
     }

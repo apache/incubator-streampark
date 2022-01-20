@@ -56,15 +56,22 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
       failoverStorage match {
         case Kafka =>
           if (!Lock.initialized) {
-            Lock.lock.lock()
-            if (!Lock.initialized) {
-              Lock.initialized = true
-              //failoverConfig.remove(KEY_KAFKA_TOPIC)
-              properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-              properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-              kafkaProducer = new KafkaProducer[String, String](properties)
+            try {
+              Lock.lock.lock()
+              if (!Lock.initialized) {
+                Lock.initialized = true
+                properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+                properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+                kafkaProducer = new KafkaProducer[String, String](properties)
+              }
+            } catch {
+              case exception: Exception => {
+                logError(s"build Failover storageType:KAFKA failed exception ${exception.getStackTrace}")
+                throw exception
+              }
+            } finally {
+              Lock.lock.unlock()
             }
-            Lock.lock.unlock()
           }
           val topic = properties.getProperty(KEY_KAFKA_TOPIC)
           val timestamp = System.currentTimeMillis()
@@ -87,16 +94,23 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
           if (!Lock.initialized) {
             try {
               Lock.lock.lock()
-              Lock.initialized = true
-              properties.put(KEY_ALIAS, s"failover-${table}")
-              val mysqlConnect = JdbcUtils.getConnection(properties)
-              val mysqlTable = mysqlConnect.getMetaData.getTables(null, null, table, Array("TABLE", "VIEW"))
-              if (!mysqlTable.next()) {
-                JdbcUtils.execute(
-                  mysqlConnect,
-                  s"create table $table (`values` text, `timestamp` bigint)"
-                )
-                logWarn(s"Failover storageType:MySQL,table: $table is not exist,auto created...")
+              if (!Lock.initialized) {
+                Lock.initialized = true
+                properties.put(KEY_ALIAS, s"failover-${table}")
+                val mysqlConnect = JdbcUtils.getConnection(properties)
+                val mysqlTable = mysqlConnect.getMetaData.getTables(null, null, table, Array("TABLE", "VIEW"))
+                if (!mysqlTable.next()) {
+                  JdbcUtils.execute(
+                    mysqlConnect,
+                    s"create table $table (`values` text, `timestamp` bigint)"
+                  )
+                  logWarn(s"Failover storageType:MySQL,table: $table is not exist,auto created...")
+                }
+              }
+            } catch {
+              case exception: Exception => {
+                logError(s"build Failover storageType:MySQL failed exception ${exception.getStackTrace}")
+                throw exception
               }
             } finally {
               Lock.lock.unlock()
@@ -137,6 +151,11 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                   })
                 mutator = hConnect.getBufferedMutator(mutatorParam)
               }
+            } catch {
+              case exception: Exception => {
+                logError(s"build Failover storageType:HBase failed exception ${exception.getStackTrace}")
+                throw exception
+              }
             } finally {
               Lock.lock.unlock()
             }
@@ -169,6 +188,11 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                     case (Some(nn), _) => FileSystem.get(new URI(nn), new HConf())
                     case _ => throw new IllegalArgumentException("[StreamX] usage error..")
                   }
+                }
+              } catch {
+                case exception: Exception => {
+                  logError(s"build Failover storageType:HDFS failed exception ${exception.getStackTrace}")
+                  throw exception
                 }
               } finally {
                 Lock.lock.unlock()

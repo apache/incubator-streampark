@@ -173,7 +173,9 @@
               {{ controller.flinkSql.errorMsg }}
             </span>
             <span v-else class="sql-desc" style="color: green">
-              successful
+              <span v-if="controller.flinkSql.verified">
+                successful
+              </span>
             </span>
           </p>
           <a-icon
@@ -188,6 +190,14 @@
             title="Full Screen"
             two-tone-color="#4a9ff5"
             @click="handleBigScreenOpen()"/>
+
+          <a-button
+            type="primary"
+            class="verify-sql"
+            @click="handleVerifySql()">
+            Verify
+          </a-button>
+
         </a-form-item>
 
         <a-form-item
@@ -1352,9 +1362,14 @@
           name="dynamicOptions"
           placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
           v-decorator="['dynamicOptions']"/>
+        <p class="conf-desc">
+          <span class="note-info">
+            <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+            It works the same as <span class="note-elem">-D$property=$value</span> in CLI mode, e.g: <span class="note-elem">yarn.application.queue=flink</span>, Allows specifying multiple generic configuration options. The available options can be found
+            <a href="https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html" target="_blank">here</a>
+          </span>
+        </p>
       </a-form-item>
-
-
 
       <a-form-item
         v-if="jobType === 'customcode'"
@@ -1442,13 +1457,15 @@
 <script>
 import Ellipsis from '@/components/Ellipsis'
 import {jars, listConf, modules, select} from '@api/project'
-import {create, exists, main, name, readConf, upload} from '@api/application'
+import {create, checkName, main, name, readConf, upload} from '@api/application'
 import {list as listFlinkEnv} from '@/api/flinkenv'
 import {template} from '@api/config'
 import {checkHadoop} from '@api/setting'
 import Mergely from './Mergely'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
+import { sysHadoopConf } from '@api/config'
+
 import {
   uploadJars as histUploadJars,
   k8sNamespaces as histK8sNamespaces,
@@ -1458,14 +1475,20 @@ import {
   flinkJmPodTemplates as histJmPodTemplates,
   flinkTmPodTemplates as histTmPodTemplates
 } from '@api/flinkhistory'
-import { sysHadoopConf } from '@api/config'
-import { sysHosts, initPodTemplate, completeHostAliasToPodTemplate, extractHostAliasFromPodTemplate, previewHostAlias } from '@api/flinkpodtmpl'
+
+import {
+  sysHosts,
+  initPodTemplate,
+  completeHostAliasToPodTemplate,
+  extractHostAliasFromPodTemplate,
+  previewHostAlias
+} from '@api/flinkpodtmpl'
 
 import {
   applyPom,
-  bigScreenClose,
   bigScreenOk,
   bigScreenOpen,
+  checkPomScalaVersion,
   formatSql,
   initEditor,
   initPodTemplateEditor,
@@ -1489,6 +1512,7 @@ export default {
       projectList: [],
       projectId: null,
       versionId: null,
+      scalaVersion: null,
       uploadJar: null,
       module: null,
       moduleList: [],
@@ -1588,6 +1612,7 @@ export default {
           errorMsg: null,
           errorStart: null,
           errorEnd: null,
+          verified: false,
           success: true
         },
         dependency: {
@@ -1734,6 +1759,7 @@ export default {
       this.form.getFieldDecorator('resolveOrder', {initialValue: 0})
       this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
       this.form.getFieldDecorator('restartSize', {initialValue: 0})
+      this.executionMode = null
       listFlinkEnv().then((resp) => {
         if (resp.data.length > 0) {
           this.flinkEnvs = resp.data
@@ -1742,6 +1768,7 @@ export default {
           })[0]
           this.form.getFieldDecorator('versionId', {initialValue: v.id})
           this.versionId = v.id
+          this.scalaVersion = v.scalaVersion
         }
       })
       // load history config records
@@ -1809,6 +1836,8 @@ export default {
 
     handleFlinkVersion(id) {
       this.versionId = id
+      this.scalaVersion = this.flinkEnvs.find(v => v.id === id).scalaVersion
+      this.handleCheckPomScalaVersion()
     },
 
     handleChangeJmMemory(value) {
@@ -1869,6 +1898,10 @@ export default {
         this.configOverride = null
         this.isSetConfig = false
       }
+    },
+
+    handleCheckPomScalaVersion() {
+      checkPomScalaVersion(this)
     },
 
     handleApplyPom() {
@@ -1990,6 +2023,10 @@ export default {
       formatSql(this)
     },
 
+    handleVerifySql() {
+      verifySQL(this)
+    },
+
     handleBigScreenOpen() {
       bigScreenOpen(this)
     },
@@ -2002,7 +2039,6 @@ export default {
     },
 
     handleBigScreenClose() {
-      bigScreenClose(this)
     },
 
     handleChangeModule(module) {
@@ -2091,7 +2127,7 @@ export default {
       if (value === null || value === undefined || value === '') {
         callback(new Error('Application Name is required'))
       } else {
-        exists({jobName: value}).then((resp) => {
+        checkName({jobName: value}).then((resp) => {
           const exists = parseInt(resp.data)
           if (exists === 0) {
             callback()
@@ -2102,7 +2138,7 @@ export default {
           } else if (exists === 3) {
             callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
           } else {
-            callback(new Error('The application name is invalid.Please input Chinese,English letters,characters like [ _ ],[ - ],[ — ],[ . ] and so on.Please check'))
+            callback(new Error('The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check'))
           }
         })
       }

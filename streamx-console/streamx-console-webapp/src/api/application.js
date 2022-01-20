@@ -65,8 +65,8 @@ export function name (params) {
   return http.post(api.Application.NAME, params)
 }
 
-export function exists (params) {
-  return http.post(api.Application.EXISTS, params)
+export function checkName (params) {
+  return http.post(api.Application.CHECKNAME, params)
 }
 
 export function cancel (params) {
