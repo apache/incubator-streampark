@@ -202,20 +202,16 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     CommandUtils.execute(cmd);
                 }
             } else {
-                try {
-                    // 2) .jar文件(普通,官方标准的flink工程)
-                    Utils.checkJarFile(app.toURI().toURL());
-                    String moduleName = app.getName().replace(".jar", "");
-                    File appBase = project.getDistHome();
-                    File targetDir = new File(appBase, moduleName);
-                    if (!targetDir.exists()) {
-                        targetDir.mkdirs();
-                    }
-                    File targetJar = new File(targetDir, app.getName());
-                    app.renameTo(targetJar);
-                } catch (IOException e) {
-                    throw e;
+                // 2) .jar文件(普通,官方标准的flink工程)
+                Utils.checkJarFile(app.toURI().toURL());
+                String moduleName = app.getName().replace(".jar", "");
+                File appBase = project.getDistHome();
+                File targetDir = new File(appBase, moduleName);
+                if (!targetDir.exists()) {
+                    targetDir.mkdirs();
                 }
+                File targetJar = new File(targetDir, app.getName());
+                app.renameTo(targetJar);
             }
         }
     }
