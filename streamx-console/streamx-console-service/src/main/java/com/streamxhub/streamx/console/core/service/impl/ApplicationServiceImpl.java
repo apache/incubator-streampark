@@ -931,6 +931,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String targetJar = appUploads.concat("/").concat(jar);
                 checkOrElseUploadJar(application, localJar, targetJar);
                 //3) 将upload目录下的文件上传到app/lib下.
+                if (!fsOperator.exists(application.getAppLib())) {
+                    fsOperator.mkdirs(application.getAppLib());
+                }
                 fsOperator.copy(targetJar, application.getAppLib(), false, true);
             }
         }
