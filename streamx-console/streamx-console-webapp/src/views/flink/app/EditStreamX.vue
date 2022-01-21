@@ -310,12 +310,13 @@
               class="dependency-item"
               v-for="(value, index) in dependency"
               :key="`dependency_${index}`"
-              type="info"
-              @click="handleEditPom(value)">
+              type="info">
               <template slot="message">
-                <a-space @click="handleEditPom(value)" class="tag-dependency-pom">
+                <a-space class="tag-dependency-pom">
                   <a-tag class="tag-dependency" color="#2db7f5">POM</a-tag>
-                  {{ value.artifactId }}-{{ value.version }}.jar
+                  <span @click="handleEditPom(value)">
+                    {{ value.artifactId }}-{{ value.version }}.jar
+                  </span>
                   <a-icon type="close" class="icon-close" @click="handleRemovePom(value)"/>
                 </a-space>
               </template>
