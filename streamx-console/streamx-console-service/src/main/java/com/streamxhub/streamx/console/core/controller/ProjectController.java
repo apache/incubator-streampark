@@ -63,7 +63,7 @@ public class ProjectController {
 
     @PostMapping("get")
     public RestResponse get(Long id) {
-        return RestResponse.create().data(projectService.getProject(id));
+        return RestResponse.create().data(projectService.getById(id));
     }
 
     @PostMapping("build")

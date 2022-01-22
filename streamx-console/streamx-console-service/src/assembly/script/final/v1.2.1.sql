@@ -350,6 +350,7 @@ INSERT INTO `t_menu` VALUES (33, 16, 'conf delete', NULL, NULL, 'conf:delete', N
 INSERT INTO `t_menu` VALUES (34, 16, 'flame Graph', NULL, NULL, 'app:flameGraph', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (35, 14, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', '1', 4, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (36, 35, 'Setting Update', NULL, NULL, 'setting:update', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (37, 14, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', NULL, '0', '0', NULL, NOW(), NOW());
 COMMIT;
 
 -- ----------------------------
@@ -449,24 +450,25 @@ INSERT INTO `t_role_menu` VALUES (33, 1, 33);
 INSERT INTO `t_role_menu` VALUES (34, 1, 34);
 INSERT INTO `t_role_menu` VALUES (35, 1, 35);
 INSERT INTO `t_role_menu` VALUES (36, 1, 36);
-INSERT INTO `t_role_menu` VALUES (37, 2, 14);
-INSERT INTO `t_role_menu` VALUES (38, 2, 16);
-INSERT INTO `t_role_menu` VALUES (39, 2, 17);
-INSERT INTO `t_role_menu` VALUES (40, 2, 18);
-INSERT INTO `t_role_menu` VALUES (41, 2, 19);
-INSERT INTO `t_role_menu` VALUES (42, 2, 20);
-INSERT INTO `t_role_menu` VALUES (43, 2, 21);
-INSERT INTO `t_role_menu` VALUES (44, 2, 22);
-INSERT INTO `t_role_menu` VALUES (45, 2, 25);
-INSERT INTO `t_role_menu` VALUES (46, 2, 26);
-INSERT INTO `t_role_menu` VALUES (47, 2, 27);
-INSERT INTO `t_role_menu` VALUES (48, 2, 28);
-INSERT INTO `t_role_menu` VALUES (49, 2, 29);
-INSERT INTO `t_role_menu` VALUES (50, 2, 30);
-INSERT INTO `t_role_menu` VALUES (51, 2, 31);
-INSERT INTO `t_role_menu` VALUES (52, 2, 32);
-INSERT INTO `t_role_menu` VALUES (53, 2, 33);
-INSERT INTO `t_role_menu` VALUES (54, 2, 34);
+INSERT INTO `t_role_menu` VALUES (37, 1, 37);
+INSERT INTO `t_role_menu` VALUES (38, 2, 14);
+INSERT INTO `t_role_menu` VALUES (39, 2, 16);
+INSERT INTO `t_role_menu` VALUES (40, 2, 17);
+INSERT INTO `t_role_menu` VALUES (41, 2, 18);
+INSERT INTO `t_role_menu` VALUES (42, 2, 19);
+INSERT INTO `t_role_menu` VALUES (43, 2, 20);
+INSERT INTO `t_role_menu` VALUES (44, 2, 21);
+INSERT INTO `t_role_menu` VALUES (45, 2, 22);
+INSERT INTO `t_role_menu` VALUES (46, 2, 25);
+INSERT INTO `t_role_menu` VALUES (47, 2, 26);
+INSERT INTO `t_role_menu` VALUES (48, 2, 27);
+INSERT INTO `t_role_menu` VALUES (49, 2, 28);
+INSERT INTO `t_role_menu` VALUES (50, 2, 29);
+INSERT INTO `t_role_menu` VALUES (51, 2, 30);
+INSERT INTO `t_role_menu` VALUES (52, 2, 31);
+INSERT INTO `t_role_menu` VALUES (53, 2, 32);
+INSERT INTO `t_role_menu` VALUES (54, 2, 33);
+INSERT INTO `t_role_menu` VALUES (55, 2, 34);
 COMMIT;
 
 -- ----------------------------

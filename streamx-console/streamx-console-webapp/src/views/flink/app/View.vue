@@ -364,6 +364,15 @@
               </ellipsis>
             </span>
           </template>
+
+          <template v-if="record['jobType'] === 1">
+            <a-badge class="build-badge" v-if="record.deploy === 7" count="NEW" title="the associated project has changed and this job need to be rechecked"/>
+            <a-badge class="build-badge" v-else-if="record.deploy >= 2" count="NEW" title="the application has changed."/>
+          </template>
+          <template v-else-if="record.deploy >= 2">
+            <a-badge class="build-badge" count="NEW" title="the application has changed."/>
+          </template>
+
         </template>
 
         <template
@@ -481,7 +490,7 @@
 
           <a-tooltip title="Sync Application State">
             <a-button
-              v-if="record.state === 1 || record['deploy'] === 1"
+              v-if="record.state === 1 || record.deploy === 1"
               click="handleSeeLog(record)"
               shape="circle"
               size="small"
@@ -1264,7 +1273,8 @@
       return [{
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 240,
+        width: 300,
+        fixed: 'left',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
