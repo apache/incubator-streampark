@@ -173,7 +173,7 @@
                     size="small"
                     style="margin-left: 8px"
                     class="control-button ctl-btn-color">
-                  <a-icon type="build"/>
+                  <a-icon type="thunderbolt" />
                 </a-button>
               </a-popconfirm>
             </a-tooltip>
