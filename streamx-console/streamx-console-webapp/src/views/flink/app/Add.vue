@@ -1502,7 +1502,7 @@ export default {
         {mode: 'local (coming soon)', value: 0, disabled: true},
         {mode: 'standalone (coming soon)', value: 1, disabled: true},
         {mode: 'yarn session (coming soon)', value: 3, disabled: true},
-        {mode: 'yarn pre-job (deprecated, please use yarn-application mode)', value: 2, disabled: true}
+        {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: true}
       ],
       cpTriggerAction: [
         {name: 'alert', value: 1},
