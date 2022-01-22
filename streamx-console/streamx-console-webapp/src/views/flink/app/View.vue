@@ -472,7 +472,7 @@
               shape="circle"
               size="small"
               class="control-button ctl-btn-color">
-              <a-icon type="build"/>
+              <a-icon type="cloud-upload" />
             </a-button>
           </a-tooltip>
 
@@ -554,7 +554,7 @@
               shape="circle"
               size="small"
               class="control-button ctl-btn-color">
-              <a-icon type="fork"/>
+              <a-icon type="deployment-unit" />
             </a-button>
           </a-tooltip>
 
