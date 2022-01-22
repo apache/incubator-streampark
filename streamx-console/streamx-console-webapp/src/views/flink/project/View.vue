@@ -120,6 +120,9 @@
               <p v-if="item.buildState === -1">
                 <a-tag color="#C0C0C0">NOT BUILD</a-tag>
               </p>
+              <p v-if="item.buildState === -2">
+                <a-tag color="#FFA500">NEED REBUILD</a-tag>
+              </p>
               <p v-else-if="item.buildState === 0">
                 <a-tag color="#1AB58E" class="status-processing-building">BUILDING</a-tag>
               </p>
@@ -149,6 +152,12 @@
               <svg-icon
                 name="thunderbolt"/>
             </a-popconfirm>
+            <svg-icon
+              v-permit="'project:update'"
+              name="edit"
+              @click.native="handleEdit(item)"
+              title="edit"
+              style="margin-left:10px;"/>
             <a-popconfirm
               title="Are you sure delete this project ?"
               cancel-text="No"
@@ -186,6 +195,7 @@
 <script>
 import { build, buildlog, list,remove,closebuild } from '@api/project'
 import Ellipsis from '@comp/Ellipsis'
+import {mapActions} from 'vuex'
 import { Terminal } from 'xterm'
 import 'xterm/css/xterm.css'
 
@@ -237,6 +247,8 @@ export default {
   },
 
   methods: {
+    ...mapActions(['SetProjectId']),
+
     handleSearch (value) {
       this.paginationInfo = null
       this.handleFetch({
@@ -263,6 +275,11 @@ export default {
 
     handleAdd () {
       this.$router.push({ 'path': '/flink/project/add' })
+    },
+
+    handleEdit(item) {
+      this.SetProjectId(item.id)
+      this.$router.push({'path': '/flink/project/edit'})
     },
 
     handleDelete(item) {

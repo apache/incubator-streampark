@@ -36,6 +36,10 @@ public interface ProjectService extends IService<Project> {
 
     RestResponse create(Project project);
 
+    boolean update(Project projectParam);
+
+    Project getProject(Long id);
+
     boolean delete(Long id);
 
     IPage<Project> page(Project project, RestRequest restRequest);

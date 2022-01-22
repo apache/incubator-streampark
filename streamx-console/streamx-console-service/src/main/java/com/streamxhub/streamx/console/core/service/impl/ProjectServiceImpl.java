@@ -116,6 +116,33 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
+    public boolean update(Project projectParam) {
+        try {
+            Project project = getById(projectParam.getId());
+            assert project != null;
+            project.setName(projectParam.getName());
+            project.setUrl(projectParam.getUrl());
+            project.setBranches(projectParam.getBranches());
+            project.setUsername(projectParam.getUsername());
+            project.setPassword(projectParam.getPassword());
+            project.setPom(projectParam.getPom());
+            project.setDescription(projectParam.getDescription());
+            project.setBuildState(projectParam.getBuildState());
+            baseMapper.updateById(project);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public Project getProject(Long id) {
+        return baseMapper.selectById(id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean delete(Long id) {
         Project project = getById(id);
         assert project != null;
