@@ -577,6 +577,11 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
+    public boolean isNeedCheck() {
+        return DeployState.NEED_CHECK_AFTER_PROJECT_CHANGED.get() == this.getDeploy();
+    }
+
+    @JsonIgnore
     public boolean isNeedRestartOnFailed() {
         if (this.restartSize != null && this.restartCount != null) {
             return this.restartSize > 0 && this.restartCount <= this.restartSize;

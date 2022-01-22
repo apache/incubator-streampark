@@ -290,7 +290,6 @@ export default {
                 )
               } else {
                 this.handleCheckRebuild(values)
-
                 update({
                   id: this.project.id,
                   name: values.name,

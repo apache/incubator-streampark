@@ -26,6 +26,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
+import com.streamxhub.streamx.console.core.enums.BuildState;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.Data;
@@ -80,7 +81,7 @@ public class Project implements Serializable {
 
     private String description;
     /**
-     * 构建状态: -1:未构建 0:正在构建 1:构建成功 2:构建失败
+     * 构建状态: -2:发生变更,需重新build -1:未构建 0:正在构建 1:构建成功 2:构建失败
      */
     @TableField("BUILDSTATE")
     private Integer buildState;
@@ -170,8 +171,8 @@ public class Project implements Serializable {
                 }
             }
             return branchList;
-        } catch (Exception ignored) {
-            ignored.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return Collections.emptyList();
     }
