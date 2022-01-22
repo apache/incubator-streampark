@@ -30,7 +30,7 @@ CREATE TABLE `t_app_build_pipe`
 
 BEGIN;
 
-INSERT INTO `t_menu` VALUES (37, 14, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', '', '0', '0', NULL, NOW(), NOW());
+INSERT INTO `t_menu` VALUES (37, 14, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', NULL, '0', '0', NULL, NOW(), NOW());
 
 delete from `t_role_menu` where id > 36 AND id < 56;
 INSERT INTO `t_role_menu` VALUES (37, 1, 37);
