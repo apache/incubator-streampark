@@ -1,4 +1,4 @@
-<div style="text-align: center">
+<div align="center">
     <br/>
     <h1>
         <a href="http://www.streamxhub.com" target="_blank" rel="noopener noreferrer">
@@ -10,7 +10,7 @@
 
 <br/>
 
-<p style="text-align: center">
+<p align="center">
   <a href="https://www.apache.org/licenses/LICENSE-2.0.html"><img src="https://img.shields.io/badge/license-Apache%202-4EB1BA.svg"></a>
   <img src="https://tokei.rs/b1/github/streamxhub/streamx">
   <img src="https://img.shields.io/github/v/release/streamxhub/streamx.svg">
@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/github/languages/count/streamxhub/streamx">
 </p>
 
-<div style="text-align: center">
+<div align="center">
 
 **[官网](http://www.streamxhub.com)** |
 **[更新日志](#)** |
