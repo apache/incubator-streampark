@@ -1996,7 +1996,7 @@
 
     handleView(params) {
       if (params.state === 6 || params.state === 7 || params['optionState'] === 4) {
-        // yarn-pre-job|yarn-session|yarn-application
+        // yarn-per-job|yarn-session|yarn-application
         const executionMode = params['executionMode']
         if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
           if(this.yarn == null) {
