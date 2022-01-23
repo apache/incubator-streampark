@@ -46,7 +46,7 @@ import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates;
-import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
+import com.streamxhub.streamx.flink.packer.maven.DependencyInfo;
 import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -562,7 +562,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public JarPackDeps getJarPackDeps() {
+    public DependencyInfo getDependencyInfo() {
         return Application.Dependency.jsonToDependency(getDependency()).toJarPackDeps();
     }
 
@@ -742,14 +742,14 @@ public class Application implements Serializable {
         }
 
         @JsonIgnore
-        public JarPackDeps toJarPackDeps() {
+        public DependencyInfo toJarPackDeps() {
             List<MavenArtifact> mvnArts = this.pom.stream()
                 .map(pom -> new MavenArtifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
                 .collect(Collectors.toList());
             List<String> extJars = this.jar.stream()
                 .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
                 .collect(Collectors.toList());
-            return new JarPackDeps(mvnArts, extJars);
+            return new DependencyInfo(mvnArts, extJars);
         }
 
     }

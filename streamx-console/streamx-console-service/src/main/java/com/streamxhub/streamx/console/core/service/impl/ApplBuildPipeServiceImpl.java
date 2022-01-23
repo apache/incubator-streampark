@@ -33,6 +33,7 @@ import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
+import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
@@ -119,7 +120,10 @@ public class ApplBuildPipeServiceImpl
 
         // set dependency
         if (app.isFlinkSqlJob()) {
-            FlinkSql flinkSql = flinkSqlService.getById(app.getSqlId());
+            FlinkSql flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
+            if (flinkSql == null) {
+                flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.HISTORY);
+            }
             assert flinkSql != null;
             app.setDependency(flinkSql.getDependency());
         }
@@ -194,7 +198,7 @@ public class ApplBuildPipeServiceImpl
                     app.getExecutionModeEnum(),
                     app.getDevelopmentMode(),
                     flinkEnv.getFlinkVersion(),
-                    app.getJarPackDeps(),
+                    app.getDependencyInfo(),
                     flinkUserJar,
                     app.getClusterId(),
                     app.getK8sNamespace());
@@ -207,7 +211,7 @@ public class ApplBuildPipeServiceImpl
                     app.getExecutionModeEnum(),
                     app.getDevelopmentMode(),
                     flinkEnv.getFlinkVersion(),
-                    app.getJarPackDeps(),
+                    app.getDependencyInfo(),
                     flinkUserJar,
                     app.getClusterId(),
                     app.getK8sNamespace(),
@@ -239,7 +243,7 @@ public class ApplBuildPipeServiceImpl
                     case APACHE_FLINK:
                         return String.format("%s/%s", application.getAppHome(), application.getJar());
                     default:
-                        throw new IllegalArgumentException("[streamx] unsupported ApplicationType of custom code: "
+                        throw new IllegalArgumentException("[StreamX] unsupported ApplicationType of custom code: "
                                 + application.getApplicationType());
                 }
             case FLINKSQL:
@@ -249,7 +253,7 @@ public class ApplBuildPipeServiceImpl
                 }
                 return Workspace.local().APP_PLUGINS().concat("/").concat(retrieveSqlDistJar());
             default:
-                throw new UnsupportedOperationException("[streamx] unsupported JobType: " + application.getDevelopmentMode());
+                throw new UnsupportedOperationException("[StreamX] unsupported JobType: " + application.getDevelopmentMode());
         }
     }
 
@@ -264,10 +268,10 @@ public class ApplBuildPipeServiceImpl
                 Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
                         .collect(Collectors.toList());
         if (jars.isEmpty()) {
-            throw new IllegalArgumentException("[streamx] can no found streamx-flink-sqlclient jar in " + localPlugins);
+            throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localPlugins);
         }
         if (jars.size() > 1) {
-            throw new IllegalArgumentException("[streamx] found multiple streamx-flink-sqlclient jar in " + localPlugins);
+            throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localPlugins);
         }
         return jars.get(0);
     }
