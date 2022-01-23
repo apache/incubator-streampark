@@ -17,34 +17,35 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.packer.maven
+package com.streamxhub.streamx.flink.packer.pipeline
 
-import java.util.{List => JavaList}
-import scala.collection.JavaConversions._
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+import javax.annotation.Nullable
 
 /**
- * @author Al-assad
+ * Error details of building pipeline.
  *
- * @param mavenArts  collection of maven artifacts
- * @param extJarLibs collection of jar lib paths, which elements can be a directory or file path.
+ * @param summary   summary of error
+ * @param exception exception stack
+ * @author Al-assad
  */
-case class JarPackDeps(mavenArts: Set[MavenArtifact] = Set(),
-                       extJarLibs: Set[String] = Set()) {
+@JsonIgnoreProperties(ignoreUnknown = true, value = Array("exception"))
+case class PipeError(summary: String,
+                     @Nullable exception: Throwable,
+                     @Nullable exceptionStack: String) {
 
-  def this(mavenArts: JavaList[MavenArtifact], extJarLibs: JavaList[String]) {
-    this(mavenArts.toSet, extJarLibs.toSet)
-  }
+  def nonEmpty: Boolean = Option(summary).exists(_.nonEmpty) || exception != null
 
-  def merge(jarLibs: Set[String]): JarPackDeps =
-    if (jarLibs != null) JarPackDeps(mavenArts, extJarLibs ++ jarLibs) else this.copy()
-
-  def clearExtJarLibs: (JarPackDeps, Set[String]) = JarPackDeps(mavenArts, Set()) -> extJarLibs
-
+  def isEmpty: Boolean = !nonEmpty
 }
 
-object JarPackDeps {
-  def empty: JarPackDeps = new JarPackDeps()
-}
+object PipeError {
 
+  def empty(): PipeError = of("", null)
+
+  def of(summary: String, @Nullable exception: Throwable): PipeError =
+    PipeError(summary, exception, if (exception == null) "" else exception.getStackTrace.mkString("\n"))
+}
 
 

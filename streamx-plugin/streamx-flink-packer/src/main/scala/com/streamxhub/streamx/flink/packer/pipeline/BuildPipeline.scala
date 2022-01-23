@@ -68,7 +68,7 @@ trait BuildPipelineExpose {
   /**
    * get error of pipeline instance
    */
-  def getError: PipeErr
+  def getError: PipeError
 
   /**
    * get all of the steps status
@@ -104,7 +104,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
 
   protected var pipeStatus: PipeStatus = PipeStatus.pending
 
-  protected var error: PipeErr = PipeErr.empty()
+  protected var error: PipeError = PipeError.empty()
 
   protected var curStep: Int = 0
 
@@ -139,7 +139,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
       case Failure(cause) =>
         stepsStatus(seq) = PipeStepStatus.failure-> System.currentTimeMillis
         pipeStatus = PipeStatus.failure
-        error = PipeErr.of(cause.getMessage, cause)
+        error = PipeError.of(cause.getMessage, cause)
         logInfo(s"building pipeline step[$seq/$allSteps] failure => ${pipeType.getSteps.get(seq)}")
         watcher.onStepStateChange(snapshot)
         None
@@ -169,7 +169,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
         result
       case Failure(cause) =>
         pipeStatus = PipeStatus.failure
-        error = PipeErr.of(cause.getMessage, cause)
+        error = PipeError.of(cause.getMessage, cause)
         // log and print error trace stack
         logError(s"building pipeline has failed.", cause)
         val result = ErrorResult()
@@ -180,7 +180,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
 
   override def getPipeStatus: PipeStatus = pipeStatus
 
-  override def getError: PipeErr = error.copy()
+  override def getError: PipeError = error.copy()
 
   override def getStepsStatus: Map[Int, (PipeStepStatus, Long)] = stepsStatus.toMap
 

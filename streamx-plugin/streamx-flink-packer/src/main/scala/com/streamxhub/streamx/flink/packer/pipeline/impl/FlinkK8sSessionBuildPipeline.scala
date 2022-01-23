@@ -60,7 +60,7 @@ class FlinkK8sSessionBuildPipeline(params: FlinkK8sSessionBuildRequest) extends 
     execStep(2) {
       val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(params)
       val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${appName}_${DateUtils.now(fullCompact)}.jar"
-      val flinkLibs = params.jarPackDeps.merge(providedLibs)
+      val flinkLibs = params.dependencyInfo.merge(providedLibs)
       val output = MavenTool.buildFatJar(flinkLibs, shadedJarOutputPath)
       logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
       output
