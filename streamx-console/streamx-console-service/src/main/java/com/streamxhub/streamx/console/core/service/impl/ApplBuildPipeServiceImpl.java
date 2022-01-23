@@ -32,8 +32,10 @@ import com.streamxhub.streamx.console.core.dao.ApplicationBuildPipelineMapper;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
+import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
+import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline;
@@ -88,6 +90,9 @@ public class ApplBuildPipeServiceImpl
     private FlinkEnvService flinkEnvService;
 
     @Autowired
+    private FlinkSqlService flinkSqlService;
+
+    @Autowired
     private SettingService settingService;
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
@@ -111,6 +116,14 @@ public class ApplBuildPipeServiceImpl
 
     @Override
     public boolean buildApplication(@Nonnull Application app) {
+
+        // set dependency
+        if (app.isFlinkSqlJob()) {
+           FlinkSql flinkSql = flinkSqlService.getById(app.getSqlId());
+           assert flinkSql != null;
+           app.setDependency(flinkSql.getDependency());
+        }
+
         // create pipeline instance
         BuildPipeline pipeline = createPipelineInstance(app);
 
