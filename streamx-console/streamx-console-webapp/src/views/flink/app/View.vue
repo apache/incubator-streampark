@@ -491,7 +491,7 @@
           <a-tooltip title="Sync Application State">
             <a-button
               v-if="record.state === 1 || record.deploy === 1"
-              click="handleSeeLog(record)"
+              @click.native="handleSeeLog(record)"
               shape="circle"
               size="small"
               class="control-button ctl-btn-color">
@@ -757,7 +757,7 @@
               left: 0,
               background: '#fff',
               borderRadius: '0 0 4px 4px'}">
-            <a-button type="primary" @click="openBuildErrorLogDrawer">
+            <a-button type="primary" @click.native="openBuildErrorLogDrawer">
               <a-icon type="warning"/>
               Error Log
             </a-button>
