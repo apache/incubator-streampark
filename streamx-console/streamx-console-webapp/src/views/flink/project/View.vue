@@ -144,35 +144,35 @@
           <div class="operation">
 
             <a-tooltip
-                title="See Build log"
-                v-if="item.buildState === 0">
-                <a-button
-                    shape="circle"
-                    size="small"
-                    style="margin-left: 8px"
-                    @click.native="handleSeeLog(item)"
-                    class="control-button ctl-btn-color">
-                  <a-icon
-                      spin
-                      type="sync"
-                      style="color:#4a9ff5"/>
-                </a-button>
+              title="See Build log"
+              v-if="item.buildState === 0">
+              <a-button
+                shape="circle"
+                size="small"
+                style="margin-left: 8px"
+                @click.native="handleSeeLog(item)"
+                class="control-button ctl-btn-color">
+                <a-icon
+                  spin
+                  type="sync"
+                  style="color:#4a9ff5"/>
+              </a-button>
             </a-tooltip>
 
             <a-tooltip
-                title="Build Project"
-                v-if="item.buildState !== 0"
-                v-permit="'project:build'">
+              title="Build Project"
+              v-if="item.buildState !== 0"
+              v-permit="'project:build'">
               <a-popconfirm
-                  title="Are you sure build this project?"
-                  cancel-text="No"
-                  ok-text="Yes"
-                  @confirm="handleBuild(item)">
+                title="Are you sure build this project?"
+                cancel-text="No"
+                ok-text="Yes"
+                @confirm="handleBuild(item)">
                 <a-button
-                    shape="circle"
-                    size="small"
-                    style="margin-left: 8px"
-                    class="control-button ctl-btn-color">
+                  shape="circle"
+                  size="small"
+                  style="margin-left: 8px"
+                  class="control-button ctl-btn-color">
                   <a-icon type="thunderbolt" />
                 </a-button>
               </a-popconfirm>
@@ -180,28 +180,28 @@
 
             <a-tooltip title="Update Project">
               <a-button
-                  v-permit="'project:update'"
-                  @click.native="handleEdit(item)"
-                  shape="circle"
-                  size="small"
-                  style="margin-left: 8px"
-                  class="control-button ctl-btn-color">
+                v-permit="'project:update'"
+                @click.native="handleEdit(item)"
+                shape="circle"
+                size="small"
+                style="margin-left: 8px"
+                class="control-button ctl-btn-color">
                 <a-icon type="edit"/>
               </a-button>
             </a-tooltip>
 
             <a-tooltip title="Delete Project">
               <a-popconfirm
-                  title="Are you sure delete this project ?"
-                  cancel-text="No"
-                  ok-text="Yes"
-                  @confirm="handleDelete(item)">
+                title="Are you sure delete this project ?"
+                cancel-text="No"
+                ok-text="Yes"
+                @confirm="handleDelete(item)">
                 <a-button
-                    type="danger"
-                    shape="circle"
-                    size="small"
-                    style="margin-left: 8px"
-                    class="control-button">
+                  type="danger"
+                  shape="circle"
+                  size="small"
+                  style="margin-left: 8px"
+                  class="control-button">
                   <a-icon type="delete"/>
                 </a-button>
               </a-popconfirm>
