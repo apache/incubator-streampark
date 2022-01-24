@@ -33,7 +33,6 @@ import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
-import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
@@ -120,10 +119,7 @@ public class ApplBuildPipeServiceImpl
 
         // set dependency
         if (app.isFlinkSqlJob()) {
-            FlinkSql flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
-            if (flinkSql == null) {
-                flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.HISTORY);
-            }
+            FlinkSql flinkSql = flinkSqlService.getEffective(app.getId(), false);
             assert flinkSql != null;
             app.setDependency(flinkSql.getDependency());
         }
