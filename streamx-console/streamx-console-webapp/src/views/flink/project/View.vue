@@ -150,12 +150,12 @@
                     shape="circle"
                     size="small"
                     style="margin-left: 8px"
+                    @click.native="handleSeeLog(item)"
                     class="control-button ctl-btn-color">
                   <a-icon
-                      type="sync"
-                      style="color:#4a9ff5"
                       spin
-                      @click="handleSeeLog(item)" />
+                      type="sync"
+                      style="color:#4a9ff5"/>
                 </a-button>
             </a-tooltip>
 
