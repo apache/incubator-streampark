@@ -546,10 +546,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setState(FlinkAppState.CREATED.getValue());
         appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
+        appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
             String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
             appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
         }
+
         boolean saved = save(appParam);
         if (saved) {
             if (appParam.isFlinkSqlJob()) {
@@ -624,6 +626,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setClusterId(appParam.getClusterId());
             application.setFlinkImage(appParam.getFlinkImage());
             application.setK8sNamespace(appParam.getK8sNamespace());
+            application.updateHotParams(appParam);
             application.setK8sRestExposedType(appParam.getK8sRestExposedType());
             application.setK8sPodTemplate(appParam.getK8sPodTemplate());
             application.setK8sJmPodTemplate(appParam.getK8sJmPodTemplate());
@@ -1002,6 +1005,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
+        if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
+            if (!application.getHotParamsMap().isEmpty()) {
+                application.setYarnQueue(application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE()).toString());
+            }
+        }
+
         return application;
     }
 
@@ -1244,6 +1253,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             Map<String, Object> optionMap = application.getOptionMap();
             optionMap.put(ConfigConst.KEY_JOB_ID(), application.getId());
+            if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
+                optionMap.putAll(application.getHotParamsMap());
+            }
 
             if (application.isFlinkSqlJob()) {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);

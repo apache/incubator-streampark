@@ -6,6 +6,8 @@ ALTER TABLE `t_flink_app` ADD COLUMN `RESOURCE_FROM` tinyint(1) NULL AFTER `EXEC
 
 ALTER TABLE `t_flink_app` ADD COLUMN `JAR_CHECK_SUM` bigint NULL AFTER `JAR`;
 
+ALTER TABLE `t_flink_app` ADD COLUMN `HOT_PARAMS` text NULL AFTER `OPTIONS`;
+
 update `t_flink_app` set `RESOURCE_FROM` = 1 where `JOB_TYPE` = 1;
 
 -- ----------------------------
