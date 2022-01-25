@@ -110,6 +110,8 @@ object ConfigConst {
 
   val KEY_FLINK_APP_NAME = "yarn.application.name"
 
+  val KEY_YARN_APP_QUEUE = "yarn.application.queue"
+
   val KEY_FLINK_SAVEPOINT_PATH = "execution.savepoint.path"
 
   // --checkpoints--

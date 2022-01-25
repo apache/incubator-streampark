@@ -1321,6 +1321,20 @@
         </p>
       </a-form-item>
 
+      <template v-if="executionMode === 4">
+        <a-form-item
+          label="Yarn Queue"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            allowClear
+            placeholder="Please enter yarn queue"
+            v-decorator="[ 'yarnQueue']">
+          </a-input>
+        </a-form-item>
+      </template>
+
       <a-form-item
         label="Dynamic Option"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -1333,7 +1347,7 @@
         <p class="conf-desc">
           <span class="note-info">
             <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
-            It works the same as <span class="note-elem">-D$property=$value</span> in CLI mode, e.g: <span class="note-elem">yarn.application.queue=flink</span>, Allows specifying multiple generic configuration options. The available options can be found
+            It works the same as <span class="note-elem">-D$property=$value</span> in CLI mode, Allows specifying multiple generic configuration options. The available options can be found
             <a href="https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html" target="_blank">here</a>
           </span>
         </p>
@@ -2244,6 +2258,7 @@ export default {
         jobName: values.jobName,
         args: values.args,
         options: JSON.stringify(options),
+        yarnQueue: this.handleYarnQueue(values),
         cpMaxFailureInterval: values.cpMaxFailureInterval || null,
         cpFailureRateInterval: values.cpFailureRateInterval || null,
         cpFailureAction: values.cpFailureAction || null,
@@ -2334,6 +2349,7 @@ export default {
         args: values.args || null,
         dependency: dependency.pom === undefined && dependency.jar === undefined ? null : JSON.stringify(dependency),
         options: JSON.stringify(options),
+        yarnQueue: this.handleYarnQueue(values),
         cpMaxFailureInterval: values.cpMaxFailureInterval || null,
         cpFailureRateInterval: values.cpFailureRateInterval || null,
         cpFailureAction: values.cpFailureAction || null,
@@ -2354,6 +2370,16 @@ export default {
         params.k8sHadoopIntegration = this.useSysHadoopConf
       }
       this.handleCreateApp(params)
+    },
+
+    handleYarnQueue(values) {
+      if ( this.executionMode === 4 ) {
+        const queue = values['yarnQueue']
+        if (queue != null && queue !== '' && queue !== undefined) {
+          return queue
+        }
+        return null
+      }
     },
 
     handleFormValue(values) {

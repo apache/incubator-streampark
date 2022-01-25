@@ -62,6 +62,7 @@ CREATE TABLE `t_flink_app` (
 `MAIN_CLASS` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `ARGS` text COLLATE utf8mb4_general_ci,
 `OPTIONS` text COLLATE utf8mb4_general_ci,
+`HOT_PARAMS` text COLLATE utf8mb4_general_ci,
 `USER_ID` bigint DEFAULT NULL,
 `APP_ID` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `APP_TYPE` tinyint DEFAULT NULL,
