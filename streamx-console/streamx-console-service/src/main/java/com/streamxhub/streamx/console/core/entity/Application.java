@@ -710,7 +710,7 @@ public class Application implements Serializable {
         Map<String, String> hotParams = new HashMap<>();
         ExecutionMode executionModeEnum = this.getExecutionModeEnum();
         if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
-            if (this.getYarnQueue() != null) {
+            if (StringUtils.isNotEmpty(this.getYarnQueue())) {
                 hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.getYarnQueue());
             }
         }
@@ -722,11 +722,11 @@ public class Application implements Serializable {
     @JsonIgnore
     @SneakyThrows
     public void updateHotParams(Application appParam) {
-        ExecutionMode executionModeEnum = this.getExecutionModeEnum();
+        ExecutionMode executionModeEnum = appParam.getExecutionModeEnum();
         Map<String, String> hotParams = new HashMap<>();
         if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
-            if (appParam.getYarnQueue() != null) {
-                hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.getYarnQueue());
+            if (StringUtils.isNotEmpty(appParam.getYarnQueue())) {
+                hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), appParam.getYarnQueue());
             }
         }
         this.setHotParams(JsonUtils.write(hotParams));
