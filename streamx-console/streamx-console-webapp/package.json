@@ -3,17 +3,17 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service --mode=development serve",
-    "build:mix": "vue-cli-service --mode=mixin build",
-    "build": "vue-cli-service --mode=production build",
+    "serve": "vue-cli-service serve --mode development",
+    "build:mix": "cross-env VUE_MIXIN=mixin vue-cli-service build",
+    "build": "vue-cli-service build --mode production",
     "lint": "vue-cli-service lint",
-    "lint:nofix": "vue-cli-service lint --no-fix",
-    "postinstall": "opencollective-postinstall"
+    "lint:nofix": "vue-cli-service lint --no-fix"
   },
   "dependencies": {
     "ant-design-vue": "^1.7.8",
     "axios": "^0.24.0",
     "core-js": "^3.20.0",
+    "cross-env": "^7.0.3",
     "dedent": "^0.7.0",
     "enquire.js": "^2.1.6",
     "github-markdown-css": "^5.1.0",
