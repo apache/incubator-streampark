@@ -62,6 +62,8 @@ mybatis-plus:
   configuration:
     jdbc-type-for-null: null
   global-config:
+    db-config:
+      id-type: auto
     # 关闭 mybatis-plus的 banner
     banner: false
 
