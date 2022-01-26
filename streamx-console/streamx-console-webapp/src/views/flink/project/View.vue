@@ -489,7 +489,7 @@ export default {
 }
 
 .operation {
-  width: 100px;
+  width: 120px;
 }
 
 .ant-tag {

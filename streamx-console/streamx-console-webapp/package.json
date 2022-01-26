@@ -3,9 +3,9 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service --mode=development serve",
-    "build:mix": "vue-cli-service --mode=mixin build",
-    "build": "vue-cli-service --mode=production build",
+    "serve": "vue-cli-service serve --mode development",
+    "build:mix": "vue-cli-service build --mode mixin",
+    "build": "vue-cli-service build --mode production",
     "lint": "vue-cli-service lint",
     "lint:nofix": "vue-cli-service lint --no-fix",
     "postinstall": "opencollective-postinstall"
