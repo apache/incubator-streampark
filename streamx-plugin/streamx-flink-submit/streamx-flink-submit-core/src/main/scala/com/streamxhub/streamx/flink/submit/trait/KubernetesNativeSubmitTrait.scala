@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.submit.`trait`
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType}
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildResponse
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.collections.MapUtils
@@ -148,6 +149,24 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .safeSet(PipelineOptions.NAME, submitRequest.appName)
       .safeSet(CoreOptions.CLASSLOADER_RESOLVE_ORDER, submitRequest.resolveOrder.getName)
       .set(KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE, covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType))
+
+    if (submitRequest.buildResult != null) {
+      val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
+      val templatePaths: Map[String, String] = buildResult.podTemplatePaths
+      for ((key, path) <- templatePaths) {
+        if (key.equals(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE.key())) {
+          flinkConfig.set(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, path)
+        }
+
+        if (key.equals(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE.key())) {
+          flinkConfig.set(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, path)
+        }
+
+        if (key.equals(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE.key())) {
+          flinkConfig.set(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, path)
+        }
+      }
+    }
 
     if (DevelopmentMode.FLINKSQL == submitRequest.developmentMode) {
       flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, "com.streamxhub.streamx.flink.cli.SqlClient")
