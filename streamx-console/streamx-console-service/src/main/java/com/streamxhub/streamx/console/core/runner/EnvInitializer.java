@@ -152,13 +152,28 @@ public class EnvInitializer implements ApplicationRunner {
                 fsOperator.mkdirs(appJars);
             }
 
+            String keepFile = ".gitkeep";
+
+            String appClient = workspace.APP_CLIENT();
+            if (fsOperator.exists(appClient)) {
+                fsOperator.delete(appClient);
+            }
+            fsOperator.mkdirs(appClient);
+
+            File client = new File(WebUtils.getAppDir("client"));
+            for (File file : Objects.requireNonNull(client.listFiles())) {
+                String plugin = appClient.concat("/").concat(file.getName());
+                if (!fsOperator.exists(plugin) && !keepFile.equals(file.getName())) {
+                    log.info("load client:{} to {}", file.getName(), appClient);
+                    fsOperator.upload(file.getAbsolutePath(), appClient);
+                }
+            }
+
             String appPlugins = workspace.APP_PLUGINS();
             if (fsOperator.exists(appPlugins)) {
                 fsOperator.delete(appPlugins);
             }
             fsOperator.mkdirs(appPlugins);
-
-            String keepFile = ".gitkeep";
 
             File plugins = new File(WebUtils.getAppDir("plugins"));
             for (File file : Objects.requireNonNull(plugins.listFiles())) {

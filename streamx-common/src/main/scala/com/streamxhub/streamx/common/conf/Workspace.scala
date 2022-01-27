@@ -81,6 +81,8 @@ case class Workspace(storageType: StorageType) {
 
   lazy val APP_PLUGINS = s"$WORKSPACE/plugins"
 
+  lazy val APP_CLIENT = s"$WORKSPACE/client"
+
   /**
    * 存放不同版本flink相关的jar
    */
