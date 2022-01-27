@@ -254,7 +254,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_sql`;
 CREATE TABLE `t_flink_sql` (
-`ID` bigint NOT NULL,
+`ID` bigint NOT NULL AUTO_INCREMENT,
 `APP_ID` bigint DEFAULT NULL,
 `SQL` text COLLATE utf8mb4_general_ci,
 `DEPENDENCY` text COLLATE utf8mb4_general_ci,
@@ -484,7 +484,7 @@ CREATE TABLE `t_setting` (
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `TYPE` tinyint NOT NULL COMMENT '1: input 2: boolean 3: number',
 PRIMARY KEY (`KEY`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_setting
@@ -555,9 +555,8 @@ COMMIT;
 -- Table of t_app_build_pipe
 -- ----------------------------
 DROP TABLE IF EXISTS `t_app_build_pipe`;
-CREATE TABLE `t_app_build_pipe`
-(
-    `APP_ID`          BIGINT PRIMARY KEY,
+CREATE TABLE `t_app_build_pipe`(
+    `APP_ID`          BIGINT AUTO_INCREMENT,
     `PIPE_TYPE`       TINYINT,
     `PIPE_STATUS`     TINYINT,
     `CUR_STEP`        SMALLINT,
@@ -566,7 +565,8 @@ CREATE TABLE `t_app_build_pipe`
     `STEPS_STATUS_TS` TEXT,
     `ERROR`           TEXT,
     `BUILD_RESULT`    TEXT,
-    `UPDATE_TIME`     DATETIME
+    `UPDATE_TIME`     DATETIME,
+    PRIMARY KEY (`APP_ID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 

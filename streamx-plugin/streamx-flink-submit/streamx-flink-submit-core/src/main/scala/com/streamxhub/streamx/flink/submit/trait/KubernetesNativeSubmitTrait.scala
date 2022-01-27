@@ -152,20 +152,18 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
     if (submitRequest.buildResult != null) {
       val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
-      val templatePaths: Map[String, String] = buildResult.podTemplatePaths
-      for ((key, path) <- templatePaths) {
-        if (key.equals(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE.key())) {
-          flinkConfig.set(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, path)
-        }
 
-        if (key.equals(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE.key())) {
-          flinkConfig.set(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, path)
+      buildResult.podTemplatePaths.foreach(p => {
+        if (p._1 == KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE.key()) {
+          flinkConfig.set(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
         }
-
-        if (key.equals(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE.key())) {
-          flinkConfig.set(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, path)
+        if (p._1 == KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE.key()) {
+          flinkConfig.set(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
         }
-      }
+        if (p._1 == KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE.key()) {
+          flinkConfig.set(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
+        }
+      })
     }
 
     if (DevelopmentMode.FLINKSQL == submitRequest.developmentMode) {

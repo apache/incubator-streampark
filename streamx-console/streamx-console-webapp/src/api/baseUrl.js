@@ -21,7 +21,7 @@
 
 
 export function baseUrl() {
-  if (process.env.VUE_MIXIN) {
+  if (process.env.VUE_APP_ENV) {
     return `${location.protocol}//${location.host}`
   }
   let url = ''
