@@ -23,7 +23,7 @@
 
 **[官网](http://www.streamxhub.com)** |
 **[更新日志](#)** |
-**[使用文档](http://www.streamxhub.com/zh/doc)**
+**[使用文档](https://www.streamxhub.com/zh-CN/docs/intro)**
 
 </div>
 

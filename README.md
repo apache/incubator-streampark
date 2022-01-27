@@ -23,7 +23,7 @@
 
 **[Official Website](http://www.streamxhub.com)** |
 **[Change Log](#)** |
-**[Document](http://www.streamxhub.com/zh/doc/)**
+**[Document](https://www.streamxhub.com/docs/intro)**
 
 </div>
 
