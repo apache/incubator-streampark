@@ -89,7 +89,16 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val jobID = JobID.fromHexString(stopRequest.jobId)
-      val savePointDir = stopRequest.customSavePointPath
+      var savePointDir = stopRequest.customSavePointPath
+
+      if (StringUtils.isBlank(savePointDir)) {
+        savePointDir = getOptionFromDefaultFlinkConfig(
+          stopRequest.flinkVersion.flinkHome,
+          ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
+            .stringType()
+            .defaultValue(s"${workspace.APP_SAVEPOINTS}")
+        )
+      }
 
       val actionResult = (stopRequest.withSavePoint, stopRequest.withDrain) match {
         case (true, true) if savePointDir.nonEmpty => client.stopWithSavepoint(jobID, true, savePointDir).get()
