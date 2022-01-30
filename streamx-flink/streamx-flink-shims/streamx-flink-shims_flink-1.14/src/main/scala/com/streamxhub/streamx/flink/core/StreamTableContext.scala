@@ -114,7 +114,7 @@ class StreamTableContext(override val parameter: ParameterTool,
 
   def from(descriptor: TableDescriptor): org.apache.flink.table.api.Table = tableEnv.from(descriptor)
 
-  def getStreamGraph(clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(clearTransformations)
+  def $getStreamGraph(clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(clearTransformations)
 
   override def createStatementSet(): StreamStatementSet = tableEnv.createStatementSet()
 

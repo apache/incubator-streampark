@@ -408,7 +408,7 @@ export default [
         name: 'taskmanager.memory.jvm-metaspace.size',
         placeholder: 'JVM Metaspace Size for the TaskExecutors',
         description: 'JVM Metaspace Size for the TaskExecutors',
-        unit: null,
+        unit: 'mb',
         group: 'taskmanager-memory',
         type: 'number',
         min: 1,

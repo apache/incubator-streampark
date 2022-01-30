@@ -54,6 +54,18 @@ public class ProjectController {
         return projectService.create(project);
     }
 
+    @PostMapping("update")
+    @RequiresPermissions("project:update")
+    public RestResponse update(Project project) {
+        boolean update = projectService.update(project);
+        return RestResponse.create().data(update);
+    }
+
+    @PostMapping("get")
+    public RestResponse get(Long id) {
+        return RestResponse.create().data(projectService.getById(id));
+    }
+
     @PostMapping("build")
     @RequiresPermissions("project:build")
     public RestResponse build(Long id, String socketId) throws Exception {

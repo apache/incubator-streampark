@@ -12,7 +12,7 @@
             </a>
           </div>
           <div class="desc">
-            StreamX, Make Flink|Spark easier!
+            StreamX ── Make stream processing easier!
           </div>
         </div>
         <a-form

@@ -17,35 +17,31 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.packer.pipeline
+package com.streamxhub.streamx.flink.packer.maven
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-
-import javax.annotation.Nullable
+import java.util.{List => JavaList}
+import scala.collection.JavaConversions._
 
 /**
- * Error details of building pipeline.
- *
- * @param summary   summary of error
- * @param exception exception stack
  * @author Al-assad
+ * @param mavenArts  collection of maven artifacts
+ * @param extJarLibs collection of jar lib paths, which elements can be a directory or file path.
  */
-@JsonIgnoreProperties(ignoreUnknown = true, value = Array("exception"))
-case class PipeErr(summary: String,
-                   @Nullable exception: Throwable,
-                   @Nullable exceptionStack: String) {
+case class DependencyInfo(mavenArts: Set[MavenArtifact] = Set(),
+                          extJarLibs: Set[String] = Set()) {
 
-  def nonEmpty: Boolean = Option(summary).exists(_.nonEmpty) || exception != null
+  def this(mavenArts: JavaList[MavenArtifact], extJarLibs: JavaList[String]) {
+    this(mavenArts.toSet, extJarLibs.toSet)
+  }
 
-  def isEmpty: Boolean = !nonEmpty
+  def merge(jarLibs: Set[String]): DependencyInfo =
+    if (jarLibs != null) DependencyInfo(mavenArts, extJarLibs ++ jarLibs) else this.copy()
+
 }
 
-object PipeErr {
-
-  def empty(): PipeErr = of("", null)
-
-  def of(summary: String, @Nullable exception: Throwable): PipeErr =
-    PipeErr(summary, exception, if (exception == null) "" else exception.getStackTrace.mkString("\n"))
+object DependencyInfo {
+  def empty: DependencyInfo = new DependencyInfo()
 }
+
 
 

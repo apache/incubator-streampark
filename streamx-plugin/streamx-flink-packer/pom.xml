@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-plugin</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.2</version>
     </parent>
 
     <artifactId>streamx-flink-packer</artifactId>
@@ -42,6 +42,10 @@
                 <exclusion>
                     <artifactId>guava</artifactId>
                     <groupId>com.google.guava</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jdom</groupId>
+                    <artifactId>jdom2</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

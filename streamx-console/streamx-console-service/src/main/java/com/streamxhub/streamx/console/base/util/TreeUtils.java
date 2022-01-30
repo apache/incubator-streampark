@@ -113,7 +113,7 @@ public class TreeUtils {
 
         ArrayList<VueRouter<T>> list = new ArrayList<>();
         VueRouter<T> root = new VueRouter<>();
-        root.setName("主页");
+        root.setName("Root");
         root.setComponent("BasicView");
         root.setPath("/");
         root.setChildren(topRoutes);

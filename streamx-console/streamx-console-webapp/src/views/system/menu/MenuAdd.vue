@@ -104,39 +104,16 @@
           :tree-data="menuTreeData" />
       </a-form-item>
     </a-form>
-    <div
-      class="drawer-bootom-button">
-      <a-dropdown
-        :trigger="['click']"
-        placement="topCenter">
-        <a-menu
-          slot="overlay">
-          <a-menu-item
-            key="1"
-            @click="expandAll">
-            展开所有
-          </a-menu-item>
-          <a-menu-item
-            key="2"
-            @click="closeAll">
-            合并所有
-          </a-menu-item>
-        </a-menu>
-        <a-button>
-          树操作
-          <a-icon
-            type="up" />
-        </a-button>
-      </a-dropdown>
+    <div class="drawer-bootom-button">
       <a-button
         @click="onClose">
-        取消
+        Cancel
       </a-button>
       <a-button
         @click="handleSubmit"
         type="primary"
         :loading="loading">
-        提交
+        Submit
       </a-button>
     </div>
     <icons
@@ -150,7 +127,7 @@ import Icons from './Icons'
 import { list, post } from '@/api/menu'
 
 const formItemLayout = {
-  labelCol: { span: 3 },
+  labelCol: { span: 4 },
   wrapperCol: { span: 18 }
 }
 export default {
