@@ -123,7 +123,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public ArrayList<VueRouter<Menu>> getUserRouters(User user) {
         List<VueRouter<Menu>> routes = new ArrayList<>();
-        // 只差type为菜单类型
+        // 查询type为菜单类型
         List<Menu> menus = this.findUserMenus(user.getUsername());
         menus.forEach(menu -> {
             VueRouter<Menu> route = new VueRouter<>();

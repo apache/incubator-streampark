@@ -17,8 +17,8 @@
         <a-button
           type="danger"
           icon="cloud"
-          @click="handleFlinkWebUiView"
-          :disabled="this.app.flinkRestUrl === null"
+          @click="handleView"
+          :disabled="this.app.state !== 7 || (this.yarn === null && this.app.flinkRestUrl === null)"
           style="float: right;margin-top: -8px;margin-right: 20px">Flink Web UI</a-button>
         <a-divider
           style="margin-top: 5px;margin-bottom: -5px" />
@@ -197,28 +197,44 @@
               <template
                 slot="operation"
                 slot-scope="text, record">
-                <svg-icon
-                  name="see"
-                  border
-                  @click.native="handleConfDetail(record)"
-                  title="detail" />
-                <svg-icon
-                  name="swap"
-                  border
-                  v-if="configVersions.length>1"
-                  @click.native="handleCompare(record)"
-                  title="compare" />
+
+                <a-tooltip title="View Config Detail">
+                  <a-button
+                    @click.native="handleConfDetail(record)"
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="eye"/>
+                  </a-button>
+                </a-tooltip>
+
+                <a-tooltip title="Compare Config">
+                  <a-button
+                    v-if="configVersions.length>1"
+                    @click.native="handleCompare(record)"
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="swap"/>
+                  </a-button>
+                </a-tooltip>
+
                 <a-popconfirm
                   v-if="!record.effective"
+                  v-permit="'conf:delete'"
                   title="Are you sure delete this record ?"
                   cancel-text="No"
                   ok-text="Yes"
                   @confirm="handleDeleteConf(record)">
-                  <svg-icon
-                    name="remove"
-                    border
-                    v-permit="'conf:delete'" />
+                  <a-button
+                    type="danger"
+                    shape="circle"
+                    size="small"
+                    class="control-button">
+                    <a-icon type="delete"/>
+                  </a-button>
                 </a-popconfirm>
+
               </template>
             </a-table>
           </a-descriptions-item>
@@ -283,21 +299,32 @@
               <template
                 slot="operation"
                 slot-scope="text, record">
-                <svg-icon
-                  name="copy"
-                  border
-                  v-clipboard:copy="record.path"
-                  v-clipboard:success="handleCopySuccess"
-                  v-clipboard:error="handleCopyError" />
+
+                <a-tooltip title="Copy Path">
+                  <a-button
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color"
+                    v-clipboard:copy="record.path"
+                    v-clipboard:success="handleCopySuccess"
+                    v-clipboard:error="handleCopyError">
+                    <a-icon type="copy"/>
+                  </a-button>
+                </a-tooltip>
+
                 <a-popconfirm
-                  title="确定要删除吗?"
+                  title="Are you sure delete?"
                   cancel-text="No"
                   ok-text="Yes"
+                  v-permit="'savepoint:delete'"
                   @confirm="handleDeleteSavePoint(record)">
-                  <svg-icon
-                    name="remove"
-                    border
-                    v-permit="'savepoint:delete'"/>
+                  <a-button
+                    type="danger"
+                    shape="circle"
+                    size="small"
+                    class="control-button">
+                    <a-icon type="delete"/>
+                  </a-button>
                 </a-popconfirm>
               </template>
             </a-table>
@@ -335,21 +362,33 @@
                 slot="operation"
                 v-if="1 === 2"
                 slot-scope="text, record">
-                <svg-icon
-                  name="rollback"
-                  border
-                  v-permit="'backup:rollback'"
-                  @click.native="handleRollback(record)"/>
+
+                <a-tooltip title="Rollback Job">
+                  <a-button
+                    v-permit="'backup:rollback'"
+                    @click.native="handleRollback(record)"
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="rollback"/>
+                  </a-button>
+                </a-tooltip>
+
                 <a-popconfirm
-                  title="Are you sure delete?"
+                  title="Are you sure delete ?"
                   cancel-text="No"
                   ok-text="Yes"
+                  v-permit="'backup:delete'"
                   @confirm="handleDeleteBackUp(record)">
-                  <svg-icon
-                    name="remove"
-                    border
-                    v-permit="'backup:delete'"/>
+                  <a-button
+                    type="danger"
+                    shape="circle"
+                    size="small"
+                    class="control-button">
+                    <a-icon type="delete"/>
+                  </a-button>
                 </a-popconfirm>
+
               </template>
             </a-table>
           </a-descriptions-item>
@@ -374,9 +413,8 @@
               class="detail-table">
               <template
                 slot="yarnAppId"
-                slot-scope="text, record"
-                class="pointer">
-                <span @click="handleView(record.yarnAppId)">{{ record.yarnAppId }}</span>
+                slot-scope="text, record">
+                <span class="pointer" @click="handleView(record.yarnAppId)">{{ record.yarnAppId }}</span>
               </template>
               <template
                 slot="startTime"
@@ -404,12 +442,16 @@
               <template
                 slot="operation"
                 slot-scope="text, record">
-                <svg-icon
-                  v-if="!record.success"
-                  name="see"
-                  border
-                  @click.native="handleException(record)"
-                  title="查看" />
+                <a-tooltip title="View Exception" v-if="!record.success">
+                  <a-button
+                    v-permit="'app:detail'"
+                    @click.native="handleException(record)"
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="eye"/>
+                  </a-button>
+                </a-tooltip>
               </template>
             </a-table>
           </a-descriptions-item>
@@ -606,8 +648,10 @@ import { history, remove as removeSp } from '@api/savepoint'
 import Mergely from './Mergely'
 import Different from './Different'
 import notification from 'ant-design-vue/lib/notification'
-import monaco from '@/views/flink/app/Monaco.log'
+import * as monaco from 'monaco-editor'
 import SvgIcon from '@/components/SvgIcon'
+import storage from '@/utils/storage'
+import {DEFAULT_THEME} from '@/store/mutation-types'
 
 const Base64 = require('js-base64').Base64
 configOptions.push(
@@ -886,9 +930,11 @@ export default {
     filterNotCurrConfig() {
       return this.allConfigVersions.filter(x => x.version !== this.compare.version)
     },
+
     myTheme() {
-      return this.ideTheme()
+      return this.$store.state.app.theme
     }
+
   },
 
   mounted() {
@@ -975,20 +1021,24 @@ export default {
         this.pager.config.loading = false
       })
     },
+
     handleYarn() {
       yarn({}).then((resp) => {
         this.yarn = resp.data
       })
     },
-    handleView(appId) {
-      if (this.yarn !== null) {
-        const url = this.yarn + '/proxy/' + appId + '/'
-        window.open(url)
+
+    handleView() {
+      if (this.app.executionMode === 2 || this.app.executionMode === 3 || this.app.executionMode === 4) {
+        if (this.yarn !== null) {
+          const url = this.yarn + '/proxy/' + this.app.appId + '/'
+          window.open(url)
+        }
+      } else {
+        window.open(this.app.flinkRestUrl)
       }
     },
-    handleFlinkWebUiView() {
-      window.open(this.app.flinkRestUrl)
-    },
+
     handleSavePoint() {
       const params = {
         appId: this.app.id
@@ -1210,6 +1260,7 @@ export default {
       this.execOption.visible = true
       this.execOption.content = record.exception
       this.$nextTick(() => {
+        this.handleLogMonaco()
         this.editor.exception = monaco.editor.create(document.querySelector('#startExp'), {
           theme: 'log',
           value: this.execOption.content,
@@ -1269,6 +1320,9 @@ export default {
       this.$nextTick(()=>{
         if (this.activeTab === '3') {
           this.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), this.editor.option)
+          this.editor.flinkSql.updateOptions({
+            theme: this.ideTheme()
+          })
         } else if (this.editor.flinkSql) {
           this.editor.flinkSql.dispose()
         }
@@ -1279,15 +1333,51 @@ export default {
       for (const k in this.pager) {
         this.pager[k]['loading'] = this.pager[k]['key'] === this.activeTab
       }
+    },
+
+    handleLogMonaco() {
+      monaco.languages.register({ id: 'log' })
+      monaco.languages.setMonarchTokensProvider('log', {
+        tokenizer: {
+          root: [
+            [/.*\.Exception.*/,'log-error'],
+            [/.*Caused\s+by:.*/,'log-error'],
+            [/\s+at\s+.*/, 'log-info'],
+            [/http:\/\/(.*):\d+(.*)\/application_\d+_\d+/, 'yarn-info'],
+            [/Container\s+id:\s+container_\d+_\d+_\d+_\d+/, 'yarn-info'],
+            [/yarn\s+logs\s+-applicationId\s+application_\d+_\d+/ , 'yarn-info'],
+            [/\[20\d+-\d+-\d+\s+\d+:\d+:\d+\d+|.\d+]/, 'log-date'],
+            [/\[[a-zA-Z 0-9:]+]/, 'log-date'],
+          ]
+        }
+      })
+
+      monaco.editor.defineTheme('log', {
+        base: storage.get(DEFAULT_THEME) === 'dark' ? 'vs-dark' : 'vs',
+        inherit: true,
+        rules: [
+          { token: 'log-info', foreground: '808080' },
+          { token: 'log-error', foreground: 'ff0000', fontStyle: 'bold' },
+          { token: 'log-notice', foreground: 'FFA500' },
+          { token: 'yarn-info', foreground: '0066FF', fontStyle: 'bold'},
+          { token: 'log-date', foreground: '008800' },
+        ]
+      })
     }
+
   },
 
   watch: {
     myTheme() {
       this.$refs.confEdit.theme()
       this.$refs.different.theme()
-      if(this.editor.exception !== null) {
+      if (this.editor.exception !== null) {
         this.editor.exception.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      if (this.editor.flinkSql != null) {
+        this.editor.flinkSql.updateOptions({
           theme: this.ideTheme()
         })
       }

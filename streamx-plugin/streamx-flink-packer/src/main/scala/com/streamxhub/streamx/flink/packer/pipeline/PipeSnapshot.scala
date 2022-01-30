@@ -39,7 +39,7 @@ case class PipeSnapshot(appName: String,
                         curStep: Int,
                         allSteps: Int,
                         stepStatus: Map[Int, (PipeStepStatus, Long)],
-                        error: PipeErr,
+                        error: PipeError,
                         emitTime: Long) {
 
   def percent(): Double = calPercent(curStep, allSteps)

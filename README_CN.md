@@ -5,7 +5,7 @@
         <img width="500" src="https://user-images.githubusercontent.com/13284744/142753483-4e96eb33-01ee-469d-ad7c-387e1bf95ee1.png" alt="StreamX logo">
         </a>
     </h1>
-    <strong>Make Flink|Spark easier!!!</strong>
+    <strong>Make stream processing easier!!!</strong>
 </div>
 
 <br/>
@@ -23,17 +23,17 @@
 
 **[官网](http://www.streamxhub.com)** |
 **[更新日志](#)** |
-**[使用文档](http://www.streamxhub.com/zh/doc)**
+**[使用文档](https://www.streamxhub.com/zh-CN/docs/intro)**
 
 </div>
 
-##[English](README.md) | 中文
+[English](README.md) | 中文
 
 # StreamX
 
-Make Flink|Spark easier!!!
+Make stream processing easier
 
-> 一个神奇的框架，让 Flink|Spark 开发更简单
+> 一个神奇的框架，让流处理更简单
 
 ## 🚀 什么是StreamX
 

@@ -2,6 +2,6 @@
 module.exports = {
   theme: {
     color: '#1890ff',
-    mode: 'dark',
+    mode: 'light',
   }
 }

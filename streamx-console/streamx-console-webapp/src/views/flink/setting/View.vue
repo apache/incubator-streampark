@@ -127,7 +127,7 @@
             <a-button
               type="primary"
               style="float:right;margin-top: 10px;margin-right: 130px"
-              @click="handleSync">
+              @click.native="handleSync">
               <a-icon type="sync" />
               Sync Conf
             </a-button>

@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-flink-shims</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.2</version>
     </parent>
 
     <artifactId>streamx-flink-shims_flink-1.13</artifactId>

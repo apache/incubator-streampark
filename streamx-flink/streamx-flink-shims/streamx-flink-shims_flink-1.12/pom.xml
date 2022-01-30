@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-flink-shims</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.2</version>
     </parent>
 
     <artifactId>streamx-flink-shims_flink-1.12</artifactId>
@@ -28,12 +28,14 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-api-scala_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-scala_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
