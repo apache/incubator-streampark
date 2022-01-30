@@ -27,22 +27,25 @@ import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{SinkFunction, TwoPhaseCommitSinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig}
+import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig, FlinkJedisSentinelConfig}
 import org.apache.flink.streaming.connectors.redis.common.container.{RedisContainer => RContainer}
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand._
 import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, RedisCommandDescription, RedisMapper => RMapper}
 import org.apache.flink.streaming.connectors.redis.{RedisSink => RSink}
 import redis.clients.jedis.exceptions.JedisException
-import redis.clients.jedis.{Jedis, JedisPool}
+import redis.clients.jedis.{Jedis, JedisPool, JedisSentinelPool}
 
 import java.io.IOException
+import java.util
 import java.util.Properties
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.collection.mutable
+import scala.util.Try
 
 object RedisSink {
 
@@ -60,31 +63,78 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
                 uid: String = null
                ) extends Sink {
 
+  val enableCheckpoint: Boolean = ctx.parameter.toMap.getOrElse(KEY_FLINK_CHECKPOINTS_ENABLE, "false").toBoolean
+
+  val cpMode: CheckpointingMode = Try(CheckpointingMode.valueOf(ctx.parameter.toMap.get(KEY_FLINK_CHECKPOINTS_MODE))).getOrElse(CheckpointingMode.AT_LEAST_ONCE)
+
   lazy val config: FlinkJedisConfigBase = {
-    val redisConf = ConfigUtils.getConf(ctx.parameter.toMap, REDIS_PREFIX)
+    val map: util.Map[String, String] = ctx.parameter.toMap
+    val redisConf = ConfigUtils.getConf(map, REDIS_PREFIX)
+    val connectType: String = Try(redisConf.remove(REDIS_CONNECT_TYPE).toString).getOrElse(DEFAULT_REDIS_CONNECT_TYPE)
     Utils.copyProperties(property, redisConf)
-    val builder = new FlinkJedisPoolConfig.Builder()
-    redisConf.map {
-      case (KEY_HOST, host) => builder.setHost(host)
-      case (KEY_PORT, port) => builder.setPort(port.toInt)
-      case (KEY_DB, db) => builder.setDatabase(db.toInt)
-      case (KEY_PASSWORD, password) => builder.setPassword(password)
-      case _ =>
+    val host: String = redisConf.remove(KEY_HOST) match {
+      case null => throw new IllegalArgumentException("redis host  must not null")
+      case hostStr => hostStr.toString
     }
-    builder.build()
+    val port: Int = redisConf.remove(KEY_PORT) match {
+      case null => 6379
+      case portStr => portStr.toString.toInt
+    }
+    connectType match {
+      case "sentinel" => {
+        val sentinels: Set[String] = host.split(SIGN_COMMA).map(x => {
+          if (!x.contains(SIGN_COLON)) {
+            throw new IllegalArgumentException(s"redis sentinel host invalid {$x} must match host:port ")
+          }
+          x
+        }).toSet
+        val builder: FlinkJedisSentinelConfig.Builder = new FlinkJedisSentinelConfig.Builder().setSentinels(sentinels)
+        redisConf.foreach(x => {
+          val field = Try(Option(builder.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+            case Some(x) => x
+            case None => throw new IllegalArgumentException(s"redis  config error,property:${
+              x._1
+            } invalid,init FlinkJedisSentinelConfig err")
+          }
+          field.setAccessible(true)
+          field.getType.getSimpleName match {
+            case "String" => field.set(builder, x._2)
+            case "int" | "Integer" => field.set(builder, x._2.toInt)
+            case "long" | "Long" => field.set(builder, x._2.toLong)
+            case "boolean" | "Boolean" => field.set(builder, x._2.toBoolean)
+            case _ =>
+          }
+        })
+        builder.build()
+      }
+      case DEFAULT_REDIS_CONNECT_TYPE => {
+        val builder: FlinkJedisPoolConfig.Builder = new FlinkJedisPoolConfig.Builder().setHost(host).setPort(port)
+        redisConf.foreach(x => {
+          val field = Try(Option(builder.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+            case Some(x) => x
+            case None => throw new IllegalArgumentException(s"redis  config error,property:${x._1} invalid,init FlinkJedisPoolConfig err")
+          }
+          field.setAccessible(true)
+          field.getType.getSimpleName match {
+            case "String" => field.set(builder, x._2)
+            case "int" | "Integer" => field.set(builder, x._2.toInt)
+            case "long" | "Long" => field.set(builder, x._2.toLong)
+            case "boolean" | "Boolean" => field.set(builder, x._2.toBoolean)
+            case _ =>
+          }
+        })
+        builder.build()
+      }
+      case _ => throw throw new IllegalArgumentException(s"redis  connectType must be jedispool|sentinel|cluster $connectType")
+    }
   }
 
   def sink[T](stream: DataStream[T], mapper: RedisMapper[T], ttl: Int = Int.MaxValue): DataStreamSink[T] = {
-    val sinkFun = ttl match {
-      case Int.MaxValue => new RSink[T](config, mapper)
+    val sinkFun = (enableCheckpoint, cpMode) match {
+      case (false, CheckpointingMode.EXACTLY_ONCE) => throw new IllegalArgumentException("redis sink EXACTLY_ONCE must enable checkpoint")
+      case (true, CheckpointingMode.EXACTLY_ONCE) => new Redis2PCSinkFunction[T](config, mapper, ttl)
       case _ => new RedisSinkFunction[T](config, mapper, ttl)
     }
-    val sink = stream.addSink(sinkFun)
-    afterSink(sink, parallelism, name, uid)
-  }
-
-  def towPCSink[T](stream: DataStream[T], mapper: RedisMapper[T], ttl: Int = Int.MaxValue): DataStreamSink[T] = {
-    val sinkFun = new Redis2PCSinkFunction[T](config, mapper, ttl)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
@@ -115,7 +165,6 @@ class RedisSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMappe
 class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMapper[T], ttl: Int)
   extends TwoPhaseCommitSinkFunction[T, RedisTransaction[T], Void](new KryoSerializer[RedisTransaction[T]](classOf[RedisTransaction[T]], new ExecutionConfig), VoidSerializer.INSTANCE) with Logger {
 
-  private[this] val buffer: collection.mutable.Map[String, RedisTransaction[T]] = collection.mutable.Map.empty[String, RedisTransaction[T]]
 
   override def beginTransaction(): RedisTransaction[T] = {
     logInfo("Redis2PCSink beginTransaction.")
@@ -131,7 +180,6 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
     //防止未调用invoke方法直接调用preCommit
     if (transaction.invoked) {
       logInfo(s"Redis2PCSink preCommit.TransactionId:${transaction.transactionId}")
-      buffer += transaction.transactionId -> transaction
     }
   }
 
@@ -148,8 +196,8 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
         transaction.exec()
         transaction.close()
         redisContainer.close()
+        redisTransaction.mapper.clear()
         //成功,清除state...
-        buffer -= redisTransaction.transactionId
       } catch {
         case e: JedisException =>
           logError(s"Redis2PCSink commit JedisException:${e.getMessage}")
@@ -163,7 +211,7 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
 
   override def abort(transaction: RedisTransaction[T]): Unit = {
     logInfo(s"Redis2PCSink abort,TransactionId:${transaction.transactionId}")
-    buffer -= transaction.transactionId
+    transaction.mapper.clear()
   }
 
 }
@@ -182,21 +230,36 @@ case class RedisTransaction[T](
 object RedisContainer extends Logger {
 
   def getContainer(jedisConfig: FlinkJedisConfigBase): RedisContainer = {
-    val jedisPoolConfig = jedisConfig.asInstanceOf[FlinkJedisPoolConfig]
     val genericObjectPoolConfig = new GenericObjectPoolConfig
-    genericObjectPoolConfig.setMaxIdle(jedisPoolConfig.getMaxIdle)
-    genericObjectPoolConfig.setMaxTotal(jedisPoolConfig.getMaxTotal)
-    genericObjectPoolConfig.setMinIdle(jedisPoolConfig.getMinIdle)
-    val jedisPool = new JedisPool(
-      genericObjectPoolConfig,
-      jedisPoolConfig.getHost,
-      jedisPoolConfig.getPort,
-      jedisPoolConfig.getConnectionTimeout,
-      jedisPoolConfig.getPassword,
-      jedisPoolConfig.getDatabase
-    )
+    genericObjectPoolConfig.setMaxIdle(jedisConfig.getMaxIdle)
+    genericObjectPoolConfig.setMaxTotal(jedisConfig.getMaxTotal)
+    genericObjectPoolConfig.setMinIdle(jedisConfig.getMinIdle)
     try {
-      val redisContainer = new RedisContainer(jedisPool)
+      var redisContaineInnerr: RContainer = null
+      if (jedisConfig.isInstanceOf[FlinkJedisPoolConfig]) {
+        val jedisPoolConfig = jedisConfig.asInstanceOf[FlinkJedisPoolConfig]
+        val jedisPool = new JedisPool(
+          genericObjectPoolConfig,
+          jedisPoolConfig.getHost,
+          jedisPoolConfig.getPort,
+          jedisPoolConfig.getConnectionTimeout,
+          jedisPoolConfig.getPassword,
+          jedisPoolConfig.getDatabase
+        )
+        redisContaineInnerr = new RContainer(jedisPool)
+      }
+      else {
+        val jedissentinelconfig: FlinkJedisSentinelConfig = jedisConfig.asInstanceOf[FlinkJedisSentinelConfig]
+        val jedisSentinelPool: JedisSentinelPool = new JedisSentinelPool(jedissentinelconfig.getMasterName(),
+          jedissentinelconfig.getSentinels(),
+          genericObjectPoolConfig,
+          jedissentinelconfig.getSoTimeout(),
+          jedissentinelconfig.getPassword(),
+          jedissentinelconfig.getDatabase()
+        )
+        redisContaineInnerr = new RContainer(jedisSentinelPool)
+      }
+      val redisContainer = new RedisContainer(redisContaineInnerr)
       redisContainer.open()
       redisContainer
     } catch {
@@ -208,12 +271,16 @@ object RedisContainer extends Logger {
 
 }
 
-class RedisContainer(jedisPool: JedisPool) extends RContainer(jedisPool) {
+class RedisContainer(reContainer: RContainer) {
+
+  def open(): Unit = {
+    reContainer.open()
+  }
 
   lazy val jedis: Jedis = {
-    val method = classOf[RContainer].getDeclaredMethod("getInstance")
+    val method = reContainer.getClass.getDeclaredMethod("getInstance")
     method.setAccessible(true)
-    method.invoke(this).asInstanceOf[Jedis]
+    method.invoke(reContainer).asInstanceOf[Jedis]
   }
 
   def invoke[T](mapper: RedisMapper[T], input: T, transaction: Option[redis.clients.jedis.Transaction]): Unit = {
@@ -222,39 +289,39 @@ class RedisContainer(jedisPool: JedisPool) extends RContainer(jedisPool) {
     mapper.getCommandDescription.getCommand match {
       case RPUSH => transaction match {
         case Some(t) => t.rpush(key, value)
-        case _ => this.rpush(key, value)
+        case _ => this.reContainer.rpush(key, value)
       }
       case LPUSH => transaction match {
         case Some(t) => t.lpush(key, value)
-        case _ => this.lpush(key, value)
+        case _ => this.reContainer.lpush(key, value)
       }
       case SADD => transaction match {
         case Some(t) => t.sadd(key, value)
-        case _ => this.sadd(key, value)
+        case _ => this.reContainer.sadd(key, value)
       }
       case SET => transaction match {
         case Some(t) => t.set(key, value)
-        case _ => this.set(key, value)
+        case _ => this.reContainer.set(key, value)
       }
       case PFADD => transaction match {
         case Some(t) => t.pfadd(key, value)
-        case _ => this.pfadd(key, value)
+        case _ => this.reContainer.pfadd(key, value)
       }
       case PUBLISH => transaction match {
         case Some(t) => t.publish(key, value)
-        case _ => this.publish(key, value)
+        case _ => this.reContainer.publish(key, value)
       }
       case ZADD => transaction match {
         case Some(t) => t.zadd(mapper.getCommandDescription.getAdditionalKey, value.toDouble, key)
-        case _ => this.zadd(mapper.getCommandDescription.getAdditionalKey, value, key)
+        case _ => this.reContainer.zadd(mapper.getCommandDescription.getAdditionalKey, value, key)
       }
       case ZREM => transaction match {
         case Some(t) => t.zrem(mapper.getCommandDescription.getAdditionalKey, key)
-        case _ => this.zrem(mapper.getCommandDescription.getAdditionalKey, key)
+        case _ => this.reContainer.zrem(mapper.getCommandDescription.getAdditionalKey, key)
       }
       case HSET => transaction match {
         case Some(t) => t.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
-        case _ => this.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
+        case _ => this.reContainer.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
       }
       case other => throw new IllegalArgumentException("[StreamX] RedisSink:Cannot process such data type: " + other)
     }
@@ -267,9 +334,14 @@ class RedisContainer(jedisPool: JedisPool) extends RContainer(jedisPool) {
     }
   }
 
+  def close(): Unit = {
+    reContainer.close()
+  }
+
 }
 
-case class RedisMapper[T](cmd: RedisCommand, additionalKey: String, key: T => String, value: T => String) extends RMapper[T] with Serializable {
+
+case class RedisMapper[T](cmd: RedisCommand, additionalKey: String, key: T => String, value: T => String) extends RMapper[T] {
 
   override def getCommandDescription: RedisCommandDescription = new RedisCommandDescription(cmd, additionalKey)
 

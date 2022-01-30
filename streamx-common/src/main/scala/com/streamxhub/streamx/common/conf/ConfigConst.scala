@@ -195,7 +195,11 @@ object ConfigConst {
 
   val KEY_KAFKA_START_FROM_TIMESTAMP = "timestamp"
 
-  val REDIS_PREFIX = "redis."
+  val REDIS_PREFIX = "redis.sink"
+
+  val REDIS_CONNECT_TYPE = "connectType"
+
+  val DEFAULT_REDIS_CONNECT_TYPE = "jedispool"
 
   val KEY_ALIAS = "alias"
 
