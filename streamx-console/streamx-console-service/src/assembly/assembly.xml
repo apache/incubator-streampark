@@ -37,6 +37,11 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
+            <directory>${project.basedir}/../../.mvn</directory>
+            <outputDirectory>bin/.mvn</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
             <directory>${project.build.directory}/lib</directory>
             <outputDirectory>lib</outputDirectory>
             <fileMode>0755</fileMode>
@@ -81,5 +86,4 @@
             </includes>
         </fileSet>
     </fileSets>
-
 </assembly>
