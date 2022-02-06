@@ -19,7 +19,6 @@
 package com.streamxhub.streamx.common.util
 
 import java.io._
-import java.lang.{Iterable => Iterable}
 import java.util.Scanner
 import java.util.function.Consumer
 import scala.collection.JavaConversions._
@@ -54,21 +53,17 @@ object CommandUtils extends Logger {
       while (scanner.hasNextLine) {
         consumer.accept(scanner.nextLine)
       }
-      processClose(process)
+      process.waitFor()
+      process.getErrorStream.close()
+      process.getInputStream.close()
+      process.getOutputStream.close()
+      process.destroy()
       scanner.close()
       out.close()
     } match {
       case Success(_) =>
       case Failure(e) => throw e
     }
-  }
-
-  def processClose(process: Process): Unit = {
-    process.waitFor()
-    process.getErrorStream.close()
-    process.getInputStream.close()
-    process.getOutputStream.close()
-    process.destroy()
   }
 
 }
