@@ -27,15 +27,23 @@ import scala.util.{Failure, Success, Try}
 
 object CommandUtils extends Logger {
 
-
-  def execute(command: String): String = {
-    val buffer = new StringBuffer()
-    this.execute(List(command), new Consumer[String] {
-      override def accept(line: String): Unit = {
-        buffer.append(line).append("\n")
+  @throws[Exception] def execute(command: String): String = {
+    Try {
+      val buffer = new StringBuffer()
+      val process: Process = Runtime.getRuntime.exec(command)
+      val reader = new InputStreamReader(process.getInputStream)
+      val scanner = new Scanner(reader)
+      while (scanner.hasNextLine) {
+        buffer.append(scanner.nextLine()).append("\n")
       }
-    })
-    buffer.toString
+      processClose(process)
+      reader.close()
+      scanner.close()
+      buffer.toString
+    } match {
+      case Success(v) => v
+      case Failure(e) => throw e
+    }
   }
 
   def execute(commands: JavaIterable[String], consumer: Consumer[String]): Unit = {
@@ -54,11 +62,7 @@ object CommandUtils extends Logger {
       while (scanner.hasNextLine) {
         consumer.accept(scanner.nextLine)
       }
-      process.waitFor()
-      process.getErrorStream.close()
-      process.getInputStream.close()
-      process.getOutputStream.close()
-      process.destroy()
+      processClose(process)
       scanner.close()
       out.close()
     } match {
@@ -66,5 +70,14 @@ object CommandUtils extends Logger {
       case Failure(e) => throw e
     }
   }
+
+  private[this] def processClose(process: Process): Unit = {
+    process.waitFor()
+    process.getErrorStream.close()
+    process.getInputStream.close()
+    process.getOutputStream.close()
+    process.destroy()
+  }
+
 
 }
