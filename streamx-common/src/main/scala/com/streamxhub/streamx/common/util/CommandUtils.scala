@@ -19,7 +19,7 @@
 package com.streamxhub.streamx.common.util
 
 import java.io._
-import java.lang.{Iterable => JavaIter}
+import java.lang.{Iterable => Iterable}
 import java.util.Scanner
 import java.util.function.Consumer
 import scala.collection.JavaConversions._
@@ -30,24 +30,15 @@ object CommandUtils extends Logger {
 
   def execute(command: String): String = {
     val buffer = new StringBuffer()
-    Try {
-      val process = new ProcessBuilder(List(command)).redirectErrorStream(true).start
-      val reader = new InputStreamReader(process.getInputStream)
-      val scanner = new Scanner(reader)
-      while (scanner.hasNextLine) {
-        buffer.append(scanner.nextLine()).append("\n")
+    this.execute(List(command), new Consumer[String] {
+      override def accept(line: String): Unit = {
+        buffer.append(line).append("\n")
       }
-      processClose(process)
-      scanner.close()
-      reader.close()
-    } match {
-      case Success(_) =>
-      case Failure(e) => throw e
-    }
+    })
     buffer.toString
   }
 
-  def execute(commands: JavaIter[String], consumer: Consumer[String]): Unit = {
+  def execute(commands: Iterable[String], consumer: Consumer[String]): Unit = {
     Try {
       require(commands != null && commands.nonEmpty, "[StreamX] CommandUtils.execute: commands must not be null.")
       logDebug(s"Command execute:\n${commands.mkString("\n")} ")
