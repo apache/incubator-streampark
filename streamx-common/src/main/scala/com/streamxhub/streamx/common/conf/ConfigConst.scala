@@ -201,7 +201,7 @@ object ConfigConst {
 
   val REDIS_CONNECT_TYPE = "connectType"
 
-  val DEFAULT_REDIS_CONNECT_TYPE = "jedispool"
+  val DEFAULT_REDIS_CONNECT_TYPE = "jedisPool"
 
   val KEY_ALIAS = "alias"
 

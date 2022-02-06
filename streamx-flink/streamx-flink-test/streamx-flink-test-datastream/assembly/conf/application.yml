@@ -206,4 +206,4 @@ redis.sink:
   host: 127.0.0.1
   port: 6379
   database: 2
-  connectType: jedispool #可选参数：jedispool（默认）|sentinel
+  connectType: jedisPool #可选参数：jedisPool（默认）|sentinel
