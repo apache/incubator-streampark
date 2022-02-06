@@ -76,10 +76,12 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
     val redisConf = ConfigUtils.getConf(map, REDIS_PREFIX)
     val connectType: String = Try(redisConf.remove(REDIS_CONNECT_TYPE).toString).getOrElse(DEFAULT_REDIS_CONNECT_TYPE)
     Utils.copyProperties(property, redisConf)
+
     val host: String = redisConf.remove(KEY_HOST) match {
       case null => throw new IllegalArgumentException("redis host  must not null")
       case hostStr => hostStr.toString
     }
+
     val port: Int = redisConf.remove(KEY_PORT) match {
       case null => 6379
       case portStr => portStr.toString.toInt
@@ -97,7 +99,8 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
     }
 
     connectType match {
-      case "sentinel" => {
+
+      case "sentinel" =>
         val sentinels: Set[String] = host.split(SIGN_COMMA).map(x => {
           if (x.contains(SIGN_COLON)) x; else {
             throw new IllegalArgumentException(s"redis sentinel host invalid {$x} must match host:port ")
@@ -123,7 +126,7 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
           setFieldValue(field, builder, x._2)
         })
         builder.build()
-      }
+
       case DEFAULT_REDIS_CONNECT_TYPE =>
         val builder: FlinkJedisPoolConfig.Builder = new FlinkJedisPoolConfig.Builder().setHost(host).setPort(port)
         redisConf.foreach(x => {
@@ -143,7 +146,9 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
           }
           setFieldValue(field, builder, x._2)
         })
+
         builder.build()
+
       case _ => throw throw new IllegalArgumentException(s"redis  connectType must be jedisPool|sentinel|cluster $connectType")
     }
   }
