@@ -19,6 +19,7 @@
 package com.streamxhub.streamx.common.util
 
 import java.io._
+import java.lang.{Iterable => JavaIterable}
 import java.util.Scanner
 import java.util.function.Consumer
 import scala.collection.JavaConversions._
@@ -37,7 +38,7 @@ object CommandUtils extends Logger {
     buffer.toString
   }
 
-  def execute(commands: Iterable[String], consumer: Consumer[String]): Unit = {
+  def execute(commands: JavaIterable[String], consumer: Consumer[String]): Unit = {
     Try {
       require(commands != null && commands.nonEmpty, "[StreamX] CommandUtils.execute: commands must not be null.")
       logDebug(s"Command execute:\n${commands.mkString("\n")} ")
