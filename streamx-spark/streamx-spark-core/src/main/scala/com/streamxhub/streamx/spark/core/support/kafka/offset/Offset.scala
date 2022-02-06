@@ -28,6 +28,7 @@ import org.apache.spark.{SparkConf, SparkException}
 
 import java.util.Properties
 import scala.collection.mutable
+import scala.language.implicitConversions
 import scala.util.Try
 
 
