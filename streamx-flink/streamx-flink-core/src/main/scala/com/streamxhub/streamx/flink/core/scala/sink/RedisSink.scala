@@ -111,7 +111,7 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
           val field = Try(builder.getClass.getDeclaredField(x._1)).getOrElse {
             throw new IllegalArgumentException(
               s"""
-                 |redis  config error,property:${x._1} invalid,init FlinkJedisSentinelConfig error, property options:
+                 |redis config error,property:${x._1} invalid,init FlinkJedisSentinelConfig error, property options:
                  |<String masterName>,
                  |<Set<String> sentinels>,
                  |<int connectionTimeout>,
@@ -149,7 +149,7 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
 
         builder.build()
 
-      case _ => throw throw new IllegalArgumentException(s"redis  connectType must be jedisPool|sentinel|cluster $connectType")
+      case _ => throw throw new IllegalArgumentException(s"redis connectType must be jedisPool|sentinel|cluster $connectType")
     }
   }
 
