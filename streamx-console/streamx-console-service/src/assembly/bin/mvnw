@@ -34,6 +34,35 @@
 #   MAVEN_SKIP_RC - flag to disable loading of mavenrc files
 # ----------------------------------------------------------------------------
 
+# resolve links - $0 may be a softlink
+PRG="$0"
+
+# shellcheck disable=SC2039
+while [[ -h "$PRG" ]]; do
+  # shellcheck disable=SC2006
+  ls=`ls -ld "$PRG"`
+  # shellcheck disable=SC2006
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    # shellcheck disable=SC2006
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+
+# Get standard environment variables
+# shellcheck disable=SC2006
+PRG_DIR=`dirname "$PRG"`
+
+# shellcheck disable=SC2006
+# shellcheck disable=SC2164
+BASE_DIR=`cd "$PRG_DIR" >/dev/null; pwd`
+
+if [ -z "$BASE_DIR" ]; then
+  exit 1;
+fi
+
 if [ -z "$MAVEN_SKIP_RC" ] ; then
 
   if [ -f /etc/mavenrc ] ; then
@@ -50,6 +79,7 @@ fi
 cygwin=false;
 darwin=false;
 mingw=false
+# shellcheck disable=SC2006
 case "`uname`" in
   CYGWIN*) cygwin=true ;;
   MINGW*) mingw=true;;
@@ -58,6 +88,8 @@ case "`uname`" in
     # See https://developer.apple.com/library/mac/qa/qa1170/_index.html
     if [ -z "$JAVA_HOME" ]; then
       if [ -x "/usr/libexec/java_home" ]; then
+        # shellcheck disable=SC2006
+        # shellcheck disable=SC2155
         export JAVA_HOME="`/usr/libexec/java_home`"
       else
         export JAVA_HOME="/Library/Java/Home"
@@ -68,6 +100,7 @@ esac
 
 if [ -z "$JAVA_HOME" ] ; then
   if [ -r /etc/gentoo-release ] ; then
+    # shellcheck disable=SC2006
     JAVA_HOME=`java-config --jre-home`
   fi
 fi
@@ -78,29 +111,38 @@ if [ -z "$M2_HOME" ] ; then
 
   # need this for relative symlinks
   while [ -h "$PRG" ] ; do
+    # shellcheck disable=SC2006
     ls=`ls -ld "$PRG"`
+    # shellcheck disable=SC2006
     link=`expr "$ls" : '.*-> \(.*\)$'`
     if expr "$link" : '/.*' > /dev/null; then
       PRG="$link"
     else
+      # shellcheck disable=SC2006
       PRG="`dirname "$PRG"`/$link"
     fi
   done
 
-  saveddir=`pwd`
+  # shellcheck disable=SC2155
+  # shellcheck disable=SC2039
+  local SAVED_DIR=`pwd`
 
+  # shellcheck disable=SC2006
   M2_HOME=`dirname "$PRG"`/..
 
   # make it fully qualified
+  # shellcheck disable=SC2006
   M2_HOME=`cd "$M2_HOME" && pwd`
 
-  cd "$saveddir"
+  # shellcheck disable=SC2164
+  cd "$SAVED_DIR"
   # echo Using m2 at $M2_HOME
 fi
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin ; then
   [ -n "$M2_HOME" ] &&
+    # shellcheck disable=SC2006
     M2_HOME=`cygpath --unix "$M2_HOME"`
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
@@ -160,34 +202,6 @@ if [ -z "$JAVA_HOME" ] ; then
   echo "Warning: JAVA_HOME environment variable is not set."
 fi
 
-CLASSWORLDS_LAUNCHER=org.codehaus.plexus.classworlds.launcher.Launcher
-
-# traverses directory structure from process work directory to filesystem root
-# first directory with .mvn subdirectory is considered project base directory
-find_maven_basedir() {
-
-  if [ -z "$1" ]
-  then
-    echo "Path not specified to find_maven_basedir"
-    return 1
-  fi
-
-  basedir="$1"
-  wdir="$1"
-  while [ "$wdir" != '/' ] ; do
-    if [ -d "$wdir"/.mvn ] ; then
-      basedir=$wdir
-      break
-    fi
-    # workaround for JBEAP-8937 (on Solaris 10/Sparc)
-    if [ -d "${wdir}" ]; then
-      wdir=`cd "$wdir/.."; pwd`
-    fi
-    # end of workaround
-  done
-  echo "${basedir}"
-}
-
 # concatenates all lines of a file
 concat_lines() {
   if [ -f "$1" ]; then
@@ -195,10 +209,7 @@ concat_lines() {
   fi
 }
 
-BASE_DIR=`find_maven_basedir "$(pwd)"`
-if [ -z "$BASE_DIR" ]; then
-  exit 1;
-fi
+
 
 ##########################################################################################
 # Extension to allow automatically downloading the maven-wrapper.jar from Maven-central
