@@ -149,8 +149,8 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public void delete() throws IOException {
-        File file = getGitRepository();
-        FileUtils.deleteDirectory(file);
+        FileUtils.deleteDirectory(getAppSource());
+        FileUtils.deleteDirectory(getDistHome());
     }
 
     @JsonIgnore
@@ -212,8 +212,7 @@ public class Project implements Serializable {
      */
     public void cleanCloned() throws IOException {
         if (isCloned()) {
-            FileUtils.deleteDirectory(getAppSource());
-            FileUtils.deleteDirectory(getDistHome());
+            this.delete();
         }
     }
 
