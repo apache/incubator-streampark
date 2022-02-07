@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.flink.submit.`trait`
 
-import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType}
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildResponse
@@ -89,7 +88,16 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val jobID = JobID.fromHexString(stopRequest.jobId)
-      val savePointDir = stopRequest.customSavePointPath
+      var savePointDir = stopRequest.customSavePointPath
+
+      if (StringUtils.isBlank(savePointDir)) {
+        savePointDir = getOptionFromDefaultFlinkConfig(
+          stopRequest.flinkVersion.flinkHome,
+          ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
+            .stringType()
+            .defaultValue(s"${workspace.APP_SAVEPOINTS}")
+        )
+      }
 
       val actionResult = (stopRequest.withSavePoint, stopRequest.withDrain) match {
         case (true, true) if savePointDir.nonEmpty => client.stopWithSavepoint(jobID, true, savePointDir).get()
@@ -190,14 +198,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     extractDynamicOption(submitRequest.dynamicOption)
       .foreach(e => flinkConfig.setString(e._1, e._2))
 
-    // set parallelism
-    if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
-      flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
-        Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString))
-    } else {
-      flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
-        CoreOptions.DEFAULT_PARALLELISM.defaultValue())
-    }
 
     if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) {
       flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
@@ -222,6 +222,8 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     programArgs += submitRequest.flinkYaml
     programArgs += PARAM_KEY_APP_NAME
     programArgs += submitRequest.effectiveAppName
+    programArgs += PARAM_KEY_FLINK_PARALLELISM
+    programArgs += s"${getParallelism(submitRequest)}"
     submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>
         programArgs += PARAM_KEY_FLINK_SQL

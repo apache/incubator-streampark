@@ -229,4 +229,14 @@ trait FlinkSubmitTrait extends Logger {
     customCommandLines
   }
 
+  private[submit] def getParallelism(submitRequest: SubmitRequest): Integer = {
+    if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
+      Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString)
+    } else {
+      getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome).getInteger(
+        CoreOptions.DEFAULT_PARALLELISM,
+        CoreOptions.DEFAULT_PARALLELISM.defaultValue()
+      )
+    }
+  }
 }

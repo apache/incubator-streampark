@@ -19,8 +19,8 @@ spring:
   servlet:
     multipart:
       enabled: true
-      max-file-size: 200MB
-      max-request-size: 200MB
+      max-file-size: 500MB
+      max-request-size: 500MB
   datasource:
     dynamic:
       # 是否开启 SQL日志输出，生产环境建议关闭，有性能损耗

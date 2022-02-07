@@ -25,7 +25,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.streamxhub.streamx.common.conf.Workspace;
+import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.Data;
@@ -147,8 +149,8 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public void delete() throws IOException {
-        File file = getGitRepository();
-        FileUtils.deleteDirectory(file);
+        FileUtils.deleteDirectory(getAppSource());
+        FileUtils.deleteDirectory(getDistHome());
     }
 
     @JsonIgnore
@@ -210,8 +212,7 @@ public class Project implements Serializable {
      */
     public void cleanCloned() throws IOException {
         if (isCloned()) {
-            FileUtils.deleteDirectory(getAppSource());
-            FileUtils.deleteDirectory(getDistHome());
+            this.delete();
         }
     }
 
@@ -223,7 +224,17 @@ public class Project implements Serializable {
                 .getParentFile()
                 .getAbsolutePath();
         }
-        return Arrays.asList("cd ".concat(buildHome), "mvn clean install -DskipTests");
+        String mvn = "mvn";
+        try {
+            CommandUtils.execute("mvn --version");
+        } catch (Exception e) {
+            if (CommonUtils.isWindows()) {
+                mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
+            } else {
+                mvn = WebUtils.getAppHome().concat("/bin/mvnw");
+            }
+        }
+        return Arrays.asList("cd ".concat(buildHome), String.format("%s clean install -DskipTests", mvn));
     }
 
     @JsonIgnore
