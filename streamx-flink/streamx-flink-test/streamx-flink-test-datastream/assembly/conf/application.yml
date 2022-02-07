@@ -157,18 +157,18 @@ clickhouse:
       storage: kafka #kafka|mysql|hbase|hdfs
       mysql:
         driverClassName: com.mysql.cj.jdbc.Driver
-        jdbcUrl: jdbc:mysql://127.0.0.1:3306/test?useSSL=false&allowPublicKeyRetrieval=true
+        jdbcUrl: jdbc:mysql://10.10.130.220:3306/test?useSSL=false&allowPublicKeyRetrieval=true
         username: user
         password: pass
       kafka:
-        bootstrap.servers: 192.169.0.1:9092
+        bootstrap.servers: slave3.test.gitv.we:9092,slave4.test.gitv.we:9092,slave2.test.gitv.we:9092
         topic: test1
         group.id: user_01
         auto.offset.reset: latest
       hbase:
       hdfs:
         path: /data/chfailover
-        namenode: hdfs://localhost:8020
+        namenode: hdfs://master2.test.gitv.we:8020
         user: hdfs
 
 
