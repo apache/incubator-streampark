@@ -77,7 +77,7 @@ kafka.source:
     #enable.auto.commit: true
     #start.from:
     #timestamp: 1591286400000 #指定timestamp,针对所有的topic生效
-    #offset: # 给每个topic的partition指定offset
+  #offset: # 给每个topic的partition指定offset
   #topic: kafka01,kafka02
   #kafka01: 0:182,1:183,2:182 #分区0从182开始消费,分区1从183...
   #kafka02: 0:182,1:183,2:182
@@ -157,18 +157,18 @@ clickhouse:
       storage: kafka #kafka|mysql|hbase|hdfs
       mysql:
         driverClassName: com.mysql.cj.jdbc.Driver
-        jdbcUrl: jdbc:mysql://10.10.130.220:3306/test?useSSL=false&allowPublicKeyRetrieval=true
+        jdbcUrl: jdbc:mysql://127.0.0.1:3306/test?useSSL=false&allowPublicKeyRetrieval=true
         username: user
         password: pass
       kafka:
-        bootstrap.servers: slave3.test.gitv.we:9092,slave4.test.gitv.we:9092,slave2.test.gitv.we:9092
+        bootstrap.servers: 192.169.0.1:9092
         topic: test1
         group.id: user_01
         auto.offset.reset: latest
       hbase:
       hdfs:
         path: /data/chfailover
-        namenode: hdfs://master2.test.gitv.we:8020
+        namenode: hdfs://localhost:8020
         user: hdfs
 
 
