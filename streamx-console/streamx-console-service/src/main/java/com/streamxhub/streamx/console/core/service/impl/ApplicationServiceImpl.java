@@ -252,7 +252,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        // mergee metrics from flink kubernetes cluster
+        // merge metrics from flink kubernetes cluster
         FlinkMetricCV k8sMetric = k8sFlinkTrkMonitor.getAccClusterMetrics();
         totalJmMemory += k8sMetric.totalJmMemory();
         totalTmMemory += k8sMetric.totalTmMemory();
@@ -288,13 +288,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public String upload(MultipartFile file) throws Exception {
         String temp = WebUtils.getAppDir("temp");
-        File saveFile = new File(temp, file.getOriginalFilename());
+        File saveFile = new File(temp, Objects.requireNonNull(file.getOriginalFilename()));
         // delete when exists
         if (saveFile.exists()) {
             saveFile.delete();
         }
         // save file to temp dir
-        FileUtils.writeByteArrayToFile(saveFile, file.getBytes());
+        file.transferTo(saveFile);
         return saveFile.getAbsolutePath();
     }
 
