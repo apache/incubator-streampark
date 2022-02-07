@@ -1723,7 +1723,7 @@ export default {
         this.defaultOptions = JSON.parse(this.app.options || '{}')
         this.configId = this.app.configId
         this.executionMode = this.app.executionMode
-        this.versionId = this.app.versionId
+        this.versionId = this.app.versionId || null
         this.defaultFlinkSqlId = this.app['sqlId'] || null
         this.handleReset()
         this.handleListConfVersion()
@@ -2583,7 +2583,7 @@ export default {
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
           'resolveOrder': this.app.resolveOrder,
-          'versionId': this.app.versionId,
+          'versionId': this.app.versionId || null,
           'k8sRestExposedType': this.app.k8sRestExposedType,
           'executionMode': this.app.executionMode,
           'yarnQueue': this.app.yarnQueue,

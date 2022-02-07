@@ -791,7 +791,7 @@ export default {
     handleGet(appId) {
       get({ id: appId }).then((resp) => {
         this.app = resp.data
-        this.versionId = this.app.versionId
+        this.versionId = this.app.versionId || null
         this.executionMode = this.app.executionMode
         this.defaultOptions = JSON.parse(this.app.options || '{}')
         this.resourceFrom = this.app.resourceFrom
@@ -1109,7 +1109,7 @@ export default {
           'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
           'cpFailureRateInterval': this.app.cpFailureRateInterval,
           'cpFailureAction': this.app.cpFailureAction,
-          'versionId': this.app.versionId,
+          'versionId': this.app.versionId || null,
           'k8sRestExposedType': this.app.k8sRestExposedType,
           'clusterId': this.app.clusterId,
           'flinkImage': this.app.flinkImage,
