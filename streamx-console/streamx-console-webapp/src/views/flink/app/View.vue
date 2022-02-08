@@ -1273,8 +1273,7 @@
       return [{
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 300,
-        fixed: 'left',
+        width: 280,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
