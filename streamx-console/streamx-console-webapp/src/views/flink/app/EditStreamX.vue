@@ -1432,16 +1432,20 @@
 </template>
 
 <script>
+const Base64 = require('js-base64').Base64
 import Ellipsis from '@/components/Ellipsis'
 import { listConf } from '@api/project'
 import { get, update, checkName, name, readConf, upload } from '@api/application'
-import { history as confhistory, get as getVer, template, sysHadoopConf  } from '@api/config'
+import { history as confHistory, get as getVer, template, sysHadoopConf  } from '@api/config'
 import { get as getSQL, history as sqlhistory } from '@api/flinksql'
 import { mapActions, mapGetters } from 'vuex'
 import Mergely from './Mergely'
 import Different from './Different'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
+import { toPomString } from './Pom'
+import {list as listFlinkEnv} from '@/api/flinkenv'
+import {checkHadoop} from '@/api/setting'
 import {
   uploadJars as histUploadJars,
   k8sNamespaces as histK8sNamespaces,
@@ -1452,7 +1456,6 @@ import {
   flinkTmPodTemplates as histTmPodTemplates
 } from '@api/flinkhistory'
 
-const Base64 = require('js-base64').Base64
 import {
   initEditor,
   initPodTemplateEditor,
@@ -1464,10 +1467,15 @@ import {
   updateDependency, checkPomScalaVersion
 } from './AddEdit'
 
-import { toPomString } from './Pom'
-import {list as listFlinkEnv} from '@/api/flinkenv'
-import {checkHadoop} from '@/api/setting'
-import { sysHosts, initPodTemplate, completeHostAliasToPodTemplate, extractHostAliasFromPodTemplate, previewHostAlias } from '@api/flinkpodtmpl'
+import {
+  sysHosts,
+  initPodTemplate,
+  completeHostAliasToPodTemplate,
+  extractHostAliasFromPodTemplate,
+  previewHostAlias
+} from '@api/flinkpodtmpl'
+
+
 
 export default {
   name: 'EditStreamX',
@@ -1716,15 +1724,15 @@ export default {
             this.flinkSqlHistory = resp.data
           })
         }
-        if (this.app.config && this.app.config.trim() != '') {
+        if (this.app.config && this.app.config.trim() !== '') {
           this.configOverride = Base64.decode(this.app.config)
           this.isSetConfig = true
         }
         this.defaultOptions = JSON.parse(this.app.options || '{}')
         this.configId = this.app.configId
         this.executionMode = this.app.executionMode
-        this.versionId = this.app.versionId
-        this.defaultFlinkSqlId = this.app['sqlId'] || null
+        this.versionId = this.app.versionId || null
+        this.defaultFlinkSqlId = this.app.sqlId || null
         this.handleReset()
         this.handleListConfVersion()
         this.handleConfList()
@@ -2147,7 +2155,7 @@ export default {
       const options = this.handleFormValue(values)
       const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
       let config = this.configOverride || this.app.config
-      if (config != null && config != undefined && config.trim() != '') {
+      if (config != null && config.trim() !== '') {
         config = Base64.encode(config)
       } else {
         config = null
@@ -2257,7 +2265,7 @@ export default {
     },
 
     handleListConfVersion() {
-      confhistory({ id: this.app.id }).then((resp) => {
+      confHistory({ id: this.app.id }).then((resp) => {
         resp.data.forEach((value, index) => {
           if (value.effective) {
             this.defaultConfigId = value.id
@@ -2583,7 +2591,7 @@ export default {
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
           'resolveOrder': this.app.resolveOrder,
-          'versionId': this.app.versionId,
+          'versionId': this.app.versionId || null,
           'k8sRestExposedType': this.app.k8sRestExposedType,
           'executionMode': this.app.executionMode,
           'yarnQueue': this.app.yarnQueue,
