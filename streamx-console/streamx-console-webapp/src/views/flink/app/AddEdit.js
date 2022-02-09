@@ -318,7 +318,7 @@ export function applyPom(vue) {
         'please set flink version first.',
         'error'
       )
-      return;
+      return
     }
     const scalaVersion = vue.flinkEnvs.find(v => v.id === versionId).scalaVersion
     if (pom == null || pom.trim() === '') {
