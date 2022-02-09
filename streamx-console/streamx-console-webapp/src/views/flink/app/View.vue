@@ -1754,11 +1754,13 @@
                 allowNonRestored: allowNonRestoredState
               }).then((resp) => {
                 if (!resp.data) {
-                  this.$swal.fire(
-                    'Failed',
-                    'startup failed,' + resp.message.replaceAll(/\[StreamX]/g,''),
-                    'error'
-                  )
+                  this.$swal.fire({
+                    title: 'Failed',
+                    icon: 'error',
+                    width: this.exceptionPropWidth(),
+                    html: '<pre class="propException"> startup failed, ' + resp.message.replaceAll(/\[StreamX]/g,'') + '</pre>',
+                    focusConfirm: false
+                  })
                 }
               })
             })
