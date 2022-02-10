@@ -21,11 +21,11 @@
 
 
 export function baseUrl() {
+  if (process.env.VUE_APP_ENV) {
+    return `${location.protocol}//${location.host}`
+  }
   let url = ''
   switch (process.env.NODE_ENV) {
-    case 'mixin':
-      url = `'${location.protocol}//${location.host}'`
-      break
     case 'production':
       url = process.env['VUE_APP_BASE_API']
       break

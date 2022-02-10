@@ -3,16 +3,45 @@
     class="user-wrapper">
 
     <div class="slogan">
-      <span class="slogan-streamx">Botech</span>&nbsp;
+      <span class="slogan-streamx">StreamX </span>,
       <span class="slogan-action">
-        <span class="slogan-make">Streaming</span>&nbsp;
-        <span class="slogan-target">System</span>&nbsp;
+        <span class="slogan-make">Make</span>&nbsp;
+        <span class="slogan-target">stream processing</span>&nbsp;
+        <span class="slogan-result">easier!</span>
       </span>
     </div>
 
     <div class="content-box header-icon">
       <a title="theme">
         <svg-icon name="theme" size="small" class="icon" @click.native="handleChangeTheme(false)"></svg-icon>
+      </a>
+
+      <a
+        href="http://www.streamxhub.com/docs/user-guide/quick-start"
+        title="How to use"
+        target="_blank">
+        <svg-icon name="question" size="small" class="icon"></svg-icon>
+      </a>
+
+      <a
+        href="https://github.com/streamxhub/streamx"
+        title="GitHub"
+        target="_blank">
+        <svg-icon name="github" size="small" class="icon"></svg-icon>
+      </a>
+
+      <a
+        href="https://github.com/streamxhub/streamx"
+        title="GitHub"
+        target="_blank">
+        <img src="https://img.shields.io/github/stars/streamxhub/streamx.svg?sanitize=true" class="shields">
+      </a>
+
+      <a
+        href="https://github.com/streamxhub/streamx"
+        title="GitHub"
+        target="_blank">
+        <img src="https://img.shields.io/github/forks/streamxhub/streamx.svg?sanitize=true" class="shields">
       </a>
 
       <notice class="action"/>

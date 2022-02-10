@@ -249,7 +249,7 @@ object JdbcUtils {
                 val setMethod = s"set${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
                 val method = Try(jdbcConfig.getClass.getMethods.filter(_.getName == setMethod).filter(_.getParameterCount == 1).head).getOrElse(null)
                 method match {
-                  case m =>
+                  case m if m != null =>
                     m.setAccessible(true)
                     m.getParameterTypes.head.getSimpleName match {
                       case "String" => m.invoke(jdbcConfig, Seq(x._2.asInstanceOf[Object]): _*)

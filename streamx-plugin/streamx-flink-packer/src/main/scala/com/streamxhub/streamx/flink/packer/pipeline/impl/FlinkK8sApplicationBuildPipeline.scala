@@ -89,18 +89,17 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
     val (shadedJar, extJarLibs) =
     execStep(3) {
       val appName = BuildPipelineHelper.letAppNameSafe(params.appName)
-      val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${appName}.jar"
+      val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_$appName.jar"
 
+      val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(params)
+      val jarPackDepsWithProvidedLibs = params.dependencyInfo.merge(providedLibs)
       val (shadedJar, extJarLibs) = params.developmentMode match {
         case DevelopmentMode.FLINKSQL =>
-          val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(params)
-          val (jarPackDeps, extJarLibs) = params.jarPackDeps.clearExtJarLibs
-          val shadedJar = MavenTool.buildFatJar(jarPackDeps.merge(providedLibs), shadedJarOutputPath)
-          shadedJar -> extJarLibs
+          val shadedJar = MavenTool.buildFatJar(jarPackDepsWithProvidedLibs, shadedJarOutputPath)
+          shadedJar -> params.dependencyInfo.extJarLibs
 
         case DevelopmentMode.CUSTOMCODE =>
-          val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(params)
-          val shadedJar = MavenTool.buildFatJar(params.jarPackDeps.merge(providedLibs), shadedJarOutputPath)
+          val shadedJar = MavenTool.buildFatJar(jarPackDepsWithProvidedLibs, shadedJarOutputPath)
           shadedJar -> Set[String]()
       }
       logInfo(s"output shaded flink job jar: ${shadedJar.getAbsolutePath}")
@@ -208,7 +207,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
    * compile image tag with namespace and remote address.
    */
   private[this] def compileTag(tag: String, registerAddress: String): String = {
-    val imgNamespace = ConfigHub.get(DOCKER_IMAGE_NAMESPACE)
+    val imgNamespace: String = ConfigHub.get(DOCKER_IMAGE_NAMESPACE)
     var tagName = if (tag.contains("/")) tag else s"$imgNamespace/$tag"
     if (registerAddress.nonEmpty && !tagName.startsWith(registerAddress)) {
       tagName = s"$registerAddress/$tagName"

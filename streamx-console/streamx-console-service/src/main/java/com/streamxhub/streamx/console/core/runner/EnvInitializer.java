@@ -74,7 +74,7 @@ public class EnvInitializer implements ApplicationRunner {
             throw new ExceptionInInitializerError("[StreamX] System initialization check failed," +
                 " The system initialization check failed. If started local for development and debugging," +
                 " please ensure the -Dapp.home parameter is clearly specified," +
-                " more detail: http://www.streamxhub.com/zh/doc/console/deployment");
+                " more detail: http://www.streamxhub.com/docs/user-guide/development");
         }
 
         // init ConfigHub
@@ -87,15 +87,17 @@ public class EnvInitializer implements ApplicationRunner {
     }
 
     private void initConfigHub(Environment springEnv) {
-        ConfigHub.init();
         // override config from spring application.yaml
-        ConfigHub.allRegisteredKeys().stream()
+        ConfigHub
+            .keys()
+            .stream()
             .filter(springEnv::containsProperty)
             .forEach(key -> {
-                ConfigOption config = ConfigHub.getRegisteredConfig(key);
-                ConfigHub.overwritten(config, springEnv.getProperty(key, config.classType()));
+                ConfigOption config = ConfigHub.getConfig(key);
+                ConfigHub.set(config, springEnv.getProperty(key, config.classType()));
             });
-        ConfigHub.logAllConfigs();
+
+        ConfigHub.log();
     }
 
     private void overrideSystemProp(String key, String defaultValue) {
@@ -150,13 +152,28 @@ public class EnvInitializer implements ApplicationRunner {
                 fsOperator.mkdirs(appJars);
             }
 
+            String keepFile = ".gitkeep";
+
+            String appClient = workspace.APP_CLIENT();
+            if (fsOperator.exists(appClient)) {
+                fsOperator.delete(appClient);
+            }
+            fsOperator.mkdirs(appClient);
+
+            File client = new File(WebUtils.getAppDir("client"));
+            for (File file : Objects.requireNonNull(client.listFiles())) {
+                String plugin = appClient.concat("/").concat(file.getName());
+                if (!fsOperator.exists(plugin) && !keepFile.equals(file.getName())) {
+                    log.info("load client:{} to {}", file.getName(), appClient);
+                    fsOperator.upload(file.getAbsolutePath(), appClient);
+                }
+            }
+
             String appPlugins = workspace.APP_PLUGINS();
             if (fsOperator.exists(appPlugins)) {
                 fsOperator.delete(appPlugins);
             }
             fsOperator.mkdirs(appPlugins);
-
-            String keepFile = ".gitkeep";
 
             File plugins = new File(WebUtils.getAppDir("plugins"));
             for (File file : Objects.requireNonNull(plugins.listFiles())) {

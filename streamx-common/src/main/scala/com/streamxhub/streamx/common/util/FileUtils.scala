@@ -56,6 +56,11 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     file.getAbsolutePath
   }
 
+  def getSuffix(filename: String): String = {
+    require(filename != null)
+    filename.drop(filename.lastIndexOf("."))
+  }
+
   def listFileAsURL(dirPath: String): util.List[URL] = {
     new File(dirPath) match {
       case x if x.exists() && x.isDirectory =>

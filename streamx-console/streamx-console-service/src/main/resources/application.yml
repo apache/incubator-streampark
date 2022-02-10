@@ -19,8 +19,8 @@ spring:
   servlet:
     multipart:
       enabled: true
-      max-file-size: 200MB
-      max-request-size: 200MB
+      max-file-size: 500MB
+      max-request-size: 500MB
   datasource:
     dynamic:
       # 是否开启 SQL日志输出，生产环境建议关闭，有性能损耗
@@ -38,16 +38,14 @@ spring:
         # 数据源-1，名称为 primary
         primary:
           username: root
-          password: botech@123456
+          password: 123456
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://10.233.38.173:3306/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+          url: jdbc:mysql://localhost:3306/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
   aop.proxy-target-class: true
   messages.encoding: utf-8
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
-  flyway:
-    enabled: true
   main:
     banner-mode: off
 
@@ -64,19 +62,28 @@ mybatis-plus:
   configuration:
     jdbc-type-for-null: null
   global-config:
+    db-config:
+      id-type: auto
     # 关闭 mybatis-plus的 banner
     banner: false
 
 streamx:
+  # HADOOP_USER_NAME
+  hadoop-user-name: hdfs
   # 本地的工作空间,用于存放项目源码,构建的目录等.
   workspace:
-    local: ~/streamx_workspace
-    remote: hdfs:///user/wangqh/streamx
+    local: /opt/streamx_workspace
+    remote: hdfs:///streamx   # support hdfs:///streamx/ 、 /streamx 、hdfs://host:ip/streamx/
 
   # remote docker register namespace for streamx
   docker:
     register:
       image-namespace: streamx
+    # instantiating DockerHttpClient
+    http-client:
+      max-connections: 100
+      connection-timeout-sec: 100
+      response-timeout-sec: 120
 
   # flink-k8s tracking configuration
   flink-k8s:
