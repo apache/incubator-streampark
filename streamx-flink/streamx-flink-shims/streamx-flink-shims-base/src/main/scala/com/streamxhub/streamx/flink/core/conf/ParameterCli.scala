@@ -88,7 +88,7 @@ object ParameterCli {
             buffer.toString.trim
           case "--name" =>
             map.getOrElse(propertyPrefix.concat(ConfigConst.KEY_FLINK_APP_NAME), "").trim match {
-              case yarnName if yarnName.nonEmpty => yarnName
+              case appName if appName.nonEmpty => appName
               case _ => ""
             }
           //是否detached模式...
