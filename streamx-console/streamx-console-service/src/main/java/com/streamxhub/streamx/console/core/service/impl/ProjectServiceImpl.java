@@ -75,7 +75,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
-        implements ProjectService {
+    implements ProjectService {
 
     private volatile Map<Long, Byte> tailOutMap = new ConcurrentHashMap<>();
 
@@ -87,13 +87,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     private ApplicationMapper applicationMapper;
 
     private ExecutorService executorService = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 2,
-            200,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("streamx-build-executor"),
-            new ThreadPoolExecutor.AbortPolicy()
+        Runtime.getRuntime().availableProcessors() * 2,
+        200,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("streamx-build-executor"),
+        new ThreadPoolExecutor.AbortPolicy()
     );
 
     @Override
@@ -200,7 +200,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         }));
                     } catch (Exception e) {
                         this.baseMapper.failureBuild(project);
-                        log.error(String.format("deploy error, project name: %s ", project.getName()), e);
+                        log.error("deploy error, project name: {}, detail: {}", project.getName(), e.getMessage());
                     }
                 } else {
                     this.baseMapper.failureBuild(project);
@@ -229,9 +229,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 // 将项目解包到app下.
                 if (app.exists()) {
                     String cmd = String.format(
-                            "tar -xzvf %s -C %s",
-                            app.getAbsolutePath(),
-                            deployPath.getAbsolutePath()
+                        "tar -xzvf %s -C %s",
+                        app.getAbsolutePath(),
+                        deployPath.getAbsolutePath()
                     );
                     CommandUtils.execute(cmd);
                 }
@@ -265,8 +265,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     }
                     // 2) 尝试寻找jar文件...可能存在发现多个jar.
                     if (!targetFile.getName().startsWith("original-")
-                            && !targetFile.getName().endsWith("-sources.jar")
-                            && targetFile.getName().endsWith(".jar")) {
+                        && !targetFile.getName().endsWith("-sources.jar")
+                        && targetFile.getName().endsWith(".jar")) {
                         if (jar == null) {
                             jar = targetFile;
                         } else {
@@ -316,8 +316,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         Project project = getById(id);
         File appHome = project.getDistHome();
         Optional<File> fileOptional = Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
-                .filter((x) -> x.getName().equals(module))
-                .findFirst();
+            .filter((x) -> x.getName().equals(module))
+            .findFirst();
         return fileOptional.map(File::getAbsolutePath).orElse(null);
     }
 
@@ -335,7 +335,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             }
         }
         LambdaQueryWrapper<Project> wrapper = new QueryWrapper<Project>().lambda()
-                .eq(Project::getName, project.getName());
+            .eq(Project::getName, project.getName());
         return this.baseMapper.selectCount(wrapper) > 0;
     }
 
@@ -367,9 +367,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             log.info("clone {}, {} starting...", project.getName(), project.getUrl());
             tailBuffer.get(project.getId()).append(project.getLog4CloneStart());
             CloneCommand cloneCommand = Git.cloneRepository()
-                    .setURI(project.getUrl())
-                    .setDirectory(project.getAppSource())
-                    .setBranch(project.getBranches());
+                .setURI(project.getUrl())
+                .setDirectory(project.getAppSource())
+                .setBranch(project.getBranches());
 
             if (CommonUtils.notEmpty(project.getUsername(), project.getPassword())) {
                 cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
@@ -384,18 +384,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             File workTree = git.getRepository().getWorkTree();
             gitWorkTree(project.getId(), workTree, "");
             tailBuffer.get(project.getId()).append(
-                    String.format(
-                            "[StreamX] project [%s] git clone successful!\n",
-                            project.getName()
-                    )
+                String.format(
+                    "[StreamX] project [%s] git clone successful!\n",
+                    project.getName()
+                )
             );
             return true;
         } catch (Exception e) {
             String errorLog = String.format(
-                    "[StreamX] project [%s] branch [%s] git clone failure, err: %s",
-                    project.getName(),
-                    project.getBranches(),
-                    e
+                "[StreamX] project [%s] branch [%s] git clone failure, err: %s",
+                project.getName(),
+                project.getBranches(),
+                e
             );
             tailBuffer.get(project.getId()).append(errorLog);
             log.error(String.format("project %s clone error ", project.getName()), e);
@@ -465,7 +465,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 if (tailBeginning.containsKey(project.getId())) {
                     tailBeginning.remove(project.getId());
                     Arrays.stream(builder.toString().split("\n"))
-                            .forEach(out -> WebSocketEndpoint.writeMessage(socketId, out));
+                        .forEach(out -> WebSocketEndpoint.writeMessage(socketId, out));
                 }
                 WebSocketEndpoint.writeMessage(socketId, line);
             }

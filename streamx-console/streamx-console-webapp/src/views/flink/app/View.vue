@@ -1273,8 +1273,7 @@
       return [{
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 300,
-        fixed: 'left',
+        width: 280,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -1755,11 +1754,13 @@
                 allowNonRestored: allowNonRestoredState
               }).then((resp) => {
                 if (!resp.data) {
-                  this.$swal.fire(
-                    'Failed',
-                    'startup failed,' + resp.message.replaceAll(/\[StreamX]/g,''),
-                    'error'
-                  )
+                  this.$swal.fire({
+                    title: 'Failed',
+                    icon: 'error',
+                    width: this.exceptionPropWidth(),
+                    html: '<pre class="propException"> startup failed, ' + resp.message.replaceAll(/\[StreamX]/g,'') + '</pre>',
+                    focusConfirm: false
+                  })
                 }
               })
             })
