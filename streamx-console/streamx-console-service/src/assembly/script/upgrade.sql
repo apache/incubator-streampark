@@ -1,3 +1,4 @@
+--------------------------------------- version: 1.2.1 START ---------------------------------------
 SET FOREIGN_KEY_CHECKS = 0;
 
 ALTER TABLE `t_flink_app` ADD COLUMN `K8S_HADOOP_INTEGRATION` tinyint(1) default 0 AFTER `K8S_TM_POD_TEMPLATE`;
@@ -27,7 +28,7 @@ CREATE TABLE `t_app_build_pipe`(
 `BUILD_RESULT`    TEXT,
 `UPDATE_TIME`     DATETIME,
 PRIMARY KEY (`APP_ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+) ENGINE = InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 BEGIN;
 
@@ -57,3 +58,7 @@ INSERT INTO `t_role_menu` VALUES (55, 2, 34);
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
+--------------------------------------- version: 1.2.2 END ---------------------------------------
+
+
+--------------------------------------- version: 1.2.2 START ---------------------------------------
