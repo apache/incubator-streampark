@@ -26,7 +26,6 @@ import com.streamxhub.streamx.flink.core.conf.FlinkRunOption
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.commons.collections.MapUtils
-import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
@@ -102,12 +101,6 @@ trait FlinkSubmitTrait extends Logger {
       .safeSet(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
       .safeSet(ApplicationConfiguration.APPLICATION_ARGS, extractProgramArgs(submitRequest))
 
-    if (StringUtils.isNotBlank(submitRequest.option)
-      && submitRequest.option.split("\\s+").contains("-n")) {
-      // please transfer the execution.savepoint.ignore-unclaimed-state to submitRequest.property or dynamicOption
-      flinkConfig.safeSet(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, JavaBool.TRUE)
-    }
-
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
     //state.checkpoints.num-retained
     val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
@@ -121,6 +114,7 @@ trait FlinkSubmitTrait extends Logger {
          |""".stripMargin)
 
     doConfig(submitRequest, flinkConfig)
+
     doSubmit(submitRequest, flinkConfig)
   }
 
@@ -292,7 +286,7 @@ trait FlinkSubmitTrait extends Logger {
     }
   }
 
-  private[submit] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
+  private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
     val programArgs = new ArrayBuffer[String]()
     Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
     programArgs += PARAM_KEY_FLINK_CONF
