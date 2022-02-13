@@ -229,7 +229,7 @@ public class ApplBuildPipeServiceImpl
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
-                app.getJarPackDeps(),
+                app.getDependencyInfo(),
                 flinkUserJar
             );
             log.info("Submit params to building pipeline : {}", params);

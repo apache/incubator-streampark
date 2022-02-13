@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.submit.impl
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
-import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
+import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper
 import com.streamxhub.streamx.flink.submit.`trait`.StandaloneSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
@@ -42,9 +42,9 @@ import scala.collection.JavaConversions._
  */
 object StandaloneSubmit extends StandaloneSubmitTrait {
 
-  override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
+  override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
     // require parameters with standalone remote
-    val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
+    super.setJobSpecificConfig(submitRequest, flinkConfig)
     // get build result
     val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
     // build fat-jar
@@ -59,10 +59,10 @@ object StandaloneSubmit extends StandaloneSubmitTrait {
   override def doStop(stopRequest: StopRequest): StopResponse = {
     val flinkConfig = new Configuration()
     //get standalone jm to dynamicOption
-    extractDynamicOption(stopRequest.dynamicOption)
-      .foreach(e => flinkConfig.setString(e._1, e._2))
-    flinkConfig.set(DeploymentOptions.TARGET, ExecutionMode.STANDALONE.getName)
-    checkAndReplaceRestOptions(flinkConfig)
+    FlinkSubmitHelper.extractDynamicOption(stopRequest.dynamicOption).foreach(e => flinkConfig.setString(e._1, e._2))
+
+    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.STANDALONE.getName)
+
     val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
     var client: ClusterClient[StandaloneClusterId] = null
     try {

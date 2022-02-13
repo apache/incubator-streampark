@@ -29,7 +29,6 @@ import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
-import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
@@ -49,35 +48,32 @@ import scala.util.Try
 object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Logger {
 
   @throws[Exception]
-  override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
+  override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
+
+    super.setJobSpecificConfig(submitRequest, flinkConfig)
+
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
 
     // check the last building result
     checkBuildResult(submitRequest)
-    val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sSessionBuildResponse]
 
-    val jobID = {
-      if (StringUtils.isNotBlank(submitRequest.jobID)) new JobID()
-      else JobID.fromHexString(submitRequest.jobID)
-    }
-    // extract flink configuration
-    val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
+    val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sSessionBuildResponse]
 
     val fatJar = new File(buildResult.flinkShadedJarPath)
     // use api submit plan
     restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
 
     // Prioritize using JobGraph submit plan while using Rest API submit plan as backup
-/*    Try(jobGraphSubmitPlan(submitRequest, flinkConfig, jobID, fatJar))
-      .recover {
-        case _ =>
-          logInfo(s"[flink-submit] JobGraph Submit Plan failed, try Rest API Submit Plan now.")
-          restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
-      } match {
-      case Success(submitResponse) => submitResponse
-      case Failure(ex) => throw ex
-    }*/
+    /*    Try(jobGraphSubmitPlan(submitRequest, flinkConfig, jobID, fatJar))
+          .recover {
+            case _ =>
+              logInfo(s"[flink-submit] JobGraph Submit Plan failed, try Rest API Submit Plan now.")
+              restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
+          } match {
+          case Success(submitResponse) => submitResponse
+          case Failure(ex) => throw ex
+        }*/
   }
 
   /**
