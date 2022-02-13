@@ -82,7 +82,7 @@ case class FlinkStandaloneBuildRequest(appName: String,
                                        executionMode: ExecutionMode,
                                        developmentMode: DevelopmentMode,
                                        flinkVersion: FlinkVersion,
-                                       jarPackDeps: JarPackDeps,
+                                       dependencyInfo: DependencyInfo,
                                        customFlinkUsrJarPath: String) extends FlinkBuildParam
 
 // todo case class FlinkYarnApplicationBuildRequest() extends FlinkBuildParam

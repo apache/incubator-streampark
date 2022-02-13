@@ -19,27 +19,21 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
-import org.apache.commons.cli.CommandLine
-import org.apache.flink.client.cli.CustomCommandLine
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
-import org.apache.flink.configuration.DeploymentOptions
+import org.apache.flink.configuration.{Configuration, DeploymentOptions}
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
 import org.apache.flink.yarn.YarnClusterDescriptor
-import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
+import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.fs.{Path => HadoopPath}
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.io.File
-import java.lang.{Boolean => JavaBool}
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.Try
 
 /**
@@ -48,17 +42,11 @@ import scala.util.Try
 @deprecated
 object YarnPreJobSubmit extends YarnSubmitTrait {
 
-  override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
+  override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
 
-    val commandLine = getEffectiveCommandLine(
-      submitRequest,
-      "-t" -> YarnDeploymentTarget.PER_JOB.getName,
-      "-m" -> "yarn-cluster",
-      "-c" -> submitRequest.appMain
-    )
+    setJobSpecificConfig(submitRequest, flinkConfig)
+
     val flinkHome = submitRequest.flinkVersion.flinkHome
-    val activeCommandLine = validateAndGetActiveCommandLine(getCustomCommandLines(flinkHome), commandLine)
-    val flinkConfig = getEffectiveConfiguration(submitRequest, activeCommandLine, commandLine)
 
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
@@ -149,54 +137,17 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     }
   }
 
-  private def getEffectiveConfiguration[T](submitRequest: SubmitRequest, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine) = {
-    val effectiveConfiguration = super.applyConfiguration(submitRequest, activeCustomCommandLine, commandLine)
-    val (providedLibs, programArgs) = {
-      val providedLibs = ListBuffer(submitRequest.hdfsWorkspace.appJars)
-      val programArgs = new ArrayBuffer[String]()
-      Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
-      programArgs += PARAM_KEY_APP_NAME
-      programArgs += submitRequest.effectiveAppName
-      programArgs += PARAM_KEY_FLINK_CONF
-      programArgs += submitRequest.flinkYaml
-
-      submitRequest.developmentMode match {
-        case DevelopmentMode.FLINKSQL =>
-          programArgs += PARAM_KEY_FLINK_SQL
-          programArgs += submitRequest.flinkSQL
-          if (submitRequest.appConf != null) {
-            programArgs += PARAM_KEY_APP_CONF
-            programArgs += submitRequest.appConf
-          }
-          val jobId = submitRequest.jobID
-        case _ =>
-          // Custom Code 必传配置文件...
-          programArgs += PARAM_KEY_APP_CONF
-          programArgs += submitRequest.appConf
-      }
-      programArgs += PARAM_KEY_FLINK_PARALLELISM
-      programArgs += s"${getParallelism(submitRequest)}"
-      providedLibs -> programArgs
-    }
-
-    effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
+  private def setJobSpecificConfig[T](submitRequest: SubmitRequest, flinkConfig: Configuration) = {
     //execution.target
-    effectiveConfiguration.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
-    //yarn application Type
-    effectiveConfiguration.set(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType)
-    //arguments...
-    effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
-    //shutdown-on-attached-exit
-    effectiveConfiguration.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.TRUE)
-
+    flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
     logInfo(
       s"""
          |------------------------------------------------------------------
-         |Effective executor configuration: $effectiveConfiguration
+         |Effective executor configuration: $flinkConfig
          |------------------------------------------------------------------
          |""".stripMargin)
 
-    effectiveConfiguration
+    flinkConfig
   }
 
 }

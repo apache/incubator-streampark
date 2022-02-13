@@ -64,7 +64,10 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
 
   lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX)
 
-  lazy val appMain: String = appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
+  lazy val appMain: String = this.developmentMode match {
+    case DevelopmentMode.FLINKSQL => "com.streamxhub.streamx.flink.cli.SqlClient"
+    case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
+  }
 
   lazy val effectiveAppName: String = if (this.appName == null) appProperties(KEY_FLINK_APP_NAME) else this.appName
 

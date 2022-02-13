@@ -26,7 +26,7 @@ import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.configuration.{DeploymentOptionsInternal, PipelineOptions}
+import org.apache.flink.configuration.{Configuration, DeploymentOptionsInternal, PipelineOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.util.IOUtils
@@ -40,7 +40,10 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
 
   // noinspection DuplicatedCode
   @throws[Exception]
-  override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
+  override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
+
+    super.setJobSpecificConfig(submitRequest, flinkConfig)
+
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
 
@@ -48,17 +51,14 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     checkBuildResult(submitRequest)
     val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
 
-    // extract flink config
-    val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
-
     // add flink pipeline.jars configuration
-    flinkConfig.set(PipelineOptions.JARS, Lists.newArrayList(buildResult.dockerInnerMainJarPath))
+    flinkConfig.safeSet(PipelineOptions.JARS, Lists.newArrayList(buildResult.dockerInnerMainJarPath))
     // add flink conf configuration, mainly to set the log4j configuration
     if (!flinkConfig.contains(DeploymentOptionsInternal.CONF_DIR)) {
-      flinkConfig.set(DeploymentOptionsInternal.CONF_DIR, s"${submitRequest.flinkVersion.flinkHome}/conf")
+      flinkConfig.safeSet(DeploymentOptionsInternal.CONF_DIR, s"${submitRequest.flinkVersion.flinkHome}/conf")
     }
     // add flink container image tag to flink configuration
-    flinkConfig.set(KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag)
+    flinkConfig.safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag)
 
     // retrieve k8s cluster and submit flink job on application mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
@@ -76,7 +76,6 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
       val result = SubmitResponse(clusterId, flinkConfig.toMap)
       logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
       result
-
     } catch {
       case e: Exception =>
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
@@ -89,5 +88,6 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
   override def doStop(stopInfo: StopRequest): StopResponse = {
     super.doStop(ExecutionMode.KUBERNETES_NATIVE_APPLICATION, stopInfo)
   }
+
 
 }
