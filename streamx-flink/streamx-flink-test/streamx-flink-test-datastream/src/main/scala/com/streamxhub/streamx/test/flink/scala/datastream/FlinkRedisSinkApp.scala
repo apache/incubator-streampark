@@ -22,12 +22,11 @@ package com.streamxhub.streamx.test.flink.scala.datastream
 
 import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import com.streamxhub.streamx.flink.core.scala.sink.{RedisMapper, RedisSink}
-import com.streamxhub.streamx.flink.core.scala.source.KafkaSource
 import org.apache.flink.api.scala._
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand
 import org.json4s.DefaultFormats
 
-object FlinkSinkApp extends FlinkStreaming {
+object FlinkRedisSinkApp extends FlinkStreaming {
 
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
@@ -35,48 +34,19 @@ object FlinkSinkApp extends FlinkStreaming {
   override def handle(): Unit = {
 
     /**
-     * 从kafka里读数据.这里的数据是数字或者字母,每次读取1条
+     * 创造读取数据的源头
      */
-    val source = new KafkaSource(context).getDataStream[String]()
-      .uid("kfkSource1")
-      .name("kfkSource1")
-      .map(x => {
-        x.value
-      })
+    val source = context.addSource(new TestSource)
 
-    //Kafka sink..................
-    //2)下沉到目标
-    //KafkaSink(context).sink(source)
-
-    val ds = source.flatMap(x => {
-      x.split(",") match {
-        case Array(d, a, b, c) => Some(Person(d.toInt, a, b.toInt, c.toInt))
-        case _ => None
-      }
-    })
-
-    val ds2 = source.flatMap(x => {
-      x.split(",") match {
-        case Array(d, a, b, c) => Some(User(d.toInt, a, b.toInt, c.toInt))
-        case _ => None
-      }
-    })
 
     // Redis sink..................
     //1)定义 RedisSink
     val sink = RedisSink()
     //2)写Mapper映射
-    val personMapper: RedisMapper[Person] = RedisMapper[Person](RedisCommand.HSET, "flink_person", _.id.toString, _.name)
-    val userMapper: RedisMapper[User] = RedisMapper[User](RedisCommand.HSET, "flink_user", _.id.toString, _.name)
+    val personMapper: RedisMapper[TestEntity] = RedisMapper[TestEntity](RedisCommand.HSET, "flink_user", _.userId.toString, _.orderId.toString)
 
-
+    sink.sink[TestEntity](source, personMapper, 60000000).setParallelism(1)
 
   }
 
-
 }
-
-
-case class Person(id: Int, name: String, sex: Int, age: Int)
-
-case class User(id: Int, name: String, sex: Int, age: Int)

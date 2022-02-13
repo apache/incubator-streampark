@@ -174,11 +174,8 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
           programArgs += PARAM_KEY_APP_CONF
           programArgs += submitRequest.appConf
       }
-      val parallelism = getParallelism(submitRequest)
-      if (parallelism != null) {
-        programArgs += PARAM_KEY_FLINK_PARALLELISM
-        programArgs += s"$parallelism"
-      }
+      programArgs += PARAM_KEY_FLINK_PARALLELISM
+      programArgs += s"${getParallelism(submitRequest)}"
       providedLibs -> programArgs
     }
 

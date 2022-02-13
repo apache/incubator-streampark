@@ -37,6 +37,7 @@ import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
+import com.streamxhub.streamx.console.core.enums.BuildState;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
@@ -116,6 +117,39 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
+    public boolean update(Project projectParam) {
+        try {
+            Project project = getById(projectParam.getId());
+            assert project != null;
+            project.setName(projectParam.getName());
+            project.setUrl(projectParam.getUrl());
+            project.setBranches(projectParam.getBranches());
+            project.setUsername(projectParam.getUsername());
+            project.setPassword(projectParam.getPassword());
+            project.setPom(projectParam.getPom());
+            project.setDescription(projectParam.getDescription());
+            if (projectParam.getBuildState() != null) {
+                project.setBuildState(projectParam.getBuildState());
+                if (BuildState.of(projectParam.getBuildState()).equals(BuildState.NEED_REBUILD)) {
+                    List<Application> applications = getApplications(project);
+                    // 更新部署状态
+                    FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
+                        log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
+                        app.setDeploy(DeployState.NEED_CHECK_AFTER_PROJECT_CHANGED.get());
+                        this.applicationMapper.updateDeploy(app);
+                    }));
+                }
+            }
+            baseMapper.updateById(project);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean delete(Long id) {
         Project project = getById(id);
         assert project != null;
@@ -166,7 +200,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         }));
                     } catch (Exception e) {
                         this.baseMapper.failureBuild(project);
-                        log.error(String.format("deploy error, project name: %s ", project.getName()), e);
+                        log.error("deploy error, project name: {}, detail: {}", project.getName(), e.getMessage());
                     }
                 } else {
                     this.baseMapper.failureBuild(project);
@@ -202,20 +236,16 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     CommandUtils.execute(cmd);
                 }
             } else {
-                try {
-                    // 2) .jar文件(普通,官方标准的flink工程)
-                    Utils.checkJarFile(app.toURI().toURL());
-                    String moduleName = app.getName().replace(".jar", "");
-                    File appBase = project.getDistHome();
-                    File targetDir = new File(appBase, moduleName);
-                    if (!targetDir.exists()) {
-                        targetDir.mkdirs();
-                    }
-                    File targetJar = new File(targetDir, app.getName());
-                    app.renameTo(targetJar);
-                } catch (IOException e) {
-                    throw e;
+                // 2) .jar文件(普通,官方标准的flink工程)
+                Utils.checkJarFile(app.toURI().toURL());
+                String moduleName = app.getName().replace(".jar", "");
+                File appBase = project.getDistHome();
+                File targetDir = new File(appBase, moduleName);
+                if (!targetDir.exists()) {
+                    targetDir.mkdirs();
                 }
+                File targetJar = new File(targetDir, app.getName());
+                app.renameTo(targetJar);
             }
         }
     }

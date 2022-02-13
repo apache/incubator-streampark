@@ -27,7 +27,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import com.streamxhub.streamx.console.base.util.JsonUtils;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeErr;
+import com.streamxhub.streamx.flink.packer.pipeline.PipeError;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeStepStatus;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeType;
@@ -175,20 +175,20 @@ public class AppBuildPipeline {
 
     @Nonnull
     @JsonIgnore
-    public PipeErr getError() {
+    public PipeError getError() {
         if (StringUtils.isBlank(errorJson)) {
-            return PipeErr.empty();
+            return PipeError.empty();
         }
         try {
-            return JsonUtils.read(errorJson, PipeErr.class);
+            return JsonUtils.read(errorJson, PipeError.class);
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, errorJson={}", errorJson, e);
-            return PipeErr.empty();
+            return PipeError.empty();
         }
     }
 
     @JsonIgnore
-    public AppBuildPipeline setError(@Nonnull PipeErr error) {
+    public AppBuildPipeline setError(@Nonnull PipeError error) {
         try {
             this.errorJson = JsonUtils.write(error);
         } catch (JsonProcessingException e) {

@@ -75,11 +75,11 @@
           ]">
           <a-radio
             value="0">
-            锁定
+            locked
           </a-radio>
           <a-radio
             value="1">
-            有效
+            effective
           </a-radio>
         </a-radio-group>
       </a-form-item>
@@ -93,15 +93,15 @@
           ]">
           <a-radio
             value="0">
-            男
+            male
           </a-radio>
           <a-radio
             value="1">
-            女
+            female
           </a-radio>
           <a-radio
             value="2">
-            保密
+            secret
           </a-radio>
         </a-radio-group>
       </a-form-item>
@@ -110,13 +110,13 @@
       class="drawer-bootom-button">
       <a-button
         @click="onClose">
-        取消
+        Cancel
       </a-button>
       <a-button
         @click="handleSubmit"
         type="primary"
         :loading="loading">
-        提交
+        Submit
       </a-button>
     </div>
   </a-drawer>

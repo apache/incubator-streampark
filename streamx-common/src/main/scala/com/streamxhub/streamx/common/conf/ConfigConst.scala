@@ -108,7 +108,9 @@ object ConfigConst {
 
   val KEY_FLINK_DEPLOYMENT_OPTION_PREFIX = "flink.deployment.option."
 
-  val KEY_FLINK_APP_NAME = "yarn.application.name"
+  val KEY_FLINK_APP_NAME = "pipeline.name"
+
+  val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
   val KEY_FLINK_SAVEPOINT_PATH = "execution.savepoint.path"
 
@@ -195,7 +197,11 @@ object ConfigConst {
 
   val KEY_KAFKA_START_FROM_TIMESTAMP = "timestamp"
 
-  val REDIS_PREFIX = "redis."
+  val REDIS_PREFIX = "redis.sink"
+
+  val REDIS_CONNECT_TYPE = "connectType"
+
+  val DEFAULT_REDIS_CONNECT_TYPE = "jedisPool"
 
   val KEY_ALIAS = "alias"
 
@@ -203,15 +209,27 @@ object ConfigConst {
    * about config jdbc...
    */
   val KEY_JDBC_PREFIX = "jdbc."
+
   val KEY_JDBC_DRIVER = "driverClassName"
+
   val KEY_JDBC_DATABASE = "database"
+
   val KEY_JDBC_URL = "jdbcUrl"
+
   val KEY_JDBC_USER = "username"
+
   val KEY_JDBC_PASSWORD = "password"
+
   val KEY_JDBC_INSERT_BATCH = "batch.size"
+
+  val KEY_JDBC_INSERT_BATCH_DELAYTIME = "batch.delaytime"
+
   val DEFAULT_JDBC_INSERT_BATCH = 1
 
+  val DEFAULT_JDBC_INSERT_BATCH_DELAYTIME = 1000L
+
   val MONGO_PREFIX = "mongodb."
+
   /**
    * about config HBase
    */
@@ -231,12 +249,25 @@ object ConfigConst {
    * about influx
    */
   val INFLUX_PREFIX = "influx."
+
   val KEY_INFLUX_ACTIONS = "actions"
+
   val KEY_INFLUX_FLUSH_DURATION = "flush.duration"
+
   /**
    * about clickhouse
    */
   val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"
+
+  val CLICKHOUSE_HOSTS = "hosts"
+
+  val CLICKHOUSE_USER = "user"
+
+  val CLICKHOUSE_PASSWORD = "password"
+
+  val CLICKHOUSE_TARGET_TABLE = "targetTable"
+
+
 
   val HTTP_SINK_PREFIX = "http.sink"
 
@@ -244,22 +275,37 @@ object ConfigConst {
    * sink threshold and failover...
    */
   val KEY_SINK_THRESHOLD_BUFFER_SIZE: String = "threshold.bufferSize"
+
   val KEY_SINK_THRESHOLD_NUM_WRITERS: String = "threshold.numWriters"
+
   val KEY_SINK_THRESHOLD_QUEUE_CAPACITY: String = "threshold.queueCapacity"
+
   val KEY_SINK_THRESHOLD_DELAY_TIME: String = "threshold.delayTime"
+
   val KEY_SINK_THRESHOLD_REQ_TIMEOUT: String = "threshold.requestTimeout"
+
   val KEY_SINK_THRESHOLD_RETRIES: String = "threshold.retries"
+
   val KEY_SINK_THRESHOLD_SUCCESS_CODE: String = "threshold.successCode"
 
+
   val KEY_SINK_FAILOVER_TABLE: String = "failover.table"
+
   val KEY_SINK_FAILOVER_STORAGE: String = "failover.storage"
 
+
   val DEFAULT_SINK_REQUEST_TIMEOUT = 2000
+
   val DEFAULT_HTTP_SUCCESS_CODE = 200
+
   val DEFAULT_SINK_THRESHOLD_QUEUE_CAPACITY = 10000
+
   val DEFAULT_SINK_THRESHOLD_DELAY_TIME = 1000L
+
   val DEFAULT_SINK_THRESHOLD_BUFFER_SIZE = 1000
+
   val DEFAULT_SINK_THRESHOLD_RETRIES = 3
+
   val DEFAULT_SINK_THRESHOLD_NUM_WRITERS: Int = Runtime.getRuntime.availableProcessors()
 
   /**
@@ -312,7 +358,7 @@ object ConfigConst {
     println("\n       WebSite:  http://www.streamxhub.com            ")
     println("       GitHub :  https://github.com/streamxhub/streamx  ")
     println("       Gitee  :  https://gitee.com/streamxhub/streamx   ")
-    println("       Ver    :  1.2.1                                  ")
+    println("       Ver    :  1.2.2                                  ")
     println(s"       Info   :  $info                                 ")
     println(s"       Time   :  ${LocalDateTime.now}              \n\n")
   }

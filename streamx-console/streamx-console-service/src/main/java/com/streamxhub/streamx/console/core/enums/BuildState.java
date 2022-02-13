@@ -17,34 +17,51 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.packer.maven
+package com.streamxhub.streamx.console.core.enums;
 
-import java.util.{List => JavaList}
-import scala.collection.JavaConversions._
+import java.io.Serializable;
+import java.util.Arrays;
 
 /**
- * @author Al-assad
- *
- * @param mavenArts  collection of maven artifacts
- * @param extJarLibs collection of jar lib paths, which elements can be a directory or file path.
+ * @author benjobs
  */
-case class JarPackDeps(mavenArts: Set[MavenArtifact] = Set(),
-                       extJarLibs: Set[String] = Set()) {
+public enum BuildState implements Serializable {
 
-  def this(mavenArts: JavaList[MavenArtifact], extJarLibs: JavaList[String]) {
-    this(mavenArts.toSet, extJarLibs.toSet)
-  }
+    /**
+     * 发生变更,需重新build
+     */
+    NEED_REBUILD(-2),
+    /**
+     * 发布的任务已经撤销
+     */
+    NOT_BUILD(-1),
 
-  def merge(jarLibs: Set[String]): JarPackDeps =
-    if (jarLibs != null) JarPackDeps(mavenArts, extJarLibs ++ jarLibs) else this.copy()
+    /**
+     * 正在构建
+     */
+    BUILDING(0),
 
-  def clearExtJarLibs: (JarPackDeps, Set[String]) = JarPackDeps(mavenArts, Set()) -> extJarLibs
+    /**
+     * 构建成功
+     */
+    SUCCESSFUL(1),
 
+    /**
+     * 构建失败
+     */
+    FAILED(2);
+
+    int value;
+
+    BuildState(int value) {
+        this.value = value;
+    }
+
+    public int get() {
+        return this.value;
+    }
+
+    public static BuildState of(Integer state) {
+        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+    }
 }
-
-object JarPackDeps {
-  def empty: JarPackDeps = new JarPackDeps()
-}
-
-
-

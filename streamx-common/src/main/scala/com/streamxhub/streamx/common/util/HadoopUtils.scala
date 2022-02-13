@@ -89,7 +89,7 @@ object HadoopUtils extends Logger {
     val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
     val kerberosEnable = Try(enableString.trim.toBoolean).getOrElse(false)
     if (kerberosEnable) {
-      kerberosLogin(reusableConf)
+      kerberosLogin()
     } else {
       UserGroupInformation.createRemoteUser(hadoopUserName)
     }
@@ -118,7 +118,7 @@ object HadoopUtils extends Logger {
     if (!configurationCache.containsKey(confDir)) {
       FileUtils.exists(confDir)
       val hadoopConfDir = new File(confDir)
-      val confName = List("core-site.xml", "hdfs-site.xml", "yarn-site.xml", "mapred-site.xml")
+      val confName = List("core-site.xml", "hdfs-site.xml", "yarn-site.xml")
       val files = hadoopConfDir.listFiles().filter(x => x.isFile && confName.contains(x.getName)).toList
       val conf = new Configuration()
       if (CollectionUtils.isNotEmpty(files)) {
@@ -138,32 +138,28 @@ object HadoopUtils extends Logger {
    * </pre>
    */
   def hadoopConf: Configuration = Option(reusableConf).getOrElse {
-    reusableConf = initHadoopConf()
-    reusableConf
-  }
-
-  private[this] def initHadoopConf(): Configuration = {
-    val conf = getConfigurationFromHadoopConfDir(hadoopConfDir)
+    reusableConf = getConfigurationFromHadoopConfDir(hadoopConfDir)
     //add hadoopConfDir to classpath...you know why???
     ClassLoaderUtils.loadResource(hadoopConfDir)
 
-    if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
-      conf.set("hadoop.tmp.dir", "/tmp")
+    if (StringUtils.isBlank(reusableConf.get("hadoop.tmp.dir"))) {
+      reusableConf.set("hadoop.tmp.dir", "/tmp")
     }
-    if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
-      conf.set("hbase.fs.tmp.dir", "/tmp")
+    if (StringUtils.isBlank(reusableConf.get("hbase.fs.tmp.dir"))) {
+      reusableConf.set("hbase.fs.tmp.dir", "/tmp")
     }
     // disable timeline service as we only query yarn app here.
     // Otherwise we may hit this kind of ERROR:
     // java.lang.ClassNotFoundException: com.sun.jersey.api.client.config.ClientConfig
-    conf.set("yarn.timeline-service.enabled", "false")
-    conf.set("fs.hdfs.impl", classOf[DistributedFileSystem].getName)
-    conf.set("fs.file.impl", classOf[LocalFileSystem].getName)
-    conf.set("fs.hdfs.impl.disable.cache", "true")
-    conf
+    reusableConf.set("yarn.timeline-service.enabled", "false")
+    reusableConf.set("fs.hdfs.impl", classOf[DistributedFileSystem].getName)
+    reusableConf.set("fs.file.impl", classOf[LocalFileSystem].getName)
+    reusableConf.set("fs.hdfs.impl.disable.cache", "true")
+    reusableConf
   }
 
   private[this] def closeHadoop(): Unit = {
+    reusableConf = null
     if (tgt != null && !tgt.isDestroyed) {
       tgt.destroy()
     }
@@ -177,7 +173,7 @@ object HadoopUtils extends Logger {
     }
   }
 
-  private[this] def kerberosLogin(conf: Configuration): UserGroupInformation = {
+  private[this] def kerberosLogin(): UserGroupInformation = {
     logInfo("kerberos login starting....")
     val principal = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim
     val keytab = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KEYTAB, "").trim
@@ -197,9 +193,9 @@ object HadoopUtils extends Logger {
     }
     System.setProperty("sun.security.spnego.debug", "true")
     System.setProperty("sun.security.krb5.debug", "true")
-    conf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
+    hadoopConf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
     try {
-      UserGroupInformation.setConfiguration(conf)
+      UserGroupInformation.setConfiguration(hadoopConf)
       val ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(principal, keytab)
       logInfo("kerberos authentication successful")
       ugi
@@ -215,8 +211,7 @@ object HadoopUtils extends Logger {
     timer.schedule(new TimerTask {
       override def run(): Unit = {
         closeHadoop()
-        reusableConf = initHadoopConf()
-        kerberosLogin(reusableConf)
+        kerberosLogin()
         logInfo(s"Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: ${DateUtils.format()}")
       }
     }, tgtRefreshTime, tgtRefreshTime)

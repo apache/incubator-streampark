@@ -159,7 +159,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         new ThreadPoolExecutor.AbortPolicy()
     );
 
-    private static final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_—-]+$");
+    private static final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_\\-\\s]+$");
+
+    private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("^[^\\s]+(\\s[^\\s]+)*$");
 
     @Autowired
     private ProjectService projectService;
@@ -253,7 +255,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        // mergee metrics from flink kubernetes cluster
+        // merge metrics from flink kubernetes cluster
         FlinkMetricCV k8sMetric = k8sFlinkTrkMonitor.getAccClusterMetrics();
         totalJmMemory += k8sMetric.totalJmMemory();
         totalTmMemory += k8sMetric.totalTmMemory();
@@ -289,13 +291,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public String upload(MultipartFile file) throws Exception {
         String temp = WebUtils.getAppDir("temp");
-        File saveFile = new File(temp, file.getOriginalFilename());
+        File saveFile = new File(temp, Objects.requireNonNull(file.getOriginalFilename()));
         // delete when exists
         if (saveFile.exists()) {
             saveFile.delete();
         }
         // save file to temp dir
-        FileUtils.writeByteArrayToFile(saveFile, file.getBytes());
+        file.transferTo(saveFile);
         return saveFile.getAbsolutePath();
     }
 
@@ -547,10 +549,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setState(FlinkAppState.CREATED.getValue());
         appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
+        appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
             String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
             appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
         }
+
         boolean saved = save(appParam);
         if (saved) {
             if (appParam.isFlinkSqlJob()) {
@@ -625,6 +629,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setClusterId(appParam.getClusterId());
             application.setFlinkImage(appParam.getFlinkImage());
             application.setK8sNamespace(appParam.getK8sNamespace());
+            application.updateHotParams(appParam);
             application.setK8sRestExposedType(appParam.getK8sRestExposedType());
             application.setK8sPodTemplate(appParam.getK8sPodTemplate());
             application.setK8sJmPodTemplate(appParam.getK8sJmPodTemplate());
@@ -932,6 +937,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String targetJar = appUploads.concat("/").concat(jar);
                 checkOrElseUploadJar(application, localJar, targetJar);
                 //3) 将upload目录下的文件上传到app/lib下.
+                if (!fsOperator.exists(application.getAppLib())) {
+                    fsOperator.mkdirs(application.getAppLib());
+                }
                 fsOperator.copy(targetJar, application.getAppLib(), false, true);
             }
         }
@@ -997,6 +1005,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             long now = System.currentTimeMillis();
             if (application.getTracking() == 1 && application.getStartTime() != null && application.getStartTime().getTime() > 0) {
                 application.setDuration(now - application.getStartTime().getTime());
+            }
+        }
+
+        if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
+            if (!application.getHotParamsMap().isEmpty()) {
+                if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
+                    application.setYarnQueue(application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE()).toString());
+                }
             }
         }
 
@@ -1201,32 +1217,32 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 assert flinkSql != null;
 
                 //1) dist_userJar
-                File localPlugins = new File(WebUtils.getAppDir("plugins"));
-                assert localPlugins.exists();
+                File localClient = new File(WebUtils.getAppDir("client"));
+                assert localClient.exists();
                 List<String> jars =
-                    Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
+                    Arrays.stream(Objects.requireNonNull(localClient.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
                         .collect(Collectors.toList());
                 if (jars.isEmpty()) {
-                    throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localPlugins);
+                    throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localClient);
                 }
                 if (jars.size() > 1) {
-                    throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localPlugins);
+                    throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localClient);
                 }
                 String sqlDistJar = jars.get(0);
                 //2) appConfig
                 appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
                 assert executionMode != null;
-                //3) plugin
+                //3) client
                 switch (executionMode) {
                     case STANDALONE:
                     case YARN_PER_JOB:
-                    case YARN_APPLICATION:
-                        String pluginPath = Workspace.remote().APP_PLUGINS();
-                        flinkUserJar = String.format("%s/%s", pluginPath, sqlDistJar);
-                        break;
                     case KUBERNETES_NATIVE_SESSION:
                     case KUBERNETES_NATIVE_APPLICATION:
-                        flinkUserJar = Workspace.local().APP_PLUGINS().concat("/").concat(sqlDistJar);
+                        flinkUserJar = Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
+                        break;
+                    case YARN_APPLICATION:
+                        String clientPath = Workspace.remote().APP_CLIENT();
+                        flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
                         break;
                     default:
                         throw new UnsupportedOperationException("Unsupported..." + executionMode);
@@ -1244,6 +1260,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             Map<String, Object> optionMap = application.getOptionMap();
             optionMap.put(ConfigConst.KEY_JOB_ID(), application.getId());
+            if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
+                optionMap.putAll(application.getHotParamsMap());
+            }
 
             if (application.isFlinkSqlJob()) {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
@@ -1265,23 +1284,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
 
             SubmitRequest submitRequest = new SubmitRequest(
-                    flinkEnv.getFlinkVersion(),
-                    flinkEnv.getFlinkConf(),
-                    flinkUserJar,
-                    DevelopmentMode.of(application.getJobType()),
-                    ExecutionMode.of(application.getExecutionMode()),
-                    resolveOrder,
-                    application.getJobName(),
-                    appConf,
-                    application.getApplicationType().getName(),
-                    getSavePointed(appParam),
-                    appParam.getFlameGraph() ? getFlameGraph(application) : null,
-                    option.toString(),
-                    optionMap,
-                    dynamicOption,
-                    application.getArgs(),
-                    buildPipeline == null ? null : buildPipeline.getBuildResult(),
-                    kubernetesSubmitParam
+                flinkEnv.getFlinkVersion(),
+                flinkEnv.getFlinkConf(),
+                flinkUserJar,
+                DevelopmentMode.of(application.getJobType()),
+                ExecutionMode.of(application.getExecutionMode()),
+                resolveOrder,
+                application.getJobName(),
+                appConf,
+                application.getApplicationType().getName(),
+                getSavePointed(appParam),
+                appParam.getFlameGraph() ? getFlameGraph(application) : null,
+                option.toString(),
+                optionMap,
+                dynamicOption,
+                application.getArgs(),
+                buildPipeline == null ? null : buildPipeline.getBuildResult(),
+                kubernetesSubmitParam
             );
 
             SubmitResponse submitResponse = FlinkSubmitHelper.submit(submitRequest);
@@ -1352,7 +1371,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     private Boolean checkJobName(String jobName) {
         if (!StringUtils.isEmpty(jobName.trim())) {
-            return JOB_NAME_PATTERN.matcher(jobName).matches();
+            return JOB_NAME_PATTERN.matcher(jobName).matches() && SINGLE_SPACE_PATTERN.matcher(jobName).matches();
         }
         return false;
     }

@@ -3,10 +3,10 @@
     class="user-wrapper">
 
     <div class="slogan">
-      <span class="slogan-streamx">StreamX </span>, &nbsp;
+      <span class="slogan-streamx">StreamX </span>,
       <span class="slogan-action">
         <span class="slogan-make">Make</span>&nbsp;
-        <span class="slogan-target">Flink|Spark</span>&nbsp;
+        <span class="slogan-target">stream processing</span>&nbsp;
         <span class="slogan-result">easier!</span>
       </span>
     </div>
@@ -17,7 +17,7 @@
       </a>
 
       <a
-        href="http://www.streamxhub.com/zh/doc/"
+        href="http://www.streamxhub.com/docs/user-guide/quick-start"
         title="How to use"
         target="_blank">
         <svg-icon name="question" size="small" class="icon"></svg-icon>

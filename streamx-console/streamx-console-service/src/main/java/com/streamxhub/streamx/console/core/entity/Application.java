@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.K8sFlinkConfig;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
@@ -47,7 +48,7 @@ import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates;
-import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
+import com.streamxhub.streamx.flink.packer.maven.DependencyInfo;
 import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -152,6 +153,7 @@ public class Application implements Serializable {
     private String module;
 
     private String options;
+    private String hotParams;
     private Integer resolveOrder;
     private Integer executionMode;
     private String dynamicOptions;
@@ -274,6 +276,7 @@ public class Application implements Serializable {
     private transient String createTimeFrom;
     private transient String createTimeTo;
     private transient String backUpDescription;
+    private transient String yarnQueue;
 
     /**
      * Flink Web UI Url
@@ -384,9 +387,9 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getDistHome() {
         String path = String.format("%s/%s/%s",
-            Workspace.local().APP_LOCAL_DIST(),
-            projectId.toString(),
-            getModule()
+                Workspace.local().APP_LOCAL_DIST(),
+                projectId.toString(),
+                getModule()
         );
         log.info("local distHome:{}", path);
         return path;
@@ -395,8 +398,8 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getLocalAppHome() {
         String path = String.format("%s/%s",
-            Workspace.local().APP_WORKSPACE(),
-            id.toString()
+                Workspace.local().APP_WORKSPACE(),
+                id.toString()
         );
         log.info("local appHome:{}", path);
         return path;
@@ -405,9 +408,9 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getRemoteAppHome() {
         String path = String.format(
-            "%s/%s",
-            Workspace.remote().APP_WORKSPACE(),
-            id.toString()
+                "%s/%s",
+                Workspace.remote().APP_WORKSPACE(),
+                id.toString()
         );
         log.info("remote appHome:{}", path);
         return path;
@@ -611,7 +614,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public JarPackDeps getJarPackDeps() {
+    public DependencyInfo getDependencyInfo() {
         return Application.Dependency.jsonToDependency(getDependency()).toJarPackDeps();
     }
 
@@ -623,6 +626,11 @@ public class Application implements Serializable {
     @JsonIgnore
     public boolean isNeedRollback() {
         return DeployState.NEED_ROLLBACK.get() == this.getDeploy();
+    }
+
+    @JsonIgnore
+    public boolean isNeedCheck() {
+        return DeployState.NEED_CHECK_AFTER_PROJECT_CHANGED.get() == this.getDeploy();
     }
 
     @JsonIgnore
@@ -656,8 +664,8 @@ public class Application implements Serializable {
         }
 
         if (!ObjectUtils.safeEquals(this.getResolveOrder(), other.getResolveOrder()) ||
-            !ObjectUtils.safeEquals(this.getExecutionMode(), other.getExecutionMode()) ||
-            !ObjectUtils.safeEquals(this.getK8sRestExposedType(), other.getK8sRestExposedType())) {
+                !ObjectUtils.safeEquals(this.getExecutionMode(), other.getExecutionMode()) ||
+                !ObjectUtils.safeEquals(this.getK8sRestExposedType(), other.getK8sRestExposedType())) {
             return false;
         }
 
@@ -736,6 +744,45 @@ public class Application implements Serializable {
         return Workspace.of(getStorageType());
     }
 
+    @JsonIgnore
+    @SneakyThrows
+    public Map<String, Object> getHotParamsMap() {
+        if (this.hotParams != null) {
+            Map<String, Object> map = JsonUtils.read(this.hotParams, Map.class);
+            map.entrySet().removeIf(entry -> entry.getValue() == null);
+            return map;
+        }
+        return Collections.EMPTY_MAP;
+    }
+
+    @JsonIgnore
+    @SneakyThrows
+    public void doSetHotParams() {
+        Map<String, String> hotParams = new HashMap<>();
+        ExecutionMode executionModeEnum = this.getExecutionModeEnum();
+        if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
+            if (StringUtils.isNotEmpty(this.getYarnQueue())) {
+                hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.getYarnQueue());
+            }
+        }
+        if (!hotParams.isEmpty()) {
+            this.setHotParams(JsonUtils.write(hotParams));
+        }
+    }
+
+    @JsonIgnore
+    @SneakyThrows
+    public void updateHotParams(Application appParam) {
+        ExecutionMode executionModeEnum = appParam.getExecutionModeEnum();
+        Map<String, String> hotParams = new HashMap<>();
+        if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
+            if (StringUtils.isNotEmpty(appParam.getYarnQueue())) {
+                hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), appParam.getYarnQueue());
+            }
+        }
+        this.setHotParams(JsonUtils.write(hotParams));
+    }
+
     @Data
     public static class Dependency {
         private List<Pom> pom = Collections.emptyList();
@@ -788,14 +835,14 @@ public class Application implements Serializable {
         }
 
         @JsonIgnore
-        public JarPackDeps toJarPackDeps() {
+        public DependencyInfo toJarPackDeps() {
             List<MavenArtifact> mvnArts = this.pom.stream()
-                .map(pom -> new MavenArtifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
-                .collect(Collectors.toList());
+                    .map(pom -> new MavenArtifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
+                    .collect(Collectors.toList());
             List<String> extJars = this.jar.stream()
-                .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
-                .collect(Collectors.toList());
-            return new JarPackDeps(mvnArts, extJars);
+                    .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
+                    .collect(Collectors.toList());
+            return new DependencyInfo(mvnArts, extJars);
         }
 
     }
@@ -810,10 +857,10 @@ public class Application implements Serializable {
         @Override
         public String toString() {
             return "{" +
-                "groupId='" + groupId + '\'' +
-                ", artifactId='" + artifactId + '\'' +
-                ", version='" + version + '\'' +
-                '}';
+                    "groupId='" + groupId + '\'' +
+                    ", artifactId='" + artifactId + '\'' +
+                    ", version='" + version + '\'' +
+                    '}';
         }
 
         private String getGav() {

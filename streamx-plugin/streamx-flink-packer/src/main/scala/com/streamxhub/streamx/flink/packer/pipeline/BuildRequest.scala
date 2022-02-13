@@ -23,7 +23,7 @@ import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf
-import com.streamxhub.streamx.flink.packer.maven.JarPackDeps
+import com.streamxhub.streamx.flink.packer.maven.DependencyInfo
 
 /**
  * Params of a BuildPipeline instance.
@@ -42,7 +42,7 @@ sealed trait FlinkBuildParam extends BuildParam {
 
   def flinkVersion: FlinkVersion
 
-  def jarPackDeps: JarPackDeps
+  def dependencyInfo: DependencyInfo
 
   def customFlinkUsrJarPath: String
 }
@@ -58,7 +58,7 @@ case class FlinkK8sSessionBuildRequest(appName: String,
                                        executionMode: ExecutionMode,
                                        developmentMode: DevelopmentMode,
                                        flinkVersion: FlinkVersion,
-                                       jarPackDeps: JarPackDeps,
+                                       dependencyInfo: DependencyInfo,
                                        customFlinkUsrJarPath: String,
                                        clusterId: String,
                                        k8sNamespace: String
@@ -68,7 +68,7 @@ case class FlinkK8sApplicationBuildRequest(appName: String,
                                            executionMode: ExecutionMode,
                                            developmentMode: DevelopmentMode,
                                            flinkVersion: FlinkVersion,
-                                           jarPackDeps: JarPackDeps,
+                                           dependencyInfo: DependencyInfo,
                                            customFlinkUsrJarPath: String,
                                            clusterId: String,
                                            k8sNamespace: String,
