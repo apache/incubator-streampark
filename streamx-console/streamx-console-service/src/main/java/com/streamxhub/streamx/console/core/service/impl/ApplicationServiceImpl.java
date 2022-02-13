@@ -97,6 +97,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.configuration.JobManagerOptions;
+import org.apache.flink.configuration.RestOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -119,6 +121,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -1081,7 +1084,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     appParam.getSavePointed(),
                     appParam.getDrain(),
                     customSavepoint,
-                    application.getK8sNamespace()
+                    application.getK8sNamespace(),
+                    application.getDynamicOptions()
                 );
 
                 StopResponse stopResponse = FlinkSubmitHelper.stop(stopInfo);
@@ -1230,6 +1234,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 assert executionMode != null;
                 //3) client
                 switch (executionMode) {
+                    case STANDALONE:
                     case YARN_PER_JOB:
                     case KUBERNETES_NATIVE_SESSION:
                     case KUBERNETES_NATIVE_APPLICATION:
@@ -1311,6 +1316,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (tmMemory != null) {
                     application.setTmMemory(FlinkMemorySize.parse(tmMemory).getMebiBytes());
                 }
+            }
+            if (ExecutionMode.isStandaloneMode(application.getExecutionModeEnum())) {
+                Optional<String> restUrl = Optional.ofNullable(submitResponse.flinkConfig().get(RestOptions.ADDRESS.key()));
+                application.setRestUrl(restUrl.orElseGet(() -> submitResponse.flinkConfig().getOrDefault(JobManagerOptions.ADDRESS.key(),
+                    null)));
+                application.setRestPort(Integer.valueOf(submitResponse.flinkConfig().getOrDefault(RestOptions.PORT.key(), null)));
             }
             application.setAppId(submitResponse.clusterId());
             if (StringUtils.isNoneEmpty(submitResponse.jobId())) {

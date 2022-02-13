@@ -67,10 +67,17 @@ public enum PipeType {
             .build(),
         FlinkK8sApplicationBuildResponse.class
     ),
-
+    FLINK_STANDALONE(
+        3,
+        "flink standalone session mode task building pipeline",
+        ImmutableMap.<Integer, String>builder()
+            .put(1, "Create building workspace")
+            .put(2, "Build shaded flink app jar")
+            .build(),
+        FlinkStandaloneBuildResponse.class
+    ),
     // todo FLINK_YARN_APPLICATION(),
     // todo FLINK_YARN_SESSION(),
-    // todo FLINK_STANDALONE(),
     ;
 
 

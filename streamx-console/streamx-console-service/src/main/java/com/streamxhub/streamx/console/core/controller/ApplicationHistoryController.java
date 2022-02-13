@@ -76,7 +76,7 @@ public class ApplicationHistoryController {
         switch (ExecutionMode.of(executionMode)) {
             case KUBERNETES_NATIVE_SESSION:
             case YARN_SESSION:
-            case REMOTE:
+            case STANDALONE:
                 clusterIds = applicationMapper.getRecentK8sClusterId(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
                 break;
             default:

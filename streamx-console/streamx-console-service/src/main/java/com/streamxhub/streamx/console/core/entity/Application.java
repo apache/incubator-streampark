@@ -35,6 +35,7 @@ import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
+import com.streamxhub.streamx.common.util.StandaloneUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.util.JsonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
@@ -210,6 +211,14 @@ public class Application implements Serializable {
     private Integer jmMemory;
     private Integer tmMemory;
     private Integer totalTask;
+
+    /**
+     * web url
+     */
+    @TableField("REST_URL")
+    private String restUrl;
+    @TableField("REST_PORT")
+    private Integer restPort;
 
     private String description;
 
@@ -421,6 +430,8 @@ public class Application implements Serializable {
             case YARN_SESSION:
             case LOCAL:
                 return getLocalAppHome();
+            case STANDALONE:
+                return getLocalAppHome();
             case YARN_APPLICATION:
                 return getRemoteAppHome();
             default:
@@ -462,18 +473,29 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public JobsOverview httpJobsOverview() throws Exception {
+    public JobsOverview httpJobsOverview(FlinkEnv env) throws Exception {
+        final String flinkUrl = "jobs/overview";
         if (appId != null) {
-            String format = "%s/proxy/%s/jobs/overview";
-            try {
-                String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
-                return httpGetDoResult(url, JobsOverview.class);
-            } catch (IOException e) {
+            if (ExecutionMode.isYarnMode(executionMode)) {
+                String format = "%s/proxy/%s/" + flinkUrl;
                 try {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
                     return httpGetDoResult(url, JobsOverview.class);
-                } catch (Exception e1) {
-                    throw e1;
+                } catch (IOException e) {
+                    try {
+                        String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
+                        return httpGetDoResult(url, JobsOverview.class);
+                    } catch (Exception e1) {
+                        throw e1;
+                    }
+                }
+            } else {
+                String remoteUrl = StandaloneUtils.getRestWebAppURL(env.convertFlinkYamlAsMap(),
+                    restUrl, restPort, flinkUrl);
+                try {
+                    return httpGetDoResult(remoteUrl, JobsOverview.class);
+                } catch (Exception e) {
+                    throw e;
                 }
             }
         }
@@ -481,35 +503,62 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public Overview httpOverview() throws IOException {
-        String format = "%s/proxy/%s/overview";
-        try {
-            String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
-            return httpGetDoResult(url, Overview.class);
-        } catch (IOException e) {
-            try {
-                String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                return httpGetDoResult(url, Overview.class);
-            } catch (Exception e1) {
-                throw e1;
+    public Overview httpOverview(FlinkEnv env) throws IOException {
+        final String flinkUrl = "overview";
+        if (appId != null) {
+            if (ExecutionMode.isYarnMode(executionMode)) {
+                String format = "%s/proxy/%s/" + flinkUrl;
+                try {
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
+                    return httpGetDoResult(url, Overview.class);
+                } catch (IOException e) {
+                    try {
+                        String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
+                        return httpGetDoResult(url, Overview.class);
+                    } catch (Exception e1) {
+                        throw e1;
+                    }
+                }
+            } else {
+                String remoteUrl = StandaloneUtils.getRestWebAppURL(env.convertFlinkYamlAsMap(), restUrl, restPort, flinkUrl);
+                try {
+                    return httpGetDoResult(remoteUrl, Overview.class);
+                } catch (Exception e) {
+                    throw e;
+                }
             }
         }
+        return null;
     }
 
     @JsonIgnore
-    public CheckPoints httpCheckpoints() throws IOException {
-        String format = "%s/proxy/%s/jobs/%s/checkpoints";
-        try {
-            String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId, jobId);
-            return httpGetDoResult(url, CheckPoints.class);
-        } catch (IOException e) {
-            try {
-                String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId, jobId);
-                return httpGetDoResult(url, CheckPoints.class);
-            } catch (Exception e1) {
-                throw e1;
+    public CheckPoints httpCheckpoints(FlinkEnv env) throws IOException {
+        final String flinkUrl = "jobs/%s/checkpoints";
+        if (appId != null) {
+            if (ExecutionMode.isYarnMode(executionMode)) {
+                String format = "%s/proxy/%s/" + flinkUrl;
+                try {
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId, jobId);
+                    return httpGetDoResult(url, CheckPoints.class);
+                } catch (IOException e) {
+                    try {
+                        String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId, jobId);
+                        return httpGetDoResult(url, CheckPoints.class);
+                    } catch (Exception e1) {
+                        throw e1;
+                    }
+                }
+            } else {
+                String remoteUrl = StandaloneUtils.getRestWebAppURL(env.convertFlinkYamlAsMap(), restUrl, restPort,
+                    String.format(flinkUrl, jobId));
+                try {
+                    return httpGetDoResult(remoteUrl, CheckPoints.class);
+                } catch (Exception e) {
+                    throw e;
+                }
             }
         }
+        return null;
     }
 
     @JsonIgnore
@@ -679,6 +728,8 @@ public class Application implements Serializable {
             case YARN_SESSION:
             case KUBERNETES_NATIVE_SESSION:
             case KUBERNETES_NATIVE_APPLICATION:
+                return StorageType.LFS;
+            case STANDALONE:
                 return StorageType.LFS;
             default:
                 throw new UnsupportedOperationException("Unsupported ".concat(executionMode.getName()));
