@@ -47,6 +47,31 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
 
+  override def doConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    // extract from submitRequest
+    flinkConfig
+      .safeSet(PipelineOptions.NAME, submitRequest.appName)
+      .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
+      .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
+      .safeSet(
+        KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
+        covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType)
+      )
+
+    if (submitRequest.buildResult != null) {
+      val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
+      buildResult.podTemplatePaths.foreach(p => {
+        flinkConfig.safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
+        flinkConfig.safeSet(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
+        flinkConfig.safeSet(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
+      })
+    }
+
+    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) {
+      flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
+    }
+  }
+
   @throws[Exception]
   protected def checkBuildResult(submitRequest: SubmitRequest): Unit = {
     val result = submitRequest.buildResult
@@ -143,35 +168,5 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     case FlinkK8sRestExposedType.NodePort => ServiceExposedType.NodePort
     case _ => ServiceExposedType.LoadBalancer
   }
-
-  /**
-   * extract all necessary flink configuration from submitRequest
-   */
-  @Nonnull def setJobSpecificConfig(@Nonnull submitRequest: SubmitRequest, flinkConfig: Configuration): Configuration = {
-    // extract from submitRequest
-    flinkConfig
-      .safeSet(PipelineOptions.NAME, submitRequest.appName)
-      .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
-      .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
-      .safeSet(
-        KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
-        covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType)
-      )
-
-    if (submitRequest.buildResult != null) {
-      val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
-      buildResult.podTemplatePaths.foreach(p => {
-        flinkConfig.safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
-        flinkConfig.safeSet(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
-        flinkConfig.safeSet(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
-      })
-    }
-
-    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) {
-      flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
-    }
-    flinkConfig
-  }
-
 
 }

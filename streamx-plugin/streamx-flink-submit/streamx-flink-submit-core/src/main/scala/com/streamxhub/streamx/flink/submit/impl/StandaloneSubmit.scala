@@ -21,14 +21,15 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.common.util.StandaloneUtils
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper
-import com.streamxhub.streamx.flink.submit.`trait`.StandaloneSubmitTrait
+import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.deployment.{StandaloneClusterDescriptor, StandaloneClusterId}
+import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.util.IOUtils
@@ -40,11 +41,26 @@ import scala.collection.JavaConversions._
 /**
  * Submit Job to Remote Session Cluster
  */
-object StandaloneSubmit extends StandaloneSubmitTrait {
+object StandaloneSubmit extends FlinkSubmitTrait {
+
+  /**
+   * @param submitRequest
+   * @param flinkConfig
+   */
+  override def doConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    flinkConfig.safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
+    if (!flinkConfig.contains(JobManagerOptions.ADDRESS) && !flinkConfig.contains(RestOptions.ADDRESS)) {
+      logWarn(s"RestOptions Address is not set,use default value : ${StandaloneUtils.DEFAULT_REST_ADDRESS}")
+      flinkConfig.setString(RestOptions.ADDRESS, StandaloneUtils.DEFAULT_REST_ADDRESS)
+    }
+    if (!flinkConfig.contains(RestOptions.PORT)) {
+      logWarn(s"RestOptions port is not set,use default value : ${StandaloneUtils.DEFAULT_REST_PORT}")
+      flinkConfig.setInteger(RestOptions.PORT, StandaloneUtils.DEFAULT_REST_PORT)
+    }
+  }
+
 
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    // require parameters with standalone remote
-    super.setJobSpecificConfig(submitRequest, flinkConfig)
     // get build result
     val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
     // build fat-jar
@@ -155,4 +171,18 @@ object StandaloneSubmit extends StandaloneSubmitTrait {
       IOUtils.closeAll(client, packageProgram, clusterDescriptor)
     }
   }
+
+  /**
+   * create StandAloneClusterDescriptor
+   *
+   * @param flinkConfig
+   */
+  def getStandAloneClusterDescriptor(flinkConfig: Configuration): (StandaloneClusterId, StandaloneClusterDescriptor) = {
+    val serviceLoader = new DefaultClusterClientServiceLoader
+    val clientFactory = serviceLoader.getClusterClientFactory(flinkConfig)
+    val standaloneClusterId: StandaloneClusterId = clientFactory.getClusterId(flinkConfig)
+    val standaloneClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[StandaloneClusterDescriptor]
+    (standaloneClusterId, standaloneClusterDescriptor)
+  }
+
 }

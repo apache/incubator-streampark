@@ -42,13 +42,12 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
   @throws[Exception]
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
 
-    super.setJobSpecificConfig(submitRequest, flinkConfig)
-
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
 
     // check the last building result
     checkBuildResult(submitRequest)
+
     val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
 
     // add flink pipeline.jars configuration

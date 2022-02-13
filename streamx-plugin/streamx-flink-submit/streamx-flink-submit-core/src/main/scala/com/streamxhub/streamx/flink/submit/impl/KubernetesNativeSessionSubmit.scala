@@ -49,9 +49,6 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
 
   @throws[Exception]
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-
-    super.setJobSpecificConfig(submitRequest, flinkConfig)
-
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
 
