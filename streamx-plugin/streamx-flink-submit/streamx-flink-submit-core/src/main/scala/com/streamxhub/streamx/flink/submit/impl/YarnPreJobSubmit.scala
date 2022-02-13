@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
+import com.streamxhub.streamx.common.util.FlinkUtils
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
@@ -53,11 +54,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
     val clusterDescriptor = {
       val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[YarnClusterDescriptor]
-      val flinkDistJar = new File(s"${flinkHome}/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-        case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in ${flinkHome}/lib")
-        case array if array.length == 1 => s"${flinkHome}/lib/${array.head}"
-        case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in ${flinkHome}/lib,[${more.mkString(",")}]")
-      }
+      val flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome)
       clusterDescriptor.setLocalJarPath(new HadoopPath(flinkDistJar))
       clusterDescriptor.addShipFiles(List(new File(s"${flinkHome}/plugins")))
       clusterDescriptor
