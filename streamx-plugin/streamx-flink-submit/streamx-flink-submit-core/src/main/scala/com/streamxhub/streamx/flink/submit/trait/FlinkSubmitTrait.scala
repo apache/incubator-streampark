@@ -269,7 +269,7 @@ trait FlinkSubmitTrait extends Logger {
     getFlinkDefaultConfiguration(flinkHome).get(option)
   }
 
-  private[this] def getCustomCommandLines(flinkHome: String) = {
+  private[this] def getCustomCommandLines(flinkHome: String): JavaList[CustomCommandLine] = {
     val flinkDefaultConfiguration: Configuration = getFlinkDefaultConfiguration(flinkHome)
     // 1. find the configuration directory
     val configurationDirectory = s"$flinkHome/conf"
