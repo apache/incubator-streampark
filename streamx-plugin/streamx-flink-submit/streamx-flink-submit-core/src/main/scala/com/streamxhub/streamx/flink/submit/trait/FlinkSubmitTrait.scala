@@ -339,10 +339,6 @@ trait FlinkSubmitTrait extends Logger {
       }
     })
     configuration.addAll(customConfiguration)
-    //main class
-    if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
-      configuration.safeSet(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
-    }
     configuration
   }
 
