@@ -25,14 +25,28 @@ import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, Su
 import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
 import org.apache.flink.configuration._
 
-import javax.annotation.Nonnull
-
 /**
  * @Description Remote Submit
  */
 trait StandaloneSubmitTrait extends FlinkSubmitTrait {
 
   lazy val workspace: Workspace = Workspace.local
+
+  /**
+   * @param submitRequest
+   * @param flinkConfig
+   */
+  override def doConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    flinkConfig.safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
+    if (!flinkConfig.contains(JobManagerOptions.ADDRESS) && !flinkConfig.contains(RestOptions.ADDRESS)) {
+      logWarn(s"RestOptions Address is not set,use default value : ${StandaloneUtils.DEFAULT_REST_ADDRESS}")
+      flinkConfig.setString(RestOptions.ADDRESS, StandaloneUtils.DEFAULT_REST_ADDRESS)
+    }
+    if (!flinkConfig.contains(RestOptions.PORT)) {
+      logWarn(s"RestOptions port is not set,use default value : ${StandaloneUtils.DEFAULT_REST_PORT}")
+      flinkConfig.setInteger(RestOptions.PORT, StandaloneUtils.DEFAULT_REST_PORT)
+    }
+  }
 
   override def submit(submitRequest: SubmitRequest): SubmitResponse = super.submit(submitRequest)
 
@@ -49,26 +63,6 @@ trait StandaloneSubmitTrait extends FlinkSubmitTrait {
     val standaloneClusterId: StandaloneClusterId = clientFactory.getClusterId(flinkConfig)
     val standaloneClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[StandaloneClusterDescriptor]
     (standaloneClusterId, standaloneClusterDescriptor)
-  }
-
-
-  /**
-   * submitRequest to flinkConfig
-   *
-   * @param submitRequest
-   * @return
-   */
-  @Nonnull def setJobSpecificConfig(@Nonnull submitRequest: SubmitRequest, flinkConfig: Configuration): Configuration = {
-    flinkConfig.safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
-    if (!flinkConfig.contains(JobManagerOptions.ADDRESS) && !flinkConfig.contains(RestOptions.ADDRESS)) {
-      logWarn(s"RestOptions Address is not set,use default value : ${StandaloneUtils.DEFAULT_REST_ADDRESS}")
-      flinkConfig.setString(RestOptions.ADDRESS, StandaloneUtils.DEFAULT_REST_ADDRESS)
-    }
-    if (!flinkConfig.contains(RestOptions.PORT)) {
-      logWarn(s"RestOptions port is not set,use default value : ${StandaloneUtils.DEFAULT_REST_PORT}")
-      flinkConfig.setInteger(RestOptions.PORT, StandaloneUtils.DEFAULT_REST_PORT)
-    }
-    flinkConfig
   }
 
 }

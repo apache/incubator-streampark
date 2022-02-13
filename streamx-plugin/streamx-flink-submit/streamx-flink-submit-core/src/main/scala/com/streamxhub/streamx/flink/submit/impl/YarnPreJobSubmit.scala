@@ -43,9 +43,18 @@ import scala.util.Try
 @deprecated
 object YarnPreJobSubmit extends YarnSubmitTrait {
 
-  override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
+  override def doConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    //execution.target
+    flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
+    logInfo(
+      s"""
+         |------------------------------------------------------------------
+         |Effective executor configuration: $flinkConfig
+         |------------------------------------------------------------------
+         |""".stripMargin)
+  }
 
-    setJobSpecificConfig(submitRequest, flinkConfig)
+  override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
 
     val flinkHome = submitRequest.flinkVersion.flinkHome
 
@@ -132,19 +141,6 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }
-  }
-
-  private def setJobSpecificConfig[T](submitRequest: SubmitRequest, flinkConfig: Configuration) = {
-    //execution.target
-    flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
-    logInfo(
-      s"""
-         |------------------------------------------------------------------
-         |Effective executor configuration: $flinkConfig
-         |------------------------------------------------------------------
-         |""".stripMargin)
-
-    flinkConfig
   }
 
 }

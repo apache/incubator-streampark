@@ -81,7 +81,6 @@ trait FlinkSubmitTrait extends Logger {
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
-
     val commandLine = getEffectiveCommandLine(
       submitRequest,
       "-t" -> submitRequest.executionMode.getName
@@ -121,8 +120,11 @@ trait FlinkSubmitTrait extends Logger {
          |------------------------------------------------------------------
          |""".stripMargin)
 
+    doConfig(submitRequest, flinkConfig)
     doSubmit(submitRequest, flinkConfig)
   }
+
+  def doConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
 
   @throws[Exception] def stop(stopRequest: StopRequest): StopResponse = {
     logInfo(

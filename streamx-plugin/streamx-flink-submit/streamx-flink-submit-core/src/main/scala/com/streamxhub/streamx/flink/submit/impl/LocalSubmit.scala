@@ -24,6 +24,11 @@ import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.flink.configuration.Configuration
 
 object LocalSubmit extends FlinkSubmitTrait {
+
+  override def doConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit = {
+
+  }
+
   override def doSubmit(submitInfo: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
     throw new UnsupportedOperationException("Unsupported local Submit ")
   }
@@ -31,4 +36,5 @@ object LocalSubmit extends FlinkSubmitTrait {
   override def doStop(stopInfo: StopRequest): StopResponse = {
     throw new UnsupportedOperationException("Unsupported local Submit ")
   }
+
 }

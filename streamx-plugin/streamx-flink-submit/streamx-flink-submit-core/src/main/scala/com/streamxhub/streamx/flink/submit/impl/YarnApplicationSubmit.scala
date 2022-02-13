@@ -42,8 +42,61 @@ import scala.collection.mutable.ListBuffer
  */
 object YarnApplicationSubmit extends YarnSubmitTrait {
 
+  override def doConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
+    val currentUser = UserGroupInformation.getCurrentUser
+    logDebug(s"UserGroupInformation currentUser: $currentUser")
+    if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
+      logDebug(s"kerberos Security is Enabled...")
+      val useTicketCache = flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
+      if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
+        throw new RuntimeException(s"Hadoop security with Kerberos is enabled but the login user ${currentUser} does not have Kerberos credentials or delegation tokens!")
+      }
+    }
+    val providedLibs = {
+      val array = ListBuffer(
+        submitRequest.hdfsWorkspace.flinkLib,
+        submitRequest.hdfsWorkspace.appJars,
+        submitRequest.hdfsWorkspace.appPlugins
+      )
+      submitRequest.developmentMode match {
+        case DevelopmentMode.FLINKSQL =>
+          val version = submitRequest.flinkVersion.version.split("\\.").map(_.trim.toInt)
+          version match {
+            case Array(1, 12, _) => array += s"${workspace.APP_SHIMS}/flink-1.12"
+            case Array(1, 13, _) => array += s"${workspace.APP_SHIMS}/flink-1.13"
+            case Array(1, 14, _) => array += s"${workspace.APP_SHIMS}/flink-1.14"
+            case _ => throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
+          }
+          val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
+          if (HdfsUtils.exists(jobLib)) {
+            array += jobLib
+          }
+        case _ =>
+      }
+      array.toList
+    }
+
+    //yarn.provided.lib.dirs
+    flinkConfig.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
+    //flinkDistJar
+    flinkConfig.set(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.hdfsWorkspace.flinkDistJar)
+    //pipeline.jars
+    flinkConfig.set(PipelineOptions.JARS, Collections.singletonList(submitRequest.flinkUserJar))
+    //yarn application name
+    flinkConfig.set(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
+    //yarn application Type
+    flinkConfig.set(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType)
+
+    logInfo(
+      s"""
+         |------------------------------------------------------------------
+         |Effective executor configuration: $flinkConfig
+         |------------------------------------------------------------------
+         |""".stripMargin)
+  }
+
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    setJobSpecificConfig(submitRequest, flinkConfig)
     SecurityUtils.install(new SecurityConfiguration(flinkConfig))
     SecurityUtils.getInstalledContext.runSecured(new Callable[SubmitResponse] {
       override def call(): SubmitResponse = {
@@ -77,66 +130,6 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
         }
       }
     })
-  }
-
-  private def setJobSpecificConfig[T](submitRequest: SubmitRequest, effectiveConfiguration: Configuration) = {
-    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
-    val currentUser = UserGroupInformation.getCurrentUser
-    logDebug(s"UserGroupInformation currentUser: $currentUser")
-    if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
-      logDebug(s"kerberos Security is Enabled...")
-      val useTicketCache = flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
-      if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
-        throw new RuntimeException(s"Hadoop security with Kerberos is enabled but the login user ${currentUser} does not have Kerberos credentials or delegation tokens!")
-      }
-    }
-    val providedLibs = {
-      val array = ListBuffer(
-        submitRequest.hdfsWorkspace.flinkLib,
-        submitRequest.hdfsWorkspace.appJars,
-        submitRequest.hdfsWorkspace.appPlugins
-      )
-      submitRequest.developmentMode match {
-        case DevelopmentMode.FLINKSQL =>
-          val version = submitRequest.flinkVersion.version.split("\\.").map(_.trim.toInt)
-          version match {
-            case Array(1, 12, _) =>
-              array += s"${workspace.APP_SHIMS}/flink-1.12"
-            case Array(1, 13, _) =>
-              array += s"${workspace.APP_SHIMS}/flink-1.13"
-            case Array(1, 14, _) =>
-              array += s"${workspace.APP_SHIMS}/flink-1.14"
-            case _ =>
-              throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
-          }
-          val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
-          if (HdfsUtils.exists(jobLib)) {
-            array += jobLib
-          }
-        case _ =>
-      }
-      array.toList
-    }
-
-    //yarn.provided.lib.dirs
-    effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
-    //flinkDistJar
-    effectiveConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.hdfsWorkspace.flinkDistJar)
-    //pipeline.jars
-    effectiveConfiguration.set(PipelineOptions.JARS, Collections.singletonList(submitRequest.flinkUserJar))
-    //yarn application name
-    effectiveConfiguration.set(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
-    //yarn application Type
-    effectiveConfiguration.set(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType)
-
-    logInfo(
-      s"""
-         |------------------------------------------------------------------
-         |Effective executor configuration: $effectiveConfiguration
-         |------------------------------------------------------------------
-         |""".stripMargin)
-
-    effectiveConfiguration
   }
 
 

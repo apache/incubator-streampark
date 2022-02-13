@@ -43,8 +43,6 @@ import scala.collection.JavaConversions._
 object StandaloneSubmit extends StandaloneSubmitTrait {
 
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    // require parameters with standalone remote
-    super.setJobSpecificConfig(submitRequest, flinkConfig)
     // get build result
     val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
     // build fat-jar
