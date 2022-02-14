@@ -123,7 +123,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       val submitResult = client.submitJob(jobGraph)
       val jobId = submitResult.get().toString
       val result = SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId)
-      logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId=${jobID.toString}")
+      logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId: $jobId")
       result
     } catch {
       case e: Exception =>
