@@ -26,8 +26,9 @@ import scala.util.Try
 
 object StandaloneUtils {
 
-  private[this] lazy val DEFAULT_REST_ADDRESS: String = "localhost"
-  private[this] lazy val DEFAULT_REST_PORT: Int = 8081
+  lazy val DEFAULT_REST_ADDRESS: String = "localhost"
+
+  lazy val DEFAULT_REST_PORT: Int = 8081
 
   /**
    * Append the http Rest Api
