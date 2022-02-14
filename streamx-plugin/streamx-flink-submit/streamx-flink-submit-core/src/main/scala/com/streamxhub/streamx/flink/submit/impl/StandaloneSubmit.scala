@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
 import com.streamxhub.streamx.common.util.StandaloneUtils
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper
@@ -60,20 +60,23 @@ object StandaloneSubmit extends FlinkSubmitTrait {
     }
   }
 
-
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    // 1) get build result
-    val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
+    // 1) get userJar
+    val userJar = submitRequest.developmentMode match {
+      case DevelopmentMode.FLINKSQL =>
+        // 1) get build result
+        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
+        // 2) get fat-jar
+        new File(buildResult.flinkShadedJarPath)
+      case _ => new File(submitRequest.flinkUserJar)
+    }
 
-    // 2) get fat-jar
-    val fatJar = new File(buildResult.flinkShadedJarPath)
-
-    // 3) submit job
-    Try(restApiSubmitPlan(submitRequest, flinkConfig, fatJar))
+    // 2) submit job
+    Try(restApiSubmitPlan(submitRequest, flinkConfig, userJar))
       .recover {
         case _ =>
           logInfo(s"[flink-submit] Rest API Submit Plan failed, try Submit Plan  now.")
-          jobGraphSubmitPlan(submitRequest, flinkConfig, fatJar)
+          jobGraphSubmitPlan(submitRequest, flinkConfig, userJar)
       } match {
       case Success(submitResponse) => submitResponse
       case Failure(ex) => throw ex
