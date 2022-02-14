@@ -26,8 +26,8 @@ import scala.util.Try
 
 object StandaloneUtils {
 
-  val DEFAULT_REST_ADDRESS: String = "localhost"
-  val DEFAULT_REST_PORT: Int = 8081
+  private[this] lazy val DEFAULT_REST_ADDRESS: String = "localhost"
+  private[this] lazy val DEFAULT_REST_PORT: Int = 8081
 
   /**
    * Append the http Rest Api
@@ -42,23 +42,15 @@ object StandaloneUtils {
                        address: String,
                        port: Integer,
                        flinkUrl: String): String = {
-    var lastAddress = address
-    var lastPort = port
-    if (address.isEmpty) {
-      lastAddress = getRestAddress(flinkConf)
-    }
-    if (port == null) {
-      lastPort = getRestPort(flinkConf)
-    }
+    val lastAddress = Option(address).getOrElse(getRestAddress(flinkConf))
+    val lastPort = Option(port).getOrElse(getRestPort(flinkConf))
     s"http://$lastAddress:$lastPort/$flinkUrl"
   }
 
   def getRestAddress(flinkConf: util.Map[String, String]): String = {
-    val address: Option[String] = Some(flinkConf.get(flinkConf.get(RestOptions.ADDRESS)))
-    if (address.isEmpty) {
-      flinkConf.getOrDefault(JobManagerOptions.ADDRESS, DEFAULT_REST_ADDRESS)
-    } else {
-      address.get
+    Option(flinkConf.get(RestOptions.ADDRESS)) match {
+      case None => flinkConf.getOrDefault(JobManagerOptions.ADDRESS, DEFAULT_REST_ADDRESS)
+      case Some(x) => x
     }
   }
 

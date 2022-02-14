@@ -698,7 +698,6 @@ public class Application implements Serializable {
             case YARN_SESSION:
             case KUBERNETES_NATIVE_SESSION:
             case KUBERNETES_NATIVE_APPLICATION:
-                return StorageType.LFS;
             case STANDALONE:
                 return StorageType.LFS;
             default:
