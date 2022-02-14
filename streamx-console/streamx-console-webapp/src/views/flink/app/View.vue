@@ -406,7 +406,7 @@
               :title="handleDeployTitle(record.deploy)"
               :data="record"/>
             <State
-              v-if="record.executionMode === 5 || record.executionMode === 6"
+              v-if="record.executionMode === 1 || record.executionMode === 5 || record.executionMode === 6"
               option="build"
               click="openBuildProgressDetailDrawer(record)"
               :data="record"/>
@@ -444,7 +444,7 @@
 
           <a-tooltip title="Build Application">
             <a-button
-              v-if="record.executionMode === 5 || record.executionMode === 6"
+              v-if="record.executionMode === 1 || record.executionMode === 5 || record.executionMode === 6"
               @click.native="handleCheckBuildApp(record)"
               shape="circle"
               size="small"
@@ -455,7 +455,7 @@
 
           <a-tooltip title="Building Progress Detail">
             <a-button
-              v-if="(record.executionMode === 5 || record.executionMode === 6) && record.buildStatus != null"
+              v-if="(record.executionMode === 1 || record.executionMode === 5 || record.executionMode === 6) && record.buildStatus != null"
               @click.native="openBuildProgressDetailDrawer(record)"
               shape="circle"
               size="small"

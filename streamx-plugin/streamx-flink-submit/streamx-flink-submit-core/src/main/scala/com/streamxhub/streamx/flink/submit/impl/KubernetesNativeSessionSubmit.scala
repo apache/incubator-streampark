@@ -29,7 +29,6 @@ import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
-import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
@@ -40,7 +39,7 @@ import org.apache.flink.util.IOUtils
 import java.io.File
 import scala.collection.JavaConversions._
 import scala.language.postfixOps
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
  * kubernetes native session mode submit
@@ -58,19 +57,17 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sSessionBuildResponse]
 
     val fatJar = new File(buildResult.flinkShadedJarPath)
-    // use api submit plan
-    restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
 
-    // Prioritize using JobGraph submit plan while using Rest API submit plan as backup
-    /*    Try(jobGraphSubmitPlan(submitRequest, flinkConfig, jobID, fatJar))
-          .recover {
-            case _ =>
-              logInfo(s"[flink-submit] JobGraph Submit Plan failed, try Rest API Submit Plan now.")
-              restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
-          } match {
-          case Success(submitResponse) => submitResponse
-          case Failure(ex) => throw ex
-        }*/
+    // Prioritize using Rest API submit while using JobGraph submit plan as backup
+    Try(restApiSubmitPlan(submitRequest, flinkConfig, fatJar))
+      .recover {
+        case _ =>
+          logInfo(s"[flink-submit] Rest API Submit Plan failed, try Submit Plan  now.")
+          jobGraphSubmitPlan(submitRequest, flinkConfig, fatJar)
+      } match {
+      case Success(submitResponse) => submitResponse
+      case Failure(ex) => throw ex
+    }
   }
 
   /**
@@ -100,7 +97,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
    */
   // noinspection DuplicatedCode
   @throws[Exception]
-  private def jobGraphSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, jobID: JobID, fatJar: File): SubmitResponse = {
+  private def jobGraphSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     // retrieve k8s cluster and submit flink job on session mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var packageProgram: PackagedProgram = null
@@ -120,14 +117,13 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         packageProgram,
         flinkConfig,
         flinkConfig.getInteger(CoreOptions.DEFAULT_PARALLELISM),
-        jobID,
         false)
       // retrieve client and submit JobGraph
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val submitResult = client.submitJob(jobGraph)
       val jobId = submitResult.get().toString
       val result = SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId)
-      logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId=${jobID.toString}")
+      logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId: $jobId")
       result
     } catch {
       case e: Exception =>
