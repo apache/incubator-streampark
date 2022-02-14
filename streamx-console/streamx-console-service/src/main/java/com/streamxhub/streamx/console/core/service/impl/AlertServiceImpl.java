@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -52,6 +53,7 @@ import java.util.Map.Entry;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.PostConstruct;
+
 import java.io.File;
 import java.io.StringWriter;
 import java.net.URL;
@@ -258,8 +260,14 @@ public class AlertServiceImpl implements AlertService {
             duration = application.getEndTime().getTime() - application.getStartTime().getTime();
         }
         duration = duration / 1000 / 60;
-        String format = "%s/proxy/%s/";
-        String url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
+
+        // TODO: modify url for both k8s and yarn execute mode, the k8s mode is different from yarn, when the flink job failed ,
+        //  the k8s pod is missing , so we should look for  a more reasonable url for k8s
+        String url = "";
+        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            String format = "%s/proxy/%s/";
+            url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
+        }
 
         MailTemplate template = new MailTemplate();
         template.setJobName(application.getJobName());

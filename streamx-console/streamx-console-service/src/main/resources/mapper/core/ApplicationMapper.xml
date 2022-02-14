@@ -8,6 +8,7 @@
         <result column="ARGS" jdbcType="LONGVARCHAR" property="args"/>
         <result column="OPTIONS" jdbcType="LONGVARCHAR" property="options"/>
         <result column="DYNAMIC_OPTIONS" jdbcType="LONGVARCHAR" property="dynamicOptions"/>
+        <result column="HOT_PARAMS" jdbcType="VARCHAR" property="hotParams"/>
         <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="VERSION_ID" jdbcType="BIGINT" property="versionId"/>

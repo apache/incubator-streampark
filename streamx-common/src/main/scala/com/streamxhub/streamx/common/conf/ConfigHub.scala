@@ -51,14 +51,14 @@ object ConfigHub extends Logger {
   /**
    * Initialize the ConfigHub.
    */
-  def init(): Unit = {
+  {
     Seq(CommonConfig, K8sFlinkConfig)
   }
 
   /**
    * Register the ConfigOption
    */
-  private[common] def set(@Nonnull conf: ConfigOption): Unit = {
+  private[conf] def register(@Nonnull conf: ConfigOption): Unit = {
     confOptions.put(conf.key, conf)
     confData.put(conf.key, conf.defaultValue)
   }
@@ -173,20 +173,7 @@ object ConfigHub extends Logger {
          |  ${configKeys.map(key => s"$key = ${get(key)}").mkString("\n  ")}""".stripMargin)
   }
 
-  private object Converter {
 
-    def convert[T](v: String, classType: Class[_]): T = {
-      classType match {
-        case c if c == classOf[java.lang.Integer] => java.lang.Integer.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[java.lang.Long] => java.lang.Long.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[java.lang.Boolean] => java.lang.Boolean.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[java.lang.Float] => java.lang.Float.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[java.lang.Double] => java.lang.Double.valueOf(v).asInstanceOf[T]
-        case _ =>
-          throw new IllegalArgumentException(s"Unsupported type: $classType")
-      }
-    }
-  }
 
 }
 
@@ -205,9 +192,23 @@ case class ConfigOption(key: String,
                         defaultValue: Any,
                         classType: Class[_],
                         description: String = "") {
-  {
-    // register conf to ConfigHub
-    ConfigHub.set(this)
+  // register conf to ConfigHub
+  ConfigHub.register(this)
+}
+
+object Converter {
+
+  def convert[T](v: String, classType: Class[_]): T = {
+    classType match {
+      case c if c == classOf[java.lang.String] => v.asInstanceOf[T]
+      case c if c == classOf[java.lang.Integer] => java.lang.Integer.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[java.lang.Long] => java.lang.Long.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[java.lang.Boolean] => java.lang.Boolean.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[java.lang.Float] => java.lang.Float.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[java.lang.Double] => java.lang.Double.valueOf(v).asInstanceOf[T]
+      case _ =>
+        throw new IllegalArgumentException(s"Unsupported type: $classType")
+    }
   }
 }
 

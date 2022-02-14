@@ -23,7 +23,7 @@
 
 **[Official Website](http://www.streamxhub.com)** |
 **[Change Log](#)** |
-**[Document](http://www.streamxhub.com/zh/doc/)**
+**[Document](https://www.streamxhub.com/docs/intro)**
 
 </div>
 
@@ -220,7 +220,7 @@ Thank you to all our backers!
 </div>
 
 <div align="center">
-    <img src="https://user-images.githubusercontent.com/13284744/142746862-42e9e2d8-b574-4253-8aea-bf4d96c56088.jpeg" alt="Join the Group" height="250px"><br>
+    <img src="https://user-images.githubusercontent.com/13284744/152627523-de455a4d-97c7-46cd-815f-3328a3fe3663.png" alt="Join the Group" height="300px"><br>
 </div>
 
 

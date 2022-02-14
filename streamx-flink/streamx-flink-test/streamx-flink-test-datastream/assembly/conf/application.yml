@@ -114,37 +114,65 @@ hbase:
   rpc.timeout: 5000
   client.pause: 20
 
-#clickhouse
-clickhouse.sink:
-  driverClassName:
-  jdbcUrl: http://192.168.0.100:8123
-  username: default
-  password: 123456
-  threshold:
-    bufferSize: 100
-    numWriters: 3
-    queueCapacity: 100
-    timeout: 1000
-    successCode: 200
-    retries: 10 #一条记录当插入失败时重试的最大次数
-  failover:
-    storage: mysql #kafka,hbase,hdfs
-    jdbc: # 保存类型为MySQL,将失败的数据保存到MySQL
-      jdbcUrl: jdbc:mysql://localhost:3306/test
-      username: root
-      password: 123456
-    kafka:
-      topic: bigdata
-      bootstrap.servers: localhost:9091,localhost:9092,localhost:9093
-    hbase:
-      zookeeper.quorum: localhost
-      zookeeper.property.clientPort: 2181
-    hdfs:
-      namenode: hdfs://localhost:8020 # namenode rpc address and port, e.g: hdfs://hadoop:8020 , hdfs://hadoop:9000
-      user: benjobs # user
-      path: /clickhouse/failover # save path
-      format: yyyy-MM-dd
+##clickhouse  jdbc同步写入配置
+#clickhouse:
+#  sink:
+#    #    写入节点地址
+#    jdbcUrl: jdbc:clickhouse://127.0.0.1:8123,192.168.1.2:8123
+#    socketTimeout: 3000000
+#    database: test
+#    user: $user
+#    password: $password
+#    #    写结果表及对应的字段，全部可不写字段
+#    targetTable: orders(userId,siteId)
+#    batch:
+#      size: 1
+#      delaytime: 6000000
 
+clickhouse:
+  sink:
+    hosts: 127.0.0.1:8123,192.168.1.2:8123
+    socketTimeout: 3000000
+    database: test
+    user: $user
+    password: $password
+    targetTable: test.orders(userId,siteId)
+    batch:
+      size: 1
+      delaytime: 60000
+    threshold:
+      bufferSize: 10
+      #      异步写入的并发数
+      numWriters: 4
+      #      缓存队列大小
+      queueCapacity: 100
+      delayTime: 10
+      requestTimeout: 600
+      retries: 1
+      #      成功响应码
+      successCode: 200
+    failover:
+      table: chfailover
+      #      达到失败最大写入次数后，数据备份的组件
+      storage: kafka #kafka|mysql|hbase|hdfs
+      mysql:
+        driverClassName: com.mysql.cj.jdbc.Driver
+        jdbcUrl: jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true
+        username: user
+        password: pass
+      kafka:
+        bootstrap.servers: localhost:9092
+        topic: test1
+        group.id: user_01
+        auto.offset.reset: latest
+      hbase:
+      hdfs:
+        path: /data/chfailover
+        namenode: hdfs://localhost:8020
+        user: hdfs
+
+
+#http sink 配置
 http.sink:
   threshold:
     numWriters: 3
@@ -161,7 +189,7 @@ http.sink:
       password: 123456
     kafka:
       topic: bigdata
-      bootstrap.servers: localhost:9091,localhost:9092,localhost:9093
+      bootstrap.servers: localhost:9093
     hbase:
       zookeeper.quorum: localhost
       zookeeper.property.clientPort: 2181
@@ -170,3 +198,12 @@ http.sink:
       user: benjobs # user
       path: /clickhouse/failover # save path
       format: yyyy-MM-dd
+
+#redis sink 配置
+redis.sink:
+  #  masterName: master 哨兵模式参数
+  #  host: 192.168.0.1:6379, 192.168.0.3:6379 哨兵模式参数
+  host: 127.0.0.1
+  port: 6379
+  database: 2
+  connectType: jedisPool #可选参数：jedisPool（默认）|sentinel

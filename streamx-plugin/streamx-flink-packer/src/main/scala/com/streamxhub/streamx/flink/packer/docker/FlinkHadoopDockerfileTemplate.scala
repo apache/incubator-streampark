@@ -53,7 +53,7 @@ case class FlinkHadoopDockerfileTemplate(workspacePath: String,
   override def offerDockerfileContent: String = {
     var dockerfile =
       s"""FROM $flinkBaseImage
-         |RUN mkdir -p $FLINK_HOME/usrlib
+         |RUN mkdir -p $FLINK_HOME/lib
          |""".stripMargin
     if (hadoopConfDir.nonEmpty) dockerfile +=
       s"""
@@ -68,7 +68,7 @@ case class FlinkHadoopDockerfileTemplate(workspacePath: String,
     dockerfile +=
       s"""
          |COPY $extraLibName $FLINK_HOME/lib/
-         |COPY $mainJarName $FLINK_HOME/usrlib/$mainJarName
+         |COPY $mainJarName $FLINK_HOME/lib/_$mainJarName
          |""".stripMargin
     dockerfile
   }

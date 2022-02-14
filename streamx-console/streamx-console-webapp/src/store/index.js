@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 
 import app from './modules/app'
 import application from './modules/application'
+import project from './modules/project'
 import user from './modules/user'
 import getters from './getters'
 
@@ -12,7 +13,8 @@ export default new Vuex.Store({
   modules: {
     app,
     user,
-    application
+    application,
+    project
   },
   state: {},
   mutations: {},

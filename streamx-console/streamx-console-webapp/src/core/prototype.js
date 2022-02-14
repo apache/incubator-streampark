@@ -26,7 +26,7 @@ Vue.prototype.exceptionPropWidth = function () {
 Vue.prototype.getSocket = function (url) {
   window.WebSocket = window.WebSocket || window.MozWebSocket
   if (window.WebSocket) {
-    return new WebSocket(url.replace('http:', 'ws:'))
+    return new WebSocket(url.replace(/^http/,'ws'))
   } else {
     return new SockJS(url)
   }

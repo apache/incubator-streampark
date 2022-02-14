@@ -16,7 +16,7 @@ CREATE TABLE `t_app_backup` (
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_app_backup
@@ -37,7 +37,7 @@ CREATE TABLE `t_flame_graph` (
 PRIMARY KEY (`ID`) USING BTREE,
 KEY `INX_TIME` (`TIMELINE`),
 KEY `INX_APPID` (`APP_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flame_graph
@@ -62,6 +62,7 @@ CREATE TABLE `t_flink_app` (
 `MAIN_CLASS` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `ARGS` text COLLATE utf8mb4_general_ci,
 `OPTIONS` text COLLATE utf8mb4_general_ci,
+`HOT_PARAMS` text COLLATE utf8mb4_general_ci,
 `USER_ID` bigint DEFAULT NULL,
 `APP_ID` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `APP_TYPE` tinyint DEFAULT NULL,
@@ -104,13 +105,13 @@ PRIMARY KEY (`ID`) USING BTREE,
 KEY `INX_STATE` (`STATE`) USING BTREE,
 KEY `INX_JOB_TYPE` (`JOB_TYPE`) USING BTREE,
 KEY `INX_TRACK` (`TRACKING`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1401710007170375682 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_app` VALUES (1401710007170375681, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', 1, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '2', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+INSERT INTO `t_flink_app` VALUES (1, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', NULL, 1, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '2', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 COMMIT;
 
 -- ----------------------------
@@ -126,7 +127,7 @@ CREATE TABLE `t_flink_config` (
 `CONTENT` text COLLATE utf8mb4_general_ci NOT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_config
@@ -146,13 +147,13 @@ CREATE TABLE `t_flink_effective` (
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_INX` (`APP_ID`,`TARGET_TYPE`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1401710007468171266 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_effective
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_effective` VALUES (1401710007468171265, 1401710007170375681, 2, 1401710007208124417, NOW());
+INSERT INTO `t_flink_effective` VALUES (1, 1, 2, 1, NOW());
 COMMIT;
 
 -- ----------------------------
@@ -171,7 +172,7 @@ CREATE TABLE `t_flink_env` (
 `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_NAME` (`FLINK_NAME`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_env
@@ -191,7 +192,7 @@ CREATE TABLE `t_flink_log` (
 `EXCEPTION` text COLLATE utf8mb4_general_ci,
 `START_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_log
@@ -218,7 +219,7 @@ CREATE TABLE `t_flink_project` (
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `BUILDSTATE` tinyint DEFAULT '-1',
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_project
@@ -240,7 +241,7 @@ CREATE TABLE `t_flink_savepoint` (
 `TRIGGER_TIME` datetime DEFAULT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_savepoint
@@ -253,7 +254,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_sql`;
 CREATE TABLE `t_flink_sql` (
-`ID` bigint NOT NULL,
+`ID` bigint NOT NULL AUTO_INCREMENT,
 `APP_ID` bigint DEFAULT NULL,
 `SQL` text COLLATE utf8mb4_general_ci,
 `DEPENDENCY` text COLLATE utf8mb4_general_ci,
@@ -261,13 +262,13 @@ CREATE TABLE `t_flink_sql` (
 `CANDIDATE` tinyint NOT NULL DEFAULT '0',
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_sql
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_sql` VALUES (1401710007208124417, 1401710007170375681, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94AaVqGxSSPZIKgxrY2mxrdGfb4GS3c0+LnJo6Mz36syapkmZQpk8vKbQMMt2KOFmAe5rK4Nf3yhrhCwvA1/TTDaqO61UxmooSprlT1PDGkgKEKpmwvIOjWVdP3W2zpG+JfQFHjfU46xxrVvYZuWztye1khJrqzSBFRCfjUwSYQiqt1xJJvyPcbWJp9WPCXvUoUEn0ZAVufcs0nIUjYn2L4s++YiY75eBLr+2Dnl3GYKTWRyfQKYRRR2XZxXmNvu9yh9GHAmUO/sxyMRkGNly4c714RZ7zaWtLHsX+N9NjvVrWxm99jmyvEhpOUhujmIYFI5zkCOYzYIj11a7QH7Tyz+nE8bw', NULL, 1, 0, NOW());
+INSERT INTO `t_flink_sql` VALUES (1, 1, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94AaVqGxSSPZIKgxrY2mxrdGfb4GS3c0+LnJo6Mz36syapkmZQpk8vKbQMMt2KOFmAe5rK4Nf3yhrhCwvA1/TTDaqO61UxmooSprlT1PDGkgKEKpmwvIOjWVdP3W2zpG+JfQFHjfU46xxrVvYZuWztye1khJrqzSBFRCfjUwSYQiqt1xJJvyPcbWJp9WPCXvUoUEn0ZAVufcs0nIUjYn2L4s++YiY75eBLr+2Dnl3GYKTWRyfQKYRRR2XZxXmNvu9yh9GHAmUO/sxyMRkGNly4c714RZ7zaWtLHsX+N9NjvVrWxm99jmyvEhpOUhujmIYFI5zkCOYzYIj11a7QH7Tyz+nE8bw', NULL, 1, 0, NOW());
 COMMIT;
 
 -- ----------------------------
@@ -281,7 +282,7 @@ CREATE TABLE `t_flink_tutorial` (
 `CONTENT` text COLLATE utf8mb4_general_ci,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_tutorial
@@ -308,7 +309,7 @@ CREATE TABLE `t_menu` (
 `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
 `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
 PRIMARY KEY (`MENU_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_menu
@@ -350,6 +351,7 @@ INSERT INTO `t_menu` VALUES (33, 16, 'conf delete', NULL, NULL, 'conf:delete', N
 INSERT INTO `t_menu` VALUES (34, 16, 'flame Graph', NULL, NULL, 'app:flameGraph', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (35, 14, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', '1', 4, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (36, 35, 'Setting Update', NULL, NULL, 'setting:update', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (37, 14, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', NULL, '0', '0', NULL, NOW(), NOW());
 COMMIT;
 
 -- ----------------------------
@@ -367,7 +369,7 @@ CREATE TABLE `t_message` (
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 KEY `INX_USER_ID` (`USER_ID`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_message
@@ -387,7 +389,7 @@ CREATE TABLE `t_role` (
 `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
 `ROLE_CODE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '角色标识',
 PRIMARY KEY (`ROLE_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_role
@@ -407,7 +409,7 @@ CREATE TABLE `t_role_menu` (
 `MENU_ID` bigint NOT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_INX` (`ROLE_ID`,`MENU_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_role_menu
@@ -449,24 +451,25 @@ INSERT INTO `t_role_menu` VALUES (33, 1, 33);
 INSERT INTO `t_role_menu` VALUES (34, 1, 34);
 INSERT INTO `t_role_menu` VALUES (35, 1, 35);
 INSERT INTO `t_role_menu` VALUES (36, 1, 36);
-INSERT INTO `t_role_menu` VALUES (37, 2, 14);
-INSERT INTO `t_role_menu` VALUES (38, 2, 16);
-INSERT INTO `t_role_menu` VALUES (39, 2, 17);
-INSERT INTO `t_role_menu` VALUES (40, 2, 18);
-INSERT INTO `t_role_menu` VALUES (41, 2, 19);
-INSERT INTO `t_role_menu` VALUES (42, 2, 20);
-INSERT INTO `t_role_menu` VALUES (43, 2, 21);
-INSERT INTO `t_role_menu` VALUES (44, 2, 22);
-INSERT INTO `t_role_menu` VALUES (45, 2, 25);
-INSERT INTO `t_role_menu` VALUES (46, 2, 26);
-INSERT INTO `t_role_menu` VALUES (47, 2, 27);
-INSERT INTO `t_role_menu` VALUES (48, 2, 28);
-INSERT INTO `t_role_menu` VALUES (49, 2, 29);
-INSERT INTO `t_role_menu` VALUES (50, 2, 30);
-INSERT INTO `t_role_menu` VALUES (51, 2, 31);
-INSERT INTO `t_role_menu` VALUES (52, 2, 32);
-INSERT INTO `t_role_menu` VALUES (53, 2, 33);
-INSERT INTO `t_role_menu` VALUES (54, 2, 34);
+INSERT INTO `t_role_menu` VALUES (37, 1, 37);
+INSERT INTO `t_role_menu` VALUES (38, 2, 14);
+INSERT INTO `t_role_menu` VALUES (39, 2, 16);
+INSERT INTO `t_role_menu` VALUES (40, 2, 17);
+INSERT INTO `t_role_menu` VALUES (41, 2, 18);
+INSERT INTO `t_role_menu` VALUES (42, 2, 19);
+INSERT INTO `t_role_menu` VALUES (43, 2, 20);
+INSERT INTO `t_role_menu` VALUES (44, 2, 21);
+INSERT INTO `t_role_menu` VALUES (45, 2, 22);
+INSERT INTO `t_role_menu` VALUES (46, 2, 25);
+INSERT INTO `t_role_menu` VALUES (47, 2, 26);
+INSERT INTO `t_role_menu` VALUES (48, 2, 27);
+INSERT INTO `t_role_menu` VALUES (49, 2, 28);
+INSERT INTO `t_role_menu` VALUES (50, 2, 29);
+INSERT INTO `t_role_menu` VALUES (51, 2, 30);
+INSERT INTO `t_role_menu` VALUES (52, 2, 31);
+INSERT INTO `t_role_menu` VALUES (53, 2, 32);
+INSERT INTO `t_role_menu` VALUES (54, 2, 33);
+INSERT INTO `t_role_menu` VALUES (55, 2, 34);
 COMMIT;
 
 -- ----------------------------
@@ -487,17 +490,17 @@ PRIMARY KEY (`KEY`) USING BTREE
 -- Records of t_setting
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_setting` VALUES (5, 'alert.email.from', NULL, 'Alert  Email From', '发送告警的邮箱', 1);
-INSERT INTO `t_setting` VALUES (3, 'alert.email.host', NULL, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
-INSERT INTO `t_setting` VALUES (7, 'alert.email.password', NULL, 'Alert Email Password', '用来发送告警邮箱的认证密码', 1);
-INSERT INTO `t_setting` VALUES (4, 'alert.email.port', NULL, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);
-INSERT INTO `t_setting` VALUES (8, 'alert.email.ssl', 'false', 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL', 2);
-INSERT INTO `t_setting` VALUES (6, 'alert.email.userName', NULL, 'Alert  Email User', '用来发送告警邮箱的认证用户名', 1);
-INSERT INTO `t_setting` VALUES (9, 'docker.register.address', NULL, 'Docker Register Address', 'Docker容器服务地址', 1);
-INSERT INTO `t_setting` VALUES (11, 'docker.register.password', NULL, 'Docker Register Password', 'Docker容器服务认证密码', 1);
-INSERT INTO `t_setting` VALUES (10, 'docker.register.user', NULL, 'Docker Register User', 'Docker容器服务认证用户名', 1);
 INSERT INTO `t_setting` VALUES (1, 'maven.central.repository', NULL, 'Maven Central Repository', 'Maven 私服地址', 1);
 INSERT INTO `t_setting` VALUES (2, 'streamx.console.webapp.address', NULL, 'StreamX Webapp address', 'StreamX Console Web 应用程序HTTP URL', 1);
+INSERT INTO `t_setting` VALUES (3, 'alert.email.host', NULL, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
+INSERT INTO `t_setting` VALUES (4, 'alert.email.port', NULL, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);
+INSERT INTO `t_setting` VALUES (5, 'alert.email.from', NULL, 'Alert  Email From', '发送告警的邮箱', 1);
+INSERT INTO `t_setting` VALUES (6, 'alert.email.userName', NULL, 'Alert  Email User', '用来发送告警邮箱的认证用户名', 1);
+INSERT INTO `t_setting` VALUES (7, 'alert.email.password', NULL, 'Alert Email Password', '用来发送告警邮箱的认证密码', 1);
+INSERT INTO `t_setting` VALUES (8, 'alert.email.ssl', 'false', 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL', 2);
+INSERT INTO `t_setting` VALUES (9, 'docker.register.address', NULL, 'Docker Register Address', 'Docker容器服务地址', 1);
+INSERT INTO `t_setting` VALUES (10, 'docker.register.user', NULL, 'Docker Register User', 'Docker容器服务认证用户名', 1);
+INSERT INTO `t_setting` VALUES (11, 'docker.register.password', NULL, 'Docker Register Password', 'Docker容器服务认证密码', 1);
 COMMIT;
 
 -- ----------------------------
@@ -521,7 +524,7 @@ CREATE TABLE `t_user` (
 `DESCRIPTION` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述',
 PRIMARY KEY (`USER_ID`) USING BTREE,
 UNIQUE KEY `UN_USERNAME` (`NICK_NAME`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
@@ -539,7 +542,7 @@ CREATE TABLE `t_user_role` (
 `ROLE_ID` bigint DEFAULT NULL COMMENT '角色ID',
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_INX` (`USER_ID`,`ROLE_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_user_role
@@ -552,9 +555,8 @@ COMMIT;
 -- Table of t_app_build_pipe
 -- ----------------------------
 DROP TABLE IF EXISTS `t_app_build_pipe`;
-CREATE TABLE `t_app_build_pipe`
-(
-    `APP_ID`          BIGINT PRIMARY KEY,
+CREATE TABLE `t_app_build_pipe`(
+    `APP_ID`          BIGINT AUTO_INCREMENT,
     `PIPE_TYPE`       TINYINT,
     `PIPE_STATUS`     TINYINT,
     `CUR_STEP`        SMALLINT,
@@ -563,10 +565,9 @@ CREATE TABLE `t_app_build_pipe`
     `STEPS_STATUS_TS` TEXT,
     `ERROR`           TEXT,
     `BUILD_RESULT`    TEXT,
-    `UPDATE_TIME`     DATETIME
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_general_ci;
+    `UPDATE_TIME`     DATETIME,
+    PRIMARY KEY (`APP_ID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 
 SET FOREIGN_KEY_CHECKS = 1;

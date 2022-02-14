@@ -29,6 +29,8 @@ export default {
     GITCHECK: '/flink/project/gitcheck',
     EXISTS: '/flink/project/exists',
     CREATE: '/flink/project/create',
+    GET: '/flink/project/get',
+    UPDATE: '/flink/project/update',
     BUILD: '/flink/project/build',
     BUILDLOG: '/flink/project/buildlog',
     CLOSEBUILD: '/flink/project/closebuild',

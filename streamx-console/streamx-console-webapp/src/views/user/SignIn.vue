@@ -12,7 +12,7 @@
             </a>
           </div>
           <div class="desc">
-            Botech流式计算平台
+            StreamX ── Make stream processing easier!
           </div>
         </div>
         <a-form

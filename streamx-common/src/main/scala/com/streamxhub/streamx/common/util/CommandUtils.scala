@@ -19,54 +19,39 @@
 package com.streamxhub.streamx.common.util
 
 import java.io._
-import java.lang.{Iterable => JavaIter}
+import java.lang.{Iterable => JavaIterable}
 import java.util.Scanner
 import java.util.function.Consumer
 import scala.collection.JavaConversions._
-import scala.util.control.Breaks._
 import scala.util.{Failure, Success, Try}
 
 object CommandUtils extends Logger {
 
-  def execute(command: String): String = {
-    val buffer = new StringBuffer()
+  @throws[Exception] def execute(command: String): String = {
     Try {
+      val buffer = new StringBuffer()
       val process: Process = Runtime.getRuntime.exec(command)
-      val reader: BufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream))
-      breakable {
-        while (true) {
-          val line: String = reader.readLine()
-          if (line == null) {
-            break
-          } else {
-            buffer.append(line).append("\n")
-          }
-        }
+      val reader = new InputStreamReader(process.getInputStream)
+      val scanner = new Scanner(reader)
+      while (scanner.hasNextLine) {
+        buffer.append(scanner.nextLine()).append("\n")
       }
-      if (process != null) {
-        process.waitFor()
-        process.getErrorStream.close()
-        process.getInputStream.close()
-        process.getOutputStream.close()
-      }
-      if (reader != null) {
-        reader.close()
-      }
+      processClose(process)
+      reader.close()
+      scanner.close()
+      buffer.toString
     } match {
-      case Success(_) =>
-      case Failure(e) => e.printStackTrace()
+      case Success(v) => v
+      case Failure(e) => throw e
     }
-    buffer.toString
   }
 
-  def execute(commands: JavaIter[String], consumer: Consumer[String]): Unit = {
+  def execute(commands: JavaIterable[String], consumer: Consumer[String]): Unit = {
     Try {
       require(commands != null && commands.nonEmpty, "[StreamX] CommandUtils.execute: commands must not be null.")
       logDebug(s"Command execute:\n${commands.mkString("\n")} ")
-      val process = Utils.isWindows match {
-        case x if x => Runtime.getRuntime.exec("cmd /k ", null, null)
-        case _ => Runtime.getRuntime.exec("/bin/bash ", null, null)
-      }
+      val interpreter = if (Utils.isWindows) "cmd /k" else "/bin/bash"
+      val process = new ProcessBuilder(List(interpreter)).redirectErrorStream(true).start
       val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
       commands.foreach(out.println)
       commands.last.toLowerCase.trim match {
@@ -77,16 +62,22 @@ object CommandUtils extends Logger {
       while (scanner.hasNextLine) {
         consumer.accept(scanner.nextLine)
       }
-      process.waitFor
+      processClose(process)
       scanner.close()
-      process.getErrorStream.close()
-      process.getInputStream.close()
-      process.getOutputStream.close()
-      process.destroy()
+      out.close()
     } match {
       case Success(_) =>
       case Failure(e) => throw e
     }
   }
+
+  private[this] def processClose(process: Process): Unit = {
+    process.waitFor()
+    process.getErrorStream.close()
+    process.getInputStream.close()
+    process.getOutputStream.close()
+    process.destroy()
+  }
+
 
 }

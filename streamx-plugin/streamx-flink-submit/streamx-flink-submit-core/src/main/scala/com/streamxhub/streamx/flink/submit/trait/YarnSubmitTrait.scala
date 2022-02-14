@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.flink.submit.`trait`
 
-import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.ExceptionUtils
@@ -102,15 +101,6 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     val deployInternal = classOf[YarnClusterDescriptor].getDeclaredMethod("deployInternal", paramClass: _*)
     deployInternal.setAccessible(true)
     deployInternal
-  }
-
-  private[submit] def getParallelism(submitRequest: SubmitRequest): Integer = {
-    if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
-      Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString)
-    } else {
-      val parallelism = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome).getInteger(CoreOptions.DEFAULT_PARALLELISM, -1)
-      if (parallelism == -1) null else parallelism
-    }
   }
 
   /**
