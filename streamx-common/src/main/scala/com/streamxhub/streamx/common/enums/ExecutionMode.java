@@ -58,8 +58,9 @@ public enum ExecutionMode implements Serializable {
      */
     KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application");
 
-    private Integer mode;
-    private String name;
+    private final Integer mode;
+
+    private final String name;
 
     ExecutionMode(Integer mode, String name) {
         this.mode = mode;
