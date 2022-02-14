@@ -114,7 +114,7 @@ trait FlinkSubmitTrait extends Logger {
          |""".stripMargin)
 
     doConfig(submitRequest, flinkConfig)
-
+    
     doSubmit(submitRequest, flinkConfig)
   }
 
