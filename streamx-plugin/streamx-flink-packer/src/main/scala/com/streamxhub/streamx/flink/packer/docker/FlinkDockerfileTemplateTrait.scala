@@ -60,7 +60,7 @@ trait FlinkDockerfileTemplateTrait {
   /**
    * Startup flink main jar path inner Docker
    */
-  def innerMainJarPath: String = s"local:///opt/flink/usrlib/$mainJarName"
+  def innerMainJarPath: String = s"local:///opt/flink/lib/_$mainJarName"
 
   /**
    * output dockerfile name
