@@ -98,9 +98,9 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
     val distJar = flinkLib.listFiles().filter(_.getName.matches("flink-dist_.*\\.jar"))
     distJar match {
       case x if x.isEmpty =>
-        throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $x")
+        throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLib")
       case x if x.length > 1 =>
-        throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $x")
+        throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLib")
       case _ =>
     }
     distJar.head
