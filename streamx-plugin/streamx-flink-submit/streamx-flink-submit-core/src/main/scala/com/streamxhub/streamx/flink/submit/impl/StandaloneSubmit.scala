@@ -36,6 +36,7 @@ import org.apache.flink.util.IOUtils
 
 import java.io.File
 import scala.collection.JavaConversions._
+import scala.util.{Failure, Success, Try}
 
 
 /**
@@ -61,15 +62,22 @@ object StandaloneSubmit extends FlinkSubmitTrait {
 
 
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    // get build result
+    // 1) get build result
     val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
-    // build fat-jar
-    val fatJar = new File(buildResult.flinkShadedJarPath)
-    // new submit plan with rest api
-    restApiSubmitPlan(submitRequest, flinkConfig, fatJar)
 
-    // old submit plan
-    // jobGraphSubmitPlan(submitRequest, flinkConfig, fatJar)
+    // 2) get fat-jar
+    val fatJar = new File(buildResult.flinkShadedJarPath)
+
+    // 3) submit job
+    Try(restApiSubmitPlan(submitRequest, flinkConfig, fatJar))
+      .recover {
+        case _ =>
+          logInfo(s"[flink-submit] Rest API Submit Plan failed, try Submit Plan  now.")
+          jobGraphSubmitPlan(submitRequest, flinkConfig, fatJar)
+      } match {
+      case Success(submitResponse) => submitResponse
+      case Failure(ex) => throw ex
+    }
   }
 
   override def doStop(stopRequest: StopRequest): StopResponse = {
@@ -121,7 +129,7 @@ object StandaloneSubmit extends FlinkSubmitTrait {
       SubmitResponse(jobId, flinkConfig.toMap, jobId)
     } catch {
       case e: Exception =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} with standalone mode")
+        logError(s"submit flink job fail in standalone mode")
         e.printStackTrace()
         throw e
     }
