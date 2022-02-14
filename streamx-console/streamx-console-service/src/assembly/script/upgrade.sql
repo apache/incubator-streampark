@@ -60,5 +60,8 @@ COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;
 --------------------------------------- version: 1.2.2 END ---------------------------------------
 
+ALTER TABLE `t_flink_app` ADD COLUMN `REST_URL` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
+
+ALTER TABLE `t_flink_app` ADD COLUMN `REST_PORT` int DEFAULT NULL AFTER `REST_URL`;
 
 --------------------------------------- version: 1.2.2 START ---------------------------------------

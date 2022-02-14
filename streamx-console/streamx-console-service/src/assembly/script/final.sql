@@ -16,7 +16,7 @@ CREATE TABLE `t_app_backup` (
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_app_backup
@@ -37,7 +37,7 @@ CREATE TABLE `t_flame_graph` (
 PRIMARY KEY (`ID`) USING BTREE,
 KEY `INX_TIME` (`TIMELINE`),
 KEY `INX_APPID` (`APP_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flame_graph
@@ -101,11 +101,13 @@ CREATE TABLE `t_flink_app` (
 `K8S_JM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
 `K8S_TM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
 `K8S_HADOOP_INTEGRATION` tinyint(1) DEFAULT '0',
+`REST_URL` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`REST_PORT` int DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 KEY `INX_STATE` (`STATE`) USING BTREE,
 KEY `INX_JOB_TYPE` (`JOB_TYPE`) USING BTREE,
 KEY `INX_TRACK` (`TRACKING`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_app
@@ -127,7 +129,7 @@ CREATE TABLE `t_flink_config` (
 `CONTENT` text COLLATE utf8mb4_general_ci NOT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_config
@@ -147,7 +149,7 @@ CREATE TABLE `t_flink_effective` (
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_INX` (`APP_ID`,`TARGET_TYPE`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_effective
@@ -172,7 +174,7 @@ CREATE TABLE `t_flink_env` (
 `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_NAME` (`FLINK_NAME`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_env
@@ -192,7 +194,7 @@ CREATE TABLE `t_flink_log` (
 `EXCEPTION` text COLLATE utf8mb4_general_ci,
 `START_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_log
@@ -219,7 +221,7 @@ CREATE TABLE `t_flink_project` (
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `BUILDSTATE` tinyint DEFAULT '-1',
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_project
@@ -241,7 +243,7 @@ CREATE TABLE `t_flink_savepoint` (
 `TRIGGER_TIME` datetime DEFAULT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_savepoint
@@ -262,7 +264,7 @@ CREATE TABLE `t_flink_sql` (
 `CANDIDATE` tinyint NOT NULL DEFAULT '0',
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_sql
@@ -282,7 +284,7 @@ CREATE TABLE `t_flink_tutorial` (
 `CONTENT` text COLLATE utf8mb4_general_ci,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_tutorial
@@ -309,7 +311,7 @@ CREATE TABLE `t_menu` (
 `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
 `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
 PRIMARY KEY (`MENU_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_menu
@@ -369,7 +371,7 @@ CREATE TABLE `t_message` (
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 KEY `INX_USER_ID` (`USER_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_message
@@ -389,7 +391,7 @@ CREATE TABLE `t_role` (
 `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
 `ROLE_CODE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '角色标识',
 PRIMARY KEY (`ROLE_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_role
@@ -409,7 +411,7 @@ CREATE TABLE `t_role_menu` (
 `MENU_ID` bigint NOT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_INX` (`ROLE_ID`,`MENU_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_role_menu
@@ -524,7 +526,7 @@ CREATE TABLE `t_user` (
 `DESCRIPTION` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述',
 PRIMARY KEY (`USER_ID`) USING BTREE,
 UNIQUE KEY `UN_USERNAME` (`NICK_NAME`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
@@ -542,7 +544,7 @@ CREATE TABLE `t_user_role` (
 `ROLE_ID` bigint DEFAULT NULL COMMENT '角色ID',
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_INX` (`USER_ID`,`ROLE_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_user_role
@@ -567,7 +569,7 @@ CREATE TABLE `t_app_build_pipe`(
     `BUILD_RESULT`    TEXT,
     `UPDATE_TIME`     DATETIME,
     PRIMARY KEY (`APP_ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+) ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 
 SET FOREIGN_KEY_CHECKS = 1;
