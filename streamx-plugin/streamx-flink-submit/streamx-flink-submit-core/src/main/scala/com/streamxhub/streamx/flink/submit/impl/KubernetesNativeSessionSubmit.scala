@@ -20,12 +20,12 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildResponse
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
@@ -51,15 +51,18 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
 
-    // check the last building result
-    checkBuildResult(submitRequest)
-
-    val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sSessionBuildResponse]
-
-    val jarFile = new File(buildResult.flinkShadedJarPath)
+    // 2) get userJar
+    val jarFile = submitRequest.developmentMode match {
+      case DevelopmentMode.FLINKSQL =>
+        checkBuildResult(submitRequest)
+        // 1) get build result
+        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
+        // 2) get fat-jar
+        new File(buildResult.flinkShadedJarPath)
+      case _ => new File(submitRequest.flinkUserJar)
+    }
 
     super.trySubmit(submitRequest, flinkConfig, jarFile)(restApiSubmit)(jobGraphSubmit)
-
   }
 
   /**
