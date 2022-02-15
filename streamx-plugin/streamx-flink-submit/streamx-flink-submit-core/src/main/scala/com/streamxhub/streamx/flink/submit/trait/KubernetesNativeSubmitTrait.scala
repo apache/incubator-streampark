@@ -71,6 +71,13 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) {
       flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
     }
+
+    logInfo(
+      s"""
+         |------------------------------------------------------------------
+         |Effective submit configuration: $flinkConfig
+         |------------------------------------------------------------------
+         |""".stripMargin)
   }
 
   @throws[Exception]

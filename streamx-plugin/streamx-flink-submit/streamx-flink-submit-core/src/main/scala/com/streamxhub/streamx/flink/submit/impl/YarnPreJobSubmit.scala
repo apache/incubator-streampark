@@ -49,7 +49,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     logInfo(
       s"""
          |------------------------------------------------------------------
-         |Effective executor configuration: $flinkConfig
+         |Effective submit configuration: $flinkConfig
          |------------------------------------------------------------------
          |""".stripMargin)
   }

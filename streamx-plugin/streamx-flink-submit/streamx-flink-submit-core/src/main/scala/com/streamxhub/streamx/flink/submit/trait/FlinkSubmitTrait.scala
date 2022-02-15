@@ -106,13 +106,6 @@ trait FlinkSubmitTrait extends Logger {
     val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
     flinkConfig.set(retainedOption, flinkDefaultConfiguration.get(retainedOption))
 
-    logInfo(
-      s"""
-         |------------------------------------------------------------------
-         |Effective executor configuration: $flinkConfig
-         |------------------------------------------------------------------
-         |""".stripMargin)
-
     doConfig(submitRequest, flinkConfig)
 
     doSubmit(submitRequest, flinkConfig)
