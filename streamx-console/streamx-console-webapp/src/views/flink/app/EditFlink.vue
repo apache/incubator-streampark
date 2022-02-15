@@ -699,10 +699,10 @@ export default {
         {name: 'NodePort', order: 2}
       ],
       executionModes: [
-        {mode: 'standalone', value: 1, disabled: false},
         {mode: 'yarn application', value: 4, disabled: false},
         {mode: 'kubernetes session', value: 5, disabled: false},
         {mode: 'kubernetes application', value: 6, disabled: false},
+        {mode: 'standalone', value: 1, disabled: false},
         {mode: 'local (coming soon)', value: 0, disabled: true},
         {mode: 'yarn session (coming soon)', value: 3, disabled: true},
         {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: true}
