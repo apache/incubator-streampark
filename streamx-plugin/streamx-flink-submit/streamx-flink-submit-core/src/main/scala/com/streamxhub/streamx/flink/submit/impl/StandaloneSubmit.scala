@@ -36,7 +36,7 @@ import org.apache.flink.util.IOUtils
 
 import java.io.File
 import scala.collection.JavaConversions._
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 
 /**
@@ -85,15 +85,8 @@ object StandaloneSubmit extends FlinkSubmitTrait {
     }
 
     // 2) submit job
-    Try(restApiSubmitPlan(submitRequest, flinkConfig, userJar))
-      .recover {
-        case _ =>
-          logInfo(s"[flink-submit] Rest API Submit Plan failed, try Submit Plan  now.")
-          jobGraphSubmitPlan(submitRequest, flinkConfig, userJar)
-      } match {
-      case Success(submitResponse) => submitResponse
-      case Failure(ex) => throw ex
-    }
+    super.trySubmit(submitRequest, flinkConfig, userJar)(restApiSubmit)(jobGraphSubmit)
+
   }
 
   override def doStop(stopRequest: StopRequest): StopResponse = {
@@ -134,7 +127,7 @@ object StandaloneSubmit extends FlinkSubmitTrait {
    * Submit flink session job via rest api.
    */
   // noinspection DuplicatedCode
-  @throws[Exception] private def restApiSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
+  @throws[Exception] def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
     var client: ClusterClient[StandaloneClusterId] = null
@@ -158,7 +151,7 @@ object StandaloneSubmit extends FlinkSubmitTrait {
    * Submit flink session job with building JobGraph via Standalone ClusterClient api.
    */
   // noinspection DuplicatedCode
-  @throws[Exception] private def jobGraphSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
+  @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
     var packageProgram: PackagedProgram = null

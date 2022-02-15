@@ -39,7 +39,7 @@ import org.apache.flink.util.IOUtils
 import java.io.File
 import scala.collection.JavaConversions._
 import scala.language.postfixOps
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 /**
  * kubernetes native session mode submit
@@ -56,25 +56,16 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
 
     val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sSessionBuildResponse]
 
-    val fatJar = new File(buildResult.flinkShadedJarPath)
+    val jarFile = new File(buildResult.flinkShadedJarPath)
 
-    // Prioritize using Rest API submit while using JobGraph submit plan as backup
-    Try(restApiSubmitPlan(submitRequest, flinkConfig, fatJar))
-      .recover {
-        case _ =>
-          logInfo(s"[flink-submit] Rest API Submit Plan failed, try Submit Plan  now.")
-          jobGraphSubmitPlan(submitRequest, flinkConfig, fatJar)
-      } match {
-      case Success(submitResponse) => submitResponse
-      case Failure(ex) => throw ex
-    }
+    super.trySubmit(submitRequest, flinkConfig, jarFile)(restApiSubmit)(jobGraphSubmit)
+
   }
 
   /**
    * Submit flink session job via rest api.
    */
-  @throws[Exception]
-  private def restApiSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
+  @throws[Exception] def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     try {
       // get jm rest url of flink session cluster
       val clusterKey = ClusterKey(FlinkK8sExecuteMode.SESSION,
@@ -96,8 +87,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
    * Submit flink session job with building JobGraph via ClusterClient api.
    */
   // noinspection DuplicatedCode
-  @throws[Exception]
-  private def jobGraphSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
+  @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     // retrieve k8s cluster and submit flink job on session mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var packageProgram: PackagedProgram = null

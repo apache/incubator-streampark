@@ -135,6 +135,22 @@ trait FlinkSubmitTrait extends Logger {
   @throws[Exception]
   def doStop(stopRequest: StopRequest): StopResponse
 
+  def trySubmit(submitRequest: SubmitRequest,
+                flinkConfig: Configuration,
+                jarFile: File)(restApiFunc: (SubmitRequest, Configuration, File) => SubmitResponse)
+               (jobGraphFunc: (SubmitRequest, Configuration, File) => SubmitResponse): SubmitResponse = {
+    // Prioritize using Rest API submit while using JobGraph submit plan as backup
+    Try(restApiFunc(submitRequest, flinkConfig, jarFile))
+      .recover {
+        case _ =>
+          logInfo(s"[flink-submit] Rest API Submit Plan failed,try JobGraph Submit Plan now.")
+          jobGraphFunc(submitRequest, flinkConfig, jarFile)
+      } match {
+      case Success(submitResponse) => submitResponse
+      case Failure(ex) => throw ex
+    }
+  }
+
   private[submit] def getJobID(jobId: String) = Try(JobID.fromHexString(jobId)) match {
     case Success(id) => id
     case Failure(e) => throw new CliArgsException(e.getMessage)
