@@ -24,6 +24,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Maps;
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.ThreadUtils;
@@ -78,6 +79,7 @@ import java.util.stream.Collectors;
 import static com.streamxhub.streamx.common.enums.ExecutionMode.KUBERNETES_NATIVE_APPLICATION;
 import static com.streamxhub.streamx.common.enums.ExecutionMode.KUBERNETES_NATIVE_SESSION;
 import static com.streamxhub.streamx.common.enums.ExecutionMode.STANDALONE;
+
 
 /**
  * @author Al-assad
@@ -190,10 +192,12 @@ public class ApplBuildPipeServiceImpl
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
         String flinkUserJar = retrieveFlinkUserJar(app);
         ExecutionMode executionMode = app.getExecutionModeEnum();
+        String mainClass = ConfigConst.STREAMX_FLINKSQL_CLIENT_CLASS();
 
         if (KUBERNETES_NATIVE_SESSION.equals(executionMode)) {
             FlinkK8sSessionBuildRequest params = new FlinkK8sSessionBuildRequest(
                 app.getJobName(),
+                mainClass,
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
@@ -207,6 +211,7 @@ public class ApplBuildPipeServiceImpl
         } else if (KUBERNETES_NATIVE_APPLICATION.equals(executionMode)) {
             FlinkK8sApplicationBuildRequest params = new FlinkK8sApplicationBuildRequest(
                 app.getJobName(),
+                mainClass,
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
@@ -223,9 +228,10 @@ public class ApplBuildPipeServiceImpl
                     settingService.getDockerRegisterPassword()));
             log.info("Submit params to building pipeline : {}", params);
             return FlinkK8sApplicationBuildPipeline.of(params);
-        } else if (STANDALONE.equals(executionMode)){
+        } else if (STANDALONE.equals(executionMode)) {
             FlinkStandaloneBuildRequest params = new FlinkStandaloneBuildRequest(
                 app.getJobName(),
+                mainClass,
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),

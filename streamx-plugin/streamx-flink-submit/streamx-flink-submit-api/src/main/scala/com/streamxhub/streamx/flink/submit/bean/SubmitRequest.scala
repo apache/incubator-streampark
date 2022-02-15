@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.submit.bean
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.conf.Workspace
+import com.streamxhub.streamx.common.conf.{ConfigConst, Workspace}
 import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums._
 import com.streamxhub.streamx.common.util.{DeflaterUtils, FlinkUtils, HdfsUtils, PropertiesUtils}
@@ -67,7 +67,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
   lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case DevelopmentMode.FLINKSQL => "com.streamxhub.streamx.flink.cli.SqlClient"
+    case DevelopmentMode.FLINKSQL => ConfigConst.STREAMX_FLINKSQL_CLIENT_CLASS
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 
