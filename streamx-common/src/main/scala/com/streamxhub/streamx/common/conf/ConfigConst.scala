@@ -268,7 +268,6 @@ object ConfigConst {
   val CLICKHOUSE_TARGET_TABLE = "targetTable"
 
 
-
   val HTTP_SINK_PREFIX = "http.sink"
 
   /**
@@ -346,6 +345,7 @@ object ConfigConst {
 
   val KEY_FLINK_JVM_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size"
 
+  val STREAMX_FLINKSQL_CLIENT_CLASS = "com.streamxhub.streamx.flink.cli.SqlClient"
 
   def printLogo(info: String): Unit = {
     println("\n\n                 .+.                                ")

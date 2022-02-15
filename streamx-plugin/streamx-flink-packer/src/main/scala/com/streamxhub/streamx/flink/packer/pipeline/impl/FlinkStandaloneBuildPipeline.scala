@@ -60,7 +60,7 @@ class FlinkStandaloneBuildPipeline(params: FlinkStandaloneBuildRequest) extends 
         val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(params)
         val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${appName}_${DateUtils.now(fullCompact)}.jar"
         val flinkLibs = params.dependencyInfo.merge(providedLibs)
-        val output = MavenTool.buildFatJar(flinkLibs, shadedJarOutputPath)
+        val output = MavenTool.buildFatJar(params.mainClass, flinkLibs, shadedJarOutputPath)
         logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
         output
       }.getOrElse(throw getError.exception)
