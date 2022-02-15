@@ -23,9 +23,9 @@ import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
 import com.streamxhub.streamx.common.util.StandaloneUtils
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
-import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper
+import com.streamxhub.streamx.flink.submit.FlinkSubmitter
 import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
-import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -102,7 +102,7 @@ object StandaloneSubmit extends FlinkSubmitTrait {
 
     this.doConfig(null, flinkConfig)
     //get standalone jm to dynamicOption
-    FlinkSubmitHelper.extractDynamicOption(stopRequest.dynamicOption).foreach(e => flinkConfig.setString(e._1, e._2))
+    FlinkSubmitter.extractDynamicOption(stopRequest.dynamicOption).foreach(e => flinkConfig.setString(e._1, e._2))
 
     flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.STANDALONE.getName)
 

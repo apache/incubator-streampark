@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.submit
 
 import com.streamxhub.streamx.common.enums.ExecutionMode
-import com.streamxhub.streamx.flink.submit.domain._
+import com.streamxhub.streamx.flink.submit.bean._
 import com.streamxhub.streamx.flink.submit.impl._
 
 object FlinkSubmit {

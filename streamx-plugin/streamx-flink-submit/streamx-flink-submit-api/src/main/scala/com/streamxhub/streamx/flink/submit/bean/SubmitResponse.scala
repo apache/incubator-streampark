@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.domain
+package com.streamxhub.streamx.flink.submit.bean
 
 import java.util.{Map => JavaMap}
 import javax.annotation.Nullable

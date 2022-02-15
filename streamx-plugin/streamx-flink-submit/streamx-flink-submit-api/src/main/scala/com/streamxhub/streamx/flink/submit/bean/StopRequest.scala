@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.domain
+package com.streamxhub.streamx.flink.submit.bean
 
 import com.streamxhub.streamx.common.conf.K8sFlinkConfig
 import com.streamxhub.streamx.common.domain.FlinkVersion

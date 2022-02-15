@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.util.ExceptionUtils
-import com.streamxhub.streamx.flink.submit.domain._
+import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.program.ClusterClientProvider

@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.submit.`trait`
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildResponse
-import com.streamxhub.streamx.flink.submit.domain._
+import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.ClusterSpecification
