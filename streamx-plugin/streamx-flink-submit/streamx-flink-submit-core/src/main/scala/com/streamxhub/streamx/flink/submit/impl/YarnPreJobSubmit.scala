@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
+import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.util.FlinkUtils
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
@@ -26,7 +27,6 @@ import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration.{Configuration, DeploymentOptions}
-import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
 import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
@@ -35,7 +35,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.io.File
 import scala.collection.JavaConversions._
-import scala.util.Try
 
 /**
  * yarn PreJob mode submit
@@ -79,33 +78,16 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
              |------------------------------------------------------------------
              |""".stripMargin)
 
-        val savepointRestoreSettings = {
-          // 判断参数 submitRequest.option 中是否包涵 -n 参数；赋值 allowNonRestoredState: true or false
-          lazy val allowNonRestoredState = Try(submitRequest.option.split("\\s+").contains("-n")).getOrElse(false)
-          submitRequest.savePoint match {
-            case sp if Try(sp.isEmpty).getOrElse(true) => SavepointRestoreSettings.none
-            case sp => SavepointRestoreSettings.forPath(sp, allowNonRestoredState)
-          }
-        }
-
-        logInfo(
-          s"""
-             |------------------------<<savepointRestoreSettings>>--------------
-             |$savepointRestoreSettings
-             |------------------------------------------------------------------
-             |""".stripMargin)
-
         val packagedProgram = PackagedProgram
           .newBuilder
-          .setSavepointRestoreSettings(savepointRestoreSettings)
+          .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
           .setJarFile(new File(submitRequest.flinkUserJar))
           .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
           .setArguments(
             flinkConfig
               .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-              .get()
-              : _*
-          ).build
+              .orElse(Lists.newArrayList()): _*
+          ).build()
 
         val jobGraph = PackagedProgramUtils.createJobGraph(
           packagedProgram,

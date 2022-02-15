@@ -105,14 +105,18 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     try {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       // build JobGraph
-      packageProgram = PackagedProgram.newBuilder()
+      packageProgram = PackagedProgram
+        .newBuilder()
+        .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
         .setJarFile(fatJar)
         .setConfiguration(flinkConfig)
         .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
-        .setArguments(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-          .orElse(Lists.newArrayList())
-          : _*
+        .setArguments(
+          flinkConfig
+            .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+            .orElse(Lists.newArrayList()): _*
         ).build()
+
       val jobGraph = PackagedProgramUtils.createJobGraph(
         packageProgram,
         flinkConfig,

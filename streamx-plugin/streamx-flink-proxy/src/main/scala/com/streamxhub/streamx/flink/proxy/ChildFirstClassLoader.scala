@@ -30,7 +30,7 @@ import scala.util.Try
  * A variant of the URLClassLoader that first loads from the URLs and only after that from the
  * parent.
  *
- * <p>{@link #getResourceAsStream ( String )} uses {@link #getResource ( String )} internally so we don't
+ * <p>{@link # getResourceAsStream ( String )} uses {@link # getResource ( String )} internally so we don't
  * override that.
  *
  * @author benjobs

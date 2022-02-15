@@ -134,8 +134,7 @@ object StandaloneSubmit extends FlinkSubmitTrait {
    * Submit flink session job via rest api.
    */
   // noinspection DuplicatedCode
-  @throws[Exception]
-  private def restApiSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
+  @throws[Exception] private def restApiSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
     var client: ClusterClient[StandaloneClusterId] = null
@@ -159,8 +158,7 @@ object StandaloneSubmit extends FlinkSubmitTrait {
    * Submit flink session job with building JobGraph via Standalone ClusterClient api.
    */
   // noinspection DuplicatedCode
-  @throws[Exception]
-  private def jobGraphSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
+  @throws[Exception] private def jobGraphSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
     var packageProgram: PackagedProgram = null
@@ -168,20 +166,24 @@ object StandaloneSubmit extends FlinkSubmitTrait {
     try {
       val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
       clusterDescriptor = standAloneDescriptor._2
+
       // build JobGraph
       packageProgram = PackagedProgram.newBuilder()
         .setJarFile(fatJar)
         .setConfiguration(flinkConfig)
         .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
-        .setArguments(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-          .orElse(Lists.newArrayList())
-          : _*)
-        .build()
+        .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
+        .setArguments(
+          flinkConfig
+            .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+            .orElse(Lists.newArrayList()): _*
+        ).build()
 
       val jobGraph = PackagedProgramUtils.createJobGraph(
         packageProgram,
         flinkConfig,
         flinkConfig.getInteger(CoreOptions.DEFAULT_PARALLELISM),
+        null,
         false)
 
       client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
@@ -212,8 +214,7 @@ object StandaloneSubmit extends FlinkSubmitTrait {
     (standaloneClusterId, standaloneClusterDescriptor)
   }
 
-  @throws[Exception]
-  private[this] def checkBuildResult(submitRequest: SubmitRequest): Unit = {
+  @throws[Exception] private[this] def checkBuildResult(submitRequest: SubmitRequest): Unit = {
     val result = submitRequest.buildResult
     if (result == null) {
       throw new Exception(s"[flink-submit] current job: ${submitRequest.effectiveAppName} was not yet built, buildResult is empty")
