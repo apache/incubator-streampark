@@ -85,8 +85,8 @@ object MavenTool extends Logger {
   /**
    * Build a fat-jar with custom jar librarties and maven artifacts.
    *
-   * @param dependencyInfo   maven artifacts and jar libraries for building a fat-jar
-   * @param outFatJarPath output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
+   * @param dependencyInfo maven artifacts and jar libraries for building a fat-jar
+   * @param outFatJarPath  output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
    */
   @throws[Exception] def buildFatJar(@Nonnull dependencyInfo: DependencyInfo, @Nonnull outFatJarPath: String): File = {
     val jarLibs = dependencyInfo.extJarLibs

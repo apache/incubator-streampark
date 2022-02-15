@@ -21,8 +21,8 @@ package com.streamxhub.streamx.flink.packer.pipeline
 
 import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper.calPercent
 
-import java.util.{Map => JavaMap}
 import java.lang.{Long => JavaLong}
+import java.util.{Map => JavaMap}
 import scala.collection.JavaConverters._
 
 /**

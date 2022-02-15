@@ -22,6 +22,7 @@ import com.streamxhub.streamx.common.util.CommandUtils
 import org.apache.commons.lang3.StringUtils
 
 import java.io.File
+import java.net.{URL => NetURL}
 import java.util.concurrent.atomic.AtomicReference
 import java.util.function.Consumer
 import java.util.regex.Pattern
@@ -54,6 +55,8 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable {
     require(lib.exists() && lib.isDirectory, s"[StreamX] $flinkHome/lib must be exists and must be directory.")
     lib
   }
+
+  lazy val flinkLibs: List[NetURL] = flinkLib.listFiles().map(_.toURI.toURL).toList
 
   lazy val version: String = {
     val flinkVersion = new AtomicReference[String]

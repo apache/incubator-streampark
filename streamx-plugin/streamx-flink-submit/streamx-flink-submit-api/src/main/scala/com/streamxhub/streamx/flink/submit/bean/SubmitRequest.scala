@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.domain
+package com.streamxhub.streamx.flink.submit.bean
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.streamx.common.conf.ConfigConst._
@@ -27,11 +27,13 @@ import com.streamxhub.streamx.common.enums._
 import com.streamxhub.streamx.common.util.{DeflaterUtils, FlinkUtils, HdfsUtils, PropertiesUtils}
 import com.streamxhub.streamx.flink.packer.pipeline.BuildResult
 import org.apache.commons.io.FileUtils
+import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
 
 import java.io.File
 import java.util.{Map => JavaMap}
 import javax.annotation.Nullable
 import scala.collection.JavaConversions._
+import scala.util.Try
 
 /**
  * @param clusterId            flink cluster id in k8s cluster.
@@ -74,6 +76,14 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
   lazy val flinkSQL: String = property.remove(KEY_FLINK_SQL()).toString
 
   lazy val jobID: String = property.remove(KEY_JOB_ID).toString
+
+  lazy val savepointRestoreSettings: SavepointRestoreSettings = {
+    lazy val allowNonRestoredState = Try(option.split("\\s+").contains("-n")).getOrElse(false)
+    savePoint match {
+      case sp if Try(sp.isEmpty).getOrElse(true) => SavepointRestoreSettings.none
+      case sp => SavepointRestoreSettings.forPath(sp, allowNonRestoredState)
+    }
+  }
 
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
     if (this.appConf == null) Map.empty[String, String] else {

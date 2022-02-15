@@ -137,7 +137,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
         watcher.onStepStateChange(snapshot)
         Some(result)
       case Failure(cause) =>
-        stepsStatus(seq) = PipeStepStatus.failure-> System.currentTimeMillis
+        stepsStatus(seq) = PipeStepStatus.failure -> System.currentTimeMillis
         pipeStatus = PipeStatus.failure
         error = PipeError.of(cause.getMessage, cause)
         logInfo(s"building pipeline step[$seq/$allSteps] failure => ${pipeType.getSteps.get(seq)}")

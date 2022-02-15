@@ -27,7 +27,7 @@ import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
-import com.streamxhub.streamx.flink.submit.domain._
+import com.streamxhub.streamx.flink.submit.bean._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
@@ -105,14 +105,18 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     try {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       // build JobGraph
-      packageProgram = PackagedProgram.newBuilder()
+      packageProgram = PackagedProgram
+        .newBuilder()
+        .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
         .setJarFile(fatJar)
         .setConfiguration(flinkConfig)
         .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
-        .setArguments(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-          .orElse(Lists.newArrayList())
-          : _*
+        .setArguments(
+          flinkConfig
+            .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+            .orElse(Lists.newArrayList()): _*
         ).build()
+
       val jobGraph = PackagedProgramUtils.createJobGraph(
         packageProgram,
         flinkConfig,

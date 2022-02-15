@@ -86,12 +86,12 @@ import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
-import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper;
-import com.streamxhub.streamx.flink.submit.domain.KubernetesSubmitParam;
-import com.streamxhub.streamx.flink.submit.domain.StopRequest;
-import com.streamxhub.streamx.flink.submit.domain.StopResponse;
-import com.streamxhub.streamx.flink.submit.domain.SubmitRequest;
-import com.streamxhub.streamx.flink.submit.domain.SubmitResponse;
+import com.streamxhub.streamx.flink.submit.FlinkSubmitter;
+import com.streamxhub.streamx.flink.submit.bean.KubernetesSubmitParam;
+import com.streamxhub.streamx.flink.submit.bean.StopRequest;
+import com.streamxhub.streamx.flink.submit.bean.StopResponse;
+import com.streamxhub.streamx.flink.submit.bean.SubmitRequest;
+import com.streamxhub.streamx.flink.submit.bean.SubmitResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -1072,7 +1072,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String customSavepoint = "";
                 if (isKubernetesApp(application)) {
                     customSavepoint = StringUtils.isNotBlank(appParam.getSavePoint()) ? appParam.getSavePoint() :
-                        FlinkSubmitHelper
+                        FlinkSubmitter
                             .extractDynamicOptionAsJava(application.getDynamicOptions())
                             .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
                 }
@@ -1088,7 +1088,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     application.getDynamicOptions()
                 );
 
-                StopResponse stopResponse = FlinkSubmitHelper.stop(stopInfo);
+                StopResponse stopResponse = FlinkSubmitter.stop(stopInfo);
                 if (stopResponse != null && stopResponse.savePointDir() != null) {
                     String savePointDir = stopResponse.savePointDir();
                     log.info("savePoint path:{}", savePointDir);
@@ -1303,7 +1303,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 kubernetesSubmitParam
             );
 
-            SubmitResponse submitResponse = FlinkSubmitHelper.submit(submitRequest);
+            SubmitResponse submitResponse = FlinkSubmitter.submit(submitRequest);
 
             assert submitResponse != null;
 

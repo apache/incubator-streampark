@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.submit.impl
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.HdfsUtils
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
-import com.streamxhub.streamx.flink.submit.domain._
+import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration._
@@ -77,21 +77,22 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       array.toList
     }
 
-    //yarn.provided.lib.dirs
-    flinkConfig.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
-    //flinkDistJar
-    flinkConfig.set(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.hdfsWorkspace.flinkDistJar)
-    //pipeline.jars
-    flinkConfig.set(PipelineOptions.JARS, Collections.singletonList(submitRequest.flinkUserJar))
-    //yarn application name
-    flinkConfig.set(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
-    //yarn application Type
-    flinkConfig.set(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType)
+    flinkConfig
+      //yarn.provided.lib.dirs
+      .safeSet(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
+      //flinkDistJar
+      .safeSet(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.hdfsWorkspace.flinkDistJar)
+      //pipeline.jars
+      .safeSet(PipelineOptions.JARS, Collections.singletonList(submitRequest.flinkUserJar))
+      //yarn application name
+      .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
+      //yarn application Type
+      .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType)
 
     logInfo(
       s"""
          |------------------------------------------------------------------
-         |Effective executor configuration: $flinkConfig
+         |Effective submit configuration: $flinkConfig
          |------------------------------------------------------------------
          |""".stripMargin)
   }
@@ -131,6 +132,5 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       }
     })
   }
-
 
 }

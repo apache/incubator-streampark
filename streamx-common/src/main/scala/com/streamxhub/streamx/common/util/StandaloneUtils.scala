@@ -23,12 +23,13 @@ import org.apache.flink.configuration.{JobManagerOptions, RestOptions}
 
 import java.util
 import scala.util.Try
+import java.lang.{Integer => JavaInt}
 
 object StandaloneUtils {
 
   lazy val DEFAULT_REST_ADDRESS: String = "localhost"
 
-  lazy val DEFAULT_REST_PORT: Int = 8081
+  lazy val DEFAULT_REST_PORT: JavaInt = 8081
 
   /**
    * Append the http Rest Api

@@ -23,7 +23,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils, Utils}
 import com.streamxhub.streamx.flink.core.conf.FlinkRunOption
-import com.streamxhub.streamx.flink.submit.domain._
+import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.commons.collections.MapUtils
 import org.apache.flink.api.common.JobID
@@ -105,13 +105,6 @@ trait FlinkSubmitTrait extends Logger {
     //state.checkpoints.num-retained
     val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
     flinkConfig.set(retainedOption, flinkDefaultConfiguration.get(retainedOption))
-
-    logInfo(
-      s"""
-         |------------------------------------------------------------------
-         |Effective executor configuration: $flinkConfig
-         |------------------------------------------------------------------
-         |""".stripMargin)
 
     doConfig(submitRequest, flinkConfig)
 
