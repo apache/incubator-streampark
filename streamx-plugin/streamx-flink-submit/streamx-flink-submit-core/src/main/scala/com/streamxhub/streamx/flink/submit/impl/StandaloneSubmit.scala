@@ -49,21 +49,27 @@ object StandaloneSubmit extends FlinkSubmitTrait {
    * @param flinkConfig
    */
   override def doConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
-    flinkConfig.safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
-    if (!flinkConfig.contains(JobManagerOptions.ADDRESS) && !flinkConfig.contains(RestOptions.ADDRESS)) {
-      logWarn(s"RestOptions Address is not set,use default value : ${StandaloneUtils.DEFAULT_REST_ADDRESS}")
-      flinkConfig.setString(RestOptions.ADDRESS, StandaloneUtils.DEFAULT_REST_ADDRESS)
-    }
-    if (!flinkConfig.contains(RestOptions.PORT)) {
-      logWarn(s"RestOptions port is not set,use default value : ${StandaloneUtils.DEFAULT_REST_PORT}")
-      flinkConfig.setInteger(RestOptions.PORT, StandaloneUtils.DEFAULT_REST_PORT)
-    }
+    flinkConfig
+      .safeSet(PipelineOptions.NAME, Try(submitRequest.effectiveAppName).getOrElse(null))
+      .safeSet(
+        RestOptions.ADDRESS,
+        Try(flinkConfig.get(JobManagerOptions.ADDRESS)).getOrElse {
+          logWarn(s"RestOptions Address is not set,use default value : ${StandaloneUtils.DEFAULT_REST_ADDRESS}")
+          StandaloneUtils.DEFAULT_REST_ADDRESS
+        })
+      .safeSet(
+        RestOptions.PORT,
+        Try(flinkConfig.get(RestOptions.PORT)).getOrElse {
+          logWarn(s"RestOptions port is not set,use default value : ${StandaloneUtils.DEFAULT_REST_PORT}")
+          StandaloneUtils.DEFAULT_REST_PORT
+        })
   }
 
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
     // 1) get userJar
     val userJar = submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>
+        checkBuildResult(submitRequest)
         // 1) get build result
         val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
         // 2) get fat-jar
@@ -84,7 +90,10 @@ object StandaloneSubmit extends FlinkSubmitTrait {
   }
 
   override def doStop(stopRequest: StopRequest): StopResponse = {
+
     val flinkConfig = new Configuration()
+
+    this.doConfig(null, flinkConfig)
     //get standalone jm to dynamicOption
     FlinkSubmitHelper.extractDynamicOption(stopRequest.dynamicOption).foreach(e => flinkConfig.setString(e._1, e._2))
 
@@ -194,6 +203,17 @@ object StandaloneSubmit extends FlinkSubmitTrait {
     val standaloneClusterId: StandaloneClusterId = clientFactory.getClusterId(flinkConfig)
     val standaloneClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[StandaloneClusterDescriptor]
     (standaloneClusterId, standaloneClusterDescriptor)
+  }
+
+  @throws[Exception]
+  private[this] def checkBuildResult(submitRequest: SubmitRequest): Unit = {
+    val result = submitRequest.buildResult
+    if (result == null) {
+      throw new Exception(s"[flink-submit] current job: ${submitRequest.effectiveAppName} was not yet built, buildResult is empty")
+    }
+    if (!result.pass) {
+      throw new Exception(s"[flink-submit] current job ${submitRequest.effectiveAppName} build failed, please check")
+    }
   }
 
 }

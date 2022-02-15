@@ -44,6 +44,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
 
   lazy val workspace: Workspace = Workspace.remote
 
+
   override def doStop(stopRequest: StopRequest): StopResponse = {
 
     val jobID = getJobID(stopRequest.jobId)
