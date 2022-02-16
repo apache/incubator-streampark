@@ -47,7 +47,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
 
-  override def doConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+  override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     // extract from submitRequest
     flinkConfig
       .safeSet(PipelineOptions.NAME, submitRequest.appName)

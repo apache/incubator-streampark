@@ -20,10 +20,9 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
-import com.streamxhub.streamx.common.util.StandaloneUtils
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
 import com.streamxhub.streamx.flink.submit.FlinkSubmitter
-import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
+import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
 import org.apache.flink.api.common.JobID
@@ -33,34 +32,24 @@ import org.apache.flink.configuration._
 import org.apache.flink.util.IOUtils
 
 import java.io.File
+import java.lang.{Integer => JavaInt}
 import scala.util.Try
 
 
 /**
- * Submit Job to Remote Session Cluster
+ * Submit Job to YARN Session Cluster
  */
-object StandaloneSubmit extends FlinkSubmitTrait {
+object YarnSessionSubmit extends YarnSubmitTrait {
 
   /**
    * @param submitRequest
    * @param flinkConfig
    */
-  override def doConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+  override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     flinkConfig
       .safeSet(PipelineOptions.NAME, Try(submitRequest.effectiveAppName).getOrElse(null))
-      .safeSet(
-        RestOptions.ADDRESS,
-        Try(flinkConfig.get(JobManagerOptions.ADDRESS)).getOrElse {
-          logWarn(s"RestOptions Address is not set,use default value : ${StandaloneUtils.DEFAULT_REST_ADDRESS}")
-          StandaloneUtils.DEFAULT_REST_ADDRESS
-        })
-      .safeSet(
-        RestOptions.PORT,
-        Try(flinkConfig.get(RestOptions.PORT)).getOrElse {
-          logWarn(s"RestOptions port is not set,use default value : ${StandaloneUtils.DEFAULT_REST_PORT}")
-          StandaloneUtils.DEFAULT_REST_PORT
-        })
-
+      .safeSet(RestOptions.ADDRESS, submitRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
+      .safeSet(RestOptions.PORT, JavaInt.valueOf(submitRequest.extraParameter.get(RestOptions.PORT.key()).toString))
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -90,11 +79,11 @@ object StandaloneSubmit extends FlinkSubmitTrait {
 
     val flinkConfig = new Configuration()
 
-    this.doConfig(null, flinkConfig)
+    this.setConfig(null, flinkConfig)
     //get standalone jm to dynamicOption
     FlinkSubmitter.extractDynamicOption(stopRequest.dynamicOption).foreach(e => flinkConfig.setString(e._1, e._2))
 
-    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.STANDALONE.getName)
+    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.REMOTE.getName)
 
     val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
     var client: ClusterClient[StandaloneClusterId] = null

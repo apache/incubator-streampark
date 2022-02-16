@@ -42,7 +42,7 @@ import scala.collection.JavaConversions._
 @deprecated
 object YarnPreJobSubmit extends YarnSubmitTrait {
 
-  override def doConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+  override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     //execution.target
     flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
     logInfo(

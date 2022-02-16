@@ -104,6 +104,45 @@
           </a-list>
         </a-card>
       </a-tab-pane>
+      <a-tab-pane key="cluster" tab="Flink Cluster">
+        <a-card
+          :bordered="false"
+          class="system_setting">
+          <div
+            v-permit="'project:create'">
+            <a-button
+              type="dashed"
+              style="width: 100%;margin-top: 20px"
+              icon="plus"
+              @click="handleClusterFormVisible(true)">
+              Add New
+            </a-button>
+          </div>
+          <a-list>
+            <a-list-item v-for="(item,index) in clusters" :key="index">
+              <a-list-item-meta style="width: 60%">
+                <svg-icon class="avatar" name="flink" size="large" slot="avatar"></svg-icon>
+                <span slot="title">{{ item.clusterName }}</span>
+                <span slot="description">{{ item.description }}</span>
+              </a-list-item-meta>
+
+              <div class="list-content" style="width: 40%">
+                <div class="list-content-item" style="width: 60%">
+                  <span>Address</span>
+                  <p style="margin-top: 10px">
+                    {{ item.address }}
+                  </p>
+                </div>
+              </div>
+
+              <div slot="actions">
+                <a @click="handleEditCluster(item)">Edit</a>
+              </div>
+
+            </a-list-item>
+          </a-list>
+        </a-card>
+      </a-tab-pane>
     </a-tabs>
 
     <a-drawer
@@ -142,7 +181,7 @@
         slot="title">
         <svg-icon
           slot="icon"
-          name="play"/>
+          name="flink"/>
         Add Flink
       </template>
 
@@ -203,12 +242,97 @@
       </template>
     </a-modal>
 
+    <a-modal
+      v-model="flinkClusterVisible">
+      <template
+        slot="title">
+        <svg-icon
+          slot="icon"
+          name="flink"/>
+        Add Cluster
+      </template>
+
+      <a-form
+        :form="clusterForm">
+        <a-form-item
+          label="Cluster Name"
+          style="margin-bottom: 10px"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-input
+            type="text"
+            placeholder="Please enter cluster name"
+            v-decorator="['clusterName',{ rules: [{ required: true } ]}]"/>
+          <span
+            class="conf-switch"
+            style="color:darkgrey">the cluster name, e.g: my Cluster </span>
+        </a-form-item>
+
+        <a-form-item
+          label="Address"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-textarea
+            rows="4"
+            name="address"
+            placeholder="Please enter cluster address,  e.g: http://host:port,http://host1:port2"
+            v-decorator="['address',{ rules: [{ required: true } ]}]"/>
+          <span
+            class="conf-switch"
+            style="color:darkgrey">cluster address,multiple addresses use "," split</span>
+        </a-form-item>
+
+        <a-form-item
+          label="Description"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-textarea
+            rows="4"
+            name="description"
+            placeholder="Please enter description"
+            v-decorator="['description']"/>
+        </a-form-item>
+
+      </a-form>
+
+      <template slot="footer">
+        <a-button
+          key="back"
+          @click="handleClusterFormVisible(false)">
+          Cancel
+        </a-button>
+        <a-button
+          key="submit"
+          @click="handleSubmitCluster"
+          type="primary">
+          Submit
+        </a-button>
+      </template>
+    </a-modal>
+
   </div>
 </template>
 
 <script>
 import {all, update } from '@api/setting'
-import {list, create, get as getFlink, sync, update as updateFlink,exists, setDefault } from '@/api/flinkenv'
+import {
+  list as listFlink,
+  create as createFlink,
+  get as getFlink,
+  update as updateFlink,
+  exists as existsEnv,
+  setDefault,
+  sync
+} from '@/api/flinkEnv'
+
+import {
+  list as listCluster,
+  create as createCluster,
+  get as getCluster,
+  update as updateCluster,
+  check as checkCluster, check
+} from '@/api/flinkCluster'
+
 import SvgIcon from '@/components/SvgIcon'
 import monaco from '@/views/flink/app/Monaco.yaml'
 
@@ -219,14 +343,18 @@ export default {
     return {
       settings: [],
       flinks: [],
+      clusters: [],
       flinkName: null,
       flinkHome: null,
       flinkConf: null,
       versionId: null,
+      clusterId: null,
       flinkConfVisible: false,
       flinkFormVisible: false,
+      flinkClusterVisible: false,
       editor: null,
-      flinkForm: null
+      flinkForm: null,
+      clusterForm: null
     }
   },
 
@@ -238,8 +366,10 @@ export default {
 
   mounted() {
     this.flinkForm = this.$form.createForm(this)
+    this.clusterForm = this.$form.createForm(this)
     this.handleSettingAll()
     this.handleFlinkAll()
+    this.handleClusterAll()
   },
 
   methods: {
@@ -321,9 +451,33 @@ export default {
       })
     },
 
+    handleClusterFormVisible(flag) {
+      this.clusterId = null
+      this.flinkClusterVisible = flag
+      this.clusterForm.resetFields()
+    },
+
+    handleEditCluster(item) {
+      this.clusterId = item.id
+      this.flinkClusterVisible = true
+      this.$nextTick(()=>{
+        this.clusterForm.setFieldsValue({
+          'clusterName': item.clusterName,
+          'address': item.address,
+          'description': item.description || null
+        })
+      })
+    },
+
     handleFlinkAll() {
-      list({}).then((resp)=>{
+      listFlink({}).then((resp)=>{
         this.flinks = resp.data
+      })
+    },
+
+    handleClusterAll() {
+      listCluster({}).then((resp)=>{
+        this.clusters = resp.data
       })
     },
 
@@ -331,15 +485,15 @@ export default {
       e.preventDefault()
       this.flinkForm.validateFields((err, values) => {
         if (!err) {
-          exists({
+          existsEnv({
             id: this.versionId,
             flinkName: values.flinkName,
             flinkHome: values.flinkHome
           }).then((resp)=>{
-            if(resp.data) {
-              if(this.versionId == null) {
-                create(values).then((resp)=>{
-                  if(resp.data) {
+            if (resp.data) {
+              if (this.versionId == null) {
+                createFlink(values).then((resp)=>{
+                  if (resp.data) {
                     this.flinkFormVisible = false
                     this.handleFlinkAll()
                   } else {
@@ -376,7 +530,7 @@ export default {
                 })
               }
             } else {
-              if(resp.status === 'error') {
+              if (resp.status === 'error') {
                 this.$swal.fire(
                   'Failed',
                   'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
@@ -387,6 +541,78 @@ export default {
                   'Failed',
                   'flink name is already exists',
                   'error'
+                )
+              }
+            }
+          })
+        }
+      })
+    },
+
+    handleSubmitCluster(e) {
+      e.preventDefault()
+      this.clusterForm.validateFields((err, values) => {
+        if (!err) {
+          checkCluster({
+            id: this.clusterId,
+            clusterName: values.clusterName,
+            address: values.address
+          }).then((resp)=> {
+            if (resp.data === 'success') {
+              if (this.clusterId == null) {
+                createCluster({
+                  clusterName: values.clusterName,
+                  address: values.address,
+                  description: values.description || null
+                }).then((resp)=>{
+                  if (resp.data) {
+                    this.flinkClusterVisible = false
+                    this.handleClusterAll()
+                  } else {
+                    this.$swal.fire(
+                        'Failed',
+                        resp['message'].replaceAll(/\[StreamX]/g,''),
+                        'error'
+                    )
+                  }
+                })
+              } else {
+                updateCluster({
+                  id: this.clusterId,
+                  clusterName: values.clusterName,
+                  address: values.address,
+                  description: values.description || null
+                }).then((resp)=>{
+                  if (resp.data) {
+                    this.clusterFormVisible = false
+                    this.$swal.fire({
+                      icon: 'success',
+                      title: values.clusterName.concat(' update successful!'),
+                      showConfirmButton: false,
+                      timer: 2000
+                    })
+                    this.handleClusterAll()
+                  } else {
+                    this.$swal.fire(
+                        'Failed',
+                        resp['message'].replaceAll(/\[StreamX]/g, ''),
+                        'error'
+                    )
+                  }
+                })
+              }
+            } else {
+              if (resp.status === 'exists') {
+                this.$swal.fire(
+                    'Failed',
+                    'the cluster name: ' + values.clusterName + ' is already exists,please check',
+                    'error'
+                )
+              } else if (resp.status === 'fail') {
+                this.$swal.fire(
+                    'Failed',
+                    'the address is invalid or connection failure, please check',
+                    'error'
                 )
               }
             }
@@ -431,7 +657,7 @@ export default {
     },
 
     handleSetDefault(item) {
-      if(item.isDefault) {
+      if (item.isDefault) {
         setDefault({ id: item.id }).then((resp)=>{
           this.$swal.fire({
             icon: 'success',

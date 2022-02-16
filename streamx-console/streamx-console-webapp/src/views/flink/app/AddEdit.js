@@ -19,7 +19,7 @@
  * under the License.
  */
 import monaco from '@/views/flink/app/Monaco.xml'
-import {verify} from '@/api/flinksql'
+import {verify} from '@/api/flinkSql'
 import {format} from 'sql-formatter'
 
 export function globalOption(vue) {
