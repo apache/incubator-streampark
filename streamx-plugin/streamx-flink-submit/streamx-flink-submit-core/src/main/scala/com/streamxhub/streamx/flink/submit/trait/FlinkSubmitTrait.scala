@@ -73,7 +73,7 @@ trait FlinkSubmitTrait extends Logger {
          |    savePoint        : ${submitRequest.savePoint}
          |    userJar          : ${submitRequest.flinkUserJar}
          |    option           : ${submitRequest.option}
-         |    property         : ${submitRequest.property}
+         |    property         : ${submitRequest.option}
          |    dynamicOption    : ${submitRequest.dynamicOption.mkString(" ")}
          |    args             : ${submitRequest.args}
          |    appConf          : ${submitRequest.appConf}
@@ -107,12 +107,12 @@ trait FlinkSubmitTrait extends Logger {
     val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
     flinkConfig.set(retainedOption, flinkDefaultConfiguration.get(retainedOption))
 
-    doConfig(submitRequest, flinkConfig)
+    setConfig(submitRequest, flinkConfig)
 
     doSubmit(submitRequest, flinkConfig)
   }
 
-  def doConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
+  def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
 
   @throws[Exception] def stop(stopRequest: StopRequest): StopResponse = {
     logInfo(
@@ -229,16 +229,9 @@ trait FlinkSubmitTrait extends Logger {
         array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/$jvmProfilerJar=$param"
       }
 
-      if (submitRequest.option != null && submitRequest.option.trim.nonEmpty) {
-        submitRequest.option.split("\\s").filter(_.trim.nonEmpty).foreach(array +=)
-      }
-
       //页面定义的参数优先级大于app配置文件,属性参数...
-      if (MapUtils.isNotEmpty(submitRequest.property)) {
-        submitRequest.property
-          .filter(_._1 != KEY_FLINK_SQL())
-          .filter(_._1 != KEY_JOB_ID)
-          .foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+      if (MapUtils.isNotEmpty(submitRequest.option)) {
+        submitRequest.option.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
       }
 
       //-D 其他动态参数配置....
@@ -299,8 +292,8 @@ trait FlinkSubmitTrait extends Logger {
   }
 
   private[submit] def getParallelism(submitRequest: SubmitRequest): Integer = {
-    if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
-      Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString)
+    if (submitRequest.option.containsKey(KEY_FLINK_PARALLELISM())) {
+      Integer.valueOf(submitRequest.option.get(KEY_FLINK_PARALLELISM()).toString)
     } else {
       getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome).getInteger(
         CoreOptions.DEFAULT_PARALLELISM,

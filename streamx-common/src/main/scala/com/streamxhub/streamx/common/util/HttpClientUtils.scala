@@ -19,6 +19,7 @@
 package com.streamxhub.streamx.common.util
 
 import org.apache.http.NameValuePair
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods._
 import org.apache.http.client.utils.URIBuilder
@@ -52,24 +53,33 @@ object HttpClientUtils {
    */
   private[this] def getHttpClient = HttpClients.custom.setConnectionManager(connectionManager).build
 
+  private[this] def getHttpGet(url: String, params: util.Map[String, AnyRef] = null, config: RequestConfig = null): HttpGet = {
+    val httpGet = params match {
+      case null => new HttpGet(url)
+      case _ =>
+        val ub = uriBuilder(url, params)
+        new HttpGet(ub.build)
+    }
+    if (config != null) {
+      httpGet.setConfig(config)
+    }
+    httpGet
+  }
+
   /**
    * @param url
    * @return
    */
-  def httpGetRequest(url: String): String = {
-    val httpGet = new HttpGet(url)
-    getResult(httpGet)
+  def httpGetRequest(url: String, config: RequestConfig): String = {
+    getResult(getHttpGet(url, null, config))
   }
 
-  @throws[URISyntaxException] def httpGetRequest(url: String, params: util.Map[String, AnyRef]): String = {
-    val ub = uriBuilder(url, params)
-    val httpGet = new HttpGet(ub.build)
-    getResult(httpGet)
+  @throws[URISyntaxException] def httpGetRequest(url: String, config: RequestConfig, params: util.Map[String, AnyRef]): String = {
+    getResult(getHttpGet(url, params, config))
   }
 
-  @throws[URISyntaxException] def httpGetRequest(url: String, headers: util.Map[String, AnyRef], params: util.Map[String, AnyRef]): String = {
-    val ub = uriBuilder(url, params)
-    val httpGet = new HttpGet(ub.build)
+  @throws[URISyntaxException] def httpGetRequest(url: String, config: RequestConfig, headers: util.Map[String, AnyRef], params: util.Map[String, AnyRef]): String = {
+    val httpGet = getHttpGet(url, params, config)
     for (param <- headers.entrySet) {
       httpGet.addHeader(param.getKey, String.valueOf(param.getValue))
     }

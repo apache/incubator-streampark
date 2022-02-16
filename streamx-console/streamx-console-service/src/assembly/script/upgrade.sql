@@ -30,10 +30,23 @@ PRIMARY KEY (`APP_ID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
---------------------------------------- version: 1.2.2 END ---------------------------------------
+--------------------------------------- version: 1.2.1 END ---------------------------------------
 
-ALTER TABLE `t_flink_app` ADD COLUMN `REST_URL` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
-
-ALTER TABLE `t_flink_app` ADD COLUMN `REST_PORT` int DEFAULT NULL AFTER `REST_URL`;
 
 --------------------------------------- version: 1.2.2 START ---------------------------------------
+ALTER TABLE `t_flink_app` ADD COLUMN `FLINK_CLUSTER_ID` bigint DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
+
+-- ----------------------------
+-- Table of t_flink_cluster
+-- ----------------------------
+DROP TABLE IF EXISTS `t_flink_cluster`;
+CREATE TABLE `t_flink_cluster`(
+`ID`              bigint NOT NULL AUTO_INCREMENT,
+`CLUSTER_NAME`    varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群名称',
+`ADDRESS`         text COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群地址,http://$host:$port多个地址用,分割',
+`DESCRIPTION`     varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`CREATE_TIME`     datetime DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--------------------------------------- version: 1.2.2 END ---------------------------------------

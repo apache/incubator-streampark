@@ -78,7 +78,7 @@ import java.util.stream.Collectors;
 
 import static com.streamxhub.streamx.common.enums.ExecutionMode.KUBERNETES_NATIVE_APPLICATION;
 import static com.streamxhub.streamx.common.enums.ExecutionMode.KUBERNETES_NATIVE_SESSION;
-import static com.streamxhub.streamx.common.enums.ExecutionMode.STANDALONE;
+import static com.streamxhub.streamx.common.enums.ExecutionMode.REMOTE;
 
 
 /**
@@ -228,7 +228,7 @@ public class ApplBuildPipeServiceImpl
                     settingService.getDockerRegisterPassword()));
             log.info("Submit params to building pipeline : {}", params);
             return FlinkK8sApplicationBuildPipeline.of(params);
-        } else if (STANDALONE.equals(executionMode)) {
+        } else if (REMOTE.equals(executionMode)) {
             FlinkStandaloneBuildRequest params = new FlinkStandaloneBuildRequest(
                 app.getJobName(),
                 mainClass,
