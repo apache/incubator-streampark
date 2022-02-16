@@ -70,15 +70,15 @@ object HttpClientUtils {
    * @param url
    * @return
    */
-  def httpGetRequest(url: String, config: RequestConfig = null): String = {
+  def httpGetRequest(url: String, config: RequestConfig): String = {
     getResult(getHttpGet(url, null, config))
   }
 
-  @throws[URISyntaxException] def httpGetRequest(url: String, config: RequestConfig = null, params: util.Map[String, AnyRef]): String = {
+  @throws[URISyntaxException] def httpGetRequest(url: String, config: RequestConfig, params: util.Map[String, AnyRef]): String = {
     getResult(getHttpGet(url, params, config))
   }
 
-  @throws[URISyntaxException] def httpGetRequest(url: String, config: RequestConfig = null, headers: util.Map[String, AnyRef], params: util.Map[String, AnyRef]): String = {
+  @throws[URISyntaxException] def httpGetRequest(url: String, config: RequestConfig, headers: util.Map[String, AnyRef], params: util.Map[String, AnyRef]): String = {
     val httpGet = getHttpGet(url, params, config)
     for (param <- headers.entrySet) {
       httpGet.addHeader(param.getKey, String.valueOf(param.getValue))

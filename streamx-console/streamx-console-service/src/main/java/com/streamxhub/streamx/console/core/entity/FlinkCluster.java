@@ -54,6 +54,7 @@ public class FlinkCluster implements Serializable {
                 HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setSocketTimeout(2000).build());
                 return new URI(url);
             } catch (Exception ignored) {
+                //
             }
         }
         return null;
@@ -76,10 +77,9 @@ public class FlinkCluster implements Serializable {
                 HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(2000).build());
                 return true;
             } catch (Exception ignored) {
+                //
             }
         }
         return false;
     }
-
-
 }
