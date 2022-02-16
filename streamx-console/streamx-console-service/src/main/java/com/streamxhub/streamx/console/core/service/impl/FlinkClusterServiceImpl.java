@@ -36,4 +36,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, FlinkCluster> implements FlinkClusterService {
 
+    @Override
+    public String check(FlinkCluster cluster) {
+        //1) 检查名称是否重复,是否已经存在
+        FlinkCluster flinkCluster = this.baseMapper.getByName(cluster.getClusterName());
+        if (flinkCluster != null) {
+            if (cluster.getId() != null) {
+                if (!cluster.getId().equals(flinkCluster.getId())) {
+                    return "exists";
+                }
+            } else {
+                return "exists";
+            }
+        }
+
+        //2) 检查连接是否能连接到
+        return cluster.verifyConnection() ? "success" : "fail";
+    }
 }

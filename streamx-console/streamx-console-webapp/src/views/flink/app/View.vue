@@ -1162,7 +1162,7 @@
   import {history, latest} from '@api/savepoint'
   import {flamegraph} from '@api/metrics'
   import {weburl} from '@api/setting'
-  import {build, detail as buildDetail} from '@api/appbuild'
+  import {build, detail as buildDetail} from '@/api/appBuild'
   import {Terminal} from 'xterm'
   import 'xterm/css/xterm.css'
   import {baseUrl} from '@/api/baseUrl'

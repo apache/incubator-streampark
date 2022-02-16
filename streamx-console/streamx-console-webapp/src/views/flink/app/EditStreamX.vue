@@ -64,6 +64,24 @@
         </a-select>
       </a-form-item>
 
+      <template v-if="executionMode === 1">
+        <a-form-item
+          label="Flink Cluster"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            placeholder="Flink Cluster"
+            v-decorator="[ 'flinkClusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
+            <a-select-option
+              v-for="(v,index) in flinkClusters"
+              :key="`cluster_${index}`"
+              :value="v.id">
+              {{ v.clusterName }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </template>
+
       <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode !== null && (executionMode === 5 || executionMode === 6))">
         <a-form-item
           label="Kubernetes Namespace"
@@ -1437,14 +1455,15 @@ import Ellipsis from '@/components/Ellipsis'
 import { listConf } from '@api/project'
 import { get, update, checkName, name, readConf, upload } from '@api/application'
 import { history as confHistory, get as getVer, template, sysHadoopConf  } from '@api/config'
-import { get as getSQL, history as sqlhistory } from '@api/flinksql'
+import { get as getSQL, history as sqlhistory } from '@/api/flinkSql'
 import { mapActions, mapGetters } from 'vuex'
 import Mergely from './Mergely'
 import Different from './Different'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
 import { toPomString } from './Pom'
-import {list as listFlinkEnv} from '@/api/flinkenv'
+import {list as listFlinkEnv} from '@/api/flinkEnv'
+import {list as listFlinkCluster} from '@/api/flinkCluster'
 import {checkHadoop} from '@/api/setting'
 import {
   uploadJars as histUploadJars,
@@ -1454,7 +1473,7 @@ import {
   flinkPodTemplates as histPodTemplates,
   flinkJmPodTemplates as histJmPodTemplates,
   flinkTmPodTemplates as histTmPodTemplates
-} from '@api/flinkhistory'
+} from '@/api/flinkHistory'
 
 import {
   initEditor,
@@ -1473,7 +1492,7 @@ import {
   completeHostAliasToPodTemplate,
   extractHostAliasFromPodTemplate,
   previewHostAlias
-} from '@api/flinkpodtmpl'
+} from '@/api/flinkPodtmpl'
 
 
 
@@ -1500,7 +1519,7 @@ export default {
         {name: 'NodePort', order: 2}
       ],
       executionModes: [
-        {mode: 'standalone', value: 1, disabled: false},
+        {mode: 'remote (standalone)', value: 1, disabled: false},
         {mode: 'yarn application', value: 4, disabled: false},
         {mode: 'kubernetes session', value: 5, disabled: false},
         {mode: 'kubernetes application', value: 6, disabled: false},
@@ -1528,6 +1547,7 @@ export default {
       configId: null,
       versionId: null,
       flinkEnvs: [],
+      flinkClusters: [],
       configVersions: [],
       flinkSqlHistory: [],
       flinkSql: {},
@@ -1683,6 +1703,9 @@ export default {
     })
     listFlinkEnv().then((resp)=>{
       this.flinkEnvs = resp.data
+    })
+    listFlinkCluster().then((resp)=>{
+      this.flinkClusters = resp.data
     })
     // load history config records
     histUploadJars().then((resp) => {
@@ -2183,6 +2206,7 @@ export default {
         description: values.description,
         k8sNamespace: values.k8sNamespace || null,
         clusterId: values.clusterId || null,
+        flinkClusterId: values.flinkClusterId || null,
         flinkImage: values.flinkImage || null,
       }
       if (params.executionMode === 6) {
@@ -2237,6 +2261,7 @@ export default {
         description: values.description || null,
         k8sNamespace: values.k8sNamespace || null,
         clusterId: values.clusterId || null,
+        flinkClusterId: values.flinkClusterId || null,
         flinkImage: values.flinkImage || null
       }
       if (params.executionMode === 6) {
@@ -2601,6 +2626,7 @@ export default {
           'cpFailureRateInterval': this.app.cpFailureRateInterval,
           'cpFailureAction': this.app.cpFailureAction,
           'clusterId': this.app.clusterId,
+          'flinkClusterId': this.app.flinkClusterId,
           'flinkImage': this.app.flinkImage,
           'k8sNamespace': this.app.k8sNamespace,
           'resource': this.app.resourceFrom

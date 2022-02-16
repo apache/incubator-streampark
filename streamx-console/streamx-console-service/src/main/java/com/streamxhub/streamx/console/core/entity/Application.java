@@ -53,11 +53,13 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.config.RequestConfig;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -527,7 +529,7 @@ public class Application implements Serializable {
 
     @JsonIgnore
     private <T> T httpGetDoResult(String url, Class<T> clazz) throws IOException {
-        String result = HttpClientUtils.httpGetRequest(url);
+        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
         if (result != null) {
             return JsonUtils.read(result, clazz);
         }
@@ -572,8 +574,8 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    private String getFlinkClusterRestUrl(FlinkCluster cluster, String url) {
-        return cluster.getActiveUrl() + "/" + url;
+    private String getFlinkClusterRestUrl(FlinkCluster cluster, String url) throws MalformedURLException {
+        return cluster.getActiveAddress().toURL() + "/" + url;
     }
 
     @JsonIgnore

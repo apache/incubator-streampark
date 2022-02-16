@@ -21,9 +21,12 @@ package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.streamxhub.streamx.common.util.HttpClientUtils;
 import lombok.Data;
+import org.apache.http.client.config.RequestConfig;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Date;
 
 /**
@@ -41,24 +44,42 @@ public class FlinkCluster implements Serializable {
 
     private String description;
 
-    private Date createTime;
-
-    private transient ActiveAddress activeAddress;
+    private Date createTime = new Date();
 
     @JsonIgnore
-    public ActiveAddress getActiveAddress() {
+    public URI getActiveAddress() {
+        String[] array = address.split(",");
+        for (String url : array) {
+            try {
+                HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setSocketTimeout(2000).build());
+                return new URI(url);
+            } catch (Exception ignored) {
+            }
+        }
         return null;
     }
 
     @JsonIgnore
-    public String getActiveUrl() {
-        return null;
+    public boolean verifyConnection() {
+        if (address == null) {
+            return false;
+        }
+        String[] array = address.split(",");
+        for (String url : array) {
+            try {
+                // 检查是否有效
+                new URI(url);
+            } catch (Exception ignored) {
+                return false;
+            }
+            try {
+                HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(2000).build());
+                return true;
+            } catch (Exception ignored) {
+            }
+        }
+        return false;
     }
 
-    @Data
-    public static class ActiveAddress {
-        private String host;
-        private Integer port;
-    }
 
 }

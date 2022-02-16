@@ -30,8 +30,10 @@ PRIMARY KEY (`APP_ID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
---------------------------------------- version: 1.2.2 END ---------------------------------------
+--------------------------------------- version: 1.2.1 END ---------------------------------------
 
+
+--------------------------------------- version: 1.2.2 START ---------------------------------------
 ALTER TABLE `t_flink_app` ADD COLUMN `FLINK_CLUSTER_ID` bigint DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
 
 -- ----------------------------
@@ -47,4 +49,4 @@ CREATE TABLE `t_flink_cluster`(
 PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---------------------------------------- version: 1.2.2 START ---------------------------------------
+--------------------------------------- version: 1.2.2 END ---------------------------------------

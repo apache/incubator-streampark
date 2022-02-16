@@ -21,7 +21,15 @@ package com.streamxhub.streamx.console.core.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
 
+    /**
+     * @param clusterName
+     * @return
+     */
+    @Select("SELECT * from t_flink_cluster where cluster_name=#{clusterName}")
+    FlinkCluster getByName(@Param("clusterName") String clusterName);
 }

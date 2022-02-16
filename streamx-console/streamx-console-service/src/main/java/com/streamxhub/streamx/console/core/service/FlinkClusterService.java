@@ -27,4 +27,10 @@ import com.streamxhub.streamx.console.core.entity.FlinkCluster;
  */
 public interface FlinkClusterService extends IService<FlinkCluster> {
 
+    /**
+     * check
+     * @param cluster
+     * @return
+     */
+    String check(FlinkCluster cluster);
 }

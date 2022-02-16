@@ -114,6 +114,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
@@ -647,6 +648,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setCpFailureAction(appParam.getCpFailureAction());
             application.setCpFailureRateInterval(appParam.getCpFailureRateInterval());
             application.setCpMaxFailureInterval(appParam.getCpMaxFailureInterval());
+            application.setFlinkClusterId(appParam.getFlinkClusterId());
 
             // Flink Sql job...
             if (application.isFlinkSqlJob()) {
@@ -1272,7 +1274,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
                 FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
                 assert cluster != null;
-                FlinkCluster.ActiveAddress activeAddress = cluster.getActiveAddress();
+                URI activeAddress = cluster.getActiveAddress();
                 extraParameter.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
                 extraParameter.put(RestOptions.PORT.key(), activeAddress.getPort());
             }

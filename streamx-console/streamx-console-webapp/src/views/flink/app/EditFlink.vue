@@ -91,6 +91,24 @@
         </a-select>
       </a-form-item>
 
+      <template v-if="executionMode === 1">
+        <a-form-item
+          label="Flink Cluster"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            placeholder="Flink Cluster"
+            v-decorator="[ 'flinkClusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
+            <a-select-option
+              v-for="(v,index) in flinkClusters"
+              :key="`cluster_${index}`"
+              :value="v.id">
+              {{ v.clusterName }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </template>
+
       <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode === 5 || executionMode === 6)">
         <a-form-item
           label="Kubernetes Namespace"
@@ -664,7 +682,8 @@ import { jars } from '@api/project'
 import {get, update, checkName, main, upload} from '@api/application'
 import { mapActions, mapGetters } from 'vuex'
 import configOptions from './Option'
-import {list as listFlinkEnv} from '@/api/flinkenv'
+import {list as listFlinkEnv} from '@/api/flinkEnv'
+import {list as listFlinkCluster} from '@/api/flinkCluster'
 import {initPodTemplateEditor} from './AddEdit'
 import SvgIcon from '@/components/SvgIcon'
 
@@ -688,6 +707,7 @@ export default {
       configSource: [],
       jars: [],
       flinkEnvs: [],
+      flinkClusters: [],
       validateAgain: false,
       resolveOrder: [
         { name: 'parent-first', order: 0 },
@@ -699,7 +719,7 @@ export default {
         {name: 'NodePort', order: 2}
       ],
       executionModes: [
-        {mode: 'standalone', value: 1, disabled: false},
+        {mode: 'remote (standalone)', value: 1, disabled: false},
         {mode: 'yarn application', value: 4, disabled: false},
         {mode: 'kubernetes session', value: 5, disabled: false},
         {mode: 'kubernetes application', value: 6, disabled: false},
@@ -772,6 +792,9 @@ export default {
     })
     listFlinkEnv().then((resp)=>{
       this.flinkEnvs = resp.data
+    })
+    listFlinkCluster().then((resp)=>{
+      this.flinkClusters = resp.data
     })
   },
 
@@ -1021,6 +1044,7 @@ export default {
               k8sRestExposedType: values.k8sRestExposedType,
               k8sNamespace: values.k8sNamespace || null,
               clusterId: values.clusterId || null,
+              flinkClusterId: values.flinkClusterId || null,
               flinkImage: values.flinkImage || null,
               resourceFrom: this.resourceFrom
             }
@@ -1111,6 +1135,7 @@ export default {
           'versionId': this.app.versionId || null,
           'k8sRestExposedType': this.app.k8sRestExposedType,
           'clusterId': this.app.clusterId,
+          'flinkClusterId': this.app.flinkClusterId,
           'flinkImage': this.app.flinkImage,
           'k8sNamespace': this.app.k8sNamespace
         })
