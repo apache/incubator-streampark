@@ -17,24 +17,23 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.impl
+package com.streamxhub.streamx.console.core.service.impl;
 
-import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
-import com.streamxhub.streamx.flink.submit.bean._
-import org.apache.flink.configuration.Configuration
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.console.core.dao.FlinkClusterMapper;
+import com.streamxhub.streamx.console.core.entity.FlinkCluster;
+import com.streamxhub.streamx.console.core.service.FlinkClusterService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-object LocalSubmit extends FlinkSubmitTrait {
-
-  override def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit = {
-
-  }
-
-  override def doSubmit(submitInfo: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    throw new UnsupportedOperationException("Unsupported local Submit ")
-  }
-
-  override def doStop(stopInfo: StopRequest): StopResponse = {
-    throw new UnsupportedOperationException("Unsupported local Submit ")
-  }
+/**
+ * @author benjobs
+ */
+@Slf4j
+@Service
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, FlinkCluster> implements FlinkClusterService {
 
 }

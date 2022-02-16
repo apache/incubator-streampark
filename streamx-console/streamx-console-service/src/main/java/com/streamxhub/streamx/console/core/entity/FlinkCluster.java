@@ -17,24 +17,48 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.impl
+package com.streamxhub.streamx.console.core.entity;
 
-import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
-import com.streamxhub.streamx.flink.submit.bean._
-import org.apache.flink.configuration.Configuration
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 
-object LocalSubmit extends FlinkSubmitTrait {
+import java.io.Serializable;
+import java.util.Date;
 
-  override def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit = {
+/**
+ * @author benjobs
+ */
+@Data
+@TableName("t_flink_cluster")
+public class FlinkCluster implements Serializable {
 
-  }
+    private Long id;
 
-  override def doSubmit(submitInfo: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    throw new UnsupportedOperationException("Unsupported local Submit ")
-  }
+    private String clusterName;
 
-  override def doStop(stopInfo: StopRequest): StopResponse = {
-    throw new UnsupportedOperationException("Unsupported local Submit ")
-  }
+    private String address;
+
+    private String description;
+
+    private Date createTime;
+
+    private transient ActiveAddress activeAddress;
+
+    @JsonIgnore
+    public ActiveAddress getActiveAddress() {
+        return null;
+    }
+
+    @JsonIgnore
+    public String getActiveUrl() {
+        return null;
+    }
+
+    @Data
+    public static class ActiveAddress {
+        private String host;
+        private Integer port;
+    }
 
 }

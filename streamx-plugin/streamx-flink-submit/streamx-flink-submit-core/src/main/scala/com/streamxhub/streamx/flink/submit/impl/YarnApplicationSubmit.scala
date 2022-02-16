@@ -42,7 +42,7 @@ import scala.collection.mutable.ListBuffer
  */
 object YarnApplicationSubmit extends YarnSubmitTrait {
 
-  override def doConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+  override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
     val currentUser = UserGroupInformation.getCurrentUser
     logDebug(s"UserGroupInformation currentUser: $currentUser")

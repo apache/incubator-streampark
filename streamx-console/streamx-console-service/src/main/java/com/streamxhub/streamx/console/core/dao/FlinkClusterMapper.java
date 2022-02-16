@@ -17,24 +17,11 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.impl
+package com.streamxhub.streamx.console.core.dao;
 
-import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
-import com.streamxhub.streamx.flink.submit.bean._
-import org.apache.flink.configuration.Configuration
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 
-object LocalSubmit extends FlinkSubmitTrait {
-
-  override def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit = {
-
-  }
-
-  override def doSubmit(submitInfo: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    throw new UnsupportedOperationException("Unsupported local Submit ")
-  }
-
-  override def doStop(stopInfo: StopRequest): StopResponse = {
-    throw new UnsupportedOperationException("Unsupported local Submit ")
-  }
+public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
 
 }

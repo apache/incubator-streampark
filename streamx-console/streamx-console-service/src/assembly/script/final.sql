@@ -101,8 +101,7 @@ CREATE TABLE `t_flink_app` (
 `K8S_JM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
 `K8S_TM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
 `K8S_HADOOP_INTEGRATION` tinyint(1) DEFAULT '0',
-`REST_URL` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-`REST_PORT` int DEFAULT NULL,
+`FLINK_CLUSTER_ID` bigint DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 KEY `INX_STATE` (`STATE`) USING BTREE,
 KEY `INX_JOB_TYPE` (`JOB_TYPE`) USING BTREE,
@@ -571,5 +570,17 @@ CREATE TABLE `t_app_build_pipe`(
     PRIMARY KEY (`APP_ID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
+-- ----------------------------
+-- Table of t_flink_cluster
+-- ----------------------------
+DROP TABLE IF EXISTS `t_flink_cluster`;
+CREATE TABLE `t_flink_cluster`(
+`ID`              bigint NOT NULL AUTO_INCREMENT,
+`CLUSTER_NAME`    varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群名称',
+`ADDRESS`         text COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群地址,http://$host:$port多个地址用,分割',
+`DESCRIPTION`     varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`CREATE_TIME`     datetime DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
