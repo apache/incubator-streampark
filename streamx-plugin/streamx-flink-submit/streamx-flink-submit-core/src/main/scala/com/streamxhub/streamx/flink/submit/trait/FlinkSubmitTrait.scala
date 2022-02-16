@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.flink.submit.`trait`
 
+import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.{ApplicationType, DevelopmentMode}
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils, Utils}
@@ -30,7 +31,7 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.PackagedProgramUtils
+import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 import org.apache.flink.util.Preconditions.checkNotNull
@@ -149,6 +150,19 @@ trait FlinkSubmitTrait extends Logger {
       case Success(submitResponse) => submitResponse
       case Failure(ex) => throw ex
     }
+  }
+
+  private[submit] def getPackageProgram(flinkConfig: Configuration, submitRequest: SubmitRequest, jarFile: File): PackagedProgram = {
+    PackagedProgram
+      .newBuilder
+      .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
+      .setJarFile(jarFile)
+      .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
+      .setArguments(
+        flinkConfig
+          .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+          .orElse(Lists.newArrayList()): _*
+      ).build()
   }
 
   private[submit] def getJobID(jobId: String) = Try(JobID.fromHexString(jobId)) match {

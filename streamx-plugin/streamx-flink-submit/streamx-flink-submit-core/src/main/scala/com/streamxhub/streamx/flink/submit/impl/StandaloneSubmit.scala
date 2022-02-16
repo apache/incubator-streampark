@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
 import com.streamxhub.streamx.common.util.StandaloneUtils
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
@@ -28,14 +27,12 @@ import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
 import org.apache.flink.api.common.JobID
-import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.util.IOUtils
 
 import java.io.File
-import scala.collection.JavaConversions._
 import scala.util.Try
 
 
@@ -74,7 +71,7 @@ object StandaloneSubmit extends FlinkSubmitTrait {
 
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
     // 1) get userJar
-    val userJar = submitRequest.developmentMode match {
+    val jarFile = submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>
         checkBuildResult(submitRequest)
         // 1) get build result
@@ -85,7 +82,7 @@ object StandaloneSubmit extends FlinkSubmitTrait {
     }
 
     // 2) submit job
-    super.trySubmit(submitRequest, flinkConfig, userJar)(restApiSubmit)(jobGraphSubmit)
+    super.trySubmit(submitRequest, flinkConfig, jarFile)(restApiSubmit)(jobGraphSubmit)
 
   }
 
@@ -151,7 +148,7 @@ object StandaloneSubmit extends FlinkSubmitTrait {
    * Submit flink session job with building JobGraph via Standalone ClusterClient api.
    */
   // noinspection DuplicatedCode
-  @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
+  @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File): SubmitResponse = {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
     var packageProgram: PackagedProgram = null
@@ -159,25 +156,16 @@ object StandaloneSubmit extends FlinkSubmitTrait {
     try {
       val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
       clusterDescriptor = standAloneDescriptor._2
-
       // build JobGraph
-      packageProgram = PackagedProgram.newBuilder()
-        .setJarFile(fatJar)
-        .setConfiguration(flinkConfig)
-        .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
-        .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-        .setArguments(
-          flinkConfig
-            .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-            .orElse(Lists.newArrayList()): _*
-        ).build()
+      packageProgram = super.getPackageProgram(flinkConfig, submitRequest, jarFile)
 
       val jobGraph = PackagedProgramUtils.createJobGraph(
         packageProgram,
         flinkConfig,
         getParallelism(submitRequest),
         null,
-        false)
+        false
+      )
 
       client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
       val jobId = client.submitJob(jobGraph).get().toString
@@ -189,7 +177,7 @@ object StandaloneSubmit extends FlinkSubmitTrait {
         e.printStackTrace()
         throw e
     } finally {
-      IOUtils.closeAll(client, packageProgram, clusterDescriptor)
+      IOUtils.closeAll(client, clusterDescriptor)
     }
   }
 

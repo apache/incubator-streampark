@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
@@ -29,7 +28,6 @@ import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
-import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
@@ -37,7 +35,6 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.util.IOUtils
 
 import java.io.File
-import scala.collection.JavaConversions._
 import scala.language.postfixOps
 import scala.util.Try
 
@@ -71,8 +68,11 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   @throws[Exception] def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     try {
       // get jm rest url of flink session cluster
-      val clusterKey = ClusterKey(FlinkK8sExecuteMode.SESSION,
-        submitRequest.k8sSubmitParam.kubernetesNamespace, submitRequest.k8sSubmitParam.clusterId)
+      val clusterKey = ClusterKey(
+        FlinkK8sExecuteMode.SESSION,
+        submitRequest.k8sSubmitParam.kubernetesNamespace,
+        submitRequest.k8sSubmitParam.clusterId
+      )
       val jmRestUrl = KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
         .getOrElse(throw new Exception(s"[flink-submit] retrieve flink session rest url failed, clusterKey=$clusterKey"))
       // submit job via rest api
@@ -90,7 +90,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
    * Submit flink session job with building JobGraph via ClusterClient api.
    */
   // noinspection DuplicatedCode
-  @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
+  @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File): SubmitResponse = {
     // retrieve k8s cluster and submit flink job on session mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var packageProgram: PackagedProgram = null
@@ -98,23 +98,14 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     try {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       // build JobGraph
-      packageProgram = PackagedProgram
-        .newBuilder()
-        .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-        .setJarFile(fatJar)
-        .setConfiguration(flinkConfig)
-        .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
-        .setArguments(
-          flinkConfig
-            .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-            .orElse(Lists.newArrayList()): _*
-        ).build()
+      packageProgram = super.getPackageProgram(flinkConfig, submitRequest, jarFile)
 
       val jobGraph = PackagedProgramUtils.createJobGraph(
         packageProgram,
         flinkConfig,
         getParallelism(submitRequest),
-        false)
+        false
+      )
       // retrieve client and submit JobGraph
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val submitResult = client.submitJob(jobGraph)
@@ -130,7 +121,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     } finally {
       // ref FLINK-21164 FLINK-9844 packageProgram.close()
       // must be flink 1.12.2 and above
-      IOUtils.closeAll(client, packageProgram, clusterDescriptor)
+      IOUtils.closeAll(client, clusterDescriptor)
     }
   }
 
