@@ -28,6 +28,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.domain.FlinkMemorySize;
+import com.streamxhub.streamx.common.enums.ApplicationType;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
@@ -57,7 +58,6 @@ import com.streamxhub.streamx.console.core.entity.Message;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.enums.AppExistsState;
-import com.streamxhub.streamx.console.core.enums.ApplicationType;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.ChangedType;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
@@ -1292,7 +1292,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 resolveOrder,
                 application.getJobName(),
                 appConf,
-                application.getApplicationType().getName(),
+                application.getApplicationType(),
                 getSavePointed(appParam),
                 appParam.getFlameGraph() ? getFlameGraph(application) : null,
                 option.toString(),

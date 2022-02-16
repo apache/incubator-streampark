@@ -19,17 +19,15 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildResponse
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
-import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
@@ -37,9 +35,8 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.util.IOUtils
 
 import java.io.File
-import scala.collection.JavaConversions._
 import scala.language.postfixOps
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 /**
  * kubernetes native session mode submit
@@ -51,34 +48,31 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
 
-    // check the last building result
-    checkBuildResult(submitRequest)
-
-    val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sSessionBuildResponse]
-
-    val fatJar = new File(buildResult.flinkShadedJarPath)
-
-    // Prioritize using Rest API submit while using JobGraph submit plan as backup
-    Try(restApiSubmitPlan(submitRequest, flinkConfig, fatJar))
-      .recover {
-        case _ =>
-          logInfo(s"[flink-submit] Rest API Submit Plan failed, try Submit Plan  now.")
-          jobGraphSubmitPlan(submitRequest, flinkConfig, fatJar)
-      } match {
-      case Success(submitResponse) => submitResponse
-      case Failure(ex) => throw ex
+    // 2) get userJar
+    val jarFile = submitRequest.developmentMode match {
+      case DevelopmentMode.FLINKSQL =>
+        checkBuildResult(submitRequest)
+        // 1) get build result
+        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
+        // 2) get fat-jar
+        new File(buildResult.flinkShadedJarPath)
+      case _ => new File(submitRequest.flinkUserJar)
     }
+
+    super.trySubmit(submitRequest, flinkConfig, jarFile)(restApiSubmit)(jobGraphSubmit)
   }
 
   /**
    * Submit flink session job via rest api.
    */
-  @throws[Exception]
-  private def restApiSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
+  @throws[Exception] def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     try {
       // get jm rest url of flink session cluster
-      val clusterKey = ClusterKey(FlinkK8sExecuteMode.SESSION,
-        submitRequest.k8sSubmitParam.kubernetesNamespace, submitRequest.k8sSubmitParam.clusterId)
+      val clusterKey = ClusterKey(
+        FlinkK8sExecuteMode.SESSION,
+        submitRequest.k8sSubmitParam.kubernetesNamespace,
+        submitRequest.k8sSubmitParam.clusterId
+      )
       val jmRestUrl = KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
         .getOrElse(throw new Exception(s"[flink-submit] retrieve flink session rest url failed, clusterKey=$clusterKey"))
       // submit job via rest api
@@ -96,8 +90,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
    * Submit flink session job with building JobGraph via ClusterClient api.
    */
   // noinspection DuplicatedCode
-  @throws[Exception]
-  private def jobGraphSubmitPlan(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
+  @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File): SubmitResponse = {
     // retrieve k8s cluster and submit flink job on session mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var packageProgram: PackagedProgram = null
@@ -105,23 +98,14 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     try {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       // build JobGraph
-      packageProgram = PackagedProgram
-        .newBuilder()
-        .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-        .setJarFile(fatJar)
-        .setConfiguration(flinkConfig)
-        .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
-        .setArguments(
-          flinkConfig
-            .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-            .orElse(Lists.newArrayList()): _*
-        ).build()
+      packageProgram = super.getPackageProgram(flinkConfig, submitRequest, jarFile)
 
       val jobGraph = PackagedProgramUtils.createJobGraph(
         packageProgram,
         flinkConfig,
-        flinkConfig.getInteger(CoreOptions.DEFAULT_PARALLELISM),
-        false)
+        getParallelism(submitRequest),
+        false
+      )
       // retrieve client and submit JobGraph
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val submitResult = client.submitJob(jobGraph)
@@ -137,7 +121,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     } finally {
       // ref FLINK-21164 FLINK-9844 packageProgram.close()
       // must be flink 1.12.2 and above
-      IOUtils.closeAll(client, packageProgram, clusterDescriptor)
+      IOUtils.closeAll(client, clusterDescriptor)
     }
   }
 

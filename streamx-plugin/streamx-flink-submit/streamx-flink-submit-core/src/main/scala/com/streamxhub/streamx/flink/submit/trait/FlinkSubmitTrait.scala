@@ -19,8 +19,9 @@
 
 package com.streamxhub.streamx.flink.submit.`trait`
 
+import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.enums.DevelopmentMode
+import com.streamxhub.streamx.common.enums.{ApplicationType, DevelopmentMode}
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils, Utils}
 import com.streamxhub.streamx.flink.core.conf.FlinkRunOption
 import com.streamxhub.streamx.flink.submit.bean._
@@ -30,7 +31,7 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.PackagedProgramUtils
+import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 import org.apache.flink.util.Preconditions.checkNotNull
@@ -67,7 +68,7 @@ trait FlinkSubmitTrait extends Logger {
          |    flinkExposedType : ${submitRequest.k8sSubmitParam.flinkRestExposedType}
          |    clusterId        : ${submitRequest.k8sSubmitParam.clusterId}
          |    resolveOrder     : ${submitRequest.resolveOrder.getName}
-         |    applicationType  : ${submitRequest.applicationType}
+         |    applicationType  : ${submitRequest.applicationType.getName}
          |    flameGraph       : ${submitRequest.flameGraph != null}
          |    savePoint        : ${submitRequest.savePoint}
          |    userJar          : ${submitRequest.flinkUserJar}
@@ -134,6 +135,35 @@ trait FlinkSubmitTrait extends Logger {
 
   @throws[Exception]
   def doStop(stopRequest: StopRequest): StopResponse
+
+  def trySubmit(submitRequest: SubmitRequest,
+                flinkConfig: Configuration,
+                jarFile: File)(restApiFunc: (SubmitRequest, Configuration, File) => SubmitResponse)
+               (jobGraphFunc: (SubmitRequest, Configuration, File) => SubmitResponse): SubmitResponse = {
+    // Prioritize using Rest API submit while using JobGraph submit plan as backup
+    Try(restApiFunc(submitRequest, flinkConfig, jarFile))
+      .recover {
+        case _ =>
+          logInfo(s"[flink-submit] Rest API Submit Plan failed,try JobGraph Submit Plan now.")
+          jobGraphFunc(submitRequest, flinkConfig, jarFile)
+      } match {
+      case Success(submitResponse) => submitResponse
+      case Failure(ex) => throw ex
+    }
+  }
+
+  private[submit] def getPackageProgram(flinkConfig: Configuration, submitRequest: SubmitRequest, jarFile: File): PackagedProgram = {
+    PackagedProgram
+      .newBuilder
+      .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
+      .setJarFile(jarFile)
+      .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
+      .setArguments(
+        flinkConfig
+          .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+          .orElse(Lists.newArrayList()): _*
+      ).build()
+  }
 
   private[submit] def getJobID(jobId: String) = Try(JobID.fromHexString(jobId)) match {
     case Success(id) => id
@@ -280,25 +310,30 @@ trait FlinkSubmitTrait extends Logger {
   }
 
   private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
+
     val programArgs = new ArrayBuffer[String]()
+
     Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
-    programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += submitRequest.flinkYaml
-    programArgs += PARAM_KEY_APP_NAME
-    programArgs += submitRequest.effectiveAppName
-    programArgs += PARAM_KEY_FLINK_PARALLELISM
-    programArgs += s"${getParallelism(submitRequest)}"
-    submitRequest.developmentMode match {
-      case DevelopmentMode.FLINKSQL =>
-        programArgs += PARAM_KEY_FLINK_SQL
-        programArgs += submitRequest.flinkSQL
-        if (submitRequest.appConf != null) {
+
+    if (submitRequest.applicationType == ApplicationType.STREAMX_FLINK) {
+      programArgs += PARAM_KEY_FLINK_CONF
+      programArgs += submitRequest.flinkYaml
+      programArgs += PARAM_KEY_APP_NAME
+      programArgs += submitRequest.effectiveAppName
+      programArgs += PARAM_KEY_FLINK_PARALLELISM
+      programArgs += getParallelism(submitRequest).toString
+      submitRequest.developmentMode match {
+        case DevelopmentMode.FLINKSQL =>
+          programArgs += PARAM_KEY_FLINK_SQL
+          programArgs += submitRequest.flinkSQL
+          if (submitRequest.appConf != null) {
+            programArgs += PARAM_KEY_APP_CONF
+            programArgs += submitRequest.appConf
+          }
+        case _ if Try(!submitRequest.appConf.startsWith("json:")).getOrElse(true) =>
           programArgs += PARAM_KEY_APP_CONF
           programArgs += submitRequest.appConf
-        }
-      case _ =>
-        programArgs += PARAM_KEY_APP_CONF
-        programArgs += submitRequest.appConf
+      }
     }
     programArgs.toList.asJava
   }
