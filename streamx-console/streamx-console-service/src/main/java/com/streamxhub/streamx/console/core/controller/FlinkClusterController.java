@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 /**
@@ -48,6 +49,12 @@ public class FlinkClusterController {
     public RestResponse list() {
         List<FlinkCluster> flinkClusters = flinkClusterService.list();
         return RestResponse.create().data(flinkClusters);
+    }
+
+    @PostMapping("activeUrl")
+    public RestResponse activeUrl(Long id) throws MalformedURLException {
+        FlinkCluster cluster = flinkClusterService.getById(id);
+        return RestResponse.create().data(cluster.getActiveAddress().toURL());
     }
 
     @PostMapping("check")

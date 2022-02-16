@@ -739,7 +739,7 @@ public class FlinkTrackingTask {
         if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
             FlinkCluster flinkCluster = FLINK_CLUSTER_MAP.get(application.getFlinkClusterId());
             if (flinkCluster == null) {
-                flinkCluster = flinkClusterService.getById(application.getClusterId());
+                flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
                 FLINK_CLUSTER_MAP.put(application.getFlinkClusterId(), flinkCluster);
             }
             return flinkCluster;

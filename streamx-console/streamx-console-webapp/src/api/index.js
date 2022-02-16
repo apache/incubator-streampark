@@ -103,6 +103,7 @@ export default {
   },
   FlinkCluster: {
     LIST: '/flink/cluster/list',
+    ACTIVEURL: '/flink/cluster/activeUrl',
     CREATE:  '/flink/cluster/create',
     CHECK: '/flink/cluster/check',
     GET: '/flink/cluster/get',

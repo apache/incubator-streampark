@@ -1163,6 +1163,7 @@
   import {flamegraph} from '@api/metrics'
   import {weburl} from '@api/setting'
   import {build, detail as buildDetail} from '@/api/appBuild'
+  import { activeURL } from '@/api/flinkCluster'
   import {Terminal} from 'xterm'
   import 'xterm/css/xterm.css'
   import {baseUrl} from '@/api/baseUrl'
@@ -2009,8 +2010,14 @@
       if (params.state === 6 || params.state === 7 || params['optionState'] === 4) {
         // yarn-per-job|yarn-session|yarn-application
         const executionMode = params['executionMode']
-        if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
-          if(this.yarn == null) {
+        if (executionMode === 1) {
+          // http://localhost:8081/#/job/8db4a644baec45fd0e78ea759ae33fac/overview
+          activeURL({ id: params['id'] }).then((resp) =>{
+            const url = resp.data + '/#/job/' + params['appId'] + '/overview'
+            window.open(url)
+          })
+        } else if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
+          if (this.yarn == null) {
             yarn({}).then((resp) => {
               this.yarn = resp.data
               const url = this.yarn + '/proxy/' + params['appId'] + '/'

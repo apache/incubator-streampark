@@ -560,7 +560,11 @@ export default {
           }).then((resp)=> {
             if (resp.data === 'success') {
               if (this.clusterId == null) {
-                createCluster(values).then((resp)=>{
+                createCluster({
+                  clusterName: values.clusterName,
+                  address: values.address,
+                  description: values.description || null
+                }).then((resp)=>{
                   if (resp.data) {
                     this.flinkClusterVisible = false
                     this.handleClusterAll()
