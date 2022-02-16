@@ -175,13 +175,12 @@ object StandaloneSubmit extends FlinkSubmitTrait {
       val jobGraph = PackagedProgramUtils.createJobGraph(
         packageProgram,
         flinkConfig,
-        flinkConfig.getInteger(CoreOptions.DEFAULT_PARALLELISM),
+        getParallelism(submitRequest),
         null,
         false)
 
       client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
-      val submitResult = client.submitJob(jobGraph)
-      val jobId = submitResult.get().toString
+      val jobId = client.submitJob(jobGraph).get().toString
       val result = SubmitResponse(jobId, flinkConfig.toMap, jobId)
       result
     } catch {

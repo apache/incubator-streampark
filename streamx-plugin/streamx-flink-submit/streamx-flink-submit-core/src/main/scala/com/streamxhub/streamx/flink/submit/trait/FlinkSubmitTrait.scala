@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.enums.DevelopmentMode
+import com.streamxhub.streamx.common.enums.{ApplicationType, DevelopmentMode}
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils, Utils}
 import com.streamxhub.streamx.flink.core.conf.FlinkRunOption
 import com.streamxhub.streamx.flink.submit.bean._
@@ -67,7 +67,7 @@ trait FlinkSubmitTrait extends Logger {
          |    flinkExposedType : ${submitRequest.k8sSubmitParam.flinkRestExposedType}
          |    clusterId        : ${submitRequest.k8sSubmitParam.clusterId}
          |    resolveOrder     : ${submitRequest.resolveOrder.getName}
-         |    applicationType  : ${submitRequest.applicationType}
+         |    applicationType  : ${submitRequest.applicationType.getName}
          |    flameGraph       : ${submitRequest.flameGraph != null}
          |    savePoint        : ${submitRequest.savePoint}
          |    userJar          : ${submitRequest.flinkUserJar}
@@ -296,25 +296,30 @@ trait FlinkSubmitTrait extends Logger {
   }
 
   private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
+
     val programArgs = new ArrayBuffer[String]()
+
     Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
-    programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += submitRequest.flinkYaml
-    programArgs += PARAM_KEY_APP_NAME
-    programArgs += submitRequest.effectiveAppName
-    programArgs += PARAM_KEY_FLINK_PARALLELISM
-    programArgs += s"${getParallelism(submitRequest)}"
-    submitRequest.developmentMode match {
-      case DevelopmentMode.FLINKSQL =>
-        programArgs += PARAM_KEY_FLINK_SQL
-        programArgs += submitRequest.flinkSQL
-        if (submitRequest.appConf != null) {
+
+    if (submitRequest.applicationType == ApplicationType.STREAMX_FLINK) {
+      programArgs += PARAM_KEY_FLINK_CONF
+      programArgs += submitRequest.flinkYaml
+      programArgs += PARAM_KEY_APP_NAME
+      programArgs += submitRequest.effectiveAppName
+      programArgs += PARAM_KEY_FLINK_PARALLELISM
+      programArgs += getParallelism(submitRequest).toString
+      submitRequest.developmentMode match {
+        case DevelopmentMode.FLINKSQL =>
+          programArgs += PARAM_KEY_FLINK_SQL
+          programArgs += submitRequest.flinkSQL
+          if (submitRequest.appConf != null) {
+            programArgs += PARAM_KEY_APP_CONF
+            programArgs += submitRequest.appConf
+          }
+        case _ if Try(!submitRequest.appConf.startsWith("json:")).getOrElse(true) =>
           programArgs += PARAM_KEY_APP_CONF
           programArgs += submitRequest.appConf
-        }
-      case _ =>
-        programArgs += PARAM_KEY_APP_CONF
-        programArgs += submitRequest.appConf
+      }
     }
     programArgs.toList.asJava
   }

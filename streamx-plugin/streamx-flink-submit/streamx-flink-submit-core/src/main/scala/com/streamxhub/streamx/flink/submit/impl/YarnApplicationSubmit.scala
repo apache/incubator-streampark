@@ -87,7 +87,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       //yarn application name
       .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
       //yarn application Type
-      .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType)
+      .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
 
     logInfo(
       s"""

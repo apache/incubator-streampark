@@ -64,7 +64,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
       val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[YarnClusterDescriptor]
       val flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome)
       clusterDescriptor.setLocalJarPath(new HadoopPath(flinkDistJar))
-      clusterDescriptor.addShipFiles(List(new File(s"${flinkHome}/plugins")))
+      clusterDescriptor.addShipFiles(List(new File(s"$flinkHome/plugins")))
       clusterDescriptor
     }
 
