@@ -74,7 +74,7 @@ public enum PipeType {
             .put(1, "Create building workspace")
             .put(2, "Build shaded flink app jar")
             .build(),
-        FlinkStandaloneBuildResponse.class
+        FlinkRemoteBuildResponse.class
     ),
     // todo FLINK_YARN_APPLICATION(),
     // todo FLINK_YARN_SESSION(),

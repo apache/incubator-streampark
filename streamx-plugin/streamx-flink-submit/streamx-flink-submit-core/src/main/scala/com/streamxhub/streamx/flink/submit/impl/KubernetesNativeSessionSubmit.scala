@@ -24,7 +24,7 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
@@ -53,7 +53,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       case DevelopmentMode.FLINKSQL =>
         checkBuildResult(submitRequest)
         // 1) get build result
-        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
+        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sSessionBuildResponse]
         // 2) get fat-jar
         new File(buildResult.flinkShadedJarPath)
       case _ => new File(submitRequest.flinkUserJar)

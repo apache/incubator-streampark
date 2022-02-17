@@ -31,17 +31,17 @@ import com.streamxhub.streamx.flink.packer.pipeline._
  *
  * @author czy006
  */
-class FlinkStandaloneBuildPipeline(params: FlinkStandaloneBuildRequest) extends BuildPipeline {
+class FlinkRemoteBuildPipeline(params: FlinkRemoteBuildRequest) extends BuildPipeline {
 
   override def pipeType: PipeType = PipeType.FLINK_STANDALONE
 
-  override def offerBuildParam: FlinkStandaloneBuildRequest = params
+  override def offerBuildParam: FlinkRemoteBuildRequest = params
 
   /**
    * The construction logic needs to be implemented by subclasses
    */
   @throws[Throwable]
-  override protected def buildProcess(): FlinkStandaloneBuildResponse = {
+  override protected def buildProcess(): FlinkRemoteBuildResponse = {
     val appName = BuildPipelineHelper.letAppNameSafe(params.appName)
 
     // create workspace.
@@ -65,12 +65,12 @@ class FlinkStandaloneBuildPipeline(params: FlinkStandaloneBuildRequest) extends 
         output
       }.getOrElse(throw getError.exception)
 
-    FlinkStandaloneBuildResponse(buildWorkspace, shadedJar.getAbsolutePath)
+    FlinkRemoteBuildResponse(buildWorkspace, shadedJar.getAbsolutePath)
   }
 }
 
-object FlinkStandaloneBuildPipeline {
-  def of(params: FlinkStandaloneBuildRequest): FlinkStandaloneBuildPipeline = new FlinkStandaloneBuildPipeline(params)
+object FlinkRemoteBuildPipeline {
+  def of(params: FlinkRemoteBuildRequest): FlinkRemoteBuildPipeline = new FlinkRemoteBuildPipeline(params)
 }
 
 
