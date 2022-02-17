@@ -59,13 +59,15 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       )
 
     if (submitRequest.buildResult != null) {
-      val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
-      buildResult.podTemplatePaths.foreach(p => {
-        flinkConfig
-          .safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
-          .safeSet(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
-          .safeSet(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
-      })
+      if (submitRequest.executionMode == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
+        buildResult.podTemplatePaths.foreach(p => {
+          flinkConfig
+            .safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
+            .safeSet(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
+            .safeSet(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
+        })
+      }
     }
 
     if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) {
