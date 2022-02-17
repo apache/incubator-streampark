@@ -1082,6 +1082,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                     .extractDynamicOptionAsJava(application.getDynamicOptions())
                                     .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
                 }
+
+                Map<String, Object> extraParameter = new HashMap<>();
+
+                if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
+                    FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+                    assert cluster != null;
+                    URI activeAddress = cluster.getActiveAddress();
+                    extraParameter.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
+                    extraParameter.put(RestOptions.PORT.key(), activeAddress.getPort());
+                }
+
                 StopRequest stopInfo = new StopRequest(
                         flinkEnv.getFlinkVersion(),
                         ExecutionMode.of(application.getExecutionMode()),
@@ -1091,7 +1102,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         appParam.getDrain(),
                         customSavepoint,
                         application.getK8sNamespace(),
-                        application.getDynamicOptions()
+                        application.getDynamicOptions(),
+                        extraParameter
                 );
 
                 StopResponse stopResponse = FlinkSubmitter.stop(stopInfo);
@@ -1312,10 +1324,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     appParam.getFlameGraph() ? getFlameGraph(application) : null,
                     optionMap,
                     dynamicOption,
-                    extraParameter,
                     application.getArgs(),
                     buildPipeline == null ? null : buildPipeline.getBuildResult(),
-                    kubernetesSubmitParam
+                    kubernetesSubmitParam,
+                    extraParameter
             );
 
             SubmitResponse submitResponse = FlinkSubmitter.submit(submitRequest);
