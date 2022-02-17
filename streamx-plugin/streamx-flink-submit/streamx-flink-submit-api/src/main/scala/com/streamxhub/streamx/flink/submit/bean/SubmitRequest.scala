@@ -57,10 +57,10 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
                          flameGraph: JavaMap[String, java.io.Serializable],
                          option: JavaMap[String, Any],
                          dynamicOption: Array[String],
-                         extraParameter: JavaMap[String, Any],
                          args: String,
                          @Nullable buildResult: BuildResult,
-                         @Nullable k8sSubmitParam: KubernetesSubmitParam) {
+                         @Nullable k8sSubmitParam: KubernetesSubmitParam,
+                         @Nullable  extraParameter: JavaMap[String, Any]) {
 
   lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
 

@@ -19,9 +19,8 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
+import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
-import com.streamxhub.streamx.flink.submit.FlinkSubmitter
 import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
@@ -33,7 +32,6 @@ import org.apache.flink.util.IOUtils
 
 import java.io.File
 import java.lang.{Integer => JavaInt}
-import scala.util.Try
 
 
 /**
@@ -47,7 +45,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
    */
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     flinkConfig
-      .safeSet(PipelineOptions.NAME, Try(submitRequest.effectiveAppName).getOrElse(null))
+      .safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
       .safeSet(RestOptions.ADDRESS, submitRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
       .safeSet(RestOptions.PORT, JavaInt.valueOf(submitRequest.extraParameter.get(RestOptions.PORT.key()).toString))
     logInfo(
@@ -76,14 +74,16 @@ object RemoteSubmit extends FlinkSubmitTrait {
   }
 
   override def doStop(stopRequest: StopRequest): StopResponse = {
-
     val flinkConfig = new Configuration()
-
-    this.setConfig(null, flinkConfig)
-    //get standalone jm to dynamicOption
-    FlinkSubmitter.extractDynamicOption(stopRequest.dynamicOption).foreach(e => flinkConfig.setString(e._1, e._2))
-
-    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.REMOTE.getName)
+    flinkConfig
+      .safeSet(RestOptions.ADDRESS, stopRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
+      .safeSet(RestOptions.PORT, JavaInt.valueOf(stopRequest.extraParameter.get(RestOptions.PORT.key()).toString))
+    logInfo(
+      s"""
+         |------------------------------------------------------------------
+         |Effective submit configuration: $flinkConfig
+         |------------------------------------------------------------------
+         |""".stripMargin)
 
     val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
     var client: ClusterClient[StandaloneClusterId] = null
