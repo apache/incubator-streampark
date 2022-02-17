@@ -2011,7 +2011,6 @@
         // yarn-per-job|yarn-session|yarn-application
         const executionMode = params['executionMode']
         if (executionMode === 1) {
-          // http://localhost:8081/#/job/8db4a644baec45fd0e78ea759ae33fac/overview
           activeURL({ id: params.id }).then((resp) =>{
             const url = resp.data + '/#/job/' + params.jobId + '/overview'
             window.open(url)
