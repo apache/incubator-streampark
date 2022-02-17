@@ -48,14 +48,14 @@ import com.streamxhub.streamx.flink.packer.pipeline.DockerPushSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildRequest;
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildRequest;
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemoteBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeType;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeWatcher;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline;
-import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkStandaloneBuildPipeline;
+import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,7 +229,7 @@ public class ApplBuildPipeServiceImpl
             log.info("Submit params to building pipeline : {}", params);
             return FlinkK8sApplicationBuildPipeline.of(params);
         } else if (REMOTE.equals(executionMode)) {
-            FlinkStandaloneBuildRequest params = new FlinkStandaloneBuildRequest(
+            FlinkRemoteBuildRequest params = new FlinkRemoteBuildRequest(
                 app.getJobName(),
                 mainClass,
                 app.getExecutionModeEnum(),
@@ -239,7 +239,7 @@ public class ApplBuildPipeServiceImpl
                 flinkUserJar
             );
             log.info("Submit params to building pipeline : {}", params);
-            return FlinkStandaloneBuildPipeline.of(params);
+            return FlinkRemoteBuildPipeline.of(params);
         } else {
             throw new UnsupportedOperationException("Unsupported Building Application for ExecutionMode: " + app.getExecutionModeEnum());
         }

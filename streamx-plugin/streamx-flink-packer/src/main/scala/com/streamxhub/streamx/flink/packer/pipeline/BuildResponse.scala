@@ -62,9 +62,9 @@ case class FlinkK8sApplicationBuildResponse(workspacePath: String,
                                             pass: Boolean = true) extends FlinkBuildResult
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-case class FlinkStandaloneBuildResponse(workspacePath: String,
-                                        flinkShadedJarPath: String,
-                                        pass: Boolean = true) extends FlinkSessionBuildResult
+case class FlinkRemoteBuildResponse(workspacePath: String,
+                                    flinkShadedJarPath: String,
+                                    pass: Boolean = true) extends FlinkSessionBuildResult
 
 // todo case class FlinkYarnSessionBuildResponse(workspacePath: String, flinkShadedJarPath: String) extends FlinkSessionBuildResult
 

@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkStandaloneBuildResponse
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemoteBuildResponse
 import com.streamxhub.streamx.flink.submit.FlinkSubmitter
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
@@ -64,7 +64,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
       case DevelopmentMode.FLINKSQL =>
         checkBuildResult(submitRequest)
         // 1) get build result
-        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkStandaloneBuildResponse]
+        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkRemoteBuildResponse]
         // 2) get fat-jar
         new File(buildResult.flinkShadedJarPath)
       case _ => new File(submitRequest.flinkUserJar)
