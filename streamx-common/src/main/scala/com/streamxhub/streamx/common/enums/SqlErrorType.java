@@ -42,7 +42,8 @@ public enum SqlErrorType {
      * 非";"结尾
      */
     ENDS_WITH(5);
-    public int errorType;
+
+    public final int errorType;
 
     SqlErrorType(int errorType) {
         this.errorType = errorType;

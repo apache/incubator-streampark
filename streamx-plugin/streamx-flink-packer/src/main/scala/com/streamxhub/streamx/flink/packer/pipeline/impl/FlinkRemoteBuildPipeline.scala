@@ -27,49 +27,50 @@ import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.packer.pipeline._
 
 /**
- * Building pipeline for flink kubernetes-native session mode
+ * Building pipeline for flink standalone session mode
  *
- * @author Al-assad
+ * @author czy006
  */
-class FlinkK8sSessionBuildPipeline(params: FlinkK8sSessionBuildRequest) extends BuildPipeline {
+class FlinkRemoteBuildPipeline(params: FlinkRemoteBuildRequest) extends BuildPipeline {
 
-  override def pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_SESSION
+  override def pipeType: PipeType = PipeType.FLINK_STANDALONE
 
-  override def offerBuildParam: FlinkK8sSessionBuildRequest = params
+  override def offerBuildParam: FlinkRemoteBuildRequest = params
 
   /**
    * The construction logic needs to be implemented by subclasses
    */
   @throws[Throwable]
-  override protected def buildProcess(): FlinkK8sSessionBuildResponse = {
+  override protected def buildProcess(): FlinkRemoteBuildResponse = {
     val appName = BuildPipelineHelper.letAppNameSafe(params.appName)
 
     // create workspace.
-    // the sub workspace path like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/job-name/
+    // the sub workspace path like: APP_WORKSPACE/jobName
     val buildWorkspace =
     execStep(1) {
-      val buildWorkspace = s"${Workspace.local.APP_WORKSPACE}/${params.clusterId}@${params.k8sNamespace}/$appName"
+      val buildWorkspace = s"${Workspace.local.APP_WORKSPACE}/$appName"
       LfsOperator.mkCleanDirs(buildWorkspace)
       logInfo(s"recreate building workspace: $buildWorkspace")
       buildWorkspace
     }.getOrElse(throw getError.exception)
 
-    // build flink job shaded jar.
-    // the output shaded file name like: streamx-flinkjob_myjob_20211024134822
+    // build flink job shaded jar
     val shadedJar =
-    execStep(2) {
-      val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(params)
-      val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${appName}_${DateUtils.now(fullCompact)}.jar"
-      val flinkLibs = params.dependencyInfo.merge(providedLibs)
-      val output = MavenTool.buildFatJar(params.mainClass, flinkLibs, shadedJarOutputPath)
-      logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
-      output
-    }.getOrElse(throw getError.exception)
+      execStep(2) {
+        val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(params)
+        val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${appName}_${DateUtils.now(fullCompact)}.jar"
+        val flinkLibs = params.dependencyInfo.merge(providedLibs)
+        val output = MavenTool.buildFatJar(params.mainClass, flinkLibs, shadedJarOutputPath)
+        logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
+        output
+      }.getOrElse(throw getError.exception)
 
-    FlinkK8sSessionBuildResponse(buildWorkspace, shadedJar.getAbsolutePath)
+    FlinkRemoteBuildResponse(buildWorkspace, shadedJar.getAbsolutePath)
   }
 }
 
-object FlinkK8sSessionBuildPipeline {
-  def of(params: FlinkK8sSessionBuildRequest): FlinkK8sSessionBuildPipeline = new FlinkK8sSessionBuildPipeline(params)
+object FlinkRemoteBuildPipeline {
+  def of(params: FlinkRemoteBuildRequest): FlinkRemoteBuildPipeline = new FlinkRemoteBuildPipeline(params)
 }
+
+

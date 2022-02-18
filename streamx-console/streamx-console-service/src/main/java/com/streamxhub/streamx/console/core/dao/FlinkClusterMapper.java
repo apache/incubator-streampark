@@ -17,13 +17,19 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.domain
+package com.streamxhub.streamx.console.core.dao;
 
-import java.util.{Map => JavaMap}
-import javax.annotation.Nullable
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.streamxhub.streamx.console.core.entity.FlinkCluster;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
-case class SubmitResponse(clusterId: String,
-                          flinkConfig: JavaMap[String, String],
-                          @Nullable jobId: String = "") {
+public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
 
+    /**
+     * @param clusterName
+     * @return
+     */
+    @Select("SELECT * from t_flink_cluster where cluster_name=#{clusterName}")
+    FlinkCluster getByName(@Param("clusterName") String clusterName);
 }

@@ -31,7 +31,7 @@ import java.time.Duration
 
 class DockerClientTest extends AnyWordSpec with BeforeAndAfterAll with Matchers {
 
-  "Docker Client Config" when{
+  "Docker Client Config" when {
     val dockerHttpClientBuilder: ApacheDockerHttpClient.Builder = new ApacheDockerHttpClient.Builder()
       .dockerHost(dockerClientConf.getDockerHost)
       .sslConfig(dockerClientConf.getSSLConfig)

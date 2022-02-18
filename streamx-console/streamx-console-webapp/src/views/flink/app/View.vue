@@ -406,7 +406,7 @@
               :title="handleDeployTitle(record.deploy)"
               :data="record"/>
             <State
-              v-if="record.executionMode === 5 || record.executionMode === 6"
+              v-if="record.executionMode === 1 || record.executionMode === 5 || record.executionMode === 6"
               option="build"
               click="openBuildProgressDetailDrawer(record)"
               :data="record"/>
@@ -444,7 +444,7 @@
 
           <a-tooltip title="Build Application">
             <a-button
-              v-if="record.executionMode === 5 || record.executionMode === 6"
+              v-if="record.executionMode === 1 || record.executionMode === 5 || record.executionMode === 6"
               @click.native="handleCheckBuildApp(record)"
               shape="circle"
               size="small"
@@ -455,7 +455,7 @@
 
           <a-tooltip title="Building Progress Detail">
             <a-button
-              v-if="(record.executionMode === 5 || record.executionMode === 6) && record.buildStatus != null"
+              v-if="(record.executionMode === 1 || record.executionMode === 5 || record.executionMode === 6) && record.buildStatus != null"
               @click.native="openBuildProgressDetailDrawer(record)"
               shape="circle"
               size="small"
@@ -1162,7 +1162,8 @@
   import {history, latest} from '@api/savepoint'
   import {flamegraph} from '@api/metrics'
   import {weburl} from '@api/setting'
-  import {build, detail as buildDetail} from '@api/appbuild'
+  import {build, detail as buildDetail} from '@/api/appBuild'
+  import { activeURL } from '@/api/flinkCluster'
   import {Terminal} from 'xterm'
   import 'xterm/css/xterm.css'
   import {baseUrl} from '@/api/baseUrl'
@@ -2009,8 +2010,13 @@
       if (params.state === 6 || params.state === 7 || params['optionState'] === 4) {
         // yarn-per-job|yarn-session|yarn-application
         const executionMode = params['executionMode']
-        if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
-          if(this.yarn == null) {
+        if (executionMode === 1) {
+          activeURL({ id: params.id }).then((resp) =>{
+            const url = resp.data + '/#/job/' + params.jobId + '/overview'
+            window.open(url)
+          })
+        } else if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
+          if (this.yarn == null) {
             yarn({}).then((resp) => {
               this.yarn = resp.data
               const url = this.yarn + '/proxy/' + params['appId'] + '/'

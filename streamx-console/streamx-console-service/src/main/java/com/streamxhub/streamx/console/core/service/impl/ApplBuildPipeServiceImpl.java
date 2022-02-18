@@ -24,6 +24,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Maps;
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.ThreadUtils;
@@ -47,12 +48,14 @@ import com.streamxhub.streamx.flink.packer.pipeline.DockerPushSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildRequest;
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemoteBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeType;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeWatcher;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline;
+import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +78,8 @@ import java.util.stream.Collectors;
 
 import static com.streamxhub.streamx.common.enums.ExecutionMode.KUBERNETES_NATIVE_APPLICATION;
 import static com.streamxhub.streamx.common.enums.ExecutionMode.KUBERNETES_NATIVE_SESSION;
+import static com.streamxhub.streamx.common.enums.ExecutionMode.REMOTE;
+
 
 /**
  * @author Al-assad
@@ -187,10 +192,12 @@ public class ApplBuildPipeServiceImpl
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
         String flinkUserJar = retrieveFlinkUserJar(app);
         ExecutionMode executionMode = app.getExecutionModeEnum();
+        String mainClass = ConfigConst.STREAMX_FLINKSQL_CLIENT_CLASS();
 
         if (KUBERNETES_NATIVE_SESSION.equals(executionMode)) {
             FlinkK8sSessionBuildRequest params = new FlinkK8sSessionBuildRequest(
                 app.getJobName(),
+                mainClass,
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
@@ -204,6 +211,7 @@ public class ApplBuildPipeServiceImpl
         } else if (KUBERNETES_NATIVE_APPLICATION.equals(executionMode)) {
             FlinkK8sApplicationBuildRequest params = new FlinkK8sApplicationBuildRequest(
                 app.getJobName(),
+                mainClass,
                 app.getExecutionModeEnum(),
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
@@ -220,7 +228,18 @@ public class ApplBuildPipeServiceImpl
                     settingService.getDockerRegisterPassword()));
             log.info("Submit params to building pipeline : {}", params);
             return FlinkK8sApplicationBuildPipeline.of(params);
-
+        } else if (REMOTE.equals(executionMode)) {
+            FlinkRemoteBuildRequest params = new FlinkRemoteBuildRequest(
+                app.getJobName(),
+                mainClass,
+                app.getExecutionModeEnum(),
+                app.getDevelopmentMode(),
+                flinkEnv.getFlinkVersion(),
+                app.getDependencyInfo(),
+                flinkUserJar
+            );
+            log.info("Submit params to building pipeline : {}", params);
+            return FlinkRemoteBuildPipeline.of(params);
         } else {
             throw new UnsupportedOperationException("Unsupported Building Application for ExecutionMode: " + app.getExecutionModeEnum());
         }

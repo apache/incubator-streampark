@@ -16,44 +16,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.streamxhub.streamx.common.enums;
+
+package com.streamxhub.streamx.console.core.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 
 /**
  * @author benjobs
  */
-public enum DevelopmentMode {
+public interface FlinkClusterService extends IService<FlinkCluster> {
 
     /**
-     * custom code
+     * check
+     * @param cluster
+     * @return
      */
-    CUSTOMCODE("Custom Code", 1),
-
-    /**
-     * Flink SQL
-     */
-    FLINKSQL("Flink SQL", 2);
-
-
-    private final String mode;
-
-    private final Integer value;
-
-    DevelopmentMode(String mode, Integer value) {
-        this.mode = mode;
-        this.value = value;
-    }
-
-    public static DevelopmentMode of(Integer value) {
-        for (DevelopmentMode mode : values()) {
-            if (mode.value.equals(value)) {
-                return mode;
-            }
-        }
-        return null;
-    }
-
-    public Integer getValue() {
-        return value;
-    }
-
+    String check(FlinkCluster cluster);
 }

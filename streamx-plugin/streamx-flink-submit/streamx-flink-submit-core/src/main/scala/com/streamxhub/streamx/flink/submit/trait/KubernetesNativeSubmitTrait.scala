@@ -20,31 +20,22 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.Workspace
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType}
+import com.streamxhub.streamx.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildResponse
-import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
-import com.streamxhub.streamx.flink.submit.domain._
-import org.apache.commons.collections.MapUtils
+import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.ClusterSpecification
-import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType
 import org.apache.flink.kubernetes.{KubernetesClusterClientFactory, KubernetesClusterDescriptor}
-import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
 import java.io.File
-import java.lang.{Boolean => JavaBool}
 import javax.annotation.Nonnull
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
-import scala.util.Try
 
 /**
  * kubernetes native mode submit
@@ -55,6 +46,41 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   lazy val workspace: Workspace = Workspace.local
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
+
+  override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    // extract from submitRequest
+    flinkConfig
+      .safeSet(PipelineOptions.NAME, submitRequest.appName)
+      .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
+      .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
+      .safeSet(
+        KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
+        covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType)
+      )
+
+    if (submitRequest.buildResult != null) {
+      if (submitRequest.executionMode == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
+        buildResult.podTemplatePaths.foreach(p => {
+          flinkConfig
+            .safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
+            .safeSet(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
+            .safeSet(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
+        })
+      }
+    }
+
+    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) {
+      flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
+    }
+
+    logInfo(
+      s"""
+         |------------------------------------------------------------------
+         |Effective submit configuration: $flinkConfig
+         |------------------------------------------------------------------
+         |""".stripMargin)
+  }
 
   @throws[Exception]
   protected def checkBuildResult(submitRequest: SubmitRequest): Unit = {
@@ -139,104 +165,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     val clientFactory = new KubernetesClusterClientFactory()
     val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
     clusterDescriptor
-  }
-
-  /**
-   * extract all necessary flink configuration from submitRequest
-   */
-  @Nonnull def extractEffectiveFlinkConfig(@Nonnull submitRequest: SubmitRequest): Configuration = {
-    // base from default config
-    val flinkConfig = Try(getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)).getOrElse(new Configuration)
-
-    // extract from submitRequest
-    flinkConfig.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.FALSE)
-      .safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
-      .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
-      .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
-      .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
-      .safeSet(PipelineOptions.NAME, submitRequest.appName)
-      .safeSet(CoreOptions.CLASSLOADER_RESOLVE_ORDER, submitRequest.resolveOrder.getName)
-      .set(KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE, covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType))
-
-    if (submitRequest.buildResult != null) {
-      val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
-
-      buildResult.podTemplatePaths.foreach(p => {
-        if (p._1 == KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE.key()) {
-          flinkConfig.set(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
-        }
-        if (p._1 == KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE.key()) {
-          flinkConfig.set(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
-        }
-        if (p._1 == KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE.key()) {
-          flinkConfig.set(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
-        }
-      })
-    }
-
-    if (DevelopmentMode.FLINKSQL == submitRequest.developmentMode) {
-      flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, "com.streamxhub.streamx.flink.cli.SqlClient")
-    } else {
-      flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
-    }
-    if (StringUtils.isNotBlank(submitRequest.option)
-      && submitRequest.option.split("\\s+").contains("-n")) {
-      // please transfer the execution.savepoint.ignore-unclaimed-state to submitRequest.property or dynamicOption
-      flinkConfig.set(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, JavaBool.TRUE)
-    }
-    val args = extractProgramArgs(submitRequest)
-    flinkConfig.set(ApplicationConfiguration.APPLICATION_ARGS, args.toList.asJava)
-
-    // copy from submitRequest.property
-    if (MapUtils.isNotEmpty(submitRequest.property)) {
-      submitRequest.property
-        .filter(_._2 != null)
-        .foreach(e => flinkConfig.setString(e._1, e._2.toString))
-    }
-
-    // copy from submitRequest.dynamicOption
-    extractDynamicOption(submitRequest.dynamicOption)
-      .foreach(e => flinkConfig.setString(e._1, e._2))
-
-
-    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) {
-      flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
-    }
-
-    flinkConfig
-  }
-
-  private[submit] implicit class EnhanceFlinkConfiguration(flinkConfig: Configuration) {
-    def safeSet(option: ConfigOption[String], value: String): Configuration = {
-      flinkConfig match {
-        case x if StringUtils.isNotBlank(value) => x.set(option, value)
-        case x => x
-      }
-    }
-  }
-
-  private[submit] def extractProgramArgs(submitRequest: SubmitRequest): ArrayBuffer[String] = {
-    val programArgs = new ArrayBuffer[String]()
-    Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
-    programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += submitRequest.flinkYaml
-    programArgs += PARAM_KEY_APP_NAME
-    programArgs += submitRequest.effectiveAppName
-    programArgs += PARAM_KEY_FLINK_PARALLELISM
-    programArgs += s"${getParallelism(submitRequest)}"
-    submitRequest.developmentMode match {
-      case DevelopmentMode.FLINKSQL =>
-        programArgs += PARAM_KEY_FLINK_SQL
-        programArgs += submitRequest.flinkSQL
-        if (submitRequest.appConf != null) {
-          programArgs += PARAM_KEY_APP_CONF
-          programArgs += submitRequest.appConf
-        }
-      case _ =>
-        programArgs += PARAM_KEY_APP_CONF
-        programArgs += submitRequest.appConf
-    }
-    programArgs
   }
 
   protected def flinkConfIdentifierInfo(@Nonnull conf: Configuration): String =

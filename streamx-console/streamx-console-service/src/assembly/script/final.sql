@@ -16,7 +16,7 @@ CREATE TABLE `t_app_backup` (
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_app_backup
@@ -37,7 +37,7 @@ CREATE TABLE `t_flame_graph` (
 PRIMARY KEY (`ID`) USING BTREE,
 KEY `INX_TIME` (`TIMELINE`),
 KEY `INX_APPID` (`APP_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flame_graph
@@ -101,17 +101,18 @@ CREATE TABLE `t_flink_app` (
 `K8S_JM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
 `K8S_TM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
 `K8S_HADOOP_INTEGRATION` tinyint(1) DEFAULT '0',
+`FLINK_CLUSTER_ID` bigint DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 KEY `INX_STATE` (`STATE`) USING BTREE,
 KEY `INX_JOB_TYPE` (`JOB_TYPE`) USING BTREE,
 KEY `INX_TRACK` (`TRACKING`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_app` VALUES (1, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', NULL, 1, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '2', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+INSERT INTO `t_flink_app` VALUES (100000, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', NULL, 100000, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '2', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -127,7 +128,7 @@ CREATE TABLE `t_flink_config` (
 `CONTENT` text COLLATE utf8mb4_general_ci NOT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_config
@@ -147,13 +148,13 @@ CREATE TABLE `t_flink_effective` (
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_INX` (`APP_ID`,`TARGET_TYPE`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_effective
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_effective` VALUES (1, 1, 2, 1, NOW());
+INSERT INTO `t_flink_effective` VALUES (100000, 100000, 2, 100000, NOW());
 COMMIT;
 
 -- ----------------------------
@@ -172,7 +173,7 @@ CREATE TABLE `t_flink_env` (
 `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_NAME` (`FLINK_NAME`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_env
@@ -192,7 +193,7 @@ CREATE TABLE `t_flink_log` (
 `EXCEPTION` text COLLATE utf8mb4_general_ci,
 `START_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_log
@@ -219,13 +220,13 @@ CREATE TABLE `t_flink_project` (
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `BUILDSTATE` tinyint DEFAULT '-1',
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_project
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_project` VALUES (1, 'streamx-quickstart', 'https://gitee.com/streamxhub/streamx-quickstart.git', 'main', NULL, NULL, NULL, 1, 1, NOW(), NULL, 'streamx-quickstart', 1);
+INSERT INTO `t_flink_project` VALUES (100000, 'streamx-quickstart', 'https://github.com/streamxhub/streamx-quickstart.git', 'main', NULL, NULL, NULL, 1, 1, NOW(), NULL, 'streamx-quickstart', 1);
 COMMIT;
 
 -- ----------------------------
@@ -241,7 +242,7 @@ CREATE TABLE `t_flink_savepoint` (
 `TRIGGER_TIME` datetime DEFAULT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_savepoint
@@ -262,13 +263,13 @@ CREATE TABLE `t_flink_sql` (
 `CANDIDATE` tinyint NOT NULL DEFAULT '0',
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_sql
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_sql` VALUES (1, 1, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94AaVqGxSSPZIKgxrY2mxrdGfb4GS3c0+LnJo6Mz36syapkmZQpk8vKbQMMt2KOFmAe5rK4Nf3yhrhCwvA1/TTDaqO61UxmooSprlT1PDGkgKEKpmwvIOjWVdP3W2zpG+JfQFHjfU46xxrVvYZuWztye1khJrqzSBFRCfjUwSYQiqt1xJJvyPcbWJp9WPCXvUoUEn0ZAVufcs0nIUjYn2L4s++YiY75eBLr+2Dnl3GYKTWRyfQKYRRR2XZxXmNvu9yh9GHAmUO/sxyMRkGNly4c714RZ7zaWtLHsX+N9NjvVrWxm99jmyvEhpOUhujmIYFI5zkCOYzYIj11a7QH7Tyz+nE8bw', NULL, 1, 0, NOW());
+INSERT INTO `t_flink_sql` VALUES (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94AaVqGxSSPZIKgxrY2mxrdGfb4GS3c0+LnJo6Mz36syapkmZQpk8vKbQMMt2KOFmAe5rK4Nf3yhrhCwvA1/TTDaqO61UxmooSprlT1PDGkgKEKpmwvIOjWVdP3W2zpG+JfQFHjfU46xxrVvYZuWztye1khJrqzSBFRCfjUwSYQiqt1xJJvyPcbWJp9WPCXvUoUEn0ZAVufcs0nIUjYn2L4s++YiY75eBLr+2Dnl3GYKTWRyfQKYRRR2XZxXmNvu9yh9GHAmUO/sxyMRkGNly4c714RZ7zaWtLHsX+N9NjvVrWxm99jmyvEhpOUhujmIYFI5zkCOYzYIj11a7QH7Tyz+nE8bw', NULL, 1, 0, NOW());
 COMMIT;
 
 -- ----------------------------
@@ -282,13 +283,13 @@ CREATE TABLE `t_flink_tutorial` (
 `CONTENT` text COLLATE utf8mb4_general_ci,
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_flink_tutorial
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_tutorial` VALUES (1, 1, 'repl', '### Introduction\n\n[Apache Flink](https://flink.apache.org/) is a framework and distributed processing engine for stateful computations over unbounded and bounded data streams. This is Flink tutorial for running classical wordcount in both batch and streaming mode.\n\nThere\'re 3 things you need to do before using flink in StreamX Notebook.\n\n* Download [Flink 1.11](https://flink.apache.org/downloads.html) for scala 2.11 (Only scala-2.11 is supported, scala-2.12 is not supported yet in StreamX Notebook), unpack it and set `FLINK_HOME` in flink interpreter setting to this location.\n* Copy flink-python_2.11–1.11.1.jar from flink opt folder to flink lib folder (it is used by pyflink which is supported)\n* If you want to run yarn mode, you need to set `HADOOP_CONF_DIR` in flink interpreter setting. And make sure `hadoop` is in your `PATH`, because internally flink will call command `hadoop classpath` and put all the hadoop related jars in the classpath of flink interpreter process.\n\nThere\'re 6 sub interpreters in flink interpreter, each is used for different purpose. However they are in the the JVM and share the same ExecutionEnviroment/StremaExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment.\n\n* `flink`	- Creates ExecutionEnvironment/StreamExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment and provides a Scala environment\n* `pyflink`	- Provides a python environment\n* `ipyflink`	- Provides an ipython environment\n* `ssql`	 - Provides a stream sql environment\n* `bsql`	- Provides a batch sql environment\n', NOW());
+INSERT INTO `t_flink_tutorial` VALUES (100000, 1, 'repl', '### Introduction\n\n[Apache Flink](https://flink.apache.org/) is a framework and distributed processing engine for stateful computations over unbounded and bounded data streams. This is Flink tutorial for running classical wordcount in both batch and streaming mode.\n\nThere\'re 3 things you need to do before using flink in StreamX Notebook.\n\n* Download [Flink 1.11](https://flink.apache.org/downloads.html) for scala 2.11 (Only scala-2.11 is supported, scala-2.12 is not supported yet in StreamX Notebook), unpack it and set `FLINK_HOME` in flink interpreter setting to this location.\n* Copy flink-python_2.11–1.11.1.jar from flink opt folder to flink lib folder (it is used by pyflink which is supported)\n* If you want to run yarn mode, you need to set `HADOOP_CONF_DIR` in flink interpreter setting. And make sure `hadoop` is in your `PATH`, because internally flink will call command `hadoop classpath` and put all the hadoop related jars in the classpath of flink interpreter process.\n\nThere\'re 6 sub interpreters in flink interpreter, each is used for different purpose. However they are in the the JVM and share the same ExecutionEnviroment/StremaExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment.\n\n* `flink`	- Creates ExecutionEnvironment/StreamExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment and provides a Scala environment\n* `pyflink`	- Provides a python environment\n* `ipyflink`	- Provides an ipython environment\n* `ssql`	 - Provides a stream sql environment\n* `bsql`	- Provides a batch sql environment\n', NOW());
 COMMIT;
 
 -- ----------------------------
@@ -309,49 +310,49 @@ CREATE TABLE `t_menu` (
 `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
 `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
 PRIMARY KEY (`MENU_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_menu
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_menu` VALUES (1, 0, 'System', '/system', 'PageView', NULL, 'desktop', '0', '1', 1, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (2, 1, 'User Management', '/system/user', 'system/user/User', 'user:view', 'user', '0', '1', 1, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (3, 1, 'Role Management', '/system/role', 'system/role/Role', 'role:view', 'smile', '0', '1', 2, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (4, 1, 'Router Management', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', '1', 3, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (5, 2, 'add', NULL, NULL, 'user:add', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (6, 2, 'update', NULL, NULL, 'user:update', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (7, 2, 'delete', NULL, NULL, 'user:delete', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (8, 3, 'add', NULL, NULL, 'role:add', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (9, 3, 'update', NULL, NULL, 'role:update', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (10, 3, 'delete', NULL, NULL, 'role:delete', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (11, 4, 'add', NULL, NULL, 'menu:add', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (12, 4, 'update', NULL, NULL, 'menu:update', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (13, 2, 'reset', NULL, NULL, 'user:reset', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (14, 0, 'StreamX', '/flink', 'PageView', NULL, 'build', '0', '1', 2, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (15, 14, 'Project', '/flink/project', 'flink/project/View', 'project:view', 'github', '0', '1', 1, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (16, 14, 'Application', '/flink/app', 'flink/app/View', 'app:view', 'mobile', '0', '1', 2, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (17, 14, 'Add Application', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', '0', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (18, 14, 'Add Project', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', '0', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (19, 14, 'App Detail', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', '0', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (20, 14, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', '1', 3, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (21, 14, 'Edit Flink App', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', '0', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (22, 14, 'Edit StreamX App', '/flink/app/edit_streamx', 'flink/app/EditStreamX', 'app:update', '', '0', '0', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (23, 15, 'build', NULL, NULL, 'project:build', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (24, 15, 'delete', NULL, NULL, 'project:delete', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (25, 16, 'mapping', NULL, NULL, 'app:mapping', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (26, 16, 'deploy', NULL, NULL, 'app:deploy', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (27, 16, 'start', NULL, NULL, 'app:start', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (28, 16, 'clean', NULL, NULL, 'app:clean', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (29, 16, 'cancel', NULL, NULL, 'app:cancel', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (30, 16, 'savepoint delete', NULL, NULL, 'savepoint:delete', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (31, 16, 'backup rollback', NULL, NULL, 'backup:rollback', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (32, 16, 'backup delete', NULL, NULL, 'backup:delete', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (33, 16, 'conf delete', NULL, NULL, 'conf:delete', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (34, 16, 'flame Graph', NULL, NULL, 'app:flameGraph', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (35, 14, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', '1', 4, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (36, 35, 'Setting Update', NULL, NULL, 'setting:update', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (37, 14, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', NULL, '0', '0', NULL, NOW(), NOW());
+INSERT INTO `t_menu` VALUES (100000, 0, 'System', '/system', 'PageView', NULL, 'desktop', '0', '1', 1, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100001, 100000, 'User Management', '/system/user', 'system/user/User', 'user:view', 'user', '0', '1', 1, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100002, 100000, 'Role Management', '/system/role', 'system/role/Role', 'role:view', 'smile', '0', '1', 2, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100003, 100000, 'Router Management', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', '1', 3, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100004, 100001, 'add', NULL, NULL, 'user:add', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100005, 100001, 'update', NULL, NULL, 'user:update', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100006, 100001, 'delete', NULL, NULL, 'user:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100007, 100002, 'add', NULL, NULL, 'role:add', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100008, 100002, 'update', NULL, NULL, 'role:update', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100009, 100002, 'delete', NULL, NULL, 'role:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100010, 100003, 'add', NULL, NULL, 'menu:add', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100011, 100003, 'update', NULL, NULL, 'menu:update', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100012, 100001, 'reset', NULL, NULL, 'user:reset', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100013, 0, 'StreamX', '/flink', 'PageView', NULL, 'build', '0', '1', 2, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100014, 100013, 'Project', '/flink/project', 'flink/project/View', 'project:view', 'github', '0', '1', 1, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100015, 100013, 'Application', '/flink/app', 'flink/app/View', 'app:view', 'mobile', '0', '1', 2, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100016, 100013, 'Add Application', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', '0', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100017, 100013, 'Add Project', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', '0', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100018, 100013, 'App Detail', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', '0', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100019, 100013, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', '1', 3, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100020, 100013, 'Edit Flink App', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', '0', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100021, 100013, 'Edit StreamX App', '/flink/app/edit_streamx', 'flink/app/EditStreamX', 'app:update', '', '0', '0', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100022, 100014, 'build', NULL, NULL, 'project:build', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100023, 100014, 'delete', NULL, NULL, 'project:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100024, 100015, 'mapping', NULL, NULL, 'app:mapping', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100025, 100015, 'deploy', NULL, NULL, 'app:deploy', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100026, 100015, 'start', NULL, NULL, 'app:start', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100027, 100015, 'clean', NULL, NULL, 'app:clean', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100028, 100015, 'cancel', NULL, NULL, 'app:cancel', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100029, 100015, 'savepoint delete', NULL, NULL, 'savepoint:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100030, 100015, 'backup rollback', NULL, NULL, 'backup:rollback', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100031, 100015, 'backup delete', NULL, NULL, 'backup:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100032, 100015, 'conf delete', NULL, NULL, 'conf:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100033, 100015, 'flame Graph', NULL, NULL, 'app:flameGraph', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100034, 100013, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', '1', 4, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100035, 100034, 'Setting Update', NULL, NULL, 'setting:update', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100036, 100013, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', NULL, '0', '0', NULL, NOW(), NOW());
 COMMIT;
 
 -- ----------------------------
@@ -369,7 +370,7 @@ CREATE TABLE `t_message` (
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 KEY `INX_USER_ID` (`USER_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_message
@@ -389,14 +390,14 @@ CREATE TABLE `t_role` (
 `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
 `ROLE_CODE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '角色标识',
 PRIMARY KEY (`ROLE_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_role
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_role` VALUES (1, 'admin', 'admin', NOW(), NULL, NULL);
-INSERT INTO `t_role` VALUES (2, 'developer', 'developer', NOW(), NULL, NULL);
+INSERT INTO `t_role` VALUES (100000, 'admin', 'admin', NOW(), NULL, NULL);
+INSERT INTO `t_role` VALUES (100001, 'developer', 'developer', NOW(), NULL, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -409,67 +410,67 @@ CREATE TABLE `t_role_menu` (
 `MENU_ID` bigint NOT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_INX` (`ROLE_ID`,`MENU_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_role_menu
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_role_menu` VALUES (1, 1, 1);
-INSERT INTO `t_role_menu` VALUES (2, 1, 2);
-INSERT INTO `t_role_menu` VALUES (3, 1, 3);
-INSERT INTO `t_role_menu` VALUES (4, 1, 4);
-INSERT INTO `t_role_menu` VALUES (5, 1, 5);
-INSERT INTO `t_role_menu` VALUES (6, 1, 6);
-INSERT INTO `t_role_menu` VALUES (7, 1, 7);
-INSERT INTO `t_role_menu` VALUES (8, 1, 8);
-INSERT INTO `t_role_menu` VALUES (9, 1, 9);
-INSERT INTO `t_role_menu` VALUES (10, 1, 10);
-INSERT INTO `t_role_menu` VALUES (11, 1, 11);
-INSERT INTO `t_role_menu` VALUES (12, 1, 12);
-INSERT INTO `t_role_menu` VALUES (13, 1, 13);
-INSERT INTO `t_role_menu` VALUES (14, 1, 14);
-INSERT INTO `t_role_menu` VALUES (15, 1, 15);
-INSERT INTO `t_role_menu` VALUES (16, 1, 16);
-INSERT INTO `t_role_menu` VALUES (17, 1, 17);
-INSERT INTO `t_role_menu` VALUES (18, 1, 18);
-INSERT INTO `t_role_menu` VALUES (19, 1, 19);
-INSERT INTO `t_role_menu` VALUES (20, 1, 20);
-INSERT INTO `t_role_menu` VALUES (21, 1, 21);
-INSERT INTO `t_role_menu` VALUES (22, 1, 22);
-INSERT INTO `t_role_menu` VALUES (23, 1, 23);
-INSERT INTO `t_role_menu` VALUES (24, 1, 24);
-INSERT INTO `t_role_menu` VALUES (25, 1, 25);
-INSERT INTO `t_role_menu` VALUES (26, 1, 26);
-INSERT INTO `t_role_menu` VALUES (27, 1, 27);
-INSERT INTO `t_role_menu` VALUES (28, 1, 28);
-INSERT INTO `t_role_menu` VALUES (29, 1, 29);
-INSERT INTO `t_role_menu` VALUES (30, 1, 30);
-INSERT INTO `t_role_menu` VALUES (31, 1, 31);
-INSERT INTO `t_role_menu` VALUES (32, 1, 32);
-INSERT INTO `t_role_menu` VALUES (33, 1, 33);
-INSERT INTO `t_role_menu` VALUES (34, 1, 34);
-INSERT INTO `t_role_menu` VALUES (35, 1, 35);
-INSERT INTO `t_role_menu` VALUES (36, 1, 36);
-INSERT INTO `t_role_menu` VALUES (37, 1, 37);
-INSERT INTO `t_role_menu` VALUES (38, 2, 14);
-INSERT INTO `t_role_menu` VALUES (39, 2, 16);
-INSERT INTO `t_role_menu` VALUES (40, 2, 17);
-INSERT INTO `t_role_menu` VALUES (41, 2, 18);
-INSERT INTO `t_role_menu` VALUES (42, 2, 19);
-INSERT INTO `t_role_menu` VALUES (43, 2, 20);
-INSERT INTO `t_role_menu` VALUES (44, 2, 21);
-INSERT INTO `t_role_menu` VALUES (45, 2, 22);
-INSERT INTO `t_role_menu` VALUES (46, 2, 25);
-INSERT INTO `t_role_menu` VALUES (47, 2, 26);
-INSERT INTO `t_role_menu` VALUES (48, 2, 27);
-INSERT INTO `t_role_menu` VALUES (49, 2, 28);
-INSERT INTO `t_role_menu` VALUES (50, 2, 29);
-INSERT INTO `t_role_menu` VALUES (51, 2, 30);
-INSERT INTO `t_role_menu` VALUES (52, 2, 31);
-INSERT INTO `t_role_menu` VALUES (53, 2, 32);
-INSERT INTO `t_role_menu` VALUES (54, 2, 33);
-INSERT INTO `t_role_menu` VALUES (55, 2, 34);
+INSERT INTO `t_role_menu` VALUES (100000, 100000, 100000);
+INSERT INTO `t_role_menu` VALUES (100001, 100000, 100001);
+INSERT INTO `t_role_menu` VALUES (100002, 100000, 100002);
+INSERT INTO `t_role_menu` VALUES (100003, 100000, 100003);
+INSERT INTO `t_role_menu` VALUES (100004, 100000, 100004);
+INSERT INTO `t_role_menu` VALUES (100005, 100000, 100005);
+INSERT INTO `t_role_menu` VALUES (100006, 100000, 100006);
+INSERT INTO `t_role_menu` VALUES (100007, 100000, 100007);
+INSERT INTO `t_role_menu` VALUES (100008, 100000, 100008);
+INSERT INTO `t_role_menu` VALUES (100009, 100000, 100009);
+INSERT INTO `t_role_menu` VALUES (100010, 100000, 100010);
+INSERT INTO `t_role_menu` VALUES (100011, 100000, 100011);
+INSERT INTO `t_role_menu` VALUES (100012, 100000, 100012);
+INSERT INTO `t_role_menu` VALUES (100013, 100000, 100013);
+INSERT INTO `t_role_menu` VALUES (100014, 100000, 100014);
+INSERT INTO `t_role_menu` VALUES (100015, 100000, 100015);
+INSERT INTO `t_role_menu` VALUES (100016, 100000, 100016);
+INSERT INTO `t_role_menu` VALUES (100017, 100000, 100017);
+INSERT INTO `t_role_menu` VALUES (100018, 100000, 100018);
+INSERT INTO `t_role_menu` VALUES (100019, 100000, 100019);
+INSERT INTO `t_role_menu` VALUES (100020, 100000, 100020);
+INSERT INTO `t_role_menu` VALUES (100021, 100000, 100021);
+INSERT INTO `t_role_menu` VALUES (100022, 100000, 100022);
+INSERT INTO `t_role_menu` VALUES (100023, 100000, 100023);
+INSERT INTO `t_role_menu` VALUES (100024, 100000, 100024);
+INSERT INTO `t_role_menu` VALUES (100025, 100000, 100025);
+INSERT INTO `t_role_menu` VALUES (100026, 100000, 100026);
+INSERT INTO `t_role_menu` VALUES (100027, 100000, 100027);
+INSERT INTO `t_role_menu` VALUES (100028, 100000, 100028);
+INSERT INTO `t_role_menu` VALUES (100029, 100000, 100029);
+INSERT INTO `t_role_menu` VALUES (100030, 100000, 100030);
+INSERT INTO `t_role_menu` VALUES (100031, 100000, 100031);
+INSERT INTO `t_role_menu` VALUES (100032, 100000, 100032);
+INSERT INTO `t_role_menu` VALUES (100033, 100000, 100033);
+INSERT INTO `t_role_menu` VALUES (100034, 100000, 100034);
+INSERT INTO `t_role_menu` VALUES (100035, 100000, 100035);
+INSERT INTO `t_role_menu` VALUES (100036, 100000, 100036);
+INSERT INTO `t_role_menu` VALUES (100037, 100000, 100037);
+INSERT INTO `t_role_menu` VALUES (100038, 100001, 100014);
+INSERT INTO `t_role_menu` VALUES (100039, 100001, 100016);
+INSERT INTO `t_role_menu` VALUES (100040, 100001, 100017);
+INSERT INTO `t_role_menu` VALUES (100041, 100001, 100018);
+INSERT INTO `t_role_menu` VALUES (100042, 100001, 100019);
+INSERT INTO `t_role_menu` VALUES (100043, 100001, 100020);
+INSERT INTO `t_role_menu` VALUES (100044, 100001, 100021);
+INSERT INTO `t_role_menu` VALUES (100045, 100001, 100022);
+INSERT INTO `t_role_menu` VALUES (100046, 100001, 100025);
+INSERT INTO `t_role_menu` VALUES (100047, 100001, 100026);
+INSERT INTO `t_role_menu` VALUES (100048, 100001, 100027);
+INSERT INTO `t_role_menu` VALUES (100049, 100001, 100028);
+INSERT INTO `t_role_menu` VALUES (100050, 100001, 100029);
+INSERT INTO `t_role_menu` VALUES (100051, 100001, 100030);
+INSERT INTO `t_role_menu` VALUES (100052, 100001, 100031);
+INSERT INTO `t_role_menu` VALUES (100053, 100001, 100032);
+INSERT INTO `t_role_menu` VALUES (100054, 100001, 100033);
 COMMIT;
 
 -- ----------------------------
@@ -524,12 +525,12 @@ CREATE TABLE `t_user` (
 `DESCRIPTION` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述',
 PRIMARY KEY (`USER_ID`) USING BTREE,
 UNIQUE KEY `UN_USERNAME` (`NICK_NAME`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_user` VALUES (1, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', 'benjobs@qq.com', '13800000000', '1', NOW(), NULL,NULL,NULL,NULL,NULL );
+INSERT INTO `t_user` VALUES (100000, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', 'benjobs@qq.com', '13800000000', '1', NOW(), NULL,NULL,NULL,NULL,NULL );
 COMMIT;
 
 -- ----------------------------
@@ -542,13 +543,13 @@ CREATE TABLE `t_user_role` (
 `ROLE_ID` bigint DEFAULT NULL COMMENT '角色ID',
 PRIMARY KEY (`ID`) USING BTREE,
 UNIQUE KEY `UN_INX` (`USER_ID`,`ROLE_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of t_user_role
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_user_role` VALUES (1, 1, 1);
+INSERT INTO `t_user_role` VALUES (100000, 100000, 100000);
 COMMIT;
 
 -- ----------------------------
@@ -567,7 +568,19 @@ CREATE TABLE `t_app_build_pipe`(
     `BUILD_RESULT`    TEXT,
     `UPDATE_TIME`     DATETIME,
     PRIMARY KEY (`APP_ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+) ENGINE = InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
+-- ----------------------------
+-- Table of t_flink_cluster
+-- ----------------------------
+DROP TABLE IF EXISTS `t_flink_cluster`;
+CREATE TABLE `t_flink_cluster`(
+`ID`              bigint NOT NULL AUTO_INCREMENT,
+`CLUSTER_NAME`    varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群名称',
+`ADDRESS`         text COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群地址,http://$host:$port多个地址用,分割',
+`DESCRIPTION`     varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`CREATE_TIME`     datetime DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
