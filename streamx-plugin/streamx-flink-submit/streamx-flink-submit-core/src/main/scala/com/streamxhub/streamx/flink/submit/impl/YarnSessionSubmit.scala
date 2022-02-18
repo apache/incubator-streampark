@@ -112,7 +112,6 @@ object YarnSessionSubmit extends YarnSubmitTrait {
   /**
    * Submit flink session job via rest api.
    */
-  // noinspection DuplicatedCode
   @throws[Exception] def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
@@ -136,7 +135,6 @@ object YarnSessionSubmit extends YarnSubmitTrait {
   /**
    * Submit flink session job with building JobGraph via Standalone ClusterClient api.
    */
-  // noinspection DuplicatedCode
   @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File): SubmitResponse = {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
