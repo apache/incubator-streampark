@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
+import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemoteBuildResponse
 import com.streamxhub.streamx.flink.submit.FlinkSubmitter
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
@@ -29,7 +30,6 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
-import org.apache.flink.util.IOUtils
 
 import java.io.File
 import java.lang.{Integer => JavaInt}
@@ -112,7 +112,6 @@ object YarnSessionSubmit extends YarnSubmitTrait {
   /**
    * Submit flink session job via rest api.
    */
-  // noinspection DuplicatedCode
   @throws[Exception] def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
@@ -136,7 +135,6 @@ object YarnSessionSubmit extends YarnSubmitTrait {
   /**
    * Submit flink session job with building JobGraph via Standalone ClusterClient api.
    */
-  // noinspection DuplicatedCode
   @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File): SubmitResponse = {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
@@ -166,7 +164,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
         e.printStackTrace()
         throw e
     } finally {
-      IOUtils.closeAll(client, clusterDescriptor)
+      Utils.close(packageProgram, client, clusterDescriptor)
     }
   }
 
