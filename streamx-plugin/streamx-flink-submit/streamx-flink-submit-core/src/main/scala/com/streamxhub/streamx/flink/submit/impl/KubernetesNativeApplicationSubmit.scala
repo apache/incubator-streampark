@@ -21,6 +21,7 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
@@ -29,7 +30,6 @@ import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{Configuration, DeploymentOptionsInternal, PipelineOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
-import org.apache.flink.util.IOUtils
 
 import scala.util.Try
 
@@ -80,7 +80,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
         throw e
     } finally {
-      IOUtils.closeAll(clusterClient, clusterDescriptor)
+      Utils.close(clusterClient, clusterDescriptor)
     }
   }
 

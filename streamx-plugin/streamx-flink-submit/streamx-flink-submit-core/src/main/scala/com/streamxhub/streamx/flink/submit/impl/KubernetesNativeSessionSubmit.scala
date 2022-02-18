@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
-import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
@@ -32,7 +32,6 @@ import org.apache.flink.client.program.{ClusterClient, PackagedProgram, Packaged
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
-import org.apache.flink.util.IOUtils
 
 import java.io.File
 import scala.language.postfixOps
@@ -95,6 +94,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var packageProgram: PackagedProgram = null
     var client: ClusterClient[String] = null
+
     try {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       // build JobGraph
@@ -121,7 +121,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     } finally {
       // ref FLINK-21164 FLINK-9844 packageProgram.close()
       // must be flink 1.12.2 and above
-      IOUtils.closeAll(client, clusterDescriptor)
+      Utils.close(packageProgram, client, clusterDescriptor)
     }
   }
 

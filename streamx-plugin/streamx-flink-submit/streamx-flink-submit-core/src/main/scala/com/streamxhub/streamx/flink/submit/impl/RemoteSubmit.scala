@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.DevelopmentMode
+import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemoteBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
@@ -28,7 +29,6 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
-import org.apache.flink.util.IOUtils
 
 import java.io.File
 import java.lang.{Integer => JavaInt}
@@ -167,7 +167,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
         e.printStackTrace()
         throw e
     } finally {
-      IOUtils.closeAll(client, clusterDescriptor)
+      Utils.close(packageProgram, client, clusterDescriptor)
     }
   }
 
