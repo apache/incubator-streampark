@@ -652,6 +652,7 @@ import * as monaco from 'monaco-editor'
 import SvgIcon from '@/components/SvgIcon'
 import storage from '@/utils/storage'
 import {DEFAULT_THEME} from '@/store/mutation-types'
+import {activeURL} from '@/api/flinkCluster'
 
 const Base64 = require('js-base64').Base64
 configOptions.push(
@@ -1029,7 +1030,12 @@ export default {
     },
 
     handleView() {
-      if (this.app.executionMode === 2 || this.app.executionMode === 3 || this.app.executionMode === 4) {
+      if (this.app.executionMode === 1) {
+        activeURL({ id: this.app.id }).then((resp) =>{
+          const url = resp.data + '/#/job/' + this.app.jobId + '/overview'
+          window.open(url)
+        })
+      } else if (this.app.executionMode === 2 || this.app.executionMode === 3 || this.app.executionMode === 4) {
         if (this.yarn !== null) {
           const url = this.yarn + '/proxy/' + this.app.appId + '/'
           window.open(url)

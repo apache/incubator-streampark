@@ -51,6 +51,8 @@
         <result column="K8S_JM_POD_TEMPLATE" jdbcType="LONGVARCHAR" property="k8sJmPodTemplate"/>
         <result column="K8S_TM_POD_TEMPLATE" jdbcType="LONGVARCHAR" property="k8sTmPodTemplate"/>
         <result column="K8S_HADOOP_INTEGRATION" jdbcType="TINYINT" property="k8sHadoopIntegration"/>
+        <result column="REST_URL" jdbcType="VARCHAR" property="restUrl"/>
+        <result column="REST_PORT" jdbcType="INTEGER" property="restPort"/>
     </resultMap>
 
     <select id="page" resultType="application" parameterType="application">

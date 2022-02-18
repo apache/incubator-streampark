@@ -101,6 +101,14 @@ export default {
     UPDATE: '/flink/env/update',
     DEFAULT: '/flink/env/default',
   },
+  FlinkCluster: {
+    LIST: '/flink/cluster/list',
+    ACTIVEURL: '/flink/cluster/activeUrl',
+    CREATE:  '/flink/cluster/create',
+    CHECK: '/flink/cluster/check',
+    GET: '/flink/cluster/get',
+    UPDATE: '/flink/cluster/update'
+  },
   AppBuild: {
     BUILD: '/flink/pipe/build',
     DETAIL: '/flink/pipe/detail',

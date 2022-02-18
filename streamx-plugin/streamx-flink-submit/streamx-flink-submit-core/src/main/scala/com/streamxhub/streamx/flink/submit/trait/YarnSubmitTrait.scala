@@ -20,15 +20,12 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.Workspace
-import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.ExceptionUtils
-import com.streamxhub.streamx.flink.submit.domain._
-import org.apache.commons.cli.CommandLine
-import org.apache.flink.client.cli.{ClientOptions, CustomCommandLine}
+import com.streamxhub.streamx.flink.submit.bean._
+import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.ClusterSpecification
-import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClientProvider
-import org.apache.flink.configuration.{CheckpointingOptions, ConfigOptions, Configuration, CoreOptions}
+import org.apache.flink.configuration.{CheckpointingOptions, ConfigOptions, Configuration}
 import org.apache.flink.runtime.jobgraph.JobGraph
 import org.apache.flink.util.FlinkException
 import org.apache.flink.yarn.configuration.YarnConfigOptions
@@ -38,7 +35,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 import java.lang.reflect.Method
 import java.lang.{Boolean => JavaBool}
 import java.util.concurrent.TimeUnit
-import scala.collection.JavaConversions._
 import scala.util.Try
 
 /**
@@ -48,13 +44,14 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
 
   lazy val workspace: Workspace = Workspace.remote
 
+
   override def doStop(stopRequest: StopRequest): StopResponse = {
 
     val jobID = getJobID(stopRequest.jobId)
 
     val clusterClient = {
       val flinkConfiguration = new Configuration
-      flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, stopRequest.clusterId)
+      flinkConfiguration.safeSet(YarnConfigOptions.APPLICATION_ID, stopRequest.clusterId)
       val clusterClientFactory = new YarnClusterClientFactory
       val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
       if (applicationId == null) {
@@ -103,37 +100,6 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     deployInternal
   }
 
-  /**
-   * 页面定义参数优先级 > flink-conf.yaml中配置优先级
-   *
-   * @param submitRequest
-   * @param activeCustomCommandLine
-   * @param commandLine
-   * @return
-   */
-  private[submit] def applyConfiguration(submitRequest: SubmitRequest,
-                                         activeCustomCommandLine: CustomCommandLine,
-                                         commandLine: CommandLine): Configuration = {
-
-    require(activeCustomCommandLine != null, "YarnSubmitTrait.applyConfiguration: activeCustomCommandLine must not be null.")
-    val executorConfig = activeCustomCommandLine.toConfiguration(commandLine)
-    val customConfiguration = new Configuration(executorConfig)
-    val configuration = new Configuration()
-    //flink-conf.yaml配置
-    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
-    flinkDefaultConfiguration.keySet.foreach(x => {
-      flinkDefaultConfiguration.getString(x, null) match {
-        case v if v != null => configuration.setString(x, v)
-        case _ =>
-      }
-    })
-    configuration.addAll(customConfiguration)
-    //main class
-    if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
-      configuration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
-    }
-    configuration
-  }
 
   private[submit] def deployInternal(clusterDescriptor: YarnClusterDescriptor,
                                      clusterSpecification: ClusterSpecification,

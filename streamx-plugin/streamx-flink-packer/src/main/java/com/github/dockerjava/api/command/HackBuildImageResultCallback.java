@@ -41,7 +41,7 @@ public class HackBuildImageResultCallback extends BuildImageResultCallback {
         String stream = item.getStream();
         if (item.isErrorIndicated()) {
             listener.watchBuildStep(item.getErrorDetail().getMessage());
-        } else if (stream != null && stream.startsWith(STEP_PREFIX)){
+        } else if (stream != null && stream.startsWith(STEP_PREFIX)) {
             listener.watchBuildStep(stream);
         }
     }
