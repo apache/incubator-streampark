@@ -60,7 +60,8 @@ object RemoteSubmit extends FlinkSubmitTrait {
     // 1) get userJar
     val jarFile = submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>
-        checkBuildResult(submitRequest)
+
+        submitRequest.checkBuildResult()
         // 1) get build result
         val buildResult = submitRequest.buildResult.asInstanceOf[FlinkRemoteBuildResponse]
         // 2) get fat-jar
@@ -182,16 +183,6 @@ object RemoteSubmit extends FlinkSubmitTrait {
     val standaloneClusterId: StandaloneClusterId = clientFactory.getClusterId(flinkConfig)
     val standaloneClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[StandaloneClusterDescriptor]
     (standaloneClusterId, standaloneClusterDescriptor)
-  }
-
-  @throws[Exception] private[this] def checkBuildResult(submitRequest: SubmitRequest): Unit = {
-    val result = submitRequest.buildResult
-    if (result == null) {
-      throw new Exception(s"[flink-submit] current job: ${submitRequest.effectiveAppName} was not yet built, buildResult is empty")
-    }
-    if (!result.pass) {
-      throw new Exception(s"[flink-submit] current job ${submitRequest.effectiveAppName} build failed, please check")
-    }
   }
 
 }

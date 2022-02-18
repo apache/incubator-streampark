@@ -82,21 +82,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
          |""".stripMargin)
   }
 
-  @throws[Exception]
-  protected def checkBuildResult(submitRequest: SubmitRequest): Unit = {
-    val result = submitRequest.buildResult
-    if (result == null) {
-      throw new Exception("[flink-submit] current flink app was not yet built, buildResult is empty" +
-        s",clusterId=${submitRequest.k8sSubmitParam.clusterId}," +
-        s",namespace=${submitRequest.k8sSubmitParam.kubernetesNamespace}")
-    }
-    if (!result.pass) {
-      throw new Exception(s"[flink-submit] current flink app build failed, clusterId" +
-        s",clusterId=${submitRequest.k8sSubmitParam.clusterId}," +
-        s",namespace=${submitRequest.k8sSubmitParam.kubernetesNamespace}")
-    }
-  }
-
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
   @throws[Exception] protected def doStop(@Nonnull executeMode: ExecutionMode,
                                           stopRequest: StopRequest): StopResponse = {

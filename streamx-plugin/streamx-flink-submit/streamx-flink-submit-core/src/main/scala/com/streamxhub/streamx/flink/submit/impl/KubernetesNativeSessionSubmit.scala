@@ -50,7 +50,8 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // 2) get userJar
     val jarFile = submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>
-        checkBuildResult(submitRequest)
+
+        submitRequest.checkBuildResult()
         // 1) get build result
         val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sSessionBuildResponse]
         // 2) get fat-jar

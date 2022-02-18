@@ -46,7 +46,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
 
     // check the last building result
-    checkBuildResult(submitRequest)
+    submitRequest.checkBuildResult()
 
     val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
 
