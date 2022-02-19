@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildResponse
+import com.streamxhub.streamx.flink.packer.pipeline.DockerImageBuildResponse
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
@@ -60,7 +60,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
     if (submitRequest.buildResult != null) {
       if (submitRequest.executionMode == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
-        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
+        val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
         buildResult.podTemplatePaths.foreach(p => {
           flinkConfig
             .safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)

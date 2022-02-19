@@ -23,39 +23,35 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * Status of per step of building pipeline.
+ * Status of building pipeline instance.
  * state machine:
- * ┌──────────────────────────────────┐
- * │                     ┌─► success  │
- * │ pending ─► running ─┤            │
- * │              │      └─► failure  │
- * │              │             │     │
- * │              │             ▼     │
- * │              └────────► skipped  │
- * └──────────────────────────────────┘
+ * ┌───────────────────────────────────┐
+ * │                      ┌─► success  │
+ * │  pending ─► running ─┤            │
+ * │                      └─► failure  │
+ * └───────────────────────────────────┘
  *
  * @author Al-assad
  */
 @SuppressWarnings("AlibabaEnumConstantsMustHaveComment")
-public enum PipeStepStatus {
+public enum PipelineStatus {
 
     unknown(0),
 
-    waiting(1),
+    pending(1),
     running(2),
     success(3),
-    failure(4),
-    skipped(5);
+    failure(4);
 
     private final Integer code;
 
-    PipeStepStatus(Integer code) {
+    PipelineStatus(Integer code) {
         this.code = code;
     }
 
     @JsonCreator
-    public static PipeStepStatus of(Integer code) {
-        for (PipeStepStatus status : PipeStepStatus.values()) {
+    public static PipelineStatus of(Integer code) {
+        for (PipelineStatus status : PipelineStatus.values()) {
             if (status.getCode().equals(code)) {
                 return status;
             }
@@ -71,5 +67,4 @@ public enum PipeStepStatus {
     public boolean isUnknown() {
         return this == unknown;
     }
-
 }

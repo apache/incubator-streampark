@@ -33,7 +33,7 @@ import com.streamxhub.streamx.flink.packer.pipeline._
  */
 class FlinkK8sSessionBuildPipeline(params: FlinkK8sSessionBuildRequest) extends BuildPipeline {
 
-  override def pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_SESSION
+  override def pipeType: PipelineType = PipelineType.FLINK_NATIVE_K8S_SESSION
 
   override def offerBuildParam: FlinkK8sSessionBuildRequest = params
 
@@ -41,7 +41,7 @@ class FlinkK8sSessionBuildPipeline(params: FlinkK8sSessionBuildRequest) extends 
    * The construction logic needs to be implemented by subclasses
    */
   @throws[Throwable]
-  override protected def buildProcess(): FlinkK8sSessionBuildResponse = {
+  override protected def buildProcess(): ShadedBuildResponse = {
     val appName = BuildPipelineHelper.letAppNameSafe(params.appName)
 
     // create workspace.
@@ -66,7 +66,7 @@ class FlinkK8sSessionBuildPipeline(params: FlinkK8sSessionBuildRequest) extends 
       output
     }.getOrElse(throw getError.exception)
 
-    FlinkK8sSessionBuildResponse(buildWorkspace, shadedJar.getAbsolutePath)
+    ShadedBuildResponse(buildWorkspace, shadedJar.getAbsolutePath)
   }
 }
 

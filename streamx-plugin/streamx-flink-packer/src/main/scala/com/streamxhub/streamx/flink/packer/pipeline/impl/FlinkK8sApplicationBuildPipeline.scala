@@ -45,7 +45,7 @@ import scala.language.postfixOps
  */
 class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) extends BuildPipeline {
 
-  override def pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_APPLICATION
+  override def pipeType: PipelineType = PipelineType.FLINK_NATIVE_K8S_APPLICATION
 
   private var dockerProcessWatcher: DockerProgressWatcher = new SilentDockerProgressWatcher
 
@@ -59,7 +59,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
   }
 
   @throws[Throwable]
-  override protected def buildProcess(): FlinkK8sApplicationBuildResponse = {
+  override protected def buildProcess(): DockerImageBuildResponse = {
 
     // Step-1: init build workspace of flink job
     // the sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/
@@ -199,7 +199,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
       }(err => throw new Exception(s"push docker image failed. tag=${pushImageTag}", err))
     }.getOrElse(throw getError.exception)
 
-    FlinkK8sApplicationBuildResponse(buildWorkspace, pushImageTag, podTemplatePaths, dockerFileTemplate.innerMainJarPath)
+    DockerImageBuildResponse(buildWorkspace, pushImageTag, podTemplatePaths, dockerFileTemplate.innerMainJarPath)
   }
 
 

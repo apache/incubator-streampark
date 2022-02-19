@@ -50,8 +50,8 @@ import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildRequ
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemoteBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeSnapshot;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeType;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineType;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeWatcher;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline;
@@ -156,7 +156,7 @@ public class ApplBuildPipeServiceImpl
             }
         });
         // save docker resolve progress detail to cache, only for flink-k8s application mode.
-        if (PipeType.FLINK_NATIVE_K8S_APPLICATION == pipeline.pipeType()) {
+        if (PipelineType.FLINK_NATIVE_K8S_APPLICATION == pipeline.pipeType()) {
             pipeline.as(FlinkK8sApplicationBuildPipeline.class).registerDockerProgressWatcher(new DockerProgressWatcher() {
                 @Override
                 public void onDockerPullProgressChange(DockerPullSnapshot snapshot) {
@@ -308,12 +308,12 @@ public class ApplBuildPipeServiceImpl
     @Override
     public boolean allowToBuildNow(@Nonnull Long appId) {
         return getCurrentBuildPipeline(appId)
-            .map(pipeline -> PipeStatus.running != pipeline.getPipeStatus())
+            .map(pipeline -> PipelineStatus.running != pipeline.getPipeStatus())
             .orElse(true);
     }
 
     @Override
-    public Map<Long, PipeStatus> listPipelineStatus(List<Long> appIds) {
+    public Map<Long, PipelineStatus> listPipelineStatus(List<Long> appIds) {
         if (CollectionUtils.isEmpty(appIds)) {
             return Maps.newHashMap();
         }
@@ -325,7 +325,7 @@ public class ApplBuildPipeServiceImpl
         }
         return rMaps.stream().collect(Collectors.toMap(
             e -> (Long) e.get("app_id"),
-            e -> PipeStatus.of((Integer) e.get("pipe_status"))));
+            e -> PipelineStatus.of((Integer) e.get("pipe_status"))));
     }
 
     public boolean saveEntity(AppBuildPipeline pipe) {

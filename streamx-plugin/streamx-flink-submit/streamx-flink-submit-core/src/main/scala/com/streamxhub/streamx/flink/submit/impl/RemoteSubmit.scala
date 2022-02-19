@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.Utils
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemoteBuildResponse
+import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
@@ -35,7 +35,7 @@ import java.lang.{Integer => JavaInt}
 
 
 /**
- * Submit Job to Remote Session Cluster
+ * Submit Job to Remote Cluster
  */
 object RemoteSubmit extends FlinkSubmitTrait {
 
@@ -47,7 +47,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
     flinkConfig
       .safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
       .safeSet(RestOptions.ADDRESS, submitRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
-      .safeSet(RestOptions.PORT, JavaInt.valueOf(submitRequest.extraParameter.get(RestOptions.PORT.key()).toString))
+      .safeSet[JavaInt](RestOptions.PORT, submitRequest.extraParameter.get(RestOptions.PORT.key()).toString.toInt)
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -63,9 +63,9 @@ object RemoteSubmit extends FlinkSubmitTrait {
 
         submitRequest.checkBuildResult()
         // 1) get build result
-        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkRemoteBuildResponse]
+        val buildResult = submitRequest.buildResult.asInstanceOf[ShadedBuildResponse]
         // 2) get fat-jar
-        new File(buildResult.flinkShadedJarPath)
+        new File(buildResult.shadedJarPath)
       case _ => new File(submitRequest.flinkUserJar)
     }
 
@@ -79,7 +79,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, stopRequest.executionMode.getName)
       .safeSet(RestOptions.ADDRESS, stopRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
-      .safeSet(RestOptions.PORT, JavaInt.valueOf(stopRequest.extraParameter.get(RestOptions.PORT.key()).toString))
+      .safeSet[JavaInt](RestOptions.PORT, stopRequest.extraParameter.get(RestOptions.PORT.key()).toString.toInt)
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -134,13 +134,10 @@ object RemoteSubmit extends FlinkSubmitTrait {
     }
   }
 
-
   /**
    * Submit flink session job with building JobGraph via Standalone ClusterClient api.
    */
-  // noinspection DuplicatedCode
   @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File): SubmitResponse = {
-    // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
     var packageProgram: PackagedProgram = null
     var client: ClusterClient[StandaloneClusterId] = null

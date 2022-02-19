@@ -26,7 +26,7 @@ import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeType;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +90,7 @@ public class ApplicationBuildPipelineController {
         Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
         details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
 
-        if (pipeline.isPresent() && PipeType.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
+        if (pipeline.isPresent() && PipelineType.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
             DockerResolvedSnapshot dockerProgress = appBuildPipeService.getDockerProgressDetailSnapshot(appId);
             details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));
         }

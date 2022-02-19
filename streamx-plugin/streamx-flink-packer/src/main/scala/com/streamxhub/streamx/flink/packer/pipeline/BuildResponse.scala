@@ -40,35 +40,22 @@ sealed trait FlinkBuildResult extends BuildResult {
   def workspacePath: String
 }
 
-sealed trait FlinkSessionBuildResult extends FlinkBuildResult {
-  def flinkShadedJarPath: String
-}
-
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 case class ErrorResult(pass: Boolean = false) extends BuildResult {
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-case class FlinkK8sSessionBuildResponse(workspacePath: String,
-                                        flinkShadedJarPath: String,
-                                        pass: Boolean = true) extends FlinkSessionBuildResult
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-case class FlinkK8sApplicationBuildResponse(workspacePath: String,
-                                            flinkImageTag: String,
-                                            podTemplatePaths: Map[String, String],
-                                            dockerInnerMainJarPath: String,
-                                            pass: Boolean = true) extends FlinkBuildResult
+case class ShadedBuildResponse(workspacePath: String,
+                               shadedJarPath: String,
+                               pass: Boolean = true) extends FlinkBuildResult
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-case class FlinkRemoteBuildResponse(workspacePath: String,
-                                    flinkShadedJarPath: String,
-                                    pass: Boolean = true) extends FlinkSessionBuildResult
-
-// todo case class FlinkYarnSessionBuildResponse(workspacePath: String, flinkShadedJarPath: String) extends FlinkSessionBuildResult
-
-// todo case class FlinkYarnApplicationBuildResponse() extends BuildResult
+case class DockerImageBuildResponse(workspacePath: String,
+                                    flinkImageTag: String,
+                                    podTemplatePaths: Map[String, String],
+                                    dockerInnerMainJarPath: String,
+                                    pass: Boolean = true) extends FlinkBuildResult
 
 
 

@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.Utils
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemoteBuildResponse
+import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.executors.RemoteExecutor
@@ -31,6 +31,7 @@ import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 
 import java.io.File
+import java.lang.{Integer => JavaInt}
 
 object LocalSubmit extends FlinkSubmitTrait {
 
@@ -50,9 +51,9 @@ object LocalSubmit extends FlinkSubmitTrait {
       case DevelopmentMode.FLINKSQL =>
         submitRequest.checkBuildResult()
         // 1) get build result
-        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkRemoteBuildResponse]
+        val buildResult = submitRequest.buildResult.asInstanceOf[ShadedBuildResponse]
         // 2) get fat-jar
-        new File(buildResult.flinkShadedJarPath)
+        new File(buildResult.shadedJarPath)
       case _ => new File(submitRequest.flinkUserJar)
     }
 
@@ -88,7 +89,7 @@ object LocalSubmit extends FlinkSubmitTrait {
 
   private[this] def createLocalCluster(flinkConfig: Configuration) = {
 
-    flinkConfig.safeSet(JobManagerOptions.PORT, 0)
+    flinkConfig.safeSet[JavaInt](JobManagerOptions.PORT, 0)
 
     val cluster = {
       val numTaskManagers = flinkConfig.getInteger(
@@ -114,9 +115,9 @@ object LocalSubmit extends FlinkSubmitTrait {
 
     flinkConfig
       .safeSet(JobManagerOptions.ADDRESS, host)
-      .safeSet(JobManagerOptions.PORT, port)
+      .safeSet[JavaInt](JobManagerOptions.PORT, port)
       .safeSet(RestOptions.ADDRESS, host)
-      .safeSet(RestOptions.PORT, port)
+      .safeSet[JavaInt](RestOptions.PORT, port)
       .safeSet(DeploymentOptions.TARGET, RemoteExecutor.NAME)
 
     logInfo(s"\nStarting local Flink cluster (host: localhost, port: $port).\n")

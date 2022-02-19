@@ -23,7 +23,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -62,6 +62,6 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
     /**
      * list pipeline status on application id list
      */
-    Map<Long, PipeStatus> listPipelineStatus(List<Long> appIds);
+    Map<Long, PipelineStatus> listPipelineStatus(List<Long> appIds);
 
 }
