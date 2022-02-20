@@ -207,3 +207,26 @@ redis.sink:
   port: 6379
   database: 2
   connectType: jedisPool #可选参数：jedisPool（默认）|sentinel
+
+
+
+es.sink:
+  #  必填参数，多个节点使用 host1:port, host2:port,
+  host: localhost:9200
+#  选填参数
+#  es:
+#    disableFlushOnCheckpoint: false #是否
+#    auth:
+#    user:
+#      password:
+#    rest:
+#      max.retry.timeout:
+#      path.prefix:
+#      content.type:
+#    connect:
+#      request.timeout:
+#      timeout:
+#    cluster.name: elasticsearch
+#  client.transport.sniff:
+#  bulk.flush.:
+
