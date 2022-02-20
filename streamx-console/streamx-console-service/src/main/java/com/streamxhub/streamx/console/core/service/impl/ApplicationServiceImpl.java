@@ -930,7 +930,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private void uploadDependency(Application application, Collection<String> dependencyJars) throws IOException {
         FsOperator fsOperator = application.getFsOperator();
 
-        // /flinksql/1233333/lib/12333.jar
         //1 ) upload pom dependency
         if (!dependencyJars.isEmpty()) {
             File lib = new File(application.getLocalFlinkSqlHome(), "lib");
@@ -943,7 +942,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             // 1.2 ) upload jar by pomJar
             fsOperator.delete(application.getAppHome());
 
-            // /flinksql/1233333 ===> /workspace
             fsOperator.upload(application.getLocalFlinkSqlHome().getAbsolutePath(), application.getWorkspace().APP_WORKSPACE());
         }
 
