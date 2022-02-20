@@ -36,6 +36,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 --------------------------------------- version: 1.2.2 START ---------------------------------------
 ALTER TABLE `t_flink_app` ADD COLUMN `FLINK_CLUSTER_ID` bigint DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
 
+UPDATE `t_setting` SET `KEY`='streamx.maven.central.repository' WHERE `KEY` = 'maven.central.repository';
+
 -- ----------------------------
 -- Table of t_flink_cluster
 -- ----------------------------

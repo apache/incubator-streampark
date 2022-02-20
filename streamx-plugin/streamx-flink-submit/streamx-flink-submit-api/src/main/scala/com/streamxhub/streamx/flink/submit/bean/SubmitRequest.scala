@@ -85,6 +85,16 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
     }
   }
 
+  lazy val safePackageProgram: Boolean = {
+    // ref FLINK-21164 FLINK-9844 packageProgram.close()
+    // must be flink 1.12.2 and above
+    flinkVersion.version.split("\\.").map(_.trim.toInt) match {
+      case Array(a, b, c) if a >= 1 => b > 12 || (b == 12 && c >= 2)
+      case _ => false
+    }
+  }
+
+
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
     if (this.appConf == null) Map.empty[String, String] else {
       val map = this.appConf match {

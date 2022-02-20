@@ -165,24 +165,6 @@ trait FlinkSubmitTrait extends Logger {
       ).build()
   }
 
-  private[submit] def safeClose(submitRequest: SubmitRequest, cloneable: AutoCloseable*): Unit = {
-    // ref FLINK-21164 FLINK-9844 packageProgram.close()
-    // must be flink 1.12.2 and above
-    val seq = cloneable.filter(_.isInstanceOf[PackagedProgram])
-    if (seq.nonEmpty) {
-      submitRequest.flinkVersion.version.split("\\.").map(_.trim.toInt) match {
-        case Array(a, b, c) if a >= 1 =>
-          if (b > 12 || (b == 12 && c >= 2)) {
-            Utils.close(seq.head)
-          }
-        case _ =>
-      }
-      Utils.close(cloneable.filterNot(_.isInstanceOf[PackagedProgram]): _*)
-    } else {
-      Utils.close(cloneable: _*)
-    }
-  }
-
   private[submit] def getJobID(jobId: String) = Try(JobID.fromHexString(jobId)) match {
     case Success(id) => id
     case Failure(e) => throw new CliArgsException(e.getMessage)

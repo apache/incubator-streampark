@@ -132,7 +132,7 @@ object MavenTool extends Logger {
       // read relevant artifact descriptor info
       // plz don't simplify the following lambda syntax to maintain the readability of the code.
       val resolvedArtifacts = artifacts
-        .map(artifact => new ArtifactDescriptorRequest(artifact, MavenRetriever.remoteRepos, null))
+        .map(artifact => new ArtifactDescriptorRequest(artifact, MavenRetriever.remoteRepos(), null))
         .map(artDescReq => repoSystem.readArtifactDescriptor(session, artDescReq))
         .flatMap(_.getDependencies)
         .filter(_.getScope == "compile")
@@ -150,7 +150,7 @@ object MavenTool extends Logger {
       logInfo(s"resolved dependencies: ${mergedArtifacts.mkString}")
 
       // download artifacts
-      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos, null))
+      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos(), null))
       repoSystem.resolveArtifacts(session, artReqs)
         .map(_.getArtifact.getFile).toSet
     }

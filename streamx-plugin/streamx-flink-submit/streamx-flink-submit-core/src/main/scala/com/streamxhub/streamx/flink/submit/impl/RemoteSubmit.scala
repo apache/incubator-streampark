@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.DevelopmentMode
+import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
@@ -164,7 +165,10 @@ object RemoteSubmit extends FlinkSubmitTrait {
         e.printStackTrace()
         throw e
     } finally {
-      safeClose(submitRequest, packageProgram, clusterDescriptor, client)
+      if (submitRequest.safePackageProgram) {
+        Utils.close(packageProgram)
+      }
+      Utils.close(client, clusterDescriptor)
     }
   }
 

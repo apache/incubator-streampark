@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.DevelopmentMode
-import com.streamxhub.streamx.common.util.HdfsUtils
+import com.streamxhub.streamx.common.util.{HdfsUtils, Utils}
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
@@ -128,7 +128,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
 
           SubmitResponse(applicationId.toString, flinkConfig.toMap)
         } finally {
-          safeClose(null, clusterDescriptor, clusterClient)
+          Utils.close(clusterDescriptor, clusterClient)
         }
       }
     })

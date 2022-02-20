@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.util.FlinkUtils
+import com.streamxhub.streamx.common.util.{FlinkUtils, Utils}
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
@@ -123,7 +123,10 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
       SubmitResponse(applicationId.toString, flinkConfig.toMap)
     } finally {
-      safeClose(submitRequest, packagedProgram, clusterDescriptor, clusterClient)
+      if (submitRequest.safePackageProgram) {
+        Utils.close(packagedProgram)
+      }
+      Utils.close(clusterClient, clusterDescriptor)
     }
   }
 

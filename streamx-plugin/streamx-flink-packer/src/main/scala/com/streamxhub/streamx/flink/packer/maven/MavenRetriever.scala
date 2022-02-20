@@ -39,23 +39,18 @@ import java.util
 object MavenRetriever {
 
   /**
-   * default maven remote center repository
-   */
-  lazy val remoteCenterRepo: RemoteRepository = {
-    new RemoteRepository.Builder("central", "default", ConfigHub.get(MAVEN_REMOTE_URL)).build()
-  }
-
-  /**
-   * maven remote repository lists
-   */
-  lazy val remoteRepos: util.ArrayList[RemoteRepository] = Lists.newArrayList(remoteCenterRepo)
-
-  /**
    * default maven local repository
    */
   lazy val localRepo = new LocalRepository(Workspace.local.MAVEN_LOCAL_DIR)
 
   private lazy val locator = MavenRepositorySystemUtils.newServiceLocator
+
+  /**
+   * maven remote repository lists
+   */
+  def remoteRepos(): util.ArrayList[RemoteRepository] = Lists.newArrayList(
+    new RemoteRepository.Builder("central", "default", ConfigHub.get(MAVEN_REMOTE_URL)).build()
+  )
 
   /**
    * create maven repository endpoint
