@@ -46,7 +46,7 @@ sealed trait FlinkBuildParam extends BuildParam {
 
   def dependencyInfo: DependencyInfo
 
-  def customFlinkUsrJarPath: String
+  def customFlinkUserJarPath: String
 }
 
 sealed trait FlinkK8sBuildParam extends FlinkBuildParam {
@@ -62,7 +62,7 @@ case class FlinkK8sSessionBuildRequest(appName: String,
                                        developmentMode: DevelopmentMode,
                                        flinkVersion: FlinkVersion,
                                        dependencyInfo: DependencyInfo,
-                                       customFlinkUsrJarPath: String,
+                                       customFlinkUserJarPath: String,
                                        clusterId: String,
                                        k8sNamespace: String
                                       ) extends FlinkK8sBuildParam
@@ -73,7 +73,7 @@ case class FlinkK8sApplicationBuildRequest(appName: String,
                                            developmentMode: DevelopmentMode,
                                            flinkVersion: FlinkVersion,
                                            dependencyInfo: DependencyInfo,
-                                           customFlinkUsrJarPath: String,
+                                           customFlinkUserJarPath: String,
                                            clusterId: String,
                                            k8sNamespace: String,
                                            flinkBaseImage: String,
@@ -88,9 +88,15 @@ case class FlinkRemoteBuildRequest(appName: String,
                                    developmentMode: DevelopmentMode,
                                    flinkVersion: FlinkVersion,
                                    dependencyInfo: DependencyInfo,
-                                   customFlinkUsrJarPath: String) extends FlinkBuildParam
+                                   customFlinkUserJarPath: String) extends FlinkBuildParam
 
-// todo case class FlinkYarnApplicationBuildRequest() extends FlinkBuildParam
+
+case class FlinkYarnApplicationBuildRequest(appName: String,
+                                            mainClass: String,
+                                            localPath: String,
+                                            yarnProvidedPath: String,
+                                            developmentMode: DevelopmentMode,
+                                            dependencyInfo: DependencyInfo) extends BuildParam
 
 // todo case class FlinkYarnSessionBuildRequest() extends FlinkBuildParam
 

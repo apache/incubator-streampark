@@ -58,21 +58,21 @@ object FlinkSessionSubmitHelper extends Logger {
           .addBinaryBody("jarfile", flinkJobJar, ContentType.create("application/java-archive"), flinkJobJar.getName)
           .build())
       .execute.returnContent().asString(StandardCharsets.UTF_8)
-      .fromJson[JarUploadRsp]
+      .fromJson[JarUploadResponse]
 
     if (!uploadResult.isSuccessful) {
       throw new Exception(s"[flink-submit] upload flink jar to flink session cluster failed, jmRestUrl=$jmRestUrl, response=$uploadResult")
     }
 
     // run flink job
-    val jarRunRsp = Request.post(s"$jmRestUrl/jars/${uploadResult.jarId}/run")
+    val jarRunResponse = Request.post(s"$jmRestUrl/jars/${uploadResult.jarId}/run")
       .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
       .responseTimeout(Timeout.ofSeconds(60))
-      .body(new StringEntity(new JarRunReq(flinkConfig).toJson))
+      .body(new StringEntity(new JarRunRequest(flinkConfig).toJson))
       .execute.returnContent().asString(StandardCharsets.UTF_8)
-      .fromJson[JarRunRsp]
+      .fromJson[JarRunResponse]
 
-    jarRunRsp.jobId
+    jarRunResponse.jobId
   }
 
 }
@@ -81,8 +81,8 @@ object FlinkSessionSubmitHelper extends Logger {
 /**
  * refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
  */
-private[submit] case class JarUploadRsp(@JsonProperty("filename") filename: String,
-                                        @JsonProperty("status") status: String) {
+private[submit] case class JarUploadResponse(@JsonProperty("filename") filename: String,
+                                             @JsonProperty("status") status: String) {
 
   def isSuccessful: Boolean = "success".equalsIgnoreCase(status)
 
@@ -92,11 +92,11 @@ private[submit] case class JarUploadRsp(@JsonProperty("filename") filename: Stri
 /**
  * refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
  */
-private[submit] case class JarRunReq(@JsonProperty("entryClass") entryClass: String,
-                                     @JsonProperty("programArgs") programArgs: String,
-                                     @JsonProperty("parallelism") parallelism: String,
-                                     @JsonProperty("savepointPath") savepointPath: String,
-                                     @JsonProperty("allowNonRestoredState") allowNonRestoredState: Boolean) {
+private[submit] case class JarRunRequest(@JsonProperty("entryClass") entryClass: String,
+                                         @JsonProperty("programArgs") programArgs: String,
+                                         @JsonProperty("parallelism") parallelism: String,
+                                         @JsonProperty("savepointPath") savepointPath: String,
+                                         @JsonProperty("allowNonRestoredState") allowNonRestoredState: Boolean) {
   def this(flinkConf: Configuration) {
     this(
       entryClass = flinkConf.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS),
@@ -111,7 +111,7 @@ private[submit] case class JarRunReq(@JsonProperty("entryClass") entryClass: Str
 /**
  * refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
  */
-private[submit] case class JarRunRsp(@JsonProperty("jobid") jobId: String)
+private[submit] case class JarRunResponse(@JsonProperty("jobid") jobId: String)
 
 
 
