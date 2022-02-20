@@ -69,7 +69,7 @@ case class Workspace(storageType: StorageType) {
               if (p.startsWith(defaultFs)) {
                 p
               } else {
-                var path = URI.create(p).getPath
+                val path = URI.create(p).getPath
                 s"${HdfsUtils.getDefaultFS}$path"
               }
             } else {

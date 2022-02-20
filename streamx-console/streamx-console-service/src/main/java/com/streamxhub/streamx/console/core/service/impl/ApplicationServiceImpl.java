@@ -136,7 +136,6 @@ import java.util.stream.Collectors;
 import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.Bridge.toTrkId;
 import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.isKubernetesApp;
 
-
 /**
  * @author benjobs
  */
@@ -583,24 +582,38 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         try {
             Application application = getById(appParam.getId());
 
-            boolean localJarChanged = false;
+            boolean needDeploy = false;
 
             if (application.isUploadJob()) {
                 if (!ObjectUtils.safeEquals(application.getJar(), application.getJar())) {
                     application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
-                    localJarChanged = true;
-                }
-                File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());
-                if (jarFile.exists()) {
-                    long checkSum = FileUtils.checksumCRC32(jarFile);
-                    if (!ObjectUtils.safeEquals(checkSum, application.getJarCheckSum())) {
-                        application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
-                        localJarChanged = true;
+                    needDeploy = true;
+                } else {
+                    File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());
+                    if (jarFile.exists()) {
+                        long checkSum = FileUtils.checksumCRC32(jarFile);
+                        if (!ObjectUtils.safeEquals(checkSum, application.getJarCheckSum())) {
+                            application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
+                            needDeploy = true;
+                        }
                     }
                 }
             }
 
-            if (!localJarChanged) {
+            if (!needDeploy) {
+                //部署模式发生了变化.
+                if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
+                    if (appParam.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
+                            application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)) {
+                        if (application.isFlinkSqlJob()) {
+                            application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
+                            needDeploy = true;
+                        }
+                    }
+                }
+            }
+
+            if (!needDeploy) {
                 //检查任务相关的参数是否发生变化,发生变化则设置需要重启的状态
                 if (!appParam.eqJobParam(application)) {
                     application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());

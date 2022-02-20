@@ -145,9 +145,7 @@ public class ApplBuildPipeServiceImpl
         pipeline.registerWatcher(new PipeWatcher() {
             @Override
             public void onStart(PipeSnapshot snapshot) {
-                if (app.getBackUp()) {
-                    backUpService.backup(app);
-                }
+                backUpService.backup(app);
                 app.setDeploy(DeployState.DEPLOYING.get());
                 applicationService.updateDeploy(app);
                 AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());

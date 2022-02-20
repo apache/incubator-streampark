@@ -53,10 +53,9 @@ data laker.
 * Support maven compilation
 * Configuration
 * Multi version flink support(1.12.x,1.13.x,1.14.x)
-* on Kubernetes deployment (`K8s-Native-Application`/`K8s-Native-Session`)
-* on YARN deployment (`YARN-Application`/`YARN-Per-Job`)
-* Support `Applicaion` and `Yarn-Per-Job` mode
+* All Flink deployment mode support(`Remote`/`Local`/`K8s-Native-Application`/`K8s-Native-Session`/`YARN-Application`/`YARN-Per-Job`/`YARN-Session`)
 * `start`, `stop`, `savepoint`, resume from `savepoint`
+* Various companies and organizations use `StreamX` for production and commercial products.
 * Flame graph
 * Notebook
 * Project configuration and dependency version management
