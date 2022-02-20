@@ -91,7 +91,7 @@ trait BuildPipelineExpose {
    */
   def launch(): BuildResult
 
-  def as[T <: BuildPipeline](clz: Class[T]): T = this.asInstanceOf[T]
+  def as[T <: BuildPipeline](implicit clz: Class[T]): T = this.asInstanceOf[T]
 }
 
 

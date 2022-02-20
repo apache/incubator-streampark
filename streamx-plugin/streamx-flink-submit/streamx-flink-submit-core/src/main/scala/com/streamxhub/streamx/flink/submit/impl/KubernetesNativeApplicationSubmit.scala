@@ -21,7 +21,6 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.ExecutionMode
-import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.packer.pipeline.DockerImageBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
@@ -80,7 +79,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
         throw e
     } finally {
-      Utils.close(clusterClient, clusterDescriptor)
+      safeClose(null, clusterDescriptor, clusterClient)
     }
   }
 

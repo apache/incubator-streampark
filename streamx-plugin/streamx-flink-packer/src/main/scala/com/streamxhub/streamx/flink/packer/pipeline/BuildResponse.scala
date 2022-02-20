@@ -33,7 +33,7 @@ sealed trait BuildResult {
    */
   def pass: Boolean
 
-  def as[T <: BuildResult](clz: Class[T]): T = this.asInstanceOf[T]
+  def as[T <: BuildResult](implicit clz: Class[T]): T = this.asInstanceOf[T]
 }
 
 sealed trait FlinkBuildResult extends BuildResult {

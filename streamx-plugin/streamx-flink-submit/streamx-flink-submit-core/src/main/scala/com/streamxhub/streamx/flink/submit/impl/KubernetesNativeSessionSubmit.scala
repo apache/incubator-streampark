@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
-import com.streamxhub.streamx.common.util.{Logger, Utils}
+import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
@@ -119,9 +119,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         e.printStackTrace()
         throw e
     } finally {
-      // ref FLINK-21164 FLINK-9844 packageProgram.close()
-      // must be flink 1.12.2 and above
-      Utils.close(packageProgram, client, clusterDescriptor)
+      safeClose(submitRequest, packageProgram, clusterDescriptor, client)
     }
   }
 
