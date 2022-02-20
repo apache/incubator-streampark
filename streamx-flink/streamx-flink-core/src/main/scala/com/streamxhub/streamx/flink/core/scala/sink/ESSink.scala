@@ -24,7 +24,10 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.elasticsearch.ActionRequestFailureHandler
 import org.apache.flink.streaming.connectors.elasticsearch.util.RetryRejectedExecutionFailureHandler
+import org.apache.flink.streaming.connectors.elasticsearch6.RestClientFactory
+import org.elasticsearch.action.delete.DeleteRequest
 import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.action.update.UpdateRequest
 
 import java.util.Properties
 import scala.annotation.meta.param
@@ -46,26 +49,6 @@ class ESSink(@(transient@param) context: StreamingContext,
              uid: String = null) {
 
   /**
-   * for ElasticSearch5....
-   *
-   * @param stream
-   * @param suffix
-   * @param failureHandler
-   * @param f
-   * @tparam T
-   * @return
-   */
-  def sink5[T](stream: DataStream[T],
-               suffix: String = "",
-               failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
-              (implicit f: T => IndexRequest): DataStreamSink[T] = {
-
-    //TODO....
-    null
-    //new sink5(context, property, parallelism, uidHash).sink[T](stream, suffix, failureHandler)(f)
-  }
-
-  /**
    * for ElasticSearch6....
    *
    * @param stream
@@ -78,11 +61,53 @@ class ESSink(@(transient@param) context: StreamingContext,
    */
   def sink6[T](stream: DataStream[T],
                suffix: String = "",
-               restClientFactory: Any = null,
+               restClientFactory: RestClientFactory = null,
                failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
               (implicit f: T => IndexRequest): DataStreamSink[T] = {
 
-    new ES6Sink(context, property, parallelism, name, uid).sink[T](stream, suffix, failureHandler)(f)
+    new ES6Sink(context, property, parallelism, name, uid).sink[T](stream, suffix, restClientFactory, failureHandler, f)
+  }
+
+
+  /**
+   * for ElasticSearch6....
+   *
+   * @param stream
+   * @param suffix
+   * @param restClientFactory
+   * @param failureHandler
+   * @param f
+   * @tparam T
+   * @return
+   */
+  def update6[T](stream: DataStream[T],
+               suffix: String = "",
+               restClientFactory: RestClientFactory = null,
+               failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
+              ( f: T => UpdateRequest): DataStreamSink[T] = {
+
+    new ES6Sink(context, property, parallelism, name, uid).sink[T](stream, suffix, restClientFactory, failureHandler, f)
+  }
+
+
+  /**
+   * for ElasticSearch6....
+   *
+   * @param stream
+   * @param suffix
+   * @param restClientFactory
+   * @param failureHandler
+   * @param f
+   * @tparam T
+   * @return
+   */
+  def delete6[T](stream: DataStream[T],
+               suffix: String = "",
+               restClientFactory: RestClientFactory = null,
+               failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
+              ( f: T => DeleteRequest): DataStreamSink[T] = {
+
+    new ES6Sink(context, property, parallelism, name, uid).sink[T](stream, suffix, restClientFactory, failureHandler, f)
   }
 
 }
