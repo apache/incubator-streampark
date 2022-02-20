@@ -119,9 +119,10 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         e.printStackTrace()
         throw e
     } finally {
-      // ref FLINK-21164 FLINK-9844 packageProgram.close()
-      // must be flink 1.12.2 and above
-      Utils.close(packageProgram, client, clusterDescriptor)
+      if (submitRequest.safePackageProgram) {
+        Utils.close(packageProgram)
+      }
+      Utils.close(clusterDescriptor, client)
     }
   }
 

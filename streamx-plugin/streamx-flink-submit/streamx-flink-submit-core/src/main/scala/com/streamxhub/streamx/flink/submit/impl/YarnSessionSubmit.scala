@@ -162,7 +162,10 @@ object YarnSessionSubmit extends YarnSubmitTrait {
         e.printStackTrace()
         throw e
     } finally {
-      Utils.close(packageProgram, client, clusterDescriptor)
+      if (submitRequest.safePackageProgram) {
+        Utils.close(packageProgram)
+      }
+      Utils.close(client, clusterDescriptor)
     }
   }
 

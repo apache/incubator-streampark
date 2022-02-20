@@ -28,7 +28,7 @@ import com.streamxhub.streamx.console.core.entity.Setting;
  */
 public interface SettingService extends IService<Setting> {
 
-    String KEY_MAVEN_REPOSITORY = "maven.central.repository";
+    String KEY_MAVEN_REPOSITORY = "streamx.maven.central.repository";
     String KEY_STREAMX_ADDRESS = "streamx.console.webapp.address";
 
     String KEY_ALERT_EMAIL_HOST = "alert.email.host";

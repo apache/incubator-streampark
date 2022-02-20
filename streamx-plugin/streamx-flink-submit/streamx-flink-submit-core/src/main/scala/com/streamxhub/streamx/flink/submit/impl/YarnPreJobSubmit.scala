@@ -20,12 +20,12 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.util.FlinkUtils
+import com.streamxhub.streamx.common.util.{FlinkUtils, Utils}
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
+import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration.{Configuration, DeploymentOptions}
 import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
@@ -59,6 +59,8 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
+    var packagedProgram: PackagedProgram = null
+    var clusterClient: ClusterClient[ApplicationId] = null
 
     val clusterDescriptor = {
       val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[YarnClusterDescriptor]
@@ -69,7 +71,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     }
 
     try {
-      val clusterClient = {
+      clusterClient = {
         val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
         logInfo(
           s"""
@@ -78,7 +80,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
              |------------------------------------------------------------------
              |""".stripMargin)
 
-        val packagedProgram = PackagedProgram
+        packagedProgram = PackagedProgram
           .newBuilder
           .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
           .setJarFile(new File(submitRequest.flinkUserJar))
@@ -120,8 +122,11 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
            |""".stripMargin)
 
       SubmitResponse(applicationId.toString, flinkConfig.toMap)
-    } finally if (clusterDescriptor != null) {
-      clusterDescriptor.close()
+    } finally {
+      if (submitRequest.safePackageProgram) {
+        Utils.close(packagedProgram)
+      }
+      Utils.close(clusterClient, clusterDescriptor)
     }
   }
 

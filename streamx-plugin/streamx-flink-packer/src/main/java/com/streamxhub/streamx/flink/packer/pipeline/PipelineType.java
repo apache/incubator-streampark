@@ -85,7 +85,7 @@ public enum PipelineType {
                     .put(2, "Resolve maven dependencies")
                     .put(3, "upload jar to yarn.provided.lib.dirs")
                     .build(),
-            DockerImageBuildResponse.class
+            SimpleBuildResponse.class
     );
 
 

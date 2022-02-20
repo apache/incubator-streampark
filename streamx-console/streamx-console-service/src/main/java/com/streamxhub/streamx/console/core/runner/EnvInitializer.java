@@ -29,6 +29,7 @@ import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
+import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -59,6 +60,9 @@ public class EnvInitializer implements ApplicationRunner {
 
     @Autowired
     private ApplicationContext context;
+
+    @Autowired
+    private SettingService settingService;
 
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
 
@@ -97,6 +101,11 @@ public class EnvInitializer implements ApplicationRunner {
                     assert config != null;
                     ConfigHub.set(config, springEnv.getProperty(key, config.classType()));
                 });
+
+        String mvnRepository = settingService.getMavenRepository();
+        if (mvnRepository != null) {
+            ConfigHub.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);
+        }
 
         ConfigHub.log();
     }

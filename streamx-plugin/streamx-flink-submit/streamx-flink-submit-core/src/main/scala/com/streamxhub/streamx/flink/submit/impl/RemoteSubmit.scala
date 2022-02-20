@@ -165,7 +165,10 @@ object RemoteSubmit extends FlinkSubmitTrait {
         e.printStackTrace()
         throw e
     } finally {
-      Utils.close(packageProgram, client, clusterDescriptor)
+      if (submitRequest.safePackageProgram) {
+        Utils.close(packageProgram)
+      }
+      Utils.close(client, clusterDescriptor)
     }
   }
 

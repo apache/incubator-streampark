@@ -491,7 +491,7 @@ PRIMARY KEY (`KEY`) USING BTREE
 -- Records of t_setting
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_setting` VALUES (1, 'maven.central.repository', NULL, 'Maven Central Repository', 'Maven 私服地址', 1);
+INSERT INTO `t_setting` VALUES (1, 'streamx.maven.central.repository', NULL, 'Maven Central Repository', 'Maven 私服地址', 1);
 INSERT INTO `t_setting` VALUES (2, 'streamx.console.webapp.address', NULL, 'StreamX Webapp address', 'StreamX Console Web 应用程序HTTP URL', 1);
 INSERT INTO `t_setting` VALUES (3, 'alert.email.host', NULL, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
 INSERT INTO `t_setting` VALUES (4, 'alert.email.port', NULL, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);

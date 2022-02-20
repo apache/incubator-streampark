@@ -80,7 +80,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
         throw e
     } finally {
-      Utils.close(clusterClient, clusterDescriptor)
+      Utils.close(clusterDescriptor, clusterClient)
     }
   }
 

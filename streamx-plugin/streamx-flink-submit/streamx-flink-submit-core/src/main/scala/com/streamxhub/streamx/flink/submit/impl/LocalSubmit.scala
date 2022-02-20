@@ -79,7 +79,10 @@ object LocalSubmit extends FlinkSubmitTrait {
         e.printStackTrace()
         throw e
     } finally {
-      Utils.close(packageProgram, client)
+      if (submitRequest.safePackageProgram) {
+        Utils.close(packageProgram)
+      }
+      Utils.close(client)
     }
   }
 
