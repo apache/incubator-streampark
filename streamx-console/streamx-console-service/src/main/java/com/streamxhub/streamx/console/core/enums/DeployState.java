@@ -28,9 +28,9 @@ import java.util.Arrays;
 public enum DeployState implements Serializable {
 
     /**
-     * 需用重新发布,但是下载maven依赖失败.(针对flinkSql任务)
+     * 部署失败
      */
-    NEED_DEPLOY_DOWN_DEPENDENCY_FAILED(-1),
+    FAILED(-1),
     /**
      * 完结
      */

@@ -136,6 +136,7 @@ import java.util.stream.Collectors;
 import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.Bridge.toTrkId;
 import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.isKubernetesApp;
 
+
 /**
  * @author benjobs
  */
@@ -295,7 +296,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public String upload(MultipartFile file) throws Exception {
-        String temp = WebUtils.getAppDir("temp");
+        File temp = WebUtils.getAppTempDir();
         File saveFile = new File(temp, Objects.requireNonNull(file.getOriginalFilename()));
         // delete when exists
         if (saveFile.exists()) {
@@ -343,7 +344,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(Application::getId, application.getId());
         if (application.isFlinkSqlJob()) {
-            updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
+            updateWrapper.set(Application::getDeploy, DeployState.FAILED.get());
         } else {
             updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_AFTER_BUILD.get());
         }
@@ -556,7 +557,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setCreateTime(new Date());
         appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
-            String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
+            String jarPath = WebUtils.getAppTempDir().getAbsolutePath().concat("/").concat(appParam.getJar());
             appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
         }
 
@@ -570,7 +571,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 configService.create(appParam, true);
             }
             assert appParam.getId() != null;
-            deploy(appParam, appParam.getSocketId());
             return true;
         }
         return false;
@@ -590,8 +590,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     application.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
                     localJarChanged = true;
                 }
-                String jarPath = WebUtils.getAppDir("temp").concat("/").concat(appParam.getJar());
-                File jarFile = new File(jarPath);
+                File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());
                 if (jarFile.exists()) {
                     long checkSum = FileUtils.checksumCRC32(jarFile);
                     if (!ObjectUtils.safeEquals(checkSum, application.getJarCheckSum())) {
@@ -766,7 +765,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             fsOperator.delete(appHome);
                             if (application.isUploadJob()) {
                                 String appUploads = application.getWorkspace().APP_UPLOADS();
-                                String temp = WebUtils.getAppDir("temp");
+                                File temp = WebUtils.getAppTempDir();
                                 File localJar = new File(temp, application.getJar());
                                 String targetJar = appUploads.concat("/").concat(application.getJar());
                                 checkOrElseUploadJar(application, localJar, targetJar);
@@ -813,7 +812,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         messageService.push(message);
                         updateWrapper.set(Application::getState, FlinkAppState.ADDED.getValue());
                         updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
-                        updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
+                        updateWrapper.set(Application::getDeploy, DeployState.FAILED.get());
                     } finally {
                         FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                             baseMapper.update(application, updateWrapper);
@@ -834,8 +833,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    @RefreshCache
     public void updateDeploy(Application application) {
-        baseMapper.updateDeploy(application);
+        LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(Application::getId, application.getId());
+        updateWrapper.set(Application::getDeploy, application.getDeploy());
+        if (application.getOptionState() != null) {
+            updateWrapper.set(Application::getOptionState, application.getOptionState());
+        }
+        baseMapper.update(application, updateWrapper);
+    }
+
+    @Override
+    public List<Application> getByProjectId(Long id) {
+        return baseMapper.getByProjectId(id);
     }
 
     private Collection<String> downloadDependency(Application application, String socketId) throws Exception {
@@ -919,6 +930,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private void uploadDependency(Application application, Collection<String> dependencyJars) throws IOException {
         FsOperator fsOperator = application.getFsOperator();
 
+        // /flinksql/1233333/lib/12333.jar
         //1 ) upload pom dependency
         if (!dependencyJars.isEmpty()) {
             File lib = new File(application.getLocalFlinkSqlHome(), "lib");
@@ -930,13 +942,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             // 1.2 ) upload jar by pomJar
             fsOperator.delete(application.getAppHome());
+
+            // /flinksql/1233333 ===> /workspace
             fsOperator.upload(application.getLocalFlinkSqlHome().getAbsolutePath(), application.getWorkspace().APP_WORKSPACE());
         }
 
         //2 ) upload local jar
         List<String> jars = application.getDependencyObject().getJar();
         String appUploads = application.getWorkspace().APP_UPLOADS();
-        String temp = WebUtils.getAppDir("temp");
+        File temp = WebUtils.getAppTempDir();
         if (Utils.notEmpty(jars)) {
             for (String jar : jars) {
                 File localJar = new File(temp, jar);
@@ -975,7 +989,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @RefreshCache
     public void clean(Application appParam) {
         appParam.setDeploy(DeployState.DONE.get());
-        this.baseMapper.updateDeploy(appParam);
+        this.updateDeploy(appParam);
     }
 
     @Override
@@ -1235,7 +1249,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 assert flinkSql != null;
 
                 //1) dist_userJar
-                File localClient = new File(WebUtils.getAppDir("client"));
+                File localClient = WebUtils.getAppClientDir();
                 assert localClient.exists();
                 List<String> jars =
                         Arrays.stream(Objects.requireNonNull(localClient.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))

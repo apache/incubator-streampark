@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
+ * <pre>
  * Status of per step of building pipeline.
  * state machine:
  * ┌──────────────────────────────────┐
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * │              │             ▼     │
  * │              └────────► skipped  │
  * └──────────────────────────────────┘
+ * </pre>
  *
  * @author Al-assad
  */
@@ -40,7 +42,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum PipelineStepStatus {
 
     unknown(0),
-
     waiting(1),
     running(2),
     success(3),

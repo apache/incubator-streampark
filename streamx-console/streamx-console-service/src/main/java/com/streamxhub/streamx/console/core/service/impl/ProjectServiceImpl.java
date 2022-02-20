@@ -33,12 +33,12 @@ import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.GZipUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
-import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.BuildState;
 import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
@@ -84,7 +84,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     private final Map<Long, Byte> tailBeginning = new ConcurrentHashMap<>();
 
     @Autowired
-    private ApplicationMapper applicationMapper;
+    private ApplicationService applicationService;
 
     private ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
@@ -136,7 +136,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                         log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
                         app.setDeploy(DeployState.NEED_CHECK_AFTER_PROJECT_CHANGED.get());
-                        this.applicationMapper.updateDeploy(app);
+                        applicationService.updateDeploy(app);
                     }));
                 }
             }
@@ -155,7 +155,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         assert project != null;
         LambdaQueryWrapper<Application> queryWrapper = new QueryWrapper<Application>().lambda();
         queryWrapper.eq(Application::getProjectId, id);
-        Integer count = applicationMapper.selectCount(queryWrapper);
+        Integer count = applicationService.count(queryWrapper);
         if (count > 0) {
             return false;
         }
@@ -196,7 +196,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                             log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
                             app.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
-                            this.applicationMapper.updateDeploy(app);
+                            this.applicationService.updateDeploy(app);
                         }));
                     } catch (Exception e) {
                         this.baseMapper.failureBuild(project);
@@ -323,7 +323,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public List<Application> getApplications(Project project) {
-        return this.applicationMapper.getByProject(project);
+        return this.applicationService.getByProjectId(project.getId());
     }
 
     @Override

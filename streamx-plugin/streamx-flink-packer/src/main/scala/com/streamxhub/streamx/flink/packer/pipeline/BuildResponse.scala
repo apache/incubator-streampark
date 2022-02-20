@@ -46,6 +46,11 @@ case class ErrorResult(pass: Boolean = false) extends BuildResult {
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+case class SimpleBuildResponse(workspacePath: String = null,
+                               pass: Boolean = true) extends FlinkBuildResult
+
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 case class ShadedBuildResponse(workspacePath: String,
                                shadedJarPath: String,
                                pass: Boolean = true) extends FlinkBuildResult

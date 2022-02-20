@@ -76,9 +76,17 @@ public enum PipelineType {
                     .build(),
             ShadedBuildResponse.class
     ),
-    // todo FLINK_YARN_APPLICATION(),
-    // todo FLINK_YARN_SESSION(),
-    ;
+
+    FLINK_YARN_APPLICATION(
+            4,
+            "flink yarn application mode task building pipeline",
+            ImmutableMap.<Integer, String>builder()
+                    .put(1, "Create building workspace")
+                    .put(2, "Resolve maven dependencies")
+                    .put(3, "upload jar to yarn.provided.lib.dirs")
+                    .build(),
+            DockerImageBuildResponse.class
+    );
 
 
     private final Integer code;

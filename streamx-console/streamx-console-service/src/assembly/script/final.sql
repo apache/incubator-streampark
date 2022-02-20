@@ -93,7 +93,7 @@ CREATE TABLE `t_flink_app` (
 `OPTION_STATE` tinyint DEFAULT NULL,
 `TRACKING` tinyint DEFAULT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
-`DEPLOY` tinyint DEFAULT '0',
+`DEPLOY` tinyint DEFAULT '2',
 `START_TIME` datetime DEFAULT NULL,
 `END_TIME` datetime DEFAULT NULL,
 `ALERT_EMAIL` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -112,7 +112,7 @@ KEY `INX_TRACK` (`TRACKING`) USING BTREE
 -- Records of t_flink_app
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_app` VALUES (100000, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', NULL, 100000, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '2', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL);
+INSERT INTO `t_flink_app` VALUES (100000, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', NULL, 100000, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '2', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), 2, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL);
 COMMIT;
 
 -- ----------------------------
