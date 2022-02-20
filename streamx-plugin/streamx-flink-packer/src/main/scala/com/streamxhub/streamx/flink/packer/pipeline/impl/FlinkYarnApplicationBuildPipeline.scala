@@ -28,6 +28,11 @@ import org.apache.commons.codec.digest.DigestUtils
 
 import java.io.{File, FileInputStream, IOException}
 
+/**
+ * Building pipeline for flink yarn application mode
+ *
+ * @author benjobs
+ */
 class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildRequest) extends BuildPipeline {
 
   private[this] val fsOperator = FsOperator.hdfs
@@ -46,10 +51,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
    */
   @throws[Throwable] override protected def buildProcess(): SimpleBuildResponse = {
     execStep(1) {
-      request.developmentMode match {
-        case DevelopmentMode.CUSTOMCODE => LfsOperator.mkCleanDirs(request.yarnProvidedPath)
-        case _ =>
-      }
+      LfsOperator.mkCleanDirs(request.yarnProvidedPath)
       logInfo(s"recreate building workspace: ${request.yarnProvidedPath}")
     }.getOrElse(throw getError.exception)
 
