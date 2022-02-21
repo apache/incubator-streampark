@@ -551,7 +551,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     public boolean create(Application appParam) {
         appParam.setUserId(serverComponent.getUser().getUserId());
-        appParam.setState(FlinkAppState.CREATED.getValue());
+        appParam.setState(FlinkAppState.ADDED.getValue());
+        appParam.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
         appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
         appParam.doSetHotParams();
