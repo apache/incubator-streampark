@@ -37,7 +37,7 @@ object BuildPipelineHelper {
   /**
    * Let appName more suitable as part of the file path
    */
-  def letAppNameSafe(appName: String): String = appName.replace(" ", "_")
+  def getSafeAppName(appName: String): String = appName.replaceAll("\\s+", "_")
 
   /**
    * Extract provided flink libs from StreamX Workspace
@@ -47,7 +47,7 @@ object BuildPipelineHelper {
     val providedLibs = ArrayBuffer(
       localWorkspace.APP_JARS,
       localWorkspace.APP_PLUGINS,
-      buildParams.customFlinkUsrJarPath
+      buildParams.customFlinkUserJarPath
     )
     if (buildParams.developmentMode == DevelopmentMode.FLINKSQL) {
       providedLibs += {

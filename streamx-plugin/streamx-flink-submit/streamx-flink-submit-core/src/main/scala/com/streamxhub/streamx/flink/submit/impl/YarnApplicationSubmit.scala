@@ -20,11 +20,12 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.DevelopmentMode
-import com.streamxhub.streamx.common.util.HdfsUtils
+import com.streamxhub.streamx.common.util.{HdfsUtils, Utils}
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
+import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
 import org.apache.flink.runtime.util.HadoopUtils
@@ -104,6 +105,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
         val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
         val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
         val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
+        var clusterClient: ClusterClient[ApplicationId] = null
         try {
           val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
           logInfo(
@@ -115,9 +117,8 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
 
           val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
           var applicationId: ApplicationId = null
-          val clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+          clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
           applicationId = clusterClient.getClusterId
-
           logInfo(
             s"""
                |-------------------------<<applicationId>>------------------------
@@ -126,8 +127,8 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
                |""".stripMargin)
 
           SubmitResponse(applicationId.toString, flinkConfig.toMap)
-        } finally if (clusterDescriptor != null) {
-          clusterDescriptor.close()
+        } finally {
+          Utils.close(clusterDescriptor, clusterClient)
         }
       }
     })

@@ -24,7 +24,7 @@ import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildResponse
+import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
@@ -50,11 +50,12 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // 2) get userJar
     val jarFile = submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>
-        checkBuildResult(submitRequest)
+
+        submitRequest.checkBuildResult()
         // 1) get build result
-        val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sSessionBuildResponse]
+        val buildResult = submitRequest.buildResult.asInstanceOf[ShadedBuildResponse]
         // 2) get fat-jar
-        new File(buildResult.flinkShadedJarPath)
+        new File(buildResult.shadedJarPath)
       case _ => new File(submitRequest.flinkUserJar)
     }
 
@@ -88,7 +89,6 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   /**
    * Submit flink session job with building JobGraph via ClusterClient api.
    */
-  // noinspection DuplicatedCode
   @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File): SubmitResponse = {
     // retrieve k8s cluster and submit flink job on session mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
@@ -119,9 +119,10 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         e.printStackTrace()
         throw e
     } finally {
-      // ref FLINK-21164 FLINK-9844 packageProgram.close()
-      // must be flink 1.12.2 and above
-      Utils.close(packageProgram, client, clusterDescriptor)
+      if (submitRequest.safePackageProgram) {
+        Utils.close(packageProgram)
+      }
+      Utils.close(clusterDescriptor, client)
     }
   }
 

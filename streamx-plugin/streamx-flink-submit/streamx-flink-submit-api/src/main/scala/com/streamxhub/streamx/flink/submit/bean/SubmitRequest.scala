@@ -60,7 +60,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
                          args: String,
                          @Nullable buildResult: BuildResult,
                          @Nullable k8sSubmitParam: KubernetesSubmitParam,
-                         @Nullable  extraParameter: JavaMap[String, Any]) {
+                         @Nullable extraParameter: JavaMap[String, Any]) {
 
   lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
 
@@ -84,6 +84,16 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
       case sp => SavepointRestoreSettings.forPath(sp, allowNonRestoredState)
     }
   }
+
+  lazy val safePackageProgram: Boolean = {
+    // ref FLINK-21164 FLINK-9844 packageProgram.close()
+    // must be flink 1.12.2 and above
+    flinkVersion.version.split("\\.").map(_.trim.toInt) match {
+      case Array(a, b, c) if a >= 1 => b > 12 || (b == 12 && c >= 2)
+      case _ => false
+    }
+  }
+
 
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
     if (this.appConf == null) Map.empty[String, String] else {
@@ -140,6 +150,29 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
       appJars = workspace.APP_JARS,
       appPlugins = workspace.APP_PLUGINS
     )
+  }
+
+  @throws[Exception] def checkBuildResult(): Unit = {
+    executionMode match {
+      case ExecutionMode.KUBERNETES_NATIVE_SESSION | ExecutionMode.KUBERNETES_NATIVE_APPLICATION =>
+        if (buildResult == null) {
+          throw new Exception(s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty" +
+            s",clusterId=${k8sSubmitParam.clusterId}," +
+            s",namespace=${k8sSubmitParam.kubernetesNamespace}")
+        }
+        if (!buildResult.pass) {
+          throw new Exception(s"[flink-submit] current job ${this.effectiveAppName} build failed, clusterId" +
+            s",clusterId=${k8sSubmitParam.clusterId}," +
+            s",namespace=${k8sSubmitParam.kubernetesNamespace}")
+        }
+      case _ =>
+        if (this.buildResult == null) {
+          throw new Exception(s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty")
+        }
+        if (!this.buildResult.pass) {
+          throw new Exception(s"[flink-submit] current job ${this.effectiveAppName} build failed, please check")
+        }
+    }
   }
 
 }

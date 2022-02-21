@@ -61,6 +61,7 @@ public class ApplicationBackUp {
             case KUBERNETES_NATIVE_SESSION:
             case YARN_PER_JOB:
             case YARN_SESSION:
+            case REMOTE:
             case LOCAL:
                 this.path = String.format(
                     "%s/%d/%d",

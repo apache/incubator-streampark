@@ -51,7 +51,7 @@ public class MetricsTask {
     @Scheduled(cron = "0 0 * * * ?")
     public void cleanFlameGraph() {
         // 1) clean file
-        String tempPath = WebUtils.getAppDir("temp");
+        String tempPath = WebUtils.getAppTempDir().getAbsolutePath();
         File temp = new File(tempPath);
         Arrays.stream(Objects.requireNonNull(temp.listFiles()))
             .filter(x -> x.getName().matches(FLAME_GRAPH_FILE_REGEXP))

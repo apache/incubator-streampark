@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -85,4 +86,6 @@ public interface ApplicationService extends IService<Application> {
     boolean checkEnv(Application app) throws Exception;
 
     void updateDeploy(Application application);
+
+    List<Application> getByProjectId(Long id);
 }

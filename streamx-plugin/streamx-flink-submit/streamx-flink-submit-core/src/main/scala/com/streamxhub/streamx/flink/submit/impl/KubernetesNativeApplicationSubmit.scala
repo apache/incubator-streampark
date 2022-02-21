@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.submit.impl
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.Utils
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildResponse
+import com.streamxhub.streamx.flink.packer.pipeline.DockerImageBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -46,9 +46,9 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
 
     // check the last building result
-    checkBuildResult(submitRequest)
+    submitRequest.checkBuildResult()
 
-    val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
+    val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
 
     // add flink pipeline.jars configuration
     flinkConfig.safeSet(PipelineOptions.JARS, Lists.newArrayList(buildResult.dockerInnerMainJarPath))
@@ -80,7 +80,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
         throw e
     } finally {
-      Utils.close(clusterClient, clusterDescriptor)
+      Utils.close(clusterDescriptor, clusterClient)
     }
   }
 

@@ -134,11 +134,11 @@ export function verifySQL(vue) {
     }
     controller.flinkSql.verified = true
     if (vue.versionId == null) {
-      this.$swal.fire(
-        'Failed',
-        'please set flink version first.',
-        'error'
-      )
+        vue.$swal.fire(
+            'Failed',
+            'please set flink version first.',
+            'error'
+        )
     } else {
         const callback = arguments[1] || function (r) {
         }
@@ -313,12 +313,12 @@ export function applyPom(vue) {
     const pom = controller.pom.value
     const versionId = vue.versionId
     if (versionId == null) {
-      this.$swal.fire(
-        'Failed',
-        'please set flink version first.',
-        'error'
-      )
-      return
+        vue.$swal.fire(
+            'Failed',
+            'please set flink version first.',
+            'error'
+        )
+        return
     }
     const scalaVersion = vue.flinkEnvs.find(v => v.id === versionId).scalaVersion
     if (pom == null || pom.trim() === '') {

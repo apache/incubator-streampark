@@ -42,6 +42,12 @@ object MavenTool extends Logger {
 
   val plexusLog = new ConsoleLogger(PlexusLog.LEVEL_INFO, "streamx-maven")
 
+  private[this] val excludeArtifact = List(
+    MavenArtifact.of("org.apache.flink:force-shading:*"),
+    MavenArtifact.of("com.google.code.findbugs:jsr305:*"),
+    MavenArtifact.of("org.apache.logging.log4j:*:*")
+  )
+
   private val isJarFile = (file: File) => file.isFile && Try(Utils.checkJarFile(file.toURL)).isSuccess
 
   /**
@@ -126,17 +132,25 @@ object MavenTool extends Logger {
       // read relevant artifact descriptor info
       // plz don't simplify the following lambda syntax to maintain the readability of the code.
       val resolvedArtifacts = artifacts
-        .map(artifact => new ArtifactDescriptorRequest(artifact, MavenRetriever.remoteRepos, null))
+        .map(artifact => new ArtifactDescriptorRequest(artifact, MavenRetriever.remoteRepos(), null))
         .map(artDescReq => repoSystem.readArtifactDescriptor(session, artDescReq))
         .flatMap(_.getDependencies)
         .filter(_.getScope == "compile")
-        .map(_.getArtifact)
+        .filter(x => !excludeArtifact.exists(e => {
+          val groupId = e.groupId == x.getArtifact.getGroupId
+          val artifact = e.artifactId match {
+            case "*" => true
+            case a => a == x.getArtifact.getArtifactId
+          }
+          groupId && artifact
+        })
+        ).map(_.getArtifact)
 
       val mergedArtifacts = artifacts ++ resolvedArtifacts
       logInfo(s"resolved dependencies: ${mergedArtifacts.mkString}")
 
       // download artifacts
-      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos, null))
+      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos(), null))
       repoSystem.resolveArtifacts(session, artReqs)
         .map(_.getArtifact.getFile).toSet
     }
