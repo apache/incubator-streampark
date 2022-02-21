@@ -37,7 +37,7 @@ import scala.collection.mutable.{ListBuffer, Map => MutableMap}
 object FlinkShimsProxy extends Logger {
 
   private[this] val INCLUDE_PATTERN: Pattern = Pattern.compile(
-    "(enumeratum|jackson|streamx)(.*).jar",
+    "(enumeratum|streamx)(.*).jar",
     Pattern.CASE_INSENSITIVE | Pattern.DOTALL
   )
 
