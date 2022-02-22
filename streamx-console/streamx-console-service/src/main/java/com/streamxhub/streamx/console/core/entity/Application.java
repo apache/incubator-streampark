@@ -274,6 +274,7 @@ public class Application implements Serializable {
     private transient String createTimeTo;
     private transient String backUpDescription;
     private transient String yarnQueue;
+    private transient String yarnSessionClusterId;
     /**
      * Flink Web UI Url
      */
@@ -723,6 +724,11 @@ public class Application implements Serializable {
                 hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.getYarnQueue());
             }
         }
+        if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
+            if (StringUtils.isNotEmpty(this.getYarnSessionClusterId())) {
+                hotParams.put("yarn.application.id", this.getYarnSessionClusterId());
+            }
+        }
         if (!hotParams.isEmpty()) {
             this.setHotParams(JacksonUtils.write(hotParams));
         }
@@ -736,6 +742,11 @@ public class Application implements Serializable {
         if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
             if (StringUtils.isNotEmpty(appParam.getYarnQueue())) {
                 hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), appParam.getYarnQueue());
+            }
+        }
+        if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
+            if (StringUtils.isNotEmpty(appParam.getYarnSessionClusterId())) {
+                hotParams.put(ConfigConst.KEY_YARN_SESSION_ID(), appParam.getYarnSessionClusterId());
             }
         }
         this.setHotParams(JacksonUtils.write(hotParams));
