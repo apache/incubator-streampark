@@ -1519,7 +1519,6 @@ export default {
         {name: 'NodePort', order: 2}
       ],
       executionModes: [
-        {mode: 'local (NOTE: just test)', value: 0, disabled: false},
         {mode: 'remote (standalone)', value: 1, disabled: false},
         {mode: 'yarn application', value: 4, disabled: false},
         {mode: 'kubernetes session', value: 5, disabled: false},

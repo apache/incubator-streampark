@@ -780,88 +780,6 @@
       </a-modal>
 
       <a-modal
-        v-model="deployVisible"
-        on-ok="handleDeployOk">
-        <template
-          slot="title">
-          <svg-icon
-            slot="icon"
-            name="deploy"/>
-          Launch Application
-        </template>
-        <template
-          slot="footer">
-          <a-button
-            key="back"
-            @click="handleDeployCancel">
-            Cancel
-          </a-button>
-          <a-button
-            key="submit"
-            type="primary"
-            :loading="loading"
-            @click="handleDeployOk">
-            Apply
-          </a-button>
-        </template>
-        <a-form
-          @submit="handleDeployOk"
-          :form="formDeploy">
-          <a-form-item
-            v-if="application && application.state === 7 "
-            label="restart"
-            :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
-            <a-switch
-              checked-children="ON"
-              un-checked-children="OFF"
-              placeholder="restarting this application"
-              v-model="restart"
-              v-decorator="['restart']"/>
-            <span
-              class="conf-switch"
-              style="color:darkgrey"> restart application after deploy</span>
-          </a-form-item>
-          <a-form-item
-            v-if="restart"
-            label="Savepoint"
-            :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
-            <a-switch
-              checked-children="ON"
-              un-checked-children="OFF"
-              v-model="savePoint"
-              v-decorator="['savePoint']"/>
-            <span
-              class="conf-switch"
-              style="color:darkgrey"> trigger savePoint before taking stoping </span>
-          </a-form-item>
-          <a-form-item
-            v-if="restart"
-            label="ignore restored"
-            :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
-            <a-switch
-              checked-children="ON"
-              un-checked-children="OFF"
-              v-model="allowNonRestoredState"
-              v-decorator="['allowNonRestoredState']"/>
-            <span
-              class="conf-switch"
-              style="color:darkgrey"> ignore savepoint then cannot be restored </span>
-          </a-form-item>
-          <a-form-item
-            label="backup desc"
-            :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
-            <a-textarea
-              rows="3"
-              placeholder="Before launching the new version, the current task will be backed up. Please enter the backup information of the current task"
-              v-decorator="['description',{ rules: [{ required: true, message: 'Please enter a backup description' } ]}]"/>
-          </a-form-item>
-        </a-form>
-      </a-modal>
-      <a-modal
         v-model="startVisible"
         on-ok="handleStartOk">
         <template
@@ -1138,7 +1056,7 @@
 import Ellipsis from '@/components/Ellipsis'
 import State from './State'
 import {mapActions} from 'vuex'
-import {cancel, clean, dashboard, deploy, downLog, list, mapping, remove, revoke, start, yarn} from '@api/application'
+import {cancel, clean, dashboard, downLog, list, mapping, remove, revoke, start, yarn} from '@api/application'
 import {history, latest} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
 import {weburl} from '@api/setting'
@@ -1175,7 +1093,6 @@ export default {
       filteredInfo: null,
       queryInterval: 2000,
       yarn: null,
-      deployVisible: false,
       stopVisible: false,
       startVisible: false,
       mappingVisible: false,
@@ -1383,59 +1300,6 @@ export default {
       }
     },
 
-    handleDeployCancel() {
-      this.deployVisible = false
-      setTimeout(() => {
-        this.application = null
-        this.restart = false
-        this.allowNonRestoredState = false
-        this.savePoint = true
-        this.formDeploy.resetFields()
-      }, 1000)
-    },
-
-    handleDeployOk() {
-      this.formDeploy.validateFields((err, values) => {
-        if (!err) {
-          const id = this.application.id
-          const savePoint = this.savePoint
-          const description = values.description
-          const restart = this.restart
-          const allowNonRestoredState = this.allowNonRestoredState
-          this.handleDeployCancel()
-          this.optionApps.deploy.set(id, new Date().getTime())
-          this.handleMapUpdate('deploy')
-          this.$swal.fire({
-            icon: 'success',
-            title: 'The current job is deploying',
-            showConfirmButton: false,
-            timer: 2000
-          }).then((r) => {
-            this.socketId = this.uuid()
-            storage.set(this.storageKey, this.socketId)
-            deploy({
-              id: id,
-              restart: restart,
-              savePointed: savePoint,
-              allowNonRestored: allowNonRestoredState,
-              backUpDescription: description,
-              socketId: this.socketId
-            }).then((resp) => {
-              if (!resp.data) {
-                this.$swal.fire(
-                    'Failed',
-                    'deploy failed,' + resp.message.replaceAll(/\[StreamX]/g, ''),
-                    'error'
-                )
-              } else if (!restart) {
-                this.optionApps.deploy.delete(id)
-                this.handleMapUpdate('deploy')
-              }
-            })
-          })
-        }
-      })
-    },
 
     handleMapping(app) {
       this.mappingVisible = true

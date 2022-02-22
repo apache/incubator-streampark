@@ -123,7 +123,9 @@ object Utils {
   def close(closeable: AutoCloseable*)(implicit func: Throwable => Unit = null): Unit = {
     closeable.foreach(c => {
       try {
-        c.close()
+        if (c != null) {
+          c.close()
+        }
       } catch {
         case e: Throwable if func != null => func(e)
       }

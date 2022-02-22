@@ -52,8 +52,6 @@ public interface ApplicationService extends IService<Application> {
 
     AppExistsState checkExists(Application app);
 
-    void deploy(Application app, String socketId);
-
     void cancel(Application app);
 
     void updateTracking(Application application);
@@ -88,4 +86,5 @@ public interface ApplicationService extends IService<Application> {
     void updateDeploy(Application application);
 
     List<Application> getByProjectId(Long id);
+
 }

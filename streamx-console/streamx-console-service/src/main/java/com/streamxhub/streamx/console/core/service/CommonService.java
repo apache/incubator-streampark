@@ -17,28 +17,21 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.authentication;
+package com.streamxhub.streamx.console.core.service;
 
 import com.streamxhub.streamx.console.system.entity.User;
-import com.streamxhub.streamx.console.system.service.UserService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-/**
- * @author benjobs
- */
-@Slf4j
-@Component
-public class ServerComponent {
+public interface CommonService {
 
-    @Autowired
-    private UserService userService;
+    /**
+     * get login user
+     * @return
+     */
+    User getCurrentUser();
 
-    public User getUser() {
-        String token = (String) SecurityUtils.getSubject().getPrincipal();
-        String username = JWTUtil.getUsername(token);
-        return userService.findByName(username);
-    }
+    /**
+     * get sqlclient
+     * @return
+     */
+    String getSqlClientJar();
 }

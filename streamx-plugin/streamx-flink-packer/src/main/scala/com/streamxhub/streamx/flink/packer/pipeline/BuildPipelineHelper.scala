@@ -47,7 +47,7 @@ object BuildPipelineHelper {
     val providedLibs = ArrayBuffer(
       localWorkspace.APP_JARS,
       localWorkspace.APP_PLUGINS,
-      buildParams.customFlinkUserJarPath
+      buildParams.customFlinkUserJar
     )
     if (buildParams.developmentMode == DevelopmentMode.FLINKSQL) {
       providedLibs += {
