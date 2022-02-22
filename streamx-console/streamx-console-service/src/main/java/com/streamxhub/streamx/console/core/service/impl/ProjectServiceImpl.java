@@ -155,7 +155,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         assert project != null;
         LambdaQueryWrapper<Application> queryWrapper = new QueryWrapper<Application>().lambda();
         queryWrapper.eq(Application::getProjectId, id);
-        Integer count = applicationService.count(queryWrapper);
+        int count = applicationService.count(queryWrapper);
         if (count > 0) {
             return false;
         }
