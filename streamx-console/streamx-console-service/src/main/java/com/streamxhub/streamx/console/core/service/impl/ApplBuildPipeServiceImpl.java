@@ -144,7 +144,7 @@ public class ApplBuildPipeServiceImpl
     @Override
     public boolean buildApplication(@Nonnull Application app) throws Exception {
 
-        //1)
+        //1) checkEnv
         applicationService.checkEnv(app);
 
         // 2) set dependency
@@ -201,7 +201,7 @@ public class ApplBuildPipeServiceImpl
             public void onFinish(PipeSnapshot snapshot, BuildResult result) {
                 AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId()).setBuildResult(result);
                 if (result.pass()) {
-                    //正在运行的任务...
+                    //running job ...
                     if (app.isRunning()) {
                         app.setDeploy(DeployState.NEED_RESTART_AFTER_DEPLOY.get());
                     } else {
@@ -367,7 +367,8 @@ public class ApplBuildPipeServiceImpl
         return new DockerResolvedSnapshot(
             DOCKER_PULL_PG_SNAPSHOTS.getIfPresent(appId),
             DOCKER_BUILD_PG_SNAPSHOTS.getIfPresent(appId),
-            DOCKER_PUSH_PG_SNAPSHOTS.getIfPresent(appId));
+            DOCKER_PUSH_PG_SNAPSHOTS.getIfPresent(appId)
+        );
     }
 
     @Override
@@ -416,8 +417,6 @@ public class ApplBuildPipeServiceImpl
                 if (!md5.equals(fsOperator.fileMd5(targetJar))) {
                     fsOperator.upload(localJar.getAbsolutePath(), appUploads, false, true);
                 }
-            } catch (IOException e) {
-                throw e;
             }
         }
     }

@@ -32,7 +32,6 @@ import com.streamxhub.streamx.common.enums.ApplicationType;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
-import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
@@ -90,7 +89,6 @@ import com.streamxhub.streamx.flink.submit.bean.SubmitRequest;
 import com.streamxhub.streamx.flink.submit.bean.SubmitResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.RestOptions;
@@ -103,9 +101,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Base64;
@@ -747,26 +743,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return baseMapper.getByProjectId(id);
     }
 
-    private void checkOrElseUploadJar(Application application, File localJar, String targetJar) throws IOException {
-        FsOperator fsOperator = application.getFsOperator();
-        String appUploads = application.getWorkspace().APP_UPLOADS();
-        //1)文件不存直接上传
-        if (!fsOperator.exists(targetJar)) {
-            fsOperator.upload(localJar.getAbsolutePath(), appUploads, false, true);
-        } else {
-            //2) 文件已经存在则检查md5是否一致.不一致则重新上传
-            try (InputStream inputStream = new FileInputStream(localJar)) {
-                String md5 = DigestUtils.md5Hex(inputStream);
-                //2) md5不一致,则需重新上传.将本地temp/下的文件上传到upload目录下
-                if (!md5.equals(fsOperator.fileMd5(targetJar))) {
-                    fsOperator.upload(localJar.getAbsolutePath(), appUploads, false, true);
-                }
-            } catch (IOException e) {
-                throw e;
-            }
-        }
-    }
-
     @Override
     @RefreshCache
     public void clean(Application appParam) {
@@ -870,7 +846,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         executorService.submit(() -> {
             try {
-                // intfer savepoint
+                // infer savepoint
                 String customSavepoint = "";
                 if (isKubernetesApp(application)) {
                     customSavepoint = StringUtils.isNotBlank(appParam.getSavePoint()) ? appParam.getSavePoint() :
