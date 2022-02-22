@@ -28,6 +28,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.fs.FsOperator;
+import com.streamxhub.streamx.common.util.ExceptionUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationBuildPipelineMapper;
@@ -37,13 +38,17 @@ import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.entity.Message;
+import com.streamxhub.streamx.console.core.enums.NoticeType;
 import com.streamxhub.streamx.console.core.enums.OptionState;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
+import com.streamxhub.streamx.console.core.service.MessageService;
 import com.streamxhub.streamx.console.core.service.SettingService;
+import com.streamxhub.streamx.console.system.authentication.ServerComponent;
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildResult;
@@ -108,7 +113,13 @@ public class ApplBuildPipeServiceImpl
     private ApplicationBackUpService backUpService;
 
     @Autowired
+    private ServerComponent serverComponent;
+
+    @Autowired
     private SettingService settingService;
+
+    @Autowired
+    private MessageService messageService;
 
     @Autowired
     private ApplicationService applicationService;
@@ -200,6 +211,14 @@ public class ApplBuildPipeServiceImpl
                         app.setDeploy(DeployState.DONE.get());
                     }
                 } else {
+                    Message message = new Message(
+                        serverComponent.getUser().getUserId(),
+                        app.getId(),
+                        app.getJobName().concat(" deploy failed"),
+                        ExceptionUtils.stringifyException(snapshot.error().exception()),
+                        NoticeType.EXCEPTION
+                    );
+                    messageService.push(message);
                     app.setDeploy(DeployState.FAILED.get());
                     app.setOptionState(OptionState.NONE.getValue());
                 }
@@ -321,7 +340,7 @@ public class ApplBuildPipeServiceImpl
             case CUSTOMCODE:
                 switch (app.getApplicationType()) {
                     case STREAMX_FLINK:
-                        return String.format("%s/lib/%s", app.getAppHome(), app.getModule().concat(".jar"));
+                        return String.format("%s/%s", app.getAppLib(), app.getModule().concat(".jar"));
                     case APACHE_FLINK:
                         return String.format("%s/%s", app.getAppHome(), app.getJar());
                     default:
