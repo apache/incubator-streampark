@@ -239,8 +239,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 // 2) .jar文件(普通,官方标准的flink工程)
                 Utils.checkJarFile(app.toURI().toURL());
                 String moduleName = app.getName().replace(".jar", "");
-                File appBase = project.getDistHome();
-                File targetDir = new File(appBase, moduleName);
+                File distHome = project.getDistHome();
+                File targetDir = new File(distHome, moduleName);
                 if (!targetDir.exists()) {
                     targetDir.mkdirs();
                 }

@@ -46,7 +46,7 @@ sealed trait FlinkBuildParam extends BuildParam {
 
   def dependencyInfo: DependencyInfo
 
-  def customFlinkUserJarPath: String
+  def customFlinkUserJar: String
 }
 
 sealed trait FlinkK8sBuildParam extends FlinkBuildParam {
@@ -58,22 +58,22 @@ sealed trait FlinkK8sBuildParam extends FlinkBuildParam {
 
 case class FlinkK8sSessionBuildRequest(appName: String,
                                        mainClass: String,
+                                       customFlinkUserJar: String,
                                        executionMode: ExecutionMode,
                                        developmentMode: DevelopmentMode,
                                        flinkVersion: FlinkVersion,
                                        dependencyInfo: DependencyInfo,
-                                       customFlinkUserJarPath: String,
                                        clusterId: String,
                                        k8sNamespace: String
                                       ) extends FlinkK8sBuildParam
 
 case class FlinkK8sApplicationBuildRequest(appName: String,
                                            mainClass: String,
+                                           customFlinkUserJar: String,
                                            executionMode: ExecutionMode,
                                            developmentMode: DevelopmentMode,
                                            flinkVersion: FlinkVersion,
                                            dependencyInfo: DependencyInfo,
-                                           customFlinkUserJarPath: String,
                                            clusterId: String,
                                            k8sNamespace: String,
                                            flinkBaseImage: String,
@@ -84,11 +84,12 @@ case class FlinkK8sApplicationBuildRequest(appName: String,
 
 case class FlinkRemoteBuildRequest(appName: String,
                                    mainClass: String,
+                                   customFlinkUserJar: String,
                                    executionMode: ExecutionMode,
                                    developmentMode: DevelopmentMode,
                                    flinkVersion: FlinkVersion,
-                                   dependencyInfo: DependencyInfo,
-                                   customFlinkUserJarPath: String) extends FlinkBuildParam
+                                   dependencyInfo: DependencyInfo
+                                  ) extends FlinkBuildParam
 
 
 case class FlinkYarnApplicationBuildRequest(appName: String,

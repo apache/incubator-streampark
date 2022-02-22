@@ -27,6 +27,7 @@ import com.google.common.collect.Maps;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationBuildPipelineMapper;
@@ -64,6 +65,7 @@ import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sSessionBuildPip
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,6 +74,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -128,7 +133,7 @@ public class ApplBuildPipeServiceImpl
             Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
     @Override
-    public boolean buildApplication(@Nonnull Application app) {
+    public boolean buildApplication(@Nonnull Application app) throws IOException {
 
         // set dependency
         if (app.isFlinkSqlJob()) {
@@ -138,6 +143,25 @@ public class ApplBuildPipeServiceImpl
             }
             assert flinkSql != null;
             app.setDependency(flinkSql.getDependency());
+        }
+
+        // dist jar copy to local workspace
+        if (app.isCustomCodeJob()) {
+            String appHome = app.getAppHome();
+            FsOperator fsOperator = app.getFsOperator();
+            fsOperator.delete(appHome);
+            if (app.isUploadJob()) {
+                String appUploads = app.getWorkspace().APP_UPLOADS();
+                File temp = WebUtils.getAppTempDir();
+                File localJar = new File(temp, app.getJar());
+                String targetJar = appUploads.concat("/").concat(app.getJar());
+                checkOrElseUploadJar(app, localJar, targetJar);
+                // upload jar copy to appHome
+                fsOperator.mkdirs(appHome);
+                fsOperator.copy(targetJar, appHome, false, true);
+            } else {
+                fsOperator.upload(app.getDistHome(), appHome);
+            }
         }
 
         // create pipeline instance
@@ -223,21 +247,12 @@ public class ApplBuildPipeServiceImpl
         String flinkUserJar = retrieveFlinkUserJar(app);
         ExecutionMode executionMode = app.getExecutionModeEnum();
         String mainClass = ConfigConst.STREAMX_FLINKSQL_CLIENT_CLASS();
-
         switch (executionMode) {
             case YARN_APPLICATION:
-                String localPath;
-                if (app.isCustomCodeJob()) {
-                    localPath = app.isUploadJob() ?
-                            app.getDistHome() :
-                            new File(WebUtils.getAppTempDir(), app.getJar()).getAbsolutePath();
-                } else {
-                    localPath = app.getLocalFlinkSqlHome().getAbsolutePath();
-                }
                 FlinkYarnApplicationBuildRequest yarnAppRequest = new FlinkYarnApplicationBuildRequest(
                         app.getJobName(),
                         mainClass,
-                        localPath,
+                        flinkUserJar,
                         app.getAppHome(),
                         app.getDevelopmentMode(),
                         app.getDependencyInfo()
@@ -248,11 +263,11 @@ public class ApplBuildPipeServiceImpl
                 FlinkRemoteBuildRequest remoteBuildRequest = new FlinkRemoteBuildRequest(
                         app.getJobName(),
                         mainClass,
+                        flinkUserJar,
                         app.getExecutionModeEnum(),
                         app.getDevelopmentMode(),
                         flinkEnv.getFlinkVersion(),
-                        app.getDependencyInfo(),
-                        flinkUserJar
+                        app.getDependencyInfo()
                 );
                 log.info("Submit params to building pipeline : {}", remoteBuildRequest);
                 return FlinkRemoteBuildPipeline.of(remoteBuildRequest);
@@ -260,11 +275,11 @@ public class ApplBuildPipeServiceImpl
                 FlinkK8sSessionBuildRequest k8sSessionBuildRequest = new FlinkK8sSessionBuildRequest(
                         app.getJobName(),
                         mainClass,
+                        flinkUserJar,
                         app.getExecutionModeEnum(),
                         app.getDevelopmentMode(),
                         flinkEnv.getFlinkVersion(),
                         app.getDependencyInfo(),
-                        flinkUserJar,
                         app.getClusterId(),
                         app.getK8sNamespace());
                 log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
@@ -273,11 +288,11 @@ public class ApplBuildPipeServiceImpl
                 FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest = new FlinkK8sApplicationBuildRequest(
                         app.getJobName(),
                         mainClass,
+                        flinkUserJar,
                         app.getExecutionModeEnum(),
                         app.getDevelopmentMode(),
                         flinkEnv.getFlinkVersion(),
                         app.getDependencyInfo(),
-                        flinkUserJar,
                         app.getClusterId(),
                         app.getK8sNamespace(),
                         app.getFlinkImage(),
@@ -385,6 +400,26 @@ public class ApplBuildPipeServiceImpl
             return save(pipe);
         } else {
             return updateById(pipe);
+        }
+    }
+
+    private void checkOrElseUploadJar(Application application, File localJar, String targetJar) throws IOException {
+        FsOperator fsOperator = application.getFsOperator();
+        String appUploads = application.getWorkspace().APP_UPLOADS();
+        //1)文件不存直接上传
+        if (!fsOperator.exists(targetJar)) {
+            fsOperator.upload(localJar.getAbsolutePath(), appUploads, false, true);
+        } else {
+            //2) 文件已经存在则检查md5是否一致.不一致则重新上传
+            try (InputStream inputStream = new FileInputStream(localJar)) {
+                String md5 = DigestUtils.md5Hex(inputStream);
+                //2) md5不一致,则需重新上传.将本地temp/下的文件上传到upload目录下
+                if (!md5.equals(fsOperator.fileMd5(targetJar))) {
+                    fsOperator.upload(localJar.getAbsolutePath(), appUploads, false, true);
+                }
+            } catch (IOException e) {
+                throw e;
+            }
         }
     }
 
