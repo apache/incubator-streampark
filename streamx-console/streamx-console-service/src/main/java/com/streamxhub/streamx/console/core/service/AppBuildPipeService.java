@@ -26,7 +26,6 @@ import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,7 +39,7 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
      * Build application.
      * This is an async call method.
      */
-    boolean buildApplication(@Nonnull Application app) throws IOException;
+    boolean buildApplication(@Nonnull Application app) throws Exception;
 
     /**
      * Get current build pipeline instance of specified application

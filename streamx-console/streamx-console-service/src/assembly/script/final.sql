@@ -112,7 +112,7 @@ KEY `INX_TRACK` (`TRACKING`) USING BTREE
 -- Records of t_flink_app
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_app` VALUES (100000, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', NULL, 100000, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '2', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL);
+INSERT INTO `t_flink_app` VALUES (100000, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', NULL, 100000, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '0', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), 2, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL);
 COMMIT;
 
 -- ----------------------------

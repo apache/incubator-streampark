@@ -96,7 +96,7 @@ import java.util.stream.Collectors;
 @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class ApplBuildPipeServiceImpl
-        extends ServiceImpl<ApplicationBuildPipelineMapper, AppBuildPipeline> implements AppBuildPipeService {
+    extends ServiceImpl<ApplicationBuildPipelineMapper, AppBuildPipeline> implements AppBuildPipeService {
 
     @Autowired
     private FlinkEnvService flinkEnvService;
@@ -114,28 +114,31 @@ public class ApplBuildPipeServiceImpl
     private ApplicationService applicationService;
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 2,
-            300,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(2048),
-            ThreadUtils.threadFactory("streamx-build-pipeline-executor"),
-            new ThreadPoolExecutor.AbortPolicy()
+        Runtime.getRuntime().availableProcessors() * 2,
+        300,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(2048),
+        ThreadUtils.threadFactory("streamx-build-pipeline-executor"),
+        new ThreadPoolExecutor.AbortPolicy()
     );
 
     private static final Cache<Long, DockerPullSnapshot> DOCKER_PULL_PG_SNAPSHOTS =
-            Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
+        Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
     private static final Cache<Long, DockerBuildSnapshot> DOCKER_BUILD_PG_SNAPSHOTS =
-            Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
+        Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
     private static final Cache<Long, DockerPushSnapshot> DOCKER_PUSH_PG_SNAPSHOTS =
-            Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
+        Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
 
     @Override
-    public boolean buildApplication(@Nonnull Application app) throws IOException {
+    public boolean buildApplication(@Nonnull Application app) throws Exception {
 
-        // set dependency
+        //1)
+        applicationService.checkEnv(app);
+
+        // 2) set dependency
         if (app.isFlinkSqlJob()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(app.getId(), false);
             if (flinkSql == null) {
@@ -145,7 +148,7 @@ public class ApplBuildPipeServiceImpl
             app.setDependency(flinkSql.getDependency());
         }
 
-        // dist jar copy to local workspace
+        // 3) dist jar copy to appHome
         if (app.isCustomCodeJob()) {
             String appHome = app.getAppHome();
             FsOperator fsOperator = app.getFsOperator();
@@ -164,7 +167,7 @@ public class ApplBuildPipeServiceImpl
             }
         }
 
-        // create pipeline instance
+        // 4) create pipeline instance
         BuildPipeline pipeline = createPipelineInstance(app);
 
         // register pipeline progress event watcher.
@@ -250,59 +253,58 @@ public class ApplBuildPipeServiceImpl
         switch (executionMode) {
             case YARN_APPLICATION:
                 FlinkYarnApplicationBuildRequest yarnAppRequest = new FlinkYarnApplicationBuildRequest(
-                        app.getJobName(),
-                        mainClass,
-                        flinkUserJar,
-                        app.getAppHome(),
-                        app.getDevelopmentMode(),
-                        app.getDependencyInfo()
+                    app.getJobName(),
+                    mainClass,
+                    app.getAppHome(),
+                    app.getDevelopmentMode(),
+                    app.getDependencyInfo()
                 );
                 log.info("Submit params to building pipeline : {}", yarnAppRequest);
                 return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
             case REMOTE:
                 FlinkRemoteBuildRequest remoteBuildRequest = new FlinkRemoteBuildRequest(
-                        app.getJobName(),
-                        mainClass,
-                        flinkUserJar,
-                        app.getExecutionModeEnum(),
-                        app.getDevelopmentMode(),
-                        flinkEnv.getFlinkVersion(),
-                        app.getDependencyInfo()
+                    app.getJobName(),
+                    mainClass,
+                    flinkUserJar,
+                    app.getExecutionModeEnum(),
+                    app.getDevelopmentMode(),
+                    flinkEnv.getFlinkVersion(),
+                    app.getDependencyInfo()
                 );
                 log.info("Submit params to building pipeline : {}", remoteBuildRequest);
                 return FlinkRemoteBuildPipeline.of(remoteBuildRequest);
             case KUBERNETES_NATIVE_SESSION:
                 FlinkK8sSessionBuildRequest k8sSessionBuildRequest = new FlinkK8sSessionBuildRequest(
-                        app.getJobName(),
-                        mainClass,
-                        flinkUserJar,
-                        app.getExecutionModeEnum(),
-                        app.getDevelopmentMode(),
-                        flinkEnv.getFlinkVersion(),
-                        app.getDependencyInfo(),
-                        app.getClusterId(),
-                        app.getK8sNamespace());
+                    app.getJobName(),
+                    mainClass,
+                    flinkUserJar,
+                    app.getExecutionModeEnum(),
+                    app.getDevelopmentMode(),
+                    flinkEnv.getFlinkVersion(),
+                    app.getDependencyInfo(),
+                    app.getClusterId(),
+                    app.getK8sNamespace());
                 log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
                 return FlinkK8sSessionBuildPipeline.of(k8sSessionBuildRequest);
             case KUBERNETES_NATIVE_APPLICATION:
                 FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest = new FlinkK8sApplicationBuildRequest(
-                        app.getJobName(),
-                        mainClass,
-                        flinkUserJar,
-                        app.getExecutionModeEnum(),
-                        app.getDevelopmentMode(),
-                        flinkEnv.getFlinkVersion(),
-                        app.getDependencyInfo(),
-                        app.getClusterId(),
-                        app.getK8sNamespace(),
-                        app.getFlinkImage(),
-                        app.getK8sPodTemplates(),
-                        app.getK8sHadoopIntegration() != null ? app.getK8sHadoopIntegration() : false,
-                        DockerAuthConf.of(
-                                settingService.getDockerRegisterAddress(),
-                                settingService.getDockerRegisterUser(),
-                                settingService.getDockerRegisterPassword()
-                        )
+                    app.getJobName(),
+                    mainClass,
+                    flinkUserJar,
+                    app.getExecutionModeEnum(),
+                    app.getDevelopmentMode(),
+                    flinkEnv.getFlinkVersion(),
+                    app.getDependencyInfo(),
+                    app.getClusterId(),
+                    app.getK8sNamespace(),
+                    app.getFlinkImage(),
+                    app.getK8sPodTemplates(),
+                    app.getK8sHadoopIntegration() != null ? app.getK8sHadoopIntegration() : false,
+                    DockerAuthConf.of(
+                        settingService.getDockerRegisterAddress(),
+                        settingService.getDockerRegisterUser(),
+                        settingService.getDockerRegisterPassword()
+                    )
                 );
                 log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
                 return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
@@ -313,47 +315,45 @@ public class ApplBuildPipeServiceImpl
 
     /**
      * copy from {@link ApplicationServiceImpl#start(Application, boolean)}
-     * todo needs to be refactored.
      */
-    private String retrieveFlinkUserJar(Application application) {
-        switch (application.getDevelopmentMode()) {
+    private String retrieveFlinkUserJar(Application app) {
+        switch (app.getDevelopmentMode()) {
             case CUSTOMCODE:
-                switch (application.getApplicationType()) {
+                switch (app.getApplicationType()) {
                     case STREAMX_FLINK:
-                        return String.format("%s/lib/%s", application.getAppHome(), application.getModule().concat(".jar"));
+                        return String.format("%s/lib/%s", app.getAppHome(), app.getModule().concat(".jar"));
                     case APACHE_FLINK:
-                        return String.format("%s/%s", application.getAppHome(), application.getJar());
+                        return String.format("%s/%s", app.getAppHome(), app.getJar());
                     default:
                         throw new IllegalArgumentException("[StreamX] unsupported ApplicationType of custom code: "
-                                + application.getApplicationType());
+                            + app.getApplicationType());
                 }
             case FLINKSQL:
                 String sqlDistJar = retrieveSqlDistJar();
-                if (application.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
+                if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }
                 return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
             default:
-                throw new UnsupportedOperationException("[StreamX] unsupported JobType: " + application.getDevelopmentMode());
+                throw new UnsupportedOperationException("[StreamX] unsupported JobType: " + app.getDevelopmentMode());
         }
     }
 
     /**
      * copy from {@link ApplicationServiceImpl#start(Application, boolean)}
-     * todo needs to be refactored.
      */
     private String retrieveSqlDistJar() {
-        File localPlugins = WebUtils.getAppClientDir();
-        assert localPlugins.exists();
+        File clientDir = WebUtils.getAppClientDir();
+        assert clientDir.exists();
         List<String> jars =
-                Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
-                        .collect(Collectors.toList());
+            Arrays.stream(Objects.requireNonNull(clientDir.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
+                .collect(Collectors.toList());
         if (jars.isEmpty()) {
-            throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localPlugins);
+            throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + clientDir);
         }
         if (jars.size() > 1) {
-            throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localPlugins);
+            throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + clientDir);
         }
         return jars.get(0);
     }
@@ -366,16 +366,16 @@ public class ApplBuildPipeServiceImpl
     @Override
     public DockerResolvedSnapshot getDockerProgressDetailSnapshot(@Nonnull Long appId) {
         return new DockerResolvedSnapshot(
-                DOCKER_PULL_PG_SNAPSHOTS.getIfPresent(appId),
-                DOCKER_BUILD_PG_SNAPSHOTS.getIfPresent(appId),
-                DOCKER_PUSH_PG_SNAPSHOTS.getIfPresent(appId));
+            DOCKER_PULL_PG_SNAPSHOTS.getIfPresent(appId),
+            DOCKER_BUILD_PG_SNAPSHOTS.getIfPresent(appId),
+            DOCKER_PUSH_PG_SNAPSHOTS.getIfPresent(appId));
     }
 
     @Override
     public boolean allowToBuildNow(@Nonnull Long appId) {
         return getCurrentBuildPipeline(appId)
-                .map(pipeline -> PipelineStatus.running != pipeline.getPipeStatus())
-                .orElse(true);
+            .map(pipeline -> PipelineStatus.running != pipeline.getPipeStatus())
+            .orElse(true);
     }
 
     @Override
@@ -390,8 +390,8 @@ public class ApplBuildPipeServiceImpl
             return Maps.newHashMap();
         }
         return rMaps.stream().collect(Collectors.toMap(
-                e -> (Long) e.get("app_id"),
-                e -> PipelineStatus.of((Integer) e.get("pipe_status"))));
+            e -> (Long) e.get("app_id"),
+            e -> PipelineStatus.of((Integer) e.get("pipe_status"))));
     }
 
     public boolean saveEntity(AppBuildPipeline pipe) {
