@@ -42,7 +42,7 @@ import java.util.Map;
 @ServerEndpoint(value = "/websocket/{id}")
 public class WebSocketEndpoint {
 
-    private static Map<String, Session> socketSessions = new CopyOnWriteMap<>();
+    private static final Map<String, Session> SOCKET_SESSIONS = new CopyOnWriteMap<>();
 
     @Getter
     private String id;
@@ -55,14 +55,14 @@ public class WebSocketEndpoint {
         log.info("websocket onOpen....");
         this.id = id;
         this.session = session;
-        socketSessions.put(id, session);
+        SOCKET_SESSIONS.put(id, session);
     }
 
     @OnClose
     public void onClose() throws IOException {
         log.info("websocket onClose....");
         this.session.close();
-        socketSessions.remove(this.id);
+        SOCKET_SESSIONS.remove(this.id);
     }
 
     @OnError
@@ -72,7 +72,7 @@ public class WebSocketEndpoint {
 
     public static void writeMessage(String socketId, String message) {
         try {
-            Session session = socketSessions.get(socketId);
+            Session session = SOCKET_SESSIONS.get(socketId);
             if (session != null) {
                 session.getBasicRemote().sendText(message);
             }
@@ -83,7 +83,7 @@ public class WebSocketEndpoint {
 
     public static void pushNotice(Message message) {
         try {
-            Session session = socketSessions.get(message.getUserId().toString());
+            Session session = SOCKET_SESSIONS.get(message.getUserId().toString());
             if (session != null) {
                 session.getBasicRemote().sendObject(message);
             }
