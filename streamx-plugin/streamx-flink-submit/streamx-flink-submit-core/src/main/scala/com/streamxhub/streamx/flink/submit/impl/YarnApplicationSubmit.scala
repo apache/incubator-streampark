@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.streamxhub.streamx.common.enums.DevelopmentMode
+import com.streamxhub.streamx.common.enums.{ApplicationType, DevelopmentMode}
 import com.streamxhub.streamx.common.util.{HdfsUtils, Utils}
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
@@ -69,7 +69,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
             case Array(1, 14, _) => array += s"${workspace.APP_SHIMS}/flink-1.14"
             case _ => throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
           }
-          val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
+          val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}"
           if (HdfsUtils.exists(jobLib)) {
             array += jobLib
           }

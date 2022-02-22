@@ -44,11 +44,11 @@ import com.streamxhub.streamx.console.core.enums.OptionState;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.CommonService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.service.MessageService;
 import com.streamxhub.streamx.console.core.service.SettingService;
-import com.streamxhub.streamx.console.system.authentication.ServerComponent;
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildResult;
@@ -82,10 +82,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -113,7 +111,7 @@ public class ApplBuildPipeServiceImpl
     private ApplicationBackUpService backUpService;
 
     @Autowired
-    private ServerComponent serverComponent;
+    private CommonService commonService;
 
     @Autowired
     private SettingService settingService;
@@ -212,7 +210,7 @@ public class ApplBuildPipeServiceImpl
                     }
                 } else {
                     Message message = new Message(
-                        serverComponent.getUser().getUserId(),
+                        commonService.getCurrentUser().getUserId(),
                         app.getId(),
                         app.getJobName().concat(" deploy failed"),
                         ExceptionUtils.stringifyException(snapshot.error().exception()),
@@ -348,7 +346,7 @@ public class ApplBuildPipeServiceImpl
                             + app.getApplicationType());
                 }
             case FLINKSQL:
-                String sqlDistJar = retrieveSqlDistJar();
+                String sqlDistJar = commonService.getSqlClientJar();
                 if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);
@@ -357,24 +355,6 @@ public class ApplBuildPipeServiceImpl
             default:
                 throw new UnsupportedOperationException("[StreamX] unsupported JobType: " + app.getDevelopmentMode());
         }
-    }
-
-    /**
-     * copy from {@link ApplicationServiceImpl#start(Application, boolean)}
-     */
-    private String retrieveSqlDistJar() {
-        File clientDir = WebUtils.getAppClientDir();
-        assert clientDir.exists();
-        List<String> jars =
-            Arrays.stream(Objects.requireNonNull(clientDir.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
-                .collect(Collectors.toList());
-        if (jars.isEmpty()) {
-            throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + clientDir);
-        }
-        if (jars.size() > 1) {
-            throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + clientDir);
-        }
-        return jars.get(0);
     }
 
     @Override

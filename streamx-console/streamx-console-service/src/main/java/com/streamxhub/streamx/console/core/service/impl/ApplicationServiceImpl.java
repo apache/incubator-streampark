@@ -69,6 +69,7 @@ import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.ApplicationLogService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.CommonService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkClusterService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
@@ -77,7 +78,6 @@ import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
-import com.streamxhub.streamx.console.system.authentication.ServerComponent;
 import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
@@ -108,7 +108,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -182,7 +181,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private SettingService settingService;
 
     @Autowired
-    private ServerComponent serverComponent;
+    private CommonService commonService;
 
     @Autowired
     private EnvInitializer envInitializer;
@@ -536,7 +535,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean create(Application appParam) {
-        appParam.setUserId(serverComponent.getUser().getUserId());
+        appParam.setUserId(commonService.getCurrentUser().getUserId());
         appParam.setState(FlinkAppState.ADDED.getValue());
         appParam.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
         appParam.setOptionState(OptionState.NONE.getValue());
@@ -1030,20 +1029,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             } else if (application.isFlinkSqlJob()) {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
                 assert flinkSql != null;
-
                 //1) dist_userJar
-                File localClient = WebUtils.getAppClientDir();
-                assert localClient.exists();
-                List<String> jars =
-                    Arrays.stream(Objects.requireNonNull(localClient.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
-                        .collect(Collectors.toList());
-                if (jars.isEmpty()) {
-                    throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localClient);
-                }
-                if (jars.size() > 1) {
-                    throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localClient);
-                }
-                String sqlDistJar = jars.get(0);
+                String sqlDistJar = commonService.getSqlClientJar();
                 //2) appConfig
                 appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
                 assert executionMode != null;
