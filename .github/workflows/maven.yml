@@ -2,9 +2,9 @@ name: Maven Package Test
 
 on:
   push:
-    branches: [ feat_docker ]
+    branches: [ dev ]
   pull_request:
-    branches: [ feat_docker ]
+    branches: [ dev ]
 
 jobs:
   build:
@@ -22,17 +22,3 @@ jobs:
       - name: Build with Maven
         run: mvn -B package -DskipTests --file pom.xml
 
-      - name: Get version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-
-      - name: Build the Docker image
-          run: |
-            docker version
-            # 登录阿里云镜像仓库
-            docker login --username=${{ secrets.DOCKER_USERNAME }} --password=${{ secrets.DOCKER_PASSWORD }} registry.cn-hangzhou.aliyuncs.com
-            cd docker
-            sh build.sh ${{ steps.get_version.outputs.VERSION }}
-            docker tag streamx/mysql:${{ steps.get_version.outputs.VERSION }} registry.ap-northeast-1.aliyuncs.com/streamx_test/streamx-console-service:${{ steps.get_version.outputs.VERSION }}
-            # 使用Dockerfile构建镜像
-            docker push registry.ap-northeast-1.aliyuncs.com/streamx_test/streamx-console-service:${{ steps.get_version.outputs.VERSION }}
