@@ -2,7 +2,7 @@ version: '1'
 services:
   mysql-db:
     container_name: streamx-mysql-docker
-    image: streamx/mysql:${v_num}
+    image: registry.ap-northeast-1.aliyuncs.com/streamx_test/mysql:${v_num}
     ports:
       - "3306:3306"
     expose:
@@ -14,7 +14,7 @@ services:
 
   stream:
     container_name: stream-service-docker
-    image: streamx/streamx-console-service:${v_num}
+    image: registry.ap-northeast-1.aliyuncs.com/streamx_test/streamx-console-service:${v_num}
     volumes:
       - conf:/opt/streamx/conf
     ports:
