@@ -22,6 +22,8 @@ import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.FunctionInitializationContext
 
+import java.io.File
+
 
 object FlinkUtils {
 
@@ -29,5 +31,12 @@ object FlinkUtils {
     context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(descriptorName, implicitly[TypeInformation[R]].getTypeClass))
   }
 
+  def getFlinkDistJar(flinkHome: String): String = {
+    new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in ${flinkHome}/lib")
+      case array if array.length == 1 => s"$flinkHome/lib/${array.head}"
+      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in ${flinkHome}/lib,[${more.mkString(",")}]")
+    }
+  }
 
 }

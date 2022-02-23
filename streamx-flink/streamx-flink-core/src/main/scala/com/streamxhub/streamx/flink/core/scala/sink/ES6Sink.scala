@@ -26,7 +26,6 @@ import org.apache.flink.api.common.functions.RuntimeContext
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.elasticsearch.ElasticsearchSinkBase._
-import org.apache.flink.streaming.connectors.elasticsearch.util.RetryRejectedExecutionFailureHandler
 import org.apache.flink.streaming.connectors.elasticsearch.{ActionRequestFailureHandler, ElasticsearchSinkFunction, RequestIndexer}
 import org.apache.flink.streaming.connectors.elasticsearch6.{ElasticsearchSink, RestClientFactory}
 import org.apache.http.HttpHost
@@ -36,7 +35,10 @@ import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.message.BasicHeader
+import org.elasticsearch.action.ActionRequest
+import org.elasticsearch.action.delete.DeleteRequest
 import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.client.RestClientBuilder
 
 import java.util.Properties
@@ -64,15 +66,12 @@ class ES6Sink(@(transient@param) ctx: StreamingContext,
               name: String = null,
               uid: String = null) extends Sink with Logger {
 
-  def sink[T](stream: DataStream[T],
-              suffix: String = "",
-              restClientFactory: Any = null,
-              failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
-             (implicit f: T => IndexRequest): DataStreamSink[T] = {
 
-    if (restClientFactory != null) {
-      require(restClientFactory.isInstanceOf[RestClientFactory], "restClientFactory error: must be RestClientFactory instance")
-    }
+   def sink[T](stream: DataStream[T],
+                          suffix: String,
+                          restClientFactory: RestClientFactory,
+                          failureHandler: ActionRequestFailureHandler,
+                          f: T => ActionRequest): DataStreamSink[T] = {
 
     //所有es的配置文件...
     val fullConfig = ctx.parameter.toMap
@@ -94,9 +93,20 @@ class ES6Sink(@(transient@param) ctx: StreamingContext,
     require(httpHosts.nonEmpty, "elasticsearch config error,please check, e.g: sink.es.host=$host1:$port1,$host2:$port2")
 
     val sinkFunc: ElasticsearchSinkFunction[T] = new ElasticsearchSinkFunction[T] {
-      def createIndexRequest(element: T): IndexRequest = f(element)
+      def createIndexRequest(element: T): ActionRequest = f(element)
 
-      override def process(element: T, runtimeContext: RuntimeContext, requestIndexer: RequestIndexer): Unit = requestIndexer.add(createIndexRequest(element))
+      override def process(element: T, runtimeContext: RuntimeContext, requestIndexer: RequestIndexer): Unit = {
+        val request: ActionRequest = createIndexRequest(element)
+        request match {
+          case indexRequest if indexRequest.isInstanceOf[IndexRequest] => requestIndexer.add(indexRequest.asInstanceOf[IndexRequest])
+          case deleteRequest if deleteRequest.isInstanceOf[DeleteRequest] => requestIndexer.add(deleteRequest.asInstanceOf[DeleteRequest])
+          case updateRequest if updateRequest.isInstanceOf[UpdateRequest] => requestIndexer.add(updateRequest.asInstanceOf[UpdateRequest])
+          case _ => {
+            logError("ElasticsearchSinkFunction add ActionRequest is Deprecated plasase use IndexRequest|DeleteRequest|UpdateRequest ")
+            requestIndexer.add(request)
+          }
+        }
+      }
     }
 
     val sinkBuilder = new ElasticsearchSink.Builder[T](httpHosts.toList, sinkFunc)
@@ -107,7 +117,7 @@ class ES6Sink(@(transient@param) ctx: StreamingContext,
       val restClientFactory = new RestClientFactoryImpl(fullConfig)
       sinkBuilder.setRestClientFactory(restClientFactory)
     } else {
-      sinkBuilder.setRestClientFactory(restClientFactory.asInstanceOf[RestClientFactory])
+      sinkBuilder.setRestClientFactory(restClientFactory)
     }
 
     def doConfig(param: (String, String)): Unit = param match {
@@ -135,10 +145,11 @@ class ES6Sink(@(transient@param) ctx: StreamingContext,
       override def accept(k: Object, v: Object): Unit = doConfig(k.toString, v.toString)
     })
 
-    val esSink = sinkBuilder.build()
-
+    val esSink: ElasticsearchSink[T] = sinkBuilder.build()
+    if (shortConfig.getOrElse(KEY_ES_DISABLE_FLUSH_ONCHECKPOINT, "false").toBoolean) {
+      esSink.disableFlushOnCheckpoint()
+    }
     val sink = stream.addSink(esSink)
-
     afterSink(sink, parallelism, name, uid)
   }
 }
@@ -203,6 +214,11 @@ class RestClientFactoryImpl(val config: Map[String, String]) extends RestClientF
       val headers = new BasicHeader("Content-Type", contentType)
       restClientBuilder.setDefaultHeaders(Array(headers))
       restClientBuilder.setMaxRetryTimeoutMillis(maxRetry)
+      config.getOrElse(KEY_ES_REST_PATH_PREFIX, null) match {
+        case null => null
+        case path => restClientBuilder.setPathPrefix(path)
+      }
+
     }
 
     configCallback()

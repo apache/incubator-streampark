@@ -35,6 +35,7 @@ import ru.yandex.clickhouse.ClickHouseDataSource
 import ru.yandex.clickhouse.settings.ClickHouseProperties
 
 import java.sql.{Connection, PreparedStatement, Statement}
+import java.util
 import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicLong
 import java.util.{Base64, Properties}
@@ -73,18 +74,19 @@ class ClickHouseSink(@(transient@param) ctx: StreamingContext,
                      uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
   val prop = ConfigUtils.getConf(ctx.parameter.toMap, CLICKHOUSE_SINK_PREFIX)(alias)
+
   Utils.copyProperties(property, prop)
 
   /**
    *
    * @param stream
-   * @param dbAndTable database and table ,e.g test.user....
    * @param toCSVFun
    * @tparam T
    * @return
    */
-  def sink[T](stream: DataStream[T], dbAndTable: String)(implicit toCSVFun: T => String = null): DataStreamSink[T] = {
-    prop.put(KEY_SINK_FAILOVER_TABLE, dbAndTable)
+  def sink[T](stream: DataStream[T])(implicit toCSVFun: T => String = null): DataStreamSink[T] = {
+    val failoverTable: String = prop.getProperty(KEY_SINK_FAILOVER_TABLE)
+    require(failoverTable != null && !failoverTable.isEmpty, () => s"ClickHouse async  insert failoverTable must not null")
     val sinkFun = new AsyncClickHouseSinkFunction[T](prop)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
@@ -117,10 +119,11 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
         if (!Lock.initialized) {
           Lock.initialized = true
           clickHouseConf = new ClickHouseConfig(properties)
-          val table = properties(KEY_SINK_FAILOVER_TABLE)
+          val targetTable = properties(CLICKHOUSE_TARGET_TABLE)
+          require(targetTable != null && !targetTable.isEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
           clickHouseWriter = ClickHouseSinkWriter(clickHouseConf)
           failoverChecker = FailoverChecker(clickHouseConf.delayTime)
-          sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize, table)
+          sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize, targetTable)
           failoverChecker.addSinkBuffer(sinkBuffer)
           logInfo("AsyncClickHouseSink initialize... ")
         }
@@ -130,7 +133,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
 
   override def invoke(value: T): Unit = {
     val csv = toCSVFun match {
-      case null => //啧啧啧...
+      case null =>
         val buffer = new StringBuilder("(")
         val fields = value.getClass.getDeclaredFields
         fields.foreach(f => {
@@ -194,12 +197,19 @@ class ClickHouseSinkFunction[T](config: Properties)(implicit toSQLFn: T => Strin
   }
   private val offset: AtomicLong = new AtomicLong(0L)
   private var timestamp = 0L
+  private var delayTime = DEFAULT_JDBC_INSERT_BATCH_DELAYTIME
+  private val sqlValues = new util.ArrayList[String](batchSize)
+  private var insertSqlPrefixes: String = _
+
 
   override def open(parameters: Configuration): Unit = {
     val url: String = Try(config.remove(KEY_JDBC_URL).toString).getOrElse(null)
     val user: String = Try(config.remove(KEY_JDBC_USER).toString).getOrElse(null)
     val driver: String = Try(config.remove(KEY_JDBC_DRIVER).toString).getOrElse(null)
-
+    delayTime = Try(config.remove(KEY_JDBC_INSERT_BATCH_DELAYTIME).toString.toLong).getOrElse(DEFAULT_JDBC_INSERT_BATCH_DELAYTIME)
+    val targetTable = Try(config.remove(CLICKHOUSE_TARGET_TABLE).toString).getOrElse(null)
+    require(targetTable != null && !targetTable.isEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
+    insertSqlPrefixes = s"insert into  $targetTable  values "
     val properties = new ClickHouseProperties()
     (user, driver) match {
       case (u, d) if (u != null && d != null) =>
@@ -231,36 +241,33 @@ class ClickHouseSinkFunction[T](config: Properties)(implicit toSQLFn: T => Strin
     })
     val dataSource = new ClickHouseDataSource(url, properties)
     connection = dataSource.getConnection
-    if (batchSize > 1) {
-      statement = connection.createStatement()
-    }
   }
 
   override def invoke(value: T, context: SinkFunction.Context): Unit = {
     require(connection != null)
-    val sql = toSQLFn(value)
+    val valueStr = toSQLFn(value)
     batchSize match {
       case 1 =>
         try {
-          statement = connection.prepareStatement(sql)
-          statement.asInstanceOf[PreparedStatement].executeUpdate
+          val sql = s"$insertSqlPrefixes $valueStr"
+          connection.prepareStatement(sql).executeUpdate
         } catch {
           case e: Exception =>
-            logError(s"""ClickHouseSink invoke error:$sql""")
+            logError(s"""ClickHouseSink invoke error:$valueStr""")
             throw e
           case _: Throwable =>
         }
       case batch =>
         try {
-          statement.addBatch(sql)
+          sqlValues.add(valueStr)
           (offset.incrementAndGet() % batch, System.currentTimeMillis()) match {
             case (0, _) => execBatch()
-            case (_, current) if current - timestamp > 1000 => execBatch()
+            case (_, current) if current - timestamp > delayTime => execBatch()
             case _ =>
           }
         } catch {
           case e: Exception =>
-            logError(s"""ClickHouseSink batch invoke error:$sql""")
+            logError(s"""ClickHouseSink batch invoke error:$sqlValues""")
             throw e
           case _: Throwable =>
         }
@@ -274,11 +281,18 @@ class ClickHouseSinkFunction[T](config: Properties)(implicit toSQLFn: T => Strin
 
   private[this] def execBatch(): Unit = {
     if (offset.get() > 0) {
-      offset.set(0)
-      val count = statement.executeBatch().sum
-      statement.clearBatch()
-      logInfo(s"ClickHouseSink batch $count successful..")
-      timestamp = System.currentTimeMillis()
+      try {
+        logInfo(s"ClickHouseSink batch ${offset.get()} insert begain..")
+        offset.set(0)
+        val valuesStr: String = sqlValues.mkString(",")
+        val sql = s"$insertSqlPrefixes $valuesStr"
+        //clickhouse batch insert  return num always 1
+        val insertNum: Int = connection.prepareStatement(sql).executeUpdate()
+        logInfo(s"ClickHouseSink batch  successful..")
+        timestamp = System.currentTimeMillis()
+      } finally {
+        sqlValues.clear()
+      }
     }
   }
 
@@ -314,30 +328,30 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
 
 class ClickHouseConfig(parameters: Properties) extends ThresholdConf(parameters) {
   var currentHostId: Int = 0
-  val credentials: String = (parameters.getProperty(KEY_JDBC_USER), parameters.getProperty(KEY_JDBC_PASSWORD)) match {
+  val credentials: String = (parameters.getProperty(CLICKHOUSE_USER), parameters.getProperty(CLICKHOUSE_PASSWORD)) match {
     case (null, null) => null
     case (u, p) => new String(Base64.getEncoder.encode(s"$u:$p".getBytes))
   }
-  val jdbcUrls: java.util.List[String] = parameters.getOrElse(KEY_JDBC_URL, "")
+  val hosts: java.util.List[String] = parameters.getOrElse(CLICKHOUSE_HOSTS, "")
     .split(SIGN_COMMA)
     .filter(_.nonEmpty)
     .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
     .toList
 
-  require(jdbcUrls.nonEmpty)
+  require(hosts.nonEmpty)
 
   def getRandomHostUrl: String = {
-    currentHostId = ThreadLocalRandom.current.nextInt(jdbcUrls.size)
-    jdbcUrls.get(currentHostId)
+    currentHostId = ThreadLocalRandom.current.nextInt(hosts.size)
+    hosts.get(currentHostId)
   }
 
   def nextHost: String = {
-    if (currentHostId >= jdbcUrls.size - 1) {
+    if (currentHostId >= hosts.size - 1) {
       currentHostId = 0
     } else {
       currentHostId += 1
     }
-    jdbcUrls.get(currentHostId)
+    hosts.get(currentHostId)
   }
 
 }
@@ -366,9 +380,9 @@ case class ClickHouseSinkWriter(clickHouseConfig: ClickHouseConfig) extends Sink
     service.submit(task)
   }
 
-  def write(params: SinkRequest): Unit = {
+  def write(request: SinkRequest): Unit = {
     try {
-      recordQueue.put(params)
+      recordQueue.put(request)
     } catch {
       case e: InterruptedException =>
         logError(s"Interrupted error while putting data to queue,error:$e")
@@ -394,6 +408,7 @@ case class ClickHouseWriterTask(id: Int,
                                 asyncHttpClient: AsyncHttpClient,
                                 queue: BlockingQueue[SinkRequest],
                                 callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
+
   @volatile var isWorking = false
 
   val failoverWriter: FailoverWriter = new FailoverWriter(clickHouseConf.storageType, clickHouseConf.getFailoverConfig)
@@ -465,7 +480,7 @@ case class ClickHouseWriterTask(id: Int,
       logInfo(s"failover Successful, StorageType = ${clickHouseConf.storageType}, size = ${sinkRequest.size}")
     } else {
       sinkRequest.incrementCounter()
-      logWarn(s"Next attempt to send data to ClickHouse, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
+      logWarn(s"Next attempt to send data to ClickHouse, targetTable = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
       queue.put(sinkRequest)
     }
   }

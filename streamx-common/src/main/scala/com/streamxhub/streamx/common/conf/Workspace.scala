@@ -19,7 +19,7 @@
 package com.streamxhub.streamx.common.conf
 
 import com.streamxhub.streamx.common.enums.StorageType
-import com.streamxhub.streamx.common.util.HdfsUtils
+import com.streamxhub.streamx.common.util.{HdfsUtils, SystemPropertyUtils}
 
 import java.net.URI
 
@@ -40,14 +40,26 @@ object Workspace {
 
 case class Workspace(storageType: StorageType) {
 
+  private[this] def getConfigValue[T](option: ConfigOption): T = {
+    val s = SystemPropertyUtils.get(option.key)
+    val v = ConfigHub.get(option).asInstanceOf[T]
+    val d = option.defaultValue.asInstanceOf[T]
+    (s, v) match {
+      case (null, null) => d
+      case (null, b) => b
+      case (a, null) => Converter.convert(a, option.classType).asInstanceOf[T]
+      case (a, b) => if (b == d) Converter.convert(a, option.classType).asInstanceOf[T] else b
+    }
+  }
+
   lazy val WORKSPACE: String = {
     storageType match {
       case StorageType.LFS =>
-        val path: String = ConfigHub.get(CommonConfig.STREAMX_WORKSPACE_LOCAL)
+        val path: String = getConfigValue[String](CommonConfig.STREAMX_WORKSPACE_LOCAL)
         require(path != null, "[StreamX] streamx.workspace.local must not be null")
         path
       case StorageType.HDFS =>
-        val path: String = ConfigHub.get(CommonConfig.STREAMX_WORKSPACE_REMOTE)
+        val path: String = getConfigValue[String](CommonConfig.STREAMX_WORKSPACE_REMOTE)
         path match {
           case p if p.isEmpty =>
             s"${HdfsUtils.getDefaultFS}${CommonConfig.STREAMX_WORKSPACE_REMOTE.defaultValue}"
@@ -57,7 +69,7 @@ case class Workspace(storageType: StorageType) {
               if (p.startsWith(defaultFs)) {
                 p
               } else {
-                var path = URI.create(p).getPath
+                val path = URI.create(p).getPath
                 s"${HdfsUtils.getDefaultFS}$path"
               }
             } else {
@@ -68,6 +80,8 @@ case class Workspace(storageType: StorageType) {
   }
 
   lazy val APP_PLUGINS = s"$WORKSPACE/plugins"
+
+  lazy val APP_CLIENT = s"$WORKSPACE/client"
 
   /**
    * 存放不同版本flink相关的jar

@@ -34,7 +34,7 @@ import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationLogService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +106,7 @@ public class ApplicationController {
 
         List<Application> appRecords = applicationList.getRecords();
         List<Long> appIds = appRecords.stream().map(Application::getId).collect(Collectors.toList());
-        Map<Long, PipeStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
+        Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
 
         // add building pipeline status info and app control info
         appRecords = appRecords.stream()
@@ -117,8 +117,8 @@ public class ApplicationController {
             })
             .peek(e -> e.setAppControl(
                 new AppControl()
-                    .setAllowBuild(e.getBuildStatus() == null || !PipeStatus.running.getCode().equals(e.getBuildStatus()))
-                    .setAllowStart(PipeStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack())
+                    .setAllowBuild(e.getBuildStatus() == null || !PipelineStatus.running.getCode().equals(e.getBuildStatus()))
+                    .setAllowStart(PipelineStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack())
                     .setAllowStop(e.isRunning()))
             )
             .collect(Collectors.toList());
@@ -132,22 +132,6 @@ public class ApplicationController {
     public RestResponse mapping(Application app) {
         boolean flag = applicationService.mapping(app);
         return RestResponse.create().data(flag);
-    }
-
-    @PostMapping("deploy")
-    @RequiresPermissions("app:deploy")
-    public RestResponse deploy(Application app, String socketId) {
-        Application application = applicationService.getById(app.getId());
-        assert application != null;
-        try {
-            applicationService.checkEnv(app);
-            application.setBackUp(true);
-            application.setBackUpDescription(app.getBackUpDescription());
-            applicationService.deploy(application, socketId);
-            return RestResponse.create().data(true);
-        } catch (Exception e) {
-            return RestResponse.create().data(false).message(e.getMessage());
-        }
     }
 
     @PostMapping("revoke")
@@ -184,7 +168,6 @@ public class ApplicationController {
         return RestResponse.create();
     }
 
-    // fixme to adapte for kubernetes-only scenarios
     @PostMapping("yarn")
     public RestResponse yarn() {
         return RestResponse.create().data(HadoopUtils.getRMWebAppURL(false));
@@ -196,8 +179,8 @@ public class ApplicationController {
         return RestResponse.create().data(yarnName);
     }
 
-    @PostMapping("exists")
-    public RestResponse exists(Application app) {
+    @PostMapping("checkName")
+    public RestResponse checkName(Application app) {
         AppExistsState exists = applicationService.checkExists(app);
         return RestResponse.create().data(exists.get());
     }

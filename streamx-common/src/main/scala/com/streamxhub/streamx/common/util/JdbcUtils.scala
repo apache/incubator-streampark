@@ -88,18 +88,6 @@ object JdbcUtils {
 
   def count(conn: Connection, sql: String): Long = unique(conn, sql).head._2.toString.toLong
 
-  /**
-   * 直接查询一个对象
-   *
-   * @param sql
-   * @param jdbcConfig
-   * @tparam T
-   * @return
-   */
-  def select2[T](sql: String, func: ResultSet => Unit = null)(implicit jdbcConfig: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(sql, func))
-
-  private[this] def toObject[T](list: List[Map[String, _]])(implicit manifest: Manifest[T]): List[T] = if (list.isEmpty) List.empty else list.map(JsonUtils.read[T])
-
   def batch(sql: Iterable[String])(implicit jdbcConfig: Properties): Int = {
     var conn: Connection = null
     Try(sql.size).getOrElse(0) match {
@@ -188,10 +176,6 @@ object JdbcUtils {
     }
   }
 
-  def unique2[T](sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): T = toObject[T](List(unique(sql))).head
-
-  def unique2[T](connection: Connection, sql: String)(implicit manifest: Manifest[T]): T = toObject(List(unique(connection, sql))).head
-
   /**
    *
    * 方法execute：
@@ -249,7 +233,7 @@ object JdbcUtils {
                 val setMethod = s"set${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
                 val method = Try(jdbcConfig.getClass.getMethods.filter(_.getName == setMethod).filter(_.getParameterCount == 1).head).getOrElse(null)
                 method match {
-                  case m =>
+                  case m if m != null =>
                     m.setAccessible(true)
                     m.getParameterTypes.head.getSimpleName match {
                       case "String" => m.invoke(jdbcConfig, Seq(x._2.asInstanceOf[Object]): _*)

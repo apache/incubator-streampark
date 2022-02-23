@@ -29,6 +29,8 @@ export default {
     GITCHECK: '/flink/project/gitcheck',
     EXISTS: '/flink/project/exists',
     CREATE: '/flink/project/create',
+    GET: '/flink/project/get',
+    UPDATE: '/flink/project/update',
     BUILD: '/flink/project/build',
     BUILDLOG: '/flink/project/buildlog',
     CLOSEBUILD: '/flink/project/closebuild',
@@ -68,7 +70,7 @@ export default {
     DASHBOARD: '/flink/app/dashboard',
     MAIN: '/flink/app/main',
     NAME: '/flink/app/name',
-    EXISTS: '/flink/app/exists',
+    CHECKNAME: '/flink/app/checkName',
     CANCEL: '/flink/app/cancel',
     DELETE: '/flink/app/delete',
     DELETEBAK: '/flink/app/deletebak',
@@ -98,6 +100,14 @@ export default {
     SYNC: '/flink/env/sync',
     UPDATE: '/flink/env/update',
     DEFAULT: '/flink/env/default',
+  },
+  FlinkCluster: {
+    LIST: '/flink/cluster/list',
+    ACTIVEURL: '/flink/cluster/activeUrl',
+    CREATE:  '/flink/cluster/create',
+    CHECK: '/flink/cluster/check',
+    GET: '/flink/cluster/get',
+    UPDATE: '/flink/cluster/update'
   },
   AppBuild: {
     BUILD: '/flink/pipe/build',

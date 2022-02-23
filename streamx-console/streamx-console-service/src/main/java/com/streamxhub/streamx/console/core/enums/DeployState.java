@@ -28,9 +28,9 @@ import java.util.Arrays;
 public enum DeployState implements Serializable {
 
     /**
-     * 需用重新发布,但是下载maven依赖失败.(针对flinkSql任务)
+     * 部署失败
      */
-    NEED_DEPLOY_DOWN_DEPENDENCY_FAILED(-1),
+    FAILED(-1),
     /**
      * 完结
      */
@@ -66,18 +66,23 @@ public enum DeployState implements Serializable {
      */
     NEED_RESTART_AFTER_DEPLOY(6),
 
+    /**
+     * 项目发生变化,任务需检查(是否需要重新选择jar)
+     */
+    NEED_CHECK_AFTER_PROJECT_CHANGED(7),
+
     //需要回滚
-    NEED_ROLLBACK(7),
+    NEED_ROLLBACK(8),
 
     /**
      * 回滚完成,需要重新启动
      */
-    NEED_RESTART_AFTER_ROLLBACK(8),
+    NEED_RESTART_AFTER_ROLLBACK(9),
 
     /**
      * 发布的任务已经撤销
      */
-    REVOKED(8);
+    REVOKED(10);
 
     int value;
 

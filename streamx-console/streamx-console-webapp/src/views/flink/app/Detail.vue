@@ -17,8 +17,8 @@
         <a-button
           type="danger"
           icon="cloud"
-          @click="handleFlinkWebUiView"
-          :disabled="this.app.flinkRestUrl === null"
+          @click="handleView"
+          :disabled="this.app.state !== 7 || (this.yarn === null && this.app.flinkRestUrl === null)"
           style="float: right;margin-top: -8px;margin-right: 20px">Flink Web UI</a-button>
         <a-divider
           style="margin-top: 5px;margin-bottom: -5px" />
@@ -197,28 +197,44 @@
               <template
                 slot="operation"
                 slot-scope="text, record">
-                <svg-icon
-                  name="see"
-                  border
-                  @click.native="handleConfDetail(record)"
-                  title="detail" />
-                <svg-icon
-                  name="swap"
-                  border
-                  v-if="configVersions.length>1"
-                  @click.native="handleCompare(record)"
-                  title="compare" />
+
+                <a-tooltip title="View Config Detail">
+                  <a-button
+                    @click.native="handleConfDetail(record)"
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="eye"/>
+                  </a-button>
+                </a-tooltip>
+
+                <a-tooltip title="Compare Config">
+                  <a-button
+                    v-if="configVersions.length>1"
+                    @click.native="handleCompare(record)"
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="swap"/>
+                  </a-button>
+                </a-tooltip>
+
                 <a-popconfirm
                   v-if="!record.effective"
+                  v-permit="'conf:delete'"
                   title="Are you sure delete this record ?"
                   cancel-text="No"
                   ok-text="Yes"
                   @confirm="handleDeleteConf(record)">
-                  <svg-icon
-                    name="remove"
-                    border
-                    v-permit="'conf:delete'" />
+                  <a-button
+                    type="danger"
+                    shape="circle"
+                    size="small"
+                    class="control-button">
+                    <a-icon type="delete"/>
+                  </a-button>
                 </a-popconfirm>
+
               </template>
             </a-table>
           </a-descriptions-item>
@@ -283,21 +299,32 @@
               <template
                 slot="operation"
                 slot-scope="text, record">
-                <svg-icon
-                  name="copy"
-                  border
-                  v-clipboard:copy="record.path"
-                  v-clipboard:success="handleCopySuccess"
-                  v-clipboard:error="handleCopyError" />
+
+                <a-tooltip title="Copy Path">
+                  <a-button
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color"
+                    v-clipboard:copy="record.path"
+                    v-clipboard:success="handleCopySuccess"
+                    v-clipboard:error="handleCopyError">
+                    <a-icon type="copy"/>
+                  </a-button>
+                </a-tooltip>
+
                 <a-popconfirm
-                  title="确定要删除吗?"
+                  title="Are you sure delete?"
                   cancel-text="No"
                   ok-text="Yes"
+                  v-permit="'savepoint:delete'"
                   @confirm="handleDeleteSavePoint(record)">
-                  <svg-icon
-                    name="remove"
-                    border
-                    v-permit="'savepoint:delete'"/>
+                  <a-button
+                    type="danger"
+                    shape="circle"
+                    size="small"
+                    class="control-button">
+                    <a-icon type="delete"/>
+                  </a-button>
                 </a-popconfirm>
               </template>
             </a-table>
@@ -335,21 +362,33 @@
                 slot="operation"
                 v-if="1 === 2"
                 slot-scope="text, record">
-                <svg-icon
-                  name="rollback"
-                  border
-                  v-permit="'backup:rollback'"
-                  @click.native="handleRollback(record)"/>
+
+                <a-tooltip title="Rollback Job">
+                  <a-button
+                    v-permit="'backup:rollback'"
+                    @click.native="handleRollback(record)"
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="rollback"/>
+                  </a-button>
+                </a-tooltip>
+
                 <a-popconfirm
-                  title="Are you sure delete?"
+                  title="Are you sure delete ?"
                   cancel-text="No"
                   ok-text="Yes"
+                  v-permit="'backup:delete'"
                   @confirm="handleDeleteBackUp(record)">
-                  <svg-icon
-                    name="remove"
-                    border
-                    v-permit="'backup:delete'"/>
+                  <a-button
+                    type="danger"
+                    shape="circle"
+                    size="small"
+                    class="control-button">
+                    <a-icon type="delete"/>
+                  </a-button>
                 </a-popconfirm>
+
               </template>
             </a-table>
           </a-descriptions-item>
@@ -374,9 +413,8 @@
               class="detail-table">
               <template
                 slot="yarnAppId"
-                slot-scope="text, record"
-                class="pointer">
-                <span @click="handleView(record.yarnAppId)">{{ record.yarnAppId }}</span>
+                slot-scope="text, record">
+                <span class="pointer" @click="handleView(record.yarnAppId)">{{ record.yarnAppId }}</span>
               </template>
               <template
                 slot="startTime"
@@ -404,12 +442,16 @@
               <template
                 slot="operation"
                 slot-scope="text, record">
-                <svg-icon
-                  v-if="!record.success"
-                  name="see"
-                  border
-                  @click.native="handleException(record)"
-                  title="查看" />
+                <a-tooltip title="View Exception" v-if="!record.success">
+                  <a-button
+                    v-permit="'app:detail'"
+                    @click.native="handleException(record)"
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="eye"/>
+                  </a-button>
+                </a-tooltip>
               </template>
             </a-table>
           </a-descriptions-item>
@@ -610,6 +652,7 @@ import * as monaco from 'monaco-editor'
 import SvgIcon from '@/components/SvgIcon'
 import storage from '@/utils/storage'
 import {DEFAULT_THEME} from '@/store/mutation-types'
+import {activeURL} from '@/api/flinkCluster'
 
 const Base64 = require('js-base64').Base64
 configOptions.push(
@@ -986,15 +1029,20 @@ export default {
       })
     },
 
-    handleView(appId) {
-      if (this.yarn !== null) {
-        const url = this.yarn + '/proxy/' + appId + '/'
-        window.open(url)
+    handleView() {
+      if (this.app.executionMode === 1) {
+        activeURL({ id: this.app.id }).then((resp) =>{
+          const url = resp.data + '/#/job/' + this.app.jobId + '/overview'
+          window.open(url)
+        })
+      } else if (this.app.executionMode === 2 || this.app.executionMode === 3 || this.app.executionMode === 4) {
+        if (this.yarn !== null) {
+          const url = this.yarn + '/proxy/' + this.app.appId + '/'
+          window.open(url)
+        }
+      } else {
+        window.open(this.app.flinkRestUrl)
       }
-    },
-
-    handleFlinkWebUiView() {
-      window.open(this.app.flinkRestUrl)
     },
 
     handleSavePoint() {

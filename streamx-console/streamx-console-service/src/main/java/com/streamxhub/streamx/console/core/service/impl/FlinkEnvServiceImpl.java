@@ -24,6 +24,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.console.core.dao.FlinkEnvMapper;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
+import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -65,14 +66,10 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
         if (count == 0) {
             version.setIsDefault(true);
         }
-        try {
-            version.setCreateTime(new Date());
-            version.doSetVersion();
-            version.doSetFlinkConf();
-            return save(version);
-        } catch (Exception e) {
-            throw e;
-        }
+        version.setCreateTime(new Date());
+        version.doSetVersion();
+        version.doSetFlinkConf();
+        return save(version);
     }
 
     @Override
@@ -89,6 +86,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
             flinkEnv.doSetFlinkConf();
         }
         updateById(flinkEnv);
+        FlinkTrackingTask.getFlinkEnvMap().put(flinkEnv.getId(), version);
     }
 
     @Override

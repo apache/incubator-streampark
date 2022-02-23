@@ -23,7 +23,14 @@ import org.apache.commons.lang3.StringUtils;
 
 public enum StorageType {
 
+    /**
+     * hdfs
+     */
     HDFS("hdfs"),
+
+    /**
+     * local File system
+     */
     LFS("lfs");
 
     private final String identifier;

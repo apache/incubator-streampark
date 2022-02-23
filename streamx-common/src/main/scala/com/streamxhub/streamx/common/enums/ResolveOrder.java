@@ -31,8 +31,10 @@ public enum ResolveOrder {
      * child-first
      */
     CHILD_FIRST("child-first", 1);
-    String name;
-    Integer value;
+
+    final String name;
+
+    final Integer value;
 
     ResolveOrder(String name, Integer value) {
         this.name = name;

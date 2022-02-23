@@ -106,7 +106,8 @@ public class K8sFlinkChangeEventListener {
 
         // email alerts when necessary
         FlinkAppState state = FlinkAppState.of(app.getState());
-        if (FlinkAppState.FAILED.equals(state) || FlinkAppState.LOST.equals(state)) {
+        if (FlinkAppState.FAILED.equals(state) || FlinkAppState.LOST.equals(state)
+            || FlinkAppState.RESTARTING.equals(state) || FlinkAppState.FINISHED.equals(state)) {
             Application finalApp = app;
             executor.execute(() -> alertService.alert(finalApp, state));
         }

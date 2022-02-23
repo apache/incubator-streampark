@@ -20,49 +20,48 @@
 package com.streamxhub.streamx.console.core.enums;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * @author benjobs
  */
-public enum ApplicationType implements Serializable {
-    /**
-     * StreamX Flink
-     */
-    STREAMX_FLINK(1, "StreamX Flink"),
-    /**
-     * Apache Flink
-     */
-    APACHE_FLINK(2, "Apache Flink"),
-    /**
-     * StreamX Spark
-     */
-    STREAMX_SPARK(3, "StreamX Spark"),
-    /**
-     * Apache Spark
-     */
-    APACHE_SPARK(4, "Apache Spark");
-    int type;
-    String name;
+public enum BuildState implements Serializable {
 
-    ApplicationType(int type, String name) {
-        this.type = type;
-        this.name = name;
+    /**
+     * 发生变更,需重新build
+     */
+    NEED_REBUILD(-2),
+    /**
+     * 发布的任务已经撤销
+     */
+    NOT_BUILD(-1),
+
+    /**
+     * 正在构建
+     */
+    BUILDING(0),
+
+    /**
+     * 构建成功
+     */
+    SUCCESSFUL(1),
+
+    /**
+     * 构建失败
+     */
+    FAILED(2);
+
+    int value;
+
+    BuildState(int value) {
+        this.value = value;
     }
 
-    public int getType() {
-        return type;
+    public int get() {
+        return this.value;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public static ApplicationType of(int type) {
-        for (ApplicationType appType : ApplicationType.values()) {
-            if (appType.getType() == type) {
-                return appType;
-            }
-        }
-        return null;
+    public static BuildState of(Integer state) {
+        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
     }
 }

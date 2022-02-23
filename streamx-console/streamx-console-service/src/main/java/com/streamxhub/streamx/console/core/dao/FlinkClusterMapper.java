@@ -17,28 +17,19 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.authentication;
+package com.streamxhub.streamx.console.core.dao;
 
-import com.streamxhub.streamx.console.system.entity.User;
-import com.streamxhub.streamx.console.system.service.UserService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.streamxhub.streamx.console.core.entity.FlinkCluster;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
-/**
- * @author benjobs
- */
-@Slf4j
-@Component
-public class ServerComponent {
+public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
 
-    @Autowired
-    private UserService userService;
-
-    public User getUser() {
-        String token = (String) SecurityUtils.getSubject().getPrincipal();
-        String username = JWTUtil.getUsername(token);
-        return userService.findByName(username);
-    }
+    /**
+     * @param clusterName
+     * @return
+     */
+    @Select("SELECT * from t_flink_cluster where cluster_name=#{clusterName}")
+    FlinkCluster getByName(@Param("clusterName") String clusterName);
 }

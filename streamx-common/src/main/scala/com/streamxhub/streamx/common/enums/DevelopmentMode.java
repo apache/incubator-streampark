@@ -22,11 +22,21 @@ package com.streamxhub.streamx.common.enums;
  * @author benjobs
  */
 public enum DevelopmentMode {
+
+    /**
+     * custom code
+     */
     CUSTOMCODE("Custom Code", 1),
+
+    /**
+     * Flink SQL
+     */
     FLINKSQL("Flink SQL", 2);
 
-    String mode;
-    Integer value;
+
+    private final String mode;
+
+    private final Integer value;
 
     DevelopmentMode(String mode, Integer value) {
         this.mode = mode;

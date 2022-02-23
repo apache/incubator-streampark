@@ -29,6 +29,7 @@ import scala.util.{Failure, Success, Try}
 
 object Utils {
 
+
   private[this] lazy val OS = System.getProperty("os.name").toLowerCase
 
   def notEmpty(elem: Any): Boolean = {
@@ -117,6 +118,18 @@ object Utils {
         handle.close()
       }
     }
+  }
+
+  def close(closeable: AutoCloseable*)(implicit func: Throwable => Unit = null): Unit = {
+    closeable.foreach(c => {
+      try {
+        if (c != null) {
+          c.close()
+        }
+      } catch {
+        case e: Throwable if func != null => func(e)
+      }
+    })
   }
 
 }

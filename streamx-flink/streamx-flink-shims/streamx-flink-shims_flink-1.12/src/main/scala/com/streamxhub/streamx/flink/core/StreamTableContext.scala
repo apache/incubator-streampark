@@ -53,9 +53,9 @@ class StreamTableContext(override val parameter: ParameterTool,
 
   @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
 
-  def getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
+  def $getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
 
-  def getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(jobName, clearTransformations)
+  def $getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(jobName, clearTransformations)
 
   override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
 

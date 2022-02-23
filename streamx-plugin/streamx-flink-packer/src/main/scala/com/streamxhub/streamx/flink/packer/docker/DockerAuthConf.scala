@@ -25,8 +25,8 @@ import javax.annotation.Nullable
 
 /**
  * Authentication Configuration of Remote Docker Register
- * @author Al-assad
  *
+ * @author Al-assad
  * @param registerAddress  docker image regoster address. when this configuration item
  *                         is empty, it means that the dockerhub public repository is used.
  * @param registerUsername login username of docker image regoster.

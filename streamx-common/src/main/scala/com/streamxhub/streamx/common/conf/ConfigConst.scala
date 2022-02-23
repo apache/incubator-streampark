@@ -108,7 +108,9 @@ object ConfigConst {
 
   val KEY_FLINK_DEPLOYMENT_OPTION_PREFIX = "flink.deployment.option."
 
-  val KEY_FLINK_APP_NAME = "yarn.application.name"
+  val KEY_FLINK_APP_NAME = "pipeline.name"
+
+  val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
   val KEY_FLINK_SAVEPOINT_PATH = "execution.savepoint.path"
 
@@ -195,7 +197,11 @@ object ConfigConst {
 
   val KEY_KAFKA_START_FROM_TIMESTAMP = "timestamp"
 
-  val REDIS_PREFIX = "redis."
+  val REDIS_PREFIX = "redis.sink"
+
+  val REDIS_CONNECT_TYPE = "connectType"
+
+  val DEFAULT_REDIS_CONNECT_TYPE = "jedisPool"
 
   val KEY_ALIAS = "alias"
 
@@ -203,15 +209,27 @@ object ConfigConst {
    * about config jdbc...
    */
   val KEY_JDBC_PREFIX = "jdbc."
+
   val KEY_JDBC_DRIVER = "driverClassName"
+
   val KEY_JDBC_DATABASE = "database"
+
   val KEY_JDBC_URL = "jdbcUrl"
+
   val KEY_JDBC_USER = "username"
+
   val KEY_JDBC_PASSWORD = "password"
+
   val KEY_JDBC_INSERT_BATCH = "batch.size"
+
+  val KEY_JDBC_INSERT_BATCH_DELAYTIME = "batch.delaytime"
+
   val DEFAULT_JDBC_INSERT_BATCH = 1
 
+  val DEFAULT_JDBC_INSERT_BATCH_DELAYTIME = 1000L
+
   val MONGO_PREFIX = "mongodb."
+
   /**
    * about config HBase
    */
@@ -231,35 +249,79 @@ object ConfigConst {
    * about influx
    */
   val INFLUX_PREFIX = "influx."
+
   val KEY_INFLUX_ACTIONS = "actions"
+
   val KEY_INFLUX_FLUSH_DURATION = "flush.duration"
+
   /**
    * about clickhouse
    */
   val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"
 
+  val CLICKHOUSE_HOSTS = "hosts"
+
+  val CLICKHOUSE_USER = "user"
+
+  val CLICKHOUSE_PASSWORD = "password"
+
+  val CLICKHOUSE_TARGET_TABLE = "targetTable"
+
+
   val HTTP_SINK_PREFIX = "http.sink"
+
+  /**
+   * about config doris
+   */
+  val DORIS_SINK_PREFIX = "doris.sink"
+  val DORIS_FENODES = "fenodes"
+  val DORIS_DATABASE = "database"
+  val DORIS_TABLE = "table"
+  val DORIS_USER = "user"
+  val DORIS_PASSWORD = "password"
+  val DORIS_BATCHSIZE = "batchSize"
+  val DORIS_DEFAULT_BATCHSIZE = "100"
+  val DORIS_INTERVALMS = "intervalMs"
+  val DORIS_DEFAULT_INTERVALMS = "3000"
+  val DORIS_MAXRETRIES = "maxRetries"
+  val DORIS_DEFAULT_MAXRETRIES = "1"
+  val DORIS_STREAM_LOAD_PROP_PREFIX = "streamLoad."
 
   /**
    * sink threshold and failover...
    */
   val KEY_SINK_THRESHOLD_BUFFER_SIZE: String = "threshold.bufferSize"
+
   val KEY_SINK_THRESHOLD_NUM_WRITERS: String = "threshold.numWriters"
+
   val KEY_SINK_THRESHOLD_QUEUE_CAPACITY: String = "threshold.queueCapacity"
+
   val KEY_SINK_THRESHOLD_DELAY_TIME: String = "threshold.delayTime"
+
   val KEY_SINK_THRESHOLD_REQ_TIMEOUT: String = "threshold.requestTimeout"
+
   val KEY_SINK_THRESHOLD_RETRIES: String = "threshold.retries"
+
   val KEY_SINK_THRESHOLD_SUCCESS_CODE: String = "threshold.successCode"
 
+
   val KEY_SINK_FAILOVER_TABLE: String = "failover.table"
+
   val KEY_SINK_FAILOVER_STORAGE: String = "failover.storage"
 
+
   val DEFAULT_SINK_REQUEST_TIMEOUT = 2000
+
   val DEFAULT_HTTP_SUCCESS_CODE = 200
+
   val DEFAULT_SINK_THRESHOLD_QUEUE_CAPACITY = 10000
+
   val DEFAULT_SINK_THRESHOLD_DELAY_TIME = 1000L
+
   val DEFAULT_SINK_THRESHOLD_BUFFER_SIZE = 1000
+
   val DEFAULT_SINK_THRESHOLD_RETRIES = 3
+
   val DEFAULT_SINK_THRESHOLD_NUM_WRITERS: Int = Runtime.getRuntime.availableProcessors()
 
   /**
@@ -273,6 +335,8 @@ object ConfigConst {
 
   val KEY_ES_REST_MAX_RETRY = "es.rest.max.retry.timeout"
 
+  val KEY_ES_REST_PATH_PREFIX = "es.rest.path.prefix"
+
   val KEY_ES_REST_CONTENT_TYPE = "es.rest.content.type"
 
   val KEY_ES_CONN_REQ_TIME_OUT = "es.connect.request.timeout"
@@ -284,6 +348,8 @@ object ConfigConst {
   val KEY_ES_BULK_PREFIX = "bulk.flush."
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
+
+  val KEY_ES_DISABLE_FLUSH_ONCHECKPOINT = "es.disableFlushOnCheckpoint"
 
   /**
    * flink config key
@@ -300,6 +366,7 @@ object ConfigConst {
 
   val KEY_FLINK_JVM_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size"
 
+  val STREAMX_FLINKSQL_CLIENT_CLASS = "com.streamxhub.streamx.flink.cli.SqlClient"
 
   def printLogo(info: String): Unit = {
     println("\n\n                 .+.                                ")
@@ -312,7 +379,7 @@ object ConfigConst {
     println("\n       WebSite:  http://www.streamxhub.com            ")
     println("       GitHub :  https://github.com/streamxhub/streamx  ")
     println("       Gitee  :  https://gitee.com/streamxhub/streamx   ")
-    println("       Ver    :  1.2.1                                  ")
+    println("       Ver    :  1.2.2                                  ")
     println(s"       Info   :  $info                                 ")
     println(s"       Time   :  ${LocalDateTime.now}              \n\n")
   }
