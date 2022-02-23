@@ -1,11 +1,10 @@
 FROM centos:centos7
 
-
 ARG streamx_version=???
 
 MAINTAINER streamx@whojohn
 
-COPY streamx-console-service-${streamx_version}-bin.tar.gz jdk-8.tar.gz  /tmp/
+COPY streamx.gz jdk-8.tar.gz /tmp/
 COPY start.sh /opt/
 
 #RUN tar xf /tmp/streamx-console-service-${streamx_version}-bin.tar.gz -C /opt  \
