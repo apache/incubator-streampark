@@ -2,9 +2,9 @@ name: Maven Package Test
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ feat_docker ]
   pull_request:
-    branches: [ dev ]
+    branches: [ feat_docker ]
 
 jobs:
   build:
