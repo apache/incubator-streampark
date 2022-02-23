@@ -20,7 +20,7 @@
  */
 import monaco from '@/views/flink/app/Monaco.xml'
 import {verify} from '@/api/flinkSql'
-import {format} from 'sql-formatter'
+import {format} from './FlinkSqlFormatter'
 
 export function globalOption(vue) {
     return {
