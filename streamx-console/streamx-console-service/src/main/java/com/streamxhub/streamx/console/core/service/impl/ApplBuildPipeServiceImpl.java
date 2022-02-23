@@ -165,10 +165,7 @@ public class ApplBuildPipeServiceImpl
                 fsOperator.upload(app.getDistHome(), appHome);
             }
         } else {
-            FlinkSql flinkSql = flinkSqlService.getEffective(app.getId(), false);
-            if (flinkSql == null) {
-                flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
-            }
+            FlinkSql flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
             assert flinkSql != null;
             app.setDependency(flinkSql.getDependency());
             if (!app.getDependencyObject().getJar().isEmpty()) {
