@@ -279,6 +279,7 @@ public class ApplBuildPipeServiceImpl
                 FlinkYarnApplicationBuildRequest yarnAppRequest = new FlinkYarnApplicationBuildRequest(
                         app.getJobName(),
                         mainClass,
+                        app.getLocalAppHome().concat("/lib"),
                         app.getAppLib(),
                         app.getDevelopmentMode(),
                         app.getDependencyInfo()

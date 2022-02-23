@@ -56,7 +56,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
 
 import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -438,15 +437,6 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getAppLib() {
         return getAppHome().concat("/lib");
-    }
-
-    @JsonIgnore
-    public File getLocalFlinkSqlHome() {
-        File flinkSql = new File(Workspace.local().APP_WORKSPACE(), "flinksql");
-        if (!flinkSql.exists()) {
-            flinkSql.mkdirs();
-        }
-        return new File(flinkSql, id.toString());
     }
 
     @JsonIgnore
