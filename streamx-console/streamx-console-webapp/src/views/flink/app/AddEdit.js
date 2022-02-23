@@ -238,7 +238,7 @@ export function bigScreenOpen(vue) {
 
 export function formatSql(vue) {
     const sql = vue.controller.flinkSql.value
-    const formatSql = format(sql)
+    const formatSql = format(sql, { language: 'spark' })
     if (vue.controller.visiable.bigScreen) {
         vue.controller.editor.bigScreen.getModel().setValue(formatSql)
     } else {
