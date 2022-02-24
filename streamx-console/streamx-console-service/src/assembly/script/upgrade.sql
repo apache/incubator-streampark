@@ -133,42 +133,25 @@ update `t_flink_app` set STATE = STATE - 2 where STATE > 1;
 
 -- change table AUTO_INCREMENT to 100000
 BEGIN;
-DROP PROCEDURE IF EXISTS `alter_auto_inc`;
-CREATE PROCEDURE `alter_auto_inc` (tablename VARCHAR ( 64 ),valueAuto INT ( 20 )) BEGIN
-	DECLARE ROWS_CNT INT UNSIGNED;
-	DECLARE NUM INT UNSIGNED;
-  SELECT AUTO_INCREMENT INTO  ROWS_CNT FROM information_schema.tables WHERE table_name= tablename and table_schema = 'streamx';
-	if ROWS_CNT is null then
-		set ROWS_CNT = 0;
-	end if;
-	SELECT valueAuto + ROWS_CNT INTO NUM;
-	
-	SET @ALTER = CONCAT( 'alter table ', tableName, ' AUTO_INCREMENT = ', NUM );
-	PREPARE STMT FROM @ALTER;
-	EXECUTE STMT;
-	DEALLOCATE PREPARE STMT;
-END 
-
-CALL alter_auto_inc ( 't_app_backup', '100000' );
-CALL alter_auto_inc ( 't_flame_graph', '100000' );
-CALL alter_auto_inc ( 't_flink_app', '100000' );
-CALL alter_auto_inc ( 't_flink_config', '100000' );
-CALL alter_auto_inc ( 't_flink_effective', '100000' );
-CALL alter_auto_inc ( 't_flink_env', '100000' );
-CALL alter_auto_inc ( 't_flink_log', '100000' );
-CALL alter_auto_inc ( 't_flink_project', '100000' );
-CALL alter_auto_inc ( 't_flink_savepoint', '100000' );
-CALL alter_auto_inc ( 't_flink_sql', '100000' );
-CALL alter_auto_inc ( 't_flink_tutorial', '100000' );
-CALL alter_auto_inc ( 't_menu', '100000' );
-CALL alter_auto_inc ( 't_message', '100000' );
-CALL alter_auto_inc ( 't_role', '100000' );
-CALL alter_auto_inc ( 't_role_menu', '100000' );
-CALL alter_auto_inc ( 't_setting', '100000' );
-CALL alter_auto_inc ( 't_user', '100000' );
-CALL alter_auto_inc ( 't_user_role', '100000' );
-CALL alter_auto_inc ( 't_app_build_pipe', '100000' );
-DROP PROCEDURE IF EXISTS `alter_auto_inc`;
+ALTER TABLE t_app_backup AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_flame_graph AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_flink_app AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_flink_config AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_flink_effective AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_flink_env AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_flink_log AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_flink_project AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_flink_savepoint AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_flink_sql AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_flink_tutorial AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_menu AUTO_INCREMENT = 100037 ;
+ALTER TABLE t_message AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_role AUTO_INCREMENT = 100003 ;
+ALTER TABLE t_role_menu AUTO_INCREMENT = 100055 ;
+ALTER TABLE t_setting AUTO_INCREMENT = 100000 ;
+ALTER TABLE t_user AUTO_INCREMENT = 100001 ;
+ALTER TABLE t_user_role AUTO_INCREMENT = 100001 ;
+ALTER TABLE t_app_build_pipe AUTO_INCREMENT = 100000 ;
 COMMIT;
 -- update table id 
 BEGIN;
