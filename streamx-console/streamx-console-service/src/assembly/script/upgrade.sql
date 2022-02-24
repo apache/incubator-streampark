@@ -137,7 +137,7 @@ DROP PROCEDURE IF EXISTS `alter_auto_inc`;
 CREATE PROCEDURE `alter_auto_inc` (tablename VARCHAR ( 64 ),valueAuto INT ( 20 )) BEGIN
 	DECLARE ROWS_CNT INT UNSIGNED;
 	DECLARE NUM INT UNSIGNED;
-  SELECT AUTO_INCREMENT INTO  ROWS_CNT FROM information_schema.tables WHERE table_name= tablename and table_schema = 'streamx'; ;
+  SELECT AUTO_INCREMENT INTO  ROWS_CNT FROM information_schema.tables WHERE table_name= tablename and table_schema = 'streamx';
 	if ROWS_CNT is null then
 		set ROWS_CNT = 0;
 	end if;
