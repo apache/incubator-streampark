@@ -1,6 +1,8 @@
---------------------------------------- version: 1.2.1 START ---------------------------------------
+-- ------------------------------------- version: 1.2.1 START ---------------------------------------
 SET FOREIGN_KEY_CHECKS = 0;
+COMMIT;
 
+BEGIN;
 ALTER TABLE `t_flink_app` ADD COLUMN `K8S_HADOOP_INTEGRATION` tinyint(1) default 0 AFTER `K8S_TM_POD_TEMPLATE`;
 
 ALTER TABLE `t_flink_app` ADD COLUMN `RESOURCE_FROM` tinyint(1) NULL AFTER `EXECUTION_MODE`;
@@ -11,6 +13,8 @@ ALTER TABLE `t_flink_app` ADD COLUMN `HOT_PARAMS` text NULL AFTER `OPTIONS`;
 
 update `t_flink_app` set `RESOURCE_FROM` = 1 where `JOB_TYPE` = 1;
 
+ALTER TABLE `t_user_role` ADD COLUMN `ID` bigint NOT NULL primary key AUTO_INCREMENT FIRST;
+COMMIT;
 -- ----------------------------
 -- Table of t_app_build_pipe
 -- ----------------------------
@@ -29,11 +33,83 @@ CREATE TABLE `t_app_build_pipe`(
 PRIMARY KEY (`APP_ID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
+-- ----------------------------
+-- Table structure for t_role_menu
+-- ----------------------------
+DROP TABLE IF EXISTS `t_role_menu`;
+CREATE TABLE `t_role_menu` (
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`ROLE_ID` bigint NOT NULL,
+`MENU_ID` bigint NOT NULL,
+PRIMARY KEY (`ID`) USING BTREE,
+UNIQUE KEY `UN_INX` (`ROLE_ID`,`MENU_ID`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ----------------------------
+-- Records of t_role_menu
+-- ----------------------------
+BEGIN;
+INSERT INTO `t_role_menu` VALUES (1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (2, 1, 2);
+INSERT INTO `t_role_menu` VALUES (3, 1, 3);
+INSERT INTO `t_role_menu` VALUES (4, 1, 4);
+INSERT INTO `t_role_menu` VALUES (5, 1, 5);
+INSERT INTO `t_role_menu` VALUES (6, 1, 6);
+INSERT INTO `t_role_menu` VALUES (7, 1, 7);
+INSERT INTO `t_role_menu` VALUES (8, 1, 8);
+INSERT INTO `t_role_menu` VALUES (9, 1, 9);
+INSERT INTO `t_role_menu` VALUES (10, 1, 10);
+INSERT INTO `t_role_menu` VALUES (11, 1, 11);
+INSERT INTO `t_role_menu` VALUES (12, 1, 12);
+INSERT INTO `t_role_menu` VALUES (13, 1, 13);
+INSERT INTO `t_role_menu` VALUES (14, 1, 14);
+INSERT INTO `t_role_menu` VALUES (15, 1, 15);
+INSERT INTO `t_role_menu` VALUES (16, 1, 16);
+INSERT INTO `t_role_menu` VALUES (17, 1, 17);
+INSERT INTO `t_role_menu` VALUES (18, 1, 18);
+INSERT INTO `t_role_menu` VALUES (19, 1, 19);
+INSERT INTO `t_role_menu` VALUES (20, 1, 20);
+INSERT INTO `t_role_menu` VALUES (21, 1, 21);
+INSERT INTO `t_role_menu` VALUES (22, 1, 22);
+INSERT INTO `t_role_menu` VALUES (23, 1, 23);
+INSERT INTO `t_role_menu` VALUES (24, 1, 24);
+INSERT INTO `t_role_menu` VALUES (25, 1, 25);
+INSERT INTO `t_role_menu` VALUES (26, 1, 26);
+INSERT INTO `t_role_menu` VALUES (27, 1, 27);
+INSERT INTO `t_role_menu` VALUES (28, 1, 28);
+INSERT INTO `t_role_menu` VALUES (29, 1, 29);
+INSERT INTO `t_role_menu` VALUES (30, 1, 30);
+INSERT INTO `t_role_menu` VALUES (31, 1, 31);
+INSERT INTO `t_role_menu` VALUES (32, 1, 32);
+INSERT INTO `t_role_menu` VALUES (33, 1, 33);
+INSERT INTO `t_role_menu` VALUES (34, 1, 34);
+INSERT INTO `t_role_menu` VALUES (35, 1, 35);
+INSERT INTO `t_role_menu` VALUES (36, 1, 36);
+INSERT INTO `t_role_menu` VALUES (37, 1, 37);
+INSERT INTO `t_role_menu` VALUES (38, 2, 14);
+INSERT INTO `t_role_menu` VALUES (39, 2, 16);
+INSERT INTO `t_role_menu` VALUES (40, 2, 17);
+INSERT INTO `t_role_menu` VALUES (41, 2, 18);
+INSERT INTO `t_role_menu` VALUES (42, 2, 19);
+INSERT INTO `t_role_menu` VALUES (43, 2, 20);
+INSERT INTO `t_role_menu` VALUES (44, 2, 21);
+INSERT INTO `t_role_menu` VALUES (45, 2, 22);
+INSERT INTO `t_role_menu` VALUES (46, 2, 25);
+INSERT INTO `t_role_menu` VALUES (47, 2, 26);
+INSERT INTO `t_role_menu` VALUES (48, 2, 27);
+INSERT INTO `t_role_menu` VALUES (49, 2, 28);
+INSERT INTO `t_role_menu` VALUES (50, 2, 29);
+INSERT INTO `t_role_menu` VALUES (51, 2, 30);
+INSERT INTO `t_role_menu` VALUES (52, 2, 31);
+INSERT INTO `t_role_menu` VALUES (53, 2, 32);
+INSERT INTO `t_role_menu` VALUES (54, 2, 33);
+INSERT INTO `t_role_menu` VALUES (55, 2, 34);
+COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;
---------------------------------------- version: 1.2.1 END ---------------------------------------
+-- ------------------------------------- version: 1.2.1 END ---------------------------------------
 
 
---------------------------------------- version: 1.2.2 START ---------------------------------------
+-- ------------------------------------- version: 1.2.2 START ---------------------------------------
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- menu
@@ -48,10 +124,62 @@ ALTER TABLE `t_flink_app` CHANGE COLUMN `DEPLOY` `LAUNCH` tinyint NULL DEFAULT 2
 -- add new field FLINK_CLUSTER_ID
 ALTER TABLE `t_flink_app` ADD COLUMN `FLINK_CLUSTER_ID` bigint DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
 
+-- change column id to AUTO_INCREMENT
+ALTER TABLE t_flink_sql change id  id bigint NOT NULL AUTO_INCREMENT;
+
 update `t_flink_app` set STATE = 0 where STATE in (1,2);
 
 update `t_flink_app` set STATE = STATE - 2 where STATE > 1;
 
+-- change table AUTO_INCREMENT to 100000
+BEGIN;
+DROP PROCEDURE IF EXISTS `alter_auto_inc`;
+CREATE PROCEDURE `alter_auto_inc` (tablename VARCHAR ( 64 ),valueAuto INT ( 20 )) BEGIN
+	DECLARE ROWS_CNT INT UNSIGNED;
+	DECLARE NUM INT UNSIGNED;
+  SELECT AUTO_INCREMENT INTO  ROWS_CNT FROM information_schema.tables WHERE table_name= tablename and table_schema = 'streamx'; ;
+	if ROWS_CNT is null then
+		set ROWS_CNT = 0;
+	end if;
+	SELECT valueAuto + ROWS_CNT INTO NUM;
+	
+	SET @ALTER = CONCAT( 'alter table ', tableName, ' AUTO_INCREMENT = ', NUM );
+	PREPARE STMT FROM @ALTER;
+	EXECUTE STMT;
+	DEALLOCATE PREPARE STMT;
+END 
+
+CALL alter_auto_inc ( 't_app_backup', '100000' );
+CALL alter_auto_inc ( 't_flame_graph', '100000' );
+CALL alter_auto_inc ( 't_flink_app', '100000' );
+CALL alter_auto_inc ( 't_flink_config', '100000' );
+CALL alter_auto_inc ( 't_flink_effective', '100000' );
+CALL alter_auto_inc ( 't_flink_env', '100000' );
+CALL alter_auto_inc ( 't_flink_log', '100000' );
+CALL alter_auto_inc ( 't_flink_project', '100000' );
+CALL alter_auto_inc ( 't_flink_savepoint', '100000' );
+CALL alter_auto_inc ( 't_flink_sql', '100000' );
+CALL alter_auto_inc ( 't_flink_tutorial', '100000' );
+CALL alter_auto_inc ( 't_menu', '100000' );
+CALL alter_auto_inc ( 't_message', '100000' );
+CALL alter_auto_inc ( 't_role', '100000' );
+CALL alter_auto_inc ( 't_role_menu', '100000' );
+CALL alter_auto_inc ( 't_setting', '100000' );
+CALL alter_auto_inc ( 't_user', '100000' );
+CALL alter_auto_inc ( 't_user_role', '100000' );
+CALL alter_auto_inc ( 't_app_build_pipe', '100000' );
+DROP PROCEDURE IF EXISTS `alter_auto_inc`;
+COMMIT;
+-- update table id 
+BEGIN;
+UPDATE t_menu set PARENT_ID=PARENT_ID+99999 where PARENT_ID != '0';
+UPDATE t_menu set MENU_ID=MENU_ID+99999;
+UPDATE t_role set ROLE_ID=ROLE_ID+99999;
+UPDATE t_role_menu set ID=ID+99999,ROLE_ID=ROLE_ID+99999,MENU_ID=MENU_ID+99999;
+UPDATE t_user set USER_ID=USER_ID+99999;
+UPDATE t_user_role set ID=ID+99999,ROLE_ID=ROLE_ID+99999,USER_ID=USER_ID+99999;
+UPDATE t_flink_app set USER_ID = USER_ID+99999;
+COMMIT;
 -- ----------------------------
 -- Table of t_flink_cluster
 -- ----------------------------
@@ -66,4 +194,4 @@ PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
---------------------------------------- version: 1.2.2 END ---------------------------------------
+-- ------------------------------------- version: 1.2.2 END ---------------------------------------
