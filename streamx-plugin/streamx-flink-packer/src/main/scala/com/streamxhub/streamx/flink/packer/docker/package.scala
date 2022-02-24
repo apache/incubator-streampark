@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.packer
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.listener.{BuildImageCallbackListener, PullImageCallbackListener, PushImageCallbackListener}
 import com.github.dockerjava.api.model.{PullResponseItem, PushResponseItem}
-import com.streamxhub.streamx.common.util.Utils.tryWithResourceException
+import com.streamxhub.streamx.common.util.Utils.tryWithResource
 
 /**
  * @author Al-assad
@@ -45,6 +45,6 @@ package object docker {
     }
 
   def usingDockerClient[R](process: DockerClient => R)(handleException: Throwable => R): R =
-    tryWithResourceException(DockerRetriever.newDockerClient())(process)(handleException)
+    tryWithResource(DockerRetriever.newDockerClient())(process)(handleException)
 
 }

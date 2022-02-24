@@ -94,6 +94,7 @@ case class FlinkRemoteBuildRequest(appName: String,
 
 case class FlinkYarnApplicationBuildRequest(appName: String,
                                             mainClass: String,
+                                            localWorkspace: String,
                                             yarnProvidedPath: String,
                                             developmentMode: DevelopmentMode,
                                             dependencyInfo: DependencyInfo) extends BuildParam
