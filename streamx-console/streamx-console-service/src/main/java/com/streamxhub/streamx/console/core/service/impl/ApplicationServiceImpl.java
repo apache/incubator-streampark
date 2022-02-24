@@ -81,6 +81,7 @@ import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
 import com.streamxhub.streamx.flink.submit.FlinkSubmitter;
 import com.streamxhub.streamx.flink.submit.bean.KubernetesSubmitParam;
 import com.streamxhub.streamx.flink.submit.bean.StopRequest;
@@ -669,53 +670,64 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      * @param appParam
      */
     private void updateFlinkSqlJob(Application application, Application appParam) {
-        //1) 获取copy的源FlinkSql
-        FlinkSql copySourceFlinkSql = flinkSqlService.getById(appParam.getSqlId());
-        assert copySourceFlinkSql != null;
-        copySourceFlinkSql.decode();
-
-        //当前提交的FlinkSql记录
-        FlinkSql targetFlinkSql = new FlinkSql(appParam);
-
-        //2) 判断sql和依赖是否发生变化
-        ChangedType changedType = copySourceFlinkSql.checkChange(targetFlinkSql);
-
-        log.info("updateFlinkSqlJob changedType: {}", changedType);
-
-        //依赖或sql发生了变更
-        if (changedType.hasChanged()) {
-            // 3) 检查是否存在新增记录的候选版本
-            FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
-            //存在新增记录的候选版本则直接删除,只会保留一个候选版本,新增候选版本在没有生效的情况下,如果再次编辑,下个记录进来,则删除上个候选版本
-            if (newFlinkSql != null) {
-                //删除候选版本的所有记录
-                flinkSqlService.removeById(newFlinkSql.getId());
-            }
-            FlinkSql historyFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.HISTORY);
-            //将已经存在的但是被设置成候选版本的移除候选标记
-            if (historyFlinkSql != null) {
-                flinkSqlService.cleanCandidate(historyFlinkSql.getId());
-            }
+        AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
+        //从来没有上线过的新任务.直接保存
+        if (buildPipeline == null || buildPipeline.getPipeStatus().equals(PipelineStatus.failure) ) {
+            application.setLaunch(LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
+            flinkSqlService.removeById(application.getSqlId());
             FlinkSql sql = new FlinkSql(appParam);
-            CandidateType type = (changedType.isDependencyChanged() || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
-            flinkSqlService.create(sql, type);
-            if (changedType.isDependencyChanged()) {
-                application.setLaunch(LaunchState.NEED_LAUNCH_AFTER_DEPENDENCY_UPDATE.get());
-            } else {
-                application.setLaunch(LaunchState.NEED_RESTART_AFTER_SQL_UPDATE.get());
-            }
+            flinkSqlService.create(sql, CandidateType.NEW);
+            toEffective(application);
         } else {
-            // 2) 判断版本是否发生变化
-            //获取正式版本的flinkSql
-            FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
-            assert effectiveFlinkSql != null;
-            boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
-            if (versionChanged) {
-                //sql和依赖未发生变更,但是版本号发生了变化,说明是回滚到某个版本了
-                CandidateType type = CandidateType.HISTORY;
-                flinkSqlService.setCandidateOrEffective(type, appParam.getId(), appParam.getSqlId());
-                //直接回滚到某个历史版本(rollback)
-                application.setLaunch(LaunchState.NEED_ROLLBACK.get());
+            //1) 获取copy的源FlinkSql
+            FlinkSql copySourceFlinkSql = flinkSqlService.getById(appParam.getSqlId());
+            assert copySourceFlinkSql != null;
+            copySourceFlinkSql.decode();
+
+            //当前提交的FlinkSql记录
+            FlinkSql targetFlinkSql = new FlinkSql(appParam);
+
+            //2) 判断sql和依赖是否发生变化
+            ChangedType changedType = copySourceFlinkSql.checkChange(targetFlinkSql);
+
+            log.info("updateFlinkSqlJob changedType: {}", changedType);
+
+            //依赖或sql发生了变更
+            if (changedType.hasChanged()) {
+                // 3) 检查是否存在新增记录的候选版本
+                FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
+                //存在新增记录的候选版本则直接删除,只会保留一个候选版本,新增候选版本在没有生效的情况下,如果再次编辑,下个记录进来,则删除上个候选版本
+                if (newFlinkSql != null) {
+                    //删除候选版本的所有记录
+                    flinkSqlService.removeById(newFlinkSql.getId());
+                }
+                FlinkSql historyFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.HISTORY);
+                //将已经存在的但是被设置成候选版本的移除候选标记
+                if (historyFlinkSql != null) {
+                    flinkSqlService.cleanCandidate(historyFlinkSql.getId());
+                }
+                FlinkSql sql = new FlinkSql(appParam);
+                CandidateType type = (changedType.isDependencyChanged() || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
+                flinkSqlService.create(sql, type);
+
+                if (changedType.isDependencyChanged()) {
+                    application.setLaunch(LaunchState.NEED_LAUNCH_AFTER_DEPENDENCY_UPDATE.get());
+                } else {
+                    application.setLaunch(LaunchState.NEED_RESTART_AFTER_SQL_UPDATE.get());
+                }
+            } else {
+                // 2) 判断版本是否发生变化
+                //获取正式版本的flinkSql
+                FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
+                assert effectiveFlinkSql != null;
+                boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
+                if (versionChanged) {
+                    //sql和依赖未发生变更,但是版本号发生了变化,说明是回滚到某个版本了
+                    CandidateType type = CandidateType.HISTORY;
+                    flinkSqlService.setCandidateOrEffective(type, appParam.getId(), appParam.getSqlId());
+                    //直接回滚到某个历史版本(rollback)
+                    application.setLaunch(LaunchState.NEED_ROLLBACK.get());
+                }
             }
         }
         // 7) 配置文件修改

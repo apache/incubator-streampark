@@ -143,54 +143,58 @@ public class ApplBuildPipeServiceImpl
 
     @Override
     public boolean buildApplication(@Nonnull Application app) throws Exception {
-
-        // 1) checkEnv
-        applicationService.checkEnv(app);
-
-        // 2) some preparatory work
-        if (app.isCustomCodeJob()) {
-            String appHome = app.getAppHome();
-            FsOperator fsOperator = app.getFsOperator();
-            fsOperator.delete(appHome);
-            if (app.isUploadJob()) {
-                String appUploads = app.getWorkspace().APP_UPLOADS();
-                File temp = WebUtils.getAppTempDir();
-                File localJar = new File(temp, app.getJar());
-                String targetJar = appUploads.concat("/").concat(app.getJar());
-                checkOrElseUploadJar(app.getFsOperator(), localJar, targetJar, appUploads);
-                // upload jar copy to appHome
-                fsOperator.mkdirs(appHome);
-                fsOperator.copy(targetJar, appHome, false, true);
-            } else {
-                fsOperator.upload(app.getDistHome(), appHome);
-            }
-        } else {
-            FlinkSql flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
-            assert flinkSql != null;
-            app.setDependency(flinkSql.getDependency());
-            if (!app.getDependencyObject().getJar().isEmpty()) {
-                //copy jar to upload dir
-                for (String jar : app.getDependencyObject().getJar()) {
-                    File jarFile = new File(WebUtils.getAppTempDir(), jar);
-                    assert jarFile.exists();
-                    String appUploads = Workspace.local().APP_UPLOADS();
-                    String targetJar = appUploads.concat("/").concat(jar);
-                    checkOrElseUploadJar(FsOperator.lfs(), jarFile, targetJar, appUploads);
-                }
-            }
-        }
-
-        // 3) create pipeline instance
+        // 1) create pipeline instance
         BuildPipeline pipeline = createPipelineInstance(app);
 
         // register pipeline progress event watcher.
         // save snapshot of pipeline to db when status of pipeline was changed.
         pipeline.registerWatcher(new PipeWatcher() {
             @Override
-            public void onStart(PipeSnapshot snapshot) {
-                backUpService.backup(app);
+            public void onStart(PipeSnapshot snapshot) throws Exception {
                 app.setLaunch(LaunchState.LAUNCHING.get());
                 applicationService.updateLaunch(app);
+
+                // 1) checkEnv
+                applicationService.checkEnv(app);
+
+                // 2) some preparatory work
+                if (app.isCustomCodeJob()) {
+                    String appHome = app.getAppHome();
+                    FsOperator fsOperator = app.getFsOperator();
+                    fsOperator.delete(appHome);
+                    if (app.isUploadJob()) {
+                        String appUploads = app.getWorkspace().APP_UPLOADS();
+                        File temp = WebUtils.getAppTempDir();
+                        File localJar = new File(temp, app.getJar());
+                        String targetJar = appUploads.concat("/").concat(app.getJar());
+                        checkOrElseUploadJar(app.getFsOperator(), localJar, targetJar, appUploads);
+                        // upload jar copy to appHome
+                        fsOperator.mkdirs(appHome);
+                        fsOperator.copy(targetJar, appHome, false, true);
+                    } else {
+                        fsOperator.upload(app.getDistHome(), appHome);
+                    }
+                } else {
+                    FlinkSql flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
+                    if (flinkSql == null) {
+                        flinkSql = flinkSqlService.getEffective(app.getId(),false);
+                    }
+                    assert flinkSql != null;
+                    app.setDependency(flinkSql.getDependency());
+                    if (!app.getDependencyObject().getJar().isEmpty()) {
+                        //copy jar to upload dir
+                        for (String jar : app.getDependencyObject().getJar()) {
+                            File jarFile = new File(WebUtils.getAppTempDir(), jar);
+                            assert jarFile.exists();
+                            String appUploads = Workspace.local().APP_UPLOADS();
+                            String targetJar = appUploads.concat("/").concat(jar);
+                            checkOrElseUploadJar(FsOperator.lfs(), jarFile, targetJar, appUploads);
+                        }
+                    }
+                }
+                // 3) backup.
+                backUpService.backup(app);
+
                 AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
                 saveEntity(buildPipeline);
             }
