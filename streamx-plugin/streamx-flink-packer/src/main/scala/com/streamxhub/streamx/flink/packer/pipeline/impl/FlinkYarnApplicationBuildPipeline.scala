@@ -85,32 +85,20 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
       // check file in upload dir
       fsOperator match {
         case FsOperator.lfs =>
-          val uploadCache = s"${Workspace.local.APP_UPLOADS}/${originFile.getName}"
-          if (fsOperator.exists(uploadCache)) {
-            // check upload exists file
-            Utils.tryWithResource(new FileInputStream(originFile))(inputStream => {
-              if (DigestUtils.md5Hex(inputStream) != fsOperator.fileMd5(uploadCache)) {
-                fsOperator.copy(originFile.getAbsolutePath, uploadCache)
-              }
-            })
-          } else {
-            fsOperator.copy(originFile.getAbsolutePath, uploadCache)
-          }
-          // copy jar from upload dir to target dir
-          fsOperator.copy(uploadCache, target)
+          fsOperator.copy(originFile.getAbsolutePath, target)
         case FsOperator.hdfs =>
-          val uploadCache = s"${Workspace.remote.APP_UPLOADS}/${originFile.getName}"
-          if (fsOperator.exists(uploadCache)) {
+          val uploadFile = s"${Workspace.remote.APP_UPLOADS}/${originFile.getName}"
+          if (fsOperator.exists(uploadFile)) {
             Utils.tryWithResource(new FileInputStream(originFile))(inputStream => {
-              if (DigestUtils.md5Hex(inputStream) != fsOperator.fileMd5(uploadCache)) {
-                fsOperator.upload(originFile.getAbsolutePath, uploadCache)
+              if (DigestUtils.md5Hex(inputStream) != fsOperator.fileMd5(uploadFile)) {
+                fsOperator.upload(originFile.getAbsolutePath, uploadFile)
               }
             })
           } else {
-            fsOperator.upload(originFile.getAbsolutePath, uploadCache)
+            fsOperator.upload(originFile.getAbsolutePath, uploadFile)
           }
           // copy jar from upload dir to target dir
-          fsOperator.copy(uploadCache, target)
+          fsOperator.copy(uploadFile, target)
       }
     } else {
       fsOperator match {
