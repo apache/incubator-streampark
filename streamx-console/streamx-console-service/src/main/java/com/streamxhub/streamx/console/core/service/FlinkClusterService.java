@@ -17,34 +17,20 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.packer.maven
+package com.streamxhub.streamx.console.core.service;
 
-import java.util.{List => JavaList}
-import scala.collection.JavaConversions._
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 
 /**
- * @author Al-assad
- *
- * @param mavenArts  collection of maven artifacts
- * @param extJarLibs collection of jar lib paths, which elements can be a directory or file path.
+ * @author benjobs
  */
-case class JarPackDeps(mavenArts: Set[MavenArtifact] = Set(),
-                       extJarLibs: Set[String] = Set()) {
+public interface FlinkClusterService extends IService<FlinkCluster> {
 
-  def this(mavenArts: JavaList[MavenArtifact], extJarLibs: JavaList[String]) {
-    this(mavenArts.toSet, extJarLibs.toSet)
-  }
-
-  def merge(jarLibs: Set[String]): JarPackDeps =
-    if (jarLibs != null) JarPackDeps(mavenArts, extJarLibs ++ jarLibs) else this.copy()
-
-  def clearExtJarLibs: (JarPackDeps, Set[String]) = JarPackDeps(mavenArts, Set()) -> extJarLibs
-
+    /**
+     * check
+     * @param cluster
+     * @return
+     */
+    String check(FlinkCluster cluster);
 }
-
-object JarPackDeps {
-  def empty: JarPackDeps = new JarPackDeps()
-}
-
-
-

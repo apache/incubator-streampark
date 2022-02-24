@@ -17,8 +17,21 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.domain
+package com.streamxhub.streamx.console.core.service;
 
-case class StopResponse(savePointDir: String) {
+import com.streamxhub.streamx.console.system.entity.User;
 
+public interface CommonService {
+
+    /**
+     * get login user
+     * @return
+     */
+    User getCurrentUser();
+
+    /**
+     * get sqlclient
+     * @return
+     */
+    String getSqlClientJar();
 }

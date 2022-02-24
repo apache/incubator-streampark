@@ -24,7 +24,6 @@ import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.Note;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.NoteBookService;
-import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.flink.repl.interpreter.FlinkInterpreter;
 import com.streamxhub.streamx.flink.repl.interpreter.InterpreterOutput;
 import com.streamxhub.streamx.flink.repl.interpreter.InterpreterResult;
@@ -45,19 +44,16 @@ import java.util.concurrent.TimeUnit;
 public class NoteBookServiceImpl implements NoteBookService {
 
     @Autowired
-    private SettingService settingService;
-
-    @Autowired
     private FlinkEnvService flinkEnvService;
 
     private ExecutorService executorService = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() * 2,
-        200,
-        60L,
-        TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(1024),
-        ThreadUtils.threadFactory("notebook-submit-executor"),
-        new ThreadPoolExecutor.AbortPolicy()
+            Runtime.getRuntime().availableProcessors() * 2,
+            200,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("notebook-submit-executor"),
+            new ThreadPoolExecutor.AbortPolicy()
     );
 
     @Override

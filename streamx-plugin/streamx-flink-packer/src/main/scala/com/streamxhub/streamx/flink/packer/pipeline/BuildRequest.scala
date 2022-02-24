@@ -23,7 +23,7 @@ import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf
-import com.streamxhub.streamx.flink.packer.maven.JarPackDeps
+import com.streamxhub.streamx.flink.packer.maven.DependencyInfo
 
 /**
  * Params of a BuildPipeline instance.
@@ -32,6 +32,8 @@ import com.streamxhub.streamx.flink.packer.maven.JarPackDeps
  */
 sealed trait BuildParam {
   def appName: String
+
+  def mainClass: String
 }
 
 sealed trait FlinkBuildParam extends BuildParam {
@@ -42,9 +44,9 @@ sealed trait FlinkBuildParam extends BuildParam {
 
   def flinkVersion: FlinkVersion
 
-  def jarPackDeps: JarPackDeps
+  def dependencyInfo: DependencyInfo
 
-  def customFlinkUsrJarPath: String
+  def customFlinkUserJar: String
 }
 
 sealed trait FlinkK8sBuildParam extends FlinkBuildParam {
@@ -55,21 +57,23 @@ sealed trait FlinkK8sBuildParam extends FlinkBuildParam {
 }
 
 case class FlinkK8sSessionBuildRequest(appName: String,
+                                       mainClass: String,
+                                       customFlinkUserJar: String,
                                        executionMode: ExecutionMode,
                                        developmentMode: DevelopmentMode,
                                        flinkVersion: FlinkVersion,
-                                       jarPackDeps: JarPackDeps,
-                                       customFlinkUsrJarPath: String,
+                                       dependencyInfo: DependencyInfo,
                                        clusterId: String,
                                        k8sNamespace: String
                                       ) extends FlinkK8sBuildParam
 
 case class FlinkK8sApplicationBuildRequest(appName: String,
+                                           mainClass: String,
+                                           customFlinkUserJar: String,
                                            executionMode: ExecutionMode,
                                            developmentMode: DevelopmentMode,
                                            flinkVersion: FlinkVersion,
-                                           jarPackDeps: JarPackDeps,
-                                           customFlinkUsrJarPath: String,
+                                           dependencyInfo: DependencyInfo,
                                            clusterId: String,
                                            k8sNamespace: String,
                                            flinkBaseImage: String,
@@ -78,10 +82,22 @@ case class FlinkK8sApplicationBuildRequest(appName: String,
                                            dockerAuthConfig: DockerAuthConf
                                           ) extends FlinkK8sBuildParam
 
+case class FlinkRemoteBuildRequest(appName: String,
+                                   mainClass: String,
+                                   customFlinkUserJar: String,
+                                   executionMode: ExecutionMode,
+                                   developmentMode: DevelopmentMode,
+                                   flinkVersion: FlinkVersion,
+                                   dependencyInfo: DependencyInfo
+                                  ) extends FlinkBuildParam
 
-// todo case class FlinkYarnApplicationBuildRequest() extends FlinkBuildParam
+
+case class FlinkYarnApplicationBuildRequest(appName: String,
+                                            mainClass: String,
+                                            localWorkspace: String,
+                                            yarnProvidedPath: String,
+                                            developmentMode: DevelopmentMode,
+                                            dependencyInfo: DependencyInfo) extends BuildParam
 
 // todo case class FlinkYarnSessionBuildRequest() extends FlinkBuildParam
-
-// todo case class FlinkStandaloneBuildRequest() extends FlinkBuildParam
 

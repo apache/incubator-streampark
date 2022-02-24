@@ -38,8 +38,15 @@ object HdfsUtils extends Logger {
 
   def mkdirs(path: String): Unit = HadoopUtils.hdfs.mkdirs(getPath(path))
 
-  def copyHdfs(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
-    FileUtil.copy(HadoopUtils.hdfs, getPath(src), HadoopUtils.hdfs, getPath(dst), delSrc, overwrite, HadoopUtils.hadoopConf)
+  def copyHdfs(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit = {
+    val srcPath = getPath(src)
+    val dstPath = getPath(dst)
+    val dstStatus = HadoopUtils.hdfs.getFileStatus(dstPath)
+    val dstFinalPath = if (dstStatus.isFile) dstPath else {
+      getPath(s"$dst/${srcPath.getName}")
+    }
+    FileUtil.copy(HadoopUtils.hdfs, srcPath, HadoopUtils.hdfs, dstFinalPath, delSrc, overwrite, HadoopUtils.hadoopConf)
+  }
 
   def copyHdfsDir(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit = {
     list(src).foreach(x => FileUtil.copy(HadoopUtils.hdfs, x, HadoopUtils.hdfs, getPath(dst), delSrc, overwrite, HadoopUtils.hadoopConf))

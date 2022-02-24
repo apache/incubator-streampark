@@ -64,6 +64,24 @@
         </a-select>
       </a-form-item>
 
+      <template v-if="executionMode === 1">
+        <a-form-item
+          label="Flink Cluster"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            placeholder="Flink Cluster"
+            v-decorator="[ 'flinkClusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
+            <a-select-option
+              v-for="(v,index) in flinkClusters"
+              :key="`cluster_${index}`"
+              :value="v.id">
+              {{ v.clusterName }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </template>
+
       <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode !== null && (executionMode === 5 || executionMode === 6))">
         <a-form-item
           label="Kubernetes Namespace"
@@ -310,12 +328,13 @@
               class="dependency-item"
               v-for="(value, index) in dependency"
               :key="`dependency_${index}`"
-              type="info"
-              @click="handleEditPom(value)">
+              type="info">
               <template slot="message">
-                <a-space @click="handleEditPom(value)" class="tag-dependency-pom">
+                <a-space class="tag-dependency-pom">
                   <a-tag class="tag-dependency" color="#2db7f5">POM</a-tag>
-                  {{ value.artifactId }}-{{ value.version }}.jar
+                  <span @click="handleEditPom(value)">
+                    {{ value.artifactId }}-{{ value.version }}.jar
+                  </span>
                   <a-icon type="close" class="icon-close" @click="handleRemovePom(value)"/>
                 </a-space>
               </template>
@@ -1240,6 +1259,20 @@
         </p>
       </a-form-item>
 
+      <template v-if="executionMode === 4">
+        <a-form-item
+          label="Yarn Queue"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            allowClear
+            placeholder="Please enter yarn queue"
+            v-decorator="[ 'yarnQueue']">
+          </a-input>
+        </a-form-item>
+      </template>
+
       <a-form-item
         label="Dynamic Option"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -1252,7 +1285,7 @@
         <p class="conf-desc">
           <span class="note-info">
             <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
-            It works the same as <span class="note-elem">-D$property=$value</span> in CLI mode, e.g: <span class="note-elem">yarn.application.queue=flink</span>, Allows specifying multiple generic configuration options. The available options can be found
+            It works the same as <span class="note-elem">-D$property=$value</span> in CLI mode, Allows specifying multiple generic configuration options. The available options can be found
             <a href="https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html" target="_blank">here</a>
           </span>
         </p>
@@ -1417,16 +1450,21 @@
 </template>
 
 <script>
+const Base64 = require('js-base64').Base64
 import Ellipsis from '@/components/Ellipsis'
 import { listConf } from '@api/project'
 import { get, update, checkName, name, readConf, upload } from '@api/application'
-import { history as confhistory, get as getVer, template, sysHadoopConf  } from '@api/config'
-import { get as getSQL, history as sqlhistory } from '@api/flinksql'
+import { history as confHistory, get as getVer, template, sysHadoopConf  } from '@api/config'
+import { get as getSQL, history as sqlhistory } from '@/api/flinkSql'
 import { mapActions, mapGetters } from 'vuex'
 import Mergely from './Mergely'
 import Different from './Different'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
+import { toPomString } from './Pom'
+import {list as listFlinkEnv} from '@/api/flinkEnv'
+import {list as listFlinkCluster} from '@/api/flinkCluster'
+import {checkHadoop} from '@/api/setting'
 import {
   uploadJars as histUploadJars,
   k8sNamespaces as histK8sNamespaces,
@@ -1435,9 +1473,8 @@ import {
   flinkPodTemplates as histPodTemplates,
   flinkJmPodTemplates as histJmPodTemplates,
   flinkTmPodTemplates as histTmPodTemplates
-} from '@api/flinkhistory'
+} from '@/api/flinkHistory'
 
-const Base64 = require('js-base64').Base64
 import {
   initEditor,
   initPodTemplateEditor,
@@ -1449,10 +1486,15 @@ import {
   updateDependency, checkPomScalaVersion
 } from './AddEdit'
 
-import { toPomString } from './Pom'
-import {list as listFlinkEnv} from '@/api/flinkenv'
-import {checkHadoop} from '@/api/setting'
-import { sysHosts, initPodTemplate, completeHostAliasToPodTemplate, extractHostAliasFromPodTemplate, previewHostAlias } from '@api/flinkpodtmpl'
+import {
+  sysHosts,
+  initPodTemplate,
+  completeHostAliasToPodTemplate,
+  extractHostAliasFromPodTemplate,
+  previewHostAlias
+} from '@/api/flinkPodtmpl'
+
+
 
 export default {
   name: 'EditStreamX',
@@ -1477,13 +1519,12 @@ export default {
         {name: 'NodePort', order: 2}
       ],
       executionModes: [
+        {mode: 'remote (standalone)', value: 1, disabled: false},
         {mode: 'yarn application', value: 4, disabled: false},
         {mode: 'kubernetes session', value: 5, disabled: false},
         {mode: 'kubernetes application', value: 6, disabled: false},
-        {mode: 'local (coming soon)', value: 0, disabled: true},
-        {mode: 'standalone (coming soon)', value: 1, disabled: true},
         {mode: 'yarn session (coming soon)', value: 3, disabled: true},
-        {mode: 'yarn pre-job (deprecated, please use yarn-application mode)', value: 2, disabled: true}
+        {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: false}
       ],
       cpTriggerAction: [
         { name: 'alert', value: 1 },
@@ -1505,6 +1546,7 @@ export default {
       configId: null,
       versionId: null,
       flinkEnvs: [],
+      flinkClusters: [],
       configVersions: [],
       flinkSqlHistory: [],
       flinkSql: {},
@@ -1661,6 +1703,9 @@ export default {
     listFlinkEnv().then((resp)=>{
       this.flinkEnvs = resp.data
     })
+    listFlinkCluster().then((resp)=>{
+      this.flinkClusters = resp.data
+    })
     // load history config records
     histUploadJars().then((resp) => {
       this.historyRecord.uploadJars = resp.data
@@ -1701,14 +1746,15 @@ export default {
             this.flinkSqlHistory = resp.data
           })
         }
-        if (this.app.config && this.app.config.trim() != '') {
+        if (this.app.config && this.app.config.trim() !== '') {
           this.configOverride = Base64.decode(this.app.config)
           this.isSetConfig = true
         }
         this.defaultOptions = JSON.parse(this.app.options || '{}')
         this.configId = this.app.configId
-        this.versionId = this.app.versionId
-        this.defaultFlinkSqlId = this.app['sqlId'] || null
+        this.executionMode = this.app.executionMode
+        this.versionId = this.app.versionId || null
+        this.defaultFlinkSqlId = this.app.sqlId || null
         this.handleReset()
         this.handleListConfVersion()
         this.handleConfList()
@@ -2087,6 +2133,16 @@ export default {
       })
     },
 
+    handleYarnQueue(values) {
+      if ( this.executionMode === 4 ) {
+        const queue = values['yarnQueue']
+        if (queue != null && queue !== '' && queue !== undefined) {
+          return queue
+        }
+        return null
+      }
+    },
+
     handleFormValue(values) {
       const options = {}
       for (const k in values) {
@@ -2121,7 +2177,7 @@ export default {
       const options = this.handleFormValue(values)
       const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
       let config = this.configOverride || this.app.config
-      if (config != null && config != undefined && config.trim() != '') {
+      if (config != null && config.trim() !== '') {
         config = Base64.encode(config)
       } else {
         config = null
@@ -2136,6 +2192,7 @@ export default {
         config: config,
         args: values.args,
         options: JSON.stringify(options),
+        yarnQueue: this.handleYarnQueue(values),
         dynamicOptions: values.dynamicOptions,
         cpMaxFailureInterval: values.cpMaxFailureInterval || null,
         cpFailureRateInterval: values.cpFailureRateInterval || null,
@@ -2148,6 +2205,7 @@ export default {
         description: values.description,
         k8sNamespace: values.k8sNamespace || null,
         clusterId: values.clusterId || null,
+        flinkClusterId: values.flinkClusterId || null,
         flinkImage: values.flinkImage || null,
       }
       if (params.executionMode === 6) {
@@ -2189,6 +2247,7 @@ export default {
         args: values.args || null,
         dependency: dependency.pom === undefined && dependency.jar === undefined ? null : JSON.stringify(dependency),
         options: JSON.stringify(options),
+        yarnQueue: this.handleYarnQueue(values),
         cpMaxFailureInterval: values.cpMaxFailureInterval || null,
         cpFailureRateInterval: values.cpFailureRateInterval || null,
         cpFailureAction: values.cpFailureAction || null,
@@ -2201,6 +2260,7 @@ export default {
         description: values.description || null,
         k8sNamespace: values.k8sNamespace || null,
         clusterId: values.clusterId || null,
+        flinkClusterId: values.flinkClusterId || null,
         flinkImage: values.flinkImage || null
       }
       if (params.executionMode === 6) {
@@ -2229,7 +2289,7 @@ export default {
     },
 
     handleListConfVersion() {
-      confhistory({ id: this.app.id }).then((resp) => {
+      confHistory({ id: this.app.id }).then((resp) => {
         resp.data.forEach((value, index) => {
           if (value.effective) {
             this.defaultConfigId = value.id
@@ -2555,15 +2615,17 @@ export default {
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
           'resolveOrder': this.app.resolveOrder,
-          'versionId': this.app.versionId,
+          'versionId': this.app.versionId || null,
           'k8sRestExposedType': this.app.k8sRestExposedType,
           'executionMode': this.app.executionMode,
+          'yarnQueue': this.app.yarnQueue,
           'restartSize': this.app.restartSize,
           'alertEmail': this.app.alertEmail,
           'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
           'cpFailureRateInterval': this.app.cpFailureRateInterval,
           'cpFailureAction': this.app.cpFailureAction,
           'clusterId': this.app.clusterId,
+          'flinkClusterId': this.app.flinkClusterId,
           'flinkImage': this.app.flinkImage,
           'k8sNamespace': this.app.k8sNamespace,
           'resource': this.app.resourceFrom

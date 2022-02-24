@@ -20,6 +20,8 @@
 package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.conf.CommonConfig;
+import com.streamxhub.streamx.common.conf.ConfigHub;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
@@ -41,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
-    implements SettingService {
+        implements SettingService {
 
     @Override
     public Setting get(String key) {
@@ -63,6 +65,9 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
                 setting.setValue(setting.getValue().trim());
             }
             this.baseMapper.updateByKey(setting);
+            if (setting.getKey().equals(CommonConfig.MAVEN_REMOTE_URL().key())) {
+                ConfigHub.set(CommonConfig.MAVEN_REMOTE_URL(), setting.getValue());
+            }
             settings.get(setting.getKey()).setValue(setting.getValue());
             return true;
         } catch (Exception e) {

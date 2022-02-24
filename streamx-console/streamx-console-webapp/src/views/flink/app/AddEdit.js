@@ -19,8 +19,8 @@
  * under the License.
  */
 import monaco from '@/views/flink/app/Monaco.xml'
-import {verify} from '@/api/flinksql'
-import {format} from 'sql-formatter'
+import {verify} from '@/api/flinkSql'
+import {format} from './FlinkSqlFormatter'
 
 export function globalOption(vue) {
     return {
@@ -133,7 +133,13 @@ export function verifySQL(vue) {
         return
     }
     controller.flinkSql.verified = true
-    if (vue.versionId != null) {
+    if (vue.versionId == null) {
+        vue.$swal.fire(
+            'Failed',
+            'please set flink version first.',
+            'error'
+        )
+    } else {
         const callback = arguments[1] || function (r) {
         }
         verify({
@@ -232,11 +238,11 @@ export function bigScreenOpen(vue) {
 
 export function formatSql(vue) {
     const sql = vue.controller.flinkSql.value
-    const foramtSql = format(sql)
+    const formatSql = format(sql)
     if (vue.controller.visiable.bigScreen) {
-        vue.controller.editor.bigScreen.getModel().setValue(foramtSql)
+        vue.controller.editor.bigScreen.getModel().setValue(formatSql)
     } else {
-        vue.controller.editor.flinkSql.getModel().setValue(foramtSql)
+        vue.controller.editor.flinkSql.getModel().setValue(formatSql)
     }
 }
 
@@ -306,6 +312,14 @@ export function applyPom(vue) {
     const controller = vue.controller
     const pom = controller.pom.value
     const versionId = vue.versionId
+    if (versionId == null) {
+        vue.$swal.fire(
+            'Failed',
+            'please set flink version first.',
+            'error'
+        )
+        return
+    }
     const scalaVersion = vue.flinkEnvs.find(v => v.id === versionId).scalaVersion
     if (pom == null || pom.trim() === '') {
         return

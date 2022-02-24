@@ -69,9 +69,6 @@ object FlinkSinkApp extends FlinkStreaming {
     val personMapper: RedisMapper[Person] = RedisMapper[Person](RedisCommand.HSET, "flink_person", _.id.toString, _.name)
     val userMapper: RedisMapper[User] = RedisMapper[User](RedisCommand.HSET, "flink_user", _.id.toString, _.name)
 
-    //3)下沉数据.done
-    sink.towPCSink[User](ds2, userMapper, 201800)
-    sink.towPCSink[Person](ds, personMapper, 204800)
 
 
   }

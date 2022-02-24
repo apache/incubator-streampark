@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.streamxhub.streamx</groupId>
     <artifactId>streamx</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <packaging>pom</packaging>
     <name>StreamX Parent</name>
     <description>A magical framework that makes Flink development easier</description>
@@ -76,7 +76,6 @@
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <scalatest.version>3.2.9</scalatest.version>
-        <scala-async.version>0.9.7</scala-async.version>
         <junit.version>5.6.3</junit.version>
         <zkclient.version>0.11</zkclient.version>
         <curator.version>4.2.0</curator.version>
@@ -104,13 +103,6 @@
 
     <dependencies>
 
-        <!--jansi-->
-        <dependency>
-            <groupId>org.fusesource.jansi</groupId>
-            <artifactId>jansi</artifactId>
-            <version>2.3.4</version>
-        </dependency>
-
         <!--scala-->
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -133,11 +125,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.scala-lang.modules</groupId>
-            <artifactId>scala-async_${scala.binary.version}</artifactId>
-            <version>${scala-async.version}</version>
-        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -221,12 +208,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.json4s</groupId>
-                <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
-                <version>3.7.0-M2</version>
-            </dependency>
-
-            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
@@ -239,9 +220,35 @@
             </dependency>
 
             <dependency>
+                <groupId>org.json4s</groupId>
+                <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
+                <version>3.7.0-M2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala-reflect</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
                 <groupId>com.fasterxml.jackson.module</groupId>
                 <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
                 <version>${jackson.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala-reflect</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala-compiler</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala-library</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!--mail-->

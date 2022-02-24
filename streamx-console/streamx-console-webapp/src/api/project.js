@@ -37,6 +37,14 @@ export function create (params) {
   return http.post(api.Project.CREATE, params)
 }
 
+export function get(params) {
+  return http.post(api.Project.GET, params)
+}
+
+export function update(params) {
+  return http.post(api.Project.UPDATE, params)
+}
+
 export function list (params) {
   return http.post(api.Project.LIST, params)
 }

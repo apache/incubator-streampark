@@ -17,35 +17,13 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.packer.pipeline
+package com.streamxhub.streamx.flink.submit.bean
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-
+import java.util.{Map => JavaMap}
 import javax.annotation.Nullable
 
-/**
- * Error details of building pipeline.
- *
- * @param summary   summary of error
- * @param exception exception stack
- * @author Al-assad
- */
-@JsonIgnoreProperties(ignoreUnknown = true, value = Array("exception"))
-case class PipeErr(summary: String,
-                   @Nullable exception: Throwable,
-                   @Nullable exceptionStack: String) {
+case class SubmitResponse(clusterId: String,
+                          flinkConfig: JavaMap[String, String],
+                          @Nullable jobId: String = "") {
 
-  def nonEmpty: Boolean = Option(summary).exists(_.nonEmpty) || exception != null
-
-  def isEmpty: Boolean = !nonEmpty
 }
-
-object PipeErr {
-
-  def empty(): PipeErr = of("", null)
-
-  def of(summary: String, @Nullable exception: Throwable): PipeErr =
-    PipeErr(summary, exception, if (exception == null) "" else exception.getStackTrace.mkString("\n"))
-}
-
-

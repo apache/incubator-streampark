@@ -25,12 +25,12 @@ import java.util.Arrays;
 /**
  * @author benjobs
  */
-public enum DeployState implements Serializable {
+public enum LaunchState implements Serializable {
 
     /**
-     * 需用重新发布,但是下载maven依赖失败.(针对flinkSql任务)
+     * 部署失败
      */
-    NEED_DEPLOY_DOWN_DEPENDENCY_FAILED(-1),
+    FAILED(-1),
     /**
      * 完结
      */
@@ -39,17 +39,17 @@ public enum DeployState implements Serializable {
     /**
      * 正在部署中
      */
-    DEPLOYING(1),
+    LAUNCHING(1),
 
     /**
      * 程序更新需要重新发布
      */
-    NEED_DEPLOY_AFTER_BUILD(2),
+    NEED_LAUNCH_AFTER_BUILD(2),
 
     /**
      * 依赖更新需要重新发布
      */
-    NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE(3),
+    NEED_LAUNCH_AFTER_DEPENDENCY_UPDATE(3),
 
     /**
      * 配置文件更新需要重新启动
@@ -66,22 +66,27 @@ public enum DeployState implements Serializable {
      */
     NEED_RESTART_AFTER_DEPLOY(6),
 
+    /**
+     * 项目发生变化,任务需检查(是否需要重新选择jar)
+     */
+    NEED_CHECK_AFTER_PROJECT_CHANGED(7),
+
     //需要回滚
-    NEED_ROLLBACK(7),
+    NEED_ROLLBACK(8),
 
     /**
      * 回滚完成,需要重新启动
      */
-    NEED_RESTART_AFTER_ROLLBACK(8),
+    NEED_RESTART_AFTER_ROLLBACK(9),
 
     /**
      * 发布的任务已经撤销
      */
-    REVOKED(8);
+    REVOKED(10);
 
     int value;
 
-    DeployState(int value) {
+    LaunchState(int value) {
         this.value = value;
     }
 
@@ -89,7 +94,7 @@ public enum DeployState implements Serializable {
         return this.value;
     }
 
-    public static DeployState of(Integer state) {
+    public static LaunchState of(Integer state) {
         return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
     }
 }

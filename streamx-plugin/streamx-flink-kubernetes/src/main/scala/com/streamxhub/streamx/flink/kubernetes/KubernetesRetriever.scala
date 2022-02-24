@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.common.util.Utils.{tryWithResource, tryWithResourceException}
+import com.streamxhub.streamx.common.util.Utils.tryWithResource
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
@@ -111,7 +111,7 @@ object KubernetesRetriever extends Logger {
    * @param namespace deployment namespace
    */
   def isDeploymentExists(name: String, namespace: String): Boolean =
-    tryWithResourceException(Try(KubernetesRetriever.newK8sClient()).getOrElse(return false)) {
+    tryWithResource(Try(KubernetesRetriever.newK8sClient()).getOrElse(return false)) {
       client =>
         client.apps()
           .deployments()

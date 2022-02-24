@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.submit
 
 import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy
-import com.streamxhub.streamx.flink.submit.domain.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import org.apache.commons.lang3.StringUtils
 
 import java.util.regex.Pattern
@@ -30,16 +30,16 @@ import javax.annotation.Nonnull
 import scala.collection.JavaConverters._
 import scala.util.Try
 
-object FlinkSubmitHelper extends Logger {
+object FlinkSubmitter extends Logger {
 
   // effective k-v regex pattern of submit.dynamicOption
   private val DYNAMIC_OPTION_ITEM_PATTERN = Pattern.compile("(-D)?(\\S+)=(\\S+)")
 
   private[this] val FLINK_SUBMIT_CLASS_NAME = "com.streamxhub.streamx.flink.submit.FlinkSubmit"
 
-  private[this] val SUBMIT_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.domain.SubmitRequest"
+  private[this] val SUBMIT_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.bean.SubmitRequest"
 
-  private[this] val STOP_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.domain.StopRequest"
+  private[this] val STOP_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.bean.StopRequest"
 
   @throws[Exception] def submit(submitRequest: SubmitRequest): SubmitResponse = {
     FlinkShimsProxy.proxy(submitRequest.flinkVersion, (classLoader: ClassLoader) => {
