@@ -672,7 +672,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private void updateFlinkSqlJob(Application application, Application appParam) {
         AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
         //从来没有上线过的新任务.直接保存
-        if (buildPipeline == null || buildPipeline.getPipeStatus().equals(PipelineStatus.failure) ) {
+        if (buildPipeline == null || buildPipeline.getPipeStatus().equals(PipelineStatus.failure)) {
             application.setLaunch(LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
             flinkSqlService.removeById(application.getSqlId());
             FlinkSql sql = new FlinkSql(appParam);

@@ -177,7 +177,7 @@ public class ApplBuildPipeServiceImpl
                 } else {
                     FlinkSql flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
                     if (flinkSql == null) {
-                        flinkSql = flinkSqlService.getEffective(app.getId(),false);
+                        flinkSql = flinkSqlService.getEffective(app.getId(), false);
                     }
                     assert flinkSql != null;
                     app.setDependency(flinkSql.getDependency());
