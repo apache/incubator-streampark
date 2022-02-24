@@ -241,7 +241,7 @@
           slot="expandedRowRender"
           class="expanded-table"
           slot-scope="record"
-          v-if="record.state === 7"
+          v-if="record.state === 5"
           row-key="id"
           :columns="innerColumns"
           :data-source="record.expanded"
@@ -297,10 +297,10 @@
           <!--有条件搜索-->
           <template v-if="searchText && searchedColumn === column.dataIndex">
             <span
-              :class="{pointer: record.state === 6 || record.state === 7 || record['optionState'] === 4 }"
+              :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
               @click="handleView(record)">
               <template
-                v-if="record.deploy === 0"
+                v-if="record.launch === 0"
                 v-for="(fragment, i) in text
                   .toString()
                   .substr(0,(text.length > 30 ? 30: text.length ))
@@ -348,7 +348,7 @@
           <template v-else>
             <span
               v-if="column.dataIndex === 'jobName'"
-              :class="{pointer: record.state === 6 || record.state === 7 || record['optionState'] === 4 }"
+              :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
               @click="handleView(record)">
               <ellipsis
                 :length="30"
@@ -368,16 +368,16 @@
           <template v-if="record['jobType'] === 1">
             <a-badge
               class="build-badge"
-              v-if="record.deploy === 7"
+              v-if="record.launch === 7"
               count="NEW"
               title="the associated project has changed and this job need to be rechecked"/>
             <a-badge
               class="build-badge"
-              v-else-if="record.deploy >= 2"
+              v-else-if="record.launch >= 2"
               count="NEW"
               title="the application has changed."/>
           </template>
-          <template v-else-if="record.deploy >= 2">
+          <template v-else-if="record.launch >= 2">
             <a-badge class="build-badge" count="NEW" title="the application has changed."/>
           </template>
 
@@ -406,12 +406,12 @@
         </template>
 
         <template
-          slot="deployState"
+          slot="launchState"
           slot-scope="text, record">
           <a-space size="small">
             <State
-              option="deploy"
-              :title="handleDeployTitle(record.deploy)"
+              option="launch"
+              :title="handleLaunchTitle(record.launch)"
               :data="record"/>
             <State
               option="build"
@@ -438,7 +438,7 @@
 
           <a-tooltip title="Edit Application">
             <a-button
-              v-if="record.deploy !== 6"
+              v-if="record.launch !== 6"
               v-permit="'app:update'"
               @click.native="handleEdit(record)"
               shape="circle"
@@ -449,20 +449,20 @@
             </a-button>
           </a-tooltip>
 
-          <a-tooltip title="Build Application">
+          <a-tooltip title="Launch Application">
             <a-button
-              v-if="(record.deploy === -1 || record.deploy === 2 || record.deploy === 3) && record['optionState'] === 0"
-              @click.native="handleCheckBuildApp(record)"
+              v-if="(record.launch === -1 || record.launch === 2 || record.launch === 3) && record['optionState'] === 0"
+              @click.native="handleCheckLaunchApp(record)"
               shape="circle"
               size="small"
               class="control-button ctl-btn-color">
-              <a-icon type="gold"/>
+              <a-icon type="cloud-upload"/>
             </a-button>
           </a-tooltip>
 
-          <a-tooltip title="Building Progress Detail">
+          <a-tooltip title="Launching Progress Detail">
             <a-button
-              v-if="record.deploy === 1 || record.deploy === -1 || record['optionState'] === 1"
+              v-if="record.launch === 1 || record.launch === -1 || record['optionState'] === 1"
               @click.native="openBuildProgressDetailDrawer(record)"
               shape="circle"
               size="small"
@@ -485,7 +485,7 @@
 
           <a-tooltip title="Stop Application">
             <a-button
-              v-show="record.state === 7 && record['optionState'] === 0"
+              v-show="record.state === 5 && record['optionState'] === 0"
               v-permit="'app:cancel'"
               @click.native="handleCancel(record)"
               shape="circle"
@@ -553,7 +553,7 @@
       <!-- app building progress detail-->
       <template>
         <a-drawer
-          title="Application Building Progress"
+          title="Application Launching Progress"
           placement="right"
           width="500"
           :closable="true"
@@ -752,9 +752,9 @@
         okText="Yes"
         cancelText="Cancel"
         :visible="forceBuildAppModalVisual"
-        @ok="handleBuildApp(application, true)"
+        @ok="handleLaunchApp(application, true)"
         @cancel="closeCheckForceBuildModel">
-        <p>The current build of the application is in progress.</p>
+        <p>The current launch of the application is in progress.</p>
         <p>are you sure you want to force another build?</p>
       </a-modal>
 
@@ -1115,7 +1115,7 @@ export default {
       optionApps: {
         'starting': new Map(),
         'stoping': new Map(),
-        'deploy': new Map()
+        'launch': new Map()
       },
       searchedColumn: null,
       paginationInfo: null,
@@ -1232,10 +1232,10 @@ export default {
           {text: 'FINISHED', value: 21},
         ]
       }, {
-        title: 'Deploy | Build Status',
-        dataIndex: 'deploy',
+        title: 'Launch | Build',
+        dataIndex: 'launch',
         width: 250,
-        scopedSlots: {customRender: 'deployState'}
+        scopedSlots: {customRender: 'launchState'}
       }, {
         dataIndex: 'operation',
         key: 'operation',
@@ -1279,12 +1279,12 @@ export default {
       }
     },
 
-    handleDeployTitle(deploy) {
-      switch (deploy) {
+    handleLaunchTitle(launch) {
+      switch (launch) {
         case -1:
           return 'dependency changed,but download dependency failed'
         case 1:
-          return 'deploying'
+          return 'launching'
         case 2:
           return 'application is updated,need relaunch'
         case 3:
@@ -1294,7 +1294,7 @@ export default {
         case 5:
           return 'flink sql is updated,need restart'
         case 6:
-          return 'application is deployed to workspace,need restart'
+          return 'application is launched to workspace,need restart'
         case 7:
           return 'application is rollbacked,need restart'
       }
@@ -1347,20 +1347,21 @@ export default {
       this.forceBuildAppModalVisual = false
     },
 
-    handleCheckBuildApp(app) {
+
+    handleCheckLaunchApp(app) {
       this.application = app
       if (app['appControl']['allowBuild'] === true) {
-        this.handleBuildApp(app, false)
+        this.handleLaunchApp(app, false)
       } else {
         this.showCheckForceBuildModel()
       }
     },
 
-    handleBuildApp(app, force) {
+    handleLaunchApp(app, force) {
       this.closeCheckForceBuildModel()
       this.$swal.fire({
         icon: 'success',
-        title: 'Current Application is Building',
+        title: 'Current Application is Launching',
         showConfirmButton: false,
         timer: 2000
       }).then((e) =>
@@ -1371,7 +1372,7 @@ export default {
             if (!resp.data) {
               this.$swal.fire(
                   'Failed',
-                  'build application failed, ' + resp.message.replaceAll(/\[StreamX]/g, ''),
+                  'lanuch application failed, ' + resp.message.replaceAll(/\[StreamX]/g, ''),
                   'error'
               )
             }
@@ -1486,14 +1487,13 @@ export default {
 
     handleIsStart(app) {
       const status = app.state === 0 ||
-          app.state === 2 ||
+          app.state === 7 ||
           app.state === 9 ||
+          app.state === 10 ||
           app.state === 11 ||
-          app.state === 12 ||
           app.state === 13 ||
-          app.state === 15 ||
-          app.state === 20 ||
-          app.state === 21 || false
+          app.state === 18 ||
+          app.state === 19 || false
 
       const optionState = !this.optionApps.starting.get(app.id) || app['optionState'] === 0 || false
 
@@ -1501,8 +1501,8 @@ export default {
     },
 
     handleCanRemapping(record) {
-      return record.state !== 7 &&
-      !this.optionApps.deploy.get(record.id) &&
+      return record.state !== 5 &&
+      !this.optionApps.launch.get(record.id) &&
       !this.optionApps.stoping.get(record.id) &&
       !this.optionApps.starting.get(record.id) &&
       record['optionState'] === 0
@@ -1701,13 +1701,12 @@ export default {
 
     handleCanDelete(app) {
       return app.state === 0 ||
-          app.state === 2 ||
+          app.state === 7 ||
           app.state === 9 ||
-          app.state === 11 ||
-          app.state === 12 ||
-          app.state === 15 ||
-          app.state === 20 ||
-          app.state === 21 || false
+          app.state === 10 ||
+          app.state === 13 ||
+          app.state === 18 ||
+          app.state === 19 || false
     },
 
     handleDelete(app) {
@@ -1808,10 +1807,10 @@ export default {
                 this.handleMapUpdate('stoping')
               }
             }
-            if (this.optionApps.deploy.get(x.id)) {
-              if (timestamp - this.optionApps.deploy.get(x.id) > this.queryInterval) {
-                this.optionApps.deploy.delete(x.id)
-                this.handleMapUpdate('deploy')
+            if (this.optionApps.launch.get(x.id)) {
+              if (timestamp - this.optionApps.launch.get(x.id) > this.queryInterval) {
+                this.optionApps.launch.delete(x.id)
+                this.handleMapUpdate('launch')
               }
             }
           }
@@ -1832,7 +1831,7 @@ export default {
     },
 
     handleExpandIcon(props) {
-      if (props.record.state === 7) {
+      if (props.record.state === 5) {
         if (props.expanded) {
           return <a class="expand-icon-open" onClick={(e) => {
             props.onExpand(props.record, e)
@@ -1853,7 +1852,7 @@ export default {
 
     handleView(params) {
       // 任务正在运行中, 重启中, 正在 savePoint 中
-      if (params.state === 6 || params.state === 7 || params['optionState'] === 4) {
+      if (params.state === 4 || params.state === 5 || params['optionState'] === 4) {
         // yarn-per-job|yarn-session|yarn-application
         const executionMode = params['executionMode']
         if (executionMode === 1) {

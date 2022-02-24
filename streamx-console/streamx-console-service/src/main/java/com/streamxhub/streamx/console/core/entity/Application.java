@@ -39,7 +39,7 @@ import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.util.JsonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
-import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.ResourceFrom;
 import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
@@ -126,9 +126,9 @@ public class Application implements Serializable {
 
     private Integer state;
     /**
-     * 是否需要重新发布(针对项目已更新,需要重新发布项目.)
+     * 任务的上线发布状态
      */
-    private Integer deploy;
+    private Integer launch;
 
     /**
      * 任务失败后的最大重启次数.
@@ -306,8 +306,6 @@ public class Application implements Serializable {
      */
     public static Integer shouldTracking(@Nonnull FlinkAppState state) {
         switch (state) {
-            case DEPLOYING:
-            case DEPLOYED:
             case CREATED:
             case FINISHED:
             case FAILED:
@@ -326,13 +324,13 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public DeployState getDeployState() {
-        return DeployState.of(state);
+    public LaunchState getLaunchState() {
+        return LaunchState.of(state);
     }
 
     @JsonIgnore
-    public void setDeployState(DeployState deployState) {
-        this.deploy = deployState.get();
+    public void setLaunchState(LaunchState launchState) {
+        this.launch = launchState.get();
     }
 
     @JsonIgnore
@@ -586,12 +584,12 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public boolean isNeedRollback() {
-        return DeployState.NEED_ROLLBACK.get() == this.getDeploy();
+        return LaunchState.NEED_ROLLBACK.get() == this.getLaunch();
     }
 
     @JsonIgnore
     public boolean isNeedCheck() {
-        return DeployState.NEED_CHECK_AFTER_PROJECT_CHANGED.get() == this.getDeploy();
+        return LaunchState.NEED_CHECK_AFTER_PROJECT_CHANGED.get() == this.getLaunch();
     }
 
     @JsonIgnore

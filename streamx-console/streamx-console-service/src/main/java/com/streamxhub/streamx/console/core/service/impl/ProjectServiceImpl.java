@@ -37,7 +37,7 @@ import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.BuildState;
-import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
@@ -135,8 +135,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     // 更新部署状态
                     FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                         log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                        app.setDeploy(DeployState.NEED_CHECK_AFTER_PROJECT_CHANGED.get());
-                        applicationService.updateDeploy(app);
+                        app.setLaunch(LaunchState.NEED_CHECK_AFTER_PROJECT_CHANGED.get());
+                        applicationService.updateLaunch(app);
                     }));
                 }
             }
@@ -195,8 +195,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         // 更新部署状态
                         FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                             log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                            app.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
-                            this.applicationService.updateDeploy(app);
+                            app.setLaunch(LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
+                            this.applicationService.updateLaunch(app);
                         }));
                     } catch (Exception e) {
                         this.baseMapper.failureBuild(project);

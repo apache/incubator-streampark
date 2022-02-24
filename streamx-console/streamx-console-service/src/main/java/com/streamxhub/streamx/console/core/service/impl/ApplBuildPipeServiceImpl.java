@@ -37,7 +37,7 @@ import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
-import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.entity.Message;
 import com.streamxhub.streamx.console.core.enums.NoticeType;
 import com.streamxhub.streamx.console.core.enums.OptionState;
@@ -189,8 +189,8 @@ public class ApplBuildPipeServiceImpl
             @Override
             public void onStart(PipeSnapshot snapshot) {
                 backUpService.backup(app);
-                app.setDeploy(DeployState.DEPLOYING.get());
-                applicationService.updateDeploy(app);
+                app.setLaunch(LaunchState.LAUNCHING.get());
+                applicationService.updateLaunch(app);
                 AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
                 saveEntity(buildPipeline);
             }
@@ -207,24 +207,24 @@ public class ApplBuildPipeServiceImpl
                 if (result.pass()) {
                     //running job ...
                     if (app.isRunning()) {
-                        app.setDeploy(DeployState.NEED_RESTART_AFTER_DEPLOY.get());
+                        app.setLaunch(LaunchState.NEED_RESTART_AFTER_DEPLOY.get());
                     } else {
                         app.setOptionState(OptionState.NONE.getValue());
-                        app.setDeploy(DeployState.DONE.get());
+                        app.setLaunch(LaunchState.DONE.get());
                     }
                 } else {
                     Message message = new Message(
                             commonService.getCurrentUser().getUserId(),
                             app.getId(),
-                            app.getJobName().concat(" deploy failed"),
+                            app.getJobName().concat(" launch failed"),
                             ExceptionUtils.stringifyException(snapshot.error().exception()),
                             NoticeType.EXCEPTION
                     );
                     messageService.push(message);
-                    app.setDeploy(DeployState.FAILED.get());
+                    app.setLaunch(LaunchState.FAILED.get());
                     app.setOptionState(OptionState.NONE.getValue());
                 }
-                applicationService.updateDeploy(app);
+                applicationService.updateLaunch(app);
                 //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
                 FlinkSql flinkSql = flinkSqlService.getEffective(app.getId(), false);
                 if (!app.isRunning() || flinkSql == null) {
