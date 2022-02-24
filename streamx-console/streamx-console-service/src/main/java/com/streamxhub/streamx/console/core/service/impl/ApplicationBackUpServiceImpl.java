@@ -36,7 +36,7 @@ import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
 import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
-import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
@@ -156,7 +156,7 @@ public class ApplicationBackUpServiceImpl
                         applicationService.update(new UpdateWrapper<Application>()
                             .lambda()
                             .eq(Application::getId, application.getId())
-                            .set(Application::getDeploy, DeployState.NEED_RESTART_AFTER_ROLLBACK.get())
+                            .set(Application::getLaunch, LaunchState.NEED_RESTART_AFTER_ROLLBACK.get())
                         );
                     } catch (Exception e) {
                         //1. TODO: 如果失败,则要恢复第4第5步操作.

@@ -29,7 +29,7 @@ import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
-import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.OptionState;
 import com.streamxhub.streamx.console.core.enums.StopFrom;
@@ -418,16 +418,16 @@ public class FlinkTrackingTask {
          * NEED_RESTART_AFTER_DEPLOY(任务重新发布后需要回滚)
          */
         if (OptionState.STARTING.equals(optionState)) {
-            DeployState deployState = DeployState.of(application.getDeploy());
+            LaunchState launchState = LaunchState.of(application.getLaunch());
             //如果任务更新后需要重新启动 或 发布后需要重新启动
-            switch (deployState) {
+            switch (launchState) {
                 case NEED_RESTART_AFTER_CONF_UPDATE:
                 case NEED_RESTART_AFTER_SQL_UPDATE:
                 case NEED_RESTART_AFTER_ROLLBACK:
                 case NEED_RESTART_AFTER_DEPLOY:
                 case NEED_ROLLBACK:
                     //清空需要重新启动的状态.
-                    application.setDeploy(DeployState.DONE.get());
+                    application.setLaunch(LaunchState.DONE.get());
                     break;
                 default:
                     break;

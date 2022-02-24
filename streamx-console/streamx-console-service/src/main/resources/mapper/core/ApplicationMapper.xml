@@ -33,7 +33,7 @@
         <result column="CP_FAILURE_ACTION" jdbcType="INTEGER" property="cpFailureAction"/>
         <result column="RESTART_SIZE" jdbcType="INTEGER" property="restartSize"/>
         <result column="RESTART_COUNT" jdbcType="INTEGER" property="restartCount"/>
-        <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
+        <result column="LAUNCH" jdbcType="INTEGER" property="launch"/>
         <result column="FLAME_GRAPH" jdbcType="BOOLEAN" property="flameGraph"/>
         <result column="RESOLVE_ORDER" jdbcType="INTEGER" property="resolveOrder"/>
         <result column="TOTAL_TM" jdbcType="INTEGER" property="totalTM"/>
@@ -116,8 +116,8 @@
             <if test="application.state != null">
                 state=#{application.state},
             </if>
-            <if test="application.deploy != null">
-                deploy=#{application.deploy},
+            <if test="application.launch != null">
+                launch=#{application.launch},
             </if>
             <if test="application.optionState != null">
                 option_state=#{application.optionState},

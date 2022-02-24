@@ -25,7 +25,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.flink.kubernetes.FlinkTrkConf;
@@ -116,7 +115,6 @@ public class K8sFlinkTrkMonitorWrapper {
         // correct corrupted data
         List<Application> correctApps = k8sApplication.stream()
             .filter(app -> Bridge.toTrkId(app).nonLegal())
-            .peek(app -> app.setState(FlinkAppState.DEPLOYED.getValue()))
             .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(correctApps)) {
             applicationService.saveOrUpdateBatch(correctApps);

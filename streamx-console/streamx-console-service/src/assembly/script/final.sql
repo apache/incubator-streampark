@@ -93,7 +93,7 @@ CREATE TABLE `t_flink_app` (
 `OPTION_STATE` tinyint DEFAULT NULL,
 `TRACKING` tinyint DEFAULT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
-`DEPLOY` tinyint DEFAULT '2',
+`LAUNCH` tinyint DEFAULT '2',
 `START_TIME` datetime DEFAULT NULL,
 `END_TIME` datetime DEFAULT NULL,
 `ALERT_EMAIL` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -341,7 +341,7 @@ INSERT INTO `t_menu` VALUES (100021, 100013, 'Edit StreamX App', '/flink/app/edi
 INSERT INTO `t_menu` VALUES (100022, 100014, 'build', NULL, NULL, 'project:build', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100023, 100014, 'delete', NULL, NULL, 'project:delete', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100024, 100015, 'mapping', NULL, NULL, 'app:mapping', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (100025, 100015, 'deploy', NULL, NULL, 'app:deploy', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100025, 100015, 'launch', NULL, NULL, 'app:launch', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100026, 100015, 'start', NULL, NULL, 'app:start', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100027, 100015, 'clean', NULL, NULL, 'app:clean', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100028, 100015, 'cancel', NULL, NULL, 'app:cancel', NULL, '1', '1', NULL, NOW(), NULL);

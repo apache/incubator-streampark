@@ -34,9 +34,23 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 --------------------------------------- version: 1.2.2 START ---------------------------------------
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- menu
+update `t_menu` set MENU_NAME='launch',PERMS='app:launch' where MENU_NAME='deploy';
+
+-- change default value
+UPDATE `t_setting` SET `KEY`='streamx.maven.central.repository' WHERE `KEY` = 'maven.central.repository';
+
+-- rename column name DEPLOY to LAUNCH
+ALTER TABLE `t_flink_app` CHANGE COLUMN `DEPLOY` `LAUNCH` tinyint NULL DEFAULT 2 AFTER `CREATE_TIME`;
+
+-- add new field FLINK_CLUSTER_ID
 ALTER TABLE `t_flink_app` ADD COLUMN `FLINK_CLUSTER_ID` bigint DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
 
-UPDATE `t_setting` SET `KEY`='streamx.maven.central.repository' WHERE `KEY` = 'maven.central.repository';
+update `t_flink_app` set STATE = 0 where STATE in (1,2);
+
+update `t_flink_app` set STATE = STATE - 2 where STATE > 1;
 
 -- ----------------------------
 -- Table of t_flink_cluster
@@ -51,4 +65,5 @@ CREATE TABLE `t_flink_cluster`(
 PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+SET FOREIGN_KEY_CHECKS = 1;
 --------------------------------------- version: 1.2.2 END ---------------------------------------
