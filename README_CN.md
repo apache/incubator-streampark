@@ -56,7 +56,7 @@ Make stream processing easier
 * 在线参数配置
 * 多版本flink支持(1.12.x,1.13.x,1.14.x)
 * 快捷的日常操作(任务`启动`、`停止`、`savepoint`，从`savepoint`恢复)
-* Flink所有部署模式的支持(`Remote`/`Local`/`K8s-Native-Application`/`K8s-Native-Session`/`YARN-Application`/`YARN-Per-Job`/`YARN-Session`)
+* Flink所有部署模式的支持(`Remote`/`K8s-Native-Application`/`K8s-Native-Session`/`YARN-Application`/`YARN-Per-Job`/`YARN-Session`)
 * 快捷的日常操作(任务`启动`、`停止`、`savepoint`，从`savepoint`恢复)
 * 稳定可靠,诸多公司和组织将 `StreamX` 用于生产和商业产品中
 * 支持火焰图
