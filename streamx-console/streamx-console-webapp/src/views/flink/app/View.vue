@@ -1492,7 +1492,8 @@ export default {
        * KILLED(-9)
        * @type {boolean}
        */
-      const status = app.state === 7 ||
+      const status = app.state === 0 ||
+          app.state === 7 ||
           app.state === 9 ||
           app.state === 10 ||
           app.state === 11 ||
