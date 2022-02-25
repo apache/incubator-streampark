@@ -16,8 +16,7 @@
                 Task Slots
                 <strong>{{ metrics.totalSlot }}</strong>
               </span>
-              <a-divider
-                type="vertical"/>
+              <a-divider type="vertical"/>
               <span>
                 Task Managers
                 <strong>{{ metrics.totalTM }}</strong>
@@ -81,8 +80,7 @@
                 suffix="MB"
                 :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}"/>
             </a-card>
-            <a-divider
-              style="margin-bottom: 10px"/>
+            <a-divider style="margin-bottom: 10px"/>
             <div>
               <span>
                 Total TaskManager Mem
@@ -132,27 +130,23 @@
                 </a-card>
               </a-col>
             </a-row>
-            <a-divider
-              style="margin-bottom: 10px"/>
+            <a-divider style="margin-bottom: 10px"/>
             <div>
               <span>
                 Total Task
                 <strong>{{ metrics.task.total }}</strong>
               </span>
-              <a-divider
-                type="vertical"/>
+              <a-divider type="vertical"/>
               <span>
                 Running Task
                 <strong>{{ metrics.task.running }}</strong>
               </span>
-              <a-divider
-                type="vertical"/>
+              <a-divider type="vertical"/>
               <span>
                 Task Slots
                 <strong>{{ metrics.totalSlot }}</strong>
               </span>
-              <a-divider
-                type="vertical"/>
+              <a-divider type="vertical"/>
               <span>
                 Task Managers
                 <strong>{{ metrics.totalTM }}</strong>
@@ -202,15 +196,13 @@
                 </a-card>
               </a-col>
             </a-row>
-            <a-divider
-              style="margin-bottom: 10px"/>
+            <a-divider style="margin-bottom: 10px"/>
             <div>
               <span>
                 Total JobManager Mem
                 <strong>{{ metrics.jmMemory }} MB</strong>
               </span>
-              <a-divider
-                type="vertical"/>
+              <a-divider type="vertical"/>
               <span>
                 Total TaskManager Mem
                 <strong>{{ metrics.tmMemory }} MB</strong>
@@ -1486,18 +1478,42 @@ export default {
     },
 
     handleIsStart(app) {
-      const status = app.state === 0 ||
-          app.state === 7 ||
+      /**
+       * FAILED(7),
+       * CANCELED(9),
+       * FINISHED(10),
+       * SUSPENDED(11),
+       * LOST(13),
+       * OTHER(15),
+       * REVOKED(16),
+       * TERMINATED(18),
+       * POS_TERMINATED(19),
+       * SUCCEEDED(20),
+       * KILLED(-9)
+       * @type {boolean}
+       */
+      const status = app.state === 7 ||
           app.state === 9 ||
           app.state === 10 ||
           app.state === 11 ||
           app.state === 13 ||
+          app.state === 16 ||
           app.state === 18 ||
-          app.state === 19 || false
+          app.state === 19 ||
+          app.state === 20 ||
+          app.state === -9 || false
+
+      const launch = app.launch === 0 ||
+        app.launch === 4 ||
+        app.launch === 5 ||
+        app.launch === 6 ||
+        app.launch === 8 ||
+        app.launch === 9 || false
+
 
       const optionState = !this.optionApps.starting.get(app.id) || app['optionState'] === 0 || false
 
-      return status && optionState
+      return status && launch && optionState
     },
 
     handleCanRemapping(record) {

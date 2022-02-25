@@ -29,18 +29,18 @@ trait PipeWatcher {
   /**
    * called when the pipeline is launched.
    */
-  def onStart(snapshot: PipeSnapshot): Unit
+  @throws[Exception] def onStart(snapshot: PipeSnapshot): Unit
 
   /**
    * called when the any status of building step is changed.
    */
-  def onStepStateChange(snapshot: PipeSnapshot): Unit
+  @throws[Exception] def onStepStateChange(snapshot: PipeSnapshot): Unit
 
   /**
    * called when the pipeline is finished, or you can get the
    * results directly from the BuildPipeline.launch() synchronously.
    */
-  def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit
+  @throws[Exception] def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit
 }
 
 
