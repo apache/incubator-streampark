@@ -1510,6 +1510,7 @@ export default {
         app.launch === 8 ||
         app.launch === 9 || false
 
+
       const optionState = !this.optionApps.starting.get(app.id) || app['optionState'] === 0 || false
 
       return status && launch && optionState
