@@ -125,7 +125,10 @@ ALTER TABLE `t_flink_app` CHANGE COLUMN `DEPLOY` `LAUNCH` tinyint NULL DEFAULT 2
 ALTER TABLE `t_flink_app` ADD COLUMN `FLINK_CLUSTER_ID` bigint DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
 
 -- change column id to AUTO_INCREMENT
-ALTER TABLE t_flink_sql change id  id bigint NOT NULL AUTO_INCREMENT;
+ALTER TABLE `t_flink_sql` change id  id bigint NOT NULL AUTO_INCREMENT;
+
+-- change default value
+ALTER TABLE `t_flink_sql` MODIFY COLUMN `CANDIDATE` tinyint(4) NOT NULL DEFAULT 1;
 
 update `t_flink_app` set STATE = 0 where STATE in (1,2);
 
@@ -153,7 +156,7 @@ ALTER TABLE t_user AUTO_INCREMENT = 100001 ;
 ALTER TABLE t_user_role AUTO_INCREMENT = 100001 ;
 ALTER TABLE t_app_build_pipe AUTO_INCREMENT = 100000 ;
 COMMIT;
--- update table id 
+-- update table id
 BEGIN;
 UPDATE t_menu set PARENT_ID=PARENT_ID+99999 where PARENT_ID != '0';
 UPDATE t_menu set MENU_ID=MENU_ID+99999;

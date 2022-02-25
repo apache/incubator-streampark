@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.packer.pipeline.impl
 
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.DevelopmentMode
-import com.streamxhub.streamx.common.fs.{FsOperator, LfsOperator}
+import com.streamxhub.streamx.common.fs.{FsOperator, HdfsOperator, LfsOperator}
 import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.packer.pipeline._
@@ -50,9 +50,8 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
    */
   @throws[Throwable] override protected def buildProcess(): SimpleBuildResponse = {
     execStep(1) {
-      if (request.developmentMode == DevelopmentMode.FLINKSQL) {
-        LfsOperator.mkCleanDirs(request.yarnProvidedPath)
-      }
+      LfsOperator.mkCleanDirs(request.localWorkspace)
+      HdfsOperator.mkCleanDirs(request.yarnProvidedPath)
       logInfo(s"recreate building workspace: ${request.yarnProvidedPath}")
     }.getOrElse(throw getError.exception)
 
