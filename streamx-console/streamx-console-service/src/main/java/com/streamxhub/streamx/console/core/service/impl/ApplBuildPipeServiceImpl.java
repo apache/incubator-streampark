@@ -143,7 +143,18 @@ public class ApplBuildPipeServiceImpl
 
     @Override
     public boolean buildApplication(@Nonnull Application app) throws Exception {
-        // 1) create pipeline instance
+
+        // 1) flink sql setDependency
+        if (app.isFlinkSqlJob()) {
+            FlinkSql flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
+            if (flinkSql == null) {
+                flinkSql = flinkSqlService.getEffective(app.getId(), false);
+            }
+            assert flinkSql != null;
+            app.setDependency(flinkSql.getDependency());
+        }
+
+        // 2) create pipeline instance
         BuildPipeline pipeline = createPipelineInstance(app);
 
         // register pipeline progress event watcher.
@@ -175,12 +186,6 @@ public class ApplBuildPipeServiceImpl
                         fsOperator.upload(app.getDistHome(), appHome);
                     }
                 } else {
-                    FlinkSql flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
-                    if (flinkSql == null) {
-                        flinkSql = flinkSqlService.getEffective(app.getId(), false);
-                    }
-                    assert flinkSql != null;
-                    app.setDependency(flinkSql.getDependency());
                     if (!app.getDependencyObject().getJar().isEmpty()) {
                         //copy jar to upload dir
                         for (String jar : app.getDependencyObject().getJar()) {
