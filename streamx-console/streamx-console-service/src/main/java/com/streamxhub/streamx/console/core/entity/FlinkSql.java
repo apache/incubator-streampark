@@ -24,7 +24,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.console.core.enums.ChangedType;
 import lombok.Data;
-import net.minidev.json.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Base64;
 import java.util.Date;

@@ -37,7 +37,7 @@ import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
-import com.streamxhub.streamx.console.base.util.JsonUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
@@ -519,7 +519,7 @@ public class Application implements Serializable {
     private <T> T httpGetDoResult(String url, Class<T> clazz) throws IOException {
         String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
         if (result != null) {
-            return JsonUtils.read(result, clazz);
+            return JacksonUtils.read(result, clazz);
         }
         return null;
     }
@@ -532,7 +532,7 @@ public class Application implements Serializable {
     @JsonIgnore
     @SneakyThrows
     public Map<String, Object> getOptionMap() {
-        Map<String, Object> map = JsonUtils.read(getOptions(), Map.class);
+        Map<String, Object> map = JacksonUtils.read(getOptions(), Map.class);
         map.entrySet().removeIf(entry -> entry.getValue() == null);
         return map;
     }
@@ -706,7 +706,7 @@ public class Application implements Serializable {
     @SneakyThrows
     public Map<String, Object> getHotParamsMap() {
         if (this.hotParams != null) {
-            Map<String, Object> map = JsonUtils.read(this.hotParams, Map.class);
+            Map<String, Object> map = JacksonUtils.read(this.hotParams, Map.class);
             map.entrySet().removeIf(entry -> entry.getValue() == null);
             return map;
         }
@@ -724,7 +724,7 @@ public class Application implements Serializable {
             }
         }
         if (!hotParams.isEmpty()) {
-            this.setHotParams(JsonUtils.write(hotParams));
+            this.setHotParams(JacksonUtils.write(hotParams));
         }
     }
 
@@ -738,7 +738,7 @@ public class Application implements Serializable {
                 hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), appParam.getYarnQueue());
             }
         }
-        this.setHotParams(JsonUtils.write(hotParams));
+        this.setHotParams(JacksonUtils.write(hotParams));
     }
 
     @Data
@@ -750,7 +750,7 @@ public class Application implements Serializable {
         @SneakyThrows
         public static Dependency jsonToDependency(String dependency) {
             if (Utils.notEmpty(dependency)) {
-                return JsonUtils.read(dependency, new TypeReference<Dependency>() {
+                return JacksonUtils.read(dependency, new TypeReference<Dependency>() {
                 });
             }
             return new Dependency();
