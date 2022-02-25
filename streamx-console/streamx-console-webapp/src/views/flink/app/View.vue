@@ -1503,14 +1503,12 @@ export default {
           app.state === 20 ||
           app.state === -9 || false
 
-      const needRestart = app.launch === 0 ||
-          app.launch === 4 ||
-          app.launch === 5 ||
-          app.launch === 6 ||
-          app.launch === 8 ||
-          app.launch === 9 || false
-
-      const launch = status && needRestart || false
+      const launch = app.launch === 0 ||
+        app.launch === 4 ||
+        app.launch === 5 ||
+        app.launch === 6 ||
+        app.launch === 8 ||
+        app.launch === 9 || false
 
       const optionState = !this.optionApps.starting.get(app.id) || app['optionState'] === 0 || false
 
