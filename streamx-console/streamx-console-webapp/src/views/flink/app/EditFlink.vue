@@ -91,6 +91,20 @@
         </a-select>
       </a-form-item>
 
+      <template v-if="executionMode === 3">
+        <a-form-item
+          label="Yarn Session ClusterId"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            allowClear
+            placeholder="Please enter Yarn Session clusterId"
+            v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, validator: handleCheckYarnSessionClusterId }] }]">
+          </a-input>
+        </a-form-item>
+      </template>
+
       <template v-if="executionMode === 1">
         <a-form-item
           label="Flink Cluster"
@@ -723,7 +737,7 @@ export default {
         {mode: 'yarn application', value: 4, disabled: false},
         {mode: 'kubernetes session', value: 5, disabled: false},
         {mode: 'kubernetes application', value: 6, disabled: false},
-        {mode: 'yarn session (coming soon)', value: 3, disabled: true},
+        {mode: 'yarn session', value: 3, disabled: false},
         {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: false}
       ],
       cpTriggerAction: [
@@ -857,6 +871,18 @@ export default {
 
     handleFlinkVersion(id) {
       this.versionId = id
+    },
+
+    handleCheckYarnSessionClusterId(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Yarn session clusterId is required'))
+      } else {
+        if (!value.startsWith('application')) {
+          callback(new Error("Yarn session clusterId is invalid, clusterId must start with 'application'.Please check"))
+        } else {
+          callback()
+        }
+      }
     },
 
     handleCheckJobName(rule, value, callback) {
@@ -1045,7 +1071,8 @@ export default {
               clusterId: values.clusterId || null,
               flinkClusterId: values.flinkClusterId || null,
               flinkImage: values.flinkImage || null,
-              resourceFrom: this.resourceFrom
+              resourceFrom: this.resourceFrom,
+              yarnSessionClusterId: values.yarnSessionClusterId || null
             }
             if (params.executionMode === 6) {
               params.k8sPodTemplate = this.podTemplate
@@ -1136,7 +1163,8 @@ export default {
           'clusterId': this.app.clusterId,
           'flinkClusterId': this.app.flinkClusterId,
           'flinkImage': this.app.flinkImage,
-          'k8sNamespace': this.app.k8sNamespace
+          'k8sNamespace': this.app.k8sNamespace,
+          'yarnSessionClusterId': this.app.yarnSessionClusterId
         })
         if (this.app.executionMode === 6) {
           this.podTemplate = this.app.k8sPodTemplate

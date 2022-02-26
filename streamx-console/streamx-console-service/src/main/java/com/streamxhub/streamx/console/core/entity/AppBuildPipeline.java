@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -65,7 +66,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AppBuildPipeline {
 
-    @TableId(value = "app_id")
+    @TableId(value = "app_id", type = IdType.INPUT)
     private Long appId;
 
     @TableField(value = "pipe_type")

@@ -292,6 +292,7 @@ public class ApplBuildPipeServiceImpl
                 );
                 log.info("Submit params to building pipeline : {}", yarnAppRequest);
                 return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
+            case YARN_SESSION:
             case REMOTE:
                 FlinkRemoteBuildRequest remoteBuildRequest = new FlinkRemoteBuildRequest(
                         app.getJobName(),

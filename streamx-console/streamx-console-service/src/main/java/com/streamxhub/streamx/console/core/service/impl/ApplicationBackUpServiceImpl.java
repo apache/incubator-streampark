@@ -244,7 +244,7 @@ public class ApplicationBackUpServiceImpl
     @Transactional(rollbackFor = {Exception.class})
     public void backup(Application application) {
         //1) 基础的配置文件备份
-        String appHome = application.isCustomCodeJob() ? application.getDistHome() : application.getAppHome();
+        String appHome = (application.isCustomCodeJob() && application.isCICDJob()) ? application.getDistHome() : application.getAppHome();
         FsOperator fsOperator = application.getFsOperator();
         if (fsOperator.exists(appHome)) {
             // 3) 需要备份的做备份,移动文件到备份目录...
