@@ -53,7 +53,7 @@ public enum OptionState implements Serializable {
      */
     SAVEPOINTING(4);
 
-    int value;
+    private final int value;
 
     OptionState(int value) {
         this.value = value;

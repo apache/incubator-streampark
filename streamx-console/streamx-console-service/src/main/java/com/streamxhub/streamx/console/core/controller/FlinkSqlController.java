@@ -64,7 +64,7 @@ public class FlinkSqlController {
             RestResponse response = RestResponse.create()
                 .data(false)
                 .message(sqlError.exception())
-                .put("type", sqlError.errorType().errorType)
+                .put("type", sqlError.errorType().getValue())
                 .put("start", start)
                 .put("end", end);
             //语法异常

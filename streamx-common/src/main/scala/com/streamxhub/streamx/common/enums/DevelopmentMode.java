@@ -18,10 +18,12 @@
  */
 package com.streamxhub.streamx.common.enums;
 
+import java.io.Serializable;
+
 /**
  * @author benjobs
  */
-public enum DevelopmentMode {
+public enum DevelopmentMode implements Serializable {
 
     /**
      * custom code

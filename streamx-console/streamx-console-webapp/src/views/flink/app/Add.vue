@@ -1491,7 +1491,7 @@ import {
   bigScreenOpen,
   checkPomScalaVersion,
   formatSql,
-  initEditor,
+  initFlinkSqlEditor,
   initPodTemplateEditor,
   updateDependency,
   verifySQL
@@ -1809,7 +1809,7 @@ export default {
       this.form.getFieldDecorator('jobType', {initialValue: 'sql'})
       this.form.getFieldDecorator('tableEnv', {initialValue: '1'})
       this.$nextTick(() => {
-        initEditor(this)
+        initFlinkSqlEditor(this)
       })
     },
 
@@ -1836,6 +1836,8 @@ export default {
 
     handleChangeMode(mode) {
       this.executionMode = mode
+      this.handleInitSQLMode()
+      this.handleK8sPodTemplateEditor()
     },
 
     handleFlinkVersion(id) {

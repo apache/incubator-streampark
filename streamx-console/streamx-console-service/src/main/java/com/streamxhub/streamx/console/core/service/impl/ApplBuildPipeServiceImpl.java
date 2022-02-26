@@ -169,12 +169,13 @@ public class ApplBuildPipeServiceImpl
                 applicationService.checkEnv(app);
 
                 // 2) some preparatory work
+                String appUploads = app.getWorkspace().APP_UPLOADS();
                 if (app.isCustomCodeJob()) {
+                    // customCode upload jar to appHome...
                     String appHome = app.getAppHome();
                     FsOperator fsOperator = app.getFsOperator();
                     fsOperator.delete(appHome);
                     if (app.isUploadJob()) {
-                        String appUploads = app.getWorkspace().APP_UPLOADS();
                         File temp = WebUtils.getAppTempDir();
                         File localJar = new File(temp, app.getJar());
                         String targetJar = appUploads.concat("/").concat(app.getJar());
@@ -191,7 +192,6 @@ public class ApplBuildPipeServiceImpl
                         for (String jar : app.getDependencyObject().getJar()) {
                             File jarFile = new File(WebUtils.getAppTempDir(), jar);
                             assert jarFile.exists();
-                            String appUploads = Workspace.local().APP_UPLOADS();
                             String targetJar = appUploads.concat("/").concat(jar);
                             checkOrElseUploadJar(FsOperator.lfs(), jarFile, targetJar, appUploads);
                         }

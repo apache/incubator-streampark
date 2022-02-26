@@ -47,7 +47,7 @@ public enum GitAuthorizedError implements Serializable {
      */
     UNKNOW(3);
 
-    int value;
+    private final int value;
 
     GitAuthorizedError(int value) {
         this.value = value;

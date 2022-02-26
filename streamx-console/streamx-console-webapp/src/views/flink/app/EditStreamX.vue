@@ -6,7 +6,7 @@
     <a-form
       @submit="handleSubmit"
       :form="form"
-      v-if="app!=null">
+      v-if="app != null">
 
       <a-form-item
         label="Development Mode"
@@ -1317,7 +1317,7 @@
         :wrapper-col="{ span: 24 }"
         style="text-align: center">
         <a-button
-          @click="handleReset">
+          @click="handleReset(true)">
           Reset
         </a-button>
         <a-button
@@ -1476,7 +1476,7 @@ import {
 } from '@/api/flinkHistory'
 
 import {
-  initEditor,
+  initFlinkSqlEditor,
   initPodTemplateEditor,
   verifySQL,
   bigScreenOpen,
@@ -1696,6 +1696,7 @@ export default {
     this.optionsKeyMapping = new Map()
     this.optionsValueMapping = new Map()
     this.options.forEach((item, index, array) => {
+      console.table(index)
       this.optionsKeyMapping.set(item.key, item)
       this.optionsValueMapping.set(item.name, item.key)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
@@ -2633,7 +2634,7 @@ export default {
         if (this.app.jobType === 2) {
           this.flinkSql.sql = this.app.flinkSql || null
           this.flinkSql.dependency = this.app.dependency || null
-          initEditor(this,Base64.decode(this.flinkSql.sql))
+          initFlinkSqlEditor(this,Base64.decode(this.flinkSql.sql))
           this.handleInitDependency()
         }
         this.selectedHistoryUploadJars = []

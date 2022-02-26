@@ -55,7 +55,7 @@ export function globalOption(vue) {
     }
 }
 
-export function initEditor(vue) {
+export function initFlinkSqlEditor(vue) {
     const controller = vue.controller
     controller.flinkSql.value = arguments[1] || controller.flinkSql.defaultValue
     const option = Object.assign({}, globalOption(vue))
