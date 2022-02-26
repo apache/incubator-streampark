@@ -19,7 +19,6 @@
 package com.streamxhub.streamx.common.util
 
 
-import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 
 import scala.reflect.ClassTag
@@ -32,10 +31,6 @@ object JsonUtils extends Serializable {
     .newBuilder()
     .setDateFormat(DATE_FORMAT_DEFAULT)
     .create()
-
-  def read[T](json: String)(implicit typeof: TypeToken[T]): T = gson.fromJson[T](json, typeof.getType)
-
-  def read[T](json: String)(implicit clazz: Class[T]): T = gson.fromJson(json, clazz)
 
   def read[T](json: String)(implicit tag: ClassTag[T]): T = gson.fromJson(json, tag.runtimeClass)
 
