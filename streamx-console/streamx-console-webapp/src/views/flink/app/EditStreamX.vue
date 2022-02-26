@@ -6,7 +6,7 @@
     <a-form
       @submit="handleSubmit"
       :form="form"
-      v-if="app!=null">
+      v-if="app != null">
 
       <a-form-item
         label="Development Mode"
@@ -218,7 +218,33 @@
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
           class="form-required"
           style="margin-top: 10px">
+
           <div class="sql-box" id="flink-sql" :class="'syntax-' + controller.flinkSql.success"></div>
+
+          <a-button-group class="flinksql-tool">
+            <a-button
+              class="flinksql-tool-item"
+              type="primary"
+              size="small"
+              icon="check"
+              @click="handleVerifySql">Verify
+            </a-button>
+            <a-button
+              class="flinksql-tool-item"
+              size="small"
+              type="default"
+              icon="thunderbolt"
+              @click.native="handleFormatSql">Format
+            </a-button>
+            <a-button
+              class="flinksql-tool-item"
+              type="default"
+              size="small"
+              icon="fullscreen"
+              @click="handleBigScreenOpen">Full Screen
+            </a-button>
+          </a-button-group>
+
           <p class="conf-desc" style="margin-bottom: -25px;margin-top: -5px">
             <span class="sql-desc" v-if="!controller.flinkSql.success">
               {{ controller.flinkSql.errorMsg }}
@@ -229,27 +255,6 @@
               </span>
             </span>
           </p>
-
-          <a-icon
-            class="format-sql"
-            type="align-left"
-            title="Format SQL"
-            @click.native="handleFormatSql"/>
-
-          <a-icon
-            class="big-screen"
-            type="fullscreen"
-            title="Full Screen"
-            two-tone-color="#4a9ff5"
-            @click="handleBigScreenOpen()" />
-
-          <a-button
-            type="primary"
-            class="verify-sql"
-            @click="handleVerifySql()">
-            Verify
-          </a-button>
-
         </a-form-item>
 
         <a-form-item
@@ -262,11 +267,16 @@
               key="pom"
               tab="Maven pom">
               <div class="pom-box syntax-true" style="height: 300px"></div>
+              <a-button
+                type="primary"
+                class="apply-pom"
+                @click="handleApplyPom()">
+                Apply
+              </a-button>
             </a-tab-pane>
             <a-tab-pane
               key="jar"
               tab="Upload Jar">
-
               <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode !== null && (executionMode === 5 || executionMode === 6))">
                 <a-select
                   mode="multiple"
@@ -313,13 +323,6 @@
               </a-upload-dragger>
             </a-tab-pane>
           </a-tabs>
-
-          <a-button
-            type="primary"
-            class="apply-pom"
-            @click="handleApplyPom()">
-            Apply
-          </a-button>
 
           <div
             v-if="dependency.length > 0 || uploadJars.length > 0"
@@ -1317,7 +1320,7 @@
         :wrapper-col="{ span: 24 }"
         style="text-align: center">
         <a-button
-          @click="handleReset">
+          @click="handleReset(true)">
           Reset
         </a-button>
         <a-button
@@ -1354,14 +1357,13 @@
         </span>
         <a-button
           type="primary"
-          title="Format SQL"
-          @click="handleFormatSql">
-          <a-icon type="align-left"/>
+          icon="thunderbolt"
+          @click.native="handleFormatSql">Format
         </a-button>
         <a-button
           type="primary"
-          @click="handleBigScreenOk">
-          Apply
+          icon="fullscreen"
+          @click="handleBigScreenOk">Apply
         </a-button>
       </template>
       <div class="sql-box" id="big-sql" style="width: 100%;" :class="'syntax-' + controller.flinkSql.success"></div>
@@ -1476,7 +1478,7 @@ import {
 } from '@/api/flinkHistory'
 
 import {
-  initEditor,
+  initFlinkSqlEditor,
   initPodTemplateEditor,
   verifySQL,
   bigScreenOpen,
@@ -1626,6 +1628,7 @@ export default {
           defaultValue: ''
         }
       },
+      renderFlinkSql: true,
       selectedHistoryUploadJars: [],
       historyRecord: {
         uploadJars: [],
@@ -1696,6 +1699,7 @@ export default {
     this.optionsKeyMapping = new Map()
     this.optionsValueMapping = new Map()
     this.options.forEach((item, index, array) => {
+      console.table(index)
       this.optionsKeyMapping.set(item.key, item)
       this.optionsValueMapping.set(item.name, item.key)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
@@ -1771,6 +1775,7 @@ export default {
 
     handleChangeMode(mode) {
       this.executionMode = mode
+      this.handleReset()
     },
 
     handleChangeConf(item) {
@@ -2617,7 +2622,7 @@ export default {
           'resolveOrder': this.app.resolveOrder,
           'versionId': this.app.versionId || null,
           'k8sRestExposedType': this.app.k8sRestExposedType,
-          'executionMode': this.app.executionMode,
+          'executionMode': this.executionMode || this.app.executionMode,
           'yarnQueue': this.app.yarnQueue,
           'restartSize': this.app.restartSize,
           'alertEmail': this.app.alertEmail,
@@ -2630,21 +2635,9 @@ export default {
           'k8sNamespace': this.app.k8sNamespace,
           'resource': this.app.resourceFrom
         })
-        if (this.app.jobType === 2) {
-          this.flinkSql.sql = this.app.flinkSql || null
-          this.flinkSql.dependency = this.app.dependency || null
-          initEditor(this,Base64.decode(this.flinkSql.sql))
-          this.handleInitDependency()
-        }
-        this.selectedHistoryUploadJars = []
-        if (this.app.executionMode === 6) {
-          this.podTemplate = this.app.k8sPodTemplate
-          this.jmPodTemplate = this.app.k8sJmPodTemplate
-          this.tmPodTemplate = this.app.k8sTmPodTemplate
-          initPodTemplateEditor(this)
-          this.useSysHadoopConf = this.app.k8sHadoopIntegration
-        }
       })
+
+      this.handleInitEditor()
 
       let parallelism = null
       let slot = null
@@ -2680,6 +2673,35 @@ export default {
         this.form.setFieldsValue({ 'jmOptions': this.jmMemoryItems })
         this.form.setFieldsValue({ 'tmOptions': this.tmMemoryItems })
         this.form.setFieldsValue(fieldValueOptions)
+      })
+    },
+
+    handleDisposeEditor() {
+      this.controller.editor.flinkSql && this.controller.editor.flinkSql.dispose()
+      this.controller.editor.bigScreen && this.controller.editor.bigScreen.dispose()
+      this.controller.editor.pom && this.controller.editor.pom.dispose()
+      this.controller.editor.podTemplate && this.controller.editor.podTemplate.dispose()
+      this.controller.editor.jmPodTemplate && this.controller.editor.jmPodTemplate.dispose()
+      this.controller.editor.tmPodTemplate && this.controller.editor.tmPodTemplate.dispose()
+    },
+
+    handleInitEditor() {
+      this.handleDisposeEditor()
+      this.$nextTick(()=> {
+        if (this.app.jobType === 2) {
+          this.flinkSql.sql = this.app.flinkSql || null
+          this.flinkSql.dependency = this.app.dependency || null
+          initFlinkSqlEditor(this,this.controller.flinkSql.value || Base64.decode(this.flinkSql.sql))
+          this.handleInitDependency()
+        }
+        this.selectedHistoryUploadJars = []
+        if (this.executionMode === 6 || this.app.executionMode === 6) {
+          this.podTemplate = this.app.k8sPodTemplate
+          this.jmPodTemplate = this.app.k8sJmPodTemplate
+          this.tmPodTemplate = this.app.k8sTmPodTemplate
+          initPodTemplateEditor(this)
+          this.useSysHadoopConf = this.app.k8sHadoopIntegration
+        }
       })
     }
   },

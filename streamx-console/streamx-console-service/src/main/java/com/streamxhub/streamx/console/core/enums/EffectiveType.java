@@ -34,7 +34,7 @@ public enum EffectiveType implements Serializable {
      */
     FLINKSQL(2);
 
-    int type;
+    private final int type;
 
     EffectiveType(int value) {
         this.type = value;

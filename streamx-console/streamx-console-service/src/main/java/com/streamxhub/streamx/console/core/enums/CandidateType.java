@@ -22,6 +22,10 @@ package com.streamxhub.streamx.console.core.enums;
 import java.io.Serializable;
 import java.util.Arrays;
 
+/**
+ * @author benjobs
+ */
+
 public enum CandidateType implements Serializable {
 
     /**
@@ -39,7 +43,7 @@ public enum CandidateType implements Serializable {
      */
     HISTORY(2);
 
-    int value;
+    private final int value;
 
     CandidateType(int value) {
         this.value = value;

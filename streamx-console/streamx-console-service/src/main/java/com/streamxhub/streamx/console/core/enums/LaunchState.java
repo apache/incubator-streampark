@@ -84,7 +84,7 @@ public enum LaunchState implements Serializable {
      */
     REVOKED(10);
 
-    int value;
+    private final int value;
 
     LaunchState(int value) {
         this.value = value;

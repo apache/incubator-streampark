@@ -19,13 +19,14 @@
 
 package com.streamxhub.streamx.console.core.enums;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * @author benjobs
  */
 
-public enum ResourceFrom {
+public enum ResourceFrom implements Serializable {
 
     /**
      * cicd(build from cvs)
@@ -37,7 +38,7 @@ public enum ResourceFrom {
      */
     UPLOAD(2);
 
-    Integer value;
+    private final Integer value;
 
     ResourceFrom(Integer value) {
         this.value = value;
