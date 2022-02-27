@@ -315,7 +315,7 @@
                 :showUploadList="loading"
                 :customRequest="handleCustomRequest"
                 :beforeUpload="handleBeforeUpload">
-                <div style="height: 266px">
+                <div :style="{height: (executionMode === 5 || executionMode === 6) ? '234px' : '266px'}">
                   <p
                     class="ant-upload-drag-icon"
                     style="padding-top: 40px">
