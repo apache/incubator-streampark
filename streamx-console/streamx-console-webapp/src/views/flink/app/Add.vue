@@ -1546,9 +1546,9 @@ export default {
       executionModes: [
         {mode: 'remote (standalone)', value: 1, disabled: false},
         {mode: 'yarn application', value: 4, disabled: false},
+        {mode: 'yarn session', value: 3, disabled: false},
         {mode: 'kubernetes session', value: 5, disabled: false},
         {mode: 'kubernetes application', value: 6, disabled: false},
-        {mode: 'yarn session', value: 3, disabled: false},
         {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: false}
       ],
       cpTriggerAction: [

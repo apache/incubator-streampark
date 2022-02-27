@@ -64,20 +64,6 @@
         </a-select>
       </a-form-item>
 
-      <template v-if="executionMode === 3">
-        <a-form-item
-          label="Yarn Session ClusterId"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-          <a-input
-            type="text"
-            allowClear
-            placeholder="Please enter Yarn Session clusterId"
-            v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, validator: handleCheckYarnSessionClusterId }] }]">
-          </a-input>
-        </a-form-item>
-      </template>
-
       <template v-if="executionMode === 1">
         <a-form-item
           label="Flink Cluster"
@@ -93,6 +79,20 @@
               {{ v.clusterName }}
             </a-select-option>
           </a-select>
+        </a-form-item>
+      </template>
+
+      <template v-if="executionMode === 3">
+        <a-form-item
+            label="Yarn Session ClusterId"
+            :label-col="{lg: {span: 5}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+              type="text"
+              allowClear
+              placeholder="Please enter Yarn Session clusterId"
+              v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, validator: handleCheckYarnSessionClusterId }] }]">
+          </a-input>
         </a-form-item>
       </template>
 
@@ -1537,9 +1537,9 @@ export default {
       executionModes: [
         {mode: 'remote (standalone)', value: 1, disabled: false},
         {mode: 'yarn application', value: 4, disabled: false},
+        {mode: 'yarn session', value: 3, disabled: false},
         {mode: 'kubernetes session', value: 5, disabled: false},
         {mode: 'kubernetes application', value: 6, disabled: false},
-        {mode: 'yarn session', value: 3, disabled: false},
         {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: false}
       ],
       cpTriggerAction: [

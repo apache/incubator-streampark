@@ -33,7 +33,7 @@ import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
-import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
+import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.Preconditions.checkNotNull
 
 import java.io.File
@@ -152,8 +152,8 @@ trait FlinkSubmitTrait extends Logger {
     }
   }
 
-  private[submit] def getPackageProgram(flinkConfig: Configuration, submitRequest: SubmitRequest, jarFile: File): PackagedProgram = {
-    PackagedProgram
+  private[submit] def getJobGraph(flinkConfig: Configuration, submitRequest: SubmitRequest, jarFile: File): (PackagedProgram, JobGraph) = {
+    val packageProgram = PackagedProgram
       .newBuilder
       .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
       .setJarFile(jarFile)
@@ -163,6 +163,15 @@ trait FlinkSubmitTrait extends Logger {
           .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
           .orElse(Lists.newArrayList()): _*
       ).build()
+
+    val jobGraph = PackagedProgramUtils.createJobGraph(
+      packageProgram,
+      flinkConfig,
+      getParallelism(submitRequest),
+      null,
+      false
+    )
+    packageProgram -> jobGraph
   }
 
   private[submit] def getJobID(jobId: String) = Try(JobID.fromHexString(jobId)) match {

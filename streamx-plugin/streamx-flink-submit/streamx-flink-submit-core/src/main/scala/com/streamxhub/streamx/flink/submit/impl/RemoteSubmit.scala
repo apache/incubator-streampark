@@ -27,7 +27,7 @@ import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, Subm
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
-import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
+import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
 
 import java.io.File
@@ -145,16 +145,9 @@ object RemoteSubmit extends FlinkSubmitTrait {
       val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
       clusterDescriptor = standAloneDescriptor._2
       // build JobGraph
-      packageProgram = super.getPackageProgram(flinkConfig, submitRequest, jarFile)
-
-      val jobGraph = PackagedProgramUtils.createJobGraph(
-        packageProgram,
-        flinkConfig,
-        getParallelism(submitRequest),
-        null,
-        false
-      )
-
+      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
+      packageProgram = packageProgramJobGraph._1
+      val jobGraph = packageProgramJobGraph._2
       client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
       val jobId = client.submitJob(jobGraph).get().toString
       val result = SubmitResponse(jobId, flinkConfig.toMap, jobId)
@@ -177,7 +170,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
    *
    * @param flinkConfig
    */
-  def getStandAloneClusterDescriptor(flinkConfig: Configuration): (StandaloneClusterId, StandaloneClusterDescriptor) = {
+  private[this] def getStandAloneClusterDescriptor(flinkConfig: Configuration): (StandaloneClusterId, StandaloneClusterDescriptor) = {
     val serviceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = serviceLoader.getClusterClientFactory(flinkConfig)
     val standaloneClusterId: StandaloneClusterId = clientFactory.getClusterId(flinkConfig)
