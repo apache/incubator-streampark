@@ -50,8 +50,12 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
    */
   @throws[Throwable] override protected def buildProcess(): SimpleBuildResponse = {
     execStep(1) {
-      LfsOperator.mkCleanDirs(request.localWorkspace)
-      HdfsOperator.mkCleanDirs(request.yarnProvidedPath)
+      request.developmentMode match {
+        case DevelopmentMode.FLINKSQL =>
+          LfsOperator.mkCleanDirs(request.localWorkspace)
+          HdfsOperator.mkCleanDirs(request.yarnProvidedPath)
+        case _ =>
+      }
       logInfo(s"recreate building workspace: ${request.yarnProvidedPath}")
     }.getOrElse(throw getError.exception)
 

@@ -98,6 +98,3 @@ case class FlinkYarnApplicationBuildRequest(appName: String,
                                             yarnProvidedPath: String,
                                             developmentMode: DevelopmentMode,
                                             dependencyInfo: DependencyInfo) extends BuildParam
-
-// todo case class FlinkYarnSessionBuildRequest() extends FlinkBuildParam
-
