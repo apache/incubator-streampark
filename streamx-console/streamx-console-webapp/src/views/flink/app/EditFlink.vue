@@ -111,14 +111,14 @@
 
       <template v-if="executionMode === 3">
         <a-form-item
-            label="Yarn Session ClusterId"
-            :label-col="{lg: {span: 5}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          label="Yarn Session ClusterId"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-input
-              type="text"
-              allowClear
-              placeholder="Please enter Yarn Session clusterId"
-              v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, validator: handleCheckYarnSessionClusterId }] }]">
+            type="text"
+            allowClear
+            placeholder="Please enter Yarn Session clusterId"
+            v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, validator: handleCheckYarnSessionClusterId }] }]">
           </a-input>
         </a-form-item>
       </template>

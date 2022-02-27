@@ -55,6 +55,15 @@ export function globalOption(vue) {
     }
 }
 
+export function disposeEditor(vue) {
+    vue.controller.editor.flinkSql && vue.controller.editor.flinkSql.dispose()
+    vue.controller.editor.bigScreen && vue.controller.editor.bigScreen.dispose()
+    vue.controller.editor.pom && vue.controller.editor.pom.dispose()
+    vue.controller.editor.podTemplate && vue.controller.editor.podTemplate.dispose()
+    vue.controller.editor.jmPodTemplate && vue.controller.editor.jmPodTemplate.dispose()
+    vue.controller.editor.tmPodTemplate && vue.controller.editor.tmPodTemplate.dispose()
+}
+
 export function initFlinkSqlEditor(vue) {
     const controller = vue.controller
     controller.flinkSql.value = arguments[1] || controller.flinkSql.defaultValue
