@@ -803,8 +803,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
         if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
             if (!application.getHotParamsMap().isEmpty()) {
-                if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_SESSION_ID())) {
-                    application.setYarnSessionClusterId(application.getHotParamsMap().get(ConfigConst.KEY_YARN_SESSION_ID()).toString());
+                if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_ID())) {
+                    application.setYarnSessionClusterId(application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID()).toString());
                 }
             }
         }
@@ -880,9 +880,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
                 if (ExecutionMode.isYarnSessionMode(application.getExecutionModeEnum())) {
                     if (!application.getHotParamsMap().isEmpty()) {
-                        String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_SESSION_ID());
+                        String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
                         assert yarnSessionClusterId != null;
-                        extraParameter.put(ConfigConst.KEY_YARN_SESSION_ID(), yarnSessionClusterId);
+                        extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
                     }
                 }
 

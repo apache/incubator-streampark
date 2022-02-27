@@ -26,7 +26,7 @@ import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.executors.RemoteExecutor
 import org.apache.flink.client.program.MiniClusterClient.MiniClusterId
-import org.apache.flink.client.program.{ClusterClient, MiniClusterClient, PackagedProgram, PackagedProgramUtils}
+import org.apache.flink.client.program.{ClusterClient, MiniClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 
@@ -61,14 +61,9 @@ object LocalSubmit extends FlinkSubmitTrait {
     var client: ClusterClient[MiniClusterId] = null
     try {
       // build JobGraph
-      packageProgram = super.getPackageProgram(flinkConfig, submitRequest, jarFile)
-      val jobGraph = PackagedProgramUtils.createJobGraph(
-        packageProgram,
-        flinkConfig,
-        getParallelism(submitRequest),
-        null,
-        false
-      )
+      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
+      packageProgram = packageProgramJobGraph._1
+      val jobGraph = packageProgramJobGraph._2
       client = createLocalCluster(flinkConfig)
       val jobId = client.submitJob(jobGraph).get().toString
       val result = SubmitResponse(jobId, flinkConfig.toMap, jobId)

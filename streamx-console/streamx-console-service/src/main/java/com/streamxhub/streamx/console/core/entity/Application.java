@@ -746,7 +746,7 @@ public class Application implements Serializable {
         }
         if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
             if (StringUtils.isNotEmpty(appParam.getYarnSessionClusterId())) {
-                hotParams.put(ConfigConst.KEY_YARN_SESSION_ID(), appParam.getYarnSessionClusterId());
+                hotParams.put(ConfigConst.KEY_YARN_APP_ID(), appParam.getYarnSessionClusterId());
             }
         }
         this.setHotParams(JacksonUtils.write(hotParams));
