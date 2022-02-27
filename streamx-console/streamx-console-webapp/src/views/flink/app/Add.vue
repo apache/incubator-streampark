@@ -199,7 +199,33 @@
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
           class="form-required"
           style="margin-top: 10px">
+
           <div class="sql-box" id="flink-sql" :class="'syntax-' + controller.flinkSql.success"></div>
+
+          <a-button-group class="flinksql-tool">
+            <a-button
+              class="flinksql-tool-item"
+              type="primary"
+              size="small"
+              icon="check"
+              @click="handleVerifySql">Verify
+            </a-button>
+            <a-button
+              class="flinksql-tool-item"
+              size="small"
+              type="default"
+              icon="thunderbolt"
+              @click.native="handleFormatSql">Format
+            </a-button>
+            <a-button
+              class="flinksql-tool-item"
+              type="default"
+              size="small"
+              icon="fullscreen"
+              @click="handleBigScreenOpen">Full Screen
+            </a-button>
+          </a-button-group>
+
           <p class="conf-desc" style="margin-bottom: -25px;margin-top: -5px">
             <span class="sql-desc" v-if="!controller.flinkSql.success">
               {{ controller.flinkSql.errorMsg }}
@@ -210,26 +236,6 @@
               </span>
             </span>
           </p>
-          <a-icon
-            class="format-sql"
-            type="align-left"
-            title="Format SQL"
-            @click.native="handleFormatSql"/>
-
-          <a-icon
-            class="big-screen"
-            type="fullscreen"
-            title="Full Screen"
-            two-tone-color="#4a9ff5"
-            @click="handleBigScreenOpen()"/>
-
-          <a-button
-            type="primary"
-            class="verify-sql"
-            @click="handleVerifySql()">
-            Verify
-          </a-button>
-
         </a-form-item>
 
         <a-form-item
@@ -242,6 +248,12 @@
               key="pom"
               tab="Maven pom">
               <div class="pom-box syntax-true" style="height: 300px"></div>
+              <a-button
+                type="primary"
+                class="apply-pom"
+                @click="handleApplyPom()">
+                Apply
+              </a-button>
             </a-tab-pane>
             <a-tab-pane
               key="jar"
@@ -293,12 +305,6 @@
               </a-upload-dragger>
             </a-tab-pane>
           </a-tabs>
-          <a-button
-            type="primary"
-            class="apply-pom"
-            @click="handleApplyPom()">
-            Apply
-          </a-button>
 
           <div
             v-if="dependency.length > 0 || uploadJars.length > 0"
@@ -1507,6 +1513,7 @@ import {
   formatSql,
   initFlinkSqlEditor,
   initPodTemplateEditor,
+  disposeEditor,
   updateDependency,
   verifySQL
 } from './AddEdit'
@@ -1676,8 +1683,7 @@ export default {
 
   beforeMount() {
     this.handleInitForm()
-    this.handleInitSQLMode()
-    this.handleK8sPodTemplateEditor()
+    this.handleInitEditor()
   },
 
   filters: {
@@ -1806,31 +1812,31 @@ export default {
       this.jobType = value
       this.handleInitForm()
       if (this.jobType === 'sql') {
-        this.handleInitSQLMode()
+        this.form.getFieldDecorator('jobType', {initialValue: 'sql'})
+        this.form.getFieldDecorator('tableEnv', {initialValue: '1'})
+        this.handleInitEditor()
       } else {
         this.form.getFieldDecorator('jobType', {initialValue: 'customcode'})
         this.form.getFieldDecorator('resourceFrom', {initialValue: 'cvs'})
         this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.defaultValue)
       }
-      this.handleK8sPodTemplateEditor()
     },
 
     handleChangeResourceFrom(value) {
       this.resourceFrom = value
     },
 
-    handleInitSQLMode() {
-      this.form.getFieldDecorator('jobType', {initialValue: 'sql'})
-      this.form.getFieldDecorator('tableEnv', {initialValue: '1'})
-      this.$nextTick(() => {
-        initFlinkSqlEditor(this)
-      })
-    },
-
-    handleK8sPodTemplateEditor() {
-      this.$nextTick(() => {
-        initPodTemplateEditor(this)
-      })
+    handleInitEditor() {
+      if (this.jobType === 'sql') {
+        disposeEditor(this)
+        this.$nextTick(()=> {
+          initFlinkSqlEditor(this)
+          this.selectedHistoryUploadJars = []
+          if (this.executionMode === 6) {
+            initPodTemplateEditor(this)
+          }
+        })
+      }
     },
 
     handleTableEnv(value) {
@@ -1850,8 +1856,7 @@ export default {
 
     handleChangeMode(mode) {
       this.executionMode = mode
-      this.handleInitSQLMode()
-      this.handleK8sPodTemplateEditor()
+      this.handleInitEditor()
     },
 
     handleFlinkVersion(id) {
@@ -2384,7 +2389,7 @@ export default {
       }
 
       let config = this.configOverride
-      if (config != null && config != undefined && config.trim() != '') {
+      if (config != null && config !== undefined && config.trim() != '') {
         config = Base64.encode(config)
       } else {
         config = null

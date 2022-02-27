@@ -84,14 +84,14 @@
 
       <template v-if="executionMode === 3">
         <a-form-item
-            label="Yarn Session ClusterId"
-            :label-col="{lg: {span: 5}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          label="Yarn Session ClusterId"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-input
-              type="text"
-              allowClear
-              placeholder="Please enter Yarn Session clusterId"
-              v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, validator: handleCheckYarnSessionClusterId }] }]">
+            type="text"
+            allowClear
+            placeholder="Please enter Yarn Session clusterId"
+            v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, validator: handleCheckYarnSessionClusterId }] }]">
           </a-input>
         </a-form-item>
       </template>
@@ -1494,6 +1494,7 @@ import {
 import {
   initFlinkSqlEditor,
   initPodTemplateEditor,
+  disposeEditor,
   verifySQL,
   bigScreenOpen,
   bigScreenOk,
@@ -2705,22 +2706,13 @@ export default {
       })
     },
 
-    handleDisposeEditor() {
-      this.controller.editor.flinkSql && this.controller.editor.flinkSql.dispose()
-      this.controller.editor.bigScreen && this.controller.editor.bigScreen.dispose()
-      this.controller.editor.pom && this.controller.editor.pom.dispose()
-      this.controller.editor.podTemplate && this.controller.editor.podTemplate.dispose()
-      this.controller.editor.jmPodTemplate && this.controller.editor.jmPodTemplate.dispose()
-      this.controller.editor.tmPodTemplate && this.controller.editor.tmPodTemplate.dispose()
-    },
-
     handleInitEditor() {
-      this.handleDisposeEditor()
+      disposeEditor(this)
       this.$nextTick(()=> {
         if (this.app.jobType === 2) {
           this.flinkSql.sql = this.app.flinkSql || null
           this.flinkSql.dependency = this.app.dependency || null
-          initFlinkSqlEditor(this,this.controller.flinkSql.value || Base64.decode(this.flinkSql.sql))
+          initFlinkSqlEditor(this)
           this.handleInitDependency()
         }
         this.selectedHistoryUploadJars = []
