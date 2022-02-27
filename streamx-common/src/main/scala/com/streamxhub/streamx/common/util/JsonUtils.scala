@@ -34,6 +34,8 @@ object JsonUtils extends Serializable {
 
   def read[T](json: String)(implicit tag: ClassTag[T]): T = gson.fromJson(json, tag.runtimeClass)
 
+  def read[T](json: String, clazz: Class[T]): T = gson.fromJson(json, clazz)
+
   def write(obj: Any): String = gson.toJson(obj)
 
   implicit class Unmarshal(jsonStr: String) {
@@ -43,6 +45,5 @@ object JsonUtils extends Serializable {
   implicit class Marshal(obj: AnyRef) {
     def toJson: String = write(obj)
   }
-
 }
 
