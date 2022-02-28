@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -26,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
-import com.streamxhub.streamx.console.base.util.JsonUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeError;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStepStatus;
@@ -65,7 +66,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AppBuildPipeline {
 
-    @TableId(value = "app_id")
+    @TableId(value = "app_id", type = IdType.INPUT)
     private Long appId;
 
     @TableField(value = "pipe_type")
@@ -128,7 +129,7 @@ public class AppBuildPipeline {
             return Maps.newHashMap();
         }
         try {
-            return JsonUtils.read(stepStatusJson, new TypeReference<HashMap<Integer, PipelineStepStatus>>() {
+            return JacksonUtils.read(stepStatusJson, new TypeReference<HashMap<Integer, PipelineStepStatus>>() {
             });
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusJson, e);
@@ -139,7 +140,7 @@ public class AppBuildPipeline {
     @JsonIgnore
     public AppBuildPipeline setStepStatus(@Nonnull Map<Integer, PipelineStepStatus> stepStatus) {
         try {
-            this.stepStatusJson = JsonUtils.write(stepStatus);
+            this.stepStatusJson = JacksonUtils.write(stepStatus);
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, stepStatusMap=({})",
                 stepStatus.entrySet().stream().map(et -> et.getKey() + "->" + et.getValue()).collect(Collectors.joining(",")), e);
@@ -154,7 +155,7 @@ public class AppBuildPipeline {
             return Maps.newHashMap();
         }
         try {
-            return JsonUtils.read(stepStatusTimestampJson, new TypeReference<HashMap<Integer, Long>>() {
+            return JacksonUtils.read(stepStatusTimestampJson, new TypeReference<HashMap<Integer, Long>>() {
             });
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusTimestampJson, e);
@@ -165,7 +166,7 @@ public class AppBuildPipeline {
     @JsonIgnore
     public AppBuildPipeline setStepStatusTimestamp(@Nonnull Map<Integer, Long> stepStatusSt) {
         try {
-            this.stepStatusTimestampJson = JsonUtils.write(stepStatusSt);
+            this.stepStatusTimestampJson = JacksonUtils.write(stepStatusSt);
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, stepStatusSt=({})",
                 stepStatusSt.entrySet().stream().map(et -> et.getKey() + "->" + et.getValue()).collect(Collectors.joining(",")), e);
@@ -180,7 +181,7 @@ public class AppBuildPipeline {
             return PipeError.empty();
         }
         try {
-            return JsonUtils.read(errorJson, PipeError.class);
+            return JacksonUtils.read(errorJson, PipeError.class);
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, errorJson={}", errorJson, e);
             return PipeError.empty();
@@ -190,7 +191,7 @@ public class AppBuildPipeline {
     @JsonIgnore
     public AppBuildPipeline setError(@Nonnull PipeError error) {
         try {
-            this.errorJson = JsonUtils.write(error);
+            this.errorJson = JacksonUtils.write(error);
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, error={}", error, e);
         }
@@ -200,7 +201,7 @@ public class AppBuildPipeline {
     @JsonIgnore
     public <R extends BuildResult> AppBuildPipeline setBuildResult(@Nonnull R result) {
         try {
-            this.buildResultJson = JsonUtils.write(result);
+            this.buildResultJson = JacksonUtils.write(result);
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, buildResult={}", result, e);
         }
@@ -231,7 +232,7 @@ public class AppBuildPipeline {
             return null;
         }
         try {
-            return (R) JsonUtils.read(buildResultJson, pipeType.getResultType());
+            return (R) JacksonUtils.read(buildResultJson, pipeType.getResultType());
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, buildResultJson={}", buildResultJson, e);
             return null;

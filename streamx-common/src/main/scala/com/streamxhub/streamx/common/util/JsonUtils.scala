@@ -18,47 +18,32 @@
  */
 package com.streamxhub.streamx.common.util
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 
-import java.text.SimpleDateFormat
+import com.google.gson.Gson
+
+import scala.reflect.ClassTag
 
 object JsonUtils extends Serializable {
 
-  private val mapper = new ObjectMapper() with ScalaObjectMapper
+  private val DATE_FORMAT_DEFAULT = "yyyy-MM-dd HH:mm:ss"
 
-  mapper.registerModule(DefaultScalaModule)
+  private[this] lazy val gson = new Gson()
+    .newBuilder()
+    .setDateFormat(DATE_FORMAT_DEFAULT)
+    .create()
 
-  //忽略在json字符串中存在，在java类中不存在字段，防止错误。
-  mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+  def read[T](json: String)(implicit tag: ClassTag[T]): T = gson.fromJson(json, tag.runtimeClass)
 
-  //该属性设置主要是将忽略空bean转json错误
-  mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-  //该属性设置主要是取消将对象的时间默认转换timesstamps(时间戳)形式
-  mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+  def read[T](json: String, clazz: Class[T]): T = gson.fromJson(json, clazz)
 
-  mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-
-  //所有日期都统一为以下样式：yyyy-MM-dd HH:mm:ss，这里可以不用我的DateTimeUtil.DATE_FORMAT，手动添加
-  mapper.setDateFormat(new SimpleDateFormat(DateUtils.fullFormat))
-
-  def read[T](obj: AnyRef)(implicit manifest: Manifest[T]): T = {
-    obj match {
-      case str: String => mapper.readValue[T](str)
-      case _ => mapper.readValue[T](write(obj))
-    }
-  }
-
-  def write(obj: AnyRef): String = mapper.writeValueAsString(obj)
+  def write(obj: Any): String = gson.toJson(obj)
 
   implicit class Unmarshal(jsonStr: String) {
-    def fromJson[T]()(implicit manifest: Manifest[T]): T = read[T](jsonStr)
+    def fromJson[T](implicit clazz: ClassTag[T]): T = gson.fromJson(jsonStr, clazz.runtimeClass)
   }
 
   implicit class Marshal(obj: AnyRef) {
     def toJson: String = write(obj)
   }
-
 }
+

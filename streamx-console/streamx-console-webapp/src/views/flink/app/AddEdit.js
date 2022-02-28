@@ -20,7 +20,7 @@
  */
 import monaco from '@/views/flink/app/Monaco.xml'
 import {verify} from '@/api/flinkSql'
-import {format} from 'sql-formatter'
+import {format} from './FlinkSqlFormatter'
 
 export function globalOption(vue) {
     return {
@@ -55,23 +55,22 @@ export function globalOption(vue) {
     }
 }
 
-export function initEditor(vue) {
+export function disposeEditor(vue) {
+    vue.controller.editor.flinkSql && vue.controller.editor.flinkSql.dispose()
+    vue.controller.editor.bigScreen && vue.controller.editor.bigScreen.dispose()
+    vue.controller.editor.pom && vue.controller.editor.pom.dispose()
+    vue.controller.editor.podTemplate && vue.controller.editor.podTemplate.dispose()
+    vue.controller.editor.jmPodTemplate && vue.controller.editor.jmPodTemplate.dispose()
+    vue.controller.editor.tmPodTemplate && vue.controller.editor.tmPodTemplate.dispose()
+}
+
+export function initFlinkSqlEditor(vue) {
     const controller = vue.controller
     controller.flinkSql.value = arguments[1] || controller.flinkSql.defaultValue
     const option = Object.assign({}, globalOption(vue))
     option.value = controller.flinkSql.value
     option.minimap = {enabled: false}
     controller.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), option)
-    vue.$nextTick(() => {
-        const formatSql = document.querySelector('.format-sql')
-        const bigScreen = document.querySelector('.big-screen')
-        const verifySql = document.querySelector('.verify-sql')
-        const editorEl = document.querySelector('#flink-sql>.monaco-editor')
-        editorEl.appendChild(formatSql)
-        editorEl.appendChild(bigScreen)
-        editorEl.appendChild(verifySql)
-    })
-
     //输入事件触发...
     controller.editor.flinkSql.onDidChangeModelContent(() => {
         controller.flinkSql.value = controller.editor.flinkSql.getValue()
@@ -83,11 +82,6 @@ export function initEditor(vue) {
     pomOption.value = controller.pom.defaultValue
     pomOption.minimap = {enabled: false}
     controller.editor.pom = monaco.editor.create(document.querySelector('.pom-box'), pomOption)
-    vue.$nextTick(() => {
-        const applyPom = document.querySelector('.apply-pom')
-        document.querySelector('.pom-box>.monaco-editor').appendChild(applyPom)
-    })
-
     controller.editor.pom.onDidChangeModelContent(() => {
         controller.pom.value = controller.editor.pom.getValue()
     })

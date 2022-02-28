@@ -37,9 +37,9 @@ import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
-import com.streamxhub.streamx.console.base.util.JsonUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
-import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.ResourceFrom;
 import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
@@ -56,7 +56,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
 
 import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -127,9 +126,9 @@ public class Application implements Serializable {
 
     private Integer state;
     /**
-     * 是否需要重新发布(针对项目已更新,需要重新发布项目.)
+     * 任务的上线发布状态
      */
-    private Integer deploy;
+    private Integer launch;
 
     /**
      * 任务失败后的最大重启次数.
@@ -275,6 +274,7 @@ public class Application implements Serializable {
     private transient String createTimeTo;
     private transient String backUpDescription;
     private transient String yarnQueue;
+    private transient String yarnSessionClusterId;
     /**
      * Flink Web UI Url
      */
@@ -307,8 +307,6 @@ public class Application implements Serializable {
      */
     public static Integer shouldTracking(@Nonnull FlinkAppState state) {
         switch (state) {
-            case DEPLOYING:
-            case DEPLOYED:
             case CREATED:
             case FINISHED:
             case FAILED:
@@ -327,13 +325,13 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public DeployState getDeployState() {
-        return DeployState.of(state);
+    public LaunchState getLaunchState() {
+        return LaunchState.of(state);
     }
 
     @JsonIgnore
-    public void setDeployState(DeployState deployState) {
-        this.deploy = deployState.get();
+    public void setLaunchState(LaunchState launchState) {
+        this.launch = launchState.get();
     }
 
     @JsonIgnore
@@ -441,15 +439,6 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public File getLocalFlinkSqlHome() {
-        File flinkSql = new File(Workspace.local().APP_WORKSPACE(), "flinksql");
-        if (!flinkSql.exists()) {
-            flinkSql.mkdirs();
-        }
-        return new File(flinkSql, id.toString());
-    }
-
-    @JsonIgnore
     public AppInfo httpYarnAppInfo() throws Exception {
         if (appId != null) {
             String format = "%s/ws/v1/cluster/apps/%s";
@@ -531,7 +520,7 @@ public class Application implements Serializable {
     private <T> T httpGetDoResult(String url, Class<T> clazz) throws IOException {
         String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
         if (result != null) {
-            return JsonUtils.read(result, clazz);
+            return JacksonUtils.read(result, clazz);
         }
         return null;
     }
@@ -544,7 +533,7 @@ public class Application implements Serializable {
     @JsonIgnore
     @SneakyThrows
     public Map<String, Object> getOptionMap() {
-        Map<String, Object> map = JsonUtils.read(getOptions(), Map.class);
+        Map<String, Object> map = JacksonUtils.read(getOptions(), Map.class);
         map.entrySet().removeIf(entry -> entry.getValue() == null);
         return map;
     }
@@ -596,12 +585,12 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public boolean isNeedRollback() {
-        return DeployState.NEED_ROLLBACK.get() == this.getDeploy();
+        return LaunchState.NEED_ROLLBACK.get() == this.getLaunch();
     }
 
     @JsonIgnore
     public boolean isNeedCheck() {
-        return DeployState.NEED_CHECK_AFTER_PROJECT_CHANGED.get() == this.getDeploy();
+        return LaunchState.NEED_CHECK_AFTER_PROJECT_CHANGED.get() == this.getLaunch();
     }
 
     @JsonIgnore
@@ -718,7 +707,7 @@ public class Application implements Serializable {
     @SneakyThrows
     public Map<String, Object> getHotParamsMap() {
         if (this.hotParams != null) {
-            Map<String, Object> map = JsonUtils.read(this.hotParams, Map.class);
+            Map<String, Object> map = JacksonUtils.read(this.hotParams, Map.class);
             map.entrySet().removeIf(entry -> entry.getValue() == null);
             return map;
         }
@@ -735,8 +724,13 @@ public class Application implements Serializable {
                 hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.getYarnQueue());
             }
         }
+        if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
+            if (StringUtils.isNotEmpty(this.getYarnSessionClusterId())) {
+                hotParams.put("yarn.application.id", this.getYarnSessionClusterId());
+            }
+        }
         if (!hotParams.isEmpty()) {
-            this.setHotParams(JsonUtils.write(hotParams));
+            this.setHotParams(JacksonUtils.write(hotParams));
         }
     }
 
@@ -750,7 +744,12 @@ public class Application implements Serializable {
                 hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), appParam.getYarnQueue());
             }
         }
-        this.setHotParams(JsonUtils.write(hotParams));
+        if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
+            if (StringUtils.isNotEmpty(appParam.getYarnSessionClusterId())) {
+                hotParams.put(ConfigConst.KEY_YARN_APP_ID(), appParam.getYarnSessionClusterId());
+            }
+        }
+        this.setHotParams(JacksonUtils.write(hotParams));
     }
 
     @Data
@@ -762,7 +761,7 @@ public class Application implements Serializable {
         @SneakyThrows
         public static Dependency jsonToDependency(String dependency) {
             if (Utils.notEmpty(dependency)) {
-                return JsonUtils.read(dependency, new TypeReference<Dependency>() {
+                return JacksonUtils.read(dependency, new TypeReference<Dependency>() {
                 });
             }
             return new Dependency();

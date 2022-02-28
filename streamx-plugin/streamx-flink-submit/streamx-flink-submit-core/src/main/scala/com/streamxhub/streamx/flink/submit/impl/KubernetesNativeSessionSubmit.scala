@@ -28,7 +28,7 @@ import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
-import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
+import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
@@ -50,7 +50,6 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // 2) get userJar
     val jarFile = submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>
-
         submitRequest.checkBuildResult()
         // 1) get build result
         val buildResult = submitRequest.buildResult.asInstanceOf[ShadedBuildResponse]
@@ -98,14 +97,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     try {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       // build JobGraph
-      packageProgram = super.getPackageProgram(flinkConfig, submitRequest, jarFile)
-
-      val jobGraph = PackagedProgramUtils.createJobGraph(
-        packageProgram,
-        flinkConfig,
-        getParallelism(submitRequest),
-        false
-      )
+      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
+      packageProgram = packageProgramJobGraph._1
+      val jobGraph = packageProgramJobGraph._2
       // retrieve client and submit JobGraph
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val submitResult = client.submitJob(jobGraph)

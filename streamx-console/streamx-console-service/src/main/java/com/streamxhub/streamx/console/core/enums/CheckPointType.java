@@ -37,7 +37,7 @@ public enum CheckPointType implements Serializable {
 
     SYNC_SAVEPOINT(3);
 
-    int value;
+    private final int value;
 
     public int get() {
         return this.value;

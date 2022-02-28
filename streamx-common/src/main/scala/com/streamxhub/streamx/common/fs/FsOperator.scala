@@ -45,6 +45,8 @@ abstract class FsOperator {
 
   def delete(path: String): Unit
 
+  def mkCleanDirs(path: String): Unit
+
   def upload(srcPath: String, dstPath: String): Unit = upload(srcPath, dstPath, delSrc = false, overwrite = true)
 
   def copy(srcPath: String, dstPath: String): Unit = copy(srcPath, dstPath, delSrc = false, overwrite = true)

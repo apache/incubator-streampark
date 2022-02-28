@@ -51,7 +51,7 @@ public enum BuildState implements Serializable {
      */
     FAILED(2);
 
-    int value;
+    private final int value;
 
     BuildState(int value) {
         this.value = value;

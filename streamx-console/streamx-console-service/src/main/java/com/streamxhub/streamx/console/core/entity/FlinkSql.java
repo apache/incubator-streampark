@@ -24,7 +24,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.console.core.enums.ChangedType;
 import lombok.Data;
-import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.Base64;
 import java.util.Date;
@@ -40,7 +39,6 @@ public class FlinkSql {
     @TableField("`sql`")
     private String sql;
     private String dependency;
-    @JsonIgnore
     private Integer version = 1;
 
     /**
@@ -51,7 +49,6 @@ public class FlinkSql {
      */
     private Integer candidate;
 
-    @JsonIgnore
     private Date createTime;
     private transient boolean effective = false;
     /**

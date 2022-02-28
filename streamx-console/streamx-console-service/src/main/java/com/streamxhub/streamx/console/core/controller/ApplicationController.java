@@ -134,24 +134,8 @@ public class ApplicationController {
         return RestResponse.create().data(flag);
     }
 
-    @PostMapping("deploy")
-    @RequiresPermissions("app:deploy")
-    public RestResponse deploy(Application app, String socketId) {
-        Application application = applicationService.getById(app.getId());
-        assert application != null;
-        try {
-            applicationService.checkEnv(app);
-            application.setBackUp(true);
-            application.setBackUpDescription(app.getBackUpDescription());
-            applicationService.deploy(application, socketId);
-            return RestResponse.create().data(true);
-        } catch (Exception e) {
-            return RestResponse.create().data(false).message(e.getMessage());
-        }
-    }
-
     @PostMapping("revoke")
-    @RequiresPermissions("app:deploy")
+    @RequiresPermissions("app:launch")
     public RestResponse revoke(Application app) throws Exception {
         applicationService.revoke(app);
         return RestResponse.create();

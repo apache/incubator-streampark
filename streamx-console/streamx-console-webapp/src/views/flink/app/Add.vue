@@ -62,6 +62,20 @@
         </a-select>
       </a-form-item>
 
+      <template v-if="executionMode === 3">
+        <a-form-item
+          label="Yarn Session ClusterId"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            allowClear
+            placeholder="Please enter Yarn Session clusterId"
+            v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, validator: handleCheckYarnSessionClusterId }] }]">
+          </a-input>
+        </a-form-item>
+      </template>
+
       <template v-if="executionMode === 1">
         <a-form-item
           label="Flink Cluster"
@@ -115,7 +129,7 @@
             placeholder="Please enter Kubernetes clusterId"
             @change="handleClusterId"
             allowClear
-            v-decorator="[ 'clusterId', {rules: [{ required: true, validator: handleChecKubernetesClusterId }] }]">
+            v-decorator="[ 'clusterId', {rules: [{ required: true, validator: handleCheckKubernetesClusterId }] }]">
             <template v-if="executionMode === 5">
               <a-dropdown slot="addonAfter" placement="bottomRight">
                 <a-menu slot="overlay" trigger="['click', 'hover']">
@@ -185,7 +199,33 @@
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
           class="form-required"
           style="margin-top: 10px">
+
           <div class="sql-box" id="flink-sql" :class="'syntax-' + controller.flinkSql.success"></div>
+
+          <a-button-group class="flinksql-tool">
+            <a-button
+              class="flinksql-tool-item"
+              type="primary"
+              size="small"
+              icon="check"
+              @click="handleVerifySql">Verify
+            </a-button>
+            <a-button
+              class="flinksql-tool-item"
+              size="small"
+              type="default"
+              icon="thunderbolt"
+              @click.native="handleFormatSql">Format
+            </a-button>
+            <a-button
+              class="flinksql-tool-item"
+              type="default"
+              size="small"
+              icon="fullscreen"
+              @click="handleBigScreenOpen">Full Screen
+            </a-button>
+          </a-button-group>
+
           <p class="conf-desc" style="margin-bottom: -25px;margin-top: -5px">
             <span class="sql-desc" v-if="!controller.flinkSql.success">
               {{ controller.flinkSql.errorMsg }}
@@ -196,26 +236,6 @@
               </span>
             </span>
           </p>
-          <a-icon
-            class="format-sql"
-            type="align-left"
-            title="Format SQL"
-            @click.native="handleFormatSql"/>
-
-          <a-icon
-            class="big-screen"
-            type="fullscreen"
-            title="Full Screen"
-            two-tone-color="#4a9ff5"
-            @click="handleBigScreenOpen()"/>
-
-          <a-button
-            type="primary"
-            class="verify-sql"
-            @click="handleVerifySql()">
-            Verify
-          </a-button>
-
         </a-form-item>
 
         <a-form-item
@@ -228,6 +248,12 @@
               key="pom"
               tab="Maven pom">
               <div class="pom-box syntax-true" style="height: 300px"></div>
+              <a-button
+                type="primary"
+                class="apply-pom"
+                @click="handleApplyPom()">
+                Apply
+              </a-button>
             </a-tab-pane>
             <a-tab-pane
               key="jar"
@@ -279,12 +305,6 @@
               </a-upload-dragger>
             </a-tab-pane>
           </a-tabs>
-          <a-button
-            type="primary"
-            class="apply-pom"
-            @click="handleApplyPom()">
-            Apply
-          </a-button>
 
           <div
             v-if="dependency.length > 0 || uploadJars.length > 0"
@@ -1491,8 +1511,9 @@ import {
   bigScreenOpen,
   checkPomScalaVersion,
   formatSql,
-  initEditor,
+  initFlinkSqlEditor,
   initPodTemplateEditor,
+  disposeEditor,
   updateDependency,
   verifySQL
 } from './AddEdit'
@@ -1530,12 +1551,11 @@ export default {
         {name: 'NodePort', order: 2}
       ],
       executionModes: [
-        {mode: 'local (NOTE: just test)', value: 0, disabled: false},
         {mode: 'remote (standalone)', value: 1, disabled: false},
         {mode: 'yarn application', value: 4, disabled: false},
+        {mode: 'yarn session', value: 3, disabled: false},
         {mode: 'kubernetes session', value: 5, disabled: false},
         {mode: 'kubernetes application', value: 6, disabled: false},
-        {mode: 'yarn session (coming soon)', value: 3, disabled: true},
         {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: false}
       ],
       cpTriggerAction: [
@@ -1663,8 +1683,7 @@ export default {
 
   beforeMount() {
     this.handleInitForm()
-    this.handleInitSQLMode()
-    this.handleK8sPodTemplateEditor()
+    this.handleInitEditor()
   },
 
   filters: {
@@ -1793,31 +1812,31 @@ export default {
       this.jobType = value
       this.handleInitForm()
       if (this.jobType === 'sql') {
-        this.handleInitSQLMode()
+        this.form.getFieldDecorator('jobType', {initialValue: 'sql'})
+        this.form.getFieldDecorator('tableEnv', {initialValue: '1'})
+        this.handleInitEditor()
       } else {
         this.form.getFieldDecorator('jobType', {initialValue: 'customcode'})
         this.form.getFieldDecorator('resourceFrom', {initialValue: 'cvs'})
         this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.defaultValue)
       }
-      this.handleK8sPodTemplateEditor()
     },
 
     handleChangeResourceFrom(value) {
       this.resourceFrom = value
     },
 
-    handleInitSQLMode() {
-      this.form.getFieldDecorator('jobType', {initialValue: 'sql'})
-      this.form.getFieldDecorator('tableEnv', {initialValue: '1'})
-      this.$nextTick(() => {
-        initEditor(this)
-      })
-    },
-
-    handleK8sPodTemplateEditor() {
-      this.$nextTick(() => {
-        initPodTemplateEditor(this)
-      })
+    handleInitEditor() {
+      if (this.jobType === 'sql') {
+        disposeEditor(this)
+        this.$nextTick(()=> {
+          initFlinkSqlEditor(this)
+          this.selectedHistoryUploadJars = []
+          if (this.executionMode === 6) {
+            initPodTemplateEditor(this)
+          }
+        })
+      }
     },
 
     handleTableEnv(value) {
@@ -1837,6 +1856,7 @@ export default {
 
     handleChangeMode(mode) {
       this.executionMode = mode
+      this.handleInitEditor()
     },
 
     handleFlinkVersion(id) {
@@ -2115,7 +2135,19 @@ export default {
       }
     },
 
-    handleChecKubernetesClusterId(rule, value, callback) {
+    handleCheckYarnSessionClusterId(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Yarn session clusterId is required'))
+      } else {
+        if (!value.startsWith('application')) {
+          callback(new Error("Yarn session clusterId is invalid, clusterId must start with 'application'.Please check"))
+        } else {
+          callback()
+        }
+      }
+    },
+
+    handleCheckKubernetesClusterId(rule, value, callback) {
       const clusterIdReg = /^[a-z]([-a-z0-9]*[a-z0-9])?$/
       if (value === null || value === undefined || value === '') {
         callback(new Error('Kubernetes clusterId is required'))
@@ -2294,7 +2326,8 @@ export default {
         k8sNamespace: values.k8sNamespace || null,
         clusterId: values.clusterId || null,
         flinkClusterId: values.flinkClusterId || null,
-        flinkImage: values.flinkImage || null
+        flinkImage: values.flinkImage || null,
+        yarnSessionClusterId: values.yarnSessionClusterId || null
       }
       if (params.executionMode === 6) {
         params.k8sPodTemplate = this.podTemplate
@@ -2356,7 +2389,7 @@ export default {
       }
 
       let config = this.configOverride
-      if (config != null && config != undefined && config.trim() != '') {
+      if (config != null && config !== undefined && config.trim() != '') {
         config = Base64.encode(config)
       } else {
         config = null
@@ -2386,7 +2419,8 @@ export default {
         k8sNamespace: values.k8sNamespace || null,
         clusterId: values.clusterId || null,
         flinkClusterId: values.flinkClusterId || null,
-        flinkImage: values.flinkImage || null
+        flinkImage: values.flinkImage || null,
+        yarnSessionClusterId: values.yarnSessionClusterId || null
       }
       if (params.executionMode === 6) {
         params.k8sPodTemplate = this.podTemplate

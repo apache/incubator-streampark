@@ -37,7 +37,7 @@ import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.BuildState;
-import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
@@ -135,8 +135,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     // 更新部署状态
                     FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                         log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                        app.setDeploy(DeployState.NEED_CHECK_AFTER_PROJECT_CHANGED.get());
-                        applicationService.updateDeploy(app);
+                        app.setLaunch(LaunchState.NEED_CHECK_AFTER_PROJECT_CHANGED.get());
+                        applicationService.updateLaunch(app);
                     }));
                 }
             }
@@ -155,7 +155,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         assert project != null;
         LambdaQueryWrapper<Application> queryWrapper = new QueryWrapper<Application>().lambda();
         queryWrapper.eq(Application::getProjectId, id);
-        Integer count = applicationService.count(queryWrapper);
+        int count = applicationService.count(queryWrapper);
         if (count > 0) {
             return false;
         }
@@ -195,8 +195,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         // 更新部署状态
                         FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                             log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                            app.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
-                            this.applicationService.updateDeploy(app);
+                            app.setLaunch(LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
+                            this.applicationService.updateLaunch(app);
                         }));
                     } catch (Exception e) {
                         this.baseMapper.failureBuild(project);
@@ -239,8 +239,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 // 2) .jar文件(普通,官方标准的flink工程)
                 Utils.checkJarFile(app.toURI().toURL());
                 String moduleName = app.getName().replace(".jar", "");
-                File appBase = project.getDistHome();
-                File targetDir = new File(appBase, moduleName);
+                File distHome = project.getDistHome();
+                File targetDir = new File(distHome, moduleName);
                 if (!targetDir.exists()) {
                     targetDir.mkdirs();
                 }

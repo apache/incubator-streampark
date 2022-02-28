@@ -66,14 +66,10 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
         if (count == 0) {
             version.setIsDefault(true);
         }
-        try {
-            version.setCreateTime(new Date());
-            version.doSetVersion();
-            version.doSetFlinkConf();
-            return save(version);
-        } catch (Exception e) {
-            throw e;
-        }
+        version.setCreateTime(new Date());
+        version.doSetVersion();
+        version.doSetFlinkConf();
+        return save(version);
     }
 
     @Override

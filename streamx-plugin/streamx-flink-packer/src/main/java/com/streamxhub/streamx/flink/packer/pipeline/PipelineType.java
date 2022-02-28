@@ -81,9 +81,10 @@ public enum PipelineType {
             4,
             "flink yarn application mode task building pipeline",
             ImmutableMap.<Integer, String>builder()
-                    .put(1, "Create building workspace")
-                    .put(2, "Resolve maven dependencies")
-                    .put(3, "upload jar to yarn.provided.lib.dirs")
+                    .put(1, "Prepare hadoop yarn environment")
+                    .put(2, "Create building workspace")
+                    .put(3, "Resolve maven dependencies")
+                    .put(4, "upload jar to yarn.provided.lib.dirs")
                     .build(),
             SimpleBuildResponse.class
     );

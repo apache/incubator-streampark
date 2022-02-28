@@ -157,9 +157,9 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
    * Launch the building pipeline.
    */
   override def launch(): BuildResult = {
-    logInfo(s"building pipeline is launching, params=${offerBuildParam.toString}")
     pipeStatus = PipelineStatus.running
     watcher.onStart(snapshot)
+    logInfo(s"building pipeline is launching, params=${offerBuildParam.toString}")
 
     Try(buildProcess()) match {
       case Success(result) =>

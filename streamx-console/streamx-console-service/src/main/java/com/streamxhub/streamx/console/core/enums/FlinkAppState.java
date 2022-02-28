@@ -35,115 +35,109 @@ public enum FlinkAppState implements Serializable {
      * added new job to database
      */
     ADDED(0),
-    /**
-     * Application which is currently deploying.
-     */
-    DEPLOYING(1),
-    /**
-     * Application which is currently deploying.
-     */
-    DEPLOYED(2),
+
     /**
      * The job has been received by the Dispatcher, and is waiting for the job manager to be
      * created.
      */
-    INITIALIZING(3),
+    INITIALIZING(1),
+
     /**
      * Job is newly created, no task has started to run.
      */
-    CREATED(4),
+    CREATED(2),
     /**
      * Application which is currently running.
      */
-    STARTING(5),
+    STARTING(3),
 
     /**
      * Application which is currently running.
      */
-    RESTARTING(6),
+    RESTARTING(4),
     /**
      * Some tasks are scheduled or running, some may be pending, some may be finished.
      */
-    RUNNING(7),
+    RUNNING(5),
 
     /**
      * The job has failed and is currently waiting for the cleanup to complete.
      */
-    FAILING(8),
+    FAILING(6),
 
     /**
      * The job has failed with a non-recoverable task failure.
      */
-    FAILED(9),
+    FAILED(7),
 
     /**
      * Job is being cancelled.
      */
-    CANCELLING(10),
+    CANCELLING(8),
 
     /**
      * Job has been cancelled.
      */
-    CANCELED(11),
+    CANCELED(9),
 
     /**
      * All of the job's tasks have successfully finished.
      */
-    FINISHED(12),
+    FINISHED(10),
 
     /**
      * The job has been suspended which means that it has been stopped but not been removed from a
      * potential HA job store.
      */
-    SUSPENDED(13),
+    SUSPENDED(11),
     /**
      * The job is currently reconciling and waits for task execution report to recover state.
      */
-    RECONCILING(14),
+    RECONCILING(12),
     /**
      * 失联
      */
-    LOST(15),
+    LOST(13),
 
     /**
      * 射影中...
      */
-    MAPPING(16),
+    MAPPING(14),
 
     /**
      * 其他不关心的状态...
      */
-    OTHER(17),
+    OTHER(15),
 
     //已回滚
-    REVOKED(18),
+    REVOKED(16),
 
     /**
      * Lost track of flink job temporarily.
      * A complete loss of flink job tracking translates into LOST state.
      */
-    SILENT(19),
+    SILENT(17),
 
     /**
      * Flink job has terminated vaguely, maybe FINISHED, CACNELED or FAILED
      */
-    TERMINATED(20),
+    TERMINATED(18),
 
     /**
      * Flink job has terminated vaguely, maybe FINISHED, CACNELED or FAILED
      */
-    POS_TERMINATED(21),
+    POS_TERMINATED(19),
 
     /**
      * job SUCCEEDED on yarn
      */
-    SUCCEEDED(22),
+    SUCCEEDED(20),
     /**
      * yarn 中检查到被killed
      */
     KILLED(-9);
 
-    int value;
+    private final int value;
 
     FlinkAppState(int value) {
         this.value = value;

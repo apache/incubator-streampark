@@ -39,7 +39,7 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
      * Build application.
      * This is an async call method.
      */
-    boolean buildApplication(@Nonnull Application app);
+    boolean buildApplication(@Nonnull Application app) throws Exception;
 
     /**
      * Get current build pipeline instance of specified application
