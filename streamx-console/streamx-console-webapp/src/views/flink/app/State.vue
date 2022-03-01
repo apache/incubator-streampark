@@ -88,20 +88,20 @@
   </span>
   <span v-else-if="option === 'launch'" class="app_state">
     <a-tag
-      v-if="data['launch'] === -1"
+      v-if="data.launch === -1"
       color="#f5222d">FAILED</a-tag>
     <a-tag
-      v-if="data['launch'] === 0"
+      v-if="data.launch === 0"
       color="#52c41a">DONE</a-tag>
     <a-tag
-      v-if="data['launch'] === 1"
+      v-if="data.launch === 1 || data.launch === 4"
+      color="#fa8c16">NEED LAUNCH</a-tag>
+    <a-tag
+      v-if="data.launch === 2"
       class="status-processing-deploying"
       color="#52c41a">LAUNCHING</a-tag>
     <a-tag
-      v-if="data['launch'] === 2 || data['launch'] === 3"
-      color="#fa8c16">NEED LAUNCH</a-tag>
-    <a-tag
-      v-if="data['launch'] > 3"
+      v-if="data.launch === 3"
       color="#fa8c16">NEED RESTART</a-tag>
   </span>
   <span v-else-if="option === 'build'" class="app_state">

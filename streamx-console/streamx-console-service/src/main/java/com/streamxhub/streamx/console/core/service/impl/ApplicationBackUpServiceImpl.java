@@ -156,7 +156,7 @@ public class ApplicationBackUpServiceImpl
                         applicationService.update(new UpdateWrapper<Application>()
                             .lambda()
                             .eq(Application::getId, application.getId())
-                            .set(Application::getLaunch, LaunchState.NEED_RESTART_AFTER_ROLLBACK.get())
+                            .set(Application::getLaunch, LaunchState.NEED_RESTART.get())
                         );
                     } catch (Exception e) {
                         //1. TODO: 如果失败,则要恢复第4第5步操作.
@@ -193,21 +193,11 @@ public class ApplicationBackUpServiceImpl
     public void rollbackFlinkSql(Application application, FlinkSql sql) {
         ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
         assert backUp != null;
-        FsOperator fsOperator = application.getFsOperator();
-        if (!fsOperator.exists(backUp.getPath())) {
-            return;
-        }
         try {
             FlinkTrackingTask.refreshTracking(backUp.getAppId(), () -> {
                 // 回滚 config 和 sql
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
-                String appHome = application.getAppHome();
-                String backUpPath = backUp.getPath();
-                // 2) 删除当前项目
-                fsOperator.delete(appHome);
-                // 5)将备份的文件copy到有效项目目录下.
-                fsOperator.copyDir(backUpPath, appHome);
                 return null;
             });
         } catch (Exception e) {

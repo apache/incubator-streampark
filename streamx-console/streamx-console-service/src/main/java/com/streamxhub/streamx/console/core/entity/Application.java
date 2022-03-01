@@ -131,6 +131,11 @@ public class Application implements Serializable {
     private Integer launch;
 
     /**
+     * 任务实现需要构建
+     */
+    private Boolean build;
+
+    /**
      * 任务失败后的最大重启次数.
      */
     private Integer restartSize;
@@ -586,11 +591,6 @@ public class Application implements Serializable {
     @JsonIgnore
     public boolean isNeedRollback() {
         return LaunchState.NEED_ROLLBACK.get() == this.getLaunch();
-    }
-
-    @JsonIgnore
-    public boolean isNeedCheck() {
-        return LaunchState.NEED_CHECK_AFTER_PROJECT_CHANGED.get() == this.getLaunch();
     }
 
     @JsonIgnore

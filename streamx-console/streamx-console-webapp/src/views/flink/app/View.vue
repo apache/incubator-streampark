@@ -360,7 +360,7 @@
           <template v-if="record['jobType'] === 1">
             <a-badge
               class="build-badge"
-              v-if="record.launch === 7"
+              v-if="record.launch === 5"
               count="NEW"
               title="the associated project has changed and this job need to be rechecked"/>
             <a-badge
@@ -369,10 +369,6 @@
               count="NEW"
               title="the application has changed."/>
           </template>
-          <template v-else-if="record.launch >= 2">
-            <a-badge class="build-badge" count="NEW" title="the application has changed."/>
-          </template>
-
         </template>
 
         <template
@@ -430,7 +426,6 @@
 
           <a-tooltip title="Edit Application">
             <a-button
-              v-if="record.launch !== 6"
               v-permit="'app:update'"
               @click.native="handleEdit(record)"
               shape="circle"
@@ -443,7 +438,7 @@
 
           <a-tooltip title="Launch Application">
             <a-button
-              v-if="(record.launch === -1 || record.launch === 2 || record.launch === 3) && record['optionState'] === 0"
+              v-if="(record.launch === -1 || record.launch === 1) && record['optionState'] === 0"
               @click.native="handleCheckLaunchApp(record)"
               shape="circle"
               size="small"
@@ -454,7 +449,7 @@
 
           <a-tooltip title="Launching Progress Detail">
             <a-button
-              v-if="record.launch === 1 || record.launch === -1 || record['optionState'] === 1"
+              v-if="record.launch === -1 || record.launch === 2 || record['optionState'] === 1"
               @click.native="openBuildProgressDetailDrawer(record)"
               shape="circle"
               size="small"
@@ -1274,21 +1269,15 @@ export default {
     handleLaunchTitle(launch) {
       switch (launch) {
         case -1:
-          return 'dependency changed,but download dependency failed'
+          return 'launch failed'
         case 1:
-          return 'launching'
+          return 'need relaunch'
         case 2:
-          return 'application is updated,need relaunch'
+          return 'launching'
         case 3:
-          return 'dependency is updated,need relaunch'
+          return 'launch finished,need restart'
         case 4:
-          return 'config is updated,need restart'
-        case 5:
-          return 'flink sql is updated,need restart'
-        case 6:
-          return 'application is launched to workspace,need restart'
-        case 7:
-          return 'application is rollbacked,need restart'
+          return 'application is rollbacked,need relaunch'
       }
     },
 
@@ -1504,17 +1493,9 @@ export default {
           app.state === 20 ||
           app.state === -9 || false
 
-      const launch = app.launch === 0 ||
-        app.launch === 4 ||
-        app.launch === 5 ||
-        app.launch === 6 ||
-        app.launch === 8 ||
-        app.launch === 9 || false
-
-
       const optionState = !this.optionApps.starting.get(app.id) || app['optionState'] === 0 || false
 
-      return status && launch && optionState
+      return status && optionState
     },
 
     handleCanRemapping(record) {

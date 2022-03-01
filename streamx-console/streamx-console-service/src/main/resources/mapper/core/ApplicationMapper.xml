@@ -34,6 +34,7 @@
         <result column="RESTART_SIZE" jdbcType="INTEGER" property="restartSize"/>
         <result column="RESTART_COUNT" jdbcType="INTEGER" property="restartCount"/>
         <result column="LAUNCH" jdbcType="INTEGER" property="launch"/>
+        <result column="BUILD" jdbcType="BOOLEAN" property="build"/>
         <result column="FLAME_GRAPH" jdbcType="BOOLEAN" property="flameGraph"/>
         <result column="RESOLVE_ORDER" jdbcType="INTEGER" property="resolveOrder"/>
         <result column="TOTAL_TM" jdbcType="INTEGER" property="totalTM"/>
