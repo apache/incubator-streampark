@@ -649,7 +649,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
         //从来没有上线过的新任务.直接保存
         if (buildPipeline == null || buildPipeline.getPipeStatus().equals(PipelineStatus.failure)) {
-            flinkSqlService.removeById(application.getSqlId());
+            FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
+            flinkSqlService.removeById(newFlinkSql.getId());
             FlinkSql sql = new FlinkSql(appParam);
             flinkSqlService.create(sql, CandidateType.NEW);
             toEffective(application);
@@ -982,13 +983,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         applicationLog.setStartTime(new Date());
 
         try {
-            //回滚任务.
-            if (application.isNeedRollback()) {
-                if (application.isFlinkSqlJob()) {
-                    flinkSqlService.rollback(application);
-                }
-            }
-
             //2) 将latest的设置为Effective的,(此时才真正变成当前生效的)
             this.toEffective(application);
 

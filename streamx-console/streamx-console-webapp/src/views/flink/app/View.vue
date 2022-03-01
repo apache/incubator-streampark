@@ -1277,7 +1277,7 @@ export default {
         case 3:
           return 'launch finished,need restart'
         case 4:
-          return 'application is rollbacked,need restart'
+          return 'application is rollbacked,need relaunch'
       }
     },
 
