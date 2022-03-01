@@ -32,10 +32,7 @@ import com.streamxhub.streamx.common.enums.ApplicationType;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
-import com.streamxhub.streamx.common.util.ExceptionUtils;
-import com.streamxhub.streamx.common.util.ThreadUtils;
-import com.streamxhub.streamx.common.util.Utils;
-import com.streamxhub.streamx.common.util.YarnUtils;
+import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
@@ -562,31 +559,27 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             application.setLaunch(LaunchState.NEED_LAUNCH.get());
 
-            boolean needBuild = false;
             if (application.isUploadJob()) {
                 if (!ObjectUtils.safeEquals(application.getJar(), appParam.getJar())) {
                     application.setBuild(true);
-                    needBuild = true;
                 } else {
                     File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());
                     if (jarFile.exists()) {
                         long checkSum = FileUtils.checksumCRC32(jarFile);
                         if (!ObjectUtils.safeEquals(checkSum, application.getJarCheckSum())) {
                             application.setBuild(true);
-                            needBuild = true;
                         }
                     }
                 }
             }
 
-            if (!needBuild) {
+            if (!application.getBuild()) {
                 //部署模式发生了变化.
                 if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
                     if (appParam.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
                         application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)) {
                         if (application.isFlinkSqlJob()) {
                             application.setBuild(true);
-                            needBuild = true;
                         }
                     }
                 }
@@ -689,13 +682,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 CandidateType type = (changedType.isDependencyChanged() || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
                 flinkSqlService.create(sql, type);
 
-                /*
                 if (changedType.isDependencyChanged()) {
-                    application.setLaunch(LaunchState.NEED_LAUNCH_AFTER_DEPENDENCY_UPDATE.get());
-                } else {
-                    application.setLaunch(LaunchState.NEED_RESTART_AFTER_SQL_UPDATE.get());
+                    application.setBuild(true);
                 }
-                */
             } else {
                 // 2) 判断版本是否发生变化
                 //获取正式版本的flinkSql
@@ -708,6 +697,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     flinkSqlService.setCandidateOrEffective(type, appParam.getId(), appParam.getSqlId());
                     //直接回滚到某个历史版本(rollback)
                     application.setLaunch(LaunchState.NEED_ROLLBACK.get());
+                    application.setBuild(true);
                 }
             }
         }
