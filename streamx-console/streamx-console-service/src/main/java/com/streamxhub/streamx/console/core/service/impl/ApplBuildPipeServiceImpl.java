@@ -232,6 +232,7 @@ public class ApplBuildPipeServiceImpl
                     if (!app.isRunning() || flinkSql == null) {
                         applicationService.toEffective(app);
                     }
+                    app.setBuild(false);
                 } else {
                     Message message = new Message(
                             commonService.getCurrentUser().getUserId(),
@@ -243,8 +244,8 @@ public class ApplBuildPipeServiceImpl
                     messageService.push(message);
                     app.setLaunch(LaunchState.FAILED.get());
                     app.setOptionState(OptionState.NONE.getValue());
+                    app.setBuild(true);
                 }
-                app.setBuild(false);
                 applicationService.updateLaunch(app);
                 saveEntity(buildPipeline);
             }

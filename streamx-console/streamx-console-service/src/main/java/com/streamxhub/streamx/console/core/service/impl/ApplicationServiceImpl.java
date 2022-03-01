@@ -648,12 +648,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private void updateFlinkSqlJob(Application application, Application appParam) {
         AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
         //从来没有上线过的新任务.直接保存
-        if (buildPipeline == null || buildPipeline.getPipeStatus().equals(PipelineStatus.failure)) {
+        if (buildPipeline == null) {
             FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
             flinkSqlService.removeById(newFlinkSql.getId());
             FlinkSql sql = new FlinkSql(appParam);
             flinkSqlService.create(sql, CandidateType.NEW);
-            toEffective(application);
+            flinkSqlService.toEffective(application.getId(), sql.getId());
+        } else if (buildPipeline.getPipeStatus().equals(PipelineStatus.failure)) {
+            FlinkSql newFlinkSql = flinkSqlService.getEffective(application.getId(), false);
+            flinkSqlService.removeById(newFlinkSql.getId());
+            FlinkSql sql = new FlinkSql(appParam);
+            flinkSqlService.create(sql, CandidateType.NEW);
+            flinkSqlService.toEffective(application.getId(), sql.getId());
+            application.setBuild(true);
         } else {
             //1) 获取copy的源FlinkSql
             FlinkSql copySourceFlinkSql = flinkSqlService.getById(appParam.getSqlId());
