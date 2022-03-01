@@ -177,6 +177,7 @@ public class ApplBuildPipeServiceImpl
 
                 // 3) some preparatory work
                 String appUploads = app.getWorkspace().APP_UPLOADS();
+
                 if (app.isCustomCodeJob()) {
                     // customCode upload jar to appHome...
                     String appHome = app.getAppHome();
@@ -221,10 +222,15 @@ public class ApplBuildPipeServiceImpl
                 if (result.pass()) {
                     //running job ...
                     if (app.isRunning()) {
-                        app.setLaunch(LaunchState.NEED_RESTART_AFTER_DEPLOY.get());
+                        app.setLaunch(LaunchState.NEED_RESTART.get());
                     } else {
                         app.setOptionState(OptionState.NONE.getValue());
                         app.setLaunch(LaunchState.DONE.get());
+                    }
+                    //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
+                    FlinkSql flinkSql = flinkSqlService.getEffective(app.getId(), false);
+                    if (!app.isRunning() || flinkSql == null) {
+                        applicationService.toEffective(app);
                     }
                 } else {
                     Message message = new Message(
@@ -238,12 +244,8 @@ public class ApplBuildPipeServiceImpl
                     app.setLaunch(LaunchState.FAILED.get());
                     app.setOptionState(OptionState.NONE.getValue());
                 }
+                app.setBuild(false);
                 applicationService.updateLaunch(app);
-                //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
-                FlinkSql flinkSql = flinkSqlService.getEffective(app.getId(), false);
-                if (!app.isRunning() || flinkSql == null) {
-                    applicationService.toEffective(app);
-                }
                 saveEntity(buildPipeline);
             }
         });

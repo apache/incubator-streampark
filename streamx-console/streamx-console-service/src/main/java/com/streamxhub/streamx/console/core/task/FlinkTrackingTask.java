@@ -421,10 +421,7 @@ public class FlinkTrackingTask {
             LaunchState launchState = LaunchState.of(application.getLaunch());
             //如果任务更新后需要重新启动 或 发布后需要重新启动
             switch (launchState) {
-                case NEED_RESTART_AFTER_CONF_UPDATE:
-                case NEED_RESTART_AFTER_SQL_UPDATE:
-                case NEED_RESTART_AFTER_ROLLBACK:
-                case NEED_RESTART_AFTER_DEPLOY:
+                case NEED_RESTART:
                 case NEED_ROLLBACK:
                     //清空需要重新启动的状态.
                     application.setLaunch(LaunchState.DONE.get());

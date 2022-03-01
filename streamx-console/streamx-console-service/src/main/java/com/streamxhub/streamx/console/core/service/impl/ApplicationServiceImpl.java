@@ -32,7 +32,6 @@ import com.streamxhub.streamx.common.enums.ApplicationType;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
-import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -327,7 +326,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (application.isFlinkSqlJob()) {
             updateWrapper.set(Application::getLaunch, LaunchState.FAILED.get());
         } else {
-            updateWrapper.set(Application::getLaunch, LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
+            updateWrapper.set(Application::getLaunch, LaunchState.NEED_LAUNCH.get());
         }
         if (!application.isRunning()) {
             updateWrapper.set(Application::getState, FlinkAppState.REVOKED.getValue());
@@ -530,7 +529,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean create(Application appParam) {
         appParam.setUserId(commonService.getCurrentUser().getUserId());
         appParam.setState(FlinkAppState.ADDED.getValue());
-        appParam.setLaunch(LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
+        appParam.setLaunch(LaunchState.NEED_LAUNCH.get());
         appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
         appParam.doSetHotParams();
@@ -561,52 +560,33 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         try {
             Application application = getById(appParam.getId());
 
-            boolean needLaunch = false;
+            application.setLaunch(LaunchState.NEED_LAUNCH.get());
 
+            boolean needBuild = false;
             if (application.isUploadJob()) {
                 if (!ObjectUtils.safeEquals(application.getJar(), appParam.getJar())) {
-                    application.setLaunch(LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
-                    needLaunch = true;
+                    application.setBuild(true);
+                    needBuild = true;
                 } else {
                     File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());
                     if (jarFile.exists()) {
                         long checkSum = FileUtils.checksumCRC32(jarFile);
                         if (!ObjectUtils.safeEquals(checkSum, application.getJarCheckSum())) {
-                            application.setLaunch(LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
-                            needLaunch = true;
+                            application.setBuild(true);
+                            needBuild = true;
                         }
                     }
                 }
             }
 
-            if (!needLaunch) {
+            if (!needBuild) {
                 //部署模式发生了变化.
                 if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
                     if (appParam.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
                         application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)) {
                         if (application.isFlinkSqlJob()) {
-                            application.setLaunch(LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
-                            needLaunch = true;
-                        }
-                    }
-                }
-            }
-
-            if (!needLaunch) {
-                //检查任务相关的参数是否发生变化,发生变化则设置需要重启的状态
-                if (!appParam.eqJobParam(application)) {
-                    application.setLaunch(LaunchState.NEED_RESTART_AFTER_CONF_UPDATE.get());
-                } else if (application.isStreamXJob()) {
-                    ApplicationConfig config = configService.getEffective(application.getId());
-                    if (config != null) {
-                        if (appParam.getConfigId() == null || !appParam.getConfigId().equals(config.getId())) {
-                            application.setLaunch(LaunchState.NEED_RESTART_AFTER_CONF_UPDATE.get());
-                        } else {
-                            String decode = new String(Base64.getDecoder().decode(appParam.getConfig()));
-                            String encode = DeflaterUtils.zipString(decode.trim());
-                            if (!config.getContent().equals(encode)) {
-                                application.setLaunch(LaunchState.NEED_RESTART_AFTER_CONF_UPDATE.get());
-                            }
+                            application.setBuild(true);
+                            needBuild = true;
                         }
                     }
                 }
@@ -673,7 +653,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
         //从来没有上线过的新任务.直接保存
         if (buildPipeline == null || buildPipeline.getPipeStatus().equals(PipelineStatus.failure)) {
-            application.setLaunch(LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
             flinkSqlService.removeById(application.getSqlId());
             FlinkSql sql = new FlinkSql(appParam);
             flinkSqlService.create(sql, CandidateType.NEW);
@@ -710,11 +689,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 CandidateType type = (changedType.isDependencyChanged() || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
                 flinkSqlService.create(sql, type);
 
+                /*
                 if (changedType.isDependencyChanged()) {
                     application.setLaunch(LaunchState.NEED_LAUNCH_AFTER_DEPENDENCY_UPDATE.get());
                 } else {
                     application.setLaunch(LaunchState.NEED_RESTART_AFTER_SQL_UPDATE.get());
                 }
+                */
             } else {
                 // 2) 判断版本是否发生变化
                 //获取正式版本的flinkSql
@@ -740,6 +721,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(Application::getId, application.getId());
         updateWrapper.set(Application::getLaunch, application.getLaunch());
+        updateWrapper.set(Application::getBuild, application.getBuild());
         if (application.getOptionState() != null) {
             updateWrapper.set(Application::getOptionState, application.getOptionState());
         }
@@ -749,6 +731,29 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public List<Application> getByProjectId(Long id) {
         return baseMapper.getByProjectId(id);
+    }
+
+    @Override
+    @RefreshCache
+    public boolean checkBuildAndUpdate(Application application) {
+        boolean build = application.getBuild();
+        if (!build) {
+            LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
+            updateWrapper.eq(Application::getId, application.getId());
+            if (application.isRunning()) {
+                updateWrapper.set(Application::getLaunch, LaunchState.NEED_RESTART.get());
+            } else {
+                updateWrapper.set(Application::getLaunch, LaunchState.DONE.get());
+                updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
+            }
+            baseMapper.update(application, updateWrapper);
+            //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
+            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+            if (!application.isRunning() || flinkSql == null) {
+                this.toEffective(application);
+            }
+        }
+        return build;
     }
 
     @Override

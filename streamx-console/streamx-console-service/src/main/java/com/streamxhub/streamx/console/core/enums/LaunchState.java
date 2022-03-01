@@ -37,47 +37,27 @@ public enum LaunchState implements Serializable {
     DONE(0),
 
     /**
-     * 正在部署中
+     * 任务修改完毕需要重新发布
      */
-    LAUNCHING(1),
+    NEED_LAUNCH(1),
 
     /**
-     * 程序更新需要重新发布
+     * 上线中
      */
-    NEED_LAUNCH_AFTER_BUILD(2),
+    LAUNCHING(2),
 
     /**
-     * 依赖更新需要重新发布
+     * 上线完毕,需要重启
      */
-    NEED_LAUNCH_AFTER_DEPENDENCY_UPDATE(3),
+    NEED_RESTART(3),
 
-    /**
-     * 配置文件更新需要重新启动
-     */
-    NEED_RESTART_AFTER_CONF_UPDATE(4),
-
-    /**
-     * sql更新需要重新启动
-     */
-    NEED_RESTART_AFTER_SQL_UPDATE(5),
-
-    /**
-     * 发布完成,需要重新启动.
-     */
-    NEED_RESTART_AFTER_DEPLOY(6),
+    //需要回滚
+    NEED_ROLLBACK(4),
 
     /**
      * 项目发生变化,任务需检查(是否需要重新选择jar)
      */
-    NEED_CHECK_AFTER_PROJECT_CHANGED(7),
-
-    //需要回滚
-    NEED_ROLLBACK(8),
-
-    /**
-     * 回滚完成,需要重新启动
-     */
-    NEED_RESTART_AFTER_ROLLBACK(9),
+    NEED_CHECK(5),
 
     /**
      * 发布的任务已经撤销

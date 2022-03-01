@@ -156,7 +156,7 @@ public class ApplicationBackUpServiceImpl
                         applicationService.update(new UpdateWrapper<Application>()
                             .lambda()
                             .eq(Application::getId, application.getId())
-                            .set(Application::getLaunch, LaunchState.NEED_RESTART_AFTER_ROLLBACK.get())
+                            .set(Application::getLaunch, LaunchState.NEED_RESTART.get())
                         );
                     } catch (Exception e) {
                         //1. TODO: 如果失败,则要恢复第4第5步操作.
