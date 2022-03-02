@@ -121,6 +121,9 @@ UPDATE `t_setting` SET `KEY`='streamx.maven.central.repository' WHERE `KEY` = 'm
 -- rename column name DEPLOY to LAUNCH
 ALTER TABLE `t_flink_app` CHANGE COLUMN `DEPLOY` `LAUNCH` tinyint NULL DEFAULT 2 AFTER `CREATE_TIME`;
 
+-- add new field BUILD
+ALTER TABLE `t_flink_app` ADD COLUMN `BUILD` tinyint DEFAULT '1' AFTER `LAUNCH`;
+
 -- add new field FLINK_CLUSTER_ID
 ALTER TABLE `t_flink_app` ADD COLUMN `FLINK_CLUSTER_ID` bigint DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
 
@@ -130,9 +133,16 @@ ALTER TABLE `t_flink_sql` change id  id bigint NOT NULL AUTO_INCREMENT;
 -- change default value
 ALTER TABLE `t_flink_sql` MODIFY COLUMN `CANDIDATE` tinyint(4) NOT NULL DEFAULT 1;
 
+-- change state value
+BEGIN;
 update `t_flink_app` set STATE = 0 where STATE in (1,2);
-
 update `t_flink_app` set STATE = STATE - 2 where STATE > 1;
+COMMIT;
+
+-- change launch value
+BEGIN;
+update `t_flink_app` set launch = 0;
+COMMIT;
 
 -- change table AUTO_INCREMENT to 100000
 BEGIN;

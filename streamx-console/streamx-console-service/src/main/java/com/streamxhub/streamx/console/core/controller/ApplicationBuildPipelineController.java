@@ -25,6 +25,7 @@ import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineType;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,9 @@ public class ApplicationBuildPipelineController {
     @Autowired
     private ApplicationService applicationService;
 
+    @Autowired
+    private FlinkSqlService flinkSqlService;
+
     /**
      * Launch application building pipeline.
      *
@@ -70,6 +74,19 @@ public class ApplicationBuildPipelineController {
                 return RestResponse.create().data(false);
             }
             Application app = applicationService.getById(appId);
+            // 检查是否需要走build这一步流程(如:jar和pom发送变化了则需要走build流程,其他普通参数修改了,不需要走build流程)
+            boolean needBuild = applicationService.checkBuildAndUpdate(app);
+            if (!needBuild) {
+                return RestResponse.create().data(true);
+            }
+
+            //回滚任务.
+            if (app.isNeedRollback()) {
+                if (app.isFlinkSqlJob()) {
+                    flinkSqlService.rollback(app);
+                }
+            }
+
             boolean actionResult = appBuildPipeService.buildApplication(app);
             return RestResponse.create().data(actionResult);
         } catch (Exception e) {

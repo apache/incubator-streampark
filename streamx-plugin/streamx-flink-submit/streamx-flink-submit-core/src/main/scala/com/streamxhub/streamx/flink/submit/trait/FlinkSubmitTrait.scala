@@ -141,14 +141,18 @@ trait FlinkSubmitTrait extends Logger {
                 jarFile: File)(restApiFunc: (SubmitRequest, Configuration, File) => SubmitResponse)
                (jobGraphFunc: (SubmitRequest, Configuration, File) => SubmitResponse): SubmitResponse = {
     // Prioritize using Rest API submit while using JobGraph submit plan as backup
-    Try(restApiFunc(submitRequest, flinkConfig, jarFile))
-      .recover {
-        case _ =>
-          logInfo(s"[flink-submit] Rest API Submit Plan failed,try JobGraph Submit Plan now.")
-          jobGraphFunc(submitRequest, flinkConfig, jarFile)
-      } match {
-      case Success(submitResponse) => submitResponse
-      case Failure(ex) => throw ex
+    Try {
+      logInfo(s"[flink-submit] Attempting to submit in Rest API Submit Plan.")
+      restApiFunc(submitRequest, flinkConfig, jarFile)
+    }.getOrElse {
+      logWarn(s"[flink-submit] RestAPI Submit Plan failed,try JobGraph Submit Plan now.")
+      Try(jobGraphFunc(submitRequest, flinkConfig, jarFile)) match {
+        case Success(r) => r
+        case Failure(e) =>
+          logError(s"[flink-submit] Both Rest API Submit Plan and JobGraph Submit Plan failed.")
+          throw e
+      }
+
     }
   }
 

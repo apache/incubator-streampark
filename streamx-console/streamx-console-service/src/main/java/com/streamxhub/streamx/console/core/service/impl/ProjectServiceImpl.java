@@ -135,7 +135,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     // 更新部署状态
                     FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                         log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                        app.setLaunch(LaunchState.NEED_CHECK_AFTER_PROJECT_CHANGED.get());
+                        app.setLaunch(LaunchState.NEED_CHECK.get());
                         applicationService.updateLaunch(app);
                     }));
                 }
@@ -195,7 +195,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         // 更新部署状态
                         FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                             log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                            app.setLaunch(LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
+                            app.setLaunch(LaunchState.NEED_LAUNCH.get());
                             this.applicationService.updateLaunch(app);
                         }));
                     } catch (Exception e) {
