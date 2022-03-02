@@ -124,7 +124,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             project.setName(projectParam.getName());
             project.setUrl(projectParam.getUrl());
             project.setBranches(projectParam.getBranches());
-            project.setUsername(projectParam.getUsername());
+            project.setUserName(projectParam.getUserName());
             project.setPassword(projectParam.getPassword());
             project.setPom(projectParam.getPom());
             project.setDescription(projectParam.getDescription());
@@ -371,7 +371,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 .setDirectory(project.getAppSource())
                 .setBranch(project.getBranches());
 
-            if (CommonUtils.notEmpty(project.getUsername(), project.getPassword())) {
+            if (CommonUtils.notEmpty(project.getUserName(), project.getPassword())) {
                 cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
             }
 

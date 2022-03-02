@@ -863,6 +863,7 @@ export default {
 
     handleChangeMode(mode) {
       this.executionMode = mode
+      this.handleReset()
     },
 
     handleChangeProcess(item) {
@@ -1151,7 +1152,7 @@ export default {
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
           'resolveOrder': this.app.resolveOrder,
-          'executionMode': this.app.executionMode,
+          'executionMode': this.executionMode || this.app.executionMode,
           'yarnQueue': this.app.yarnQueue,
           'restartSize': this.app.restartSize,
           'alertEmail': this.app.alertEmail,
