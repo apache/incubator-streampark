@@ -76,7 +76,7 @@ public class FlinkEnv implements Serializable {
         this.setVersion(this.getFlinkVersion().version());
         this.setScalaVersion(this.getFlinkVersion().scalaVersion());
         if (this.getScalaVersion().equals("2.12")) {
-            throw new UnsupportedOperationException("[StreamX] flick with scala version 2.12 is not supported, only supported scala version 2.11");
+            throw new UnsupportedOperationException("[StreamX] flink with scala version 2.12 is not supported, only supported scala version 2.11");
         }
     }
 
