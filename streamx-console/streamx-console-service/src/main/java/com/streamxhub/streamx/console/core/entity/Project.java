@@ -20,7 +20,6 @@
 package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,6 +31,7 @@ import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.Data;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.CredentialsProvider;
@@ -65,10 +65,9 @@ public class Project implements Serializable {
      */
     private String branches;
 
-    @TableField("LASTBUILD")
     private Date lastBuild;
 
-    private String username;
+    private String userName;
 
     private String password;
     /**
@@ -78,13 +77,14 @@ public class Project implements Serializable {
 
     private String pom;
 
+    private String buildArgs;
+
     private Date date;
 
     private String description;
     /**
      * 构建状态: -2:发生变更,需重新build -1:未构建 0:正在构建 1:构建成功 2:构建失败
      */
-    @TableField("BUILDSTATE")
     private Integer buildState;
 
     /**
@@ -138,7 +138,7 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public CredentialsProvider getCredentialsProvider() {
-        return new UsernamePasswordCredentialsProvider(this.username, this.password);
+        return new UsernamePasswordCredentialsProvider(this.userName, this.password);
     }
 
     @JsonIgnore
@@ -157,8 +157,8 @@ public class Project implements Serializable {
     public List<String> getAllBranches() {
         try {
             Collection<Ref> refList;
-            if (CommonUtils.notEmpty(username, password)) {
-                UsernamePasswordCredentialsProvider pro = new UsernamePasswordCredentialsProvider(username, password);
+            if (CommonUtils.notEmpty(userName, password)) {
+                UsernamePasswordCredentialsProvider pro = new UsernamePasswordCredentialsProvider(userName, password);
                 refList = Git.lsRemoteRepository().setRemote(url).setCredentialsProvider(pro).call();
             } else {
                 refList = Git.lsRemoteRepository().setRemote(url).call();
@@ -181,8 +181,8 @@ public class Project implements Serializable {
     @JsonIgnore
     public GitAuthorizedError gitCheck() {
         try {
-            if (CommonUtils.notEmpty(username, password)) {
-                UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
+            if (CommonUtils.notEmpty(userName, password)) {
+                UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(userName, password);
                 Git.lsRemoteRepository().setRemote(url).setCredentialsProvider(credentialsProvider).call();
             } else {
                 Git.lsRemoteRepository().setRemote(url).call();
@@ -221,8 +221,8 @@ public class Project implements Serializable {
         String buildHome = this.getAppSource().getAbsolutePath();
         if (CommonUtils.notEmpty(this.getPom())) {
             buildHome = new File(buildHome.concat("/").concat(this.getPom()))
-                .getParentFile()
-                .getAbsolutePath();
+                    .getParentFile()
+                    .getAbsolutePath();
         }
         String mvn = "mvn";
         try {
@@ -234,28 +234,28 @@ public class Project implements Serializable {
                 mvn = WebUtils.getAppHome().concat("/bin/mvnw");
             }
         }
-        return Arrays.asList("cd ".concat(buildHome), String.format("%s clean install -DskipTests", mvn));
+        return Arrays.asList("cd ".concat(buildHome), String.format("%s clean install -DskipTests %s", mvn, StringUtils.isEmpty(this.buildArgs) ? "" : this.buildArgs.trim()));
     }
 
     @JsonIgnore
     public String getLog4BuildStart() {
         return String.format(
-            "%sproject : %s\nbranches: %s\ncommand : %s\n\n",
-            getLogHeader("maven install"),
-            getName(),
-            getBranches(),
-            getMavenBuildCmd()
+                "%sproject : %s\nbranches: %s\ncommand : %s\n\n",
+                getLogHeader("maven install"),
+                getName(),
+                getBranches(),
+                getMavenBuildCmd()
         );
     }
 
     @JsonIgnore
     public String getLog4CloneStart() {
         return String.format(
-            "%sproject  : %s\nbranches : %s\nworkspace: %s\n\n",
-            getLogHeader("git clone"),
-            getName(),
-            getBranches(),
-            getAppSource()
+                "%sproject  : %s\nbranches : %s\nworkspace: %s\n\n",
+                getLogHeader("git clone"),
+                getName(),
+                getBranches(),
+                getAppSource()
         );
     }
 

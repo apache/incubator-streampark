@@ -79,7 +79,7 @@
           type="text"
           placeholder="UserName for this project"
           @blur="handleBranches"
-          v-decorator="['username']" />
+          v-decorator="['userName']" />
       </a-form-item>
 
       <a-form-item
@@ -121,6 +121,17 @@
           type="text"
           placeholder="By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xml"
           v-decorator="['pom',{ rules: [{ message: 'Specifies the module to compile pom.xml If it is not specified, it is found under the root path pom.xml' } ]}]" />
+      </a-form-item>
+
+      <a-form-item
+        label="Build Argument"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-textarea
+          rows="2"
+          name="buildArgs"
+          placeholder="Build Argument, e.g: -Pprod"
+          v-decorator="['buildArgs']" />
       </a-form-item>
 
       <a-form-item
@@ -219,7 +230,7 @@ export default {
           gitcheck({
             url: values.url,
             branches: values.branches,
-            username: values.username || null,
+            userName: values.userName || null,
             password: values.password || null,
           }).then((resp) => {
             if ( resp.data === 0 ) {
@@ -239,9 +250,10 @@ export default {
                   repository: values.repository,
                   type: values.type,
                   branches: values.branches,
-                  username: values.username,
+                  userName: values.userName,
                   password: values.password,
                   pom: values.pom,
+                  buildArgs: values.buildArgs,
                   description: values.description
                 }).then((resp) => {
                   const created = resp.data
@@ -262,8 +274,8 @@ export default {
               this.$swal.fire(
                 'Failed',
                 (resp.data === 1?
-                  'not authorized ..>﹏<.. <br><br> username and password is required'
-                  : 'authentication error ..>﹏<.. <br><br> please check username and password'
+                  'not authorized ..>﹏<.. <br><br> userName and password is required'
+                  : 'authentication error ..>﹏<.. <br><br> please check userName and password'
                 ),
                 'error'
               )
@@ -278,14 +290,14 @@ export default {
       const form = this.form
       const url = form.getFieldValue('url')
       if (url) {
-        const username = form.getFieldValue('username') || null
+        const userName = form.getFieldValue('userName') || null
         const password = form.getFieldValue('password') || null
-        const userNull = username === null || username === undefined || username === ''
+        const userNull = userName === null || userName === undefined || userName === ''
         const passNull = password === null || password === undefined || password === ''
         if ( (userNull && passNull) || (!userNull && !passNull) ) {
           branches({
             url: url,
-            username: username ,
+            userName: userName ,
             password: password
           }).then((resp) => {
             this.brancheList = resp.data

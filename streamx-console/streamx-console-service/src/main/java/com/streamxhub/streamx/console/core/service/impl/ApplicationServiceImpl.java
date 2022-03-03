@@ -581,9 +581,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
                     if (appParam.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
                         application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)) {
-                        if (application.isFlinkSqlJob()) {
-                            application.setBuild(true);
-                        }
+                        application.setBuild(true);
                     }
                 }
             }

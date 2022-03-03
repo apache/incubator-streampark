@@ -211,15 +211,16 @@ CREATE TABLE `t_flink_project` (
 `NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `URL` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `BRANCHES` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
-`USERNAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`USER_NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `PASSWORD` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `POM` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`BUILD_ARGS` tinyint DEFAULT '-1',
 `TYPE` tinyint DEFAULT NULL,
 `REPOSITORY` tinyint DEFAULT NULL,
 `DATE` datetime DEFAULT NULL,
-`LASTBUILD` datetime DEFAULT NULL,
+`LAST_BUILD` datetime DEFAULT NULL,
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-`BUILDSTATE` tinyint DEFAULT '-1',
+`BUILD_STATE` tinyint DEFAULT '-1',
 PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -227,7 +228,7 @@ PRIMARY KEY (`ID`) USING BTREE
 -- Records of t_flink_project
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_project` VALUES (100000, 'streamx-quickstart', 'https://github.com/streamxhub/streamx-quickstart.git', 'main', NULL, NULL, NULL, 1, 1, NOW(), NULL, 'streamx-quickstart', 1);
+INSERT INTO `t_flink_project` VALUES (100000, 'streamx-quickstart', 'https://github.com/streamxhub/streamx-quickstart.git', 'main', NULL, NULL, NULL, NULL, 1, 1, NOW(), NULL, 'streamx-quickstart', 1);
 COMMIT;
 
 -- ----------------------------
