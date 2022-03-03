@@ -136,16 +136,21 @@ ALTER TABLE `t_flink_sql`
     CHANGE COLUMN `id` `id` bigint NOT NULL AUTO_INCREMENT,
     MODIFY COLUMN `CANDIDATE` tinyint(4) NOT NULL DEFAULT 1;
 
--- change state value
-BEGIN;
-update `t_flink_app` set STATE = 0 where STATE in (1,2);
-update `t_flink_app` set STATE = STATE - 2 where STATE > 1;
-COMMIT;
 
 -- change launch value
 BEGIN;
 update `t_flink_app` set launch = 0;
 COMMIT;
+
+-- change state value
+BEGIN;
+update `t_flink_app` set STATE = 0 where STATE in (1,2);
+COMMIT;
+
+BEGIN;
+update `t_flink_app` set STATE = STATE - 2 where STATE > 1;
+COMMIT;
+
 
 -- change table AUTO_INCREMENT to 100000
 BEGIN;
