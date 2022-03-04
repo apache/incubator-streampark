@@ -346,15 +346,15 @@ export function applyPom(vue) {
                 if (exclusion != null) {
                     const exclusions = exclusion.split('<exclusion>')
                     exclusions.forEach(e => {
-                      if (e != null && e.length > 0) {
-                        const e_group = e.match(groupExp) ? (groupExp.exec(e)[1]).trim() : null
-                        const e_artifact = e.match(artifactExp) ? (artifactExp.exec(e)[1]).trim() : null
-                        const id = e_group + '_' + e_artifact
-                        pomExclusion.set(id, {
-                          'groupId': e_group,
-                          'artifactId': e_artifact
-                        })
-                      }
+                        if (e != null && e.length > 0) {
+                            const e_group = e.match(groupExp) ? (groupExp.exec(e)[1]).trim() : null
+                            const e_artifact = e.match(artifactExp) ? (artifactExp.exec(e)[1]).trim() : null
+                            const id = e_group + '_' + e_artifact
+                            pomExclusion.set(id, {
+                              'groupId': e_group,
+                              'artifactId': e_artifact
+                            })
+                        }
                     })
                 }
                 mvnPom.exclusions = pomExclusion
