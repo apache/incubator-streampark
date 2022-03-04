@@ -214,7 +214,7 @@ CREATE TABLE `t_flink_project` (
 `USER_NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `PASSWORD` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `POM` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-`BUILD_ARGS` tinyint DEFAULT '-1',
+`BUILD_ARGS` varchar(255) DEFAULT '-1',
 `TYPE` tinyint DEFAULT NULL,
 `REPOSITORY` tinyint DEFAULT NULL,
 `DATE` datetime DEFAULT NULL,
