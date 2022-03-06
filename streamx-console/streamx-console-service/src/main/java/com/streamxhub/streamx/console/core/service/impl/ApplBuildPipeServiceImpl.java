@@ -184,8 +184,7 @@ public class ApplBuildPipeServiceImpl
                     FsOperator fsOperator = app.getFsOperator();
                     fsOperator.delete(appHome);
                     if (app.isUploadJob()) {
-                        File temp = WebUtils.getAppTempDir();
-                        File localJar = new File(temp, app.getJar());
+                        File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
                         // upload jar copy to appHome
                         String uploadJar = appUploads.concat("/").concat(app.getJar());
                         checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
@@ -196,12 +195,13 @@ public class ApplBuildPipeServiceImpl
                     }
                 } else {
                     if (!app.getDependencyObject().getJar().isEmpty()) {
-                        //copy jar to upload dir
+                        //copy jar to local upload dir
                         for (String jar : app.getDependencyObject().getJar()) {
-                            File jarFile = new File(WebUtils.getAppTempDir(), jar);
-                            assert jarFile.exists();
-                            String uploadJar = appUploads.concat("/").concat(jar);
-                            checkOrElseUploadJar(FsOperator.lfs(), jarFile, uploadJar, appUploads);
+                            File localJar = new File(WebUtils.getAppTempDir(), jar);
+                            assert localJar.exists();
+                            String localUploads = Workspace.local().APP_UPLOADS();
+                            String uploadJar = localUploads.concat("/").concat(jar);
+                            checkOrElseUploadJar(FsOperator.lfs(), localJar, uploadJar, localUploads);
                         }
                     }
                 }
