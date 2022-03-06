@@ -188,10 +188,19 @@ public class ApplBuildPipeServiceImpl
                         // upload jar copy to appHome
                         String uploadJar = appUploads.concat("/").concat(app.getJar());
                         checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
-                        fsOperator.mkdirs(appHome);
-                        fsOperator.copy(uploadJar,appHome,false,true);
-                        fsOperator.mkdirs(app.getAppLib());
-                        fsOperator.copy(uploadJar, app.getAppLib(), false, true);
+                        switch (app.getApplicationType()) {
+                            case STREAMX_FLINK:
+                                fsOperator.mkdirs(app.getAppLib());
+                                fsOperator.copy(uploadJar, app.getAppLib(), false, true);
+                                break;
+                            case APACHE_FLINK:
+                                fsOperator.mkdirs(appHome);
+                                fsOperator.copy(uploadJar, appHome, false, true);
+                                break;
+                            default:
+                                throw new IllegalArgumentException("[StreamX] unsupported ApplicationType of custom code: "
+                                    + app.getApplicationType());
+                        }
                     } else {
                         fsOperator.upload(app.getDistHome(), appHome);
                     }
