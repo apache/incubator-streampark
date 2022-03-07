@@ -18,7 +18,7 @@
           type="danger"
           icon="cloud"
           @click="handleView"
-          :disabled="this.app.state !== 7 || (this.yarn === null && this.app.flinkRestUrl === null)"
+          :disabled="this.app.state !== 5 || (this.yarn === null && this.app.flinkRestUrl === null)"
           style="float: right;margin-top: -8px;margin-right: 20px">Flink Web UI</a-button>
         <a-divider
           style="margin-top: 5px;margin-bottom: -5px" />
