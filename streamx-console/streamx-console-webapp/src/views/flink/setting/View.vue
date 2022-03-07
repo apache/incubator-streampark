@@ -602,13 +602,13 @@ export default {
                 })
               }
             } else {
-              if (resp.status === 'exists') {
+              if (resp.data === 'exists') {
                 this.$swal.fire(
                     'Failed',
                     'the cluster name: ' + values.clusterName + ' is already exists,please check',
                     'error'
                 )
-              } else if (resp.status === 'fail') {
+              } else if (resp.data === 'fail') {
                 this.$swal.fire(
                     'Failed',
                     'the address is invalid or connection failure, please check',
