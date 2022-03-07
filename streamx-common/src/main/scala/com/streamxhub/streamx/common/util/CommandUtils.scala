@@ -50,8 +50,8 @@ object CommandUtils extends Logger {
     Try {
       require(commands != null && commands.nonEmpty, "[StreamX] CommandUtils.execute: commands must not be null.")
       logDebug(s"Command execute:\n${commands.mkString("\n")} ")
-      val interpreter = if (Utils.isWindows) "cmd /k" else "/bin/bash"
-      val process = new ProcessBuilder(List(interpreter)).redirectErrorStream(true).start
+      val interpreters = if (Utils.isWindows) List("cmd", "/k") else List("/bin/bash")
+      val process = new ProcessBuilder(interpreters).redirectErrorStream(true).start
       val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
       commands.foreach(out.println)
       commands.last.toLowerCase.trim match {
