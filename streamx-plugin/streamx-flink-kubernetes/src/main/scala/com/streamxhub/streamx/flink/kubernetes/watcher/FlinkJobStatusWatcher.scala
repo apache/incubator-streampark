@@ -125,7 +125,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
               cachePool.jobStatuses.getAllPresent(trkRs.map(_._1).toSet.asJava).asScala
             // put job status to cache
             cachePool.jobStatuses.putAll(trkRs.toMap.asJava)
-            // publish JobStatuChangeEvent when necessary
+            // publish JobStatusChangeEvent when necessary
             trkRs.filter(e =>
               preCache.get(e._1) match {
                 case cv if cv.isEmpty || cv.get.jobState != e._2.jobState => true

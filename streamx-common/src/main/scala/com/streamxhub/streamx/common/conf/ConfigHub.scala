@@ -60,7 +60,9 @@ object ConfigHub extends Logger {
    */
   private[conf] def register(@Nonnull conf: ConfigOption): Unit = {
     confOptions.put(conf.key, conf)
-    confData.put(conf.key, conf.defaultValue)
+    if (conf.defaultValue != null) {
+      confData.put(conf.key, conf.defaultValue)
+    }
   }
 
   /**
@@ -170,9 +172,8 @@ object ConfigHub extends Logger {
     logInfo(
       s"""registered configs:
          |ConfigHub collected configs: ${configKeys.size}
-         |  ${configKeys.map(key => s"$key = ${get(key)}").mkString("\n  ")}""".stripMargin)
+         |  ${configKeys.map(key => s"$key = ${if (key.contains("password")) "********" else get(key)}").mkString("\n  ")}""".stripMargin)
   }
-
 
 
 }
