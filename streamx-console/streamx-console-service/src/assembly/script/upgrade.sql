@@ -151,6 +151,15 @@ BEGIN;
 update `t_flink_app` set STATE = STATE - 2 where STATE > 1;
 COMMIT;
 
+-- t_setting
+BEGIN;
+update `t_setting` set `NUM` = `NUM` + 2 where `NUM` > 1;
+COMMIT;
+
+BEGIN;
+INSERT INTO `t_setting` VALUES (2, 'streamx.maven.auth.user', NULL, 'Maven Central Repository Auth User', 'Maven 私服认证用户名', 1);
+INSERT INTO `t_setting` VALUES (3, 'streamx.maven.auth.password', NULL, 'Maven Central Repository Auth Password', 'Maven 私服认证密码', 1);
+COMMIT;
 
 -- change table AUTO_INCREMENT to 100000
 BEGIN;
@@ -169,7 +178,6 @@ ALTER TABLE t_menu AUTO_INCREMENT = 100037 ;
 ALTER TABLE t_message AUTO_INCREMENT = 100000 ;
 ALTER TABLE t_role AUTO_INCREMENT = 100003 ;
 ALTER TABLE t_role_menu AUTO_INCREMENT = 100055 ;
-ALTER TABLE t_setting AUTO_INCREMENT = 100000 ;
 ALTER TABLE t_user AUTO_INCREMENT = 100001 ;
 ALTER TABLE t_user_role AUTO_INCREMENT = 100001 ;
 ALTER TABLE t_app_build_pipe AUTO_INCREMENT = 100000 ;

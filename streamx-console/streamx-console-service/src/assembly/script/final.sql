@@ -494,16 +494,18 @@ PRIMARY KEY (`KEY`) USING BTREE
 -- ----------------------------
 BEGIN;
 INSERT INTO `t_setting` VALUES (1, 'streamx.maven.central.repository', NULL, 'Maven Central Repository', 'Maven 私服地址', 1);
-INSERT INTO `t_setting` VALUES (2, 'streamx.console.webapp.address', NULL, 'StreamX Webapp address', 'StreamX Console Web 应用程序HTTP URL', 1);
-INSERT INTO `t_setting` VALUES (3, 'alert.email.host', NULL, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
-INSERT INTO `t_setting` VALUES (4, 'alert.email.port', NULL, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);
-INSERT INTO `t_setting` VALUES (5, 'alert.email.from', NULL, 'Alert  Email From', '发送告警的邮箱', 1);
-INSERT INTO `t_setting` VALUES (6, 'alert.email.userName', NULL, 'Alert  Email User', '用来发送告警邮箱的认证用户名', 1);
-INSERT INTO `t_setting` VALUES (7, 'alert.email.password', NULL, 'Alert Email Password', '用来发送告警邮箱的认证密码', 1);
-INSERT INTO `t_setting` VALUES (8, 'alert.email.ssl', 'false', 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL', 2);
-INSERT INTO `t_setting` VALUES (9, 'docker.register.address', NULL, 'Docker Register Address', 'Docker容器服务地址', 1);
-INSERT INTO `t_setting` VALUES (10, 'docker.register.user', NULL, 'Docker Register User', 'Docker容器服务认证用户名', 1);
-INSERT INTO `t_setting` VALUES (11, 'docker.register.password', NULL, 'Docker Register Password', 'Docker容器服务认证密码', 1);
+INSERT INTO `t_setting` VALUES (2, 'streamx.maven.auth.user', NULL, 'Maven Central Repository Auth User', 'Maven 私服认证用户名', 1);
+INSERT INTO `t_setting` VALUES (3, 'streamx.maven.auth.password', NULL, 'Maven Central Repository Auth Password', 'Maven 私服认证密码', 1);
+INSERT INTO `t_setting` VALUES (4, 'streamx.console.webapp.address', NULL, 'StreamX Webapp address', 'StreamX Console Web 应用程序HTTP URL', 1);
+INSERT INTO `t_setting` VALUES (5, 'alert.email.host', NULL, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
+INSERT INTO `t_setting` VALUES (6, 'alert.email.port', NULL, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);
+INSERT INTO `t_setting` VALUES (7, 'alert.email.from', NULL, 'Alert  Email From', '发送告警的邮箱', 1);
+INSERT INTO `t_setting` VALUES (8, 'alert.email.userName', NULL, 'Alert  Email User', '用来发送告警邮箱的认证用户名', 1);
+INSERT INTO `t_setting` VALUES (9, 'alert.email.password', NULL, 'Alert Email Password', '用来发送告警邮箱的认证密码', 1);
+INSERT INTO `t_setting` VALUES (10, 'alert.email.ssl', 'false', 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL', 2);
+INSERT INTO `t_setting` VALUES (11, 'docker.register.address', NULL, 'Docker Register Address', 'Docker容器服务地址', 1);
+INSERT INTO `t_setting` VALUES (12, 'docker.register.user', NULL, 'Docker Register User', 'Docker容器服务认证用户名', 1);
+INSERT INTO `t_setting` VALUES (13, 'docker.register.password', NULL, 'Docker Register Password', 'Docker容器服务认证密码', 1);
 COMMIT;
 
 -- ----------------------------
