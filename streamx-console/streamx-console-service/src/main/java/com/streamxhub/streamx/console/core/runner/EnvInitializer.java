@@ -67,7 +67,7 @@ public class EnvInitializer implements ApplicationRunner {
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
 
     private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
-            "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final String MKDIR_LOG = "mkdir {} starting ...";
 
@@ -76,9 +76,9 @@ public class EnvInitializer implements ApplicationRunner {
         String appHome = WebUtils.getAppHome();
         if (appHome == null) {
             throw new ExceptionInInitializerError("[StreamX] System initialization check failed," +
-                    " The system initialization check failed. If started local for development and debugging," +
-                    " please ensure the -Dapp.home parameter is clearly specified," +
-                    " more detail: http://www.streamxhub.com/docs/user-guide/development");
+                " The system initialization check failed. If started local for development and debugging," +
+                " please ensure the -Dapp.home parameter is clearly specified," +
+                " more detail: http://www.streamxhub.com/docs/user-guide/development");
         }
 
         // init ConfigHub
@@ -93,18 +93,28 @@ public class EnvInitializer implements ApplicationRunner {
     private void initConfigHub(Environment springEnv) {
         // override config from spring application.yaml
         ConfigHub
-                .keys()
-                .stream()
-                .filter(springEnv::containsProperty)
-                .forEach(key -> {
-                    ConfigOption config = ConfigHub.getConfig(key);
-                    assert config != null;
-                    ConfigHub.set(config, springEnv.getProperty(key, config.classType()));
-                });
+            .keys()
+            .stream()
+            .filter(springEnv::containsProperty)
+            .forEach(key -> {
+                ConfigOption config = ConfigHub.getConfig(key);
+                assert config != null;
+                ConfigHub.set(config, springEnv.getProperty(key, config.classType()));
+            });
 
         String mvnRepository = settingService.getMavenRepository();
         if (mvnRepository != null) {
             ConfigHub.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);
+        }
+
+        String mvnAuthUser = settingService.getMavenAuthUser();
+        if (mvnAuthUser != null) {
+            ConfigHub.set(CommonConfig.MAVEN_AUTH_USER(), mvnAuthUser);
+        }
+
+        String mvnAuthPassword = settingService.getMavenAuthPassword();
+        if (mvnAuthPassword != null) {
+            ConfigHub.set(CommonConfig.MAVEN_AUTH_PASSWORD(), mvnAuthPassword);
         }
 
         ConfigHub.log();

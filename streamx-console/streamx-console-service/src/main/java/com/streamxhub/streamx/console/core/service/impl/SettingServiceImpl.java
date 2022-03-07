@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
-        implements SettingService {
+    implements SettingService {
 
     @Override
     public Setting get(String key) {
@@ -122,6 +122,16 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public String getMavenRepository() {
         return settings.get(SettingService.KEY_MAVEN_REPOSITORY).getValue();
+    }
+
+    @Override
+    public String getMavenAuthUser() {
+        return settings.get(SettingService.KEY_MAVEN_AUTH_USER).getValue();
+    }
+
+    @Override
+    public String getMavenAuthPassword() {
+        return settings.get(SettingService.KEY_MAVEN_AUTH_PASSWORD).getValue();
     }
 
 }
