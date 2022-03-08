@@ -1014,7 +1014,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                 ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
                                 application.getMainClass()
                             );
-                            flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getJar());
+                            flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
                             break;
                         default:
                             throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
