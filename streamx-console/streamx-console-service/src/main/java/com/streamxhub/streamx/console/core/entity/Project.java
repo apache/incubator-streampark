@@ -227,7 +227,7 @@ public class Project implements Serializable {
         String mvn = "mvn";
         try {
             if (CommonUtils.isWindows()) {
-                CommandUtils.execute("cmd /k mvn --version");
+                CommandUtils.execute("mvn.cmd --version");
             } else {
                 CommandUtils.execute("mvn --version");
             }
