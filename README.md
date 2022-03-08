@@ -117,9 +117,7 @@ Our ultimate goal is to build a one-stop big data solution integrating stream pr
 * ...
 
 Thanks to the above excellent open source projects and many outstanding open source projects that are not mentioned, for giving the greatest
-respect, special thanks to [Apache Zeppelin](http://zeppelin.apache.org)
-, [IntelliJ IDEA](https://www.jetbrains.com/idea/), Thanks to the [fire-spark](https://github.com/GuoNingNing/fire-spark) project for the
-early inspiration and help.
+respect,Thanks to [Apache Flink](http://flink.apache.org) for creating a great project!  Thanks to the [Apache Zeppelin](http://zeppelin.apache.org) project for the early inspiration.
 
 ### 🚀 Quick Start
 

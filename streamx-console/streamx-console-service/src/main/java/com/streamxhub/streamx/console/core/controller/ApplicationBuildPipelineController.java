@@ -74,7 +74,7 @@ public class ApplicationBuildPipelineController {
                 return RestResponse.create().data(false);
             }
             Application app = applicationService.getById(appId);
-            // 检查是否需要走build这一步流程(如:jar和pom发送变化了则需要走build流程,其他普通参数修改了,不需要走build流程)
+            // 检查是否需要走build这一步流程(jar和pom发生变化了则需要走build流程, 其他普通参数修改了,不需要走build流程)
             boolean needBuild = applicationService.checkBuildAndUpdate(app);
             if (!needBuild) {
                 return RestResponse.create().data(true);

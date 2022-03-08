@@ -27,6 +27,7 @@ import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
-        implements SettingService {
+    implements SettingService {
 
     @Override
     public Setting get(String key) {
@@ -61,14 +62,27 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public boolean update(Setting setting) {
         try {
-            if (setting.getValue() != null) {
-                setting.setValue(setting.getValue().trim());
+            String value = setting.getValue();
+            if (value != null) {
+                if (StringUtils.isEmpty(value.trim())) {
+                    value = null;
+                } else {
+                    value = setting.getValue().trim();
+                }
             }
+            setting.setValue(value);
             this.baseMapper.updateByKey(setting);
+
             if (setting.getKey().equals(CommonConfig.MAVEN_REMOTE_URL().key())) {
-                ConfigHub.set(CommonConfig.MAVEN_REMOTE_URL(), setting.getValue());
+                ConfigHub.set(CommonConfig.MAVEN_REMOTE_URL(), value);
             }
-            settings.get(setting.getKey()).setValue(setting.getValue());
+            if (setting.getKey().equals(CommonConfig.MAVEN_AUTH_USER().key())) {
+                ConfigHub.set(CommonConfig.MAVEN_AUTH_USER(), value);
+            }
+            if (setting.getKey().equals(CommonConfig.MAVEN_AUTH_PASSWORD().key())) {
+                ConfigHub.set(CommonConfig.MAVEN_AUTH_PASSWORD(), value);
+            }
+            settings.get(setting.getKey()).setValue(value);
             return true;
         } catch (Exception e) {
             return false;
@@ -122,6 +136,16 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public String getMavenRepository() {
         return settings.get(SettingService.KEY_MAVEN_REPOSITORY).getValue();
+    }
+
+    @Override
+    public String getMavenAuthUser() {
+        return settings.get(SettingService.KEY_MAVEN_AUTH_USER).getValue();
+    }
+
+    @Override
+    public String getMavenAuthPassword() {
+        return settings.get(SettingService.KEY_MAVEN_AUTH_PASSWORD).getValue();
     }
 
 }

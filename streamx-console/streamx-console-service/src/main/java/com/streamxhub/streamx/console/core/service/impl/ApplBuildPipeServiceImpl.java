@@ -184,24 +184,35 @@ public class ApplBuildPipeServiceImpl
                     FsOperator fsOperator = app.getFsOperator();
                     fsOperator.delete(appHome);
                     if (app.isUploadJob()) {
-                        File temp = WebUtils.getAppTempDir();
-                        File localJar = new File(temp, app.getJar());
+                        File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
                         // upload jar copy to appHome
                         String uploadJar = appUploads.concat("/").concat(app.getJar());
                         checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
-                        fsOperator.mkdirs(app.getAppLib());
-                        fsOperator.copy(uploadJar, app.getAppLib(), false, true);
+                        switch (app.getApplicationType()) {
+                            case STREAMX_FLINK:
+                                fsOperator.mkdirs(app.getAppLib());
+                                fsOperator.copy(uploadJar, app.getAppLib(), false, true);
+                                break;
+                            case APACHE_FLINK:
+                                fsOperator.mkdirs(appHome);
+                                fsOperator.copy(uploadJar, appHome, false, true);
+                                break;
+                            default:
+                                throw new IllegalArgumentException("[StreamX] unsupported ApplicationType of custom code: "
+                                    + app.getApplicationType());
+                        }
                     } else {
                         fsOperator.upload(app.getDistHome(), appHome);
                     }
                 } else {
                     if (!app.getDependencyObject().getJar().isEmpty()) {
-                        //copy jar to upload dir
+                        //copy jar to local upload dir
                         for (String jar : app.getDependencyObject().getJar()) {
-                            File jarFile = new File(WebUtils.getAppTempDir(), jar);
-                            assert jarFile.exists();
-                            String uploadJar = appUploads.concat("/").concat(jar);
-                            checkOrElseUploadJar(FsOperator.lfs(), jarFile, uploadJar, appUploads);
+                            File localJar = new File(WebUtils.getAppTempDir(), jar);
+                            assert localJar.exists();
+                            String localUploads = Workspace.local().APP_UPLOADS();
+                            String uploadJar = localUploads.concat("/").concat(jar);
+                            checkOrElseUploadJar(FsOperator.lfs(), localJar, uploadJar, localUploads);
                         }
                     }
                 }
