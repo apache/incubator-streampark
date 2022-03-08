@@ -226,7 +226,11 @@ public class Project implements Serializable {
         }
         String mvn = "mvn";
         try {
-            CommandUtils.execute("mvn --version");
+            if (CommonUtils.isWindows()) {
+                CommandUtils.execute("cmd /k mvn --version");
+            } else {
+                CommandUtils.execute("mvn --version");
+            }
         } catch (Exception e) {
             if (CommonUtils.isWindows()) {
                 mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
