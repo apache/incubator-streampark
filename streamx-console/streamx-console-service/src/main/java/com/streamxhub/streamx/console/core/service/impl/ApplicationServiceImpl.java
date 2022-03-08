@@ -1001,7 +1001,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
                         application.getMainClass()
                     );
-                    flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getJar());
+                    if (ExecutionMode.isKubernetesSessionMode(application.getExecutionMode())) {
+                        flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+                    } else {
+                        flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getJar());
+                    }
                 } else {
                     switch (application.getApplicationType()) {
                         case STREAMX_FLINK:
