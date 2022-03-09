@@ -374,7 +374,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             if (CommonUtils.notEmpty(project.getUserName(), project.getPassword())) {
                 cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
             }
-            try(Git git = cloneCommand.call()) {
+            try (Git git = cloneCommand.call()) {
                 StoredConfig config = git.getRepository().getConfig();
                 config.setBoolean("http", project.getUrl(), "sslVerify", false);
                 config.setBoolean("https", project.getUrl(), "sslVerify", false);
