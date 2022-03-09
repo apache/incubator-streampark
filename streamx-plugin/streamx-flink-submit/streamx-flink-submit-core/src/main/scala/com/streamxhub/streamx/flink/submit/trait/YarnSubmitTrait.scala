@@ -68,17 +68,15 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
         .defaultValue(s"${workspace.APP_SAVEPOINTS}")
     )
 
-    val savepointPathFuture = (Try(stopRequest.withSavePoint).getOrElse(false), Try(stopRequest.withDrain).getOrElse(false)) match {
-      case (false, false) =>
-        clusterClient.cancel(jobID)
-        null
-      case (true, false) => clusterClient.cancelWithSavepoint(jobID, savePointDir)
-      case (_, _) => clusterClient.stopWithSavepoint(jobID, stopRequest.withDrain, savePointDir)
-    }
-
-    if (savepointPathFuture == null) null else try {
+    try {
       val clientTimeout = getOptionFromDefaultFlinkConfig(stopRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
-      val savepointDir = savepointPathFuture.get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      val savepointDir = (Try(stopRequest.withSavePoint).getOrElse(false), Try(stopRequest.withDrain).getOrElse(false)) match {
+        case (false, false) =>
+          clusterClient.cancel(jobID).get()
+          null
+        case (true, false) => clusterClient.cancelWithSavepoint(jobID, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+        case (_, _) => clusterClient.stopWithSavepoint(jobID, stopRequest.withDrain, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      }
       StopResponse(savepointDir)
     } catch {
       case e: Exception =>

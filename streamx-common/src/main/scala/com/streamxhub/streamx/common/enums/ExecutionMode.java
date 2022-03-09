@@ -105,6 +105,10 @@ public enum ExecutionMode implements Serializable {
         return isYarnMode(of(value));
     }
 
+    public static boolean isKubernetesSessionMode(Integer value) {
+        return KUBERNETES_NATIVE_SESSION.equals(of(value));
+    }
+
     public static boolean isKubernetesMode(ExecutionMode mode) {
         return KUBERNETES_NATIVE_SESSION.equals(mode) || KUBERNETES_NATIVE_APPLICATION.equals(mode);
     }
