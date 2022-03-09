@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.core.java.sink;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.flink.core.scala.sink.KafkaEqualityPartitioner;
 import org.apache.flink.api.common.serialization.SerializationSchema;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
@@ -34,15 +35,15 @@ public class KafkaSink<T> {
     /**
      * common param
      */
-    private Properties property;
-    private Integer parallelism;
+    private Properties property = new Properties();
+    private Integer parallelism = 0;
     private String name;
     private String uid;
     //---end---
 
     private String alias;
     private String topic;
-    private SerializationSchema<T> serializer;
+    private SerializationSchema<T> serializer = (SerializationSchema<T>) new SimpleStringSchema();
     private FlinkKafkaPartitioner<T> partitioner;
 
     public KafkaSink(StreamingContext context) {
@@ -115,8 +116,19 @@ public class KafkaSink<T> {
 
     public DataStreamSink<T> sink(DataStream<T> source, String topic) {
         this.topic(topic);
-        com.streamxhub.streamx.flink.core.scala.sink.KafkaSink scalaSink = new com.streamxhub.streamx.flink.core.scala.sink.KafkaSink(this.context, this.property, this.parallelism, this.name, this.uid);
-        org.apache.flink.streaming.api.scala.DataStream<T> scalaDataStream = new org.apache.flink.streaming.api.scala.DataStream<>(source);
-        return scalaSink.sink(scalaDataStream, this.alias, this.topic, this.serializer, this.partitioner);
+        com.streamxhub.streamx.flink.core.scala.sink.KafkaSink scalaSink = new com.streamxhub.streamx.flink.core.scala.sink.KafkaSink(
+                this.context,
+                this.property,
+                this.parallelism,
+                this.name,
+                this.uid
+        );
+        return scalaSink.sink(
+                new org.apache.flink.streaming.api.scala.DataStream<>(source),
+                this.alias,
+                this.topic,
+                this.serializer,
+                this.partitioner
+        );
     }
 }
