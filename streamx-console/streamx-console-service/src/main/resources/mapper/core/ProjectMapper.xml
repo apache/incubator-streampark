@@ -7,13 +7,14 @@
         <result column="URL" jdbcType="VARCHAR" property="url"/>
         <result column="REPOSITORY" jdbcType="INTEGER" property="repository"/>
         <result column="BRANCHES" jdbcType="VARCHAR" property="branches"/>
-        <result column="USERNAME" jdbcType="VARCHAR" property="username"/>
+        <result column="USER_NAME" jdbcType="VARCHAR" property="userName"/>
         <result column="PASSWORD" jdbcType="VARCHAR" property="password"/>
         <result column="POM" jdbcType="VARCHAR" property="pom"/>
+        <result column="BUILD_ARGS" jdbcType="VARCHAR" property="buildArgs"/>
         <result column="TYPE" jdbcType="INTEGER" property="type"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
-        <result column="LASTBUILD" jdbcType="TIMESTAMP" property="lastBuild"/>
-        <result column="BUILDSTATE" jdbcType="INTEGER" property="buildState"/>
+        <result column="LAST_BUILD" jdbcType="TIMESTAMP" property="lastBuild"/>
+        <result column="BUILD_STATE" jdbcType="INTEGER" property="buildState"/>
         <result column="DATE" jdbcType="TIMESTAMP" property="date"/>
     </resultMap>
 
@@ -24,7 +25,7 @@
                 AND t.name like '%${project.name}%'
             </if>
             <if test="project.buildState != null">
-                AND t.buildState = #{project.buildState}
+                AND t.build_state = #{project.buildState}
             </if>
         </where>
     </select>

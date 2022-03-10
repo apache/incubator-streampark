@@ -581,9 +581,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
                     if (appParam.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
                         application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)) {
-                        if (application.isFlinkSqlJob()) {
-                            application.setBuild(true);
-                        }
+                        application.setBuild(true);
                     }
                 }
             }
@@ -1003,7 +1001,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
                         application.getMainClass()
                     );
-                    flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getJar());
+                    if (ExecutionMode.isKubernetesSessionMode(application.getExecutionMode())) {
+                        flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+                    } else {
+                        flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getJar());
+                    }
                 } else {
                     switch (application.getApplicationType()) {
                         case STREAMX_FLINK:
@@ -1016,7 +1018,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                 ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
                                 application.getMainClass()
                             );
-                            flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getJar());
+                            flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
                             break;
                         default:
                             throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");

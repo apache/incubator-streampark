@@ -1342,7 +1342,7 @@ export default {
       this.closeCheckForceBuildModel()
       this.$swal.fire({
         icon: 'success',
-        title: 'Current Application is Launching',
+        title: 'Current Application is launching',
         showConfirmButton: false,
         timer: 2000
       }).then((e) =>
@@ -1493,9 +1493,31 @@ export default {
           app.state === 20 ||
           app.state === -9 || false
 
+      /**
+       *
+       * // 部署失败
+       * FAILED(-1),
+       * // 完结
+       * DONE(0),
+       * // 任务修改完毕需要重新发布
+       * NEED_LAUNCH(1),
+       * // 上线中
+       * LAUNCHING(2),
+       * // 上线完毕,需要重启
+       * NEED_RESTART(3),
+       * //需要回滚
+       * NEED_ROLLBACK(4),
+       * // 项目发生变化,任务需检查(是否需要重新选择jar)
+       * NEED_CHECK(5),
+       * // 发布的任务已经撤销
+       * REVOKED(10);
+       */
+
+      const launch = app.launch === 0 || app.launch === 3
+
       const optionState = !this.optionApps.starting.get(app.id) || app['optionState'] === 0 || false
 
-      return status && optionState
+      return status && launch && optionState
     },
 
     handleCanRemapping(record) {
@@ -1879,9 +1901,6 @@ export default {
 
     handleEdit(app) {
       this.SetAppId(app.id)
-      //appType         STREAMX_FLINK(1, "StreamX Flink"), APACHE_FLINK(2, "Apache Flink"),
-      //jobType         CUSTOMCODE("Custom Code", 1), FLINKSQL("Flink SQL", 2)
-      //ResourceFrom    CICD(1),UPLOAD(2)
       if (app.appType === 1) {
         this.$router.push({'path': '/flink/app/edit_streamx'})
         if (app.jobType === 1) {

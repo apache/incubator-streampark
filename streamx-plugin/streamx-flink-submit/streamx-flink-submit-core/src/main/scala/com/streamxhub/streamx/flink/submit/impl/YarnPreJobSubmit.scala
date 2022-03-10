@@ -19,13 +19,13 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.google.common.collect.Lists
+import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.{FlinkUtils, Utils}
+import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
-import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
+import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration.{Configuration, DeploymentOptions}
 import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
@@ -66,7 +66,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
       val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[YarnClusterDescriptor]
       val flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome)
       clusterDescriptor.setLocalJarPath(new HadoopPath(flinkDistJar))
-      clusterDescriptor.addShipFiles(List(new File(s"$flinkHome/plugins")))
+      clusterDescriptor.addShipFiles(List(new File(s"$flinkHome/lib")))
       clusterDescriptor
     }
 
@@ -80,23 +80,18 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
              |------------------------------------------------------------------
              |""".stripMargin)
 
-        packagedProgram = PackagedProgram
-          .newBuilder
-          .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
-          .setJarFile(new File(submitRequest.flinkUserJar))
-          .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
-          .setArguments(
-            flinkConfig
-              .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-              .orElse(Lists.newArrayList()): _*
-          ).build()
+        val jarFile = submitRequest.developmentMode match {
+          case DevelopmentMode.FLINKSQL =>
+            submitRequest.checkBuildResult()
+            val buildResult = submitRequest.buildResult.asInstanceOf[ShadedBuildResponse]
+            new File(buildResult.shadedJarPath)
+          case _ => new File(submitRequest.flinkUserJar)
+        }
 
-        val jobGraph = PackagedProgramUtils.createJobGraph(
-          packagedProgram,
-          flinkConfig,
-          getParallelism(submitRequest),
-          false
-        )
+        val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
+        packagedProgram = packageProgramJobGraph._1
+        val jobGraph = packageProgramJobGraph._2
+
         logInfo(
           s"""
              |-------------------------<<applicationId>>------------------------
