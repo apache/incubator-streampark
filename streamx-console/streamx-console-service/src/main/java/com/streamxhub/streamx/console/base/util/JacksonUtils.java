@@ -30,7 +30,14 @@ import com.streamxhub.streamx.common.util.DateUtils;
 
 import java.text.SimpleDateFormat;
 
-public class JacksonUtils {
+/**
+ * @author benjobs
+ */
+public final class JacksonUtils {
+
+    private JacksonUtils() {
+
+    }
 
     private static final ObjectMapper MAPPER;
 

@@ -24,7 +24,11 @@ import org.apache.shiro.util.ByteSource;
 
 import java.util.Random;
 
-public class ShaHashUtils {
+public final class ShaHashUtils {
+
+    private ShaHashUtils() {
+
+    }
 
     /**
      * 用户密码加密
