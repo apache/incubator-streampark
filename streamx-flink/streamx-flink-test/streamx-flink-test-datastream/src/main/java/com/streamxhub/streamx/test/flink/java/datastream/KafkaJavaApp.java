@@ -19,17 +19,16 @@
 
 package com.streamxhub.streamx.test.flink.java.datastream;
 
+import com.streamxhub.streamx.common.util.JsonUtils;
 import com.streamxhub.streamx.flink.core.StreamEnvConfig;
 import com.streamxhub.streamx.flink.core.java.sink.KafkaSink;
 import com.streamxhub.streamx.flink.core.java.source.KafkaSource;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.flink.core.scala.source.KafkaRecord;
-import com.streamxhub.streamx.test.flink.java.bean.LogBean;
+import com.streamxhub.streamx.test.flink.java.bean.Behavior;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 /**
  * @author benjobs
@@ -40,36 +39,21 @@ public class KafkaJavaApp {
 
         StreamEnvConfig javaConfig = new StreamEnvConfig(args, (environment, parameterTool) -> {
             System.out.println("environment argument set...");
-            environment.getConfig().enableForceAvro();
+            //environment.getConfig().enableForceAvro();
         });
 
         StreamingContext context = new StreamingContext(javaConfig);
 
-        DataStream<LogBean> source = new KafkaSource<LogBean>(context)
-                .deserializer(new KafkaDeserializationSchema<LogBean>() {
-                    @Override
-                    public TypeInformation<LogBean> getProducedType() {
-                        return TypeInformation.of(LogBean.class);
-                    }
-
-                    @Override
-                    public boolean isEndOfStream(LogBean nextElement) {
-                        return false;
-                    }
-
-                    @Override
-                    public LogBean deserialize(ConsumerRecord<byte[], byte[]> record) {
-                        String value = new String(record.value());
-                        LogBean logBean = new LogBean();
-                        logBean.setControlid("benjobs");
-                        //value to logBean....
-                        return logBean;
-                    }
-                })
+        //1) 从 kafka 中读取数据
+        DataStream<Behavior> source = new KafkaSource<String>(context)
                 .getDataStream()
-                .map((MapFunction<KafkaRecord<LogBean>, LogBean>) KafkaRecord::value);
+                .map((MapFunction<KafkaRecord<String>, Behavior>) value -> JsonUtils.read(value, Behavior.class));
 
-        new KafkaSink<LogBean>(context).sink(source);
+
+        // 2) 将数据写入其他 kafka 主题
+        new KafkaSink<Behavior>(context)
+                .serializer((SerializationSchema<Behavior>) element -> JsonUtils.write(element).getBytes())
+                .sink(source);
 
         context.start();
     }
