@@ -52,13 +52,13 @@ object MavenRetriever {
   def remoteRepos(): util.ArrayList[RemoteRepository] = {
     val builder = new RemoteRepository.Builder("central", "default", ConfigHub.get(MAVEN_REMOTE_URL))
     val remoteRepository = if (ConfigHub.get(MAVEN_AUTH_USER) == null || ConfigHub.get(MAVEN_AUTH_PASSWORD) == null) {
+      builder.build()
+    } else {
       val authentication = new AuthenticationBuilder()
         .addUsername(ConfigHub.get[String](MAVEN_AUTH_USER))
         .addPassword(ConfigHub.get[String](MAVEN_AUTH_PASSWORD))
         .build()
       builder.setAuthentication(authentication).build()
-    } else {
-      builder.build()
     }
     Lists.newArrayList(remoteRepository)
   }
