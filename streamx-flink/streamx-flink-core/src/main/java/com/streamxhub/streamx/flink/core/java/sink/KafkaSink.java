@@ -29,6 +29,9 @@ import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartiti
 
 import java.util.Properties;
 
+/**
+ * @author benjobs
+ */
 public class KafkaSink<T> {
 
     private final StreamingContext context;
@@ -41,8 +44,8 @@ public class KafkaSink<T> {
     private String uid;
     //---end---
 
-    private String alias;
-    private String topic;
+    private String alias = "";
+    private String topic = "";
     private SerializationSchema<T> serializer = (SerializationSchema<T>) new SimpleStringSchema();
     private FlinkKafkaPartitioner<T> partitioner;
 
@@ -53,27 +56,37 @@ public class KafkaSink<T> {
     }
 
     public KafkaSink<T> parallelism(Integer parallelism) {
-        this.parallelism = parallelism;
+        if (parallelism != null) {
+            this.parallelism = parallelism;
+        }
         return this;
     }
 
     public KafkaSink<T> name(String name) {
-        this.name = name;
+        if (name != null) {
+            this.name = name;
+        }
         return this;
     }
 
     public KafkaSink<T> uid(String uid) {
-        this.uid = uid;
+        if (uid != null) {
+            this.uid = uid;
+        }
         return this;
     }
 
     public KafkaSink<T> property(Properties property) {
-        this.property = property;
+        if (property != null) {
+            this.property = property;
+        }
         return this;
     }
 
     public KafkaSink<T> alias(String alias) {
-        this.alias = alias;
+        if (alias != null) {
+            this.alias = alias;
+        }
         return this;
     }
 
@@ -84,7 +97,9 @@ public class KafkaSink<T> {
      * @return KafkaSink: KafkaSink instance
      */
     public KafkaSink<T> topic(String topic) {
-        this.topic = topic;
+        if (topic != null) {
+            this.topic = topic;
+        }
         return this;
     }
 
@@ -95,7 +110,9 @@ public class KafkaSink<T> {
      * @return KafkaSink: KafkaSink instance
      */
     public KafkaSink<T> serializer(SerializationSchema<T> serializer) {
-        this.serializer = serializer;
+        if (serializer != null) {
+            this.serializer = serializer;
+        }
         return this;
     }
 
@@ -106,7 +123,9 @@ public class KafkaSink<T> {
      * @return KafkaSink: KafkaSink
      */
     public KafkaSink<T> partitioner(FlinkKafkaPartitioner<T> partitioner) {
-        this.partitioner = partitioner;
+        if (partitioner != null) {
+            this.partitioner = partitioner;
+        }
         return this;
     }
 
@@ -117,18 +136,18 @@ public class KafkaSink<T> {
     public DataStreamSink<T> sink(DataStream<T> source, String topic) {
         this.topic(topic);
         com.streamxhub.streamx.flink.core.scala.sink.KafkaSink scalaSink = new com.streamxhub.streamx.flink.core.scala.sink.KafkaSink(
-                this.context,
-                this.property,
-                this.parallelism,
-                this.name,
-                this.uid
+            this.context,
+            this.property,
+            this.parallelism,
+            this.name,
+            this.uid
         );
         return scalaSink.sink(
-                new org.apache.flink.streaming.api.scala.DataStream<>(source),
-                this.alias,
-                this.topic,
-                this.serializer,
-                this.partitioner
+            new org.apache.flink.streaming.api.scala.DataStream<>(source),
+            this.alias,
+            this.topic,
+            this.serializer,
+            this.partitioner
         );
     }
 }

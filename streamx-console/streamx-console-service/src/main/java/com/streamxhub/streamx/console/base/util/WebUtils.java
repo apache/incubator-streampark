@@ -31,7 +31,11 @@ import java.util.stream.IntStream;
  * 工具类
  */
 @Slf4j
-public class WebUtils {
+public final class WebUtils {
+
+    private WebUtils() {
+
+    }
 
     /**
      * token 加密

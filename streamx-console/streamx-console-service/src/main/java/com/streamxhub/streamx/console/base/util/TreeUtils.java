@@ -25,9 +25,12 @@ import com.streamxhub.streamx.console.base.domain.router.VueRouter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TreeUtils {
+/**
+ * @author benjobs
+ */
+public final class TreeUtils {
 
-    protected TreeUtils() {
+    private TreeUtils() {
     }
 
     private static final String TOP_NODE_ID = "0";
