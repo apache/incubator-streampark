@@ -34,59 +34,59 @@ public class DorisSink<T> {
 
     private final StreamingContext context;
     private String alias = "";
-    private Properties streamLoadProp = new Properties();
+    private Properties properties = new Properties();
 
     public DorisSink(StreamingContext context) {
         this.context = context;
     }
 
     public DorisSink<T> fenodes(String fenodes) {
-        streamLoadProp.put(ConfigConst.DORIS_FENODES(), fenodes);
+        properties.put(ConfigConst.DORIS_FENODES(), fenodes);
         return this;
     }
 
     public DorisSink<T> database(String database) {
-        streamLoadProp.put(ConfigConst.DORIS_DATABASE(), database);
+        properties.put(ConfigConst.DORIS_DATABASE(), database);
         return this;
     }
 
     public DorisSink<T> table(String table) {
-        streamLoadProp.put(ConfigConst.DORIS_TABLE(), table);
+        properties.put(ConfigConst.DORIS_TABLE(), table);
         return this;
     }
 
     public DorisSink<T> user(String user) {
-        streamLoadProp.put(ConfigConst.DORIS_USER(), user);
+        properties.put(ConfigConst.DORIS_USER(), user);
         return this;
     }
 
     public DorisSink<T> password(String password) {
-        streamLoadProp.put(ConfigConst.DORIS_PASSWORD(), password);
+        properties.put(ConfigConst.DORIS_PASSWORD(), password);
         return this;
     }
 
     public DorisSink<T> batchSize(Integer batchSize) {
-        streamLoadProp.put(ConfigConst.DORIS_BATCHSIZE(), batchSize);
+        properties.put(ConfigConst.DORIS_BATCHSIZE(), batchSize);
         return this;
     }
 
     public DorisSink<T> intervalMs(Long intervalMs) {
-        streamLoadProp.put(ConfigConst.DORIS_INTERVALMS(), intervalMs);
+        properties.put(ConfigConst.DORIS_INTERVALMS(), intervalMs);
         return this;
     }
 
     public DorisSink<T> maxRetries(Integer maxRetries) {
-        streamLoadProp.put(ConfigConst.DORIS_MAXRETRIES(), maxRetries);
+        properties.put(ConfigConst.DORIS_MAXRETRIES(), maxRetries);
         return this;
     }
 
     public DorisSink<T> streamLoadProp(Properties streamLoadProp) {
-        this.streamLoadProp = streamLoadProp;
+        this.properties = streamLoadProp;
         return this;
     }
 
     public DataStreamSink<T> sink(DataStream<T> source) {
-        DorisSinkFunction<T> sinkFunction = new DorisSinkFunction<>(context, streamLoadProp, alias);
+        DorisSinkFunction<T> sinkFunction = new DorisSinkFunction<>(context, properties, alias);
         return source.addSink(sinkFunction);
     }
 }
