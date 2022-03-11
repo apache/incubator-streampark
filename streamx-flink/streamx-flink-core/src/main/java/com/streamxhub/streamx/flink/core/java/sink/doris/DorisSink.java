@@ -20,7 +20,6 @@
 package com.streamxhub.streamx.flink.core.java.sink.doris;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
-import com.streamxhub.streamx.common.util.ConfigUtils;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
@@ -28,20 +27,13 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import java.util.Properties;
 
 /**
- * Doris sink
- **/
+ * @param <T>
+ * @author wudi
+ */
 public class DorisSink<T> {
 
     private final StreamingContext context;
-
-    private String fenodes;
-    private String database;
-    private String table;
-    private String user;
-    private String password;
-    private Integer batchSize = 100;
-    private Long intervalMs = 3000L;
-    private Integer maxRetries = 1;
+    private String alias = "";
     private Properties streamLoadProp = new Properties();
 
     public DorisSink(StreamingContext context) {
@@ -49,42 +41,42 @@ public class DorisSink<T> {
     }
 
     public DorisSink<T> fenodes(String fenodes) {
-        this.fenodes = fenodes;
+        streamLoadProp.put(ConfigConst.DORIS_FENODES(), fenodes);
         return this;
     }
 
     public DorisSink<T> database(String database) {
-        this.database = database;
+        streamLoadProp.put(ConfigConst.DORIS_DATABASE(), database);
         return this;
     }
 
     public DorisSink<T> table(String table) {
-        this.table = table;
+        streamLoadProp.put(ConfigConst.DORIS_TABLE(), table);
         return this;
     }
 
     public DorisSink<T> user(String user) {
-        this.user = user;
+        streamLoadProp.put(ConfigConst.DORIS_USER(), user);
         return this;
     }
 
     public DorisSink<T> password(String password) {
-        this.password = password;
+        streamLoadProp.put(ConfigConst.DORIS_PASSWORD(), password);
         return this;
     }
 
     public DorisSink<T> batchSize(Integer batchSize) {
-        this.batchSize = batchSize;
+        streamLoadProp.put(ConfigConst.DORIS_BATCHSIZE(), batchSize);
         return this;
     }
 
     public DorisSink<T> intervalMs(Long intervalMs) {
-        this.intervalMs = intervalMs;
+        streamLoadProp.put(ConfigConst.DORIS_INTERVALMS(), intervalMs);
         return this;
     }
 
     public DorisSink<T> maxRetries(Integer maxRetries) {
-        this.maxRetries = maxRetries;
+        streamLoadProp.put(ConfigConst.DORIS_MAXRETRIES(), maxRetries);
         return this;
     }
 
@@ -94,7 +86,7 @@ public class DorisSink<T> {
     }
 
     public DataStreamSink<T> sink(DataStream<T> source) {
-        Properties config = ConfigUtils.getConf(context.parameter().toMap(), ConfigConst.DORIS_SINK_PREFIX(), "", "");
-        return source.addSink(new DorisSinkFunction<>(config));
+        DorisSinkFunction<T> sinkFunction = new DorisSinkFunction<>(context, streamLoadProp, alias);
+        return source.addSink(sinkFunction);
     }
 }
