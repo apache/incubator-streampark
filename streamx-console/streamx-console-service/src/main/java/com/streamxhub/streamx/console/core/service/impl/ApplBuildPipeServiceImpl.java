@@ -194,8 +194,13 @@ public class ApplBuildPipeServiceImpl
                                 fsOperator.copy(uploadJar, app.getAppLib(), false, true);
                                 break;
                             case APACHE_FLINK:
-                                fsOperator.mkdirs(appHome);
-                                fsOperator.copy(uploadJar, appHome, false, true);
+                                if (ExecutionMode.isYarnMode(app.getExecutionMode())) {
+                                    fsOperator.mkdirs(app.getAppLib());
+                                    fsOperator.copy(uploadJar, app.getAppLib(), false, true);
+                                } else {
+                                    fsOperator.mkdirs(appHome);
+                                    fsOperator.copy(uploadJar, appHome, false, true);
+                                }
                                 break;
                             default:
                                 throw new IllegalArgumentException("[StreamX] unsupported ApplicationType of custom code: "
