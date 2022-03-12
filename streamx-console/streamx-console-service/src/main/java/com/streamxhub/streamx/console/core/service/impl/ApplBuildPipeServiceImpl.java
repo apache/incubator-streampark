@@ -146,8 +146,6 @@ public class ApplBuildPipeServiceImpl
     @Override
     public boolean buildApplication(@Nonnull Application app) throws Exception {
 
-        AppBuildPipeline appBuildPipeline = getById(app.getAppId());
-
         // 1) flink sql setDependency
         if (app.isFlinkSqlJob()) {
             FlinkSql flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
@@ -173,9 +171,7 @@ public class ApplBuildPipeServiceImpl
                 applicationService.checkEnv(app);
 
                 // 2) backup.
-                if (appBuildPipeline != null) {
-                    backUpService.backup(app);
-                }
+                backUpService.backup(app);
 
                 // 3) some preparatory work
                 String appUploads = app.getWorkspace().APP_UPLOADS();
@@ -325,6 +321,7 @@ public class ApplBuildPipeServiceImpl
             case REMOTE:
                 FlinkRemoteBuildRequest remoteBuildRequest = new FlinkRemoteBuildRequest(
                     app.getJobName(),
+                    app.getLocalAppHome(),
                     mainClass,
                     flinkUserJar,
                     app.getExecutionModeEnum(),
@@ -337,6 +334,7 @@ public class ApplBuildPipeServiceImpl
             case KUBERNETES_NATIVE_SESSION:
                 FlinkK8sSessionBuildRequest k8sSessionBuildRequest = new FlinkK8sSessionBuildRequest(
                     app.getJobName(),
+                    app.getLocalAppHome(),
                     mainClass,
                     flinkUserJar,
                     app.getExecutionModeEnum(),
@@ -350,6 +348,7 @@ public class ApplBuildPipeServiceImpl
             case KUBERNETES_NATIVE_APPLICATION:
                 FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest = new FlinkK8sApplicationBuildRequest(
                     app.getJobName(),
+                    app.getLocalAppHome(),
                     mainClass,
                     flinkUserJar,
                     app.getExecutionModeEnum(),

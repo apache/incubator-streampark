@@ -57,6 +57,7 @@ sealed trait FlinkK8sBuildParam extends FlinkBuildParam {
 }
 
 case class FlinkK8sSessionBuildRequest(appName: String,
+                                       workspace: String,
                                        mainClass: String,
                                        customFlinkUserJar: String,
                                        executionMode: ExecutionMode,
@@ -68,6 +69,7 @@ case class FlinkK8sSessionBuildRequest(appName: String,
                                       ) extends FlinkK8sBuildParam
 
 case class FlinkK8sApplicationBuildRequest(appName: String,
+                                           workspace: String,
                                            mainClass: String,
                                            customFlinkUserJar: String,
                                            executionMode: ExecutionMode,
@@ -83,6 +85,7 @@ case class FlinkK8sApplicationBuildRequest(appName: String,
                                           ) extends FlinkK8sBuildParam
 
 case class FlinkRemoteBuildRequest(appName: String,
+                                   workspace: String,
                                    mainClass: String,
                                    customFlinkUserJar: String,
                                    executionMode: ExecutionMode,

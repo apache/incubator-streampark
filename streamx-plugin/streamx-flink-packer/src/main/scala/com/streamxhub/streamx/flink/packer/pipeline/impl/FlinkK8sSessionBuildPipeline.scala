@@ -47,7 +47,7 @@ class FlinkK8sSessionBuildPipeline(request: FlinkK8sSessionBuildRequest) extends
     // the sub workspace path like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/job-name/
     val buildWorkspace =
     execStep(1) {
-      val buildWorkspace = s"${Workspace.local.APP_WORKSPACE}/${request.clusterId}@${request.k8sNamespace}/$appName"
+      val buildWorkspace = s"${request.workspace}/${request.clusterId}@${request.k8sNamespace}/$appName"
       LfsOperator.mkCleanDirs(buildWorkspace)
       logInfo(s"recreate building workspace: $buildWorkspace")
       buildWorkspace

@@ -64,7 +64,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
     // the sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/
     val buildWorkspace =
     execStep(1) {
-      val buildWorkspace = s"${Workspace.local.APP_WORKSPACE}/${request.clusterId}@${request.k8sNamespace}"
+      val buildWorkspace = s"${request.workspace}/${request.clusterId}@${request.k8sNamespace}"
       LfsOperator.mkCleanDirs(buildWorkspace)
       logInfo(s"recreate building workspace: $buildWorkspace")
       buildWorkspace

@@ -45,25 +45,22 @@ class FlinkRemoteBuildPipeline(request: FlinkRemoteBuildRequest) extends BuildPi
 
     // create workspace.
     // the sub workspace path like: APP_WORKSPACE/jobName
-    val buildWorkspace =
     execStep(1) {
-      val buildWorkspace = s"${Workspace.local.APP_WORKSPACE}/$appName"
-      LfsOperator.mkCleanDirs(buildWorkspace)
-      logInfo(s"recreate building workspace: $buildWorkspace")
-      buildWorkspace
+      LfsOperator.mkCleanDirs(request.workspace)
+      logInfo(s"recreate building workspace: ${request.workspace}")
     }.getOrElse(throw getError.exception)
     // build flink job shaded jar
     val shadedJar =
       execStep(2) {
         val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(request)
-        val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${appName}_${DateUtils.now(fullCompact)}.jar"
+        val shadedJarOutputPath = s"${request.workspace}/streamx-flinkjob_${appName}_${DateUtils.now(fullCompact)}.jar"
         val flinkLibs = request.dependencyInfo.merge(providedLibs)
         val output = MavenTool.buildFatJar(request.mainClass, flinkLibs, shadedJarOutputPath)
         logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
         output
       }.getOrElse(throw getError.exception)
 
-    ShadedBuildResponse(buildWorkspace, shadedJar.getAbsolutePath)
+    ShadedBuildResponse(request.workspace, shadedJar.getAbsolutePath)
   }
 
 }
