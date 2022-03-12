@@ -112,6 +112,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -1106,7 +1107,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 extraParameter
             );
 
-            SubmitResponse submitResponse = FlinkSubmitter.submit(submitRequest);
+            Future<SubmitResponse> future = executorService.submit(() -> FlinkSubmitter.submit(submitRequest));
+
+            SubmitResponse submitResponse = future.get(60, TimeUnit.SECONDS);
 
             assert submitResponse != null;
 
