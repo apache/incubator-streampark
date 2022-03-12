@@ -34,6 +34,7 @@ import org.apache.hadoop.fs.{Path => HadoopPath}
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.io.File
+import java.lang.{Boolean => JavaBool}
 import scala.collection.JavaConversions._
 
 /**
@@ -44,7 +45,11 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     //execution.target
-    flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
+    flinkConfig
+      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
+      .safeSet(DeploymentOptions.ATTACHED, JavaBool.TRUE)
+      .safeSet(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.TRUE)
+
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -132,4 +137,5 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     clusterDescriptor.killCluster(ApplicationId.fromString(stopRequest.clusterId))
     response
   }
+
 }

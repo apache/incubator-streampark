@@ -83,7 +83,11 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
   @throws[Exception] override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
-    assert(StringUtils.isNotBlank(stopRequest.clusterId))
+
+    require(
+      StringUtils.isNotBlank(stopRequest.clusterId),
+      s"[flink-submit] stop flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
+    )
 
     flinkConfig
       .safeSet(KubernetesConfigOptions.CLUSTER_ID, stopRequest.clusterId)

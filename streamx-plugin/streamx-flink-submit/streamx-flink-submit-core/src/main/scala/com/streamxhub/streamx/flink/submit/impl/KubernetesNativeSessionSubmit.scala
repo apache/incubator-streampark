@@ -28,6 +28,7 @@ import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
@@ -35,7 +36,6 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import java.io.File
 import scala.language.postfixOps
-import scala.util.Try
 
 /**
  * kubernetes native session mode submit
@@ -45,7 +45,10 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   @throws[Exception]
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
     // require parameters
-    assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
+    require(
+      StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
+      s"[flink-submit] stop flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
+    )
 
     // 2) get userJar
     val jarFile = submitRequest.developmentMode match {
