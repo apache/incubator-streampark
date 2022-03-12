@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.flink.packer.pipeline.impl
 
-import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.fs.LfsOperator
 import com.streamxhub.streamx.common.util.DateUtils
 import com.streamxhub.streamx.common.util.DateUtils.fullCompact
