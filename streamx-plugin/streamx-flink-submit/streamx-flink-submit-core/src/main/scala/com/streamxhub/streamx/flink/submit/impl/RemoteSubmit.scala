@@ -45,7 +45,6 @@ object RemoteSubmit extends FlinkSubmitTrait {
    */
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     flinkConfig
-      .safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
       .safeSet(RestOptions.ADDRESS, submitRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
       .safeSet[JavaInt](RestOptions.PORT, submitRequest.extraParameter.get(RestOptions.PORT.key()).toString.toInt)
     logInfo(
@@ -74,8 +73,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
 
   }
 
-  override def doStop(stopRequest: StopRequest): StopResponse = {
-    val flinkConfig = new Configuration()
+  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, stopRequest.executionMode.getName)
       .safeSet(RestOptions.ADDRESS, stopRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)

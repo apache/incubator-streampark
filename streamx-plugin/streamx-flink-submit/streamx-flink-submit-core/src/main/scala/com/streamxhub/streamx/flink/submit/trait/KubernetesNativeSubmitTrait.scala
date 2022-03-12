@@ -50,7 +50,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     // extract from submitRequest
     flinkConfig
-      .safeSet(PipelineOptions.NAME, submitRequest.appName)
       .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
       .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
       .safeSet(
@@ -83,12 +82,10 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   }
 
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
-  @throws[Exception] protected def doStop(@Nonnull executeMode: ExecutionMode,
-                                          stopRequest: StopRequest): StopResponse = {
+  @throws[Exception] override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
     assert(StringUtils.isNotBlank(stopRequest.clusterId))
 
-    val flinkConfig = new Configuration()
-      .safeSet(DeploymentOptions.TARGET, executeMode.getName)
+    flinkConfig
       .safeSet(KubernetesConfigOptions.CLUSTER_ID, stopRequest.clusterId)
       .safeSet(KubernetesConfigOptions.NAMESPACE, stopRequest.kubernetesNamespace)
 
@@ -119,7 +116,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       StopResponse(actionResult)
     } catch {
       case e: Exception =>
-        logger.error(s"[flink-submit] stop flink job failed, mode=${executeMode.toString}, stopRequest=${stopRequest}")
+        logger.error(s"[flink-submit] stop flink job failed, mode=${flinkConfig.get(DeploymentOptions.TARGET)}, stopRequest=${stopRequest}")
         throw e
     } finally {
       if (client != null) client.close()

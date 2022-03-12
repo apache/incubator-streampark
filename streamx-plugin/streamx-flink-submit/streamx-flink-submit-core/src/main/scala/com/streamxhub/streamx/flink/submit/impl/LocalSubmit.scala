@@ -81,8 +81,8 @@ object LocalSubmit extends FlinkSubmitTrait {
     }
   }
 
-  override def doStop(stopRequest: StopRequest): StopResponse = {
-    RemoteSubmit.stop(stopRequest)
+  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
+    RemoteSubmit.doStop(stopRequest, flinkConfig)
   }
 
   private[this] def createLocalCluster(flinkConfig: Configuration) = {

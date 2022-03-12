@@ -438,7 +438,7 @@
 
           <a-tooltip title="Launch Application">
             <a-button
-              v-if="(record.launch === -1 || record.launch === 1) && record['optionState'] === 0"
+              v-if="(record.launch === -1 || record.launch === 1 || record.launch === 4) && record['optionState'] === 0"
               @click.native="handleCheckLaunchApp(record)"
               shape="circle"
               size="small"

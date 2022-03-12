@@ -120,8 +120,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     }
   }
 
-  override def doStop(stopInfo: StopRequest): StopResponse = {
-    super.doStop(ExecutionMode.KUBERNETES_NATIVE_SESSION, stopInfo)
+  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
+    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
+    super.doStop(stopRequest, flinkConfig)
   }
 
 }
