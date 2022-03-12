@@ -103,8 +103,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
     }
   }
 
-  override def doStop(stopRequest: StopRequest): StopResponse = {
-    val flinkConfig = new Configuration()
+  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
     flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, stopRequest.extraParameter.get(KEY_YARN_APP_ID).toString)
     flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     logInfo(

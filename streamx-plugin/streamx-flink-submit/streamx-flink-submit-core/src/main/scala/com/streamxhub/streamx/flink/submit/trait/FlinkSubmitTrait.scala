@@ -127,14 +127,15 @@ trait FlinkSubmitTrait extends Logger {
          |     jobId          : ${stopRequest.jobId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
-    doStop(stopRequest)
+    val flinkConf = new Configuration()
+    doStop(stopRequest, flinkConf)
   }
 
   @throws[Exception]
   def doSubmit(submitRequest: SubmitRequest, flinkConf: Configuration): SubmitResponse
 
   @throws[Exception]
-  def doStop(stopRequest: StopRequest): StopResponse
+  def doStop(stopRequest: StopRequest, flinkConf: Configuration): StopResponse
 
   def trySubmit(submitRequest: SubmitRequest,
                 flinkConfig: Configuration,

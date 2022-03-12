@@ -27,7 +27,7 @@ import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.configuration.{Configuration, DeploymentOptionsInternal, PipelineOptions}
+import org.apache.flink.configuration.{Configuration, DeploymentOptions, DeploymentOptionsInternal, PipelineOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
@@ -84,8 +84,9 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     }
   }
 
-  override def doStop(stopInfo: StopRequest): StopResponse = {
-    super.doStop(ExecutionMode.KUBERNETES_NATIVE_APPLICATION, stopInfo)
+  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
+    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
+    super.doStop(stopRequest, flinkConfig)
   }
 
 
