@@ -47,8 +47,9 @@ object YarnSessionSubmit extends YarnSubmitTrait {
    */
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     flinkConfig
-      .safeSet(YarnConfigOptions.APPLICATION_ID, submitRequest.option.get(KEY_YARN_APP_ID).toString)
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+      .safeSet(YarnConfigOptions.APPLICATION_ID, submitRequest.option.get(KEY_YARN_APP_ID).toString)
+
     logInfo(
       s"""
          |------------------------------------------------------------------

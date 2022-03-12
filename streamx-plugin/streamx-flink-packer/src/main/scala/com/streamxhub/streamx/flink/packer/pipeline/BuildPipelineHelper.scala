@@ -37,7 +37,7 @@ object BuildPipelineHelper {
   /**
    * Let appName more suitable as part of the file path
    */
-  def getSafeAppName(appName: String): String = appName.replaceAll("\\s+", "_")
+  def getSafeAppName(appName: String): String = appName.replaceAll("\\s+", "_") + "_" + System.currentTimeMillis()
 
   /**
    * Extract provided flink libs from StreamX Workspace

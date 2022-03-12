@@ -47,6 +47,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
     flinkConfig
       .safeSet(RestOptions.ADDRESS, submitRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
       .safeSet[JavaInt](RestOptions.PORT, submitRequest.extraParameter.get(RestOptions.PORT.key()).toString.toInt)
+
     logInfo(
       s"""
          |------------------------------------------------------------------
