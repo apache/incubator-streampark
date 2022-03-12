@@ -32,6 +32,7 @@ import com.streamxhub.streamx.common.enums.ApplicationType;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
+import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -80,7 +81,6 @@ import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
-import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
 import com.streamxhub.streamx.flink.submit.FlinkSubmitter;
 import com.streamxhub.streamx.flink.submit.bean.KubernetesSubmitParam;
 import com.streamxhub.streamx.flink.submit.bean.StopRequest;
@@ -542,7 +542,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (saved) {
             if (appParam.isFlinkSqlJob()) {
                 FlinkSql flinkSql = new FlinkSql(appParam);
-                flinkSqlService.create(flinkSql, CandidateType.NEW);
+                flinkSqlService.create(flinkSql);
             }
             if (appParam.getConfig() != null) {
                 configService.create(appParam, true);
@@ -644,20 +644,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      * @param appParam
      */
     private void updateFlinkSqlJob(Application application, Application appParam) {
-        AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
-        //从来没有上线过的新任务.直接保存
-        if (buildPipeline == null) {
-            FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
-            flinkSqlService.removeById(newFlinkSql.getId());
+        FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
+        if (effectiveFlinkSql == null) {
+            effectiveFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
+            flinkSqlService.removeById(effectiveFlinkSql.getId());
             FlinkSql sql = new FlinkSql(appParam);
-            flinkSqlService.create(sql, CandidateType.NEW);
-            flinkSqlService.toEffective(application.getId(), sql.getId());
-        } else if (buildPipeline.getPipeStatus().equals(PipelineStatus.failure)) {
-            FlinkSql newFlinkSql = flinkSqlService.getEffective(application.getId(), false);
-            flinkSqlService.removeById(newFlinkSql.getId());
-            FlinkSql sql = new FlinkSql(appParam);
-            flinkSqlService.create(sql, CandidateType.NEW);
-            flinkSqlService.toEffective(application.getId(), sql.getId());
+            flinkSqlService.create(sql);
             application.setBuild(true);
         } else {
             //1) 获取copy的源FlinkSql
@@ -688,22 +680,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     flinkSqlService.cleanCandidate(historyFlinkSql.getId());
                 }
                 FlinkSql sql = new FlinkSql(appParam);
-                CandidateType type = (changedType.isDependencyChanged() || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
-                flinkSqlService.create(sql, type);
-
+                flinkSqlService.create(sql);
                 if (changedType.isDependencyChanged()) {
                     application.setBuild(true);
                 }
             } else {
                 // 2) 判断版本是否发生变化
                 //获取正式版本的flinkSql
-                FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
-                assert effectiveFlinkSql != null;
                 boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
                 if (versionChanged) {
                     //sql和依赖未发生变更,但是版本号发生了变化,说明是回滚到某个版本了
                     CandidateType type = CandidateType.HISTORY;
-                    flinkSqlService.setCandidateOrEffective(type, appParam.getId(), appParam.getSqlId());
+                    flinkSqlService.setCandidate(type, appParam.getId(), appParam.getSqlId());
                     //直接回滚到某个历史版本(rollback)
                     application.setLaunch(LaunchState.NEED_ROLLBACK.get());
                     application.setBuild(true);
@@ -779,6 +767,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
         if (application.isFlinkSqlJob()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
+            if (flinkSql == null) {
+                flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
+                flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
+            }
             flinkSql.setToApplication(application);
         } else {
             if (application.isCICDJob()) {

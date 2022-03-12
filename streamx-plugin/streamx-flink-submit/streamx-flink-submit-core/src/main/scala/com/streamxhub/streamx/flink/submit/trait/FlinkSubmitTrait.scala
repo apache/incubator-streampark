@@ -37,7 +37,6 @@ import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.Preconditions.checkNotNull
 
 import java.io.File
-import java.lang.{Boolean => JavaBool}
 import java.util.{Collections, List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -95,7 +94,8 @@ trait FlinkSubmitTrait extends Logger {
     executionParameters.applyToConfiguration(flinkConfig)
 
     // set common parameter
-    flinkConfig.safeSet(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.FALSE)
+    flinkConfig
+      .safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
       .safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
       .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
       .safeSet(CoreOptions.CLASSLOADER_RESOLVE_ORDER, submitRequest.resolveOrder.getName)

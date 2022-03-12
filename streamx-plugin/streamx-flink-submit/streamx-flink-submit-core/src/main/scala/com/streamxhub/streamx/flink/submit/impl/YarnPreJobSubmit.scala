@@ -44,7 +44,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     //execution.target
-    flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
+    flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
     logInfo(
       s"""
          |------------------------------------------------------------------

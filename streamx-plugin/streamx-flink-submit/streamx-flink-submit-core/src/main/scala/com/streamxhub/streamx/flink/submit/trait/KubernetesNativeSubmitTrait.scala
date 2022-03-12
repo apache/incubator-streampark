@@ -50,7 +50,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     // extract from submitRequest
     flinkConfig
-      .safeSet(PipelineOptions.NAME, submitRequest.appName)
       .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
       .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
       .safeSet(
