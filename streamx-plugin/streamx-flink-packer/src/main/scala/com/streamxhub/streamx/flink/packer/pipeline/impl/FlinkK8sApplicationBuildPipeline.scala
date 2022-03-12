@@ -23,7 +23,7 @@ import com.github.dockerjava.api.command.PushImageCmd
 import com.github.dockerjava.core.command.{HackBuildImageCmd, HackPullImageCmd, HackPushImageCmd}
 import com.google.common.collect.Sets
 import com.streamxhub.streamx.common.conf.CommonConfig.DOCKER_IMAGE_NAMESPACE
-import com.streamxhub.streamx.common.conf.{ConfigHub, Workspace}
+import com.streamxhub.streamx.common.conf.ConfigHub
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.fs.LfsOperator
 import com.streamxhub.streamx.common.util.ThreadUtils
@@ -64,7 +64,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
     // the sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/
     val buildWorkspace =
     execStep(1) {
-      val buildWorkspace = s"${Workspace.local.APP_WORKSPACE}/${request.clusterId}@${request.k8sNamespace}"
+      val buildWorkspace = s"${request.workspace}/${request.clusterId}@${request.k8sNamespace}"
       LfsOperator.mkCleanDirs(buildWorkspace)
       logInfo(s"recreate building workspace: $buildWorkspace")
       buildWorkspace
