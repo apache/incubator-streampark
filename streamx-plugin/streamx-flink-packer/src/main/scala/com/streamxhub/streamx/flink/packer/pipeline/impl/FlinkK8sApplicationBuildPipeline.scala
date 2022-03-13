@@ -87,18 +87,13 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
     // the output shaded jar file name like: streamx-flinkjob_myjob-test.jar
     val (shadedJar, extJarLibs) =
     execStep(3) {
-      val appName = BuildPipelineHelper.getSafeAppName(request.appName)
-      val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_$appName.jar"
-
-      val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(request)
-      val depsInfoWithProvidedLibs = request.dependencyInfo.merge(providedLibs)
+      val shadedJarOutputPath = request.getShadedJarPath(buildWorkspace)
       val (shadedJar, extJarLibs) = request.developmentMode match {
         case DevelopmentMode.FLINKSQL =>
-          val shadedJar = MavenTool.buildFatJar(request.mainClass, depsInfoWithProvidedLibs, shadedJarOutputPath)
+          val shadedJar = MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)
           shadedJar -> request.dependencyInfo.extJarLibs
-
         case DevelopmentMode.CUSTOMCODE =>
-          val shadedJar = MavenTool.buildFatJar(request.mainClass, depsInfoWithProvidedLibs, shadedJarOutputPath)
+          val shadedJar = MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)
           shadedJar -> Set[String]()
       }
       logInfo(s"output shaded flink job jar: ${shadedJar.getAbsolutePath}")
