@@ -20,9 +20,9 @@
 package com.streamxhub.streamx.flink.packer.pipeline
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper.calPercent
+import com.streamxhub.streamx.common.util.Utils
 
-import java.util.{List => JList}
+import java.util.{List => JavaList}
 import scala.collection.JavaConverters._
 
 /**
@@ -38,7 +38,7 @@ case class DockerResolvedSnapshot(pull: DockerPullSnapshot, build: DockerBuildSn
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 case class DockerPullSnapshot(detail: Seq[DockerLayerProgress], error: String, emitTime: Long, percent: Double) {
-  def detailAsJava: JList[DockerLayerProgress] = detail.asJava
+  def detailAsJava: JavaList[DockerLayerProgress] = detail.asJava
 }
 
 /**
@@ -46,7 +46,7 @@ case class DockerPullSnapshot(detail: Seq[DockerLayerProgress], error: String, e
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 case class DockerBuildSnapshot(detail: Seq[String], emitTime: Long) {
-  def detailAsJava: JList[String] = detail.asJava
+  def detailAsJava: JavaList[String] = detail.asJava
 }
 
 /**
@@ -54,17 +54,17 @@ case class DockerBuildSnapshot(detail: Seq[String], emitTime: Long) {
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 case class DockerPushSnapshot(detail: Seq[DockerLayerProgress], error: String, emitTime: Long, percent: Double) {
-  def detailAsJava: JList[DockerLayerProgress] = detail.asJava
+  def detailAsJava: JavaList[DockerLayerProgress] = detail.asJava
 }
 
 object DockerPullSnapshot {
   def of(detail: Seq[DockerLayerProgress], error: String, emitTime: Long): DockerPullSnapshot =
-    DockerPullSnapshot(detail, error, emitTime, calPercent(detail.map(_.current).sum, detail.map(_.total).sum))
+    DockerPullSnapshot(detail, error, emitTime, Utils.calPercent(detail.map(_.current).sum, detail.map(_.total).sum))
 }
 
 object DockerPushSnapshot {
   def of(detail: Seq[DockerLayerProgress], error: String, emitTime: Long): DockerPushSnapshot =
-    DockerPushSnapshot(detail, error, emitTime, calPercent(detail.map(_.current).sum, detail.map(_.total).sum))
+    DockerPushSnapshot(detail, error, emitTime, Utils.calPercent(detail.map(_.current).sum, detail.map(_.total).sum))
 }
 
 

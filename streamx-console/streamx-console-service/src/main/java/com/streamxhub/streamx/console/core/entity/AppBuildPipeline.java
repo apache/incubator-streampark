@@ -27,13 +27,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
+import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeError;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStepStatus;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineType;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildResult;
-import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeSnapshot;
 import lombok.AllArgsConstructor;
@@ -313,7 +313,7 @@ public class AppBuildPipeline {
                 .setPipeStatus(pipe.getPipeStatusCode())
                 .setCurStep(pipe.getCurStep())
                 .setTotalStep(pipe.getTotalStep())
-                .setPercent(BuildPipelineHelper.calPercent(pipe.getCurStep(), pipe.getTotalStep()))
+                .setPercent(Utils.calPercent(pipe.getCurStep(), pipe.getTotalStep()))
                 .setCostSec(pipe.calCostSecond())
                 .setSteps(steps)
                 .setIsErr(pipe.getError().nonEmpty())
