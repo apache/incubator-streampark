@@ -735,11 +735,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
             }
             baseMapper.update(application, updateWrapper);
+
+            // backup.
+            if (application.isFlinkSqlJob()) {
+                FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
+                if (!application.isNeedRollback() && newFlinkSql != null) {
+                    backUpService.backup(application, newFlinkSql);
+                }
+            }
+
             //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
             if (!application.isRunning() || flinkSql == null) {
                 this.toEffective(application);
             }
+
         }
         return build;
     }
