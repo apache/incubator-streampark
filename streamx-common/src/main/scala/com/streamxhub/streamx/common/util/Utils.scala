@@ -117,4 +117,12 @@ object Utils {
     })
   }
 
+  /**
+   * calculate the percentage of num1 / num2, the result range from 0 to 100, with one small digit reserve.
+   */
+  def calPercent(num1: Long, num2: Long): Double =
+    if (num1 == 0 || num2 == 0) 0.0
+    else (num1.toDouble / num2.toDouble * 100).formatted("%.1f").toDouble
+
+
 }

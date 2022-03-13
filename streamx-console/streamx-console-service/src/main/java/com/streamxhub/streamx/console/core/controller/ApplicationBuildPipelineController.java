@@ -81,10 +81,8 @@ public class ApplicationBuildPipelineController {
             }
 
             //回滚任务.
-            if (app.isNeedRollback()) {
-                if (app.isFlinkSqlJob()) {
-                    flinkSqlService.rollback(app);
-                }
+            if (app.isNeedRollback() && app.isFlinkSqlJob()) {
+                flinkSqlService.rollback(app);
             }
 
             boolean actionResult = appBuildPipeService.buildApplication(app);
