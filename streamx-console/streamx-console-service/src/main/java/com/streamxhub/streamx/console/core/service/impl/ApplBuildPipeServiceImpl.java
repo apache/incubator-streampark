@@ -169,7 +169,6 @@ public class ApplBuildPipeServiceImpl
                 // 1) checkEnv
                 applicationService.checkEnv(app);
 
-
                 // 3) some preparatory work
                 String appUploads = app.getWorkspace().APP_UPLOADS();
 
