@@ -70,7 +70,6 @@ trait FlinkSubmitTrait extends Logger {
          |    applicationType  : ${submitRequest.applicationType.getName}
          |    flameGraph       : ${submitRequest.flameGraph != null}
          |    savePoint        : ${submitRequest.savePoint}
-         |    userJar          : ${submitRequest.flinkUserJar}
          |    option           : ${submitRequest.option}
          |    property         : ${submitRequest.option}
          |    dynamicOption    : ${submitRequest.dynamicOption.mkString(" ")}
@@ -86,7 +85,7 @@ trait FlinkSubmitTrait extends Logger {
     )
 
     val activeCommandLine = validateAndGetActiveCommandLine(getCustomCommandLines(submitRequest.flinkVersion.flinkHome), commandLine)
-    val uri = PackagedProgramUtils.resolveURI(submitRequest.flinkUserJar)
+    val uri = PackagedProgramUtils.resolveURI(submitRequest.shadedJarPath.getAbsolutePath)
     val flinkConfig = applyConfiguration(submitRequest, activeCommandLine, commandLine)
 
     val programOptions = ProgramOptions.create(commandLine)

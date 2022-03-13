@@ -19,9 +19,7 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.{FlinkUtils, Utils}
-import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
@@ -85,15 +83,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
              |------------------------------------------------------------------
              |""".stripMargin)
 
-        val jarFile = submitRequest.developmentMode match {
-          case DevelopmentMode.FLINKSQL =>
-            submitRequest.checkBuildResult()
-            val buildResult = submitRequest.buildResult.asInstanceOf[ShadedBuildResponse]
-            new File(buildResult.shadedJarPath)
-          case _ => new File(submitRequest.flinkUserJar)
-        }
-
-        val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
+        val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.shadedJarPath)
         packagedProgram = packageProgramJobGraph._1
         val jobGraph = packageProgramJobGraph._2
 

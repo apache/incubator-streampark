@@ -985,7 +985,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         //1) 真正执行启动相关的操作..
         String appConf;
-        String flinkUserJar;
         ApplicationLog applicationLog = new ApplicationLog();
         applicationLog.setAppId(application.getId());
         applicationLog.setStartTime(new Date());
@@ -1017,40 +1016,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
                     }
                 }
-                switch (application.getApplicationType()) {
-                    case STREAMX_FLINK:
-                        flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getModule().concat(".jar"));
-                        break;
-                    case APACHE_FLINK:
-                        flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
-                        break;
-                    default:
-                        throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
-                }
             } else if (application.isFlinkSqlJob()) {
-                FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-                assert flinkSql != null;
-                //1) dist_userJar
-                String sqlDistJar = commonService.getSqlClientJar();
                 //2) appConfig
                 appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
-                assert executionMode != null;
-                //3) client
-                switch (executionMode) {
-                    case REMOTE:
-                    case YARN_PER_JOB:
-                    case YARN_SESSION:
-                    case KUBERNETES_NATIVE_SESSION:
-                    case KUBERNETES_NATIVE_APPLICATION:
-                        flinkUserJar = Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
-                        break;
-                    case YARN_APPLICATION:
-                        String clientPath = Workspace.remote().APP_CLIENT();
-                        flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("Unsupported..." + executionMode);
-                }
             } else {
                 throw new UnsupportedOperationException("Unsupported...");
             }
@@ -1100,7 +1068,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             SubmitRequest submitRequest = new SubmitRequest(
                 flinkEnv.getFlinkVersion(),
                 flinkEnv.getFlinkConf(),
-                flinkUserJar,
                 DevelopmentMode.of(application.getJobType()),
                 ExecutionMode.of(application.getExecutionMode()),
                 resolveOrder,
@@ -1112,7 +1079,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 optionMap,
                 dynamicOption,
                 application.getArgs(),
-                buildPipeline == null ? null : buildPipeline.getBuildResult(),
+                buildPipeline.getBuildResult(),
                 kubernetesSubmitParam,
                 extraParameter
             );
