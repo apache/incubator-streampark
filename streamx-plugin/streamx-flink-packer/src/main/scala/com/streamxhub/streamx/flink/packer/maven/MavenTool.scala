@@ -48,7 +48,7 @@ object MavenTool extends Logger {
     MavenArtifact.of("org.apache.logging.log4j:*:*")
   )
 
-  private val isJarFile = (file: File) => file.isFile && Try(Utils.checkJarFile(file.toURL)).isSuccess
+  private val isJarFile = (file: File) => file.isFile && Try(Utils.checkJarFile(file.toURI.toURL)).isSuccess
 
   /**
    * Build a fat-jar with custom jar libraries.
