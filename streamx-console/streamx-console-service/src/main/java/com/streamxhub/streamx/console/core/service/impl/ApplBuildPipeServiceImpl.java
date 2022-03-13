@@ -235,7 +235,7 @@ public class ApplBuildPipeServiceImpl
 
                     //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
                     if (!app.isRunning()) {
-                        if (app.isFlinkSqlJob() && effectiveFlinkSql == null) {
+                        if (app.isFlinkSqlJob()) {
                             applicationService.toEffective(app);
                         }
                     }
