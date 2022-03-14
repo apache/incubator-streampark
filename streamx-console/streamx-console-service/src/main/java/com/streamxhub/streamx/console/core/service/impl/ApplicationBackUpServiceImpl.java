@@ -114,7 +114,12 @@ public class ApplicationBackUpServiceImpl
                     // 1) 在回滚时判断当前生效的项目是否需要备份.如需要则先执行备份...
                     if (backParam.isBackup()) {
                         application.setBackUpDescription(backParam.getDescription());
-                        backup(application);
+                        if (application.isFlinkSqlJob()) {
+                            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+                            backup(application, flinkSql);
+                        } else {
+                            backup(application, null);
+                        }
                     }
 
                     //2) 恢复 配置和SQL
@@ -232,7 +237,7 @@ public class ApplicationBackUpServiceImpl
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public void backup(Application application) {
+    public void backup(Application application, FlinkSql flinkSql) {
         //1) 基础的配置文件备份
         String appHome = (application.isCustomCodeJob() && application.isCICDJob()) ? application.getDistHome() : application.getAppHome();
         FsOperator fsOperator = application.getFsOperator();
@@ -244,9 +249,7 @@ public class ApplicationBackUpServiceImpl
             }
             //2) FlinkSQL任务需要备份sql和依赖.
             int version = 1;
-            if (application.isFlinkSqlJob()) {
-                FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-                assert flinkSql != null;
+            if (flinkSql != null) {
                 application.setSqlId(flinkSql.getId());
                 version = flinkSql.getVersion();
             } else if (config != null) {

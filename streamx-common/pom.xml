@@ -242,7 +242,7 @@
                     <relocations>
                         <relocation>
                             <pattern>com.fasterxml.jackson</pattern>
-                            <shadedPattern>${streamx.shaded.packageName}.com.fasterxml.jackson</shadedPattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

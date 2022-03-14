@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.flink.packer.pipeline.impl
 
-import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.fs.LfsOperator
 import com.streamxhub.streamx.common.util.DateUtils
 import com.streamxhub.streamx.common.util.DateUtils.fullCompact
@@ -41,13 +40,12 @@ class FlinkK8sSessionBuildPipeline(request: FlinkK8sSessionBuildRequest) extends
    * The construction logic needs to be implemented by subclasses
    */
   @throws[Throwable] override protected def buildProcess(): ShadedBuildResponse = {
-    val appName = BuildPipelineHelper.getSafeAppName(request.appName)
 
     // create workspace.
-    // the sub workspace path like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/job-name/
+    // the sub workspace path like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/
     val buildWorkspace =
     execStep(1) {
-      val buildWorkspace = s"${Workspace.local.APP_WORKSPACE}/${request.clusterId}@${request.k8sNamespace}/$appName"
+      val buildWorkspace = s"${request.workspace}/${request.clusterId}@${request.k8sNamespace}"
       LfsOperator.mkCleanDirs(buildWorkspace)
       logInfo(s"recreate building workspace: $buildWorkspace")
       buildWorkspace
@@ -57,10 +55,7 @@ class FlinkK8sSessionBuildPipeline(request: FlinkK8sSessionBuildRequest) extends
     // the output shaded file name like: streamx-flinkjob_myjob_20211024134822
     val shadedJar =
     execStep(2) {
-      val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(request)
-      val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_${appName}_${DateUtils.now(fullCompact)}.jar"
-      val flinkLibs = request.dependencyInfo.merge(providedLibs)
-      val output = MavenTool.buildFatJar(request.mainClass, flinkLibs, shadedJarOutputPath)
+      val output = MavenTool.buildFatJar(request.mainClass, request.providedLibs, request.getShadedJarPath(buildWorkspace))
       logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
       output
     }.getOrElse(throw getError.exception)

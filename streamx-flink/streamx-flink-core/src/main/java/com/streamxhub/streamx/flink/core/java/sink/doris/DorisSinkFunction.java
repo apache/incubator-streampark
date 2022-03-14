@@ -20,6 +20,9 @@
 package com.streamxhub.streamx.flink.core.java.sink.doris;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.util.ConfigUtils;
+import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.runtime.state.FunctionInitializationContext;
 import org.apache.flink.runtime.state.FunctionSnapshotContext;
@@ -51,7 +54,7 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
     private final String user;
     private final String password;
     private final Properties streamLoadProp;
-    private final List batch = new ArrayList<>();
+    private final List<Object> batch = new ArrayList<>();
     private String fenodes;
     private Integer batchSize;
     private long intervalMs;
@@ -62,24 +65,25 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
     private transient volatile Exception flushException;
     private transient volatile boolean closed = false;
 
-    public DorisSinkFunction(Properties props) {
-        this.fenodes = props.getProperty(ConfigConst.DORIS_FENODES());
-        this.database = props.getProperty(ConfigConst.DORIS_DATABASE());
-        this.table = props.getProperty(ConfigConst.DORIS_TABLE());
-        this.user = props.getProperty(ConfigConst.DORIS_USER());
-        this.password = props.getProperty(ConfigConst.DORIS_PASSWORD());
-        this.batchSize = Integer.valueOf(props.getProperty(ConfigConst.DORIS_BATCHSIZE(), ConfigConst.DORIS_DEFAULT_BATCHSIZE()));
-        this.intervalMs = Long.valueOf(props.getProperty(ConfigConst.DORIS_INTERVALMS(), ConfigConst.DORIS_DEFAULT_INTERVALMS()));
-        this.maxRetries = Integer.valueOf(props.getProperty(ConfigConst.DORIS_MAXRETRIES(), ConfigConst.DORIS_DEFAULT_MAXRETRIES()));
-        this.streamLoadProp = parseStreamLoadProps(props, ConfigConst.DORIS_STREAM_LOAD_PROP_PREFIX());
+    public DorisSinkFunction(StreamingContext context, Properties props, String alias) {
+        Properties config = ConfigUtils.getConf(context.parameter().toMap(), ConfigConst.DORIS_SINK_PREFIX(), "", alias);
+        Utils.copyProperties(props, config);
+        this.fenodes = config.getProperty(ConfigConst.DORIS_FENODES());
+        this.database = config.getProperty(ConfigConst.DORIS_DATABASE());
+        this.table = config.getProperty(ConfigConst.DORIS_TABLE());
+        this.user = config.getProperty(ConfigConst.DORIS_USER());
+        this.password = config.getProperty(ConfigConst.DORIS_PASSWORD());
+        this.batchSize = Integer.valueOf(config.getProperty(ConfigConst.DORIS_BATCHSIZE(), ConfigConst.DORIS_DEFAULT_BATCHSIZE()));
+        this.intervalMs = Long.parseLong(config.getProperty(ConfigConst.DORIS_INTERVALMS(), ConfigConst.DORIS_DEFAULT_INTERVALMS()));
+        this.maxRetries = Integer.valueOf(config.getProperty(ConfigConst.DORIS_MAXRETRIES(), ConfigConst.DORIS_DEFAULT_MAXRETRIES()));
+        this.streamLoadProp = parseStreamLoadProps(config, ConfigConst.DORIS_STREAM_LOAD_PROP_PREFIX());
         this.dorisStreamLoad = new DorisStreamLoad(fenodes, database, table, user, password, streamLoadProp);
     }
 
     public Properties parseStreamLoadProps(Properties properties, String prefix) {
         Properties result = new Properties();
-        properties.entrySet().forEach(entry -> {
-            String key = entry.getKey().toString();
-            Object value = entry.getValue();
+        properties.forEach((key1, value) -> {
+            String key = key1.toString();
             if (key.startsWith(prefix)) {
                 result.put(key.substring(prefix.length()), value);
             }
@@ -91,8 +95,7 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
         if (intervalMs > 0 && batchSize != 1) {
-            this.scheduler = Executors.newScheduledThreadPool(1, new ExecutorThreadFactory("doris-streamload-output" +
-                "-format"));
+            this.scheduler = Executors.newScheduledThreadPool(1, new ExecutorThreadFactory("doris-streamload-output-format"));
             this.scheduledFuture = this.scheduler.scheduleWithFixedDelay(() -> {
                 synchronized (DorisSinkFunction.this) {
                     if (!closed) {
@@ -120,7 +123,7 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
         if (row instanceof String) {
             batch.add(row);
         } else {
-            throw new RuntimeException("unsupport type " + row.getClass());
+            throw new RuntimeException("unSupport type " + row.getClass());
         }
     }
 
