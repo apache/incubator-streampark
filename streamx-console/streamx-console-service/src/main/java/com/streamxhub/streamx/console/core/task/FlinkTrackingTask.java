@@ -141,13 +141,9 @@ public class FlinkTrackingTask {
 
     private static final Map<Long, OptionState> OPTIONING = new ConcurrentHashMap<>();
 
-    private static final Long STARTING_INTERVAL = 1000L * 30;
-
     private Long lastTrackTime = 0L;
 
     private Long lastOptionTime = 0L;
-
-    private static Long optioningTime = 0L;
 
     private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
 
@@ -200,8 +196,7 @@ public class FlinkTrackingTask {
     }
 
     private void tracking() {
-        Long now = System.currentTimeMillis();
-        lastTrackTime = now;
+        lastTrackTime = System.currentTimeMillis();
         TRACKING_MAP.entrySet().stream()
                 .filter(trkElement -> !isKubernetesMode(trkElement.getValue().getExecutionMode()))
                 .forEach(trkElement -> EXECUTOR.execute(() -> {
@@ -222,11 +217,8 @@ public class FlinkTrackingTask {
                              * 3) 从flink的restAPI和yarn的restAPI都查询失败</br>
                              * 此时需要根据管理端正在操作的状态来决定是否返回最终状态,需满足:</br>
                              * 1: 操作状态为为取消和正常的状态跟踪(操作状态不为STARTING)</br>
-                             * 2: 如果操作状态为STARTING,则需要判断操作间隔是否在30秒之内(启动可能需要时间,这里给足够多的时间去完成启动)</br>
                              */
-                            if (optionState == null
-                                    || !optionState.equals(OptionState.STARTING)
-                                    || now - optioningTime >= STARTING_INTERVAL) {
+                            if (optionState == null || !optionState.equals(OptionState.STARTING)) {
                                 //非正在手动映射appId
                                 if (application.getState() != FlinkAppState.MAPPING.getValue()) {
                                     log.error("flinkTrackingTask getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint obsoleted!");
@@ -338,7 +330,7 @@ public class FlinkTrackingTask {
             FlinkEnv flinkEnv = getFlinkEnvCache(application);
             FlinkCluster flinkCluster = getFlinkClusterCache(application);
             Overview override = application.httpOverview(flinkEnv, flinkCluster);
-            if (override.getSlotsTotal() > 0) {
+            if (override != null && override.getSlotsTotal() > 0) {
                 STARTING_CACHE.invalidate(application.getId());
                 application.setTotalTM(override.getTaskmanagers());
                 application.setTotalSlot(override.getSlotsTotal());
@@ -524,7 +516,9 @@ public class FlinkTrackingTask {
             // 2)到yarn的restApi中查询状态
             AppInfo appInfo = application.httpYarnAppInfo();
             if (appInfo == null) {
-                throw new RuntimeException("flinkTrackingTask getFromYarnRestApi failed ");
+                if (!ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
+                    throw new RuntimeException("flinkTrackingTask getFromYarnRestApi failed ");
+                }
             } else {
                 try {
                     String state = appInfo.getApp().getFinalStatus();
@@ -556,7 +550,9 @@ public class FlinkTrackingTask {
                         }
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException("flinkTrackingTask getFromYarnRestApi error,", e);
+                    if (!ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
+                        throw new RuntimeException("flinkTrackingTask getFromYarnRestApi error,", e);
+                    }
                 }
             }
         }
@@ -613,7 +609,7 @@ public class FlinkTrackingTask {
             return;
         }
         log.info("flinkTrackingTask setOptioning");
-        optioningTime = System.currentTimeMillis();
+        Long optioningTime = System.currentTimeMillis();
         OPTIONING.put(appId, state);
         //从streamx停止
         if (state.equals(OptionState.CANCELLING)) {

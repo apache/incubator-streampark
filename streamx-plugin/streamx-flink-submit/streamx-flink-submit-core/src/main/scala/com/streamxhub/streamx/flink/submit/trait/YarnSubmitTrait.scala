@@ -44,20 +44,18 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
 
   lazy val workspace: Workspace = Workspace.remote
 
-
-  override def doStop(stopRequest: StopRequest): StopResponse = {
+  override def doStop(stopRequest: StopRequest, flinkConf: Configuration): StopResponse = {
 
     val jobID = getJobID(stopRequest.jobId)
 
     val clusterClient = {
-      val flinkConfiguration = new Configuration
-      flinkConfiguration.safeSet(YarnConfigOptions.APPLICATION_ID, stopRequest.clusterId)
+      flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, stopRequest.clusterId)
       val clusterClientFactory = new YarnClusterClientFactory
-      val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
+      val applicationId = clusterClientFactory.getClusterId(flinkConf)
       if (applicationId == null) {
         throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
       }
-      val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
+      val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
       clusterDescriptor.retrieve(applicationId).getClusterClient
     }
 

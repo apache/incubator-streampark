@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.flink.packer.pipeline
 
-import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper.calPercent
+import com.streamxhub.streamx.common.util.Utils
 
 import java.lang.{Long => JavaLong}
 import java.util.{Map => JavaMap}
@@ -42,7 +42,7 @@ case class PipeSnapshot(appName: String,
                         error: PipeError,
                         emitTime: Long) {
 
-  def percent(): Double = calPercent(curStep, allSteps)
+  def percent(): Double = Utils.calPercent(curStep, allSteps)
 
   def stepStatusAsJava: JavaMap[Integer, (PipelineStepStatus, JavaLong)] = {
     stepStatus.toSeq.map(e => new Integer(e._1) -> (e._2._1 -> new JavaLong(e._2._2))).toMap.asJava

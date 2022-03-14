@@ -84,7 +84,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       //flinkDistJar
       .safeSet(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.hdfsWorkspace.flinkDistJar)
       //pipeline.jars
-      .safeSet(PipelineOptions.JARS, Collections.singletonList(submitRequest.flinkUserJar))
+      .safeSet(PipelineOptions.JARS, Collections.singletonList(submitRequest.userJarFile.getAbsolutePath))
       //yarn application name
       .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
       //yarn application Type

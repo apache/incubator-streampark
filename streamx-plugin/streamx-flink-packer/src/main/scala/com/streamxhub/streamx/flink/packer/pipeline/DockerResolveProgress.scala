@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.packer.pipeline
 
 import com.github.dockerjava.api.model.{PullResponseItem, PushResponseItem}
-import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper.calPercent
+import com.streamxhub.streamx.common.util.Utils
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -113,7 +113,7 @@ object DockerPushProgress {
  */
 case class DockerLayerProgress(layerId: String, status: String, current: Long, total: Long) {
 
-  def percent: Double = calPercent(current, total)
+  def percent: Double = Utils.calPercent(current, total)
 
   def currentMb: Double = if (current == 0) 0 else (current.toDouble / (1024 * 1024)).formatted("%.2f").toDouble
 

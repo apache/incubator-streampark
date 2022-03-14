@@ -25,8 +25,9 @@ import com.streamxhub.streamx.common.conf.{ConfigConst, Workspace}
 import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums._
 import com.streamxhub.streamx.common.util.{DeflaterUtils, FlinkUtils, HdfsUtils, PropertiesUtils}
-import com.streamxhub.streamx.flink.packer.pipeline.BuildResult
+import com.streamxhub.streamx.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
 import org.apache.commons.io.FileUtils
+import org.apache.flink.configuration.PipelineOptions
 import org.apache.flink.runtime.jobgraph.{SavepointConfigOptions, SavepointRestoreSettings}
 
 import java.io.File
@@ -46,7 +47,6 @@ case class KubernetesSubmitParam(clusterId: String,
 
 case class SubmitRequest(flinkVersion: FlinkVersion,
                          flinkYaml: String,
-                         flinkUserJar: String,
                          developmentMode: DevelopmentMode,
                          executionMode: ExecutionMode,
                          resolveOrder: ResolveOrder,
@@ -82,6 +82,16 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
     savePoint match {
       case sp if Try(sp.isEmpty).getOrElse(true) => SavepointRestoreSettings.none
       case sp => SavepointRestoreSettings.forPath(sp, allowNonRestoredState)
+    }
+  }
+
+  lazy val userJarFile: File = {
+    executionMode match {
+      case ExecutionMode.YARN_APPLICATION => new File(extraParameter.get(PipelineOptions.JARS.key()).toString)
+      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => null
+      case _ =>
+        checkBuildResult()
+        new File(buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath)
     }
   }
 

@@ -438,7 +438,7 @@
 
           <a-tooltip title="Launch Application">
             <a-button
-              v-if="(record.launch === -1 || record.launch === 1) && record['optionState'] === 0"
+              v-if="(record.launch === -1 || record.launch === 1 || record.launch === 4) && record['optionState'] === 0"
               @click.native="handleCheckLaunchApp(record)"
               shape="circle"
               size="small"
@@ -1876,7 +1876,7 @@ export default {
         // yarn-per-job|yarn-session|yarn-application
         const executionMode = params['executionMode']
         if (executionMode === 1) {
-          activeURL({id: params.id}).then((resp) => {
+          activeURL({id: params.flinkClusterId}).then((resp) => {
             const url = resp.data + '/#/job/' + params.jobId + '/overview'
             window.open(url)
           })

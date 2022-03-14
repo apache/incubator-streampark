@@ -21,6 +21,7 @@
 package com.streamxhub.streamx.test.flink.scala.tablesql
 
 import java.util.Scanner
+import scala.language.postfixOps
 
 
 object SQLRegExpTest extends App {
