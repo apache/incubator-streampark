@@ -101,7 +101,7 @@ public class ApplicationBuildPipelineController {
     @PostMapping("/detail")
     @RequiresPermissions("app:view")
     public RestResponse getBuildProgressDetail(Long appId) {
-        Map<String, Object> details = new HashMap<>();
+        Map<String, Object> details = new HashMap<>(0);
         Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
         details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
 

@@ -45,15 +45,15 @@ case class PipeSnapshot(appName: String,
   def percent(): Double = Utils.calPercent(curStep, allSteps)
 
   def stepStatusAsJava: JavaMap[Integer, (PipelineStepStatus, JavaLong)] = {
-    stepStatus.toSeq.map(e => new Integer(e._1) -> (e._2._1 -> new JavaLong(e._2._2))).toMap.asJava
+    stepStatus.toSeq.map(e => Integer.valueOf(e._1) -> (e._2._1 -> JavaLong.valueOf(e._2._2))).toMap.asJava
   }
 
   def pureStepStatusAsJava: JavaMap[Integer, PipelineStepStatus] = {
-    stepStatus.toSeq.map(e => new Integer(e._1) -> e._2._1).toMap.asJava
+    stepStatus.toSeq.map(e => Integer.valueOf(e._1) -> e._2._1).toMap.asJava
   }
 
   def stepStatusTimestampAsJava: JavaMap[Integer, JavaLong] = {
-    stepStatus.toSeq.map(e => new Integer(e._1) -> new JavaLong(e._2._2)).toMap.asJava
+    stepStatus.toSeq.map(e => Integer.valueOf(e._1) -> JavaLong.valueOf(e._2._2)).toMap.asJava
   }
 
 }
