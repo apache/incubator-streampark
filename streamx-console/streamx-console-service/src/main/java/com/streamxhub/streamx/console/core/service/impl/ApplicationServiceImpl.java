@@ -32,6 +32,8 @@ import com.streamxhub.streamx.common.enums.ApplicationType;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
+import com.streamxhub.streamx.common.enums.StorageType;
+import com.streamxhub.streamx.common.fs.HdfsOperator;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
@@ -425,6 +427,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Long appId = application.getId();
         removeById(appId);
         application.getFsOperator().delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
+        try {
+            //曾经设置过yarn-application类型,尝试删除,不留后患.
+            HdfsOperator.delete(Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString()));
+        } catch (Exception e) {
+            //skip
+        }
     }
 
     @Override
@@ -812,6 +820,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             }
         }
+
         if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
             if (!application.getHotParamsMap().isEmpty()) {
                 if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_ID())) {
@@ -896,7 +905,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     String yarnQueue = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
                     optionMap.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
 
-                    if (!application.getHotParamsMap().isEmpty()) {
+                    if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
                         String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
                         assert yarnSessionClusterId != null;
                         extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
@@ -1070,6 +1079,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 URI activeAddress = cluster.getActiveAddress();
                 extraParameter.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
                 extraParameter.put(RestOptions.PORT.key(), activeAddress.getPort());
+            }
+
+            if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+                String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
+                assert yarnSessionClusterId != null;
+                extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
             }
 
             if (application.isFlinkSqlJob()) {

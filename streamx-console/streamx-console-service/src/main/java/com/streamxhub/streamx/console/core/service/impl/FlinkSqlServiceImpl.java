@@ -111,14 +111,14 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
         List<FlinkSql> sqlList = this.baseMapper.selectList(wrapper);
         FlinkSql effective = getEffective(application.getId(), false);
-
-        for (FlinkSql sql : sqlList) {
-            if (sql.getId().equals(effective.getId())) {
-                sql.setEffective(true);
-                break;
+        if (effective != null && !sqlList.isEmpty()) {
+            for (FlinkSql sql : sqlList) {
+                if (sql.getId().equals(effective.getId())) {
+                    sql.setEffective(true);
+                    break;
+                }
             }
         }
-
         return sqlList;
     }
 

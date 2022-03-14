@@ -44,6 +44,7 @@ import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.NoticeType;
 import com.streamxhub.streamx.console.core.enums.OptionState;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
+import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.CommonService;
@@ -123,6 +124,9 @@ public class ApplBuildPipeServiceImpl
 
     @Autowired
     private ApplicationService applicationService;
+
+    @Autowired
+    private ApplicationConfigService applicationConfigService;
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() * 2,
@@ -239,6 +243,8 @@ public class ApplBuildPipeServiceImpl
                     if (!app.isRunning()) {
                         if (app.isFlinkSqlJob()) {
                             applicationService.toEffective(app);
+                        } else {
+                            applicationConfigService.toEffective(app.getId(), app.getConfigId());
                         }
                     }
 

@@ -312,6 +312,7 @@ public class Application implements Serializable {
      */
     public static Integer shouldTracking(@Nonnull FlinkAppState state) {
         switch (state) {
+            case ADDED:
             case CREATED:
             case FINISHED:
             case FAILED:
