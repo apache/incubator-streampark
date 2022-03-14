@@ -1904,17 +1904,9 @@ export default {
     handleEdit(app) {
       this.SetAppId(app.id)
       if (app.appType === 1) {
+        // jobType( 1 custom code 2: flinkSQL)
         this.$router.push({'path': '/flink/app/edit_streamx'})
-        if (app.jobType === 1) {
-          if (app.resourceForm === 1) {
-            this.$router.push({'path': '/flink/app/edit_streamx'})
-          } else {
-            this.$router.push({'path': '/flink/app/edit_flink'})
-          }
-        } else {
-          this.$router.push({'path': '/flink/app/edit_streamx'})
-        }
-      } else {
+      } else if (app.appType === 2) { //Apache Flink
         this.$router.push({'path': '/flink/app/edit_flink'})
       }
     },
