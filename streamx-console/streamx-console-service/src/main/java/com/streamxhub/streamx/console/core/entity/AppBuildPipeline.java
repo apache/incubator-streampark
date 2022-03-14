@@ -143,7 +143,7 @@ public class AppBuildPipeline {
             this.stepStatusJson = JacksonUtils.write(stepStatus);
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, stepStatusMap=({})",
-                stepStatus.entrySet().stream().map(et -> et.getKey() + "->" + et.getValue()).collect(Collectors.joining(",")), e);
+                    stepStatus.entrySet().stream().map(et -> et.getKey() + "->" + et.getValue()).collect(Collectors.joining(",")), e);
         }
         return this;
     }
@@ -169,7 +169,7 @@ public class AppBuildPipeline {
             this.stepStatusTimestampJson = JacksonUtils.write(stepStatusSt);
         } catch (JsonProcessingException e) {
             log.error("json parse error on ApplicationBuildPipeline, stepStatusSt=({})",
-                stepStatusSt.entrySet().stream().map(et -> et.getKey() + "->" + et.getValue()).collect(Collectors.joining(",")), e);
+                    stepStatusSt.entrySet().stream().map(et -> et.getKey() + "->" + et.getValue()).collect(Collectors.joining(",")), e);
         }
         return this;
     }
@@ -228,7 +228,7 @@ public class AppBuildPipeline {
     @JsonIgnore
     public <R extends BuildResult> R getBuildResult() {
         PipelineType pipeType = getPipeType();
-        if (pipeType.isUnknown()) {
+        if (pipeType.isUnknown() || buildResultJson == null) {
             return null;
         }
         try {
@@ -251,14 +251,14 @@ public class AppBuildPipeline {
      */
     public static AppBuildPipeline fromPipeSnapshot(@Nonnull PipeSnapshot snapshot) {
         return new AppBuildPipeline()
-            .setPipeType(snapshot.pipeType())
-            .setPipeStatus(snapshot.pipeStatus())
-            .setTotalStep(snapshot.allSteps())
-            .setCurStep(snapshot.curStep())
-            .setStepStatus(snapshot.pureStepStatusAsJava())
-            .setStepStatusTimestamp(snapshot.stepStatusTimestampAsJava())
-            .setError(snapshot.error())
-            .setUpdateTime(new Date(snapshot.emitTime()));
+                .setPipeType(snapshot.pipeType())
+                .setPipeStatus(snapshot.pipeStatus())
+                .setTotalStep(snapshot.allSteps())
+                .setCurStep(snapshot.curStep())
+                .setStepStatus(snapshot.pureStepStatusAsJava())
+                .setStepStatusTimestamp(snapshot.stepStatusTimestampAsJava())
+                .setError(snapshot.error())
+                .setUpdateTime(new Date(snapshot.emitTime()));
     }
 
     /**
@@ -267,7 +267,6 @@ public class AppBuildPipeline {
     public View toView() {
         return View.of(this);
     }
-
 
 
     /**
@@ -285,9 +284,9 @@ public class AppBuildPipeline {
         private Double percent;
         private Long costSec;
         private List<Step> steps;
-        private Boolean isErr;
-        private String errSummary;
-        private String errStack;
+        private Boolean hasError;
+        private String errorSummary;
+        private String errorStack;
         private Date updateTime;
 
         public static View of(@Nonnull AppBuildPipeline pipe) {
@@ -298,28 +297,32 @@ public class AppBuildPipeline {
             List<Step> steps = new ArrayList<>(stepDesc.size());
             for (int i = 1; i <= pipe.getPipeType().getSteps().size(); i++) {
                 Step step = new Step()
-                    .setSeq(i)
-                    .setDesc(stepDesc.getOrDefault(i, "unknown step"))
-                    .setStatus(stepStatus.getOrDefault(i, PipelineStepStatus.unknown).getCode());
+                        .setSeq(i)
+                        .setDesc(stepDesc.getOrDefault(i, "unknown step"))
+                        .setStatus(stepStatus.getOrDefault(i, PipelineStepStatus.unknown).getCode());
                 Long st = stepTs.get(i);
                 if (st != null) {
                     step.setTs(new Date(st));
                 }
                 steps.add(step);
             }
+
             return new View()
-                .setAppId(pipe.getAppId())
-                .setPipeType(pipe.getPipeTypeCode())
-                .setPipeStatus(pipe.getPipeStatusCode())
-                .setCurStep(pipe.getCurStep())
-                .setTotalStep(pipe.getTotalStep())
-                .setPercent(Utils.calPercent(pipe.getCurStep(), pipe.getTotalStep()))
-                .setCostSec(pipe.calCostSecond())
-                .setSteps(steps)
-                .setIsErr(pipe.getError().nonEmpty())
-                .setErrSummary(pipe.getError().summary())
-                .setErrStack(pipe.getError().exceptionStack())
-                .setUpdateTime(pipe.getUpdateTime());
+                    .setAppId(pipe.getAppId())
+                    .setPipeType(pipe.getPipeTypeCode())
+                    .setPipeStatus(pipe.getPipeStatusCode())
+                    .setCurStep(pipe.getCurStep())
+                    .setTotalStep(pipe.getTotalStep())
+                    .setPercent(Utils.calPercent(
+                            pipe.getBuildResult() == null ? pipe.getCurStep() - 1 : pipe.getCurStep(),
+                            pipe.getTotalStep())
+                    )
+                    .setCostSec(pipe.calCostSecond())
+                    .setSteps(steps)
+                    .setHasError(pipe.getError().nonEmpty())
+                    .setErrorSummary(pipe.getError().summary())
+                    .setErrorStack(pipe.getError().exceptionStack())
+                    .setUpdateTime(pipe.getUpdateTime());
         }
     }
 

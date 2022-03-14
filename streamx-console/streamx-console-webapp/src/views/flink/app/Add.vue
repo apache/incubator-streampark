@@ -1830,7 +1830,7 @@ export default {
       if (this.jobType === 'sql') {
         disposeEditor(this)
         this.$nextTick(()=> {
-          initFlinkSqlEditor(this)
+          initFlinkSqlEditor(this, this.controller.flinkSql.value)
           this.selectedHistoryUploadJars = []
           if (this.executionMode === 6) {
             initPodTemplateEditor(this)

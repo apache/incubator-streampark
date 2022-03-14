@@ -155,21 +155,26 @@ public class ApplBuildPipeServiceImpl
             app.setDependency(flinkSql.getDependency());
         }
 
-        // 2) create pipeline instance
+        // create pipeline instance
         BuildPipeline pipeline = createPipelineInstance(app);
 
+        // clear history
+        removeApp(app.getId());
         // register pipeline progress event watcher.
         // save snapshot of pipeline to db when status of pipeline was changed.
         pipeline.registerWatcher(new PipeWatcher() {
             @Override
             public void onStart(PipeSnapshot snapshot) throws Exception {
+                AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
+                saveEntity(buildPipeline);
+
                 app.setLaunch(LaunchState.LAUNCHING.get());
                 applicationService.updateLaunch(app);
 
                 // 1) checkEnv
                 applicationService.checkEnv(app);
 
-                // 3) some preparatory work
+                // 2) some preparatory work
                 String appUploads = app.getWorkspace().APP_UPLOADS();
 
                 if (app.isCustomCodeJob()) {
@@ -210,9 +215,6 @@ public class ApplBuildPipeServiceImpl
                         }
                     }
                 }
-
-                AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
-                saveEntity(buildPipeline);
             }
 
             @Override
