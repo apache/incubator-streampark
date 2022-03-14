@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -820,6 +821,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             }
         }
+
         if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
             if (!application.getHotParamsMap().isEmpty()) {
                 if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_ID())) {
@@ -904,7 +906,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     String yarnQueue = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
                     optionMap.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
 
-                    if (!application.getHotParamsMap().isEmpty()) {
+                    if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
                         String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
                         assert yarnSessionClusterId != null;
                         extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
@@ -1078,6 +1080,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 URI activeAddress = cluster.getActiveAddress();
                 extraParameter.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
                 extraParameter.put(RestOptions.PORT.key(), activeAddress.getPort());
+            }
+
+            if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+                String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
+                assert yarnSessionClusterId != null;
+                extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
             }
 
             if (application.isFlinkSqlJob()) {
