@@ -62,7 +62,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
       val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
       val yarnClusterId: ApplicationId = yarnClusterDescriptor._1
-      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.shadedJarPath)
+      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
       packageProgram = packageProgramJobGraph._1
       val jobGraph = packageProgramJobGraph._2
 

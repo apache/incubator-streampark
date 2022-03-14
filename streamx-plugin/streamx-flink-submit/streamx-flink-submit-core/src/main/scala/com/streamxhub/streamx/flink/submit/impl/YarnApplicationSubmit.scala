@@ -33,6 +33,7 @@ import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
+import java.util.Collections
 import java.util.concurrent.Callable
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -82,6 +83,8 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       .safeSet(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
       //flinkDistJar
       .safeSet(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.hdfsWorkspace.flinkDistJar)
+      //pipeline.jars
+      .safeSet(PipelineOptions.JARS, Collections.singletonList(submitRequest.userJarFile.getAbsolutePath))
       //yarn application name
       .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
       //yarn application Type

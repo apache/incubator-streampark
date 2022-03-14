@@ -85,12 +85,13 @@ trait FlinkSubmitTrait extends Logger {
     )
 
     val activeCommandLine = validateAndGetActiveCommandLine(getCustomCommandLines(submitRequest.flinkVersion.flinkHome), commandLine)
-    val uri = PackagedProgramUtils.resolveURI(submitRequest.shadedJarPath.getAbsolutePath)
     val flinkConfig = applyConfiguration(submitRequest, activeCommandLine, commandLine)
-
-    val programOptions = ProgramOptions.create(commandLine)
-    val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, Collections.singletonList(uri.toString))
-    executionParameters.applyToConfiguration(flinkConfig)
+    if (submitRequest.userJarFile != null) {
+      val uri = PackagedProgramUtils.resolveURI(submitRequest.userJarFile.getAbsolutePath)
+      val programOptions = ProgramOptions.create(commandLine)
+      val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, Collections.singletonList(uri.toString))
+      executionParameters.applyToConfiguration(flinkConfig)
+    }
 
     // set common parameter
     flinkConfig

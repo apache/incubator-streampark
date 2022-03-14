@@ -28,12 +28,11 @@ import com.streamxhub.streamx.flink.packer.pipeline._
  *
  * @author czy006
  */
-class FlinkRemoteBuildPipeline(request: FlinkRemoteBuildRequest) extends BuildPipeline {
+class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends BuildPipeline {
 
   override def pipeType: PipelineType = PipelineType.FLINK_STANDALONE
 
-  override def offerBuildParam: FlinkRemoteBuildRequest = request
-
+  override def offerBuildParam: FlinkRemotePerJobBuildRequest = request
 
   /**
    * The construction logic needs to be implemented by subclasses
@@ -41,25 +40,29 @@ class FlinkRemoteBuildPipeline(request: FlinkRemoteBuildRequest) extends BuildPi
   @throws[Throwable] override protected def buildProcess(): ShadedBuildResponse = {
     // create workspace.
     // the sub workspace path like: APP_WORKSPACE/jobName
-    execStep(1) {
-      LfsOperator.mkCleanDirs(request.workspace)
-      logInfo(s"recreate building workspace: ${request.workspace}")
-    }.getOrElse(throw getError.exception)
-    // build flink job shaded jar
-    val shadedJar =
-      execStep(2) {
-        val output = MavenTool.buildFatJar(request.mainClass, request.providedLibs, request.getShadedJarPath(request.workspace))
-        logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
-        output
+    if (request.skipBuild) {
+      ShadedBuildResponse(request.workspace, request.customFlinkUserJar)
+    } else {
+      execStep(1) {
+        LfsOperator.mkCleanDirs(request.workspace)
+        logInfo(s"recreate building workspace: ${request.workspace}")
       }.getOrElse(throw getError.exception)
+      // build flink job shaded jar
+      val shadedJar =
+        execStep(2) {
+          val output = MavenTool.buildFatJar(request.mainClass, request.providedLibs, request.getShadedJarPath(request.workspace))
+          logInfo(s"output shaded flink job jar: ${output.getAbsolutePath}")
+          output
+        }.getOrElse(throw getError.exception)
+      ShadedBuildResponse(request.workspace, shadedJar.getAbsolutePath)
+    }
 
-    ShadedBuildResponse(request.workspace, shadedJar.getAbsolutePath)
   }
 
 }
 
 object FlinkRemoteBuildPipeline {
-  def of(request: FlinkRemoteBuildRequest): FlinkRemoteBuildPipeline = new FlinkRemoteBuildPipeline(request)
+  def of(request: FlinkRemotePerJobBuildRequest): FlinkRemoteBuildPipeline = new FlinkRemoteBuildPipeline(request)
 }
 
 

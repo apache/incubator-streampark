@@ -56,7 +56,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
 
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
     // 2) submit job
-    super.trySubmit(submitRequest, flinkConfig, submitRequest.shadedJarPath)(restApiSubmit)(jobGraphSubmit)
+    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(restApiSubmit)(jobGraphSubmit)
 
   }
 

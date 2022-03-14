@@ -83,7 +83,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
              |------------------------------------------------------------------
              |""".stripMargin)
 
-        val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.shadedJarPath)
+        val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
         packagedProgram = packageProgramJobGraph._1
         val jobGraph = packageProgramJobGraph._2
 

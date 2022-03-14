@@ -119,14 +119,15 @@ case class FlinkK8sApplicationBuildRequest(appName: String,
 
 }
 
-case class FlinkRemoteBuildRequest(appName: String,
-                                   workspace: String,
-                                   mainClass: String,
-                                   customFlinkUserJar: String,
-                                   executionMode: ExecutionMode,
-                                   developmentMode: DevelopmentMode,
-                                   flinkVersion: FlinkVersion,
-                                   dependencyInfo: DependencyInfo
+case class FlinkRemotePerJobBuildRequest(appName: String,
+                                         workspace: String,
+                                         mainClass: String,
+                                         customFlinkUserJar: String,
+                                         skipBuild: Boolean,
+                                         executionMode: ExecutionMode,
+                                         developmentMode: DevelopmentMode,
+                                         flinkVersion: FlinkVersion,
+                                         dependencyInfo: DependencyInfo
                                   ) extends FlinkBuildParam {
 
 

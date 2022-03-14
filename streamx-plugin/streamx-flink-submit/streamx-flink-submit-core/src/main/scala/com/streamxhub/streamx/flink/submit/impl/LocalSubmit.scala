@@ -47,7 +47,7 @@ object LocalSubmit extends FlinkSubmitTrait {
     var client: ClusterClient[MiniClusterId] = null
     try {
       // build JobGraph
-      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.shadedJarPath)
+      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
       packageProgram = packageProgramJobGraph._1
       val jobGraph = packageProgramJobGraph._2
       client = createLocalCluster(flinkConfig)

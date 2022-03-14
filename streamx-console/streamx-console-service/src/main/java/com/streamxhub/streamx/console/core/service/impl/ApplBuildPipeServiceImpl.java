@@ -61,7 +61,7 @@ import com.streamxhub.streamx.flink.packer.pipeline.DockerPushSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildRequest;
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemoteBuildRequest;
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemotePerJobBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkYarnApplicationBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
@@ -328,18 +328,19 @@ public class ApplBuildPipeServiceImpl
             case YARN_PER_JOB:
             case YARN_SESSION:
             case REMOTE:
-                FlinkRemoteBuildRequest remoteBuildRequest = new FlinkRemoteBuildRequest(
+                FlinkRemotePerJobBuildRequest buildRequest = new FlinkRemotePerJobBuildRequest(
                         app.getJobName(),
                         app.getLocalAppHome(),
                         mainClass,
                         flinkUserJar,
+                        app.isCustomCodeJob(),
                         app.getExecutionModeEnum(),
                         app.getDevelopmentMode(),
                         flinkEnv.getFlinkVersion(),
                         app.getDependencyInfo()
                 );
-                log.info("Submit params to building pipeline : {}", remoteBuildRequest);
-                return FlinkRemoteBuildPipeline.of(remoteBuildRequest);
+                log.info("Submit params to building pipeline : {}", buildRequest);
+                return FlinkRemoteBuildPipeline.of(buildRequest);
             case KUBERNETES_NATIVE_SESSION:
                 FlinkK8sSessionBuildRequest k8sSessionBuildRequest = new FlinkK8sSessionBuildRequest(
                         app.getJobName(),
