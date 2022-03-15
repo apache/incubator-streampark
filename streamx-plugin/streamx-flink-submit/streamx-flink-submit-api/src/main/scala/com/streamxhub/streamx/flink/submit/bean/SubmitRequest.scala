@@ -85,8 +85,12 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
   }
 
   lazy val userJarFile: File = {
-    checkBuildResult()
-    new File(buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath)
+    executionMode match {
+      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => null
+      case _ =>
+        checkBuildResult()
+        new File(buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath)
+    }
   }
 
   lazy val safePackageProgram: Boolean = {
