@@ -83,6 +83,8 @@ import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
+import com.streamxhub.streamx.flink.packer.pipeline.BuildResult;
+import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse;
 import com.streamxhub.streamx.flink.submit.FlinkSubmitter;
 import com.streamxhub.streamx.flink.submit.bean.KubernetesSubmitParam;
 import com.streamxhub.streamx.flink.submit.bean.StopRequest;
@@ -93,7 +95,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1036,15 +1037,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
                     }
                 }
-                switch (application.getApplicationType()) {
-                    case STREAMX_FLINK:
-                        flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getModule().concat(".jar"));
-                        break;
-                    case APACHE_FLINK:
-                        flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
-                        break;
-                    default:
-                        throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
+
+                if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
+                    switch (application.getApplicationType()) {
+                        case STREAMX_FLINK:
+                            flinkUserJar = String.format("%s/%s", application.getAppLib(), application.getModule().concat(".jar"));
+                            break;
+                        case APACHE_FLINK:
+                            flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+                            break;
+                        default:
+                            throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
+                    }
                 }
             } else if (application.isFlinkSqlJob()) {
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
@@ -1067,7 +1071,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             Map<String, Object> extraParameter = new HashMap<>(0);
             extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());
-            extraParameter.put(PipelineOptions.JARS.key(), flinkUserJar);
 
             if (appParam.getAllowNonRestored()) {
                 extraParameter.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
@@ -1106,6 +1109,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
 
+            assert buildPipeline != null;
+
+            BuildResult buildResult = buildPipeline.getBuildResult();
+            if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
+                buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
+            }
+
             SubmitRequest submitRequest = new SubmitRequest(
                     flinkEnv.getFlinkVersion(),
                     flinkEnv.getFlinkConf(),
@@ -1120,7 +1130,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     application.getOptionMap(),
                     dynamicOption,
                     application.getArgs(),
-                    buildPipeline.getBuildResult(),
+                    buildResult,
                     kubernetesSubmitParam,
                     extraParameter
             );

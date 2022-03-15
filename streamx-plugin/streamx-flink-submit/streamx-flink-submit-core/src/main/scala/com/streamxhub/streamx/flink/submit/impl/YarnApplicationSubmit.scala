@@ -21,6 +21,7 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.{HdfsUtils, Utils}
+import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
@@ -84,7 +85,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       //flinkDistJar
       .safeSet(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.hdfsWorkspace.flinkDistJar)
       //pipeline.jars
-      .safeSet(PipelineOptions.JARS, Collections.singletonList(submitRequest.userJarFile.getAbsolutePath))
+      .safeSet(PipelineOptions.JARS, Collections.singletonList(submitRequest.buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath))
       //yarn application name
       .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
       //yarn application Type
