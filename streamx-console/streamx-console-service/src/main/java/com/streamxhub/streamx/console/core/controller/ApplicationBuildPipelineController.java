@@ -81,10 +81,8 @@ public class ApplicationBuildPipelineController {
             }
 
             //回滚任务.
-            if (app.isNeedRollback()) {
-                if (app.isFlinkSqlJob()) {
-                    flinkSqlService.rollback(app);
-                }
+            if (app.isNeedRollback() && app.isFlinkSqlJob()) {
+                flinkSqlService.rollback(app);
             }
 
             boolean actionResult = appBuildPipeService.buildApplication(app);
@@ -103,7 +101,7 @@ public class ApplicationBuildPipelineController {
     @PostMapping("/detail")
     @RequiresPermissions("app:view")
     public RestResponse getBuildProgressDetail(Long appId) {
-        Map<String, Object> details = new HashMap<>();
+        Map<String, Object> details = new HashMap<>(0);
         Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
         details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
 

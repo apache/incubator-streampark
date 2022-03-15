@@ -326,7 +326,7 @@ print_logo() {
   printf '  • WebSite: %s http://www.streamxhub.com%s\n'                              $BLUE   $RESET
   printf '  • GitHub : %s http://github.com/streamxhub/streamx%s\n'                   $BLUE   $RESET
   printf '  • Gitee  : %s http://gitee.com/streamxhub/streamx%s\n'                    $BLUE   $RESET
-  printf '          %s ────────  Make stream processing easier ô‿ô!%s\n\n'            $GREEN  $RESET
+  printf '          %s ────────  Make stream processing easier ô~ô!%s\n\n'            $GREEN  $RESET
 }
 
 # shellcheck disable=SC2120

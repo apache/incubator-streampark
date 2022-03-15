@@ -34,7 +34,7 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
 
     Boolean delete(Long id) throws ServiceException;
 
-    void backup(Application app);
+    void backup(Application application, FlinkSql flinkSql);
 
     IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request);
 

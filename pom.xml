@@ -63,7 +63,7 @@
         <project.build.jdk>1.8</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <streamx.shaded.packageName>com.streamxhub.streamx.shaded</streamx.shaded.packageName>
+        <streamx.shaded.package>com.streamxhub.streamx.shaded</streamx.shaded.package>
 
         <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
         <flink.version>1.14.0</flink.version>
