@@ -115,7 +115,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
         case (true, true) if savePointDir.nonEmpty => client.stopWithSavepoint(jobID, true, savePointDir).get()
         case (true, false) if savePointDir.nonEmpty => client.cancelWithSavepoint(jobID, savePointDir).get()
         case _ => client.cancel(jobID).get()
-          ""
+          null
       }
       StopResponse(actionResult)
     } catch {
