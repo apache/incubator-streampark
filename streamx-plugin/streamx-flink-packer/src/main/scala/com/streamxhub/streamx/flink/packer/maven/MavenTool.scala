@@ -48,7 +48,7 @@ object MavenTool extends Logger {
     MavenArtifact.of("org.apache.logging.log4j:*:*")
   )
 
-  private val isJarFile = (file: File) => file.isFile && Try(Utils.checkJarFile(file.toURL)).isSuccess
+  private val isJarFile = (file: File) => file.isFile && Try(Utils.checkJarFile(file.toURI.toURL)).isSuccess
 
   /**
    * Build a fat-jar with custom jar libraries.
@@ -61,6 +61,7 @@ object MavenTool extends Logger {
     // check userJarPath
     val uberJar = new File(outFatJarPath)
     require(outFatJarPath.endsWith(".jar") && !uberJar.isDirectory, s"[StreamX] streamx-packer: outFatJarPath($outFatJarPath) should be a JAR file.")
+    uberJar.delete()
     // resolve all jarLibs
     val jarSet = new util.HashSet[File]
     jarLibs.map(lib => new File(lib))
@@ -104,7 +105,9 @@ object MavenTool extends Logger {
    * @param dependencyInfo maven artifacts and jar libraries for building a fat-jar
    * @param outFatJarPath  output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
    */
-  @throws[Exception] def buildFatJar(@Nullable mainClass: String, @Nonnull dependencyInfo: DependencyInfo, @Nonnull outFatJarPath: String): File = {
+  @throws[Exception] def buildFatJar(@Nullable mainClass: String,
+                                     @Nonnull dependencyInfo: DependencyInfo,
+                                     @Nonnull outFatJarPath: String): File = {
     val jarLibs = dependencyInfo.extJarLibs
     val arts = dependencyInfo.mavenArts
     if (jarLibs.isEmpty && arts.isEmpty) {

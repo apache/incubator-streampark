@@ -19,15 +19,15 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
+import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
-import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
@@ -35,7 +35,6 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import java.io.File
 import scala.language.postfixOps
-import scala.util.Try
 
 /**
  * kubernetes native session mode submit
@@ -45,20 +44,11 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   @throws[Exception]
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
     // require parameters
-    assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
-
-    // 2) get userJar
-    val jarFile = submitRequest.developmentMode match {
-      case DevelopmentMode.FLINKSQL =>
-        submitRequest.checkBuildResult()
-        // 1) get build result
-        val buildResult = submitRequest.buildResult.asInstanceOf[ShadedBuildResponse]
-        // 2) get fat-jar
-        new File(buildResult.shadedJarPath)
-      case _ => new File(submitRequest.flinkUserJar)
-    }
-
-    super.trySubmit(submitRequest, flinkConfig, jarFile)(restApiSubmit)(jobGraphSubmit)
+    require(
+      StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
+      s"[flink-submit] stop flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
+    )
+    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(restApiSubmit)(jobGraphSubmit)
   }
 
   /**
@@ -120,8 +110,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     }
   }
 
-  override def doStop(stopInfo: StopRequest): StopResponse = {
-    super.doStop(ExecutionMode.KUBERNETES_NATIVE_SESSION, stopInfo)
+  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
+    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
+    super.doStop(stopRequest, flinkConfig)
   }
 
 }

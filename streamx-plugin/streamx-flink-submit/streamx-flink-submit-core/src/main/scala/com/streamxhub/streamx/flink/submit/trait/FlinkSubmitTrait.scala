@@ -37,7 +37,6 @@ import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.Preconditions.checkNotNull
 
 import java.io.File
-import java.lang.{Boolean => JavaBool}
 import java.util.{Collections, List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -71,7 +70,6 @@ trait FlinkSubmitTrait extends Logger {
          |    applicationType  : ${submitRequest.applicationType.getName}
          |    flameGraph       : ${submitRequest.flameGraph != null}
          |    savePoint        : ${submitRequest.savePoint}
-         |    userJar          : ${submitRequest.flinkUserJar}
          |    option           : ${submitRequest.option}
          |    property         : ${submitRequest.option}
          |    dynamicOption    : ${submitRequest.dynamicOption.mkString(" ")}
@@ -87,15 +85,17 @@ trait FlinkSubmitTrait extends Logger {
     )
 
     val activeCommandLine = validateAndGetActiveCommandLine(getCustomCommandLines(submitRequest.flinkVersion.flinkHome), commandLine)
-    val uri = PackagedProgramUtils.resolveURI(submitRequest.flinkUserJar)
     val flinkConfig = applyConfiguration(submitRequest, activeCommandLine, commandLine)
-
-    val programOptions = ProgramOptions.create(commandLine)
-    val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, Collections.singletonList(uri.toString))
-    executionParameters.applyToConfiguration(flinkConfig)
+    if (submitRequest.userJarFile != null) {
+      val uri = PackagedProgramUtils.resolveURI(submitRequest.userJarFile.getAbsolutePath)
+      val programOptions = ProgramOptions.create(commandLine)
+      val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, Collections.singletonList(uri.toString))
+      executionParameters.applyToConfiguration(flinkConfig)
+    }
 
     // set common parameter
-    flinkConfig.safeSet(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.FALSE)
+    flinkConfig
+      .safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
       .safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
       .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
       .safeSet(CoreOptions.CLASSLOADER_RESOLVE_ORDER, submitRequest.resolveOrder.getName)
@@ -127,14 +127,15 @@ trait FlinkSubmitTrait extends Logger {
          |     jobId          : ${stopRequest.jobId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
-    doStop(stopRequest)
+    val flinkConf = new Configuration()
+    doStop(stopRequest, flinkConf)
   }
 
   @throws[Exception]
   def doSubmit(submitRequest: SubmitRequest, flinkConf: Configuration): SubmitResponse
 
   @throws[Exception]
-  def doStop(stopRequest: StopRequest): StopResponse
+  def doStop(stopRequest: StopRequest, flinkConf: Configuration): StopResponse
 
   def trySubmit(submitRequest: SubmitRequest,
                 flinkConfig: Configuration,
