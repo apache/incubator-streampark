@@ -246,7 +246,7 @@ export default {
     },
     handleUserAddSuccess () {
       this.userAdd.visible = false
-      this.$message.success('新增用户成功，初始密码为streamx123')
+      this.$message.success('新增用户成功')
       this.search()
     },
     handleEdit (record) {
