@@ -230,6 +230,7 @@ public class ApplBuildPipeServiceImpl
             @Override
             public void onFinish(PipeSnapshot snapshot, BuildResult result) {
                 AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId()).setBuildResult(result);
+                saveEntity(buildPipeline);
                 if (result.pass()) {
                     //running job ...
                     if (app.isRunning()) {
@@ -237,17 +238,15 @@ public class ApplBuildPipeServiceImpl
                     } else {
                         app.setOptionState(OptionState.NONE.getValue());
                         app.setLaunch(LaunchState.DONE.get());
-                    }
-
-                    //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
-                    if (!app.isRunning()) {
+                        //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
                         if (app.isFlinkSqlJob()) {
                             applicationService.toEffective(app);
                         } else {
-                            applicationConfigService.toEffective(app.getId(), app.getConfigId());
+                            if (app.isStreamXJob()) {
+                                applicationConfigService.toEffective(app.getId(), app.getConfigId());
+                            }
                         }
                     }
-
                     // backup.
                     if (!app.isNeedRollback()) {
                         if (app.isFlinkSqlJob() && newFlinkSql != null) {
@@ -273,7 +272,6 @@ public class ApplBuildPipeServiceImpl
                     app.setBuild(true);
                 }
                 applicationService.updateLaunch(app);
-                saveEntity(buildPipeline);
             }
         });
         // save docker resolve progress detail to cache, only for flink-k8s application mode.

@@ -1017,8 +1017,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //获取一个最新的Effective的配置
             ApplicationConfig applicationConfig = configService.getEffective(application.getId());
             ExecutionMode executionMode = ExecutionMode.of(application.getExecutionMode());
+            assert executionMode != null;
             if (application.isCustomCodeJob()) {
-                assert executionMode != null;
                 if (application.isUploadJob()) {
                     appConf = String.format("json://{\"%s\":\"%s\"}",
                             ConfigConst.KEY_FLINK_APPLICATION_MAIN_CLASS(),
@@ -1057,7 +1057,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String sqlDistJar = commonService.getSqlClientJar();
                 //2) appConfig
                 appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
-                assert executionMode != null;
                 //3) client
                 if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
                     String clientPath = Workspace.remote().APP_CLIENT();
