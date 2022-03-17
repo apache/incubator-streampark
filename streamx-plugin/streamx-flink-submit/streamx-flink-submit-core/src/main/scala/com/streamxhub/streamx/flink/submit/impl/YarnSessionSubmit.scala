@@ -20,9 +20,7 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.conf.ConfigConst.KEY_YARN_APP_ID
-import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.Utils
-import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import org.apache.flink.api.common.JobID
@@ -32,8 +30,6 @@ import org.apache.flink.configuration._
 import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.yarn.api.records.ApplicationId
-
-import java.io.File
 
 
 /**
@@ -46,8 +42,10 @@ object YarnSessionSubmit extends YarnSubmitTrait {
    * @param flinkConfig
    */
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
-    flinkConfig.set(YarnConfigOptions.APPLICATION_ID, submitRequest.option.get(KEY_YARN_APP_ID).toString)
-    flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+    flinkConfig
+      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+      .safeSet(YarnConfigOptions.APPLICATION_ID, submitRequest.extraParameter.get(KEY_YARN_APP_ID).toString)
+
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -57,17 +55,6 @@ object YarnSessionSubmit extends YarnSubmitTrait {
   }
 
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    // 1) get userJar
-    val jarFile = submitRequest.developmentMode match {
-      case DevelopmentMode.FLINKSQL =>
-        submitRequest.checkBuildResult()
-        // 1) get build result
-        val buildResult = submitRequest.buildResult.asInstanceOf[ShadedBuildResponse]
-        // 2) get fat-jar
-        new File(buildResult.shadedJarPath)
-      case _ => new File(submitRequest.flinkUserJar)
-    }
-
     var clusterDescriptor: YarnClusterDescriptor = null
     var packageProgram: PackagedProgram = null
     var client: ClusterClient[ApplicationId] = null
@@ -75,7 +62,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
       val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
       val yarnClusterId: ApplicationId = yarnClusterDescriptor._1
-      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
+      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
       packageProgram = packageProgramJobGraph._1
       val jobGraph = packageProgramJobGraph._2
 
@@ -102,8 +89,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
     }
   }
 
-  override def doStop(stopRequest: StopRequest): StopResponse = {
-    val flinkConfig = new Configuration()
+  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
     flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, stopRequest.extraParameter.get(KEY_YARN_APP_ID).toString)
     flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     logInfo(
@@ -125,7 +111,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
         case (true, true) if savePointDir.nonEmpty => client.stopWithSavepoint(jobID, true, savePointDir).get()
         case (true, false) if savePointDir.nonEmpty => client.cancelWithSavepoint(jobID, savePointDir).get()
         case _ => client.cancel(jobID).get()
-          ""
+          null
       }
       StopResponse(actionResult)
     } catch {

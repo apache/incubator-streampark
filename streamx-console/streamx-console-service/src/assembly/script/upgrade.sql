@@ -206,4 +206,9 @@ PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+BEGIN;
+INSERT INTO `t_role_menu` VALUES (100055, 100001, 100013);
+INSERT INTO `t_role_menu` VALUES (100056, 100001, 100015);
+COMMIT;
 -- ------------------------------------- version: 1.2.2 END ---------------------------------------

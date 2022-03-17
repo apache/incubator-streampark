@@ -35,7 +35,12 @@ import java.util.zip.GZIPInputStream;
 /**
  * @author benjobs
  */
-public class GZipUtils {
+public final class GZipUtils {
+
+    private GZipUtils() {
+
+    }
+
     /**
      * @param tarZipSource 源文件
      * @param targetDir    目标目录

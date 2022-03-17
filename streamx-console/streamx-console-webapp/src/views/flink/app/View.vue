@@ -438,7 +438,7 @@
 
           <a-tooltip title="Launch Application">
             <a-button
-              v-if="(record.launch === -1 || record.launch === 1) && record['optionState'] === 0"
+              v-if="(record.launch === -1 || record.launch === 1 || record.launch === 4) && record['optionState'] === 0"
               @click.native="handleCheckLaunchApp(record)"
               shape="circle"
               size="small"
@@ -554,7 +554,7 @@
           <template v-if="appBuildDetail.pipeline != null">
             <a-row>
               <a-progress
-                v-if="appBuildDetail.pipeline.isErr"
+                v-if="appBuildDetail.pipeline.hasError"
                 :percent="appBuildDetail.pipeline.percent"
                 status="exception"/>
               <a-progress
@@ -698,14 +698,14 @@
             :visible="appBuildErrorLogDrawerVisual"
             @close="closeBuildErrorLogDrawer">
             <template
-              v-if="appBuildDetail.pipeline != null && (appBuildDetail.pipeline.errSummary != null || appBuildDetail.pipeline.errStack != null)">
+              v-if="appBuildDetail.pipeline != null && appBuildDetail.pipeline.hasError">
               <h3>Error Summary</h3>
               <br/>
-              <p>{{ appBuildDetail.pipeline.errSummary }}</p>
+              <p>{{ appBuildDetail.pipeline.errorSummary }}</p>
               <a-divider/>
               <h3>Error Stack</h3>
               <br/>
-              <pre style="font-size: 12px">{{ appBuildDetail.pipeline.errStack }}</pre>
+              <pre style="font-size: 12px">{{ appBuildDetail.pipeline.errorStack }}</pre>
             </template>
             <template v-else>
               <a-empty/>
@@ -714,6 +714,7 @@
 
           <!-- bottom tools -->
           <div
+            v-if="appBuildDetail.pipeline != null && appBuildDetail.pipeline.hasError"
             :style="{
               position: 'absolute',
               bottom: 0,
@@ -1372,16 +1373,17 @@ export default {
 
     openBuildProgressDetailDrawer(app) {
       this.appBuildDrawerVisual = true
-      clearInterval(this.appBuildDtlReqTimer)
+      if (this.appBuildDtlReqTimer) {
+        clearInterval(this.appBuildDtlReqTimer)
+      }
       this.handleFetchBuildDetail(app)
-      this.appBuildDtlReqTimer = window.setInterval(
-          () => this.handleFetchBuildDetail(app),
-          500)
+      this.appBuildDtlReqTimer = window.setInterval(() => this.handleFetchBuildDetail(app), 500)
     },
 
     closeBuildProgressDrawer() {
       this.appBuildDrawerVisual = false
       clearInterval(this.appBuildDtlReqTimer)
+      this.appBuildDtlReqTimer = null
       this.appBuildDetail.pipeline = null
       this.appBuildDetail.docker = null
     },
@@ -1876,7 +1878,7 @@ export default {
         // yarn-per-job|yarn-session|yarn-application
         const executionMode = params['executionMode']
         if (executionMode === 1) {
-          activeURL({id: params.id}).then((resp) => {
+          activeURL({id: params.flinkClusterId}).then((resp) => {
             const url = resp.data + '/#/job/' + params.jobId + '/overview'
             window.open(url)
           })
@@ -1902,17 +1904,9 @@ export default {
     handleEdit(app) {
       this.SetAppId(app.id)
       if (app.appType === 1) {
+        // jobType( 1 custom code 2: flinkSQL)
         this.$router.push({'path': '/flink/app/edit_streamx'})
-        if (app.jobType === 1) {
-          if (app.resourceForm === 1) {
-            this.$router.push({'path': '/flink/app/edit_streamx'})
-          } else {
-            this.$router.push({'path': '/flink/app/edit_flink'})
-          }
-        } else {
-          this.$router.push({'path': '/flink/app/edit_streamx'})
-        }
-      } else {
+      } else if (app.appType === 2) { //Apache Flink
         this.$router.push({'path': '/flink/app/edit_flink'})
       }
     },
