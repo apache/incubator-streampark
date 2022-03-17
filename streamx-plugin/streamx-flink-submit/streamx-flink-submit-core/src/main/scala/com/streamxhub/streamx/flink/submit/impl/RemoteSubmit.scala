@@ -137,7 +137,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
       val jobGraph = packageProgramJobGraph._2
       client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
       val jobId = client.submitJob(jobGraph).get().toString
-      val result = SubmitResponse(standAloneDescriptor._1.toString, flinkConfig.toMap, jobId)
+      val result = SubmitResponse(null, flinkConfig.toMap, jobId)
       result
     } catch {
       case e: Exception =>
