@@ -571,3 +571,6 @@ CREATE TABLE `t_app_build_pipe`(
 
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+alter table t_flink_app add column name varchar(255);
+alter table t_flink_app add column alert_phone_number varchar(255);

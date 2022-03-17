@@ -422,6 +422,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             updateState(application, appState);
             throw e;
         }
+
     }
 
     @RefreshCache
@@ -928,15 +929,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         List<String> jars = application.getDependencyObject().getJar();
         String appUploads = application.getWorkspace().APP_UPLOADS();
         String temp = WebUtils.getAppDir("temp");
+        //cleanup applib if it exists
+        if (fsOperator.exists(application.getAppLib())) {
+            fsOperator.delete(application.getAppLib());
+        }
+        fsOperator.mkdirs(application.getAppLib());
         if (Utils.notEmpty(jars)) {
             for (String jar : jars) {
                 File localJar = new File(temp, jar);
                 String targetJar = appUploads.concat("/").concat(jar);
                 checkOrElseUploadJar(application, localJar, targetJar);
                 //3) 将upload目录下的文件上传到app/lib下.
-                if (!fsOperator.exists(application.getAppLib())) {
-                    fsOperator.mkdirs(application.getAppLib());
-                }
                 fsOperator.copy(targetJar, application.getAppLib(), false, true);
             }
         }
