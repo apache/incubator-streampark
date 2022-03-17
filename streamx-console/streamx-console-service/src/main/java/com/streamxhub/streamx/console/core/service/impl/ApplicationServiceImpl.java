@@ -601,7 +601,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
 
             if (ExecutionMode.isKubernetesMode(appParam.getExecutionMode())) {
-                if (!ObjectUtils.safeEquals(application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate()) ||
+                if (!ObjectUtils.safeEquals(application.getK8sRestExposedType(), appParam.getK8sRestExposedType()) ||
+                    !ObjectUtils.safeEquals(application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate()) ||
                     !ObjectUtils.safeEquals(application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate()) ||
                     !ObjectUtils.safeEquals(application.getK8sPodTemplates(), appParam.getK8sPodTemplates()) ||
                     !ObjectUtils.safeEquals(application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())) {
