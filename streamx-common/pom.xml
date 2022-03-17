@@ -238,8 +238,24 @@
                     </artifactSet>
                     <relocations>
                         <relocation>
-                            <pattern>com.fasterxml.jackson</pattern>
-                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson</shadedPattern>
+                            <pattern>com.fasterxml.jackson.core</pattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson.code</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.fasterxml.jackson.module</pattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson.module</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.fasterxml.jackson.databind</pattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson.databind</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.fasterxml.jackson.dataformat</pattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson.dataformat</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.fasterxml.jackson.datatype</pattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson.datatype</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

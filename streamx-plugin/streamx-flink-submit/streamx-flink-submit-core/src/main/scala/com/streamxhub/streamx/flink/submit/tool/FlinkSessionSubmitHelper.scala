@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.flink.submit.tool
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.streamxhub.streamx.common.util.JsonUtils.{Marshal, Unmarshal}
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
@@ -72,7 +71,7 @@ object FlinkSessionSubmitHelper extends Logger {
       .execute.returnContent().asString(StandardCharsets.UTF_8)
       .fromJson[JarRunResponse]
 
-    jarRunResponse.jobId
+    jarRunResponse.jobid
   }
 
 }
@@ -81,8 +80,8 @@ object FlinkSessionSubmitHelper extends Logger {
 /**
  * refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
  */
-private[submit] case class JarUploadResponse(@JsonProperty("filename") filename: String,
-                                             @JsonProperty("status") status: String) {
+private[submit] case class JarUploadResponse(filename: String,
+                                             status: String) {
 
   def isSuccessful: Boolean = "success".equalsIgnoreCase(status)
 
@@ -92,11 +91,11 @@ private[submit] case class JarUploadResponse(@JsonProperty("filename") filename:
 /**
  * refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
  */
-private[submit] case class JarRunRequest(@JsonProperty("entryClass") entryClass: String,
-                                         @JsonProperty("programArgs") programArgs: String,
-                                         @JsonProperty("parallelism") parallelism: String,
-                                         @JsonProperty("savepointPath") savepointPath: String,
-                                         @JsonProperty("allowNonRestoredState") allowNonRestoredState: Boolean) {
+private[submit] case class JarRunRequest(entryClass: String,
+                                         programArgs: String,
+                                         parallelism: String,
+                                         savepointPath: String,
+                                         allowNonRestoredState: Boolean) {
   def this(flinkConf: Configuration) {
     this(
       entryClass = flinkConf.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS),
@@ -111,7 +110,7 @@ private[submit] case class JarRunRequest(@JsonProperty("entryClass") entryClass:
 /**
  * refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
  */
-private[submit] case class JarRunResponse(@JsonProperty("jobid") jobId: String)
+private[submit] case class JarRunResponse(jobid: String)
 
 
 
