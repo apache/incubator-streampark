@@ -19,17 +19,19 @@
 
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
-import com.google.gson.annotations.SerializedName
-import com.streamxhub.streamx.common.util.GsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model._
+import com.streamxhub.streamx.flink.kubernetes.watcher.JobDetails.Unmarshal
 import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrkCachePool, JobStatusWatcherConf, KubernetesRetriever}
 import io.fabric8.kubernetes.client.Watcher.Action
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
+import org.json4s.DefaultFormats
+import org.json4s.JsonAST.JArray
+import org.json4s.jackson.JsonMethods.parse
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
@@ -41,7 +43,7 @@ import scala.collection.mutable
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.language.{implicitConversions, postfixOps}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
  * Watcher for continuously monitor flink job status on kubernetes-mode,
@@ -254,8 +256,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
       .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
       .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
       .execute.returnContent().asString(StandardCharsets.UTF_8)
-      .fromJson[JobDetails]
-
+      .>>()
 
   /**
    * Infer the current flink state from the last relevant k8s events.
@@ -340,17 +341,17 @@ object FlinkJobStatusWatcher {
 
 }
 
+private[kubernetes] case class JobDetails(jobs: Array[JobDetail] = Array())
 
-private[kubernetes] case class JobDetails(@SerializedName("jobs") jobs: Array[JobDetail] = Array())
 
-private[kubernetes] case class JobDetail(@SerializedName("jid") jid: String,
-                                         @SerializedName("name") name: String,
-                                         @SerializedName("state") state: String,
-                                         @SerializedName("start-time") startTime: Long,
-                                         @SerializedName("end-time") endTime: Long,
-                                         @SerializedName("duration") duration: Long,
-                                         @SerializedName("last-modification") lastModification: Long,
-                                         @SerializedName("tasks") tasks: JobTask) {
+private[kubernetes] case class JobDetail(jid: String,
+                                         name: String,
+                                         state: String,
+                                         startTime: Long,
+                                         endTime: Long,
+                                         duration: Long,
+                                         lastModification: Long,
+                                         tasks: JobTask) {
   def toJobStatusCV(pollEmitTime: Long, pollAckTime: Long): JobStatusCV = {
     JobStatusCV(
       jobState = FlinkJobState.of(state),
@@ -377,3 +378,51 @@ private[kubernetes] case class JobTask(total: Int,
                                        reconciling: Int,
                                        initializing: Int)
 
+
+private[kubernetes] object JobDetails {
+
+  @transient
+  implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
+
+  implicit class Unmarshal(json: String) {
+
+    def >>(): JobDetails = {
+
+      JobDetails(Try(parse(json)) match {
+        case Success(ok) =>
+          ok \ "jobs" match {
+            case JArray(arr) =>
+              arr.map(x => {
+                val task = x \ "tasks"
+                JobDetail(
+                  (x \ "jid").extractOpt[String].getOrElse(null),
+                  (x \ "name").extractOpt[String].getOrElse(null),
+                  (x \ "state").extractOpt[String].getOrElse(null),
+                  (x \ "start-time").extractOpt[Long].getOrElse(0),
+                  (x \ "end-time").extractOpt[Long].getOrElse(0),
+                  (x \ "duration").extractOpt[Long].getOrElse(null),
+                  (x \ "last-modification").extractOpt[Long].getOrElse(0),
+                  JobTask(
+                    (task \ "total").extractOpt[Int].getOrElse(0),
+                    (task \ "created").extractOpt[Int].getOrElse(0),
+                    (task \ "scheduled").extractOpt[Int].getOrElse(0),
+                    (task \ "deploying").extractOpt[Int].getOrElse(0),
+                    (task \ "running").extractOpt[Int].getOrElse(0),
+                    (task \ "finished").extractOpt[Int].getOrElse(0),
+                    (task \ "canceling").extractOpt[Int].getOrElse(0),
+                    (task \ "canceled").extractOpt[Int].getOrElse(0),
+                    (task \ "failed").extractOpt[Int].getOrElse(0),
+                    (task \ "reconciling").extractOpt[Int].getOrElse(0),
+                    (task \ "initializing").extractOpt[Int].getOrElse(0)
+                  )
+                )
+              }).toArray
+            case _ => null
+          }
+        case Failure(_) => null
+      })
+
+    }
+  }
+
+}

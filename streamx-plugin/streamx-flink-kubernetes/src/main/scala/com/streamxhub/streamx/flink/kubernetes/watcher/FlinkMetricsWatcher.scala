@@ -19,15 +19,16 @@
 
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
-import com.google.gson.annotations.SerializedName
-import com.streamxhub.streamx.common.util.GsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkClusterMetricChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV}
+import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkRestOverview.Unmarshal
 import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrkCachePool, KubernetesRetriever, MetricWatcherConf}
 import org.apache.flink.configuration.{JobManagerOptions, MemorySize, TaskManagerOptions}
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
+import org.json4s.jackson.JsonMethods.parse
+import org.json4s.{DefaultFormats, JArray}
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
@@ -35,7 +36,7 @@ import javax.annotation.concurrent.ThreadSafe
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.language.postfixOps
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
  * auther:Al-assad
@@ -45,6 +46,7 @@ import scala.util.Try
 class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf)
                         (implicit val cachePool: FlinkTrkCachePool,
                          implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
+
 
   private val trkTaskExecPool = Executors.newWorkStealingPool()
   private implicit val trkTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trkTaskExecPool)
@@ -146,16 +148,18 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
         .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
         .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
         .execute.returnContent.asString(StandardCharsets.UTF_8)
-        .fromJson[FlinkRestOverview])
-      .getOrElse(return None)
+        .->()
+    ).getOrElse(return None)
+
 
     // call flink rest jm config api
+
     val flinkJmConfigs = Try(
       Request.get(s"$flinkJmRestUrl/jobmanager/config")
         .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
         .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
         .execute.returnContent.asString(StandardCharsets.UTF_8)
-        .fromJson[Array[FlinkRestJmConfigItem]]
+        .>>
         .map(e => (e.key, e.value))
         .toMap
     ).getOrElse(return None)
@@ -184,16 +188,68 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
 /**
  * bean for response message of flink-rest/overview
  */
-private[kubernetes] case class FlinkRestOverview(@SerializedName("taskmanagers") taskManagers: Integer,
-                                                 @SerializedName("slots-total") slotsTotal: Integer,
-                                                 @SerializedName("slots-available") slotsAvailable: Integer,
-                                                 @SerializedName("jobs-running") jobsRunning: Integer,
-                                                 @SerializedName("jobs-finished") jobsFinished: Integer,
-                                                 @SerializedName("jobs-cancelled") jobsCancelled: Integer,
-                                                 @SerializedName("jobs-failed") jobsFailed: Integer,
-                                                 @SerializedName("flink-version") flinkVersion: String)
+private[kubernetes] case class FlinkRestOverview(taskManagers: Integer,
+                                                 slotsTotal: Integer,
+                                                 slotsAvailable: Integer,
+                                                 jobsRunning: Integer,
+                                                 jobsFinished: Integer,
+                                                 jobsCancelled: Integer,
+                                                 jobsFailed: Integer,
+                                                 flinkVersion: String)
+
+object FlinkRestOverview {
+
+  @transient
+  implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
+
+  implicit class Unmarshal(json: String) {
+    def ->(): FlinkRestOverview = {
+      Try(parse(json)) match {
+        case Success(ok) =>
+          FlinkRestOverview(
+            (ok \ "taskmanagers").extractOpt[Integer].getOrElse(0),
+            (ok \ "slots-total").extractOpt[Integer].getOrElse(0),
+            (ok \ "slots-available").extractOpt[Integer].getOrElse(0),
+            (ok \ "jobs-running").extractOpt[Integer].getOrElse(0),
+            (ok \ "jobs-finished").extractOpt[Integer].getOrElse(0),
+            (ok \ "jobs-cancelled").extractOpt[Integer].getOrElse(0),
+            (ok \ "jobs-failed").extractOpt[Integer].getOrElse(0),
+            (ok \ "flink-version").extractOpt[String].getOrElse(null)
+          )
+        case Failure(_) => null
+      }
+    }
+  }
+
+}
 
 /**
  * bean for response message of flink-rest/jobmanager/config
  */
 private[kubernetes] case class FlinkRestJmConfigItem(key: String, value: String)
+
+private[kubernetes] object FlinkRestJmConfigItem {
+
+  @transient
+  implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
+
+  implicit class Unmarshal(json: String) {
+    def ->>(): List[FlinkRestJmConfigItem] = {
+      Try(parse(json)) match {
+        case Success(ok) =>
+          ok match {
+            case JArray(arr) =>
+              arr.map(x => {
+                FlinkRestJmConfigItem(
+                  (x \ "key").extractOpt[String].getOrElse(null),
+                  (x \ "value").extractOpt[String].getOrElse(null)
+                )
+              })
+            case _ => null
+          }
+        case Failure(_) => null
+      }
+    }
+  }
+
+}
