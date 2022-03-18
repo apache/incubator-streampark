@@ -18,14 +18,11 @@
  */
 package com.streamxhub.streamx.common.util
 
-import com.fasterxml.jackson.annotation.{JsonInclude, JsonProperty}
-import com.fasterxml.jackson.databind.cfg.MapperConfig
-import com.fasterxml.jackson.databind.introspect.AnnotatedField
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, PropertyNamingStrategy, SerializationFeature}
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 import java.text.SimpleDateFormat
-import java.util.regex.Pattern
 import scala.reflect.ClassTag
 
 object JsonUtils extends Serializable {
@@ -47,32 +44,6 @@ object JsonUtils extends Serializable {
 
   //所有日期都统一为以下样式：yyyy-MM-dd HH:mm:ss，这里可以不用我的DateTimeUtil.DATE_FORMAT，手动添加
   mapper.setDateFormat(new SimpleDateFormat(DateUtils.fullFormat))
-
-  mapper.setPropertyNamingStrategy(new PropertyNamingStrategy() {
-    override def nameForField(config: MapperConfig[_], field: AnnotatedField, defaultName: String): String = {
-      val jsonProperty = field.getAnnotation(classOf[JsonProperty])
-      if (jsonProperty != null) {
-        jsonProperty.value()
-      } else {
-        toCamelField(defaultName)
-      }
-    }
-
-    def toCamelField(defaultName: String): String = {
-      val sb = new StringBuilder(defaultName)
-      val matcher = Pattern.compile("[_\\-]").matcher(defaultName)
-      var i = 0
-      while (matcher.find) {
-        val position = matcher.end - {
-          i += 1
-          i - 1
-        }
-        sb.replace(position - 1, position + 1, sb.substring(position, position + 1).toUpperCase)
-      }
-      sb.toString
-    }
-
-  })
 
   private[streamx] def read[T](obj: AnyRef, clazz: Class[T]): T = {
     obj match {

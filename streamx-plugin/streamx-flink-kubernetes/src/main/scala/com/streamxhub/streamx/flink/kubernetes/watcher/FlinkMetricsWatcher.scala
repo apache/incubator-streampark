@@ -19,7 +19,8 @@
 
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.streamxhub.streamx.common.util.JsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkClusterMetricChangeEvent
@@ -184,17 +185,17 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
 /**
  * bean for response message of flink-rest/overview
  */
-private[kubernetes] case class FlinkRestOverview(@JsonProperty("taskmanagers") taskManagers: Integer,
-                                                 @JsonProperty("slots-total") slotsTotal: Integer,
-                                                 @JsonProperty("slots-available") slotsAvailable: Integer,
-                                                 @JsonProperty("jobs-running") jobsRunning: Integer,
-                                                 @JsonProperty("jobs-finished") jobsFinished: Integer,
-                                                 @JsonProperty("jobs-cancelled") jobsCancelled: Integer,
-                                                 @JsonProperty("jobs-failed") jobsFailed: Integer,
-                                                 @JsonProperty("flink-version") flinkVersion: String)
+@JsonNaming(classOf[PropertyNamingStrategies.KebabCaseStrategy])
+private[kubernetes] case class FlinkRestOverview(taskManagers: Integer,
+                                                 slotsTotal: Integer,
+                                                 slotsAvailable: Integer,
+                                                 jobsRunning: Integer,
+                                                 jobsFinished: Integer,
+                                                 jobsCancelled: Integer,
+                                                 jobsFailed: Integer,
+                                                 flinkVersion: String)
 
 /**
  * bean for response message of flink-rest/jobmanager/config
  */
-private[kubernetes] case class FlinkRestJmConfigItem(@JsonProperty("key") key: String,
-                                                     @JsonProperty("value") value: String)
+private[kubernetes] case class FlinkRestJmConfigItem(key: String, value: String)

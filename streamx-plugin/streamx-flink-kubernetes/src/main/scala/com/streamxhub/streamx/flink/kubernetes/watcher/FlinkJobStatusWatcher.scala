@@ -19,7 +19,8 @@
 
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.streamxhub.streamx.common.util.JsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
@@ -341,16 +342,17 @@ object FlinkJobStatusWatcher {
 }
 
 
-private[kubernetes] case class JobDetails(@JsonProperty("jobs") jobs: Array[JobDetail] = Array())
+private[kubernetes] case class JobDetails(jobs: Array[JobDetail] = Array())
 
-private[kubernetes] case class JobDetail(@JsonProperty("jid") jid: String,
-                                         @JsonProperty("name") name: String,
-                                         @JsonProperty("state") state: String,
-                                         @JsonProperty("start-time") startTime: Long,
-                                         @JsonProperty("end-time") endTime: Long,
-                                         @JsonProperty("duration") duration: Long,
-                                         @JsonProperty("last-modification") lastModification: Long,
-                                         @JsonProperty("tasks") tasks: JobTask) {
+@JsonNaming(classOf[PropertyNamingStrategies.KebabCaseStrategy])
+private[kubernetes] case class JobDetail(jid: String,
+                                         name: String,
+                                         state: String,
+                                         startTime: Long,
+                                         endTime: Long,
+                                         duration: Long,
+                                         lastModification: Long,
+                                         tasks: JobTask) {
   def toJobStatusCV(pollEmitTime: Long, pollAckTime: Long): JobStatusCV = {
     JobStatusCV(
       jobState = FlinkJobState.of(state),
