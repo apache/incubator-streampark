@@ -19,9 +19,8 @@
 
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.databind.annotation.JsonNaming
-import com.streamxhub.streamx.common.util.JsonUtils.Unmarshal
+import com.google.gson.annotations.SerializedName
+import com.streamxhub.streamx.common.util.GsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
@@ -342,17 +341,16 @@ object FlinkJobStatusWatcher {
 }
 
 
-private[kubernetes] case class JobDetails(jobs: Array[JobDetail] = Array())
+private[kubernetes] case class JobDetails(@SerializedName("jobs") jobs: Array[JobDetail] = Array())
 
-@JsonNaming(classOf[PropertyNamingStrategies.KebabCaseStrategy])
-private[kubernetes] case class JobDetail(jid: String,
-                                         name: String,
-                                         state: String,
-                                         startTime: Long,
-                                         endTime: Long,
-                                         duration: Long,
-                                         lastModification: Long,
-                                         tasks: JobTask) {
+private[kubernetes] case class JobDetail(@SerializedName("jid") jid: String,
+                                         @SerializedName("name") name: String,
+                                         @SerializedName("state") state: String,
+                                         @SerializedName("start-time") startTime: Long,
+                                         @SerializedName("end-time") endTime: Long,
+                                         @SerializedName("duration") duration: Long,
+                                         @SerializedName("last-modification") lastModification: Long,
+                                         @SerializedName("tasks") tasks: JobTask) {
   def toJobStatusCV(pollEmitTime: Long, pollAckTime: Long): JobStatusCV = {
     JobStatusCV(
       jobState = FlinkJobState.of(state),

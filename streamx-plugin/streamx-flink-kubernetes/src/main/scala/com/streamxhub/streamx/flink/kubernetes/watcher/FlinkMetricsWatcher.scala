@@ -19,9 +19,8 @@
 
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.databind.annotation.JsonNaming
-import com.streamxhub.streamx.common.util.JsonUtils.Unmarshal
+import com.google.gson.annotations.SerializedName
+import com.streamxhub.streamx.common.util.GsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkClusterMetricChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV}
@@ -185,15 +184,14 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
 /**
  * bean for response message of flink-rest/overview
  */
-@JsonNaming(classOf[PropertyNamingStrategies.KebabCaseStrategy])
-private[kubernetes] case class FlinkRestOverview(taskManagers: Integer,
-                                                 slotsTotal: Integer,
-                                                 slotsAvailable: Integer,
-                                                 jobsRunning: Integer,
-                                                 jobsFinished: Integer,
-                                                 jobsCancelled: Integer,
-                                                 jobsFailed: Integer,
-                                                 flinkVersion: String)
+private[kubernetes] case class FlinkRestOverview(@SerializedName("taskmanagers") taskManagers: Integer,
+                                                 @SerializedName("slots-total") slotsTotal: Integer,
+                                                 @SerializedName("slots-available") slotsAvailable: Integer,
+                                                 @SerializedName("jobs-running") jobsRunning: Integer,
+                                                 @SerializedName("jobs-finished") jobsFinished: Integer,
+                                                 @SerializedName("jobs-cancelled") jobsCancelled: Integer,
+                                                 @SerializedName("jobs-failed") jobsFailed: Integer,
+                                                 @SerializedName("flink-version") flinkVersion: String)
 
 /**
  * bean for response message of flink-rest/jobmanager/config
