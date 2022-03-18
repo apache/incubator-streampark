@@ -256,7 +256,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
       .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
       .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
       .execute.returnContent().asString(StandardCharsets.UTF_8)
-      .>>()
+      .->>
 
   /**
    * Infer the current flink state from the last relevant k8s events.
@@ -386,7 +386,7 @@ private[kubernetes] object JobDetails {
 
   implicit class Unmarshal(json: String) {
 
-    def >>(): JobDetails = {
+    def ->>(): JobDetails = {
 
       JobDetails(Try(parse(json)) match {
         case Success(ok) =>
@@ -400,7 +400,7 @@ private[kubernetes] object JobDetails {
                   (x \ "state").extractOpt[String].getOrElse(null),
                   (x \ "start-time").extractOpt[Long].getOrElse(0),
                   (x \ "end-time").extractOpt[Long].getOrElse(0),
-                  (x \ "duration").extractOpt[Long].getOrElse(null),
+                  (x \ "duration").extractOpt[Long].getOrElse(0),
                   (x \ "last-modification").extractOpt[Long].getOrElse(0),
                   JobTask(
                     (task \ "total").extractOpt[Int].getOrElse(0),

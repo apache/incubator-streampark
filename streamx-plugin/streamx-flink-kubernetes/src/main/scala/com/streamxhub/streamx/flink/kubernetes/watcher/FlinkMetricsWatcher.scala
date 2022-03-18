@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.kubernetes.watcher
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkClusterMetricChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV}
+import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkRestJmConfigItem.Unmarshal
 import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkRestOverview.Unmarshal
 import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrkCachePool, KubernetesRetriever, MetricWatcherConf}
 import org.apache.flink.configuration.{JobManagerOptions, MemorySize, TaskManagerOptions}
@@ -148,7 +149,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
         .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
         .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
         .execute.returnContent.asString(StandardCharsets.UTF_8)
-        .->()
+        .->
     ).getOrElse(return None)
 
 
@@ -159,7 +160,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
         .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
         .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
         .execute.returnContent.asString(StandardCharsets.UTF_8)
-        .>>
+        .->>
         .map(e => (e.key, e.value))
         .toMap
     ).getOrElse(return None)
