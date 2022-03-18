@@ -233,16 +233,21 @@
                 <configuration>
                     <artifactSet>
                         <includes>
-                            <include>com.fasterxml.jackson.core:jackson-databind</include>
-                            <include>com.fasterxml.jackson.core:jackson-annotations</include>
-                            <include>com.fasterxml.jackson.core:jackson-core</include>
-                            <include>com.fasterxml.jackson.module:jackson-module-scala_${scala.binary.version}</include>
+                            <include>com.fasterxml.jackson.*:*</include>
                         </includes>
                     </artifactSet>
                     <relocations>
                         <relocation>
-                            <pattern>com.fasterxml.jackson</pattern>
-                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson</shadedPattern>
+                            <pattern>com.fasterxml.jackson.code</pattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson.code</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.fasterxml.jackson.module</pattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson.module</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.fasterxml.jackson.databind</pattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson.databind</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

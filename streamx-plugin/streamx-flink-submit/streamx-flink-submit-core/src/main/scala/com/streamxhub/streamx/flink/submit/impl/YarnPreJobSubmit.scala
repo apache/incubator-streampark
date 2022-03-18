@@ -38,7 +38,6 @@ import scala.collection.JavaConversions._
 /**
  * yarn PreJob mode submit
  */
-@deprecated
 object YarnPreJobSubmit extends YarnSubmitTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
