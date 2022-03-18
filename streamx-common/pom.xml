@@ -46,6 +46,7 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!--log4j -->
@@ -234,6 +235,7 @@
                     <artifactSet>
                         <includes>
                             <include>com.fasterxml.jackson.*:*</include>
+                            <include>com.beachape:*</include>
                         </includes>
                     </artifactSet>
                     <relocations>

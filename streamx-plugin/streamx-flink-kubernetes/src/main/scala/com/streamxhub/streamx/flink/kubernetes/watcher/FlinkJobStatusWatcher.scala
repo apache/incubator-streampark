@@ -392,9 +392,9 @@ private[kubernetes] object JobDetails {
             arr.map(x => {
               val task = x \ "tasks"
               JobDetail(
-                (x \ "jid").extractOpt[String].getOrElse(null),
-                (x \ "name").extractOpt[String].getOrElse(null),
-                (x \ "state").extractOpt[String].getOrElse(null),
+                (x \ "jid").extractOpt[String].orNull,
+                (x \ "name").extractOpt[String].orNull,
+                (x \ "state").extractOpt[String].orNull,
                 (x \ "start-time").extractOpt[Long].getOrElse(0),
                 (x \ "end-time").extractOpt[Long].getOrElse(0),
                 (x \ "duration").extractOpt[Long].getOrElse(0),

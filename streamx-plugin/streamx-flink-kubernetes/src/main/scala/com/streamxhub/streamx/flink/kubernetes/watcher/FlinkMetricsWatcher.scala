@@ -213,7 +213,7 @@ object FlinkRestOverview {
           (ok \ "jobs-finished").extractOpt[Integer].getOrElse(0),
           (ok \ "jobs-cancelled").extractOpt[Integer].getOrElse(0),
           (ok \ "jobs-failed").extractOpt[Integer].getOrElse(0),
-          (ok \ "flink-version").extractOpt[String].getOrElse(null)
+          (ok \ "flink-version").extractOpt[String].orNull
         )
       case Failure(_) => null
     }
@@ -238,8 +238,8 @@ private[kubernetes] object FlinkRestJmConfigItem {
           case JArray(arr) =>
             arr.map(x => {
               FlinkRestJmConfigItem(
-                (x \ "key").extractOpt[String].getOrElse(null),
-                (x \ "value").extractOpt[String].getOrElse(null)
+                (x \ "key").extractOpt[String].orNull,
+                (x \ "value").extractOpt[String].orNull
               )
             })
           case _ => null
