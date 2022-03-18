@@ -149,7 +149,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
         .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
         .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
         .execute.returnContent.asString(StandardCharsets.UTF_8)
-        .->
+        .->()
     ).getOrElse(return None)
 
 
@@ -160,7 +160,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
         .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
         .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
         .execute.returnContent.asString(StandardCharsets.UTF_8)
-        .->>
+        .->>()
         .map(e => (e.key, e.value))
         .toMap
     ).getOrElse(return None)

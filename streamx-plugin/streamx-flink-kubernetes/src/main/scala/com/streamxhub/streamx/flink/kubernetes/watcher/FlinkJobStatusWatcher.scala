@@ -256,7 +256,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
       .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
       .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
       .execute.returnContent().asString(StandardCharsets.UTF_8)
-      .->>
+      .->>()
 
   /**
    * Infer the current flink state from the last relevant k8s events.
