@@ -24,7 +24,6 @@ import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model._
-import com.streamxhub.streamx.flink.kubernetes.watcher.JobDetails.Unmarshal
 import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrkCachePool, JobStatusWatcherConf, KubernetesRetriever}
 import io.fabric8.kubernetes.client.Watcher.Action
 import org.apache.hc.client5.http.fluent.Request
@@ -251,12 +250,12 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
   /**
    * list flink jobs details from rest api
    */
-  @throws[Exception] private def callJobsOverviewsApi(restUrl: String): JobDetails =
+  @throws[Exception] private def callJobsOverviewsApi(restUrl: String): JobDetails = JobDetails.as(
     Request.get(s"$restUrl/jobs/overview")
       .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
       .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
       .execute.returnContent().asString(StandardCharsets.UTF_8)
-      .->>()
+  )
 
   /**
    * Infer the current flink state from the last relevant k8s events.
@@ -384,45 +383,42 @@ private[kubernetes] object JobDetails {
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
 
-  implicit class Unmarshal(json: String) {
+  def as(json: String): JobDetails = {
 
-    def ->>(): JobDetails = {
-
-      JobDetails(Try(parse(json)) match {
-        case Success(ok) =>
-          ok \ "jobs" match {
-            case JArray(arr) =>
-              arr.map(x => {
-                val task = x \ "tasks"
-                JobDetail(
-                  (x \ "jid").extractOpt[String].getOrElse(null),
-                  (x \ "name").extractOpt[String].getOrElse(null),
-                  (x \ "state").extractOpt[String].getOrElse(null),
-                  (x \ "start-time").extractOpt[Long].getOrElse(0),
-                  (x \ "end-time").extractOpt[Long].getOrElse(0),
-                  (x \ "duration").extractOpt[Long].getOrElse(0),
-                  (x \ "last-modification").extractOpt[Long].getOrElse(0),
-                  JobTask(
-                    (task \ "total").extractOpt[Int].getOrElse(0),
-                    (task \ "created").extractOpt[Int].getOrElse(0),
-                    (task \ "scheduled").extractOpt[Int].getOrElse(0),
-                    (task \ "deploying").extractOpt[Int].getOrElse(0),
-                    (task \ "running").extractOpt[Int].getOrElse(0),
-                    (task \ "finished").extractOpt[Int].getOrElse(0),
-                    (task \ "canceling").extractOpt[Int].getOrElse(0),
-                    (task \ "canceled").extractOpt[Int].getOrElse(0),
-                    (task \ "failed").extractOpt[Int].getOrElse(0),
-                    (task \ "reconciling").extractOpt[Int].getOrElse(0),
-                    (task \ "initializing").extractOpt[Int].getOrElse(0)
-                  )
+    JobDetails(Try(parse(json)) match {
+      case Success(ok) =>
+        ok \ "jobs" match {
+          case JArray(arr) =>
+            arr.map(x => {
+              val task = x \ "tasks"
+              JobDetail(
+                (x \ "jid").extractOpt[String].getOrElse(null),
+                (x \ "name").extractOpt[String].getOrElse(null),
+                (x \ "state").extractOpt[String].getOrElse(null),
+                (x \ "start-time").extractOpt[Long].getOrElse(0),
+                (x \ "end-time").extractOpt[Long].getOrElse(0),
+                (x \ "duration").extractOpt[Long].getOrElse(0),
+                (x \ "last-modification").extractOpt[Long].getOrElse(0),
+                JobTask(
+                  (task \ "total").extractOpt[Int].getOrElse(0),
+                  (task \ "created").extractOpt[Int].getOrElse(0),
+                  (task \ "scheduled").extractOpt[Int].getOrElse(0),
+                  (task \ "deploying").extractOpt[Int].getOrElse(0),
+                  (task \ "running").extractOpt[Int].getOrElse(0),
+                  (task \ "finished").extractOpt[Int].getOrElse(0),
+                  (task \ "canceling").extractOpt[Int].getOrElse(0),
+                  (task \ "canceled").extractOpt[Int].getOrElse(0),
+                  (task \ "failed").extractOpt[Int].getOrElse(0),
+                  (task \ "reconciling").extractOpt[Int].getOrElse(0),
+                  (task \ "initializing").extractOpt[Int].getOrElse(0)
                 )
-              }).toArray
-            case _ => null
-          }
-        case Failure(_) => null
-      })
+              )
+            }).toArray
+          case _ => null
+        }
+      case Failure(_) => null
+    })
 
-    }
   }
 
 }

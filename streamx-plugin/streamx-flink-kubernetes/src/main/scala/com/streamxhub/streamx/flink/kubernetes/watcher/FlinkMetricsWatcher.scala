@@ -22,8 +22,6 @@ package com.streamxhub.streamx.flink.kubernetes.watcher
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkClusterMetricChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV}
-import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkRestJmConfigItem.Unmarshal
-import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkRestOverview.Unmarshal
 import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrkCachePool, KubernetesRetriever, MetricWatcherConf}
 import org.apache.flink.configuration.{JobManagerOptions, MemorySize, TaskManagerOptions}
 import org.apache.hc.client5.http.fluent.Request
@@ -145,23 +143,24 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
 
     // call flink rest overview api
     val flinkOverview: FlinkRestOverview = Try(
-      Request.get(s"$flinkJmRestUrl/overview")
-        .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-        .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
-        .execute.returnContent.asString(StandardCharsets.UTF_8)
-        .->()
+      FlinkRestOverview.as(
+        Request.get(s"$flinkJmRestUrl/overview")
+          .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
+          .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+          .execute.returnContent.asString(StandardCharsets.UTF_8)
+      )
     ).getOrElse(return None)
 
 
     // call flink rest jm config api
 
     val flinkJmConfigs = Try(
-      Request.get(s"$flinkJmRestUrl/jobmanager/config")
-        .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-        .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
-        .execute.returnContent.asString(StandardCharsets.UTF_8)
-        .->>()
-        .map(e => (e.key, e.value))
+      FlinkRestJmConfigItem
+        .as(Request.get(s"$flinkJmRestUrl/jobmanager/config")
+          .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
+          .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+          .execute.returnContent.asString(StandardCharsets.UTF_8)
+        ).map(e => (e.key, e.value))
         .toMap
     ).getOrElse(return None)
 
@@ -203,22 +202,20 @@ object FlinkRestOverview {
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
 
-  implicit class Unmarshal(json: String) {
-    def ->(): FlinkRestOverview = {
-      Try(parse(json)) match {
-        case Success(ok) =>
-          FlinkRestOverview(
-            (ok \ "taskmanagers").extractOpt[Integer].getOrElse(0),
-            (ok \ "slots-total").extractOpt[Integer].getOrElse(0),
-            (ok \ "slots-available").extractOpt[Integer].getOrElse(0),
-            (ok \ "jobs-running").extractOpt[Integer].getOrElse(0),
-            (ok \ "jobs-finished").extractOpt[Integer].getOrElse(0),
-            (ok \ "jobs-cancelled").extractOpt[Integer].getOrElse(0),
-            (ok \ "jobs-failed").extractOpt[Integer].getOrElse(0),
-            (ok \ "flink-version").extractOpt[String].getOrElse(null)
-          )
-        case Failure(_) => null
-      }
+  def as(json: String): FlinkRestOverview = {
+    Try(parse(json)) match {
+      case Success(ok) =>
+        FlinkRestOverview(
+          (ok \ "taskmanagers").extractOpt[Integer].getOrElse(0),
+          (ok \ "slots-total").extractOpt[Integer].getOrElse(0),
+          (ok \ "slots-available").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-running").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-finished").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-cancelled").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-failed").extractOpt[Integer].getOrElse(0),
+          (ok \ "flink-version").extractOpt[String].getOrElse(null)
+        )
+      case Failure(_) => null
     }
   }
 
@@ -234,22 +231,20 @@ private[kubernetes] object FlinkRestJmConfigItem {
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
 
-  implicit class Unmarshal(json: String) {
-    def ->>(): List[FlinkRestJmConfigItem] = {
-      Try(parse(json)) match {
-        case Success(ok) =>
-          ok match {
-            case JArray(arr) =>
-              arr.map(x => {
-                FlinkRestJmConfigItem(
-                  (x \ "key").extractOpt[String].getOrElse(null),
-                  (x \ "value").extractOpt[String].getOrElse(null)
-                )
-              })
-            case _ => null
-          }
-        case Failure(_) => null
-      }
+  def as(json: String): List[FlinkRestJmConfigItem] = {
+    Try(parse(json)) match {
+      case Success(ok) =>
+        ok match {
+          case JArray(arr) =>
+            arr.map(x => {
+              FlinkRestJmConfigItem(
+                (x \ "key").extractOpt[String].getOrElse(null),
+                (x \ "value").extractOpt[String].getOrElse(null)
+              )
+            })
+          case _ => null
+        }
+      case Failure(_) => null
     }
   }
 
