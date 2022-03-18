@@ -36,6 +36,7 @@ import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationBuildPipelineMapper;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.entity.Message;
@@ -243,7 +244,11 @@ public class ApplBuildPipeServiceImpl
                             applicationService.toEffective(app);
                         } else {
                             if (app.isStreamXJob()) {
-                                applicationConfigService.toEffective(app.getId(), app.getConfigId());
+                                ApplicationConfig config = applicationConfigService.getLatest(app.getId());
+                                if (config != null) {
+                                    config.setToApplication(app);
+                                    applicationConfigService.toEffective(app.getId(), app.getConfigId());
+                                }
                             }
                         }
                     }
