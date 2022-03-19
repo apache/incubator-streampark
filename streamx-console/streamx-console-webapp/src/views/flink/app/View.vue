@@ -1627,7 +1627,15 @@ export default {
                   icon: 'error',
                   width: this.exceptionPropWidth(),
                   html: '<pre class="propException"> startup failed, ' + resp.message.replaceAll(/\[StreamX]/g, '') + '</pre>',
-                  focusConfirm: false
+                  showCancelButton: true,
+                  confirmButtonColor: '#55BDDDFF',
+                  confirmButtonText: 'Detail',
+                  cancelButtonText: 'Close'
+                }).then((isConfirm) =>{
+                  if (isConfirm.value) {
+                    this.SetAppId(id)
+                    this.$router.push({'path': '/flink/app/detail'})
+                  }
                 })
               }
             })
