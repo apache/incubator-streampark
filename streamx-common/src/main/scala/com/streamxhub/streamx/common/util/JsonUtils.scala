@@ -36,6 +36,7 @@ object JsonUtils extends Serializable {
 
   //该属性设置主要是将忽略空bean转json错误
   mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+
   //该属性设置主要是取消将对象的时间默认转换timesstamps(时间戳)形式
   mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
@@ -62,5 +63,6 @@ object JsonUtils extends Serializable {
   implicit class Marshal(obj: AnyRef) {
     private[streamx] def toJson: String = write(obj)
   }
+
 
 }

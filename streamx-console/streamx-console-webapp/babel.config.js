@@ -1,4 +1,4 @@
-const plugins = ['transform-remove-console']
+const plugins = []
 plugins.push(['import', {
   'libraryName': 'Antd',
   'libraryDirectory': 'es',
@@ -16,5 +16,10 @@ module.exports = {
       }
     ]
   ],
-  plugins
+  plugins,
+  'env': {
+    'production': {
+      'plugins': ['transform-remove-console']
+    }
+  }
 }
