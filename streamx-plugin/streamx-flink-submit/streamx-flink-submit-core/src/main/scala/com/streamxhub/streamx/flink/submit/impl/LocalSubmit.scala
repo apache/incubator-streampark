@@ -19,18 +19,15 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.Utils
-import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.deployment.executors.RemoteExecutor
 import org.apache.flink.client.program.MiniClusterClient.MiniClusterId
-import org.apache.flink.client.program.{ClusterClient, MiniClusterClient, PackagedProgram, PackagedProgramUtils}
+import org.apache.flink.client.program.{ClusterClient, MiniClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 
-import java.io.File
 import java.lang.{Integer => JavaInt}
 
 object LocalSubmit extends FlinkSubmitTrait {
@@ -46,29 +43,13 @@ object LocalSubmit extends FlinkSubmitTrait {
   }
 
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    // 1) get userJar
-    val jarFile = submitRequest.developmentMode match {
-      case DevelopmentMode.FLINKSQL =>
-        submitRequest.checkBuildResult()
-        // 1) get build result
-        val buildResult = submitRequest.buildResult.asInstanceOf[ShadedBuildResponse]
-        // 2) get fat-jar
-        new File(buildResult.shadedJarPath)
-      case _ => new File(submitRequest.flinkUserJar)
-    }
-
     var packageProgram: PackagedProgram = null
     var client: ClusterClient[MiniClusterId] = null
     try {
       // build JobGraph
-      packageProgram = super.getPackageProgram(flinkConfig, submitRequest, jarFile)
-      val jobGraph = PackagedProgramUtils.createJobGraph(
-        packageProgram,
-        flinkConfig,
-        getParallelism(submitRequest),
-        null,
-        false
-      )
+      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
+      packageProgram = packageProgramJobGraph._1
+      val jobGraph = packageProgramJobGraph._2
       client = createLocalCluster(flinkConfig)
       val jobId = client.submitJob(jobGraph).get().toString
       val result = SubmitResponse(jobId, flinkConfig.toMap, jobId)
@@ -86,8 +67,8 @@ object LocalSubmit extends FlinkSubmitTrait {
     }
   }
 
-  override def doStop(stopRequest: StopRequest): StopResponse = {
-    RemoteSubmit.stop(stopRequest)
+  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
+    RemoteSubmit.doStop(stopRequest, flinkConfig)
   }
 
   private[this] def createLocalCluster(flinkConfig: Configuration) = {

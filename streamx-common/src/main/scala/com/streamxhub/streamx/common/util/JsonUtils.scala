@@ -27,35 +27,42 @@ import scala.reflect.ClassTag
 
 object JsonUtils extends Serializable {
 
-  private[this] lazy val mapper = new ObjectMapper()
-    .registerModule(DefaultScalaModule)
-    //忽略在json字符串中存在，在java类中不存在字段，防止错误。
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    //该属性设置主要是将忽略空bean转json错误
-    .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-    //该属性设置主要是取消将对象的时间默认转换timesstamps(时间戳)形式
-    .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+  private val mapper = new ObjectMapper()
 
-    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-    //所有日期都统一为以下样式：yyyy-MM-dd HH:mm:ss，这里可以不用我的DateTimeUtil.DATE_FORMAT，手动添加
-    .setDateFormat(new SimpleDateFormat(DateUtils.fullFormat))
+  mapper.registerModule(DefaultScalaModule)
 
-  def read[T](obj: AnyRef)(implicit clazz: ClassTag[T]): T = {
+  //忽略在json字符串中存在，在java类中不存在字段，防止错误。
+  mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+
+  //该属性设置主要是将忽略空bean转json错误
+  mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+
+  //该属性设置主要是取消将对象的时间默认转换timesstamps(时间戳)形式
+  mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+
+  mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+  //所有日期都统一为以下样式：yyyy-MM-dd HH:mm:ss，这里可以不用我的DateTimeUtil.DATE_FORMAT，手动添加
+  mapper.setDateFormat(new SimpleDateFormat(DateUtils.fullFormat))
+
+  private[streamx] def read[T](obj: AnyRef, clazz: Class[T]): T = {
     obj match {
-      case str: String => mapper.readValue(str, implicitly[ClassTag[T]].runtimeClass).asInstanceOf[T]
-      case _ => mapper.readValue(write(obj), implicitly[ClassTag[T]].runtimeClass).asInstanceOf[T]
+      case str: String => mapper.readValue(str, clazz)
+      case _ => mapper.readValue(write(obj), clazz)
     }
   }
 
-  def write(obj: AnyRef): String = mapper.writeValueAsString(obj)
+  private[streamx] def read[T](obj: AnyRef)(implicit classTag: ClassTag[T]): T = this.read(obj, classTag.runtimeClass).asInstanceOf[T]
+
+  private[streamx] def write(obj: AnyRef): String = mapper.writeValueAsString(obj)
 
   implicit class Unmarshal(jsonStr: String) {
-    def fromJson[T](implicit clazz: ClassTag[T]): T = read[T](jsonStr)
+    private[streamx] def fromJson[T]()(implicit classTag: ClassTag[T]): T = read[T](jsonStr)
   }
 
   implicit class Marshal(obj: AnyRef) {
-    def toJson: String = write(obj)
+    private[streamx] def toJson: String = write(obj)
   }
 
-}
 
+}

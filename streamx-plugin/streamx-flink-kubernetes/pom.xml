@@ -65,6 +65,12 @@
             <version>${apache.httpclient5.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.json4s</groupId>
+            <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- snake yaml -->
         <dependency>
             <groupId>org.yaml</groupId>

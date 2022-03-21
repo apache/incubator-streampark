@@ -63,10 +63,10 @@
         <project.build.jdk>1.8</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <streamx.shaded.package>com.streamxhub.streamx.shaded</streamx.shaded.package>
 
-        <flink.version>1.14.0</flink.version>
         <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
-
+        <flink.version>1.14.0</flink.version>
         <spark.version>2.2.0</spark.version>
         <hive.version>2.3.4</hive.version>
         <async.client.version>2.12.3</async.client.version>
@@ -87,7 +87,6 @@
         <logback.version>1.2.6</logback.version>
         <grpc.version>1.15.0</grpc.version>
         <jackson.version>2.12.1</jackson.version>
-        <gson.version>2.8.5</gson.version>
         <guava.version>30.0-jre</guava.version>
         <caffeine.version>2.8.6</caffeine.version>
 
@@ -208,18 +207,6 @@
             </dependency>
 
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.json4s</groupId>
                 <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
                 <version>3.7.0-M2</version>
@@ -229,6 +216,18 @@
                         <artifactId>scala-reflect</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
 
             <dependency>

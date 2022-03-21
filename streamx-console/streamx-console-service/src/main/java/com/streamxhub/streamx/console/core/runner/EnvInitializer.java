@@ -31,6 +31,7 @@ import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -103,8 +104,18 @@ public class EnvInitializer implements ApplicationRunner {
                 });
 
         String mvnRepository = settingService.getMavenRepository();
-        if (mvnRepository != null) {
+        if (StringUtils.isNotEmpty(mvnRepository)) {
             ConfigHub.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);
+        }
+
+        String mvnAuthUser = settingService.getMavenAuthUser();
+        if (StringUtils.isNotEmpty(mvnAuthUser)) {
+            ConfigHub.set(CommonConfig.MAVEN_AUTH_USER(), mvnAuthUser);
+        }
+
+        String mvnAuthPassword = settingService.getMavenAuthPassword();
+        if (StringUtils.isNotEmpty(mvnAuthPassword)) {
+            ConfigHub.set(CommonConfig.MAVEN_AUTH_PASSWORD(), mvnAuthPassword);
         }
 
         ConfigHub.log();

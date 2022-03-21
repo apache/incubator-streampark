@@ -124,7 +124,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             project.setName(projectParam.getName());
             project.setUrl(projectParam.getUrl());
             project.setBranches(projectParam.getBranches());
-            project.setUsername(projectParam.getUsername());
+            project.setUserName(projectParam.getUserName());
             project.setPassword(projectParam.getPassword());
             project.setPom(projectParam.getPom());
             project.setDescription(projectParam.getDescription());
@@ -135,7 +135,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     // 更新部署状态
                     FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                         log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                        app.setLaunch(LaunchState.NEED_CHECK_AFTER_PROJECT_CHANGED.get());
+                        app.setLaunch(LaunchState.NEED_CHECK.get());
                         applicationService.updateLaunch(app);
                     }));
                 }
@@ -195,7 +195,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         // 更新部署状态
                         FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                             log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                            app.setLaunch(LaunchState.NEED_LAUNCH_AFTER_BUILD.get());
+                            app.setLaunch(LaunchState.NEED_LAUNCH.get());
                             this.applicationService.updateLaunch(app);
                         }));
                     } catch (Exception e) {
@@ -371,24 +371,24 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 .setDirectory(project.getAppSource())
                 .setBranch(project.getBranches());
 
-            if (CommonUtils.notEmpty(project.getUsername(), project.getPassword())) {
+            if (CommonUtils.notEmpty(project.getUserName(), project.getPassword())) {
                 cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
             }
+            try (Git git = cloneCommand.call()) {
+                StoredConfig config = git.getRepository().getConfig();
+                config.setBoolean("http", project.getUrl(), "sslVerify", false);
+                config.setBoolean("https", project.getUrl(), "sslVerify", false);
+                config.save();
 
-            Git git = cloneCommand.call();
-            StoredConfig config = git.getRepository().getConfig();
-            config.setBoolean("http", project.getUrl(), "sslVerify", false);
-            config.setBoolean("https", project.getUrl(), "sslVerify", false);
-            config.save();
-
-            File workTree = git.getRepository().getWorkTree();
-            gitWorkTree(project.getId(), workTree, "");
-            tailBuffer.get(project.getId()).append(
-                String.format(
-                    "[StreamX] project [%s] git clone successful!\n",
-                    project.getName()
-                )
-            );
+                File workTree = git.getRepository().getWorkTree();
+                gitWorkTree(project.getId(), workTree, "");
+                tailBuffer.get(project.getId()).append(
+                    String.format(
+                        "[StreamX] project [%s] git clone successful!\n",
+                        project.getName()
+                    )
+                );
+            }
             return true;
         } catch (Exception e) {
             String errorLog = String.format(

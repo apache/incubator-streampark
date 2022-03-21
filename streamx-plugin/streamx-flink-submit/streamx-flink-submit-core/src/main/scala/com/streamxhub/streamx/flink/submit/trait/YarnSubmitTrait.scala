@@ -44,20 +44,18 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
 
   lazy val workspace: Workspace = Workspace.remote
 
-
-  override def doStop(stopRequest: StopRequest): StopResponse = {
+  override def doStop(stopRequest: StopRequest, flinkConf: Configuration): StopResponse = {
 
     val jobID = getJobID(stopRequest.jobId)
 
     val clusterClient = {
-      val flinkConfiguration = new Configuration
-      flinkConfiguration.safeSet(YarnConfigOptions.APPLICATION_ID, stopRequest.clusterId)
+      flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, stopRequest.clusterId)
       val clusterClientFactory = new YarnClusterClientFactory
-      val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
+      val applicationId = clusterClientFactory.getClusterId(flinkConf)
       if (applicationId == null) {
         throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
       }
-      val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
+      val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
       clusterDescriptor.retrieve(applicationId).getClusterClient
     }
 
@@ -68,17 +66,15 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
         .defaultValue(s"${workspace.APP_SAVEPOINTS}")
     )
 
-    val savepointPathFuture = (Try(stopRequest.withSavePoint).getOrElse(false), Try(stopRequest.withDrain).getOrElse(false)) match {
-      case (false, false) =>
-        clusterClient.cancel(jobID)
-        null
-      case (true, false) => clusterClient.cancelWithSavepoint(jobID, savePointDir)
-      case (_, _) => clusterClient.stopWithSavepoint(jobID, stopRequest.withDrain, savePointDir)
-    }
-
-    if (savepointPathFuture == null) null else try {
+    try {
       val clientTimeout = getOptionFromDefaultFlinkConfig(stopRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
-      val savepointDir = savepointPathFuture.get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      val savepointDir = (Try(stopRequest.withSavePoint).getOrElse(false), Try(stopRequest.withDrain).getOrElse(false)) match {
+        case (false, false) =>
+          clusterClient.cancel(jobID).get()
+          null
+        case (true, false) => clusterClient.cancelWithSavepoint(jobID, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+        case (_, _) => clusterClient.stopWithSavepoint(jobID, stopRequest.withDrain, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      }
       StopResponse(savepointDir)
     } catch {
       case e: Exception =>

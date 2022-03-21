@@ -360,7 +360,7 @@
           <template v-if="record['jobType'] === 1">
             <a-badge
               class="build-badge"
-              v-if="record.launch === 7"
+              v-if="record.launch === 5"
               count="NEW"
               title="the associated project has changed and this job need to be rechecked"/>
             <a-badge
@@ -369,10 +369,6 @@
               count="NEW"
               title="the application has changed."/>
           </template>
-          <template v-else-if="record.launch >= 2">
-            <a-badge class="build-badge" count="NEW" title="the application has changed."/>
-          </template>
-
         </template>
 
         <template
@@ -430,7 +426,6 @@
 
           <a-tooltip title="Edit Application">
             <a-button
-              v-if="record.launch !== 6"
               v-permit="'app:update'"
               @click.native="handleEdit(record)"
               shape="circle"
@@ -443,7 +438,7 @@
 
           <a-tooltip title="Launch Application">
             <a-button
-              v-if="(record.launch === -1 || record.launch === 2 || record.launch === 3) && record['optionState'] === 0"
+              v-if="(record.launch === -1 || record.launch === 1 || record.launch === 4) && record['optionState'] === 0"
               @click.native="handleCheckLaunchApp(record)"
               shape="circle"
               size="small"
@@ -454,7 +449,7 @@
 
           <a-tooltip title="Launching Progress Detail">
             <a-button
-              v-if="record.launch === 1 || record.launch === -1 || record['optionState'] === 1"
+              v-if="record.launch === -1 || record.launch === 2 || record['optionState'] === 1"
               @click.native="openBuildProgressDetailDrawer(record)"
               shape="circle"
               size="small"
@@ -559,7 +554,7 @@
           <template v-if="appBuildDetail.pipeline != null">
             <a-row>
               <a-progress
-                v-if="appBuildDetail.pipeline.isErr"
+                v-if="appBuildDetail.pipeline.hasError"
                 :percent="appBuildDetail.pipeline.percent"
                 status="exception"/>
               <a-progress
@@ -703,14 +698,14 @@
             :visible="appBuildErrorLogDrawerVisual"
             @close="closeBuildErrorLogDrawer">
             <template
-              v-if="appBuildDetail.pipeline != null && (appBuildDetail.pipeline.errSummary != null || appBuildDetail.pipeline.errStack != null)">
+              v-if="appBuildDetail.pipeline != null && appBuildDetail.pipeline.hasError">
               <h3>Error Summary</h3>
               <br/>
-              <p>{{ appBuildDetail.pipeline.errSummary }}</p>
+              <p>{{ appBuildDetail.pipeline.errorSummary }}</p>
               <a-divider/>
               <h3>Error Stack</h3>
               <br/>
-              <pre style="font-size: 12px">{{ appBuildDetail.pipeline.errStack }}</pre>
+              <pre style="font-size: 12px">{{ appBuildDetail.pipeline.errorStack }}</pre>
             </template>
             <template v-else>
               <a-empty/>
@@ -719,6 +714,7 @@
 
           <!-- bottom tools -->
           <div
+            v-if="appBuildDetail.pipeline != null && appBuildDetail.pipeline.hasError"
             :style="{
               position: 'absolute',
               bottom: 0,
@@ -1274,21 +1270,15 @@ export default {
     handleLaunchTitle(launch) {
       switch (launch) {
         case -1:
-          return 'dependency changed,but download dependency failed'
+          return 'launch failed'
         case 1:
-          return 'launching'
+          return 'need relaunch'
         case 2:
-          return 'application is updated,need relaunch'
+          return 'launching'
         case 3:
-          return 'dependency is updated,need relaunch'
+          return 'launch finished,need restart'
         case 4:
-          return 'config is updated,need restart'
-        case 5:
-          return 'flink sql is updated,need restart'
-        case 6:
-          return 'application is launched to workspace,need restart'
-        case 7:
-          return 'application is rollbacked,need restart'
+          return 'application is rollbacked,need relaunch'
       }
     },
 
@@ -1353,7 +1343,7 @@ export default {
       this.closeCheckForceBuildModel()
       this.$swal.fire({
         icon: 'success',
-        title: 'Current Application is Launching',
+        title: 'Current Application is launching',
         showConfirmButton: false,
         timer: 2000
       }).then((e) =>
@@ -1383,16 +1373,17 @@ export default {
 
     openBuildProgressDetailDrawer(app) {
       this.appBuildDrawerVisual = true
-      clearInterval(this.appBuildDtlReqTimer)
+      if (this.appBuildDtlReqTimer) {
+        clearInterval(this.appBuildDtlReqTimer)
+      }
       this.handleFetchBuildDetail(app)
-      this.appBuildDtlReqTimer = window.setInterval(
-          () => this.handleFetchBuildDetail(app),
-          500)
+      this.appBuildDtlReqTimer = window.setInterval(() => this.handleFetchBuildDetail(app), 500)
     },
 
     closeBuildProgressDrawer() {
       this.appBuildDrawerVisual = false
       clearInterval(this.appBuildDtlReqTimer)
+      this.appBuildDtlReqTimer = null
       this.appBuildDetail.pipeline = null
       this.appBuildDetail.docker = null
     },
@@ -1492,7 +1483,8 @@ export default {
        * KILLED(-9)
        * @type {boolean}
        */
-      const status = app.state === 7 ||
+      const status = app.state === 0 ||
+          app.state === 7 ||
           app.state === 9 ||
           app.state === 10 ||
           app.state === 11 ||
@@ -1503,13 +1495,27 @@ export default {
           app.state === 20 ||
           app.state === -9 || false
 
-      const launch = app.launch === 0 ||
-        app.launch === 4 ||
-        app.launch === 5 ||
-        app.launch === 6 ||
-        app.launch === 8 ||
-        app.launch === 9 || false
+      /**
+       *
+       * // 部署失败
+       * FAILED(-1),
+       * // 完结
+       * DONE(0),
+       * // 任务修改完毕需要重新发布
+       * NEED_LAUNCH(1),
+       * // 上线中
+       * LAUNCHING(2),
+       * // 上线完毕,需要重启
+       * NEED_RESTART(3),
+       * //需要回滚
+       * NEED_ROLLBACK(4),
+       * // 项目发生变化,任务需检查(是否需要重新选择jar)
+       * NEED_CHECK(5),
+       * // 发布的任务已经撤销
+       * REVOKED(10);
+       */
 
+      const launch = app.launch === 0 || app.launch === 3
 
       const optionState = !this.optionApps.starting.get(app.id) || app['optionState'] === 0 || false
 
@@ -1621,7 +1627,15 @@ export default {
                   icon: 'error',
                   width: this.exceptionPropWidth(),
                   html: '<pre class="propException"> startup failed, ' + resp.message.replaceAll(/\[StreamX]/g, '') + '</pre>',
-                  focusConfirm: false
+                  showCancelButton: true,
+                  confirmButtonColor: '#55BDDDFF',
+                  confirmButtonText: 'Detail',
+                  cancelButtonText: 'Close'
+                }).then((isConfirm) =>{
+                  if (isConfirm.value) {
+                    this.SetAppId(id)
+                    this.$router.push({'path': '/flink/app/detail'})
+                  }
                 })
               }
             })
@@ -1872,7 +1886,7 @@ export default {
         // yarn-per-job|yarn-session|yarn-application
         const executionMode = params['executionMode']
         if (executionMode === 1) {
-          activeURL({id: params.id}).then((resp) => {
+          activeURL({id: params.flinkClusterId}).then((resp) => {
             const url = resp.data + '/#/job/' + params.jobId + '/overview'
             window.open(url)
           })
@@ -1897,21 +1911,10 @@ export default {
 
     handleEdit(app) {
       this.SetAppId(app.id)
-      //appType         STREAMX_FLINK(1, "StreamX Flink"), APACHE_FLINK(2, "Apache Flink"),
-      //jobType         CUSTOMCODE("Custom Code", 1), FLINKSQL("Flink SQL", 2)
-      //ResourceFrom    CICD(1),UPLOAD(2)
       if (app.appType === 1) {
+        // jobType( 1 custom code 2: flinkSQL)
         this.$router.push({'path': '/flink/app/edit_streamx'})
-        if (app.jobType === 1) {
-          if (app.resourceForm === 1) {
-            this.$router.push({'path': '/flink/app/edit_streamx'})
-          } else {
-            this.$router.push({'path': '/flink/app/edit_flink'})
-          }
-        } else {
-          this.$router.push({'path': '/flink/app/edit_streamx'})
-        }
-      } else {
+      } else if (app.appType === 2) { //Apache Flink
         this.$router.push({'path': '/flink/app/edit_flink'})
       }
     },

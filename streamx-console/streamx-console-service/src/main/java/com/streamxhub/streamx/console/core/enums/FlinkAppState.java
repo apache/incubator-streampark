@@ -137,7 +137,7 @@ public enum FlinkAppState implements Serializable {
      */
     KILLED(-9);
 
-    int value;
+    private final int value;
 
     FlinkAppState(int value) {
         this.value = value;

@@ -46,6 +46,7 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!--log4j -->
@@ -116,11 +117,13 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -214,5 +217,43 @@
 
     </dependencies>
 
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactSet>
+                        <includes>
+                            <include>com.fasterxml.jackson.*:*</include>
+                            <include>com.beachape:*</include>
+                        </includes>
+                    </artifactSet>
+                    <relocations>
+                        <relocation>
+                            <pattern>com.fasterxml.jackson.code</pattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson.code</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.fasterxml.jackson.module</pattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson.module</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.fasterxml.jackson.databind</pattern>
+                            <shadedPattern>${streamx.shaded.package}.com.fasterxml.jackson.databind</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

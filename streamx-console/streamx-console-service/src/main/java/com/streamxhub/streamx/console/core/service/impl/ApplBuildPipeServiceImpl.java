@@ -26,6 +26,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Maps;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.Workspace;
+import com.streamxhub.streamx.common.enums.ApplicationType;
+import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
@@ -34,14 +36,16 @@ import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationBuildPipelineMapper;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
+import com.streamxhub.streamx.console.core.entity.Message;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
-import com.streamxhub.streamx.console.core.entity.Message;
 import com.streamxhub.streamx.console.core.enums.NoticeType;
 import com.streamxhub.streamx.console.core.enums.OptionState;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
+import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.CommonService;
@@ -59,7 +63,7 @@ import com.streamxhub.streamx.flink.packer.pipeline.DockerPushSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildRequest;
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemoteBuildRequest;
+import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemotePerJobBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkYarnApplicationBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
@@ -122,6 +126,9 @@ public class ApplBuildPipeServiceImpl
     @Autowired
     private ApplicationService applicationService;
 
+    @Autowired
+    private ApplicationConfigService applicationConfigService;
+
     private final ExecutorService executorService = new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() * 2,
             300,
@@ -143,14 +150,29 @@ public class ApplBuildPipeServiceImpl
 
     @Override
     public boolean buildApplication(@Nonnull Application app) throws Exception {
-        // 1) create pipeline instance
+
+        // 1) flink sql setDependency
+        FlinkSql newFlinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
+        FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
+        if (app.isFlinkSqlJob()) {
+            FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
+            assert flinkSql != null;
+            app.setDependency(flinkSql.getDependency());
+        }
+
+        // create pipeline instance
         BuildPipeline pipeline = createPipelineInstance(app);
 
+        // clear history
+        removeApp(app.getId());
         // register pipeline progress event watcher.
         // save snapshot of pipeline to db when status of pipeline was changed.
         pipeline.registerWatcher(new PipeWatcher() {
             @Override
             public void onStart(PipeSnapshot snapshot) throws Exception {
+                AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
+                saveEntity(buildPipeline);
+
                 app.setLaunch(LaunchState.LAUNCHING.get());
                 applicationService.updateLaunch(app);
 
@@ -158,45 +180,46 @@ public class ApplBuildPipeServiceImpl
                 applicationService.checkEnv(app);
 
                 // 2) some preparatory work
+                String appUploads = app.getWorkspace().APP_UPLOADS();
+
                 if (app.isCustomCodeJob()) {
+                    // customCode upload jar to appHome...
                     String appHome = app.getAppHome();
                     FsOperator fsOperator = app.getFsOperator();
                     fsOperator.delete(appHome);
                     if (app.isUploadJob()) {
-                        String appUploads = app.getWorkspace().APP_UPLOADS();
-                        File temp = WebUtils.getAppTempDir();
-                        File localJar = new File(temp, app.getJar());
-                        String targetJar = appUploads.concat("/").concat(app.getJar());
-                        checkOrElseUploadJar(app.getFsOperator(), localJar, targetJar, appUploads);
+                        File localJar = new File(WebUtils.getAppTempDir(), app.getJar());
                         // upload jar copy to appHome
-                        fsOperator.mkdirs(appHome);
-                        fsOperator.copy(targetJar, appHome, false, true);
+                        String uploadJar = appUploads.concat("/").concat(app.getJar());
+                        checkOrElseUploadJar(app.getFsOperator(), localJar, uploadJar, appUploads);
+                        switch (app.getApplicationType()) {
+                            case STREAMX_FLINK:
+                                fsOperator.mkdirs(app.getAppLib());
+                                fsOperator.copy(uploadJar, app.getAppLib(), false, true);
+                                break;
+                            case APACHE_FLINK:
+                                fsOperator.mkdirs(appHome);
+                                fsOperator.copy(uploadJar, appHome, false, true);
+                                break;
+                            default:
+                                throw new IllegalArgumentException("[StreamX] unsupported ApplicationType of custom code: "
+                                        + app.getApplicationType());
+                        }
                     } else {
                         fsOperator.upload(app.getDistHome(), appHome);
                     }
                 } else {
-                    FlinkSql flinkSql = flinkSqlService.getCandidate(app.getId(), CandidateType.NEW);
-                    if (flinkSql == null) {
-                        flinkSql = flinkSqlService.getEffective(app.getId(), false);
-                    }
-                    assert flinkSql != null;
-                    app.setDependency(flinkSql.getDependency());
                     if (!app.getDependencyObject().getJar().isEmpty()) {
-                        //copy jar to upload dir
+                        //copy jar to local upload dir
                         for (String jar : app.getDependencyObject().getJar()) {
-                            File jarFile = new File(WebUtils.getAppTempDir(), jar);
-                            assert jarFile.exists();
-                            String appUploads = Workspace.local().APP_UPLOADS();
-                            String targetJar = appUploads.concat("/").concat(jar);
-                            checkOrElseUploadJar(FsOperator.lfs(), jarFile, targetJar, appUploads);
+                            File localJar = new File(WebUtils.getAppTempDir(), jar);
+                            assert localJar.exists();
+                            String localUploads = Workspace.local().APP_UPLOADS();
+                            String uploadJar = localUploads.concat("/").concat(jar);
+                            checkOrElseUploadJar(FsOperator.lfs(), localJar, uploadJar, localUploads);
                         }
                     }
                 }
-                // 3) backup.
-                backUpService.backup(app);
-
-                AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
-                saveEntity(buildPipeline);
             }
 
             @Override
@@ -208,14 +231,38 @@ public class ApplBuildPipeServiceImpl
             @Override
             public void onFinish(PipeSnapshot snapshot, BuildResult result) {
                 AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId()).setBuildResult(result);
+                saveEntity(buildPipeline);
                 if (result.pass()) {
                     //running job ...
                     if (app.isRunning()) {
-                        app.setLaunch(LaunchState.NEED_RESTART_AFTER_DEPLOY.get());
+                        app.setLaunch(LaunchState.NEED_RESTART.get());
                     } else {
                         app.setOptionState(OptionState.NONE.getValue());
                         app.setLaunch(LaunchState.DONE.get());
+                        //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
+                        if (app.isFlinkSqlJob()) {
+                            applicationService.toEffective(app);
+                        } else {
+                            if (app.isStreamXJob()) {
+                                ApplicationConfig config = applicationConfigService.getLatest(app.getId());
+                                if (config != null) {
+                                    config.setToApplication(app);
+                                    applicationConfigService.toEffective(app.getId(), app.getConfigId());
+                                }
+                            }
+                        }
                     }
+                    // backup.
+                    if (!app.isNeedRollback()) {
+                        if (app.isFlinkSqlJob() && newFlinkSql != null) {
+                            backUpService.backup(app, newFlinkSql);
+                        } else {
+                            backUpService.backup(app, null);
+                        }
+                    }
+
+                    app.setBuild(false);
+
                 } else {
                     Message message = new Message(
                             commonService.getCurrentUser().getUserId(),
@@ -227,14 +274,9 @@ public class ApplBuildPipeServiceImpl
                     messageService.push(message);
                     app.setLaunch(LaunchState.FAILED.get());
                     app.setOptionState(OptionState.NONE.getValue());
+                    app.setBuild(true);
                 }
                 applicationService.updateLaunch(app);
-                //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
-                FlinkSql flinkSql = flinkSqlService.getEffective(app.getId(), false);
-                if (!app.isRunning() || flinkSql == null) {
-                    applicationService.toEffective(app);
-                }
-                saveEntity(buildPipeline);
             }
         });
         // save docker resolve progress detail to cache, only for flink-k8s application mode.
@@ -277,31 +319,43 @@ public class ApplBuildPipeServiceImpl
         String mainClass = ConfigConst.STREAMX_FLINKSQL_CLIENT_CLASS();
         switch (executionMode) {
             case YARN_APPLICATION:
+                String yarnProvidedPath = app.getAppLib();
+                String localWorkspace = app.getLocalAppHome().concat("/lib");
+                if (app.getDevelopmentMode().equals(DevelopmentMode.CUSTOMCODE)
+                        && app.getApplicationType().equals(ApplicationType.APACHE_FLINK)) {
+                    yarnProvidedPath = app.getAppHome();
+                    localWorkspace = app.getLocalAppHome();
+                }
                 FlinkYarnApplicationBuildRequest yarnAppRequest = new FlinkYarnApplicationBuildRequest(
                         app.getJobName(),
                         mainClass,
-                        app.getLocalAppHome().concat("/lib"),
-                        app.getAppLib(),
+                        localWorkspace,
+                        yarnProvidedPath,
                         app.getDevelopmentMode(),
                         app.getDependencyInfo()
                 );
                 log.info("Submit params to building pipeline : {}", yarnAppRequest);
                 return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
+            case YARN_PER_JOB:
+            case YARN_SESSION:
             case REMOTE:
-                FlinkRemoteBuildRequest remoteBuildRequest = new FlinkRemoteBuildRequest(
+                FlinkRemotePerJobBuildRequest buildRequest = new FlinkRemotePerJobBuildRequest(
                         app.getJobName(),
+                        app.getLocalAppHome(),
                         mainClass,
                         flinkUserJar,
+                        app.isCustomCodeJob(),
                         app.getExecutionModeEnum(),
                         app.getDevelopmentMode(),
                         flinkEnv.getFlinkVersion(),
                         app.getDependencyInfo()
                 );
-                log.info("Submit params to building pipeline : {}", remoteBuildRequest);
-                return FlinkRemoteBuildPipeline.of(remoteBuildRequest);
+                log.info("Submit params to building pipeline : {}", buildRequest);
+                return FlinkRemoteBuildPipeline.of(buildRequest);
             case KUBERNETES_NATIVE_SESSION:
                 FlinkK8sSessionBuildRequest k8sSessionBuildRequest = new FlinkK8sSessionBuildRequest(
                         app.getJobName(),
+                        app.getLocalAppHome(),
                         mainClass,
                         flinkUserJar,
                         app.getExecutionModeEnum(),
@@ -315,6 +369,7 @@ public class ApplBuildPipeServiceImpl
             case KUBERNETES_NATIVE_APPLICATION:
                 FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest = new FlinkK8sApplicationBuildRequest(
                         app.getJobName(),
+                        app.getLocalAppHome(),
                         mainClass,
                         flinkUserJar,
                         app.getExecutionModeEnum(),
@@ -401,6 +456,11 @@ public class ApplBuildPipeServiceImpl
         return rMaps.stream().collect(Collectors.toMap(
                 e -> (Long) e.get("app_id"),
                 e -> PipelineStatus.of((Integer) e.get("pipe_status"))));
+    }
+
+    @Override
+    public void removeApp(Long appId) {
+        baseMapper.delete(new QueryWrapper<AppBuildPipeline>().lambda().eq(AppBuildPipeline::getAppId, appId));
     }
 
     public boolean saveEntity(AppBuildPipeline pipe) {

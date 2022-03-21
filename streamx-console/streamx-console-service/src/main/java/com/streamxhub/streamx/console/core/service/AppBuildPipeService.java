@@ -64,4 +64,9 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
      */
     Map<Long, PipelineStatus> listPipelineStatus(List<Long> appIds);
 
+    /**
+     * delete appBuildPipeline By application
+     * @param appId
+     */
+    void removeApp(Long appId);
 }

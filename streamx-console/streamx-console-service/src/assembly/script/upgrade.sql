@@ -118,18 +118,48 @@ update `t_menu` set MENU_NAME='launch',PERMS='app:launch' where MENU_NAME='deplo
 -- change default value
 UPDATE `t_setting` SET `KEY`='streamx.maven.central.repository' WHERE `KEY` = 'maven.central.repository';
 
--- rename column name DEPLOY to LAUNCH
-ALTER TABLE `t_flink_app` CHANGE COLUMN `DEPLOY` `LAUNCH` tinyint NULL DEFAULT 2 AFTER `CREATE_TIME`;
+-- rename column
+ALTER TABLE `t_flink_project`
+    CHANGE COLUMN `USERNAME` `USER_NAME` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL AFTER `BRANCHES`,
+    CHANGE COLUMN `LASTBUILD` `LAST_BUILD` datetime(0) NULL DEFAULT NULL AFTER `DATE`,
+    CHANGE COLUMN `BUILDSTATE` `BUILD_STATE` tinyint(4) NULL DEFAULT -1 AFTER `DESCRIPTION`,
+    ADD COLUMN `BUILD_ARGS` varchar(255) NULL AFTER `POM`;
 
--- add new field FLINK_CLUSTER_ID
-ALTER TABLE `t_flink_app` ADD COLUMN `FLINK_CLUSTER_ID` bigint DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
+-- rename column name DEPLOY to LAUNCH
+ALTER TABLE `t_flink_app`
+    CHANGE COLUMN `DEPLOY` `LAUNCH` tinyint NULL DEFAULT 2 AFTER `CREATE_TIME`,
+    ADD COLUMN `BUILD` tinyint DEFAULT '1' AFTER `LAUNCH`,
+    ADD COLUMN `FLINK_CLUSTER_ID` bigint DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
 
 -- change column id to AUTO_INCREMENT
-ALTER TABLE t_flink_sql change id  id bigint NOT NULL AUTO_INCREMENT;
+ALTER TABLE `t_flink_sql`
+    CHANGE COLUMN `id` `id` bigint NOT NULL AUTO_INCREMENT,
+    MODIFY COLUMN `CANDIDATE` tinyint(4) NOT NULL DEFAULT 1;
 
+
+-- change launch value
+BEGIN;
+update `t_flink_app` set launch = 0;
+COMMIT;
+
+-- change state value
+BEGIN;
 update `t_flink_app` set STATE = 0 where STATE in (1,2);
+COMMIT;
 
+BEGIN;
 update `t_flink_app` set STATE = STATE - 2 where STATE > 1;
+COMMIT;
+
+-- t_setting
+BEGIN;
+update `t_setting` set `NUM` = `NUM` + 2 where `NUM` > 1;
+COMMIT;
+
+BEGIN;
+INSERT INTO `t_setting` VALUES (2, 'streamx.maven.auth.user', NULL, 'Maven Central Repository Auth User', 'Maven 私服认证用户名', 1);
+INSERT INTO `t_setting` VALUES (3, 'streamx.maven.auth.password', NULL, 'Maven Central Repository Auth Password', 'Maven 私服认证密码', 1);
+COMMIT;
 
 -- change table AUTO_INCREMENT to 100000
 BEGIN;
@@ -148,12 +178,11 @@ ALTER TABLE t_menu AUTO_INCREMENT = 100037 ;
 ALTER TABLE t_message AUTO_INCREMENT = 100000 ;
 ALTER TABLE t_role AUTO_INCREMENT = 100003 ;
 ALTER TABLE t_role_menu AUTO_INCREMENT = 100055 ;
-ALTER TABLE t_setting AUTO_INCREMENT = 100000 ;
 ALTER TABLE t_user AUTO_INCREMENT = 100001 ;
 ALTER TABLE t_user_role AUTO_INCREMENT = 100001 ;
 ALTER TABLE t_app_build_pipe AUTO_INCREMENT = 100000 ;
 COMMIT;
--- update table id 
+-- update table id
 BEGIN;
 UPDATE t_menu set PARENT_ID=PARENT_ID+99999 where PARENT_ID != '0';
 UPDATE t_menu set MENU_ID=MENU_ID+99999;
@@ -177,4 +206,9 @@ PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+BEGIN;
+INSERT INTO `t_role_menu` VALUES (100055, 100001, 100013);
+INSERT INTO `t_role_menu` VALUES (100056, 100001, 100015);
+COMMIT;
 -- ------------------------------------- version: 1.2.2 END ---------------------------------------

@@ -32,13 +32,11 @@ import java.util.List;
  */
 public interface FlinkSqlService extends IService<FlinkSql> {
 
-    //TODO 所有的历史记录和版本相关功能,需要重构,重新讨论实现
-
     /**
      * @param flinkSql
      * @param latest   是否latest
      */
-    void create(FlinkSql flinkSql, CandidateType type);
+    void create(FlinkSql flinkSql);
 
     /**
      * @param latest true  表示设置新增的的记录为 "latest"<br>
@@ -46,7 +44,7 @@ public interface FlinkSqlService extends IService<FlinkSql> {
      * @param sqlId
      * @param appId
      */
-    void setCandidateOrEffective(CandidateType candidateType, Long appId, Long sqlId);
+    void setCandidate(CandidateType candidateType, Long appId, Long sqlId);
 
     /**
      * @param appId

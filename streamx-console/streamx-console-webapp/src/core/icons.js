@@ -12,6 +12,7 @@ import spark from '@/assets/icons/spark.svg?inline'
 import fql from '@/assets/icons/fql.svg?inline'
 import flinksql from '@/assets/icons/flinksql.svg?inline'
 import maven from '@/assets/icons/maven.svg?inline'
+import mvnpass from '@/assets/icons/mvnpass.svg?inline'
 import workspace from '@/assets/icons/workspace.svg?inline'
 import http from '@/assets/icons/http.svg?inline'
 import deploy from '@/assets/icons/deploy.svg?inline'
@@ -59,6 +60,7 @@ export {
   fql,
   spark,
   maven,
+  mvnpass,
   workspace,
   http,
   deploy,

@@ -9,6 +9,8 @@
             <a-list-item v-for="(item,index) in settings" :key="index">
               <a-list-item-meta style="width: 50%">
                 <svg-icon class="avatar" name="maven" size="large" slot="avatar" v-if="item.key === 'streamx.maven.central.repository'"></svg-icon>
+                <svg-icon class="avatar" name="user" size="large" slot="avatar" v-if="item.key === 'streamx.maven.auth.user'"></svg-icon>
+                <svg-icon class="avatar" name="mvnpass" size="large" slot="avatar" v-if="item.key === 'streamx.maven.auth.password'"></svg-icon>
                 <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
                 <svg-icon class="avatar" name="host" size="large" slot="avatar" v-if="item.key === 'alert.email.host'"></svg-icon>
                 <svg-icon class="avatar" name="port" size="large" slot="avatar" v-if="item.key === 'alert.email.port'"></svg-icon>
@@ -26,12 +28,14 @@
                 <div class="list-content-item" style="width: 100%">
                   <template v-if="item.type === 1">
                     <input
+                      :type="item.key === 'streamx.maven.auth.password' ? 'password': 'text'"
                       v-if="item.editable"
                       :value="item.value"
                       :class="item.key.replace(/\./g,'_')"
                       class="ant-input"/>
                     <div v-else style="width: 100%;text-align: right">
-                      {{ item.value }}
+                      <span v-if="item.key === 'streamx.maven.auth.password' && item.value !== null"> ******** </span>
+                      <span v-else>{{ item.value }}</span>
                     </div>
                   </template>
                   <template v-else>
@@ -602,13 +606,13 @@ export default {
                 })
               }
             } else {
-              if (resp.status === 'exists') {
+              if (resp.data === 'exists') {
                 this.$swal.fire(
                     'Failed',
                     'the cluster name: ' + values.clusterName + ' is already exists,please check',
                     'error'
                 )
-              } else if (resp.status === 'fail') {
+              } else if (resp.data === 'fail') {
                 this.$swal.fire(
                     'Failed',
                     'the address is invalid or connection failure, please check',

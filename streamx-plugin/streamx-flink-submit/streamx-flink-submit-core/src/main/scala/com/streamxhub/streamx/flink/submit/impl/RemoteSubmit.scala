@@ -19,15 +19,13 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.Utils
-import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
 import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
-import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
+import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
 
 import java.io.File
@@ -45,9 +43,9 @@ object RemoteSubmit extends FlinkSubmitTrait {
    */
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     flinkConfig
-      .safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
       .safeSet(RestOptions.ADDRESS, submitRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
       .safeSet[JavaInt](RestOptions.PORT, submitRequest.extraParameter.get(RestOptions.PORT.key()).toString.toInt)
+
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -57,25 +55,12 @@ object RemoteSubmit extends FlinkSubmitTrait {
   }
 
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    // 1) get userJar
-    val jarFile = submitRequest.developmentMode match {
-      case DevelopmentMode.FLINKSQL =>
-
-        submitRequest.checkBuildResult()
-        // 1) get build result
-        val buildResult = submitRequest.buildResult.asInstanceOf[ShadedBuildResponse]
-        // 2) get fat-jar
-        new File(buildResult.shadedJarPath)
-      case _ => new File(submitRequest.flinkUserJar)
-    }
-
     // 2) submit job
-    super.trySubmit(submitRequest, flinkConfig, jarFile)(restApiSubmit)(jobGraphSubmit)
+    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(restApiSubmit)(jobGraphSubmit)
 
   }
 
-  override def doStop(stopRequest: StopRequest): StopResponse = {
-    val flinkConfig = new Configuration()
+  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, stopRequest.executionMode.getName)
       .safeSet(RestOptions.ADDRESS, stopRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
@@ -97,7 +82,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
         case (true, true) if savePointDir.nonEmpty => client.stopWithSavepoint(jobID, true, savePointDir).get()
         case (true, false) if savePointDir.nonEmpty => client.cancelWithSavepoint(jobID, savePointDir).get()
         case _ => client.cancel(jobID).get()
-          ""
+          null
       }
       StopResponse(actionResult)
     } catch {
@@ -121,14 +106,16 @@ object RemoteSubmit extends FlinkSubmitTrait {
     var client: ClusterClient[StandaloneClusterId] = null
     try {
       val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
+      val yarnClusterId: StandaloneClusterId = standAloneDescriptor._1
       clusterDescriptor = standAloneDescriptor._2
-      client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
-      logInfo(s"standalone submit WebInterfaceURL ${client.getWebInterfaceURL}")
+
+      client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
       val jobId = FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
-      SubmitResponse(jobId, flinkConfig.toMap, jobId)
+      logInfo(s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
+      SubmitResponse(null, flinkConfig.toMap, jobId)
     } catch {
       case e: Exception =>
-        logError(s"submit flink job fail in standalone mode")
+        logError(s"${submitRequest.executionMode} mode submit by restApi fail.")
         e.printStackTrace()
         throw e
     }
@@ -145,23 +132,17 @@ object RemoteSubmit extends FlinkSubmitTrait {
       val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
       clusterDescriptor = standAloneDescriptor._2
       // build JobGraph
-      packageProgram = super.getPackageProgram(flinkConfig, submitRequest, jarFile)
-
-      val jobGraph = PackagedProgramUtils.createJobGraph(
-        packageProgram,
-        flinkConfig,
-        getParallelism(submitRequest),
-        null,
-        false
-      )
-
+      val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
+      packageProgram = packageProgramJobGraph._1
+      val jobGraph = packageProgramJobGraph._2
       client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
       val jobId = client.submitJob(jobGraph).get().toString
-      val result = SubmitResponse(jobId, flinkConfig.toMap, jobId)
+      logInfo(s"${submitRequest.executionMode} mode submit by jobGraph, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
+      val result = SubmitResponse(null, flinkConfig.toMap, jobId)
       result
     } catch {
       case e: Exception =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
+        logError(s"${submitRequest.executionMode} mode submit by jobGraph fail.")
         e.printStackTrace()
         throw e
     } finally {
@@ -177,7 +158,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
    *
    * @param flinkConfig
    */
-  def getStandAloneClusterDescriptor(flinkConfig: Configuration): (StandaloneClusterId, StandaloneClusterDescriptor) = {
+  private[this] def getStandAloneClusterDescriptor(flinkConfig: Configuration): (StandaloneClusterId, StandaloneClusterDescriptor) = {
     val serviceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = serviceLoader.getClusterClientFactory(flinkConfig)
     val standaloneClusterId: StandaloneClusterId = clientFactory.getClusterId(flinkConfig)

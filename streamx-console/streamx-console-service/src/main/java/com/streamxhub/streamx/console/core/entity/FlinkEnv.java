@@ -20,11 +20,11 @@
 package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.streamxhub.streamx.common.domain.FlinkVersion;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
 import lombok.Data;
-import net.minidev.json.annotate.JsonIgnore;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -75,6 +75,9 @@ public class FlinkEnv implements Serializable {
         assert this.flinkHome != null;
         this.setVersion(this.getFlinkVersion().version());
         this.setScalaVersion(this.getFlinkVersion().scalaVersion());
+        if (this.getScalaVersion().equals("2.12")) {
+            throw new UnsupportedOperationException("[StreamX] flink with scala version 2.12 is not supported, only supported scala version 2.11");
+        }
     }
 
     @JsonIgnore

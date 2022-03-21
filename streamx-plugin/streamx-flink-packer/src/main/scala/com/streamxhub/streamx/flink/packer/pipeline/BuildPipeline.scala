@@ -20,11 +20,12 @@
 package com.streamxhub.streamx.flink.packer.pipeline
 
 import com.streamxhub.streamx.common.util.{Logger, ThreadUtils}
+import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline.executor
 
-import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
+import java.util.concurrent.{Callable, LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -157,11 +158,14 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
    * Launch the building pipeline.
    */
   override def launch(): BuildResult = {
-    logInfo(s"building pipeline is launching, params=${offerBuildParam.toString}")
     pipeStatus = PipelineStatus.running
-    watcher.onStart(snapshot)
-
-    Try(buildProcess()) match {
+    Try {
+      watcher.onStart(snapshot)
+      logInfo(s"building pipeline is launching, params=${offerBuildParam.toString}")
+      executor.submit(new Callable[BuildResult] {
+        override def call(): BuildResult = buildProcess()
+      }).get(5, TimeUnit.MINUTES)
+    } match {
       case Success(result) =>
         pipeStatus = PipelineStatus.success
         logInfo(s"building pipeline has finished successfully.")
@@ -222,6 +226,6 @@ object BuildPipeline {
     new ThreadPoolExecutor.AbortPolicy
   )
 
-  implicit val executor: ExecutionContext = ExecutionContext.fromExecutorService(execPool)
+  implicit val executor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(execPool)
 
 }

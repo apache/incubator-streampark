@@ -26,8 +26,8 @@ import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.CoreOptions
-import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend
+import org.apache.flink.configuration.{Configuration, CoreOptions}
+import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, EmbeddedRocksDBStateBackend}
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend
 import org.apache.flink.runtime.state.storage.{FileSystemCheckpointStorage, JobManagerCheckpointStorage}
 import org.apache.flink.streaming.api.CheckpointingMode
@@ -38,6 +38,7 @@ import org.apache.flink.table.api.TableConfig
 
 import java.io.File
 import java.util.concurrent.TimeUnit
+import java.util.{HashMap => JavaHashMap}
 import collection.JavaConversions._
 import collection.Map
 import util.{Failure, Success, Try}
@@ -348,14 +349,29 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           storage match {
             case CheckpointStorage.jobmanager =>
               logInfo("state.checkpoint-storage: jobmanager...")
-              cpConfig.setCheckpointStorage(new JobManagerCheckpointStorage())
+              val maxMemorySize = Try(parameter.get(KEY_FLINK_STATE_BACKEND_MEMORY).toInt).getOrElse(JobManagerCheckpointStorage.DEFAULT_MAX_STATE_SIZE)
+              val jobManagerCheckpointStorage = new JobManagerCheckpointStorage(maxMemorySize)
+              cpConfig.setCheckpointStorage(jobManagerCheckpointStorage)
             case CheckpointStorage.filesystem =>
               logInfo("state.checkpoint-storage: filesystem...")
               cpConfig.setCheckpointStorage(new FileSystemCheckpointStorage(cpDir))
           }
         case XStateBackend.rocksdb =>
           logInfo("stat.backend: rocksdb...")
-          streamEnvironment.setStateBackend(new EmbeddedRocksDBStateBackend())
+          val rock = new EmbeddedRocksDBStateBackend()
+          val map = new JavaHashMap[String, Object]()
+          val skipKey = List(KEY_FLINK_STATE_BACKEND_ASYNC, KEY_FLINK_STATE_BACKEND_INCREMENTAL, KEY_FLINK_STATE_BACKEND_MEMORY, KEY_FLINK_STATE_ROCKSDB)
+          parameter.getProperties.filter(_._1.startsWith(KEY_FLINK_STATE_ROCKSDB)).filterNot(x => skipKey.contains(x._1)).foreach(x => map.put(x._1, x._2))
+          if (map.nonEmpty) {
+            val optionsFactory = new DefaultConfigurableOptionsFactory
+            val config = new Configuration()
+            val confData = classOf[Configuration].getDeclaredField("confData")
+            confData.setAccessible(true)
+            confData.set(map, config)
+            optionsFactory.configure(config)
+            rock.setRocksDBOptions(optionsFactory)
+          }
+          streamEnvironment.setStateBackend(rock)
           storage match {
             case CheckpointStorage.filesystem =>
               logInfo("state.checkpoint-storage: filesystem...")

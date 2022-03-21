@@ -350,7 +350,7 @@ object SqlError {
   private[core] val separator = "\001"
 
   def toString(sqlError: SqlError): String = {
-    s"${sqlError.errorType.errorType}${SqlError.separator}${sqlError.exception}${SqlError.separator}${sqlError.sql}"
+    s"${sqlError.errorType.getValue}${SqlError.separator}${sqlError.exception}${SqlError.separator}${sqlError.sql}"
   }
 
   def fromString(string: String): SqlError = {

@@ -19,8 +19,6 @@
 
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.streamxhub.streamx.common.util.JsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkClusterMetricChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV}
@@ -28,6 +26,8 @@ import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrkCachePoo
 import org.apache.flink.configuration.{JobManagerOptions, MemorySize, TaskManagerOptions}
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
+import org.json4s.jackson.JsonMethods.parse
+import org.json4s.{DefaultFormats, JArray}
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
@@ -35,7 +35,7 @@ import javax.annotation.concurrent.ThreadSafe
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.language.postfixOps
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
  * auther:Al-assad
@@ -45,6 +45,7 @@ import scala.util.Try
 class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf)
                         (implicit val cachePool: FlinkTrkCachePool,
                          implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
+
 
   private val trkTaskExecPool = Executors.newWorkStealingPool()
   private implicit val trkTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trkTaskExecPool)
@@ -142,21 +143,24 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
 
     // call flink rest overview api
     val flinkOverview: FlinkRestOverview = Try(
-      Request.get(s"$flinkJmRestUrl/overview")
-        .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-        .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
-        .execute.returnContent.asString(StandardCharsets.UTF_8)
-        .fromJson[FlinkRestOverview])
-      .getOrElse(return None)
+      FlinkRestOverview.as(
+        Request.get(s"$flinkJmRestUrl/overview")
+          .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
+          .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+          .execute.returnContent.asString(StandardCharsets.UTF_8)
+      )
+    ).getOrElse(return None)
+
 
     // call flink rest jm config api
+
     val flinkJmConfigs = Try(
-      Request.get(s"$flinkJmRestUrl/jobmanager/config")
-        .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-        .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
-        .execute.returnContent.asString(StandardCharsets.UTF_8)
-        .fromJson[Array[FlinkRestJmConfigItem]]
-        .map(e => (e.key, e.value))
+      FlinkRestJmConfigItem
+        .as(Request.get(s"$flinkJmRestUrl/jobmanager/config")
+          .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
+          .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+          .execute.returnContent.asString(StandardCharsets.UTF_8)
+        ).map(e => (e.key, e.value))
         .toMap
     ).getOrElse(return None)
 
@@ -184,17 +188,64 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
 /**
  * bean for response message of flink-rest/overview
  */
-private[kubernetes] case class FlinkRestOverview(@JsonProperty("taskmanagers") taskManagers: Integer,
-                                                 @JsonProperty("slots-total") slotsTotal: Integer,
-                                                 @JsonProperty("slots-available") slotsAvailable: Integer,
-                                                 @JsonProperty("jobs-running") jobsRunning: Integer,
-                                                 @JsonProperty("jobs-finished") jobsFinished: Integer,
-                                                 @JsonProperty("jobs-cancelled") jobsCancelled: Integer,
-                                                 @JsonProperty("jobs-failed") jobsFailed: Integer,
-                                                 @JsonProperty("flink-version") flinkVersion: String)
+private[kubernetes] case class FlinkRestOverview(taskManagers: Integer,
+                                                 slotsTotal: Integer,
+                                                 slotsAvailable: Integer,
+                                                 jobsRunning: Integer,
+                                                 jobsFinished: Integer,
+                                                 jobsCancelled: Integer,
+                                                 jobsFailed: Integer,
+                                                 flinkVersion: String)
+
+object FlinkRestOverview {
+
+  @transient
+  implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
+
+  def as(json: String): FlinkRestOverview = {
+    Try(parse(json)) match {
+      case Success(ok) =>
+        FlinkRestOverview(
+          (ok \ "taskmanagers").extractOpt[Integer].getOrElse(0),
+          (ok \ "slots-total").extractOpt[Integer].getOrElse(0),
+          (ok \ "slots-available").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-running").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-finished").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-cancelled").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-failed").extractOpt[Integer].getOrElse(0),
+          (ok \ "flink-version").extractOpt[String].orNull
+        )
+      case Failure(_) => null
+    }
+  }
+
+}
 
 /**
  * bean for response message of flink-rest/jobmanager/config
  */
-private[kubernetes] case class FlinkRestJmConfigItem(@JsonProperty("key") key: String,
-                                                     @JsonProperty("value") value: String)
+private[kubernetes] case class FlinkRestJmConfigItem(key: String, value: String)
+
+private[kubernetes] object FlinkRestJmConfigItem {
+
+  @transient
+  implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
+
+  def as(json: String): List[FlinkRestJmConfigItem] = {
+    Try(parse(json)) match {
+      case Success(ok) =>
+        ok match {
+          case JArray(arr) =>
+            arr.map(x => {
+              FlinkRestJmConfigItem(
+                (x \ "key").extractOpt[String].orNull,
+                (x \ "value").extractOpt[String].orNull
+              )
+            })
+          case _ => null
+        }
+      case Failure(_) => null
+    }
+  }
+
+}

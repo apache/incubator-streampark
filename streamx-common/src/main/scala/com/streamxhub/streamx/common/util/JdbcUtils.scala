@@ -20,7 +20,6 @@ package com.streamxhub.streamx.common.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-import org.json4s.DefaultFormats
 
 import java.sql.{Connection, ResultSet, Statement}
 import java.util.Properties
@@ -37,8 +36,6 @@ import scala.util.Try
  */
 object JdbcUtils {
 
-  @transient
-  implicit private lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
 
   private val lockMap: mutable.Map[String, ReentrantLock] = new ConcurrentHashMap[String, ReentrantLock]
 
