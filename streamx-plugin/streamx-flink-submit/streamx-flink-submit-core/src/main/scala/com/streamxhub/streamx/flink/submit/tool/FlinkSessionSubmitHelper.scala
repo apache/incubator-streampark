@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.flink.submit.tool
 
-import com.streamxhub.streamx.common.util.{Logger, Utils}
+import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration.{Configuration, CoreOptions}
@@ -60,7 +60,7 @@ object FlinkSessionSubmitHelper extends Logger {
       .responseTimeout(Timeout.ofSeconds(60))
       .body(MultipartEntityBuilder
         .create()
-        .addBinaryBody("jarfile", flinkJobJar, ContentType.create("application/java-archive"), s"${Utils.uuid()}.jar")
+        .addBinaryBody("jarfile", flinkJobJar, ContentType.create("application/java-archive"), flinkJobJar.getName)
         .build()
       ).execute
       .returnContent()
