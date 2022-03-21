@@ -468,7 +468,7 @@ case class ClickHouseWriterTask(id: Int,
   }
 
   /**
-   * if send data to ClickHouse Failed, retry $maxRetries, if still failed,flush data to $failoverStorage
+   * if send data to ClickHouse Failed, retry maxRetries, if still failed,flush data to failoverStorage
    *
    * @param response
    * @param sinkRequest

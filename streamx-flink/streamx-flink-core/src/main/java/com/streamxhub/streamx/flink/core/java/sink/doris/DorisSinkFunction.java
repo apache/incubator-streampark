@@ -29,6 +29,7 @@ import org.apache.flink.runtime.state.FunctionSnapshotContext;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.util.concurrent.ExecutorThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +112,7 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
     }
 
     @Override
-    public void invoke(T value, Context context) throws Exception {
+    public void invoke(T value, SinkFunction.Context context) throws Exception {
         checkFlushException();
         addBatch(value);
         if (batchSize > 0 && batch.size() >= batchSize) {
