@@ -936,7 +936,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     extraParameter
                 );
 
-                StopResponse stopResponse = FlinkSubmitter.stop(stopInfo);
+                Future<StopResponse> future = executorService.submit(() -> FlinkSubmitter.stop(stopInfo));
+
+                StopResponse stopResponse = future.get(60, TimeUnit.SECONDS);
+
                 if (stopResponse != null && stopResponse.savePointDir() != null) {
                     String savePointDir = stopResponse.savePointDir();
                     log.info("savePoint path:{}", savePointDir);
@@ -1151,11 +1154,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             assert submitResponse != null;
 
             if (submitResponse.flinkConfig() != null) {
-                String jmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_TOTAL_PROCESS_MEMORY());
+                String jmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_JM_PROCESS_MEMORY());
                 if (jmMemory != null) {
                     application.setJmMemory(FlinkMemorySize.parse(jmMemory).getMebiBytes());
                 }
-                String tmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_TOTAL_PROCESS_MEMORY());
+                String tmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_TM_PROCESS_MEMORY());
                 if (tmMemory != null) {
                     application.setTmMemory(FlinkMemorySize.parse(tmMemory).getMebiBytes());
                 }
