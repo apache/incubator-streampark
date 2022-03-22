@@ -210,8 +210,8 @@ public class ApplicationController {
         return RestResponse.create();
     }
 
-    @PostMapping("startlog")
-    public RestResponse startlog(ApplicationLog applicationLog, RestRequest request) {
+    @PostMapping("optionlog")
+    public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.page(applicationLog, request);
         return RestResponse.create().data(applicationList);
     }

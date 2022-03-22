@@ -136,6 +136,8 @@ ALTER TABLE `t_flink_sql`
     CHANGE COLUMN `id` `id` bigint NOT NULL AUTO_INCREMENT,
     MODIFY COLUMN `CANDIDATE` tinyint(4) NOT NULL DEFAULT 1;
 
+ALTER TABLE t_flink_log`
+    CHANGE COLUMN `START_TIME` `OPTION_TIME` datetime(0) NULL DEFAULT NULL AFTER `EXCEPTION`;
 
 -- change launch value
 BEGIN;
