@@ -24,7 +24,7 @@ import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.program.ClusterClientProvider
-import org.apache.flink.configuration.{CheckpointingOptions, ConfigOptions, Configuration}
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.jobgraph.JobGraph
 import org.apache.flink.util.FlinkException
 import org.apache.flink.yarn.configuration.YarnConfigOptions
@@ -40,7 +40,6 @@ import scala.util.Try
  * yarn application mode submit
  */
 trait YarnSubmitTrait extends FlinkSubmitTrait {
-
 
   override def doStop(stopRequest: StopRequest, flinkConf: Configuration): StopResponse = {
 

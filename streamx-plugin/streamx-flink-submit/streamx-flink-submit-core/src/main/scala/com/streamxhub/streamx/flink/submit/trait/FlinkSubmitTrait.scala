@@ -398,7 +398,7 @@ trait FlinkSubmitTrait extends Logger {
         .defaultValue {
           if (stopRequest.executionMode == ExecutionMode.YARN_APPLICATION) {
             Workspace.remote.APP_SAVEPOINTS
-          } else throw new FlinkException("[StreamX] savePoint path is null or invalid.")
+          } else throw new FlinkException(s"[StreamX] executionMode: ${stopRequest.executionMode.getName}, savePoint path is null or invalid.")
         }
     )
   }
