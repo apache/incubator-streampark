@@ -396,19 +396,19 @@
       </a-tab-pane>
       <a-tab-pane
         key="6"
-        tab="Start Logs"
-        v-if="app && startLogList && startLogList.length > 0">
+        tab="Option Logs"
+        v-if="app && optionLogList && optionLogList.length > 0">
         <a-descriptions>
           <a-descriptions-item>
             <a-table
-              ref="TableStartLog"
-              :columns="column.startLog"
+              ref="TableOptLog"
+              :columns="column.optionLog"
               size="middle"
               row-key="id"
               style="margin-top: -24px"
-              :data-source="startLogList"
-              :pagination="pagination.startLog"
-              :loading="pager.startLog.loading"
+              :data-source="optionLogList"
+              :pagination="pagination.optionLog"
+              :loading="pager.optionLog.loading"
               @change="handleTableChange"
               class="detail-table">
               <template
@@ -417,11 +417,11 @@
                 <span class="pointer" @click="handleView(record.yarnAppId)">{{ record.yarnAppId }}</span>
               </template>
               <template
-                slot="startTime"
+                slot="optionTime"
                 slot-scope="text, record">
                 <a-icon
                   type="clock-circle" />
-                {{ record.startTime }}
+                {{ record.optionTime }}
               </template>
               <template
                 slot="success"
@@ -640,7 +640,7 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import {get, backUps, startLog, removeBak, rollback, yarn} from '@api/application'
+import {get, backUps, optionLog, removeBak, rollback, yarn} from '@api/application'
 import State from './State'
 import configOptions from './Option'
 import { get as getVer, list as listVer, remove as removeConf } from '@api/config'
@@ -683,7 +683,7 @@ export default {
       compareVisible: false,
       formCompare: null,
       compare: null,
-      startLogList: null,
+      optionLogList: null,
       queryParams: {},
       animated: false,
       tabBarGutter: 0,
@@ -708,7 +708,7 @@ export default {
           info: null,
           loading: false
         },
-        startLog: {
+        optionLog: {
           key: '6',
           info: null,
           loading: false
@@ -739,7 +739,7 @@ export default {
           showSizeChanger: true,
           showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
         },
-        startLog: {
+        optionLog: {
           pageSizeOptions: ['10', '20', '30', '40', '100'],
           defaultCurrent: 1,
           defaultPageSize: 10,
@@ -892,7 +892,7 @@ export default {
             width: 150
           }
         ],
-        startLog: [
+        optionLog: [
           {
             title: 'Application Id',
             dataIndex: 'yarnAppId',
@@ -905,9 +905,9 @@ export default {
             scopedSlots: { customRender: 'success' }
           },
           {
-            title: 'Start Time',
-            dataIndex: 'startTime',
-            scopedSlots: { customRender: 'startTime' }
+            title: 'Option Time',
+            dataIndex: 'optionTime',
+            scopedSlots: { customRender: 'optionTime' }
           },
           {
             title: 'Operation',
@@ -968,7 +968,7 @@ export default {
             this.handleFlinkSql()
             this.handleSavePoint()
             this.handleBackUps()
-            this.handleStartLog()
+            this.handleOptionLog()
           })
         } else {
           /**
@@ -1095,28 +1095,28 @@ export default {
       })
     },
 
-    handleStartLog() {
+    handleOptionLog() {
       const params = {
         appId: this.app.id
       }
-      if (this.pager.startLog.info) {
+      if (this.pager.optionLog.info) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
-        this.$refs.TableStartLog.pagination.current = this.pager.startLog.info.current
-        this.$refs.TableStartLog.pagination.pageSize = this.pager.startLog.info.pageSize
-        params.pageSize = this.pager.startLog.info.pageSize
-        params.pageNum = this.pager.startLog.info.current
+        this.$refs.TableOptLog.pagination.current = this.pager.optionLog.info.current
+        this.$refs.TableOptLog.pagination.pageSize = this.pager.optionLog.info.pageSize
+        params.pageSize = this.pager.optionLog.info.pageSize
+        params.pageNum = this.pager.optionLog.info.current
       } else {
         // 如果分页信息为空，则设置为默认值
-        params.pageSize = this.pagination.startLog.defaultPageSize
-        params.pageNum = this.pagination.startLog.defaultCurrent
+        params.pageSize = this.pagination.optionLog.defaultPageSize
+        params.pageNum = this.pagination.optionLog.defaultCurrent
       }
       this.handlePagerLoading()
-      startLog({ ...params }).then((resp) => {
-        const pagination = { ...this.pagination.startLog }
+      optionLog({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.optionLog }
         pagination.total = parseInt(resp.data.total)
-        this.startLogList = resp.data.records
-        this.pagination.startLog = pagination
-        this.pager.startLog.loading = false
+        this.optionLogList = resp.data.records
+        this.pagination.optionLog = pagination
+        this.pager.optionLog.loading = false
       })
     },
 
@@ -1315,8 +1315,8 @@ export default {
           this.handleBackUps()
           break
         case '6':
-          this.pager.startLog.info = pagination
-          this.handleStartLog()
+          this.pager.optionLog.info = pagination
+          this.handleOptionLog()
           break
       }
     },

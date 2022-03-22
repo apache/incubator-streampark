@@ -105,8 +105,8 @@ export function revoke (params) {
   return http.post(api.Application.REVOKE, params)
 }
 
-export function startLog (params) {
-  return http.post(api.Application.STARTLOG, params)
+export function optionLog (params) {
+  return http.post(api.Application.OPTIONLOG, params)
 }
 
 export function downLog (params) {

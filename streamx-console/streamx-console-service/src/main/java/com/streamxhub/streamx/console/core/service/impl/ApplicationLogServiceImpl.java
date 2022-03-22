@@ -46,7 +46,7 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
     @Override
     public IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request) {
         Page<Application> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "start_time", Constant.ORDER_DESC, false);
+        SortUtils.handlePageSort(request, page, "option_time", Constant.ORDER_DESC, false);
         return this.baseMapper.page(page, applicationLog.getAppId());
     }
 

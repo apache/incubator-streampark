@@ -955,25 +955,33 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     savePointService.save(savePoint);
                 }
             } catch (Throwable e) {
-                log.error("stop flink job fail.");
-                e.printStackTrace();
+                log.error("stop flink job fail. {}", e);
+                application.setOptionState(OptionState.NONE.getValue());
+                application.setState(FlinkAppState.FAILED.getValue());
+                updateById(application);
+
                 // 保持savepoint失败.则将之前的统统设置为过期
                 if (appParam.getSavePointed()) {
                     savePointService.obsolete(application.getId());
                 }
+
                 // retracking flink job on kubernetes and logging exception
                 if (isKubernetesApp(application)) {
                     TrkId trkid = toTrkId(application);
                     k8sFlinkTrkMonitor.unTrackingJob(trkid);
-                    ApplicationLog log = new ApplicationLog();
-                    log.setAppId(application.getId());
-                    log.setStartTime(new Date());
-                    log.setYarnAppId(application.getClusterId());
-                    log.setException(ExceptionUtils.stringifyException(e));
-                    log.setSuccess(false);
-                    applicationLogService.save(log);
                     k8sFlinkTrkMonitor.trackingJob(trkid);
+                } else {
+                    FlinkTrackingTask.stopTracking(application.getId());
                 }
+
+                ApplicationLog log = new ApplicationLog();
+                log.setAppId(application.getId());
+                log.setYarnAppId(application.getClusterId());
+                log.setOptionTime(new Date());
+                String exception = ExceptionUtils.stringifyException(e);
+                log.setException(exception);
+                log.setSuccess(false);
+                applicationLogService.save(log);
             }
         });
     }
@@ -1021,7 +1029,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String flinkUserJar = null;
         ApplicationLog applicationLog = new ApplicationLog();
         applicationLog.setAppId(application.getId());
-        applicationLog.setStartTime(new Date());
+        applicationLog.setOptionTime(new Date());
 
         try {
             //2) 将latest的设置为Effective的,(此时才真正变成当前生效的)
