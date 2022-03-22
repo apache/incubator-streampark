@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.flink.submit.`trait`
 
-import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.util.ExceptionUtils
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.flink.client.cli.ClientOptions
@@ -42,7 +41,6 @@ import scala.util.Try
  */
 trait YarnSubmitTrait extends FlinkSubmitTrait {
 
-  lazy val workspace: Workspace = Workspace.remote
 
   override def doStop(stopRequest: StopRequest, flinkConf: Configuration): StopResponse = {
 
@@ -59,12 +57,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor.retrieve(applicationId).getClusterClient
     }
 
-    val savePointDir = getOptionFromDefaultFlinkConfig(
-      stopRequest.flinkVersion.flinkHome,
-      ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
-        .stringType()
-        .defaultValue(s"${workspace.APP_SAVEPOINTS}")
-    )
+    val savePointDir = getSavePointDir(stopRequest)
 
     try {
       val clientTimeout = getOptionFromDefaultFlinkConfig(stopRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)

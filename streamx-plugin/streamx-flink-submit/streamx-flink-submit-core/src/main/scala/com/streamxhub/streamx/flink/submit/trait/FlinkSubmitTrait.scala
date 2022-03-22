@@ -35,9 +35,11 @@ import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.Preconditions.checkNotNull
-
 import java.io.File
 import java.util.{Collections, List => JavaList}
+
+import com.streamxhub.streamx.common.conf.Workspace
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -47,6 +49,8 @@ import scala.util.{Failure, Success, Try}
 
 
 trait FlinkSubmitTrait extends Logger {
+
+  lazy val workspace: Workspace = Workspace.local
 
   private[submit] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF("--")
   private[submit] lazy val PARAM_KEY_FLINK_SQL = KEY_FLINK_SQL("--")
@@ -380,6 +384,22 @@ trait FlinkSubmitTrait extends Logger {
         case x => x
       }
     }
+  }
+
+  /**
+   * get dir for default config or params
+   * @param stopRequest requset params
+   * @return
+   */
+  def getSavePointDir(stopRequest: StopRequest): String = {
+    if (stopRequest.customSavePointPath.isEmpty) {
+      getOptionFromDefaultFlinkConfig[String](
+        stopRequest.flinkVersion.flinkHome,
+        ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
+          .stringType()
+          .defaultValue(s"${workspace.APP_SAVEPOINTS}")
+      )
+    } else stopRequest.customSavePointPath
   }
 
 }
