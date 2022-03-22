@@ -153,15 +153,4 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     case FlinkK8sRestExposedType.NodePort => ServiceExposedType.NodePort
     case _ => ServiceExposedType.LoadBalancer
   }
-
-  def getSavePointDir(stopRequest: StopRequest): String = {
-    if (stopRequest.customSavePointPath.isEmpty) {
-      getOptionFromDefaultFlinkConfig[String](
-        stopRequest.flinkVersion.flinkHome,
-        ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
-          .stringType()
-          .defaultValue(s"${workspace.APP_SAVEPOINTS}")
-      )
-    } else stopRequest.customSavePointPath
-  }
 }
