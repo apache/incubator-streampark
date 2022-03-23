@@ -69,7 +69,6 @@
           type="text"
           placeholder="The Repository URL for this project"
           @change="handleSchema"
-          @blur="handleBranches"
           v-decorator="['url',{ rules: [{ required: true, message: 'Repository URL is required'} ]}]" />
       </a-form-item>
 
@@ -80,7 +79,6 @@
         <a-input
           type="text"
           placeholder="UserName for this project"
-          @blur="handleBranches"
           v-decorator="['userName']" />
       </a-form-item>
 
@@ -90,7 +88,6 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-input
           type="password"
-          @blur="handleBranches"
           placeholder="Password for this project"
           v-decorator="['password']" />
       </a-form-item>
@@ -105,6 +102,7 @@
           option-filter-prop="children"
           :filter-option="filterOption"
           allow-clear
+          @click.native="handleBranches"
           v-decorator="['branches',{ rules: [{ required: true } ]}]">
           <a-select-option
             v-for="(k ,i) in brancheList"
@@ -211,7 +209,6 @@ export default {
     handleGet(projectId) {
       get({ id: projectId }).then((resp) => {
         this.project = resp.data
-        this.brancheList = this.project.branches
         this.handleReset()
       }).catch((error) => {
         this.$message.error(error.message)
