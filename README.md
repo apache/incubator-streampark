@@ -127,7 +127,7 @@ cd streamx
 ./mvnw clean install -DskipTests -Denv=prod
 ```
 
-click [Document](http://www.streamxhub.com/zh/doc/) for more information
+click [Document](http://www.streamxhub.com/zh-CN/docs/intro/) for more information
 
 ## 👻 Why not...❓
 
