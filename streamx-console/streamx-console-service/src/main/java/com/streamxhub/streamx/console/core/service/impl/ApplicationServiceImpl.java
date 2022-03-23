@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.domain.FlinkMemorySize;
@@ -36,11 +37,13 @@ import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.HdfsOperator;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
+import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
@@ -98,6 +101,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
+import org.apache.http.client.config.RequestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -894,30 +898,47 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         executorService.submit(() -> {
             try {
                 // infer savepoint
-                String customSavepoint = "";
-                if (isKubernetesApp(application)) {
-                    customSavepoint = StringUtils.isNotBlank(appParam.getSavePoint()) ? appParam.getSavePoint() :
-                        FlinkSubmitter
-                            .extractDynamicOptionAsJava(application.getDynamicOptions())
-                            .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
-
-                } else {
-                    ApplicationConfig applicationConfig = configService.getEffective(application.getId());
-                    if (applicationConfig != null) {
-                        Map<String, String> map = null;
-                        switch (applicationConfig.getFormat()) {
-                            case 1:
-                                map = JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(applicationConfig.getContent())));
-                                break;
-                            case 2:
-                                map = JavaConversions.mapAsJavaMap(PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(applicationConfig.getContent())));
-                                break;
-                            default:
-                                break;
+                String customSavepoint = null;
+                if (appParam.getSavePointed()) {
+                    customSavepoint = appParam.getSavePoint();
+                }
+                if (customSavepoint == null) {
+                    if (isKubernetesApp(application)) {
+                        customSavepoint = FlinkSubmitter
+                                .extractDynamicOptionAsJava(application.getDynamicOptions())
+                                .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
+                    } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+                        //rest api读取.
+                        FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+                        assert cluster != null;
+                        URI activeAddress = cluster.getActiveAddress();
+                        String restUrl = activeAddress.toURL() + "/jobmanager/config";
+                        String json = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+                        List<Map<String,String>> confList = JacksonUtils.read(json, new TypeReference<List<Map<String,String>>>() {
+                        });
+                        List<Map<String, String>> savePoints = confList.stream().filter(x -> x.containsKey("state.savepoints.dir")).collect(Collectors.toList());
+                        if (!savePoints.isEmpty()) {
+                            customSavepoint = savePoints.get(0).get("state.savepoints.dir");
                         }
-                        boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()));
-                        if (checkpointEnable) {
-                            customSavepoint = map.get("flink.state.savepoints.dir");
+                    } else if (application.isStreamXJob() || application.isFlinkSqlJob()) {
+                        ApplicationConfig applicationConfig = configService.getEffective(application.getId());
+                        if (applicationConfig != null) {
+                            Map<String, String> map = null;
+                            switch (applicationConfig.getFormat()) {
+                                case 1:
+                                    map = JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(applicationConfig.getContent())));
+                                    break;
+                                case 2:
+                                    map = JavaConversions.mapAsJavaMap(PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(applicationConfig.getContent())));
+                                    break;
+                                default:
+                                    break;
+                            }
+                            assert map != null;
+                            boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()));
+                            if (checkpointEnable) {
+                                customSavepoint = map.get("flink.state.savepoints.dir");
+                            }
                         }
                     }
                 }

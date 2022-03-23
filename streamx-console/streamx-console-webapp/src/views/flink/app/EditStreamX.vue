@@ -2275,6 +2275,7 @@ export default {
         sqlId: this.defaultFlinkSqlId || null,
         flinkSql: this.controller.flinkSql.value,
         config: config,
+        format: this.isSetConfig ? 1 : null,
         versionId: values.versionId,
         jobName: values.jobName,
         args: values.args || null,

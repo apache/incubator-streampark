@@ -909,6 +909,19 @@
               style="color:darkgrey"> trigger savePoint before taking stoping </span>
           </a-form-item>
           <a-form-item
+              label="Custom SavePoint"
+              style="margin-bottom: 10px"
+              :label-col="{lg: {span: 7}, sm: {span: 7}}"
+              :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
+              v-show="savePoint">
+            <a-input
+                type="text"
+                placeholder="Entry the custom savepoint path"
+                v-model="customSavepoint"
+                v-decorator="['customSavepoint']"/>
+            <div style="color:darkgrey">cancel job with savepoint path.</div>
+          </a-form-item>
+          <a-form-item
             label="Drain"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
@@ -921,19 +934,6 @@
             <span
               class="conf-switch"
               style="color:darkgrey"> Send max watermark before stoping</span>
-          </a-form-item>
-          <a-form-item
-            label="Custom SavePoint"
-            style="margin-bottom: 10px"
-            :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
-            v-show="savePoint">
-            <a-input
-              type="text"
-              placeholder="Entry the custom savepoint path"
-              v-model="customSavepoint"
-              v-decorator="['customSavepoint']"/>
-            <div style="color:darkgrey">Custom savepoint path is not supported on YARN mode.</div>
           </a-form-item>
         </a-form>
 
