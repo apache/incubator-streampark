@@ -103,6 +103,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import scala.collection.JavaConversions;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -903,17 +904,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 } else {
                     ApplicationConfig applicationConfig = configService.getEffective(application.getId());
                     if (applicationConfig != null) {
-                        scala.collection.immutable.Map map = null;
+                        Map<String,String> map = null;
                         switch (applicationConfig.getFormat()) {
                             case 1:
-                                map = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(applicationConfig.getContent()));
+                                map = JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(applicationConfig.getContent())));
                                 break;
                             case 2:
-                                map = PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(applicationConfig.getContent()));
+                                map = JavaConversions.mapAsJavaMap(PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(applicationConfig.getContent())));
+                                break;
+                            default:
+                                break;
                         }
-                        boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()).toString());
+                        boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()));
                         if (checkpointEnable) {
-                            customSavepoint = map.get("flink.state.savepoints.dir").toString();
+                            customSavepoint = map.get("flink.state.savepoints.dir");
                         }
                     }
                 }
