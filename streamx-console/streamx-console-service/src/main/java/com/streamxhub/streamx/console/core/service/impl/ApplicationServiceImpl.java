@@ -36,6 +36,7 @@ import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.HdfsOperator;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
+import com.streamxhub.streamx.common.util.PropertiesUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
@@ -898,6 +899,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         FlinkSubmitter
                             .extractDynamicOptionAsJava(application.getDynamicOptions())
                             .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
+
+                } else {
+                    ApplicationConfig applicationConfig = configService.getEffective(application.getId());
+                    if (applicationConfig != null) {
+                        scala.collection.immutable.Map map = null;
+                        switch (applicationConfig.getFormat()) {
+                            case 1:
+                                map = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(applicationConfig.getContent()));
+                                break;
+                            case 2:
+                                map = PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(applicationConfig.getContent()));
+                        }
+                        boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()).toString());
+                        if (checkpointEnable) {
+                            customSavepoint = map.get("flink.state.savepoints.dir").toString();
+                        }
+                    }
                 }
 
                 Map<String, Object> extraParameter = new HashMap<>();
