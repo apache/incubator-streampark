@@ -902,7 +902,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (appParam.getSavePointed()) {
                     customSavepoint = appParam.getSavePoint();
                 }
-                if (customSavepoint == null) {
+                if (StringUtils.isBlank(customSavepoint)) {
                     if (isKubernetesApp(application)) {
                         customSavepoint = FlinkSubmitter
                                 .extractDynamicOptionAsJava(application.getDynamicOptions())
