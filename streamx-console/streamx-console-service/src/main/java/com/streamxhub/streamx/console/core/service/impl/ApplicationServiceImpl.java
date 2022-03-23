@@ -916,9 +916,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         String json = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
                         List<Map<String,String>> confList = JacksonUtils.read(json, new TypeReference<List<Map<String,String>>>() {
                         });
-                        List<Map<String, String>> savePoints = confList.stream().filter(x -> x.containsKey("state.savepoints.dir")).collect(Collectors.toList());
+                        List<Map<String, String>> savePoints = confList.stream().filter(x -> "state.savepoints.dir".equals(x.get("key"))).collect(Collectors.toList());
                         if (!savePoints.isEmpty()) {
-                            customSavepoint = savePoints.get(0).get("state.savepoints.dir");
+                            customSavepoint = savePoints.get(0).get("value");
                         }
                     } else if (application.isStreamXJob() || application.isFlinkSqlJob()) {
                         ApplicationConfig applicationConfig = configService.getEffective(application.getId());
