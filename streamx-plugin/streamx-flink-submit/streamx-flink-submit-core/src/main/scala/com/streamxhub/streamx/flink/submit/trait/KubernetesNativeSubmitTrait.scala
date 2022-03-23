@@ -97,7 +97,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val jobID = JobID.fromHexString(stopRequest.jobId)
-      val actionResult = cancel(stopRequest, jobID, client)
+      val actionResult = cancelJob(stopRequest, jobID, client)
       StopResponse(actionResult)
     } catch {
       case e: Exception =>

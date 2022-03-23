@@ -53,7 +53,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor.retrieve(applicationId).getClusterClient
     }
     try {
-      val savepointDir = cancel(stopRequest, jobID, clusterClient)
+      val savepointDir = cancelJob(stopRequest, jobID, clusterClient)
       StopResponse(savepointDir)
     } catch {
       case e: Exception =>

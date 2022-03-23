@@ -77,7 +77,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
     try {
       client = standAloneDescriptor._2.retrieve(standAloneDescriptor._1).getClusterClient
       val jobID = JobID.fromHexString(stopRequest.jobId)
-      val actionResult = cancel(stopRequest, jobID, client)
+      val actionResult = cancelJob(stopRequest, jobID, client)
       StopResponse(actionResult)
     } catch {
       case e: Exception =>

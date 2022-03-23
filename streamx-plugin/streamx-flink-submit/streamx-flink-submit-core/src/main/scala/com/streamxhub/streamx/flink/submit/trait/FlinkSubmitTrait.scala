@@ -385,7 +385,7 @@ trait FlinkSubmitTrait extends Logger {
     }
   }
 
-  def cancel(stopRequest: StopRequest, jobID: JobID, client: ClusterClient[_]): String = {
+  private[submit] def cancelJob(stopRequest: StopRequest, jobID: JobID, client: ClusterClient[_]): String = {
     val savePointDir = {
       if (!stopRequest.withSavePoint) null; else {
         Try(Option(stopRequest.customSavePointPath).get).getOrElse {

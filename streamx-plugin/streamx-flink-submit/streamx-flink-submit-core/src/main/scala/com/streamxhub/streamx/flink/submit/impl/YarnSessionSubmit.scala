@@ -106,7 +106,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
       clusterDescriptor = yarnClusterDescriptor._2
       client = clusterDescriptor.retrieve(yarnClusterDescriptor._1).getClusterClient
       val jobID = JobID.fromHexString(stopRequest.jobId)
-      val actionResult = cancel(stopRequest, jobID, client)
+      val actionResult = cancelJob(stopRequest, jobID, client)
       StopResponse(actionResult)
     } catch {
       case e: Exception =>
