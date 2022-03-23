@@ -904,7 +904,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 } else {
                     ApplicationConfig applicationConfig = configService.getEffective(application.getId());
                     if (applicationConfig != null) {
-                        Map<String,String> map = null;
+                        Map<String, String> map = null;
                         switch (applicationConfig.getFormat()) {
                             case 1:
                                 map = JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(applicationConfig.getContent())));
