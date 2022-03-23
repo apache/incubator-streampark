@@ -32,13 +32,14 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
+import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 
 import java.io.File
+import java.util.concurrent.TimeUnit
 import java.util.{Collections, List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -384,23 +385,32 @@ trait FlinkSubmitTrait extends Logger {
     }
   }
 
-  /**
-   * get dir for default config or params
-   *
-   * @param stopRequest requset params
-   * @return
-   */
-  def getSavePointDir(stopRequest: StopRequest): String = Try(Option(stopRequest.customSavePointPath).get).getOrElse {
-    getOptionFromDefaultFlinkConfig[String](
-      stopRequest.flinkVersion.flinkHome,
-      ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
-        .stringType()
-        .defaultValue {
-          if (stopRequest.executionMode == ExecutionMode.YARN_APPLICATION) {
-            Workspace.remote.APP_SAVEPOINTS
-          } else throw new FlinkException(s"[StreamX] executionMode: ${stopRequest.executionMode.getName}, savePoint path is null or invalid.")
+  def cancel(stopRequest: StopRequest, jobID: JobID, client: ClusterClient[_]): String = {
+    val savePointDir = {
+      if (!stopRequest.withSavePoint) null; else {
+        Try(Option(stopRequest.customSavePointPath).get).getOrElse {
+          getOptionFromDefaultFlinkConfig[String](
+            stopRequest.flinkVersion.flinkHome,
+            ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
+              .stringType()
+              .defaultValue {
+                if (stopRequest.executionMode == ExecutionMode.YARN_APPLICATION) {
+                  Workspace.remote.APP_SAVEPOINTS
+                } else throw new FlinkException(s"[StreamX] executionMode: ${stopRequest.executionMode.getName}, savePoint path is null or invalid.")
+              }
+          )
         }
-    )
+      }
+    }
+
+    val clientTimeout = getOptionFromDefaultFlinkConfig(stopRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
+    (Try(stopRequest.withSavePoint).getOrElse(false), Try(stopRequest.withDrain).getOrElse(false)) match {
+      case (false, false) =>
+        client.cancel(jobID).get()
+        null
+      case (true, false) => client.cancelWithSavepoint(jobID, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      case (_, _) => client.stopWithSavepoint(jobID, stopRequest.withDrain, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+    }
   }
 
 }
