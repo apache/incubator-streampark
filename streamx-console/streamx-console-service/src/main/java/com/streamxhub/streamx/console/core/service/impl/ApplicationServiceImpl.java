@@ -902,39 +902,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (appParam.getSavePointed()) {
                     customSavepoint = appParam.getSavePoint();
                 }
-                if (StringUtils.isBlank(customSavepoint)) {
+                if (appParam.getSavePointed() && StringUtils.isBlank(customSavepoint)) {
                     if (isKubernetesApp(application)) {
                         customSavepoint = FlinkSubmitter
                                 .extractDynamicOptionAsJava(application.getDynamicOptions())
                                 .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
                     } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
-                        //rest api读取.
                         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
                         assert cluster != null;
-                        URI activeAddress = cluster.getActiveAddress();
-                        String restUrl = activeAddress.toURL() + "/jobmanager/config";
-                        String json = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
-                        List<Map<String,String>> confList = JacksonUtils.read(json, new TypeReference<List<Map<String,String>>>() {
-                        });
-                        List<Map<String, String>> savePoints = confList.stream().filter(x -> "state.savepoints.dir".equals(x.get("key"))).collect(Collectors.toList());
-                        if (!savePoints.isEmpty()) {
-                            customSavepoint = savePoints.get(0).get("value");
+                        Map<String, String> config = cluster.getFlinkConfig();
+                        if (!config.isEmpty()) {
+                            customSavepoint = config.get("state.savepoints.dir");
                         }
                     } else if (application.isStreamXJob() || application.isFlinkSqlJob()) {
                         ApplicationConfig applicationConfig = configService.getEffective(application.getId());
                         if (applicationConfig != null) {
-                            Map<String, String> map = null;
-                            switch (applicationConfig.getFormat()) {
-                                case 1:
-                                    map = JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(applicationConfig.getContent())));
-                                    break;
-                                case 2:
-                                    map = JavaConversions.mapAsJavaMap(PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(applicationConfig.getContent())));
-                                    break;
-                                default:
-                                    break;
-                            }
-                            assert map != null;
+                            Map<String, String> map = applicationConfig.readConfig();
                             boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()));
                             if (checkpointEnable) {
                                 customSavepoint = map.get("flink.state.savepoints.dir");
@@ -943,7 +926,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     }
                 }
 
-                Map<String, Object> extraParameter = new HashMap<>();
+                Map<String, Object> extraParameter = new HashMap<>(0);
 
                 Map<String, Object> optionMap = application.getOptionMap();
 
@@ -985,7 +968,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
                 if (stopResponse != null && stopResponse.savePointDir() != null) {
                     String savePointDir = stopResponse.savePointDir();
-                    log.info("savePoint path:{}", savePointDir);
                     log.info("savePoint path:{}", savePointDir);
                     SavePoint savePoint = new SavePoint();
                     Date now = new Date();

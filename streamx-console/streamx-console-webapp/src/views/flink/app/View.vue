@@ -1044,7 +1044,19 @@
 import Ellipsis from '@/components/Ellipsis'
 import State from './State'
 import {mapActions} from 'vuex'
-import {cancel, clean, dashboard, downLog, list, mapping, remove, revoke, start, yarn} from '@api/application'
+import {
+  cancel,
+  clean,
+  dashboard,
+  downLog,
+  list,
+  mapping,
+  remove,
+  revoke,
+  start,
+  yarn,
+  verifySchema
+} from '@api/application'
 import {history, latest} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
 import {weburl} from '@api/setting'
@@ -1662,26 +1674,49 @@ export default {
     },
 
     handleStopOk() {
+      const customSavePoint = this.customSavepoint
       const id = this.application.id
       const savePointed = this.savePoint
       const drain = this.drain
-      const customSavePoint = this.customSavepoint
       this.optionApps.stoping.set(id, new Date().getTime())
       this.handleMapUpdate('stoping')
       this.handleStopCancel()
 
+      const stopReq = {
+        id: id,
+        savePointed: savePointed,
+        drain: drain,
+        savePoint: customSavePoint
+      }
+
+      if ( customSavePoint != null ) {
+        verifySchema({
+          'path': customSavePoint
+        }).then(resp => {
+          if (resp.data === false) {
+            this.$swal.fire(
+                'Failed',
+                'custom savePoint path is invalid, ' + resp.message,
+                'error'
+            )
+          } else {
+            this.handleStopAction(stopReq)
+          }
+        })
+      } else {
+        this.handleStopAction(stopReq)
+      }
+
+    },
+
+    handleStopAction(stopReq) {
       this.$swal.fire({
         icon: 'success',
         title: 'The current job is canceling',
         showConfirmButton: false,
         timer: 2000
       }).then((result) => {
-        cancel({
-          id: id,
-          savePointed: savePointed,
-          drain: drain,
-          savePoint: customSavePoint
-        }).then((resp) => {
+        cancel(stopReq).then((resp) => {
           if (resp.status === 'error') {
             this.$swal.fire(
                 'Failed',

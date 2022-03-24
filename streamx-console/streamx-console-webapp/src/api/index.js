@@ -82,7 +82,8 @@ export default {
     REVOKE: '/flink/app/revoke',
     OPTIONLOG: '/flink/app/optionlog',
     DOWNLOG: '/flink/app/downlog',
-    CHECKJAR: '/flink/app/checkjar'
+    CHECKJAR: '/flink/app/checkjar',
+    VERIFYSCHEMA: '/flink/app/verifySchema'
   },
   Config: {
     GET: '/flink/conf/get',
