@@ -111,18 +111,18 @@ public class ApplicationController {
 
         // add building pipeline status info and app control info
         appRecords = appRecords.stream()
-            .peek(e -> {
-                if (pipeStates.containsKey(e.getId())) {
-                    e.setBuildStatus(pipeStates.get(e.getId()).getCode());
-                }
-            })
-            .peek(e -> e.setAppControl(
-                new AppControl()
-                    .setAllowBuild(e.getBuildStatus() == null || !PipelineStatus.running.getCode().equals(e.getBuildStatus()))
-                    .setAllowStart(PipelineStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack())
-                    .setAllowStop(e.isRunning()))
-            )
-            .collect(Collectors.toList());
+                .peek(e -> {
+                    if (pipeStates.containsKey(e.getId())) {
+                        e.setBuildStatus(pipeStates.get(e.getId()).getCode());
+                    }
+                })
+                .peek(e -> e.setAppControl(
+                        new AppControl()
+                                .setAllowBuild(e.getBuildStatus() == null || !PipelineStatus.running.getCode().equals(e.getBuildStatus()))
+                                .setAllowStart(PipelineStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack())
+                                .setAllowStop(e.isRunning()))
+                )
+                .collect(Collectors.toList());
 
         applicationList.setRecords(appRecords);
         return RestResponse.create().data(applicationList);
@@ -254,7 +254,7 @@ public class ApplicationController {
     }
 
     @PostMapping("verifySchema")
-    public RestResponse verifySchema (String path) {
+    public RestResponse verifySchema(String path) {
         final URI uri = URI.create(path);
         final String scheme = uri.getScheme();
         final String pathPart = uri.getPath();
@@ -265,7 +265,7 @@ public class ApplicationController {
             restResponse.data(false).message(error);
         }
         if (pathPart == null) {
-            error =  "The path to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
+            error = "The path to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
             restResponse.data(false).message(error);
         }
         if (pathPart.length() == 0 || pathPart.equals("/")) {
