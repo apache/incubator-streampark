@@ -116,3 +116,7 @@ export function downLog (params) {
 export function checkJar(params) {
   return http.post(api.Application.CHECKJAR, params)
 }
+
+export function verifySchema(params) {
+  return http.post(api.Application.VERIFYSCHEMA, params)
+}

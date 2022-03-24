@@ -2402,6 +2402,7 @@ export default {
         flinkSql: this.controller.flinkSql.value,
         appType: 1,
         config: config,
+        format: this.isSetConfig ? 1 : null,
         jobName: values.jobName,
         args: values.args || null,
         dependency: dependency.pom === undefined && dependency.jar === undefined ? null : JSON.stringify(dependency),

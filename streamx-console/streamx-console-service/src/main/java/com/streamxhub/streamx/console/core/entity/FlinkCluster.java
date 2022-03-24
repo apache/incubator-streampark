@@ -21,13 +21,20 @@ package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import lombok.Data;
 import org.apache.http.client.config.RequestConfig;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author benjobs
@@ -82,4 +89,17 @@ public class FlinkCluster implements Serializable {
         }
         return false;
     }
+
+    @JsonIgnore
+    public Map<String, String> getFlinkConfig() throws MalformedURLException, JsonProcessingException {
+        URI activeAddress = this.getActiveAddress();
+        String restUrl = activeAddress.toURL() + "/jobmanager/config";
+        String json = HttpClientUtils.httpGetRequest(restUrl, RequestConfig.custom().setConnectTimeout(2000).build());
+        List<Map<String, String>> confList = JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {
+        });
+        Map<String, String> config = new HashMap<>(0);
+        confList.forEach(k -> config.put(k.get("key"), k.get("value")));
+        return config;
+    }
+
 }
