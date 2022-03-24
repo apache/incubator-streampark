@@ -259,7 +259,7 @@ public class ApplicationController {
         final String scheme = uri.getScheme();
         final String pathPart = uri.getPath();
         RestResponse restResponse = RestResponse.create().data(true);
-        String error = null;
+        String error;
         if (scheme == null) {
             error = "The scheme (hdfs://, file://, etc) is null. Please specify the file system scheme explicitly in the URI.";
             restResponse.data(false).message(error);
