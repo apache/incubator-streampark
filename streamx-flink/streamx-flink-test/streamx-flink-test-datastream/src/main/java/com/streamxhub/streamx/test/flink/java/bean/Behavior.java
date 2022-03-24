@@ -17,13 +17,15 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.domain
+package com.streamxhub.streamx.test.flink.java.bean;
 
-import java.util.{Map => JavaMap}
-import javax.annotation.Nullable
+import lombok.Data;
 
-case class SubmitResponse(clusterId: String,
-                          flinkConfig: JavaMap[String, String],
-                          @Nullable jobId: String = "") {
-
+@Data
+public class Behavior {
+    private String user_id;
+    private Long item_id;
+    private Long category_id;
+    private String behavior;
+    private Long ts;
 }

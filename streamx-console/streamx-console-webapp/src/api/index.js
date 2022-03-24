@@ -81,9 +81,10 @@ export default {
     BACKUPS: '/flink/app/backups',
     ROLLBACK: '/flink/app/rollback',
     REVOKE: '/flink/app/revoke',
-    STARTLOG: '/flink/app/startlog',
+    OPTIONLOG: '/flink/app/optionlog',
     DOWNLOG: '/flink/app/downlog',
-    CHECKJAR: '/flink/app/checkjar'
+    CHECKJAR: '/flink/app/checkjar',
+    VERIFYSCHEMA: '/flink/app/verifySchema'
   },
   Config: {
     GET: '/flink/conf/get',
@@ -101,6 +102,14 @@ export default {
     SYNC: '/flink/env/sync',
     UPDATE: '/flink/env/update',
     DEFAULT: '/flink/env/default',
+  },
+  FlinkCluster: {
+    LIST: '/flink/cluster/list',
+    ACTIVEURL: '/flink/cluster/activeUrl',
+    CREATE:  '/flink/cluster/create',
+    CHECK: '/flink/cluster/check',
+    GET: '/flink/cluster/get',
+    UPDATE: '/flink/cluster/update'
   },
   AppBuild: {
     BUILD: '/flink/pipe/build',

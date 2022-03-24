@@ -105,8 +105,8 @@ export function revoke (params) {
   return http.post(api.Application.REVOKE, params)
 }
 
-export function startLog (params) {
-  return http.post(api.Application.STARTLOG, params)
+export function optionLog (params) {
+  return http.post(api.Application.OPTIONLOG, params)
 }
 
 export function downLog (params) {
@@ -119,4 +119,7 @@ export function checkJar(params) {
 
 export function uploadAddProject(params) {
   return http.upload(api.Project.PROJAR, params)
+  
+export function verifySchema(params) {
+  return http.post(api.Application.VERIFYSCHEMA, params)
 }

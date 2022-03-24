@@ -37,14 +37,14 @@ import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.GZipUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
-import com.streamxhub.streamx.console.base.util.WebUtils;
-import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.BuildState;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.runner.EnvInitializer;
+import com.streamxhub.streamx.console.core.enums.LaunchState;
+import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
@@ -82,7 +82,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     private final Map<Long, Byte> tailBeginning = new ConcurrentHashMap<>();
 
     @Autowired
-    private ApplicationMapper applicationMapper;
+    private ApplicationService applicationService;
 
     @Autowired
     private EnvInitializer envInitializer;
@@ -126,10 +126,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             project.setName(projectParam.getName());
             project.setUrl(projectParam.getUrl());
             project.setBranches(projectParam.getBranches());
-            project.setUsername(projectParam.getUsername());
+            project.setUserName(projectParam.getUserName());
             project.setPassword(projectParam.getPassword());
             project.setPom(projectParam.getPom());
             project.setDescription(projectParam.getDescription());
+            project.setBuildArgs(projectParam.getBuildArgs());
             if (projectParam.getBuildState() != null) {
                 project.setBuildState(projectParam.getBuildState());
                 if (BuildState.of(projectParam.getBuildState()).equals(BuildState.NEED_REBUILD)) {
@@ -137,8 +138,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     // 更新部署状态
                     FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                         log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                        app.setDeploy(DeployState.NEED_CHECK_AFTER_PROJECT_CHANGED.get());
-                        this.applicationMapper.updateDeploy(app);
+                        app.setLaunch(LaunchState.NEED_CHECK.get());
+                        applicationService.updateLaunch(app);
                     }));
                 }
             }
@@ -157,7 +158,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         assert project != null;
         LambdaQueryWrapper<Application> queryWrapper = new QueryWrapper<Application>().lambda();
         queryWrapper.eq(Application::getProjectId, id);
-        Integer count = applicationMapper.selectCount(queryWrapper);
+        int count = applicationService.count(queryWrapper);
         if (count > 0) {
             return false;
         }
@@ -195,7 +196,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                     log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
                     app.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
-                    this.applicationMapper.updateDeploy(app);
+                    this.applicationService.updateDeploy(app);
                 }));
                 this.baseMapper.successBuild(project);
                 return;
@@ -221,8 +222,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         // 更新部署状态
                         FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                             log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                            app.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
-                            this.applicationMapper.updateDeploy(app);
+                            app.setLaunch(LaunchState.NEED_LAUNCH.get());
+                            this.applicationService.updateLaunch(app);
                         }));
                     } catch (Exception e) {
                         this.baseMapper.failureBuild(project);
@@ -265,8 +266,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 // 2) .jar文件(普通,官方标准的flink工程)
                 Utils.checkJarFile(app.toURI().toURL());
                 String moduleName = app.getName().replace(".jar", "");
-                File appBase = project.getDistHome();
-                File targetDir = new File(appBase, moduleName);
+                File distHome = project.getDistHome();
+                File targetDir = new File(distHome, moduleName);
                 if (!targetDir.exists()) {
                     targetDir.mkdirs();
                 }
@@ -350,7 +351,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public List<Application> getApplications(Project project) {
-        return this.applicationMapper.getByProject(project);
+        return this.applicationService.getByProjectId(project.getId());
     }
 
     @Override
@@ -398,24 +399,24 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 .setDirectory(project.getAppSource())
                 .setBranch(project.getBranches());
 
-            if (CommonUtils.notEmpty(project.getUsername(), project.getPassword())) {
+            if (CommonUtils.notEmpty(project.getUserName(), project.getPassword())) {
                 cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
             }
+            try (Git git = cloneCommand.call()) {
+                StoredConfig config = git.getRepository().getConfig();
+                config.setBoolean("http", project.getUrl(), "sslVerify", false);
+                config.setBoolean("https", project.getUrl(), "sslVerify", false);
+                config.save();
 
-            Git git = cloneCommand.call();
-            StoredConfig config = git.getRepository().getConfig();
-            config.setBoolean("http", project.getUrl(), "sslVerify", false);
-            config.setBoolean("https", project.getUrl(), "sslVerify", false);
-            config.save();
-
-            File workTree = git.getRepository().getWorkTree();
-            gitWorkTree(project.getId(), workTree, "");
-            tailBuffer.get(project.getId()).append(
-                String.format(
-                    "[StreamX] project [%s] git clone successful!\n",
-                    project.getName()
-                )
-            );
+                File workTree = git.getRepository().getWorkTree();
+                gitWorkTree(project.getId(), workTree, "");
+                tailBuffer.get(project.getId()).append(
+                    String.format(
+                        "[StreamX] project [%s] git clone successful!\n",
+                        project.getName()
+                    )
+                );
+            }
             return true;
         } catch (Exception e) {
             String errorLog = String.format(

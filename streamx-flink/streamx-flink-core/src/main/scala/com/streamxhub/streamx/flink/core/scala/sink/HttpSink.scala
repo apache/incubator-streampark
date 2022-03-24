@@ -30,7 +30,6 @@ import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.http.client.methods._
 import org.asynchttpclient._
-import org.json4s.jackson.Serialization
 
 import java.util.Properties
 import java.util.concurrent._
@@ -235,7 +234,7 @@ case class HttpWriterTask(id: Int,
         })
         if (paramMap.nonEmpty) {
           builder.setHeader(HttpHeaders.Names.CONTENT_TYPE, HttpHeaders.Values.APPLICATION_JSON)
-          val json = Serialization.write(paramMap)(org.json4s.DefaultFormats)
+          val json = JsonUtils.write(paramMap)
           builder.setBody(json.getBytes)
         }
     }
@@ -282,7 +281,7 @@ case class HttpWriterTask(id: Int,
   }
 
   /**
-   * if send data to Http Failed, retry $maxRetries, if still failed,flush data to $failoverStorage
+   * if send data to Http Failed, retry maxRetries, if still failed,flush data to failoverStorage
    *
    * @param response
    * @param sinkRequest

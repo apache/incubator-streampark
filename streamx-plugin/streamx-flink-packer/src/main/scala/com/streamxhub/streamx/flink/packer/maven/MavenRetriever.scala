@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.packer.maven
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.conf.CommonConfig.MAVEN_REMOTE_URL
+import com.streamxhub.streamx.common.conf.CommonConfig.{MAVEN_AUTH_PASSWORD, MAVEN_AUTH_USER, MAVEN_REMOTE_URL}
 import com.streamxhub.streamx.common.conf.{ConfigHub, Workspace}
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory
@@ -29,6 +29,7 @@ import org.eclipse.aether.spi.connector.RepositoryConnectorFactory
 import org.eclipse.aether.spi.connector.transport.TransporterFactory
 import org.eclipse.aether.transport.file.FileTransporterFactory
 import org.eclipse.aether.transport.http.HttpTransporterFactory
+import org.eclipse.aether.util.repository.AuthenticationBuilder
 import org.eclipse.aether.{RepositorySystem, RepositorySystemSession}
 
 import java.util
@@ -39,23 +40,28 @@ import java.util
 object MavenRetriever {
 
   /**
-   * default maven remote center repository
-   */
-  lazy val remoteCenterRepo: RemoteRepository = {
-    new RemoteRepository.Builder("central", "default", ConfigHub.get(MAVEN_REMOTE_URL)).build()
-  }
-
-  /**
-   * maven remote repository lists
-   */
-  lazy val remoteRepos: util.ArrayList[RemoteRepository] = Lists.newArrayList(remoteCenterRepo)
-
-  /**
    * default maven local repository
    */
   lazy val localRepo = new LocalRepository(Workspace.local.MAVEN_LOCAL_DIR)
 
   private lazy val locator = MavenRepositorySystemUtils.newServiceLocator
+
+  /**
+   * maven remote repository lists
+   */
+  def remoteRepos(): util.ArrayList[RemoteRepository] = {
+    val builder = new RemoteRepository.Builder("central", "default", ConfigHub.get(MAVEN_REMOTE_URL))
+    val remoteRepository = if (ConfigHub.get(MAVEN_AUTH_USER) == null || ConfigHub.get(MAVEN_AUTH_PASSWORD) == null) {
+      builder.build()
+    } else {
+      val authentication = new AuthenticationBuilder()
+        .addUsername(ConfigHub.get[String](MAVEN_AUTH_USER))
+        .addPassword(ConfigHub.get[String](MAVEN_AUTH_PASSWORD))
+        .build()
+      builder.setAuthentication(authentication).build()
+    }
+    Lists.newArrayList(remoteRepository)
+  }
 
   /**
    * create maven repository endpoint

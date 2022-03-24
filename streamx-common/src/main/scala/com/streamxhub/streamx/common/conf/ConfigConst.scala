@@ -108,7 +108,9 @@ object ConfigConst {
 
   val KEY_FLINK_DEPLOYMENT_OPTION_PREFIX = "flink.deployment.option."
 
-  val KEY_FLINK_APP_NAME = "yarn.application.name"
+  val KEY_FLINK_APP_NAME = "pipeline.name"
+
+  val KEY_YARN_APP_ID = "yarn.application.id"
 
   val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
@@ -268,8 +270,24 @@ object ConfigConst {
   val CLICKHOUSE_TARGET_TABLE = "targetTable"
 
 
-
   val HTTP_SINK_PREFIX = "http.sink"
+
+  /**
+   * about config doris
+   */
+  val DORIS_SINK_PREFIX = "doris.sink"
+  val DORIS_FENODES = "fenodes"
+  val DORIS_DATABASE = "database"
+  val DORIS_TABLE = "table"
+  val DORIS_USER = "user"
+  val DORIS_PASSWORD = "password"
+  val DORIS_BATCHSIZE = "batchSize"
+  val DORIS_DEFAULT_BATCHSIZE = "100"
+  val DORIS_INTERVALMS = "intervalMs"
+  val DORIS_DEFAULT_INTERVALMS = "3000"
+  val DORIS_MAXRETRIES = "maxRetries"
+  val DORIS_DEFAULT_MAXRETRIES = "1"
+  val DORIS_STREAM_LOAD_PROP_PREFIX = "streamLoad."
 
   /**
    * sink threshold and failover...
@@ -319,6 +337,8 @@ object ConfigConst {
 
   val KEY_ES_REST_MAX_RETRY = "es.rest.max.retry.timeout"
 
+  val KEY_ES_REST_PATH_PREFIX = "es.rest.path.prefix"
+
   val KEY_ES_REST_CONTENT_TYPE = "es.rest.content.type"
 
   val KEY_ES_CONN_REQ_TIME_OUT = "es.connect.request.timeout"
@@ -331,6 +351,8 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
+  val KEY_ES_DISABLE_FLUSH_ONCHECKPOINT = "es.disableFlushOnCheckpoint"
+
   /**
    * flink config key
    */
@@ -338,7 +360,9 @@ object ConfigConst {
 
   val KEY_FLINK_APPLICATION_MAIN_CLASS = "$internal.application.main"
 
-  val KEY_FLINK_TOTAL_PROCESS_MEMORY = "jobmanager.memory.process.size"
+  val KEY_FLINK_JM_PROCESS_MEMORY = "jobmanager.memory.process.size"
+
+  val KEY_FLINK_TM_PROCESS_MEMORY = "taskmanager.memory.process.size"
 
   val KEY_FLINK_TOTAL_MEMORY = "jobmanager.memory.flink.size"
 
@@ -346,6 +370,7 @@ object ConfigConst {
 
   val KEY_FLINK_JVM_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size"
 
+  val STREAMX_FLINKSQL_CLIENT_CLASS = "com.streamxhub.streamx.flink.cli.SqlClient"
 
   def printLogo(info: String): Unit = {
     println("\n\n                 .+.                                ")

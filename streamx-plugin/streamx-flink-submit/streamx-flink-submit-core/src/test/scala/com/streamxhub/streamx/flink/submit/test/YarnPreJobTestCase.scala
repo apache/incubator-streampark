@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.submit.test
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.core.conf.FlinkRunOption
-import com.streamxhub.streamx.flink.submit.domain
+import com.streamxhub.streamx.flink.submit.bean
 import org.apache.commons.cli.Options
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.{CliFrontendParser, CustomCommandLine}
@@ -194,7 +194,7 @@ object YarnPreJobTestCase extends Logger {
       logInfo("------------------<<applicationId>>-------------------")
       logInfo(s"Flink Job Started: applicationId: $applicationId ")
       logInfo("-------------------------------------")
-      domain.SubmitResponse(applicationId.toString, flinkConfig.toMap)
+      bean.SubmitResponse(applicationId.toString, flinkConfig.toMap)
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }

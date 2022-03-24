@@ -19,8 +19,6 @@
 
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.streamxhub.streamx.common.util.JsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
@@ -30,6 +28,9 @@ import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrkCachePoo
 import io.fabric8.kubernetes.client.Watcher.Action
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
+import org.json4s.DefaultFormats
+import org.json4s.JsonAST.JArray
+import org.json4s.jackson.JsonMethods.parse
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
@@ -41,7 +42,7 @@ import scala.collection.mutable
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.language.{implicitConversions, postfixOps}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
  * Watcher for continuously monitor flink job status on kubernetes-mode,
@@ -125,7 +126,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
               cachePool.jobStatuses.getAllPresent(trkRs.map(_._1).toSet.asJava).asScala
             // put job status to cache
             cachePool.jobStatuses.putAll(trkRs.toMap.asJava)
-            // publish JobStatuChangeEvent when necessary
+            // publish JobStatusChangeEvent when necessary
             trkRs.filter(e =>
               preCache.get(e._1) match {
                 case cv if cv.isEmpty || cv.get.jobState != e._2.jobState => true
@@ -249,13 +250,12 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
   /**
    * list flink jobs details from rest api
    */
-  @throws[Exception] private def callJobsOverviewsApi(restUrl: String): JobDetails =
+  @throws[Exception] private def callJobsOverviewsApi(restUrl: String): JobDetails = JobDetails.as(
     Request.get(s"$restUrl/jobs/overview")
       .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
       .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
       .execute.returnContent().asString(StandardCharsets.UTF_8)
-      .fromJson[JobDetails]
-
+  )
 
   /**
    * Infer the current flink state from the last relevant k8s events.
@@ -340,17 +340,17 @@ object FlinkJobStatusWatcher {
 
 }
 
+private[kubernetes] case class JobDetails(jobs: Array[JobDetail] = Array())
 
-private[kubernetes] case class JobDetails(@JsonProperty("jobs") jobs: Array[JobDetail] = Array())
 
-private[kubernetes] case class JobDetail(@JsonProperty("jid") jid: String,
-                                         @JsonProperty("name") name: String,
-                                         @JsonProperty("state") state: String,
-                                         @JsonProperty("start-time") startTime: Long,
-                                         @JsonProperty("end-time") endTime: Long,
-                                         @JsonProperty("duration") duration: Long,
-                                         @JsonProperty("last-modification") lastModification: Long,
-                                         @JsonProperty("tasks") tasks: JobTask) {
+private[kubernetes] case class JobDetail(jid: String,
+                                         name: String,
+                                         state: String,
+                                         startTime: Long,
+                                         endTime: Long,
+                                         duration: Long,
+                                         lastModification: Long,
+                                         tasks: JobTask) {
   def toJobStatusCV(pollEmitTime: Long, pollAckTime: Long): JobStatusCV = {
     JobStatusCV(
       jobState = FlinkJobState.of(state),
@@ -377,3 +377,48 @@ private[kubernetes] case class JobTask(total: Int,
                                        reconciling: Int,
                                        initializing: Int)
 
+
+private[kubernetes] object JobDetails {
+
+  @transient
+  implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
+
+  def as(json: String): JobDetails = {
+
+    JobDetails(Try(parse(json)) match {
+      case Success(ok) =>
+        ok \ "jobs" match {
+          case JArray(arr) =>
+            arr.map(x => {
+              val task = x \ "tasks"
+              JobDetail(
+                (x \ "jid").extractOpt[String].orNull,
+                (x \ "name").extractOpt[String].orNull,
+                (x \ "state").extractOpt[String].orNull,
+                (x \ "start-time").extractOpt[Long].getOrElse(0),
+                (x \ "end-time").extractOpt[Long].getOrElse(0),
+                (x \ "duration").extractOpt[Long].getOrElse(0),
+                (x \ "last-modification").extractOpt[Long].getOrElse(0),
+                JobTask(
+                  (task \ "total").extractOpt[Int].getOrElse(0),
+                  (task \ "created").extractOpt[Int].getOrElse(0),
+                  (task \ "scheduled").extractOpt[Int].getOrElse(0),
+                  (task \ "deploying").extractOpt[Int].getOrElse(0),
+                  (task \ "running").extractOpt[Int].getOrElse(0),
+                  (task \ "finished").extractOpt[Int].getOrElse(0),
+                  (task \ "canceling").extractOpt[Int].getOrElse(0),
+                  (task \ "canceled").extractOpt[Int].getOrElse(0),
+                  (task \ "failed").extractOpt[Int].getOrElse(0),
+                  (task \ "reconciling").extractOpt[Int].getOrElse(0),
+                  (task \ "initializing").extractOpt[Int].getOrElse(0)
+                )
+              )
+            }).toArray
+          case _ => null
+        }
+      case Failure(_) => null
+    })
+
+  }
+
+}

@@ -29,7 +29,9 @@ import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
+import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -60,10 +62,13 @@ public class EnvInitializer implements ApplicationRunner {
     @Autowired
     private ApplicationContext context;
 
+    @Autowired
+    private SettingService settingService;
+
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
 
     private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
-        "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final String MKDIR_LOG = "mkdir {} starting ...";
 
@@ -72,9 +77,9 @@ public class EnvInitializer implements ApplicationRunner {
         String appHome = WebUtils.getAppHome();
         if (appHome == null) {
             throw new ExceptionInInitializerError("[StreamX] System initialization check failed," +
-                " The system initialization check failed. If started local for development and debugging," +
-                " please ensure the -Dapp.home parameter is clearly specified," +
-                " more detail: http://www.streamxhub.com/docs/user-guide/development");
+                    " The system initialization check failed. If started local for development and debugging," +
+                    " please ensure the -Dapp.home parameter is clearly specified," +
+                    " more detail: http://www.streamxhub.com/docs/user-guide/development");
         }
 
         // init ConfigHub
@@ -89,13 +94,29 @@ public class EnvInitializer implements ApplicationRunner {
     private void initConfigHub(Environment springEnv) {
         // override config from spring application.yaml
         ConfigHub
-            .keys()
-            .stream()
-            .filter(springEnv::containsProperty)
-            .forEach(key -> {
-                ConfigOption config = ConfigHub.getConfig(key);
-                ConfigHub.set(config, springEnv.getProperty(key, config.classType()));
-            });
+                .keys()
+                .stream()
+                .filter(springEnv::containsProperty)
+                .forEach(key -> {
+                    ConfigOption config = ConfigHub.getConfig(key);
+                    assert config != null;
+                    ConfigHub.set(config, springEnv.getProperty(key, config.classType()));
+                });
+
+        String mvnRepository = settingService.getMavenRepository();
+        if (StringUtils.isNotEmpty(mvnRepository)) {
+            ConfigHub.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);
+        }
+
+        String mvnAuthUser = settingService.getMavenAuthUser();
+        if (StringUtils.isNotEmpty(mvnAuthUser)) {
+            ConfigHub.set(CommonConfig.MAVEN_AUTH_USER(), mvnAuthUser);
+        }
+
+        String mvnAuthPassword = settingService.getMavenAuthPassword();
+        if (StringUtils.isNotEmpty(mvnAuthPassword)) {
+            ConfigHub.set(CommonConfig.MAVEN_AUTH_PASSWORD(), mvnAuthPassword);
+        }
 
         ConfigHub.log();
     }
@@ -160,7 +181,7 @@ public class EnvInitializer implements ApplicationRunner {
             }
             fsOperator.mkdirs(appClient);
 
-            File client = new File(WebUtils.getAppDir("client"));
+            File client = WebUtils.getAppClientDir();
             for (File file : Objects.requireNonNull(client.listFiles())) {
                 String plugin = appClient.concat("/").concat(file.getName());
                 if (!fsOperator.exists(plugin) && !keepFile.equals(file.getName())) {
@@ -175,7 +196,7 @@ public class EnvInitializer implements ApplicationRunner {
             }
             fsOperator.mkdirs(appPlugins);
 
-            File plugins = new File(WebUtils.getAppDir("plugins"));
+            File plugins = WebUtils.getAppPluginsDir();
             for (File file : Objects.requireNonNull(plugins.listFiles())) {
                 String plugin = appPlugins.concat("/").concat(file.getName());
                 if (!fsOperator.exists(plugin) && !keepFile.equals(file.getName())) {
@@ -189,7 +210,7 @@ public class EnvInitializer implements ApplicationRunner {
                 fsOperator.delete(appShims);
             }
 
-            File[] shims = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
+            File[] shims = WebUtils.getAppLibDir().listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
             for (File file : Objects.requireNonNull(shims)) {
                 Matcher matcher = PATTERN_FLINK_SHIMS_JAR.matcher(file.getName());
                 if (!keepFile.equals(file.getName()) && matcher.matches()) {

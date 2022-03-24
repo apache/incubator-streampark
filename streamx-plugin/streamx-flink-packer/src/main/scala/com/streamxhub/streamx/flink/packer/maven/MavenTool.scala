@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.packer.maven
 
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.util.{Logger, Utils}
-import org.apache.maven.plugins.shade.resource.ServicesResourceTransformer
+import org.apache.maven.plugins.shade.resource.{ManifestResourceTransformer, ResourceTransformer, ServicesResourceTransformer}
 import org.apache.maven.plugins.shade.{DefaultShader, ShadeRequest}
 import org.codehaus.plexus.logging.console.ConsoleLogger
 import org.codehaus.plexus.logging.{Logger => PlexusLog}
@@ -30,8 +30,9 @@ import org.eclipse.aether.resolution.{ArtifactDescriptorRequest, ArtifactRequest
 
 import java.io.File
 import java.util
-import javax.annotation.Nonnull
+import javax.annotation.{Nonnull, Nullable}
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 
 /**
@@ -41,7 +42,13 @@ object MavenTool extends Logger {
 
   val plexusLog = new ConsoleLogger(PlexusLog.LEVEL_INFO, "streamx-maven")
 
-  private val isJarFile = (file: File) => file.isFile && Try(Utils.checkJarFile(file.toURL)).isSuccess
+  private[this] val excludeArtifact = List(
+    MavenArtifact.of("org.apache.flink:force-shading:*"),
+    MavenArtifact.of("com.google.code.findbugs:jsr305:*"),
+    MavenArtifact.of("org.apache.logging.log4j:*:*")
+  )
+
+  private val isJarFile = (file: File) => file.isFile && Try(Utils.checkJarFile(file.toURI.toURL)).isSuccess
 
   /**
    * Build a fat-jar with custom jar libraries.
@@ -50,10 +57,11 @@ object MavenTool extends Logger {
    * @param outFatJarPath output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
    * @return File Object of output fat-jar
    */
-  @throws[Exception] def buildFatJar(@Nonnull jarLibs: Set[String], @Nonnull outFatJarPath: String): File = {
+  @throws[Exception] def buildFatJar(@Nullable mainClass: String, @Nonnull jarLibs: Set[String], @Nonnull outFatJarPath: String): File = {
     // check userJarPath
     val uberJar = new File(outFatJarPath)
     require(outFatJarPath.endsWith(".jar") && !uberJar.isDirectory, s"[StreamX] streamx-packer: outFatJarPath($outFatJarPath) should be a JAR file.")
+    uberJar.delete()
     // resolve all jarLibs
     val jarSet = new util.HashSet[File]
     jarLibs.map(lib => new File(lib))
@@ -70,8 +78,17 @@ object MavenTool extends Logger {
       req.setJars(jarSet)
       req.setUberJar(uberJar)
       req.setFilters(Lists.newArrayList())
+
+      val transformer = ArrayBuffer[ResourceTransformer]()
       // ref https://ci.apache.org/projects/flink/flink-docs-master/docs/connectors/table/overview/#transform-table-connectorformat-resources
-      req.setResourceTransformers(Lists.newArrayList(new ServicesResourceTransformer()))
+      transformer += new ServicesResourceTransformer()
+      if (mainClass != null) {
+        val manifest = new ManifestResourceTransformer()
+        manifest.setMainClass(mainClass)
+        transformer += manifest
+      }
+
+      req.setResourceTransformers(transformer.toList)
       req.setRelocators(Lists.newArrayList())
       req
     }
@@ -85,17 +102,19 @@ object MavenTool extends Logger {
   /**
    * Build a fat-jar with custom jar librarties and maven artifacts.
    *
-   * @param jarPackDeps   maven artifacts and jar libraries for building a fat-jar
-   * @param outFatJarPath output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
+   * @param dependencyInfo maven artifacts and jar libraries for building a fat-jar
+   * @param outFatJarPath  output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
    */
-  @throws[Exception] def buildFatJar(@Nonnull jarPackDeps: DependencyInfo, @Nonnull outFatJarPath: String): File = {
-    val jarLibs = jarPackDeps.extJarLibs
-    val arts = jarPackDeps.mavenArts
+  @throws[Exception] def buildFatJar(@Nullable mainClass: String,
+                                     @Nonnull dependencyInfo: DependencyInfo,
+                                     @Nonnull outFatJarPath: String): File = {
+    val jarLibs = dependencyInfo.extJarLibs
+    val arts = dependencyInfo.mavenArts
     if (jarLibs.isEmpty && arts.isEmpty) {
       throw new Exception(s"[StreamX] streamx-packer: empty artifacts.")
     }
     val artFilePaths = resolveArtifacts(arts).map(_.getAbsolutePath)
-    buildFatJar(jarLibs ++ artFilePaths, outFatJarPath)
+    buildFatJar(mainClass, jarLibs ++ artFilePaths, outFatJarPath)
   }
 
 
@@ -116,17 +135,25 @@ object MavenTool extends Logger {
       // read relevant artifact descriptor info
       // plz don't simplify the following lambda syntax to maintain the readability of the code.
       val resolvedArtifacts = artifacts
-        .map(artifact => new ArtifactDescriptorRequest(artifact, MavenRetriever.remoteRepos, null))
+        .map(artifact => new ArtifactDescriptorRequest(artifact, MavenRetriever.remoteRepos(), null))
         .map(artDescReq => repoSystem.readArtifactDescriptor(session, artDescReq))
         .flatMap(_.getDependencies)
         .filter(_.getScope == "compile")
-        .map(_.getArtifact)
+        .filter(x => !excludeArtifact.exists(e => {
+          val groupId = e.groupId == x.getArtifact.getGroupId
+          val artifact = e.artifactId match {
+            case "*" => true
+            case a => a == x.getArtifact.getArtifactId
+          }
+          groupId && artifact
+        })
+        ).map(_.getArtifact)
 
       val mergedArtifacts = artifacts ++ resolvedArtifacts
       logInfo(s"resolved dependencies: ${mergedArtifacts.mkString}")
 
       // download artifacts
-      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos, null))
+      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos(), null))
       repoSystem.resolveArtifacts(session, artReqs)
         .map(_.getArtifact.getFile).toSet
     }

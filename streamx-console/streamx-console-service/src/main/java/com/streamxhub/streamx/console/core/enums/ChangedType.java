@@ -48,7 +48,7 @@ public enum ChangedType implements Serializable {
     ALL(3);
 
 
-    int value;
+    private final int value;
 
     ChangedType(int value) {
         this.value = value;

@@ -49,7 +49,7 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGraph>
-    implements FlameGraphService {
+        implements FlameGraphService {
 
     @Autowired
     private ApplicationService applicationService;
@@ -57,9 +57,9 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
     @Override
     public String generateFlameGraph(FlameGraph flameGraph) throws IOException {
         List<FlameGraph> flameGraphList = this.baseMapper.getFlameGraph(
-            flameGraph.getAppId(),
-            flameGraph.getStart(),
-            flameGraph.getEnd()
+                flameGraph.getAppId(),
+                flameGraph.getStart(),
+                flameGraph.getEnd()
         );
         if (CommonUtils.notEmpty(flameGraphList)) {
             StringBuffer jsonBuffer = new StringBuffer();
@@ -67,15 +67,15 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
 
             Application application = applicationService.getById(flameGraph.getAppId());
             String jsonName = String.format(
-                "%d_%d_%d.json",
-                flameGraph.getAppId(),
-                flameGraph.getStart().getTime(),
-                flameGraph.getEnd().getTime()
+                    "%d_%d_%d.json",
+                    flameGraph.getAppId(),
+                    flameGraph.getStart().getTime(),
+                    flameGraph.getEnd().getTime()
             );
-            String jsonPath = WebUtils.getAppDir("temp").concat(File.separator).concat(jsonName);
+            String jsonPath = new File(WebUtils.getAppTempDir(), jsonName).getAbsolutePath();
             String foldedPath = jsonPath.replace(".json", ".folded");
             String svgPath = jsonPath.replace(".json", ".svg");
-            String flameGraphPath = WebUtils.getAppDir("bin/flame-graph");
+            File flameGraphPath = WebUtils.getAppDir("bin/flame-graph");
 
             // write json
             FileOutputStream fileOutputStream = new FileOutputStream(jsonPath);
@@ -84,15 +84,15 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
             String title = application.getJobName().concat(" ___ FlameGraph");
             // generate...
             List<String> commands = Arrays.asList(
-                String.format("cd %s", flameGraphPath),
-                String.format("python ./stackcollapse.py -i %s > %s ", jsonPath, foldedPath),
-                String.format(
-                    "./flamegraph.pl --title=\"%s\" --width=%d --colors=java %s > %s ",
-                    title,
-                    flameGraph.getWidth(),
-                    foldedPath,
-                    svgPath
-                )
+                    String.format("cd %s", flameGraphPath.getAbsolutePath()),
+                    String.format("python ./stackcollapse.py -i %s > %s ", jsonPath, foldedPath),
+                    String.format(
+                            "./flamegraph.pl --title=\"%s\" --width=%d --colors=java %s > %s ",
+                            title,
+                            flameGraph.getWidth(),
+                            foldedPath,
+                            svgPath
+                    )
             );
             CommandUtils.execute(commands, (line) -> log.info("flameGraph: {} ", line));
             return svgPath;

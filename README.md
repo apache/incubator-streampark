@@ -53,10 +53,9 @@ data laker.
 * Support maven compilation
 * Configuration
 * Multi version flink support(1.12.x,1.13.x,1.14.x)
-* on Kubernetes deployment (`K8s-Native-Application`/`K8s-Native-Session`)
-* on YARN deployment (`YARN-Application`/`YARN-Per-Job`)
-* Support `Applicaion` and `Yarn-Per-Job` mode
+* All Flink deployment mode support(`Remote`/`K8s-Native-Application`/`K8s-Native-Session`/`YARN-Application`/`YARN-Per-Job`/`YARN-Session`)
 * `start`, `stop`, `savepoint`, resume from `savepoint`
+* Various companies and organizations use `StreamX` for production and commercial products.
 * Flame graph
 * Notebook
 * Project configuration and dependency version management
@@ -118,9 +117,7 @@ Our ultimate goal is to build a one-stop big data solution integrating stream pr
 * ...
 
 Thanks to the above excellent open source projects and many outstanding open source projects that are not mentioned, for giving the greatest
-respect, special thanks to [Apache Zeppelin](http://zeppelin.apache.org)
-, [IntelliJ IDEA](https://www.jetbrains.com/idea/), Thanks to the [fire-spark](https://github.com/GuoNingNing/fire-spark) project for the
-early inspiration and help.
+respect,Thanks to [Apache Flink](http://flink.apache.org) for creating a great project!  Thanks to the [Apache Zeppelin](http://zeppelin.apache.org) project for the early inspiration.
 
 ### 🚀 Quick Start
 
@@ -130,7 +127,7 @@ cd streamx
 ./mvnw clean install -DskipTests -Denv=prod
 ```
 
-click [Document](http://www.streamxhub.com/zh/doc/) for more information
+click [Document](http://www.streamxhub.com/zh-CN/docs/intro/) for more information
 
 ## 👻 Why not...❓
 

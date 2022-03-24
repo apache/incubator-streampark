@@ -188,9 +188,9 @@ object DateUtils {
     localDateTime.format(dateTimeFormatter)
   }
 
-  private def getDateFormat(date: Date, dateFormatType: String) = {
-    val simformat = new SimpleDateFormat(dateFormatType)
-    simformat.format(date)
+  private def getDateFormat(date: Date, dateFormatType: String): String = {
+    val format = new SimpleDateFormat(dateFormatType)
+    format.format(date)
   }
 
   @throws[ParseException] def formatCSTTime(date: String, format: String): String = {

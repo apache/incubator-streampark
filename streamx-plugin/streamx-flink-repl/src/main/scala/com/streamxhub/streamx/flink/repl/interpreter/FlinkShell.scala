@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.flink.repl.interpreter
 
-import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.util.{FlinkUtils, Logger}
 import com.streamxhub.streamx.flink.repl.shims.FlinkShims
 import org.apache.flink.annotation.Internal
 import org.apache.flink.client.cli.{CliFrontend, CliFrontendParser, CustomCommandLine}
@@ -30,7 +30,7 @@ import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 
-import java.io.{BufferedReader, File}
+import java.io.BufferedReader
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -110,11 +110,7 @@ object FlinkShell extends Logger {
            * 则一定要指定本地的Flink dist jar位置,不然yarn启动报错(错误: 找不到或无法加载主类 org.apache.flink.yarn.entrypoint.YarnSessionClusterEntrypoint)
            */
           val flinkLocalHome = System.getenv("FLINK_HOME")
-          val flinkDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-            case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
-            case array if array.length == 1 => s"$flinkLocalHome/lib/${array.head}"
-            case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
-          }
+          val flinkDistJar = FlinkUtils.getFlinkDistJar(flinkLocalHome)
           executorConfig.set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar)
         }
 

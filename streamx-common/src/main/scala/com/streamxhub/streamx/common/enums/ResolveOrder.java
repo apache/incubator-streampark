@@ -19,10 +19,12 @@
 
 package com.streamxhub.streamx.common.enums;
 
+import java.io.Serializable;
+
 /**
  * classloader.resolve-order
  */
-public enum ResolveOrder {
+public enum ResolveOrder implements Serializable {
     /**
      * parent-first
      */
@@ -31,8 +33,10 @@ public enum ResolveOrder {
      * child-first
      */
     CHILD_FIRST("child-first", 1);
-    String name;
-    Integer value;
+
+    private final String name;
+
+    private final Integer value;
 
     ResolveOrder(String name, Integer value) {
         this.name = name;

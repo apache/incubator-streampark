@@ -18,10 +18,12 @@
  */
 package com.streamxhub.streamx.common.enums;
 
+import java.io.Serializable;
+
 /**
  * @author benjobs
  */
-public enum SqlErrorType {
+public enum SqlErrorType implements Serializable {
     /**
      * 基本检验失败(如为null等)
      */
@@ -42,19 +44,23 @@ public enum SqlErrorType {
      * 非";"结尾
      */
     ENDS_WITH(5);
-    public int errorType;
 
-    SqlErrorType(int errorType) {
-        this.errorType = errorType;
+    private final int value;
+
+    SqlErrorType(int value) {
+        this.value = value;
     }
 
-    public static SqlErrorType of(Integer errorType) {
+    public static SqlErrorType of(Integer value) {
         for (SqlErrorType type : values()) {
-            if (type.errorType == errorType) {
+            if (type.value == value) {
                 return type;
             }
         }
         return null;
     }
 
+    public int getValue() {
+        return value;
+    }
 }

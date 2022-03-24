@@ -17,19 +17,8 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.domain
+package com.streamxhub.streamx.flink.submit.bean
 
-import com.streamxhub.streamx.common.conf.K8sFlinkConfig
-import com.streamxhub.streamx.common.domain.FlinkVersion
-import com.streamxhub.streamx.common.enums.ExecutionMode
-
-case class StopRequest(flinkVersion: FlinkVersion,
-                       executionMode: ExecutionMode,
-                       clusterId: String,
-                       jobId: String,
-                       withSavePoint: Boolean,
-                       withDrain: Boolean,
-                       customSavePointPath: String,
-                       kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE) {
+case class StopResponse(savePointDir: String) {
 
 }

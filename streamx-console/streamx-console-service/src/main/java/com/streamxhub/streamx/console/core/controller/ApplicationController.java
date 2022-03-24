@@ -34,7 +34,7 @@ import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationLogService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -106,22 +107,22 @@ public class ApplicationController {
 
         List<Application> appRecords = applicationList.getRecords();
         List<Long> appIds = appRecords.stream().map(Application::getId).collect(Collectors.toList());
-        Map<Long, PipeStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
+        Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
 
         // add building pipeline status info and app control info
         appRecords = appRecords.stream()
-            .peek(e -> {
-                if (pipeStates.containsKey(e.getId())) {
-                    e.setBuildStatus(pipeStates.get(e.getId()).getCode());
-                }
-            })
-            .peek(e -> e.setAppControl(
-                new AppControl()
-                    .setAllowBuild(e.getBuildStatus() == null || !PipeStatus.running.getCode().equals(e.getBuildStatus()))
-                    .setAllowStart(PipeStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack())
-                    .setAllowStop(e.isRunning()))
-            )
-            .collect(Collectors.toList());
+                .peek(e -> {
+                    if (pipeStates.containsKey(e.getId())) {
+                        e.setBuildStatus(pipeStates.get(e.getId()).getCode());
+                    }
+                })
+                .peek(e -> e.setAppControl(
+                        new AppControl()
+                                .setAllowBuild(e.getBuildStatus() == null || !PipelineStatus.running.getCode().equals(e.getBuildStatus()))
+                                .setAllowStart(PipelineStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack())
+                                .setAllowStop(e.isRunning()))
+                )
+                .collect(Collectors.toList());
 
         applicationList.setRecords(appRecords);
         return RestResponse.create().data(applicationList);
@@ -134,24 +135,8 @@ public class ApplicationController {
         return RestResponse.create().data(flag);
     }
 
-    @PostMapping("deploy")
-    @RequiresPermissions("app:deploy")
-    public RestResponse deploy(Application app, String socketId) {
-        Application application = applicationService.getById(app.getId());
-        assert application != null;
-        try {
-            applicationService.checkEnv(app);
-            application.setBackUp(true);
-            application.setBackUpDescription(app.getBackUpDescription());
-            applicationService.deploy(application, socketId);
-            return RestResponse.create().data(true);
-        } catch (Exception e) {
-            return RestResponse.create().data(false).message(e.getMessage());
-        }
-    }
-
     @PostMapping("revoke")
-    @RequiresPermissions("app:deploy")
+    @RequiresPermissions("app:launch")
     public RestResponse revoke(Application app) throws Exception {
         applicationService.revoke(app);
         return RestResponse.create();
@@ -226,8 +211,8 @@ public class ApplicationController {
         return RestResponse.create();
     }
 
-    @PostMapping("startlog")
-    public RestResponse startlog(ApplicationLog applicationLog, RestRequest request) {
+    @PostMapping("optionlog")
+    public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.page(applicationLog, request);
         return RestResponse.create().data(applicationList);
     }
@@ -263,9 +248,31 @@ public class ApplicationController {
     }
 
     @PostMapping("downlog")
-    public RestResponse downlog(Long id) throws Exception {
+    public RestResponse downlog(Long id) {
         applicationService.tailMvnDownloading(id);
         return RestResponse.create();
+    }
+
+    @PostMapping("verifySchema")
+    public RestResponse verifySchema(String path) {
+        final URI uri = URI.create(path);
+        final String scheme = uri.getScheme();
+        final String pathPart = uri.getPath();
+        RestResponse restResponse = RestResponse.create().data(true);
+        String error;
+        if (scheme == null) {
+            error = "The scheme (hdfs://, file://, etc) is null. Please specify the file system scheme explicitly in the URI.";
+            restResponse.data(false).message(error);
+        }
+        if (pathPart == null) {
+            error = "The path to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
+            restResponse.data(false).message(error);
+        }
+        if (pathPart.length() == 0 || pathPart.equals("/")) {
+            error = "Cannot use the root directory for checkpoints.";
+            restResponse.data(false).message(error);
+        }
+        return restResponse;
     }
 
 }

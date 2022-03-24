@@ -31,7 +31,11 @@ import java.util.stream.IntStream;
  * 工具类
  */
 @Slf4j
-public class WebUtils {
+public final class WebUtils {
+
+    private WebUtils() {
+
+    }
 
     /**
      * token 加密
@@ -94,7 +98,25 @@ public class WebUtils {
         return System.getProperty("app.home");
     }
 
-    public static String getAppDir(String dir) {
-        return getAppHome().concat(File.separator).concat(dir);
+    public static File getAppDir(String dir) {
+        return new File(getAppHome(), dir);
     }
+
+    public static File getAppTempDir() {
+        return getAppDir("temp");
+    }
+
+    public static File getAppLibDir() {
+        return getAppDir("lib");
+    }
+
+    public static File getAppPluginsDir() {
+        return getAppDir("plugins");
+    }
+
+    public static File getAppClientDir() {
+        return getAppDir("client");
+    }
+
 }
+

@@ -46,7 +46,7 @@ import java.lang.management.RuntimeMXBean;
  *      GitHub :  https://github.com/streamxhub/streamx
  *      Gitee  :  https://gitee.com/streamxhub/streamx
  *
- *      [StreamX] Make Flink|Spark easier ô‿ô!
+ *      [StreamX] Make stream processing easier ô~ô!
  *
  *      十步杀一人 千里不留行 事了拂衣去 深藏身与名
  *
@@ -83,8 +83,8 @@ public class StreamXConsole {
         String name = runtime.getName();
         try {
             return Integer.parseInt(name.substring(0, name.indexOf('@')));
-        } catch (Exception ignored) {
-            ignored.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return -1;
     }

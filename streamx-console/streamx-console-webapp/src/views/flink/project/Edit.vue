@@ -69,7 +69,6 @@
           type="text"
           placeholder="The Repository URL for this project"
           @change="handleSchema"
-          @blur="handleBranches"
           v-decorator="['url',{ rules: [{ required: true, message: 'Repository URL is required'} ]}]" />
       </a-form-item>
 
@@ -80,8 +79,7 @@
         <a-input
           type="text"
           placeholder="UserName for this project"
-          @blur="handleBranches"
-          v-decorator="['username']" />
+          v-decorator="['userName']" />
       </a-form-item>
 
       <a-form-item
@@ -90,7 +88,6 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-input
           type="password"
-          @blur="handleBranches"
           placeholder="Password for this project"
           v-decorator="['password']" />
       </a-form-item>
@@ -105,6 +102,7 @@
           option-filter-prop="children"
           :filter-option="filterOption"
           allow-clear
+          @click.native="handleBranches"
           v-decorator="['branches',{ rules: [{ required: true } ]}]">
           <a-select-option
             v-for="(k ,i) in brancheList"
@@ -123,6 +121,17 @@
           type="text"
           placeholder="By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xml"
           v-decorator="['pom',{ rules: [{ message: 'Specifies the module to compile pom.xml If it is not specified, it is found under the root path pom.xml' } ]}]" />
+      </a-form-item>
+
+      <a-form-item
+        label="Build Argument"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-textarea
+          rows="2"
+          name="buildArgs"
+          placeholder="Build Argument, e.g: -Pprod"
+          v-decorator="['buildArgs']" />
       </a-form-item>
 
       <a-form-item
@@ -200,7 +209,6 @@ export default {
     handleGet(projectId) {
       get({ id: projectId }).then((resp) => {
         this.project = resp.data
-        this.brancheList = this.project.branches
         this.handleReset()
       }).catch((error) => {
         this.$message.error(error.message)
@@ -214,10 +222,11 @@ export default {
           'type': this.project.type,
           'repository': this.project.repository,
           'url': this.project.url,
-          'username': this.project.username,
+          'userName': this.project.userName,
           'password': this.project.password,
           'branches': this.project.branches,
           'pom': this.project.pom,
+          'buildArgs': this.project.buildArgs,
           'description': this.project.description
         })
       })
@@ -275,7 +284,7 @@ export default {
           gitcheck({
             url: values.url,
             branches: values.branches,
-            username: values.username || null,
+            userName: values.userName || null,
             password: values.password || null,
           }).then((resp) => {
             if ( resp.data === 0 ) {
@@ -297,9 +306,10 @@ export default {
                   repository: values.repository,
                   type: values.type,
                   branches: values.branches,
-                  username: values.username,
+                  userName: values.userName,
                   password: values.password,
                   pom: values.pom,
+                  buildArgs: values.buildArgs,
                   description: values.description,
                   buildState: this.buildState
                 }).then((resp) => {
@@ -321,8 +331,8 @@ export default {
               this.$swal.fire(
                 'Failed',
                 (resp.data === 1?
-                    'not authorized ..>﹏<.. <br><br> username and password is required'
-                    : 'authentication error ..>﹏<.. <br><br> please check username and password'
+                    'not authorized ..>﹏<.. <br><br> userName and password is required'
+                    : 'authentication error ..>﹏<.. <br><br> please check userName and password'
                 ),
                 'error'
               )
@@ -337,14 +347,14 @@ export default {
       const form = this.form
       const url = form.getFieldValue('url')
       if (url) {
-        const username = form.getFieldValue('username') || null
+        const userName = form.getFieldValue('userName') || null
         const password = form.getFieldValue('password') || null
-        const userNull = username === null || username === undefined || username === ''
+        const userNull = userName === null || userName === undefined || userName === ''
         const passNull = password === null || password === undefined || password === ''
         if ( (userNull && passNull) || (!userNull && !passNull) ) {
           branches({
             url: url,
-            username: username ,
+            userName: userName ,
             password: password
           }).then((resp) => {
             this.brancheList = resp.data

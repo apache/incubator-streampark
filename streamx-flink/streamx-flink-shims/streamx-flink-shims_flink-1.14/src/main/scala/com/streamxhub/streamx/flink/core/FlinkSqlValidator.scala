@@ -97,6 +97,7 @@ object FlinkSqlValidator extends Logger {
             ALTER_DATABASE | ALTER_TABLE | ALTER_FUNCTION |
             USE | USE_CATALOG |
             SELECT | INSERT_INTO | INSERT_OVERWRITE |
+            BEGIN_STATEMENT_SET | END_STATEMENT_SET |
             EXPLAIN | DESC | DESCRIBE =>
             try {
               command match {

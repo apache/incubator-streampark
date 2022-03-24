@@ -19,10 +19,12 @@
 package com.streamxhub.streamx.common.enums;
 
 
+import java.io.Serializable;
+
 /**
  * @author benjobs
  */
-public enum ApplicationType {
+public enum ApplicationType implements Serializable {
     /**
      * StreamX Flink
      */
@@ -39,8 +41,9 @@ public enum ApplicationType {
      * Apache Spark
      */
     APACHE_SPARK(4, "Apache Spark");
-    int type;
-    String name;
+
+    private final int type;
+    private final String name;
 
     ApplicationType(int type, String name) {
         this.type = type;

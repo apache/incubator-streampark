@@ -20,49 +20,61 @@
 package com.streamxhub.streamx.console.core.enums;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * @author benjobs
  */
-public enum ApplicationType implements Serializable {
-    /**
-     * StreamX Flink
-     */
-    STREAMX_FLINK(1, "StreamX Flink"),
-    /**
-     * Apache Flink
-     */
-    APACHE_FLINK(2, "Apache Flink"),
-    /**
-     * StreamX Spark
-     */
-    STREAMX_SPARK(3, "StreamX Spark"),
-    /**
-     * Apache Spark
-     */
-    APACHE_SPARK(4, "Apache Spark");
-    int type;
-    String name;
+public enum LaunchState implements Serializable {
 
-    ApplicationType(int type, String name) {
-        this.type = type;
-        this.name = name;
+    /**
+     * 部署失败
+     */
+    FAILED(-1),
+    /**
+     * 完结
+     */
+    DONE(0),
+
+    /**
+     * 任务修改完毕需要重新发布
+     */
+    NEED_LAUNCH(1),
+
+    /**
+     * 上线中
+     */
+    LAUNCHING(2),
+
+    /**
+     * 上线完毕,需要重启
+     */
+    NEED_RESTART(3),
+
+    //需要回滚
+    NEED_ROLLBACK(4),
+
+    /**
+     * 项目发生变化,任务需检查(是否需要重新选择jar)
+     */
+    NEED_CHECK(5),
+
+    /**
+     * 发布的任务已经撤销
+     */
+    REVOKED(10);
+
+    private final int value;
+
+    LaunchState(int value) {
+        this.value = value;
     }
 
-    public int getType() {
-        return type;
+    public int get() {
+        return this.value;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public static ApplicationType of(int type) {
-        for (ApplicationType appType : ApplicationType.values()) {
-            if (appType.getType() == type) {
-                return appType;
-            }
-        }
-        return null;
+    public static LaunchState of(Integer state) {
+        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
     }
 }

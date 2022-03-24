@@ -33,39 +33,36 @@ sealed trait BuildResult {
    */
   def pass: Boolean
 
-  def as[T <: BuildResult](clz: Class[T]): T = this.asInstanceOf[T]
+  def as[T <: BuildResult](implicit clz: Class[T]): T = this.asInstanceOf[T]
 }
 
 sealed trait FlinkBuildResult extends BuildResult {
   def workspacePath: String
 }
 
-sealed trait FlinkSessionBuildResult extends FlinkBuildResult {
-  def flinkShadedJarPath: String
-}
-
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 case class ErrorResult(pass: Boolean = false) extends BuildResult {
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-case class FlinkK8sSessionBuildResponse(workspacePath: String,
-                                        flinkShadedJarPath: String,
-                                        pass: Boolean = true) extends FlinkSessionBuildResult
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-case class FlinkK8sApplicationBuildResponse(workspacePath: String,
-                                            flinkImageTag: String,
-                                            podTemplatePaths: Map[String, String],
-                                            dockerInnerMainJarPath: String,
-                                            pass: Boolean = true) extends FlinkBuildResult
+case class SimpleBuildResponse(workspacePath: String = null,
+                               pass: Boolean = true) extends FlinkBuildResult
 
-// todo case class FlinkYarnSessionBuildResponse(workspacePath: String, flinkShadedJarPath: String) extends FlinkSessionBuildResult
 
-// todo case class FlinkYarnApplicationBuildResponse() extends BuildResult
+@JsonIgnoreProperties(ignoreUnknown = true)
+case class ShadedBuildResponse(workspacePath: String,
+                               shadedJarPath: String,
+                               pass: Boolean = true) extends FlinkBuildResult
 
-// todo case class FlinkStandaloneBuildResponse(workspacePath: String, flinkShadedJarPath: String) extends FlinkSessionBuildResult
+@JsonIgnoreProperties(ignoreUnknown = true)
+case class DockerImageBuildResponse(workspacePath: String,
+                                    flinkImageTag: String,
+                                    podTemplatePaths: Map[String, String],
+                                    dockerInnerMainJarPath: String,
+                                    pass: Boolean = true) extends FlinkBuildResult
+
+
 
 
 

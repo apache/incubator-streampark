@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
+ * <pre>
  * Status of building pipeline instance.
  * state machine:
  * ┌───────────────────────────────────┐
@@ -30,14 +31,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * │  pending ─► running ─┤            │
  * │                      └─► failure  │
  * └───────────────────────────────────┘
- *
+ * </pre>
  * @author Al-assad
  */
 @SuppressWarnings("AlibabaEnumConstantsMustHaveComment")
-public enum PipeStatus {
+public enum PipelineStatus {
 
     unknown(0),
-
     pending(1),
     running(2),
     success(3),
@@ -45,13 +45,13 @@ public enum PipeStatus {
 
     private final Integer code;
 
-    PipeStatus(Integer code) {
+    PipelineStatus(Integer code) {
         this.code = code;
     }
 
     @JsonCreator
-    public static PipeStatus of(Integer code) {
-        for (PipeStatus status : PipeStatus.values()) {
+    public static PipelineStatus of(Integer code) {
+        for (PipelineStatus status : PipelineStatus.values()) {
             if (status.getCode().equals(code)) {
                 return status;
             }

@@ -65,8 +65,20 @@ object CommonConfig {
     description = "instantiating connection timeout for DockerHttpClient")
 
   val MAVEN_REMOTE_URL: ConfigOption = ConfigOption(
-    key = "streamx.maven.remote-url",
+    key = "streamx.maven.central.repository",
     defaultValue = "https://repo1.maven.org/maven2/",
+    classType = classOf[java.lang.String],
+    description = "maven repository used for built-in compilation")
+
+  val MAVEN_AUTH_USER: ConfigOption = ConfigOption(
+    key = "streamx.maven.auth.user",
+    defaultValue = null,
+    classType = classOf[java.lang.String],
+    description = "maven repository used for built-in compilation")
+
+  val MAVEN_AUTH_PASSWORD: ConfigOption = ConfigOption(
+    key = "streamx.maven.auth.password",
+    defaultValue = null,
     classType = classOf[java.lang.String],
     description = "maven repository used for built-in compilation")
 

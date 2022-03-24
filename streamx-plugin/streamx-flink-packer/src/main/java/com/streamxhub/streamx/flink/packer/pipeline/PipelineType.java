@@ -30,7 +30,7 @@ import java.util.Map;
  *
  * @author Al-assad
  */
-public enum PipeType {
+public enum PipelineType {
 
     /**
      * unknown type
@@ -41,37 +41,52 @@ public enum PipeType {
      * flink native kubernetes session mode
      */
     FLINK_NATIVE_K8S_SESSION(
-        1,
-        "flink native kubernetes session mode task building pipeline",
-        ImmutableMap.<Integer, String>builder()
-            .put(1, "Create building workspace")
-            .put(2, "Build shaded flink app jar")
-            .build(),
-        FlinkK8sSessionBuildResponse.class
+            1,
+            "flink native kubernetes session mode task building pipeline",
+            ImmutableMap.<Integer, String>builder()
+                    .put(1, "Create building workspace")
+                    .put(2, "Build shaded flink app jar")
+                    .build(),
+            ShadedBuildResponse.class
     ),
 
     /**
      * flink native kubernetes application mode
      */
     FLINK_NATIVE_K8S_APPLICATION(
-        2,
-        "flink native kubernetes session mode task building pipeline",
-        ImmutableMap.<Integer, String>builder()
-            .put(1, "Create building workspace")
-            .put(2, "Export kubernetes pod template")
-            .put(3, "Build shaded flink app jar")
-            .put(4, "Export flink app dockerfile")
-            .put(5, "Pull flink app base docker image")
-            .put(6, "Build flink app docker image")
-            .put(7, "Push flink app docker image")
-            .build(),
-        FlinkK8sApplicationBuildResponse.class
+            2,
+            "flink native kubernetes session mode task building pipeline",
+            ImmutableMap.<Integer, String>builder()
+                    .put(1, "Create building workspace")
+                    .put(2, "Export kubernetes pod template")
+                    .put(3, "Build shaded flink app jar")
+                    .put(4, "Export flink app dockerfile")
+                    .put(5, "Pull flink app base docker image")
+                    .put(6, "Build flink app docker image")
+                    .put(7, "Push flink app docker image")
+                    .build(),
+            DockerImageBuildResponse.class
+    ),
+    FLINK_STANDALONE(
+            3,
+            "flink standalone session mode task building pipeline",
+            ImmutableMap.<Integer, String>builder()
+                    .put(1, "Create building workspace")
+                    .put(2, "Build shaded flink app jar")
+                    .build(),
+            ShadedBuildResponse.class
     ),
 
-    // todo FLINK_YARN_APPLICATION(),
-    // todo FLINK_YARN_SESSION(),
-    // todo FLINK_STANDALONE(),
-    ;
+    FLINK_YARN_APPLICATION(
+            4,
+            "flink yarn application mode task building pipeline",
+            ImmutableMap.<Integer, String>builder()
+                    .put(1, "Prepare hadoop yarn environment and building workspace")
+                    .put(2, "Resolve maven dependencies")
+                    .put(3, "upload jar to yarn.provided.lib.dirs")
+                    .build(),
+            SimpleBuildResponse.class
+    );
 
 
     private final Integer code;
@@ -88,7 +103,7 @@ public enum PipeType {
      */
     private final Class<? extends BuildResult> resultType;
 
-    PipeType(Integer code, String desc, Map<Integer, String> steps, Class<? extends BuildResult> resultType) {
+    PipelineType(Integer code, String desc, Map<Integer, String> steps, Class<? extends BuildResult> resultType) {
         this.code = code;
         this.desc = desc;
         this.steps = steps;
@@ -96,8 +111,8 @@ public enum PipeType {
     }
 
     @JsonCreator
-    public static PipeType of(Integer code) {
-        for (PipeType type : PipeType.values()) {
+    public static PipelineType of(Integer code) {
+        for (PipelineType type : PipelineType.values()) {
             if (type.getCode().equals(code)) {
                 return type;
             }
@@ -105,9 +120,8 @@ public enum PipeType {
         return UNKNOWN;
     }
 
-    public static PipeType ofName(String name) {
-        PipeType r = PipeType.valueOf(name);
-        return r == null ? UNKNOWN : r;
+    public static PipelineType ofName(String name) {
+        return PipelineType.valueOf(name);
     }
 
     @JsonValue

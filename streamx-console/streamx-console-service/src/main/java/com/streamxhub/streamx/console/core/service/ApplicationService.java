@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,8 +51,6 @@ public interface ApplicationService extends IService<Application> {
     String getYarnName(Application app);
 
     AppExistsState checkExists(Application app);
-
-    void deploy(Application app, String socketId);
 
     void cancel(Application app);
 
@@ -84,5 +83,9 @@ public interface ApplicationService extends IService<Application> {
 
     boolean checkEnv(Application app) throws Exception;
 
-    void updateDeploy(Application application);
+    void updateLaunch(Application application);
+
+    List<Application> getByProjectId(Long id);
+
+    boolean checkBuildAndUpdate(Application app);
 }

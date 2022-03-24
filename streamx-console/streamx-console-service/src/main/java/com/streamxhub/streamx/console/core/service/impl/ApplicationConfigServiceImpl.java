@@ -238,7 +238,7 @@ public class ApplicationConfigServiceImpl
             try {
                 Resource resource = resourceLoader.getResource("classpath:flink-application.template");
                 Scanner scanner = new Scanner(resource.getInputStream());
-                StringBuffer stringBuffer = new StringBuffer();
+                StringBuilder stringBuffer = new StringBuilder();
                 while (scanner.hasNextLine()) {
                     stringBuffer.append(scanner.nextLine())
                         .append(System.lineSeparator());
