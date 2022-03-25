@@ -77,13 +77,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
     try {
       client = standAloneDescriptor._2.retrieve(standAloneDescriptor._1).getClusterClient
       val jobID = JobID.fromHexString(stopRequest.jobId)
-      val savePointDir = stopRequest.customSavePointPath
-      val actionResult = (stopRequest.withSavePoint, stopRequest.withDrain) match {
-        case (true, true) if savePointDir.nonEmpty => client.stopWithSavepoint(jobID, true, savePointDir).get()
-        case (true, false) if savePointDir.nonEmpty => client.cancelWithSavepoint(jobID, savePointDir).get()
-        case _ => client.cancel(jobID).get()
-          null
-      }
+      val actionResult = cancelJob(stopRequest, jobID, client)
       StopResponse(actionResult)
     } catch {
       case e: Exception =>
@@ -111,11 +105,11 @@ object RemoteSubmit extends FlinkSubmitTrait {
 
       client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
       val jobId = FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
-      logInfo(s"standalone submit WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
+      logInfo(s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
       SubmitResponse(null, flinkConfig.toMap, jobId)
     } catch {
       case e: Exception =>
-        logError(s"submit flink job fail in standalone mode")
+        logError(s"${submitRequest.executionMode} mode submit by restApi fail.")
         e.printStackTrace()
         throw e
     }
@@ -137,11 +131,12 @@ object RemoteSubmit extends FlinkSubmitTrait {
       val jobGraph = packageProgramJobGraph._2
       client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
       val jobId = client.submitJob(jobGraph).get().toString
+      logInfo(s"${submitRequest.executionMode} mode submit by jobGraph, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
       val result = SubmitResponse(null, flinkConfig.toMap, jobId)
       result
     } catch {
       case e: Exception =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
+        logError(s"${submitRequest.executionMode} mode submit by jobGraph fail.")
         e.printStackTrace()
         throw e
     } finally {

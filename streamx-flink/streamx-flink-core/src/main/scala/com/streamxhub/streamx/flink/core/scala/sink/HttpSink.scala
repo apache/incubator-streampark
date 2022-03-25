@@ -281,7 +281,7 @@ case class HttpWriterTask(id: Int,
   }
 
   /**
-   * if send data to Http Failed, retry $maxRetries, if still failed,flush data to $failoverStorage
+   * if send data to Http Failed, retry maxRetries, if still failed,flush data to failoverStorage
    *
    * @param response
    * @param sinkRequest

@@ -360,7 +360,9 @@ object ConfigConst {
 
   val KEY_FLINK_APPLICATION_MAIN_CLASS = "$internal.application.main"
 
-  val KEY_FLINK_TOTAL_PROCESS_MEMORY = "jobmanager.memory.process.size"
+  val KEY_FLINK_JM_PROCESS_MEMORY = "jobmanager.memory.process.size"
+
+  val KEY_FLINK_TM_PROCESS_MEMORY = "taskmanager.memory.process.size"
 
   val KEY_FLINK_TOTAL_MEMORY = "jobmanager.memory.flink.size"
 

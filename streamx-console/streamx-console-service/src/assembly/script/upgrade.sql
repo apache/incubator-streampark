@@ -3,17 +3,17 @@ SET FOREIGN_KEY_CHECKS = 0;
 COMMIT;
 
 BEGIN;
-ALTER TABLE `t_flink_app` ADD COLUMN `K8S_HADOOP_INTEGRATION` tinyint(1) default 0 AFTER `K8S_TM_POD_TEMPLATE`;
+-- ALTER TABLE `t_flink_app` ADD COLUMN `K8S_HADOOP_INTEGRATION` tinyint(1) default 0 AFTER `K8S_TM_POD_TEMPLATE`;
 
-ALTER TABLE `t_flink_app` ADD COLUMN `RESOURCE_FROM` tinyint(1) NULL AFTER `EXECUTION_MODE`;
+-- ALTER TABLE `t_flink_app` ADD COLUMN `RESOURCE_FROM` tinyint(1) NULL AFTER `EXECUTION_MODE`;
 
-ALTER TABLE `t_flink_app` ADD COLUMN `JAR_CHECK_SUM` bigint NULL AFTER `JAR`;
+-- ALTER TABLE `t_flink_app` ADD COLUMN `JAR_CHECK_SUM` bigint NULL AFTER `JAR`;
 
-ALTER TABLE `t_flink_app` ADD COLUMN `HOT_PARAMS` text NULL AFTER `OPTIONS`;
+-- ALTER TABLE `t_flink_app` ADD COLUMN `HOT_PARAMS` text NULL AFTER `OPTIONS`;
 
 update `t_flink_app` set `RESOURCE_FROM` = 1 where `JOB_TYPE` = 1;
 
-ALTER TABLE `t_user_role` ADD COLUMN `ID` bigint NOT NULL primary key AUTO_INCREMENT FIRST;
+-- ALTER TABLE `t_user_role` ADD COLUMN `ID` bigint NOT NULL primary key AUTO_INCREMENT FIRST;
 COMMIT;
 -- ----------------------------
 -- Table of t_app_build_pipe
@@ -136,6 +136,8 @@ ALTER TABLE `t_flink_sql`
     CHANGE COLUMN `id` `id` bigint NOT NULL AUTO_INCREMENT,
     MODIFY COLUMN `CANDIDATE` tinyint(4) NOT NULL DEFAULT 1;
 
+ALTER TABLE `t_flink_log`
+    CHANGE COLUMN `START_TIME` `OPTION_TIME` datetime(0) NULL DEFAULT NULL AFTER `EXCEPTION`;
 
 -- change launch value
 BEGIN;
@@ -208,7 +210,7 @@ PRIMARY KEY (`ID`) USING BTREE
 SET FOREIGN_KEY_CHECKS = 1;
 
 BEGIN;
-INSERT INTO `t_role_menu` VALUES (100055, 100001, 100013);
-INSERT INTO `t_role_menu` VALUES (100056, 100001, 100015);
+-- INSERT INTO `t_role_menu` VALUES (100055, 100001, 100013);
+-- INSERT INTO `t_role_menu` VALUES (100056, 100001, 100015);
 COMMIT;
 -- ------------------------------------- version: 1.2.2 END ---------------------------------------

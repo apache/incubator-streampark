@@ -48,9 +48,9 @@ public class ApplicationLog {
     private Boolean success;
 
     /**
-     * 启动时间
+     * 操作时间
      */
-    private Date startTime;
+    private Date optionTime;
 
     /**
      * 启动失败的异常

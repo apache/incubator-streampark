@@ -36,6 +36,7 @@ object JsonUtils extends Serializable {
 
   //该属性设置主要是将忽略空bean转json错误
   mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+
   //该属性设置主要是取消将对象的时间默认转换timesstamps(时间戳)形式
   mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
@@ -44,23 +45,23 @@ object JsonUtils extends Serializable {
   //所有日期都统一为以下样式：yyyy-MM-dd HH:mm:ss，这里可以不用我的DateTimeUtil.DATE_FORMAT，手动添加
   mapper.setDateFormat(new SimpleDateFormat(DateUtils.fullFormat))
 
-  private[streamx] def read[T](obj: AnyRef, clazz: Class[T]): T = {
+  def read[T](obj: AnyRef, clazz: Class[T]): T = {
     obj match {
       case str: String => mapper.readValue(str, clazz)
       case _ => mapper.readValue(write(obj), clazz)
     }
   }
 
-  private[streamx] def read[T](obj: AnyRef)(implicit classTag: ClassTag[T]): T = this.read(obj, classTag.runtimeClass).asInstanceOf[T]
+  def read[T](obj: AnyRef)(implicit classTag: ClassTag[T]): T = this.read(obj, classTag.runtimeClass).asInstanceOf[T]
 
-  private[streamx] def write(obj: AnyRef): String = mapper.writeValueAsString(obj)
+  def write(obj: AnyRef): String = mapper.writeValueAsString(obj)
 
   implicit class Unmarshal(jsonStr: String) {
-    private[streamx] def fromJson[T]()(implicit classTag: ClassTag[T]): T = read[T](jsonStr)
+    def fromJson[T]()(implicit classTag: ClassTag[T]): T = read[T](jsonStr)
   }
 
   implicit class Marshal(obj: AnyRef) {
-    private[streamx] def toJson: String = write(obj)
+    def toJson: String = write(obj)
   }
 
 }

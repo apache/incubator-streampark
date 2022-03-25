@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
+import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.{HdfsUtils, Utils}
 import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse
@@ -43,6 +44,8 @@ import scala.collection.mutable.ListBuffer
  * yarn application mode submit
  */
 object YarnApplicationSubmit extends YarnSubmitTrait {
+
+  private[this] lazy val workspace = Workspace.remote
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
