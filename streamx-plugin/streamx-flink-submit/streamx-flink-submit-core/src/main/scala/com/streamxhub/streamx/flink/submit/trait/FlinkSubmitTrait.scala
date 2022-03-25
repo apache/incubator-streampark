@@ -402,7 +402,7 @@ trait FlinkSubmitTrait extends Logger {
                 } else null
               }
           )
-          if(StringUtils.isEmpty(configDir)) {
+          if (StringUtils.isEmpty(configDir)) {
             throw new FlinkException(s"[StreamX] executionMode: ${stopRequest.executionMode.getName}, savePoint path is null or invalid.")
           } else configDir
         }
