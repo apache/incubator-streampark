@@ -45,5 +45,5 @@ public class Constant {
     // 菜单
     public static final String TYPE_MENU = "0";
     public static final String APP_MENU_ID = "100015";
-    public static final String APP_DELETE_MENU_ID = "100018";
+    public static final String APP_DETAIL_MENU_ID = "100018";
 }

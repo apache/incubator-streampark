@@ -110,7 +110,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         roleMenuMapper.delete(
             new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, role.getRoleId()));
         String menuId = role.getMenuId();
-        if (StringUtils.contains(menuId, Constant.APP_DELETE_MENU_ID) && !StringUtils.contains(menuId, Constant.APP_MENU_ID)) {
+        if (StringUtils.contains(menuId, Constant.APP_DETAIL_MENU_ID) && !StringUtils.contains(menuId, Constant.APP_MENU_ID)) {
             menuId = menuId + StringPool.COMMA + Constant.APP_MENU_ID;
         }
         String[] menuIds = menuId.split(StringPool.COMMA);
