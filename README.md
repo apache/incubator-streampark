@@ -129,25 +129,13 @@ cd streamx
 
 click [Document](http://www.streamxhub.com/zh-CN/docs/intro/) for more information
 
-## 👻 Why not...❓
 
-### Apache Zeppelin
+## 💋 out users
 
-[Apache Zeppelin](https://zeppelin.apache.org) is a Web-based notebook that enables data-driven, interactive data analytics and
-collaborative documents with SQL, Java, Scala and more.
+Various companies and organizations use StreamX for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/streamxhub/streamx/issues/163)
 
-At the same time we also need a one-stop tool that can cover `development`, `test`, `package`, `deploy`, and `start`.
-`streamx-console` solves these pain points very well, positioning is a one-stop stream processing platform, and has developed more exciting
-features (such as `Flink SQL WebIDE`, `dependency isolation`, `task rollback `, `flame diagram`
-etc.)
+![image](https://user-images.githubusercontent.com/13284744/160220085-11f1e011-e7a0-421f-9294-c14213c0bc22.png)
 
-### FlinkX
-
-[FlinkX](http://github.com/DTStack/flinkx) is a distributed offline and real-time data synchronization framework based on flink widely used
-in DTStack, which realizes efficient data migration between multiple heterogeneous data sources.
-
-`StreamX` focuses on the management of development phases and tasks. The `streamx-pump` module is also under planning, dedicated to solving
-data source migration, and will eventually be integrated into the `streamx-console`.
 
 
 ## 🤝 Contributing
