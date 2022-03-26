@@ -218,6 +218,7 @@ public class ApplicationController {
     }
 
     @PostMapping("delete")
+    @RequiresPermissions("app:delete")
     public RestResponse delete(Application app) throws ServiceException {
         Boolean deleted = applicationService.delete(app);
         return RestResponse.create().data(deleted);

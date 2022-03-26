@@ -33,6 +33,7 @@ import com.streamxhub.streamx.console.system.service.RoleMenuServie;
 import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserRoleService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -107,7 +108,11 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         baseMapper.updateById(role);
         roleMenuMapper.delete(
             new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, role.getRoleId()));
-        String[] menuIds = role.getMenuId().split(StringPool.COMMA);
+        String menuId = role.getMenuId();
+        if (StringUtils.contains(menuId, "100018") && !StringUtils.contains(menuId, "100015")) {
+            menuId = menuId + ",100015";
+        }
+        String[] menuIds = menuId.split(StringPool.COMMA);
         setRoleMenus(role, menuIds);
     }
 
