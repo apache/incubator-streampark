@@ -192,7 +192,7 @@ CREATE TABLE `t_flink_log` (
 `YARN_APP_ID` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `SUCCESS` tinyint DEFAULT NULL,
 `EXCEPTION` text COLLATE utf8mb4_general_ci,
-`START_TIME` datetime DEFAULT NULL,
+`OPTION_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -214,7 +214,7 @@ CREATE TABLE `t_flink_project` (
 `USER_NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `PASSWORD` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `POM` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-`BUILD_ARGS` varchar(255) DEFAULT '-1',
+`BUILD_ARGS` varchar(255) DEFAULT NULL,
 `TYPE` tinyint DEFAULT NULL,
 `REPOSITORY` tinyint DEFAULT NULL,
 `DATE` datetime DEFAULT NULL,

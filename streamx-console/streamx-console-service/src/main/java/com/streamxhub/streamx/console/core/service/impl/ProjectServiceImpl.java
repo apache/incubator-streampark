@@ -128,6 +128,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             project.setPassword(projectParam.getPassword());
             project.setPom(projectParam.getPom());
             project.setDescription(projectParam.getDescription());
+            project.setBuildArgs(projectParam.getBuildArgs());
             if (projectParam.getBuildState() != null) {
                 project.setBuildState(projectParam.getBuildState());
                 if (BuildState.of(projectParam.getBuildState()).equals(BuildState.NEED_REBUILD)) {

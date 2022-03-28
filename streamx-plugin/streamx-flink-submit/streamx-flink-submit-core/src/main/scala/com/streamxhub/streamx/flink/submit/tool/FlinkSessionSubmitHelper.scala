@@ -62,7 +62,9 @@ object FlinkSessionSubmitHelper extends Logger {
         .create()
         .addBinaryBody("jarfile", flinkJobJar, ContentType.create("application/java-archive"), flinkJobJar.getName)
         .build()
-      ).execute.returnContent().asString(StandardCharsets.UTF_8)
+      ).execute
+      .returnContent()
+      .asString(StandardCharsets.UTF_8)
 
     val jarUploadResponse = Try(parse(uploadResult)) match {
       case Success(ok) =>

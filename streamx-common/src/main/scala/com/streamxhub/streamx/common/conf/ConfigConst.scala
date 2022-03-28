@@ -360,7 +360,9 @@ object ConfigConst {
 
   val KEY_FLINK_APPLICATION_MAIN_CLASS = "$internal.application.main"
 
-  val KEY_FLINK_TOTAL_PROCESS_MEMORY = "jobmanager.memory.process.size"
+  val KEY_FLINK_JM_PROCESS_MEMORY = "jobmanager.memory.process.size"
+
+  val KEY_FLINK_TM_PROCESS_MEMORY = "taskmanager.memory.process.size"
 
   val KEY_FLINK_TOTAL_MEMORY = "jobmanager.memory.flink.size"
 
@@ -381,7 +383,7 @@ object ConfigConst {
     println("\n       WebSite:  http://www.streamxhub.com            ")
     println("       GitHub :  https://github.com/streamxhub/streamx  ")
     println("       Gitee  :  https://gitee.com/streamxhub/streamx   ")
-    println("       Ver    :  1.2.2                                  ")
+    println("       Ver    :  1.2.3                                  ")
     println(s"       Info   :  $info                                 ")
     println(s"       Time   :  ${LocalDateTime.now}              \n\n")
   }

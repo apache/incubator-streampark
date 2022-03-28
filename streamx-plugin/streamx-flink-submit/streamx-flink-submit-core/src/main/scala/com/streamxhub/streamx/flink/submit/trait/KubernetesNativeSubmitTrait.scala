@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.flink.submit.`trait`
 
-import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
 import com.streamxhub.streamx.flink.packer.pipeline.DockerImageBuildResponse
 import com.streamxhub.streamx.flink.submit.bean._
@@ -42,8 +41,6 @@ import scala.language.postfixOps
  */
 //noinspection DuplicatedCode
 trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
-
-  lazy val workspace: Workspace = Workspace.local
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
 
@@ -100,23 +97,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val jobID = JobID.fromHexString(stopRequest.jobId)
-      var savePointDir = stopRequest.customSavePointPath
-
-      if (StringUtils.isBlank(savePointDir)) {
-        savePointDir = getOptionFromDefaultFlinkConfig(
-          stopRequest.flinkVersion.flinkHome,
-          ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
-            .stringType()
-            .defaultValue(s"${workspace.APP_SAVEPOINTS}")
-        )
-      }
-
-      val actionResult = (stopRequest.withSavePoint, stopRequest.withDrain) match {
-        case (true, true) if savePointDir.nonEmpty => client.stopWithSavepoint(jobID, true, savePointDir).get()
-        case (true, false) if savePointDir.nonEmpty => client.cancelWithSavepoint(jobID, savePointDir).get()
-        case _ => client.cancel(jobID).get()
-          null
-      }
+      val actionResult = cancelJob(stopRequest, jobID, client)
       StopResponse(actionResult)
     } catch {
       case e: Exception =>
@@ -164,5 +145,4 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     case FlinkK8sRestExposedType.NodePort => ServiceExposedType.NodePort
     case _ => ServiceExposedType.LoadBalancer
   }
-
 }

@@ -80,9 +80,10 @@ export default {
     BACKUPS: '/flink/app/backups',
     ROLLBACK: '/flink/app/rollback',
     REVOKE: '/flink/app/revoke',
-    STARTLOG: '/flink/app/startlog',
+    OPTIONLOG: '/flink/app/optionlog',
     DOWNLOG: '/flink/app/downlog',
-    CHECKJAR: '/flink/app/checkjar'
+    CHECKJAR: '/flink/app/checkjar',
+    VERIFYSCHEMA: '/flink/app/verifySchema'
   },
   Config: {
     GET: '/flink/conf/get',

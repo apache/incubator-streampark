@@ -121,23 +121,16 @@ mvn clean install -DskipTests -Denv=prod
 
 更多请查看[官网文档](http://www.streamxhub.com/zh/doc/)
 
-## 👻 为什么不是...❓
 
-### Apache Zeppelin
 
-[Apache Zeppelin](http://zeppelin.apache.org)是一个非常优秀的开源项目👏 对 `Flink` 做了很好的支持，`Zeppelin` 创新型的 `notebook`
-功能，让开发者非常方便的 `On-line` 编程，快捷的提交任务，语言层面同时支持`Java`，`Scala`，`Python`，国内阿里的章剑峰大佬也在积极推动该项目，向剑峰大佬致以崇高的敬意🙏🙏🙏，
-但该项目目前貌似没有解决项目的管理和运维方面的痛点，针对比较复杂的项目和大量的作业管理就有些力不从心了，一般来讲不论是 `DataStream` 作业还是 `Flink SQL` 作业，大概都会经历作业的`开发阶段`，`测试阶段`
-，`打包阶段`，`上传服务器阶段`，`启动任务阶段`等这些步骤，这是一个链路很长的步骤，且整个过程耗时比较长，体验不好，
-即使修改了一个符号，项目改完上线都得走上面的流程，我们期望这些步骤能够动动鼠标一键式解决，还希望至少能有一个任务列表的功能，能够方便的管理任务，可以清楚的看到哪些任务正在运行，哪些停止了，任务的资源消耗情况，可以在任务列表页面一键`启动`
-或`停止`任务，并且自动管理 `savePoint`，这些问题也是开发者实际开发中会遇到了问题，
-`streamx-console` 很好的解决了这些痛点，定位是一个一站式实时数据平台，并且开发了更多令人激动的功能(诸如`Flink SQL WebIDE`，`依赖隔离`，`任务回滚`，`火焰图`等)
 
-### FlinkX
+## 💋 谁在使用
 
-[FlinkX](http://github.com/DTStack/flinkx)
-是基于flink的分布式数据同步工具，实现了多种异构数据源之间高效的数据迁移，定位比较明确，专门用来做数据抽取和迁移，可以作为一个服务组件来使用，`StreamX` 关注开发阶段和任务后期的管理，定位有所不同，`streamx-pump`
-模块也在规划中， 致力于解决数据源抽取和迁移，最终会集成到 `streamx-console` 中
+诸多公司和组织将 StreamX 用于研究、生产和商业产品中, 如果您也在使用 ? 可以在[这里添加](https://github.com/streamxhub/streamx/issues/163)
+
+![image](https://user-images.githubusercontent.com/13284744/160220085-11f1e011-e7a0-421f-9294-c14213c0bc22.png)
+
+
 
 
 ## 🤝 如何贡献

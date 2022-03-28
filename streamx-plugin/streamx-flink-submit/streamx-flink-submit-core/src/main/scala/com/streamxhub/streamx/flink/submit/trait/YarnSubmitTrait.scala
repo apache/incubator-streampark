@@ -19,13 +19,11 @@
 
 package com.streamxhub.streamx.flink.submit.`trait`
 
-import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.util.ExceptionUtils
 import com.streamxhub.streamx.flink.submit.bean._
-import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.program.ClusterClientProvider
-import org.apache.flink.configuration.{CheckpointingOptions, ConfigOptions, Configuration}
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.jobgraph.JobGraph
 import org.apache.flink.util.FlinkException
 import org.apache.flink.yarn.configuration.YarnConfigOptions
@@ -34,15 +32,11 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.lang.reflect.Method
 import java.lang.{Boolean => JavaBool}
-import java.util.concurrent.TimeUnit
-import scala.util.Try
 
 /**
  * yarn application mode submit
  */
 trait YarnSubmitTrait extends FlinkSubmitTrait {
-
-  lazy val workspace: Workspace = Workspace.remote
 
   override def doStop(stopRequest: StopRequest, flinkConf: Configuration): StopResponse = {
 
@@ -58,23 +52,8 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
       val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
       clusterDescriptor.retrieve(applicationId).getClusterClient
     }
-
-    val savePointDir = getOptionFromDefaultFlinkConfig(
-      stopRequest.flinkVersion.flinkHome,
-      ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
-        .stringType()
-        .defaultValue(s"${workspace.APP_SAVEPOINTS}")
-    )
-
     try {
-      val clientTimeout = getOptionFromDefaultFlinkConfig(stopRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
-      val savepointDir = (Try(stopRequest.withSavePoint).getOrElse(false), Try(stopRequest.withDrain).getOrElse(false)) match {
-        case (false, false) =>
-          clusterClient.cancel(jobID).get()
-          null
-        case (true, false) => clusterClient.cancelWithSavepoint(jobID, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
-        case (_, _) => clusterClient.stopWithSavepoint(jobID, stopRequest.withDrain, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
-      }
+      val savepointDir = cancelJob(stopRequest, jobID, clusterClient)
       StopResponse(savepointDir)
     } catch {
       case e: Exception =>

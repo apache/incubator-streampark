@@ -757,7 +757,7 @@ public class Application implements Serializable {
     @SneakyThrows
     public void updateHotParams(Application appParam) {
         ExecutionMode executionModeEnum = appParam.getExecutionModeEnum();
-        Map<String, String> hotParams = new HashMap<>();
+        Map<String, String> hotParams = new HashMap<>(0);
         if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
             if (StringUtils.isNotEmpty(appParam.getYarnQueue())) {
                 hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), appParam.getYarnQueue());
