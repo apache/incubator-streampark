@@ -732,7 +732,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(Application::getId, application.getId());
         updateWrapper.set(Application::getLaunch, application.getLaunch());
-        updateWrapper.set(Application::getBuild, application.getBuild());
+        updateWrapper.set(Application::getBuild, Boolean.TRUE);
         if (application.getOptionState() != null) {
             updateWrapper.set(Application::getOptionState, application.getOptionState());
         }
