@@ -1,31 +1,133 @@
----
-name: "\U0001F41B Bug Report"
-about: As a User, I want to report a Bug.
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: Bug report
 title: "[Bug] Bug title "
-labels: type/bug
----
+description: Problems and issues with code of StreamX
+labels: ["bug"]
+body:
+- type: markdown
+  attributes:
+  value: |
+  Please make sure what you are reporting is indeed a bug with reproducible steps.
+  For better global communication, Please write in English.
 
-*Please answer these questions before submitting your issue. Thanks!*
+      If you feel the description in English is not clear, then you can append description in Chinese, thanks!
 
-### Environment Description
-* **StreamX Version**: 
-* **JVM version** (`java -version`):
-* **OS version** (`uname -a` if on a Unix-like system):
+  
+- type: checkboxes
+  attributes:
+  label: Search before asking
+  description: >
+  Please make sure to search in the [issues](https://github.com/streamxhub/streamx/issues?q=is%3Aissue+label%3A%22bug%22)
+  first to see whether the same issue was reported already.
+  options:
+  - label: >
+  I had searched in the [issues](https://github.com/streamxhub/streamx/issues?q=is%3Aissue+label%3A%22bug%22) and found
+  no similar issues.
+  required: true
 
-### Bug Description
-A clear and concise description of what the bug is. 
 
-### How to Reproduce 
-Steps to reproduce the behavior, for example:
+- type: textarea
+  attributes:
+  label: What happened
+  description: Describe what happened.
+  placeholder: >
+  Please provide the context in which the problem occurred and explain what happened
+  validations:
+  required: true
 
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+- type: textarea
+  attributes:
+  label: StreamX Version
+  description: Provide StreamX version.
+  placeholder: >
+  Please provide the version of StreamX.
+  validations:
+  required: true
 
-### Additional context
-Add any other context about the problem here such as JVM track stack log.
+- type: textarea
+  attributes:
+  label: JVM version** (`java -version`)
+  description: Provide StreamX version.
+  placeholder: >
+  Please provide the version of java.
+  validations:
+  required: true
 
-### Requirement or improvement
+- type: textarea
+  attributes:
+  label: Flink Version
+  description: Provide Flink Version.
+  placeholder: >
+  Please provide the version of Flink
+  validations:
+  required: true
 
-- Please describe about your requirements or improvement suggestions.
+- type: textarea
+  attributes:
+  label: Scala version of Flink
+  description: Provide Scala version of Flink,
+  placeholder: >
+  Please provide the scala version of Flink.
+  validations:
+  required: false
+
+- type: textarea
+  attributes:
+  label: Error Exception
+  description: Provide the error exception when you run your command.
+  placeholder: >
+  Please provide the error exception here.
+  render: log
+  validations:
+  required: true
+
+- type: textarea
+  attributes:
+  label: Screenshots
+  description: Provide the screenshots if necessary.
+  placeholder: >
+  Please copy-paste the screenshots here.
+  validations:
+  required: false
+
+- type: checkboxes
+  attributes:
+  label: Are you willing to submit PR?
+  description: >
+  This is absolutely not required, but we are happy to guide you in the contribution process
+  especially if you already have a good understanding of how to implement the fix.
+  StreamX is a totally community-driven project and we love to bring new contributors in.
+  options:
+  - label: Yes I am willing to submit a PR!
+
+- type: checkboxes
+  attributes:
+  label: Code of Conduct
+  description: |
+  The Code of Conduct helps create a safe space for everyone. We require that everyone agrees to it.
+  options:
+  - label: >
+  I agree to follow this project's
+  [Code of Conduct](https://www.apache.org/foundation/policies/conduct)
+  required: true
+
+- type: markdown
+  attributes:
+  value: "Thanks for completing our form, and we will reply you as soon as possible."
+
