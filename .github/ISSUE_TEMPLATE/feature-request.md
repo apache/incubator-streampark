@@ -1,20 +1,84 @@
----
-name: "\U0001F680 Feature Request"
-about: As a user, I want to request a New Feature on the product.
-title: "[Feature] Feature request title "
-labels: type/feature-request
----
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: Feature request
+description: Suggest an idea for StreamX
+title: "[Feature] Feature title"
+labels: ["Feature"]
+body:
+- type: markdown
+  attributes:
+  value: |
+  For better global communication, Please write in English.
 
-## Feature Request
+      If you feel the description in English is not clear, then you can append description in Chinese, thanks!
 
-**Is your feature request related to a problem? Please describe:**
-<!-- A clear and concise description of what the problem is. Ex. I'm always frustrated when [...] -->
+- type: checkboxes
+  attributes:
+  label: Search before asking
+  description: >
+  Please make sure to search in the [feature](https://github.com/streamxhub/streamx/issues?q=is%3Aissue+label%3A%22Feature%22) first
+  to see whether the same feature was requested already.
+  options:
+  - label: >
+  I had searched in the [feature](https://github.com/streamxhub/streamx/issues?q=is%3Aissue+label%3A%22Feature%22) and found no
+  similar feature requirement.
+  required: true
 
-**Describe the feature you'd like:**
-<!-- A clear and concise description of what you want to happen. -->
+- type: textarea
+  attributes:
+  label: Description
+  description: Please describe the function you want in as much detail as possible.
+  placeholder: >
+  Rather than telling us how you might implement this feature, try to take a
+  step back and describe what you are trying to achieve.
+  validations:
+  required: true
 
-**Describe alternatives you've considered:**
-<!-- A clear and concise description of any alternative solutions or features you've considered. -->
+- type: textarea
+  attributes:
+  label: Usage Scenario
+  description: Please describe usage scenario of this feature.
 
-**Teachability, Documentation, Adoption, Migration Strategy:**
-<!-- If you can, explain some scenarios how users might use this, situations it would be helpful in. Any API designs, mockups, or diagrams are also helpful. -->
+- type: textarea
+  attributes:
+  label: Related issues
+  description: Is there currently another issue associated with this?
+
+- type: checkboxes
+  attributes:
+  label: Are you willing to submit a PR?
+  description: >
+  This is absolutely not required, but we are happy to guide you in the contribution process
+  especially if you already have a good understanding of how to implement the feature.
+  StreamX is a totally community-driven project and we love to bring new contributors in.
+  options:
+  - label: Yes I am willing to submit a PR!
+
+- type: checkboxes
+  attributes:
+  label: Code of Conduct
+  description: |
+  The Code of Conduct helps create a safe space for everyone. We require that everyone agrees to it.
+  options:
+  - label: |
+  I agree to follow this project's [Code of Conduct](https://www.apache.org/foundation/policies/conduct)
+  required: true
+
+- type: markdown
+  attributes:
+  value: "Thanks for completing our form, and we will reply you as soon as possible."
+
