@@ -37,8 +37,8 @@ body:
     first to see whether the same issue was reported already.
   options:
   - label: >
-    I had searched in the [issues](https://github.com/streamxhub/streamx/issues?q=is%3Aissue+label%3A%22bug%22) and found
-    no similar issues.
+      I had searched in the [issues](https://github.com/streamxhub/streamx/issues?q=is%3Aissue+label%3A%22bug%22) and found
+      no similar issues.
   required: true
 
 
@@ -123,8 +123,8 @@ body:
     The Code of Conduct helps create a safe space for everyone. We require that everyone agrees to it.
   options:
   - label: >
-    I agree to follow this project's
-    [Code of Conduct](https://www.apache.org/foundation/policies/conduct)
+      I agree to follow this project's
+      [Code of Conduct](https://www.apache.org/foundation/policies/conduct)
   required: true
 
 - type: markdown
