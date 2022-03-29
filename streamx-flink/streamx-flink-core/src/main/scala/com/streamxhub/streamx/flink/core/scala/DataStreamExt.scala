@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.core.scala.ext
+package com.streamxhub.streamx.flink.core.scala
 
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -136,5 +136,3 @@ object DataStreamExt {
 
 
 }
-
-

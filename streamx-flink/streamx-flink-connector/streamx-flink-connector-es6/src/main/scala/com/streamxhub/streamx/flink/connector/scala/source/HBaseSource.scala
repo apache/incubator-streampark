@@ -25,7 +25,7 @@ import com.streamxhub.streamx.common.util.{FlinkUtils, Logger, Utils}
 import com.streamxhub.streamx.flink.connector.java.function.{HBaseQueryFunction, HBaseResultFunction, RunningFunction}
 import com.streamxhub.streamx.flink.connector.java.wrapper.HBaseQuery
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
-import com.streamxhub.streamx.flink.core.scala.ext.DataStreamExt.DataStream
+import com.streamxhub.streamx.flink.core.scala.DataStreamExt.DataStream
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
