@@ -24,6 +24,7 @@ import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.enums.{ApiType, Semantic}
 import com.streamxhub.streamx.common.util.{ConfigUtils, JdbcUtils, Logger, Utils}
 import com.streamxhub.streamx.flink.connector.java.function.SQLFromFunction
+import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.io.RichOutputFormat

@@ -21,8 +21,9 @@ package com.streamxhub.streamx.flink.connector.scala.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util._
+import com.streamxhub.streamx.flink.connector.failover._
+import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
-import com.streamxhub.streamx.flink.core.scala.failover._
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink

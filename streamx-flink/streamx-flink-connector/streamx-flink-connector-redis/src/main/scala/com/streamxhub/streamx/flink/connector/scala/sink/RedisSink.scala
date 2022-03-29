@@ -21,6 +21,7 @@ package com.streamxhub.streamx.flink.connector.scala.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{ConfigUtils, Logger, Utils}
+import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.flink.api.common.ExecutionConfig

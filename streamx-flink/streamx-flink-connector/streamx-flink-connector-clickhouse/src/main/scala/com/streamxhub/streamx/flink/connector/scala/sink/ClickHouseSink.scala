@@ -21,8 +21,9 @@ package com.streamxhub.streamx.flink.connector.scala.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util._
+import com.streamxhub.streamx.flink.connector.failover._
+import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
-import com.streamxhub.streamx.flink.core.scala.failover._
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -34,7 +35,7 @@ import org.asynchttpclient._
 import ru.yandex.clickhouse.ClickHouseDataSource
 import ru.yandex.clickhouse.settings.ClickHouseProperties
 
-import java.sql.{Connection, PreparedStatement, Statement}
+import java.sql.{Connection, Statement}
 import java.util
 import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicLong
