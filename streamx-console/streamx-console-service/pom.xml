@@ -401,7 +401,7 @@
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-jvm-profiler</artifactId>
-            <version>1.2.2</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
