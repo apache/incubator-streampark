@@ -16,9 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.streamxhub.streamx.flink.core.scala.ext
+package com.streamxhub.streamx.flink.core
 
-import com.streamxhub.streamx.flink.core.StreamTableContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.table.api.bridge.scala.{TableConversions => FlinkTableConversions}
