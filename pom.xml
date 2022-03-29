@@ -12,7 +12,6 @@
     <modules>
         <module>streamx-common</module>
         <module>streamx-flink</module>
-        <module>streamx-spark</module>
         <module>streamx-plugin</module>
         <module>streamx-console</module>
     </modules>
@@ -261,12 +260,6 @@
                     </exclusion>
                 </exclusions>
                 <version>0.1.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.scalaj</groupId>
-                <artifactId>scalaj-http_${scala.binary.version}</artifactId>
-                <version>2.4.2</version>
             </dependency>
 
             <dependency>

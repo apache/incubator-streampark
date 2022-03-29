@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.flink.core.scala.ext
 
-import com.streamxhub.streamx.flink.core.scala.sink.EchoSink
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks, ProcessFunction => ProcFunc}
@@ -54,14 +53,6 @@ object DataStreamExt {
     })
 
     def sideGet[R: TypeInformation](sideTag: String): DStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
-
-    /**
-     * ¬
-     * 两阶段精准一次的print...
-     *
-     * @param sinkIdentifier
-     */
-    def echo(sinkIdentifier: String = null): Unit = EchoSink(sinkIdentifier)(dataStream)
 
     /**
      * 基于最大延迟时间的Watermark生成
