@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.core.scala
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
-import com.streamxhub.streamx.flink.core.scala.ext.TableExt
+import com.streamxhub.streamx.flink.core.TableExt
 import com.streamxhub.streamx.flink.core.{FlinkTableInitializer, StreamTableContext}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
