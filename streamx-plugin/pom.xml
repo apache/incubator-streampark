@@ -21,9 +21,9 @@
         <module>streamx-flink-udf</module>
         <module>streamx-flink-submit</module>
         <module>streamx-flink-proxy</module>
-        <module>streamx-jvm-profiler</module>
         <module>streamx-flink-packer</module>
         <module>streamx-flink-kubernetes</module>
+        <module>streamx-jvm-profiler</module>
     </modules>
 
     <dependencies>
