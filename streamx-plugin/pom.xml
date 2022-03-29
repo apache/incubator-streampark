@@ -23,6 +23,7 @@
         <module>streamx-flink-proxy</module>
         <module>streamx-flink-packer</module>
         <module>streamx-flink-kubernetes</module>
+        <module>streamx-jvm-profiler</module>
     </modules>
 
     <dependencies>
