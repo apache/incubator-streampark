@@ -17,6 +17,9 @@
         <module>streamx-flink-connector-jdbc</module>
         <module>streamx-flink-connector-hbase</module>
         <module>streamx-flink-connector-mongo</module>
+        <module>streamx-flink-connector-clickhouse</module>
+        <module>streamx-flink-connector-doris</module>
+        <module>streamx-flink-connector-kafka</module>
     </modules>
 
 
