@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.repl.interpreter
+package com.streamxhub.streamx.flink.repl.shell
 
 import com.streamxhub.streamx.common.util.{FlinkUtils, Logger}
 import com.streamxhub.streamx.flink.repl.shims.FlinkShims

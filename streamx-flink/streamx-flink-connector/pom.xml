@@ -13,25 +13,24 @@
     <name>StreamX : Flink Connector</name>
     <packaging>pom</packaging>
 
-    <modules>
-        <module>streamx-flink-connector-base</module>
-        <module>streamx-flink-connector-jdbc</module>
-        <module>streamx-flink-connector-hbase</module>
-        <module>streamx-flink-connector-mongo</module>
-        <module>streamx-flink-connector-clickhouse</module>
-        <module>streamx-flink-connector-doris</module>
-        <module>streamx-flink-connector-kafka</module>
-        <module>streamx-flink-connector-redis</module>
-        <module>streamx-flink-connector-influxdb</module>
-        <module>streamx-flink-connector-http</module>
-    </modules>
-
     <properties>
         <vertx.version>4.2.3</vertx.version>
         <clickhouse.version>0.1.53</clickhouse.version>
         <async.client.version>2.12.3</async.client.version>
         <influxdb.version>2.17</influxdb.version>
     </properties>
+
+    <modules>
+        <module>streamx-flink-connector-base</module>
+        <module>streamx-flink-connector-clickhouse</module>
+        <module>streamx-flink-connector-doris</module>
+        <module>streamx-flink-connector-hbase</module>
+        <module>streamx-flink-connector-http</module>
+        <module>streamx-flink-connector-influxdb</module>
+        <module>streamx-flink-connector-jdbc</module>
+        <module>streamx-flink-connector-kafka</module>
+        <module>streamx-flink-connector-mongo</module>
+    </modules>
 
     <dependencyManagement>
 
@@ -85,12 +84,6 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpasyncclient</artifactId>
                 <version>4.1.2</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.bahir</groupId>
-                <artifactId>flink-connector-redis_${scala.binary.version}</artifactId>
-                <version>1.0</version>
             </dependency>
 
             <dependency>
@@ -203,5 +196,34 @@
         </dependency>
 
     </dependencies>
+
+    <profiles>
+        <!-- default -->
+        <profile>
+            <id>streamx-flink-connector-2.11</id>
+            <activation>
+                <property>
+                    <name>scala.binary.version</name>
+                    <value>2.11</value>
+                </property>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <!-- redis connector only support scale 2.11 -->
+                <module>streamx-flink-connector-redis</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>streamx-flink-connector-2.12</id>
+            <activation>
+                <property>
+                    <name>scala.binary.version</name>
+                    <value>2.12</value>
+                </property>
+            </activation>
+            <modules>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
