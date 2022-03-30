@@ -12,7 +12,6 @@
     <modules>
         <module>streamx-common</module>
         <module>streamx-flink</module>
-        <module>streamx-spark</module>
         <module>streamx-plugin</module>
         <module>streamx-console</module>
     </modules>
@@ -69,7 +68,6 @@
         <flink.version>1.14.0</flink.version>
         <spark.version>2.2.0</spark.version>
         <hive.version>2.3.4</hive.version>
-        <async.client.version>2.12.3</async.client.version>
         <vertx.version>4.2.3</vertx.version>
         <hadoop.version>2.10.1</hadoop.version>
         <hbase.version>2.1.10</hbase.version>
@@ -95,7 +93,6 @@
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
-        <clickhouse.version>0.1.53</clickhouse.version>
         <CodeCacheSize>512m</CodeCacheSize>
         <MaxMetaspace>512m</MaxMetaspace>
     </properties>
@@ -264,12 +261,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.scalaj</groupId>
-                <artifactId>scalaj-http_${scala.binary.version}</artifactId>
-                <version>2.4.2</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-email</artifactId>
                 <version>1.4</version>
@@ -356,18 +347,6 @@
                 <version>${flink.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.asynchttpclient</groupId>
-                <artifactId>async-http-client</artifactId>
-                <version>${async.client.version}</version>
-            </dependency>
-
-            <!--es sink need httpcomponents -->
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpasyncclient</artifactId>
-                <version>4.1.2</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.apache.bahir</groupId>
@@ -418,7 +397,6 @@
                 <version>${hadoop.version}</version>
             </dependency>
 
-
             <!--hbase-->
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
@@ -450,12 +428,6 @@
                         <artifactId>slf4j-log4j12</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.influxdb</groupId>
-                <artifactId>influxdb-java</artifactId>
-                <version>${influxdb.version}</version>
             </dependency>
 
         </dependencies>
