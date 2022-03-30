@@ -7,7 +7,7 @@
         <version>1.2.3</version>
     </parent>
 
-    <artifactId>streamx-flink-connector-jdbc</artifactId>
+    <artifactId>streamx-flink-connector-jdbc_${scala.binary.version}</artifactId>
 
     <name>StreamX : Flink Connector jdbc</name>
 
@@ -15,7 +15,7 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-connector-base</artifactId>
+            <artifactId>streamx-flink-connector-base_${scala.binary.version}</artifactId>
         </dependency>
 
         <dependency>
