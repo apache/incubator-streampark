@@ -56,8 +56,6 @@ class FlinkInterpreter(properties: Properties) extends Logger {
     })
   }
 
-  private[flink] def getExecutionEnvironment = this.interpreter.getExecutionEnvironment()
-
   private[flink] def getStreamExecutionEnvironment = this.interpreter.getStreamExecutionEnvironment()
 
   private[flink] def getDefaultParallelism: Int = this.interpreter.defaultParallelism

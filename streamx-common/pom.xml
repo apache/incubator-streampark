@@ -10,7 +10,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>streamx-common</artifactId>
+    <artifactId>streamx-common_${scala.binary.version}</artifactId>
     <name>StreamX : Common</name>
 
     <dependencies>

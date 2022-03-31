@@ -20,9 +20,9 @@
 package com.streamxhub.streamx.test.flink.java.datastream;
 
 import com.streamxhub.streamx.flink.core.StreamEnvConfig;
-import com.streamxhub.streamx.flink.core.java.function.SQLQueryFunction;
-import com.streamxhub.streamx.flink.core.java.function.SQLResultFunction;
-import com.streamxhub.streamx.flink.core.java.source.JdbcSource;
+import com.streamxhub.streamx.flink.connector.jdbc.java.function.SQLQueryFunction;
+import com.streamxhub.streamx.flink.connector.jdbc.java.function.SQLResultFunction;
+import com.streamxhub.streamx.flink.connector.jdbc.java.source.JdbcSource;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.test.flink.java.bean.OrderInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;

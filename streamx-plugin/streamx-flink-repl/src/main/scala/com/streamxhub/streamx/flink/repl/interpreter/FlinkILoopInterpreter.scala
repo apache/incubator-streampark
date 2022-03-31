@@ -81,12 +81,11 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
 
       override val importsWildcard: Boolean = selectors exists isWildcardImport
 
-      lazy val importableSymbolsWithRenames: List[(Symbol, Name)] = {
+      override lazy val individualSymbols: List[Symbol] = {
         val selectorRenameMap = individualSelectors.flatMap(x => x.name.bothNames zip x.rename.bothNames).toMap
         importableTargetMembers flatMap (m => selectorRenameMap.get(m.name) map (m -> _))
-      }
+      }.map(_._1)
 
-      override lazy val individualSymbols: List[Symbol] = importableSymbolsWithRenames map (_._1)
       override lazy val wildcardSymbols: List[Symbol] = if (importsWildcard) importableTargetMembers else Nil
 
     }
