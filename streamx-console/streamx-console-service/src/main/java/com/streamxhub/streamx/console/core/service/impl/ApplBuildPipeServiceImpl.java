@@ -314,7 +314,7 @@ public class ApplBuildPipeServiceImpl
      */
     private BuildPipeline createPipelineInstance(@Nonnull Application app) {
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
-        String flinkUserJar = retrieveFlinkUserJar(app);
+        String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
         ExecutionMode executionMode = app.getExecutionModeEnum();
         String mainClass = ConfigConst.STREAMX_FLINKSQL_CLIENT_CLASS();
         switch (executionMode) {
@@ -397,7 +397,7 @@ public class ApplBuildPipeServiceImpl
     /**
      * copy from {@link ApplicationServiceImpl#start(Application, boolean)}
      */
-    private String retrieveFlinkUserJar(Application app) {
+    private String retrieveFlinkUserJar(FlinkEnv flinkEnv, Application app) {
         switch (app.getDevelopmentMode()) {
             case CUSTOMCODE:
                 switch (app.getApplicationType()) {
@@ -410,7 +410,7 @@ public class ApplBuildPipeServiceImpl
                                 + app.getApplicationType());
                 }
             case FLINKSQL:
-                String sqlDistJar = commonService.getSqlClientJar();
+                String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
                 if (app.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);
