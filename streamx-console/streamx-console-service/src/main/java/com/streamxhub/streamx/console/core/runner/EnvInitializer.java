@@ -68,7 +68,7 @@ public class EnvInitializer implements ApplicationRunner {
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
 
     private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
-            "^streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            "^streamx-flink-shims_flink-(1.12|1.13|1.14)_(2.11|2.12)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final String MKDIR_LOG = "mkdir {} starting ...";
 
@@ -134,12 +134,28 @@ public class EnvInitializer implements ApplicationRunner {
         if (initialized.get(storageType) == null) {
             FsOperator fsOperator = FsOperator.of(storageType);
             Workspace workspace = Workspace.of(storageType);
+            String keepFile = ".gitkeep";
 
             if (storageType.equals(LFS)) {
                 String localDist = workspace.APP_LOCAL_DIST();
                 if (!fsOperator.exists(localDist)) {
                     log.info(MKDIR_LOG, localDist);
                     fsOperator.mkdirs(localDist);
+                }
+            }
+
+            String appClient = workspace.APP_CLIENT();
+            if (fsOperator.exists(appClient)) {
+                fsOperator.delete(appClient);
+            }
+            fsOperator.mkdirs(appClient);
+
+            File client = WebUtils.getAppClientDir();
+            for (File file : Objects.requireNonNull(client.listFiles())) {
+                String plugin = appClient.concat("/").concat(file.getName());
+                if (!fsOperator.exists(plugin) && !keepFile.equals(file.getName())) {
+                    log.info("load client:{} to {}", file.getName(), appClient);
+                    fsOperator.upload(file.getAbsolutePath(), appClient);
                 }
             }
 
@@ -171,23 +187,6 @@ public class EnvInitializer implements ApplicationRunner {
             if (!fsOperator.exists(appJars)) {
                 log.info(MKDIR_LOG, appJars);
                 fsOperator.mkdirs(appJars);
-            }
-
-            String keepFile = ".gitkeep";
-
-            String appClient = workspace.APP_CLIENT();
-            if (fsOperator.exists(appClient)) {
-                fsOperator.delete(appClient);
-            }
-            fsOperator.mkdirs(appClient);
-
-            File client = WebUtils.getAppClientDir();
-            for (File file : Objects.requireNonNull(client.listFiles())) {
-                String plugin = appClient.concat("/").concat(file.getName());
-                if (!fsOperator.exists(plugin) && !keepFile.equals(file.getName())) {
-                    log.info("load client:{} to {}", file.getName(), appClient);
-                    fsOperator.upload(file.getAbsolutePath(), appClient);
-                }
             }
 
             String appPlugins = workspace.APP_PLUGINS();

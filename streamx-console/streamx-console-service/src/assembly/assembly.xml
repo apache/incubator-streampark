@@ -12,7 +12,6 @@
             <outputDirectory>lib</outputDirectory>
             <excludes>
                 <exclude>com.streamxhub.streamx:streamx-jvm-profiler</exclude>
-                <exclude>com.streamxhub.streamx:streamx-flink-sqlclient</exclude>
                 <exclude>javax.servlet:servlet-api</exclude>
             </excludes>
         </dependencySet>
@@ -20,12 +19,6 @@
             <outputDirectory>plugins</outputDirectory>
             <includes>
                 <include>com.streamxhub.streamx:streamx-jvm-profiler</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>client</outputDirectory>
-            <includes>
-                <include>com.streamxhub.streamx:streamx-flink-sqlclient</include>
             </includes>
         </dependencySet>
     </dependencySets>
@@ -48,7 +41,7 @@
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/shims</directory>
-            <outputDirectory>lib</outputDirectory>
+            <outputDirectory>shims</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
@@ -62,7 +55,7 @@
             <fileMode>0777</fileMode>
         </fileSet>
         <fileSet>
-            <directory>src/assembly/client</directory>
+            <directory>${project.build.directory}/client</directory>
             <outputDirectory>client</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
