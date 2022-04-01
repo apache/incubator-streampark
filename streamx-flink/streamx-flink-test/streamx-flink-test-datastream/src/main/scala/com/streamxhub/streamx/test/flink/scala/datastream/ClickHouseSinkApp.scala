@@ -20,8 +20,8 @@
  */
 package com.streamxhub.streamx.test.flink.scala.datastream
 
+import com.streamxhub.streamx.flink.connector.clickhouse.scala.sink.ClickHouseSink
 import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
-import com.streamxhub.streamx.flink.core.scala.sink.ClickHouseSink
 import org.apache.flink.api.scala._
 
 object ClickHouseSinkApp extends FlinkStreaming {
@@ -45,23 +45,19 @@ object ClickHouseSinkApp extends FlinkStreaming {
 
     val source = context.addSource(new TestSource)
 
-    var index = 0
-    val httpDs = source.map(x => {
-      index += 1
-      s"""http://www.qq.com?id=$index"""
-    })
-    source.print()
-    //    HttpSink(context).getSink(httpDs).setParallelism(1)
-
     // 异步写入
     ClickHouseSink().sink[TestEntity](source)(x => {
       s"(${x.userId},${x.siteId})"
     }).setParallelism(1)
-
+    // 异步写入
+//    ClickHouseSink().sink[TestEntity](source).setParallelism(1)
     // jdbc同步写入写入
-    //    ClickHouseSink().syncSink[TestEntity](source)(x => {
-    //      s"(${x.userId},${x.siteId})"
-    //    }).setParallelism(1)
+//        ClickHouseSink().syncSink[TestEntity](source)(x => {
+//          s"(${x.userId},${x.siteId})"
+//        }).setParallelism(1)
+
+    // jdbc同步全字段写入
+//    ClickHouseSink().syncSink[TestEntity](source).setParallelism(1)
   }
 
 }

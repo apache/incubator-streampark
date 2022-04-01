@@ -20,15 +20,12 @@
  */
 package com.streamxhub.streamx.test.flink.scala.datastream
 
-import com.streamxhub.streamx.flink.connector.redis.scala.domain.RedisMapper
-import com.streamxhub.streamx.flink.connector.redis.scala.domain.RedisMapper.builderScalaRedisMapper
-import com.streamxhub.streamx.flink.connector.redis.scala.sink.RedisSink
+import com.streamxhub.streamx.flink.connector.http.scala.sink.HttpSink
 import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import org.apache.flink.api.scala._
-import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand}
 import org.json4s.DefaultFormats
 
-object FlinkRedisSinkApp extends FlinkStreaming {
+object FlinkHttpSinkApp extends FlinkStreaming {
 
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
@@ -42,11 +39,7 @@ object FlinkRedisSinkApp extends FlinkStreaming {
 
     // Redis sink..................
     //1)定义 RedisSink
-    val sink = RedisSink()
-    //2)写Mapper映射
-    val personMapper: RedisMapper[TestEntity] = builderScalaRedisMapper(RedisCommand.HSET, "flink_user", (x: TestEntity) => x.userId.toString, (x: TestEntity) => x.userId.toString)
-    sink.sink[TestEntity](source, personMapper, 60000000).setParallelism(1)
-
+    new HttpSink(context).get(source.map((x: TestEntity) => String.format("http://www.qq.com?id=%d", x.userId))) //2)写Mapper映射
   }
 
 }
