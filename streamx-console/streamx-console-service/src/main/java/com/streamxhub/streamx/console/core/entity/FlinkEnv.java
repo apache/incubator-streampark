@@ -71,6 +71,12 @@ public class FlinkEnv implements Serializable {
         this.flinkConf = DeflaterUtils.zipString(flinkConf);
     }
 
+    public void doSetVersion() {
+        assert this.flinkHome != null;
+        this.setVersion(this.getFlinkVersion().version());
+        this.setScalaVersion(this.getFlinkVersion().scalaVersion());
+    }
+
     @JsonIgnore
     public Map<String, String> convertFlinkYamlAsMap() {
         String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
