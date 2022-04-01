@@ -68,6 +68,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
         }
         version.setCreateTime(new Date());
         version.doSetFlinkConf();
+        version.doSetVersion();
         return save(version);
     }
 
@@ -82,6 +83,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
         if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
             flinkEnv.setFlinkHome(version.getFlinkHome());
             flinkEnv.doSetFlinkConf();
+            version.doSetVersion();
         }
         updateById(flinkEnv);
         FlinkTrackingTask.getFlinkEnvMap().put(flinkEnv.getId(), version);
