@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service;
 
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.system.entity.User;
 
 public interface CommonService {
@@ -33,5 +34,5 @@ public interface CommonService {
      * get sqlclient
      * @return
      */
-    String getSqlClientJar();
+    String getSqlClientJar(FlinkEnv flinkEnv);
 }

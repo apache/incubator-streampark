@@ -6,11 +6,11 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>streamx-common</artifactId>
+    <artifactId>streamx-common_${scala.binary.version}</artifactId>
     <name>StreamX : Common</name>
 
     <dependencies>

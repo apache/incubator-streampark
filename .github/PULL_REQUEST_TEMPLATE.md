@@ -1,10 +1,8 @@
-<!-- Thank you for contributing to StreamX 😃!
+<!--
 
-PR Title Format:
-1. pkg [, pkg2, pkg3]: what's changed
-2. *: what's changed
-
--->
+Thank you for contributing to StreamX! Please make sure that your code changes
+are covered with tests. And in case of new features or big changes
+remember to adjust the documentation.
 
 ### What problem does this PR solve?
 
@@ -16,7 +14,19 @@ Problem Summary:
 
 Proposal: [xxx](url) <!-- REMOVE this line if not applicable -->
 
-What's Changed:
 
-How it Works:
+Feel free to ping committers for the review!
 
+## Contribution Checklist
+
+  - Make sure that the pull request corresponds to a [GITHUB issue](https://github.com/streamxhub/streamx/issues).
+
+  - Name the pull request in the form "[Feature] [component] Title of the pull request", where *Feature* can be replaced by `Hotfix`, `Bug`, etc.
+
+  - Minor fixes should be named following this pattern: `[hotfix] [docs] Fix typo in README.md doc`.
+
+-->
+
+## Purpose of this pull request
+
+<!-- Describe the purpose of this pull request. For example: This pull request adds checkstyle plugin.-->

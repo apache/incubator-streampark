@@ -67,7 +67,6 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
             version.setIsDefault(true);
         }
         version.setCreateTime(new Date());
-        version.doSetVersion();
         version.doSetFlinkConf();
         return save(version);
     }
@@ -75,14 +74,13 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
     @Override
     public void update(FlinkEnv version) throws IOException {
         FlinkEnv flinkEnv = super.getById(version.getId());
-        if (flinkEnv == null){
+        if (flinkEnv == null) {
             throw new RuntimeException("flink home message lost, please check database status!");
         }
         flinkEnv.setDescription(version.getDescription());
         flinkEnv.setFlinkName(version.getFlinkName());
         if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
             flinkEnv.setFlinkHome(version.getFlinkHome());
-            flinkEnv.doSetVersion();
             flinkEnv.doSetFlinkConf();
         }
         updateById(flinkEnv);
