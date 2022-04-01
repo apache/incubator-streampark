@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.streamxhub.streamx</groupId>
+        <artifactId>streamx-flink-connector</artifactId>
+        <version>1.2.3</version>
+    </parent>
+
+    <artifactId>streamx-flink-connector-http_${scala.binary.version}</artifactId>
+
+    <name>StreamX : Flink Connector Http</name>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-connector-base_${scala.binary.version}</artifactId>
+        </dependency>
+
+        <!--clickhouse async need asynchttpclient -->
+        <dependency>
+            <groupId>org.asynchttpclient</groupId>
+            <artifactId>async-http-client</artifactId>
+        </dependency>
+
+    </dependencies>
+
+
+</project>

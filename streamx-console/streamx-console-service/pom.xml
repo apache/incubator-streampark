@@ -4,10 +4,10 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.8.RELEASE</version>
-        <relativePath/>
+        <groupId>com.streamxhub.streamx</groupId>
+        <artifactId>streamx-console</artifactId>
+        <version>1.2.3</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>streamx-console-service</artifactId>
     <version>1.2.3</version>
@@ -18,20 +18,25 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <mybatis-plus.version>3.1.0</mybatis-plus.version>
-        <hadoop.version>2.10.1</hadoop.version>
-        <hbase.version>2.1.10</hbase.version>
-        <scala.version>2.11.12</scala.version>
-        <scala.binary.version>2.11</scala.binary.version>
-        <junit.version>4.13.1</junit.version>
-
         <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
         <frontend.project.name>streamx-console-webapp</frontend.project.name>
-
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
         <guava.version>30.0-jre</guava.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>2.3.8.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
 
@@ -75,7 +80,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -97,6 +101,7 @@
             <version>1.4.7</version>
         </dependency>
 
+        <!--spring-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -148,7 +153,7 @@
         <dependency>
             <groupId>org.apache.shiro</groupId>
             <artifactId>shiro-spring</artifactId>
-            <version>1.8.0</version>
+            <version>1.9.0</version>
         </dependency>
 
         <!-- spring cache -->
@@ -370,19 +375,19 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-common</artifactId>
+            <artifactId>streamx-common_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims-base</artifactId>
+            <artifactId>streamx-flink-shims-base_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-repl</artifactId>
+            <artifactId>streamx-flink-repl_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
@@ -394,7 +399,7 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-submit-api</artifactId>
+            <artifactId>streamx-flink-submit-api_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -406,13 +411,13 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-kubernetes</artifactId>
+            <artifactId>streamx-flink-kubernetes_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-sqlclient</artifactId>
+            <artifactId>streamx-flink-sqlclient_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -557,28 +562,28 @@
                         <!-- flink 1.12 support-->
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
-                            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
+                            <artifactId>streamx-flink-shims_flink-1.12_${scala.binary.version}</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.13 support-->
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
-                            <artifactId>streamx-flink-shims_flink-1.13</artifactId>
+                            <artifactId>streamx-flink-shims_flink-1.13_${scala.binary.version}</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink 1.14 support-->
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
-                            <artifactId>streamx-flink-shims_flink-1.14</artifactId>
+                            <artifactId>streamx-flink-shims_flink-1.14_${scala.binary.version}</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>
                         <!-- flink-submit-core -->
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
-                            <artifactId>streamx-flink-submit-core</artifactId>
+                            <artifactId>streamx-flink-submit-core_${scala.binary.version}</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
                         </dependency>

@@ -37,12 +37,12 @@ import scala.collection.mutable.{ListBuffer, Map => MutableMap}
 object FlinkShimsProxy extends Logger {
 
   private[this] val INCLUDE_PATTERN: Pattern = Pattern.compile(
-    "(streamx|json4s|jackson)(.*).jar",
+    "(json4s|jackson)(.*).jar",
     Pattern.CASE_INSENSITIVE | Pattern.DOTALL
   )
 
   private[this] val SHIMS_PATTERN = Pattern.compile(
-    "streamx-flink-shims_flink-(1.12|1.13|1.14)-(.*).jar",
+    "streamx-flink-shims_flink-(1.12|1.13|1.14)_(2.11|2.12)-(.*).jar",
     Pattern.CASE_INSENSITIVE | Pattern.DOTALL
   )
 
@@ -53,6 +53,11 @@ object FlinkShimsProxy extends Logger {
       s"flink-(.*)-$flinkLargeVersion(.*).jar",
       Pattern.CASE_INSENSITIVE | Pattern.DOTALL
     )
+
+  private[this] def getStreamXLibPattern(scalaVersion: String): Pattern = Pattern.compile(
+    s"streamx-(.*)_$scalaVersion-(.*).jar",
+    Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+  )
 
   /**
    * 获取 shimsClassLoader 执行代码...
@@ -85,6 +90,7 @@ object FlinkShimsProxy extends Logger {
 
   private[this] def getFlinkShimsClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
     val majorVersion = flinkVersion.majorVersion
+    val scalaVersion = flinkVersion.scalaVersion
     logInfo(flinkVersion.toString)
 
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(s"${flinkVersion.fullVersion}", {
@@ -99,16 +105,24 @@ object FlinkShimsProxy extends Logger {
       val libPath = new File(s"$appHome/lib")
       require(libPath.exists())
 
+      val streamxMatcher = getStreamXLibPattern(scalaVersion)
+
       libPath.listFiles().foreach(jar => {
         try {
           val shimsMatcher = SHIMS_PATTERN.matcher(jar.getName)
           if (shimsMatcher.matches()) {
-            if (majorVersion != null && majorVersion.equals(shimsMatcher.group(1))) {
+            if (majorVersion == shimsMatcher.group(1) && scalaVersion == shimsMatcher.group(2)) {
               shimsUrls += jar.toURI.toURL
             }
-          } else if (INCLUDE_PATTERN.matcher(jar.getName).matches()) {
-            shimsUrls += jar.toURI.toURL
-            logInfo(s"include ${jar.getName}")
+          } else {
+            if (INCLUDE_PATTERN.matcher(jar.getName).matches()) {
+              shimsUrls += jar.toURI.toURL
+              logInfo(s"include jar lib: ${jar.getName}")
+            }
+            if (streamxMatcher.matcher(jar.getName).matches()) {
+              shimsUrls += jar.toURI.toURL
+              logInfo(s"include streamx lib: ${jar.getName}")
+            }
           }
         } catch {
           case e: Exception => e.printStackTrace()

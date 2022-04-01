@@ -71,15 +71,6 @@ public class FlinkEnv implements Serializable {
         this.flinkConf = DeflaterUtils.zipString(flinkConf);
     }
 
-    public void doSetVersion() {
-        assert this.flinkHome != null;
-        this.setVersion(this.getFlinkVersion().version());
-        this.setScalaVersion(this.getFlinkVersion().scalaVersion());
-        if (this.getScalaVersion().equals("2.12")) {
-            throw new UnsupportedOperationException("[StreamX] flink with scala version 2.12 is not supported, only supported scala version 2.11");
-        }
-    }
-
     @JsonIgnore
     public Map<String, String> convertFlinkYamlAsMap() {
         String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
