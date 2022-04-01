@@ -522,6 +522,7 @@
               title="Are you sure delete this job ?"
               cancel-text="No"
               ok-text="Yes"
+              v-permit="'app:delete'"
               @confirm="handleDelete(record)">
               <a-button
                 type="danger"
