@@ -19,24 +19,16 @@
 
 package com.streamxhub.streamx.flink.connector.influxdb.scala.sink
 
-import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.util.{ConfigUtils, Logger, Utils}
+import com.streamxhub.streamx.common.util.{ConfigUtils, Utils}
+import com.streamxhub.streamx.flink.connector.influxdb.scala.domian.InfluxEntity
+import com.streamxhub.streamx.flink.connector.influxdb.scala.internal.InfluxDBFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
-import org.apache.flink.api.common.io.RichOutputFormat
-import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.apache.flink.streaming.api.scala.DataStream
-import org.influxdb.dto.Point
-import org.influxdb.{InfluxDB, InfluxDBFactory}
 
 import java.util.Properties
-import java.util.concurrent.TimeUnit
 import scala.annotation.meta.param
-import scala.collection.JavaConversions._
-import scala.collection.Map
 
 object InfluxDBSink {
 
@@ -62,70 +54,4 @@ class InfluxDBSink(@(transient@param) ctx: StreamingContext,
     afterSink(sink, parallelism, name, uid)
   }
 
-}
-
-class InfluxDBFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]) extends RichSinkFunction[T] with Logger {
-
-  var influxDB: InfluxDB = _
-
-  override def open(parameters: Configuration): Unit = {
-    super.open(parameters)
-    val url = config.getOrElse(KEY_JDBC_URL, null)
-    require(url != null)
-    val username = config.getOrElse(KEY_JDBC_USER, null)
-    val password = config.getOrElse(KEY_JDBC_PASSWORD, null)
-    influxDB = (username, password, url) match {
-      case (null, _, u) => InfluxDBFactory.connect(u)
-      case _ => InfluxDBFactory.connect(url, username, password)
-    }
-    influxDB.enableBatch(2000, 100, TimeUnit.MILLISECONDS)
-  }
-
-  override def invoke(value: T): Unit = {
-    val point = Point.measurement(endpoint.measurement)
-      .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
-      .tag(endpoint.tagFun(value))
-      .fields(endpoint.fieldFun(value).asInstanceOf[Map[String, Object]])
-      .build()
-    influxDB.write(endpoint.database, endpoint.retentionPolicy, point)
-  }
-
-  override def close(): Unit = if (influxDB != null) {
-    influxDB.flush()
-    influxDB.close()
-  }
-
-}
-
-class InfluxDBOutputFormat[T: TypeInformation](implicit prop: Properties, endpoint: InfluxEntity[T]) extends RichOutputFormat[T] with Logger {
-
-  private val sinkFunction = new InfluxDBFunction[T](prop)
-
-  private var configuration: Configuration = _
-
-  override def configure(configuration: Configuration): Unit = this.configuration = configuration
-
-  override def open(taskNumber: Int, numTasks: Int): Unit = sinkFunction.open(this.configuration)
-
-  override def writeRecord(record: T): Unit = sinkFunction.invoke(record, null)
-
-  override def close(): Unit = sinkFunction.close()
-}
-
-
-/**
- *
- * @param database
- * @param measurement
- * @param retentionPolicy
- * @param tagFun
- * @param fieldFun
- * @tparam T
- */
-case class InfluxEntity[T](database: String, //指定database
-                           measurement: String, //指定measurement
-                           retentionPolicy: String, //失效策略
-                           tagFun: T => Map[String, String], //tags 函数
-                           fieldFun: T => Map[String, Any] //field 函数
-                          ) {
 }
