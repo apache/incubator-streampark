@@ -47,6 +47,7 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
   main:
+    allow-circular-references: true
     banner-mode: off
 
 management:
