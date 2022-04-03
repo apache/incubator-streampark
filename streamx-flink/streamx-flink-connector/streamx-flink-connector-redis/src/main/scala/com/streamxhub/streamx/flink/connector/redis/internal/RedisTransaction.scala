@@ -17,25 +17,18 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.function;
+package com.streamxhub.streamx.flink.connector.redis.internal
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.table.api.TableConfig;
+import com.streamxhub.streamx.common.util.Utils
+import com.streamxhub.streamx.flink.connector.redis.scala.domain.RedisMapper
 
-import java.io.Serializable;
+import scala.collection.mutable
 
-/**
- * @author benjobs
- */
-@FunctionalInterface
-public interface TableEnvConfigFunction extends Serializable {
-    /**
-     * 用于初始化TableEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
-     *
-     * @param tableConfig:   flink tableConfig
-     * @param parameterTool: parameterTool
-     */
-    void configuration(TableConfig tableConfig, ParameterTool parameterTool);
+case class RedisTransaction[T](
+                                transactionId: String = Utils.uuid(),
+                                mapper: mutable.MutableList[(RedisMapper[T], T, Int)] = mutable.MutableList.empty[(RedisMapper[T], T, Int)],
+                                var invoked: Boolean = false) extends Serializable {
+  def +(redisMapper: (RedisMapper[T], T, Int)): Unit = mapper += redisMapper
 
+  override def toString: String = s"(transactionId:$transactionId,size:${mapper.size},invoked:$invoked)"
 }
-

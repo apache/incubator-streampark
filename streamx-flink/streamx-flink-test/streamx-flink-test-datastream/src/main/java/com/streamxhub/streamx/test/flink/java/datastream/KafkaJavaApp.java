@@ -24,7 +24,7 @@ import com.streamxhub.streamx.flink.core.StreamEnvConfig;
 import com.streamxhub.streamx.flink.connector.kafka.java.sink.KafkaSink;
 import com.streamxhub.streamx.flink.connector.kafka.java.source.KafkaSource;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
-import com.streamxhub.streamx.flink.connector.kafka.scala.source.KafkaRecord;
+import com.streamxhub.streamx.flink.connector.kafka.source.KafkaRecord;
 import com.streamxhub.streamx.test.flink.java.bean.Behavior;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SerializationSchema;

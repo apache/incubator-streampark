@@ -19,9 +19,9 @@
 
 package com.streamxhub.streamx.test.flink.java.datastream;
 
-import com.streamxhub.streamx.flink.connector.doris.java.sink.DorisSink;
+import com.streamxhub.streamx.flink.connector.doris.sink.DorisJavaSink;
 import com.streamxhub.streamx.flink.connector.kafka.java.source.KafkaSource;
-import com.streamxhub.streamx.flink.connector.kafka.scala.source.KafkaRecord;
+import com.streamxhub.streamx.flink.connector.kafka.source.KafkaRecord;
 import com.streamxhub.streamx.flink.core.StreamEnvConfig;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -40,7 +40,7 @@ public class DorisJavaApp {
             .map((MapFunction<KafkaRecord<String>, String>) KafkaRecord::value)
             .returns(String.class);
 
-        new DorisSink<String>(context).sink(source);
+        new DorisJavaSink<String>(context).sink(source);
 
         context.start();
     }

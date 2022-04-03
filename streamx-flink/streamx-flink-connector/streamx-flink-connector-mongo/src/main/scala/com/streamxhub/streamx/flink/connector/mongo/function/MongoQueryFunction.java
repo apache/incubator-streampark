@@ -17,25 +17,25 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.function;
+package com.streamxhub.streamx.flink.connector.mongo.function;
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.table.api.TableConfig;
-
-import java.io.Serializable;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
 
 /**
  * @author benjobs
  */
 @FunctionalInterface
-public interface TableEnvConfigFunction extends Serializable {
+public interface MongoQueryFunction<T> {
+
     /**
-     * 用于初始化TableEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
+     * 返回一个查询条件
      *
-     * @param tableConfig:   flink tableConfig
-     * @param parameterTool: parameterTool
+     * @param last:      last one
+     * @param collection MongoCollection
+     * @return FindIterable
      */
-    void configuration(TableConfig tableConfig, ParameterTool parameterTool);
+    FindIterable<Document> query(T last, MongoCollection<Document> collection);
 
 }
-

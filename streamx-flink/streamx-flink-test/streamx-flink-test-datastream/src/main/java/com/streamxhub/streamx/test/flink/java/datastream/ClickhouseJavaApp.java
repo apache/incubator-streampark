@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.test.flink.java.datastream;
 
-import com.streamxhub.streamx.flink.connector.clickhouse.scala.sink.ClickHouseSink;
+import com.streamxhub.streamx.flink.connector.clickhouse.sink.ClickHouseSink;
 import com.streamxhub.streamx.flink.core.StreamEnvConfig;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.test.flink.scala.datastream.TestEntity;
