@@ -25,10 +25,11 @@ import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, RedisCommandDescription, RedisMapper => BahirRedisMapper}
 
 object RedisMapper {
-  def builderScalaRedisMapper[T](cmd: RedisCommand,
-                                 additionalKey: String,
-                                 scalaKeyFun: T => String,
-                                 scalaValueFun: T => String): RedisMapper[T] = {
+
+  def map[T](cmd: RedisCommand,
+             additionalKey: String,
+             scalaKeyFun: T => String,
+             scalaValueFun: T => String): RedisMapper[T] = {
     require(cmd != null, () => s"redis cmd  insert failoverTable must not null")
     require(additionalKey != null, () => s"redis additionalKey  insert failoverTable must not null")
     require(scalaKeyFun != null, () => s"redis scalaKeyFun  insert failoverTable must not null")
@@ -36,10 +37,10 @@ object RedisMapper {
     new RedisMapper[T](cmd, additionalKey, scalaKeyFun, scalaValueFun)
   }
 
-  def builderJavaRedisMapper[T](cmd: RedisCommand,
-                                additionalKey: String,
-                                javaKeyFun: TransformFunction[T],
-                                javaValueFun: TransformFunction[T]): RedisMapper[T] = {
+  def map[T](cmd: RedisCommand,
+             additionalKey: String,
+             javaKeyFun: TransformFunction[T],
+             javaValueFun: TransformFunction[T]): RedisMapper[T] = {
     require(cmd != null, () => s"redis cmd  insert failoverTable must not null")
     require(additionalKey != null, () => s"redis additionalKey  insert failoverTable must not null")
     require(javaKeyFun != null, () => s"redis javaKeyFun  insert failoverTable must not null")
