@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.redis.domain
+package com.streamxhub.streamx.flink.connector.redis.bean
 
 import com.streamxhub.streamx.common.util.Logger
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig

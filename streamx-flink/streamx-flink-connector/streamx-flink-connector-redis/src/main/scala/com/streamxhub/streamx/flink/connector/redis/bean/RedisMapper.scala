@@ -17,11 +17,11 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.redis.domain
+package com.streamxhub.streamx.flink.connector.redis.bean
 
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
-import com.streamxhub.streamx.flink.connector.function.PojoToStringFunction
+import com.streamxhub.streamx.flink.connector.function.SQLFromFunction
 import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, RedisCommandDescription, RedisMapper => BahirRedisMapper}
 
 object RedisMapper {
@@ -38,8 +38,8 @@ object RedisMapper {
 
   def builderJavaRedisMapper[T](cmd: RedisCommand,
                                 additionalKey: String,
-                                javaKeyFun: PojoToStringFunction[T],
-                                javaValueFun: PojoToStringFunction[T]): RedisMapper[T] = {
+                                javaKeyFun: SQLFromFunction[T],
+                                javaValueFun: SQLFromFunction[T]): RedisMapper[T] = {
     require(cmd != null, () => s"redis cmd  insert failoverTable must not null")
     require(additionalKey != null, () => s"redis additionalKey  insert failoverTable must not null")
     require(javaKeyFun != null, () => s"redis javaKeyFun  insert failoverTable must not null")
@@ -52,8 +52,8 @@ class RedisMapper[T](apiType: ApiType = ApiType.scala, cmd: RedisCommand, additi
 
   private[this] var scalaKeyFun: T => String = _
   private[this] var scalaValueFun: T => String = _
-  private[this] var javaKeyFun: PojoToStringFunction[T] = _
-  private[this] var javaValueFun: PojoToStringFunction[T] = _
+  private[this] var javaKeyFun: SQLFromFunction[T] = _
+  private[this] var javaValueFun: SQLFromFunction[T] = _
 
   //for scala
   def this() = {
@@ -73,8 +73,8 @@ class RedisMapper[T](apiType: ApiType = ApiType.scala, cmd: RedisCommand, additi
   //for scala
   def this(cmd: RedisCommand,
            additionalKey: String,
-           javaKeyFun: PojoToStringFunction[T],
-           javaValueFun: PojoToStringFunction[T]) = {
+           javaKeyFun: SQLFromFunction[T],
+           javaValueFun: SQLFromFunction[T]) = {
     this(ApiType.java, cmd, additionalKey)
     this.javaKeyFun = javaKeyFun
     this.javaValueFun = javaValueFun
@@ -84,12 +84,12 @@ class RedisMapper[T](apiType: ApiType = ApiType.scala, cmd: RedisCommand, additi
   override def getCommandDescription: RedisCommandDescription = new RedisCommandDescription(cmd, additionalKey)
 
   override def getKeyFromData(r: T): String = apiType match {
-    case ApiType.java => javaKeyFun.translateToString(r)
+    case ApiType.java => javaKeyFun.from(r)
     case ApiType.scala => scalaKeyFun(r)
   }
 
   override def getValueFromData(r: T): String = apiType match {
-    case ApiType.java => javaValueFun.translateToString(r)
+    case ApiType.java => javaValueFun.from(r)
     case ApiType.scala => scalaValueFun(r)
   }
 

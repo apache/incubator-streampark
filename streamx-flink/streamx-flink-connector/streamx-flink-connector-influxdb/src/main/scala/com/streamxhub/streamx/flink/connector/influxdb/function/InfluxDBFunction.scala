@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.connector.influxdb.function
 import com.streamxhub.streamx.common.conf.ConfigConst.{KEY_JDBC_PASSWORD, KEY_JDBC_URL, KEY_JDBC_USER}
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.connector.influxdb.domian.InfluxEntity
+import com.streamxhub.streamx.flink.connector.influxdb.bean.InfluxEntity
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.influxdb.dto.Point

@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.connector.influxdb.sink
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.connector.influxdb.domian.InfluxEntity
+import com.streamxhub.streamx.flink.connector.influxdb.bean.InfluxEntity
 import com.streamxhub.streamx.flink.connector.influxdb.function.InfluxDBFunction
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation

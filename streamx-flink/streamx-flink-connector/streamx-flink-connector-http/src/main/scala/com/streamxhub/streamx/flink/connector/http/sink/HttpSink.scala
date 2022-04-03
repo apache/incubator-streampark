@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.flink.connector.http.sink
 
-import com.streamxhub.streamx.flink.connector.http.conf.HttpConfigConst.HTTP_SINK_PREFIX
+import com.streamxhub.streamx.flink.connector.http.conf.HttpConfig.HTTP_SINK_PREFIX
 import com.streamxhub.streamx.flink.connector.http.function.HttpSinkFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext

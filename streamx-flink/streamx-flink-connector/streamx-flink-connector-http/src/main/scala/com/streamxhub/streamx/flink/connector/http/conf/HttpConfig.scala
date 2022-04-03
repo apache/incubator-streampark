@@ -17,15 +17,14 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.redis.conf
+package com.streamxhub.streamx.flink.connector.http.conf
 
-object RedisConfigConst {
+object HttpConfig {
 
+  /**
+   * about http
+   */
 
-  val REDIS_PREFIX = "redis.sink"
-
-  val REDIS_CONNECT_TYPE = "connectType"
-
-  val DEFAULT_REDIS_CONNECT_TYPE = "jedisPool"
+  val HTTP_SINK_PREFIX = "http.sink"
 
 }

@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.connector.influxdb.sink
 
 import com.streamxhub.streamx.common.util.{ConfigUtils, Utils}
-import com.streamxhub.streamx.flink.connector.influxdb.domian.InfluxEntity
+import com.streamxhub.streamx.flink.connector.influxdb.bean.InfluxEntity
 import com.streamxhub.streamx.flink.connector.influxdb.function.InfluxDBFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext

@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.influxdb.domian
+package com.streamxhub.streamx.flink.connector.influxdb.bean
 
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType

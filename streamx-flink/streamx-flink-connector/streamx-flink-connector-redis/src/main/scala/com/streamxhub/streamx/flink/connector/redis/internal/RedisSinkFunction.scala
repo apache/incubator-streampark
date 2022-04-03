@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.connector.redis.internal
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.connector.redis.scala.domain.{RedisContainer, RedisMapper}
+import com.streamxhub.streamx.flink.connector.redis.bean.{RedisContainer, RedisMapper}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
 import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisConfigBase

@@ -30,6 +30,7 @@
         <module>streamx-flink-connector-jdbc</module>
         <module>streamx-flink-connector-kafka</module>
         <module>streamx-flink-connector-mongo</module>
+        <module>streamx-flink-connector-redis</module>
     </modules>
 
     <dependencyManagement>
@@ -198,7 +199,6 @@
     </dependencies>
 
     <profiles>
-        <!-- default -->
         <profile>
             <id>streamx-flink-connector-2.11</id>
             <activation>
@@ -210,17 +210,6 @@
             <modules>
                 <!-- redis connector only support scale 2.11 -->
                 <module>streamx-flink-connector-redis</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>streamx-flink-connector-2.12</id>
-            <activation>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.12</value>
-                </property>
-            </activation>
-            <modules>
             </modules>
         </profile>
     </profiles>

@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.connector.redis.internal
 
 import com.streamxhub.streamx.common.util.Utils
-import com.streamxhub.streamx.flink.connector.redis.scala.domain.RedisMapper
+import com.streamxhub.streamx.flink.connector.redis.bean.RedisMapper
 
 import scala.collection.mutable
 
