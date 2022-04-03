@@ -17,11 +17,11 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.influxdb.sink
+package com.streamxhub.streamx.flink.connector.influx.sink
 
 import com.streamxhub.streamx.common.util.{ConfigUtils, Utils}
-import com.streamxhub.streamx.flink.connector.influxdb.bean.InfluxEntity
-import com.streamxhub.streamx.flink.connector.influxdb.function.InfluxFunction
+import com.streamxhub.streamx.flink.connector.influx.bean.InfluxEntity
+import com.streamxhub.streamx.flink.connector.influx.function.InfluxFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.streaming.api.datastream.DataStreamSink
@@ -30,21 +30,21 @@ import org.apache.flink.streaming.api.scala.DataStream
 import java.util.Properties
 import scala.annotation.meta.param
 
-object InfluxDBSink {
+object InfluxSink {
 
   def apply(@(transient@param)
             property: Properties = new Properties(),
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit ctx: StreamingContext): InfluxDBSink = new InfluxDBSink(ctx, property, parallelism, name, uid)
+            uid: String = null)(implicit ctx: StreamingContext): InfluxSink = new InfluxSink(ctx, property, parallelism, name, uid)
 
 }
 
-class InfluxDBSink(@(transient@param) ctx: StreamingContext,
-                   property: Properties = new Properties(),
-                   parallelism: Int = 0,
-                   name: String = null,
-                   uid: String = null) extends Sink {
+class InfluxSink(@(transient@param) ctx: StreamingContext,
+                 property: Properties = new Properties(),
+                 parallelism: Int = 0,
+                 name: String = null,
+                 uid: String = null) extends Sink {
 
   def sink[T](stream: DataStream[T], alias: String = "")(implicit entity: InfluxEntity[T]): DataStreamSink[T] = {
     val prop = ConfigUtils.getInfluxConfig(ctx.parameter.toMap)(alias)

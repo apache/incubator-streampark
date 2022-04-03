@@ -17,18 +17,18 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.influxdb.sink
+package com.streamxhub.streamx.flink.connector.influx.sink
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.connector.influxdb.bean.InfluxEntity
-import com.streamxhub.streamx.flink.connector.influxdb.function.InfluxFunction
+import com.streamxhub.streamx.flink.connector.influx.bean.InfluxEntity
+import com.streamxhub.streamx.flink.connector.influx.function.InfluxFunction
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 
 import java.util.Properties
 
-class InfluxDBOutputFormat[T: TypeInformation](implicit prop: Properties, endpoint: InfluxEntity[T]) extends RichOutputFormat[T] with Logger {
+class InfluxOutputFormat[T: TypeInformation](implicit prop: Properties, endpoint: InfluxEntity[T]) extends RichOutputFormat[T] with Logger {
 
   private val sinkFunction = new InfluxFunction[T](prop)
 

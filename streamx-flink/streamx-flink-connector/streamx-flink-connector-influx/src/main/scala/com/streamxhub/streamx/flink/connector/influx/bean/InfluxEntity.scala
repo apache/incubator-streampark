@@ -17,11 +17,11 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.influxdb.bean
+package com.streamxhub.streamx.flink.connector.influx.bean
 
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
-import com.streamxhub.streamx.flink.connector.influxdb.function.{InfluxFieldFunction, InfluxTagFunction}
+import com.streamxhub.streamx.flink.connector.influx.function.{InfluxFieldFunction, InfluxTagFunction}
 
 /**
  *

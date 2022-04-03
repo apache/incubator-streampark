@@ -17,12 +17,12 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.influxdb.function
+package com.streamxhub.streamx.flink.connector.influx.function
 
 import com.streamxhub.streamx.common.conf.ConfigConst.{KEY_JDBC_PASSWORD, KEY_JDBC_URL, KEY_JDBC_USER}
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.connector.influxdb.bean.InfluxEntity
+import com.streamxhub.streamx.flink.connector.influx.bean.InfluxEntity
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.influxdb.dto.Point
@@ -52,11 +52,11 @@ class InfluxFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]) 
 
   override def invoke(value: T): Unit = {
     val tag: JavaMap[String, String] = endpoint.apiType match {
-      case ApiType.java => endpoint.javaTagFun.translate(value)
+      case ApiType.java => endpoint.javaTagFun.transform(value)
       case ApiType.scala => endpoint.scalaTagFun(value)
     }
     val fields: JavaMap[String, Object] = endpoint.apiType match {
-      case ApiType.java => endpoint.javaFieldFun.translate(value)
+      case ApiType.java => endpoint.javaFieldFun.transform(value)
       case ApiType.scala => endpoint.scalaFieldFun(value)
     }
     val point = Point.measurement(endpoint.measurement)

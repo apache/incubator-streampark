@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.influxdb.function;
+package com.streamxhub.streamx.flink.connector.influx.function;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -26,5 +26,5 @@ import java.util.Map;
  * @author benjobs
  */
 public interface InfluxFieldFunction<T> extends Serializable {
-    Map<String, Object> translate(T value);
+    Map<String, Object> transform(T value);
 }
