@@ -206,7 +206,6 @@
                     <name>scala.binary.version</name>
                     <value>2.11</value>
                 </property>
-                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <!-- redis connector only support scale 2.11 -->
