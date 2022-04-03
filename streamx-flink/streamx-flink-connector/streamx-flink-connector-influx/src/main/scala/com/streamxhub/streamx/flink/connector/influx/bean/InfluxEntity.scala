@@ -47,6 +47,17 @@ case class InfluxEntity[T](apiType: ApiType = ApiType.scala,
   def this(database: String,
            measurement: String,
            retentionPolicy: String,
+           scalaTagFun: T => Map[String, String],
+           scalaFieldFun: T => Map[String, Object]) {
+    this(ApiType.scala, database, measurement, retentionPolicy)
+    this.scalaTagFun = scalaTagFun
+    this.scalaFieldFun = scalaFieldFun
+  }
+
+  //for java
+  def this(database: String,
+           measurement: String,
+           retentionPolicy: String,
            javaTagFun: InfluxTagFunction[T],
            javaFieldFun: InfluxFieldFunction[T]) {
     this(ApiType.java, database, measurement, retentionPolicy)
@@ -54,15 +65,5 @@ case class InfluxEntity[T](apiType: ApiType = ApiType.scala,
     this.javaFieldFun = javaFieldFun
   }
 
-  //for java
-  def this(database: String,
-           measurement: String,
-           retentionPolicy: String,
-           scalaTagFun: T => Map[String, String],
-           scalaFieldFun: T => Map[String, Object]) {
-    this(ApiType.scala, database, measurement, retentionPolicy)
-    this.scalaTagFun = scalaTagFun
-    this.scalaFieldFun = scalaFieldFun
-  }
 
 }
