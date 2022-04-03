@@ -197,6 +197,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                             log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
                             app.setLaunch(LaunchState.NEED_LAUNCH.get());
+                            app.setBuild(Boolean.TRUE);
                             this.applicationService.updateLaunch(app);
                         }));
                     } catch (Exception e) {

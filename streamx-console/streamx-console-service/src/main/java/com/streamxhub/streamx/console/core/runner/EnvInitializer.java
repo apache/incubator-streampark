@@ -68,7 +68,7 @@ public class EnvInitializer implements ApplicationRunner {
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
 
     private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
-            "^streamx-flink-shims_flink-(1.12|1.13|1.14)_(2.11|2.12)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        "^streamx-flink-shims_flink-(1.12|1.13|1.14)_(2.11|2.12)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final String MKDIR_LOG = "mkdir {} starting ...";
 
@@ -77,9 +77,9 @@ public class EnvInitializer implements ApplicationRunner {
         String appHome = WebUtils.getAppHome();
         if (appHome == null) {
             throw new ExceptionInInitializerError("[StreamX] System initialization check failed," +
-                    " The system initialization check failed. If started local for development and debugging," +
-                    " please ensure the -Dapp.home parameter is clearly specified," +
-                    " more detail: http://www.streamxhub.com/docs/user-guide/development");
+                " The system initialization check failed. If started local for development and debugging," +
+                " please ensure the -Dapp.home parameter is clearly specified," +
+                " more detail: http://www.streamxhub.com/docs/user-guide/development");
         }
 
         // init ConfigHub
@@ -94,14 +94,14 @@ public class EnvInitializer implements ApplicationRunner {
     private void initConfigHub(Environment springEnv) {
         // override config from spring application.yaml
         ConfigHub
-                .keys()
-                .stream()
-                .filter(springEnv::containsProperty)
-                .forEach(key -> {
-                    ConfigOption config = ConfigHub.getConfig(key);
-                    assert config != null;
-                    ConfigHub.set(config, springEnv.getProperty(key, config.classType()));
-                });
+            .keys()
+            .stream()
+            .filter(springEnv::containsProperty)
+            .forEach(key -> {
+                ConfigOption config = ConfigHub.getConfig(key);
+                assert config != null;
+                ConfigHub.set(config, springEnv.getProperty(key, config.classType()));
+            });
 
         String mvnRepository = settingService.getMavenRepository();
         if (StringUtils.isNotEmpty(mvnRepository)) {
@@ -134,28 +134,12 @@ public class EnvInitializer implements ApplicationRunner {
         if (initialized.get(storageType) == null) {
             FsOperator fsOperator = FsOperator.of(storageType);
             Workspace workspace = Workspace.of(storageType);
-            String keepFile = ".gitkeep";
 
             if (storageType.equals(LFS)) {
                 String localDist = workspace.APP_LOCAL_DIST();
                 if (!fsOperator.exists(localDist)) {
                     log.info(MKDIR_LOG, localDist);
                     fsOperator.mkdirs(localDist);
-                }
-            }
-
-            String appClient = workspace.APP_CLIENT();
-            if (fsOperator.exists(appClient)) {
-                fsOperator.delete(appClient);
-            }
-            fsOperator.mkdirs(appClient);
-
-            File client = WebUtils.getAppClientDir();
-            for (File file : Objects.requireNonNull(client.listFiles())) {
-                String plugin = appClient.concat("/").concat(file.getName());
-                if (!fsOperator.exists(plugin) && !keepFile.equals(file.getName())) {
-                    log.info("load client:{} to {}", file.getName(), appClient);
-                    fsOperator.upload(file.getAbsolutePath(), appClient);
                 }
             }
 
@@ -187,6 +171,23 @@ public class EnvInitializer implements ApplicationRunner {
             if (!fsOperator.exists(appJars)) {
                 log.info(MKDIR_LOG, appJars);
                 fsOperator.mkdirs(appJars);
+            }
+
+            String keepFile = ".gitkeep";
+
+            String appClient = workspace.APP_CLIENT();
+            if (fsOperator.exists(appClient)) {
+                fsOperator.delete(appClient);
+            }
+            fsOperator.mkdirs(appClient);
+
+            File client = WebUtils.getAppClientDir();
+            for (File file : Objects.requireNonNull(client.listFiles())) {
+                String plugin = appClient.concat("/").concat(file.getName());
+                if (!fsOperator.exists(plugin) && !keepFile.equals(file.getName())) {
+                    log.info("load client:{} to {}", file.getName(), appClient);
+                    fsOperator.upload(file.getAbsolutePath(), appClient);
+                }
             }
 
             String appPlugins = workspace.APP_PLUGINS();
