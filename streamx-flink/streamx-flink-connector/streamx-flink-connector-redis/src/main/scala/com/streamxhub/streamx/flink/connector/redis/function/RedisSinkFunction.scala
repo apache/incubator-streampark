@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.redis.internal
+package com.streamxhub.streamx.flink.connector.redis.function
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.connector.redis.bean.{RedisContainer, RedisMapper}

@@ -33,10 +33,9 @@ import java.util.{Properties, Map => JavaMap}
 import scala.collection.JavaConversions._;
 
 
-class InfluxDBFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]) extends RichSinkFunction[T] with Logger {
+class InfluxFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]) extends RichSinkFunction[T] with Logger {
 
   var influxDB: InfluxDB = _
-
 
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
@@ -53,11 +52,11 @@ class InfluxDBFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]
 
   override def invoke(value: T): Unit = {
     val tag: JavaMap[String, String] = endpoint.apiType match {
-      case ApiType.java => endpoint.javaTagFun.translateToMap(value)
+      case ApiType.java => endpoint.javaTagFun.translate(value)
       case ApiType.scala => endpoint.scalaTagFun(value)
     }
     val fields: JavaMap[String, Object] = endpoint.apiType match {
-      case ApiType.java => endpoint.javaFieldFun.translateToMap(value)
+      case ApiType.java => endpoint.javaFieldFun.translate(value)
       case ApiType.scala => endpoint.scalaFieldFun(value)
     }
     val point = Point.measurement(endpoint.measurement)

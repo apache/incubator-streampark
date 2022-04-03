@@ -25,6 +25,6 @@ import java.util.Map;
 /**
  * @author benjobs
  */
-public interface InfluxFieldFun<T> extends Serializable {
-    Map<String, Object> translateToMap(T value);
+public interface InfluxTagFunction<T> extends Serializable {
+    Map<String, String> translate(T value);
 }

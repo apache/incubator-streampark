@@ -17,18 +17,14 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.redis.internal
+package com.streamxhub.streamx.flink.connector.influxdb.function;
 
-import com.streamxhub.streamx.common.util.Utils
-import com.streamxhub.streamx.flink.connector.redis.bean.RedisMapper
+import java.io.Serializable;
+import java.util.Map;
 
-import scala.collection.mutable
-
-case class RedisTransaction[T](
-                                transactionId: String = Utils.uuid(),
-                                mapper: mutable.MutableList[(RedisMapper[T], T, Int)] = mutable.MutableList.empty[(RedisMapper[T], T, Int)],
-                                var invoked: Boolean = false) extends Serializable {
-  def +(redisMapper: (RedisMapper[T], T, Int)): Unit = mapper += redisMapper
-
-  override def toString: String = s"(transactionId:$transactionId,size:${mapper.size},invoked:$invoked)"
+/**
+ * @author benjobs
+ */
+public interface InfluxFieldFunction<T> extends Serializable {
+    Map<String, Object> translate(T value);
 }

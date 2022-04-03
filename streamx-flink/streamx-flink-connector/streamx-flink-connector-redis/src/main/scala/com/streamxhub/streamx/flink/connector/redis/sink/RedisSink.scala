@@ -21,16 +21,15 @@ package com.streamxhub.streamx.flink.connector.redis.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{ConfigUtils, Utils}
-import com.streamxhub.streamx.flink.connector.redis.conf.RedisConfig._
 import com.streamxhub.streamx.flink.connector.redis.bean.RedisMapper
-import com.streamxhub.streamx.flink.connector.redis.internal.{Redis2PCSinkFunction, RedisSinkFunction}
+import com.streamxhub.streamx.flink.connector.redis.conf.RedisConfig._
+import com.streamxhub.streamx.flink.connector.redis.function.{Redis2PCSinkFunction, RedisSinkFunction}
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.streaming.api.CheckpointingMode
-import org.apache.flink.streaming.api.datastream.DataStreamSink
+import org.apache.flink.streaming.api.datastream.{DataStreamSink, DataStream => JavaDataStream}
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig, FlinkJedisSentinelConfig}
-import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream}
 
 import java.lang.reflect.Field
 import java.util

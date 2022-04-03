@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.connector.influxdb.sink
 
 import com.streamxhub.streamx.common.util.{ConfigUtils, Utils}
 import com.streamxhub.streamx.flink.connector.influxdb.bean.InfluxEntity
-import com.streamxhub.streamx.flink.connector.influxdb.function.InfluxDBFunction
+import com.streamxhub.streamx.flink.connector.influxdb.function.InfluxFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.streaming.api.datastream.DataStreamSink
@@ -49,7 +49,7 @@ class InfluxDBSink(@(transient@param) ctx: StreamingContext,
   def sink[T](stream: DataStream[T], alias: String = "")(implicit entity: InfluxEntity[T]): DataStreamSink[T] = {
     val prop = ConfigUtils.getInfluxConfig(ctx.parameter.toMap)(alias)
     Utils.copyProperties(property, prop)
-    val sinkFun = new InfluxDBFunction[T](prop)
+    val sinkFun = new InfluxFunction[T](prop)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }

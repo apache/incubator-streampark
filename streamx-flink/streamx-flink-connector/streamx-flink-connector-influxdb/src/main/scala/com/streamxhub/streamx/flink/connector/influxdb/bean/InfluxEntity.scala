@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.connector.influxdb.bean
 
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
-import com.streamxhub.streamx.flink.connector.influxdb.function.{InfluxFieldFun, InfluxTagFun}
+import com.streamxhub.streamx.flink.connector.influxdb.function.{InfluxFieldFunction, InfluxTagFunction}
 
 /**
  *
@@ -40,15 +40,15 @@ case class InfluxEntity[T](apiType: ApiType = ApiType.scala,
   var scalaTagFun: T => Map[String, String] = _
   var scalaFieldFun: T => Map[String, Object] = _
 
-  var javaTagFun: InfluxTagFun[T] = _
-  var javaFieldFun: InfluxFieldFun[T] = _
+  var javaTagFun: InfluxTagFunction[T] = _
+  var javaFieldFun: InfluxFieldFunction[T] = _
 
   //for scala
   def this(database: String,
            measurement: String,
            retentionPolicy: String,
-           javaTagFun: InfluxTagFun[T],
-           javaFieldFun: InfluxFieldFun[T]) {
+           javaTagFun: InfluxTagFunction[T],
+           javaFieldFun: InfluxFieldFunction[T]) {
     this(ApiType.java, database, measurement, retentionPolicy)
     this.javaTagFun = javaTagFun
     this.javaFieldFun = javaFieldFun
