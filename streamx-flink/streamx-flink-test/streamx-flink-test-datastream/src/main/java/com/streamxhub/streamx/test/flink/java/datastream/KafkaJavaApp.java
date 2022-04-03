@@ -20,11 +20,11 @@
 package com.streamxhub.streamx.test.flink.java.datastream;
 
 import com.streamxhub.streamx.common.util.JsonUtils;
-import com.streamxhub.streamx.flink.core.StreamEnvConfig;
-import com.streamxhub.streamx.flink.connector.kafka.java.sink.KafkaSink;
-import com.streamxhub.streamx.flink.connector.kafka.java.source.KafkaSource;
-import com.streamxhub.streamx.flink.core.scala.StreamingContext;
+import com.streamxhub.streamx.flink.connector.kafka.sink.KafkaJavaSink;
+import com.streamxhub.streamx.flink.connector.kafka.source.KafkaJavaSource;
 import com.streamxhub.streamx.flink.connector.kafka.source.KafkaRecord;
+import com.streamxhub.streamx.flink.core.StreamEnvConfig;
+import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.test.flink.java.bean.Behavior;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SerializationSchema;
@@ -45,15 +45,15 @@ public class KafkaJavaApp {
         StreamingContext context = new StreamingContext(javaConfig);
 
         //1) 从 kafka 中读取数据
-        DataStream<Behavior> source = new KafkaSource<String>(context)
-                .getDataStream()
-                .map((MapFunction<KafkaRecord<String>, Behavior>) value -> JsonUtils.read(value, Behavior.class));
+        DataStream<Behavior> source = new KafkaJavaSource<String>(context)
+            .getDataStream()
+            .map((MapFunction<KafkaRecord<String>, Behavior>) value -> JsonUtils.read(value, Behavior.class));
 
 
         // 2) 将数据写入其他 kafka 主题
-        new KafkaSink<Behavior>(context)
-                .serializer((SerializationSchema<Behavior>) element -> JsonUtils.write(element).getBytes())
-                .sink(source);
+        new KafkaJavaSink<Behavior>(context)
+            .serializer((SerializationSchema<Behavior>) element -> JsonUtils.write(element).getBytes())
+            .sink(source);
 
         context.start();
     }

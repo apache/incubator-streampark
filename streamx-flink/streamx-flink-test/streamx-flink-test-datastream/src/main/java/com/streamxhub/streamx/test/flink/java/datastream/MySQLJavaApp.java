@@ -20,9 +20,6 @@
 package com.streamxhub.streamx.test.flink.java.datastream;
 
 import com.streamxhub.streamx.flink.core.StreamEnvConfig;
-import com.streamxhub.streamx.flink.connector.jdbc.java.function.SQLQueryFunction;
-import com.streamxhub.streamx.flink.connector.jdbc.java.function.SQLResultFunction;
-import com.streamxhub.streamx.flink.connector.jdbc.java.source.JdbcSource;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.test.flink.java.bean.OrderInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -40,7 +37,7 @@ public class MySQLJavaApp {
         StreamingContext context = new StreamingContext(envConfig);
 
         //读取MySQL数据源
-        new JdbcSource<OrderInfo>(context)
+        new JdbcJavaSource<OrderInfo>(context)
             .getDataStream(
                 (SQLQueryFunction<OrderInfo>) lastOne -> {
                     //5秒抽取一次

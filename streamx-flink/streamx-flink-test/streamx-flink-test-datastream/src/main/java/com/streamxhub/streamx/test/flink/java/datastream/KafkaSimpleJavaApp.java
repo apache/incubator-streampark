@@ -19,10 +19,10 @@
 
 package com.streamxhub.streamx.test.flink.java.datastream;
 
-import com.streamxhub.streamx.flink.core.StreamEnvConfig;
-import com.streamxhub.streamx.flink.connector.kafka.java.source.KafkaSource;
-import com.streamxhub.streamx.flink.core.scala.StreamingContext;
+import com.streamxhub.streamx.flink.connector.kafka.source.KafkaJavaSource;
 import com.streamxhub.streamx.flink.connector.kafka.source.KafkaRecord;
+import com.streamxhub.streamx.flink.core.StreamEnvConfig;
+import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 
@@ -37,7 +37,7 @@ public class KafkaSimpleJavaApp {
 
         StreamingContext context = new StreamingContext(envConfig);
 
-        DataStream<String> source = new KafkaSource<String>(context)
+        DataStream<String> source = new KafkaJavaSource<String>(context)
             .getDataStream()
             .map((MapFunction<KafkaRecord<String>, String>) KafkaRecord::value);
 

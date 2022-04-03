@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.test.flink.java.datastream;
 
 import com.streamxhub.streamx.flink.connector.doris.sink.DorisJavaSink;
-import com.streamxhub.streamx.flink.connector.kafka.java.source.KafkaSource;
+import com.streamxhub.streamx.flink.connector.kafka.source.KafkaJavaSource;
 import com.streamxhub.streamx.flink.connector.kafka.source.KafkaRecord;
 import com.streamxhub.streamx.flink.core.StreamEnvConfig;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
@@ -35,7 +35,7 @@ public class DorisJavaApp {
     public static void main(String[] args) {
         StreamEnvConfig envConfig = new StreamEnvConfig(args, null);
         StreamingContext context = new StreamingContext(envConfig);
-        DataStream<String> source = new KafkaSource<String>(context)
+        DataStream<String> source = new KafkaJavaSource<String>(context)
             .getDataStream()
             .map((MapFunction<KafkaRecord<String>, String>) KafkaRecord::value)
             .returns(String.class);

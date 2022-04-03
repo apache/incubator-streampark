@@ -24,7 +24,7 @@ import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.{FlinkUtils, Logger, Utils}
 import com.streamxhub.streamx.flink.connector.function.RunningFunction
 import com.streamxhub.streamx.flink.connector.hbase.function.{HBaseQueryFunction, HBaseResultFunction}
-import com.streamxhub.streamx.flink.connector.hbase.internal.HBaseQuery
+import com.streamxhub.streamx.flink.connector.hbase.bean.HBaseQuery
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation

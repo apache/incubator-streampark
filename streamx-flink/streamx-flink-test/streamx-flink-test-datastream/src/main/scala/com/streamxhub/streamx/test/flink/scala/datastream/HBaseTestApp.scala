@@ -21,6 +21,8 @@
 package com.streamxhub.streamx.test.flink.scala.datastream
 
 import com.streamxhub.streamx.common.util.ConfigUtils
+import com.streamxhub.streamx.flink.connector.hbase.bean.HBaseQuery
+import com.streamxhub.streamx.flink.connector.hbase.request.HBaseRequest
 import com.streamxhub.streamx.flink.core.java.wrapper.HBaseQuery
 import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import com.streamxhub.streamx.flink.core.scala.request.HBaseRequest

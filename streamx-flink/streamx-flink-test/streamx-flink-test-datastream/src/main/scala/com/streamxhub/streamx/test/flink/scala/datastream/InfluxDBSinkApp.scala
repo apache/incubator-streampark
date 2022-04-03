@@ -20,8 +20,9 @@
  */
 package com.streamxhub.streamx.test.flink.scala.datastream
 
+import com.streamxhub.streamx.flink.connector.influxdb.domian.InfluxEntity
+import com.streamxhub.streamx.flink.connector.influxdb.sink.InfluxDBSink
 import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
-import com.streamxhub.streamx.flink.core.scala.sink.{InfluxDBSink, InfluxEntity}
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala._
 

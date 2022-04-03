@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.hbase.internal;
+package com.streamxhub.streamx.flink.connector.hbase.bean;
 
 import com.streamxhub.streamx.common.util.HBaseClient;
 import org.apache.hadoop.hbase.client.Get;

@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.flink.connector.hbase.function;
 
-import com.streamxhub.streamx.flink.connector.hbase.internal.HBaseQuery;
+import com.streamxhub.streamx.flink.connector.hbase.bean.HBaseQuery;
 
 import java.io.Serializable;
 

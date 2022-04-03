@@ -23,7 +23,6 @@ package com.streamxhub.streamx.test.flink.scala.datastream
 import com.mongodb.BasicDBObject
 import com.streamxhub.streamx.common.util.{DateUtils, JsonUtils}
 import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
-import com.streamxhub.streamx.flink.core.scala.source.MongoSource
 import org.apache.flink.api.scala.createTypeInformation
 
 import scala.collection.JavaConversions.asScalaIterator

@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.connector.hbase.request
 
 import com.streamxhub.streamx.common.util.{Logger, Utils}
-import com.streamxhub.streamx.flink.connector.hbase.internal.HBaseQuery
+import com.streamxhub.streamx.flink.connector.hbase.bean.HBaseQuery
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.scala._
