@@ -17,25 +17,23 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.function;
+package com.streamxhub.streamx.flink.connector.clickhouse.conf
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.table.api.TableConfig;
+object ClickHouseConfigConst {
 
-import java.io.Serializable;
+  /**
+   * about clickhouse
+   */
+  val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"
 
-/**
- * @author benjobs
- */
-@FunctionalInterface
-public interface TableEnvConfigFunction extends Serializable {
-    /**
-     * 用于初始化TableEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
-     *
-     * @param tableConfig:   flink tableConfig
-     * @param parameterTool: parameterTool
-     */
-    void configuration(TableConfig tableConfig, ParameterTool parameterTool);
+  val CLICKHOUSE_HOSTS = "hosts"
+
+  val CLICKHOUSE_USER = "user"
+
+  val CLICKHOUSE_PASSWORD = "password"
+
+  val CLICKHOUSE_TARGET_TABLE = "targetTable"
+
+  val SIGN_COMMA = ","
 
 }
-

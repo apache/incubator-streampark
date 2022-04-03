@@ -19,23 +19,19 @@
 
 package com.streamxhub.streamx.flink.connector.function;
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.table.api.TableConfig;
-
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author benjobs
  */
 @FunctionalInterface
-public interface TableEnvConfigFunction extends Serializable {
+public interface SQLResultFunction<T> extends Serializable {
     /**
-     * 用于初始化TableEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
+     * 将查下结果以Map的方式返回,用户去实现转成对象.
      *
-     * @param tableConfig:   flink tableConfig
-     * @param parameterTool: parameterTool
+     * @param map: sqlQuery result
+     * @return Iterable: Iterable
      */
-    void configuration(TableConfig tableConfig, ParameterTool parameterTool);
-
+    Iterable<T> result(Iterable<Map<String, ?>> map);
 }
-
