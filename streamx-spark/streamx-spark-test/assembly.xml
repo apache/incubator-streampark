@@ -16,7 +16,7 @@
                 <include>org.apache.zookeeper:zookeeper</include>
                 <include>org.yaml:snakeyaml</include>
                 <include>org.apache.spark:spark-streaming-kafka-0-10_2.11</include>
-                <include>org.scalaj:scalaj-http_2.11</include>
+                <include>org.scalaj:scalaj-http_${scala.binary.version}</include>
                 <include>redis.clients:jedis</include>
                 <include>org.apache.commons:commons-pool2</include>
                 <include>com.solarmosaic.client:mail-client_2.11</include>

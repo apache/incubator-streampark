@@ -22,11 +22,13 @@ package com.streamxhub.streamx.flink.connector.function;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.table.api.TableConfig;
 
+import java.io.Serializable;
+
 /**
  * @author benjobs
  */
 @FunctionalInterface
-public interface TableEnvConfigFunction {
+public interface TableEnvConfigFunction extends Serializable {
     /**
      * 用于初始化TableEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
      *
