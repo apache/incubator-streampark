@@ -7,16 +7,11 @@
         <version>1.2.3</version>
     </parent>
 
-    <artifactId>streamx-flink-connector-redis_${scala.binary.version}</artifactId>
+    <artifactId>streamx-flink-connector-influx_${scala.binary.version}</artifactId>
 
-    <name>StreamX : Flink Connector Redis</name>
+    <name>StreamX : Flink Connector Influxdb</name>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
@@ -24,9 +19,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.bahir</groupId>
-            <artifactId>flink-connector-redis_2.11</artifactId>
-            <version>1.0</version>
+            <groupId>org.influxdb</groupId>
+            <artifactId>influxdb-java</artifactId>
         </dependency>
 
     </dependencies>

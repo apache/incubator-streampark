@@ -17,25 +17,21 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.function;
+package com.streamxhub.streamx.flink.connector.clickhouse.util
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.table.api.TableConfig;
+object ClickhouseConvertUtils {
 
-import java.io.Serializable;
-
-/**
- * @author benjobs
- */
-@FunctionalInterface
-public interface TableEnvConfigFunction extends Serializable {
-    /**
-     * 用于初始化TableEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
-     *
-     * @param tableConfig:   flink tableConfig
-     * @param parameterTool: parameterTool
-     */
-    void configuration(TableConfig tableConfig, ParameterTool parameterTool);
-
+  def convert[T](value: T): String = {
+    val buffer = new StringBuilder("(")
+    val fields = value.getClass.getDeclaredFields
+    fields.foreach(f => {
+      f.setAccessible(true)
+      val v = f.get(value)
+      f.getType.getSimpleName match {
+        case "String" => buffer.append(s""""$v",""".stripMargin)
+        case _ => buffer.append(s"""$v,""".stripMargin)
+      }
+    })
+    buffer.toString().replaceFirst(",$", ")")
+  }
 }
-
