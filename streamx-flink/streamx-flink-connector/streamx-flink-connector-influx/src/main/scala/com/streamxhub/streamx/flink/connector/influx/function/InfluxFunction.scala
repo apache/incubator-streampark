@@ -25,6 +25,7 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.connector.influx.bean.InfluxEntity
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
+import org.apache.flink.streaming.api.functions.sink.SinkFunction.Context
 import org.influxdb.dto.Point
 import org.influxdb.{InfluxDB, InfluxDBFactory}
 
@@ -50,7 +51,7 @@ class InfluxFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]) 
     influxDB.enableBatch(2000, 100, TimeUnit.MILLISECONDS)
   }
 
-  override def invoke(value: T): Unit = {
+  override def invoke(value: T, context: Context): Unit = {
     val tag: JavaMap[String, String] = endpoint.apiType match {
       case ApiType.java => endpoint.javaTagFun.transform(value)
       case ApiType.scala => endpoint.scalaTagFun(value)
