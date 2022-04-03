@@ -26,9 +26,9 @@ import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfig
 import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfigConst.CLICKHOUSE_TARGET_TABLE
 import com.streamxhub.streamx.flink.connector.clickhouse.internal
 import com.streamxhub.streamx.flink.connector.clickhouse.internal.ClickHouseSinkWriter
-import com.streamxhub.streamx.flink.connector.clickhouse.util.PoJoConvertUtils.parsePojoToInsertValue
+import com.streamxhub.streamx.flink.connector.clickhouse.util.ClickhouseConvertUtils.convert
 import com.streamxhub.streamx.flink.connector.failover.{FailoverChecker, SinkBuffer}
-import com.streamxhub.streamx.flink.connector.function.SQLFromFunction
+import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 
@@ -43,7 +43,7 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
   }
 
   private[this] var scalaSqlFunc: T => String = _
-  private[this] var javaSqlFunc: SQLFromFunction[T] = _
+  private[this] var javaSqlFunc: TransformFunction[T] = _
 
 
   //for Scala
@@ -56,7 +56,7 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
 
   //for JAVA
   def this(properties: Properties,
-           javaSqlFunc: SQLFromFunction[T]) = {
+           javaSqlFunc: TransformFunction[T]) = {
 
     this(ApiType.java, properties)
     this.javaSqlFunc = javaSqlFunc
@@ -89,9 +89,9 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
   override def invoke(value: T): Unit = {
     val csv = (javaSqlFunc, scalaSqlFunc) match {
       case (null, null) =>
-        parsePojoToInsertValue[T](value)
+        convert[T](value)
       case _ => apiType match {
-        case ApiType.java => javaSqlFunc.from(value)
+        case ApiType.java => javaSqlFunc.transform(value)
         case ApiType.scala => scalaSqlFunc(value)
       }
     }

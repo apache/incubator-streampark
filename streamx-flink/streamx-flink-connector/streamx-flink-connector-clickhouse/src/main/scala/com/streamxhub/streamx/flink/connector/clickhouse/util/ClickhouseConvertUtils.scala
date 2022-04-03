@@ -19,9 +19,9 @@
 
 package com.streamxhub.streamx.flink.connector.clickhouse.util
 
-object PoJoConvertUtils {
+object ClickhouseConvertUtils {
 
-  def parsePojoToInsertValue[T](value: T): String = {
+  def convert[T](value: T): String = {
     val buffer = new StringBuilder("(")
     val fields = value.getClass.getDeclaredFields
     fields.foreach(f => {

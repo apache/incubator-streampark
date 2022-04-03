@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.connector.redis.bean
 
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
-import com.streamxhub.streamx.flink.connector.function.SQLFromFunction
+import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, RedisCommandDescription, RedisMapper => BahirRedisMapper}
 
 object RedisMapper {
@@ -38,8 +38,8 @@ object RedisMapper {
 
   def builderJavaRedisMapper[T](cmd: RedisCommand,
                                 additionalKey: String,
-                                javaKeyFun: SQLFromFunction[T],
-                                javaValueFun: SQLFromFunction[T]): RedisMapper[T] = {
+                                javaKeyFun: TransformFunction[T],
+                                javaValueFun: TransformFunction[T]): RedisMapper[T] = {
     require(cmd != null, () => s"redis cmd  insert failoverTable must not null")
     require(additionalKey != null, () => s"redis additionalKey  insert failoverTable must not null")
     require(javaKeyFun != null, () => s"redis javaKeyFun  insert failoverTable must not null")
@@ -52,8 +52,8 @@ class RedisMapper[T](apiType: ApiType = ApiType.scala, cmd: RedisCommand, additi
 
   private[this] var scalaKeyFun: T => String = _
   private[this] var scalaValueFun: T => String = _
-  private[this] var javaKeyFun: SQLFromFunction[T] = _
-  private[this] var javaValueFun: SQLFromFunction[T] = _
+  private[this] var javaKeyFun: TransformFunction[T] = _
+  private[this] var javaValueFun: TransformFunction[T] = _
 
   //for scala
   def this() = {
@@ -73,8 +73,8 @@ class RedisMapper[T](apiType: ApiType = ApiType.scala, cmd: RedisCommand, additi
   //for scala
   def this(cmd: RedisCommand,
            additionalKey: String,
-           javaKeyFun: SQLFromFunction[T],
-           javaValueFun: SQLFromFunction[T]) = {
+           javaKeyFun: TransformFunction[T],
+           javaValueFun: TransformFunction[T]) = {
     this(ApiType.java, cmd, additionalKey)
     this.javaKeyFun = javaKeyFun
     this.javaValueFun = javaValueFun
@@ -84,12 +84,12 @@ class RedisMapper[T](apiType: ApiType = ApiType.scala, cmd: RedisCommand, additi
   override def getCommandDescription: RedisCommandDescription = new RedisCommandDescription(cmd, additionalKey)
 
   override def getKeyFromData(r: T): String = apiType match {
-    case ApiType.java => javaKeyFun.from(r)
+    case ApiType.java => javaKeyFun.transform(r)
     case ApiType.scala => scalaKeyFun(r)
   }
 
   override def getValueFromData(r: T): String = apiType match {
-    case ApiType.java => javaValueFun.from(r)
+    case ApiType.java => javaValueFun.transform(r)
     case ApiType.scala => scalaValueFun(r)
   }
 

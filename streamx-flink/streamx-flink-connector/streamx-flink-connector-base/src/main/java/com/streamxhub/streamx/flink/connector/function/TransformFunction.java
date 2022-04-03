@@ -25,10 +25,11 @@ import java.io.Serializable;
  * @author benjobs
  */
 @FunctionalInterface
-public interface SQLFromFunction<T> extends Serializable {
+public interface TransformFunction<T> extends Serializable {
     /**
      * @param bean: bean
-     * @return String: sql
+     * @return String:
      */
-    String from(T bean);
+    String transform(T bean);
+
 }

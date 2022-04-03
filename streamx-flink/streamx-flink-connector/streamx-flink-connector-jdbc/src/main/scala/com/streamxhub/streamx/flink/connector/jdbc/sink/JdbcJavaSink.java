@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.connector.jdbc.sink;
 
 import com.streamxhub.streamx.common.util.AssertUtils;
 import com.streamxhub.streamx.common.util.ConfigUtils;
-import com.streamxhub.streamx.flink.connector.function.SQLFromFunction;
+import com.streamxhub.streamx.flink.connector.function.TransformFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
@@ -35,7 +35,7 @@ public class JdbcJavaSink<T> {
 
     private final StreamingContext context;
     private Properties jdbc;
-    private SQLFromFunction<T> sqlFunc;
+    private TransformFunction<T> sqlFunc;
     private String alias = "";
 
     public JdbcJavaSink(StreamingContext context) {
@@ -52,7 +52,7 @@ public class JdbcJavaSink<T> {
         return this;
     }
 
-    public JdbcJavaSink<T> sql(SQLFromFunction<T> func) {
+    public JdbcJavaSink<T> sql(TransformFunction<T> func) {
         this.sqlFunc = func;
         return this;
     }

@@ -24,8 +24,8 @@ import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.{JdbcUtils, Logger}
 import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfigConst.CLICKHOUSE_TARGET_TABLE
-import com.streamxhub.streamx.flink.connector.clickhouse.util.PoJoConvertUtils.parsePojoToInsertValue
-import com.streamxhub.streamx.flink.connector.function.SQLFromFunction
+import com.streamxhub.streamx.flink.connector.clickhouse.util.ClickhouseConvertUtils.convert
+import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import ru.yandex.clickhouse.ClickHouseDataSource
@@ -51,10 +51,8 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
   private val sqlValues = new util.ArrayList[String](batchSize)
   private var insertSqlPrefixes: String = _
 
-
   private[this] var scalaSqlFunc: T => String = _
-  private[this] var javaSqlFunc: SQLFromFunction[T] = _
-
+  private[this] var javaSqlFunc: TransformFunction[T] = _
 
   //for Scala
   def this(properties: Properties,
@@ -66,7 +64,7 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
 
   //for JAVA
   def this(properties: Properties,
-           javaSqlFunc: SQLFromFunction[T]) = {
+           javaSqlFunc: TransformFunction[T]) = {
 
     this(ApiType.java, properties)
     this.javaSqlFunc = javaSqlFunc
@@ -118,9 +116,9 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
     require(connection != null)
 
     val valueStr = (scalaSqlFunc, javaSqlFunc) match {
-      case (null, null) => parsePojoToInsertValue(value)
+      case (null, null) => convert(value)
       case _ => apiType match {
-        case ApiType.java => javaSqlFunc.from(value)
+        case ApiType.java => javaSqlFunc.transform(value)
         case ApiType.scala => scalaSqlFunc(value)
       }
     }
