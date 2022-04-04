@@ -21,8 +21,8 @@ package com.streamxhub.streamx.console.core.runner;
 
 import com.streamxhub.streamx.common.conf.CommonConfig;
 import com.streamxhub.streamx.common.conf.ConfigConst;
-import com.streamxhub.streamx.common.conf.ConfigHub;
-import com.streamxhub.streamx.common.conf.ConfigOption;
+import com.streamxhub.streamx.common.conf.InternalConfigHolder;
+import com.streamxhub.streamx.common.conf.InternalOption;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
@@ -85,7 +85,7 @@ public class EnvInitializer implements ApplicationRunner {
         // init ConfigHub
         initConfigHub(context.getEnvironment());
         // overwrite system variable HADOOP_USER_NAME
-        String hadoopUserName = ConfigHub.get(CommonConfig.STREAMX_HADOOP_USER_NAME());
+        String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMX_HADOOP_USER_NAME());
         overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
         // initialize local file system resources
         storageInitialize(LFS);
@@ -93,32 +93,32 @@ public class EnvInitializer implements ApplicationRunner {
 
     private void initConfigHub(Environment springEnv) {
         // override config from spring application.yaml
-        ConfigHub
+        InternalConfigHolder
             .keys()
             .stream()
             .filter(springEnv::containsProperty)
             .forEach(key -> {
-                ConfigOption config = ConfigHub.getConfig(key);
+                InternalOption config = InternalConfigHolder.getConfig(key);
                 assert config != null;
-                ConfigHub.set(config, springEnv.getProperty(key, config.classType()));
+                InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
             });
 
         String mvnRepository = settingService.getMavenRepository();
         if (StringUtils.isNotEmpty(mvnRepository)) {
-            ConfigHub.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);
+            InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);
         }
 
         String mvnAuthUser = settingService.getMavenAuthUser();
         if (StringUtils.isNotEmpty(mvnAuthUser)) {
-            ConfigHub.set(CommonConfig.MAVEN_AUTH_USER(), mvnAuthUser);
+            InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), mvnAuthUser);
         }
 
         String mvnAuthPassword = settingService.getMavenAuthPassword();
         if (StringUtils.isNotEmpty(mvnAuthPassword)) {
-            ConfigHub.set(CommonConfig.MAVEN_AUTH_PASSWORD(), mvnAuthPassword);
+            InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), mvnAuthPassword);
         }
 
-        ConfigHub.log();
+        InternalConfigHolder.log();
     }
 
     private void overrideSystemProp(String key, String defaultValue) {

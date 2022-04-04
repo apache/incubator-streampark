@@ -34,7 +34,7 @@ import scala.language.postfixOps
  *
  * @author Al-assad
  */
-object ConfigHub extends Logger {
+object InternalConfigHolder extends Logger {
 
   private val initialCapacity = 45
 
@@ -46,7 +46,7 @@ object ConfigHub extends Logger {
   /**
    * configuration key options storage (key -> ConfigOption)
    */
-  private val confOptions = new ConcurrentHashMap[String, ConfigOption](initialCapacity)
+  private val confOptions = new ConcurrentHashMap[String, InternalOption](initialCapacity)
 
   /**
    * Initialize the ConfigHub.
@@ -58,7 +58,7 @@ object ConfigHub extends Logger {
   /**
    * Register the ConfigOption
    */
-  private[conf] def register(@Nonnull conf: ConfigOption): Unit = {
+  private[conf] def register(@Nonnull conf: InternalOption): Unit = {
     confOptions.put(conf.key, conf)
     if (conf.defaultValue != null) {
       confData.put(conf.key, conf.defaultValue)
@@ -78,7 +78,7 @@ object ConfigHub extends Logger {
    * @return return the defaultValue of ConfigOption when the value has not been overwritten.
    */
   @Nonnull
-  def get[T](@Nonnull conf: ConfigOption): T = {
+  def get[T](@Nonnull conf: InternalOption): T = {
     confData.get(conf.key) match {
       case null =>
         SystemPropertyUtils.get(conf.key) match {
@@ -114,7 +114,7 @@ object ConfigHub extends Logger {
               case v if v != null => Converter.convert[T](v, config.classType)
               case _ => throw new IllegalArgumentException(s"config key has not been registered: $key")
             }
-          case conf: ConfigOption => conf.defaultValue.asInstanceOf[T]
+          case conf: InternalOption => conf.defaultValue.asInstanceOf[T]
         }
       case v: T => v
     }
@@ -126,7 +126,7 @@ object ConfigHub extends Logger {
    * @return nullable
    */
   @Nullable
-  def getConfig(key: String): ConfigOption = {
+  def getConfig(key: String): InternalOption = {
     confOptions.get(key)
   }
 
@@ -135,7 +135,7 @@ object ConfigHub extends Logger {
    */
   @Nonnull
   def keys(): util.Set[String] = {
-    val map = new util.HashMap[String, ConfigOption](confOptions.size())
+    val map = new util.HashMap[String, InternalOption](confOptions.size())
     map.putAll(confOptions)
     map.keySet()
   }
@@ -149,7 +149,7 @@ object ConfigHub extends Logger {
    *                                  or the value type is not same as conf.classType.
    */
   @throws[IllegalArgumentException]
-  def set(@Nonnull conf: ConfigOption, value: Any): Unit = {
+  def set(@Nonnull conf: InternalOption, value: Any): Unit = {
     if (!confOptions.containsKey(conf.key)) {
       throw new IllegalArgumentException(s"config key has not been registered: $conf")
     }
@@ -176,31 +176,20 @@ object ConfigHub extends Logger {
   }
 
 
+
 }
 
-/**
- * Configuration option.
- * All configurations will automatically initialized from the spring configuration items
- * of the same name.
- *
- * @param key          key of configuration that consistent with the spring config.
- * @param defaultValue default value of configuration that <b>should not be null</b>.
- * @param classType    the class type of value. <b>please use java class type</b>.
- * @param description  description of configuration.
- * @author Al-assad
- */
-case class ConfigOption(key: String,
-                        defaultValue: Any,
-                        classType: Class[_],
-                        description: String = "") {
-  // register conf to ConfigHub
-  ConfigHub.register(this)
-}
 
 object Converter {
 
   def convert[T](v: String, classType: Class[_]): T = {
     classType match {
+      case c if c == classOf[String] => v.asInstanceOf[T]
+      case c if c == classOf[Int] => v.toInt.asInstanceOf[T]
+      case c if c == classOf[Long] => v.toLong.asInstanceOf[T]
+      case c if c == classOf[Boolean] => v.toBoolean.asInstanceOf[T]
+      case c if c == classOf[Float] => v.toFloat.asInstanceOf[T]
+      case c if c == classOf[Double] => v.toDouble.asInstanceOf[T]
       case c if c == classOf[java.lang.String] => v.asInstanceOf[T]
       case c if c == classOf[java.lang.Integer] => java.lang.Integer.valueOf(v).asInstanceOf[T]
       case c if c == classOf[java.lang.Long] => java.lang.Long.valueOf(v).asInstanceOf[T]

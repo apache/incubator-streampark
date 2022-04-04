@@ -26,31 +26,31 @@ package com.streamxhub.streamx.common.conf
  */
 object K8sFlinkConfig {
 
-  val jobStatusTrkTaskTimeoutSec: ConfigOption = ConfigOption(
+  val jobStatusTrkTaskTimeoutSec: InternalOption = InternalOption(
     key = "streamx.flink-k8s.tracking.polling-task-timeout-sec.job-status",
     defaultValue = 120L,
     classType = classOf[java.lang.Long],
     description = "run timeout seconds of single flink-k8s metrics tracking task")
 
-  val metricTrkTaskTimeoutSec: ConfigOption = ConfigOption(
+  val metricTrkTaskTimeoutSec: InternalOption = InternalOption(
     key = "streamx.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric",
     defaultValue = 120L,
     classType = classOf[java.lang.Long],
     description = "run timeout seconds of single flink-k8s job status tracking task")
 
-  val jobStatueTrkTaskIntervalSec: ConfigOption = ConfigOption(
+  val jobStatueTrkTaskIntervalSec: InternalOption = InternalOption(
     key = "streamx.flink-k8s.tracking.polling-interval-sec.job-status",
     defaultValue = 5L,
     classType = classOf[java.lang.Long],
     description = "interval seconds between two single flink-k8s metrics tracking task")
 
-  val metricTrkTaskIntervalSec: ConfigOption = ConfigOption(
+  val metricTrkTaskIntervalSec: InternalOption = InternalOption(
     key = "streamx.flink-k8s.tracking.polling-interval-sec.cluster-metric",
     defaultValue = 10L,
     classType = classOf[java.lang.Long],
     description = "interval seconds between two single flink-k8s metrics tracking task")
 
-  val silentStateJobKeepTrackingSec: ConfigOption = ConfigOption(
+  val silentStateJobKeepTrackingSec: InternalOption = InternalOption(
     key = "streamx.flink-k8s.tracking.silent-state-keep-sec",
     defaultValue = 60,
     classType = classOf[java.lang.Integer],
