@@ -26,8 +26,6 @@ package com.streamxhub.streamx.common.conf
  */
 object K8sFlinkConfig {
 
-  implicit val interval: Boolean = true
-
   val jobStatusTrkTaskTimeoutSec: InternalOption = InternalOption(
     key = "streamx.flink-k8s.tracking.polling-task-timeout-sec.job-status",
     defaultValue = 120L,

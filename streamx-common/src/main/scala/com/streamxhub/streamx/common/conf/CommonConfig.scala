@@ -25,8 +25,6 @@ package com.streamxhub.streamx.common.conf
  */
 object CommonConfig {
 
-  implicit val interval: Boolean = true
-
   val STREAMX_WORKSPACE_LOCAL: InternalOption = InternalOption(
     key = "streamx.workspace.local",
     defaultValue = "/streamx",

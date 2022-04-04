@@ -27,7 +27,9 @@ import scala.util.{Failure, Success, Try}
  * @param key          key of configuration that consistent with the spring config.
  * @param defaultValue default value of configuration that <b>should not be null</b>.
  * @param classType    the class type of value. <b>please use java class type</b>.
+ * @param require      is require <b>
  * @param description  description of configuration.
+ * @param handle       Processing function of special parameters
  * @author benjobs
  */
 case class ConfigOption[T](key: String,
