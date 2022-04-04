@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.common.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.conf.{CommonConfig, ConfigHub}
+import com.streamxhub.streamx.common.conf.{CommonConfig, InternalConfigHolder}
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
@@ -68,7 +68,7 @@ object HadoopUtils extends Logger {
 
   private[this] var rmHttpURL: String = _
 
-  private lazy val hadoopUserName: String = ConfigHub.get(CommonConfig.STREAMX_HADOOP_USER_NAME)
+  private lazy val hadoopUserName: String = InternalConfigHolder.get(CommonConfig.STREAMX_HADOOP_USER_NAME)
 
   private[this] lazy val configurationCache: util.Map[String, Configuration] = new ConcurrentHashMap[String, Configuration]()
 

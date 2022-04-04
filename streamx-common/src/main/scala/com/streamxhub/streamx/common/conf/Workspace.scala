@@ -40,9 +40,9 @@ object Workspace {
 
 case class Workspace(storageType: StorageType) {
 
-  private[this] def getConfigValue[T](option: ConfigOption): T = {
+  private[this] def getConfigValue[T](option: InternalOption): T = {
     val s = SystemPropertyUtils.get(option.key)
-    val v = ConfigHub.get(option).asInstanceOf[T]
+    val v = InternalConfigHolder.get(option).asInstanceOf[T]
     val d = option.defaultValue.asInstanceOf[T]
     (s, v) match {
       case (null, null) => d
