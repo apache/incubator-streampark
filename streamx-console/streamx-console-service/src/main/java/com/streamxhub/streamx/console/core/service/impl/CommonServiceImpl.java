@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.console.core.service.impl;
 
 import com.streamxhub.streamx.console.base.util.WebUtils;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.service.CommonService;
 import com.streamxhub.streamx.console.system.authentication.JWTUtil;
 import com.streamxhub.streamx.console.system.entity.User;
@@ -54,12 +55,12 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public String getSqlClientJar() {
+    public String getSqlClientJar(FlinkEnv flinkEnv) {
         if (sqlClientJar == null) {
             File localClient = WebUtils.getAppClientDir();
             assert localClient.exists();
             List<String> jars =
-                Arrays.stream(Objects.requireNonNull(localClient.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar"))
+                Arrays.stream(Objects.requireNonNull(localClient.list())).filter(x -> x.matches("streamx-flink-sqlclient_" + flinkEnv.getScalaVersion() + "-.*\\.jar"))
                     .collect(Collectors.toList());
             if (jars.isEmpty()) {
                 throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localClient);

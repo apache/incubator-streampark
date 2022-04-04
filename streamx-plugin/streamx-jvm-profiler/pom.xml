@@ -13,7 +13,7 @@
 
         <dependency>
             <groupId>org.scalaj</groupId>
-            <artifactId>scalaj-http_2.11</artifactId>
+            <artifactId>scalaj-http_${scala.binary.version}</artifactId>
             <version>2.4.2</version>
         </dependency>
 

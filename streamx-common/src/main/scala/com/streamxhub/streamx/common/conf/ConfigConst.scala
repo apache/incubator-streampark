@@ -199,11 +199,6 @@ object ConfigConst {
 
   val KEY_KAFKA_START_FROM_TIMESTAMP = "timestamp"
 
-  val REDIS_PREFIX = "redis.sink"
-
-  val REDIS_CONNECT_TYPE = "connectType"
-
-  val DEFAULT_REDIS_CONNECT_TYPE = "jedisPool"
 
   val KEY_ALIAS = "alias"
 
@@ -255,22 +250,6 @@ object ConfigConst {
   val KEY_INFLUX_ACTIONS = "actions"
 
   val KEY_INFLUX_FLUSH_DURATION = "flush.duration"
-
-  /**
-   * about clickhouse
-   */
-  val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"
-
-  val CLICKHOUSE_HOSTS = "hosts"
-
-  val CLICKHOUSE_USER = "user"
-
-  val CLICKHOUSE_PASSWORD = "password"
-
-  val CLICKHOUSE_TARGET_TABLE = "targetTable"
-
-
-  val HTTP_SINK_PREFIX = "http.sink"
 
   /**
    * about config doris

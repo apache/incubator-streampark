@@ -12,7 +12,7 @@
             <outputDirectory>lib</outputDirectory>
             <excludes>
                 <exclude>com.streamxhub.streamx:streamx-jvm-profiler</exclude>
-                <exclude>com.streamxhub.streamx:streamx-flink-sqlclient</exclude>
+                <exclude>com.streamxhub.streamx:streamx-flink-sqlclient_${scala.binary.version}</exclude>
                 <exclude>javax.servlet:servlet-api</exclude>
             </excludes>
         </dependencySet>
@@ -25,7 +25,7 @@
         <dependencySet>
             <outputDirectory>client</outputDirectory>
             <includes>
-                <include>com.streamxhub.streamx:streamx-flink-sqlclient</include>
+                <include>com.streamxhub.streamx:streamx-flink-sqlclient_${scala.binary.version}</include>
             </includes>
         </dependencySet>
     </dependencySets>
