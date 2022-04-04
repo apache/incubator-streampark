@@ -24,7 +24,7 @@ import com.streamxhub.streamx.common.conf.ConfigOption
 import java.util.Properties
 
 
-case class ClickHouseConfigSinkOption(properties: Properties) {
+case class ClickHouseSinkConfigOption(properties: Properties) {
 
   implicit val (prefix, prop) = ("clickhouse.sink", properties)
 

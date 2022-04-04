@@ -36,7 +36,7 @@ import java.util.Properties
 
 class ClickHouseConfigDemo(parameters: Properties) extends ThresholdConf(parameters) {
 
-  val sinkOption: ClickHouseConfigSinkOption = ClickHouseConfigSinkOption(parameters)
+  val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(parameters)
 
   val user = sinkOption.user.get()
 
