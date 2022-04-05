@@ -30,7 +30,7 @@ case class ClickHouseSinkConfigOption(properties: Properties) {
 
   val hosts = ConfigOption[List[String]](
     key = "hosts",
-    require = true,
+    required = true,
     classType = classOf[List[String]],
     handle = k => {
       properties
@@ -44,19 +44,19 @@ case class ClickHouseSinkConfigOption(properties: Properties) {
 
   val user = ConfigOption(
     key = "user",
-    require = true,
+    required = true,
     classType = classOf[String]
   )
 
   val password = ConfigOption(
     key = "password",
-    require = true,
+    required = true,
     classType = classOf[String]
   )
 
   val targetTable = ConfigOption(
     key = "targetTable",
-    require = true,
+    required = true,
     classType = classOf[String]
   )
 
