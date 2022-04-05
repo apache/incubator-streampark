@@ -1884,7 +1884,28 @@ export default {
       const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval') || null
       const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval') || null
       const cpFailureAction = this.form.getFieldValue('cpFailureAction') || null
+
       if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
+        if (cpMaxFailureInterval === 0) {
+          callback(new Error('checkPoint max failure interval the value must be greater than 0'))
+          return
+        }
+        if (cpFailureRateInterval === 0) {
+          callback(new Error('checkPoint failure rate interval the value must be greater than 0'))
+          return
+        }
+        if (cpFailureAction === 1) {
+          const alertEmail = this.form.getFieldValue('alertEmail')
+          if (alertEmail == null) {
+            this.form.setFields({
+              alertEmail: {
+                errors: [new Error('checkPoint Failure trigger is alert,alertEmail must not be empty')]
+              }
+            })
+            callback(new Error('trigger action is alert,alertEmail must not be empty'))
+            return
+          }
+        }
         callback()
         if (!this.validateAgain) {
           this.validateAgain = true
@@ -1916,7 +1937,7 @@ export default {
       if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
         if( cpFailureAction === 1) {
           const alertEmail = this.form.getFieldValue('alertEmail')
-          if (alertEmail == null || alertEmail.trim() === '') {
+          if (!alertEmail) {
             callback(new Error('checkPoint Failure trigger is alert,alertEmail must not be empty'))
           } else {
             callback()

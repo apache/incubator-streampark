@@ -25,7 +25,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -55,7 +54,6 @@ import java.lang.management.RuntimeMXBean;
  * @author benjobs
  */
 @Slf4j
-@CrossOrigin
 @SpringBootApplication
 @EnableScheduling
 public class StreamXConsole {
