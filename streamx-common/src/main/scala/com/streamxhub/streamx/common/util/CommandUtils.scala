@@ -27,7 +27,7 @@ import scala.util.{Failure, Success, Try}
 
 object CommandUtils extends Logger {
 
-  @throws[Exception] def execute(command: String): String = {
+  @throws[Exception] def execute(command: String): (Int, String) = {
     Try {
       val buffer = new StringBuffer()
       val process: Process = Runtime.getRuntime.exec(command)
@@ -36,48 +36,66 @@ object CommandUtils extends Logger {
       while (scanner.hasNextLine) {
         buffer.append(scanner.nextLine()).append("\n")
       }
-      processClose(process)
+      val code = waitFor(process)
       reader.close()
       scanner.close()
-      buffer.toString
+      code -> buffer.toString
     } match {
       case Success(v) => v
       case Failure(e) => throw e
     }
   }
 
-  def execute(commands: JavaIterable[String], consumer: Consumer[String]): Unit = {
+  def execute(directory: String, commands: JavaIterable[String], consumer: Consumer[String]): Int = {
     Try {
       require(commands != null && commands.nonEmpty, "[StreamX] CommandUtils.execute: commands must not be null.")
       logDebug(s"Command execute:\n${commands.mkString("\n")} ")
-      val interpreters = if (Utils.isWindows) List("cmd", "/k") else List("/bin/bash")
-      val process = new ProcessBuilder(interpreters).redirectErrorStream(true).start
-      val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
-      commands.foreach(out.println)
-      commands.last.toLowerCase.trim match {
-        case "exit" =>
-        case _ => out.println("exit")
+
+      //1) init
+      lazy val process = {
+        val interpreters = if (Utils.isWindows) List("cmd", "/k") else List("/bin/bash")
+        val builder = new ProcessBuilder(interpreters).redirectErrorStream(true)
+        if (directory != null) {
+          builder.directory(new File(directory))
+        }
+        builder.start
       }
-      val scanner = new Scanner(process.getInputStream)
-      while (scanner.hasNextLine) {
-        consumer.accept(scanner.nextLine)
+
+      // 2) input
+      def input(): Unit = {
+        val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
+        commands.foreach(out.println)
+        if (!commands.last.equalsIgnoreCase("exit")) {
+          out.println("exit")
+        }
+        out.close()
       }
-      processClose(process)
-      scanner.close()
-      out.close()
+
+      //3) out
+      def output(): Unit = {
+        val scanner = new Scanner(process.getInputStream)
+        while (scanner.hasNextLine) {
+          consumer.accept(scanner.nextLine)
+        }
+        scanner.close()
+      }
+
+      input()
+      output()
+      waitFor(process)
     } match {
-      case Success(_) =>
+      case Success(code) => code
       case Failure(e) => throw e
     }
   }
 
-  private[this] def processClose(process: Process): Unit = {
-    process.waitFor()
+  private[this] def waitFor(process: Process): Int = {
+    val code = process.waitFor()
     process.getErrorStream.close()
     process.getInputStream.close()
     process.getOutputStream.close()
     process.destroy()
+    code
   }
-
 
 }
