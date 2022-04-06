@@ -84,7 +84,6 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
             String title = application.getJobName().concat(" ___ FlameGraph");
             // generate...
             List<String> commands = Arrays.asList(
-                    String.format("cd %s", flameGraphPath.getAbsolutePath()),
                     String.format("python ./stackcollapse.py -i %s > %s ", jsonPath, foldedPath),
                     String.format(
                             "./flamegraph.pl --title=\"%s\" --width=%d --colors=java %s > %s ",
@@ -94,7 +93,7 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
                             svgPath
                     )
             );
-            CommandUtils.execute(commands, (line) -> log.info("flameGraph: {} ", line));
+            CommandUtils.execute(flameGraphPath.getAbsolutePath(), commands, (line) -> log.info("flameGraph: {} ", line));
             return svgPath;
         }
         return null;
