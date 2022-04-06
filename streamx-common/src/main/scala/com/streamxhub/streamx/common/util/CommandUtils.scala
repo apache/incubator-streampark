@@ -46,7 +46,7 @@ object CommandUtils extends Logger {
     }
   }
 
-  def execute(commands: JavaIterable[String], consumer: Consumer[String]): Int = {
+  def execute(directory: String, commands: JavaIterable[String], consumer: Consumer[String]): Int = {
     Try {
       require(commands != null && commands.nonEmpty, "[StreamX] CommandUtils.execute: commands must not be null.")
       logDebug(s"Command execute:\n${commands.mkString("\n")} ")
@@ -54,7 +54,11 @@ object CommandUtils extends Logger {
       //1) init
       lazy val process = {
         val interpreters = if (Utils.isWindows) List("cmd", "/k") else List("/bin/bash")
-        new ProcessBuilder(interpreters).redirectErrorStream(true).start
+        val builder = new ProcessBuilder(interpreters).redirectErrorStream(true)
+        if (directory != null) {
+          builder.directory(new File(directory))
+        }
+        builder.start
       }
 
       // 2) input
@@ -94,6 +98,5 @@ object CommandUtils extends Logger {
     process.destroy()
     code
   }
-
 
 }

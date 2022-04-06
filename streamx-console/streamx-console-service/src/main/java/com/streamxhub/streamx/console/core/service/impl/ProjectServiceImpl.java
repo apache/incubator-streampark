@@ -464,7 +464,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
      */
     private boolean projectBuild(Project project, String socketId) {
         StringBuilder builder = tailBuffer.get(project.getId());
-        Integer code = CommandUtils.execute(project.getMavenArgs(), (line) -> {
+        Integer code = CommandUtils.execute(project.getMavenWorkHome(), project.getMavenArgs(), (line) -> {
             builder.append(line).append("\n");
             if (tailOutMap.containsKey(project.getId())) {
                 if (tailBeginning.containsKey(project.getId())) {

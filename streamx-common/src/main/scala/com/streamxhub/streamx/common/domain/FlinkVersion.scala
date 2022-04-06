@@ -59,13 +59,10 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
 
   lazy val version: String = {
     val flinkVersion = new AtomicReference[String]
-    val cmd = List(
-      s"cd ${flinkLib.getAbsolutePath}",
-      s"java -classpath ${flinkDistJar.getAbsolutePath} org.apache.flink.client.cli.CliFrontend --version"
-    )
+    val cmd = List(s"java -classpath ${flinkDistJar.getAbsolutePath} org.apache.flink.client.cli.CliFrontend --version")
     val success = new AtomicBoolean(false)
     val buffer = new StringBuilder
-    CommandUtils.execute(cmd, new Consumer[String]() {
+    CommandUtils.execute(flinkLib.getAbsolutePath, cmd, new Consumer[String]() {
       override def accept(out: String): Unit = {
         buffer.append(out).append("\n")
         val matcher = FLINK_VERSION_PATTERN.matcher(out)

@@ -218,13 +218,6 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public List<String> getMavenArgs() {
-        String buildHome = this.getAppSource().getAbsolutePath();
-        if (CommonUtils.notEmpty(this.getPom())) {
-            buildHome = new File(buildHome.concat("/")
-                .concat(this.getPom()))
-                .getParentFile()
-                .getAbsolutePath();
-        }
         String mvn = "mvn";
         try {
             if (CommonUtils.isWindows()) {
@@ -239,10 +232,19 @@ public class Project implements Serializable {
                 mvn = WebUtils.getAppHome().concat("/bin/mvnw");
             }
         }
-        return Arrays.asList(
-            "cd ".concat(buildHome),
-            mvn.concat(" clean package -DskipTests ").concat(StringUtils.isEmpty(this.buildArgs) ? "" : this.buildArgs.trim())
-        );
+        return Arrays.asList(mvn.concat(" clean package -DskipTests ").concat(StringUtils.isEmpty(this.buildArgs) ? "" : this.buildArgs.trim()));
+    }
+
+    @JsonIgnore
+    public String getMavenWorkHome() {
+        String buildHome = this.getAppSource().getAbsolutePath();
+        if (CommonUtils.notEmpty(this.getPom())) {
+            buildHome = new File(buildHome.concat("/")
+                .concat(this.getPom()))
+                .getParentFile()
+                .getAbsolutePath();
+        }
+        return buildHome;
     }
 
     @JsonIgnore
