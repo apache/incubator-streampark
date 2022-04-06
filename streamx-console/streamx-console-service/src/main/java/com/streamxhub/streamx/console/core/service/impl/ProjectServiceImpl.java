@@ -66,7 +66,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author benjobs
@@ -457,12 +456,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
      */
     private boolean projectBuild(Project project, String socketId) {
         StringBuilder builder = tailBuffer.get(project.getId());
-        AtomicBoolean success = new AtomicBoolean(false);
-        CommandUtils.execute(project.getMavenBuildCmd(), (line) -> {
+        Integer code = CommandUtils.execute(project.getMavenArgs(), (line) -> {
             builder.append(line).append("\n");
-            if (line.contains("BUILD SUCCESS")) {
-                success.set(true);
-            }
             if (tailOutMap.containsKey(project.getId())) {
                 if (tailBeginning.containsKey(project.getId())) {
                     tailBeginning.remove(project.getId());
@@ -475,7 +470,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         closeBuildLog(project.getId());
         log.info(builder.toString());
         tailBuffer.remove(project.getId());
-        return success.get();
+        return code == 0;
     }
 
     @Override

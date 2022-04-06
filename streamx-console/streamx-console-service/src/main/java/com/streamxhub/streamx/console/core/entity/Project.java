@@ -217,12 +217,13 @@ public class Project implements Serializable {
     }
 
     @JsonIgnore
-    public List<String> getMavenBuildCmd() {
+    public List<String> getMavenArgs() {
         String buildHome = this.getAppSource().getAbsolutePath();
         if (CommonUtils.notEmpty(this.getPom())) {
-            buildHome = new File(buildHome.concat("/").concat(this.getPom()))
-                    .getParentFile()
-                    .getAbsolutePath();
+            buildHome = new File(buildHome.concat("/")
+                .concat(this.getPom()))
+                .getParentFile()
+                .getAbsolutePath();
         }
         String mvn = "mvn";
         try {
@@ -238,28 +239,31 @@ public class Project implements Serializable {
                 mvn = WebUtils.getAppHome().concat("/bin/mvnw");
             }
         }
-        return Arrays.asList("cd ".concat(buildHome), String.format("%s clean install -DskipTests %s", mvn, StringUtils.isEmpty(this.buildArgs) ? "" : this.buildArgs.trim()));
+        return Arrays.asList(
+            "cd ".concat(buildHome),
+            mvn.concat(" clean install -DskipTests ") + (StringUtils.isEmpty(this.buildArgs) ? "" : this.buildArgs.trim())
+        );
     }
 
     @JsonIgnore
     public String getLog4BuildStart() {
         return String.format(
-                "%sproject : %s\nbranches: %s\ncommand : %s\n\n",
-                getLogHeader("maven install"),
-                getName(),
-                getBranches(),
-                getMavenBuildCmd()
+            "%sproject : %s\nbranches: %s\ncommand : %s\n\n",
+            getLogHeader("maven install"),
+            getName(),
+            getBranches(),
+            getMavenArgs()
         );
     }
 
     @JsonIgnore
     public String getLog4CloneStart() {
         return String.format(
-                "%sproject  : %s\nbranches : %s\nworkspace: %s\n\n",
-                getLogHeader("git clone"),
-                getName(),
-                getBranches(),
-                getAppSource()
+            "%sproject  : %s\nbranches : %s\nworkspace: %s\n\n",
+            getLogHeader("git clone"),
+            getName(),
+            getBranches(),
+            getAppSource()
         );
     }
 
