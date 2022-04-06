@@ -241,7 +241,7 @@ public class Project implements Serializable {
         }
         return Arrays.asList(
             "cd ".concat(buildHome),
-            mvn.concat(" clean install -DskipTests ") + (StringUtils.isEmpty(this.buildArgs) ? "" : this.buildArgs.trim())
+            mvn.concat(" clean package -DskipTests ").concat(StringUtils.isEmpty(this.buildArgs) ? "" : this.buildArgs.trim())
         );
     }
 
