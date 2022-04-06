@@ -65,9 +65,8 @@ object CommandUtils extends Logger {
       def input(): Unit = {
         val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
         commands.foreach(out.println)
-        commands.last.toLowerCase.trim match {
-          case "exit" =>
-          case _ => out.println("exit")
+        if (!commands.last.equalsIgnoreCase("exit")) {
+          out.println("exit")
         }
         out.close()
       }
