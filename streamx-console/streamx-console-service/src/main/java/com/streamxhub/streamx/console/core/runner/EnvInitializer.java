@@ -83,7 +83,7 @@ public class EnvInitializer implements ApplicationRunner {
         }
 
         // init ConfigHub
-        initConfigHub(context.getEnvironment());
+        initInternalConfig(context.getEnvironment());
         // overwrite system variable HADOOP_USER_NAME
         String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMX_HADOOP_USER_NAME());
         overrideSystemProp(ConfigConst.KEY_HADOOP_USER_NAME(), hadoopUserName);
@@ -91,7 +91,7 @@ public class EnvInitializer implements ApplicationRunner {
         storageInitialize(LFS);
     }
 
-    private void initConfigHub(Environment springEnv) {
+    private void initInternalConfig(Environment springEnv) {
         // override config from spring application.yaml
         InternalConfigHolder
             .keys()
