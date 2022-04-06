@@ -82,7 +82,7 @@ public class EnvInitializer implements ApplicationRunner {
                 " more detail: http://www.streamxhub.com/docs/user-guide/development");
         }
 
-        // init ConfigHub
+        // init InternalConfig
         initInternalConfig(context.getEnvironment());
         // overwrite system variable HADOOP_USER_NAME
         String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMX_HADOOP_USER_NAME());
