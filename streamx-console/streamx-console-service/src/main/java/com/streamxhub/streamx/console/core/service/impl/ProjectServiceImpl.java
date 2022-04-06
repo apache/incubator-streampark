@@ -63,6 +63,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -181,7 +182,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         this.baseMapper.startBuild(project);
         StringBuilder builder = new StringBuilder();
         tailBuffer.put(id, builder.append(project.getLog4BuildStart()));
-        boolean cloneSuccess = cloneSourceCode(project);
+        boolean cloneSuccess = cloneSourceCode(project, socketId);
         if (cloneSuccess) {
             executorService.execute(() -> {
                 boolean build = projectBuild(project, socketId);
@@ -362,10 +363,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         return null;
     }
 
-    private boolean cloneSourceCode(Project project) {
+    private boolean cloneSourceCode(Project project, String socketId) {
         try {
             project.cleanCloned();
             log.info("clone {}, {} starting...", project.getName(), project.getUrl());
+
+            WebSocketEndpoint.writeMessage(socketId, String.format("clone %s starting..., url: %s", project.getName(), project.getUrl()));
+
             tailBuffer.get(project.getId()).append(project.getLog4CloneStart());
             CloneCommand cloneCommand = Git.cloneRepository()
                 .setURI(project.getUrl())
@@ -375,21 +379,24 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             if (CommonUtils.notEmpty(project.getUserName(), project.getPassword())) {
                 cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
             }
-            try (Git git = cloneCommand.call()) {
-                StoredConfig config = git.getRepository().getConfig();
-                config.setBoolean("http", project.getUrl(), "sslVerify", false);
-                config.setBoolean("https", project.getUrl(), "sslVerify", false);
-                config.save();
 
-                File workTree = git.getRepository().getWorkTree();
-                gitWorkTree(project.getId(), workTree, "");
-                tailBuffer.get(project.getId()).append(
-                    String.format(
-                        "[StreamX] project [%s] git clone successful!\n",
-                        project.getName()
-                    )
-                );
-            }
+            Future<Git> future = executorService.submit(() -> cloneCommand.call());
+            Git git = future.get(60, TimeUnit.SECONDS);
+
+            StoredConfig config = git.getRepository().getConfig();
+            config.setBoolean("http", project.getUrl(), "sslVerify", false);
+            config.setBoolean("https", project.getUrl(), "sslVerify", false);
+            config.save();
+
+            File workTree = git.getRepository().getWorkTree();
+            gitWorkTree(project.getId(), workTree, "");
+            String successMsg = String.format(
+                "[StreamX] project [%s] git clone successful!\n",
+                project.getName()
+            );
+            tailBuffer.get(project.getId()).append(successMsg);
+            WebSocketEndpoint.writeMessage(socketId, successMsg);
+            git.close();
             return true;
         } catch (Exception e) {
             String errorLog = String.format(
@@ -399,6 +406,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 e
             );
             tailBuffer.get(project.getId()).append(errorLog);
+            WebSocketEndpoint.writeMessage(socketId, errorLog);
             log.error(String.format("project %s clone error ", project.getName()), e);
             return false;
         }
