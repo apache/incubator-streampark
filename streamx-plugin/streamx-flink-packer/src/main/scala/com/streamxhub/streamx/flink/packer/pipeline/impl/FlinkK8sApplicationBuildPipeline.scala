@@ -23,7 +23,7 @@ import com.github.dockerjava.api.command.PushImageCmd
 import com.github.dockerjava.core.command.{HackBuildImageCmd, HackPullImageCmd, HackPushImageCmd}
 import com.google.common.collect.Sets
 import com.streamxhub.streamx.common.conf.CommonConfig.DOCKER_IMAGE_NAMESPACE
-import com.streamxhub.streamx.common.conf.ConfigHub
+import com.streamxhub.streamx.common.conf.InternalConfigHolder
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.fs.LfsOperator
 import com.streamxhub.streamx.common.util.ThreadUtils
@@ -201,7 +201,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
    * compile image tag with namespace and remote address.
    */
   private[this] def compileTag(tag: String, registerAddress: String): String = {
-    val imgNamespace: String = ConfigHub.get(DOCKER_IMAGE_NAMESPACE)
+    val imgNamespace: String = InternalConfigHolder.get(DOCKER_IMAGE_NAMESPACE)
     var tagName = if (tag.contains("/")) tag else s"$imgNamespace/$tag"
     if (registerAddress.nonEmpty && !tagName.startsWith(registerAddress)) {
       tagName = s"$registerAddress/$tagName"

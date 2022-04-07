@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.packer.maven
 
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.conf.CommonConfig.{MAVEN_AUTH_PASSWORD, MAVEN_AUTH_USER, MAVEN_REMOTE_URL}
-import com.streamxhub.streamx.common.conf.{ConfigHub, Workspace}
+import com.streamxhub.streamx.common.conf.{InternalConfigHolder, Workspace}
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory
 import org.eclipse.aether.repository.{LocalRepository, RemoteRepository}
@@ -50,13 +50,13 @@ object MavenRetriever {
    * maven remote repository lists
    */
   def remoteRepos(): util.ArrayList[RemoteRepository] = {
-    val builder = new RemoteRepository.Builder("central", "default", ConfigHub.get(MAVEN_REMOTE_URL))
-    val remoteRepository = if (ConfigHub.get(MAVEN_AUTH_USER) == null || ConfigHub.get(MAVEN_AUTH_PASSWORD) == null) {
+    val builder = new RemoteRepository.Builder("central", "default", InternalConfigHolder.get(MAVEN_REMOTE_URL))
+    val remoteRepository = if (InternalConfigHolder.get(MAVEN_AUTH_USER) == null || InternalConfigHolder.get(MAVEN_AUTH_PASSWORD) == null) {
       builder.build()
     } else {
       val authentication = new AuthenticationBuilder()
-        .addUsername(ConfigHub.get[String](MAVEN_AUTH_USER))
-        .addPassword(ConfigHub.get[String](MAVEN_AUTH_PASSWORD))
+        .addUsername(InternalConfigHolder.get[String](MAVEN_AUTH_USER))
+        .addPassword(InternalConfigHolder.get[String](MAVEN_AUTH_PASSWORD))
         .build()
       builder.setAuthentication(authentication).build()
     }

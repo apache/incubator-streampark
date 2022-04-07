@@ -21,7 +21,7 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.conf.CommonConfig;
-import com.streamxhub.streamx.common.conf.ConfigHub;
+import com.streamxhub.streamx.common.conf.InternalConfigHolder;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
@@ -74,13 +74,13 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             this.baseMapper.updateByKey(setting);
 
             if (setting.getKey().equals(CommonConfig.MAVEN_REMOTE_URL().key())) {
-                ConfigHub.set(CommonConfig.MAVEN_REMOTE_URL(), value);
+                InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), value);
             }
             if (setting.getKey().equals(CommonConfig.MAVEN_AUTH_USER().key())) {
-                ConfigHub.set(CommonConfig.MAVEN_AUTH_USER(), value);
+                InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), value);
             }
             if (setting.getKey().equals(CommonConfig.MAVEN_AUTH_PASSWORD().key())) {
-                ConfigHub.set(CommonConfig.MAVEN_AUTH_PASSWORD(), value);
+                InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), value);
             }
             settings.get(setting.getKey()).setValue(value);
             return true;

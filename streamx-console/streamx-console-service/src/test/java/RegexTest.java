@@ -25,7 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,15 +91,14 @@ public class RegexTest {
         if (distJar.length > 1) {
             throw new IllegalArgumentException("[StreamX] found multiple flink-dist jar in " + libPath);
         }
-        List<String> cmd = Arrays.asList(
-                "cd ".concat(flinkHome),
-                String.format(
-                        "java -classpath %s org.apache.flink.client.cli.CliFrontend --version",
-                        distJar[0].getAbsolutePath()
-                )
+        List<String> cmd = Collections.singletonList(
+            String.format(
+                "java -classpath %s org.apache.flink.client.cli.CliFrontend --version",
+                distJar[0].getAbsolutePath()
+            )
         );
 
-        CommandUtils.execute(cmd, versionInfo -> {
+        CommandUtils.execute(flinkHome, cmd, versionInfo -> {
             Matcher matcher = flinkVersionPattern.matcher(versionInfo);
             if (matcher.find()) {
                 String flinkVersion = matcher.group(1);
