@@ -23,7 +23,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{ConfigUtils, Utils}
 import com.streamxhub.streamx.flink.connector.redis.bean.RedisMapper
 import com.streamxhub.streamx.flink.connector.redis.conf.RedisConfig._
-import com.streamxhub.streamx.flink.connector.redis.function.{Redis2PCSinkFunction, RedisSinkFunction}
+import com.streamxhub.streamx.flink.connector.redis.internal.{Redis2PCSinkFunction, RedisSinkFunction}
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.streaming.api.CheckpointingMode

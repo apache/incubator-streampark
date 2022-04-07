@@ -39,8 +39,8 @@ object RedisMapper {
 
   def map[T](cmd: RedisCommand,
              additionalKey: String,
-             javaKeyFun: TransformFunction[T],
-             javaValueFun: TransformFunction[T]): RedisMapper[T] = {
+             javaKeyFun: TransformFunction[T, String],
+             javaValueFun: TransformFunction[T, String]): RedisMapper[T] = {
     require(cmd != null, () => s"redis cmd  insert failoverTable must not null")
     require(additionalKey != null, () => s"redis additionalKey  insert failoverTable must not null")
     require(javaKeyFun != null, () => s"redis javaKeyFun  insert failoverTable must not null")
@@ -53,8 +53,8 @@ class RedisMapper[T](apiType: ApiType = ApiType.scala, cmd: RedisCommand, additi
 
   private[this] var scalaKeyFun: T => String = _
   private[this] var scalaValueFun: T => String = _
-  private[this] var javaKeyFun: TransformFunction[T] = _
-  private[this] var javaValueFun: TransformFunction[T] = _
+  private[this] var javaKeyFun: TransformFunction[T, String] = _
+  private[this] var javaValueFun: TransformFunction[T, String] = _
 
   //for scala
   def this() = {
@@ -74,8 +74,8 @@ class RedisMapper[T](apiType: ApiType = ApiType.scala, cmd: RedisCommand, additi
   //for scala
   def this(cmd: RedisCommand,
            additionalKey: String,
-           javaKeyFun: TransformFunction[T],
-           javaValueFun: TransformFunction[T]) = {
+           javaKeyFun: TransformFunction[T, String],
+           javaValueFun: TransformFunction[T, String]) = {
     this(ApiType.java, cmd, additionalKey)
     this.javaKeyFun = javaKeyFun
     this.javaValueFun = javaValueFun

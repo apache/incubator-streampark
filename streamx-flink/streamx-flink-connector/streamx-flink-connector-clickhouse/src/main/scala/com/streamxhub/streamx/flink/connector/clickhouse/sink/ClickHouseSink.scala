@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.connector.clickhouse.sink
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util._
 import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfigConst.CLICKHOUSE_SINK_PREFIX
-import com.streamxhub.streamx.flink.connector.clickhouse.function.{AsyncClickHouseSinkFunction, ClickHouseSinkFunction}
+import com.streamxhub.streamx.flink.connector.clickhouse.internal.{AsyncClickHouseSinkFunction, ClickHouseSinkFunction}
 import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
@@ -104,7 +104,7 @@ class ClickHouseSink(@(transient@param) ctx: StreamingContext,
    * @tparam T
    * @return
    */
-  def sink[T](stream: JavaDataStream[T], toSQLFn: TransformFunction[T]): DataStreamSink[T] = {
+  def sink[T](stream: JavaDataStream[T], toSQLFn: TransformFunction[T, String]): DataStreamSink[T] = {
     checkParameters(stream)
     val sinkFun = new AsyncClickHouseSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
@@ -144,7 +144,7 @@ class ClickHouseSink(@(transient@param) ctx: StreamingContext,
    * @tparam T
    * @return
    */
-  def syncSink[T](stream: JavaDataStream[T], sqlFromFn: TransformFunction[T]): DataStreamSink[T] = {
+  def syncSink[T](stream: JavaDataStream[T], sqlFromFn: TransformFunction[T, String]): DataStreamSink[T] = {
     val sinkFun = new ClickHouseSinkFunction[T](prop, sqlFromFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)

@@ -26,6 +26,7 @@
         <module>streamx-flink-connector-doris</module>
         <module>streamx-flink-connector-hbase</module>
         <module>streamx-flink-connector-http</module>
+        <module>streamx-flink-connector-elasticsearch</module>
         <module>streamx-flink-connector-influx</module>
         <module>streamx-flink-connector-jdbc</module>
         <module>streamx-flink-connector-kafka</module>

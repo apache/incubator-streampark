@@ -24,6 +24,7 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.flink.connector.function.RunningFunction;
 import com.streamxhub.streamx.flink.connector.function.SQLQueryFunction;
 import com.streamxhub.streamx.flink.connector.function.SQLResultFunction;
+import com.streamxhub.streamx.flink.connector.jdbc.internal.JdbcSourceFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 

@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.connector.clickhouse.sink
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.connector.clickhouse.function.AsyncClickHouseSinkFunction
+import com.streamxhub.streamx.flink.connector.clickhouse.internal.AsyncClickHouseSinkFunction
 import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -44,7 +44,7 @@ class AsyncClickHouseOutputFormat[T: TypeInformation](prop: Properties) extends 
 
   //for JAVA
   def this(properties: Properties,
-           javaSqlFunc: TransformFunction[T]) = {
+           javaSqlFunc: TransformFunction[T, String]) = {
     this(properties)
     sinkFunction = new AsyncClickHouseSinkFunction[T](properties, javaSqlFunc)
   }

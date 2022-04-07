@@ -25,11 +25,11 @@ import java.io.Serializable;
  * @author benjobs
  */
 @FunctionalInterface
-public interface TransformFunction<T> extends Serializable {
+public interface TransformFunction<T,R> extends Serializable {
     /**
      * @param bean: bean
      * @return String:
      */
-    String transform(T bean);
+    R transform(T bean);
 
 }
