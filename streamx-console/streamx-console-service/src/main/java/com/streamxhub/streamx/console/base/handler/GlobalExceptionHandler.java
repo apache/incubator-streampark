@@ -30,6 +30,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -57,6 +58,13 @@ public class GlobalExceptionHandler {
     public RestResponse handleParamsInvalidException(ServiceException e) {
         log.info("系统错误：{}", e.getMessage());
         return new RestResponse().message(e.getMessage());
+    }
+
+    @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
+        log.info("不支持的request method，异常信息：", e.getMessage());
+        return new RestResponse().message("不支持的request method，异常信息：" + e.getMessage());
     }
 
     /**

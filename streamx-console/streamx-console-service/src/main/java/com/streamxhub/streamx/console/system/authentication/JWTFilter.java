@@ -96,6 +96,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     @Override
     protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+        System.out.println("请求url:"+ httpServletRequest.getRequestURL()+", method:" + httpServletRequest.getMethod());
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         httpServletResponse.setHeader(
             "Access-control-Allow-Origin", httpServletRequest.getHeader("Origin"));
@@ -108,6 +109,12 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
             httpServletResponse.setStatus(HttpStatus.OK.value());
             return false;
         }
-        return super.preHandle(request, response);
+        boolean preHandleResult = super.preHandle(request, response);
+        int httpStatus =  httpServletResponse.getStatus();
+        //避免http_status=401时，浏览器自动弹出认证框
+        if (!preHandleResult && httpStatus==401){
+            httpServletResponse.setHeader("WWW-Authenticate",null);
+        }
+        return preHandleResult;
     }
 }

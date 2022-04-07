@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.streamx.console.system.dao.AccessTokenMapper">
+
+<select id="page" resultType="com.streamxhub.streamx.console.system.entity.AccessToken"
+        parameterType="com.streamxhub.streamx.console.system.entity.AccessToken">
+        SELECT id, username, token, expire_time, create_time, modify_time
+        FROM streamx.t_access_token t
+        <where>
+            <if test="accessToken.username != null and accessToken.username != ''">
+                AND t.USERNAME = #{accessToken.username}
+            </if>
+        </where>
+    </select>
+</mapper>

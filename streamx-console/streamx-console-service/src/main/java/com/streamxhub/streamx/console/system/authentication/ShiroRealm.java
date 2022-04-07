@@ -19,7 +19,10 @@
 
 package com.streamxhub.streamx.console.system.authentication;
 
+import com.streamxhub.streamx.console.base.util.WebUtils;
+import com.streamxhub.streamx.console.system.entity.AccessToken;
 import com.streamxhub.streamx.console.system.entity.User;
+import com.streamxhub.streamx.console.system.service.AccessTokenService;
 import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserService;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +36,7 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -47,6 +51,9 @@ public class ShiroRealm extends AuthorizingRealm {
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private AccessTokenService accessTokenService;
 
     @Override
     public boolean supports(AuthenticationToken token) {
@@ -83,8 +90,7 @@ public class ShiroRealm extends AuthorizingRealm {
      * @throws AuthenticationException 认证相关异常
      */
     @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken)
-        throws AuthenticationException {
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
         // 这里的 token是从 JWTFilter 的 executeLogin 方法传递过来的，已经经过了解密
         String token = (String) authenticationToken.getCredentials();
         String username = JWTUtil.getUsername(token);
@@ -97,9 +103,16 @@ public class ShiroRealm extends AuthorizingRealm {
         if (user == null) {
             throw new AuthenticationException("用户名或密码错误");
         }
+
         if (!JWTUtil.verify(token, username, user.getPassword())) {
-            throw new AuthenticationException("token校验不通过");
+            //校验是否属于api的token
+            String tokenDb = WebUtils.encryptToken(token);
+            AccessToken api = accessTokenService.lambdaQuery().eq(AccessToken::getToken, tokenDb).eq(AccessToken::getUsername, username).one();
+            if (Objects.isNull(api) || StringUtils.isEmpty(api.getUsername())) {
+                throw new AuthenticationException("token校验不通过");
+            }
         }
+
         return new SimpleAuthenticationInfo(token, token, "streamx_shiro_realm");
     }
 }
