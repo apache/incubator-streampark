@@ -96,7 +96,6 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     @Override
     protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        System.out.println("请求url:"+ httpServletRequest.getRequestURL()+", method:" + httpServletRequest.getMethod());
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         httpServletResponse.setHeader(
             "Access-control-Allow-Origin", httpServletRequest.getHeader("Origin"));

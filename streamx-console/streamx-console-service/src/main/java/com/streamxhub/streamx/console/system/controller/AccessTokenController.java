@@ -26,6 +26,7 @@ import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.system.entity.AccessToken;
 import com.streamxhub.streamx.console.system.service.AccessTokenService;
 import io.swagger.annotations.Api;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,16 +54,18 @@ public class AccessTokenController {
      */
     @ApiIgnore
     @PostMapping(value = "/create")
-    public RestResponse createToken(@NotBlank(message = "{required}") String username, String expireTime) {
+    @RequiresPermissions("token:add")
+    public RestResponse createToken(@NotBlank(message = "{required}") String username, String expireTime , String description) {
 
-        return accessTokenService.generateToken(username, expireTime);
+        return accessTokenService.generateToken(username, expireTime,description);
     }
 
     /**
-     * generate token string
+     * query token list
      */
     @ApiIgnore
     @PostMapping(value = "/list")
+    @RequiresPermissions("token:view")
     public RestResponse tokenList(RestRequest restRequest, AccessToken accessToken) {
         IPage<AccessToken> accessTokens = accessTokenService.findAccessTokens(accessToken, restRequest);
         return RestResponse.create().data(accessTokens);
@@ -70,12 +73,13 @@ public class AccessTokenController {
 
 
     /**
-     * generate token string
+     * delete token by id
      */
     @ApiIgnore
     @DeleteMapping(value = "/delete")
-    public RestResponse deleteToken(@NotBlank(message = "{required}") Long id) {
-        boolean res = accessTokenService.deleteToken(id);
+    @RequiresPermissions("token:delete")
+    public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
+        boolean res = accessTokenService.deleteToken(tokenId);
         return RestResponse.create().data(res);
     }
 

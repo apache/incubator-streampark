@@ -35,6 +35,8 @@ public class AccessToken implements Serializable {
 
     private static final long serialVersionUID = 7187628714679791772L;
 
+    public static String DEFAULT_PASSWORD = "X-api";
+    public static String DEFAULT_EXPIRE_TIME = "9999-01-01 00:00:00";
 
     @TableId(value = "ID", type = IdType.AUTO)
     private Long id;
@@ -48,8 +50,12 @@ public class AccessToken implements Serializable {
     @NotNull(message = "{required}")
     private Date expireTime;
 
+    private String description;
+
     private Date createTime;
 
     private Date modifyTime;
+
+    private String status;
 
 }

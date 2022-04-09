@@ -53,24 +53,27 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private AccessTokenMapper tokenMapper;
 
     @Override
-    public RestResponse generateToken(String username, String expireTime) {
+    public RestResponse generateToken(String username, String expireTime, String description) {
         User user = userService.lambdaQuery().eq(User::getUsername, username).one();
         if (Objects.isNull(user)) {
             return RestResponse.create().put("code", 0).message("user not available");
         }
 
         if (StringUtils.isEmpty(expireTime)) {
-            expireTime = "9999-01-01 00:00:00";
+            expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
         }
-        String password = "streamX-api";
+        String password = AccessToken.DEFAULT_PASSWORD;
         String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
         JWTToken jwtToken = new JWTToken(token, expireTime);
 
         AccessToken accessToken = new AccessToken();
         accessToken.setToken(jwtToken.getToken());
         accessToken.setUsername(username);
+        accessToken.setDescription(description);
         accessToken.setExpireTime(DateUtils.stringToDate(jwtToken.getExpireAt()));
         accessToken.setCreateTime(new Date());
 
@@ -93,5 +96,16 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         List<AccessToken> records = page.getRecords();
         page.setRecords(records);
         return page;
+    }
+
+    @Override
+    public boolean checkTokenEffective(String username, String token) {
+
+        AccessToken res = tokenMapper.getTokenInfo(username, token);
+        if (Objects.isNull(res) || res.getStatus().equals(User.STATUS_LOCK)) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -35,6 +35,8 @@ import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationLogService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +57,7 @@ import java.util.stream.Collectors;
 /**
  * @author benjobs
  */
+@Api(tags = "[flink app]相关操作", consumes = "Content-Type=application/x-www-form-urlencoded" )
 @Slf4j
 @Validated
 @RestController
@@ -100,6 +103,8 @@ public class ApplicationController {
         return RestResponse.create().data(map);
     }
 
+
+    @ApiOperation("app list")
     @PostMapping("list")
     @RequiresPermissions("app:view")
     public RestResponse list(Application app, RestRequest request) {

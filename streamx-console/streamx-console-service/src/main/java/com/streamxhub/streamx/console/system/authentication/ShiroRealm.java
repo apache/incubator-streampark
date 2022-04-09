@@ -20,7 +20,6 @@
 package com.streamxhub.streamx.console.system.authentication;
 
 import com.streamxhub.streamx.console.base.util.WebUtils;
-import com.streamxhub.streamx.console.system.entity.AccessToken;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.service.AccessTokenService;
 import com.streamxhub.streamx.console.system.service.RoleService;
@@ -36,7 +35,6 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -105,11 +103,11 @@ public class ShiroRealm extends AuthorizingRealm {
         }
 
         if (!JWTUtil.verify(token, username, user.getPassword())) {
-            //校验是否属于api的token
+            //校验是否属于api的token，权限是否有效
             String tokenDb = WebUtils.encryptToken(token);
-            AccessToken api = accessTokenService.lambdaQuery().eq(AccessToken::getToken, tokenDb).eq(AccessToken::getUsername, username).one();
-            if (Objects.isNull(api) || StringUtils.isEmpty(api.getUsername())) {
-                throw new AuthenticationException("token校验不通过");
+            boolean effective = accessTokenService.checkTokenEffective(username, tokenDb);
+            if (!effective) {
+                throw new AuthenticationException("token校验不通过,请检查user状态或token状态");
             }
         }
 
