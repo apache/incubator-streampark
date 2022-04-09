@@ -23,7 +23,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.{JdbcUtils, Logger}
-import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfigConst.CLICKHOUSE_TARGET_TABLE
+import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfig
 import com.streamxhub.streamx.flink.connector.clickhouse.util.ClickhouseConvertUtils.convert
 import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import org.apache.flink.configuration.Configuration
@@ -76,7 +76,7 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
     val user: String = Try(config.remove(KEY_JDBC_USER).toString).getOrElse(null)
     val driver: String = Try(config.remove(KEY_JDBC_DRIVER).toString).getOrElse(null)
     delayTime = Try(config.remove(KEY_JDBC_INSERT_BATCH_DELAYTIME).toString.toLong).getOrElse(DEFAULT_JDBC_INSERT_BATCH_DELAYTIME)
-    val targetTable = Try(config.remove(CLICKHOUSE_TARGET_TABLE).toString).getOrElse(null)
+    val targetTable = new ClickHouseConfig(config).table
     require(targetTable != null && !targetTable.isEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
     insertSqlPrefixes = s"insert into  $targetTable  values "
     val properties = new ClickHouseProperties()

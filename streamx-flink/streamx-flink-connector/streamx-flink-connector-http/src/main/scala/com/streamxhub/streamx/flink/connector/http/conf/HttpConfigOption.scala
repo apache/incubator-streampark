@@ -17,35 +17,29 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.clickhouse.conf
+package com.streamxhub.streamx.flink.connector.http.conf
 
-import com.streamxhub.streamx.flink.connector.failover.ThresholdConf
 
 import java.util.Properties
 
 /**
- *
- * Flink sink for Clickhouse database. Powered by Async Http Client.
- *
- * High-performance library for loading data to Clickhouse.
- *
- * It has two triggers for loading data: by timeout and by buffer size.
- *
+ * @author benjobs
  */
-//---------------------------------------------------------------------------------------
+object HttpConfigOption {
 
-class ClickHouseConfigDemo(parameters: Properties) extends ThresholdConf(parameters) {
-
-  val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(parameters)
-
-  val user = sinkOption.user.get()
-
-  val password = sinkOption.password.get()
-
-  val hosts = sinkOption.hosts.get()
-
-  val table = sinkOption.targetTable.get()
-
-  println(s"user: $user, password:$password, hosts:$hosts, table:$table ")
+  /**
+   *
+   * @param properties
+   * @return
+   */
+  def apply(properties: Properties = new Properties): HttpConfigOption = new HttpConfigOption(properties)
 
 }
+
+case class HttpConfigOption(properties: Properties) {
+
+  implicit val (prefix, prop) = ("http.sink", properties)
+
+}
+
+

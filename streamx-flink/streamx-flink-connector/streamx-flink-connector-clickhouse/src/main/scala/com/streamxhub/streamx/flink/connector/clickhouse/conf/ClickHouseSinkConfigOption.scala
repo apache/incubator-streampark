@@ -20,13 +20,32 @@
 package com.streamxhub.streamx.flink.connector.clickhouse.conf
 
 import com.streamxhub.streamx.common.conf.ConfigOption
+import com.streamxhub.streamx.flink.connector.clickhouse.sink.ClickHouseSink
+import com.streamxhub.streamx.flink.core.scala.StreamingContext
 
 import java.util.Properties
+import scala.annotation.meta.param
+
+/**
+ * @author benjobs
+ */
+object ClickHouseSinkConfigOption {
+
+  /**
+   *
+   * @param properties
+   * @return
+   */
+  def apply(properties: Properties = new Properties): ClickHouseSinkConfigOption = new ClickHouseSinkConfigOption(properties)
+
+}
 
 
-case class ClickHouseSinkConfigOption(properties: Properties) {
+class ClickHouseSinkConfigOption(properties: Properties) {
 
   implicit val (prefix, prop) = ("clickhouse.sink", properties)
+
+  val SIGN_COMMA = ","
 
   val hosts = ConfigOption[List[String]](
     key = "hosts",
@@ -35,7 +54,7 @@ case class ClickHouseSinkConfigOption(properties: Properties) {
     handle = k => {
       properties
         .getProperty(k)
-        .split(",")
+        .split(SIGN_COMMA)
         .filter(_.nonEmpty)
         .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
         .toList
@@ -59,5 +78,6 @@ case class ClickHouseSinkConfigOption(properties: Properties) {
     required = true,
     classType = classOf[String]
   )
+
 
 }

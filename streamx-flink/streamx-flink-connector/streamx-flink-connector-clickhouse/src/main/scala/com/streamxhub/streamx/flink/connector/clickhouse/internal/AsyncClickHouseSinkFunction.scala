@@ -23,7 +23,6 @@ import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfig
-import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfigConst.CLICKHOUSE_TARGET_TABLE
 import com.streamxhub.streamx.flink.connector.clickhouse.internal
 import com.streamxhub.streamx.flink.connector.clickhouse.util.ClickhouseConvertUtils.convert
 import com.streamxhub.streamx.flink.connector.failover.{FailoverChecker, SinkBuffer}
@@ -32,7 +31,6 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 
 import java.util.Properties
-import scala.collection.JavaConversions._
 
 class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, properties: Properties) extends RichSinkFunction[T] with Logger {
 
@@ -73,7 +71,8 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
         if (!Lock.initialized) {
           Lock.initialized = true
           clickHouseConf = new ClickHouseConfig(properties)
-          val targetTable = properties(CLICKHOUSE_TARGET_TABLE)
+          val clickHouseConf1: ClickHouseConfig = new ClickHouseConfig(properties)
+          val targetTable: String = clickHouseConf1.table
           require(targetTable != null && !targetTable.isEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
           clickHouseWriter = internal.ClickHouseSinkWriter(clickHouseConf)
           failoverChecker = FailoverChecker(clickHouseConf.delayTime)

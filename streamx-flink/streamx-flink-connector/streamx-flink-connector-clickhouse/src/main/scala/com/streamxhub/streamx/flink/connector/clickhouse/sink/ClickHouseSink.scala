@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.connector.clickhouse.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util._
-import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfigConst.CLICKHOUSE_SINK_PREFIX
+import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseSinkConfigOption
 import com.streamxhub.streamx.flink.connector.clickhouse.internal.{AsyncClickHouseSinkFunction, ClickHouseSinkFunction}
 import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
@@ -62,7 +62,7 @@ class ClickHouseSink(@(transient@param) ctx: StreamingContext,
                      name: String = null,
                      uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
-  val prop = ConfigUtils.getConf(ctx.parameter.toMap, CLICKHOUSE_SINK_PREFIX)(alias)
+  val prop = ConfigUtils.getConf(ctx.parameter.toMap, ClickHouseSinkConfigOption().prefix)(alias)
 
   Utils.copyProperties(property, prop)
 

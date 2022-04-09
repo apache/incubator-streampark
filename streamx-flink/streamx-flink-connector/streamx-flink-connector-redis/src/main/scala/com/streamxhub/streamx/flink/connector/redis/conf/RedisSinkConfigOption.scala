@@ -17,23 +17,38 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.clickhouse.conf
+package com.streamxhub.streamx.flink.connector.redis.conf
 
-object ClickHouseConfigConst {
+
+import com.streamxhub.streamx.common.conf.ConfigOption
+
+import java.util.Properties
+
+/**
+ * @author benjobs
+ */
+object RedisSinkConfigOption {
+
+  implicit val prefix = "redis.sink"
 
   /**
-   * about clickhouse
+   *
+   * @param properties
+   * @return
    */
-  val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"
+  def apply(properties: Properties = new Properties): RedisSinkConfigOption = new RedisSinkConfigOption(properties)
 
-  val CLICKHOUSE_HOSTS = "hosts"
+}
 
-  val CLICKHOUSE_USER = "user"
+class RedisSinkConfigOption(properties: Properties) {
 
-  val CLICKHOUSE_PASSWORD = "password"
+  implicit val prop = properties
 
-  val CLICKHOUSE_TARGET_TABLE = "targetTable"
-
-  val SIGN_COMMA = ","
+  val connectType = ConfigOption(
+    key = "connectType",
+    required = true,
+    defaultValue = "jedisPool",
+    classType = classOf[String]
+  )
 
 }
