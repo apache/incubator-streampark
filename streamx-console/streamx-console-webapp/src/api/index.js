@@ -155,6 +155,11 @@ export default {
     CHECK_NAME: '/user/check/name',
     CHECK_PASSWORD: '/user/check/password'
   },
+  Token: {
+    LIST: '/token/list',
+    DELETE: '/token/delete',
+    CREATE: '/token/create'
+  },
   Role: {
     POST: '/role/post',
     UPDATE: '/role/update',
