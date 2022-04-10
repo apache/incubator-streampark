@@ -356,6 +356,9 @@ INSERT INTO `t_menu` VALUES (100034, 100013, 'Setting', '/flink/setting', 'flink
 INSERT INTO `t_menu` VALUES (100035, 100034, 'Setting Update', NULL, NULL, 'setting:update', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100036, 100013, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', NULL, '0', '0', NULL, NOW(), NOW());
 INSERT INTO `t_menu` VALUES (100037, 100015, 'delete', NULL, NULL, 'app:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100038,100000,'Token Management','/system/token','system/token/Token','token:view','lock','0','1',1.0,NOW(), NOW());
+INSERT INTO `t_menu` VALUES (100039,100038,'add',NULL,NULL,'token:add',NULL,'1','1',NULL,NOW(),NULL);
+INSERT INTO `t_menu` VALUES (100040,100038,'delete',NULL,NULL,'token:delete',NULL,'1','1',NULL,NOW(),NULL);
 COMMIT;
 
 -- ----------------------------

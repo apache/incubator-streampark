@@ -109,10 +109,10 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
             return false;
         }
         boolean preHandleResult = super.preHandle(request, response);
-        int httpStatus =  httpServletResponse.getStatus();
+        int httpStatus = httpServletResponse.getStatus();
         //避免http_status=401时，浏览器自动弹出认证框
-        if (!preHandleResult && httpStatus==401){
-            httpServletResponse.setHeader("WWW-Authenticate",null);
+        if (!preHandleResult && httpStatus == 401) {
+            httpServletResponse.setHeader("WWW-Authenticate", null);
         }
         return preHandleResult;
     }

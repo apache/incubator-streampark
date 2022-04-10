@@ -24,22 +24,20 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.system.entity.AccessToken;
-import com.streamxhub.streamx.console.system.entity.Role;
 
 public interface AccessTokenService extends IService<AccessToken> {
 
 
     /**
-     *
      * @param username
      * @param expireTime
      * @param description
      */
-    RestResponse generateToken(String username, String expireTime,String description);
+    RestResponse generateToken(String username, String expireTime, String description);
 
     boolean deleteToken(Long id);
 
     IPage<AccessToken> findAccessTokens(AccessToken tokenParam, RestRequest request);
 
-    boolean checkTokenEffective(String username,String token);
+    boolean checkTokenEffective(String username, String token);
 }

@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-
 package com.streamxhub.streamx.console.system.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -55,9 +54,9 @@ public class AccessTokenController {
     @ApiIgnore
     @PostMapping(value = "/create")
     @RequiresPermissions("token:add")
-    public RestResponse createToken(@NotBlank(message = "{required}") String username, String expireTime , String description) {
+    public RestResponse createToken(@NotBlank(message = "{required}") String username, String expireTime, String description) {
 
-        return accessTokenService.generateToken(username, expireTime,description);
+        return accessTokenService.generateToken(username, expireTime, description);
     }
 
     /**
@@ -71,7 +70,6 @@ public class AccessTokenController {
         return RestResponse.create().data(accessTokens);
     }
 
-
     /**
      * delete token by id
      */
@@ -82,6 +80,5 @@ public class AccessTokenController {
         boolean res = accessTokenService.deleteToken(tokenId);
         return RestResponse.create().data(res);
     }
-
 
 }

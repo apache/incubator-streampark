@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 /**
  * @author benjobs
  */
-@Api(tags = "[flink app]相关操作", consumes = "Content-Type=application/x-www-form-urlencoded" )
+@Api(tags = "[flink app]相关操作", consumes = "Content-Type=application/x-www-form-urlencoded")
 @Slf4j
 @Validated
 @RestController
@@ -103,7 +103,6 @@ public class ApplicationController {
         return RestResponse.create().data(map);
     }
 
-
     @ApiOperation("app list")
     @PostMapping("list")
     @RequiresPermissions("app:view")
@@ -115,19 +114,11 @@ public class ApplicationController {
         Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
 
         // add building pipeline status info and app control info
-        appRecords = appRecords.stream()
-                .peek(e -> {
-                    if (pipeStates.containsKey(e.getId())) {
-                        e.setBuildStatus(pipeStates.get(e.getId()).getCode());
-                    }
-                })
-                .peek(e -> e.setAppControl(
-                        new AppControl()
-                                .setAllowBuild(e.getBuildStatus() == null || !PipelineStatus.running.getCode().equals(e.getBuildStatus()))
-                                .setAllowStart(PipelineStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack())
-                                .setAllowStop(e.isRunning()))
-                )
-                .collect(Collectors.toList());
+        appRecords = appRecords.stream().peek(e -> {
+            if (pipeStates.containsKey(e.getId())) {
+                e.setBuildStatus(pipeStates.get(e.getId()).getCode());
+            }
+        }).peek(e -> e.setAppControl(new AppControl().setAllowBuild(e.getBuildStatus() == null || !PipelineStatus.running.getCode().equals(e.getBuildStatus())).setAllowStart(PipelineStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack()).setAllowStop(e.isRunning()))).collect(Collectors.toList());
 
         applicationList.setRecords(appRecords);
         return RestResponse.create().data(applicationList);
@@ -223,7 +214,6 @@ public class ApplicationController {
     }
 
     @PostMapping("delete")
-    @RequiresPermissions("app:delete")
     public RestResponse delete(Application app) throws ServiceException {
         Boolean deleted = applicationService.delete(app);
         return RestResponse.create().data(deleted);
