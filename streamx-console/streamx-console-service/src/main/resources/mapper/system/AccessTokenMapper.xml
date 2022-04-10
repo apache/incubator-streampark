@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.streamx.console.system.dao.AccessTokenMapper">
+    <select id="page" resultType="com.streamxhub.streamx.console.system.entity.AccessToken"
+            parameterType="com.streamxhub.streamx.console.system.entity.AccessToken">
+        SELECT t1.id, t1.username, t1.token, t1.expire_time, t1.create_time, t1.modify_time, t1.description , t2.`STATUS` as `status`
+        FROM t_access_token t1,t_user t2
+        <where>
+            t1.username = t2.username
+            <if test="accessToken.username != null and accessToken.username != ''">
+                AND t1.USERNAME like concat('%',#{accessToken.username},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="getTokenInfo" resultType="com.streamxhub.streamx.console.system.entity.AccessToken">
+        SELECT t1.id,
+               t1.username,
+               t1.token,
+               t1.expire_time,
+               t1.create_time,
+               t1.modify_time,
+               t1.description,
+               t2.`STATUS` as `status`
+        FROM t_user t2
+                 join t_access_token t1
+                      on t1.username = t2.username
+                          and t1.username = #{username,jdbcType=VARCHAR} and t1.token = #{accessToken,jdbcType=VARCHAR}
+    </select>
+</mapper>
