@@ -81,7 +81,6 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         return RestResponse.create().data(accessToken);
     }
 
-
     @Override
     public boolean deleteToken(Long id) {
         boolean res = this.removeById(id);

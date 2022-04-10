@@ -39,7 +39,7 @@ import java.util.List;
 /**
  * @author Al-assad
  */
-@Api(tags = "[flink history]相关操作", consumes = "Content-Type=application/x-www-form-urlencoded" )
+@Api(tags = "[flink history]相关操作", consumes = "Content-Type=application/x-www-form-urlencoded")
 @Slf4j
 @Validated
 @RestController

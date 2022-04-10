@@ -62,5 +62,4 @@ public class SwaggerConfig implements WebMvcConfigurer {
         return new ApiInfoBuilder().title("StreamX Api Docs").description("StreamX Api Docs").build();
     }
 
-
 }
