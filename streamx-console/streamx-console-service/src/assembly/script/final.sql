@@ -355,7 +355,9 @@ INSERT INTO `t_menu` VALUES (100033, 100015, 'flame Graph', NULL, NULL, 'app:fla
 INSERT INTO `t_menu` VALUES (100034, 100013, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', '1', 4, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100035, 100034, 'Setting Update', NULL, NULL, 'setting:update', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100036, 100013, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', NULL, '0', '0', NULL, NOW(), NOW());
-COMMIT;
+INSERT INTO `t_menu` VALUES (100037,100000,'Token Management','/system/token','system/token/Token','token:view','lock','0','1',1.0,NOW(), NOW());
+INSERT INTO `t_menu` VALUES (100038,100037,'add',NULL,NULL,'token:add',NULL,'1','1',NULL,NOW(),NULL);
+INSERT INTO `t_menu` VALUES (100039,100037,'delete',NULL,NULL,'token:delete',NULL,'1','1',NULL,NOW(),NULL);
 
 -- ----------------------------
 -- Table structure for t_message
