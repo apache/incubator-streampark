@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>streamx-plugin</artifactId>
@@ -21,16 +21,16 @@
         <module>streamx-flink-udf</module>
         <module>streamx-flink-submit</module>
         <module>streamx-flink-proxy</module>
-        <module>streamx-jvm-profiler</module>
         <module>streamx-flink-packer</module>
         <module>streamx-flink-kubernetes</module>
+        <module>streamx-jvm-profiler</module>
     </modules>
 
     <dependencies>
 
         <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.11</artifactId>
+            <artifactId>scalatest_${scala.binary.version}</artifactId>
             <version>${scalatest.version}</version>
             <scope>test</scope>
         </dependency>

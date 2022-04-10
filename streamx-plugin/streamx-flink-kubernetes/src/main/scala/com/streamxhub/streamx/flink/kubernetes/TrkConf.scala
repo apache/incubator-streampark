@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.common.conf.{ConfigHub, K8sFlinkConfig}
+import com.streamxhub.streamx.common.conf.{InternalConfigHolder, K8sFlinkConfig}
 
 /**
  * @author Al-assad
@@ -61,13 +61,13 @@ object FlinkTrkConf {
    */
   def fromConfigHub: FlinkTrkConf = FlinkTrkConf(
     JobStatusWatcherConf(
-      ConfigHub.get(K8sFlinkConfig.jobStatusTrkTaskTimeoutSec),
-      ConfigHub.get(K8sFlinkConfig.jobStatueTrkTaskIntervalSec),
-      ConfigHub.get(K8sFlinkConfig.silentStateJobKeepTrackingSec)
+      InternalConfigHolder.get(K8sFlinkConfig.jobStatusTrkTaskTimeoutSec),
+      InternalConfigHolder.get(K8sFlinkConfig.jobStatueTrkTaskIntervalSec),
+      InternalConfigHolder.get(K8sFlinkConfig.silentStateJobKeepTrackingSec)
     ),
     MetricWatcherConf(
-      ConfigHub.get(K8sFlinkConfig.metricTrkTaskTimeoutSec),
-      ConfigHub.get(K8sFlinkConfig.metricTrkTaskIntervalSec)
+      InternalConfigHolder.get(K8sFlinkConfig.metricTrkTaskTimeoutSec),
+      InternalConfigHolder.get(K8sFlinkConfig.metricTrkTaskIntervalSec)
     )
   )
 

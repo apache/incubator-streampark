@@ -1591,6 +1591,7 @@ export default {
       loading: false,
       submitting: false,
       executionMode: null,
+      validateAgain: false,
       exclusions: new Map(),
       podTemplate: '',
       jmPodTemplate: '',
@@ -2181,12 +2182,20 @@ export default {
       }
     },
 
-    handleCheckCheckPoint(rule, value, callback) {
-      const cpMaxFailureInterval = this.form.getFieldValue('cpMaxFailureInterval')
-      const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval')
-      const cpFailureAction = this.form.getFieldValue('cpFailureAction')
+    handleCheckCheckPoint (rule, value, callback) {
+      const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval') || null
+      const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval') || null
+      const cpFailureAction = this.form.getFieldValue('cpFailureAction') || null
 
-      if (cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null) {
+      if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
+        if (cpMaxFailureInterval === 0) {
+          callback(new Error('checkPoint max failure interval the value must be greater than 0'))
+          return
+        }
+        if (cpFailureRateInterval === 0) {
+          callback(new Error('checkPoint failure rate interval the value must be greater than 0'))
+          return
+        }
         if (cpFailureAction === 1) {
           const alertEmail = this.form.getFieldValue('alertEmail')
           if (alertEmail == null) {
@@ -2196,16 +2205,29 @@ export default {
               }
             })
             callback(new Error('trigger action is alert,alertEmail must not be empty'))
-          } else {
-            callback()
+            return
           }
-        } else {
-          callback()
         }
-      } else if (cpMaxFailureInterval == null && cpFailureRateInterval == null && cpFailureAction == null) {
         callback()
+        if (!this.validateAgain) {
+          this.validateAgain = true
+          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+          this.validateAgain = false
+        }
+      } else if(cpMaxFailureInterval == null && cpFailureRateInterval == null && cpFailureAction == null) {
+        callback()
+        if (!this.validateAgain) {
+          this.validateAgain = true
+          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+          this.validateAgain = false
+        }
       } else {
-        callback(new Error('options all required or all empty'))
+        callback(new Error('checkPoint failure options must be all required or all empty'))
+        if (!this.validateAgain) {
+          this.validateAgain = true
+          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+          this.validateAgain = false
+        }
       }
     },
 

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -12,33 +13,10 @@
     <name>StreamX : Flink Parent</name>
     <packaging>pom</packaging>
 
-    <profiles>
-        <!-- default -->
-        <profile>
-            <id>streamx-flink-all</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <modules>
-                <module>streamx-flink-shims</module>
-                <module>streamx-flink-core</module>
-                <module>streamx-flink-test</module>
-            </modules>
-        </profile>
-        <!-- when skip tests enable -->
-        <profile>
-            <id>streamx-flink-skip-test</id>
-            <activation>
-                <property>
-                    <name>skipTests</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <modules>
-                <module>streamx-flink-shims</module>
-                <module>streamx-flink-core</module>
-            </modules>
-        </profile>
-    </profiles>
+    <modules>
+        <module>streamx-flink-shims</module>
+        <module>streamx-flink-core</module>
+        <module>streamx-flink-connector</module>
+    </modules>
 
 </project>

@@ -1094,7 +1094,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
                 assert flinkSql != null;
                 //1) dist_userJar
-                String sqlDistJar = commonService.getSqlClientJar();
+                FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
+                String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
                 //2) appConfig
                 appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
                 //3) client

@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-plugin</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.3</version>
     </parent>
     <artifactId>streamx-jvm-profiler</artifactId>
     <name>StreamX : JVM Profiler</name>
@@ -13,7 +13,8 @@
 
         <dependency>
             <groupId>org.scalaj</groupId>
-            <artifactId>scalaj-http_2.11</artifactId>
+            <artifactId>scalaj-http_${scala.binary.version}</artifactId>
+            <version>2.4.2</version>
         </dependency>
 
         <dependency>

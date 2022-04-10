@@ -4,17 +4,17 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-flink-submit</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.3</version>
     </parent>
 
-    <artifactId>streamx-flink-submit-core</artifactId>
+    <artifactId>streamx-flink-submit-core_${scala.binary.version}</artifactId>
     <name>StreamX : Flink Submit Core</name>
 
     <dependencies>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-submit-api</artifactId>
+            <artifactId>streamx-flink-submit-api_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -23,14 +23,14 @@
           so a full build dependencies is required. -->
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims_flink-${streamx.flink.shims.version}</artifactId>
+            <artifactId>streamx-flink-shims_flink-${streamx.flink.shims.version}_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-kubernetes</artifactId>
+            <artifactId>streamx-flink-kubernetes_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
