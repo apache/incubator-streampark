@@ -27,6 +27,7 @@ import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.service.SqlCompleteService;
 import com.streamxhub.streamx.flink.core.SqlError;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -40,6 +41,7 @@ import java.util.List;
 /**
  * @author benjobs
  */
+@Api(tags = "[flink sql]相关操作", consumes = "Content-Type=application/x-www-form-urlencoded")
 @Slf4j
 @Validated
 @RestController

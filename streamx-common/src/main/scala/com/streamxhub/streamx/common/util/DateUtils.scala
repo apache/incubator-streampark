@@ -40,6 +40,10 @@ object DateUtils {
     df.parse(date)
   }
 
+  def stringToDate(date: String): Date = {
+    parse(date)
+  }
+
   def milliSecond2Date(time: Long): Date = new Date(time)
 
   def second2Date(time: Long): Date = milliSecond2Date(time * 1000)

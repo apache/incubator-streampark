@@ -17,38 +17,27 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.common.enums;
+package com.streamxhub.streamx.console.system.service;
 
-import java.io.Serializable;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.system.entity.AccessToken;
 
-/**
- * @author benjobs
- */
+public interface AccessTokenService extends IService<AccessToken> {
 
-public enum Semantic implements Serializable {
-
-    /**
-     *
-     */
-    EXACTLY_ONCE,
 
     /**
-     *
+     * @param username
+     * @param expireTime
+     * @param description
      */
-    AT_LEAST_ONCE,
+    RestResponse generateToken(String username, String expireTime, String description);
 
-    /**
-     *
-     */
-    NONE;
+    boolean deleteToken(Long id);
 
-    public static Semantic of(String name) {
-        for (Semantic semantic : Semantic.values()) {
-            if (name.equals(semantic.name())) {
-                return semantic;
-            }
-        }
-        return null;
-    }
+    IPage<AccessToken> findAccessTokens(AccessToken tokenParam, RestRequest request);
 
+    boolean checkTokenEffective(String username, String token);
 }

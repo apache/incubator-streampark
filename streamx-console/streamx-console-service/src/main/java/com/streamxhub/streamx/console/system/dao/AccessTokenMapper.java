@@ -17,38 +17,17 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.common.enums;
+package com.streamxhub.streamx.console.system.dao;
 
-import java.io.Serializable;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.streamxhub.streamx.console.system.entity.AccessToken;
+import org.apache.ibatis.annotations.Param;
 
-/**
- * @author benjobs
- */
+public interface AccessTokenMapper extends BaseMapper<AccessToken> {
 
-public enum Semantic implements Serializable {
+    IPage<AccessToken> page(Page<AccessToken> page, @Param("accessToken") AccessToken accessToken);
 
-    /**
-     *
-     */
-    EXACTLY_ONCE,
-
-    /**
-     *
-     */
-    AT_LEAST_ONCE,
-
-    /**
-     *
-     */
-    NONE;
-
-    public static Semantic of(String name) {
-        for (Semantic semantic : Semantic.values()) {
-            if (name.equals(semantic.name())) {
-                return semantic;
-            }
-        }
-        return null;
-    }
-
+    AccessToken getTokenInfo(@Param("username") String username, @Param("accessToken") String accessToken);
 }
