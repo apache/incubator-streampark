@@ -22,8 +22,8 @@ package com.streamxhub.streamx.flink.connector.redis.sink
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{ConfigUtils, Utils}
 import com.streamxhub.streamx.flink.connector.redis.bean.RedisMapper
-import com.streamxhub.streamx.flink.connector.redis.conf.RedisConfig._
-import com.streamxhub.streamx.flink.connector.redis.function.{Redis2PCSinkFunction, RedisSinkFunction}
+import com.streamxhub.streamx.flink.connector.redis.conf.RedisSinkConfigOption
+import com.streamxhub.streamx.flink.connector.redis.internal.{Redis2PCSinkFunction, RedisSinkFunction}
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.streaming.api.CheckpointingMode
@@ -67,8 +67,9 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
 
   lazy val config: FlinkJedisConfigBase = {
     val map: util.Map[String, String] = ctx.parameter.toMap
-    val redisConf = ConfigUtils.getConf(map, REDIS_PREFIX)
-    val connectType: String = Try(redisConf.remove(REDIS_CONNECT_TYPE).toString).getOrElse(DEFAULT_REDIS_CONNECT_TYPE)
+    val redisConf = ConfigUtils.getConf(map, RedisSinkConfigOption().prefix)
+    val option: RedisSinkConfigOption = RedisSinkConfigOption(redisConf)
+    val connectType: String = option.connectType.get()
     Utils.copyProperties(property, redisConf)
 
     val host: String = redisConf.remove(KEY_HOST) match {
@@ -121,7 +122,7 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
         })
         builder.build()
 
-      case DEFAULT_REDIS_CONNECT_TYPE =>
+      case "jedisPool" =>
         val builder: FlinkJedisPoolConfig.Builder = new FlinkJedisPoolConfig.Builder().setHost(host).setPort(port)
         redisConf.foreach(x => {
           val field = Try(builder.getClass.getDeclaredField(x._1)).getOrElse {

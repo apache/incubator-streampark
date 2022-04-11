@@ -21,6 +21,7 @@ package com.streamxhub.streamx.flink.connector.kafka.source
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{ConfigUtils, Utils}
+import com.streamxhub.streamx.flink.connector.kafka.bean.KafkaRecord
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
@@ -182,14 +183,7 @@ class KafkaSource(@(transient@param) private[this] val ctx: StreamingContext, pr
 }
 
 
-class KafkaRecord[T: TypeInformation](
-                                       val topic: String,
-                                       val partition: Long,
-                                       val timestamp: Long,
-                                       val offset: Long,
-                                       val key: String,
-                                       val value: T
-                                     )
+
 
 class KafkaDeserializer[T: TypeInformation](deserializer: KafkaDeserializationSchema[T]) extends KafkaDeserializationSchema[KafkaRecord[T]] {
 

@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.connector.doris.sink;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
-import com.streamxhub.streamx.flink.connector.doris.function.DorisSinkFunction;
+import com.streamxhub.streamx.flink.connector.doris.internal.DorisSinkFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
@@ -86,8 +86,24 @@ public class DorisJavaSink<T> {
         return this;
     }
 
+    /**
+     * java stream
+     * @param source
+     * @return
+     */
     public DataStreamSink<T> sink(DataStream<T> source) {
         DorisSinkFunction<T> sinkFunction = new DorisSinkFunction<>(context, properties, alias);
         return source.addSink(sinkFunction);
     }
+
+    /**
+     * scala stream
+     * @param source
+     * @return
+     */
+    public DataStreamSink<T> sink(org.apache.flink.streaming.api.scala.DataStream<T> source) {
+        DorisSinkFunction<T> sinkFunction = new DorisSinkFunction<>(context, properties, alias);
+        return source.addSink(sinkFunction);
+    }
+
 }

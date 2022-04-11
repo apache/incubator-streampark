@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.flink.connector.http.sink
 
-import com.streamxhub.streamx.flink.connector.http.conf.HttpConfig.HTTP_SINK_PREFIX
+import com.streamxhub.streamx.flink.connector.http.conf.HttpConfigOption
 import com.streamxhub.streamx.flink.connector.http.function.HttpSinkFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
@@ -81,7 +81,7 @@ class HttpSink(@(transient@param) ctx: StreamingContext,
   def trace(stream: JavaDataStream[String]): DataStreamSink[String] = sink(new DataStream[String](stream), HttpTrace.METHOD_NAME)
 
   private[this] def sink(stream: DataStream[String], method: String): DataStreamSink[String] = {
-    val params = ctx.parameter.toMap.filter(_._1.startsWith(HTTP_SINK_PREFIX)).map(x => x._1.drop(HTTP_SINK_PREFIX.length + 1) -> x._2)
+    val params = ctx.parameter.getProperties
     val sinkFun = new HttpSinkFunction(params, header, method)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)

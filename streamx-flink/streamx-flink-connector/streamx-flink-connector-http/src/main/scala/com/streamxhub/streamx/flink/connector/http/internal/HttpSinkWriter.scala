@@ -20,7 +20,8 @@
 package com.streamxhub.streamx.flink.connector.http.internal
 
 import com.streamxhub.streamx.common.util.{Logger, ThreadUtils}
-import com.streamxhub.streamx.flink.connector.failover.{SinkRequest, SinkWriter, ThresholdConf}
+import com.streamxhub.streamx.flink.connector.conf.ThresholdConf
+import com.streamxhub.streamx.flink.connector.failover.{SinkRequest, SinkWriter}
 import org.asynchttpclient.{AsyncHttpClient, Dsl}
 
 import java.util.concurrent._

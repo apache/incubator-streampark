@@ -21,6 +21,7 @@ package com.streamxhub.streamx.flink.connector.kafka.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst
 import com.streamxhub.streamx.common.util.{ConfigUtils, Logger, Utils}
+import com.streamxhub.streamx.flink.connector.kafka.bean.KafkaEqualityPartitioner
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
@@ -105,43 +106,4 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
 
 }
 
-/**
- *
- * <b>KafkaEqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去
- *
- * @param parallelism
- * @tparam T
- */
-class KafkaEqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitioner[T] with Logger {
 
-  private[this] var parallelInstanceId = 0
-
-  private[this] val partitionIndex: AtomicInteger = new AtomicInteger(0)
-
-  override def open(parallelInstanceId: Int, parallelInstances: Int): Unit = {
-    logInfo(s"KafkaEqualityPartitioner: parallelism $parallelism")
-    require(parallelInstanceId >= 0 && parallelInstances > 0, "[StreamX] KafkaEqualityPartitioner:Id of this subtask cannot be negative,Number of subtasks must be larger than 0.")
-    this.parallelInstanceId = parallelInstanceId
-  }
-
-  override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]): Int = {
-    require(partitions != null && partitions.length > 0, "[StreamX] KafkaEqualityPartitioner:Partitions of the target topic is empty.")
-    (parallelism, partitions.length) match {
-      //kafka have 1 partition
-      case (_, 1) => 0
-      case (x, y) if x % y == 0 => partitions(parallelInstanceId % partitions.length)
-      case (_, y) =>
-        partitionIndex.get() match {
-          case x if x == y - 1 => partitionIndex.getAndSet(0)
-          case _ => partitionIndex.incrementAndGet()
-        }
-    }
-  }
-
-  override def equals(o: Any): Boolean = this == o || o.isInstanceOf[KafkaEqualityPartitioner[T]]
-
-  override def hashCode: Int = classOf[KafkaEqualityPartitioner[T]].hashCode
-
-  def checkArgument(condition: Boolean, @Nullable errorMessage: String): Unit = if (!condition) throw new IllegalArgumentException(errorMessage)
-
-}

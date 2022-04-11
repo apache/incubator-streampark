@@ -19,13 +19,11 @@
 
 package com.streamxhub.streamx.flink.connector.clickhouse.conf
 
-import ClickHouseConfigConst.{CLICKHOUSE_HOSTS, CLICKHOUSE_PASSWORD, CLICKHOUSE_USER, SIGN_COMMA}
-import com.streamxhub.streamx.flink.connector.failover.ThresholdConf
+import com.streamxhub.streamx.flink.connector.conf.ThresholdConf
 
-import java.util.concurrent.ThreadLocalRandom
 import java.util.{Base64, Properties}
+import java.util.concurrent.ThreadLocalRandom
 import scala.collection.JavaConversions._
-
 
 /**
  *
@@ -38,19 +36,24 @@ import scala.collection.JavaConversions._
  */
 //---------------------------------------------------------------------------------------
 
-class ClickHouseConfig(parameters: Properties) extends ThresholdConf(parameters) {
+class ClickHouseConfig(parameters: Properties) extends ThresholdConf(ClickHouseSinkConfigOption(parameters).prefix, parameters) {
+  val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(parameters)
+
+  val user: String = sinkOption.user.get()
+
+  val password: String = sinkOption.password.get()
+
+  val hosts: List[String] = sinkOption.hosts.get()
+
+  val table: String = sinkOption.targetTable.get()
+
+
   var currentHostId: Int = 0
-  val credentials: String = (parameters.getProperty(CLICKHOUSE_USER), parameters.getProperty(CLICKHOUSE_PASSWORD)) match {
+
+  val credentials: String = (user, password) match {
     case (null, null) => null
     case (u, p) => new String(Base64.getEncoder.encode(s"$u:$p".getBytes))
   }
-  val hosts: java.util.List[String] = parameters.getOrElse(CLICKHOUSE_HOSTS, "")
-    .split(SIGN_COMMA)
-    .filter(_.nonEmpty)
-    .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
-    .toList
-
-  require(hosts.nonEmpty)
 
   def getRandomHostUrl: String = {
     currentHostId = ThreadLocalRandom.current.nextInt(hosts.size)
@@ -65,5 +68,7 @@ class ClickHouseConfig(parameters: Properties) extends ThresholdConf(parameters)
     }
     hosts.get(currentHostId)
   }
+
+  println(s"user: $user, password:$password, hosts:$hosts, table:$table ")
 
 }

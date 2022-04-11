@@ -20,7 +20,8 @@
 package com.streamxhub.streamx.flink.connector.http.internal
 
 import com.streamxhub.streamx.common.util.{JsonUtils, Logger}
-import com.streamxhub.streamx.flink.connector.failover.{FailoverWriter, SinkRequest, ThresholdConf}
+import com.streamxhub.streamx.flink.connector.conf.ThresholdConf
+import com.streamxhub.streamx.flink.connector.failover.{FailoverWriter, SinkRequest}
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.http.client.methods._
 import org.asynchttpclient.{AsyncHttpClient, ListenableFuture, Request, Response}

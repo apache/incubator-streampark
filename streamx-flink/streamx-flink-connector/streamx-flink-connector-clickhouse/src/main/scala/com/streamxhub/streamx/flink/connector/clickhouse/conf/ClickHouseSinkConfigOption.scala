@@ -20,22 +20,41 @@
 package com.streamxhub.streamx.flink.connector.clickhouse.conf
 
 import com.streamxhub.streamx.common.conf.ConfigOption
+import com.streamxhub.streamx.common.util.ConfigUtils
+import scala.collection.JavaConverters._
 
-import java.util.Properties
+import java.util.{Map, Properties, HashMap => JavaHashMap}
+
+/**
+ * @author benjobs
+ */
+object ClickHouseSinkConfigOption {
+
+  /**
+   *
+   * @param properties
+   * @return
+   */
+  def apply(properties: Properties = new Properties): ClickHouseSinkConfigOption = new ClickHouseSinkConfigOption(properties)
+
+}
 
 
-case class ClickHouseSinkConfigOption(properties: Properties) {
+class ClickHouseSinkConfigOption(properties: Properties) {
 
   implicit val (prefix, prop) = ("clickhouse.sink", properties)
 
+  val SIGN_COMMA = ","
+
   val hosts = ConfigOption[List[String]](
     key = "hosts",
-    required = true,
+    required = false,
+    defaultValue = List(),
     classType = classOf[List[String]],
     handle = k => {
       properties
         .getProperty(k)
-        .split(",")
+        .split(SIGN_COMMA)
         .filter(_.nonEmpty)
         .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
         .toList
@@ -50,14 +69,27 @@ case class ClickHouseSinkConfigOption(properties: Properties) {
 
   val password = ConfigOption(
     key = "password",
-    required = true,
+    required = false,
+    defaultValue = "",
     classType = classOf[String]
   )
 
   val targetTable = ConfigOption(
-    key = "targetTable",
-    required = true,
+    key = "failover.table",
+    required = false,
     classType = classOf[String]
   )
+
+
+  val failoverTable = ConfigOption(
+    key = "targetTable",
+    required = false,
+    defaultValue = "",
+    classType = classOf[String]
+  )
+
+  def getInternalConfig(): Properties = {
+    ConfigUtils.getConf(prop.asScala.asJava, prefix)
+  }
 
 }
