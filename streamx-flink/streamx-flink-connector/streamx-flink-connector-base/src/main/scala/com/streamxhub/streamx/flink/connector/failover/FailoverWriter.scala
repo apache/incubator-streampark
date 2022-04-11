@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.connector.failover
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util._
-import com.streamxhub.streamx.flink.connector.failover.FailoverStorageType.{FailoverStorageType, HBase, HDFS, Kafka, MySQL}
+import com.streamxhub.streamx.flink.connector.conf.FailoverStorageType.{FailoverStorageType, HBase, HDFS, Kafka, MySQL}
 import org.apache.hadoop.conf.{Configuration => HConf}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.hbase.client.{BufferedMutator, BufferedMutatorParams, Put, RetriesExhaustedWithDetailsException, Connection => HBaseConn}

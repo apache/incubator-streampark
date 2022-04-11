@@ -19,9 +19,10 @@
 
 package com.streamxhub.streamx.flink.connector.http.function
 
-import com.streamxhub.streamx.common.conf.ConfigConst.KEY_SINK_FAILOVER_TABLE
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.connector.failover.{FailoverChecker, SinkBuffer, ThresholdConf}
+import com.streamxhub.streamx.flink.connector.conf.ThresholdConf
+import com.streamxhub.streamx.flink.connector.failover.{FailoverChecker, SinkBuffer}
+import com.streamxhub.streamx.flink.connector.http.conf.HttpConfigOption
 import com.streamxhub.streamx.flink.connector.http.internal.HttpSinkWriter
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
@@ -54,10 +55,10 @@ class HttpSinkFunction(properties: mutable.Map[String, String],
 
         val prop: Properties = new Properties()
         properties.foreach { case (k, v) => prop.put(k, v) }
-        thresholdConf = ThresholdConf(prop)
-
+        thresholdConf = ThresholdConf(HttpConfigOption().prefix, prop)
         val bufferSize = 1
-        val table = properties(KEY_SINK_FAILOVER_TABLE)
+        val table = thresholdConf.failoverTable
+        require(table != null && !table.isEmpty, () => s"http async  insert failoverTable must not null")
 
         httpSinkWriter = HttpSinkWriter(thresholdConf, header)
         failoverChecker = FailoverChecker(thresholdConf.delayTime)

@@ -17,27 +17,29 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.failover
+package com.streamxhub.streamx.flink.connector.conf
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.ConfigUtils
-import FailoverStorageType.{FailoverStorageType, HBase, HDFS, Kafka, MySQL}
+import com.streamxhub.streamx.flink.connector.conf.FailoverStorageType.{FailoverStorageType, HBase, HDFS, Kafka, MySQL, NoType}
 
 import java.util.Properties
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.util.Try
 
-case class ThresholdConf(parameters: Properties) {
+case class ThresholdConf(prefixStr: String, parameters: Properties) {
 
-  val bufferSize: Int = Try(parameters(KEY_SINK_THRESHOLD_BUFFER_SIZE).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_BUFFER_SIZE)
-  val queueCapacity: Int = Try(parameters(KEY_SINK_THRESHOLD_QUEUE_CAPACITY).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_QUEUE_CAPACITY)
-  val delayTime: Long = Try(parameters(KEY_SINK_THRESHOLD_DELAY_TIME).toLong).getOrElse(DEFAULT_SINK_THRESHOLD_DELAY_TIME)
-  val timeout: Int = Try(parameters(KEY_SINK_THRESHOLD_REQ_TIMEOUT).toInt).getOrElse(DEFAULT_SINK_REQUEST_TIMEOUT)
-  val successCode: List[Int] = Try(parameters(KEY_SINK_THRESHOLD_SUCCESS_CODE).split(",").map(_.toInt).toList).getOrElse(List(DEFAULT_HTTP_SUCCESS_CODE))
-  val numWriters: Int = Try(parameters(KEY_SINK_THRESHOLD_NUM_WRITERS).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_NUM_WRITERS)
-  val maxRetries: Int = Try(parameters(KEY_SINK_THRESHOLD_RETRIES).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_RETRIES)
-  val storageType: FailoverStorageType = FailoverStorageType.get(parameters.getOrElse(KEY_SINK_FAILOVER_STORAGE, throw new IllegalArgumentException(s"[StreamX] usage error! failover.storage must not be null! ")))
+  private val option: ThreshlodConfigOption = ThreshlodConfigOption(prefixStr, parameters)
+
+  val bufferSize: Int = option.bufferSize.get()
+  val queueCapacity: Int = option.queueCapacity.get()
+  val delayTime: Long = option.delayTime.get()
+  val timeout: Int = option.timeout.get()
+  val successCode: List[Int] = option.successCode.get()
+  val numWriters: Int = option.numWriters.get()
+  val maxRetries: Int = option.maxRetries.get()
+  val storageType: FailoverStorageType = option.storageType.get()
+  val failoverTable: String = option.failoverTable.get()
 
   def getFailoverConfig: Properties = {
     storageType match {
@@ -45,13 +47,15 @@ case class ThresholdConf(parameters: Properties) {
       case MySQL => ConfigUtils.getConf(parameters.toMap.asJava, "failover.mysql.")
       case HBase => ConfigUtils.getConf(parameters.toMap.asJava, "failover.hbase.", HBASE_PREFIX)
       case HDFS => ConfigUtils.getConf(parameters.toMap.asJava, "failover.hdfs.")
+      case NoType => throw new IllegalArgumentException(s"[StreamX] usage error! failover.storage must not be null! ")
     }
   }
 }
 
 object FailoverStorageType extends Enumeration {
   type FailoverStorageType = Value
-  val MySQL, HBase, HDFS, Kafka = Value
+  val NoType, MySQL, HBase, HDFS, Kafka = Value
 
   def get(key: String): Value = values.find(_.toString.equalsIgnoreCase(key)).get
+
 }

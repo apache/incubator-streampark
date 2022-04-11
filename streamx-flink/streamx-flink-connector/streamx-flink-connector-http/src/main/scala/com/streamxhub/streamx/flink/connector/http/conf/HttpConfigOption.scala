@@ -36,7 +36,7 @@ object HttpConfigOption {
 
 }
 
-case class HttpConfigOption(properties: Properties) {
+class HttpConfigOption(properties: Properties) {
 
   implicit val (prefix, prop) = ("http.sink", properties)
 

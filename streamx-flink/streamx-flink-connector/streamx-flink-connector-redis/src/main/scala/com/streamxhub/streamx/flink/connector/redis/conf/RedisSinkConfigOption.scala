@@ -29,8 +29,6 @@ import java.util.Properties
  */
 object RedisSinkConfigOption {
 
-  implicit val prefix = "redis.sink"
-
   /**
    *
    * @param properties
@@ -42,13 +40,21 @@ object RedisSinkConfigOption {
 
 class RedisSinkConfigOption(properties: Properties) {
 
-  implicit val prop = properties
+  implicit val (prefix, prop) = ("redis.sink", properties)
+
+  val DEFAULT_CONNECT_TYPE: String = "jedisPool"
 
   val connectType = ConfigOption(
     key = "connectType",
-    required = true,
-    defaultValue = "jedisPool",
-    classType = classOf[String]
+    required = false,
+    defaultValue = DEFAULT_CONNECT_TYPE,
+    classType = classOf[String],
+    handle = k => {
+      val value: String = properties
+        .remove(k).toString
+      if (value == null && value.isEmpty) DEFAULT_CONNECT_TYPE else value
+    }
+
   )
 
 }

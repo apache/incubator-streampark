@@ -67,8 +67,9 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
 
   lazy val config: FlinkJedisConfigBase = {
     val map: util.Map[String, String] = ctx.parameter.toMap
-    val redisConf = ConfigUtils.getConf(map, RedisSinkConfigOption.prefix)
-    val connectType: String = RedisSinkConfigOption(redisConf).connectType.get()
+    val redisConf = ConfigUtils.getConf(map, RedisSinkConfigOption().prefix)
+    val option: RedisSinkConfigOption = RedisSinkConfigOption(redisConf)
+    val connectType: String = option.connectType.get()
     Utils.copyProperties(property, redisConf)
 
     val host: String = redisConf.remove(KEY_HOST) match {

@@ -30,7 +30,7 @@ import org.apache.hadoop.hbase.client.Mutation
 import java.lang.{Iterable => JIter}
 import java.util.Properties
 
-class HBaseOutputFormat[T: TypeInformation](tabName: String, prop: Properties) extends RichOutputFormat[T] with Logger {
+class HBaseOutputFormat[T](tabName: String, prop: Properties) extends RichOutputFormat[T] with Logger {
 
   var sinkFunction: HBaseSinkFunction[T] = _
 

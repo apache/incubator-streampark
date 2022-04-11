@@ -27,7 +27,7 @@ import scala.util.{Failure, Success, Try}
  * @param key          key of configuration that consistent with the spring config.
  * @param defaultValue default value of configuration that <b>should not be null</b>.
  * @param classType    the class type of value. <b>please use java class type</b>.
- * @param required      is required <b>
+ * @param required     is required <b>
  * @param description  description of configuration.
  * @param handle       Processing function of special parameters
  * @author benjobs
@@ -40,7 +40,7 @@ case class ConfigOption[T](key: String,
                            handle: String => T = null
                           )(implicit prefix: String = "", prop: Properties) {
 
-  private[this] lazy val fullKey = s"$prefix.$key"
+  private[this] lazy val fullKey = if (prefix != null && !prefix.isEmpty) s"$prefix.$key" else key
 
   def get(): T = handle match {
     case null =>
@@ -56,9 +56,16 @@ case class ConfigOption[T](key: String,
         }
       }
     case _ =>
-      Try(handle(fullKey)) match {
-        case Success(v) => Converter.convert[T](v.toString, classType)
-        case Failure(e) => throw error(e.getMessage)
+      if (required) {
+        Try(handle(fullKey)) match {
+          case Success(v) => v
+          case Failure(e) => throw error(e.getMessage)
+        }
+      } else {
+        Try(handle(fullKey)) match {
+          case Success(v) => v
+          case Failure(e) => defaultValue
+        }
       }
   }
 

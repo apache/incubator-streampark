@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.flink.connector.clickhouse.conf
 
-import com.streamxhub.streamx.flink.connector.failover.ThresholdConf
+import com.streamxhub.streamx.flink.connector.conf.ThresholdConf
 
 import java.util.{Base64, Properties}
 import java.util.concurrent.ThreadLocalRandom
@@ -36,8 +36,7 @@ import scala.collection.JavaConversions._
  */
 //---------------------------------------------------------------------------------------
 
-class ClickHouseConfig(parameters: Properties) extends ThresholdConf(parameters) {
-
+class ClickHouseConfig(parameters: Properties) extends ThresholdConf(ClickHouseSinkConfigOption(parameters).prefix, parameters) {
   val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(parameters)
 
   val user: String = sinkOption.user.get()
@@ -47,6 +46,7 @@ class ClickHouseConfig(parameters: Properties) extends ThresholdConf(parameters)
   val hosts: List[String] = sinkOption.hosts.get()
 
   val table: String = sinkOption.targetTable.get()
+
 
   var currentHostId: Int = 0
 

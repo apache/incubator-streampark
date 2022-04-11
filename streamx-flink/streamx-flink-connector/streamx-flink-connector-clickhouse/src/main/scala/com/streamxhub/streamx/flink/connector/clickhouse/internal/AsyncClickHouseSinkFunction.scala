@@ -71,11 +71,12 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
         if (!Lock.initialized) {
           Lock.initialized = true
           clickHouseConf = new ClickHouseConfig(properties)
-          val clickHouseConf1: ClickHouseConfig = new ClickHouseConfig(properties)
-          val targetTable: String = clickHouseConf1.table
+          val targetTable: String = clickHouseConf.table
           require(targetTable != null && !targetTable.isEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
           clickHouseWriter = internal.ClickHouseSinkWriter(clickHouseConf)
           failoverChecker = FailoverChecker(clickHouseConf.delayTime)
+          val failoverTable: String = clickHouseConf.failoverTable
+          require(failoverTable != null && !failoverTable.isEmpty, () => s"http async  insert failoverTable must not null")
           sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize, targetTable)
           failoverChecker.addSinkBuffer(sinkBuffer)
           logInfo("AsyncClickHouseSink initialize... ")
