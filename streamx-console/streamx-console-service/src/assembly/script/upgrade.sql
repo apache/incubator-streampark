@@ -214,3 +214,29 @@ BEGIN;
 -- INSERT INTO `t_role_menu` VALUES (100056, 100001, 100015);
 COMMIT;
 -- ------------------------------------- version: 1.2.2 END ---------------------------------------
+
+
+-- ------------------------------------- version: 1.2.3 START ---------------------------------------
+
+-- ----------------------------
+-- Table of t_access_token definition
+-- ----------------------------
+DROP TABLE IF EXISTS `t_access_token`;
+CREATE TABLE `t_access_token` (
+`ID` int NOT NULL AUTO_INCREMENT COMMENT 'key',
+`USERNAME` varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'USER_NAME',
+`TOKEN` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'TOKEN',
+`EXPIRE_TIME` datetime DEFAULT NULL COMMENT '过期时间',
+`DESCRIPTION` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '使用场景描述',
+`CREATE_TIME` datetime DEFAULT NULL COMMENT 'create time',
+`MODIFY_TIME` datetime DEFAULT NULL COMMENT 'modify time',
+PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+INSERT INTO `t_menu` VALUES (100038, 100000, 'Token Management', '/system/token', 'system/token/Token', 'token:view', 'lock', '0', '1', 1.0, NOW(), NOW());
+INSERT INTO `t_menu` VALUES (100039, 100038, 'add', NULL, NULL, 'token:add', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100040, 100038, 'delete', NULL, NULL, 'token:delete', NULL, '1', '1', NULL, NOW(), NULL);
+
+
+-- ------------------------------------- version: 1.2.3 END ---------------------------------------
