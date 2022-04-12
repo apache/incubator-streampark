@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.connector.clickhouse.internal
 
 import com.streamxhub.streamx.common.util.{Logger, ThreadUtils}
-import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfig
+import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseHttpConfig
 import com.streamxhub.streamx.flink.connector.clickhouse.internal
 import com.streamxhub.streamx.flink.connector.failover.{SinkRequest, SinkWriter}
 import org.asynchttpclient.{AsyncHttpClient, Dsl}
@@ -29,7 +29,7 @@ import java.util.concurrent._
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 
-case class ClickHouseSinkWriter(clickHouseConfig: ClickHouseConfig) extends SinkWriter with Logger {
+case class ClickHouseSinkWriter(clickHouseConfig: ClickHouseHttpConfig) extends SinkWriter with Logger {
   private val callbackServiceFactory = ThreadUtils.threadFactory("ClickHouse-writer-callback-executor")
   private val threadFactory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer")
 

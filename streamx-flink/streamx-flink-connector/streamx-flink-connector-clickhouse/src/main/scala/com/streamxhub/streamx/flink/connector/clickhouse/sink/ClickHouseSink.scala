@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.flink.connector.clickhouse.sink
 
-import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util._
 import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseSinkConfigOption
 import com.streamxhub.streamx.flink.connector.clickhouse.internal.{AsyncClickHouseSinkFunction, ClickHouseSinkFunction}
@@ -72,7 +71,7 @@ class ClickHouseSink(@(transient@param) ctx: StreamingContext,
 
 
   def this(ctx: StreamingContext) {
-    this(ctx, new Properties, 0, null, null)
+    this(ctx, new Properties, 0, null, null)("")
   }
 
   /**
@@ -126,7 +125,7 @@ class ClickHouseSink(@(transient@param) ctx: StreamingContext,
    */
   def syncSink[T](stream: DataStream[T])(implicit toSQLFn: T => String = null): DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
-    val sinkFun = new ClickHouseSinkFunction[T](ClickHouseSinkConfigOption(prop).getInternalConfig(), toSQLFn)
+    val sinkFun = new ClickHouseSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
@@ -141,7 +140,7 @@ class ClickHouseSink(@(transient@param) ctx: StreamingContext,
    */
   def syncSink[T](stream: JavaDataStream[T], sqlFromFn: TransformFunction[T, String]): DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
-    val sinkFun = new ClickHouseSinkFunction[T](ClickHouseSinkConfigOption(prop).getInternalConfig(), sqlFromFn)
+    val sinkFun = new ClickHouseSinkFunction[T](prop, sqlFromFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
@@ -156,4 +155,5 @@ class ClickHouseSink(@(transient@param) ctx: StreamingContext,
   def syncSink[T](stream: JavaDataStream[T]): DataStreamSink[T] = {
     syncSink(stream, null)
   }
+
 }

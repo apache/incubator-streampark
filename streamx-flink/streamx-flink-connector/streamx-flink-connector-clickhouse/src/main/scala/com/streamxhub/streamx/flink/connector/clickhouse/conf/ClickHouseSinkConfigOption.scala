@@ -21,28 +21,30 @@ package com.streamxhub.streamx.flink.connector.clickhouse.conf
 
 import com.streamxhub.streamx.common.conf.ConfigOption
 import com.streamxhub.streamx.common.util.ConfigUtils
-import scala.collection.JavaConverters._
 
-import java.util.{Map, Properties, HashMap => JavaHashMap}
+import java.util.Properties
+import scala.collection.JavaConverters._
 
 /**
  * @author benjobs
  */
 object ClickHouseSinkConfigOption {
 
+  val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"
+
   /**
    *
    * @param properties
    * @return
    */
-  def apply(properties: Properties = new Properties): ClickHouseSinkConfigOption = new ClickHouseSinkConfigOption(properties)
+  def apply(prefixStr: String = CLICKHOUSE_SINK_PREFIX, properties: Properties = new Properties): ClickHouseSinkConfigOption = new ClickHouseSinkConfigOption(prefixStr, properties)
 
 }
 
 
-class ClickHouseSinkConfigOption(properties: Properties) {
+class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) extends Serializable {
 
-  implicit val (prefix, prop) = ("clickhouse.sink", properties)
+  implicit val (prefix, prop) = (prefixStr, properties)
 
   val SIGN_COMMA = ","
 
@@ -74,22 +76,55 @@ class ClickHouseSinkConfigOption(properties: Properties) {
     classType = classOf[String]
   )
 
-  val targetTable = ConfigOption(
+  val failoverTable = ConfigOption(
     key = "failover.table",
     required = false,
     classType = classOf[String]
   )
 
 
-  val failoverTable = ConfigOption(
+  val targetTable = ConfigOption(
     key = "targetTable",
     required = false,
     defaultValue = "",
     classType = classOf[String]
   )
 
+
+  val jdbcUrl = ConfigOption(
+    key = "jdbcUrl",
+    required = true,
+    classType = classOf[String]
+  )
+
+
+  val driverClassName = ConfigOption(
+    key = "driverClassName",
+    required = false,
+    defaultValue = null,
+    classType = classOf[String]
+  )
+
+  val batchSize = ConfigOption(
+    key = "batch.size",
+    required = false,
+    defaultValue = 1,
+    classType = classOf[Int]
+  )
+
+
+  val batchDelaytime = ConfigOption(
+    key = "batch.delaytime",
+    required = false,
+    defaultValue = 1000L,
+    classType = classOf[Long],
+    handle = k => {
+      properties.remove(k).toString.toLong
+    }
+  )
+
   def getInternalConfig(): Properties = {
-    ConfigUtils.getConf(prop.asScala.asJava, prefix)
+    ConfigUtils.getConf(prop.asScala.asJava, prefix)( "")
   }
 
 }

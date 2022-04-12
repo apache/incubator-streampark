@@ -102,7 +102,7 @@ class ThreshlodConfigOption(prefixStr: String, properties: Properties) {
 
 
   val failoverTable = ConfigOption(
-    key = "targetTable",
+    key = "failover.table",
     required = false,
     defaultValue = "",
     classType = classOf[String]

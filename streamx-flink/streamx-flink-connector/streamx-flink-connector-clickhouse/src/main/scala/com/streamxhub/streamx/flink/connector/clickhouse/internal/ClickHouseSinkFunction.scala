@@ -23,7 +23,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.{JdbcUtils, Logger}
-import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfig
+import com.streamxhub.streamx.flink.connector.clickhouse.conf.{ClickHouseHttpConfig, ClickHouseJdbConfig}
 import com.streamxhub.streamx.flink.connector.clickhouse.util.ClickhouseConvertUtils.convert
 import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import org.apache.flink.configuration.Configuration
@@ -41,18 +41,18 @@ import scala.util.Try
 class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Properties) extends RichSinkFunction[T] with Logger {
   private var connection: Connection = _
   private var statement: Statement = _
-  private val batchSize = config.remove(KEY_JDBC_INSERT_BATCH) match {
-    case null => DEFAULT_JDBC_INSERT_BATCH
-    case batch => batch.toString.toInt
-  }
+  var clickHouseConf: ClickHouseJdbConfig = new ClickHouseJdbConfig(config)
+
+  private val batchSize = clickHouseConf.batchSize
   private val offset: AtomicLong = new AtomicLong(0L)
   private var timestamp = 0L
-  private var delayTime = DEFAULT_JDBC_INSERT_BATCH_DELAYTIME
+  private val delayTime = clickHouseConf.batchDelaytime
   private val sqlValues = new util.ArrayList[String](batchSize)
   private var insertSqlPrefixes: String = _
 
   private[this] var scalaSqlFunc: T => String = _
   private[this] var javaSqlFunc: TransformFunction[T, String] = _
+
 
   //for Scala
   def this(properties: Properties,
@@ -72,11 +72,9 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
 
 
   override def open(parameters: Configuration): Unit = {
-    val url: String = Try(config.remove(KEY_JDBC_URL).toString).getOrElse(null)
-    val user: String = Try(config.remove(KEY_JDBC_USER).toString).getOrElse(null)
-    val driver: String = Try(config.remove(KEY_JDBC_DRIVER).toString).getOrElse(null)
-    delayTime = Try(config.remove(KEY_JDBC_INSERT_BATCH_DELAYTIME).toString.toLong).getOrElse(DEFAULT_JDBC_INSERT_BATCH_DELAYTIME)
-    val targetTable = new ClickHouseConfig(config).table
+    val user: String = clickHouseConf.user
+    val driver: String = clickHouseConf.driverClassName
+    val targetTable = clickHouseConf.table
     require(targetTable != null && !targetTable.isEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
     insertSqlPrefixes = s"insert into  $targetTable  values "
     val properties = new ClickHouseProperties()
@@ -89,7 +87,7 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
       case _ => properties.setUser(user)
     }
     //reflect set all properties...
-    config.foreach(x => {
+    clickHouseConf.sinkOption.getInternalConfig().foreach(x => {
       val field = Try(Option(properties.getClass.getDeclaredField(x._1))).getOrElse(None) match {
         case None =>
           val boolField = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
@@ -108,7 +106,7 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
         case _ =>
       }
     })
-    val dataSource = new ClickHouseDataSource(url, properties)
+    val dataSource = new ClickHouseDataSource(clickHouseConf.jdbcUrl, properties)
     connection = dataSource.getConnection
   }
 

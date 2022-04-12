@@ -55,7 +55,7 @@ class HttpSinkFunction(properties: mutable.Map[String, String],
 
         val prop: Properties = new Properties()
         properties.foreach { case (k, v) => prop.put(k, v) }
-        thresholdConf = ThresholdConf(HttpConfigOption().prefix, prop)
+        thresholdConf = ThresholdConf(HttpConfigOption.HTTP_SINK_PREFIX, prop)
         val bufferSize = 1
         val table = thresholdConf.failoverTable
         require(table != null && !table.isEmpty, () => s"http async  insert failoverTable must not null")
