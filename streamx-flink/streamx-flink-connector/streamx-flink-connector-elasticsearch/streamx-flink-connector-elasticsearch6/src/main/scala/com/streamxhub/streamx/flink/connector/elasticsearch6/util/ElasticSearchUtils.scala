@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.util
+package com.streamxhub.streamx.flink.connector.elasticsearch6.util
 
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.common.bytes.BytesArray

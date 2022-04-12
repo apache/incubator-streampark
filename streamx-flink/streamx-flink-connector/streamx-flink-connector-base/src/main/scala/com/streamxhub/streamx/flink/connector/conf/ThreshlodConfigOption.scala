@@ -34,28 +34,28 @@ class ThreshlodConfigOption(prefixStr: String, properties: Properties) {
 
   val SIGN_COMMA = ","
 
-  val bufferSize = ConfigOption(
+  val bufferSize: ConfigOption[Int] = ConfigOption(
     key = "threshold.bufferSize",
     required = false,
     defaultValue = 1000,
     classType = classOf[Int]
   )
 
-  val queueCapacity = ConfigOption(
+  val queueCapacity: ConfigOption[Int] = ConfigOption(
     key = "threshold.queueCapacity",
     required = false,
     defaultValue = 10000,
     classType = classOf[Int]
   )
 
-  val delayTime = ConfigOption(
+  val delayTime: ConfigOption[Long] = ConfigOption(
     key = "threshold.delayTime",
     required = false,
     defaultValue = 1000L,
     classType = classOf[Long]
   )
 
-  val timeout = ConfigOption(
+  val timeout: ConfigOption[Int] = ConfigOption(
     key = "threshold.requestTimeout",
     required = false,
     defaultValue = 2000,

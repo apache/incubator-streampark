@@ -53,6 +53,7 @@ spring:
     allow-circular-references: true
     banner-mode: off
 
+
 management:
   endpoints:
     web:

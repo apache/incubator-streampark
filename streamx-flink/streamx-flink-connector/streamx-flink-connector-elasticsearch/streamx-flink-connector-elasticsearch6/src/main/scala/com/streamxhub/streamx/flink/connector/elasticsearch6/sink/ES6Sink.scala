@@ -17,13 +17,14 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.sink
+package com.streamxhub.streamx.flink.connector.elasticsearch6.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{ConfigUtils, Logger, Utils}
-import com.streamxhub.streamx.flink.connector.bean.RestClientFactoryImpl
+import com.streamxhub.streamx.flink.connector.elasticsearch6.bean.RestClientFactoryImpl
 import com.streamxhub.streamx.flink.connector.function.TransformFunction
-import com.streamxhub.streamx.flink.connector.internal.ESSinkFunction
+import com.streamxhub.streamx.flink.connector.elasticsearch6.internal.ESSinkFunction
+import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.streaming.api.datastream.{DataStreamSink, DataStream => JavaDataStream}
 import org.apache.flink.streaming.api.scala.DataStream

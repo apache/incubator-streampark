@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.internal
+package com.streamxhub.streamx.flink.connector.elasticsearch5.internal
 
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
@@ -29,6 +29,7 @@ import org.elasticsearch.action.ActionRequest
 import org.elasticsearch.action.delete.DeleteRequest
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.update.UpdateRequest
+
 
 
 class ESSinkFunction[T](apiType: ApiType = ApiType.scala) extends ElasticsearchSinkFunction[T] with Logger {
