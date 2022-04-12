@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.bean
+package com.streamxhub.streamx.flink.connector.elasticsearch6.bean
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.Logger

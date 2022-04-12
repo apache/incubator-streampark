@@ -19,11 +19,7 @@
 
 package com.streamxhub.streamx.flink.connector.clickhouse.conf
 
-import com.streamxhub.streamx.flink.connector.conf.ThresholdConf
-
-import java.util.{Base64, Properties}
-import java.util.concurrent.ThreadLocalRandom
-import scala.collection.JavaConversions._
+import java.util.Properties
 
 /**
  *
@@ -36,7 +32,7 @@ import scala.collection.JavaConversions._
  */
 //---------------------------------------------------------------------------------------
 
-class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHouseSinkConfigOption.CLICKHOUSE_SINK_PREFIX, parameters) {
+class ClickHouseJdbcConfig(parameters: Properties) extends Serializable {
 
   val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(properties = parameters)
 
@@ -44,29 +40,14 @@ class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHo
 
   val password: String = sinkOption.password.get()
 
-  val hosts: List[String] = sinkOption.hosts.get()
+  val jdbcUrl: String = sinkOption.jdbcUrl.get()
+
+  val driverClassName: String = sinkOption.driverClassName.get()
+
+  val batchSize: Int = sinkOption.batchSize.get()
 
   val table: String = sinkOption.targetTable.get()
 
-  var currentHostId: Int = 0
-
-  val credentials: String = (user, password) match {
-    case (null, null) => null
-    case (u, p) => new String(Base64.getEncoder.encode(s"$u:$p".getBytes))
-  }
-
-  def getRandomHostUrl: String = {
-    currentHostId = ThreadLocalRandom.current.nextInt(hosts.size)
-    hosts.get(currentHostId)
-  }
-
-  def nextHost: String = {
-    if (currentHostId >= hosts.size - 1) {
-      currentHostId = 0
-    } else {
-      currentHostId += 1
-    }
-    hosts.get(currentHostId)
-  }
+  val batchDelayTime: Long = sinkOption.batchDelayTime.get()
 
 }

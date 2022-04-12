@@ -9,7 +9,7 @@
 
     <artifactId>streamx-flink-connector-jdbc_${scala.binary.version}</artifactId>
 
-    <name>StreamX : Flink Connector jdbc</name>
+    <name>StreamX : Flink Connector JDBC</name>
 
     <dependencies>
 

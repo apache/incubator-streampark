@@ -9,7 +9,7 @@
 
     <artifactId>streamx-flink-connector-kafka_${scala.binary.version}</artifactId>
 
-    <name>StreamX : Flink Connector kafka</name>
+    <name>StreamX : Flink Connector Kafka</name>
 
     <dependencies>
 

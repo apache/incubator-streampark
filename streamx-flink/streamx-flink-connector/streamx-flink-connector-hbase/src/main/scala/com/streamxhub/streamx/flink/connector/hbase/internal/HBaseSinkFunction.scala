@@ -29,12 +29,12 @@ import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunc
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client._
 
+import java.lang.{Iterable => JIter}
 import java.util.Properties
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicLong}
 import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
-import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
-import java.lang.{Iterable => JIter}
+import scala.collection.mutable.ArrayBuffer
 
 class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, prop: Properties) extends RichSinkFunction[T] with Logger {
 
@@ -51,25 +51,25 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
   private val mutations = new ArrayBuffer[Mutation]()
   private val putArray = new ArrayBuffer[Put]()
 
-  private[this] var scalaTransforFun: T => JIter[Mutation] = _
-  private[this] var javaTransforFun: TransformFunction[T, JIter[Mutation]] = _
+  private[this] var scalaTransformFunc: T => JIter[Mutation] = _
+  private[this] var javaTransformFunc: TransformFunction[T, JIter[Mutation]] = _
 
   //for Scala
   def this(tabName: String,
            properties: Properties,
-           scalaTransforFun: T => JIter[Mutation]) = {
+           scalaTransformFunc: T => JIter[Mutation]) = {
 
     this(ApiType.scala, tabName, properties)
-    this.scalaTransforFun = scalaTransforFun
+    this.scalaTransformFunc = scalaTransformFunc
   }
 
   //for JAVA
   def this(tabName: String,
            properties: Properties,
-           javaTransforFun: TransformFunction[T, JIter[Mutation]]) = {
+           javaTransformFunc: TransformFunction[T, JIter[Mutation]]) = {
 
     this(ApiType.java, tabName, properties)
-    this.javaTransforFun = javaTransforFun
+    this.javaTransformFunc = javaTransformFunc
   }
 
 
@@ -81,11 +81,9 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
     val tableName = TableName.valueOf(tabName)
     val mutatorParam = new BufferedMutatorParams(tableName)
       .writeBufferSize(writeBufferSize)
-      .listener(new BufferedMutator.ExceptionListener {
-        override def onException(exception: RetriesExhaustedWithDetailsException, mutator: BufferedMutator): Unit = {
-          for (i <- 0.until(exception.getNumExceptions)) {
-            logger.error(s"[StreamX] HBaseSink Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
-          }
+      .listener((exception: RetriesExhaustedWithDetailsException, _: BufferedMutator) => {
+        for (i <- 0.until(exception.getNumExceptions)) {
+          logger.error(s"[StreamX] HBaseSink Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
         }
       })
     mutator = connection.getBufferedMutator(mutatorParam)
@@ -93,11 +91,12 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
   }
 
   override def invoke(value: T, context: SinkFunction.Context): Unit = {
-    val mutationses: JIter[Mutation] = apiType match {
-      case ApiType.java => javaTransforFun.transform(value)
-      case ApiType.scala => scalaTransforFun(value)
+    val list = apiType match {
+      case ApiType.java => javaTransformFunc.transform(value)
+      case ApiType.scala => scalaTransformFunc(value)
     }
-    mutationses.foreach {
+
+    list.foreach {
       case put: Put => putArray += put
       case other => mutations += other
     }

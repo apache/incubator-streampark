@@ -37,18 +37,18 @@ class HBaseOutputFormat[T: TypeInformation](tabName: String, prop: Properties) e
   //for Scala
   def this(tabName: String,
            properties: Properties,
-           scalaTransforFun: T => JIter[Mutation]) = {
+           scalaTransformFunc: T => JIter[Mutation]) = {
     this(tabName, properties)
-    this.sinkFunction = new HBaseSinkFunction[T](tabName, properties, scalaTransforFun)
+    this.sinkFunction = new HBaseSinkFunction[T](tabName, properties, scalaTransformFunc)
   }
 
   //for JAVA
   def this(tabName: String,
            properties: Properties,
-           javaTransforFun: TransformFunction[T, JIter[Mutation]]) = {
+           javaTransformFunc: TransformFunction[T, JIter[Mutation]]) = {
 
     this(tabName, properties)
-    this.sinkFunction = new HBaseSinkFunction[T](tabName, properties, javaTransforFun)
+    this.sinkFunction = new HBaseSinkFunction[T](tabName, properties, javaTransformFunc)
   }
 
 

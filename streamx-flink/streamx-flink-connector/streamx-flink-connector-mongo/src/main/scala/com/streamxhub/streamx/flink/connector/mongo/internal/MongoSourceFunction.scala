@@ -82,9 +82,7 @@ class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties
     this(ApiType.java, prop, collectionName)
     this.javaQueryFunc = queryFunc
     this.javaResultFunc = resultFunc
-    this.javaRunningFunc = if (runningFunc != null) runningFunc else new RunningFunction {
-      override def running(): lang.Boolean = true
-    }
+    this.javaRunningFunc = if (runningFunc != null) runningFunc else () => true
 
   }
 

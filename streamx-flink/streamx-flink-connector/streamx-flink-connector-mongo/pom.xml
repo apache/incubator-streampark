@@ -9,7 +9,7 @@
 
     <artifactId>streamx-flink-connector-mongo_${scala.binary.version}</artifactId>
 
-    <name>StreamX : Flink Connector mongo</name>
+    <name>StreamX : Flink Connector Mongo</name>
 
     <dependencies>
 

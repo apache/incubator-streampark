@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.flink.connector.conf
 
 import com.streamxhub.streamx.common.conf.ConfigOption
+import com.streamxhub.streamx.flink.connector.conf
 import com.streamxhub.streamx.flink.connector.conf.FailoverStorageType.FailoverStorageType
 
 import java.util.Properties
@@ -34,35 +35,35 @@ class ThreshlodConfigOption(prefixStr: String, properties: Properties) {
 
   val SIGN_COMMA = ","
 
-  val bufferSize = ConfigOption(
+  val bufferSize: ConfigOption[Int] = ConfigOption(
     key = "threshold.bufferSize",
     required = false,
     defaultValue = 1000,
     classType = classOf[Int]
   )
 
-  val queueCapacity = ConfigOption(
+  val queueCapacity: ConfigOption[Int] = ConfigOption(
     key = "threshold.queueCapacity",
     required = false,
     defaultValue = 10000,
     classType = classOf[Int]
   )
 
-  val delayTime = ConfigOption(
+  val delayTime: ConfigOption[Long] = ConfigOption(
     key = "threshold.delayTime",
     required = false,
     defaultValue = 1000L,
     classType = classOf[Long]
   )
 
-  val timeout = ConfigOption(
+  val timeout: ConfigOption[Int] = ConfigOption(
     key = "threshold.requestTimeout",
     required = false,
     defaultValue = 2000,
     classType = classOf[Int]
   )
 
-  val successCode = ConfigOption(
+  val successCode: ConfigOption[List[Int]] = ConfigOption(
     key = "threshold.successCode",
     required = false,
     defaultValue = List(200),
@@ -76,21 +77,21 @@ class ThreshlodConfigOption(prefixStr: String, properties: Properties) {
     }
   )
 
-  val numWriters = ConfigOption(
+  val numWriters: ConfigOption[Int] = ConfigOption(
     key = "threshold.numWriters",
     required = false,
     defaultValue = Runtime.getRuntime.availableProcessors(),
     classType = classOf[Int]
   )
 
-  val maxRetries = ConfigOption(
+  val maxRetries: ConfigOption[Int] = ConfigOption(
     key = "threshold.retries",
     required = false,
     defaultValue = 3,
     classType = classOf[Int]
   )
 
-  val storageType = ConfigOption(
+  val storageType: ConfigOption[conf.FailoverStorageType.Value] = ConfigOption(
     key = "failover.storage",
     required = false,
     classType = classOf[FailoverStorageType],
@@ -101,7 +102,7 @@ class ThreshlodConfigOption(prefixStr: String, properties: Properties) {
   )
 
 
-  val failoverTable = ConfigOption(
+  val failoverTable: ConfigOption[String] = ConfigOption(
     key = "failover.table",
     required = false,
     defaultValue = "",
