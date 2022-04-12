@@ -13,6 +13,9 @@ logging:
 
 spring:
   application.name: streamx
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   devtools:
     restart:
       enabled: false
