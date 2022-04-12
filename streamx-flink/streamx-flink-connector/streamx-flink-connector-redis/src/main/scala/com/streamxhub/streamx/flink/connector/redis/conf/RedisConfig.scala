@@ -17,31 +17,27 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.http.conf
+package com.streamxhub.streamx.flink.connector.redis.conf
 
 
 import java.util.Properties
 
-/**
- * @author benjobs
- */
-object HttpConfigOption {
+class RedisConfig(parameters: Properties) extends Serializable {
 
-  val HTTP_SINK_PREFIX: String = "http.sink"
+  val sinkOption: RedisSinkConfigOption = RedisSinkConfigOption(properties = parameters)
 
-  /**
-   *
-   * @param properties
-   * @return
-   */
-  def apply(prefixStr: String = HTTP_SINK_PREFIX, properties: Properties = new Properties): HttpConfigOption = new HttpConfigOption(prefixStr, properties)
+  val connectType: String = sinkOption.connectType.get()
 
-}
+  val host: String = sinkOption.host.get()
 
-class HttpConfigOption(prefixStr: String, properties: Properties) {
+  val port: Int = sinkOption.port.get()
 
-  implicit val (prefix, prop) = (prefixStr, properties)
+  val sentinels: Set[String] = if (connectType.equals(sinkOption.DEFAULT_CONNECT_TYPE)) Set() else {
+    host.split(sinkOption.SIGN_COMMA).map(x => {
+      if (x.contains(sinkOption.SIGN_COLON)) x; else {
+        throw new IllegalArgumentException(s"redis sentinel host invalid {$x} must match host:port ")
+      }
+    }).toSet
+  }
 
 }
-
-

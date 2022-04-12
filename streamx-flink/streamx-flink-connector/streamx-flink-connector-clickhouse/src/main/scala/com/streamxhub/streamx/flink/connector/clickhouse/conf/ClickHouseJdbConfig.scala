@@ -21,8 +21,8 @@ package com.streamxhub.streamx.flink.connector.clickhouse.conf
 
 import com.streamxhub.streamx.flink.connector.conf.ThresholdConf
 
-import java.util.{Base64, Properties}
 import java.util.concurrent.ThreadLocalRandom
+import java.util.{Base64, Properties}
 import scala.collection.JavaConversions._
 
 /**
@@ -36,39 +36,25 @@ import scala.collection.JavaConversions._
  */
 //---------------------------------------------------------------------------------------
 
-class ClickHouseConfig(parameters: Properties) extends ThresholdConf(ClickHouseSinkConfigOption(parameters).prefix, parameters) {
-  val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(parameters)
+ class ClickHouseJdbConfig(parameters: Properties) extends Serializable {
+
+  val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(properties = parameters)
 
   val user: String = sinkOption.user.get()
 
   val password: String = sinkOption.password.get()
 
-  val hosts: List[String] = sinkOption.hosts.get()
+  val jdbcUrl: String = sinkOption.jdbcUrl.get()
+
+  val driverClassName = sinkOption.driverClassName.get()
+
+  val batchSize: Int = sinkOption.batchSize.get()
 
   val table: String = sinkOption.targetTable.get()
 
+  val batchDelaytime: Long = sinkOption.batchDelaytime.get()
 
-  var currentHostId: Int = 0
 
-  val credentials: String = (user, password) match {
-    case (null, null) => null
-    case (u, p) => new String(Base64.getEncoder.encode(s"$u:$p".getBytes))
-  }
-
-  def getRandomHostUrl: String = {
-    currentHostId = ThreadLocalRandom.current.nextInt(hosts.size)
-    hosts.get(currentHostId)
-  }
-
-  def nextHost: String = {
-    if (currentHostId >= hosts.size - 1) {
-      currentHostId = 0
-    } else {
-      currentHostId += 1
-    }
-    hosts.get(currentHostId)
-  }
-
-  println(s"user: $user, password:$password, hosts:$hosts, table:$table ")
+  println(s"user:$user,password:$password,jdbcUrl:$jdbcUrl,driverClassName:$driverClassName,batchSize:$batchSize,table:$table,batchDelaytime")
 
 }

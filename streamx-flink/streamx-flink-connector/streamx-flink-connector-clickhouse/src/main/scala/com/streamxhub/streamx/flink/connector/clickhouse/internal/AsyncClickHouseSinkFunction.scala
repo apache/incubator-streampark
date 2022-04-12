@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.connector.clickhouse.internal
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfig
+import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseHttpConfig
 import com.streamxhub.streamx.flink.connector.clickhouse.internal
 import com.streamxhub.streamx.flink.connector.clickhouse.util.ClickhouseConvertUtils.convert
 import com.streamxhub.streamx.flink.connector.failover.{FailoverChecker, SinkBuffer}
@@ -59,7 +59,7 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
     this.javaSqlFunc = javaSqlFunc
   }
 
-  @transient var clickHouseConf: ClickHouseConfig = _
+  @transient var clickHouseConf: ClickHouseHttpConfig = _
   @transient var sinkBuffer: SinkBuffer = _
   @transient var clickHouseWriter: ClickHouseSinkWriter = _
   @transient var failoverChecker: FailoverChecker = _
@@ -70,13 +70,13 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
       Lock.lock.synchronized {
         if (!Lock.initialized) {
           Lock.initialized = true
-          clickHouseConf = new ClickHouseConfig(properties)
+          clickHouseConf = new ClickHouseHttpConfig(properties)
           val targetTable: String = clickHouseConf.table
           require(targetTable != null && !targetTable.isEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
           clickHouseWriter = internal.ClickHouseSinkWriter(clickHouseConf)
           failoverChecker = FailoverChecker(clickHouseConf.delayTime)
           val failoverTable: String = clickHouseConf.failoverTable
-          require(failoverTable != null && !failoverTable.isEmpty, () => s"http async  insert failoverTable must not null")
+          require(failoverTable != null && !failoverTable.isEmpty, () => s"clickhouse async  insert failoverTable must not null")
           sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize, targetTable)
           failoverChecker.addSinkBuffer(sinkBuffer)
           logInfo("AsyncClickHouseSink initialize... ")

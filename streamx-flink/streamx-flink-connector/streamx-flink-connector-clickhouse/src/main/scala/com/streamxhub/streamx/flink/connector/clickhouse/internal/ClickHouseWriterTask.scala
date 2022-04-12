@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.connector.clickhouse.internal
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfig
+import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseHttpConfig
 import com.streamxhub.streamx.flink.connector.failover.{FailoverWriter, SinkRequest}
 import io.netty.handler.codec.http.HttpHeaders
 import org.asynchttpclient.{AsyncHttpClient, ListenableFuture, Request, Response}
@@ -30,7 +30,7 @@ import scala.util.Try
 import scala.collection.JavaConversions._
 
 case class ClickHouseWriterTask(id: Int,
-                                clickHouseConf: ClickHouseConfig,
+                                clickHouseConf: ClickHouseHttpConfig,
                                 asyncHttpClient: AsyncHttpClient,
                                 queue: BlockingQueue[SinkRequest],
                                 callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
