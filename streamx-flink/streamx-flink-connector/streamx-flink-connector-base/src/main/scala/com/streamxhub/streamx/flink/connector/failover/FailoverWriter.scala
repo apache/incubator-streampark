@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.connector.failover
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util._
-import com.streamxhub.streamx.flink.connector.conf.FailoverStorageType.{FailoverStorageType, HBase, HDFS, Kafka, MySQL}
+import com.streamxhub.streamx.flink.connector.conf.FailoverStorageType._
 import org.apache.hadoop.conf.{Configuration => HConf}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.hbase.client.{BufferedMutator, BufferedMutatorParams, Put, RetriesExhaustedWithDetailsException, Connection => HBaseConn}
@@ -65,7 +65,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
               }
             } catch {
               case exception: Exception => {
-                logError(s"build Failover storageType:KAFKA failed exception ${exception.getStackTrace}")
+                logError(s"build Failover storageType:KAFKA failed exception ${exception.getStackTrace.mkString("Array(", ", ", ")")}")
                 throw exception
               }
             } finally {
@@ -152,7 +152,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
               }
             } catch {
               case exception: Exception => {
-                logError(s"build Failover storageType:HBase failed exception ${exception.getStackTrace}")
+                logError(s"build Failover storageType:HBase failed exception ${exception.getStackTrace.mkString("Array(", ", ", ")")}")
                 throw exception
               }
             } finally {
@@ -190,7 +190,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                 }
               } catch {
                 case exception: Exception => {
-                  logError(s"build Failover storageType:HDFS failed exception ${exception.getStackTrace}")
+                  logError(s"build Failover storageType:HDFS failed exception ${exception.getStackTrace.mkString("Array(", ", ", ")")}")
                   throw exception
                 }
               } finally {

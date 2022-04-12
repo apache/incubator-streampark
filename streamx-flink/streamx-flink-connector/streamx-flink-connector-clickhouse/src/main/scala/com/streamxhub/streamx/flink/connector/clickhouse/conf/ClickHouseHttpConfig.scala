@@ -37,6 +37,7 @@ import scala.collection.JavaConversions._
 //---------------------------------------------------------------------------------------
 
 class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHouseSinkConfigOption.CLICKHOUSE_SINK_PREFIX, parameters) {
+
   val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(properties = parameters)
 
   val user: String = sinkOption.user.get()
@@ -46,7 +47,6 @@ class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHo
   val hosts: List[String] = sinkOption.hosts.get()
 
   val table: String = sinkOption.targetTable.get()
-
 
   var currentHostId: Int = 0
 
@@ -68,7 +68,5 @@ class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHo
     }
     hosts.get(currentHostId)
   }
-
-  println(s"user: $user, password:$password, hosts:$hosts, table:$table ")
 
 }

@@ -22,5 +22,5 @@ package com.streamxhub.streamx.flink.connector.failover
 import com.streamxhub.streamx.common.util.Logger
 
 trait SinkWriter extends AutoCloseable with Logger {
-  def write(request: SinkRequest)
+  def write(request: SinkRequest): Unit
 }

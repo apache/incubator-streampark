@@ -19,11 +19,10 @@
 
 package com.streamxhub.streamx.flink.connector.clickhouse.internal
 
-import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.{JdbcUtils, Logger}
-import com.streamxhub.streamx.flink.connector.clickhouse.conf.{ClickHouseHttpConfig, ClickHouseJdbConfig}
+import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseJdbcConfig
 import com.streamxhub.streamx.flink.connector.clickhouse.util.ClickhouseConvertUtils.convert
 import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import org.apache.flink.configuration.Configuration
@@ -41,12 +40,12 @@ import scala.util.Try
 class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Properties) extends RichSinkFunction[T] with Logger {
   private var connection: Connection = _
   private var statement: Statement = _
-  var clickHouseConf: ClickHouseJdbConfig = new ClickHouseJdbConfig(config)
+  var clickHouseConf: ClickHouseJdbcConfig = new ClickHouseJdbcConfig(config)
 
   private val batchSize = clickHouseConf.batchSize
   private val offset: AtomicLong = new AtomicLong(0L)
   private var timestamp = 0L
-  private val delayTime = clickHouseConf.batchDelaytime
+  private val delayTime = clickHouseConf.batchDelayTime
   private val sqlValues = new util.ArrayList[String](batchSize)
   private var insertSqlPrefixes: String = _
 
@@ -75,7 +74,7 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
     val user: String = clickHouseConf.user
     val driver: String = clickHouseConf.driverClassName
     val targetTable = clickHouseConf.table
-    require(targetTable != null && !targetTable.isEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
+    require(targetTable != null && targetTable.nonEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
     insertSqlPrefixes = s"insert into  $targetTable  values "
     val properties = new ClickHouseProperties()
     (user, driver) match {
@@ -156,7 +155,7 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
   private[this] def execBatch(): Unit = {
     if (offset.get() > 0) {
       try {
-        logInfo(s"ClickHouseSink batch ${offset.get()} insert begain..")
+        logInfo(s"ClickHouseSink batch ${offset.get()} insert begin..")
         offset.set(0)
         val valuesStr: String = sqlValues.mkString(",")
         val sql = s"$insertSqlPrefixes $valuesStr"

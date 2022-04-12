@@ -84,10 +84,10 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
 
     public Properties parseStreamLoadProps(Properties properties, String prefix) {
         Properties result = new Properties();
-        properties.forEach((key1, value) -> {
-            String key = key1.toString();
+        properties.forEach((k, v) -> {
+            String key = k.toString();
             if (key.startsWith(prefix)) {
-                result.put(key.substring(prefix.length()), value);
+                result.put(key.substring(prefix.length()), v);
             }
         });
         return result;

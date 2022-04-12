@@ -52,7 +52,7 @@ class RedisSinkConfigOption(prefixStr: String, properties: Properties) extends S
   val SIGN_COLON = ":"
 
 
-  val host = ConfigOption(
+  val host: ConfigOption[String] = ConfigOption(
     key = "host",
     required = true,
     classType = classOf[String],
@@ -61,7 +61,7 @@ class RedisSinkConfigOption(prefixStr: String, properties: Properties) extends S
     }
   )
 
-  val connectType = ConfigOption(
+  val connectType: ConfigOption[String] = ConfigOption(
     key = "connectType",
     required = false,
     defaultValue = DEFAULT_CONNECT_TYPE,
@@ -74,7 +74,7 @@ class RedisSinkConfigOption(prefixStr: String, properties: Properties) extends S
   )
 
 
-  val port = ConfigOption(
+  val port: ConfigOption[Int] = ConfigOption(
     key = "port",
     required = false,
     defaultValue = 6379,
