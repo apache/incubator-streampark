@@ -55,7 +55,7 @@ class HttpSink(@(transient@param) ctx: StreamingContext,
     this(ctx, new Properties(), Map.empty[String, String], 0, null, null)
   }
 
-  val prop = ctx.parameter.getProperties
+  val prop: Properties = ctx.parameter.getProperties
   Utils.copyProperties(property, prop)
 
   def get(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpGet.METHOD_NAME)

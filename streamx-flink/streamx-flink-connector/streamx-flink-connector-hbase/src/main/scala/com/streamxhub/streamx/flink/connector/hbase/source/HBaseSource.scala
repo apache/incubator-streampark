@@ -19,28 +19,16 @@
 
 package com.streamxhub.streamx.flink.connector.hbase.source
 
-import com.streamxhub.streamx.common.enums.ApiType
-import com.streamxhub.streamx.common.enums.ApiType.ApiType
-import com.streamxhub.streamx.common.util.{FlinkUtils, Logger, Utils}
-import com.streamxhub.streamx.flink.connector.function.RunningFunction
-import com.streamxhub.streamx.flink.connector.hbase.function.{HBaseQueryFunction, HBaseResultFunction}
+import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.connector.hbase.bean.HBaseQuery
 import com.streamxhub.streamx.flink.connector.hbase.internal.HBaseSourceFunction
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
-import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}
-import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
-import org.apache.flink.streaming.api.functions.source.RichSourceFunction
-import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
+import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.hadoop.hbase.client._
 
-import java.lang
 import java.util.Properties
 import scala.annotation.meta.param
-import scala.collection.JavaConversions._
-import scala.util.{Success, Try}
 
 object HBaseSource {
 
@@ -58,7 +46,7 @@ class HBaseSource(@(transient@param) val ctx: StreamingContext, property: Proper
 
   def getDataStream[R: TypeInformation](query: R => HBaseQuery,
                                         func: Result => R,
-                                        running: Unit => Boolean)(implicit prop: Properties = new Properties()) = {
+                                        running: Unit => Boolean)(implicit prop: Properties = new Properties()): DataStream[R] = {
     Utils.copyProperties(property, prop)
     val hBaseFunc = new HBaseSourceFunction[R](prop, query, func, running)
     ctx.addSource(hBaseFunc)

@@ -33,6 +33,7 @@ import org.elasticsearch.action.update.UpdateRequest
 
 
 class ESSinkFunction[T](apiType: ApiType = ApiType.scala) extends ElasticsearchSinkFunction[T] with Logger {
+
   private[this] var scalaFunc: T => ActionRequest = _
   private[this] var javaFunc: TransformFunction[T, ActionRequest] = _
 

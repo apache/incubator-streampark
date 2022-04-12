@@ -19,11 +19,7 @@
 
 package com.streamxhub.streamx.flink.connector.clickhouse.conf
 
-import com.streamxhub.streamx.flink.connector.conf.ThresholdConf
-
-import java.util.concurrent.ThreadLocalRandom
-import java.util.{Base64, Properties}
-import scala.collection.JavaConversions._
+import java.util.Properties
 
 /**
  *
@@ -36,7 +32,7 @@ import scala.collection.JavaConversions._
  */
 //---------------------------------------------------------------------------------------
 
- class ClickHouseJdbConfig(parameters: Properties) extends Serializable {
+class ClickHouseJdbcConfig(parameters: Properties) extends Serializable {
 
   val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(properties = parameters)
 
@@ -46,15 +42,12 @@ import scala.collection.JavaConversions._
 
   val jdbcUrl: String = sinkOption.jdbcUrl.get()
 
-  val driverClassName = sinkOption.driverClassName.get()
+  val driverClassName: String = sinkOption.driverClassName.get()
 
   val batchSize: Int = sinkOption.batchSize.get()
 
   val table: String = sinkOption.targetTable.get()
 
-  val batchDelaytime: Long = sinkOption.batchDelaytime.get()
-
-
-  println(s"user:$user,password:$password,jdbcUrl:$jdbcUrl,driverClassName:$driverClassName,batchSize:$batchSize,table:$table,batchDelaytime")
+  val batchDelayTime: Long = sinkOption.batchDelayTime.get()
 
 }

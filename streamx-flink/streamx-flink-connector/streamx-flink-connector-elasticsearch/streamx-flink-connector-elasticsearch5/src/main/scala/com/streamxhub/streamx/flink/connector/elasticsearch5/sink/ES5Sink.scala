@@ -21,8 +21,8 @@ package com.streamxhub.streamx.flink.connector.elasticsearch5.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{ConfigUtils, Logger, Utils}
-import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import com.streamxhub.streamx.flink.connector.elasticsearch5.internal.ESSinkFunction
+import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.streaming.api.datastream.{DataStreamSink, DataStream => JavaDataStream}

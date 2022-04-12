@@ -48,7 +48,7 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
 
   val SIGN_COMMA = ","
 
-  val hosts = ConfigOption[List[String]](
+  val hosts: ConfigOption[List[String]] = ConfigOption[List[String]](
     key = "hosts",
     required = false,
     defaultValue = List(),
@@ -63,27 +63,27 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
     }
   )
 
-  val user = ConfigOption(
+  val user: ConfigOption[String] = ConfigOption(
     key = "user",
     required = true,
     classType = classOf[String]
   )
 
-  val password = ConfigOption(
+  val password: ConfigOption[String] = ConfigOption(
     key = "password",
     required = false,
     defaultValue = "",
     classType = classOf[String]
   )
 
-  val failoverTable = ConfigOption(
+  val failoverTable: ConfigOption[String] = ConfigOption(
     key = "failover.table",
     required = false,
     classType = classOf[String]
   )
 
 
-  val targetTable = ConfigOption(
+  val targetTable: ConfigOption[String] = ConfigOption(
     key = "targetTable",
     required = false,
     defaultValue = "",
@@ -91,21 +91,21 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
   )
 
 
-  val jdbcUrl = ConfigOption(
+  val jdbcUrl: ConfigOption[String] = ConfigOption(
     key = "jdbcUrl",
     required = true,
     classType = classOf[String]
   )
 
 
-  val driverClassName = ConfigOption(
+  val driverClassName: ConfigOption[String] = ConfigOption(
     key = "driverClassName",
     required = false,
     defaultValue = null,
     classType = classOf[String]
   )
 
-  val batchSize = ConfigOption(
+  val batchSize: ConfigOption[Int] = ConfigOption(
     key = "batch.size",
     required = false,
     defaultValue = 1,
@@ -113,7 +113,7 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
   )
 
 
-  val batchDelaytime = ConfigOption(
+  val batchDelayTime: ConfigOption[Long] = ConfigOption(
     key = "batch.delaytime",
     required = false,
     defaultValue = 1000L,
@@ -124,7 +124,7 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
   )
 
   def getInternalConfig(): Properties = {
-    ConfigUtils.getConf(prop.asScala.asJava, prefix)( "")
+    ConfigUtils.getConf(prop.asScala.asJava, prefix)("")
   }
 
 }
