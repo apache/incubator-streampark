@@ -20,9 +20,9 @@
 package com.streamxhub.streamx.flink.connector.redis.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.util.{ConfigUtils, Utils}
+import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.connector.redis.bean.RedisMapper
-import com.streamxhub.streamx.flink.connector.redis.conf.RedisSinkConfigOption
+import com.streamxhub.streamx.flink.connector.redis.conf.RedisConfig
 import com.streamxhub.streamx.flink.connector.redis.internal.{Redis2PCSinkFunction, RedisSinkFunction}
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
@@ -58,29 +58,21 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
     this(ctx, new Properties(), 0, null, null)
   }
 
-  val enableCheckpoint: Boolean = ctx.parameter.toMap.getOrElse(KEY_FLINK_CHECKPOINTS_ENABLE, "false").toBoolean
+  private val allProperties: util.Map[String, String] = ctx.parameter.toMap
+  val prop = ctx.parameter.getProperties
+  Utils.copyProperties(property, prop)
+  private val redisConfig: RedisConfig = new RedisConfig(prop)
+  val enableCheckpoint: Boolean = allProperties.getOrElse(KEY_FLINK_CHECKPOINTS_ENABLE, "false").toBoolean
 
   val cpMode: CheckpointingMode = Try(
-    CheckpointingMode.valueOf(ctx.parameter.toMap.get(KEY_FLINK_CHECKPOINTS_MODE))
+    CheckpointingMode.valueOf(allProperties.get(KEY_FLINK_CHECKPOINTS_MODE))
   ).getOrElse(CheckpointingMode.AT_LEAST_ONCE)
 
 
   lazy val config: FlinkJedisConfigBase = {
-    val map: util.Map[String, String] = ctx.parameter.toMap
-    val redisConf = ConfigUtils.getConf(map, RedisSinkConfigOption().prefix)
-    val option: RedisSinkConfigOption = RedisSinkConfigOption(redisConf)
-    val connectType: String = option.connectType.get()
-    Utils.copyProperties(property, redisConf)
+    val connectType: String = redisConfig.connectType
 
-    val host: String = redisConf.remove(KEY_HOST) match {
-      case null => throw new IllegalArgumentException("redis host  must not null")
-      case hostStr => hostStr.toString
-    }
-
-    val port: Int = redisConf.remove(KEY_PORT) match {
-      case null => 6379
-      case portStr => portStr.toString.toInt
-    }
+    val internalProp: Properties = redisConfig.sinkOption.getInternalConfig()
 
     def setFieldValue(field: Field, targetObject: Any, value: String): Unit = {
       field.setAccessible(true)
@@ -93,16 +85,10 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
       }
     }
 
-    connectType match {
-
+    redisConfig.connectType match {
       case "sentinel" =>
-        val sentinels: Set[String] = host.split(SIGN_COMMA).map(x => {
-          if (x.contains(SIGN_COLON)) x; else {
-            throw new IllegalArgumentException(s"redis sentinel host invalid {$x} must match host:port ")
-          }
-        }).toSet
-        val builder = new FlinkJedisSentinelConfig.Builder().setSentinels(sentinels)
-        redisConf.foreach(x => {
+        val builder = new FlinkJedisSentinelConfig.Builder().setSentinels(redisConfig.sentinels)
+        internalProp.foreach(x => {
           val field = Try(builder.getClass.getDeclaredField(x._1)).getOrElse {
             throw new IllegalArgumentException(
               s"""
@@ -123,8 +109,8 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
         builder.build()
 
       case "jedisPool" =>
-        val builder: FlinkJedisPoolConfig.Builder = new FlinkJedisPoolConfig.Builder().setHost(host).setPort(port)
-        redisConf.foreach(x => {
+        val builder: FlinkJedisPoolConfig.Builder = new FlinkJedisPoolConfig.Builder().setHost(redisConfig.host).setPort(redisConfig.port)
+        internalProp.foreach(x => {
           val field = Try(builder.getClass.getDeclaredField(x._1)).getOrElse {
             throw new IllegalArgumentException(
               s"""
@@ -143,7 +129,6 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
         })
 
         builder.build()
-
       case _ => throw throw new IllegalArgumentException(s"redis connectType must be jedisPool|sentinel $connectType")
     }
   }

@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.flink.connector.http.sink
 
-import com.streamxhub.streamx.flink.connector.http.conf.HttpConfigOption
+import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.connector.http.function.HttpSinkFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
@@ -27,6 +27,7 @@ import org.apache.flink.streaming.api.datastream.{DataStreamSink, DataStream => 
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.http.client.methods._
 
+import java.util.Properties
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 
@@ -35,13 +36,15 @@ object HttpSink {
 
   def apply(@(transient@param)
             header: Map[String, String] = Map.empty[String, String],
+            property: Properties = new Properties(),
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit ctx: StreamingContext): HttpSink = new HttpSink(ctx, header, parallelism, name, uid)
+            uid: String = null)(implicit ctx: StreamingContext): HttpSink = new HttpSink(ctx, property, header, parallelism, name, uid)
 
 }
 
 class HttpSink(@(transient@param) ctx: StreamingContext,
+               property: Properties = new Properties(),
                header: Map[String, String] = Map.empty[String, String],
                parallelism: Int = 0,
                name: String = null,
@@ -49,8 +52,11 @@ class HttpSink(@(transient@param) ctx: StreamingContext,
 
   // for java
   def this(ctx: StreamingContext) {
-    this(ctx, Map.empty[String, String], 0, null, null)
+    this(ctx, new Properties(), Map.empty[String, String], 0, null, null)
   }
+
+  val prop = ctx.parameter.getProperties
+  Utils.copyProperties(property, prop)
 
   def get(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpGet.METHOD_NAME)
 
@@ -81,8 +87,7 @@ class HttpSink(@(transient@param) ctx: StreamingContext,
   def trace(stream: JavaDataStream[String]): DataStreamSink[String] = sink(new DataStream[String](stream), HttpTrace.METHOD_NAME)
 
   private[this] def sink(stream: DataStream[String], method: String): DataStreamSink[String] = {
-    val params = ctx.parameter.getProperties
-    val sinkFun = new HttpSinkFunction(params, header, method)
+    val sinkFun = new HttpSinkFunction(prop, header, method)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }

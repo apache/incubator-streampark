@@ -268,42 +268,6 @@ object ConfigConst {
   val DORIS_DEFAULT_MAXRETRIES = "1"
   val DORIS_STREAM_LOAD_PROP_PREFIX = "streamLoad."
 
-  /**
-   * sink threshold and failover...
-   */
-  val KEY_SINK_THRESHOLD_BUFFER_SIZE: String = "threshold.bufferSize"
-
-  val KEY_SINK_THRESHOLD_NUM_WRITERS: String = "threshold.numWriters"
-
-  val KEY_SINK_THRESHOLD_QUEUE_CAPACITY: String = "threshold.queueCapacity"
-
-  val KEY_SINK_THRESHOLD_DELAY_TIME: String = "threshold.delayTime"
-
-  val KEY_SINK_THRESHOLD_REQ_TIMEOUT: String = "threshold.requestTimeout"
-
-  val KEY_SINK_THRESHOLD_RETRIES: String = "threshold.retries"
-
-  val KEY_SINK_THRESHOLD_SUCCESS_CODE: String = "threshold.successCode"
-
-
-  val KEY_SINK_FAILOVER_TABLE: String = "failover.table"
-
-  val KEY_SINK_FAILOVER_STORAGE: String = "failover.storage"
-
-
-  val DEFAULT_SINK_REQUEST_TIMEOUT = 2000
-
-  val DEFAULT_HTTP_SUCCESS_CODE = 200
-
-  val DEFAULT_SINK_THRESHOLD_QUEUE_CAPACITY = 10000
-
-  val DEFAULT_SINK_THRESHOLD_DELAY_TIME = 1000L
-
-  val DEFAULT_SINK_THRESHOLD_BUFFER_SIZE = 1000
-
-  val DEFAULT_SINK_THRESHOLD_RETRIES = 3
-
-  val DEFAULT_SINK_THRESHOLD_NUM_WRITERS: Int = Runtime.getRuntime.availableProcessors()
 
   /**
    * about config es

@@ -21,28 +21,45 @@ package com.streamxhub.streamx.flink.connector.redis.conf
 
 
 import com.streamxhub.streamx.common.conf.ConfigOption
+import com.streamxhub.streamx.common.util.ConfigUtils
 
 import java.util.Properties
+import scala.collection.JavaConverters._
 
 /**
  * @author benjobs
  */
 object RedisSinkConfigOption {
+  val REDIS_SINK_PREFIX = "redis.sink"
 
   /**
    *
    * @param properties
    * @return
    */
-  def apply(properties: Properties = new Properties): RedisSinkConfigOption = new RedisSinkConfigOption(properties)
+  def apply(prefixStr: String = REDIS_SINK_PREFIX, properties: Properties = new Properties): RedisSinkConfigOption = new RedisSinkConfigOption(prefixStr, properties)
 
 }
 
-class RedisSinkConfigOption(properties: Properties) {
+class RedisSinkConfigOption(prefixStr: String, properties: Properties) extends Serializable {
 
-  implicit val (prefix, prop) = ("redis.sink", properties)
+  implicit val (prefix, prop) = (prefixStr, properties)
 
   val DEFAULT_CONNECT_TYPE: String = "jedisPool"
+
+  val SIGN_COMMA = ","
+
+  val SIGN_COLON = ":"
+
+
+  val host = ConfigOption(
+    key = "host",
+    required = true,
+    classType = classOf[String],
+    handle = key => {
+      properties.remove(key).toString
+    }
+  )
 
   val connectType = ConfigOption(
     key = "connectType",
@@ -54,7 +71,24 @@ class RedisSinkConfigOption(properties: Properties) {
         .remove(k).toString
       if (value == null && value.isEmpty) DEFAULT_CONNECT_TYPE else value
     }
-
   )
+
+
+  val port = ConfigOption(
+    key = "port",
+    required = false,
+    defaultValue = 6379,
+    classType = classOf[Int],
+    handle = k => {
+      val value: String = properties
+        .remove(k).toString
+      if (value == null && value.isEmpty) 6379 else value.toInt
+    }
+  )
+
+  def getInternalConfig(): Properties = {
+    ConfigUtils.getConf(prop.asScala.asJava, prefix)(alias = "")
+  }
+
 
 }
