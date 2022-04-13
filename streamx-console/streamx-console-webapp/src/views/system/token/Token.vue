@@ -35,7 +35,7 @@
                 @click.native="search"/>
               <a-button
                 type="primary"
-                v-permit="'user:add'"
+                v-permit="'token:add'"
                 v-text="'创建token'"
                 @click="handleAdd"/>
             </span>
@@ -75,14 +75,13 @@
         slot-scope="text, record">
 
         <svg-icon
-          v-permit="'user:reset'"
+          v-permit="'token:view'"
           name="copy"
           border
           @click.native="copyToken(record)"
           title="copy token"/>
         <a-popconfirm
-          v-permit="'user:delete'"
-          v-if="record.username !== 'admin'"
+          v-permit="'token:delete'"
           title="Are you sure delete this token ?"
           cancel-text="No"
           ok-text="Yes"
