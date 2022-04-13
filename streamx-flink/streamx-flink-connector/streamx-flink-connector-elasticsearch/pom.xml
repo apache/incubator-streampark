@@ -23,6 +23,7 @@
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-connector-base_${scala.binary.version}</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
