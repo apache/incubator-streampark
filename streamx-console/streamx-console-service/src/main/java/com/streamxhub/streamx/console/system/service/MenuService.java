@@ -19,10 +19,11 @@
 
 package com.streamxhub.streamx.console.system.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.base.domain.router.VueRouter;
 import com.streamxhub.streamx.console.system.entity.Menu;
 import com.streamxhub.streamx.console.system.entity.User;
+
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.ArrayList;
 import java.util.List;

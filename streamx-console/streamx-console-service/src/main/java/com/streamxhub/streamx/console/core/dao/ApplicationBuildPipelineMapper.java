@@ -19,8 +19,9 @@
 
 package com.streamxhub.streamx.console.core.dao;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
  * @author Al-assad

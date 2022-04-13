@@ -19,19 +19,21 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
+import com.streamxhub.streamx.common.util.DeflaterUtils;
+import com.streamxhub.streamx.common.util.PropertiesUtils;
+
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.streamxhub.streamx.common.util.DeflaterUtils;
-import com.streamxhub.streamx.common.util.PropertiesUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import scala.collection.JavaConversions;
 
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
+
+import scala.collection.JavaConversions;
 
 /**
  * @author benjobs

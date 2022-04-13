@@ -19,6 +19,16 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
+import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
+import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline;
+import com.streamxhub.streamx.flink.packer.pipeline.BuildResult;
+import com.streamxhub.streamx.flink.packer.pipeline.PipeError;
+import com.streamxhub.streamx.flink.packer.pipeline.PipeSnapshot;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineStepStatus;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineType;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -27,15 +37,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
-import com.streamxhub.streamx.common.util.Utils;
-import com.streamxhub.streamx.console.base.util.JacksonUtils;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeError;
-import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
-import com.streamxhub.streamx.flink.packer.pipeline.PipelineStepStatus;
-import com.streamxhub.streamx.flink.packer.pipeline.PipelineType;
-import com.streamxhub.streamx.flink.packer.pipeline.BuildResult;
-import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeSnapshot;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -45,6 +46,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;

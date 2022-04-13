@@ -19,8 +19,9 @@
 
 package com.streamxhub.streamx.console.system.dao;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.streamxhub.streamx.console.system.entity.UserRole;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 public interface UserRoleMapper extends BaseMapper<UserRole> {

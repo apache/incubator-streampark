@@ -24,6 +24,7 @@ import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.metrics.flink.MailTemplate;
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.apache.commons.mail.EmailException;

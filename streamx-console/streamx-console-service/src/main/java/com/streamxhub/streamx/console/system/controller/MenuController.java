@@ -19,12 +19,13 @@
 
 package com.streamxhub.streamx.console.system.controller;
 
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.domain.router.VueRouter;
 import com.streamxhub.streamx.console.core.service.CommonService;
 import com.streamxhub.streamx.console.system.entity.Menu;
 import com.streamxhub.streamx.console.system.service.MenuService;
+
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+
 import java.util.ArrayList;
 import java.util.Map;
 

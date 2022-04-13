@@ -19,11 +19,12 @@
 
 package com.streamxhub.streamx.console.core.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.flink.core.SqlError;
+
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 

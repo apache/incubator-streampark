@@ -20,6 +20,7 @@
 package com.streamxhub.plugin.profiling.util;
 
 import com.streamxhub.streamx.plugin.profiling.util.StringUtils;
+
 import org.junit.Assert;
 import org.junit.Test;
 
