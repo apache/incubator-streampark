@@ -56,13 +56,16 @@ class JdbcASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => Str
 
   @throws[Exception]
   def asyncInvoke(input: T, resultFuture: ResultFuture[R]): Unit = {
-
-    CompletableFuture.supplyAsync(() => JdbcUtils.select(sqlFun(input))(jdbc), executorService).thenAccept((result: Iterable[Map[String, _]]) => {
-      val list = result.toList
-      if (list.isEmpty) {
-        resultFuture.complete(List(resultFun(input, Map.empty[String, Any])))
-      } else {
-        resultFuture.complete(list.map(x => resultFun(input, x)))
+    CompletableFuture.supplyAsync(new Supplier[Iterable[Map[String, _]]] {
+      override def get(): Iterable[Map[String, _]] = JdbcUtils.select(sqlFun(input))(jdbc)
+    }, executorService).thenAccept(new Consumer[Iterable[Map[String, _]]] {
+      override def accept(result: Iterable[Map[String, _]]): Unit = {
+        val list = result.toList
+        if (list.isEmpty) {
+          resultFuture.complete(List(resultFun(input, Map.empty[String, Any])))
+        } else {
+          resultFuture.complete(list.map(x => resultFun(input, x)))
+        }
       }
     })
 
