@@ -19,11 +19,12 @@
 
 package com.streamxhub.streamx.console.system.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.console.system.dao.UserRoleMapper;
 import com.streamxhub.streamx.console.system.entity.UserRole;
 import com.streamxhub.streamx.console.system.service.UserRoleService;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

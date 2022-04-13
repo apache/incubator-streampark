@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.connector.doris.sink;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.flink.connector.doris.internal.DorisSinkFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
+
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 

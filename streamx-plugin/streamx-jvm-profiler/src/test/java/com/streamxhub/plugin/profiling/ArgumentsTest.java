@@ -25,6 +25,7 @@ import com.streamxhub.streamx.plugin.profiling.Reporter;
 import com.streamxhub.streamx.plugin.profiling.reporter.ConsoleOutputReporter;
 import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethod;
 import com.streamxhub.streamx.plugin.profiling.util.ClassMethodArgument;
+
 import org.junit.Assert;
 import org.junit.Test;
 

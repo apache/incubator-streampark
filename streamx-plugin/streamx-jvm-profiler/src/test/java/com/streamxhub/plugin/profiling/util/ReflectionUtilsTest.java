@@ -20,12 +20,24 @@
 package com.streamxhub.plugin.profiling.util;
 
 import com.streamxhub.streamx.plugin.profiling.util.ReflectionUtils;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 
 public class ReflectionUtilsTest {
+
+    @Test
+    public void executeStaticMethods()
+        throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
+        InvocationTargetException {
+        Object result =
+            ReflectionUtils.executeStaticMethods(
+                "com.streamxhub.streamx.plugin.profiling.util.ReflectionUtilsTest$ClassB", "getClassA.method1");
+        Assert.assertEquals("hello", result);
+    }
+
     static class ClassA {
         public String method1() {
             return "hello";
@@ -36,15 +48,5 @@ public class ReflectionUtilsTest {
         public static ClassA getClassA() {
             return new ClassA();
         }
-    }
-
-    @Test
-    public void executeStaticMethods()
-        throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
-        InvocationTargetException {
-        Object result =
-            ReflectionUtils.executeStaticMethods(
-                "com.streamxhub.streamx.plugin.profiling.util.ReflectionUtilsTest$ClassB", "getClassA.method1");
-        Assert.assertEquals("hello", result);
     }
 }
