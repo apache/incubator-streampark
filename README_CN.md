@@ -44,8 +44,6 @@ Make stream processing easier
 [![StreamX video](https://user-images.githubusercontent.com/13284744/142747056-d220d69b-7f2a-447d-aeca-bc5435c8e29b.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
 
-![](https://user-images.githubusercontent.com/13284744/142746797-85ebf7b4-4105-4b5b-a023-0689c7fd1d2d.png)
-
 ## 🎉 Features
 
 * 开发脚手架
@@ -132,6 +130,17 @@ mvn clean install -DskipTests -Denv=prod
 
 
 
+## 🏆 我们的荣誉
+
+
+我们获得了一些珍贵的荣誉, 这份荣誉属于参加建设 StreamX 的每一位朋友, 谢谢大家!
+
+![](https://user-images.githubusercontent.com/13284744/142746797-85ebf7b4-4105-4b5b-a023-0689c7fd1d2d.png)
+
+
+![](https://user-images.githubusercontent.com/13284744/163287730-b9fad1c1-c368-4796-9262-9d7d8fc0c7c6.jpg)
+
+
 
 ## 🤝 如何贡献
 
@@ -141,11 +150,11 @@ mvn clean install -DskipTests -Denv=prod
 
 > 强烈推荐阅读 [《提问的智慧》](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way)(**本指南不提供此项目的实际支持服务！**)、[《如何有效地报告 Bug》](http://www.chiark.greenend.org.uk/%7Esgtatham/bugs-cn.html)、[《如何向开源项目提交无法解答的问题》](https://zhuanlan.zhihu.com/p/25795393)，更好的问题更容易获得帮助。
 
-感谢 [JetBrains](https://www.jetbrains.com/?from=streamx) 提供的免费开源 License 赞助
+感谢所有向 StreamX 贡献的朋友!
 
-[![JetBrains](https://img.alicdn.com/tfs/TB1sSomo.z1gK0jSZLeXXb9kVXa-120-130.svg)](https://www.jetbrains.com/?from=streamx)
+<a href="https://github.com/streamxhub/streamx/graphs/contributors"><img src="https://opencollective.com/streamx/contributors.svg?width=890" /></a>
 
-## 💰 Donation
+## 💰 我要捐助
 
 Are you **enjoying this project** ? 👋
 
@@ -185,6 +194,12 @@ StreamX现在离这个目标还有一段距离，还需持续投入，相应的�
     <a href="https://github.com/CrazyJugger" alt="leohantaoluo"><img src="https://avatars.githubusercontent.com/u/30514978?v=4" height="50" width="50"></a>
     <a href="https://github.com/zhaizhirui" alt="zhaizhirui"><img src="https://avatars.githubusercontent.com/u/39609947?v=4" height="50" width="50"></a>
 </p>
+
+
+感谢 [JetBrains](https://www.jetbrains.com/?from=streamx) 提供的免费开源 License 赞助
+
+[![JetBrains](https://img.alicdn.com/tfs/TB1sSomo.z1gK0jSZLeXXb9kVXa-120-130.svg)](https://www.jetbrains.com/?from=streamx)
+
 
 ## 💬 加入社区
 
