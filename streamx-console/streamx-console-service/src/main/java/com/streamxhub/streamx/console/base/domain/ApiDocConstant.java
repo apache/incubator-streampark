@@ -17,42 +17,17 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.authentication;
-
-import lombok.Data;
-import org.apache.shiro.authc.AuthenticationToken;
+package com.streamxhub.streamx.console.base.domain;
 
 /**
- * JSON Web Token
- *
- * @author benjobs
+ * @ClassName : ApiDocConstant
+ * @AUTHOR :  Yang XianWei
+ * @DATE :    2022/4/14 11:29 PM
+ * @DESCRIPTION : api swagger文档常量
+ * @since JDK 1.8
  */
-@Data
-public class JWTToken implements AuthenticationToken {
+public class ApiDocConstant {
 
-    private static final long serialVersionUID = 1282057025599826155L;
-
-    private String token;
-
-    private String expireAt;
-
-    public JWTToken(String token) {
-        this.token = token;
-    }
-
-    public JWTToken(String token, String expireAt) {
-        this.token = token;
-        this.expireAt = expireAt;
-    }
-
-    @Override
-    public Object getPrincipal() {
-        return token;
-    }
-
-    @Override
-    public Object getCredentials() {
-        return token;
-    }
+    public static final String FLINK_APP_OP_TAG = "[flink application]相关操作";
 
 }

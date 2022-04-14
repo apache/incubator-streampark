@@ -17,42 +17,16 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.authentication;
-
-import lombok.Data;
-import org.apache.shiro.authc.AuthenticationToken;
+package com.streamxhub.streamx.console.base.exception;
 
 /**
- * JSON Web Token
- *
- * @author benjobs
+ * api业务异常，区别于内部错误，需要返回友好的message
  */
-@Data
-public class JWTToken implements AuthenticationToken {
+public class ApiException extends RuntimeException {
 
-    private static final long serialVersionUID = 1282057025599826155L;
+    private static final long serialVersionUID = -994962710559017255L;
 
-    private String token;
-
-    private String expireAt;
-
-    public JWTToken(String token) {
-        this.token = token;
+    public ApiException(String message) {
+        super(message);
     }
-
-    public JWTToken(String token, String expireAt) {
-        this.token = token;
-        this.expireAt = expireAt;
-    }
-
-    @Override
-    public Object getPrincipal() {
-        return token;
-    }
-
-    @Override
-    public Object getCredentials() {
-        return token;
-    }
-
 }

@@ -21,6 +21,7 @@ package com.streamxhub.streamx.console.base.handler;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.base.exception.ApiException;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -63,8 +64,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
-        log.info("不支持的request method，异常信息：", e.getMessage());
+        log.info("不支持的request method，异常信息：{}", e.getMessage());
         return new RestResponse().message("不支持的request method，异常信息：" + e.getMessage());
+    }
+
+    @ExceptionHandler(value = ApiException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public RestResponse handleException(ApiException e) {
+        log.info("api exception：{}", e.getMessage());
+        return RestResponse.fail("api fail ， msg：" + e.getMessage());
     }
 
     /**
@@ -98,8 +106,7 @@ public class GlobalExceptionHandler {
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
         for (ConstraintViolation<?> violation : violations) {
             Path path = violation.getPropertyPath();
-            String[] pathArr =
-                StringUtils.splitByWholeSeparatorPreserveAllTokens(path.toString(), StringPool.DOT);
+            String[] pathArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(path.toString(), StringPool.DOT);
             message.append(pathArr[1]).append(violation.getMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));

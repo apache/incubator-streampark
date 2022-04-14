@@ -17,42 +17,20 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.authentication;
+package com.streamxhub.streamx.console.core.annotation;
 
-import lombok.Data;
-import org.apache.shiro.authc.AuthenticationToken;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * JSON Web Token
- *
- * @author benjobs
+ * @author xianwei.yang
+ * 控制外部api token的调用权限
  */
-@Data
-public class JWTToken implements AuthenticationToken {
-
-    private static final long serialVersionUID = 1282057025599826155L;
-
-    private String token;
-
-    private String expireAt;
-
-    public JWTToken(String token) {
-        this.token = token;
-    }
-
-    public JWTToken(String token, String expireAt) {
-        this.token = token;
-        this.expireAt = expireAt;
-    }
-
-    @Override
-    public Object getPrincipal() {
-        return token;
-    }
-
-    @Override
-    public Object getCredentials() {
-        return token;
-    }
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ApiAccess {
+    boolean value() default true;
 
 }
