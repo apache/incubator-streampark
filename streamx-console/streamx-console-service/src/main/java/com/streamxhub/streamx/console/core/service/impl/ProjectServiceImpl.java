@@ -87,7 +87,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Autowired
     private ApplicationService applicationService;
 
-    private ExecutorService executorService = new ThreadPoolExecutor(
+    private final ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
         200,
         60L,
@@ -381,7 +381,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
             }
 
-            Future<Git> future = executorService.submit(() -> cloneCommand.call());
+            Future<Git> future = executorService.submit(cloneCommand);
             Git git = future.get(60, TimeUnit.SECONDS);
 
             StoredConfig config = git.getRepository().getConfig();
@@ -465,7 +465,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
      */
     private boolean projectBuild(Project project, String socketId) {
         StringBuilder builder = tailBuffer.get(project.getId());
-        Integer code = CommandUtils.execute(project.getMavenWorkHome(), project.getMavenArgs(), (line) -> {
+        int code = CommandUtils.execute(project.getMavenWorkHome(), project.getMavenArgs(), (line) -> {
             builder.append(line).append("\n");
             if (tailOutMap.containsKey(project.getId())) {
                 if (tailBeginning.containsKey(project.getId())) {

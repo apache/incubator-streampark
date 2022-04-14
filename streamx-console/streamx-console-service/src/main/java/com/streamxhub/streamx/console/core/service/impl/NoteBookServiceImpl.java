@@ -47,7 +47,7 @@ public class NoteBookServiceImpl implements NoteBookService {
     @Autowired
     private FlinkEnvService flinkEnvService;
 
-    private ExecutorService executorService = new ThreadPoolExecutor(
+    private final ExecutorService executorService = new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() * 2,
             200,
             60L,
