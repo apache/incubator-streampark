@@ -110,6 +110,7 @@ public class ApplicationBuildPipelineController {
      * @param appId application id
      * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
      */
+    @ApiAccess
     @PostMapping("/detail")
     @RequiresPermissions("app:view")
     public RestResponse getBuildProgressDetail(Long appId) {

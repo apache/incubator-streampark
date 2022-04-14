@@ -74,6 +74,7 @@ public class ApplicationController {
     @Autowired
     private AppBuildPipeService appBuildPipeService;
 
+    @ApiAccess
     @PostMapping("get")
     @RequiresPermissions("app:detail")
     public RestResponse get(Application app) {
@@ -81,6 +82,7 @@ public class ApplicationController {
         return RestResponse.create().data(application);
     }
 
+    @ApiAccess
     @PostMapping("create")
     @RequiresPermissions("app:create")
     public RestResponse create(Application app) throws IOException {
@@ -136,6 +138,7 @@ public class ApplicationController {
         return RestResponse.create();
     }
 
+    @ApiAccess
     @PostMapping("start")
     @RequiresPermissions("app:start")
     public RestResponse start(Application app) {
@@ -149,6 +152,7 @@ public class ApplicationController {
         }
     }
 
+    @ApiAccess
     @PostMapping("clean")
     @RequiresPermissions("app:clean")
     public RestResponse clean(Application app) {
@@ -156,6 +160,7 @@ public class ApplicationController {
         return RestResponse.create().data(true);
     }
 
+    @ApiAccess
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
     public RestResponse cancel(Application app) {
