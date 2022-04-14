@@ -37,6 +37,4 @@ object ElasticSearchUtils {
     }
     indexReq
   }
-
-
 }

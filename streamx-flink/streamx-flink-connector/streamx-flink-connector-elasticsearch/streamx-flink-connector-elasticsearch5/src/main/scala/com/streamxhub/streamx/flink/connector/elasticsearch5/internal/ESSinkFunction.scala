@@ -62,7 +62,7 @@ class ESSinkFunction[T](apiType: ApiType = ApiType.scala) extends ElasticsearchS
       case deleteRequest if deleteRequest.isInstanceOf[DeleteRequest] => requestIndexer.add(deleteRequest.asInstanceOf[DeleteRequest])
       case updateRequest if updateRequest.isInstanceOf[UpdateRequest] => requestIndexer.add(updateRequest.asInstanceOf[UpdateRequest])
       case _ => {
-        logError("ElasticsearchSinkFunction add ActionRequest is Deprecated plasase use IndexRequest|DeleteRequest|UpdateRequest ")
+        logError("ElasticsearchSinkFunction add ActionRequest is Deprecated please use IndexRequest|DeleteRequest|UpdateRequest ")
         requestIndexer.add(request)
       }
     }
