@@ -19,8 +19,9 @@
 
 package com.streamxhub.streamx.console.base.config;
 
-import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
 import com.streamxhub.streamx.common.util.DateUtils;
+
+import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;

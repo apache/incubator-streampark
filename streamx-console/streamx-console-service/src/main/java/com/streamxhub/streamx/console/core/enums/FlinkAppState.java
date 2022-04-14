@@ -20,10 +20,12 @@
 package com.streamxhub.streamx.console.core.enums;
 
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
+
 import lombok.Getter;
-import scala.Enumeration;
 
 import java.io.Serializable;
+
+import scala.Enumeration;
 
 /**
  * @author benjobs

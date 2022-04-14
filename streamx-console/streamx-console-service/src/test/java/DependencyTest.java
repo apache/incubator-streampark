@@ -19,15 +19,17 @@
 
 import com.streamxhub.streamx.common.util.DependencyUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import scala.collection.JavaConversions;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import scala.collection.JavaConversions;
 
 @Slf4j
 public class DependencyTest {

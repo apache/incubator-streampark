@@ -7,7 +7,7 @@
     <version>1.2.3</version>
     <packaging>pom</packaging>
     <name>StreamX Parent</name>
-    <description>A magical framework that makes Flink development easier</description>
+    <description>A magical framework that make stream processing easier</description>
 
     <modules>
         <module>streamx-common</module>
@@ -71,7 +71,7 @@
         <vertx.version>4.2.3</vertx.version>
         <hadoop.version>2.10.1</hadoop.version>
         <hbase.version>2.1.10</hbase.version>
-        <scala.version>2.12.8</scala.version>
+        <scala.version>2.12.15</scala.version>
         <scala.binary.version>2.12</scala.binary.version>
         <scalatest.version>3.2.9</scalatest.version>
         <junit.version>5.6.3</junit.version>
@@ -88,8 +88,9 @@
         <guava.version>30.0-jre</guava.version>
         <caffeine.version>2.8.6</caffeine.version>
 
-        <checkstyle.version>3.1.2</checkstyle.version>
-        <puppycrawl.version>9.2</puppycrawl.version>
+        <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
+        <checkstyle.fails.on.error>true</checkstyle.fails.on.error>
+        <scalastyle-maven-plugin.version>1.0.0</scalastyle-maven-plugin.version>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
@@ -455,20 +456,14 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>${checkstyle.version}</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.puppycrawl.tools</groupId>
-                            <artifactId>checkstyle</artifactId>
-                            <version>${puppycrawl.version}</version>
-                        </dependency>
-                    </dependencies>
+                    <version>${maven-checkstyle-plugin.version}</version>
                     <configuration>
+                        <!--suppress UnresolvedMavenProperty -->
                         <configLocation>${maven.multiModuleProjectDirectory}/tools/checkstyle/checkstyle.xml</configLocation>
                         <encoding>UTF-8</encoding>
                         <consoleOutput>true</consoleOutput>
                         <includeTestSourceDirectory>false</includeTestSourceDirectory>
-                        <failOnViolation>true</failOnViolation>
+                        <failOnViolation>${checkstyle.fails.on.error}</failOnViolation>
                         <sourceDirectories>
                             <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
                             <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
@@ -502,7 +497,7 @@
                 <plugin>
                     <groupId>org.scalastyle</groupId>
                     <artifactId>scalastyle-maven-plugin</artifactId>
-                    <version>1.0.0</version>
+                    <version>${scalastyle-maven-plugin.version}</version>
                     <configuration>
                         <verbose>false</verbose>
                         <failOnViolation>true</failOnViolation>
@@ -510,6 +505,7 @@
                         <failOnWarning>false</failOnWarning>
                         <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
                         <testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
+                        <!--suppress UnresolvedMavenProperty -->
                         <configLocation>${maven.multiModuleProjectDirectory}/scalastyle-config.xml</configLocation>
                         <outputFile>${project.build.directory}/target/scalastyle-output.xml</outputFile>
                         <inputEncoding>UTF-8</inputEncoding>

@@ -19,11 +19,6 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.common.collect.Maps;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.ApplicationType;
@@ -44,9 +39,9 @@ import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.NoticeType;
 import com.streamxhub.streamx.console.core.enums.OptionState;
+import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
-import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.CommonService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
@@ -66,13 +61,19 @@ import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sSessionBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkRemotePerJobBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.FlinkYarnApplicationBuildRequest;
 import com.streamxhub.streamx.flink.packer.pipeline.PipeSnapshot;
+import com.streamxhub.streamx.flink.packer.pipeline.PipeWatcher;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineType;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeWatcher;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -82,6 +83,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

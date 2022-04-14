@@ -81,9 +81,11 @@ class HBaseSinkFunction[T](apiType: ApiType = ApiType.scala, tabName: String, pr
     val tableName = TableName.valueOf(tabName)
     val mutatorParam = new BufferedMutatorParams(tableName)
       .writeBufferSize(writeBufferSize)
-      .listener((exception: RetriesExhaustedWithDetailsException, _: BufferedMutator) => {
-        for (i <- 0.until(exception.getNumExceptions)) {
-          logger.error(s"[StreamX] HBaseSink Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
+      .listener(new BufferedMutator.ExceptionListener {
+        override def onException(exception: RetriesExhaustedWithDetailsException, mutator: BufferedMutator): Unit = {
+          for (i <- 0.until(exception.getNumExceptions)) {
+            logger.error(s"[StreamX] HBaseSink Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
+          }
         }
       })
     mutator = connection.getBufferedMutator(mutatorParam)

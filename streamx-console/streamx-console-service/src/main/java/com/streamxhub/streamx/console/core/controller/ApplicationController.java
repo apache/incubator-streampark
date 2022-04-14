@@ -55,7 +55,6 @@ import java.util.stream.Collectors;
 /**
  * @author benjobs
  */
-//@Api(tags = "[flink app]相关操作", consumes = "Content-Type=application/x-www-form-urlencoded")
 @Slf4j
 @Validated
 @RestController

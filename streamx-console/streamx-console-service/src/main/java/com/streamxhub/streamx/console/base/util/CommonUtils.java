@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.console.base.util;
 
 import com.streamxhub.streamx.common.util.AssertUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.beans.BeanMap;
 

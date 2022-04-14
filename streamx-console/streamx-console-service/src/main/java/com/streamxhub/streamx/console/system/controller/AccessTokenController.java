@@ -19,11 +19,12 @@
 
 package com.streamxhub.streamx.console.system.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.system.entity.AccessToken;
 import com.streamxhub.streamx.console.system.service.AccessTokenService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
