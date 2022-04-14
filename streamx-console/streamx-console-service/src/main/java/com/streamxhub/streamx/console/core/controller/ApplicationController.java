@@ -25,6 +25,7 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.core.annotation.ApiAccess;
 import com.streamxhub.streamx.console.core.entity.AppControl;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
@@ -100,6 +101,7 @@ public class ApplicationController {
         return RestResponse.create().data(map);
     }
 
+    @ApiAccess
     @PostMapping("list")
     @RequiresPermissions("app:view")
     public RestResponse list(Application app, RestRequest request) {

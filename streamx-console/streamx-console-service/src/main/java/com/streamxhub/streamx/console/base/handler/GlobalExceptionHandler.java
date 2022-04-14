@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     public RestResponse handleException(ApiException e) {
         log.info("api exception：{}", e.getMessage());
-        return RestResponse.fail("api fail ， msg：" + e.getMessage());
+        return RestResponse.fail("api fail, msg:" + e.getMessage());
     }
 
     /**
