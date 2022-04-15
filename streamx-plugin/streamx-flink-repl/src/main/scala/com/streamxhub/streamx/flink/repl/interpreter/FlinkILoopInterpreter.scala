@@ -102,7 +102,7 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
 
   import global.Name
 
-   def importsCode(wanted: Set[Name], wrapper: Request#Wrapper,
+  override def importsCode(wanted: Set[Name], wrapper: Request#Wrapper,
                            definesClass: Boolean, generousImports: Boolean): ComputedImports = {
 
     import global._
