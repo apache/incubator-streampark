@@ -26,6 +26,7 @@ import com.streamxhub.streamx.console.core.annotation.ApiAccess;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.console.system.entity.AccessToken;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -61,6 +62,7 @@ public class StreamXConsoleAspect {
     public void apiAccess() {
     }
 
+    @SuppressWarnings("checkstyle:SimplifyBooleanExpression")
     @Around(value = "response()")
     public RestResponse response(ProceedingJoinPoint joinPoint) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
@@ -70,11 +72,10 @@ public class StreamXConsoleAspect {
         Boolean isApi = (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
         if (Objects.nonNull(isApi) && isApi) {
             ApiAccess apiAccess = methodSignature.getMethod().getAnnotation(ApiAccess.class);
-            if (Objects.isNull(apiAccess) || apiAccess.value() == false) {
-                throw new ApiException("api accessToken 访问受限!");
+            if (Objects.isNull(apiAccess) || !apiAccess.value()) {
+                throw new ApiException("api accessToken authentication failed!");
             }
         }
-
         RestResponse response;
         try {
             response = (RestResponse) joinPoint.proceed();
