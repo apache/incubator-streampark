@@ -26,7 +26,25 @@ import java.util.HashMap;
  */
 public class RestResponse extends HashMap<String, Object> {
 
+    private static final String STATUS_SUCCESS = "success";
+    private static final String ERROR_SUCCESS = "error";
+
     private static final long serialVersionUID = -8713837118340960775L;
+
+    public static RestResponse success(Object data) {
+        RestResponse resp = new RestResponse();
+        resp.put("status", STATUS_SUCCESS);
+        resp.put("data", data);
+        return resp;
+    }
+
+    public static RestResponse fail(String message) {
+        RestResponse resp = new RestResponse();
+        resp.put("status", ERROR_SUCCESS);
+        resp.put("message", message);
+        resp.put("data", null);
+        return resp;
+    }
 
     public static RestResponse create() {
         return new RestResponse();

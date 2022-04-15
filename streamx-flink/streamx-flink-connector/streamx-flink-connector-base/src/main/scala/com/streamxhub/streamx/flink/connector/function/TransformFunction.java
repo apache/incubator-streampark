@@ -25,7 +25,7 @@ import java.io.Serializable;
  * @author benjobs
  */
 @FunctionalInterface
-public interface TransformFunction<T,R> extends Serializable {
+public interface TransformFunction<T, R> extends Serializable {
     /**
      * @param bean: bean
      * @return String:

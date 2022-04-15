@@ -73,7 +73,6 @@ public class ScalaShellStreamEnvironment extends StreamExecutionEnvironment {
         return super.executeAsync(streamGraph);
     }
 
-
     public static void disableAllContextAndOtherEnvironments() {
         initializeContextEnvironment(
             configuration -> {

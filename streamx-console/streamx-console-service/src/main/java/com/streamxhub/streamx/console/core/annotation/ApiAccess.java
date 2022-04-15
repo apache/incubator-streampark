@@ -17,51 +17,20 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.common.enums;
+package com.streamxhub.streamx.console.core.annotation;
 
-import java.io.Serializable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author benjobs
+ * @author xianwei.yang
+ * 控制外部api token的调用权限
  */
-public enum SqlErrorType implements Serializable {
-    /**
-     * 基本检验失败(如为null等)
-     */
-    VERIFY_FAILED(1),
-    /**
-     * 语法错误
-     */
-    SYNTAX_ERROR(2),
-    /**
-     * 不支持的方言
-     */
-    UNSUPPORTED_DIALECT(3),
-    /**
-     * 不支持的sql命令
-     */
-    UNSUPPORTED_SQL(4),
-    /**
-     * 非";"结尾
-     */
-    ENDS_WITH(5);
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ApiAccess {
+    boolean value() default true;
 
-    private final int value;
-
-    SqlErrorType(int value) {
-        this.value = value;
-    }
-
-    public static SqlErrorType of(Integer value) {
-        for (SqlErrorType type : values()) {
-            if (type.value == value) {
-                return type;
-            }
-        }
-        return null;
-    }
-
-    public int getValue() {
-        return value;
-    }
 }

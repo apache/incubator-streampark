@@ -19,11 +19,13 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.core.annotation.ApiAccess;
 import com.streamxhub.streamx.console.core.entity.AppControl;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
@@ -34,10 +36,6 @@ import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationLogService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
-
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +56,6 @@ import java.util.stream.Collectors;
 /**
  * @author benjobs
  */
-@Api(tags = "[flink app]相关操作", consumes = "Content-Type=application/x-www-form-urlencoded")
 @Slf4j
 @Validated
 @RestController
@@ -77,6 +74,7 @@ public class ApplicationController {
     @Autowired
     private AppBuildPipeService appBuildPipeService;
 
+    @ApiAccess
     @PostMapping("get")
     @RequiresPermissions("app:detail")
     public RestResponse get(Application app) {
@@ -84,6 +82,7 @@ public class ApplicationController {
         return RestResponse.create().data(application);
     }
 
+    @ApiAccess
     @PostMapping("create")
     @RequiresPermissions("app:create")
     public RestResponse create(Application app) throws IOException {
@@ -104,7 +103,7 @@ public class ApplicationController {
         return RestResponse.create().data(map);
     }
 
-    @ApiOperation("app list")
+    @ApiAccess
     @PostMapping("list")
     @RequiresPermissions("app:view")
     public RestResponse list(Application app, RestRequest request) {
@@ -139,6 +138,7 @@ public class ApplicationController {
         return RestResponse.create();
     }
 
+    @ApiAccess
     @PostMapping("start")
     @RequiresPermissions("app:start")
     public RestResponse start(Application app) {
@@ -152,6 +152,7 @@ public class ApplicationController {
         }
     }
 
+    @ApiAccess
     @PostMapping("clean")
     @RequiresPermissions("app:clean")
     public RestResponse clean(Application app) {
@@ -159,6 +160,7 @@ public class ApplicationController {
         return RestResponse.create().data(true);
     }
 
+    @ApiAccess
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
     public RestResponse cancel(Application app) {

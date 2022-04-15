@@ -17,51 +17,17 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.common.enums;
-
-import java.io.Serializable;
+package com.streamxhub.streamx.console.base.domain;
 
 /**
- * @author benjobs
+ * @ClassName : ApiDocConstant
+ * @AUTHOR :  Yang XianWei
+ * @DATE :    2022/4/14 11:29 PM
+ * @DESCRIPTION : api swagger文档常量
+ * @since JDK 1.8
  */
-public enum SqlErrorType implements Serializable {
-    /**
-     * 基本检验失败(如为null等)
-     */
-    VERIFY_FAILED(1),
-    /**
-     * 语法错误
-     */
-    SYNTAX_ERROR(2),
-    /**
-     * 不支持的方言
-     */
-    UNSUPPORTED_DIALECT(3),
-    /**
-     * 不支持的sql命令
-     */
-    UNSUPPORTED_SQL(4),
-    /**
-     * 非";"结尾
-     */
-    ENDS_WITH(5);
+public class ApiDocConstant {
 
-    private final int value;
+    public static final String FLINK_APP_OP_TAG = "[flink application]相关操作";
 
-    SqlErrorType(int value) {
-        this.value = value;
-    }
-
-    public static SqlErrorType of(Integer value) {
-        for (SqlErrorType type : values()) {
-            if (type.value == value) {
-                return type;
-            }
-        }
-        return null;
-    }
-
-    public int getValue() {
-        return value;
-    }
 }
