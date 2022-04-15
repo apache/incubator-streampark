@@ -16,7 +16,6 @@
     </properties>
 
     <modules>
-        <module>streamx-flink-repl</module>
         <module>streamx-flink-sqlclient</module>
         <module>streamx-flink-udf</module>
         <module>streamx-flink-submit</module>

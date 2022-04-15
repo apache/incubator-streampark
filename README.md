@@ -128,6 +128,7 @@ cd streamx
 click [Document](http://www.streamxhub.com/zh-CN/docs/intro/) for more information
 
 
+
 ## 💋 out users
 
 
@@ -144,8 +145,7 @@ We have received some precious honors, which belong to everyone who contributes 
 
 ![](https://user-images.githubusercontent.com/13284744/142746797-85ebf7b4-4105-4b5b-a023-0689c7fd1d2d.png)
 
-
-![](https://user-images.githubusercontent.com/13284744/163287730-b9fad1c1-c368-4796-9262-9d7d8fc0c7c6.jpg)
+![](https://user-images.githubusercontent.com/13284744/163530071-a5b6f334-9af5-439c-96c9-2bb9b4eec6a6.jpg)
 
 
 

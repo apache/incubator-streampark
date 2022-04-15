@@ -391,18 +391,6 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-repl_${scala.binary.version}</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-submit-api_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
