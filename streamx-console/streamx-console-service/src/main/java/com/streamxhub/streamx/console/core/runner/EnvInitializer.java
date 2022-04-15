@@ -19,6 +19,8 @@
 
 package com.streamxhub.streamx.console.core.runner;
 
+import static com.streamxhub.streamx.common.enums.StorageType.LFS;
+
 import com.streamxhub.streamx.common.conf.CommonConfig;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.InternalConfigHolder;
@@ -30,6 +32,7 @@ import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.service.SettingService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +51,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.streamxhub.streamx.common.enums.StorageType.LFS;
 
 /**
  * @author benjobs

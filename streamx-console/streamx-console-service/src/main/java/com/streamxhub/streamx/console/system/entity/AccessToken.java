@@ -26,6 +26,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -37,6 +38,8 @@ public class AccessToken implements Serializable {
 
     public static final String DEFAULT_PASSWORD = "X-api";
     public static final String DEFAULT_EXPIRE_TIME = "9999-01-01 00:00:00";
+    public static final String IS_API_TOKEN = "is_api_token";
+
 
     @TableId(value = "ID", type = IdType.AUTO)
     private Long id;

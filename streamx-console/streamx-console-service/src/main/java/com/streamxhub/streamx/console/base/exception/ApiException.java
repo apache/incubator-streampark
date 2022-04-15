@@ -17,19 +17,16 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.service;
-
-import com.streamxhub.streamx.console.core.entity.Note;
+package com.streamxhub.streamx.console.base.exception;
 
 /**
- * @author benjobs
+ * api业务异常，区别于内部错误，需要返回友好的message
  */
-public interface NoteBookService {
-    /**
-     * @param note
-     * @throws Exception
-     */
-    void submit(Note note);
+public class ApiException extends RuntimeException {
 
-    void submit2(Note note);
+    private static final long serialVersionUID = -994962710559017255L;
+
+    public ApiException(String message) {
+        super(message);
+    }
 }

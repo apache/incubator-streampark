@@ -44,8 +44,6 @@ data laker.
 [![StreamX video](https://user-images.githubusercontent.com/13284744/142747056-d220d69b-7f2a-447d-aeca-bc5435c8e29b.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
 
-![](https://user-images.githubusercontent.com/13284744/142746797-85ebf7b4-4105-4b5b-a023-0689c7fd1d2d.png)
-
 ## 🎉 Features
 
 * Scaffolding
@@ -130,7 +128,9 @@ cd streamx
 click [Document](http://www.streamxhub.com/zh-CN/docs/intro/) for more information
 
 
+
 ## 💋 out users
+
 
 Various companies and organizations use StreamX for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/streamxhub/streamx/issues/163)
 
@@ -138,7 +138,18 @@ Various companies and organizations use StreamX for research, production and com
 
 
 
-## 🤝 Contributing
+## 🏆 Our honor
+
+We have received some precious honors, which belong to everyone who contributes to StreamX, Thank you !
+
+
+![](https://user-images.githubusercontent.com/13284744/142746797-85ebf7b4-4105-4b5b-a023-0689c7fd1d2d.png)
+
+![](https://user-images.githubusercontent.com/13284744/163530071-a5b6f334-9af5-439c-96c9-2bb9b4eec6a6.jpg)
+
+
+
+## 🤝 Contribution
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/streamxhub/streamx/pulls)
 
@@ -146,10 +157,9 @@ You can submit any ideas as [pull requests](https://github.com/streamxhub/stream
 
 > If you're new to posting issues, we ask that you read [*How To Ask Questions The Smart Way*](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
 
-Thanks to [JetBrains](https://www.jetbrains.com/?from=streamx) for supporting us free open source licenses.
+Thank you to all the people who already contributed to StreamX!
 
-[![JetBrains](https://img.alicdn.com/tfs/TB1sSomo.z1gK0jSZLeXXb9kVXa-120-130.svg)](https://www.jetbrains.com/?from=streamx)
-
+<a href="https://github.com/streamxhub/streamx/graphs/contributors"><img src="https://opencollective.com/streamx/contributors.svg?width=890" /></a>
 
 ## 💰 Donation
 
@@ -161,7 +171,7 @@ If you like this framework, and appreciate the work done for it to exist, you ca
 |:----------|:----------|
 | <img src="https://user-images.githubusercontent.com/13284744/142746857-35e7f823-7160-4505-be3f-e748a2d0a233.png" alt="Buy Me A Coffee" width="150"> | <img src="https://user-images.githubusercontent.com/13284744/142746860-e14a8183-d973-44ca-83bf-e5f9d4da1510.png" alt="Buy Me A Coffee" width="150"> |
 
-## 🏆 My sponsors (Coffee Suppliers)
+## 🏆 Our sponsors (Coffee Suppliers)
 
 ### 💜 Monthly Supplier
 
@@ -189,9 +199,17 @@ Welcome individuals and enterprises to sponsor, your support will help us better
     <a href="https://github.com/zhaizhirui" alt="zhaizhirui"><img src="https://avatars.githubusercontent.com/u/39609947?v=4" height="50" width="50"></a>
 </p>
 
+
+Thanks to [JetBrains](https://www.jetbrains.com/?from=streamx) for supporting us free open source licenses.
+
+[![JetBrains](https://img.alicdn.com/tfs/TB1sSomo.z1gK0jSZLeXXb9kVXa-120-130.svg)](https://www.jetbrains.com/?from=streamx)
+
+
 ### 🏅 Backers
 
 Thank you to all our backers!
+
+---
 
 ## 💬 Join us
 

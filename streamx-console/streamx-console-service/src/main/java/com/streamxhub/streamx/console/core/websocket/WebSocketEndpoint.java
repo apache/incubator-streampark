@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.console.core.websocket;
 
 import com.streamxhub.streamx.console.core.entity.Message;
+
 import io.undertow.util.CopyOnWriteMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
+
 import java.io.IOException;
 import java.util.Map;
 

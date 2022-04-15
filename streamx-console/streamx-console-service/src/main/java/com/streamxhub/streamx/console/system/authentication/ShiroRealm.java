@@ -20,11 +20,14 @@
 package com.streamxhub.streamx.console.system.authentication;
 
 import com.streamxhub.streamx.console.base.util.WebUtils;
+import com.streamxhub.streamx.console.system.entity.AccessToken;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.service.AccessTokenService;
 import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserService;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -109,8 +112,8 @@ public class ShiroRealm extends AuthorizingRealm {
             if (!effective) {
                 throw new AuthenticationException("token校验不通过,请检查user状态或token状态");
             }
+            SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
         }
-
         return new SimpleAuthenticationInfo(token, token, "streamx_shiro_realm");
     }
 }

@@ -19,12 +19,13 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
+import com.streamxhub.streamx.common.util.HttpClientUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
+
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.streamxhub.streamx.common.util.HttpClientUtils;
-import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import lombok.Data;
 import org.apache.http.client.config.RequestConfig;
 

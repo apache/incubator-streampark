@@ -17,15 +17,17 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
-
-import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
-
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+package com.streamxhub.streamx.console.base.domain;
 
 /**
- * @author Al-assad
+ * @ClassName : ApiDocConstant
+ * @AUTHOR :  Yang XianWei
+ * @DATE :    2022/4/14 11:29 PM
+ * @DESCRIPTION : api swagger文档常量
+ * @since JDK 1.8
  */
-public interface ApplicationBuildPipelineMapper extends BaseMapper<AppBuildPipeline> {
+public class ApiDocConstant {
+
+    public static final String FLINK_APP_OP_TAG = "[flink application]相关操作";
 
 }

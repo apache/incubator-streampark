@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.console.system.runner;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;

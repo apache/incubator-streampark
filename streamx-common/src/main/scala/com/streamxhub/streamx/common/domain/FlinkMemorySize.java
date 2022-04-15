@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.streamxhub.streamx.common.domain;
 
 import com.streamxhub.streamx.common.util.AssertUtils;
@@ -42,7 +43,7 @@ public class FlinkMemorySize implements java.io.Serializable, Comparable<FlinkMe
 
     public static final FlinkMemorySize MAX_VALUE = new FlinkMemorySize(Long.MAX_VALUE);
 
-    private static final List<FlinkMemorySize.MemoryUnit> ORDERED_UNITS = Arrays.asList(BYTES, KILO_BYTES, MEGA_BYTES, GIGA_BYTES, TERA_BYTES);
+    private static final List<MemoryUnit> ORDERED_UNITS = Arrays.asList(BYTES, KILO_BYTES, MEGA_BYTES, GIGA_BYTES, TERA_BYTES);
 
     // ------------------------------------------------------------------------
 
@@ -308,7 +309,7 @@ public class FlinkMemorySize implements java.io.Serializable, Comparable<FlinkMe
         return result;
     }
 
-    private static Optional<FlinkMemorySize.MemoryUnit> parseUnit(String unit) {
+    private static Optional<MemoryUnit> parseUnit(String unit) {
         if (matchesAny(unit, BYTES)) {
             return Optional.of(BYTES);
         } else if (matchesAny(unit, KILO_BYTES)) {

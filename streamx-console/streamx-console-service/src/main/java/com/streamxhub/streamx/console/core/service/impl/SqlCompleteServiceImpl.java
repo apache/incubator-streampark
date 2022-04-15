@@ -19,14 +19,16 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.google.common.collect.Sets;
 import com.streamxhub.streamx.console.core.service.SqlCompleteService;
+
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,7 +113,6 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
 
     private static class SqlCompleteFstTree {
 
-
         // symbol reminder
         private static final String CHARACTER_NOTICE = "()\t<>\t\"\"\t''\t{}";
 
@@ -132,7 +133,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
                 String dict = stringBuffer.toString();
                 Arrays.stream(dict.split(SPLIT_CHAR)).map(e -> e.trim().toLowerCase()).forEach(e -> this.initSearchTree(e, 1));
             } catch (IOException e) {
-                log.error("FstTree require reserved word init fail,{}", e);
+                log.error("FstTree require reserved word init fail, {}", e.getMessage());
             }
 
             Arrays.stream(CHARACTER_NOTICE.split(SPLIT_CHAR)).map(e -> e.trim().toLowerCase()).forEach(e -> this.initSearchTree(e, 1));

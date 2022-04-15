@@ -17,15 +17,20 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.core.annotation;
 
-import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
-
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author Al-assad
+ * @author xianwei.yang
+ * 控制外部api token的调用权限
  */
-public interface ApplicationBuildPipelineMapper extends BaseMapper<AppBuildPipeline> {
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ApiAccess {
+    boolean value() default true;
 
 }

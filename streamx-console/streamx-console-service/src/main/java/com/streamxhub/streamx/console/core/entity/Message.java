@@ -19,8 +19,9 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.streamxhub.streamx.console.core.enums.NoticeType;
+
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.util.Date;

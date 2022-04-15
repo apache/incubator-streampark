@@ -21,9 +21,9 @@ package com.streamxhub.streamx.flink.connector.mongo.source;
 
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.flink.connector.function.RunningFunction;
-import com.streamxhub.streamx.flink.connector.mongo.internal.MongoSourceFunction;
 import com.streamxhub.streamx.flink.connector.mongo.function.MongoQueryFunction;
 import com.streamxhub.streamx.flink.connector.mongo.function.MongoResultFunction;
+import com.streamxhub.streamx.flink.connector.mongo.internal.MongoSourceFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 

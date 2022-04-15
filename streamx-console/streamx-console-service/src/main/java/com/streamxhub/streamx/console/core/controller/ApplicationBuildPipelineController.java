@@ -19,7 +19,9 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
+import com.streamxhub.streamx.console.base.domain.ApiDocConstant;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.core.annotation.ApiAccess;
 import com.streamxhub.streamx.console.core.entity.AppBuildDockerResolvedDetail;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -28,6 +30,10 @@ import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineType;
+
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +72,12 @@ public class ApplicationBuildPipelineController {
      * @param forceBuild forced start pipeline or not
      * @return Whether the pipeline was successfully started
      */
+    @ApiAccess
+    @ApiOperation(value = "Launch application", notes = "Launch application", tags = ApiDocConstant.FLINK_APP_OP_TAG)
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "appId", value = "APP_ID", required = true, dataType = "Long"),
+        @ApiImplicitParam(name = "forceBuild", value = "FORCE_BUILD", required = true, dataType = "Boolean", defaultValue = "false"),
+    })
     @PostMapping("/build")
     @RequiresPermissions("app:create")
     public RestResponse buildApplication(Long appId, boolean forceBuild) {
@@ -98,6 +110,7 @@ public class ApplicationBuildPipelineController {
      * @param appId application id
      * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
      */
+    @ApiAccess
     @PostMapping("/detail")
     @RequiresPermissions("app:view")
     public RestResponse getBuildProgressDetail(Long appId) {

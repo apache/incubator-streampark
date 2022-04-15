@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.console;
 
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
