@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>streamx-flink-connector-elasticsearch7</artifactId>
+    <name>StreamX : Flink Connector Elasticsearch7</name>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

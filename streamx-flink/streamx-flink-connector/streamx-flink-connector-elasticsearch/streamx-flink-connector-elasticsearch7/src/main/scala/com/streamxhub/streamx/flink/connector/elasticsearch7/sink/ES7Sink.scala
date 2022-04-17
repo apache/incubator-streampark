@@ -24,7 +24,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{ConfigUtils, Logger, Utils}
 import com.streamxhub.streamx.flink.connector.elasticsearch7.bean.RestClientFactoryImpl
 import com.streamxhub.streamx.flink.connector.elasticsearch7.internal.ESSinkFunction
-import com.streamxhub.streamx.flink.connector.function.TransformFunction
+import com.streamxhub.streamx.flink.connector.function.{SerializableFunction, TransformFunction}
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.streaming.api.datastream.{DataStreamSink, DataStream => JavaDataStream}
@@ -65,10 +65,10 @@ class ES7Sink(@(transient@param)ctx: StreamingContext,
   }
 
   private def initProp[T](suffix: String): (mutable.Map[String, String], Array[HttpHost]) = {
-    val shortConfig = prop
-      .filter(_._1.endsWith(suffix))
-      .map(x => x._1.drop(ES_PREFIX.length + suffix.length) -> x._2.trim)
-    val httpHosts = shortConfig.getOrElse(KEY_HOST, SIGN_EMPTY)
+//    val shortConfig = prop
+//      .filter(_._1.endsWith(suffix))
+//      .map(x => x._1.drop(ES_PREFIX.length + suffix.length) -> x._2.trim)
+    val httpHosts = prop.getOrElse(KEY_HOST, SIGN_EMPTY)
       .split(SIGN_COMMA)
       .map(x => {
         x.split(SIGN_COLON) match {
@@ -76,14 +76,14 @@ class ES7Sink(@(transient@param)ctx: StreamingContext,
         }
       })
     require(httpHosts.nonEmpty, "elasticsearch config error, please check, e.g: sink.es.host=$host1:$port1,$host2:$port2")
-    (shortConfig, httpHosts)
+    (prop, httpHosts)
   }
 
   private def process[T](stream: DataStream[T],
                  suffix: String,
                  restClientFactory: RestClientFactory,
                  failureHandler: ActionRequestFailureHandler,
-                 f: T => ActionRequest): DataStreamSink[T] = {
+                 f: SerializableFunction[T, ActionRequest]): DataStreamSink[T] = {
     require(stream != null, "sink Stream must not null")
     require(f != null, "es process element func must not null")
 
@@ -121,8 +121,6 @@ class ES7Sink(@(transient@param)ctx: StreamingContext,
 
     val sink = stream.addSink(esSink)
     afterSink(sink, parallelism, name, uid)
-
-
   }
 
   private def buildESSink[T](restClientFactory: RestClientFactory, failureHandler: ActionRequestFailureHandler,
@@ -167,7 +165,7 @@ class ES7Sink(@(transient@param)ctx: StreamingContext,
               restClientFactory: RestClientFactory,
               failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
              (implicit f: T => ActionRequest): DataStreamSink[T] = {
-    process(stream, suffix, restClientFactory, failureHandler, f)
+    process(stream, suffix, restClientFactory, failureHandler, (t: T) => f.apply(t))
   }
 
   def sink[T](stream: JavaDataStream[T],
