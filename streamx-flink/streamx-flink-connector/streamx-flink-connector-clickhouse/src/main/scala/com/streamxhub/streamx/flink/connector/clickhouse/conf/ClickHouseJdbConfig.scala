@@ -52,7 +52,7 @@ import scala.collection.JavaConversions._
 
   val table: String = sinkOption.targetTable.get()
 
-  val batchDelaytime: Long = sinkOption.batchDelaytime.get()
+  val batchDelaytime: Long = sinkOption.batchDelayTime.get()
 
 
   println(s"user:$user,password:$password,jdbcUrl:$jdbcUrl,driverClassName:$driverClassName,batchSize:$batchSize,table:$table,batchDelaytime")

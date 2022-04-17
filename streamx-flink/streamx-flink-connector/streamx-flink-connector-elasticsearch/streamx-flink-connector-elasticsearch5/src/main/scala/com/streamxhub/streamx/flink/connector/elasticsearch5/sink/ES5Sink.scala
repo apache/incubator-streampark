@@ -19,8 +19,8 @@
 
 package com.streamxhub.streamx.flink.connector.elasticsearch5.sink
 
-import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.util.{ConfigUtils, Logger, Utils}
+import com.streamxhub.streamx.common.util.{Logger, Utils}
+import com.streamxhub.streamx.flink.connector.elasticsearch5.conf.ESConfig
 import com.streamxhub.streamx.flink.connector.elasticsearch5.internal.ESSinkFunction
 import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
@@ -32,11 +32,9 @@ import org.apache.flink.streaming.connectors.elasticsearch.util.RetryRejectedExe
 import org.apache.flink.streaming.connectors.elasticsearch5.ElasticsearchSink
 import org.elasticsearch.action.ActionRequest
 
-import java.net.InetSocketAddress
 import java.util.Properties
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
-import scala.collection.mutable
 
 
 object ES5Sink {
@@ -57,7 +55,7 @@ class ES5Sink(@(transient@param) ctx: StreamingContext,
               uid: String = null,
               alias: String = "") extends Sink with Logger {
 
-  val prop = ConfigUtils.getConf(ctx.parameter.toMap, ES_PREFIX)(alias)
+  val prop: Properties = ctx.parameter.getProperties
 
   Utils.copyProperties(property, prop)
 
@@ -65,17 +63,16 @@ class ES5Sink(@(transient@param) ctx: StreamingContext,
     this(ctx, new Properties(), 0, null, null, "")
   }
 
+  private val config: ESConfig = new ESConfig(prop)
+
   private def process[T](stream: JavaDataStream[T],
-                         suffix: String,
                          failureHandler: ActionRequestFailureHandler,
                          f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
     require(f != null, () => s"es pocess element fun  must not null")
-    val (shortConfig: _root_.scala.collection.mutable.Map[_root_.scala.Predef.String, _root_.java.lang.String],
-    addresses: _root_.scala.Array[_root_.java.net.InetSocketAddress]) = initProp(suffix)
-
-    val esSink: ElasticsearchSink[T] = new ElasticsearchSink(shortConfig, addresses.toList, new ESSinkFunction(f), failureHandler)
-    if (shortConfig.getOrElse(KEY_ES_DISABLE_FLUSH_ONCHECKPOINT, "false").toBoolean) {
+    config.sinkOption.getInternalConfig()
+    val esSink: ElasticsearchSink[T] = new ElasticsearchSink(config.sinkOption.getInternalConfig(), config.host, new ESSinkFunction(f), failureHandler)
+    if (config.disableFlushOnCheckpoint) {
       esSink.disableFlushOnCheckpoint()
     }
     val sink = stream.addSink(esSink)
@@ -83,37 +80,18 @@ class ES5Sink(@(transient@param) ctx: StreamingContext,
   }
 
   private def process[T](stream: DataStream[T],
-                         suffix: String,
                          failureHandler: ActionRequestFailureHandler,
                          f: T => ActionRequest): DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
     require(f != null, () => s"es pocess element fun  must not null")
-    val (shortConfig: _root_.scala.collection.mutable.Map[_root_.scala.Predef.String, _root_.java.lang.String],
-    addresses: _root_.scala.Array[_root_.java.net.InetSocketAddress]) = initProp(suffix)
-
-    val esSink: ElasticsearchSink[T] = new ElasticsearchSink(shortConfig, addresses.toList, new ESSinkFunction(f), failureHandler)
-    if (shortConfig.getOrElse(KEY_ES_DISABLE_FLUSH_ONCHECKPOINT, "false").toBoolean) {
+    val esSink: ElasticsearchSink[T] = new ElasticsearchSink(config.sinkOption.getInternalConfig(), config.host, new ESSinkFunction(f), failureHandler)
+    if (config.disableFlushOnCheckpoint) {
       esSink.disableFlushOnCheckpoint()
     }
     val sink = stream.addSink(esSink)
     afterSink(sink, parallelism, name, uid)
   }
 
-  private def initProp[T](suffix: String): (mutable.Map[String, String], Array[InetSocketAddress]) = {
-    //当前实例(默认,或者指定后缀实例)的配置文件...
-    val shortConfig = prop
-      .filter(_._1.endsWith(suffix))
-      .map(x => x._1.drop(ES_PREFIX.length + suffix.length) -> x._2.trim)
-
-    // parameter of sink.es.host
-    val addresses = shortConfig.getOrElse(KEY_HOST, SIGN_EMPTY).split(SIGN_COMMA).map(x => {
-      x.split(SIGN_COLON) match {
-        case Array(host, port) => new InetSocketAddress(host, port.toInt)
-      }
-    })
-    require(addresses.nonEmpty, "elasticsearch config error,please check, e.g: sink.es.host=$host1:$port1,$host2:$port2")
-    (shortConfig, addresses)
-  }
 
   /**
    *
@@ -126,31 +104,21 @@ class ES5Sink(@(transient@param) ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T],
-              suffix: String = "",
               failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
              (implicit f: T => ActionRequest): DataStreamSink[T] = {
-    process(stream, suffix, failureHandler, f)
+    process(stream, failureHandler, f)
   }
 
   def sink[T](stream: JavaDataStream[T],
-              suffix: String,
               failureHandler: ActionRequestFailureHandler,
               f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
-    process(stream, suffix, failureHandler, f)
-  }
-
-  def sink[T](stream: JavaDataStream[T],
-              suffix: String,
-              f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
-    process(stream, suffix, new RetryRejectedExecutionFailureHandler, f)
+    process(stream, failureHandler, f)
   }
 
   def sink[T](stream: JavaDataStream[T],
               f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
-    process(stream, "", new RetryRejectedExecutionFailureHandler, f)
+    process(stream, new RetryRejectedExecutionFailureHandler, f)
   }
-
-
 }
 
 
