@@ -15,7 +15,8 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
+            <artifactId>flink-streaming-java${scala.binary.version.suffix}</artifactId>
+            <version>${flink.version}</version>
         </dependency>
 
         <dependency>

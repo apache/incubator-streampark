@@ -69,7 +69,7 @@ public class EnvInitializer implements ApplicationRunner {
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
 
     private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
-        "^streamx-flink-shims_flink-(1.12|1.13|1.14)_(2.11|2.12)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        "^streamx-flink-shims_flink-(1.12|1.13|1.14|1.15)_(2.11|2.12)-(.*).jar$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final String MKDIR_LOG = "mkdir {} starting ...";
 
