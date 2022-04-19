@@ -74,7 +74,7 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
 }
 
 
-trait FlinkStreaming extends Logger {
+trait FlinkStreaming extends Serializable with Logger {
 
   final implicit def streamExt[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt.DataStream[T] = new DataStreamExt.DataStream[T](dataStream)
 

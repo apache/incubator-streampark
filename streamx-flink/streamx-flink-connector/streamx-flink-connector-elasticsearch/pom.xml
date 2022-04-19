@@ -17,6 +17,7 @@
     <modules>
         <module>streamx-flink-connector-elasticsearch5</module>
         <module>streamx-flink-connector-elasticsearch6</module>
+        <module>streamx-flink-connector-elasticsearch7</module>
     </modules>
 
     <dependencies>
