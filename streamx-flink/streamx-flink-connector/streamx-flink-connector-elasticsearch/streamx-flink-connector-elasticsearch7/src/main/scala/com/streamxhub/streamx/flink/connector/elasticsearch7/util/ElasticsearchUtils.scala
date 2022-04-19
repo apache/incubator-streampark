@@ -17,18 +17,18 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.elasticsearch6.util
+package com.streamxhub.streamx.flink.connector.elasticsearch7.util
 
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.common.bytes.BytesArray
 import org.elasticsearch.common.xcontent.XContentType
 
-object ElasticSearchUtils {
+object ElasticsearchUtils {
 
-  def indexRequest(index: String, indexType: String, id: String, source: String)(implicit xContentType: XContentType = XContentType.JSON): IndexRequest = {
+  def indexRequest(index: String, id: String, source: String)(implicit  xContentType: XContentType = XContentType.JSON): IndexRequest = {
     require(source != null, "indexRequest error:source can not be null...")
     require(xContentType != null, "indexRequest error:xContentType can not be null...")
-    val indexReq = new IndexRequest(index, indexType, id)
+    val indexReq = new IndexRequest(index).id(id)
     val mapping = List("source" -> new BytesArray(source), "contentType" -> xContentType)
     mapping.foreach { x =>
       val field = indexReq.getClass.getDeclaredField(x._1)
@@ -37,4 +37,5 @@ object ElasticSearchUtils {
     }
     indexReq
   }
+
 }

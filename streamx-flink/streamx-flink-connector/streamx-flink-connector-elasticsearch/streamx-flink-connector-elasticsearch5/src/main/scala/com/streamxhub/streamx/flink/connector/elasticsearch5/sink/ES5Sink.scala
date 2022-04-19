@@ -70,7 +70,7 @@ class ES5Sink(@(transient@param) ctx: StreamingContext,
                          failureHandler: ActionRequestFailureHandler,
                          f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
-    require(f != null, () => s"es pocess element fun  must not null")
+    require(f != null, () => s"es process element func  must not null")
     val (shortConfig: _root_.scala.collection.mutable.Map[_root_.scala.Predef.String, _root_.java.lang.String],
     addresses: _root_.scala.Array[_root_.java.net.InetSocketAddress]) = initProp(suffix)
 
@@ -86,8 +86,8 @@ class ES5Sink(@(transient@param) ctx: StreamingContext,
                          suffix: String,
                          failureHandler: ActionRequestFailureHandler,
                          f: T => ActionRequest): DataStreamSink[T] = {
-    require(stream != null, () => s"sink Stream must not null")
-    require(f != null, () => s"es pocess element fun  must not null")
+    require(stream != null, "sink Stream must not null")
+    require(f != null, () => "es process element func  must not null")
     val (shortConfig: _root_.scala.collection.mutable.Map[_root_.scala.Predef.String, _root_.java.lang.String],
     addresses: _root_.scala.Array[_root_.java.net.InetSocketAddress]) = initProp(suffix)
 
