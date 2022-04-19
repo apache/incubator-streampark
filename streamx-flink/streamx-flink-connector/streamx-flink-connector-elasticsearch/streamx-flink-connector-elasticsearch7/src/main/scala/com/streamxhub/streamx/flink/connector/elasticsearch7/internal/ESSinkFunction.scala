@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.connector.elasticsearch7.internal
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.connector.function.{SerializableFunction, TransformFunction}
+import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import org.apache.flink.api.common.functions.RuntimeContext
 import org.apache.flink.streaming.connectors.elasticsearch.{ElasticsearchSinkFunction, RequestIndexer}
 import org.elasticsearch.action.ActionRequest
@@ -32,16 +32,18 @@ import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.update.UpdateRequest
 
 class ESSinkFunction[T](apiType: ApiType = ApiType.scala) extends ElasticsearchSinkFunction[T] with Logger {
-  private[this] var scalaFunc: SerializableFunction[T, ActionRequest] = _
+  private[this] var scalaFunc: (T => ActionRequest) with Serializable = _
   private[this] var javaFunc: TransformFunction[T, ActionRequest] = _
 
-  //for Scala
-  def this(scalaFunc: SerializableFunction[T, ActionRequest]) = {
+  // for Scala
+  def this(scalaFunc: T => ActionRequest) = {
     this(ApiType.scala)
-    this.scalaFunc = scalaFunc
+    this.scalaFunc = new (T => ActionRequest) with Serializable {
+      override def apply(v1: T): ActionRequest = scalaFunc.apply(v1)
+    }
   }
 
-  //for Java
+  // for Java
   def this(javaFunc: TransformFunction[T, ActionRequest]) = {
     this(ApiType.java)
     this.javaFunc = javaFunc
