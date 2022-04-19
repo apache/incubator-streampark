@@ -19,9 +19,9 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.console.base.domain.ApiDocConstant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
@@ -36,6 +36,11 @@ import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationLogService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +49,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.File;
 import java.io.IOException;
@@ -139,9 +145,16 @@ public class ApplicationController {
     }
 
     @ApiAccess
+    @ApiOperation(value = "App Start", notes = "App Start", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "id", value = "app Id", required = true, paramType = "form", dataType = "Long"),
+        @ApiImplicitParam(name = "savePointed", value = "从savepoint或最新checkpoint恢复app", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
+        @ApiImplicitParam(name = "savePoint", value = "手动填写savepoint或最新checkpoint", required = true, paramType = "form", dataType = "String", defaultValue = ""),
+        @ApiImplicitParam(name = "flameGraph", value = "flame Graph support", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
+        @ApiImplicitParam(name = "allowNonRestored", value = "ignore savepoint then cannot be restored", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false")})
     @PostMapping("start")
     @RequiresPermissions("app:start")
-    public RestResponse start(Application app) {
+    public RestResponse start(@ApiIgnore Application app) {
         try {
             applicationService.checkEnv(app);
             applicationService.starting(app);
@@ -161,9 +174,15 @@ public class ApplicationController {
     }
 
     @ApiAccess
+    @ApiOperation(value = "App Cancel", notes = "App Cancel", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "id", value = "app Id", required = true, paramType = "form", dataType = "Long"),
+        @ApiImplicitParam(name = "savePointed", value = "trigger savePoint before taking stoping", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
+        @ApiImplicitParam(name = "savePoint", value = "savepoint path", required = false, paramType = "form", dataType = "String", defaultValue = "hdfs:///tm/xxx"),
+        @ApiImplicitParam(name = "drain", value = "取消前发送最大 watermark", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false")})
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse cancel(Application app) {
+    public RestResponse cancel(@ApiIgnore Application app) {
         applicationService.cancel(app);
         return RestResponse.create();
     }

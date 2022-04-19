@@ -26,6 +26,7 @@ import com.streamxhub.streamx.console.core.annotation.ApiAccess;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.console.system.entity.AccessToken;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -46,10 +47,8 @@ import java.util.Objects;
 @Aspect
 public class StreamXConsoleAspect {
 
-    @Pointcut("execution(public" +
-        " com.streamxhub.streamx.console.base.domain.RestResponse" +
-        " com.streamxhub.streamx.console.*.controller.*.*(..))"
-    )
+    @Pointcut("execution(public" + " com.streamxhub.streamx.console.base.domain.RestResponse" +
+        " com.streamxhub.streamx.console.*.controller.*.*(..))")
     public void response() {
     }
 
@@ -60,7 +59,6 @@ public class StreamXConsoleAspect {
     @Pointcut("@annotation(com.streamxhub.streamx.console.core.annotation.ApiAccess)")
     public void apiAccess() {
     }
-
 
     @SuppressWarnings("checkstyle:SimplifyBooleanExpression")
     @Around(value = "response()")
@@ -82,9 +80,8 @@ public class StreamXConsoleAspect {
             response.put("status", "success");
         } catch (Throwable e) {
             e.printStackTrace();
-            response = Objects.requireNonNull(RestResponse.create()
-                    .put("status", "error"))
-                .put("exception", ExceptionUtils.stringifyException(e));
+            response =
+                Objects.requireNonNull(RestResponse.create().put("status", "error")).put("exception", ExceptionUtils.stringifyException(e));
         }
         return response;
     }
