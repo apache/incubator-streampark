@@ -219,7 +219,7 @@ object ConfigConst {
 
   val KEY_JDBC_INSERT_BATCH = "batch.size"
 
-  val KEY_JDBC_INSERT_BATCH_DELAYTIME = "batch.delaytime"
+  val KEY_JDBC_INSERT_BATCH_DELAYTIME = "batch.delayTime"
 
   val DEFAULT_JDBC_INSERT_BATCH = 1
 

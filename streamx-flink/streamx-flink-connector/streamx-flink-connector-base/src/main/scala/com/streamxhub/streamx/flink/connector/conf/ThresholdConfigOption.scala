@@ -25,11 +25,11 @@ import com.streamxhub.streamx.flink.connector.conf.FailoverStorageType.FailoverS
 
 import java.util.Properties
 
-object ThreshlodConfigOption {
-  def apply(prefixStr: String, properties: Properties = new Properties): ThreshlodConfigOption = new ThreshlodConfigOption(prefixStr, properties)
+object ThresholdConfigOption {
+  def apply(prefixStr: String, properties: Properties = new Properties): ThresholdConfigOption = new ThresholdConfigOption(prefixStr, properties)
 }
 
-class ThreshlodConfigOption(prefixStr: String, properties: Properties) {
+class ThresholdConfigOption(prefixStr: String, properties: Properties) {
 
   implicit val (prefix, prop) = (prefixStr, properties)
 
@@ -63,20 +63,6 @@ class ThreshlodConfigOption(prefixStr: String, properties: Properties) {
     classType = classOf[Int]
   )
 
-  val successCode: ConfigOption[List[Int]] = ConfigOption(
-    key = "threshold.successCode",
-    required = false,
-    defaultValue = List(200),
-    classType = classOf[List[Int]],
-    handle = k => {
-      properties
-        .getProperty(k)
-        .split(SIGN_COMMA)
-        .map(_.toInt)
-        .toList
-    }
-  )
-
   val numWriters: ConfigOption[Int] = ConfigOption(
     key = "threshold.numWriters",
     required = false,
@@ -95,7 +81,7 @@ class ThreshlodConfigOption(prefixStr: String, properties: Properties) {
     key = "failover.storage",
     required = false,
     classType = classOf[FailoverStorageType],
-    defaultValue = FailoverStorageType.NoType,
+    defaultValue = FailoverStorageType.NONE,
     handle = k => {
       FailoverStorageType.get(properties.getProperty(k))
     }
@@ -108,7 +94,6 @@ class ThreshlodConfigOption(prefixStr: String, properties: Properties) {
     defaultValue = "",
     classType = classOf[String]
   )
-
 
 
 }

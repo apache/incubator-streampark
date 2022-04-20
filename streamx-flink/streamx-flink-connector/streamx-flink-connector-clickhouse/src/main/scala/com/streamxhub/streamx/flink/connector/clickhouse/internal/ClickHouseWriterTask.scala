@@ -85,8 +85,8 @@ case class ClickHouseWriterTask(id: Int,
         case null =>
           logError(s"""Error ClickHouseSink executing callback, params = $clickHouseConf,can not get Response. """)
           handleFailedResponse(null, sinkRequest)
-        case resp if !clickHouseConf.successCode.contains(resp.getStatusCode) =>
-          logError(s"Error ClickHouseSink executing callback, params = $clickHouseConf, StatusCode = ${resp.getStatusCode} ")
+        case resp if resp.getStatusCode != 200 =>
+          logError(s"Error ClickHouseSink executing callback, params = ${clickHouseConf}, StatusCode = ${resp.getStatusCode} ")
           handleFailedResponse(resp, sinkRequest)
         case _ =>
       }
