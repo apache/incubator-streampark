@@ -23,7 +23,7 @@ import com.streamxhub.streamx.common.util.{Logger, ThreadUtils}
 import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseHttpConfig
 import com.streamxhub.streamx.flink.connector.clickhouse.internal
 import com.streamxhub.streamx.flink.connector.failover.{SinkRequest, SinkWriter}
-import org.asynchttpclient.{AsyncHttpClient, Dsl}
+import org.asynchttpclient.{AsyncHttpClient, DefaultAsyncHttpClientConfig, Dsl}
 
 import java.util.concurrent._
 import scala.collection.mutable.ListBuffer
@@ -44,7 +44,14 @@ case class ClickHouseSinkWriter(clickHouseConfig: ClickHouseHttpConfig) extends 
 
   var tasks: ListBuffer[ClickHouseWriterTask] = ListBuffer[ClickHouseWriterTask]()
   var recordQueue: BlockingQueue[SinkRequest] = new LinkedBlockingQueue[SinkRequest](clickHouseConfig.queueCapacity)
-  var asyncHttpClient: AsyncHttpClient = Dsl.asyncHttpClient
+  var asyncHttpClient: AsyncHttpClient = Dsl.asyncHttpClient(
+    new DefaultAsyncHttpClientConfig.Builder()
+      .setRequestTimeout(clickHouseConfig.sinkOption.requestTimeout.get())
+      .setConnectTimeout(clickHouseConfig.sinkOption.connectTimeout.get())
+      .setMaxRequestRetry(clickHouseConfig.sinkOption.maxRequestRetry.get())
+      .setMaxConnections(clickHouseConfig.sinkOption.maxConnections.get())
+      .build()
+  )
   var service: ExecutorService = Executors.newFixedThreadPool(clickHouseConfig.numWriters, threadFactory)
 
   for (i <- 0 until clickHouseConfig.numWriters) {

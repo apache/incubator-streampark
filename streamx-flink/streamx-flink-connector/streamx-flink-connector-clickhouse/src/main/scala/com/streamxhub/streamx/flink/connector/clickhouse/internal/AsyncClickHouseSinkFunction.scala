@@ -44,17 +44,13 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
 
 
   //for Scala
-  def this(properties: Properties,
-           scalaSqlFunc: T => String) = {
-
+  def this(properties: Properties, scalaSqlFunc: T => String) = {
     this(ApiType.scala, properties)
     this.scalaSqlFunc = scalaSqlFunc
   }
 
   //for JAVA
-  def this(properties: Properties,
-           javaSqlFunc: TransformFunction[T, String]) = {
-
+  def this(properties: Properties, javaSqlFunc: TransformFunction[T, String]) = {
     this(ApiType.java, properties)
     this.javaSqlFunc = javaSqlFunc
   }
@@ -75,8 +71,6 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
           require(targetTable != null && targetTable.nonEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
           clickHouseWriter = internal.ClickHouseSinkWriter(clickHouseConf)
           failoverChecker = FailoverChecker(clickHouseConf.delayTime)
-          val failoverTable: String = clickHouseConf.failoverTable
-          require(failoverTable != null && failoverTable.nonEmpty, () => s"clickhouse async  insert failoverTable must not null")
           sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize, targetTable)
           failoverChecker.addSinkBuffer(sinkBuffer)
           logInfo("AsyncClickHouseSink initialize... ")
@@ -87,8 +81,7 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
 
   override def invoke(value: T): Unit = {
     val csv = (javaSqlFunc, scalaSqlFunc) match {
-      case (null, null) =>
-        convert[T](value)
+      case (null, null) => convert[T](value)
       case _ => apiType match {
         case ApiType.java => javaSqlFunc.transform(value)
         case ApiType.scala => scalaSqlFunc(value)
