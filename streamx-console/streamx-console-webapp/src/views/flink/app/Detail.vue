@@ -116,7 +116,7 @@
           icon="copy"
           size="middle"
           style="margin:0 3px;padding: 0 5px"
-          @click.native="handleCopyCurl(api.Application.START.toString())">Copy start cURL
+          @click.native="handleCopyCurl(api.Application.START.toString())">Copy Start cURL
         </a-button>
         <a-button
           type="primary"
