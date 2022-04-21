@@ -96,7 +96,7 @@ case class HttpWriterTask(id: Int,
       val req = queue.poll(100, TimeUnit.MILLISECONDS)
       if (req != null) {
         val url = req.records.head
-        val sinkRequest = SinkRequest(List(url), req.table, req.attemptCounter)
+        val sinkRequest = SinkRequest(List(url), req.attemptCounter)
         val request = buildRequest(url)
         val whenResponse = asyncHttpClient.executeRequest(request)
         val callback = respCallback(whenResponse, sinkRequest)

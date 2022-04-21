@@ -45,7 +45,7 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
   private val batchSize = clickHouseConf.batchSize
   private val offset: AtomicLong = new AtomicLong(0L)
   private var timestamp = 0L
-  private val delayTime = clickHouseConf.batchDelayTime
+  private val flushInterval = clickHouseConf.flushInterval
   private val sqlValues = new util.ArrayList[String](batchSize)
   private var insertSqlPrefixes: String = _
 
@@ -55,7 +55,6 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
 
   //for Scala
   def this(properties: Properties, scalaSqlFunc: T => String) = {
-
     this(ApiType.scala, properties)
     this.scalaSqlFunc = scalaSqlFunc
   }
@@ -129,7 +128,7 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
           sqlValues.add(values)
           (offset.incrementAndGet() % batch, System.currentTimeMillis()) match {
             case (0, _) => execBatch()
-            case (_, current) if current - timestamp > delayTime => execBatch()
+            case (_, current) if current - timestamp > flushInterval => execBatch()
             case _ =>
           }
         } catch {

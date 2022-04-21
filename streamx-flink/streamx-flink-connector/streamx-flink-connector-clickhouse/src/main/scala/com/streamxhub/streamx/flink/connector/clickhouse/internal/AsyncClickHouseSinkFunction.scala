@@ -67,11 +67,9 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
         if (!Lock.initialized) {
           Lock.initialized = true
           clickHouseConf = new ClickHouseHttpConfig(properties)
-          val targetTable: String = clickHouseConf.table
-          require(targetTable != null && targetTable.nonEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
           clickHouseWriter = internal.ClickHouseSinkWriter(clickHouseConf)
           failoverChecker = FailoverChecker(clickHouseConf.delayTime)
-          sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize, targetTable)
+          sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize)
           failoverChecker.addSinkBuffer(sinkBuffer)
           logInfo("AsyncClickHouseSink initialize... ")
         }
@@ -80,7 +78,7 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
   }
 
   override def invoke(value: T): Unit = {
-    val csv = (javaSqlFunc, scalaSqlFunc) match {
+    val sql = (javaSqlFunc, scalaSqlFunc) match {
       case (null, null) => convert[T](value)
       case _ => apiType match {
         case ApiType.java => javaSqlFunc.transform(value)
@@ -88,10 +86,10 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
       }
     }
     try {
-      sinkBuffer.put(csv)
+      sinkBuffer.put(sql)
     } catch {
       case e: Exception =>
-        logError(s"""Error while sending data to Clickhouse, record = $csv,error:$e""")
+        logError(s"""Error while sending data to Clickhouse, record = $sql,error:$e""")
         throw new RuntimeException(e)
     }
   }
