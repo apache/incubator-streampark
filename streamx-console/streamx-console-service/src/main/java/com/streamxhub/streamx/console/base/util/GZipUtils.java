@@ -28,8 +28,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -46,20 +44,17 @@ public final class GZipUtils {
      * @param targetDir    目标目录
      */
     public static File decompress(String tarZipSource, String targetDir) {
-        FileInputStream inputStream = null;
-        BufferedInputStream bufInput = null;
-        ArchiveInputStream archiveInput = null;
         File unFile = null;
-        try {
-            // 文件流
-            inputStream = new FileInputStream(tarZipSource);
+        // tar压缩格式（tar类型）
+        ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
+        try (// 文件流
+            FileInputStream inputStream = new FileInputStream(tarZipSource);
             // 缓冲流
-            bufInput = new BufferedInputStream(inputStream);
+            BufferedInputStream bufInput = new BufferedInputStream(inputStream);
             // GZIP压缩流
             GZIPInputStream gzipInput = new GZIPInputStream(bufInput);
-            // tar压缩格式（tar类型）
-            ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
-            archiveInput = archiveStreamFactory.createArchiveInputStream("tar", gzipInput);
+            ArchiveInputStream archiveInput = archiveStreamFactory.createArchiveInputStream("tar", gzipInput);) {
+
             // tar压缩文件条目
             TarArchiveEntry entry = (TarArchiveEntry) archiveInput.getNextEntry();
 
@@ -77,41 +72,22 @@ public final class GZipUtils {
                     // 如果当前条目是文件
                     String fullFileName = createDir(targetDir, entryName, 2);
                     // 输出文件
-                    FileOutputStream outputStream = new FileOutputStream(fullFileName);
-                    BufferedOutputStream bufOutput = new BufferedOutputStream(outputStream);
-                    int b = -1;
-                    while ((b = archiveInput.read()) != -1) {
-                        bufOutput.write(b);
+                    try (FileOutputStream outputStream = new FileOutputStream(fullFileName);
+                        BufferedOutputStream bufOutput = new BufferedOutputStream(outputStream);) {
+                        int b = -1;
+                        while ((b = archiveInput.read()) != -1) {
+                            bufOutput.write(b);
+                        }
                     }
-                    bufOutput.flush();
-                    bufOutput.close();
                 }
                 // 下一个条目
                 entry = (TarArchiveEntry) archiveInput.getNextEntry();
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(archiveInput);
-            close(bufInput);
-            close(inputStream);
         }
 
         return unFile;
-    }
-
-    /**
-     * @param input
-     */
-    private static void close(InputStream input) {
-        // 静默关闭处理
-        if (null != input) {
-            try {
-                input.close();
-            } catch (IOException ignored) {
-                ignored.printStackTrace();
-            }
-        }
     }
 
     /**
