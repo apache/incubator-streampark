@@ -99,39 +99,44 @@
         {{ app.description }}
       </a-descriptions-item>
 
-    </a-descriptions>
-
-    <a-collapse default-active-key="1" style="margin-top: 10px">
-      <a-collapse-panel key="api">
-        <template slot="header">Application Api Info</template>
+      <a-descriptions-item
+        :span="3">
+        <template slot="label">
+          Rest Api
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>Rest API external call interface,other third-party systems easy to access streamx</span>
+            </template>
+            <a-icon type="question-circle" style="color: red"/>
+          </a-tooltip>
+        </template>
         <a-button
           type="primary"
           shape="round"
           icon="copy"
-          size="small"
+          size="middle"
           style="margin:0 3px;padding: 0 5px"
-          @click.native="handleCopyCurl(api.Application.START.toString())">Start Application cURL
+          @click.native="handleCopyCurl(api.Application.START.toString())">Copy start cURL
         </a-button>
         <a-button
           type="primary"
           shape="round"
           icon="copy"
-          size="small"
+          size="middle"
           style="margin:0 3px;padding: 0 5px"
-          @click.native="handleCopyCurl(api.Application.CANCEL.toString())">Cancel Application cURL
+          @click.native="handleCopyCurl(api.Application.CANCEL.toString())">Copy Cancel cURL
         </a-button>
         <a-button
           type="link"
           shape="round"
           icon="link"
-          size="small"
+          size="middle"
           @click.native="handleDocPage()"
-          style="margin:0 3px;padding: 0 5px">Api文档中心
+          style="margin:0 3px;padding: 0 5px">Api Doc Center
         </a-button>
+      </a-descriptions-item>
 
-      </a-collapse-panel>
-    </a-collapse>
-
+    </a-descriptions>
 
     <a-divider
       style="margin-top: 20px;margin-bottom: -17px"/>
@@ -996,16 +1001,17 @@ export default {
   methods: {
     ...mapActions(['CleanAppId']),
     ...mapGetters(['applicationId']),
+
     handleDocPage() {
-      debugger
       const res = baseUrl().split(':')[1] + ':10000/doc.html'
       window.open(res)
     },
-    handleCopyCurl(urlTmp) {
+
+    handleCopyCurl(urlPath) {
       const params = {
         appId: this.app.id,
         baseUrl: baseUrl(),
-        path: urlTmp
+        path: urlPath
       }
       copyCurl({...params}).then((resp) => {
         const oTextarea = document.createElement('textarea')
@@ -1014,7 +1020,7 @@ export default {
         // 选择对象
         oTextarea.select()
         document.execCommand('Copy')
-        this.$message.success('复制成功')
+        this.$message.success('copy successful')
         oTextarea.remove()
       })
 
