@@ -36,15 +36,13 @@ class AsyncClickHouseOutputFormat[T: TypeInformation](prop: Properties) extends 
 
 
   //for Scala
-  def this(properties: Properties,
-           scalaSqlFunc: T => String) = {
+  def this(properties: Properties, scalaSqlFunc: T => String) = {
     this(properties)
     sinkFunction = new AsyncClickHouseSinkFunction[T](properties, scalaSqlFunc)
   }
 
   //for JAVA
-  def this(properties: Properties,
-           javaSqlFunc: TransformFunction[T, String]) = {
+  def this(properties: Properties, javaSqlFunc: TransformFunction[T, String]) = {
     this(properties)
     sinkFunction = new AsyncClickHouseSinkFunction[T](properties, javaSqlFunc)
   }

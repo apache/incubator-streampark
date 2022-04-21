@@ -35,7 +35,7 @@ case class FailoverChecker(delayTime: Long) extends AutoCloseable with Logger {
 
   def addSinkBuffer(buffer: SinkBuffer): Unit = {
     this.synchronized(sinkBuffers.add(buffer))
-    logDebug(s"Add SinkBuffer, target table = ${buffer.table}")
+    logDebug(s"Add SinkBuffer, size: ${buffer.bufferSize}")
   }
 
   def getTask(): Runnable = new Runnable {

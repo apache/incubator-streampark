@@ -84,7 +84,6 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
     classType = classOf[String]
   )
 
-
   val targetTable: ConfigOption[String] = ConfigOption(
     key = "targetTable",
     required = true,
@@ -98,7 +97,6 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
     defaultValue = AsyncHttpClientConfigDefaults.defaultRequestTimeout,
     classType = classOf[Int]
   )
-
 
   val connectTimeout: ConfigOption[Int] = ConfigOption(
     key = "connectTimeout",
@@ -141,14 +139,14 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
   )
 
   val batchSize: ConfigOption[Int] = ConfigOption(
-    key = "batch.size",
+    key = "batchSize",
     required = false,
     defaultValue = 1,
     classType = classOf[Int]
   )
 
-  val batchDelayTime: ConfigOption[Long] = ConfigOption(
-    key = "batch.delayTime",
+  val flushInterval: ConfigOption[Long] = ConfigOption(
+    key = "flushInterval",
     required = false,
     defaultValue = 1000L,
     classType = classOf[Long],
