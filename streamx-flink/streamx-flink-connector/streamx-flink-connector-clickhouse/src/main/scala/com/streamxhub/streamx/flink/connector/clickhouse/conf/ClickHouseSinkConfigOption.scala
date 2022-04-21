@@ -98,6 +98,7 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
     classType = classOf[Int]
   )
 
+
   val connectTimeout: ConfigOption[Int] = ConfigOption(
     key = "connectTimeout",
     required = false,

@@ -72,16 +72,13 @@ public class JarHelper {
         }
 
         mDestJarName = destJar.getCanonicalPath();
-        FileOutputStream fout = new FileOutputStream(destJar);
-        JarOutputStream jout = new JarOutputStream(fout);
+
         // jout.setLevel(0);
-        try {
+        try(FileOutputStream fout = new FileOutputStream(destJar);
+            JarOutputStream jout = new JarOutputStream(fout);){
             jarDir(dirOrFile2Jar, jout, null);
         } catch (IOException ioe) {
             throw ioe;
-        } finally {
-            jout.close();
-            fout.close();
         }
     }
 
