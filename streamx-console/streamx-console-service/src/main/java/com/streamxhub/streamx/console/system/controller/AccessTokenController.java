@@ -21,10 +21,12 @@ package com.streamxhub.streamx.console.system.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.system.entity.AccessToken;
 import com.streamxhub.streamx.console.system.service.AccessTokenService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -83,12 +85,14 @@ public class AccessTokenController {
      * 暂且硬编码吧，这里没有配置的必要，因为是固定的几个接口
      */
     @PostMapping(value = "/curl")
-    public RestResponse copyApplicationApiCurl(@NotBlank(message = "{required}") String appId, @NotBlank(message = "{required}") String baseUrl, @NotBlank(message = "{required}") String path) {
+    public RestResponse copyApplicationApiCurl(@NotBlank(message = "{required}") String appId,
+                                               @NotBlank(message = "{required}") String baseUrl,
+                                               @NotBlank(message = "{required}") String path) {
         String resultCURL = null;
         CurlBuilder curlBuilder = new CurlBuilder()
             .setUrl(baseUrl + path)
             .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-            .addHeader("Authorization", "{替换accessToken}");
+            .addHeader("Authorization", WebUtils.encryptToken(SecurityUtils.getSubject().getPrincipal().toString()));
         if ("/flink/app/start".equalsIgnoreCase(path)) {
             resultCURL = curlBuilder
                 .addFormData("allowNonRestored", "false")
