@@ -35,15 +35,13 @@ class ClickHouseOutputFormat[T: TypeInformation](prop: Properties) extends RichO
   var configuration: Configuration = _
 
   //for Scala
-  def this(properties: Properties,
-           scalaSqlFunc: T => String) = {
+  def this(properties: Properties, scalaSqlFunc: T => String) = {
     this(properties)
     sinkFunction = new ClickHouseSinkFunction[T](properties, scalaSqlFunc)
   }
 
   //for JAVA
-  def this(properties: Properties,
-           javaSqlFunc: TransformFunction[T, String]) = {
+  def this(properties: Properties, javaSqlFunc: TransformFunction[T, String]) = {
     this(properties)
     sinkFunction = new ClickHouseSinkFunction[T](properties, javaSqlFunc)
   }

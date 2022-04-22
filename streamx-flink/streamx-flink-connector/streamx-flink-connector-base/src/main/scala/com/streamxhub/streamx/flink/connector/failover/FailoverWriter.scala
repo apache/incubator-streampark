@@ -22,16 +22,8 @@ package com.streamxhub.streamx.flink.connector.failover
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util._
 import com.streamxhub.streamx.flink.connector.conf.FailoverStorageType._
-import org.apache.hadoop.conf.{Configuration => HConf}
-import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.hadoop.hbase.client.{BufferedMutator, BufferedMutatorParams, Put, RetriesExhaustedWithDetailsException, Connection => HBaseConn}
-import org.apache.hadoop.hbase.util.Bytes
-import org.apache.hadoop.hbase.{HColumnDescriptor, HConstants, HTableDescriptor, TableName}
-import org.apache.hadoop.io.IOUtils
 import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
 
-import java.io.ByteArrayInputStream
-import java.net.URI
 import java.util._
 import java.util.concurrent.locks.ReentrantLock
 import scala.collection.JavaConversions._
@@ -44,15 +36,16 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
   }
 
   private var kafkaProducer: KafkaProducer[String, String] = _
-  private var hConnect: HBaseConn = _
-  private var mutator: BufferedMutator = _
-  private var fileSystem: FileSystem = _
 
 
   def write(request: SinkRequest): Unit = {
     this.synchronized {
       val table = request.table.split("\\.").last
       failoverStorage match {
+        case NONE =>
+        case Console =>
+          val records = request.records.map(x => s"(${cleanUp(x)})")
+          logInfo(s"failover body: [ ${records.mkString(",")} ]")
         case Kafka =>
           if (!Lock.initialized) {
             try {
@@ -88,14 +81,13 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
               logInfo(s"Failover successful!! storageType:Kafka,table: $table,size:${request.size}")
             }
           }).get()
-
         case MySQL =>
           if (!Lock.initialized) {
             try {
               Lock.lock.lock()
               if (!Lock.initialized) {
                 Lock.initialized = true
-                properties.put(KEY_ALIAS, s"failover-${table}")
+                properties.put(KEY_ALIAS, s"failover-$table")
                 val mysqlConnect = JdbcUtils.getConnection(properties)
                 val mysqlTable = mysqlConnect.getMetaData.getTables(null, null, table, Array("TABLE", "VIEW"))
                 if (!mysqlTable.next()) {
@@ -107,10 +99,9 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                 }
               }
             } catch {
-              case exception: Exception => {
+              case exception: Exception =>
                 logError(s"build Failover storageType:MySQL failed exception ${exception.getStackTrace}")
                 throw exception
-              }
             } finally {
               Lock.lock.unlock()
             }
@@ -123,94 +114,6 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
           val sql = s"INSERT INTO $table(`values`,`timestamp`) VALUES ${records.mkString(",")} "
           JdbcUtils.update(sql)(properties)
           logInfo(s"Failover successful!! storageType:MySQL,table: $table,size:${request.size}")
-
-        case HBase =>
-          val tableName = TableName.valueOf(table)
-          val familyName = "cf"
-          if (!Lock.initialized) {
-            try {
-              Lock.lock.lock()
-              if (!Lock.initialized) {
-                Lock.initialized = true
-                hConnect = HBaseClient(properties).connection
-                val admin = hConnect.getAdmin
-                if (!admin.tableExists(tableName)) {
-                  val desc = new HTableDescriptor(tableName)
-                  desc.addFamily(new HColumnDescriptor(familyName))
-                  admin.createTable(desc)
-                  logInfo(s"Failover storageType:HBase,table: $table is not exist,auto created...")
-                }
-                val mutatorParam = new BufferedMutatorParams(tableName)
-                  .listener(new BufferedMutator.ExceptionListener {
-                    override def onException(exception: RetriesExhaustedWithDetailsException, mutator: BufferedMutator): Unit = {
-                      for (i <- 0.until(exception.getNumExceptions)) {
-                        logInfo(s"Failover storageType:HBase Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
-                      }
-                    }
-                  })
-                mutator = hConnect.getBufferedMutator(mutatorParam)
-              }
-            } catch {
-              case exception: Exception => {
-                logError(s"build Failover storageType:HBase failed exception ${exception.getStackTrace.mkString("Array(", ", ", ")")}")
-                throw exception
-              }
-            } finally {
-              Lock.lock.unlock()
-            }
-          }
-          val timestamp = System.currentTimeMillis()
-          for (i <- 0 until request.size) {
-            val rowKey = HConstants.LATEST_TIMESTAMP - timestamp - i //you know?...
-            val put = new Put(Bytes.toBytes(rowKey))
-              .addColumn(familyName.getBytes, "values".getBytes, Bytes.toBytes(request.records(i)))
-              .addColumn(familyName.getBytes, "timestamp".getBytes, Bytes.toBytes(timestamp))
-            mutator.mutate(put)
-          }
-          mutator.flush()
-
-        case HDFS =>
-          val path = properties("path")
-          val format = properties.getOrElse("format", DateUtils.format_yyyyMMdd)
-          require(path != null)
-          val fileName = s"$path/$table"
-          val rootPath = new Path(s"$fileName/${DateUtils.format(new Date(), format)}")
-          try {
-            if (!Lock.initialized) {
-              try {
-                Lock.lock.lock()
-                if (!Lock.initialized) {
-                  Lock.initialized = true
-                  fileSystem = (Option(properties("namenode")), Option(properties("user"))) match {
-                    case (None, None) => FileSystem.get(new HConf())
-                    case (Some(nn), Some(u)) => FileSystem.get(new URI(nn), new HConf(), u)
-                    case (Some(nn), _) => FileSystem.get(new URI(nn), new HConf())
-                    case _ => throw new IllegalArgumentException("[StreamX] usage error..")
-                  }
-                }
-              } catch {
-                case exception: Exception => {
-                  logError(s"build Failover storageType:HDFS failed exception ${exception.getStackTrace.mkString("Array(", ", ", ")")}")
-                  throw exception
-                }
-              } finally {
-                Lock.lock.unlock()
-              }
-            }
-            val uuid = UUID.randomUUID().toString.replace("-", "")
-            val filePath = new Path(s"$rootPath/${System.currentTimeMillis()}_$uuid")
-            var outStream = fileSystem.create(filePath)
-            var record = new StringBuilder
-            request.records.foreach(x => record.append(x).append("\n"))
-            var inputStream = new ByteArrayInputStream(record.toString().getBytes)
-            IOUtils.copyBytes(inputStream, outStream, 1024, true)
-            record.clear()
-            record = null
-            inputStream = null
-            outStream = null
-          } catch {
-            case e: Exception => e.printStackTrace()
-          }
         case _ => throw new UnsupportedOperationException(s"[StreamX] unsupported failover storageType:$failoverStorage")
       }
     }
@@ -222,11 +125,6 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
 
   override def close(): Unit = {
     if (kafkaProducer != null) kafkaProducer.close()
-    if (fileSystem != null) fileSystem.close()
-    if (mutator != null) {
-      mutator.flush()
-      mutator.close()
-    }
   }
 
 }

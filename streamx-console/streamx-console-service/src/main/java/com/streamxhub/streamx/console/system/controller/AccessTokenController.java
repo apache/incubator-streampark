@@ -55,7 +55,6 @@ public class AccessTokenController {
     @PostMapping(value = "/create")
     @RequiresPermissions("token:add")
     public RestResponse createToken(@NotBlank(message = "{required}") String username, String expireTime, String description) {
-
         return accessTokenService.generateToken(username, expireTime, description);
     }
 

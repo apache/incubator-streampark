@@ -140,7 +140,8 @@ class ES7Sink(@(transient@param)ctx: StreamingContext,
     // set value from properties
     prop.filter(_._1.startsWith(KEY_ES_BULK_PREFIX)).foreach(doConfig)
     // set value from method parameter...
-    property.forEach((k: Object, v: Object) => doConfig(k.toString, v.toString))
+    property.foreach(x => doConfig(x._1, x._2))
+
     sinkBuilder.build()
   }
 

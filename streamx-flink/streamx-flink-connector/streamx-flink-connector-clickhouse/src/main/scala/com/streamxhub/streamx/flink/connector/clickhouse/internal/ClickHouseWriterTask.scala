@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.connector.clickhouse.internal
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseHttpConfig
 import com.streamxhub.streamx.flink.connector.failover.{FailoverWriter, SinkRequest}
-import io.netty.handler.codec.http.HttpHeaders
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpHeaders}
 import org.asynchttpclient.{AsyncHttpClient, ListenableFuture, Request, Response}
 
 import java.util.concurrent.{BlockingQueue, ExecutorService, TimeUnit}
@@ -58,23 +58,21 @@ case class ClickHouseWriterTask(id: Int,
 
   def send(sinkRequest: SinkRequest): Unit = {
     val request = buildRequest(sinkRequest)
-    logDebug(s"Ready to load data to ${sinkRequest.table}, size = ${sinkRequest.size}")
+    logDebug(s"Ready to load data to ${sinkRequest.table}, size: ${sinkRequest.size}")
     val whenResponse = asyncHttpClient.executeRequest(request)
     val callback = respCallback(whenResponse, sinkRequest)
     whenResponse.addListener(callback, callbackService)
   }
 
   def buildRequest(sinkRequest: SinkRequest): Request = {
-    val query = s"INSERT INTO ${sinkRequest.table} VALUES ${sinkRequest.records.mkString(",")}"
     val host = clickHouseConf.getRandomHostUrl
     val builder = asyncHttpClient
       .preparePost(host)
       .setRequestTimeout(clickHouseConf.timeout)
-      .setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=utf-8")
-      .setBody(query)
-
+      .setHeader(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=utf-8")
+      .setBody(sinkRequest.sqlStatement)
     if (clickHouseConf.credentials != null) {
-      builder.setHeader(HttpHeaders.Names.AUTHORIZATION, "Basic " + clickHouseConf.credentials)
+      builder.setHeader( HttpHeaderNames.AUTHORIZATION, "Basic " + clickHouseConf.credentials)
     }
     builder.build
   }
@@ -85,8 +83,8 @@ case class ClickHouseWriterTask(id: Int,
         case null =>
           logError(s"""Error ClickHouseSink executing callback, params = $clickHouseConf,can not get Response. """)
           handleFailedResponse(null, sinkRequest)
-        case resp if !clickHouseConf.successCode.contains(resp.getStatusCode) =>
-          logError(s"Error ClickHouseSink executing callback, params = $clickHouseConf, StatusCode = ${resp.getStatusCode} ")
+        case resp if resp.getStatusCode != 200 =>
+          logError(s"Error ClickHouseSink executing callback, params = ${clickHouseConf}, StatusCode = ${resp.getStatusCode} ")
           handleFailedResponse(resp, sinkRequest)
         case _ =>
       }
@@ -106,7 +104,7 @@ case class ClickHouseWriterTask(id: Int,
       logInfo(s"failover Successful, StorageType = ${clickHouseConf.storageType}, size = ${sinkRequest.size}")
     } else {
       sinkRequest.incrementCounter()
-      logWarn(s"Next attempt to send data to ClickHouse, targetTable = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
+      logWarn(s"Next attempt to send data to ClickHouse, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
       queue.put(sinkRequest)
     }
   }

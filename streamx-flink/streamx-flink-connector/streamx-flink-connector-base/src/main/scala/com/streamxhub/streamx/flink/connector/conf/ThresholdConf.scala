@@ -19,9 +19,8 @@
 
 package com.streamxhub.streamx.flink.connector.conf
 
-import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.ConfigUtils
-import com.streamxhub.streamx.flink.connector.conf.FailoverStorageType.{FailoverStorageType, HBase, HDFS, Kafka, MySQL, NoType}
+import com.streamxhub.streamx.flink.connector.conf.FailoverStorageType.{FailoverStorageType, Console, NONE, Kafka, MySQL}
 
 import java.util.Properties
 import scala.collection.JavaConversions._
@@ -29,13 +28,12 @@ import scala.collection.JavaConverters._
 
 case class ThresholdConf(prefixStr: String, parameters: Properties) {
 
-  private val option: ThreshlodConfigOption = ThreshlodConfigOption(prefixStr, parameters)
+  private val option: ThresholdConfigOption = ThresholdConfigOption(prefixStr, parameters)
 
   val bufferSize: Int = option.bufferSize.get()
   val queueCapacity: Int = option.queueCapacity.get()
   val delayTime: Long = option.delayTime.get()
   val timeout: Int = option.timeout.get()
-  val successCode: List[Int] = option.successCode.get()
   val numWriters: Int = option.numWriters.get()
   val maxRetries: Int = option.maxRetries.get()
   val storageType: FailoverStorageType = option.storageType.get()
@@ -43,18 +41,17 @@ case class ThresholdConf(prefixStr: String, parameters: Properties) {
 
   def getFailoverConfig: Properties = {
     storageType match {
+      case Console | NONE => null
       case Kafka => ConfigUtils.getConf(parameters.toMap.asJava, "failover.kafka.")
       case MySQL => ConfigUtils.getConf(parameters.toMap.asJava, "failover.mysql.")
-      case HBase => ConfigUtils.getConf(parameters.toMap.asJava, "failover.hbase.", HBASE_PREFIX)
-      case HDFS => ConfigUtils.getConf(parameters.toMap.asJava, "failover.hdfs.")
-      case NoType => throw new IllegalArgumentException(s"[StreamX] usage error! failover.storage must not be null! ")
+      case _ => throw new IllegalArgumentException(s"[StreamX] usage error! failover.storage must not be null! ")
     }
   }
 }
 
 object FailoverStorageType extends Enumeration {
   type FailoverStorageType = Value
-  val NoType, MySQL, HBase, HDFS, Kafka = Value
+  val Console, MySQL, Kafka, NONE = Value
 
   def get(key: String): Value = values.find(_.toString.equalsIgnoreCase(key)).get
 

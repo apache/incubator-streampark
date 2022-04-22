@@ -20,9 +20,50 @@
 package com.streamxhub.streamx.flink.connector.failover
 
 import java.util
+import java.util.regex.Pattern
+import scala.collection.JavaConversions._
 
-case class SinkRequest(records: util.List[String], table: String, var attemptCounter: Int = 0) {
+case class SinkRequest(records: util.List[String], var attemptCounter: Int = 0) {
   def incrementCounter(): Unit = attemptCounter += 1
 
   def size: Int = records.size()
+
+  private[this] lazy val TABLE_REGEXP = Pattern.compile(
+    "(insert\\s+into|update|delete)\\s+(.*?)(\\(|\\s+)",
+    Pattern.CASE_INSENSITIVE
+  )
+
+  private[this] lazy val INSERT_REGEXP = Pattern.compile(
+    "^(.*)\\s+(values|value)(.*)",
+    Pattern.CASE_INSENSITIVE
+  )
+
+  lazy val sqlStatement: String = {
+    val matcher = INSERT_REGEXP.matcher(records.head)
+    if (!matcher.find()) null; else {
+      val prefix = matcher.group(1)
+      val values = records.map(x => {
+        val valueMatcher = INSERT_REGEXP.matcher(x)
+        if (valueMatcher.find()) {
+          valueMatcher.group(3)
+        } else {
+          null
+        }
+      }).mkString(",")
+      s"$prefix VALUES $values"
+    }
+  }
+
+  lazy val table: String = {
+    // 1) insert into default.table(c1,c2) values ...
+    // 2) insert into default.table values ..."
+    // 3) update default.table where ..."
+    // 4) delete default.table where ..."
+    val matcher = TABLE_REGEXP.matcher(records.head)
+    if (matcher.find()) {
+      matcher.group(2)
+    } else null
+  }
+
 }
+
