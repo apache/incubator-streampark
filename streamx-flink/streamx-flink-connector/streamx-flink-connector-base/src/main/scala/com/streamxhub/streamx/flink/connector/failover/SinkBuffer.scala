@@ -27,9 +27,8 @@ import java.util.concurrent.CopyOnWriteArrayList
 import scala.collection.JavaConversions._
 
 case class SinkBuffer(writer: SinkWriter,
-                      delayTime: Long,
-                      bufferSize: Int,
-                      table: String) extends AutoCloseable with Logger {
+                      flushInterval: Long,
+                      bufferSize: Int) extends AutoCloseable with Logger {
 
   private var timestamp = 0L
 
@@ -51,8 +50,8 @@ case class SinkBuffer(writer: SinkWriter,
 
   private[this] def addToQueue(): Unit = {
     val deepCopy = buildDeepCopy(localValues)
-    val params = SinkRequest(deepCopy, table)
-    logDebug(s"Build blank with params: buffer size = ${params.size}, target table  = ${params.table}")
+    val params = SinkRequest(deepCopy)
+    logDebug(s"Build blank with params: buffer size = ${params.size}")
     writer.write(params)
     localValues.clear()
   }
@@ -62,7 +61,7 @@ case class SinkBuffer(writer: SinkWriter,
       localValues.size >= bufferSize || {
         if (timestamp == 0) false else {
           val current = System.currentTimeMillis
-          current - timestamp > delayTime
+          current - timestamp > flushInterval
         }
       }
     } else false

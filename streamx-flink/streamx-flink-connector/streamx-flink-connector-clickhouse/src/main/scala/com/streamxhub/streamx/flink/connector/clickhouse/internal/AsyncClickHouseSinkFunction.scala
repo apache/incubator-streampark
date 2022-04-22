@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.connector.clickhouse.internal
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseConfig
+import com.streamxhub.streamx.flink.connector.clickhouse.conf.ClickHouseHttpConfig
 import com.streamxhub.streamx.flink.connector.clickhouse.internal
 import com.streamxhub.streamx.flink.connector.clickhouse.util.ClickhouseConvertUtils.convert
 import com.streamxhub.streamx.flink.connector.failover.{FailoverChecker, SinkBuffer}
@@ -44,22 +44,18 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
 
 
   //for Scala
-  def this(properties: Properties,
-           scalaSqlFunc: T => String) = {
-
+  def this(properties: Properties, scalaSqlFunc: T => String) = {
     this(ApiType.scala, properties)
     this.scalaSqlFunc = scalaSqlFunc
   }
 
   //for JAVA
-  def this(properties: Properties,
-           javaSqlFunc: TransformFunction[T, String]) = {
-
+  def this(properties: Properties, javaSqlFunc: TransformFunction[T, String]) = {
     this(ApiType.java, properties)
     this.javaSqlFunc = javaSqlFunc
   }
 
-  @transient var clickHouseConf: ClickHouseConfig = _
+  @transient var clickHouseConf: ClickHouseHttpConfig = _
   @transient var sinkBuffer: SinkBuffer = _
   @transient var clickHouseWriter: ClickHouseSinkWriter = _
   @transient var failoverChecker: FailoverChecker = _
@@ -70,14 +66,10 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
       Lock.lock.synchronized {
         if (!Lock.initialized) {
           Lock.initialized = true
-          clickHouseConf = new ClickHouseConfig(properties)
-          val targetTable: String = clickHouseConf.table
-          require(targetTable != null && targetTable.nonEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
+          clickHouseConf = new ClickHouseHttpConfig(properties)
           clickHouseWriter = internal.ClickHouseSinkWriter(clickHouseConf)
           failoverChecker = FailoverChecker(clickHouseConf.delayTime)
-          val failoverTable: String = clickHouseConf.failoverTable
-          require(failoverTable != null && failoverTable.nonEmpty, () => s"clickhouse async  insert failoverTable must not null")
-          sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize, targetTable)
+          sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize)
           failoverChecker.addSinkBuffer(sinkBuffer)
           logInfo("AsyncClickHouseSink initialize... ")
         }
@@ -86,19 +78,18 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
   }
 
   override def invoke(value: T): Unit = {
-    val csv = (javaSqlFunc, scalaSqlFunc) match {
-      case (null, null) =>
-        convert[T](value)
+    val sql = (javaSqlFunc, scalaSqlFunc) match {
+      case (null, null) => convert[T](value)
       case _ => apiType match {
         case ApiType.java => javaSqlFunc.transform(value)
         case ApiType.scala => scalaSqlFunc(value)
       }
     }
     try {
-      sinkBuffer.put(csv)
+      sinkBuffer.put(sql)
     } catch {
       case e: Exception =>
-        logError(s"""Error while sending data to Clickhouse, record = $csv,error:$e""")
+        logError(s"""Error while sending data to Clickhouse, record = $sql,error:$e""")
         throw new RuntimeException(e)
     }
   }

@@ -38,7 +38,7 @@ import scala.collection.JavaConversions._
 
 class ClickHouseConfig(parameters: Properties) extends ThresholdConf(ClickHouseSinkConfigOption.CLICKHOUSE_SINK_PREFIX, parameters) {
 
-  val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(properties = parameters)
+  @transient val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(properties = parameters)
 
   val user: String = sinkOption.user.get()
 
@@ -69,4 +69,9 @@ class ClickHouseConfig(parameters: Properties) extends ThresholdConf(ClickHouseS
     hosts.get(currentHostId)
   }
 
+  override def toString: String = {
+    s"""
+       |{ user: $user, password: ******, hosts: ${hosts.mkString(",")},  table: $table }
+       |""".stripMargin
+  }
 }
