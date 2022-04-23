@@ -603,12 +603,13 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_access_token`;
 CREATE TABLE `t_access_token` (
-`ID` int NOT NULL AUTO_INCREMENT COMMENT 'key',
-`USERNAME` varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'USER_NAME',
-`TOKEN` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'TOKEN',
-`EXPIRE_TIME` datetime DEFAULT NULL COMMENT '过期时间',
-`DESCRIPTION` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '使用场景描述',
-`CREATE_TIME` datetime DEFAULT NULL COMMENT 'create time',
-`MODIFY_TIME` datetime DEFAULT NULL COMMENT 'modify time',
-PRIMARY KEY (`ID`)
+`ID`            int NOT NULL AUTO_INCREMENT COMMENT 'key',
+`USERNAME`      varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'USER_NAME',
+`TOKEN`         varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'TOKEN',
+`EXPIRE_TIME`   datetime DEFAULT NULL COMMENT '过期时间',
+`DESCRIPTION`   varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '使用场景描述',
+`STATUS`        tinyint DEFAULT NULL COMMENT '1:enable,0:disable',
+`CREATE_TIME`   datetime DEFAULT NULL COMMENT 'create time',
+`MODIFY_TIME`   datetime DEFAULT NULL COMMENT 'modify time',
+PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
