@@ -233,10 +233,12 @@ CREATE TABLE `t_access_token` (
 PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-
 INSERT INTO `t_menu` VALUES (100038, 100000, 'Token Management', '/system/token', 'system/token/Token', 'token:view', 'lock', '0', '1', 1.0, NOW(), NOW());
 INSERT INTO `t_menu` VALUES (100039, 100038, 'add', NULL, NULL, 'token:add', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100040, 100038, 'delete', NULL, NULL, 'token:delete', NULL, '1', '1', NULL, NOW(), NULL);
 
+INSERT INTO `t_role_menu` VALUES (100057, 100000, 100038);
+INSERT INTO `t_role_menu` VALUES (100058, 100000, 100039);
+INSERT INTO `t_role_menu` VALUES (100059, 100000, 100040);
 
 -- ------------------------------------- version: 1.2.3 END ---------------------------------------
