@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.system.controller;
 
+import com.streamxhub.streamx.common.util.CURLBuilder;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.util.WebUtils;
@@ -35,9 +36,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotBlank;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -89,10 +87,12 @@ public class AccessTokenController {
                                                @NotBlank(message = "{required}") String baseUrl,
                                                @NotBlank(message = "{required}") String path) {
         String resultCURL = null;
-        CurlBuilder curlBuilder = new CurlBuilder()
-            .setUrl(baseUrl + path)
+        CURLBuilder curlBuilder = new CURLBuilder(baseUrl + path);
+
+        curlBuilder
             .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
             .addHeader("Authorization", WebUtils.encryptToken(SecurityUtils.getSubject().getPrincipal().toString()));
+
         if ("/flink/app/start".equalsIgnoreCase(path)) {
             resultCURL = curlBuilder
                 .addFormData("allowNonRestored", "false")
@@ -109,45 +109,6 @@ public class AccessTokenController {
                 .addFormData("savePoint", "")
                 .build();
         }
-
         return RestResponse.success(resultCURL);
     }
-
-    class CurlBuilder {
-        private Map<String, String> headers = new HashMap<>();
-        private Map<String, String> formDatas = new HashMap<>();
-        private String url;
-
-        private CurlBuilder setUrl(String url) {
-            this.url = url;
-            return this;
-        }
-
-        private CurlBuilder addHeader(String k, String v) {
-            this.headers.put(k, v);
-            return this;
-        }
-
-        private CurlBuilder addFormData(String k, String v) {
-            this.formDatas.put(k, v);
-            return this;
-        }
-
-        public String build() {
-            StringBuilder cURL = new StringBuilder("curl -X POST ");
-            cURL.append(String.format("'%s' \\\n", url));
-            for (String headerKey : headers.keySet()) {
-                cURL.append(String.format("-H \'%s: %s\' \\\n", headerKey, headers.get(headerKey)));
-            }
-            for (String field : formDatas.keySet()) {
-                cURL.append(String.format("--data-urlencode \'%s=%s\' \\\n", field, formDatas.get(field)));
-            }
-
-            cURL.append("-i");
-
-            return cURL.toString();
-        }
-
-    }
-
 }
