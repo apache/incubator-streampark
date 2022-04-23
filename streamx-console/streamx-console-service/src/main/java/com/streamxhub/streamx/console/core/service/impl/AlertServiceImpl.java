@@ -196,12 +196,12 @@ public class AlertServiceImpl implements AlertService {
     }
 
     private Template loadingConf(Configuration configuration) {
-        try{
-            File file =WebUtils.getAppConfDir();
+        try {
+            File file = WebUtils.getAppConfDir();
             log.info("loading email config... dir :{}", file.getPath());
             configuration.setDirectoryForTemplateLoading(file);
             return configuration.getTemplate(CONFIG_TEMPLATE);
-        }catch (IOException e){
+        } catch (IOException e){
             log.warn("loading email error :{}", e.getMessage());
         }
         return null;
