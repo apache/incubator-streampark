@@ -17,20 +17,23 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.dao;
+package com.streamxhub.streamx.console.base.domain;
 
-import com.streamxhub.streamx.console.system.entity.AccessToken;
+/**
+ * @author xianwei.yang
+ * 业务响应code
+ */
+public interface ResponseCode {
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Param;
+    /**
+     * default
+     */
+    Long CODE_SUCCESS = 2000L;
+    Long CODE_FAIL = 2001L;
 
-public interface AccessTokenMapper extends BaseMapper<AccessToken> {
+    /**
+     * 预占：3000-4000为accessToken异常
+     */
+    Long CODE_ACCESS_TOKEN_LOCKED = 3001L;
 
-    IPage<AccessToken> page(Page<AccessToken> page, @Param("accessToken") AccessToken accessToken);
-
-    AccessToken getTokenInfo(@Param("username") String username, @Param("accessToken") String accessToken);
-
-    AccessToken getTokenInfoById(@Param("id") Long id);
 }

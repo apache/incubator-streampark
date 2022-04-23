@@ -77,7 +77,7 @@ public class StreamXConsoleAspect {
         RestResponse response;
         try {
             response = (RestResponse) joinPoint.proceed();
-            response.put("status", "success");
+            response.put("status", RestResponse.STATUS_SUCCESS);
         } catch (Throwable e) {
             e.printStackTrace();
             response =

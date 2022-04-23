@@ -21,8 +21,10 @@ package com.streamxhub.streamx.console.system.service.impl;
 
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
+import com.streamxhub.streamx.console.base.domain.ResponseCode;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.system.authentication.JWTToken;
@@ -58,7 +60,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     private AccessTokenMapper tokenMapper;
 
     @Override
-    public RestResponse generateToken(String username, String expireTime, String description) {
+    public RestResponse generateToken(String username, String expireTime, String description) throws ServiceException {
         User user = userService.lambdaQuery().eq(User::getUsername, username).one();
         if (Objects.isNull(user)) {
             return RestResponse.create().put("code", 0).message("user not available");
@@ -77,6 +79,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         accessToken.setDescription(description);
         accessToken.setExpireTime(DateUtils.stringToDate(jwtToken.getExpireAt()));
         accessToken.setCreateTime(new Date());
+        accessToken.setStatus(AccessToken.STATUS_ENABLE);
 
         this.save(accessToken);
         return RestResponse.create().data(accessToken);
@@ -100,12 +103,27 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
 
     @Override
     public boolean checkTokenEffective(String username, String token) {
-
         AccessToken res = tokenMapper.getTokenInfo(username, token);
-        if (Objects.isNull(res) || res.getStatus().equals(User.STATUS_LOCK)) {
+        if (Objects.isNull(res) || AccessToken.STATUS_DISABLE.equals(res.getFinalTokenStatus())) {
             return false;
         }
-
         return true;
+    }
+
+    @Override
+    public RestResponse updateTokenStatus(Integer status, Long tokenId) throws ServiceException {
+        AccessToken tokenInfo = tokenMapper.getTokenInfoById(tokenId);
+        if (Objects.isNull(tokenInfo)) {
+            return RestResponse.fail("accessToken could not be found!", ResponseCode.CODE_ACCESS_TOKEN_LOCKED);
+        }
+
+        if (User.STATUS_LOCK.equals(tokenInfo.getUserStatus())) {
+            return RestResponse.fail("user status is locked, could not operate this accessToken!", ResponseCode.CODE_ACCESS_TOKEN_LOCKED);
+        }
+
+        AccessToken updateObj = new AccessToken();
+        updateObj.setStatus(status);
+        updateObj.setId(tokenId);
+        return RestResponse.success(this.updateById(updateObj));
     }
 }

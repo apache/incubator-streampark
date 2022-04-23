@@ -3,10 +3,18 @@
 <mapper namespace="com.streamxhub.streamx.console.system.dao.AccessTokenMapper">
     <select id="page" resultType="com.streamxhub.streamx.console.system.entity.AccessToken"
             parameterType="com.streamxhub.streamx.console.system.entity.AccessToken">
-        SELECT t1.id, t1.username, t1.token, t1.expire_time, t1.create_time, t1.modify_time, t1.description , t2.`STATUS` as `status`
-        FROM t_access_token t1,t_user t2
+        SELECT t1.id,
+        t1.username,
+        t1.token,
+        t1.expire_time,
+        t1.create_time,
+        t1.modify_time,
+        t1.description ,
+        t1.`STATUS` as `status`,
+        t2.`STATUS` as `userStatus`,
+        if(t1.`STATUS`=1 and t2.`STATUS`=1,1,0) as `finalTokenStatus`
+        FROM t_access_token t1 join t_user t2 on t1.username = t2.username
         <where>
-            t1.username = t2.username
             <if test="accessToken.username != null and accessToken.username != ''">
                 AND t1.USERNAME like concat('%',#{accessToken.username},'%')
             </if>
@@ -21,10 +29,27 @@
                t1.create_time,
                t1.modify_time,
                t1.description,
-               t2.`STATUS` as `status`
+               t1.`STATUS` as `status`,
+               t2.`STATUS` as `userStatus`,
+               if(t1.`STATUS`=1 and t2.`STATUS`=1,1,0) as `finalTokenStatus`
         FROM t_user t2
-                 join t_access_token t1
-                      on t1.username = t2.username
-                          and t1.username = #{username,jdbcType=VARCHAR} and t1.token = #{accessToken,jdbcType=VARCHAR}
+                 join t_access_token t1 on t1.username = t2.username
+        where t1.username = #{username,jdbcType=VARCHAR}
+          and t1.token = #{accessToken,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getTokenInfoById" resultType="com.streamxhub.streamx.console.system.entity.AccessToken">
+        SELECT t1.id,
+               t1.username,
+               t1.token,
+               t1.expire_time,
+               t1.create_time,
+               t1.modify_time,
+               t1.description ,
+               t1.`STATUS` as `status`,
+               t2.`STATUS` as `userStatus`,
+               if(t1.`STATUS`=1 and t2.`STATUS`=1,1,0) as `finalTokenStatus`
+        FROM t_access_token t1 join t_user t2 on t1.username = t2.username
+        where t1.id= #{id}
     </select>
 </mapper>
