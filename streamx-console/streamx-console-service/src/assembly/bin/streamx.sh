@@ -434,6 +434,7 @@ start() {
   eval $NOHUP "\"$RUNJAVA\"" $JAVA_OPTS \
     -classpath "\"$APP_CLASSPATH\"" \
     -Dapp.home="\"${APP_HOME}\"" \
+    -Dapp.conf.dir="\"${APP_CONF}\"" \
     -Dspring.config.location="\"${PROPER}\"" \
     -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
     -Dpid="\"${APP_PID}\"" \
