@@ -84,13 +84,6 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
     classType = classOf[String]
   )
 
-  val targetTable: ConfigOption[String] = ConfigOption(
-    key = "targetTable",
-    required = true,
-    classType = classOf[String],
-    handle = k => s"${database.get}.${properties.getProperty(k)}"
-  )
-
   val requestTimeout: ConfigOption[Int] = ConfigOption(
     key = "requestTimeout",
     required = false,

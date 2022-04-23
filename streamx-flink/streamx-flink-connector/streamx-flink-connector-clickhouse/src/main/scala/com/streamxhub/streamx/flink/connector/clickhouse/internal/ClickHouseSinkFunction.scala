@@ -70,9 +70,6 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
   override def open(parameters: Configuration): Unit = {
     val user: String = clickHouseConf.user
     val driver: String = clickHouseConf.driverClassName
-    val targetTable = clickHouseConf.table
-    require(targetTable != null && targetTable.nonEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
-    insertSqlPrefixes = s"insert into  $targetTable  values "
     val properties = new ClickHouseProperties()
     (user, driver) match {
       case (u, d) if u != null && d != null =>
@@ -104,28 +101,27 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
 
   override def invoke(value: T, context: SinkFunction.Context): Unit = {
     require(connection != null)
-
-    val values = (scalaSqlFunc, javaSqlFunc) match {
-      case (null, null) => convert(value)
+    val sql = (javaSqlFunc, scalaSqlFunc) match {
+      case (null, null) => convert[T](value)
       case _ => apiType match {
         case ApiType.java => javaSqlFunc.transform(value)
         case ApiType.scala => scalaSqlFunc(value)
       }
     }
+
     batchSize match {
       case 1 =>
         try {
-          val sql = s"$insertSqlPrefixes $values"
           connection.prepareStatement(sql).executeUpdate
         } catch {
           case e: Exception =>
-            logError(s"""ClickHouseSink invoke error:$values""")
+            logError(s"ClickHouseSink invoke error: $e")
             throw e
           case _: Throwable =>
         }
       case batch =>
         try {
-          sqlValues.add(values)
+          sqlValues.add(sql)
           (offset.incrementAndGet() % batch, System.currentTimeMillis()) match {
             case (0, _) => execBatch()
             case (_, current) if current - timestamp > flushInterval => execBatch()

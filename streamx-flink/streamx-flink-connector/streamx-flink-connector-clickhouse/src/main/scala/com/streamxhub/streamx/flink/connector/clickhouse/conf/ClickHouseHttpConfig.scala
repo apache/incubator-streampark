@@ -46,8 +46,6 @@ class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHo
 
   val hosts: List[String] = sinkOption.hosts.get()
 
-  val table: String = sinkOption.targetTable.get()
-
   var currentHostId: Int = 0
 
   val credentials: String = (user, password) match {
@@ -71,7 +69,7 @@ class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHo
 
   override def toString: String = {
     s"""
-       |{ user: $user, password: ******, hosts: ${hosts.mkString(",")},  table: $table }
+       |{ user: $user, password: ******, hosts: ${hosts.mkString(",")} }
        |""".stripMargin
   }
 }
