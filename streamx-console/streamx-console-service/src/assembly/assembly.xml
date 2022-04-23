@@ -84,6 +84,7 @@
                 <include>*.yml</include>
                 <include>*.properties</include>
                 <include>*.html</include>
+                <include>logback*.xml</include>
             </includes>
         </fileSet>
     </fileSets>

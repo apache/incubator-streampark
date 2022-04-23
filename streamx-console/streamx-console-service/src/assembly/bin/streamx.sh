@@ -435,6 +435,7 @@ start() {
     -classpath "\"$APP_CLASSPATH\"" \
     -Dapp.home="\"${APP_HOME}\"" \
     -Dapp.conf.dir="\"${APP_CONF}\"" \
+    -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
     -Dspring.config.location="\"${PROPER}\"" \
     -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
     -Dpid="\"${APP_PID}\"" \
