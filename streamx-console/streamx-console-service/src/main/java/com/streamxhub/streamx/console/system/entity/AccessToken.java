@@ -19,6 +19,8 @@
 
 package com.streamxhub.streamx.console.system.entity;
 
+import com.streamxhub.streamx.console.base.exception.ServiceException;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -28,6 +30,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 
 @Data
@@ -40,6 +43,11 @@ public class AccessToken implements Serializable {
     public static final String DEFAULT_EXPIRE_TIME = "9999-01-01 00:00:00";
     public static final String IS_API_TOKEN = "is_api_token";
 
+    /**
+     * token状态
+     */
+    public static final Integer STATUS_ENABLE = 1;
+    public static final Integer STATUS_DISABLE = 0;
 
     @TableId(value = "ID", type = IdType.AUTO)
     private Long id;
@@ -51,6 +59,9 @@ public class AccessToken implements Serializable {
     private String token;
 
     @NotNull(message = "{required}")
+    private Integer status;
+
+    @NotNull(message = "{required}")
     private Date expireTime;
 
     private String description;
@@ -59,6 +70,19 @@ public class AccessToken implements Serializable {
 
     private Date modifyTime;
 
-    private String status;
+    private String userStatus;
+
+    /**
+     * token最终可用状态  token&user 同时可用 1:可用，0：不可用
+     */
+    private Integer finalTokenStatus;
+
+    public AccessToken setStatus(Integer status) throws ServiceException {
+        if (!Arrays.asList(STATUS_ENABLE, STATUS_DISABLE).contains(status)) {
+            throw new ServiceException("access token's status expect '1' or '0', but got " + status);
+        }
+        this.status = status;
+        return this;
+    }
 
 }

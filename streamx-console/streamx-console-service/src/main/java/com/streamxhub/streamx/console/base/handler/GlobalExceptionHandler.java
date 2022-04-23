@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.base.handler;
 
+import com.streamxhub.streamx.console.base.domain.ResponseCode;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ApiException;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
@@ -74,7 +75,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     public RestResponse handleException(ApiException e) {
         log.info("api exception：{}", e.getMessage());
-        return RestResponse.fail("api fail, msg:" + e.getMessage());
+        return RestResponse.fail("api fail, msg:" + e.getMessage(), ResponseCode.CODE_FAIL);
     }
 
     /**

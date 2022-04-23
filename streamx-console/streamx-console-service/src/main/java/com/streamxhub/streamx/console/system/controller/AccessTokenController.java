@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.system.controller;
 import com.streamxhub.streamx.common.util.CURLBuilder;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.system.entity.AccessToken;
 import com.streamxhub.streamx.console.system.service.AccessTokenService;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 
 /**
@@ -54,7 +56,8 @@ public class AccessTokenController {
      */
     @PostMapping(value = "/create")
     @RequiresPermissions("token:add")
-    public RestResponse createToken(@NotBlank(message = "{required}") String username, String expireTime, String description) {
+    public RestResponse createToken(@NotBlank(message = "{required}") String username, String expireTime, String description)
+        throws ServiceException {
         return accessTokenService.generateToken(username, expireTime, description);
     }
 
@@ -66,6 +69,18 @@ public class AccessTokenController {
     public RestResponse tokenList(RestRequest restRequest, AccessToken accessToken) {
         IPage<AccessToken> accessTokens = accessTokenService.findAccessTokens(accessToken, restRequest);
         return RestResponse.create().data(accessTokens);
+    }
+
+    /**
+     * update token status
+     *
+     * @return
+     */
+    @PostMapping("/update/status")
+    @RequiresPermissions("token:add")
+    public RestResponse updateTokenStatus(@NotNull(message = "{required}") Integer status, @NotNull(message = "{required}") Long tokenId)
+        throws ServiceException {
+        return accessTokenService.updateTokenStatus(status, tokenId);
     }
 
     /**
