@@ -268,34 +268,6 @@ object ConfigConst {
   val DORIS_DEFAULT_MAXRETRIES = "1"
   val DORIS_STREAM_LOAD_PROP_PREFIX = "streamLoad."
 
-
-  /**
-   * about config es
-   */
-  val ES_PREFIX = "es.sink."
-
-  val KEY_ES_AUTH_USER = "es.auth.user"
-
-  val KEY_ES_AUTH_PASSWORD = "es.auth.password"
-
-  val KEY_ES_REST_MAX_RETRY = "es.rest.max.retry.timeout"
-
-  val KEY_ES_REST_PATH_PREFIX = "es.rest.path.prefix"
-
-  val KEY_ES_REST_CONTENT_TYPE = "es.rest.content.type"
-
-  val KEY_ES_CONN_REQ_TIME_OUT = "es.connect.request.timeout"
-
-  val KEY_ES_CONN_TIME_OUT = "es.connect.timeout"
-
-  val KEY_ES_CLUSTER_NAME = "es.cluster.name"
-
-  val KEY_ES_BULK_PREFIX = "bulk.flush."
-
-  val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
-
-  val KEY_ES_DISABLE_FLUSH_ONCHECKPOINT = "es.disableFlushOnCheckpoint"
-
   /**
    * flink config key
    */

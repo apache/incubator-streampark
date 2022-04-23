@@ -17,13 +17,13 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.connector.elasticsearch6.util
+package com.streamxhub.streamx.flink.connector.elasticsearch5.util
 
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.common.bytes.BytesArray
 import org.elasticsearch.common.xcontent.XContentType
 
-object ElasticSearchUtils {
+object ElasticsearchUtils {
 
   def indexRequest(index: String, indexType: String, id: String, source: String)(implicit xContentType: XContentType = XContentType.JSON): IndexRequest = {
     require(source != null, "indexRequest error:source can not be null...")
@@ -37,4 +37,6 @@ object ElasticSearchUtils {
     }
     indexReq
   }
+
+
 }
