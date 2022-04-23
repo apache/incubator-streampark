@@ -109,6 +109,7 @@ public class AccessTokenController {
                 .addFormData("savePoint", "")
                 .build();
         }
+
         return RestResponse.success(resultCURL);
     }
 
