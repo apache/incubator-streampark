@@ -17,30 +17,26 @@
  * limitations under the License.
  */
 
-
 package com.streamxhub.streamx.flink.connector.elasticsearch7.bean
 
-import com.streamxhub.streamx.common.conf.ConfigConst.{KEY_ES_AUTH_PASSWORD, KEY_ES_AUTH_USER, KEY_ES_CONN_REQ_TIME_OUT, KEY_ES_CONN_TIME_OUT, KEY_ES_REST_CONTENT_TYPE, KEY_ES_REST_MAX_RETRY, KEY_ES_REST_PATH_PREFIX}
 import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.flink.connector.elasticsearch7.conf.ES7Config
 import org.apache.flink.streaming.connectors.elasticsearch7.RestClientFactory
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
+import org.apache.http.client.CredentialsProvider
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.message.BasicHeader
 import org.elasticsearch.client.RestClientBuilder
 
-import scala.collection.Map
-import scala.util.{Success, Try}
-
-class RestClientFactoryImpl(val config: Map[String, String]) extends RestClientFactory with Logger {
-
+class RestClientFactoryImpl(val config: ES7Config) extends RestClientFactory with Logger {
   override def configureRestClientBuilder(restClientBuilder: RestClientBuilder): Unit = {
-    // httpClientConfigCallback and requestConfigCallback........
+    //httpClientConfigCallback and requestConfigCallback........
     def configCallback(): RestClientBuilder = {
-      val userName = config.getOrElse(KEY_ES_AUTH_USER, null)
-      val password = config.getOrElse(KEY_ES_AUTH_PASSWORD, null)
-      // userName,password must be all set,or all not set..
+      val userName = config.userName
+      val password = config.password
+      //userName,password must be all set,or all not set..
       require(
         (userName != null && password != null) || (userName == null && password == null),
         "[StreamX] elasticsearch auth info error,userName,password must be all set,or all not set."
@@ -48,7 +44,7 @@ class RestClientFactoryImpl(val config: Map[String, String]) extends RestClientF
       val credentialsProvider = (userName, password) match {
         case (null, null) => null
         case _ =>
-          val credentialsProvider = new BasicCredentialsProvider()
+          val credentialsProvider: CredentialsProvider = new BasicCredentialsProvider()
           credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(userName, password))
           credentialsProvider
       }
@@ -68,12 +64,14 @@ class RestClientFactoryImpl(val config: Map[String, String]) extends RestClientF
           if (credentialsProvider != null) {
             requestConfigBuilder.setAuthenticationEnabled(true)
           }
-          config.foreach {
-            case (KEY_ES_CONN_REQ_TIME_OUT, v) => requestConfigBuilder.setConnectionRequestTimeout(v.toInt)
-            case (KEY_ES_CONN_TIME_OUT, v) => requestConfigBuilder.setConnectTimeout(v.toInt)
-            case _ =>
-          }
-          requestConfigBuilder
+          requestConfigBuilder.setConnectionRequestTimeout(config.connectRequestTimeout)
+          requestConfigBuilder.setConnectTimeout(config.connectTimeout)
+          requestConfigBuilder.setMaxRedirects(config.maxRedirects)
+          requestConfigBuilder.setRedirectsEnabled(config.redirectsEnabled)
+          requestConfigBuilder.setConnectTimeout(config.socketTimeout)
+          requestConfigBuilder.setRelativeRedirectsAllowed(config.relativeRedirectsAllowed)
+          requestConfigBuilder.setContentCompressionEnabled(config.contentCompressionEnabled)
+          requestConfigBuilder.setNormalizeUri(config.normalizeUri)
         }
       }
       restClientBuilder.setHttpClientConfigCallback(httpClientConfigCallback)
@@ -81,25 +79,15 @@ class RestClientFactoryImpl(val config: Map[String, String]) extends RestClientF
     }
 
     def setHeader(): RestClientBuilder = {
-      val contentType = config.getOrElse(KEY_ES_REST_CONTENT_TYPE, "application/json")
-      val maxRetry = Try(config.get(KEY_ES_REST_MAX_RETRY).toString.toInt) match {
-        case Success(value) => value
-        case _ =>
-          logWarn(s" config error: $KEY_ES_REST_MAX_RETRY is not set or invalid,use 10000 ")
-          10000
-      }
-
-      val headers = new BasicHeader("Content-Type", contentType)
+      val headers = new BasicHeader("Content-Type", config.contentType)
       restClientBuilder.setDefaultHeaders(Array(headers))
-      config.getOrElse(KEY_ES_REST_PATH_PREFIX, null) match {
+      config.pathPrefix match {
         case null => null
         case path => restClientBuilder.setPathPrefix(path)
       }
     }
 
     configCallback()
-
     setHeader()
   }
-
 }

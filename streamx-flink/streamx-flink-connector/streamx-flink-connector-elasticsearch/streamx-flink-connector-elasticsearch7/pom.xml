@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>streamx-flink-connector-elasticsearch7</artifactId>
+    <artifactId>streamx-flink-connector-elasticsearch7_${scala.binary.version}</artifactId>
     <name>StreamX : Flink Connector Elasticsearch7</name>
 
     <properties>

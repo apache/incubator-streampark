@@ -32,7 +32,7 @@ import org.apache.flink.streaming.connectors.elasticsearch.util.RetryRejectedExe
 import org.apache.flink.streaming.connectors.elasticsearch5.ElasticsearchSink
 import org.elasticsearch.action.ActionRequest
 
-import java.util.Properties
+import java.util.{Properties, Map => JavaMap}
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 
@@ -65,13 +65,13 @@ class ES5Sink(@(transient@param) ctx: StreamingContext,
 
   private val config: ESConfig = new ESConfig(prop)
 
-  private def process[T](stream: JavaDataStream[T],
+  private def process[T](userConfig: JavaMap[String, String],
+                         stream: JavaDataStream[T],
                          failureHandler: ActionRequestFailureHandler,
                          f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
-    require(f != null, () => s"es pocess element fun  must not null")
-    config.sinkOption.getInternalConfig()
-    val esSink: ElasticsearchSink[T] = new ElasticsearchSink(config.sinkOption.getInternalConfig(), config.host, new ESSinkFunction(f), failureHandler)
+    require(f != null, () => s"es pocess element func  must not null")
+    val esSink: ElasticsearchSink[T] = new ElasticsearchSink(userConfig, config.host, new ESSinkFunction(f), failureHandler)
     if (config.disableFlushOnCheckpoint) {
       esSink.disableFlushOnCheckpoint()
     }
@@ -79,12 +79,14 @@ class ES5Sink(@(transient@param) ctx: StreamingContext,
     afterSink(sink, parallelism, name, uid)
   }
 
-  private def process[T](stream: DataStream[T],
-                         failureHandler: ActionRequestFailureHandler,
-                         f: T => ActionRequest): DataStreamSink[T] = {
+  private def process[T](userConfig: JavaMap[String, String]
+                         , stream: DataStream[T]
+                         , failureHandler: ActionRequestFailureHandler
+                         , f: T => ActionRequest):
+  DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
     require(f != null, () => s"es pocess element fun  must not null")
-    val esSink: ElasticsearchSink[T] = new ElasticsearchSink(config.sinkOption.getInternalConfig(), config.host, new ESSinkFunction(f), failureHandler)
+    val esSink: ElasticsearchSink[T] = new ElasticsearchSink(userConfig, config.host, new ESSinkFunction(f), failureHandler)
     if (config.disableFlushOnCheckpoint) {
       esSink.disableFlushOnCheckpoint()
     }
@@ -103,21 +105,21 @@ class ES5Sink(@(transient@param) ctx: StreamingContext,
    * @tparam T
    * @return
    */
-  def sink[T](stream: DataStream[T],
+  def sink[T](userConfig: JavaMap[String, String], stream: DataStream[T],
               failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
              (implicit f: T => ActionRequest): DataStreamSink[T] = {
-    process(stream, failureHandler, f)
+    process(userConfig, stream, failureHandler, f)
   }
 
-  def sink[T](stream: JavaDataStream[T],
+  def sink[T](userConfig: JavaMap[String, String], stream: JavaDataStream[T],
               failureHandler: ActionRequestFailureHandler,
               f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
-    process(stream, failureHandler, f)
+    process(userConfig, stream, failureHandler, f)
   }
 
-  def sink[T](stream: JavaDataStream[T],
+  def sink[T](userConfig: JavaMap[String, String], stream: JavaDataStream[T],
               f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
-    process(stream, new RetryRejectedExecutionFailureHandler, f)
+    process(userConfig, stream, new RetryRejectedExecutionFailureHandler, f)
   }
 }
 
