@@ -19,12 +19,11 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.HadoopUtils;
-import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
@@ -37,7 +36,6 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.directory.api.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -198,16 +196,13 @@ public class AlertServiceImpl implements AlertService {
     }
 
     private Template loadingConf(Configuration configuration) {
-        String configDir;
-        if (Strings.isNotEmpty(configDir = SystemPropertyUtils.get(ConfigConst.KEY_APP_CONF_DIR()))) {
-            log.info("loading email config... dir :{}", configDir);
-            File file = new File(configDir);
-            try {
-                configuration.setDirectoryForTemplateLoading(file);
-                return configuration.getTemplate(CONFIG_TEMPLATE);
-            } catch (IOException e) {
-                log.error("loading email error :{}", e.getMessage());
-            }
+        try{
+            File file =WebUtils.getAppConfDir();
+            log.info("loading email config... dir :{}", file.getPath());
+            configuration.setDirectoryForTemplateLoading(file);
+            return configuration.getTemplate(CONFIG_TEMPLATE);
+        }catch (IOException e){
+            log.warn("loading email error :{}", e.getMessage());
         }
         return null;
     }

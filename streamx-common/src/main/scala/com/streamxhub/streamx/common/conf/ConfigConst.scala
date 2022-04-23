@@ -28,8 +28,6 @@ object ConfigConst {
 
   val KEY_APP_HOME = "app.home"
 
-  val KEY_APP_CONF_DIR = "app.conf.dir"
-
   val KEY_HOST = "host"
 
   val KEY_PORT = "port"
