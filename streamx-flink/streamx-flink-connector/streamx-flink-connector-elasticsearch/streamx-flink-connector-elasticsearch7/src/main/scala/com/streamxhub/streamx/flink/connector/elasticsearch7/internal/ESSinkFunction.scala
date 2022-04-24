@@ -39,7 +39,7 @@ class ESSinkFunction[T](apiType: ApiType = ApiType.scala) extends ElasticsearchS
   def this(scalaFunc: T => ActionRequest) = {
     this(ApiType.scala)
     this.scalaFunc = new (T => ActionRequest) with Serializable {
-      override def apply(v1: T): ActionRequest = scalaFunc.apply(v1)
+      override def apply(v: T): ActionRequest = scalaFunc.apply(v)
     }
   }
 

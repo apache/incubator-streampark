@@ -111,28 +111,24 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
 
     batchSize match {
       case 1 =>
-        try {
-          connection.prepareStatement(sql).executeUpdate
-        } catch {
-          case e: Exception =>
+        Try(connection.prepareStatement(sql).executeUpdate)
+          .recover{ case e =>
             logError(s"ClickHouseSink invoke error: $e")
             throw e
-          case _: Throwable =>
-        }
+          }.get
       case batch =>
-        try {
+        Try {
           sqlValues.add(sql)
           (offset.incrementAndGet() % batch, System.currentTimeMillis()) match {
             case (0, _) => execBatch()
             case (_, current) if current - timestamp > flushInterval => execBatch()
             case _ =>
           }
-        } catch {
-          case e: Exception =>
+        }.recover {
+          case e =>
             logError(s"""ClickHouseSink batch invoke error:$sqlValues""")
             throw e
-          case _: Throwable =>
-        }
+        }.get
     }
   }
 

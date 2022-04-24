@@ -31,6 +31,7 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 
 import java.util.Properties
+import scala.util.Try
 
 class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, properties: Properties) extends RichSinkFunction[T] with Logger {
 
@@ -85,13 +86,12 @@ class AsyncClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, propertie
         case ApiType.scala => scalaSqlFunc(value)
       }
     }
-    try {
-      sinkBuffer.put(sql)
-    } catch {
-      case e: Exception =>
+
+    Try(sinkBuffer.put(sql)).recover { case e =>
         logError(s"""Error while sending data to Clickhouse, record = $sql,error:$e""")
         throw new RuntimeException(e)
-    }
+    }.get
+
   }
 
 

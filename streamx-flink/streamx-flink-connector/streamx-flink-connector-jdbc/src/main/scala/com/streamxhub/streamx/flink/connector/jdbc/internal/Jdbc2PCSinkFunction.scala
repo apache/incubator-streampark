@@ -127,11 +127,8 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
         //成功,清除state...
         buffer -= transaction.transactionId
       } catch {
-        case e: SQLException =>
-          logError(s"Jdbc2PCSink commit SQLException:${e.getMessage}")
-          throw e
         case t: Throwable =>
-          logError(s"Jdbc2PCSink commit Throwable:${t.getMessage}")
+          logError(s"Jdbc2PCSink commit Exception:${t.getMessage}")
           throw t
       } finally {
         JdbcUtils.close(statement, connection)

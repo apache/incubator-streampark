@@ -30,6 +30,7 @@ import org.apache.flink.configuration._
 
 import java.io.File
 import java.lang.{Integer => JavaInt}
+import scala.util.Try
 
 
 /**
@@ -98,7 +99,7 @@ object RemoteSubmit extends FlinkSubmitTrait {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
     var client: ClusterClient[StandaloneClusterId] = null
-    try {
+    Try {
       val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
       val yarnClusterId: StandaloneClusterId = standAloneDescriptor._1
       clusterDescriptor = standAloneDescriptor._2
@@ -107,12 +108,10 @@ object RemoteSubmit extends FlinkSubmitTrait {
       val jobId = FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
       logInfo(s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
       SubmitResponse(null, flinkConfig.toMap, jobId)
-    } catch {
-      case e: Exception =>
+    }.recover { case e =>
         logError(s"${submitRequest.executionMode} mode submit by restApi fail.")
-        e.printStackTrace()
         throw e
-    }
+    }.get
   }
 
   /**
