@@ -141,7 +141,7 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-clients${scala.binary.version.suffix}</artifactId>
+            <artifactId>flink-clients${scala.binary.flink.version}</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
         </dependency>
