@@ -32,6 +32,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.lang.reflect.Method
 import java.lang.{Boolean => JavaBool}
+import scala.util.Try
 
 /**
  * yarn application mode submit
@@ -52,14 +53,12 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
       val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
       clusterDescriptor.retrieve(applicationId).getClusterClient
     }
-    try {
+    Try {
       val savepointDir = cancelJob(stopRequest, jobID, clusterClient)
       StopResponse(savepointDir)
-    } catch {
-      case e: Exception =>
-        val cause = ExceptionUtils.stringifyException(e)
-        throw new FlinkException(s"[StreamX] Triggering a savepoint for the job ${stopRequest.jobId} failed. $cause");
-    }
+    }.recover {
+      case e => throw new FlinkException(s"[StreamX] Triggering a savepoint for the job ${stopRequest.jobId} failed. detail: ${ExceptionUtils.stringifyException(e)}");
+    }.get
   }
 
   lazy private val deployInternalMethod: Method = {

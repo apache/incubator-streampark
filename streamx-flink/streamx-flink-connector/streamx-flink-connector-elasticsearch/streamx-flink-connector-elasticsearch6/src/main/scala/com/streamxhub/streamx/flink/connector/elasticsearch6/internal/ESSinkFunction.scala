@@ -37,7 +37,6 @@ class ESSinkFunction[T](apiType: ApiType = ApiType.scala) extends ElasticsearchS
 
   //for Scala
   def this(scalaFunc: T => ActionRequest) = {
-
     this(ApiType.scala)
     this.scalaFunc = scalaFunc
   }

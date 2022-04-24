@@ -65,10 +65,7 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
         redisTransaction.mapper.clear()
         //成功,清除state...
       } catch {
-        case e: JedisException =>
-          logError(s"Redis2PCSink commit JedisException:${e.getMessage}")
-          throw e
-        case t: Throwable =>
+        case t: Exception =>
           logError(s"Redis2PCSink commit Throwable:${t.getMessage}")
           throw t
       }
