@@ -21,6 +21,7 @@ package com.streamxhub.streamx.flink.connector.clickhouse.conf
 
 import com.streamxhub.streamx.common.conf.ConfigOption
 import com.streamxhub.streamx.common.util.ConfigUtils
+import org.asynchttpclient.config.AsyncHttpClientConfigDefaults
 
 import java.util.Properties
 import scala.collection.JavaConverters._
@@ -76,27 +77,53 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
     classType = classOf[String]
   )
 
+  val database: ConfigOption[String] = ConfigOption(
+    key = "database",
+    required = true,
+    defaultValue = "default",
+    classType = classOf[String]
+  )
+
+  val requestTimeout: ConfigOption[Int] = ConfigOption(
+    key = "requestTimeout",
+    required = false,
+    defaultValue = AsyncHttpClientConfigDefaults.defaultRequestTimeout,
+    classType = classOf[Int]
+  )
+
+
+  val connectTimeout: ConfigOption[Int] = ConfigOption(
+    key = "connectTimeout",
+    required = false,
+    defaultValue = AsyncHttpClientConfigDefaults.defaultConnectTimeout(),
+    classType = classOf[Long]
+  )
+
+  val maxRequestRetry: ConfigOption[Int] = ConfigOption(
+    key = "maxRequestRetry",
+    required = false,
+    defaultValue = AsyncHttpClientConfigDefaults.defaultMaxRequestRetry(),
+    classType = classOf[Long]
+  )
+
+  val maxConnections: ConfigOption[Int] = ConfigOption(
+    key = "maxConnections",
+    required = false,
+    defaultValue = AsyncHttpClientConfigDefaults.defaultMaxConnections(),
+    classType = classOf[Int]
+  )
+
   val failoverTable: ConfigOption[String] = ConfigOption(
     key = "failover.table",
     required = false,
     classType = classOf[String]
   )
 
-
-  val targetTable: ConfigOption[String] = ConfigOption(
-    key = "targetTable",
-    required = false,
-    defaultValue = "",
-    classType = classOf[String]
-  )
-
-
   val jdbcUrl: ConfigOption[String] = ConfigOption(
     key = "jdbcUrl",
-    required = true,
+    required = false,
     classType = classOf[String]
   )
-
 
   val driverClassName: ConfigOption[String] = ConfigOption(
     key = "driverClassName",
@@ -106,15 +133,14 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
   )
 
   val batchSize: ConfigOption[Int] = ConfigOption(
-    key = "batch.size",
+    key = "batchSize",
     required = false,
     defaultValue = 1,
     classType = classOf[Int]
   )
 
-
-  val batchDelayTime: ConfigOption[Long] = ConfigOption(
-    key = "batch.delaytime",
+  val flushInterval: ConfigOption[Long] = ConfigOption(
+    key = "flushInterval",
     required = false,
     defaultValue = 1000L,
     classType = classOf[Long],

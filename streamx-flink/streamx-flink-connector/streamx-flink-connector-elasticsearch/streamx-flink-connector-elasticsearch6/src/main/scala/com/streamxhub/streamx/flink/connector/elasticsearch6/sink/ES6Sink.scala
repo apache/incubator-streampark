@@ -19,11 +19,11 @@
 
 package com.streamxhub.streamx.flink.connector.elasticsearch6.sink
 
-import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.util.{ConfigUtils, Logger, Utils}
+import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.connector.elasticsearch6.bean.RestClientFactoryImpl
-import com.streamxhub.streamx.flink.connector.function.TransformFunction
+import com.streamxhub.streamx.flink.connector.elasticsearch6.conf.ES6Config
 import com.streamxhub.streamx.flink.connector.elasticsearch6.internal.ESSinkFunction
+import com.streamxhub.streamx.flink.connector.function.TransformFunction
 import com.streamxhub.streamx.flink.connector.sink.Sink
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.streaming.api.datastream.{DataStreamSink, DataStream => JavaDataStream}
@@ -32,14 +32,11 @@ import org.apache.flink.streaming.connectors.elasticsearch.ActionRequestFailureH
 import org.apache.flink.streaming.connectors.elasticsearch.ElasticsearchSinkBase._
 import org.apache.flink.streaming.connectors.elasticsearch.util.RetryRejectedExecutionFailureHandler
 import org.apache.flink.streaming.connectors.elasticsearch6.{ElasticsearchSink, RestClientFactory}
-import org.apache.http.HttpHost
 import org.elasticsearch.action.ActionRequest
 
 import java.util.Properties
-import java.util.function.BiConsumer
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
-import scala.collection.mutable
 
 
 object ES6Sink {
@@ -57,46 +54,29 @@ class ES6Sink(@(transient@param) ctx: StreamingContext,
               property: Properties = new Properties(),
               parallelism: Int = 0,
               name: String = null,
-              uid: String = null,
-              alias: String = "") extends Sink with Logger {
+              uid: String = null) extends Sink with Logger {
 
-  val prop = ConfigUtils.getConf(ctx.parameter.toMap, ES_PREFIX)(alias)
+  val prop: Properties = ctx.parameter.getProperties
 
   Utils.copyProperties(property, prop)
 
   def this(ctx: StreamingContext) {
-    this(ctx, new Properties(), 0, null, null, "")
+    this(ctx, new Properties(), 0, null, null)
   }
 
-  private def initProp[T](suffix: String): (mutable.Map[String, String], Array[HttpHost]) = {
-    //当前实例(默认,或者指定后缀实例)的配置文件...
-    val shortConfig = prop
-      .filter(_._1.endsWith(suffix))
-      .map(x => x._1.drop(ES_PREFIX.length + suffix.length) -> x._2.trim)
-
-    val httpHosts = shortConfig.getOrElse(KEY_HOST, SIGN_EMPTY).split(SIGN_COMMA).map(x => {
-      x.split(SIGN_COLON) match {
-        case Array(host, port) => new HttpHost(host, port.toInt)
-      }
-    })
-    require(httpHosts.nonEmpty, "elasticsearch config error,please check, e.g: sink.es.host=$host1:$port1,$host2:$port2")
-    (shortConfig, httpHosts)
-  }
+  private val config: ES6Config = new ES6Config(prop)
 
   private def process[T](stream: DataStream[T],
-                         suffix: String,
-                         restClientFactory: RestClientFactory,
+                         restClientFactory: Option[RestClientFactory],
                          failureHandler: ActionRequestFailureHandler,
                          f: T => ActionRequest): DataStreamSink[T] = {
-    require(stream != null, () => s"sink Stream must not null")
-    require(f != null, () => s"es pocess element fun  must not null")
-
-    val (shortConfig: mutable.Map[String, String], httpHosts: Array[HttpHost]) = initProp(suffix)
+    require(stream != null, "sink Stream must not null")
+    require(f != null, "es pocess element func must not null")
 
     val sinkFunc: ESSinkFunction[T] = new ESSinkFunction(f)
 
-    val esSink: _root_.org.apache.flink.streaming.connectors.elasticsearch6.ElasticsearchSink[T] = buildESSink(restClientFactory, failureHandler, shortConfig, httpHosts, sinkFunc)
-    if (shortConfig.getOrElse(KEY_ES_DISABLE_FLUSH_ONCHECKPOINT, "false").toBoolean) {
+    val esSink: ElasticsearchSink[T] = buildESSink(restClientFactory, failureHandler, sinkFunc)
+    if (config.disableFlushOnCheckpoint) {
       esSink.disableFlushOnCheckpoint()
     }
     val sink = stream.addSink(esSink)
@@ -104,35 +84,33 @@ class ES6Sink(@(transient@param) ctx: StreamingContext,
   }
 
   private def process[T](stream: JavaDataStream[T],
-                         suffix: String,
-                         restClientFactory: RestClientFactory,
+                         restClientFactory: Option[RestClientFactory],
                          failureHandler: ActionRequestFailureHandler,
                          f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
     require(stream != null, () => s"sink Stream must not null")
-    require(f != null, () => s"es pocess element fun  must not null")
-
-    val (shortConfig: mutable.Map[String, String], httpHosts: Array[HttpHost]) = initProp(suffix)
+    require(f != null, () => s"es process element func  must not null")
 
     val sinkFunc: ESSinkFunction[T] = new ESSinkFunction(f)
 
-    val esSink: _root_.org.apache.flink.streaming.connectors.elasticsearch6.ElasticsearchSink[T] = buildESSink(restClientFactory, failureHandler, shortConfig, httpHosts, sinkFunc)
-    if (shortConfig.getOrElse(KEY_ES_DISABLE_FLUSH_ONCHECKPOINT, "false").toBoolean) {
+    val esSink: ElasticsearchSink[T] = buildESSink(restClientFactory, failureHandler, sinkFunc)
+    if (config.disableFlushOnCheckpoint) {
       esSink.disableFlushOnCheckpoint()
     }
     val sink = stream.addSink(esSink)
     afterSink(sink, parallelism, name, uid)
   }
 
-  private def buildESSink[T](restClientFactory: RestClientFactory, failureHandler: ActionRequestFailureHandler, shortConfig: mutable.Map[String, String], httpHosts: Array[HttpHost], sinkFunc: ESSinkFunction[T]): ElasticsearchSink[T] = {
-    val sinkBuilder = new ElasticsearchSink.Builder[T](httpHosts.toList, sinkFunc)
+  private def buildESSink[T](restClientFactory: Option[RestClientFactory], failureHandler: ActionRequestFailureHandler, sinkFunc: ESSinkFunction[T]): ElasticsearchSink[T] = {
+    val sinkBuilder = new ElasticsearchSink.Builder[T](config.host, sinkFunc)
     // failureHandler
     sinkBuilder.setFailureHandler(failureHandler)
+
     //restClientFactory
-    if (restClientFactory == null) {
-      val restClientFactory = new RestClientFactoryImpl(prop)
-      sinkBuilder.setRestClientFactory(restClientFactory)
-    } else {
-      sinkBuilder.setRestClientFactory(restClientFactory)
+    restClientFactory match {
+      case Some(factory) =>
+        sinkBuilder.setRestClientFactory(factory)
+      case None =>
+        sinkBuilder.setRestClientFactory(new RestClientFactoryImpl(config))
     }
 
     def doConfig(param: (String, String)): Unit = param match {
@@ -154,14 +132,8 @@ class ES6Sink(@(transient@param) ctx: StreamingContext,
       case _ =>
     }
     //set value from properties
-    shortConfig.filter(_._1.startsWith(KEY_ES_BULK_PREFIX)).foreach(doConfig)
-    //set value from method parameter...
-    property.forEach(new BiConsumer[Object, Object] {
-      override def accept(k: Object, v: Object): Unit = doConfig(k.toString, v.toString)
-    })
-
-    val esSink: ElasticsearchSink[T] = sinkBuilder.build()
-    esSink
+    config.sinkOption.getInternalConfig().foreach(doConfig)
+    sinkBuilder.build()
   }
 
 
@@ -176,30 +148,28 @@ class ES6Sink(@(transient@param) ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T],
-              suffix: String = "",
-              restClientFactory: RestClientFactory,
+              restClientFactory: Option[RestClientFactory] = None,
               failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
              (implicit f: T => ActionRequest): DataStreamSink[T] = {
-    process(stream, suffix, restClientFactory, failureHandler, f)
+    process(stream, restClientFactory, failureHandler, f)
   }
 
   def sink[T](stream: JavaDataStream[T],
-              suffix: String,
               restClientFactory: RestClientFactory,
               failureHandler: ActionRequestFailureHandler,
               f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
-    process(stream, suffix, restClientFactory, failureHandler, f)
+    process(stream, Some(restClientFactory), failureHandler, f)
   }
 
   def sink[T](stream: JavaDataStream[T],
-              suffix: String,
+              restClientFactory: RestClientFactory,
               f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
-    process(stream, suffix, null, new RetryRejectedExecutionFailureHandler, f)
+    process(stream, Some(restClientFactory), new RetryRejectedExecutionFailureHandler, f)
   }
 
   def sink[T](stream: JavaDataStream[T],
               f: TransformFunction[T, ActionRequest]): DataStreamSink[T] = {
-    process(stream, "", null, new RetryRejectedExecutionFailureHandler, f)
+    process(stream, None, new RetryRejectedExecutionFailureHandler, f)
   }
 
 

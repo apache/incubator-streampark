@@ -54,40 +54,61 @@
       :scroll="{ x: 900 }"
       @change="handleTableChange">
       <template
-        slot="email"
-        slot-scope="text">
-        <a-popover
-          placement="topLeft">
-          <template
-            slot="content">
-            <div>
-              {{ text }}
-            </div>
-          </template>
-          <p
-            style="width: 150px;margin-bottom: 0">
-            {{ text }}
-          </p>
-        </a-popover>
+        slot="token-text"
+        slot-scope="text,record">
+
+        <a-tooltip placement="rightBottom" :title="record.token">
+          <div style="overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 2;-webkit-box-orient: vertical; ">
+            {{ record.token }}
+          </div>
+        </a-tooltip>
+
       </template>
+
+      <template
+        slot="token-status"
+        slot-scope="text,record">
+        <a-switch
+          checked-children="on"
+          un-checked-children="off"
+          :checked="Boolean(record.finalTokenStatus)"
+          @change="handleUpdateStatus($event,record)"/>
+      </template>
+
       <template
         slot="operation"
         slot-scope="text, record">
 
-        <svg-icon
-          v-permit="'token:view'"
-          name="copy"
-          border
-          @click.native="copyToken(record)"
-          title="copy token"/>
-        <a-popconfirm
-          v-permit="'token:delete'"
-          title="Are you sure delete this token ?"
-          cancel-text="No"
-          ok-text="Yes"
-          @confirm="handleDelete(record)">
-          <svg-icon name="remove" border/>
-        </a-popconfirm>
+        <a-tooltip title="Copy Token">
+          <a-button
+            v-permit="'token:view'"
+            name="copy"
+            @click.native="copyToken(record)"
+            shape="circle"
+            size="small"
+            style="margin-left: 8px"
+            class="control-button ctl-btn-color">
+            <a-icon type="copy"/>
+          </a-button>
+        </a-tooltip>
+
+        <a-tooltip title="Delete Token">
+          <a-popconfirm
+            v-permit="'token:delete'"
+            title="Are you sure delete this token ?"
+            cancel-text="No"
+            ok-text="Yes"
+            @confirm="handleDelete(record)">
+            <a-button
+              type="danger"
+              shape="circle"
+              size="small"
+              style="margin-left: 8px"
+              class="control-button">
+              <a-icon type="delete"/>
+            </a-button>
+          </a-popconfirm>
+        </a-tooltip>
       </template>
     </a-table>
 
@@ -105,7 +126,7 @@ import TokenAdd from './TokenAdd'
 import RangeDate from '@/components/DateTime/RangeDate'
 import SvgIcon from '@/components/SvgIcon'
 
-import {deleteToken, list} from '@/api/token'
+import {deleteToken, list, updateTokenStatus} from '@/api/token'
 import storage from '@/utils/storage'
 import {USER_NAME} from '@/store/mutation-types'
 
@@ -134,6 +155,7 @@ export default {
     }
   },
   computed: {
+
     columns() {
       let {sortedInfo, filteredInfo} = this
       sortedInfo = sortedInfo || {}
@@ -141,46 +163,29 @@ export default {
       return [{
         title: 'User Name',
         dataIndex: 'username',
-        sorter: true,
         width: 150,
+        sorter: true,
         sortOrder: sortedInfo.columnKey === 'username' && sortedInfo.order
       }, {
-        title: 'Status',
-        dataIndex: 'status',
-        width: 150,
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '0':
-              return <a-tag color="red"> Locked </a-tag>
-            case '1':
-              return <a-tag color="cyan"> Effective </a-tag>
-            default:
-              return text
-          }
-        },
-        filters: [
-          {text: 'Effective', value: '1'},
-          {text: 'Locked', value: '0'}
-        ],
-        filterMultiple: false,
-        filteredValue: filteredInfo.status || null,
-        onFilter: (value, record) => value
-      }, {
         title: 'Token',
-        dataIndex: 'token'
+        dataIndex: 'token',
+        scopedSlots: {customRender: 'token-text'}
       }, {
         title: 'Description',
         dataIndex: 'description'
       }, {
         title: 'Create Time',
-        dataIndex: 'createTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'createTime' && sortedInfo.order
+        dataIndex: 'createTime'
       }, {
         title: 'Expire Time',
         dataIndex: 'expireTime',
         sorter: true,
-        sortOrder: sortedInfo.columnKey === 'createTime' && sortedInfo.order
+        sortOrder: sortedInfo.columnKey === 'expireTime' && sortedInfo.order
+      }, {
+        title: 'Status',
+        dataIndex: 'status',
+        width: 150,
+        scopedSlots: {customRender: 'token-status'}
       },
         {
           title: 'Operation',
@@ -199,6 +204,21 @@ export default {
   },
 
   methods: {
+    handleUpdateStatus(checked, record) {
+      updateTokenStatus({
+        status: checked ? 1 : 0,
+        tokenId: record.id
+      }).then((resp) => {
+        if (resp.code !== undefined && resp.code.toString() === '2000') {
+          this.$message.success('update status successful')
+          this.search()
+        } else if (resp.code !== undefined && resp.code.toString() === '3001') {
+          this.$message.error(resp.message)
+        } else {
+          this.$message.error('update failed')
+        }
+      })
+    },
     search() {
       const {sortedInfo, filteredInfo} = this
       let sortField, sortOrder
@@ -277,7 +297,6 @@ export default {
       this.paginationInfo = pagination
       this.filteredInfo = filters
       this.sortedInfo = sorter
-      this.userInfo.visible = false
       this.fetch({
         sortField: sorter.field,
         sortOrder: sorter.order,
@@ -321,3 +340,4 @@ export default {
   }
 }
 </script>
+

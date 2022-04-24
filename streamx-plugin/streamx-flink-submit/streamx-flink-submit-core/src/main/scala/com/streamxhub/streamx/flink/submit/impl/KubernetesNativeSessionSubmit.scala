@@ -35,6 +35,7 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import java.io.File
 import scala.language.postfixOps
+import scala.util.Try
 
 /**
  * kubernetes native session mode submit
@@ -55,7 +56,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
    * Submit flink session job via rest api.
    */
   @throws[Exception] def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
-    try {
+    Try {
       // get jm rest url of flink session cluster
       val clusterKey = ClusterKey(
         FlinkK8sExecuteMode.SESSION,
@@ -67,12 +68,10 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       // submit job via rest api
       val jobId = FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig)
       SubmitResponse(clusterKey.clusterId, flinkConfig.toMap, jobId)
-    } catch {
-      case e: Exception =>
+    }.recover { case e =>
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
-        e.printStackTrace()
         throw e
-    }
+    }.get
   }
 
   /**

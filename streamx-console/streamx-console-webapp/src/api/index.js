@@ -158,7 +158,9 @@ export default {
   Token: {
     LIST: '/token/list',
     DELETE: '/token/delete',
-    CREATE: '/token/create'
+    CREATE: '/token/create',
+    CURL: '/token/curl',
+    UPDATE_STATUS: '/token/update/status'
   },
   Role: {
     POST: '/role/post',

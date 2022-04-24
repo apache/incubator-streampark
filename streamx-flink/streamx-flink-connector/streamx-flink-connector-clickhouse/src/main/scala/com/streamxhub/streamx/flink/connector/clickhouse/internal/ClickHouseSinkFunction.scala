@@ -45,7 +45,7 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
   private val batchSize = clickHouseConf.batchSize
   private val offset: AtomicLong = new AtomicLong(0L)
   private var timestamp = 0L
-  private val delayTime = clickHouseConf.batchDelayTime
+  private val flushInterval = clickHouseConf.flushInterval
   private val sqlValues = new util.ArrayList[String](batchSize)
   private var insertSqlPrefixes: String = _
 
@@ -54,16 +54,13 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
 
 
   //for Scala
-  def this(properties: Properties,
-           scalaSqlFunc: T => String) = {
-
+  def this(properties: Properties, scalaSqlFunc: T => String) = {
     this(ApiType.scala, properties)
     this.scalaSqlFunc = scalaSqlFunc
   }
 
   //for JAVA
-  def this(properties: Properties,
-           javaSqlFunc: TransformFunction[T, String]) = {
+  def this(properties: Properties, javaSqlFunc: TransformFunction[T, String]) = {
 
     this(ApiType.java, properties)
     this.javaSqlFunc = javaSqlFunc
@@ -73,12 +70,9 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
   override def open(parameters: Configuration): Unit = {
     val user: String = clickHouseConf.user
     val driver: String = clickHouseConf.driverClassName
-    val targetTable = clickHouseConf.table
-    require(targetTable != null && targetTable.nonEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
-    insertSqlPrefixes = s"insert into  $targetTable  values "
     val properties = new ClickHouseProperties()
     (user, driver) match {
-      case (u, d) if (u != null && d != null) =>
+      case (u, d) if u != null && d != null =>
         Class.forName(d)
         properties.setUser(u)
       case (null, null) =>
@@ -87,22 +81,18 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
     }
     //reflect set all properties...
     clickHouseConf.sinkOption.getInternalConfig().foreach(x => {
-      val field = Try(Option(properties.getClass.getDeclaredField(x._1))).getOrElse(None) match {
-        case None =>
-          val boolField = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
-          Try(Option(properties.getClass.getDeclaredField(boolField))).getOrElse(None) match {
-            case Some(x) => x
-            case None => throw new IllegalArgumentException(s"ClickHouseProperties config error,property:${x._1} invalid,please see ru.yandex.clickhouse.settings.ClickHouseProperties")
+      Try(Option(properties.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+        case Some(field) =>
+          field.setAccessible(true)
+          field.getType.getSimpleName match {
+            case "String" => field.set(properties, x._2)
+            case "int" | "Integer" => field.set(properties, x._2.toInt)
+            case "long" | "Long" => field.set(properties, x._2.toLong)
+            case "boolean" | "Boolean" => field.set(properties, x._2.toBoolean)
+            case _ =>
           }
-        case Some(x) => x
-      }
-      field.setAccessible(true)
-      field.getType.getSimpleName match {
-        case "String" => field.set(properties, x._2)
-        case "int" | "Integer" => field.set(properties, x._2.toInt)
-        case "long" | "Long" => field.set(properties, x._2.toLong)
-        case "boolean" | "Boolean" => field.set(properties, x._2.toBoolean)
-        case _ =>
+        case None =>
+          logWarn(s"ClickHouseProperties config error,property:${x._1} invalid,please see ru.yandex.clickhouse.settings.ClickHouseProperties")
       }
     })
     val dataSource = new ClickHouseDataSource(clickHouseConf.jdbcUrl, properties)
@@ -111,39 +101,34 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
 
   override def invoke(value: T, context: SinkFunction.Context): Unit = {
     require(connection != null)
-
-    val valueStr = (scalaSqlFunc, javaSqlFunc) match {
-      case (null, null) => convert(value)
+    val sql = (javaSqlFunc, scalaSqlFunc) match {
+      case (null, null) => convert[T](value)
       case _ => apiType match {
         case ApiType.java => javaSqlFunc.transform(value)
         case ApiType.scala => scalaSqlFunc(value)
       }
     }
+
     batchSize match {
       case 1 =>
-        try {
-          val sql = s"$insertSqlPrefixes $valueStr"
-          connection.prepareStatement(sql).executeUpdate
-        } catch {
-          case e: Exception =>
-            logError(s"""ClickHouseSink invoke error:$valueStr""")
+        Try(connection.prepareStatement(sql).executeUpdate)
+          .recover{ case e =>
+            logError(s"ClickHouseSink invoke error: $e")
             throw e
-          case _: Throwable =>
-        }
+          }.get
       case batch =>
-        try {
-          sqlValues.add(valueStr)
+        Try {
+          sqlValues.add(sql)
           (offset.incrementAndGet() % batch, System.currentTimeMillis()) match {
             case (0, _) => execBatch()
-            case (_, current) if current - timestamp > delayTime => execBatch()
+            case (_, current) if current - timestamp > flushInterval => execBatch()
             case _ =>
           }
-        } catch {
-          case e: Exception =>
+        }.recover {
+          case e =>
             logError(s"""ClickHouseSink batch invoke error:$sqlValues""")
             throw e
-          case _: Throwable =>
-        }
+        }.get
     }
   }
 
@@ -161,7 +146,7 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
         val sql = s"$insertSqlPrefixes $valuesStr"
         //clickhouse batch insert  return num always 1
         val insertNum: Int = connection.prepareStatement(sql).executeUpdate()
-        logInfo(s"ClickHouseSink batch  successful..")
+        logInfo(s"ClickHouseSink batch  successful, execute size : ${insertNum}")
         timestamp = System.currentTimeMillis()
       } finally {
         sqlValues.clear()

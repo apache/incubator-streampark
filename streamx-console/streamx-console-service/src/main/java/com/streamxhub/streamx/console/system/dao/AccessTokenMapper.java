@@ -31,4 +31,6 @@ public interface AccessTokenMapper extends BaseMapper<AccessToken> {
     IPage<AccessToken> page(Page<AccessToken> page, @Param("accessToken") AccessToken accessToken);
 
     AccessToken getTokenInfo(@Param("username") String username, @Param("accessToken") String accessToken);
+
+    AccessToken getTokenInfoById(@Param("id") Long id);
 }

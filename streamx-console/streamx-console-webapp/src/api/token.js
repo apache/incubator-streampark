@@ -33,3 +33,11 @@ export function create (queryParam) {
 export function deleteToken (queryParam) {
   return http.delete(api.Token.DELETE, queryParam)
 }
+
+export function copyCurl (queryParam) {
+  return http.post(api.Token.CURL, queryParam)
+}
+
+export function updateTokenStatus (queryParam) {
+  return http.post(api.Token.UPDATE_STATUS, queryParam)
+}

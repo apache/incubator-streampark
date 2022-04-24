@@ -38,15 +38,13 @@ import scala.collection.JavaConversions._
 
 class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHouseSinkConfigOption.CLICKHOUSE_SINK_PREFIX, parameters) {
 
-  val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(properties = parameters)
+  @transient val sinkOption: ClickHouseSinkConfigOption = ClickHouseSinkConfigOption(properties = parameters)
 
   val user: String = sinkOption.user.get()
 
   val password: String = sinkOption.password.get()
 
   val hosts: List[String] = sinkOption.hosts.get()
-
-  val table: String = sinkOption.targetTable.get()
 
   var currentHostId: Int = 0
 
@@ -69,4 +67,9 @@ class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHo
     hosts.get(currentHostId)
   }
 
+  override def toString: String = {
+    s"""
+       |{ user: $user, password: ******, hosts: ${hosts.mkString(",")} }
+       |""".stripMargin
+  }
 }

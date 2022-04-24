@@ -21,6 +21,7 @@ package com.streamxhub.streamx.common.util
 import java.io.File
 import java.net.{URL, URLClassLoader}
 import java.util.function.Supplier
+import scala.util.Try
 
 object ClassLoaderUtils extends Logger {
 
@@ -121,7 +122,7 @@ object ClassLoaderUtils extends Logger {
   }
 
   private[this] def addURL(file: File): Unit = {
-    try {
+    Try {
       val classLoader = ClassLoader.getSystemClassLoader
       classLoader match {
         case c if c.isInstanceOf[URLClassLoader] =>
@@ -136,9 +137,7 @@ object ClassLoaderUtils extends Logger {
           addURL.setAccessible(true)
           addURL.invoke(ucp, file.toURI.toURL)
       }
-    } catch {
-      case e: Exception => throw e
-    }
+    }.recover { case e => throw e }.get
   }
 
 

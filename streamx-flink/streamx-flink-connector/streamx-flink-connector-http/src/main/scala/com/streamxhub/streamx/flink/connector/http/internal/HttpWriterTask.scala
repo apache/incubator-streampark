@@ -91,12 +91,12 @@ case class HttpWriterTask(id: Int,
 
   override def run(): Unit = try {
     isWorking = true
-    logInfo(s"Start writer task, id = ${id}")
+    logInfo(s"Start writer task, id = $id")
     while (isWorking || queue.nonEmpty) {
       val req = queue.poll(100, TimeUnit.MILLISECONDS)
       if (req != null) {
         val url = req.records.head
-        val sinkRequest = SinkRequest(List(url), req.table, req.attemptCounter)
+        val sinkRequest = SinkRequest(List(url), req.attemptCounter)
         val request = buildRequest(url)
         val whenResponse = asyncHttpClient.executeRequest(request)
         val callback = respCallback(whenResponse, sinkRequest)
@@ -120,7 +120,7 @@ case class HttpWriterTask(id: Int,
         case null =>
           logError(s"""Error HttpSink executing callback, params = $thresholdConf,can not get Response. """)
           handleFailedResponse(null, sinkRequest)
-        case resp if !thresholdConf.successCode.contains(resp.getStatusCode) =>
+        case resp if resp.getStatusCode != 200 =>
           logError(s"""Error HttpSink executing callback, params = $thresholdConf, StatusCode = ${resp.getStatusCode} """)
           handleFailedResponse(resp, sinkRequest)
         case _ =>

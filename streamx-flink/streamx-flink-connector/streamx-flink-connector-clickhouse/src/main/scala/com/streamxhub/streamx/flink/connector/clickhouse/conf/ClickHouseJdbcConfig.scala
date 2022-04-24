@@ -46,8 +46,6 @@ class ClickHouseJdbcConfig(parameters: Properties) extends Serializable {
 
   val batchSize: Int = sinkOption.batchSize.get()
 
-  val table: String = sinkOption.targetTable.get()
-
-  val batchDelayTime: Long = sinkOption.batchDelayTime.get()
+  val flushInterval: Long = sinkOption.flushInterval.get()
 
 }

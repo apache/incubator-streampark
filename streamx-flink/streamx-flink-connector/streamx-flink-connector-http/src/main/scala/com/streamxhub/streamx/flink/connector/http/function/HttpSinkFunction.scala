@@ -62,7 +62,7 @@ class HttpSinkFunction(properties: mutable.Map[String, String],
 
         httpSinkWriter = HttpSinkWriter(thresholdConf, header)
         failoverChecker = FailoverChecker(thresholdConf.delayTime)
-        sinkBuffer = SinkBuffer(httpSinkWriter, thresholdConf.delayTime, bufferSize, table)
+        sinkBuffer = SinkBuffer(httpSinkWriter, thresholdConf.delayTime, bufferSize)
         failoverChecker.addSinkBuffer(sinkBuffer)
         logInfo("HttpSink initialize... ")
       }
