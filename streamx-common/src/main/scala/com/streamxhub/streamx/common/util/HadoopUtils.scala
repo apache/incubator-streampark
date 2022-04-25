@@ -60,6 +60,8 @@ object HadoopUtils extends Logger {
 
   private[this] var reusableYarnClient: YarnClient = _
 
+  private[this] var ugi: UserGroupInformation = _
+
   private[this] var reusableConf: Configuration = _
 
   private[this] var reusableHdfs: FileSystem = _
@@ -85,14 +87,19 @@ object HadoopUtils extends Logger {
       } else null
   }
 
-  private[this] lazy val ugi: UserGroupInformation = {
-    val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
-    val kerberosEnable = Try(enableString.trim.toBoolean).getOrElse(false)
-    if (kerberosEnable) {
-      kerberosLogin()
-    } else {
-      UserGroupInformation.createRemoteUser(hadoopUserName)
+  private[this] def getUgi(): UserGroupInformation = {
+    if (ugi == null) {
+      ugi = {
+        val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
+        val kerberosEnable = Try(enableString.trim.toBoolean).getOrElse(false)
+        if (kerberosEnable) {
+          kerberosLogin()
+        } else {
+          UserGroupInformation.createRemoteUser(hadoopUserName)
+        }
+      }
     }
+    ugi
   }
 
   private[this] lazy val hadoopConfDir: String = Try(FileUtils.getPathFromEnv(HADOOP_CONF_DIR)) match {
@@ -159,18 +166,20 @@ object HadoopUtils extends Logger {
   }
 
   private[this] def closeHadoop(): Unit = {
-    reusableConf = null
-    if (tgt != null && !tgt.isDestroyed) {
-      tgt.destroy()
+    if (reusableHdfs != null) {
+      reusableHdfs.close()
+      reusableHdfs = null
     }
     if (reusableYarnClient != null) {
       reusableYarnClient.close()
       reusableYarnClient = null
     }
-    if (reusableHdfs != null) {
-      reusableHdfs.close()
-      reusableHdfs = null
+    if (tgt != null && !tgt.isDestroyed) {
+      tgt.destroy()
+      tgt = null
     }
+    reusableConf = null
+    ugi = null
   }
 
   private[this] def kerberosLogin(): UserGroupInformation = {
@@ -194,33 +203,19 @@ object HadoopUtils extends Logger {
     System.setProperty("sun.security.spnego.debug", "true")
     System.setProperty("sun.security.krb5.debug", "true")
     hadoopConf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
-    try {
+    Try {
       UserGroupInformation.setConfiguration(hadoopConf)
       val ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(principal, keytab)
       logInfo("kerberos authentication successful")
       ugi
-    } catch {
-      case e: IOException =>
-        logError(s"kerberos login failed,${ExceptionUtils.stringifyException(e)}")
-        throw e
-    }
-  }
-
-  private[this] def reLoginKerberos(): Unit = {
-    val timer = new Timer()
-    timer.schedule(new TimerTask {
-      override def run(): Unit = {
-        closeHadoop()
-        kerberosLogin()
-        logInfo(s"Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: ${DateUtils.format()}")
-      }
-    }, tgtRefreshTime, tgtRefreshTime)
+    }.recover { case e => throw e }
+      .get
   }
 
   def hdfs: FileSystem = {
     Option(reusableHdfs).getOrElse {
       reusableHdfs = Try {
-        ugi.doAs[FileSystem](new PrivilegedAction[FileSystem]() {
+        getUgi().doAs[FileSystem](new PrivilegedAction[FileSystem]() {
           // scalastyle:off FileSystemGet
           override def run(): FileSystem = FileSystem.get(hadoopConf)
           // scalastyle:on FileSystemGet
@@ -230,7 +225,14 @@ object HadoopUtils extends Logger {
           val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
           val kerberosEnable = Try(enableString.trim.toBoolean).getOrElse(false)
           if (kerberosEnable) {
-            reLoginKerberos()
+            // reLogin...
+            val timer = new Timer()
+            timer.schedule(new TimerTask {
+              override def run(): Unit = {
+                closeHadoop()
+                logInfo(s"Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: ${DateUtils.format()}")
+              }
+            }, tgtRefreshTime, tgtRefreshTime)
           }
           fs
         case Failure(e) =>
@@ -263,87 +265,87 @@ object HadoopUtils extends Logger {
   def getRMWebAppURL(getLatest: Boolean = false): String = {
     if (rmHttpURL == null || getLatest) {
       synchronized {
-        if (rmHttpURL == null || getLatest) {
-          val conf = hadoopConf
-          val useHttps = YarnConfiguration.useHttps(conf)
-          val (addressPrefix, defaultPort, protocol) = useHttps match {
-            case x if x => (YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS, "8090", "https://")
-            case _ => (YarnConfiguration.RM_WEBAPP_ADDRESS, "8088", "http://")
-          }
+        val conf = hadoopConf
+        val useHttps = YarnConfiguration.useHttps(conf)
+        val (addressPrefix, defaultPort, protocol) = useHttps match {
+          case x if x => (YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS, "8090", "https://")
+          case _ => (YarnConfiguration.RM_WEBAPP_ADDRESS, "8088", "http://")
+        }
 
-          val name = if (!HAUtil.isHAEnabled(conf)) addressPrefix else {
-            val yarnConf = new YarnConfiguration(conf)
-            val activeRMId = {
-              Option(RMHAUtils.findActiveRMHAId(yarnConf)) match {
-                case Some(x) =>
-                  logInfo("findActiveRMHAId successful")
-                  x
-                case None =>
-                  //If you don't know why, don't modify it
-                  logWarn(s"findActiveRMHAId is null,config yarn.acl.enable:${yarnConf.get("yarn.acl.enable")},now http try it.")
-                  // url ==> rmId
-                  val idUrlMap = new JavaHashMap[String, String]
-                  val rmIds = HAUtil.getRMHAIds(conf)
-                  rmIds.foreach(id => {
-                    val address = conf.get(HAUtil.addSuffix(addressPrefix, id)) match {
-                      case null =>
-                        val hostname = conf.get(HAUtil.addSuffix("yarn.resourcemanager.hostname", id))
-                        s"$hostname:$defaultPort"
-                      case x => x
-                    }
-                    idUrlMap.put(s"$protocol$address", id)
-                  })
-                  var rmId: String = null
-                  val rpcTimeoutForChecks = yarnConf.getInt(
-                    CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
-                    CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT
-                  )
-                  breakable(idUrlMap.foreach(x => {
-                    //test yarn url
-                    val activeUrl = httpTestYarnRMUrl(x._1, rpcTimeoutForChecks)
-                    if (activeUrl != null) {
-                      rmId = idUrlMap(activeUrl)
-                      break
-                    }
-                  }))
-                  rmId
+        rmHttpURL = Option(conf.get("yarn.web-proxy.address", null)) match {
+          case Some(proxy) => s"$protocol$proxy"
+          case _ =>
+            val name = if (!HAUtil.isHAEnabled(conf)) addressPrefix else {
+              val yarnConf = new YarnConfiguration(conf)
+              val activeRMId = {
+                Option(RMHAUtils.findActiveRMHAId(yarnConf)) match {
+                  case Some(x) =>
+                    logInfo("findActiveRMHAId successful")
+                    x
+                  case None =>
+                    //If you don't know why, don't modify it
+                    logWarn(s"findActiveRMHAId is null,config yarn.acl.enable:${yarnConf.get("yarn.acl.enable")},now http try it.")
+                    // url ==> rmId
+                    val idUrlMap = new JavaHashMap[String, String]
+                    val rmIds = HAUtil.getRMHAIds(conf)
+                    rmIds.foreach(id => {
+                      val address = conf.get(HAUtil.addSuffix(addressPrefix, id)) match {
+                        case null =>
+                          val hostname = conf.get(HAUtil.addSuffix("yarn.resourcemanager.hostname", id))
+                          s"$hostname:$defaultPort"
+                        case x => x
+                      }
+                      idUrlMap.put(s"$protocol$address", id)
+                    })
+                    var rmId: String = null
+                    val rpcTimeoutForChecks = yarnConf.getInt(
+                      CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
+                      CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT
+                    )
+                    breakable(idUrlMap.foreach(x => {
+                      //test yarn url
+                      val activeUrl = httpTestYarnRMUrl(x._1, rpcTimeoutForChecks)
+                      if (activeUrl != null) {
+                        rmId = idUrlMap(activeUrl)
+                        break
+                      }
+                    }))
+                    rmId
+                }
+              }
+              require(activeRMId != null, "[StreamX] HadoopUtils.getRMWebAppURL: can not found yarn active node")
+              logInfo(s"current activeRMHAId: $activeRMId")
+              val appActiveRMKey = HAUtil.addSuffix(addressPrefix, activeRMId)
+              val hostnameActiveRMKey = HAUtil.addSuffix(YarnConfiguration.RM_HOSTNAME, activeRMId)
+              if (null == HAUtil.getConfValueForRMInstance(appActiveRMKey, yarnConf) && null != HAUtil.getConfValueForRMInstance(hostnameActiveRMKey, yarnConf)) {
+                logInfo(s"Find rm web address by : $hostnameActiveRMKey")
+                hostnameActiveRMKey
+              } else {
+                logInfo(s"Find rm web address by : $appActiveRMKey")
+                appActiveRMKey
               }
             }
-            require(activeRMId != null, "[StreamX] HadoopUtils.getRMWebAppURL: can not found yarn active node")
-            logInfo(s"current activeRMHAId: $activeRMId")
-            val appActiveRMKey = HAUtil.addSuffix(addressPrefix, activeRMId)
-            val hostnameActiveRMKey = HAUtil.addSuffix(YarnConfiguration.RM_HOSTNAME, activeRMId)
-            if (null == HAUtil.getConfValueForRMInstance(appActiveRMKey, yarnConf) && null != HAUtil.getConfValueForRMInstance(hostnameActiveRMKey, yarnConf)) {
-              logInfo(s"Find rm web address by : $hostnameActiveRMKey")
-              hostnameActiveRMKey
+
+            val inetSocketAddress = conf.getSocketAddr(name, s"0.0.0.0:$defaultPort", defaultPort.toInt)
+
+            val address = NetUtils.getConnectAddress(inetSocketAddress)
+
+            val buffer = new StringBuilder(protocol)
+            val resolved = address.getAddress
+            if (resolved != null && !resolved.isAnyLocalAddress && !resolved.isLoopbackAddress) {
+              buffer.append(address.getHostName)
             } else {
-              logInfo(s"Find rm web address by : $appActiveRMKey")
-              appActiveRMKey
+              Try(InetAddress.getLocalHost.getCanonicalHostName) match {
+                case Success(value) => buffer.append(value)
+                case _ => buffer.append(address.getHostName)
+              }
             }
-          }
-
-          val inetSocketAddress = conf.getSocketAddr(name, s"0.0.0.0:$defaultPort", defaultPort.toInt)
-
-          val address = NetUtils.getConnectAddress(inetSocketAddress)
-
-          val buffer = new StringBuilder(protocol)
-          val resolved = address.getAddress
-          if (resolved != null && !resolved.isAnyLocalAddress && !resolved.isLoopbackAddress) {
-            buffer.append(address.getHostName)
-          } else {
-            Try(InetAddress.getLocalHost.getCanonicalHostName) match {
-              case Success(value) => buffer.append(value)
-              case _ => buffer.append(address.getHostName)
-            }
-          }
-
-          rmHttpURL = buffer
-            .append(":")
-            .append(address.getPort)
-            .toString()
-
-          logInfo(s"yarn resourceManager webapp url:$rmHttpURL")
+            buffer
+              .append(":")
+              .append(address.getPort)
+              .toString()
         }
+        logInfo(s"yarn resourceManager webapp url:$rmHttpURL")
       }
     }
     rmHttpURL
