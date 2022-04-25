@@ -178,9 +178,8 @@ object HadoopUtils extends Logger {
       tgt.destroy()
       tgt = null
     }
-    // fixe "HDFS DELEGATION TOKEN"...
-    ugi = null
     reusableConf = null
+    ugi = null
   }
 
   private[this] def kerberosLogin(): UserGroupInformation = {
@@ -266,16 +265,16 @@ object HadoopUtils extends Logger {
   def getRMWebAppURL(getLatest: Boolean = false): String = {
     if (rmHttpURL == null || getLatest) {
       synchronized {
+        val conf = hadoopConf
+        val useHttps = YarnConfiguration.useHttps(conf)
+        val (addressPrefix, defaultPort, protocol) = useHttps match {
+          case x if x => (YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS, "8090", "https://")
+          case _ => (YarnConfiguration.RM_WEBAPP_ADDRESS, "8088", "http://")
+        }
 
-        if (rmHttpURL == null || getLatest) {
-          val conf = hadoopConf
-          val useHttps = YarnConfiguration.useHttps(conf)
-          val (addressPrefix, defaultPort, protocol) = useHttps match {
-            case x if x => (YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS, "8090", "https://")
-            case _ => (YarnConfiguration.RM_WEBAPP_ADDRESS, "8088", "http://")
-          }
-
-          rmHttpURL = Try(conf.get("yarn.web-proxy.address", null)).getOrElse {
+        rmHttpURL = Option(conf.get("yarn.web-proxy.address", null)) match {
+          case Some(proxy) => s"$protocol$proxy"
+          case _ =>
             val name = if (!HAUtil.isHAEnabled(conf)) addressPrefix else {
               val yarnConf = new YarnConfiguration(conf)
               val activeRMId = {
@@ -341,15 +340,12 @@ object HadoopUtils extends Logger {
                 case _ => buffer.append(address.getHostName)
               }
             }
-
             buffer
               .append(":")
               .append(address.getPort)
               .toString()
-          }
-
-          logInfo(s"yarn resourceManager webapp url:$rmHttpURL")
         }
+        logInfo(s"yarn resourceManager webapp url:$rmHttpURL")
       }
     }
     rmHttpURL
