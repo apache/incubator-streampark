@@ -21,7 +21,6 @@ package com.streamxhub.streamx.console.system.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.util.ShaHashUtils;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.service.UserService;
@@ -42,6 +41,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+
+import java.util.List;
 
 /**
  * @author benjobs
@@ -83,7 +84,7 @@ public class UserController {
 
     @DeleteMapping("delete")
     @RequiresPermissions("user:delete")
-    public RestResponse deleteUsers(Long userId) throws ServiceException {
+    public RestResponse deleteUsers(Long userId) {
         this.userService.removeById(userId);
         return RestResponse.create();
     }
@@ -101,6 +102,12 @@ public class UserController {
         throws Exception {
         this.userService.updateAvatar(username, avatar);
         return RestResponse.create();
+    }
+
+    @PostMapping("getNoTokenUser")
+    public RestResponse getNoTokenUser() {
+        List<User> userList = this.userService.getNoTokenUser();
+        return RestResponse.create().data(userList);
     }
 
     @PostMapping("check/name")

@@ -150,6 +150,7 @@ export default {
     PASSWORD: '/user/password',
     RESET: '/user/password/reset',
     GET: '/user/get',
+    GET_NOTOKEN_USER: '/user/getNoTokenUser',
     POST: '/user/post',
     DELETE: '/user/delete',
     CHECK_NAME: '/user/check/name',
@@ -159,8 +160,9 @@ export default {
     LIST: '/token/list',
     DELETE: '/token/delete',
     CREATE: '/token/create',
+    CHECK: '/token/check',
     CURL: '/token/curl',
-    UPDATE_STATUS: '/token/update/status'
+    TOGGLE: '/token/toggle'
   },
   Role: {
     POST: '/role/post',

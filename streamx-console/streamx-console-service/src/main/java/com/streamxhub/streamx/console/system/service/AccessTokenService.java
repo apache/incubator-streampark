@@ -35,13 +35,16 @@ public interface AccessTokenService extends IService<AccessToken> {
      * @param expireTime
      * @param description
      */
-    RestResponse generateToken(String username, String expireTime, String description) throws ServiceException;
+    RestResponse generateToken(Long userId, String expireTime, String description) throws ServiceException;
 
     boolean deleteToken(Long id);
 
     IPage<AccessToken> findAccessTokens(AccessToken tokenParam, RestRequest request);
 
-    boolean checkTokenEffective(String username, String token);
+    boolean checkTokenEffective(Long userId, String token);
 
-    RestResponse updateTokenStatus(Integer status, Long tokenId) throws ServiceException;
+    RestResponse toggleToken(Long tokenId);
+
+    AccessToken getByUserId(Long userId);
+
 }

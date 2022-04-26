@@ -108,7 +108,7 @@ public class ShiroRealm extends AuthorizingRealm {
         if (!JWTUtil.verify(token, username, user.getPassword())) {
             //校验是否属于api的token，权限是否有效
             String tokenDb = WebUtils.encryptToken(token);
-            boolean effective = accessTokenService.checkTokenEffective(username, tokenDb);
+            boolean effective = accessTokenService.checkTokenEffective(user.getUserId(), tokenDb);
             if (!effective) {
                 throw new AuthenticationException("token校验不通过,请检查user状态或token状态");
             }

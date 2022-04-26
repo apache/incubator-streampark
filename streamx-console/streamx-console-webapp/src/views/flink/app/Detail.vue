@@ -695,7 +695,7 @@ import {DEFAULT_THEME} from '@/store/mutation-types'
 import {activeURL} from '@/api/flinkCluster'
 import {baseUrl} from '@/api/baseUrl'
 import api from '@/api/index'
-import {copyCurl} from '@/api/token'
+import {copyCurl, check as checkToken} from '@/api/token'
 
 const Base64 = require('js-base64').Base64
 configOptions.push(
@@ -1008,22 +1008,40 @@ export default {
     },
 
     handleCopyCurl(urlPath) {
-      const params = {
-        appId: this.app.id,
-        baseUrl: baseUrl(),
-        path: urlPath
-      }
-      copyCurl({...params}).then((resp) => {
-        const oTextarea = document.createElement('textarea')
-        oTextarea.value = resp.data
-        document.body.appendChild(oTextarea)
-        // 选择对象
-        oTextarea.select()
-        document.execCommand('Copy')
-        this.$message.success('copy successful')
-        oTextarea.remove()
+      checkToken({}).then((resp) => {
+        const result = parseInt(resp.data)
+        if (result === 0) {
+          this.$swal.fire({
+            icon: 'error',
+            title: 'access token is null,please contact the administrator to add.',
+            showConfirmButton: true,
+            timer: 3500
+          })
+        } else if (result === 1) {
+          this.$swal.fire({
+            icon: 'error',
+            title: 'access token is invalid,please contact the administrator.',
+            showConfirmButton: true,
+            timer: 3500
+          })
+        } else {
+          const params = {
+            appId: this.app.id,
+            baseUrl: baseUrl(),
+            path: urlPath
+          }
+          copyCurl({...params}).then((resp) => {
+            const oTextarea = document.createElement('textarea')
+            oTextarea.value = resp.data
+            document.body.appendChild(oTextarea)
+            // 选择对象
+            oTextarea.select()
+            document.execCommand('Copy')
+            this.$message.success('copy successful')
+            oTextarea.remove()
+          })
+        }
       })
-
     },
 
     handleGet(appId) {

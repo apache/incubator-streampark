@@ -224,7 +224,7 @@ COMMIT;
 DROP TABLE IF EXISTS `t_access_token`;
 CREATE TABLE `t_access_token` (
 `ID` int NOT NULL AUTO_INCREMENT COMMENT 'key',
-`USERNAME` varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'USER_NAME',
+`USER_ID`     bigint,
 `TOKEN` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'TOKEN',
 `EXPIRE_TIME` datetime DEFAULT NULL COMMENT '过期时间',
 `DESCRIPTION` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '使用场景描述',

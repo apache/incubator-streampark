@@ -24,7 +24,6 @@ import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.ResponseCode;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.system.authentication.JWTToken;
@@ -48,6 +47,7 @@ import org.springframework.util.StringUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -56,12 +56,10 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private AccessTokenMapper tokenMapper;
 
     @Override
-    public RestResponse generateToken(String username, String expireTime, String description) throws ServiceException {
-        User user = userService.lambdaQuery().eq(User::getUsername, username).one();
+    public RestResponse generateToken(Long userId, String expireTime, String description) {
+        User user = userService.getById(userId);
         if (Objects.isNull(user)) {
             return RestResponse.create().put("code", 0).message("user not available");
         }
@@ -69,13 +67,13 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         if (StringUtils.isEmpty(expireTime)) {
             expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
         }
-        String password = AccessToken.DEFAULT_PASSWORD;
-        String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
+
+        String token = WebUtils.encryptToken(JWTUtil.sign(user.getUsername(), UUID.randomUUID().toString()));
         JWTToken jwtToken = new JWTToken(token, expireTime);
 
         AccessToken accessToken = new AccessToken();
         accessToken.setToken(jwtToken.getToken());
-        accessToken.setUsername(username);
+        accessToken.setUserId(user.getUserId());
         accessToken.setDescription(description);
         accessToken.setExpireTime(DateUtils.stringToDate(jwtToken.getExpireAt()));
         accessToken.setCreateTime(new Date());
@@ -87,8 +85,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
 
     @Override
     public boolean deleteToken(Long id) {
-        boolean res = this.removeById(id);
-        return res;
+        return this.removeById(id);
     }
 
     @Override
@@ -102,17 +99,17 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     }
 
     @Override
-    public boolean checkTokenEffective(String username, String token) {
-        AccessToken res = tokenMapper.getTokenInfo(username, token);
-        if (Objects.isNull(res) || AccessToken.STATUS_DISABLE.equals(res.getFinalTokenStatus())) {
+    public boolean checkTokenEffective(Long userId, String token) {
+        AccessToken res = baseMapper.getByUserToken(userId, token);
+        if (Objects.isNull(res) || AccessToken.STATUS_DISABLE.equals(res.getFinalStatus())) {
             return false;
         }
         return true;
     }
 
     @Override
-    public RestResponse updateTokenStatus(Integer status, Long tokenId) throws ServiceException {
-        AccessToken tokenInfo = tokenMapper.getTokenInfoById(tokenId);
+    public RestResponse toggleToken(Long tokenId) {
+        AccessToken tokenInfo = baseMapper.getById(tokenId);
         if (Objects.isNull(tokenInfo)) {
             return RestResponse.fail("accessToken could not be found!", ResponseCode.CODE_ACCESS_TOKEN_LOCKED);
         }
@@ -121,9 +118,16 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
             return RestResponse.fail("user status is locked, could not operate this accessToken!", ResponseCode.CODE_ACCESS_TOKEN_LOCKED);
         }
 
+        Integer status = tokenInfo.getStatus().equals(AccessToken.STATUS_ENABLE) ? AccessToken.STATUS_DISABLE : AccessToken.STATUS_ENABLE;
+
         AccessToken updateObj = new AccessToken();
         updateObj.setStatus(status);
         updateObj.setId(tokenId);
         return RestResponse.success(this.updateById(updateObj));
+    }
+
+    @Override
+    public AccessToken getByUserId(Long userId) {
+        return baseMapper.getByUserId(userId);
     }
 }
