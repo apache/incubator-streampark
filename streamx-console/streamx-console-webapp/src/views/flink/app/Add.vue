@@ -62,21 +62,7 @@
         </a-select>
       </a-form-item>
 
-      <template v-if="executionMode === 3">
-        <a-form-item
-          label="Yarn Session ClusterId"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-          <a-input
-            type="text"
-            allowClear
-            placeholder="Please enter Yarn Session clusterId"
-            v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, validator: handleCheckYarnSessionClusterId }] }]">
-          </a-input>
-        </a-form-item>
-      </template>
-
-      <template v-if="executionMode === 1">
+      <template v-if="executionMode === 1 || executionMode === 3 || executionMode === 5">
         <a-form-item
           label="Flink Cluster"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -85,7 +71,7 @@
             placeholder="Flink Cluster"
             v-decorator="[ 'flinkClusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
             <a-select-option
-              v-for="(v,index) in flinkClusters"
+              v-for="(v,index) in this.getExecutionCluster(executionMode)"
               :key="`cluster_${index}`"
               :value="v.id">
               {{ v.clusterName }}
@@ -117,34 +103,6 @@
               </a-menu>
               <a-icon type="history"/>
             </a-dropdown>
-          </a-input>
-        </a-form-item>
-
-        <a-form-item
-          label="Kubernetes ClusterId"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-          <a-input
-            type="text"
-            placeholder="Please enter Kubernetes clusterId"
-            @change="handleClusterId"
-            allowClear
-            v-decorator="[ 'clusterId', {rules: [{ required: true, validator: handleCheckKubernetesClusterId }] }]">
-            <template v-if="executionMode === 5">
-              <a-dropdown slot="addonAfter" placement="bottomRight">
-                <a-menu slot="overlay" trigger="['click', 'hover']">
-                  <a-menu-item
-                    v-for="item in historyRecord.k8sSessionClusterId"
-                    :key="item"
-                    @click="handleSelectHistoryK8sSessionClusterId(item)"
-                    style="padding-right: 60px">
-                    <a-icon type="plus-circle"/>
-                    {{ item }}
-                  </a-menu-item>
-                </a-menu>
-                <a-icon type="history"/>
-              </a-dropdown>
-            </template>
           </a-input>
         </a-form-item>
       </template>
@@ -1760,6 +1718,10 @@ export default {
   methods: {
     filterOption(input, option) {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+    },
+
+    getExecutionCluster(executionMode){
+      return this.flinkClusters.filter(o => o.executionMode === executionMode)
     },
 
     select() {

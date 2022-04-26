@@ -22,10 +22,9 @@ import java.time.LocalDateTime
 
 object ConfigConst {
   /**
-   *
-   * about parameter...
-   */
-
+    *
+    * about parameter...
+    */
   val KEY_APP_HOME = "app.home"
 
   val KEY_HOST = "host"
@@ -47,8 +46,8 @@ object ConfigConst {
   val KEY_STREAMX_CONSOLE_URL = "streamx.console.url"
 
   /**
-   * sign....
-   */
+    * sign....
+    */
   val SIGN_COLON = ":"
 
   val SIGN_SEMICOLON = ";"
@@ -58,15 +57,15 @@ object ConfigConst {
   val SIGN_EMPTY = ""
 
   /**
-   * kerberos
-   */
+    * kerberos
+    */
   val KEY_KERBEROS = "kerberos"
 
   val KEY_HADOOP_USER_NAME = "HADOOP_USER_NAME"
 
   /**
-   * hadoop.security.authentication
-   */
+    * hadoop.security.authentication
+    */
   val KEY_HADOOP_SECURITY_AUTHENTICATION = "hadoop.security.authentication"
 
   val KEY_SECURITY_KERBEROS_ENABLE = "security.kerberos.login.enable"
@@ -80,7 +79,6 @@ object ConfigConst {
   val KEY_JAVA_SECURITY_KRB5_CONF = "java.security.krb5.conf"
 
   //spark
-
   val KEY_SPARK_USER_ARGS = "spark.user.args"
 
   val KEY_SPARK_CONF = "spark.conf"
@@ -112,6 +110,8 @@ object ConfigConst {
 
   val KEY_YARN_APP_ID = "yarn.application.id"
 
+  val KEY_YARN_APP_NAME = "yarn.application.name"
+
   val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
   val KEY_FLINK_SAVEPOINT_PATH = "execution.savepoint.path"
@@ -134,7 +134,6 @@ object ConfigConst {
   val KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN = "flink.checkpoints.minPauseBetween"
 
   //---state---
-
   val KEY_FLINK_STATE_CHECKPOINTS_DIR = "flink.state.checkpoints.dir"
 
   val KEY_FLINK_STATE_CHECKPOINT_STORAGE = "flink.state.checkpoint-storage"
@@ -150,7 +149,6 @@ object ConfigConst {
   val KEY_FLINK_STATE_ROCKSDB = "flink.state.backend.rocksdb"
 
   //---restart-strategy---
-
   val KEY_FLINK_RESTART_STRATEGY = "flink.restart-strategy.value"
 
   val KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_PER_INTERVAL = "flink.restart-strategy.failure-rate.max-failures-per-interval"
@@ -180,9 +178,8 @@ object ConfigConst {
   val KEY_FLINK_TABLE_DATABASE = "flink.table.database"
 
   /**
-   * about config Kafka
-   */
-
+    * about config Kafka
+    */
   val KAFKA_SINK_PREFIX = "kafka.sink."
 
   val KAFKA_SOURCE_PREFIX = "kafka.source."
@@ -208,8 +205,8 @@ object ConfigConst {
   val KEY_ALIAS = "alias"
 
   /**
-   * about config jdbc...
-   */
+    * about config jdbc...
+    */
   val KEY_JDBC_PREFIX = "jdbc."
 
   val KEY_JDBC_DRIVER = "driverClassName"
@@ -233,8 +230,8 @@ object ConfigConst {
   val MONGO_PREFIX = "mongodb."
 
   /**
-   * about config HBase
-   */
+    * about config HBase
+    */
   val HBASE_PREFIX = "hbase."
 
   val KEY_HBASE_COMMIT_BATCH = "hbase.commit.batch"
@@ -248,8 +245,8 @@ object ConfigConst {
   val DEFAULT_HBASE_WRITE_SIZE = 1024 * 1024 * 10
 
   /**
-   * about influx
-   */
+    * about influx
+    */
   val INFLUX_PREFIX = "influx."
 
   val KEY_INFLUX_ACTIONS = "actions"
@@ -257,8 +254,8 @@ object ConfigConst {
   val KEY_INFLUX_FLUSH_DURATION = "flush.duration"
 
   /**
-   * about clickhouse
-   */
+    * about clickhouse
+    */
   val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"
 
   val CLICKHOUSE_HOSTS = "hosts"
@@ -273,8 +270,8 @@ object ConfigConst {
   val HTTP_SINK_PREFIX = "http.sink"
 
   /**
-   * about config doris
-   */
+    * about config doris
+    */
   val DORIS_SINK_PREFIX = "doris.sink"
   val DORIS_FENODES = "fenodes"
   val DORIS_DATABASE = "database"
@@ -290,8 +287,8 @@ object ConfigConst {
   val DORIS_STREAM_LOAD_PROP_PREFIX = "streamLoad."
 
   /**
-   * sink threshold and failover...
-   */
+    * sink threshold and failover...
+    */
   val KEY_SINK_THRESHOLD_BUFFER_SIZE: String = "threshold.bufferSize"
 
   val KEY_SINK_THRESHOLD_NUM_WRITERS: String = "threshold.numWriters"
@@ -327,8 +324,8 @@ object ConfigConst {
   val DEFAULT_SINK_THRESHOLD_NUM_WRITERS: Int = Runtime.getRuntime.availableProcessors()
 
   /**
-   * about config es
-   */
+    * about config es
+    */
   val ES_PREFIX = "es.sink."
 
   val KEY_ES_AUTH_USER = "es.auth.user"
@@ -354,8 +351,8 @@ object ConfigConst {
   val KEY_ES_DISABLE_FLUSH_ONCHECKPOINT = "es.disableFlushOnCheckpoint"
 
   /**
-   * flink config key
-   */
+    * flink config key
+    */
   val KEY_FLINK_APPLICATION_ARGS = "$internal.application.program-args"
 
   val KEY_FLINK_APPLICATION_MAIN_CLASS = "$internal.application.main"
@@ -369,6 +366,26 @@ object ConfigConst {
   val KEY_FLINK_JVM_HEAP_MEMORY = "jobmanager.memory.heap.size"
 
   val KEY_FLINK_JVM_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size"
+
+  val KEY_FLINK_TASK_SLOTS = "taskmanager.numberOfTaskSlots"
+
+  val KEY_FLINK_DIST_JAR = "yarn.flink-dist-jar"
+
+  /**
+    * flink kubernetes config
+    */
+  val KEY_FLINK_KUBERNETES_CLUSTER_ID = "kubernetes.cluster-id"
+
+  val KEY_FLINK_KUBERNETES_NAMESPACE = "kubernetes.namespace"
+
+  val KEY_FLINK_KUBERNETES_SERVICE_ACCOUNT = "kubernetes.service-account"
+
+  val KEY_FLINK_KUBERNETES_CONTAINER_IMAGE = "kubernetes.container.image"
+
+  val KEY_FLINK_KUBERNETES_EXPOSED_TYPE = "kubernetes.rest-service.exposed.type"
+
+  val KEY_FLINK_KUBERNETES_CONFIG_FILE = "kubernetes.config.file"
+
 
   val STREAMX_FLINKSQL_CLIENT_CLASS = "com.streamxhub.streamx.flink.cli.SqlClient"
 

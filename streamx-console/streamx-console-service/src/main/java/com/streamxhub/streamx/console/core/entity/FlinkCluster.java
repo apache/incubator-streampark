@@ -20,12 +20,18 @@
 package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.enums.ClusterState;
+import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.enums.FlinkK8sRestExposedType;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import lombok.Data;
+import lombok.SneakyThrows;
 import org.apache.http.client.config.RequestConfig;
 
 import java.io.Serializable;
@@ -45,13 +51,76 @@ public class FlinkCluster implements Serializable {
 
     private Long id;
 
+    private String address;
+
+    private String clusterId;
+
     private String clusterName;
 
-    private String address;
+    private Integer executionMode;
+
+    /**
+     * 对应的flink的版本.
+     */
+    private Long versionId;
+
+    private String k8sNamespace;
+
+    private String serviceAccount;
 
     private String description;
 
+    private Long userId;
+
+    private String flinkImage;
+
+    private String options;
+
+    private String yarnQueue;
+
+    private Boolean k8sHadoopIntegration;
+
+    private String dynamicOptions;
+
+    private Integer k8sRestExposedType;
+
+    private Boolean flameGraph;
+
+    private String k8sConf;
+
+    private Integer resolveOrder;
+
+    private String exception;
+
+    private Integer clusterState;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
+
+    @JsonIgnore
+    public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
+        return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
+    }
+
+    public ExecutionMode getExecutionModeEnum() {
+        return ExecutionMode.of(this.executionMode);
+    }
+
+    public ClusterState getClusterStateEnum() {
+        return ClusterState.of(this.clusterState);
+    }
+
+    @JsonIgnore
+    @SneakyThrows
+    public Map<String, Object> getOptionMap() {
+        Map<String, Object> map = JacksonUtils.read(getOptions(), Map.class);
+        if (ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
+            map.put(ConfigConst.KEY_YARN_APP_NAME(), this.clusterName);
+            map.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.yarnQueue);
+        }
+        map.entrySet().removeIf(entry -> entry.getValue() == null);
+        return map;
+    }
 
     @JsonIgnore
     public URI getActiveAddress() {

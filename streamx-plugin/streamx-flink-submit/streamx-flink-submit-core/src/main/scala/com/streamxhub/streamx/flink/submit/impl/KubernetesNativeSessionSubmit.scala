@@ -19,26 +19,33 @@
 
 package com.streamxhub.streamx.flink.submit.impl
 
+import java.io.File
+
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
-import com.streamxhub.streamx.flink.submit.bean._
+import com.streamxhub.streamx.flink.submit.bean.{DeployResponse, _}
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
+import io.fabric8.kubernetes.api.model.{Pod, Config => _}
+import io.fabric8.kubernetes.client.dsl.internal.core.v1.PodOperationsImpl
+import io.fabric8.kubernetes.client.{Config, DefaultKubernetesClient}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
-import org.apache.flink.kubernetes.KubernetesClusterDescriptor
-import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+import org.apache.flink.kubernetes.{KubernetesClusterClientFactory, KubernetesClusterDescriptor}
+import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType
+import org.apache.flink.kubernetes.configuration.{KubernetesConfigOptions, KubernetesDeploymentTarget}
+import org.apache.flink.kubernetes.kubeclient.{Fabric8FlinkKubeClient, FlinkKubeClient, FlinkKubeClientFactory}
 
-import java.io.File
+import scala.collection.JavaConversions._
 import scala.language.postfixOps
 
 /**
- * kubernetes native session mode submit
- */
+  * kubernetes native session mode submit
+  */
 object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Logger {
 
   @throws[Exception]
@@ -52,8 +59,8 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   }
 
   /**
-   * Submit flink session job via rest api.
-   */
+    * Submit flink session job via rest api.
+    */
   @throws[Exception] def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     try {
       // get jm rest url of flink session cluster
@@ -76,8 +83,8 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   }
 
   /**
-   * Submit flink session job with building JobGraph via ClusterClient api.
-   */
+    * Submit flink session job with building JobGraph via ClusterClient api.
+    */
   @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File): SubmitResponse = {
     // retrieve k8s cluster and submit flink job on session mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
@@ -115,4 +122,94 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     super.doStop(stopRequest, flinkConfig)
   }
 
+  def deploy(deployRequest: DeployRequest): DeployResponse = {
+    logInfo(
+      s"""
+         |--------------------------------------- kubernetes sesion start ---------------------------------------
+         |    userFlinkHome    : ${deployRequest.flinkVersion.flinkHome}
+         |    flinkVersion     : ${deployRequest.flinkVersion.version}
+         |    execMode         : ${deployRequest.executionMode.name()}
+         |    clusterId        : ${deployRequest.clusterId}
+         |    namespace        : ${deployRequest.k8sDeployParam.kubernetesNamespace}
+         |    exposedType      : ${deployRequest.k8sDeployParam.flinkRestExposedType}
+         |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
+         |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
+         |    resolveOrder     : ${deployRequest.resolveOrder.getName}
+         |    flameGraph       : ${deployRequest.flameGraph != null}
+         |    dynamicOption    : ${deployRequest.dynamicOption.mkString(" ")}
+         |-------------------------------------------------------------------------------------------
+         |""".stripMargin)
+    var clusterDescriptor: KubernetesClusterDescriptor = null
+    var client: ClusterClient[String] = null
+    var kubeClient: FlinkKubeClient = null
+    try {
+      val flinkConfig = extractConfiguration(deployRequest.flinkVersion.flinkHome,
+        null,
+        deployRequest.flameGraph,
+        deployRequest.dynamicOption,
+        deployRequest.extraParameter,
+        deployRequest.resolveOrder)
+      flinkConfig
+        .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
+        .safeSet(KubernetesConfigOptions.NAMESPACE, deployRequest.k8sDeployParam.kubernetesNamespace)
+        .safeSet(KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT, deployRequest.k8sDeployParam.serviceAccount)
+        .safeSet(KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE, ServiceExposedType.valueOf(deployRequest.k8sDeployParam.flinkRestExposedType.getName))
+        .safeSet(KubernetesConfigOptions.CLUSTER_ID, deployRequest.clusterId)
+        .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, deployRequest.k8sDeployParam.flinkImage)
+        .safeSet(KubernetesConfigOptions.KUBE_CONFIG_FILE, deployRequest.k8sDeployParam.kubeConf)
+
+      val kubernetesClusterDescriptor = getK8sClusterDescriptorAndSpecification(flinkConfig)
+      clusterDescriptor = kubernetesClusterDescriptor._1
+      kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
+
+      if (deployRequest.clusterId != null && kubeClient.getRestService(deployRequest.clusterId).isPresent) {
+        client = clusterDescriptor.retrieve(deployRequest.clusterId).getClusterClient
+      } else {
+        client = clusterDescriptor.deploySessionCluster(kubernetesClusterDescriptor._2).getClusterClient
+      }
+      if (client.getWebInterfaceURL != null) {
+        DeployResponse(client.getWebInterfaceURL, client.getClusterId.toString)
+      } else {
+        null
+      }
+    } catch {
+      case e: Exception => logError(s"start flink session fail in ${deployRequest.executionMode} mode")
+        e.printStackTrace()
+        throw e
+    } finally {
+      Utils.close(client, clusterDescriptor, kubeClient)
+    }
+  }
+
+  def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
+    var kubeClient: FlinkKubeClient = null
+    try {
+      val flinkConfig = getFlinkDefaultConfiguration(shutDownRequest.flinkVersion.flinkHome)
+      shutDownRequest.extraParameter.foreach(m => m._2 match {
+        case v if v != null => flinkConfig.setString(m._1, m._2.toString)
+        case _ =>
+      })
+      flinkConfig
+        .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
+        .safeSet(KubernetesConfigOptions.NAMESPACE, shutDownRequest.kubernetesDeployParam.kubernetesNamespace)
+        .safeSet(KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT, shutDownRequest.kubernetesDeployParam.serviceAccount)
+        .safeSet(KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE, ServiceExposedType.valueOf(shutDownRequest.kubernetesDeployParam.flinkRestExposedType.getName))
+        .safeSet(KubernetesConfigOptions.CLUSTER_ID, shutDownRequest.clusterId)
+        .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, shutDownRequest.kubernetesDeployParam.flinkImage)
+        .safeSet(KubernetesConfigOptions.KUBE_CONFIG_FILE, shutDownRequest.kubernetesDeployParam.kubeConf)
+      kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
+      if (shutDownRequest.clusterId != null && kubeClient.getRestService(shutDownRequest.clusterId).isPresent) {
+        kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
+        ShutDownResponse()
+      } else {
+        null
+      }
+    } catch {
+      case e: Exception => logError(s"shutdown flink session fail in ${shutDownRequest.executionMode} mode")
+        e.printStackTrace()
+        throw e
+    } finally {
+      Utils.close(kubeClient)
+    }
+  }
 }

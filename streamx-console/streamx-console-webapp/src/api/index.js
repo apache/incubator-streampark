@@ -108,7 +108,10 @@ export default {
     CREATE:  '/flink/cluster/create',
     CHECK: '/flink/cluster/check',
     GET: '/flink/cluster/get',
-    UPDATE: '/flink/cluster/update'
+    UPDATE: '/flink/cluster/update',
+    START: '/flink/cluster/start',
+    SHUTDOWN: '/flink/cluster/shutdown',
+    DELETE: '/flink/cluster/delete'
   },
   AppBuild: {
     BUILD: '/flink/pipe/build',

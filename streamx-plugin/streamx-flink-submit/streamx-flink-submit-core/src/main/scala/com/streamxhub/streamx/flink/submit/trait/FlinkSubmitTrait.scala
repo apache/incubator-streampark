@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.submit.`trait`
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.Workspace
-import com.streamxhub.streamx.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode}
+import com.streamxhub.streamx.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, ResolveOrder}
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils, Utils}
 import com.streamxhub.streamx.flink.core.conf.FlinkRunOption
 import com.streamxhub.streamx.flink.submit.bean._
@@ -38,7 +38,7 @@ import org.apache.flink.configuration._
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
-
+import java.util.{Map => JavaMap}
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.{Collections, List => JavaList}
@@ -318,6 +318,173 @@ trait FlinkSubmitTrait extends Logger {
         CoreOptions.DEFAULT_PARALLELISM.defaultValue()
       )
     }
+  }
+
+  private[submit] def extractConfiguration(flinkHome: String,
+                                           savePoint: String,
+                                           flameGraph: JavaMap[String, java.io.Serializable],
+                                           dynamicOption: Array[String],
+                                           extraParameter: JavaMap[String, Any],
+                                           resolveOrder: ResolveOrder,
+                                           otherParam: (String, String)*): Configuration = {
+    val commandLine = {
+        val customCommandLines = getCustomCommandLines(flinkHome)
+        //merge options....
+        val customCommandLineOptions = new Options
+        for (customCommandLine <- customCommandLines) {
+          customCommandLine.addGeneralOptions(customCommandLineOptions)
+          customCommandLine.addRunOptions(customCommandLineOptions)
+        }
+        val commandLineOptions = FlinkRunOption.mergeOptions(CliFrontendParser.getRunCommandOptions, customCommandLineOptions)
+
+        //read and verify user config...
+        val cliArgs = {
+          val optionMap = new mutable.HashMap[String, Any]()
+          //fromSavePoint
+          if (savePoint != null) {
+            optionMap += s"-${FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt}" -> savePoint
+          }
+
+          Seq("-e", "--executor", "-t", "--target").foreach(optionMap.remove)
+          otherParam.foreach(optionMap +=)
+
+          val array = new ArrayBuffer[String]()
+          optionMap.foreach(x => {
+            array += x._1
+            x._2 match {
+              case v: String => array += v
+              case _ =>
+            }
+          })
+
+          //-jvm profile support
+          if (Utils.notEmpty(flameGraph)) {
+            val buffer = new StringBuffer()
+            flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
+            val param = buffer.toString.dropRight(1)
+
+            /**
+              * 不要问我javaagent路径为什么这么写,魔鬼在细节中.
+              */
+            array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/$jvmProfilerJar=$param"
+          }
+
+          //页面定义的参数优先级大于app配置文件,属性参数...
+          if (MapUtils.isNotEmpty(extraParameter)) {
+            extraParameter.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+          }
+
+          //-D 其他动态参数配置....
+          if (dynamicOption != null && dynamicOption.nonEmpty) {
+            dynamicOption
+              .filter(!_.matches("(^-D|^)classloader.resolve-order.*"))
+              .foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+          }
+
+          array += s"-Dclassloader.resolve-order=${resolveOrder.getName}"
+
+          array.toArray
+        }
+
+        logger.info(s"cliArgs: ${cliArgs.mkString(" ")}")
+
+        FlinkRunOption.parse(commandLineOptions, cliArgs, true)
+    }
+    val activeCommandLine = validateAndGetActiveCommandLine(getCustomCommandLines(flinkHome), commandLine)
+    val flinkConfig = applyConfiguration(flinkHome, activeCommandLine, commandLine)
+    flinkConfig
+  }
+
+  private[this] def applyConfiguration(flinkHome: String,
+                                       activeCustomCommandLine: CustomCommandLine,
+                                       commandLine: CommandLine): Configuration = {
+
+    require(activeCustomCommandLine != null, "activeCustomCommandLine must not be null.")
+    val executorConfig = activeCustomCommandLine.toConfiguration(commandLine)
+    val customConfiguration = new Configuration(executorConfig)
+    val configuration = new Configuration()
+    //flink-conf.yaml配置
+    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(flinkHome)
+    flinkDefaultConfiguration.keySet.foreach(x => {
+      flinkDefaultConfiguration.getString(x, null) match {
+        case v if v != null => configuration.setString(x, v)
+        case _ =>
+      }
+    })
+    configuration.addAll(customConfiguration)
+    configuration
+  }
+
+  private[this] def getEffectiveCommandLine(flinkHome: String,
+                                            savePoint: String,
+                                            flameGraph: JavaMap[String, java.io.Serializable],
+                                            dynamicOption: Array[String],
+                                            extraParameter: JavaMap[String, Any],
+                                            resolveOrder: ResolveOrder,
+                                            otherParam: (String, String)
+                                           ): CommandLine = {
+
+    val customCommandLines = getCustomCommandLines(flinkHome)
+    //merge options....
+    val customCommandLineOptions = new Options
+    for (customCommandLine <- customCommandLines) {
+      customCommandLine.addGeneralOptions(customCommandLineOptions)
+      customCommandLine.addRunOptions(customCommandLineOptions)
+    }
+    val commandLineOptions = FlinkRunOption.mergeOptions(CliFrontendParser.getRunCommandOptions, customCommandLineOptions)
+
+    //read and verify user config...
+    val cliArgs = {
+      val optionMap = new mutable.HashMap[String, Any]()
+      //fromSavePoint
+      if (savePoint != null) {
+        optionMap += s"-${FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt}" -> savePoint
+      }
+
+      Seq("-e", "--executor", "-t", "--target").foreach(optionMap.remove)
+      optionMap +=otherParam
+
+      val array = new ArrayBuffer[String]()
+      optionMap.foreach(x => {
+        array += x._1
+        x._2 match {
+          case v: String => array += v
+          case _ =>
+        }
+      })
+
+      //-jvm profile support
+      if (Utils.notEmpty(flameGraph)) {
+        val buffer = new StringBuffer()
+        flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
+        val param = buffer.toString.dropRight(1)
+
+        /**
+          * 不要问我javaagent路径为什么这么写,魔鬼在细节中.
+          */
+        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/$jvmProfilerJar=$param"
+      }
+
+      //页面定义的参数优先级大于app配置文件,属性参数...
+      if (MapUtils.isNotEmpty(extraParameter)) {
+        extraParameter.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+      }
+
+      //-D 其他动态参数配置....
+      if (dynamicOption != null && dynamicOption.nonEmpty) {
+        dynamicOption
+          .filter(!_.matches("(^-D|^)classloader.resolve-order.*"))
+          .foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+      }
+
+      array += s"-Dclassloader.resolve-order=${resolveOrder.getName}"
+
+      array.toArray
+    }
+
+    logger.info(s"cliArgs: ${cliArgs.mkString(" ")}")
+
+    FlinkRunOption.parse(commandLineOptions, cliArgs, true)
   }
 
   private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {

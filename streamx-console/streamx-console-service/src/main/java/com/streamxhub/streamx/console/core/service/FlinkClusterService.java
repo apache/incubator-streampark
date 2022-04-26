@@ -21,6 +21,7 @@ package com.streamxhub.streamx.console.core.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
+import com.streamxhub.streamx.console.core.entity.ResponseResult;
 
 /**
  * @author benjobs
@@ -29,8 +30,19 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
 
     /**
      * check
-     * @param cluster
+     *
+     * @param flinkCluster
      * @return
      */
-    String check(FlinkCluster cluster);
+    String check(FlinkCluster flinkCluster);
+
+    ResponseResult create(FlinkCluster flinkCluster);
+
+    ResponseResult delete(FlinkCluster flinkCluster);
+
+    ResponseResult update(FlinkCluster flinkCluster);
+
+    ResponseResult start(FlinkCluster flinkCluster);
+
+    ResponseResult shutdown(FlinkCluster flinkCluster);
 }

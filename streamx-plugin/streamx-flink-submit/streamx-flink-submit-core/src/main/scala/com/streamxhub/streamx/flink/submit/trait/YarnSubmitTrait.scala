@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.util.ExceptionUtils
 import com.streamxhub.streamx.flink.submit.bean._
-import org.apache.flink.client.deployment.ClusterSpecification
+import org.apache.flink.client.deployment.{ClusterDescriptor, ClusterSpecification, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.ClusterClientProvider
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.jobgraph.JobGraph
@@ -29,7 +29,6 @@ import org.apache.flink.util.FlinkException
 import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
 import org.apache.hadoop.yarn.api.records.ApplicationId
-
 import java.lang.reflect.Method
 import java.lang.{Boolean => JavaBool}
 
@@ -92,4 +91,20 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     ).asInstanceOf[ClusterClientProvider[ApplicationId]]
   }
 
+  private[submit] def getSessionClusterDescriptor[T <: ClusterDescriptor[ApplicationId]](flinkConfig: Configuration): (ApplicationId, T) = {
+    val serviceLoader = new DefaultClusterClientServiceLoader
+    val clientFactory = serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
+    val yarnClusterId: ApplicationId = clientFactory.getClusterId(flinkConfig)
+    require(yarnClusterId != null)
+    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[T]
+    (yarnClusterId, clusterDescriptor)
+  }
+
+  private[submit] def getSessionClusterDeployDescriptor[T <: ClusterDescriptor[ApplicationId]](flinkConfig: Configuration): (ClusterSpecification, T) = {
+    val serviceLoader = new DefaultClusterClientServiceLoader
+    val clientFactory = serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
+    val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
+    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[T]
+    (clusterSpecification, clusterDescriptor)
+  }
 }
