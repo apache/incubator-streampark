@@ -32,6 +32,7 @@
         <module>streamx-flink-connector-kafka</module>
         <module>streamx-flink-connector-mongo</module>
         <module>streamx-flink-connector-redis</module>
+        <module>streamx-flink-connector-pulsar</module>
     </modules>
 
     <dependencyManagement>

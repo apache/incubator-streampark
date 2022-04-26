@@ -240,7 +240,8 @@ object ConfigConst {
 
   val KEY_HBASE_AUTH_USER = "hbase.auth.user"
 
-  val DEFAULT_HBASE_WRITE_SIZE = 1024 * 1024 * 10
+  //1024 * 1024 * 10
+  val DEFAULT_HBASE_WRITE_SIZE: Int = 10485760
 
   /**
    * about influx
@@ -267,6 +268,15 @@ object ConfigConst {
   val DORIS_MAXRETRIES = "maxRetries"
   val DORIS_DEFAULT_MAXRETRIES = "1"
   val DORIS_STREAM_LOAD_PROP_PREFIX = "streamLoad."
+
+  /**
+   * about config pulsar
+   */
+  val PULSAR_SINK_PREFIX = "pulsar.sink."
+  val PULSAR_SOURCE_PREFIX = "pulsar.source."
+  val KEY_PULSAR_TOPIC = "topic"
+  val KEY_PULSAR_PATTERN = "pattern"
+  val KEY_PULSAR_ALIAS = "alias"
 
   /**
    * flink config key
