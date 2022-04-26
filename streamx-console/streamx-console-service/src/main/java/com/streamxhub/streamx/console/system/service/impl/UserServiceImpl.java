@@ -195,7 +195,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public List<User> getNoTokenUser() {
         List<User> users = this.baseMapper.getNoTokenUser();
         if (!users.isEmpty()) {
-            users.forEach(u-> {
+            users.forEach(u -> {
                 u.setPassword(null);
                 u.setSalt(null);
                 u.setRoleId(null);

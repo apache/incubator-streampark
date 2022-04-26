@@ -59,7 +59,7 @@
         <ellipsis
           :length="24"
           tooltip
-          placement='rightBottom'>
+          placement="rightBottom">
           {{ record.token }}
         </ellipsis>
       </template>
