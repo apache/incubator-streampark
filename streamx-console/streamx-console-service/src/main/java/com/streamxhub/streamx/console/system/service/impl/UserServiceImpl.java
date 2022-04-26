@@ -191,6 +191,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return permissionList.stream().map(Menu::getPerms).collect(Collectors.toSet());
     }
 
+    @Override
+    public List<User> getNoTokenUser() {
+        List<User> users = this.baseMapper.getNoTokenUser();
+        if (!users.isEmpty()) {
+            users.forEach(u-> {
+                u.setPassword(null);
+                u.setSalt(null);
+                u.setRoleId(null);
+                u.setMobile(null);
+            });
+        }
+        return users;
+    }
+
     private void setUserRoles(User user, String[] roles) {
         Arrays.stream(roles).forEach(roleId -> {
             UserRole ur = new UserRole();

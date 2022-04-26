@@ -27,7 +27,6 @@
             :sm="24">
             <span
               class="table-page-search-bar">
-
               <a-button
                 type="primary"
                 shape="circle"
@@ -35,9 +34,10 @@
                 @click.native="search"/>
               <a-button
                 type="primary"
+                shape="circle"
+                icon="plus"
                 v-permit="'token:add'"
-                v-text="'创建token'"
-                @click="handleAdd"/>
+                @click="handleAdd" />
             </span>
           </a-col>
         </a-row>
@@ -56,13 +56,12 @@
       <template
         slot="token-text"
         slot-scope="text,record">
-
-        <a-tooltip placement="rightBottom" :title="record.token">
-          <div style="overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 2;-webkit-box-orient: vertical; ">
-            {{ record.token }}
-          </div>
-        </a-tooltip>
-
+        <ellipsis
+          :length="24"
+          tooltip
+          placement='rightBottom'>
+          {{ record.token }}
+        </ellipsis>
       </template>
 
       <template
@@ -71,8 +70,8 @@
         <a-switch
           checked-children="on"
           un-checked-children="off"
-          :checked="Boolean(record.finalTokenStatus)"
-          @change="handleUpdateStatus($event,record)"/>
+          :checked="Boolean(record.finalStatus)"
+          @change="handleToggle(record)"/>
       </template>
 
       <template
@@ -114,6 +113,7 @@
 
 
     <token-add
+      ref="tokenAdd"
       @close="handleTokenAddClose"
       @success="handleTokenAddSuccess"
       :visible="tokenAdd.visible"/>
@@ -126,13 +126,14 @@ import TokenAdd from './TokenAdd'
 import RangeDate from '@/components/DateTime/RangeDate'
 import SvgIcon from '@/components/SvgIcon'
 
-import {deleteToken, list, updateTokenStatus} from '@/api/token'
+import {deleteToken, list, toggle} from '@/api/token'
 import storage from '@/utils/storage'
 import {USER_NAME} from '@/store/mutation-types'
+import Ellipsis from '@/components/Ellipsis'
 
 export default {
   name: 'Token',
-  components: {RangeDate, SvgIcon, TokenAdd},
+  components: {RangeDate, SvgIcon, TokenAdd, Ellipsis},
   data() {
     return {
       tokenAdd: {
@@ -168,6 +169,7 @@ export default {
         sortOrder: sortedInfo.columnKey === 'username' && sortedInfo.order
       }, {
         title: 'Token',
+        width: 250,
         dataIndex: 'token',
         scopedSlots: {customRender: 'token-text'}
       }, {
@@ -184,7 +186,7 @@ export default {
       }, {
         title: 'Status',
         dataIndex: 'status',
-        width: 150,
+        width: 100,
         scopedSlots: {customRender: 'token-status'}
       },
         {
@@ -204,9 +206,8 @@ export default {
   },
 
   methods: {
-    handleUpdateStatus(checked, record) {
-      updateTokenStatus({
-        status: checked ? 1 : 0,
+    handleToggle(record) {
+      toggle({
         tokenId: record.id
       }).then((resp) => {
         if (resp.code !== undefined && resp.code.toString() === '2000') {
@@ -214,8 +215,10 @@ export default {
           this.search()
         } else if (resp.code !== undefined && resp.code.toString() === '3001') {
           this.$message.error(resp.message)
-        } else {
+          this.search()
+        } else if (resp.status === 'error') {
           this.$message.error('update failed')
+          this.search()
         }
       })
     },
@@ -246,6 +249,7 @@ export default {
         } else {
           this.$message.error('delete failed')
         }
+        this.$refs.tokenAdd.fetch()
       })
     },
     handleAdd() {
@@ -256,7 +260,7 @@ export default {
     },
     handleTokenAddSuccess() {
       this.tokenAdd.visible = false
-      this.$message.success('新增令牌成功')
+      this.$message.success('create Account Token Successful!')
       this.search()
     },
 
@@ -267,7 +271,7 @@ export default {
       // 选择对象
       oInput.select()
       document.execCommand('Copy')
-      this.$message.success('复制成功')
+      this.$message.success('copy successful')
       oInput.remove()
     },
     handleDateChange(value) {

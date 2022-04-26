@@ -17,22 +17,35 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.dao;
+package com.streamxhub.streamx.console.core.enums;
 
-import com.streamxhub.streamx.console.system.entity.AccessToken;
+import java.io.Serializable;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Param;
+public enum AccessTokenState implements Serializable {
 
-public interface AccessTokenMapper extends BaseMapper<AccessToken> {
+    /**
+     * 用户未添加token
+     */
+    NULL(0),
 
-    IPage<AccessToken> page(Page<AccessToken> page, @Param("accessToken") AccessToken accessToken);
+    /**
+     * 用户的token被锁定或者无效
+     */
+    INVALID(1),
 
-    AccessToken getByUserToken(@Param("userId") Long userId, @Param("accessToken") String accessToken);
+    /**
+     * 有效
+     */
+    OK(2);
 
-    AccessToken getById(@Param("id") Long id);
+    private final int value;
 
-    AccessToken getByUserId(@Param("userId") Long userId);
+    AccessTokenState(int value) {
+        this.value = value;
+    }
+
+    public int get() {
+        return this.value;
+    }
+
 }

@@ -19,8 +19,6 @@
 
 package com.streamxhub.streamx.console.system.entity;
 
-import com.streamxhub.streamx.console.base.exception.ServiceException;
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -30,7 +28,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Date;
 
 @Data
@@ -38,8 +35,6 @@ import java.util.Date;
 public class AccessToken implements Serializable {
 
     private static final long serialVersionUID = 7187628714679791772L;
-
-    public static final String DEFAULT_PASSWORD = "X-api";
     public static final String DEFAULT_EXPIRE_TIME = "9999-01-01 00:00:00";
     public static final String IS_API_TOKEN = "is_api_token";
 
@@ -53,7 +48,7 @@ public class AccessToken implements Serializable {
     private Long id;
 
     @NotBlank(message = "{required}")
-    private String username;
+    private Long userId;
 
     @NotBlank(message = "{required}")
     private String token;
@@ -70,17 +65,16 @@ public class AccessToken implements Serializable {
 
     private Date modifyTime;
 
-    private String userStatus;
+    private transient String username;
+
+    private transient String userStatus;
 
     /**
      * token最终可用状态  token&user 同时可用 1:可用，0：不可用
      */
-    private Integer finalTokenStatus;
+    private transient Integer finalStatus;
 
-    public AccessToken setStatus(Integer status) throws ServiceException {
-        if (!Arrays.asList(STATUS_ENABLE, STATUS_DISABLE).contains(status)) {
-            throw new ServiceException("access token's status expect '1' or '0', but got " + status);
-        }
+    public AccessToken setStatus(Integer status) {
         this.status = status;
         return this;
     }
