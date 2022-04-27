@@ -55,6 +55,8 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     private final Map<String, Setting> settings = new ConcurrentHashMap<>();
 
+    private final Setting defaultSetting = new Setting();
+
     @PostConstruct
     public void initSetting() {
         List<Setting> settingList = super.list();
@@ -117,37 +119,37 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public String getDockerRegisterAddress() {
-        return settings.get(SettingService.KEY_DOCKER_REGISTER_ADDRESS).getValue();
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_ADDRESS, defaultSetting).getValue();
     }
 
     @Override
     public String getDockerRegisterUser() {
-        return settings.get(SettingService.KEY_DOCKER_REGISTER_USER).getValue();
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_USER, defaultSetting).getValue();
     }
 
     @Override
     public String getDockerRegisterPassword() {
-        return settings.get(SettingService.KEY_DOCKER_REGISTER_PASSWORD).getValue();
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_PASSWORD, defaultSetting).getValue();
     }
 
     @Override
     public String getStreamXAddress() {
-        return settings.get(SettingService.KEY_STREAMX_ADDRESS).getValue();
+        return settings.getOrDefault(SettingService.KEY_STREAMX_ADDRESS, defaultSetting).getValue();
     }
 
     @Override
     public String getMavenRepository() {
-        return settings.get(SettingService.KEY_MAVEN_REPOSITORY).getValue();
+        return settings.getOrDefault(SettingService.KEY_MAVEN_REPOSITORY, defaultSetting).getValue();
     }
 
     @Override
     public String getMavenAuthUser() {
-        return settings.get(SettingService.KEY_MAVEN_AUTH_USER).getValue();
+        return settings.getOrDefault(SettingService.KEY_MAVEN_AUTH_USER, defaultSetting).getValue();
     }
 
     @Override
     public String getMavenAuthPassword() {
-        return settings.get(SettingService.KEY_MAVEN_AUTH_PASSWORD).getValue();
+        return settings.getOrDefault(SettingService.KEY_MAVEN_AUTH_PASSWORD, defaultSetting).getValue();
     }
 
 }
