@@ -522,7 +522,7 @@ public class FlinkTrackingTask {
                 }
             } else {
                 try {
-                    String state = appInfo.getApp().getFinalStatus();
+                    String state = appInfo.getApp().getState();
                     FlinkAppState flinkAppState = FlinkAppState.of(state);
                     if (FlinkAppState.OTHER.equals(flinkAppState)) {
                         return;
