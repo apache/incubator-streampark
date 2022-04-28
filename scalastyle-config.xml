@@ -184,7 +184,7 @@ This file is divided into 3 sections:
         </customMessage>
     </check>
 
-    <check customId="awaitready" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
+    <check customId="awaitready" level="error" class="org.scalastyle.file.RegexChecker" enabled="false">
         <parameters>
             <parameter name="regex">Await\.ready</parameter>
         </parameters>
@@ -198,7 +198,7 @@ This file is divided into 3 sections:
         </customMessage>
     </check>
 
-    <check customId="FileSystemGet" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
+    <check customId="FileSystemGet" level="error" class="org.scalastyle.file.RegexChecker" enabled="false">
         <parameters>
             <parameter name="regex">FileSystem.get\([a-zA-Z_$][a-zA-Z_$0-9]*\)</parameter>
         </parameters>

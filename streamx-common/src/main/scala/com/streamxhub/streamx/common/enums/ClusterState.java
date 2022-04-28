@@ -17,23 +17,45 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.common.enums;
 
-import com.streamxhub.streamx.console.core.entity.FlinkCluster;
+import java.io.Serializable;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-
-public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
-
+/**
+ * @author: xxyykkxx
+ * @create: 2022/4/10 15:59
+ * @since: 1.0.0
+ */
+public enum ClusterState implements Serializable {
     /**
-     * @param clusterName
-     * @return
+     * 集群刚创建但未启动
      */
-    @Select("SELECT * from t_flink_cluster where cluster_name=#{clusterName}")
-    FlinkCluster getByName(@Param("clusterName") String clusterName);
+    CREATED(0),
+    /**
+     * 集群已启动
+     */
+    STARTED(1),
+    /**
+     * 集群已停止
+     */
+    STOPED(2);
 
-    @Select("SELECT * from t_flink_cluster where cluster_id=#{clusterId}")
-    FlinkCluster getByClusterId(@Param("clusterId") String clusterId);
+    private final Integer value;
+
+    ClusterState(Integer value) {
+        this.value = value;
+    }
+
+    public static ClusterState of(Integer value) {
+        for (ClusterState clusterState : values()) {
+            if (clusterState.value.equals(value)) {
+                return clusterState;
+            }
+        }
+        return null;
+    }
+
+    public Integer getValue() {
+        return value;
+    }
 }
