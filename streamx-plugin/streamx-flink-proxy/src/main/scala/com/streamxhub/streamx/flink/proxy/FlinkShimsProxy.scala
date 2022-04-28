@@ -42,7 +42,7 @@ object FlinkShimsProxy extends Logger {
   )
 
   private[this] val SHIMS_PATTERN = Pattern.compile(
-    "streamx-flink-shims_flink-(1.12|1.13|1.14)_(2.11|2.12)-(.*).jar",
+    "streamx-flink-shims_flink-(1.12|1.13|1.14|1.15)_(2.11|2.12)-(.*).jar",
     Pattern.CASE_INSENSITIVE | Pattern.DOTALL
   )
 

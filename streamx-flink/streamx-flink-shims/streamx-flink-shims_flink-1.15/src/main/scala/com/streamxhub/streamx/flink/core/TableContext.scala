@@ -16,52 +16,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.conf.ConfigConst.printLogo
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.table.api.{Table, TableEnvironment}
-import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor}
-import org.apache.flink.table.sources.TableSource
-
+import org.apache.flink.table.api.{CompiledPlan, PlanReference, Table, TableDescriptor, TableEnvironment}
+import org.apache.flink.table.module.ModuleEntry
 
 class TableContext(override val parameter: ParameterTool,
                    private val tableEnv: TableEnvironment) extends FlinkTableTrait(parameter, tableEnv) {
 
-  /**
-   * for scala
-   *
-   * @param args
-   */
   def this(args: (ParameterTool, TableEnvironment)) = this(args._1, args._2)
 
-  /**
-   * for java
-   *
-   * @param args
-   */
   def this(args: TableEnvConfig) = this(FlinkTableInitializer.initJavaTable(args))
 
+  override def useModules(strings: String*): Unit = tableEnv.useModules(strings: _*)
 
-  @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
+  override def createTemporaryTable(path: String, tableDescriptor: TableDescriptor): Unit = {
+    tableEnv.createTemporaryTable(path, tableDescriptor)
+  }
+
+  override def createTable(path: String, tableDescriptor: TableDescriptor): Unit = {
+    tableEnv.createTable(path, tableDescriptor)
+  }
+
+  override def from(tableDescriptor: TableDescriptor): Table = tableEnv.from(tableDescriptor)
+
+  override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
 
   override def execute(jobName: String): JobExecutionResult = {
     printLogo(s"FlinkTable $jobName Starting...")
-    tableEnv.execute(jobName)
+    null
   }
 
-  @deprecated override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
+  /**
+   * @since 1.15
+   */
+  override def listTables(catalogName: String, databaseName: String): Array[String] = tableEnv.listTables(catalogName, databaseName)
 
-  @deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit = tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
+  /**
+   * @since 1.15
+   */
+  override def loadPlan(planReference: PlanReference): CompiledPlan = tableEnv.loadPlan(planReference)
 
-  @deprecated override def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
-
-  @deprecated override def explain(table: Table): String = tableEnv.explain(table)
-
-  @deprecated override def explain(table: Table, extended: Boolean): String = tableEnv.explain(table, extended)
-
-  @deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
-
-  @deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
+  /**
+   * @since 1.15
+   */
+  override def compilePlanSql(stmt: String): CompiledPlan = tableEnv.compilePlanSql(stmt)
 }

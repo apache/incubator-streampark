@@ -59,7 +59,14 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-uber_${scala.binary.version}</artifactId>
+            <artifactId>flink-table-api-scala-bridge_${scala.binary.version}</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>${flink.table.uber.artifact.id}</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>

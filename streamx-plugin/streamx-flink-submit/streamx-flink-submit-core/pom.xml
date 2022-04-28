@@ -37,14 +37,14 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-kubernetes_${scala.binary.version}</artifactId>
+            <artifactId>flink-kubernetes${scala.binary.flink.version}</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-yarn_${scala.binary.version}</artifactId>
+            <artifactId>flink-yarn${scala.binary.flink.version}</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
