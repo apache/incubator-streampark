@@ -43,20 +43,6 @@
             <modules></modules>
         </profile>
 
-        <profile>
-            <id>flink-shims_2.12</id>
-            <activation>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.12</value>
-                </property>
-            </activation>
-            <modules>
-                <!-- flink 1.15+ only support scala 2.12 -->
-                <module>streamx-flink-shims_flink-1.15</module>
-            </modules>
-        </profile>
-
     </profiles>
 
 </project>
