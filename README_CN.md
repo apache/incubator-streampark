@@ -41,7 +41,7 @@ Make stream processing easier
 我们将一些好的经验固化下来并结合业内的最佳实践, 通过不断努力终于诞生了今天的框架 —— `StreamX`, 项目的初衷是 —— 让流处理更简单, 使用 `StreamX` 开发, 可以极大降低学习成本和开发门槛, 让开发者只用关心最核心的业务, `StreamX` 规范了项目的配置,
 鼓励函数式编程, 定义了最佳的编程方式, 提供了一系列开箱即用的 `Connectors`, 标准化了配置、开发、测试、部署、监控、运维的整个过程, 提供了 Scala/Java 两套 api, 其最终目的是打造一个一站式大数据平台, 流批一体,湖仓一体的解决方案
 
-[![StreamX video](https://user-images.githubusercontent.com/13284744/142747056-d220d69b-7f2a-447d-aeca-bc5435c8e29b.png)](http://assets.streamxhub.com/streamx-video.mp4)
+[![StreamX video](https://user-images.githubusercontent.com/13284744/166101616-50a44d38-3ffb-4296-8a77-92f76a4c21b5.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
 
 ## 🎉 Features
@@ -51,6 +51,8 @@ Make stream processing easier
 * 支持项目编译功能(maven 编译)
 * 在线参数配置
 * 多版本flink支持(1.12.x,1.13.x,1.14.x)
+* Scala 2.11 / 2.12 支持
+* restapi 支持
 * 快捷的日常操作(任务`启动`、`停止`、`savepoint`，从`savepoint`恢复)
 * Flink所有部署模式的支持(`Remote`/`K8s-Native-Application`/`K8s-Native-Session`/`YARN-Application`/`YARN-Per-Job`/`YARN-Session`)
 * 快捷的日常操作(任务`启动`、`停止`、`savepoint`，从`savepoint`恢复)
@@ -111,15 +113,7 @@ Make stream processing easier
 
 ### 🚀 快速上手
 
-```
-git clone https://github.com/streamxhub/streamx.git
-cd streamx
-mvn clean install -DskipTests -Denv=prod
-```
-
-更多请查看[官网文档](http://www.streamxhub.com/zh/doc/)
-
-
+请查看[官网文档](http://www.streamxhub.com/zh/doc/)了解更多信息
 
 
 ## 💋 谁在使用
