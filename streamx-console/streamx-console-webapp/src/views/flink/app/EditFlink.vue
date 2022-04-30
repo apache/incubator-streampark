@@ -787,6 +787,15 @@
           { name: 'alert', value: 1 },
           { name: 'restart', value: 2 }
         ],
+        historyRecord: {
+          uploadJars: [],
+          k8sNamespace: [],
+          k8sSessionClusterId: [],
+          flinkImage: [],
+          podTemplate:[],
+          jmPodTemplate:[],
+          tmPodTemplate:[]
+        },
         podTemplate: null,
         jmPodTemplate: null,
         tmPodTemplate: null,
@@ -919,6 +928,14 @@
 
       getExecutionCluster(executionMode){
         return this.flinkClusters.filter(o => o.executionMode === executionMode && o.clusterState === 1)
+      },
+
+      handleSelectHistoryK8sNamespace(value) {
+        this.form.setFieldsValue({'k8sNamespace': value})
+      },
+
+      handleSelectHistoryK8sSessionClusterId(value) {
+        this.form.setFieldsValue({'clusterId': value})
       },
 
       handleCheckYarnSessionClusterId(rule, value, callback) {

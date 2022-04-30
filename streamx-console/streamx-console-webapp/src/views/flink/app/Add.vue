@@ -2726,7 +2726,7 @@
         this.closeTemplateHostAliasDrawer(visualType)
       },
 
-      handleRefreshHostAliasPreview() {
+      handleRefreshHostAliasPreview() {historyRecord
         previewHostAlias({hosts: this.selectedPodTemplateHostAlias.join(',')})
           .then((resp) => {
             this.hostAliasPreview = resp.data
