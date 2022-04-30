@@ -263,5 +263,7 @@ INSERT INTO `t_menu` VALUES (100040, 100038, 'delete', NULL, NULL, 'token:delete
 INSERT INTO `t_role_menu` VALUES (100057, 100000, 100038);
 INSERT INTO `t_role_menu` VALUES (100058, 100000, 100039);
 INSERT INTO `t_role_menu` VALUES (100059, 100000, 100040);
+INSERT INTO `t_role_menu` VALUES (100060, 100000, 100041);
+INSERT INTO `t_role_menu` VALUES (100061, 100000, 100042);
 
 -- ------------------------------------- version: 1.2.3 END ---------------------------------------
