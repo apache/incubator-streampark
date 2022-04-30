@@ -3,5 +3,6 @@ module.exports = {
   theme: {
     color: '#1890ff',
     mode: 'light',
-  }
+  },
+  devtool: 'source-map'
 }

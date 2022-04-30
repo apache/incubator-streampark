@@ -45,3 +45,14 @@ export function update(params) {
   return http.post(api.FlinkCluster.UPDATE, params)
 }
 
+export function start(params) {
+  return http.post(api.FlinkCluster.START, params)
+}
+
+export function shutdown(params) {
+  return http.post(api.FlinkCluster.SHUTDOWN, params)
+}
+
+export function remove(params) {
+  return http.post(api.FlinkCluster.DELETE, params)
+}

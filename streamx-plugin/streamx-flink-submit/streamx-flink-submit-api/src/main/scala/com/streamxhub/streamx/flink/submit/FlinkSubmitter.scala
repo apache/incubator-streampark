@@ -21,9 +21,8 @@ package com.streamxhub.streamx.flink.submit
 
 import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy
-import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.commons.lang3.StringUtils
-
 import java.util.regex.Pattern
 import java.util.{Map => JavaMap}
 import javax.annotation.Nonnull
@@ -39,7 +38,11 @@ object FlinkSubmitter extends Logger {
 
   private[this] val SUBMIT_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.bean.SubmitRequest"
 
+  private[this] val DEPLOY_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.bean.DeployRequest"
+
   private[this] val STOP_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.bean.StopRequest"
+
+  private[this] val SHUTDOWN_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.bean.ShutDownRequest"
 
   @throws[Exception] def submit(submitRequest: SubmitRequest): SubmitResponse = {
     FlinkShimsProxy.proxy(submitRequest.flinkVersion, (classLoader: ClassLoader) => {
@@ -64,6 +67,29 @@ object FlinkSubmitter extends Logger {
       }
     })
   }
+
+  @throws[Exception] def deploy(deployRequest: DeployRequest): DeployResponse = {
+    FlinkShimsProxy.proxy(deployRequest.flinkVersion, (classLoader: ClassLoader) => {
+      val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
+      val requestClass = classLoader.loadClass(DEPLOY_REQUEST_CLASS_NAME)
+      val method = submitClass.getDeclaredMethod("deploy", requestClass)
+      method.setAccessible(true)
+      val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, deployRequest))
+      FlinkShimsProxy.getObject[DeployResponse](this.getClass.getClassLoader, obj)
+    })
+  }
+
+  @throws[Exception] def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
+    FlinkShimsProxy.proxy(shutDownRequest.flinkVersion, (classLoader: ClassLoader) => {
+      val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
+      val requestClass = classLoader.loadClass(SHUTDOWN_REQUEST_CLASS_NAME)
+      val method = submitClass.getDeclaredMethod("shutdown", requestClass)
+      method.setAccessible(true)
+      val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, shutDownRequest))
+      FlinkShimsProxy.getObject[ShutDownResponse](this.getClass.getClassLoader, obj)
+    })
+  }
+
 
   /**
    * extract flink configuration from submitRequest.dynamicOption
