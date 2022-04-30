@@ -41,7 +41,7 @@ The original intention of `StreamX` is to make stream processing easier. `Stream
 and tasks. Our ultimate goal is to build a one-stop big data solution integrating stream processing, batch processing, data warehouse and
 data laker.
 
-[![StreamX video](https://user-images.githubusercontent.com/13284744/142747056-d220d69b-7f2a-447d-aeca-bc5435c8e29b.png)](http://assets.streamxhub.com/streamx-video.mp4)
+[![StreamX video](https://user-images.githubusercontent.com/13284744/166101616-50a44d38-3ffb-4296-8a77-92f76a4c21b5.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
 
 ## 🎉 Features
@@ -50,7 +50,9 @@ data laker.
 * Out-of-the-box connectors
 * Support maven compilation
 * Configuration
-* Multi version flink support(1.12.x,1.13.x,1.14.x)
+* Multi version flink support(1.12.x,1.13.x,1.14.x, 1.15.x)
+* Scala 2.11 / 2.12 support
+* restapi support.
 * All Flink deployment mode support(`Remote`/`K8s-Native-Application`/`K8s-Native-Session`/`YARN-Application`/`YARN-Per-Job`/`YARN-Session`)
 * `start`, `stop`, `savepoint`, resume from `savepoint`
 * Various companies and organizations use `StreamX` for production and commercial products.
@@ -60,6 +62,7 @@ data laker.
 * Task backup and rollback
 * Manage dependencies
 * UDF
+* Flink SQL Connector
 * Flink SQL WebIDE
 * Catalog、Hive
 * Full support from task `development` to `deployment`
@@ -119,14 +122,7 @@ respect,Thanks to [Apache Flink](http://flink.apache.org) for creating a great p
 
 ### 🚀 Quick Start
 
-```
-git clone https://github.com/streamxhub/streamx.git
-cd streamx
-./mvnw clean install -DskipTests -Denv=prod
-```
-
 click [Document](http://www.streamxhub.com/zh-CN/docs/intro/) for more information
-
 
 
 ## 💋 out users
