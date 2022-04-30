@@ -310,7 +310,7 @@
                     size="large"
                     style="margin-left: 3px"
                     class="control-button ctl-btn-color"
-                    :href="item.address" 
+                    :href="item.address"
                     target="_blank">
                     <a-icon type="eye"/>
                   </a-button>

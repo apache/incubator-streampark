@@ -37,8 +37,8 @@ import scala.collection.mutable
 import scala.language.postfixOps
 
 /**
- * kubernetes native mode submit
- */
+  * kubernetes native mode submit
+  */
 //noinspection DuplicatedCode
 trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
@@ -144,5 +144,10 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     case FlinkK8sRestExposedType.LoadBalancer => ServiceExposedType.LoadBalancer
     case FlinkK8sRestExposedType.NodePort => ServiceExposedType.NodePort
     case _ => ServiceExposedType.LoadBalancer
+  }
+
+  def getDefaultKubernetesConf(k8sConf: String): String = {
+    if (k8sConf != null) File.separator.concat(k8sConf.replace("~", "root"))
+    else "/root/.kube/conf"
   }
 }

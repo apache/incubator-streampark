@@ -30,6 +30,7 @@ import org.apache.flink.configuration._
 import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.yarn.api.records.{ApplicationId, ApplicationReport, FinalApplicationStatus}
+import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException
 import org.apache.hadoop.yarn.util.ConverterUtils
 
@@ -188,8 +189,10 @@ object YarnSessionSubmit extends YarnSubmitTrait {
       flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
       val yarnClusterDescriptor = getSessionClusterDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
-      val clientProvider = clusterDescriptor.retrieve(yarnClusterDescriptor._1)
-      clientProvider.getClusterClient.shutDownCluster()
+      if (FinalApplicationStatus.UNDEFINED.equals(clusterDescriptor.getYarnClient.getApplicationReport(ApplicationId.fromString(shutDownRequest.clusterId)).getFinalApplicationStatus)) {
+        val clientProvider = clusterDescriptor.retrieve(yarnClusterDescriptor._1)
+        clientProvider.getClusterClient.shutDownCluster()
+      }
       logInfo(s"the ${shutDownRequest.clusterId}'s final status is ${clusterDescriptor.getYarnClient.getApplicationReport(ConverterUtils.toApplicationId(shutDownRequest.clusterId)).getFinalApplicationStatus}")
       ShutDownResponse()
     } catch {

@@ -168,7 +168,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                     result.setStatus(0);
                     return result;
             }
-            FlinkEnv flinkEnv = flinkEnvService.getByAppId(flinkCluster.getVersionId());
+            FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
             Map<String, Object> extraParameter = flinkCluster.getOptionMap();
             ResolveOrder resolveOrder = ResolveOrder.of(flinkCluster.getResolveOrder());
             String[] dynamicOption = CommonUtils.notEmpty(flinkCluster.getDynamicOptions()) ? flinkCluster.getDynamicOptions().split("\\s+") : new String[0];
@@ -256,7 +256,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             result.setStatus(0);
             return result;
         }
-        FlinkEnv flinkEnv = flinkEnvService.getByAppId(flinkCluster.getVersionId());
+        FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
         Map<String, Object> extraParameter = flinkCluster.getOptionMap();
         ShutDownRequest stopRequest = new ShutDownRequest(
             flinkEnv.getFlinkVersion(),
