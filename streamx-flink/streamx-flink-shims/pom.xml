@@ -17,7 +17,32 @@
         <module>streamx-flink-shims_flink-1.12</module>
         <module>streamx-flink-shims_flink-1.13</module>
         <module>streamx-flink-shims_flink-1.14</module>
-        <module>streamx-flink-shims_flink-1.15</module>
     </modules>
+
+    <profiles>
+
+        <profile>
+            <id>flink-shims_default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <!-- flink 1.15+ only support scala 2.12 -->
+                <module>streamx-flink-shims_flink-1.15</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>flink-shims_2.11</id>
+            <activation>
+                <property>
+                    <name>scala.binary.version</name>
+                    <value>2.11</value>
+                </property>
+            </activation>
+            <modules></modules>
+        </profile>
+
+    </profiles>
 
 </project>
