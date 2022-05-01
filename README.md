@@ -2,7 +2,7 @@
     <br/>
     <h1>
         <a href="http://www.streamxhub.com" target="_blank" rel="noopener noreferrer">
-        <img width="650" src="https://user-images.githubusercontent.com/13284744/166110690-3db7fbf0-33b2-4a04-a82b-4da27561176a.png" alt="StreamX logo">
+        <img width="600" src="https://user-images.githubusercontent.com/13284744/166133644-ed3cc4f5-aae5-45bc-bfbe-29c540612446.png" alt="StreamX logo">
         </a>
     </h1>
     <strong style="font-size: 1.5rem">Make stream processing easier!!!</strong>
