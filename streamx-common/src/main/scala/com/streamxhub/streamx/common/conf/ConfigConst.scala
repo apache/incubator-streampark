@@ -290,6 +290,7 @@ object ConfigConst {
   val STREAMX_FLINKSQL_CLIENT_CLASS = "com.streamxhub.streamx.flink.cli.SqlClient"
 
   def printLogo(info: String): Unit = {
+    // scalastyle:off println
     println("\n\n                 .+.                                ")
     println("           _____/ /_________  ____ _____ ___  _  __     ")
     println("          / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\| |/_/   ")
@@ -303,6 +304,7 @@ object ConfigConst {
     println("       Ver    :  1.2.3                                  ")
     println(s"       Info   :  $info                                 ")
     println(s"       Time   :  ${LocalDateTime.now}              \n\n")
+    // scalastyle:on println
   }
 
 }
