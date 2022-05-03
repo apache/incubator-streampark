@@ -618,7 +618,6 @@ CREATE TABLE `t_flink_cluster` (
    UNIQUE KEY `ID` (`CLUSTER_ID`,`ADDRESS`,`EXECUTION_MODE`)
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-SET FOREIGN_KEY_CHECKS = 1;
 
 -- ----------------------------
 -- Table of t_access_token definition
@@ -635,3 +634,5 @@ CREATE TABLE `t_access_token` (
 `MODIFY_TIME`   datetime DEFAULT NULL COMMENT 'modify time',
 PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+SET FOREIGN_KEY_CHECKS = 1;
