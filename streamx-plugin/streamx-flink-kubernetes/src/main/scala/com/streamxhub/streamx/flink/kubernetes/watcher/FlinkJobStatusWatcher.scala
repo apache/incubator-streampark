@@ -117,7 +117,10 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
         val future = Future {
           clusterKey.executeMode match {
             case SESSION => touchSessionJob(clusterKey.clusterId, clusterKey.namespace, trkIds.filter(_.belongTo(clusterKey)).map(_.jobId))
-            case APPLICATION => touchApplicationJob(clusterKey.clusterId, clusterKey.namespace).toArray
+            case APPLICATION =>
+              // scalastyle:off awaitready
+              touchApplicationJob(clusterKey.clusterId, clusterKey.namespace).toArray
+              // scalastyle:on awaitready
           }
         }
         future.filter(_.nonEmpty).foreach {

@@ -64,10 +64,12 @@ object CommandUtils extends Logger {
       // 2) input
       def input(): Unit = {
         val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
+        // scalastyle:off println
         commands.foreach(out.println)
         if (!commands.last.equalsIgnoreCase("exit")) {
           out.println("exit")
         }
+        // scalastyle:on println
         out.close()
       }
 

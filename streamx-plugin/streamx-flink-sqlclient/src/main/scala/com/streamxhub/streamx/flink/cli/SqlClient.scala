@@ -29,7 +29,9 @@ object SqlClient extends FlinkStreamTable {
   override def handle(): Unit = context.sql()
 
   implicit def callback(message: String): Unit = {
+    // scalastyle:off println
     println(message)
+    // scalastyle:on println
   }
 
 }
