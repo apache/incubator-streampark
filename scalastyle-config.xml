@@ -208,20 +208,6 @@ This file is divided into 3 sections:
         </customMessage>
     </check>
 
-    <check customId="awaitready" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
-        <parameters>
-            <parameter name="regex">Await\.ready</parameter>
-        </parameters>
-        <customMessage><![CDATA[
-          Are you sure that you want to use Await.ready? In most cases, you should use ThreadUtils.awaitReady instead.
-          If you must use Await.ready, wrap the code block with
-          // scalastyle:off awaitready
-          Await.ready(...)
-          // scalastyle:on awaitready
-        ]]>
-        </customMessage>
-    </check>
-
     <check customId="commons-lang2" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
         <parameters>
             <parameter name="regex">org\.apache\.commons\.lang\.</parameter>
