@@ -33,11 +33,6 @@
         <property name="fileExtensions" value="java"/>
     </module>
 
-    <module name="NewlineAtEndOfFile">
-        <!-- windows can use \r\n vs \n, so enforce the most used one ie UNIx style -->
-        <property name="lineSeparator" value="lf"/>
-    </module>
-
     <property name="localeLanguage" value="en"/>
 
     <module name="RegexpSingleline">
@@ -62,11 +57,6 @@
 
     <module name="FileLength">
         <property name="max" value="3000"/>
-    </module>
-
-    <module name="LineLength">
-        <property name="max" value="500"/>
-        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
     </module>
 
     <module name="SuppressWarningsFilter"/>

@@ -51,4 +51,19 @@ object FlinkSubmit {
     }
   }
 
+  def deploy(deployRequest: DeployRequest): DeployResponse = {
+    deployRequest.executionMode match {
+      case ExecutionMode.YARN_SESSION => YarnSessionSubmit.deploy(deployRequest)
+      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.deploy(deployRequest)
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${deployRequest.executionMode} Submit ")
+    }
+  }
+
+  def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
+    shutDownRequest.executionMode match {
+      case ExecutionMode.YARN_SESSION => YarnSessionSubmit.shutdown(shutDownRequest)
+      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.shutdown(shutDownRequest)
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${shutDownRequest.executionMode} Submit ")
+    }
+  }
 }

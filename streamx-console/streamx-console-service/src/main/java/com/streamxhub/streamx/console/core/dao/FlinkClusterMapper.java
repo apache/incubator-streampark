@@ -33,4 +33,7 @@ public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
      */
     @Select("SELECT * from t_flink_cluster where cluster_name=#{clusterName}")
     FlinkCluster getByName(@Param("clusterName") String clusterName);
+
+    @Select("SELECT * from t_flink_cluster where cluster_id=#{clusterId}")
+    FlinkCluster getByClusterId(@Param("clusterId") String clusterId);
 }

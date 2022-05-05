@@ -36,5 +36,7 @@ object ParamAppTest extends App {
     "5"
   )
   val param = ParameterTool.fromArgs(arg).mergeWith(ParameterTool.fromArgs(argsx))
+  // scalastyle:off println
   println(param)
+  // scalastyle:on println
 }

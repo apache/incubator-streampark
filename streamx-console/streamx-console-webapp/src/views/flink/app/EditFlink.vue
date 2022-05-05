@@ -98,9 +98,10 @@
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
             placeholder="Flink Cluster"
+            allowClear
             v-decorator="[ 'flinkClusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
             <a-select-option
-              v-for="(v,index) in flinkClusters"
+              v-for="(v,index) in getExecutionCluster(executionMode)"
               :key="`cluster_${index}`"
               :value="v.id">
               {{ v.clusterName }}
@@ -114,16 +115,21 @@
           label="Yarn Session ClusterId"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-          <a-input
-            type="text"
+          <a-select
             allowClear
             placeholder="Please enter Yarn Session clusterId"
-            v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, validator: handleCheckYarnSessionClusterId }] }]">
-          </a-input>
+            v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
+            <a-select-option
+              v-for="(v,index) in getExecutionCluster(executionMode)"
+              :key="`cluster_${index}`"
+              :value="v.clusterId">
+              {{ v.clusterName }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
       </template>
 
-      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode === 5 || executionMode === 6)">
+      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode !== null && (executionMode === 5 || executionMode === 6))">
         <a-form-item
           label="Kubernetes Namespace"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -133,10 +139,19 @@
             placeholder="default"
             allowClear
             v-decorator="[ 'k8sNamespace']">
+            <a-dropdown slot="addonAfter" placement="bottomRight">
+              <a-menu slot="overlay" trigger="['click', 'hover']">
+                <a-menu-item v-for="item in historyRecord.k8sNamespace" :key="item" @click="handleSelectHistoryK8sNamespace(item)" style="padding-right: 60px">
+                  <a-icon type="plus-circle"/>{{ item }}
+                </a-menu-item>
+              </a-menu>
+              <a-icon type="history"/>
+            </a-dropdown>
           </a-input>
         </a-form-item>
 
         <a-form-item
+          v-if="app.executionMode === 6 || executionMode === 6"
           label="Kubernetes ClusterId"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -145,7 +160,35 @@
             placeholder="Please enter Kubernetes clusterId"
             allowClear
             v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
+            <template v-if="(executionMode == null && app.executionMode === 5) || (executionMode !== null && executionMode === 5)">
+              <a-dropdown slot="addonAfter" placement="bottomRight">
+                <a-menu slot="overlay" trigger="['click', 'hover']">
+                  <a-menu-item v-for="item in historyRecord.k8sSessionClusterId" :key="item" @click="handleSelectHistoryK8sSessionClusterId(item)" style="padding-right: 60px">
+                    <a-icon type="plus-circle"/>{{ item }}
+                  </a-menu-item>
+                </a-menu>
+                <a-icon type="history"/>
+              </a-dropdown>
+            </template>
           </a-input>
+        </a-form-item>
+
+        <a-form-item
+          v-if="app.executionMode === 5 || executionMode === 5"
+          label="Kubernetes ClusterId"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            allowClear
+            placeholder="Please enter Kubernetes clusterId"
+            v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
+            <a-select-option
+              v-for="(v,index) in getExecutionCluster(executionMode)"
+              :key="`cluster_${index}`"
+              :value="v.clusterId">
+              {{ v.clusterName }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
       </template>
 
@@ -692,530 +735,551 @@
 </template>
 
 <script>
-import { jars } from '@api/project'
-import {get, update, checkName, main, upload} from '@api/application'
-import { mapActions, mapGetters } from 'vuex'
-import configOptions from './Option'
-import {list as listFlinkEnv} from '@/api/flinkEnv'
-import {list as listFlinkCluster} from '@/api/flinkCluster'
-import {initPodTemplateEditor} from './AddEdit'
-import SvgIcon from '@/components/SvgIcon'
+  import { jars } from '@api/project'
+  import {get, update, checkName, main, upload} from '@api/application'
+  import { mapActions, mapGetters } from 'vuex'
+  import configOptions from './Option'
+  import {list as listFlinkEnv} from '@/api/flinkEnv'
+  import {list as listFlinkCluster} from '@/api/flinkCluster'
+  import {initPodTemplateEditor} from './AddEdit'
+  import SvgIcon from '@/components/SvgIcon'
 
-export default {
-  name: 'EditFlink',
-  components: { SvgIcon },
-  data() {
-    return {
-      strategy: 1,
-      app: null,
-      switchDefaultValue: true,
-      runMaxTagCount: 1,
-      totalTagCount: 1,
-      jmMaxTagCount: 1,
-      tmMaxTagCount: 1,
-      defaultOptions: {},
-      resourceFrom: null,
-      defaultJar: null,
-      uploadJar: null,
-      executionMode: null,
-      configSource: [],
-      jars: [],
-      flinkEnvs: [],
-      flinkClusters: [],
-      validateAgain: false,
-      resolveOrder: [
-        { name: 'parent-first', order: 0 },
-        { name: 'child-first', order: 1 }
-      ],
-      k8sRestExposedType: [
-        {name: 'LoadBalancer', order: 0},
-        {name: 'ClusterIP', order: 1},
-        {name: 'NodePort', order: 2}
-      ],
-      executionModes: [
-        {mode: 'remote (standalone)', value: 1, disabled: false},
-        {mode: 'yarn application', value: 4, disabled: false},
-        {mode: 'yarn session', value: 3, disabled: false},
-        {mode: 'kubernetes session', value: 5, disabled: false},
-        {mode: 'kubernetes application', value: 6, disabled: false},
-        {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: false}
-      ],
-      cpTriggerAction: [
-        { name: 'alert', value: 1 },
-        { name: 'restart', value: 2 }
-      ],
-      podTemplate: null,
-      jmPodTemplate: null,
-      tmPodTemplate: null,
-      configItems: [],
-      jmMemoryItems: [],
-      tmMemoryItems: [],
-      totalItems: [],
-      form: null,
-      options: configOptions,
-      optionsKeyMapping: {},
-      optionsValueMapping: {},
-      loading: false,
-      submitting: false,
-      confEdit: {
-        visiable: false
-      },
-      controller: {
-        podTemplateTab: 'pod-template',
-        editor: {
-          podTemplate: null,
-          jmPodTemplate: null,
-          tmPodTemplate: null
+  export default {
+    name: 'EditFlink',
+    components: { SvgIcon },
+    data() {
+      return {
+        strategy: 1,
+        app: null,
+        switchDefaultValue: true,
+        runMaxTagCount: 1,
+        totalTagCount: 1,
+        jmMaxTagCount: 1,
+        tmMaxTagCount: 1,
+        defaultOptions: {},
+        resourceFrom: null,
+        defaultJar: null,
+        uploadJar: null,
+        executionMode: null,
+        configSource: [],
+        jars: [],
+        flinkEnvs: [],
+        flinkClusters: [],
+        validateAgain: false,
+        resolveOrder: [
+          { name: 'parent-first', order: 0 },
+          { name: 'child-first', order: 1 }
+        ],
+        k8sRestExposedType: [
+          {name: 'LoadBalancer', order: 0},
+          {name: 'ClusterIP', order: 1},
+          {name: 'NodePort', order: 2}
+        ],
+        executionModes: [
+          {mode: 'remote (standalone)', value: 1, disabled: false},
+          {mode: 'yarn application', value: 4, disabled: false},
+          {mode: 'yarn session', value: 3, disabled: false},
+          {mode: 'kubernetes session', value: 5, disabled: false},
+          {mode: 'kubernetes application', value: 6, disabled: false},
+          {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: false}
+        ],
+        cpTriggerAction: [
+          { name: 'alert', value: 1 },
+          { name: 'restart', value: 2 }
+        ],
+        historyRecord: {
+          uploadJars: [],
+          k8sNamespace: [],
+          k8sSessionClusterId: [],
+          flinkImage: [],
+          podTemplate:[],
+          jmPodTemplate:[],
+          tmPodTemplate:[]
+        },
+        podTemplate: null,
+        jmPodTemplate: null,
+        tmPodTemplate: null,
+        configItems: [],
+        jmMemoryItems: [],
+        tmMemoryItems: [],
+        totalItems: [],
+        form: null,
+        options: configOptions,
+        optionsKeyMapping: {},
+        optionsValueMapping: {},
+        loading: false,
+        submitting: false,
+        confEdit: {
+          visiable: false
+        },
+        controller: {
+          podTemplateTab: 'pod-template',
+          editor: {
+            podTemplate: null,
+            jmPodTemplate: null,
+            tmPodTemplate: null
+          }
         }
-      }
-    }
-  },
-
-  computed: {
-    dynamicOptions() {
-      return function(group) {
-        return this.options.filter(x => x.group === group)
       }
     },
-    hasOptions() {
-      return function(items) {
-        return this.options.filter(x => items.includes(x.key))
-      }
-    }
-  },
 
-  mounted() {
-    const appId = this.applicationId()
-    if (appId) {
-      this.handleGet(appId)
-      this.CleanAppId()
-    } else {
-      this.$router.back(-1)
-    }
-  },
-
-  beforeMount() {
-    this.form = this.$form.createForm(this)
-    this.optionsKeyMapping = new Map()
-    this.optionsValueMapping = new Map()
-    this.options.forEach((item, index, array) => {
-      this.optionsKeyMapping.set(item.key, item)
-      this.optionsValueMapping.set(item.name, item.key)
-      this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
-    })
-    listFlinkEnv().then((resp)=>{
-      this.flinkEnvs = resp.data
-    })
-    listFlinkCluster().then((resp)=>{
-      this.flinkClusters = resp.data
-    })
-  },
-
-  filters: {
-    description(option) {
-      if (option.unit) {
-        return option.description + ' (Unit ' + option.unit + ')'
-      } else {
-        return option.description
-      }
-    }
-  },
-
-  methods: {
-    ...mapActions(['CleanAppId']),
-    ...mapGetters(['applicationId']),
-    handleGet(appId) {
-      get({ id: appId }).then((resp) => {
-        this.app = resp.data
-        this.versionId = this.app.versionId || null
-        this.executionMode = this.app.executionMode
-        this.defaultOptions = JSON.parse(this.app.options || '{}')
-        this.resourceFrom = this.app.resourceFrom
-        if (this.resourceFrom === 1) {
-          jars({
-            id: this.app.projectId,
-            module: this.app.module
-          }).then((resp) => {
-            this.jars = resp.data
-            this.handleReset()
-          }).catch((error) => {
-            this.$message.error(error.message)
-          })
-        } else {
-          this.handleReset()
+    computed: {
+      dynamicOptions() {
+        return function(group) {
+          return this.options.filter(x => x.group === group)
         }
-      }).catch((error) => {
-        this.$message.error(error.message)
+      },
+      hasOptions() {
+        return function(items) {
+          return this.options.filter(x => items.includes(x.key))
+        }
+      }
+    },
+
+    mounted() {
+      const appId = this.applicationId()
+      if (appId) {
+        this.handleGet(appId)
+        this.CleanAppId()
+      } else {
+        this.$router.back(-1)
+      }
+    },
+
+    beforeMount() {
+      this.form = this.$form.createForm(this)
+      this.optionsKeyMapping = new Map()
+      this.optionsValueMapping = new Map()
+      this.options.forEach((item, index, array) => {
+        this.optionsKeyMapping.set(item.key, item)
+        this.optionsValueMapping.set(item.name, item.key)
+        this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
+      })
+      listFlinkEnv().then((resp)=>{
+        this.flinkEnvs = resp.data
+      })
+      listFlinkCluster().then((resp)=>{
+        this.flinkClusters = resp.data
       })
     },
 
-    handleConf(item) {
-      this.configItems = item
-    },
-
-    handleChangeJmMemory(item) {
-      this.jmMemoryItems = item
-    },
-
-    handleChangeTmMemory(item) {
-      this.tmMemoryItems = item
-    },
-
-    handleChangeMode(mode) {
-      this.executionMode = mode
-      this.handleReset()
-    },
-
-    handleChangeProcess(item) {
-      this.totalItems = item
-    },
-
-    handleFlinkVersion(id) {
-      this.versionId = id
-    },
-
-    handleCheckYarnSessionClusterId(rule, value, callback) {
-      if (value === null || value === undefined || value === '') {
-        callback(new Error('Yarn session clusterId is required'))
-      } else {
-        if (!value.startsWith('application')) {
-          callback(new Error("Yarn session clusterId is invalid, clusterId must start with 'application'.Please check"))
+    filters: {
+      description(option) {
+        if (option.unit) {
+          return option.description + ' (Unit ' + option.unit + ')'
         } else {
-          callback()
+          return option.description
         }
       }
     },
 
-    handleCheckJobName(rule, value, callback) {
-      if (!value) {
-        callback(new Error('application name is required'))
-      } else {
-        checkName({
-          id: this.app.id,
-          jobName: value
-        }).then((resp) => {
-          const exists = parseInt(resp.data)
-          if (exists === 0) {
+    methods: {
+      ...mapActions(['CleanAppId']),
+      ...mapGetters(['applicationId']),
+      handleGet(appId) {
+        get({ id: appId }).then((resp) => {
+          this.app = resp.data
+          this.versionId = this.app.versionId || null
+          this.executionMode = this.app.executionMode
+          this.defaultOptions = JSON.parse(this.app.options || '{}')
+          this.resourceFrom = this.app.resourceFrom
+          if (this.resourceFrom === 1) {
+            jars({
+              id: this.app.projectId,
+              module: this.app.module
+            }).then((resp) => {
+              this.jars = resp.data
+              this.handleReset()
+            }).catch((error) => {
+              this.$message.error(error.message)
+            })
+          } else {
+            this.handleReset()
+          }
+        }).catch((error) => {
+          this.$message.error(error.message)
+        })
+      },
+
+      handleConf(item) {
+        this.configItems = item
+      },
+
+      handleChangeJmMemory(item) {
+        this.jmMemoryItems = item
+      },
+
+      handleChangeTmMemory(item) {
+        this.tmMemoryItems = item
+      },
+
+      handleChangeMode(mode) {
+        this.executionMode = mode
+        this.handleReset()
+      },
+
+      handleChangeProcess(item) {
+        this.totalItems = item
+      },
+
+      handleFlinkVersion(id) {
+        this.versionId = id
+      },
+
+      getExecutionCluster(executionMode){
+        return this.flinkClusters.filter(o => o.executionMode === executionMode && o.clusterState === 1)
+      },
+
+      handleSelectHistoryK8sNamespace(value) {
+        this.form.setFieldsValue({'k8sNamespace': value})
+      },
+
+      handleSelectHistoryK8sSessionClusterId(value) {
+        this.form.setFieldsValue({'clusterId': value})
+      },
+
+      handleCheckYarnSessionClusterId(rule, value, callback) {
+        if (value === null || value === undefined || value === '') {
+          callback(new Error('Yarn session clusterId is required'))
+        } else {
+          if (!value.startsWith('application')) {
+            callback(new Error("Yarn session clusterId is invalid, clusterId must start with 'application'.Please check"))
+          } else {
             callback()
-          } else if (exists === 1) {
-            callback(new Error('application name must be unique. The application name already exists'))
-          } else if (exists === 2) {
-            callback(new Error('The application name is already running in yarn,cannot be repeated. Please check'))
-          } else if (exists === 3){
-            callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
-          }else{
-            callback(new Error('The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check'))
+          }
+        }
+      },
+
+      handleCheckJobName(rule, value, callback) {
+        if (!value) {
+          callback(new Error('application name is required'))
+        } else {
+          checkName({
+            id: this.app.id,
+            jobName: value
+          }).then((resp) => {
+            const exists = parseInt(resp.data)
+            if (exists === 0) {
+              callback()
+            } else if (exists === 1) {
+              callback(new Error('application name must be unique. The application name already exists'))
+            } else if (exists === 2) {
+              callback(new Error('The application name is already running in yarn,cannot be repeated. Please check'))
+            } else if (exists === 3){
+              callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
+            }else{
+              callback(new Error('The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check'))
+            }
+          })
+        }
+      },
+
+      handleCheckCheckPoint (rule, value, callback) {
+        const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval') || null
+        const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval') || null
+        const cpFailureAction = this.form.getFieldValue('cpFailureAction') || null
+        if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
+          callback()
+          if (!this.validateAgain) {
+            this.validateAgain = true
+            this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+            this.validateAgain = false
+          }
+        } else if(cpMaxFailureInterval == null && cpFailureRateInterval == null && cpFailureAction == null) {
+          callback()
+          if (!this.validateAgain) {
+            this.validateAgain = true
+            this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+            this.validateAgain = false
+          }
+        } else {
+          callback(new Error('checkPoint failure options must be all required or all empty'))
+          if (!this.validateAgain) {
+            this.validateAgain = true
+            this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+            this.validateAgain = false
+          }
+        }
+      },
+
+      handleCheckAlertEmail(rule, value, callback) {
+        const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval')
+        const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval')
+        const cpFailureAction = this.form.getFieldValue('cpFailureAction')
+
+        if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
+          if( cpFailureAction === 1) {
+            const alertEmail = this.form.getFieldValue('alertEmail')
+            if (alertEmail == null || alertEmail.trim() === '') {
+              callback(new Error('checkPoint Failure trigger is alert,alertEmail must not be empty'))
+            } else {
+              callback()
+            }
+          } else {
+            callback()
+          }
+        } else {
+          callback()
+        }
+      },
+
+      handleBeforeUpload(file) {
+        if (file.type !== 'application/java-archive') {
+          if (!/\.(jar|JAR)$/.test(file.name)) {
+            this.loading = false
+            this.$message.error('Only jar files can be uploaded! please check your file.')
+            return false
+          }
+        }
+        this.loading = true
+        return true
+      },
+
+      handleUploadJob(info) {
+        const status = info.file.status
+        if (status === 'done') {
+          this.loading = false
+        } else if (status === 'error') {
+          this.loading = false
+          this.$message.error(`${info.file.name} file upload failed.`)
+        }
+      },
+
+      handleCustomJobRequest(data) {
+        const formData = new FormData()
+        formData.append('file', data.file)
+        upload(formData).then((resp) => {
+          if (resp.status == 'error') {
+            this.$swal.fire({
+              title: 'Failed',
+              icon: 'error',
+              width: this.exceptionPropWidth(),
+              html: '<pre class="propException">' + resp['exception'] + '</pre>',
+              focusConfirm: false
+            })
+          } else {
+            this.loading = false
+            const path = resp.data
+            this.uploadJar = data.file.name
+            this.form.setFieldsValue({ 'jar': this.uploadJar })
+            main({
+              jar: path
+            }).then((resp) => {
+              this.form.setFieldsValue({'mainClass': resp.data})
+            }).catch((error) => {
+              this.$message.error(error.message)
+            })
+          }
+        }).catch((error) => {
+          this.$message.error(error.message)
+          this.loading = false
+        })
+      },
+
+      handleUploadJar(info) {
+        const status = info.file.status
+        if (status === 'done') {
+          this.loading = false
+        } else if (status === 'error') {
+          this.loading = false
+          this.$message.error(`${info.file.name} file upload failed.`)
+        }
+      },
+
+      handleK8sPodTemplateEditor(){
+        this.$nextTick(() => {
+          initPodTemplateEditor(this)
+        })
+      },
+
+      handleChangeJars(jar) {
+        main({
+          projectId: this.app.projectId,
+          module: this.app.module,
+          jar: jar
+        }).then((resp) => {
+          if (resp.data) {
+            this.form.setFieldsValue({ 'mainClass': resp.data })
+          }
+        }).catch((error) => {
+          this.$message.error(error.message)
+        })
+      },
+
+      // handler
+      handleSubmit: function(e) {
+        e.preventDefault()
+        this.form.validateFields((err, values) => {
+          if (!err) {
+            if (!this.submitting) {
+              const options = this.handleFormValue(values)
+              const params = {
+                id: this.app.id,
+                jobName: values.jobName,
+                resolveOrder: values.resolveOrder,
+                versionId: values.versionId,
+                executionMode: values.executionMode,
+                jar: values.jar,
+                mainClass: values.mainClass,
+                args: values.args,
+                options: JSON.stringify(options),
+                yarnQueue: this.handleYarnQueue(values),
+                cpMaxFailureInterval: values.cpMaxFailureInterval || null,
+                cpFailureRateInterval: values.cpFailureRateInterval || null,
+                cpFailureAction: values.cpFailureAction || null,
+                dynamicOptions: values.dynamicOptions,
+                restartSize: values.restartSize,
+                alertEmail: values.alertEmail || null,
+                description: values.description,
+                k8sRestExposedType: values.k8sRestExposedType,
+                k8sNamespace: values.k8sNamespace || null,
+                clusterId: values.clusterId || null,
+                flinkClusterId: values.flinkClusterId || null,
+                flinkImage: values.flinkImage || null,
+                resourceFrom: this.resourceFrom,
+                yarnSessionClusterId: values.yarnSessionClusterId || null
+              }
+              if (params.executionMode === 6) {
+                params.k8sPodTemplate = this.podTemplate
+                params.k8sJmPodTemplate = this.jmPodTemplate
+                params.k8sTmPodTemplate = this.tmPodTemplate
+              }
+              this.handleUpdateApp(params)
+            }
           }
         })
-      }
-    },
+      },
 
-    handleCheckCheckPoint (rule, value, callback) {
-      const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval') || null
-      const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval') || null
-      const cpFailureAction = this.form.getFieldValue('cpFailureAction') || null
-      if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
-        callback()
-        if (!this.validateAgain) {
-          this.validateAgain = true
-          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
-          this.validateAgain = false
-        }
-      } else if(cpMaxFailureInterval == null && cpFailureRateInterval == null && cpFailureAction == null) {
-        callback()
-        if (!this.validateAgain) {
-          this.validateAgain = true
-          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
-          this.validateAgain = false
-        }
-      } else {
-        callback(new Error('checkPoint failure options must be all required or all empty'))
-        if (!this.validateAgain) {
-          this.validateAgain = true
-          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
-          this.validateAgain = false
-        }
-      }
-    },
-
-    handleCheckAlertEmail(rule, value, callback) {
-      const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval')
-      const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval')
-      const cpFailureAction = this.form.getFieldValue('cpFailureAction')
-
-      if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
-        if( cpFailureAction === 1) {
-          const alertEmail = this.form.getFieldValue('alertEmail')
-          if (alertEmail == null || alertEmail.trim() === '') {
-            callback(new Error('checkPoint Failure trigger is alert,alertEmail must not be empty'))
-          } else {
-            callback()
+      handleYarnQueue(values) {
+        if ( this.executionMode === 4 ) {
+          const queue = values['yarnQueue']
+          if (queue != null && queue !== '' && queue !== undefined) {
+            return queue
           }
-        } else {
-          callback()
+          return null
         }
-      } else {
-        callback()
-      }
-    },
+      },
 
-    handleBeforeUpload(file) {
-      if (file.type !== 'application/java-archive') {
-        if (!/\.(jar|JAR)$/.test(file.name)) {
-          this.loading = false
-          this.$message.error('Only jar files can be uploaded! please check your file.')
-          return false
-        }
-      }
-      this.loading = true
-      return true
-    },
-
-    handleUploadJob(info) {
-      const status = info.file.status
-      if (status === 'done') {
-        this.loading = false
-      } else if (status === 'error') {
-        this.loading = false
-        this.$message.error(`${info.file.name} file upload failed.`)
-      }
-    },
-
-    handleCustomJobRequest(data) {
-      const formData = new FormData()
-      formData.append('file', data.file)
-      upload(formData).then((resp) => {
-        if (resp.status == 'error') {
-          this.$swal.fire({
-            title: 'Failed',
-            icon: 'error',
-            width: this.exceptionPropWidth(),
-            html: '<pre class="propException">' + resp['exception'] + '</pre>',
-            focusConfirm: false
-          })
-        } else {
-          this.loading = false
-          const path = resp.data
-          this.uploadJar = data.file.name
-          this.form.setFieldsValue({ 'jar': this.uploadJar })
-          main({
-            jar: path
-          }).then((resp) => {
-            this.form.setFieldsValue({'mainClass': resp.data})
-          }).catch((error) => {
-            this.$message.error(error.message)
-          })
-        }
-      }).catch((error) => {
-        this.$message.error(error.message)
-        this.loading = false
-      })
-    },
-
-    handleUploadJar(info) {
-      const status = info.file.status
-      if (status === 'done') {
-        this.loading = false
-      } else if (status === 'error') {
-        this.loading = false
-        this.$message.error(`${info.file.name} file upload failed.`)
-      }
-    },
-
-    handleK8sPodTemplateEditor(){
-      this.$nextTick(() => {
-        initPodTemplateEditor(this)
-      })
-    },
-
-    handleChangeJars(jar) {
-      main({
-        projectId: this.app.projectId,
-        module: this.app.module,
-        jar: jar
-      }).then((resp) => {
-        if (resp.data) {
-          this.form.setFieldsValue({ 'mainClass': resp.data })
-        }
-      }).catch((error) => {
-        this.$message.error(error.message)
-      })
-    },
-
-    // handler
-    handleSubmit: function(e) {
-      e.preventDefault()
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          if (!this.submitting) {
-            const options = this.handleFormValue(values)
-            const params = {
-              id: this.app.id,
-              jobName: values.jobName,
-              resolveOrder: values.resolveOrder,
-              versionId: values.versionId,
-              executionMode: values.executionMode,
-              jar: values.jar,
-              mainClass: values.mainClass,
-              args: values.args,
-              options: JSON.stringify(options),
-              yarnQueue: this.handleYarnQueue(values),
-              cpMaxFailureInterval: values.cpMaxFailureInterval || null,
-              cpFailureRateInterval: values.cpFailureRateInterval || null,
-              cpFailureAction: values.cpFailureAction || null,
-              dynamicOptions: values.dynamicOptions,
-              restartSize: values.restartSize,
-              alertEmail: values.alertEmail || null,
-              description: values.description,
-              k8sRestExposedType: values.k8sRestExposedType,
-              k8sNamespace: values.k8sNamespace || null,
-              clusterId: values.clusterId || null,
-              flinkClusterId: values.flinkClusterId || null,
-              flinkImage: values.flinkImage || null,
-              resourceFrom: this.resourceFrom,
-              yarnSessionClusterId: values.yarnSessionClusterId || null
-            }
-            if (params.executionMode === 6) {
-              params.k8sPodTemplate = this.podTemplate
-              params.k8sJmPodTemplate = this.jmPodTemplate
-              params.k8sTmPodTemplate = this.tmPodTemplate
-            }
-            this.handleUpdateApp(params)
-          }
-        }
-      })
-    },
-
-    handleYarnQueue(values) {
-      if ( this.executionMode === 4 ) {
-        const queue = values['yarnQueue']
-        if (queue != null && queue !== '' && queue !== undefined) {
-          return queue
-        }
-        return null
-      }
-    },
-
-    handleFormValue(values) {
-      const options = {}
-      for (const k in values) {
-        const v = values[k]
-        if (v != null && v !== '' && v !== undefined ) {
-          if (k === 'parallelism') {
-            options['parallelism.default'] = v
-          } else if (k === 'slot') {
-            options['taskmanager.numberOfTaskSlots'] = v
-          } else {
-            if (this.configItems.includes(k)) {
-              options[k] = v
-            } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
-              const opt = this.optionsKeyMapping.get(k)
-              const unit = opt['unit'] || ''
-              const name = opt['name']
-              if (typeof v === 'string') {
-                options[name] = v.replace(/[k|m|g]b$/g, '') + unit
-              } else if (typeof v === 'number') {
-                options[name] = v + unit
-              } else {
-                options[name] = v
+      handleFormValue(values) {
+        const options = {}
+        for (const k in values) {
+          const v = values[k]
+          if (v != null && v !== '' && v !== undefined ) {
+            if (k === 'parallelism') {
+              options['parallelism.default'] = v
+            } else if (k === 'slot') {
+              options['taskmanager.numberOfTaskSlots'] = v
+            } else {
+              if (this.configItems.includes(k)) {
+                options[k] = v
+              } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
+                const opt = this.optionsKeyMapping.get(k)
+                const unit = opt['unit'] || ''
+                const name = opt['name']
+                if (typeof v === 'string') {
+                  options[name] = v.replace(/[k|m|g]b$/g, '') + unit
+                } else if (typeof v === 'number') {
+                  options[name] = v + unit
+                } else {
+                  options[name] = v
+                }
               }
             }
           }
         }
-      }
-      return options
-    },
+        return options
+      },
 
-    handleUpdateApp(params) {
-      this.submitting = true
-      update(params).then((resp) => {
-        this.submitting = false
-        const updated = resp.data
-        if (updated) {
-          this.$router.push({ path: '/flink/app' })
-        } else {
-          console.log(updated)
-        }
-      }).catch((error) => {
-        this.submitting = false
-        this.$message.error(error.message)
-      })
-    },
-
-    handleReset() {
-      this.$nextTick(() => {
-        this.form.setFieldsValue({
-          'jobName': this.app.jobName,
-          'mainClass': this.app.mainClass,
-          'args': this.app.args,
-          'jar': this.app.jar,
-          'description': this.app.description,
-          'dynamicOptions': this.app.dynamicOptions,
-          'resolveOrder': this.app.resolveOrder,
-          'executionMode': this.executionMode || this.app.executionMode,
-          'yarnQueue': this.app.yarnQueue,
-          'restartSize': this.app.restartSize,
-          'alertEmail': this.app.alertEmail,
-          'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
-          'cpFailureRateInterval': this.app.cpFailureRateInterval,
-          'cpFailureAction': this.app.cpFailureAction,
-          'versionId': this.app.versionId || null,
-          'k8sRestExposedType': this.app.k8sRestExposedType,
-          'clusterId': this.app.clusterId,
-          'flinkClusterId': this.app.flinkClusterId,
-          'flinkImage': this.app.flinkImage,
-          'k8sNamespace': this.app.k8sNamespace,
-          'yarnSessionClusterId': this.app.yarnSessionClusterId
+      handleUpdateApp(params) {
+        this.submitting = true
+        update(params).then((resp) => {
+          this.submitting = false
+          const updated = resp.data
+          if (updated) {
+            this.$router.push({ path: '/flink/app' })
+          } else {
+            console.log(updated)
+          }
+        }).catch((error) => {
+          this.submitting = false
+          this.$message.error(error.message)
         })
-        if (this.app.executionMode === 6) {
-          this.podTemplate = this.app.k8sPodTemplate
-          this.jmPodTemplate = this.app.k8sJmPodTemplate
-          this.tmPodTemplate = this.app.k8sTmPodTemplate
-          initPodTemplateEditor(this)
+      },
+
+      handleReset() {
+        this.$nextTick(() => {
+          this.form.setFieldsValue({
+            'jobName': this.app.jobName,
+            'mainClass': this.app.mainClass,
+            'args': this.app.args,
+            'jar': this.app.jar,
+            'description': this.app.description,
+            'dynamicOptions': this.app.dynamicOptions,
+            'resolveOrder': this.app.resolveOrder,
+            'executionMode': this.executionMode || this.app.executionMode,
+            'yarnQueue': this.app.yarnQueue,
+            'restartSize': this.app.restartSize,
+            'alertEmail': this.app.alertEmail,
+            'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
+            'cpFailureRateInterval': this.app.cpFailureRateInterval,
+            'cpFailureAction': this.app.cpFailureAction,
+            'versionId': this.app.versionId || null,
+            'k8sRestExposedType': this.app.k8sRestExposedType,
+            'clusterId': this.app.clusterId,
+            'flinkClusterId': this.app.flinkClusterId,
+            'flinkImage': this.app.flinkImage,
+            'k8sNamespace': this.app.k8sNamespace,
+            'yarnSessionClusterId': this.app.yarnSessionClusterId
+          })
+          if (this.app.executionMode === 6) {
+            this.podTemplate = this.app.k8sPodTemplate
+            this.jmPodTemplate = this.app.k8sJmPodTemplate
+            this.tmPodTemplate = this.app.k8sTmPodTemplate
+            initPodTemplateEditor(this)
+          }
+        })
+        let parallelism = null
+        let slot = null
+        this.totalItems = []
+        this.jmMemoryItems = []
+        this.tmMemoryItems = []
+        const fieldValueOptions = {}
+        for (const k in this.defaultOptions) {
+          const v = this.defaultOptions[k]
+          const key = this.optionsValueMapping.get(k)
+          fieldValueOptions[key] = v
+          if (k === 'jobmanager.memory.flink.size' || k === 'taskmanager.memory.flink.size' || k === 'jobmanager.memory.process.size' || k === 'taskmanager.memory.process.size') {
+            this.totalItems.push(key)
+          } else {
+            if (k.startsWith('jobmanager.memory.')) {
+              this.jmMemoryItems.push(key)
+            }
+            if (k.startsWith('taskmanager.memory.')) {
+              this.tmMemoryItems.push(key)
+            }
+            if (k === 'taskmanager.numberOfTaskSlots') {
+              slot = parseInt(v)
+            }
+            if (k === 'parallelism.default') {
+              parallelism = parseInt(v)
+            }
+          }
         }
-      })
-      let parallelism = null
-      let slot = null
-      this.totalItems = []
-      this.jmMemoryItems = []
-      this.tmMemoryItems = []
-      const fieldValueOptions = {}
-      for (const k in this.defaultOptions) {
-        const v = this.defaultOptions[k]
-        const key = this.optionsValueMapping.get(k)
-        fieldValueOptions[key] = v
-        if (k === 'jobmanager.memory.flink.size' || k === 'taskmanager.memory.flink.size' || k === 'jobmanager.memory.process.size' || k === 'taskmanager.memory.process.size') {
-          this.totalItems.push(key)
-        } else {
-          if (k.startsWith('jobmanager.memory.')) {
-            this.jmMemoryItems.push(key)
-          }
-          if (k.startsWith('taskmanager.memory.')) {
-            this.tmMemoryItems.push(key)
-          }
-          if (k === 'taskmanager.numberOfTaskSlots') {
-            slot = parseInt(v)
-          }
-          if (k === 'parallelism.default') {
-            parallelism = parseInt(v)
-          }
-        }
+        this.$nextTick(() => {
+          this.form.setFieldsValue({'parallelism': parallelism})
+          this.form.setFieldsValue({'slot': slot})
+          this.form.setFieldsValue({'totalOptions': this.totalItems})
+          this.form.setFieldsValue({'jmOptions': this.jmMemoryItems})
+          this.form.setFieldsValue({'tmOptions': this.tmMemoryItems})
+          this.form.setFieldsValue(fieldValueOptions)
+        })
       }
-      this.$nextTick(() => {
-        this.form.setFieldsValue({'parallelism': parallelism})
-        this.form.setFieldsValue({'slot': slot})
-        this.form.setFieldsValue({'totalOptions': this.totalItems})
-        this.form.setFieldsValue({'jmOptions': this.jmMemoryItems})
-        this.form.setFieldsValue({'tmOptions': this.tmMemoryItems})
-        this.form.setFieldsValue(fieldValueOptions)
-      })
+
     }
 
   }
-
-}
 </script>
 
 <style lang='less'>
-@import "AddEdit";
+  @import "AddEdit";
 </style>
