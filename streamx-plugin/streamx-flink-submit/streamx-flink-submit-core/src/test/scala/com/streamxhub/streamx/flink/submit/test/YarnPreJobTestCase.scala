@@ -151,7 +151,7 @@ object YarnPreJobTestCase extends Logger {
 
     val clusterDescriptor = {
       val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[YarnClusterDescriptor]
-      val flinkDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+      val flinkDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist.*\\.jar")) match {
         case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $FLINK_HOME/lib")
         case array if array.length == 1 => s"$FLINK_HOME/lib/${array.head}"
         case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $FLINK_HOME/lib,[${more.mkString(",")}]")
