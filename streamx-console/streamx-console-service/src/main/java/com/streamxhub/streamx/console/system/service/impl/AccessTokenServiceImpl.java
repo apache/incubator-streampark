@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.UUID;
 
 @Slf4j
@@ -68,7 +69,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
             expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
         }
 
-        String token = WebUtils.encryptToken(JWTUtil.sign(user.getUsername(), UUID.randomUUID().toString()));
+        String token = WebUtils.encryptToken(JWTUtil.sign(user.getUsername(), UUID.randomUUID().toString(), DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault())));
         JWTToken jwtToken = new JWTToken(token, expireTime);
 
         AccessToken accessToken = new AccessToken();
