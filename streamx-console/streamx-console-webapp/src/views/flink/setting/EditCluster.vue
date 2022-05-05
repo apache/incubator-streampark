@@ -306,7 +306,7 @@
             <span class="note-info">
               <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
               Explicitly configuring both <span class="note-elem">total process memory</span> and <span
-              class="note-elem">total Flink memory</span> is not recommended. It may lead to deployment failures due to potential memory configuration conflicts. Configuring other memory components also requires caution as it can produce further configuration conflicts,
+                class="note-elem">total Flink memory</span> is not recommended. It may lead to deployment failures due to potential memory configuration conflicts. Configuring other memory components also requires caution as it can produce further configuration conflicts,
               The easiest way is to set <span class="note-elem">total process memory</span>
             </span>
           </p>
