@@ -38,7 +38,7 @@ import java.util.Date;
 @Slf4j
 public class JWTUtil {
 
-    private static final long EXPIRE_TIME = SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
+    private static final long EXPIRE_TIME = System.currentTimeMillis() + SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
 
     /**
      * 校验 token是否正确
@@ -82,9 +82,21 @@ public class JWTUtil {
      * @return token
      */
     public static String sign(String username, String secret) {
+        return sign(username, secret, EXPIRE_TIME);
+    }
+
+    /**
+     * 生成 token
+     *
+     * @param username     用户名
+     * @param secret       用户的密码
+     * @param expireTime   token过期时间
+     * @return token
+     */
+    public static String sign(String username, String secret, Long expireTime) {
         try {
             username = StringUtils.lowerCase(username);
-            Date date = new Date(System.currentTimeMillis() + EXPIRE_TIME);
+            Date date = new Date(expireTime);
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create().withClaim("username", username).withExpiresAt(date).sign(algorithm);
         } catch (Exception e) {
