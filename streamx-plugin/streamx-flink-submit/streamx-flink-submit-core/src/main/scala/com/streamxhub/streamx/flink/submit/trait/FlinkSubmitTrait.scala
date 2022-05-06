@@ -20,12 +20,12 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.flink.core._
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, ResolveOrder}
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils, Utils}
 import com.streamxhub.streamx.flink.core.conf.FlinkRunOption
+import com.streamxhub.streamx.flink.core.{ClusterClient => ClusterClientWrapper}
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.commons.collections.MapUtils
@@ -579,12 +579,15 @@ trait FlinkSubmitTrait extends Logger {
     }
 
     val clientTimeout = getOptionFromDefaultFlinkConfig(stopRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
+
+    val clientWrapper = new ClusterClientWrapper(client)
+
     (Try(stopRequest.withSavePoint).getOrElse(false), Try(stopRequest.withDrain).getOrElse(false)) match {
       case (false, false) =>
-        client.cancel(jobID).get()
+        clientWrapper.cancel(jobID).get()
         null
-      case (true, false) => client.cancelWithSavepoint(jobID, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
-      case (_, _) => client.stopWithSavepoint(jobID, stopRequest.withDrain, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      case (true, false) => clientWrapper.cancelWithSavepoint(jobID, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      case (_, _) => clientWrapper.stopWithSavepoint(jobID, stopRequest.withDrain, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
     }
   }
 
