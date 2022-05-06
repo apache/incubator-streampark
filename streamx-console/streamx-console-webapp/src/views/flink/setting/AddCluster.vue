@@ -645,7 +645,6 @@
       handleSubmitCluster(e) {
         e.preventDefault()
         this.form.validateFields((err, values) => {
-          console.log(JSON.stringify(values))
           if (!err) {
             const options = this.handleFormValue(values)
             var params = {}
@@ -843,10 +842,8 @@
       },
 
       handleGoBack() {
-        console.log('---zoussguo111-')
         this.$router.push({'path': '/flink/setting?activeKey=cluster'})
         // this.$emit('changeVisble')
-        console.log('---zoussguo-')
       },
 
       handleUseSysHadoopConf(value) {

@@ -622,7 +622,6 @@
       handleGet(clusterId) {
         getCluster({id: clusterId}).then((resp) => {
           this.cluster = resp.data
-          console.log(this.cluster)
           this.versionId = this.cluster.versionId || null
           this.executionMode = this.cluster.executionMode
           this.defaultOptions = JSON.parse(this.cluster.options || '{}')
@@ -735,7 +734,6 @@
       handleSubmitCluster(e) {
         e.preventDefault()
         this.form.validateFields((err, values) => {
-          console.log(JSON.stringify(values))
           if (!err) {
             const options = this.handleFormValue(values)
             var params = {}
@@ -786,7 +784,6 @@
             }else{
               this.$message.error('error executionMode.')
             }
-            console.log('获取参数：' + JSON.stringify(params))
             checkCluster(params).then((resp)=> {
               console.log('resp.data：' + resp.data)
               if (resp.data === 'success') {
@@ -939,10 +936,8 @@
       },
 
       handleGoBack() {
-        console.log('---zoussguo111-')
         this.$router.push({'path': '/flink/setting?activeKey=cluster'})
         // this.$emit('changeVisble')
-        console.log('---zoussguo-')
       },
 
       handleUseSysHadoopConf(value) {
