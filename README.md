@@ -125,7 +125,7 @@ respect,Thanks to [Apache Flink](http://flink.apache.org) for creating a great p
 click [Document](http://www.streamxhub.com/zh-CN/docs/intro/) for more information
 
 
-## 💋 out users
+## 💋 our users
 
 
 Various companies and organizations use StreamX for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/streamxhub/streamx/issues/163)
