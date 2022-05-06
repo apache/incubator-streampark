@@ -114,7 +114,7 @@
           type="primary"
           shape="round"
           icon="copy"
-          size="middle"
+          size="default"
           style="margin:0 3px;padding: 0 5px"
           @click.native="handleCopyCurl(api.Application.START.toString())">Copy Start cURL
         </a-button>
@@ -122,7 +122,7 @@
           type="primary"
           shape="round"
           icon="copy"
-          size="middle"
+          size="default"
           style="margin:0 3px;padding: 0 5px"
           @click.native="handleCopyCurl(api.Application.CANCEL.toString())">Copy Cancel cURL
         </a-button>
@@ -130,7 +130,7 @@
           type="link"
           shape="round"
           icon="link"
-          size="middle"
+          size="default"
           @click.native="handleDocPage()"
           style="margin:0 3px;padding: 0 5px">Api Doc Center
         </a-button>
@@ -142,7 +142,7 @@
       style="margin-top: 20px;margin-bottom: -17px"/>
     <a-tabs
       v-if="app"
-      defaultActiveKey="1"
+      :defaultActiveKey="1"
       style="margin-top: 15px"
       :animated="animated"
       :tab-bar-gutter="tabBarGutter"

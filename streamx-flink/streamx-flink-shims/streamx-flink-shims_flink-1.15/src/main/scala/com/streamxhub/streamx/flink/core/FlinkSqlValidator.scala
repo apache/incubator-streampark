@@ -35,16 +35,16 @@ import org.apache.flink.table.planner.utils.TableConfigUtils
 
 object FlinkSqlValidator extends Logger {
 
-  private lazy val parser = {
+  private[this] lazy val parser = {
     val tableConfig = StreamTableEnvironment.create(
       StreamExecutionEnvironment.getExecutionEnvironment,
       EnvironmentSettings
-        .newInstance()
-        .inStreamingMode()
-        .build()
+        .newInstance
+        .inStreamingMode
+        .build
     ).getConfig
 
-    val sqlParserConfig = TableConfigUtils.getCalciteConfig(null).getSqlParserConfig.getOrElse {
+    val sqlParserConfig = TableConfigUtils.getCalciteConfig(tableConfig).getSqlParserConfig.getOrElse {
       val conformance = tableConfig.getSqlDialect match {
         case HIVE => FlinkSqlConformance.HIVE
         case DEFAULT => FlinkSqlConformance.DEFAULT
@@ -55,7 +55,7 @@ object FlinkSqlValidator extends Logger {
               s"Unsupported SQL dialect:${tableConfig.getSqlDialect}").toString
           )
       }
-      SqlParser.config()
+      SqlParser.config
         .withParserFactory(FlinkSqlParserFactories.create(conformance))
         .withConformance(conformance)
         .withLex(Lex.JAVA)
@@ -125,4 +125,5 @@ object FlinkSqlValidator extends Logger {
         SqlError.fromString(exception.getLocalizedMessage)
     }
   }
+
 }

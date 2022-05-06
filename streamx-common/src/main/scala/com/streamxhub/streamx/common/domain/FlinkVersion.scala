@@ -41,8 +41,12 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
 
   lazy val scalaVersion: String = {
     val matcher = FLINK_SCALA_VERSION_PATTERN.matcher(flinkDistJar.getName)
-    matcher.matches()
-    matcher.group(1)
+    if (matcher.matches()) {
+      matcher.group(1);
+    } else {
+      // flink 1.15 + on support scala 2.12
+       "2.12"
+    }
   }
 
   lazy val fullVersion: String = s"${version}_$scalaVersion"
@@ -92,7 +96,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
   }
 
   lazy val flinkDistJar: File = {
-    val distJar = flinkLib.listFiles().filter(_.getName.matches("flink-dist_.*\\.jar"))
+    val distJar = flinkLib.listFiles().filter(_.getName.matches("flink-dist.*\\.jar"))
     distJar match {
       case x if x.isEmpty =>
         throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLib")
