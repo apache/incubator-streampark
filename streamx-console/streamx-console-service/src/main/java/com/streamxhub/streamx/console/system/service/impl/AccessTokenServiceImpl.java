@@ -48,7 +48,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -69,7 +68,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
             expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
         }
 
-        String token = WebUtils.encryptToken(JWTUtil.sign(user.getUsername(), UUID.randomUUID().toString(), DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault())));
+        String token = WebUtils.encryptToken(JWTUtil.sign(user.getUsername(), user.getPassword(), DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault())));
         JWTToken jwtToken = new JWTToken(token, expireTime);
 
         AccessToken accessToken = new AccessToken();
