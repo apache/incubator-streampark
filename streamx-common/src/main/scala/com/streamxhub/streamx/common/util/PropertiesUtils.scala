@@ -174,7 +174,7 @@ object PropertiesUtils extends Logger {
       val line = scanner.nextLine()
       lineNo.incrementAndGet()
       // 1. check for comments
-      val comments = line.split("\\s+#", 2)
+      val comments = line.split("#", 2)
       val conf = comments(0).trim
       // 2. get key and value
       if (conf.nonEmpty) {
