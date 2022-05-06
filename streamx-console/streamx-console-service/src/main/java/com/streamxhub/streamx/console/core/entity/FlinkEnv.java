@@ -79,7 +79,7 @@ public class FlinkEnv implements Serializable {
         this.setVersion(this.getFlinkVersion().version());
         this.setScalaVersion(this.getFlinkVersion().scalaVersion());
         if (!streamxScalaVersion.startsWith(this.getFlinkVersion().scalaVersion())) {
-            throw new ExceptionInInitializerError(
+            throw new UnsupportedOperationException(
                 String.format(
                     "The current Scala version of StreamX is %s, but the scala version of Flink to be added is %s, which does not match, Please check",
                     streamxScalaVersion,
