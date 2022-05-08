@@ -1,0 +1,133 @@
+server:
+  port: 10000
+  undertow:
+    buffer-size: 1024
+    direct-buffers: true
+    threads:
+      io: 4
+      worker: 20
+
+logging:
+  level:
+    root: info
+
+spring:
+  application.name: streamx
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  devtools:
+    restart:
+      enabled: false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 500MB
+      max-request-size: 500MB
+  datasource:
+    dynamic:
+      # 是否开启 SQL日志输出，生产环境建议关闭，有性能损耗
+      p6spy: false
+      hikari:
+        connection-timeout: 30000
+        max-lifetime: 1800000
+        max-pool-size: 15
+        min-idle: 5
+        connection-test-query: select 1
+        pool-name: HikariCP-DS-POOL
+      # 配置默认数据源
+      primary: primary
+      datasource:
+        # 数据源-1，名称为 primary
+        primary:
+          username: root
+          password: 123456
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+  aop.proxy-target-class: true
+  messages.encoding: utf-8
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  main:
+    allow-circular-references: true
+    banner-mode: off
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: [ 'httptrace', 'metrics' ]
+
+#mybatis plus 设置
+mybatis-plus:
+  type-aliases-package: com.streamxhub.streamx.console.*.entity
+  mapper-locations: classpath:mapper/*/*.xml
+  configuration:
+    jdbc-type-for-null: null
+  global-config:
+    db-config:
+      id-type: auto
+    # 关闭 mybatis-plus的 banner
+    banner: false
+
+streamx:
+  # HADOOP_USER_NAME
+  hadoop-user-name: root
+  # 本地的工作空间,用于存放项目源码,构建的目录等.
+  workspace:
+    local: /opt/streamx_workspace
+    remote: hdfs://hdfscluster/streamx   # support hdfs:///streamx/ 、 /streamx 、hdfs://host:ip/streamx/
+
+  # remote docker register namespace for streamx
+  docker:
+    register:
+      image-namespace: streamx
+    # instantiating DockerHttpClient
+    http-client:
+      max-connections: 10000
+      connection-timeout-sec: 10000
+      response-timeout-sec: 12000
+
+  # flink-k8s tracking configuration
+  flink-k8s:
+    tracking:
+      silent-state-keep-sec: 10
+      polling-task-timeout-sec:
+        job-status: 120
+        cluster-metric: 120
+      polling-interval-sec:
+        job-status: 2
+        cluster-metric: 3
+
+  # packer garbage resources collection configuration
+  packer-gc:
+    # maximum retention time for temporary build resources
+    max-resource-expired-hours: 120
+    # gc task running interval hours
+    exec-cron: 0 0 0/6 * * ?
+
+  shiro:
+    # token有效期，单位秒
+    jwtTimeOut: 86400
+    # 后端免认证接口 url
+    anonUrl: >
+      /passport/**,
+      /systemName,
+      /user/check/**,
+      /websocket/**,
+      /metrics/**,
+      /index.html,
+      /assets/**,
+      /css/**,
+      /fonts/**,
+      /img/**,
+      /js/**,
+      /loading/**,
+      /*.js,
+      /*.png,
+      /*.jpg,
+      /*.less,
+      /
+

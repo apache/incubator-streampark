@@ -28,7 +28,6 @@ services:
       - database
     restart: unless-stopped
 
-  # 配置 mysql5.7 数据库
   database:
     image: 18301455973/streamx-mysql:latest
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
