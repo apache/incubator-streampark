@@ -23,8 +23,7 @@ import java.io.Serializable;
 
 /**
  * @author: xxyykkxx
- * @create: 2022/4/10 15:59
- * @since: 1.0.0
+ * @since: 1.2.3
  */
 public enum ClusterState implements Serializable {
     /**
