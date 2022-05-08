@@ -23,9 +23,8 @@ RUN tar zxvf streamx-console/streamx-console-service/target/streamx-console-serv
 
 
 FROM maven:3.8.4-jdk-8
-
-COPY --from=deps-stage /streamx /
-
+WORKDIR /streamx
+COPY --from=deps-stage /streamx /streamx
 
 ENV NODE_VERSION 16.1.0
 ENV NPM_VERSION 7.11.2
