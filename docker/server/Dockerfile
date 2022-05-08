@@ -18,14 +18,23 @@
 FROM maven:3.8.4-jdk-8 as deps-stage
 WORKDIR /streamx
 COPY . /streamx
-RUN mkdir -p ./tmp/dist
-RUN tar zxvf streamx-console/streamx-console-service/target/streamx-console-service-*.tar.gz -C ./tmp/dist
-RUN mv ./tmp/dist/streamx-console-service-* ./tmp/dist/console-service
+RUN mkdir -p ./tmp/dist/console-service \
+    && tar zxvf streamx-console/streamx-console-service/target/streamx-console-service-*.tar.gz -C ./tmp/dist \
+    && rm -rf streamx-console/streamx-console-service/target/streamx-console-service-*.tar.gz \
+    && mv ./tmp/dist/streamx-console-service-* ./tmp/dist/console-service
 WORKDIR ./tmp/dist/console-service
 
+
 FROM maven:3.8.4-jdk-8
-FROM node:16.1.0
 WORKDIR /streamx
 COPY --from=deps-stage streamx/tmp/dist/console-service .
+
+ENV NODE_VERSION 16.1.0
+ENV NPM_VERSION 7.11.2
+
+RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
+    && tar zxvf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
+    && rm "node-v$NODE_VERSION-linux-x64.tar.gz"
+
 EXPOSE 10000
 ENTRYPOINT bash bin/startup.sh
