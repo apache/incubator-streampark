@@ -1,24 +1,59 @@
 name: Maven Package Test
 
-on:
-  push:
-    branches: [ dev ]
-  pull_request:
-    branches: [ dev ]
+on: [ push ]
 
 jobs:
-  build:
 
+  docker:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 8
-        uses: actions/setup-java@v2
-        with:
-          java-version: '8'
-          distribution: 'adopt'
-          cache: maven
-      - name: Build with Maven
-        run: mvn -B package -DskipTests --file pom.xml
+      - name: Checkout
+        uses: actions/checkout@v2
 
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: init
+        run: |
+          sed -i -e 's/eval $NOHUP/eval/' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
+          sed -i -e 's/1 "&"/1/' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
+
+      - name: Maven Install
+        run: |
+          echo '======= Mixed front-end and back-end packaging ======='
+          mvn clean install -DskipTests -Pwebapp
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        run: docker login -u 18301455973 -p shihong90
+
+      - name: Build streamx
+        run: |
+          echo '======= Start building the back-end image ======='
+          echo '======= Start building streamx-server ======='
+          docker build -f docker/server/Dockerfile -t 18301455973/streamx-server:latest .
+
+          echo '======= Start building the database image ======='
+          echo '======= Start building streamx-mysql ======='
+          docker build -f docker/mysql/Dockerfile -t 18301455973/streamx-mysql:latest .
+
+      - name: push Images to DockerHub
+        run: |
+          docker images
+
+          echo '======= Start uploading streamx-server ======='
+          docker push 18301455973/streamx-server:latest
+
+          echo '======= Start uploading streamx-mysql ======='
+          docker push 18301455973/streamx-mysql:latest
+
+          echo '=====End of mirror upload====='

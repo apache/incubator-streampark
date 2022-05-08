@@ -1,3 +1,6 @@
+CREATE database IF NOT EXISTS streamx;
+use streamx;
+
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -355,12 +358,6 @@ INSERT INTO `t_menu` VALUES (100033, 100015, 'flame Graph', NULL, NULL, 'app:fla
 INSERT INTO `t_menu` VALUES (100034, 100013, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', '1', 4, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100035, 100034, 'Setting Update', NULL, NULL, 'setting:update', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100036, 100013, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', NULL, '0', '0', NULL, NOW(), NOW());
-INSERT INTO `t_menu` VALUES (100037, 100015, 'delete', NULL, NULL, 'app:delete', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (100038, 100000, 'Token Management', '/system/token', 'system/token/Token', 'token:view', 'lock', '0', '1', 1.0, NOW(), NOW());
-INSERT INTO `t_menu` VALUES (100039, 100038, 'add', NULL, NULL, 'token:add', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (100040, 100038, 'delete', NULL, NULL, 'token:delete', NULL, '1', '1', NULL, NOW(), NULL);
-INSERT INTO `t_menu` VALUES (100041, 100013, 'Add Cluster', '/flink/setting/add_cluster', 'flink/setting/AddCluster', 'cluster:create', '', '0', '0', null, NOW(), NOW());
-INSERT INTO `t_menu` VALUES (100042, 100013, 'Edit Cluster', '/flink/setting/edit_cluster', 'flink/setting/EditCluster', 'cluster:update', '', '0', '0', null, NOW(), NOW());
 COMMIT;
 
 -- ----------------------------
@@ -462,30 +459,25 @@ INSERT INTO `t_role_menu` VALUES (100034, 100000, 100034);
 INSERT INTO `t_role_menu` VALUES (100035, 100000, 100035);
 INSERT INTO `t_role_menu` VALUES (100036, 100000, 100036);
 INSERT INTO `t_role_menu` VALUES (100037, 100000, 100037);
-INSERT INTO `t_role_menu` VALUES (100038, 100000, 100038);
-INSERT INTO `t_role_menu` VALUES (100039, 100000, 100039);
-INSERT INTO `t_role_menu` VALUES (100040, 100000, 100040);
-INSERT INTO `t_role_menu` VALUES (100041, 100001, 100014);
-INSERT INTO `t_role_menu` VALUES (100042, 100001, 100016);
-INSERT INTO `t_role_menu` VALUES (100043, 100001, 100017);
-INSERT INTO `t_role_menu` VALUES (100044, 100001, 100018);
-INSERT INTO `t_role_menu` VALUES (100045, 100001, 100019);
-INSERT INTO `t_role_menu` VALUES (100046, 100001, 100020);
-INSERT INTO `t_role_menu` VALUES (100047, 100001, 100021);
-INSERT INTO `t_role_menu` VALUES (100048, 100001, 100022);
-INSERT INTO `t_role_menu` VALUES (100049, 100001, 100025);
-INSERT INTO `t_role_menu` VALUES (100050, 100001, 100026);
-INSERT INTO `t_role_menu` VALUES (100051, 100001, 100027);
-INSERT INTO `t_role_menu` VALUES (100052, 100001, 100028);
-INSERT INTO `t_role_menu` VALUES (100053, 100001, 100029);
-INSERT INTO `t_role_menu` VALUES (100054, 100001, 100030);
-INSERT INTO `t_role_menu` VALUES (100055, 100001, 100031);
-INSERT INTO `t_role_menu` VALUES (100056, 100001, 100032);
-INSERT INTO `t_role_menu` VALUES (100057, 100001, 100033);
-INSERT INTO `t_role_menu` VALUES (100058, 100001, 100013);
-INSERT INTO `t_role_menu` VALUES (100059, 100001, 100015);
-INSERT INTO `t_role_menu` VALUES (100060, 100000, 100041);
-INSERT INTO `t_role_menu` VALUES (100061, 100000, 100042);
+INSERT INTO `t_role_menu` VALUES (100038, 100001, 100014);
+INSERT INTO `t_role_menu` VALUES (100039, 100001, 100016);
+INSERT INTO `t_role_menu` VALUES (100040, 100001, 100017);
+INSERT INTO `t_role_menu` VALUES (100041, 100001, 100018);
+INSERT INTO `t_role_menu` VALUES (100042, 100001, 100019);
+INSERT INTO `t_role_menu` VALUES (100043, 100001, 100020);
+INSERT INTO `t_role_menu` VALUES (100044, 100001, 100021);
+INSERT INTO `t_role_menu` VALUES (100045, 100001, 100022);
+INSERT INTO `t_role_menu` VALUES (100046, 100001, 100025);
+INSERT INTO `t_role_menu` VALUES (100047, 100001, 100026);
+INSERT INTO `t_role_menu` VALUES (100048, 100001, 100027);
+INSERT INTO `t_role_menu` VALUES (100049, 100001, 100028);
+INSERT INTO `t_role_menu` VALUES (100050, 100001, 100029);
+INSERT INTO `t_role_menu` VALUES (100051, 100001, 100030);
+INSERT INTO `t_role_menu` VALUES (100052, 100001, 100031);
+INSERT INTO `t_role_menu` VALUES (100053, 100001, 100032);
+INSERT INTO `t_role_menu` VALUES (100054, 100001, 100033);
+INSERT INTO `t_role_menu` VALUES (100055, 100001, 100013);
+INSERT INTO `t_role_menu` VALUES (100056, 100001, 100015);
 COMMIT;
 
 -- ----------------------------
@@ -574,64 +566,29 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_app_build_pipe`;
 CREATE TABLE `t_app_build_pipe`(
-`APP_ID`          BIGINT AUTO_INCREMENT,
-`PIPE_TYPE`       TINYINT,
-`PIPE_STATUS`     TINYINT,
-`CUR_STEP`        SMALLINT,
-`TOTAL_STEP`      SMALLINT,
-`STEPS_STATUS`    TEXT,
-`STEPS_STATUS_TS` TEXT,
-`ERROR`           TEXT,
-`BUILD_RESULT`    TEXT,
-`UPDATE_TIME`     DATETIME,
-PRIMARY KEY (`APP_ID`) USING BTREE
+    `APP_ID`          BIGINT AUTO_INCREMENT,
+    `PIPE_TYPE`       TINYINT,
+    `PIPE_STATUS`     TINYINT,
+    `CUR_STEP`        SMALLINT,
+    `TOTAL_STEP`      SMALLINT,
+    `STEPS_STATUS`    TEXT,
+    `STEPS_STATUS_TS` TEXT,
+    `ERROR`           TEXT,
+    `BUILD_RESULT`    TEXT,
+    `UPDATE_TIME`     DATETIME,
+    PRIMARY KEY (`APP_ID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 -- ----------------------------
 -- Table of t_flink_cluster
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_cluster`;
-CREATE TABLE `t_flink_cluster` (
-   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
-   `ADDRESS` varchar(255) DEFAULT NULL COMMENT 'jobmanager的url地址',
-   `CLUSTER_ID` varchar(255) DEFAULT NULL COMMENT 'session模式的clusterId(yarn-session:application-id,k8s-session:cluster-id)',
-   `CLUSTER_NAME` varchar(255) NOT NULL COMMENT '集群名称',
-   `OPTIONS` text COMMENT '参数集合json形式',
-   `YARN_QUEUE` varchar(100) DEFAULT NULL COMMENT '任务所在yarn队列',
-   `EXECUTION_MODE` tinyint(4) NOT NULL DEFAULT '1' COMMENT 'session类型(1:remote,3:yarn-session,5:kubernetes-session)',
-   `VERSION_ID` bigint(20) NOT NULL COMMENT 'flink对应id',
-   `K8S_NAMESPACE` varchar(255) DEFAULT 'default' COMMENT 'k8s namespace',
-   `SERVICE_ACCOUNT` varchar(50) DEFAULT NULL COMMENT 'k8s service account',
-   `DESCRIPTION` varchar(255) DEFAULT NULL,
-   `USER_ID` bigint(20) DEFAULT NULL,
-   `FLINK_IMAGE` varchar(255) DEFAULT NULL COMMENT 'flink使用镜像',
-   `DYNAMIC_OPTIONS` text COMMENT '动态参数',
-   `K8S_REST_EXPOSED_TYPE` tinyint(4) DEFAULT '2' COMMENT 'k8s 暴露类型(0:LoadBalancer,1:ClusterIP,2:NodePort)',
-   `K8S_HADOOP_INTEGRATION` tinyint(4) DEFAULT '0',
-   `FLAME_GRAPH` tinyint(4) DEFAULT '0' COMMENT '是否开启火焰图，默认不开启',
-   `K8S_CONF` varchar(255) DEFAULT NULL COMMENT 'k8s配置文件所在路径',
-   `RESOLVE_ORDER` int(11) DEFAULT NULL,
-   `EXCEPTION` text COMMENT '异常信息',
-   `CLUSTER_STATE` tinyint(4) DEFAULT '0' COMMENT '集群状态(0:创建未启动,1:已启动,2:停止)',
-   `CREATE_TIME` datetime DEFAULT NULL,
-   PRIMARY KEY (`ID`,`CLUSTER_NAME`),
-   UNIQUE KEY `ID` (`CLUSTER_ID`,`ADDRESS`,`EXECUTION_MODE`)
-) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-
--- ----------------------------
--- Table of t_access_token definition
--- ----------------------------
-DROP TABLE IF EXISTS `t_access_token`;
-CREATE TABLE `t_access_token` (
-`ID`            int NOT NULL AUTO_INCREMENT COMMENT 'key',
-`USER_ID`       bigint,
-`TOKEN`         varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'TOKEN',
-`EXPIRE_TIME`   datetime DEFAULT NULL COMMENT '过期时间',
-`DESCRIPTION`   varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '使用场景描述',
-`STATUS`        tinyint DEFAULT NULL COMMENT '1:enable,0:disable',
-`CREATE_TIME`   datetime DEFAULT NULL COMMENT 'create time',
-`MODIFY_TIME`   datetime DEFAULT NULL COMMENT 'modify time',
+CREATE TABLE `t_flink_cluster`(
+`ID`              bigint NOT NULL AUTO_INCREMENT,
+`CLUSTER_NAME`    varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群名称',
+`ADDRESS`         text COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群地址,http://$host:$port多个地址用,分割',
+`DESCRIPTION`     varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`CREATE_TIME`     datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
