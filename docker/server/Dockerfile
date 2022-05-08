@@ -29,9 +29,15 @@ COPY --from=deps-stage /streamx /streamx
 ENV NODE_VERSION 16.1.0
 ENV NPM_VERSION 7.11.2
 
+ENV FLINK_VERSION 1.13.6
+ENV SCALA_VERSION scala-2.11
+
+
 RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
     && tar zxvf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
     && rm "node-v$NODE_VERSION-linux-x64.tar.gz"
-
+    && wget "https://dlcdn.apache.org/flink/$FLINK_VERSION/$FLINK_VERSION-bin-$SCALA_VERSION.tgz" \
+    && tar zxvf "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" -C /usr/local --strip-components=1 \
+    && rm "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz"
 EXPOSE 10000
 ENTRYPOINT bash bin/startup.sh
