@@ -16,18 +16,16 @@
 #  limitations under the License.
 ###############################################################################
 FROM maven:3.8.4-jdk-8 as deps-stage
-WORKDIR /streamx
-COPY . /streamx
-RUN mkdir -p ./tmp/dist/console-service \
-    && tar zxvf streamx-console/streamx-console-service/target/streamx-console-service-*.tar.gz -C ./tmp/dist \
-    && rm -rf streamx-console/streamx-console-service/target/streamx-console-service-*.tar.gz \
-    && mv ./tmp/dist/streamx-console-service-* ./tmp/dist/console-service
-WORKDIR ./tmp/dist/console-service
+COPY . /
+WORKDIR /
+RUN tar zxvf streamx-console/streamx-console-service/target/streamx-console-service-*.tar.gz \
+&& mv streamx-console-service-* streamx
 
 
 FROM maven:3.8.4-jdk-8
-WORKDIR /streamx
-COPY --from=deps-stage streamx/tmp/dist/console-service .
+
+COPY --from=deps-stage /streamx /
+
 
 ENV NODE_VERSION 16.1.0
 ENV NPM_VERSION 7.11.2
