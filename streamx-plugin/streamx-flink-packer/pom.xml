@@ -85,6 +85,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <!-- docker client-->
         <dependency>
             <groupId>com.github.docker-java</groupId>

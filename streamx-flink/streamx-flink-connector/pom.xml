@@ -8,7 +8,7 @@
         <version>1.2.3</version>
     </parent>
 
-    <artifactId>streamx-flink-connector</artifactId>
+    <artifactId>streamx-flink-connector_${scala.binary.version}</artifactId>
 
     <name>StreamX : Flink Connector</name>
     <packaging>pom</packaging>
@@ -86,6 +86,34 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpasyncclient</artifactId>
                 <version>4.1.2</version>
+            </dependency>
+
+            <!-- kafka connector -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-connector-kafka${scala.binary.flink.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-core</artifactId>
+                <version>${flink.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-scala_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
@@ -190,7 +218,6 @@
         </dependency>
 
     </dependencies>
-
 
     <profiles>
 
