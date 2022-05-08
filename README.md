@@ -144,7 +144,6 @@ We have received some precious honors, which belong to everyone who contributes 
 ![](https://user-images.githubusercontent.com/13284744/163530071-a5b6f334-9af5-439c-96c9-2bb9b4eec6a6.jpg)
 
 
-
 ## 🤝 Contribution
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/streamxhub/streamx/pulls)
@@ -156,6 +155,12 @@ You can submit any ideas as [pull requests](https://github.com/streamxhub/stream
 Thank you to all the people who already contributed to StreamX!
 
 <a href="https://github.com/streamxhub/streamx/graphs/contributors"><img src="https://opencollective.com/streamx/contributors.svg?width=890" /></a>
+
+
+## ⏰ Contributor Over Time
+
+[![Contributor Over Time](https://contributor-overtime-api.git-contributor.com/contributors-svg?chart=contributorOverTime&repo=streamxhub/streamx)](https://git-contributor.com?chart=contributorOverTime&repo=streamxhub/streamx)
+
 
 ## 💰 Donation
 
