@@ -16,5 +16,4 @@
 #  limitations under the License.
 ###############################################################################
 FROM mysql:5.7
-WORKDIR /
 COPY streamx-console/streamx-console-service/src/assembly/script/final.sql /docker-entrypoint-initdb.d/01-streamx.sql
