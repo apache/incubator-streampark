@@ -9,15 +9,15 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_app_backup`;
 CREATE TABLE `t_app_backup` (
-                                `ID` bigint NOT NULL AUTO_INCREMENT,
-                                `APP_ID` bigint DEFAULT NULL,
-                                `SQL_ID` bigint DEFAULT NULL,
-                                `CONFIG_ID` bigint DEFAULT NULL,
-                                `VERSION` int DEFAULT NULL,
-                                `PATH` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                `CREATE_TIME` datetime DEFAULT NULL,
-                                PRIMARY KEY (`ID`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`APP_ID` bigint DEFAULT NULL,
+`SQL_ID` bigint DEFAULT NULL,
+`CONFIG_ID` bigint DEFAULT NULL,
+`VERSION` int DEFAULT NULL,
+`PATH` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`CREATE_TIME` datetime DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -31,14 +31,14 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flame_graph`;
 CREATE TABLE `t_flame_graph` (
-                                 `ID` bigint NOT NULL AUTO_INCREMENT,
-                                 `APP_ID` bigint DEFAULT NULL,
-                                 `PROFILER` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                 `TIMELINE` datetime DEFAULT NULL,
-                                 `CONTENT` text COLLATE utf8mb4_general_ci,
-                                 PRIMARY KEY (`ID`) USING BTREE,
-                                 KEY `INX_TIME` (`TIMELINE`),
-                                 KEY `INX_APPID` (`APP_ID`)
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`APP_ID` bigint DEFAULT NULL,
+`PROFILER` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`TIMELINE` datetime DEFAULT NULL,
+`CONTENT` text COLLATE utf8mb4_general_ci,
+PRIMARY KEY (`ID`) USING BTREE,
+KEY `INX_TIME` (`TIMELINE`),
+KEY `INX_APPID` (`APP_ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -52,63 +52,63 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_app`;
 CREATE TABLE `t_flink_app` (
-                               `ID` bigint NOT NULL AUTO_INCREMENT,
-                               `JOB_TYPE` tinyint DEFAULT NULL,
-                               `EXECUTION_MODE` tinyint DEFAULT NULL,
-                               `RESOURCE_FROM` tinyint(1) DEFAULT NULL,
-                               `PROJECT_ID` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `JOB_NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `MODULE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `JAR` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `JAR_CHECK_SUM` bigint DEFAULT NULL,
-                               `MAIN_CLASS` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `ARGS` text COLLATE utf8mb4_general_ci,
-                               `OPTIONS` text COLLATE utf8mb4_general_ci,
-                               `HOT_PARAMS` text COLLATE utf8mb4_general_ci,
-                               `USER_ID` bigint DEFAULT NULL,
-                               `APP_ID` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `APP_TYPE` tinyint DEFAULT NULL,
-                               `DURATION` bigint DEFAULT NULL,
-                               `JOB_ID` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `VERSION_ID` bigint DEFAULT NULL,
-                               `CLUSTER_ID` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `K8S_NAMESPACE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `FLINK_IMAGE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `STATE` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `RESTART_SIZE` int DEFAULT NULL,
-                               `RESTART_COUNT` int DEFAULT NULL,
-                               `CP_THRESHOLD` int DEFAULT NULL,
-                               `CP_MAX_FAILURE_INTERVAL` int DEFAULT NULL,
-                               `CP_FAILURE_RATE_INTERVAL` int DEFAULT NULL,
-                               `CP_FAILURE_ACTION` tinyint DEFAULT NULL,
-                               `DYNAMIC_OPTIONS` text COLLATE utf8mb4_general_ci,
-                               `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `RESOLVE_ORDER` tinyint DEFAULT NULL,
-                               `K8S_REST_EXPOSED_TYPE` tinyint DEFAULT NULL,
-                               `FLAME_GRAPH` tinyint DEFAULT '0',
-                               `JM_MEMORY` int DEFAULT NULL,
-                               `TM_MEMORY` int DEFAULT NULL,
-                               `TOTAL_TASK` int DEFAULT NULL,
-                               `TOTAL_TM` int DEFAULT NULL,
-                               `TOTAL_SLOT` int DEFAULT NULL,
-                               `AVAILABLE_SLOT` int DEFAULT NULL,
-                               `OPTION_STATE` tinyint DEFAULT NULL,
-                               `TRACKING` tinyint DEFAULT NULL,
-                               `CREATE_TIME` datetime DEFAULT NULL,
-                               `LAUNCH` tinyint DEFAULT '1',
-                               `BUILD` tinyint DEFAULT '1',
-                               `START_TIME` datetime DEFAULT NULL,
-                               `END_TIME` datetime DEFAULT NULL,
-                               `ALERT_EMAIL` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `K8S_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
-                               `K8S_JM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
-                               `K8S_TM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
-                               `K8S_HADOOP_INTEGRATION` tinyint(1) DEFAULT '0',
-                               `FLINK_CLUSTER_ID` bigint DEFAULT NULL,
-                               PRIMARY KEY (`ID`) USING BTREE,
-                               KEY `INX_STATE` (`STATE`) USING BTREE,
-                               KEY `INX_JOB_TYPE` (`JOB_TYPE`) USING BTREE,
-                               KEY `INX_TRACK` (`TRACKING`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`JOB_TYPE` tinyint DEFAULT NULL,
+`EXECUTION_MODE` tinyint DEFAULT NULL,
+`RESOURCE_FROM` tinyint(1) DEFAULT NULL,
+`PROJECT_ID` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`JOB_NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`MODULE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`JAR` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`JAR_CHECK_SUM` bigint DEFAULT NULL,
+`MAIN_CLASS` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`ARGS` text COLLATE utf8mb4_general_ci,
+`OPTIONS` text COLLATE utf8mb4_general_ci,
+`HOT_PARAMS` text COLLATE utf8mb4_general_ci,
+`USER_ID` bigint DEFAULT NULL,
+`APP_ID` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`APP_TYPE` tinyint DEFAULT NULL,
+`DURATION` bigint DEFAULT NULL,
+`JOB_ID` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`VERSION_ID` bigint DEFAULT NULL,
+`CLUSTER_ID` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`K8S_NAMESPACE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`FLINK_IMAGE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`STATE` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`RESTART_SIZE` int DEFAULT NULL,
+`RESTART_COUNT` int DEFAULT NULL,
+`CP_THRESHOLD` int DEFAULT NULL,
+`CP_MAX_FAILURE_INTERVAL` int DEFAULT NULL,
+`CP_FAILURE_RATE_INTERVAL` int DEFAULT NULL,
+`CP_FAILURE_ACTION` tinyint DEFAULT NULL,
+`DYNAMIC_OPTIONS` text COLLATE utf8mb4_general_ci,
+`DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`RESOLVE_ORDER` tinyint DEFAULT NULL,
+`K8S_REST_EXPOSED_TYPE` tinyint DEFAULT NULL,
+`FLAME_GRAPH` tinyint DEFAULT '0',
+`JM_MEMORY` int DEFAULT NULL,
+`TM_MEMORY` int DEFAULT NULL,
+`TOTAL_TASK` int DEFAULT NULL,
+`TOTAL_TM` int DEFAULT NULL,
+`TOTAL_SLOT` int DEFAULT NULL,
+`AVAILABLE_SLOT` int DEFAULT NULL,
+`OPTION_STATE` tinyint DEFAULT NULL,
+`TRACKING` tinyint DEFAULT NULL,
+`CREATE_TIME` datetime DEFAULT NULL,
+`LAUNCH` tinyint DEFAULT '1',
+`BUILD` tinyint DEFAULT '1',
+`START_TIME` datetime DEFAULT NULL,
+`END_TIME` datetime DEFAULT NULL,
+`ALERT_EMAIL` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`K8S_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
+`K8S_JM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
+`K8S_TM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
+`K8S_HADOOP_INTEGRATION` tinyint(1) DEFAULT '0',
+`FLINK_CLUSTER_ID` bigint DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE,
+KEY `INX_STATE` (`STATE`) USING BTREE,
+KEY `INX_JOB_TYPE` (`JOB_TYPE`) USING BTREE,
+KEY `INX_TRACK` (`TRACKING`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -123,14 +123,14 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_config`;
 CREATE TABLE `t_flink_config` (
-                                  `ID` bigint NOT NULL AUTO_INCREMENT,
-                                  `APP_ID` bigint NOT NULL,
-                                  `FORMAT` tinyint NOT NULL DEFAULT '0',
-                                  `VERSION` int NOT NULL,
-                                  `LATEST` tinyint NOT NULL DEFAULT '0',
-                                  `CONTENT` text COLLATE utf8mb4_general_ci NOT NULL,
-                                  `CREATE_TIME` datetime DEFAULT NULL,
-                                  PRIMARY KEY (`ID`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`APP_ID` bigint NOT NULL,
+`FORMAT` tinyint NOT NULL DEFAULT '0',
+`VERSION` int NOT NULL,
+`LATEST` tinyint NOT NULL DEFAULT '0',
+`CONTENT` text COLLATE utf8mb4_general_ci NOT NULL,
+`CREATE_TIME` datetime DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -144,13 +144,13 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_effective`;
 CREATE TABLE `t_flink_effective` (
-                                     `ID` bigint NOT NULL AUTO_INCREMENT,
-                                     `APP_ID` bigint NOT NULL,
-                                     `TARGET_TYPE` tinyint NOT NULL COMMENT '1) config 2) flink sql',
-                                     `TARGET_ID` bigint NOT NULL COMMENT 'configId or sqlId',
-                                     `CREATE_TIME` datetime DEFAULT NULL,
-                                     PRIMARY KEY (`ID`) USING BTREE,
-                                     UNIQUE KEY `UN_INX` (`APP_ID`,`TARGET_TYPE`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`APP_ID` bigint NOT NULL,
+`TARGET_TYPE` tinyint NOT NULL COMMENT '1) config 2) flink sql',
+`TARGET_ID` bigint NOT NULL COMMENT 'configId or sqlId',
+`CREATE_TIME` datetime DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE,
+UNIQUE KEY `UN_INX` (`APP_ID`,`TARGET_TYPE`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -165,17 +165,17 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_env`;
 CREATE TABLE `t_flink_env` (
-                               `ID` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
-                               `FLINK_NAME` varchar(128) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Flink实例名称',
-                               `FLINK_HOME` varchar(255) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Flink Home路径',
-                               `VERSION` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Flink对应的版本号',
-                               `SCALA_VERSION` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Flink对应的scala版本号',
-                               `FLINK_CONF` text COLLATE utf8mb4_general_ci NOT NULL COMMENT 'flink-conf配置内容',
-                               `IS_DEFAULT` tinyint NOT NULL DEFAULT '0' COMMENT '是否为默认版本',
-                               `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述信息',
-                               `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
-                               PRIMARY KEY (`ID`) USING BTREE,
-                               UNIQUE KEY `UN_NAME` (`FLINK_NAME`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+`FLINK_NAME` varchar(128) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Flink实例名称',
+`FLINK_HOME` varchar(255) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Flink Home路径',
+`VERSION` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Flink对应的版本号',
+`SCALA_VERSION` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Flink对应的scala版本号',
+`FLINK_CONF` text COLLATE utf8mb4_general_ci NOT NULL COMMENT 'flink-conf配置内容',
+`IS_DEFAULT` tinyint NOT NULL DEFAULT '0' COMMENT '是否为默认版本',
+`DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述信息',
+`CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
+PRIMARY KEY (`ID`) USING BTREE,
+UNIQUE KEY `UN_NAME` (`FLINK_NAME`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -189,13 +189,13 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_log`;
 CREATE TABLE `t_flink_log` (
-                               `ID` bigint NOT NULL AUTO_INCREMENT,
-                               `APP_ID` bigint DEFAULT NULL,
-                               `YARN_APP_ID` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                               `SUCCESS` tinyint DEFAULT NULL,
-                               `EXCEPTION` text COLLATE utf8mb4_general_ci,
-                               `OPTION_TIME` datetime DEFAULT NULL,
-                               PRIMARY KEY (`ID`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`APP_ID` bigint DEFAULT NULL,
+`YARN_APP_ID` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`SUCCESS` tinyint DEFAULT NULL,
+`EXCEPTION` text COLLATE utf8mb4_general_ci,
+`OPTION_TIME` datetime DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -209,21 +209,21 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_project`;
 CREATE TABLE `t_flink_project` (
-                                   `ID` bigint NOT NULL AUTO_INCREMENT,
-                                   `NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                   `URL` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                   `BRANCHES` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                   `USER_NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                   `PASSWORD` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                   `POM` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                   `BUILD_ARGS` varchar(255) DEFAULT NULL,
-                                   `TYPE` tinyint DEFAULT NULL,
-                                   `REPOSITORY` tinyint DEFAULT NULL,
-                                   `DATE` datetime DEFAULT NULL,
-                                   `LAST_BUILD` datetime DEFAULT NULL,
-                                   `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                   `BUILD_STATE` tinyint DEFAULT '-1',
-                                   PRIMARY KEY (`ID`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`URL` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`BRANCHES` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`USER_NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`PASSWORD` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`POM` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`BUILD_ARGS` varchar(255) DEFAULT NULL,
+`TYPE` tinyint DEFAULT NULL,
+`REPOSITORY` tinyint DEFAULT NULL,
+`DATE` datetime DEFAULT NULL,
+`LAST_BUILD` datetime DEFAULT NULL,
+`DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`BUILD_STATE` tinyint DEFAULT '-1',
+PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -238,14 +238,14 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_savepoint`;
 CREATE TABLE `t_flink_savepoint` (
-                                     `ID` bigint NOT NULL AUTO_INCREMENT,
-                                     `APP_ID` bigint NOT NULL,
-                                     `TYPE` tinyint DEFAULT NULL,
-                                     `PATH` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                     `LATEST` tinyint NOT NULL,
-                                     `TRIGGER_TIME` datetime DEFAULT NULL,
-                                     `CREATE_TIME` datetime DEFAULT NULL,
-                                     PRIMARY KEY (`ID`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`APP_ID` bigint NOT NULL,
+`TYPE` tinyint DEFAULT NULL,
+`PATH` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`LATEST` tinyint NOT NULL,
+`TRIGGER_TIME` datetime DEFAULT NULL,
+`CREATE_TIME` datetime DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -259,14 +259,14 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_sql`;
 CREATE TABLE `t_flink_sql` (
-                               `ID` bigint NOT NULL AUTO_INCREMENT,
-                               `APP_ID` bigint DEFAULT NULL,
-                               `SQL` text COLLATE utf8mb4_general_ci,
-                               `DEPENDENCY` text COLLATE utf8mb4_general_ci,
-                               `VERSION` int DEFAULT NULL,
-                               `CANDIDATE` tinyint NOT NULL DEFAULT '1',
-                               `CREATE_TIME` datetime DEFAULT NULL,
-                               PRIMARY KEY (`ID`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`APP_ID` bigint DEFAULT NULL,
+`SQL` text COLLATE utf8mb4_general_ci,
+`DEPENDENCY` text COLLATE utf8mb4_general_ci,
+`VERSION` int DEFAULT NULL,
+`CANDIDATE` tinyint NOT NULL DEFAULT '1',
+`CREATE_TIME` datetime DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -281,12 +281,12 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_tutorial`;
 CREATE TABLE `t_flink_tutorial` (
-                                    `ID` int NOT NULL AUTO_INCREMENT,
-                                    `TYPE` tinyint DEFAULT NULL,
-                                    `NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                    `CONTENT` text COLLATE utf8mb4_general_ci,
-                                    `CREATE_TIME` datetime DEFAULT NULL,
-                                    PRIMARY KEY (`ID`) USING BTREE
+`ID` int NOT NULL AUTO_INCREMENT,
+`TYPE` tinyint DEFAULT NULL,
+`NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`CONTENT` text COLLATE utf8mb4_general_ci,
+`CREATE_TIME` datetime DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -301,16 +301,16 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_menu`;
 CREATE TABLE `t_menu` (
-                          `MENU_ID` bigint NOT NULL AUTO_INCREMENT COMMENT '菜单/按钮ID',
-                          `PARENT_ID` bigint NOT NULL COMMENT '上级菜单ID',
-                          `MENU_NAME` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '菜单/按钮名称',
-                          `PATH` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '对应路由path',
-                          `COMPONENT` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '对应路由组件component',
-                          `PERMS` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '权限标识',
-                          `ICON` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '图标',
-                          `TYPE` char(2) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '类型 0菜单 1按钮',
-                          `DISPLAY` char(2) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1' COMMENT '菜单是否显示',
-                          `ORDER_NUM` double(20,0) DEFAULT NULL COMMENT '排序',
+`MENU_ID` bigint NOT NULL AUTO_INCREMENT COMMENT '菜单/按钮ID',
+`PARENT_ID` bigint NOT NULL COMMENT '上级菜单ID',
+`MENU_NAME` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '菜单/按钮名称',
+`PATH` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '对应路由path',
+`COMPONENT` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '对应路由组件component',
+`PERMS` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '权限标识',
+`ICON` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '图标',
+`TYPE` char(2) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '类型 0菜单 1按钮',
+`DISPLAY` char(2) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1' COMMENT '菜单是否显示',
+`ORDER_NUM` double(20,0) DEFAULT NULL COMMENT '排序',
 `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
 `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
 PRIMARY KEY (`MENU_ID`) USING BTREE
@@ -370,16 +370,16 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_message`;
 CREATE TABLE `t_message` (
-                             `ID` bigint NOT NULL AUTO_INCREMENT,
-                             `APP_ID` bigint DEFAULT NULL,
-                             `USER_ID` bigint DEFAULT NULL,
-                             `TYPE` tinyint DEFAULT NULL,
-                             `TITLE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                             `CONTEXT` text COLLATE utf8mb4_general_ci,
-                             `READED` tinyint DEFAULT '0',
-                             `CREATE_TIME` datetime DEFAULT NULL,
-                             PRIMARY KEY (`ID`) USING BTREE,
-                             KEY `INX_USER_ID` (`USER_ID`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`APP_ID` bigint DEFAULT NULL,
+`USER_ID` bigint DEFAULT NULL,
+`TYPE` tinyint DEFAULT NULL,
+`TITLE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`CONTEXT` text COLLATE utf8mb4_general_ci,
+`READED` tinyint DEFAULT '0',
+`CREATE_TIME` datetime DEFAULT NULL,
+PRIMARY KEY (`ID`) USING BTREE,
+KEY `INX_USER_ID` (`USER_ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -393,13 +393,13 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_role`;
 CREATE TABLE `t_role` (
-                          `ROLE_ID` bigint NOT NULL AUTO_INCREMENT COMMENT '角色ID',
-                          `ROLE_NAME` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '角色名称',
-                          `REMARK` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '角色描述',
-                          `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
-                          `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
-                          `ROLE_CODE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '角色标识',
-                          PRIMARY KEY (`ROLE_ID`) USING BTREE
+`ROLE_ID` bigint NOT NULL AUTO_INCREMENT COMMENT '角色ID',
+`ROLE_NAME` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '角色名称',
+`REMARK` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '角色描述',
+`CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
+`MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
+`ROLE_CODE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '角色标识',
+PRIMARY KEY (`ROLE_ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -415,11 +415,11 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_role_menu`;
 CREATE TABLE `t_role_menu` (
-                               `ID` bigint NOT NULL AUTO_INCREMENT,
-                               `ROLE_ID` bigint NOT NULL,
-                               `MENU_ID` bigint NOT NULL,
-                               PRIMARY KEY (`ID`) USING BTREE,
-                               UNIQUE KEY `UN_INX` (`ROLE_ID`,`MENU_ID`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`ROLE_ID` bigint NOT NULL,
+`MENU_ID` bigint NOT NULL,
+PRIMARY KEY (`ID`) USING BTREE,
+UNIQUE KEY `UN_INX` (`ROLE_ID`,`MENU_ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -495,13 +495,13 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_setting`;
 CREATE TABLE `t_setting` (
-                             `NUM` int DEFAULT NULL,
-                             `KEY` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-                             `VALUE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                             `TITLE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                             `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                             `TYPE` tinyint NOT NULL COMMENT '1: input 2: boolean 3: number',
-                             PRIMARY KEY (`KEY`) USING BTREE
+`NUM` int DEFAULT NULL,
+`KEY` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+`VALUE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`TITLE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`TYPE` tinyint NOT NULL COMMENT '1: input 2: boolean 3: number',
+PRIMARY KEY (`KEY`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -528,22 +528,22 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_user`;
 CREATE TABLE `t_user` (
-                          `USER_ID` bigint NOT NULL AUTO_INCREMENT COMMENT '用户ID',
-                          `USERNAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '登录用户名',
-                          `NICK_NAME` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '昵称',
-                          `SALT` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '密码加盐',
-                          `PASSWORD` varchar(128) COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码',
-                          `EMAIL` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '邮箱',
-                          `MOBILE` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '联系电话',
-                          `STATUS` char(1) COLLATE utf8mb4_general_ci NOT NULL COMMENT '状态 0锁定 1有效',
-                          `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
-                          `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
-                          `LAST_LOGIN_TIME` datetime DEFAULT NULL COMMENT '最近访问时间',
-                          `SEX` char(1) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '性别 0男 1女 2保密',
-                          `AVATAR` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '用户头像',
-                          `DESCRIPTION` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述',
-                          PRIMARY KEY (`USER_ID`) USING BTREE,
-                          UNIQUE KEY `UN_USERNAME` (`NICK_NAME`) USING BTREE
+`USER_ID` bigint NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+`USERNAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '登录用户名',
+`NICK_NAME` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '昵称',
+`SALT` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '密码加盐',
+`PASSWORD` varchar(128) COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码',
+`EMAIL` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '邮箱',
+`MOBILE` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '联系电话',
+`STATUS` char(1) COLLATE utf8mb4_general_ci NOT NULL COMMENT '状态 0锁定 1有效',
+`CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
+`MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
+`LAST_LOGIN_TIME` datetime DEFAULT NULL COMMENT '最近访问时间',
+`SEX` char(1) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '性别 0男 1女 2保密',
+`AVATAR` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '用户头像',
+`DESCRIPTION` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述',
+PRIMARY KEY (`USER_ID`) USING BTREE,
+UNIQUE KEY `UN_USERNAME` (`NICK_NAME`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 -- ----------------------------
 -- Records of t_user
@@ -557,11 +557,11 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_user_role`;
 CREATE TABLE `t_user_role` (
-                               `ID` bigint NOT NULL AUTO_INCREMENT,
-                               `USER_ID` bigint DEFAULT NULL COMMENT '用户ID',
-                               `ROLE_ID` bigint DEFAULT NULL COMMENT '角色ID',
-                               PRIMARY KEY (`ID`) USING BTREE,
-                               UNIQUE KEY `UN_INX` (`USER_ID`,`ROLE_ID`) USING BTREE
+`ID` bigint NOT NULL AUTO_INCREMENT,
+`USER_ID` bigint DEFAULT NULL COMMENT '用户ID',
+`ROLE_ID` bigint DEFAULT NULL COMMENT '角色ID',
+PRIMARY KEY (`ID`) USING BTREE,
+UNIQUE KEY `UN_INX` (`USER_ID`,`ROLE_ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -576,17 +576,17 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_app_build_pipe`;
 CREATE TABLE `t_app_build_pipe`(
-                                   `APP_ID`          BIGINT AUTO_INCREMENT,
-                                   `PIPE_TYPE`       TINYINT,
-                                   `PIPE_STATUS`     TINYINT,
-                                   `CUR_STEP`        SMALLINT,
-                                   `TOTAL_STEP`      SMALLINT,
-                                   `STEPS_STATUS`    TEXT,
-                                   `STEPS_STATUS_TS` TEXT,
-                                   `ERROR`           TEXT,
-                                   `BUILD_RESULT`    TEXT,
-                                   `UPDATE_TIME`     DATETIME,
-                                   PRIMARY KEY (`APP_ID`) USING BTREE
+`APP_ID`          BIGINT AUTO_INCREMENT,
+`PIPE_TYPE`       TINYINT,
+`PIPE_STATUS`     TINYINT,
+`CUR_STEP`        SMALLINT,
+`TOTAL_STEP`      SMALLINT,
+`STEPS_STATUS`    TEXT,
+`STEPS_STATUS_TS` TEXT,
+`ERROR`           TEXT,
+`BUILD_RESULT`    TEXT,
+`UPDATE_TIME`     DATETIME,
+PRIMARY KEY (`APP_ID`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 -- ----------------------------
@@ -594,30 +594,30 @@ CREATE TABLE `t_app_build_pipe`(
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_cluster`;
 CREATE TABLE `t_flink_cluster` (
-                                   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
-                                   `ADDRESS` varchar(255) DEFAULT NULL COMMENT 'jobmanager的url地址',
-                                   `CLUSTER_ID` varchar(255) DEFAULT NULL COMMENT 'session模式的clusterId(yarn-session:application-id,k8s-session:cluster-id)',
-                                   `CLUSTER_NAME` varchar(255) NOT NULL COMMENT '集群名称',
-                                   `OPTIONS` text COMMENT '参数集合json形式',
-                                   `YARN_QUEUE` varchar(100) DEFAULT NULL COMMENT '任务所在yarn队列',
-                                   `EXECUTION_MODE` tinyint(4) NOT NULL DEFAULT '1' COMMENT 'session类型(1:remote,3:yarn-session,5:kubernetes-session)',
-                                   `VERSION_ID` bigint(20) NOT NULL COMMENT 'flink对应id',
-                                   `K8S_NAMESPACE` varchar(255) DEFAULT 'default' COMMENT 'k8s namespace',
-                                   `SERVICE_ACCOUNT` varchar(50) DEFAULT NULL COMMENT 'k8s service account',
-                                   `DESCRIPTION` varchar(255) DEFAULT NULL,
-                                   `USER_ID` bigint(20) DEFAULT NULL,
-                                   `FLINK_IMAGE` varchar(255) DEFAULT NULL COMMENT 'flink使用镜像',
-                                   `DYNAMIC_OPTIONS` text COMMENT '动态参数',
-                                   `K8S_REST_EXPOSED_TYPE` tinyint(4) DEFAULT '2' COMMENT 'k8s 暴露类型(0:LoadBalancer,1:ClusterIP,2:NodePort)',
-                                   `K8S_HADOOP_INTEGRATION` tinyint(4) DEFAULT '0',
-                                   `FLAME_GRAPH` tinyint(4) DEFAULT '0' COMMENT '是否开启火焰图，默认不开启',
-                                   `K8S_CONF` varchar(255) DEFAULT NULL COMMENT 'k8s配置文件所在路径',
-                                   `RESOLVE_ORDER` int(11) DEFAULT NULL,
-                                   `EXCEPTION` text COMMENT '异常信息',
-                                   `CLUSTER_STATE` tinyint(4) DEFAULT '0' COMMENT '集群状态(0:创建未启动,1:已启动,2:停止)',
-                                   `CREATE_TIME` datetime DEFAULT NULL,
-                                   PRIMARY KEY (`ID`,`CLUSTER_NAME`),
-                                   UNIQUE KEY `ID` (`CLUSTER_ID`,`ADDRESS`,`EXECUTION_MODE`)
+   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+   `ADDRESS` varchar(255) DEFAULT NULL COMMENT 'jobmanager的url地址',
+   `CLUSTER_ID` varchar(255) DEFAULT NULL COMMENT 'session模式的clusterId(yarn-session:application-id,k8s-session:cluster-id)',
+   `CLUSTER_NAME` varchar(255) NOT NULL COMMENT '集群名称',
+   `OPTIONS` text COMMENT '参数集合json形式',
+   `YARN_QUEUE` varchar(100) DEFAULT NULL COMMENT '任务所在yarn队列',
+   `EXECUTION_MODE` tinyint(4) NOT NULL DEFAULT '1' COMMENT 'session类型(1:remote,3:yarn-session,5:kubernetes-session)',
+   `VERSION_ID` bigint(20) NOT NULL COMMENT 'flink对应id',
+   `K8S_NAMESPACE` varchar(255) DEFAULT 'default' COMMENT 'k8s namespace',
+   `SERVICE_ACCOUNT` varchar(50) DEFAULT NULL COMMENT 'k8s service account',
+   `DESCRIPTION` varchar(255) DEFAULT NULL,
+   `USER_ID` bigint(20) DEFAULT NULL,
+   `FLINK_IMAGE` varchar(255) DEFAULT NULL COMMENT 'flink使用镜像',
+   `DYNAMIC_OPTIONS` text COMMENT '动态参数',
+   `K8S_REST_EXPOSED_TYPE` tinyint(4) DEFAULT '2' COMMENT 'k8s 暴露类型(0:LoadBalancer,1:ClusterIP,2:NodePort)',
+   `K8S_HADOOP_INTEGRATION` tinyint(4) DEFAULT '0',
+   `FLAME_GRAPH` tinyint(4) DEFAULT '0' COMMENT '是否开启火焰图，默认不开启',
+   `K8S_CONF` varchar(255) DEFAULT NULL COMMENT 'k8s配置文件所在路径',
+   `RESOLVE_ORDER` int(11) DEFAULT NULL,
+   `EXCEPTION` text COMMENT '异常信息',
+   `CLUSTER_STATE` tinyint(4) DEFAULT '0' COMMENT '集群状态(0:创建未启动,1:已启动,2:停止)',
+   `CREATE_TIME` datetime DEFAULT NULL,
+   PRIMARY KEY (`ID`,`CLUSTER_NAME`),
+   UNIQUE KEY `ID` (`CLUSTER_ID`,`ADDRESS`,`EXECUTION_MODE`)
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
@@ -626,15 +626,15 @@ CREATE TABLE `t_flink_cluster` (
 -- ----------------------------
 DROP TABLE IF EXISTS `t_access_token`;
 CREATE TABLE `t_access_token` (
-                                  `ID`            int NOT NULL AUTO_INCREMENT COMMENT 'key',
-                                  `USER_ID`       bigint,
-                                  `TOKEN`         varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'TOKEN',
-                                  `EXPIRE_TIME`   datetime DEFAULT NULL COMMENT '过期时间',
-                                  `DESCRIPTION`   varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '使用场景描述',
-                                  `STATUS`        tinyint DEFAULT NULL COMMENT '1:enable,0:disable',
-                                  `CREATE_TIME`   datetime DEFAULT NULL COMMENT 'create time',
-                                  `MODIFY_TIME`   datetime DEFAULT NULL COMMENT 'modify time',
-                                  PRIMARY KEY (`ID`) USING BTREE
+`ID`            int NOT NULL AUTO_INCREMENT COMMENT 'key',
+`USER_ID`       bigint,
+`TOKEN`         varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'TOKEN',
+`EXPIRE_TIME`   datetime DEFAULT NULL COMMENT '过期时间',
+`DESCRIPTION`   varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '使用场景描述',
+`STATUS`        tinyint DEFAULT NULL COMMENT '1:enable,0:disable',
+`CREATE_TIME`   datetime DEFAULT NULL COMMENT 'create time',
+`MODIFY_TIME`   datetime DEFAULT NULL COMMENT 'modify time',
+PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
