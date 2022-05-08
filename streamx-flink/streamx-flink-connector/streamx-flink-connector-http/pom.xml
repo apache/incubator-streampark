@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
-        <artifactId>streamx-flink-connector</artifactId>
+        <artifactId>streamx-flink-connector_${scala.binary.version}</artifactId>
         <version>1.2.3</version>
     </parent>
 

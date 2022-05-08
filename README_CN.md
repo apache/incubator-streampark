@@ -136,7 +136,7 @@ Make stream processing easier
 
 
 
-## 🤝 如何贡献
+## 🤝 我要贡献
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/streamxhub/streamx/pulls)
 
@@ -147,6 +147,12 @@ Make stream processing easier
 感谢所有向 StreamX 贡献的朋友!
 
 <a href="https://github.com/streamxhub/streamx/graphs/contributors"><img src="https://opencollective.com/streamx/contributors.svg?width=890" /></a>
+
+
+## ⏰ Contributor Over Time
+
+[![Contributor Over Time](https://contributor-overtime-api.git-contributor.com/contributors-svg?chart=contributorOverTime&repo=streamxhub/streamx)](https://git-contributor.com?chart=contributorOverTime&repo=streamxhub/streamx)
+
 
 ## 💰 我要捐助
 
