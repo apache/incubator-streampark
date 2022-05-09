@@ -22,9 +22,9 @@ jobs:
         with:
           node-version: '16'
 
-      - uses: actions/setup-scala@v1
+      - uses: olafurpg/setup-scala@v7
         with:
-            scala-version: 2.12.13
+            scala-version: 2.12
 
       - name: init
         run: |
@@ -34,7 +34,7 @@ jobs:
       - name: Maven Install
         run: |
           echo '======= Mixed front-end and back-end packaging ======='
-          mvn clean install -DskipTests -Dscala.version=2.12.13 -Dscala.binary.version=2.12 -Pwebapp
+          mvn clean install -DskipTests -Dscala.version=2.12 -Dscala.binary.version=2.12 -Pwebapp
 
 
       - name: Set up QEMU
