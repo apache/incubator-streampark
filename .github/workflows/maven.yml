@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        scala: [ 2.12.15, 2.11.7]
+        scala: [ 2.12.15 ]
         java: [ adopt@1.8 ]
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +37,7 @@ jobs:
       - name: Maven Install
         run: |
           echo '======= Mixed front-end and back-end packaging ======='
-          mvn clean install -DskipTests -Dscala.version=${{ matrix.scala }} -Dscala.binary.version=${{ matrix.scala }} -Pwebapp
+          mvn clean install -DskipTests -Dscala.version=${{ matrix.scala }} -Dscala.binary.version=2.12 -Pwebapp
 
 
       - name: Set up QEMU
