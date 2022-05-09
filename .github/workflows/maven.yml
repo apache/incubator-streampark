@@ -22,10 +22,6 @@ jobs:
         with:
           node-version: '16'
 
-      - uses: olafurpg/setup-scala@v7
-        with:
-            scala-version: 2.12
-
       - name: init
         run: |
           sed -i -e 's/eval $NOHUP/eval/' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
