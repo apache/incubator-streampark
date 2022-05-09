@@ -37,7 +37,7 @@ jobs:
       - name: Maven Install
         run: |
           echo '======= Mixed front-end and back-end packaging ======='
-          mvn clean install -DskipTests -Dscala.version=${{ matrix.scala }} -Dscala.binary.version=2.12 -Pwebapp
+          mvn clean install -DskipTests -Dscala.version=${{ matrix.scala }} -Dscala.binary.version=${{ matrix.scala }} -Pwebapp
 
 
       - name: Set up QEMU
