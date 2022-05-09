@@ -1,4 +1,4 @@
-name: Maven Package Test
+name: StreamX CI
 
 on:
   push:
