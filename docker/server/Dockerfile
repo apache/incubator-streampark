@@ -30,7 +30,7 @@ ENV NODE_VERSION 16.1.0
 ENV NPM_VERSION 7.11.2
 
 ENV FLINK_VERSION 1.13.6
-ENV SCALA_VERSION scala-2.11
+ENV SCALA_VERSION scala_2.12
 
 
 RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
