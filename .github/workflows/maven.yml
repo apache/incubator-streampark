@@ -13,9 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        scala: [ 2.12.15 ]
+        scala: [ 2.12.15, 2.11.7]
         java: [ adopt@1.8 ]
-        platform: [ jvm, js, native ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
