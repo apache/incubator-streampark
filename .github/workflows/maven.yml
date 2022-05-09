@@ -1,6 +1,10 @@
 name: Maven Package Test
 
-on: [ push ]
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
 
 jobs:
 
@@ -16,7 +20,12 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
+
+      - uses: actions/setup-scala@v1
+        with:
+            scala-version: 2.12.13
+
       - name: init
         run: |
           sed -i -e 's/eval $NOHUP/eval/' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
@@ -25,7 +34,8 @@ jobs:
       - name: Maven Install
         run: |
           echo '======= Mixed front-end and back-end packaging ======='
-          mvn clean install -DskipTests -Pwebapp
+          mvn clean install -DskipTests -Dscala.version=2.12.13 -Dscala.binary.version=2.12 -Pwebapp
+
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
