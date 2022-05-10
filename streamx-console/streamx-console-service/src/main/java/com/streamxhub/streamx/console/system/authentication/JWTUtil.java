@@ -40,8 +40,6 @@ import java.util.Date;
 @Slf4j
 public class JWTUtil {
 
-    private static final long EXPIRE_TIME = System.currentTimeMillis() + SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
-
     /**
      * 校验 token是否正确
      *
@@ -86,7 +84,7 @@ public class JWTUtil {
      * @return token
      */
     public static String sign(String username, String secret) {
-        return sign(username, secret, EXPIRE_TIME);
+        return sign(username, secret, getExpireTime());
     }
 
     /**
@@ -107,5 +105,12 @@ public class JWTUtil {
             log.info("error：{}", e);
             return null;
         }
+    }
+
+    /**
+     * 获取用户登录token 失效时间
+     */
+    public static Long getExpireTime() {
+        return System.currentTimeMillis() + SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
     }
 }
