@@ -211,7 +211,7 @@ detachedPackage () {
   if [ $? -eq 0 ]; then
     printf '\n'
     echo_g """streamx project build successful! build info: package mode @ detached, scala version @ $binaryVer
-    Next you need to build front-end by yourself. build cmd:
+    Next, you need to build front-end by yourself. build cmd:
 
      1) cd $PRG_DIR/streamx-console/streamx-console-webapp
      2) npm install # or yarn install
