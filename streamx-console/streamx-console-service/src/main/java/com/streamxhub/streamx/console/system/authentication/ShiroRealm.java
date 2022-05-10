@@ -110,7 +110,7 @@ public class ShiroRealm extends AuthorizingRealm {
             String tokenDb = WebUtils.encryptToken(token);
             boolean effective = accessTokenService.checkTokenEffective(user.getUserId(), tokenDb);
             if (!effective) {
-                throw new AuthenticationException("token校验不通过：1.浏览器用户请检查用户名或密码 ; 2.accessApi用户请检查用户状态或accessToken状态");
+                throw new AuthenticationException("token校验不通过：1.浏览器用户请检查用户名或密码 ; 2.Api用户请检查用户状态或accessToken状态");
             }
             SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
         }
