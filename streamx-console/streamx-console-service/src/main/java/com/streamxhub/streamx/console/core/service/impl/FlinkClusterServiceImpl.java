@@ -53,14 +53,19 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author benjobs
@@ -171,7 +176,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
             Map<String, Object> extraParameter = flinkCluster.getOptionMap();
             ResolveOrder resolveOrder = ResolveOrder.of(flinkCluster.getResolveOrder());
-            String[] dynamicOption = CommonUtils.notEmpty(flinkCluster.getDynamicOptions()) ? flinkCluster.getDynamicOptions().split("\\s+") : new String[0];
+            String[] dynamicOption = CommonUtils.notEmpty(flinkCluster.getDynamicOptions()) ? parseDynamicOptions(flinkCluster.getDynamicOptions()) : new String[0];
             DeployRequest deployRequest = new DeployRequest(
                 flinkEnv.getFlinkVersion(),
                 flinkCluster.getClusterId(),
@@ -320,5 +325,19 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         flameGraph.put("sampleInterval", 1000 * 60 * 2);
         flameGraph.put("metricInterval", 1000 * 60 * 2);
         return flameGraph;
+    }
+
+    private String[] parseDynamicOptions(String dynamicParams) {
+        List<String> dynamicOptins = new ArrayList<>();
+        Pattern pattern = Pattern.compile("-Denv.java.opts\\s*=\\s*\".*\"");
+        Matcher matcher = pattern.matcher(dynamicParams);
+        if (matcher.find()) {
+            dynamicOptins.add(matcher.group().replace("\"", ""));
+            dynamicParams = dynamicParams.replace(matcher.group(), "").trim();
+        }
+        if (StringUtils.isNoneBlank(dynamicParams)){
+            Arrays.stream(dynamicParams.split("\\s+")).forEach(x -> dynamicOptins.add(x));
+        }
+        return dynamicOptins.toArray(new String[]{});
     }
 }

@@ -19,9 +19,12 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.Bridge.toTrkId;
-import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.isKubernetesApp;
-
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.domain.FlinkMemorySize;
@@ -88,13 +91,6 @@ import com.streamxhub.streamx.flink.submit.bean.StopRequest;
 import com.streamxhub.streamx.flink.submit.bean.StopResponse;
 import com.streamxhub.streamx.flink.submit.bean.SubmitRequest;
 import com.streamxhub.streamx.flink.submit.bean.SubmitResponse;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -108,11 +104,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -126,8 +123,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Manifest;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.Bridge.toTrkId;
+import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.isKubernetesApp;
 
 /**
  * @author benjobs
@@ -1109,7 +1110,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 throw new UnsupportedOperationException("Unsupported...");
             }
 
-            String[] dynamicOption = CommonUtils.notEmpty(application.getDynamicOptions()) ? application.getDynamicOptions().split("\\s+") : new String[0];
+            String[] dynamicOption = CommonUtils.notEmpty(application.getDynamicOptions()) ? parseDynamicOptions(application.getDynamicOptions()) : new String[0];
 
             Map<String, Object> extraParameter = new HashMap<>(0);
             extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());
@@ -1270,4 +1271,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return flameGraph;
     }
 
+    private String[] parseDynamicOptions(String dynamicParams) {
+        List<String> dynamicOptins = new ArrayList<>();
+        Pattern pattern = Pattern.compile("-Denv.java.opts\\s*=\\s*\".*\"");
+        Matcher matcher = pattern.matcher(dynamicParams);
+        if (matcher.find()) {
+            dynamicOptins.add(matcher.group().replace("\"", ""));
+            dynamicParams = dynamicParams.replace(matcher.group(), "").trim();
+        }
+        if (StringUtils.isNoneBlank(dynamicParams)){
+            Arrays.stream(dynamicParams.split("\\s+")).forEach(x -> dynamicOptins.add(x));
+        }
+        return dynamicOptins.toArray(new String[]{});
+    }
 }
