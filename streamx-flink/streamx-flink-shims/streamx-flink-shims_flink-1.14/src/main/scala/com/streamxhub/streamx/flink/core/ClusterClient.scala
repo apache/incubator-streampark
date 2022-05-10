@@ -16,45 +16,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.streamxhub.streamx.flink.core
 
-package com.streamxhub.streamx.common.enums;
+import org.apache.flink.api.common.JobID
+import org.apache.flink.client.program.{ClusterClient => FlinkClusterClient}
 
-import java.io.Serializable;
+import java.util.concurrent.CompletableFuture
 
-/**
- * @author: xxyykkxx
- * @since: 1.2.3
- */
-public enum ClusterState implements Serializable {
-    /**
-     * 集群刚创建但未启动
-     */
-    CREATED(0),
-    /**
-     * 集群已启动
-     */
-    STARTED(1),
-    /**
-     * 集群已停止
-     */
-    STOPED(2);
+class ClusterClient[T](clusterClient: FlinkClusterClient[T]) extends ClusterClientTrait[T](clusterClient) {
 
-    private final Integer value;
+  override def cancelWithSavepoint(jobID: JobID, s: String): CompletableFuture[String] = clusterClient.cancelWithSavepoint(jobID, s)
 
-    ClusterState(Integer value) {
-        this.value = value;
-    }
+  override def stopWithSavepoint(jobID: JobID, b: Boolean, s: String): CompletableFuture[String] = clusterClient.stopWithSavepoint(jobID, b, s)
 
-    public static ClusterState of(Integer value) {
-        for (ClusterState clusterState : values()) {
-            if (clusterState.value.equals(value)) {
-                return clusterState;
-            }
-        }
-        return null;
-    }
+  override def triggerSavepoint(jobID: JobID, s: String): CompletableFuture[String] = clusterClient.triggerSavepoint(jobID, s)
 
-    public Integer getValue() {
-        return value;
-    }
 }

@@ -35,6 +35,7 @@ object TrkMonitorDebugHelper {
     def run(): Unit = fun()
   }
 
+  // scalastyle:off println
   // print job status cache size info
   def watchJobStatusCacheSize(implicit trkMonitor: K8sFlinkTrkMonitor): Unit =
     new Timer().scheduleAtFixedRate(() => println(s"[flink-k8s][status-size]-${System.currentTimeMillis} => " +
@@ -76,5 +77,6 @@ object TrkMonitorDebugHelper {
       s"count=${trkMonitor.asInstanceOf[DefaultK8sFlinkTrkMonitor].trkCache.k8sDeploymentEvents.asMap().size} | " +
       s"${trkMonitor.asInstanceOf[DefaultK8sFlinkTrkMonitor].trkCache.k8sDeploymentEvents.asMap().asScala.mkString(",")}"), 0, 1500)
   }
+  // scalastyle:on println
 
 }

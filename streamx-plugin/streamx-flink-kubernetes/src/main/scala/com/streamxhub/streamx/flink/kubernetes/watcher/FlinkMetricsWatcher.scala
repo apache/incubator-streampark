@@ -118,15 +118,14 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
         future
       })
     // blocking until all future are completed or timeout is reached
-    val futureHold = Future.sequence(trkFutures)
-    Try({
-      // scalastyle:off awaitready
+    Try {
+      val futureHold = Future.sequence(trkFutures)
       Await.ready(futureHold, conf.sglTrkTaskTimeoutSec seconds)
-      // scalastyle:on awaitready
-    }).failed.map(_ =>
-      logInfo(s"[FlinkMetricWatcher] tracking flink metrics on kubernetes mode timeout," +
+    }.failed.map { _ =>
+      logError(s"[FlinkMetricWatcher] tracking flink metrics on kubernetes mode timeout," +
         s" limitSeconds=${conf.sglTrkTaskTimeoutSec}," +
-        s" trackingClusterKeys=${trkClusterKeys.mkString(",")}"))
+        s" trackingClusterKeys=${trkClusterKeys.mkString(",")}")
+    }
   }
 
   /**

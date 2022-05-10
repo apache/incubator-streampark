@@ -82,8 +82,4 @@ object CommonConfig {
     classType = classOf[java.lang.String],
     description = "maven repository used for built-in compilation")
 
-  def main(args: Array[String]): Unit = {
-    println(MAVEN_AUTH_PASSWORD.key)
-  }
-
 }

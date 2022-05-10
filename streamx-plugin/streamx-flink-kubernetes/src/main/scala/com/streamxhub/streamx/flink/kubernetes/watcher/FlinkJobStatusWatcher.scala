@@ -117,7 +117,10 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
         val future = Future {
           clusterKey.executeMode match {
             case SESSION => touchSessionJob(clusterKey.clusterId, clusterKey.namespace, trkIds.filter(_.belongTo(clusterKey)).map(_.jobId))
-            case APPLICATION => touchApplicationJob(clusterKey.clusterId, clusterKey.namespace).toArray
+            case APPLICATION =>
+              // scalastyle:off awaitready
+              touchApplicationJob(clusterKey.clusterId, clusterKey.namespace).toArray
+              // scalastyle:on awaitready
           }
         }
         future.filter(_.nonEmpty).foreach {
@@ -147,11 +150,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
       })
     // blocking until all future are completed or timeout is reached
     val allFutureHold = Future.sequence(tracksFuture)
-    Try(
-      // scalastyle:off awaitready
-      Await.ready(allFutureHold, conf.sglTrkTaskTimeoutSec seconds)
-      // scalastyle:on awaitready
-    ).failed.map(_ =>
+    Try(Await.ready(allFutureHold, conf.sglTrkTaskTimeoutSec seconds)).failed.map(_ =>
       logInfo(s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
         s" limitSeconds=${conf.sglTrkTaskTimeoutSec}," +
         s" trackingClusterKeys=${trkClusterKeys.mkString(",")}"))

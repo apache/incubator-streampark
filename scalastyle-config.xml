@@ -36,6 +36,10 @@ This file is divided into 3 sections:
 <scalastyle>
     <name>Scalastyle standard configuration</name>
 
+    <!-- ================================================================================ -->
+    <!--                               rules we enforce                                   -->
+    <!-- ================================================================================ -->
+
     <check level="error" class="org.scalastyle.file.HeaderMatchesChecker" enabled="true">
         <parameters>
             <parameter name="header"><![CDATA[/*
@@ -155,6 +159,18 @@ This file is divided into 3 sections:
         <customMessage>Avoid using Object.toStringHelper. Use ToStringBuilder instead.</customMessage>
     </check>
 
+    <check customId="runtimeaddshutdownhook" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
+        <parameters><parameter name="regex">Runtime\.getRuntime\.addShutdownHook</parameter></parameters>
+        <customMessage><![CDATA[
+      Are you sure that you want to use Runtime.getRuntime.addShutdownHook? In most cases, you should use
+      ShutdownHookManager.addShutdownHook instead.
+      If you must use Runtime.getRuntime.addShutdownHook, wrap the code block with
+      // scalastyle:off runtimeaddshutdownhook
+      Runtime.getRuntime.addShutdownHook(...)
+      // scalastyle:on runtimeaddshutdownhook
+    ]]></customMessage>
+    </check>
+
     <check customId="mutablesynchronizedbuffer" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
         <parameters>
             <parameter name="regex">mutable\.SynchronizedBuffer</parameter>
@@ -168,6 +184,14 @@ This file is divided into 3 sections:
           // scalastyle:on mutablesynchronizedbuffer
         ]]>
         </customMessage>
+    </check>
+
+    <check customId="println" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
+        <parameters><parameter name="regex">^println$</parameter></parameters>
+        <customMessage><![CDATA[Are you sure you want to println? If yes, wrap the code block with
+      // scalastyle:off println
+      println(...)
+      // scalastyle:on println]]></customMessage>
     </check>
 
     <check customId="awaitresult" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
@@ -184,37 +208,6 @@ This file is divided into 3 sections:
         </customMessage>
     </check>
 
-    <check customId="awaitready" level="error" class="org.scalastyle.file.RegexChecker" enabled="false">
-        <parameters>
-            <parameter name="regex">Await\.ready</parameter>
-        </parameters>
-        <customMessage><![CDATA[
-          Are you sure that you want to use Await.ready? In most cases, you should use ThreadUtils.awaitReady instead.
-          If you must use Await.ready, wrap the code block with
-          // scalastyle:off awaitready
-          Await.ready(...)
-          // scalastyle:on awaitready
-        ]]>
-        </customMessage>
-    </check>
-
-    <check customId="FileSystemGet" level="error" class="org.scalastyle.file.RegexChecker" enabled="false">
-        <parameters>
-            <parameter name="regex">FileSystem.get\([a-zA-Z_$][a-zA-Z_$0-9]*\)</parameter>
-        </parameters>
-        <customMessage><![CDATA[
-          Are you sure that you want to use "FileSystem.get(Configuration conf)"? If the input
-          configuration is not set properly, a default FileSystem instance will be returned. It can
-          lead to errors when you deal with multiple file systems. Please consider using
-          "FileSystem.get(URI uri, Configuration conf)" or "Path.getFileSystem(Configuration conf)" instead.
-          If you must use the method "FileSystem.get(Configuration conf)", wrap the code block with
-          // scalastyle:off FileSystemGet
-          FileSystem.get(...)
-          // scalastyle:on FileSystemGet
-        ]]>
-        </customMessage>
-    </check>
-
     <check customId="commons-lang2" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
         <parameters>
             <parameter name="regex">org\.apache\.commons\.lang\.</parameter>
@@ -223,22 +216,6 @@ This file is divided into 3 sections:
             of Commons Lang 2 (package org.apache.commons.lang.*)
         </customMessage>
     </check>
-
-    <!-- Do not enable ScalaDocChecker below. This forces all the classes,-->
-    <!-- traits, methods, types and properties to have documentation which-->
-    <!-- is overwhelming.-->
-    <check level="error" class="org.scalastyle.scalariform.ScalaDocChecker" enabled="false"/>
-
-    <!-- This one complains about all kinds of random things. Disable. -->
-    <!--    <check level="error" class="org.scalastyle.scalariform.SimplifyBooleanExpressionChecker" enabled="true"/>-->
-
-    <!-- This breaks symbolic method names so we don't turn it on. -->
-    <!-- Maybe we should update it to allow basic symbolic names, and then we are good to go. -->
-    <!--    <check level="error" class="org.scalastyle.scalariform.MethodNamesChecker" enabled="true">-->
-    <!--        <parameters>-->
-    <!--            <parameter name="regex"><![CDATA[^[a-z][A-Za-z0-9]*$]]></parameter>-->
-    <!--        </parameters>-->
-    <!--    </check>-->
 
     <!-- Doesn't seem super big deal here ... -->
     <check level="error" class="org.scalastyle.file.FileLengthChecker" enabled="true">
@@ -262,11 +239,7 @@ This file is divided into 3 sections:
     </check>
 
     <!--    <check level="error" class="org.scalastyle.scalariform.PublicMethodsHaveTypeChecker" enabled="true"/>-->
-
     <check level="error" class="org.scalastyle.file.NewLineAtEofChecker" enabled="true"/>
-
-    <!-- We want the opposite of this: NewLineAtEofChecker is enabled above -->
-    <check level="error" class="org.scalastyle.file.NoNewLineAtEofChecker" enabled="false"/>
 
     <!-- Avoid Java annotations -->
     <check level="error" class="org.scalastyle.scalariform.OverrideJavaChecker" enabled="true"/>
@@ -294,4 +267,34 @@ This file is divided into 3 sections:
 
     <!-- ??? usually shouldn't be checked into the code base. -->
     <check level="error" class="org.scalastyle.scalariform.NotImplementedErrorUsage" enabled="true"/>
+
+
+    <!-- ================================================================================ -->
+    <!--                               rules we don't want                                -->
+    <!-- ================================================================================ -->
+    <check customId="javaconversions" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="false">
+        <parameters><parameter name="regex">JavaConversions</parameter></parameters>
+        <customMessage>Instead of importing implicits in scala.collection.JavaConversions._, import
+            scala.collection.JavaConverters._ and use .asScala / .asJava methods</customMessage>
+    </check>
+
+    <!-- Do not enable ScalaDocChecker below. This forces all the classes,-->
+    <!-- traits, methods, types and properties to have documentation which-->
+    <!-- is overwhelming.-->
+    <check level="error" class="org.scalastyle.scalariform.ScalaDocChecker" enabled="false"/>
+
+    <!-- This one complains about all kinds of random things. Disable. -->
+    <check level="error" class="org.scalastyle.scalariform.SimplifyBooleanExpressionChecker" enabled="false"/>
+
+    <!-- We want the opposite of this: NewLineAtEofChecker is enabled above -->
+    <check level="error" class="org.scalastyle.file.NoNewLineAtEofChecker" enabled="false"/>
+
+    <!-- This breaks symbolic method names so we don't turn it on. -->
+    <!-- Maybe we should update it to allow basic symbolic names, and then we are good to go. -->
+    <check level="error" class="org.scalastyle.scalariform.MethodNamesChecker" enabled="false">
+        <parameters>
+            <parameter name="regex"><![CDATA[^[a-z][A-Za-z0-9]*$]]></parameter>
+        </parameters>
+    </check>
+
 </scalastyle>

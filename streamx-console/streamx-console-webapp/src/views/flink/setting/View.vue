@@ -538,8 +538,7 @@ export default {
           this.activeKey = this.$route.query.activeKey
       }
     },
-    changeVisble(){
-      console.log('---zouguo-')
+    changeVisble() {
       this.buttonAddVisiable = false
       this.handleClusterAll()
     },
@@ -679,7 +678,7 @@ export default {
           if(resp.data.status){
             this.optionClusters.starting.delete(item.id)
             this.handleMapUpdate('starting')
-          }else{
+          } else {
             this.$swal.fire({
               title: 'Failed',
               icon: 'error',
