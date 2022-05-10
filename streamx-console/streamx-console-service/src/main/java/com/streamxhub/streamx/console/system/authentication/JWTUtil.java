@@ -26,9 +26,11 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authc.AuthenticationException;
 
 import java.util.Date;
 
@@ -37,8 +39,6 @@ import java.util.Date;
  */
 @Slf4j
 public class JWTUtil {
-
-    private static final long EXPIRE_TIME = System.currentTimeMillis() + SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
 
     /**
      * 校验 token是否正确
@@ -53,8 +53,10 @@ public class JWTUtil {
             JWTVerifier verifier = JWT.require(algorithm).withClaim("username", username).build();
             verifier.verify(token);
             return true;
+        } catch (TokenExpiredException e) {
+            throw new AuthenticationException(e.getMessage());
         } catch (Exception e) {
-            log.info("token is invalid{}", e.getMessage());
+            log.info("token is invalid:{} , e:{}", e.getMessage(), e.getClass());
             return false;
         }
     }
@@ -82,7 +84,7 @@ public class JWTUtil {
      * @return token
      */
     public static String sign(String username, String secret) {
-        return sign(username, secret, EXPIRE_TIME);
+        return sign(username, secret, getExpireTime());
     }
 
     /**
@@ -103,5 +105,12 @@ public class JWTUtil {
             log.info("error：{}", e);
             return null;
         }
+    }
+
+    /**
+     * 获取用户登录token 失效时间
+     */
+    public static Long getExpireTime() {
+        return System.currentTimeMillis() + SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
     }
 }
