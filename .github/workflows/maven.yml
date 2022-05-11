@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - dev
-      - 'release-*'
+      - '*-release'
     pull_request:
       branches:
         - dev
-        - 'release-*'
+        - '*-release'
     tags:
-      - 'release-*'
+      - '*-release'
 
 jobs:
 
