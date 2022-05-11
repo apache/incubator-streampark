@@ -36,9 +36,7 @@ ENV SCALA_VERSION scala_2.12
 RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
     && tar zxvf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
     && rm "node-v$NODE_VERSION-linux-x64.tar.gz" \
-    && ln -s /usr/local/bin/node /usr/local/bin/nodejs \
-    && node --version \
-    && npm --version
+    && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 RUN wget "https://dlcdn.apache.org/flink/flink-$FLINK_VERSION/flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" \
     && mkdir ./flink \
     && tar zxvf "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" -C ./flink --strip-components=1 \

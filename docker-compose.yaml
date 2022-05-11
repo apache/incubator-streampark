@@ -19,7 +19,7 @@ version: '3.8'
 
 services:
   streamx-server:
-    image: 18301455973/streamx-server:latest
+    image: 18301455973/streamx-server:dev
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/streamx?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     ports:
@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
 
   database:
-    image: 18301455973/streamx-mysql:latest
+    image: 18301455973/streamx-mysql:dev
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
       - 3306:3306
