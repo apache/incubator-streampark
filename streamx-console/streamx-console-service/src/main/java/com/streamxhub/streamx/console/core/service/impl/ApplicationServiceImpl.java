@@ -33,6 +33,7 @@ import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.HdfsOperator;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
+import com.streamxhub.streamx.common.util.FlinkUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
@@ -112,8 +113,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -127,7 +126,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Manifest;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -201,8 +199,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private FlinkClusterService flinkClusterService;
-
-    private final Pattern pattern = Pattern.compile("-Denv.java.opts\\s*=\\s*\".*\"");
 
     @PostConstruct
     public void resetOptionState() {
@@ -1115,7 +1111,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 throw new UnsupportedOperationException("Unsupported...");
             }
 
-            String[] dynamicOption = parseDynamicOptions(application.getDynamicOptions());
+            String[] dynamicOption = FlinkUtils.parseDynamicOptions(application.getDynamicOptions());
 
             Map<String, Object> extraParameter = new HashMap<>(0);
             extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());
@@ -1274,21 +1270,5 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         flameGraph.put("sampleInterval", 1000 * 60 * 2);
         flameGraph.put("metricInterval", 1000 * 60 * 2);
         return flameGraph;
-    }
-
-    private String[] parseDynamicOptions(String dynamicParams) {
-        List<String> dynamicOptins = new ArrayList<>();
-        if (StringUtils.isNoneBlank(dynamicParams)){
-            Matcher matcher = pattern.matcher(dynamicParams);
-            if (matcher.find()) {
-                dynamicOptins.add(matcher.group().replace("\"", ""));
-                dynamicParams = dynamicParams.replace(matcher.group(), "").trim();
-            }
-            if (StringUtils.isNoneBlank(dynamicParams)){
-                Arrays.stream(dynamicParams.split("\\s+")).forEach(x -> dynamicOptins.add(x));
-            }
-            return dynamicOptins.toArray(new String[]{});
-        }
-        return new String[0];
     }
 }

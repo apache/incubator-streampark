@@ -23,6 +23,7 @@ import com.streamxhub.streamx.common.enums.ApplicationType;
 import com.streamxhub.streamx.common.enums.ClusterState;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
+import com.streamxhub.streamx.common.util.FlinkUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.dao.FlinkClusterMapper;
@@ -177,7 +178,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
             Map<String, Object> extraParameter = flinkCluster.getOptionMap();
             ResolveOrder resolveOrder = ResolveOrder.of(flinkCluster.getResolveOrder());
-            String[] dynamicOption = parseDynamicOptions(flinkCluster.getDynamicOptions());
+            String[] dynamicOption = FlinkUtils.parseDynamicOptions(flinkCluster.getDynamicOptions());
             DeployRequest deployRequest = new DeployRequest(
                 flinkEnv.getFlinkVersion(),
                 flinkCluster.getClusterId(),
