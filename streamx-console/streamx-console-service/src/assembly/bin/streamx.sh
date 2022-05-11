@@ -262,58 +262,6 @@ fi
 
 # ----- Execute The Requested Command -----------------------------------------
 
-supports_hyperlinks() {
-  # $FORCE_HYPERLINK must be set and be non-zero (this acts as a logic bypass)
-  if [ -n "$FORCE_HYPERLINK" ]; then
-    [ "$FORCE_HYPERLINK" != 0 ]
-    return $?
-  fi
-
-  # If stdout is not a tty, it doesn't support hyperlinks
-  [[ ${have_tty} -eq 1 ]] || return 1
-
-  # DomTerm terminal emulator (domterm.org)
-  if [ -n "$DOMTERM" ]; then
-    return 0
-  fi
-
-  # VTE-based terminals above v0.50 (Gnome Terminal, Guake, ROXTerm, etc)
-  if [ -n "$VTE_VERSION" ]; then
-    [ $VTE_VERSION -ge 5000 ]
-    return $?
-  fi
-
-  # If $TERM_PROGRAM is set, these terminals support hyperlinks
-  case "$TERM_PROGRAM" in
-  Hyper|iTerm.app|terminology|WezTerm) return 0 ;;
-  esac
-
-  # kitty supports hyperlinks
-  if [ "$TERM" = xterm-kitty ]; then
-    return 0
-  fi
-
-  # Windows Terminal or Konsole also support hyperlinks
-  if [ -n "$WT_SESSION" ] || [ -n "$KONSOLE_VERSION" ]; then
-    return 0
-  fi
-
-  return 1
-}
-
-fmt_underline() {
-  [[ ${have_tty} -eq 1 ]] && printf '\033[4m%s\033[24m\n' "$*" || printf '%s\n' "$*"
-}
-
-# shellcheck disable=SC2016 # backtick in single-quote
-fmt_code() {
-  [[ ${have_tty} -eq 1 ]] && printf '`\033[2m%s\033[22m`\n' "$*" || printf '`%s`\n' "$*"
-}
-
-fmt_error() {
-  printf '%sError: %s%s\n' "$BOLD$RED" "$*" "$RESET" >&2
-}
-
 print_logo() {
   printf '\n'
   printf '%s           %s.+. %s   %s     %s     %s          %s                         %s\n' $RAINBOW $RESET
