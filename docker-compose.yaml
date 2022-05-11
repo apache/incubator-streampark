@@ -30,6 +30,9 @@ services:
 
   database:
     image: 18301455973/streamx-mysql:dev
+    build:
+      context: .
+      dockerfile: docker/mysql/Dockerfile
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
       - 3306:3306
