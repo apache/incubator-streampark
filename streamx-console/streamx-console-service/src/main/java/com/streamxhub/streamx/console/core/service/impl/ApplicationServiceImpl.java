@@ -38,7 +38,6 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
@@ -202,6 +201,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private FlinkClusterService flinkClusterService;
+
+    private final Pattern pattern = Pattern.compile("-Denv.java.opts\\s*=\\s*\".*\"");
 
     @PostConstruct
     public void resetOptionState() {
@@ -1114,7 +1115,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 throw new UnsupportedOperationException("Unsupported...");
             }
 
-            String[] dynamicOption = CommonUtils.notEmpty(application.getDynamicOptions()) ? parseDynamicOptions(application.getDynamicOptions()) : new String[0];
+            String[] dynamicOption = parseDynamicOptions(application.getDynamicOptions());
 
             Map<String, Object> extraParameter = new HashMap<>(0);
             extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());
@@ -1277,15 +1278,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     private String[] parseDynamicOptions(String dynamicParams) {
         List<String> dynamicOptins = new ArrayList<>();
-        Pattern pattern = Pattern.compile("-Denv.java.opts\\s*=\\s*\".*\"");
-        Matcher matcher = pattern.matcher(dynamicParams);
-        if (matcher.find()) {
-            dynamicOptins.add(matcher.group().replace("\"", ""));
-            dynamicParams = dynamicParams.replace(matcher.group(), "").trim();
-        }
         if (StringUtils.isNoneBlank(dynamicParams)){
-            Arrays.stream(dynamicParams.split("\\s+")).forEach(x -> dynamicOptins.add(x));
+            Matcher matcher = pattern.matcher(dynamicParams);
+            if (matcher.find()) {
+                dynamicOptins.add(matcher.group().replace("\"", ""));
+                dynamicParams = dynamicParams.replace(matcher.group(), "").trim();
+            }
+            if (StringUtils.isNoneBlank(dynamicParams)){
+                Arrays.stream(dynamicParams.split("\\s+")).forEach(x -> dynamicOptins.add(x));
+            }
+            return dynamicOptins.toArray(new String[]{});
         }
-        return dynamicOptins.toArray(new String[]{});
+        return new String[0];
     }
 }

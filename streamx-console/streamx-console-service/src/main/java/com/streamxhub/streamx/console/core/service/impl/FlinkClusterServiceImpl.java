@@ -25,7 +25,6 @@ import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
-import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.core.dao.FlinkClusterMapper;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
@@ -92,6 +91,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     @Autowired
     private SettingService settingService;
+
+    private final Pattern pattern = Pattern.compile("-Denv.java.opts\\s*=\\s*\".*\"");
 
     @Override
     public String check(FlinkCluster cluster) {
@@ -176,7 +177,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
             Map<String, Object> extraParameter = flinkCluster.getOptionMap();
             ResolveOrder resolveOrder = ResolveOrder.of(flinkCluster.getResolveOrder());
-            String[] dynamicOption = CommonUtils.notEmpty(flinkCluster.getDynamicOptions()) ? parseDynamicOptions(flinkCluster.getDynamicOptions()) : new String[0];
+            String[] dynamicOption = parseDynamicOptions(flinkCluster.getDynamicOptions());
             DeployRequest deployRequest = new DeployRequest(
                 flinkEnv.getFlinkVersion(),
                 flinkCluster.getClusterId(),
@@ -329,15 +330,17 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     private String[] parseDynamicOptions(String dynamicParams) {
         List<String> dynamicOptins = new ArrayList<>();
-        Pattern pattern = Pattern.compile("-Denv.java.opts\\s*=\\s*\".*\"");
-        Matcher matcher = pattern.matcher(dynamicParams);
-        if (matcher.find()) {
-            dynamicOptins.add(matcher.group().replace("\"", ""));
-            dynamicParams = dynamicParams.replace(matcher.group(), "").trim();
-        }
         if (StringUtils.isNoneBlank(dynamicParams)){
-            Arrays.stream(dynamicParams.split("\\s+")).forEach(x -> dynamicOptins.add(x));
+            Matcher matcher = pattern.matcher(dynamicParams);
+            if (matcher.find()) {
+                dynamicOptins.add(matcher.group().replace("\"", ""));
+                dynamicParams = dynamicParams.replace(matcher.group(), "").trim();
+            }
+            if (StringUtils.isNoneBlank(dynamicParams)){
+                Arrays.stream(dynamicParams.split("\\s+")).forEach(x -> dynamicOptins.add(x));
+            }
+            return dynamicOptins.toArray(new String[]{});
         }
-        return dynamicOptins.toArray(new String[]{});
+        return new String[0];
     }
 }
