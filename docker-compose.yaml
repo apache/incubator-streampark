@@ -35,11 +35,6 @@ services:
       - 3306:3306
     volumes:
       - mysql-data:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: streamx
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 123456
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 20s
