@@ -41,5 +41,9 @@ RUN wget "https://dlcdn.apache.org/flink/flink-$FLINK_VERSION/flink-$FLINK_VERSI
     && mkdir ./flink \
     && tar zxvf "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" -C ./flink --strip-components=1 \
     && rm "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz"
+RUN echo Y|apt-get update \
+    && echo Y|apt-get install iputils-ping \
+    && echo Y|apt-get install vim \
+    && echo Y|apt-get install net-tools
 EXPOSE 10000
 ENTRYPOINT bash bin/startup.sh
