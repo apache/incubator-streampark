@@ -50,6 +50,8 @@ object FlinkUtils {
       if (matcher.find) {
         dynamicOptins += matcher.group.replace("\"", "")
         other = dynamicParams.replace(matcher.group, "").trim
+      } else {
+        other = dynamicParams.trim
       }
       if (StringUtils.isNoneBlank(other)) {
         other.split("\\s+").foreach(x => dynamicOptins += x)
