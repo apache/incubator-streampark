@@ -2,15 +2,9 @@ name: StreamX CI
 
 on:
   push:
-    branches:
-      - dev
-      - '*-release'
-    pull_request:
-      branches:
-        - dev
-        - '*-release'
-    tags:
-      - '*-release'
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
 
 jobs:
 
