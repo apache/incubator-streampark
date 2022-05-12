@@ -23,12 +23,14 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.FunctionInitializationContext
 import java.io.File
 import java.util.regex.{Matcher, Pattern}
+
 import org.apache.commons.lang3.StringUtils
+
 import scala.collection.mutable.ListBuffer
 
 
 object FlinkUtils {
-  private lazy val pattern = Pattern.compile("-Denv.java.opts\\s*=\\s*\".*\"")
+  private lazy val ENV_JAVA_OPTS_PATTERN = Pattern.compile("-Denv.java.opts\\s*=\\s*\".*\"")
 
   def getUnionListState[R: TypeInformation](context: FunctionInitializationContext, descriptorName: String): ListState[R] = {
     context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(descriptorName, implicitly[TypeInformation[R]].getTypeClass))
@@ -43,22 +45,15 @@ object FlinkUtils {
   }
 
   def parseDynamicOptions(dynamicParams: String): Array[String] = {
-    val dynamicOptins = ListBuffer[String]();
-    var other: String = ""
-    if (StringUtils.isNoneBlank(dynamicParams)) {
-      val matcher: Matcher = pattern.matcher(dynamicParams)
-      if (matcher.find) {
-        dynamicOptins += matcher.group.replace("\"", "")
-        other = dynamicParams.replace(matcher.group, "").trim
-      } else {
-        other = dynamicParams.trim
+    if (StringUtils.isBlank(dynamicParams)) Array.empty[String] else {
+      val matcher: Matcher = ENV_JAVA_OPTS_PATTERN.matcher(dynamicParams)
+      val buffer = ListBuffer[String]()
+      val parsedParams = if (!matcher.find) dynamicParams.trim else {
+        buffer += matcher.group.replace("\"", "")
+        dynamicParams.replace(matcher.group, "").trim
       }
-      if (StringUtils.isNoneBlank(other)) {
-        other.split("\\s+").foreach(x => dynamicOptins += x)
-      }
-      return dynamicOptins.toArray
+      buffer.++=(parsedParams.split("\\s+")).toArray
     }
-    return new Array[String](0)
   }
 
 }
