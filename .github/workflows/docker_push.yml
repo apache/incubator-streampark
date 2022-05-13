@@ -65,11 +65,8 @@ jobs:
 
       - name: Mixed front-end and back-end packaging
         run: |
-          set -o pipefail; mvn clean install -DskipTests -Dscala.version=2.12.15 -Dscala.binary.version=2.12 -Pwebapp | tee ./mvn.log; set +o pipefail
-          if [[ $(grep -c "overlapping classes" ./mvn.log) -gt 0 ]];then
-            echo "Found overlapping classes, please fix"
-            exit 1
-          fi
+          mvn clean install -DskipTests -Dscala.version=2.12.15 -Dscala.binary.version=2.12 -Pwebapp
+
       - name: Log in to the Container registry
         uses: docker/login-action@v1
         with:
@@ -88,11 +85,11 @@ jobs:
             type=sha,prefix=,format=short
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-        - name: Build and push Docker images (supported platforms)
-          uses: docker/bake-action@v1.7.0
-          with:
-            files: |
-              .github/workflows/docker-bake.hcl
-              ${{ steps.meta.outputs.bake-file }}
-            targets: bake-platform
-            push: ${{ github.event_name != 'pull_request' }}
+      - name: Build and push Docker images (supported platforms)
+        uses: docker/bake-action@v1.7.0
+        with:
+          files: |
+            .github/workflows/docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
+          targets: bake-platform
+          push: ${{ github.event_name != 'pull_request' }}
