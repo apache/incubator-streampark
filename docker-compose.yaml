@@ -21,29 +21,34 @@ services:
   streamx-server:
     image: 18301455973/streamx-server:dev
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://10.30.238.21::3306/streamx?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/streamx?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     ports:
       - 10000:10000
-#    depends_on:
-#      - database
+    depends_on:
+      - database
     restart: unless-stopped
 
-#  database:
-#    image: 18301455973/streamx-mysql:dev
-#    build:
-#      context: .
-#      dockerfile: docker/mysql/Dockerfile
-#    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-#    ports:
-#      - 3306:3306
-#    volumes:
-#      - mysql-data:/var/lib/mysql
-#    healthcheck:
-#      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
-#      timeout: 20s
-#      retries: 10
-#    restart: unless-stopped
-#
-#
-#volumes:
-#  mysql-data:
+  database:
+    image: mysql-5.7:dev
+    build:
+      context: .
+      dockerfile: docker/mysql/Dockerfile
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: streamx
+      MYSQL_USER: streamx
+      MYSQL_PASSWORD: 123456
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"-uroot","-p123456","ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+    restart: unless-stopped
+
+
+volumes:
+  mysql-data:

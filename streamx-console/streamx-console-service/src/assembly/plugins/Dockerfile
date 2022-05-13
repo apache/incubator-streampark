@@ -19,16 +19,18 @@ FROM maven:3.8.4-jdk-8
 WORKDIR /streamx
 COPY . /streamx
 
+ENV kServer 10.216.138.250
+ENV vServer rancher-prod.ziroom.com
 ENV DB localhost:3306
 ENV NODE_VERSION 16.1.0
 ENV NPM_VERSION 7.11.2
-
 ENV FLINK_VERSION 1.13.6
 ENV SCALA_VERSION scala_2.12
 
 RUN sed -i -e 's/eval $NOHUP/eval/' bin/streamx.sh \
     && sed -i -e 's/"$APP_OUT" 2>&1 "&"/"$APP_OUT"/' bin/streamx.sh \
     && sed -i -e 's/localhost:3306/'$DB'/' conf/application.yml
+    && echo $kServer $vServer >> /etc/hosts
 
 RUN echo Y|apt-get update \
     && echo Y|apt-get install iputils-ping \

@@ -34,9 +34,8 @@ jobs:
           sed -i -e 's/eval $NOHUP/eval/' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
           sed -i -e 's/"$APP_OUT" 2>&1 "&"/"$APP_OUT"/' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
 
-      - name: Maven Install
+      - name: Mixed front-end and back-end packaging
         run: |
-          echo '======= Mixed front-end and back-end packaging ======='
           mvn clean install -DskipTests -Dscala.version=${{ matrix.scala }} -Dscala.binary.version=2.12 -Pwebapp
 
       - name: Docker meta

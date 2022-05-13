@@ -15,10 +15,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
-FROM mysql:5.7
-ENV MYSQL_ROOT_PASSWORD 123456
+FROM biarms/mysql:5.7
 
 COPY streamx-console/streamx-console-service/src/assembly/script/final.sql /docker-entrypoint-initdb.d/01-streamx.sql
-RUN echo "grant all privileges on *.* to 'root'@'%' identified by '${MYSQL_ROOT_PASSWORD}' with grant option;" >> /docker-entrypoint-initdb.d/01-streamx.sql
-RUN echo "flush privileges;" >>/docker-entrypoint-initdb.d/01-streamx.sql
 EXPOSE 3306

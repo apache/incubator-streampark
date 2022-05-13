@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streamx
+  namespace: native-flink
+  labels:
+    env: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streamx
+      env: test
+  template:
+    metadata:
+      labels:
+        app: streamx
+        env: test
+    spec:
+      containers:
+        - name: streamx
+          image: streamxhub/streamx:latest
+          ports:
+            - name: webui
+              containerPort: 10000
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: streamx-service
+  namespace: native-flink
+  labels:
+    env: test
+spec:
+  type: NodePort
+  selector:
+    app: streamx
+    env: test
+  ports:
+    - name: webui
+      port: 10000
+      protocol: TCP
+      targetPort: 10000
+
+
+
+
