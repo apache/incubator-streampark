@@ -15,7 +15,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
-FROM maven:3.8.4-jdk-8 as deps-stage
+FROM 3.8.5-jdk-8 as deps-stage
 COPY . /
 WORKDIR /
 RUN tar zxvf streamx-console/streamx-console-service/target/streamx-console-service-*.tar.gz \
