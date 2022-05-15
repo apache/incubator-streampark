@@ -20,13 +20,24 @@
 package com.streamxhub.streamx.flink.packer.maven
 
 import com.google.common.collect.Lists
+import com.streamxhub.streamx.common.conf.CommonConfig.{MAVEN_AUTH_PASSWORD, MAVEN_AUTH_USER, MAVEN_REMOTE_URL}
+import com.streamxhub.streamx.common.conf.{InternalConfigHolder, Workspace}
 import com.streamxhub.streamx.common.util.{Logger, Utils}
 import org.apache.maven.plugins.shade.resource.{ManifestResourceTransformer, ResourceTransformer, ServicesResourceTransformer}
 import org.apache.maven.plugins.shade.{DefaultShader, ShadeRequest}
+import org.apache.maven.repository.internal.MavenRepositorySystemUtils
 import org.codehaus.plexus.logging.console.ConsoleLogger
 import org.codehaus.plexus.logging.{Logger => PlexusLog}
+import org.eclipse.aether.{RepositorySystem, RepositorySystemSession}
 import org.eclipse.aether.artifact.DefaultArtifact
+import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory
+import org.eclipse.aether.repository.{LocalRepository, RemoteRepository}
 import org.eclipse.aether.resolution.{ArtifactDescriptorRequest, ArtifactRequest}
+import org.eclipse.aether.spi.connector.RepositoryConnectorFactory
+import org.eclipse.aether.spi.connector.transport.TransporterFactory
+import org.eclipse.aether.transport.file.FileTransporterFactory
+import org.eclipse.aether.transport.http.HttpTransporterFactory
+import org.eclipse.aether.util.repository.AuthenticationBuilder
 
 import java.io.File
 import java.util
@@ -40,13 +51,27 @@ import scala.util.Try
  */
 object MavenTool extends Logger {
 
-  val plexusLog = new ConsoleLogger(PlexusLog.LEVEL_INFO, "streamx-maven")
+  private[this] lazy val plexusLog = new ConsoleLogger(PlexusLog.LEVEL_INFO, "streamx-maven")
 
   private[this] val excludeArtifact = List(
-    MavenArtifact.of("org.apache.flink:force-shading:*"),
-    MavenArtifact.of("com.google.code.findbugs:jsr305:*"),
-    MavenArtifact.of("org.apache.logging.log4j:*:*")
+    Artifact.of("org.apache.flink:force-shading:*"),
+    Artifact.of("com.google.code.findbugs:jsr305:*"),
+    Artifact.of("org.apache.logging.log4j:*:*")
   )
+
+  private[this] lazy val remoteRepos: List[RemoteRepository] = {
+    val builder = new RemoteRepository.Builder("central", "default", InternalConfigHolder.get(MAVEN_REMOTE_URL))
+    val remoteRepository = if (InternalConfigHolder.get(MAVEN_AUTH_USER) == null || InternalConfigHolder.get(MAVEN_AUTH_PASSWORD) == null) {
+      builder.build()
+    } else {
+      val authentication = new AuthenticationBuilder()
+        .addUsername(InternalConfigHolder.get[String](MAVEN_AUTH_USER))
+        .addPassword(InternalConfigHolder.get[String](MAVEN_AUTH_PASSWORD))
+        .build()
+      builder.setAuthentication(authentication).build()
+    }
+    List(remoteRepository)
+  }
 
   private val isJarFile = (file: File) => file.isFile && Try(Utils.checkJarFile(file.toURI.toURL)).isSuccess
 
@@ -87,7 +112,6 @@ object MavenTool extends Logger {
         manifest.setMainClass(mainClass)
         transformer += manifest
       }
-
       req.setResourceTransformers(transformer.toList)
       req.setRelocators(Lists.newArrayList())
       req
@@ -126,38 +150,68 @@ object MavenTool extends Logger {
    * @param mavenArtifacts collection of maven artifacts
    * @return jar File Object of resolved artifacts
    */
-  @throws[Exception] def resolveArtifacts(mavenArtifacts: Set[MavenArtifact]): Set[File] = {
+  @throws[Exception] def resolveArtifacts(mavenArtifacts: Set[Artifact]): Set[File] = {
     if (mavenArtifacts == null) Set.empty[File]; else {
-      val (repoSystem, session) = MavenRetriever.retrieve()
+      val (repoSystem, session) = getMavenEndpoint()
       val artifacts = mavenArtifacts.map(e => new DefaultArtifact(e.groupId, e.artifactId, "jar", e.version))
       logInfo(s"start resolving dependencies: ${artifacts.mkString}")
 
       // read relevant artifact descriptor info
       // plz don't simplify the following lambda syntax to maintain the readability of the code.
       val resolvedArtifacts = artifacts
-        .map(artifact => new ArtifactDescriptorRequest(artifact, MavenRetriever.remoteRepos(), null))
+        .map(artifact => new ArtifactDescriptorRequest(artifact, remoteRepos, null))
         .map(artDescReq => repoSystem.readArtifactDescriptor(session, artDescReq))
         .flatMap(_.getDependencies)
         .filter(_.getScope == "compile")
-        .filter(x => !excludeArtifact.exists(e => {
-          val groupId = e.groupId == x.getArtifact.getGroupId
-          val artifact = e.artifactId match {
-            case "*" => true
-            case a => a == x.getArtifact.getArtifactId
-          }
-          groupId && artifact
-        })
+        .filter(x => !excludeArtifact.exists(_.eq(x.getArtifact))
         ).map(_.getArtifact)
 
       val mergedArtifacts = artifacts ++ resolvedArtifacts
       logInfo(s"resolved dependencies: ${mergedArtifacts.mkString}")
 
       // download artifacts
-      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos(), null))
+      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, remoteRepos, null))
       repoSystem.resolveArtifacts(session, artReqs)
         .map(_.getArtifact.getFile).toSet
     }
   }
 
+
+  /**
+   * create composite maven endpoint
+   */
+  private[this] def getMavenEndpoint(): (RepositorySystem, RepositorySystemSession) = {
+    /**
+     * create maven repository endpoint
+     */
+
+    lazy val locator = MavenRepositorySystemUtils.newServiceLocator
+
+    /**
+     * default maven local repository
+     */
+    lazy val localRepo = new LocalRepository(Workspace.local.MAVEN_LOCAL_DIR)
+
+
+    def newRepoSystem(): RepositorySystem = {
+      locator.addService(classOf[RepositoryConnectorFactory], classOf[BasicRepositoryConnectorFactory])
+      locator.addService(classOf[TransporterFactory], classOf[FileTransporterFactory])
+      locator.addService(classOf[TransporterFactory], classOf[HttpTransporterFactory])
+      locator.getService(classOf[RepositorySystem])
+    }
+
+    /**
+     * create maven repository session endpoint
+     */
+    def newSession(system: RepositorySystem): RepositorySystemSession = {
+      val session = MavenRepositorySystemUtils.newSession
+      session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo))
+      session
+    }
+
+    val repoSystem = newRepoSystem()
+    val session = newSession(repoSystem)
+    (repoSystem, session)
+  }
 
 }
