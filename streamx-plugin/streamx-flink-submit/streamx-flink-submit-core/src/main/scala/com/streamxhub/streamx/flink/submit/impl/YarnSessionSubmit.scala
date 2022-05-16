@@ -27,14 +27,18 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
+import org.apache.flink.runtime.util.HadoopUtils
 import org.apache.flink.yarn.YarnClusterDescriptor
-import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
+import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnConfigOptionsInternal, YarnDeploymentTarget}
+import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.{ApplicationId, ApplicationReport, FinalApplicationStatus}
 import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException
 import org.apache.hadoop.yarn.util.ConverterUtils
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 /**
   * Submit Job to YARN Session Cluster
@@ -49,6 +53,48 @@ object YarnSessionSubmit extends YarnSubmitTrait {
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
       .safeSet(YarnConfigOptions.APPLICATION_ID, submitRequest.extraParameter.get(KEY_YARN_APP_ID).toString)
+
+    logInfo(
+      s"""
+         |------------------------------------------------------------------
+         |Effective submit configuration: $flinkConfig
+         |------------------------------------------------------------------
+         |""".stripMargin)
+  }
+
+  /**
+    * @param deployRequest
+    * @param flinkConfig
+    */
+  def setConfig(deployRequest: DeployRequest, flinkConfig: Configuration): Unit = {
+    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(deployRequest.flinkVersion.flinkHome)
+    val currentUser = UserGroupInformation.getCurrentUser
+    logDebug(s"UserGroupInformation currentUser: $currentUser")
+    if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
+      logDebug(s"kerberos Security is Enabled...")
+      val useTicketCache = flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
+      if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
+        throw new RuntimeException(s"Hadoop security with Kerberos is enabled but the login user ${currentUser} does not have Kerberos credentials or delegation tokens!")
+      }
+    }
+    val providedLibs = {
+      val array = ListBuffer(
+        deployRequest.hdfsWorkspace.flinkLib,
+        deployRequest.hdfsWorkspace.appJars,
+        deployRequest.hdfsWorkspace.appPlugins
+      )
+      array.toList
+    }
+
+    flinkConfig
+      //yarn.provided.lib.dirs
+      .safeSet(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
+      //flinkDistJar
+      .safeSet(YarnConfigOptions.FLINK_DIST_JAR, deployRequest.hdfsWorkspace.flinkDistJar)
+      //
+      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+
+      .safeSet(DeploymentOptionsInternal.CONF_DIR, s"${deployRequest.flinkVersion.flinkHome}/conf")
 
     logInfo(
       s"""
@@ -143,7 +189,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
         deployRequest.dynamicOption,
         deployRequest.extraParameter,
         deployRequest.resolveOrder)
-      flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+      setConfig(deployRequest, flinkConfig)
       val yarnClusterDescriptor = getSessionClusterDeployDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
       if (null != deployRequest.clusterId && deployRequest.clusterId.nonEmpty) {

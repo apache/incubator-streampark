@@ -6,11 +6,11 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-console</artifactId>
-        <version>1.2.3</version>
+        <version>1.2.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>streamx-console-service</artifactId>
-    <version>1.2.3</version>
+    <version>1.2.4-SNAPSHOT</version>
     <name>StreamX : Console Service</name>
 
     <!-- 定义统一版本号-->
