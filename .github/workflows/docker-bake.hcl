@@ -21,7 +21,7 @@ target "docker-metadata-action" {}
 target "bake-platform" {
   inherits = ["docker-metadata-action"]
   context = "./"
-  dockerfile = "Dockerfile"
+  dockerfile = "docker/server/Dockerfile"
   platforms = [
     "linux/amd64",
     "linux/arm64/v8",

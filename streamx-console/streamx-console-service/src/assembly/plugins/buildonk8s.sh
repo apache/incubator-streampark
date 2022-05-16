@@ -139,8 +139,6 @@ print_logo() {
 }
 
 $DB
-#$ipName
-#$domainName
 $MirrorWarehouseAddress
 
 
@@ -173,7 +171,6 @@ configureDatabaseConnectionAddress(){
     case $res in
       "set new value")
         read -p 'Please input the database connection address:' DB
-        sed -i -e 's!mysql://.*:3306!mysql://'$DB':3306!' conf/application.yml
         break
         ;;
       "keep default")
@@ -185,8 +182,6 @@ configureDatabaseConnectionAddress(){
         ;;
     esac
   done
-
-
 }
 
 configureMirrorWarehouse() {
@@ -199,19 +194,14 @@ configureMirrorWarehouse() {
 }
 main() {
   print_logo
-
-
-  # 选择是否做ip映射
-  #configureIpMapping
   # 数据库连接地址
   configureDatabaseConnectionAddress
-  #
   configureMirrorWarehouse
   echo `docker login $MirrorWarehouseAddress -u $userName -p $password`
 
   echo "Do multi-architecture builds of streamx images"
   docker buildx create --name mybuilder --use
-  docker buildx build --push --platform linux/amd64 -f $PRG_DIR/Dockerfile -t $imageName .
+  docker buildx build --push --platform linux/amd64 --build-arg DB=$DB -f $PRG_DIR/Dockerfile -t $imageName .
   if [ $? -eq 0 ]; then
     echo "streamx image build success"
   else
