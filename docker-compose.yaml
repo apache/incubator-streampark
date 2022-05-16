@@ -21,8 +21,11 @@ version: '3.8'
 services:
   streamx-server:
     image: 18301455973/streamx-server:dev
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/streamx?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    build:
+      context: .
+      dockerfile: docker/server/Dockerfile
+      args:
+        DB: database
     ports:
       - 10000:10000
     depends_on:
@@ -41,6 +44,7 @@ services:
       - mysql-data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_ROOT_HOST: '%'
       MYSQL_DATABASE: streamx
       MYSQL_USER: streamx
       MYSQL_PASSWORD: 123456
