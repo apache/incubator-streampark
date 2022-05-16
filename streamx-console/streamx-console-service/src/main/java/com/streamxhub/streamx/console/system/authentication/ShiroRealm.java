@@ -96,13 +96,13 @@ public class ShiroRealm extends AuthorizingRealm {
         String token = (String) authenticationToken.getCredentials();
         String username = JWTUtil.getUsername(token);
         if (StringUtils.isBlank(username)) {
-            throw new AuthenticationException("token校验不通过");
+            throw new AuthenticationException("Token verification failed");
         }
         // 通过用户名查询用户信息
         User user = userService.findByName(username);
 
         if (user == null) {
-            throw new AuthenticationException("用户名或密码错误");
+            throw new AuthenticationException("ERROR Incorrect username or password!");
         }
 
         if (!JWTUtil.verify(token, username, user.getPassword())) {
@@ -110,7 +110,7 @@ public class ShiroRealm extends AuthorizingRealm {
             String tokenDb = WebUtils.encryptToken(token);
             boolean effective = accessTokenService.checkTokenEffective(user.getUserId(), tokenDb);
             if (!effective) {
-                throw new AuthenticationException("token校验不通过,请检查user状态或token状态");
+                throw new AuthenticationException("Token checked failed: 1-[Browser Request] please check the username or password; 2-[Api Request] please check the user status or accessToken status");
             }
             SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
         }
