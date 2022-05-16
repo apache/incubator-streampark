@@ -83,7 +83,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: docker/server/Dockerfile
+          file: docker/server/Dockerfile-02
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

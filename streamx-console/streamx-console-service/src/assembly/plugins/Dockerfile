@@ -20,8 +20,8 @@ WORKDIR /streamx
 COPY . /streamx
 
 ARG DB=localhost
-ARG NODE_VERSION=16.1.0
-ARG NPM_VERSION=7.11.2
+ENV NODE_VERSION=16.1.0
+ENV NPM_VERSION=7.11.2
 
 RUN sed -i -e 's/eval $NOHUP/eval/' bin/streamx.sh \
     && sed -i -e 's/StreamXConsole \\/StreamXConsole/' bin/streamx.sh \
