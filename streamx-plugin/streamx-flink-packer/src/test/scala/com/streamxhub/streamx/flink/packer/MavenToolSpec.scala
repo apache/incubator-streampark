@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.packer
 
-import com.streamxhub.streamx.flink.packer.maven.{DependencyInfo, MavenArtifact, MavenTool}
+import com.streamxhub.streamx.flink.packer.maven.{Artifact, DependencyInfo, MavenTool}
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.must.Matchers
@@ -73,7 +73,7 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
         val fatJar = MavenTool.buildFatJar(
           null,
           DependencyInfo(
-            Set(MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")),
+            Set(Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")),
             Set(path("jars/commons-dbutils-1.7.jar"))
           ),
           fatJarPath)
@@ -86,7 +86,7 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
 
     "resolve artifacts" should {
       "with single artifact" in {
-        val jars = MavenTool.resolveArtifacts(Set(MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")))
+        val jars = MavenTool.resolveArtifacts(Set(Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")))
         val expectJars = Array(
           "force-shading-1.13.0.jar",
           "flink-connector-base-1.13.0.jar",
@@ -97,15 +97,17 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
       }
       "with mutiply artifact" in {
         val jars = MavenTool.resolveArtifacts(Set(
-          MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0"),
-          MavenArtifact.of("org.apache.flink:flink-connector-base:1.13.0")
+          Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0"),
+          Artifact.of("org.apache.flink:flink-connector-base:1.13.0")
         ))
         val expectJars = Array(
           "flink-core-1.13.0.jar",
           "force-shading-1.13.0.jar",
           "flink-connector-base-1.13.0.jar",
           "kafka-clients-2.4.1.jar")
+        // scalastyle:off println
         jars.foreach(jar => println(jar.getName))
+        // scalastyle:on println
         jars.forall(_.exists) mustBe true
         jars.map(_.getName).sameElements(expectJars) mustBe true
         FileUtils.deleteDirectory(new File(outputDir))

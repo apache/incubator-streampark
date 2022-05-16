@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.packer
 
 import com.streamxhub.streamx.flink.packer.MavenArtifactSpec.illegalArtifactCoordsCases
-import com.streamxhub.streamx.flink.packer.maven.MavenArtifact
+import com.streamxhub.streamx.flink.packer.maven.Artifact
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -39,10 +39,10 @@ object MavenArtifactSpec {
 
 class MavenArtifactSpec extends AnyWordSpec with Matchers {
 
-  "MavenArtifact" when {
+  "Artifact" when {
     "created" should {
       "with legal coords" in {
-        val art = MavenArtifact.of("org.apache.flink:flink-table:1.13.0")
+        val art = Artifact.of("org.apache.flink:flink-table:1.13.0")
         art.groupId mustBe "org.apache.flink"
         art.artifactId mustBe "flink-table"
         art.version mustBe "1.13.0"
@@ -50,7 +50,7 @@ class MavenArtifactSpec extends AnyWordSpec with Matchers {
       "with illegal coords" in {
         illegalArtifactCoordsCases.foreach(coord => {
           assertThrows[IllegalArgumentException] {
-            MavenArtifact.of(coord)
+            Artifact.of(coord)
           }
         })
       }
