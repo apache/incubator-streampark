@@ -28,15 +28,21 @@ COPY --from=deps-stage /streamx /streamx
 
 ENV NODE_VERSION 16.1.0
 ENV NPM_VERSION 7.11.2
-
+ARG DB=localhost
 ENV FLINK_VERSION 1.13.6
 ENV SCALA_VERSION scala_2.12
 
+
+RUN sed -i -e 's/eval $NOHUP/eval/' bin/streamx.sh \
+    && sed -i -e 's/StreamXConsole \\/StreamXConsole/' bin/streamx.sh \
+    && sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' bin/streamx.sh \
+    && sed -i -e 's/localhost/'$DB'/' conf/application.yml
 
 RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
     && tar zxvf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
     && rm "node-v$NODE_VERSION-linux-x64.tar.gz" \
     && ln -s /usr/local/bin/node /usr/local/bin/nodejs
+
 RUN wget "https://dlcdn.apache.org/flink/flink-$FLINK_VERSION/flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" \
     && mkdir ./flink \
     && tar zxvf "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" -C ./flink --strip-components=1 \
