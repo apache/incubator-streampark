@@ -22,7 +22,7 @@ RUN tar zxvf streamx-console/streamx-console-service/target/streamx-console-serv
 && mv streamx-console-service-* streamx
 
 
-FROM maven:3.8.4-jdk-8
+FROM maven:3.8.5-jdk-8
 WORKDIR /streamx
 COPY --from=deps-stage /streamx /streamx
 
