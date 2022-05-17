@@ -20,22 +20,37 @@
 package com.streamxhub.streamx.flink.packer.maven
 
 import java.util.regex.Pattern
+import org.eclipse.aether.artifact.{Artifact => AetherArtifact}
 
-case class MavenArtifact(groupId: String, artifactId: String, version: String)
+case class Artifact(groupId: String, artifactId: String, version: String) {
 
-object MavenArtifact {
+  def eq(artifact: AetherArtifact): Boolean = {
+    artifact.getGroupId match {
+      case g if g == groupId =>
+        artifact.getArtifactId match {
+          case "*" => true
+          case a => a == artifactId
+        }
+      case _ => false
+    }
+  }
+
+}
+
+object Artifact {
+
   private lazy val PATTERN = Pattern.compile("([^: ]+):([^: ]+):([^: ]+)")
 
   /**
    * build from coords
    */
-  def of(coords: String): MavenArtifact = {
+  def of(coords: String): Artifact = {
     PATTERN.matcher(coords) match {
       case m if m.matches() =>
-        val groupId = m.group(1)
-        val artifactId = m.group(2)
-        val version = m.group(3)
-        MavenArtifact(groupId, artifactId, version)
+        val g = m.group(1)
+        val a = m.group(2)
+        val v = m.group(3)
+        Artifact(g, a, v)
       case _ =>
         throw new IllegalArgumentException(s"Bad artifact coordinates $coords, expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>")
     }
