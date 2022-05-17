@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: streamx
-          image: streamxhub/streamx:dev
+          image: streamxhub/streamx-console:dev
           ports:
             - name: webui
               containerPort: 10000

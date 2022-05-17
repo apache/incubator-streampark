@@ -77,7 +77,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: streamxhub/streamx-server
+          images: streamxhub/streamx-console
 
       - name: Build and push streamx
         uses: docker/build-push-action@v3

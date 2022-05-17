@@ -20,7 +20,7 @@ version: '3.8'
 
 services:
   streamx-server:
-    image: streamxhub/streamx-server:dev
+    image: streamxhub/streamx-console:dev
     build:
       context: .
       dockerfile: docker/server/Dockerfile-01
