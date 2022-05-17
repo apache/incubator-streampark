@@ -37,12 +37,12 @@ import scala.language.implicitConversions
 object LfsOperatorTest {
 
   def withTempDir(block: String => Unit): Unit = {
-    val tempDiePath = Files.createTempDirectory("LfsOperatorTest-output")
+    val tempDirPath = Files.createTempDirectory("LfsOperatorTest-output")
     try {
-      block(tempDiePath.toAbsolutePath.toString)
+      block(tempDirPath.toAbsolutePath.toString)
     }
     finally {
-      FileUtils.deleteQuietly(tempDiePath.toFile)
+      FileUtils.deleteQuietly(tempDirPath.toFile)
     }
   }
 
