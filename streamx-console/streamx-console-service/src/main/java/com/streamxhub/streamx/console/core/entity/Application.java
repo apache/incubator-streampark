@@ -43,8 +43,8 @@ import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates;
+import com.streamxhub.streamx.flink.packer.maven.Artifact;
 import com.streamxhub.streamx.flink.packer.maven.DependencyInfo;
-import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -825,8 +825,8 @@ public class Application implements Serializable {
 
         @JsonIgnore
         public DependencyInfo toJarPackDeps() {
-            List<MavenArtifact> mvnArts = this.pom.stream()
-                    .map(pom -> new MavenArtifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
+            List<Artifact> mvnArts = this.pom.stream()
+                    .map(pom -> new Artifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
                     .collect(Collectors.toList());
             List<String> extJars = this.jar.stream()
                     .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
