@@ -18,18 +18,7 @@
 
 name: "Build Docker Image"
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - dev
-      - '*-release'
-    tags:
-      - '*-release'
-  pull_request:
-    branches:
-      - dev
-      - '*-release'
+on: workflow_dispatch
 
 jobs:
   build_image:
