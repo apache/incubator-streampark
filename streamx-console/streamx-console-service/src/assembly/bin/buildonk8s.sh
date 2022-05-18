@@ -169,7 +169,6 @@ configureMirrorWarehouse() {
   read -p 'Please input the mirror warehouse password:' password
   read -p 'Please input to be pushed imageName:' imageName
   sed -i '' "s!image:.*!image: $imageName!" ../plugins/streamx.yml
-
 }
 
 configureK8sConfigfile() {
