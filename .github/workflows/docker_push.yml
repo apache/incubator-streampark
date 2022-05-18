@@ -47,9 +47,6 @@ jobs:
         with:
           node-version: '16'
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
       - name: Cache local Maven repository
         uses: actions/cache@v3
         with:
@@ -61,7 +58,8 @@ jobs:
       - name: init
         run: |
           sed -i -e 's/eval $NOHUP/eval/' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
-          sed -i -e 's/"$APP_OUT" 2>&1 "&"/"$APP_OUT"/' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
+          sed -i -e 's/StreamXConsole \\/StreamXConsole/' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
+          sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
 
       - name: Mixed front-end and back-end packaging
         run: |
@@ -77,7 +75,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: streamxhub/streamx-console
+          images: 18301455973/streamx-console
 
       - name: Build and push streamx
         uses: docker/build-push-action@v3
