@@ -100,7 +100,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_CATALOG extends SqlCommand(
     "create catalog",
-    "(CREATE\\s+CATALOG\\s+.*)"
+    "CREATE\\s+CATALOG\\s+(.*)\\s+WITH\\s*\\((\\s*'[A-Za-z].+'\\s*=\\s*'.+'\\s*,*\\s*)+\\)\\s*"
   )
 
   /**
@@ -155,10 +155,11 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    * [IF NOT EXISTS] [catalog_name.][db_name.]function_name
    * AS identifier [LANGUAGE JAVA|SCALA|PYTHON]
    * </pre
+   * only support java or scala, sql statement write java/scala/python, only flower the flink website rule.
    */
   case object CREATE_FUNCTION extends SqlCommand(
     "create function",
-    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.*)"
+    "CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF NOT EXISTS\\s+|)([A-Za-z]+[A-Za-z\\d.\\-_]+)\\s+AS\\s+([A-Za-z].+)\\s+(JAVA|SCALA|PYTHON)\\s*"
   )
 
   //----ALTER Statements ---
