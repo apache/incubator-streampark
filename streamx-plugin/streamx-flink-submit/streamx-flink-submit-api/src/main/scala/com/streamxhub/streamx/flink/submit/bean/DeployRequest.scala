@@ -19,11 +19,15 @@
 
 package com.streamxhub.streamx.flink.submit.bean
 
+import java.io.File
 import java.util.{Map => JavaMap}
-import javax.annotation.Nullable
 
+import com.streamxhub.streamx.common.conf.Workspace
+import javax.annotation.Nullable
 import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums.{ExecutionMode, FlinkK8sRestExposedType, ResolveOrder}
+import com.streamxhub.streamx.common.util.FlinkUtils
+import org.apache.commons.io.FileUtils
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 case class DeployRequest(flinkVersion: FlinkVersion,
@@ -34,7 +38,30 @@ case class DeployRequest(flinkVersion: FlinkVersion,
                          dynamicOption: Array[String],
                          @Nullable k8sDeployParam: KubernetesDeployParam,
                          @Nullable extraParameter: JavaMap[String, Any]
-                         )
+                         ) {
+  private[submit] lazy val hdfsWorkspace = {
+    /**
+      * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
+      */
+    val workspace = Workspace.remote
+    val flinkHome = flinkVersion.flinkHome
+    val flinkHomeDir = new File(flinkHome)
+    val flinkName = if (FileUtils.isSymlink(flinkHomeDir)) {
+      flinkHomeDir.getCanonicalFile.getName
+    } else {
+      flinkHomeDir.getName
+    }
+    val flinkHdfsHome = s"${workspace.APP_FLINK}/$flinkName"
+    HdfsWorkspace(
+      flinkName,
+      flinkHome,
+      flinkLib = s"$flinkHdfsHome/lib",
+      flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome),
+      appJars = workspace.APP_JARS,
+      appPlugins = workspace.APP_PLUGINS
+    )
+  }
+}
 
 case class KubernetesDeployParam(clusterId: String,
                                  kubernetesNamespace: String = KubernetesConfigOptions.NAMESPACE.defaultValue(),
@@ -42,3 +69,4 @@ case class KubernetesDeployParam(clusterId: String,
                                  serviceAccount: String = KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue(),
                                  flinkImage: String = KubernetesConfigOptions.CONTAINER_IMAGE.defaultValue(),
                                  @Nullable flinkRestExposedType: FlinkK8sRestExposedType = FlinkK8sRestExposedType.ClusterIP)
+

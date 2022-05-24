@@ -38,11 +38,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -69,7 +69,8 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
             expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
         }
 
-        String token = WebUtils.encryptToken(JWTUtil.sign(user.getUsername(), UUID.randomUUID().toString(), DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault())));
+        Long ttl = DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault());
+        String token = WebUtils.encryptToken(JWTUtil.sign(user.getUsername(), UUID.randomUUID().toString(), ttl));
         JWTToken jwtToken = new JWTToken(token, expireTime);
 
         AccessToken accessToken = new AccessToken();

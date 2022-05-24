@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-plugin</artifactId>
-        <version>1.2.3</version>
+        <version>1.2.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>streamx-flink-packer_${scala.binary.version}</artifactId>
@@ -85,6 +85,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <!-- docker client-->
         <dependency>
             <groupId>com.github.docker-java</groupId>

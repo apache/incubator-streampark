@@ -40,6 +40,9 @@ import java.util.Date;
 @Slf4j
 public class JWTUtil {
 
+
+    private static final long JWT_TIME_OUT = SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
+
     /**
      * 校验 token是否正确
      *
@@ -110,7 +113,8 @@ public class JWTUtil {
     /**
      * 获取用户登录token 失效时间
      */
-    public static Long getExpireTime() {
-        return System.currentTimeMillis() + SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
+    private static Long getExpireTime() {
+        return System.currentTimeMillis() + JWT_TIME_OUT;
     }
+
 }
