@@ -19,12 +19,15 @@
 package com.streamxhub.streamx.common.util
 
 import org.apache.http.NameValuePair
-import org.apache.http.client.config.RequestConfig
+import org.apache.http.auth.{AuthSchemeProvider, AuthScope, Credentials}
+import org.apache.http.client.config.{AuthSchemes, RequestConfig}
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods._
 import org.apache.http.client.utils.URIBuilder
+import org.apache.http.config.RegistryBuilder
 import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.HttpClients
+import org.apache.http.impl.auth.SPNegoSchemeFactory
+import org.apache.http.impl.client.{BasicCredentialsProvider, HttpClientBuilder, HttpClients}
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
@@ -32,7 +35,10 @@ import org.apache.http.util.EntityUtils
 import java.io.UnsupportedEncodingException
 import java.net.URISyntaxException
 import java.nio.charset.{Charset, StandardCharsets}
+import java.security.{Principal, PrivilegedExceptionAction}
 import java.util
+import javax.security.auth.Subject
+import javax.security.auth.login.{Configuration, LoginContext}
 import scala.collection.JavaConversions._
 
 object HttpClientUtils {
@@ -52,6 +58,23 @@ object HttpClientUtils {
    * @return
    */
   private[this] def getHttpClient = HttpClients.custom.setConnectionManager(connectionManager).build
+
+  private[this] def getSpengoHttpClient = {
+    val builder = HttpClientBuilder.create()
+    val authSchemeRegistry = RegistryBuilder.create[AuthSchemeProvider]
+      .register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory(true)).build
+    builder.setDefaultAuthSchemeRegistry(authSchemeRegistry)
+
+    val credentialsProvider = new BasicCredentialsProvider
+    credentialsProvider.setCredentials(new AuthScope(null, -1, null), new Credentials {
+      override def getUserPrincipal: Principal = null
+
+      override def getPassword: String = null
+    })
+    builder.setDefaultCredentialsProvider(credentialsProvider)
+    builder.setConnectionManager(connectionManager).build()
+  }
+
 
   private[this] def getHttpGet(url: String, params: util.Map[String, AnyRef] = null, config: RequestConfig = null): HttpGet = {
     val httpGet = params match {
@@ -163,18 +186,34 @@ object HttpClientUtils {
    * @return
    */
   private[this] def getResult(request: HttpRequestBase): String = {
-    val httpClient = getHttpClient
-    try {
-      val response = httpClient.execute(request)
-      val entity = response.getEntity
-      if (entity != null) { // long len = entity.getContentLength();// -1 表示长度未知
-        val result = EntityUtils.toString(entity)
-        response.close()
-        result
-      } else null
-    } catch {
-      case e: Exception => throw e
+
+    Subject.doAs(getSubject, new PrivilegedExceptionAction[String] {
+      override def run(): String = {
+        val httpClient = getSpengoHttpClient
+        try {
+          val response = httpClient.execute(request)
+          val entity = response.getEntity
+          if (entity != null) { // long len = entity.getContentLength();// -1 表示长度未知
+            val result = EntityUtils.toString(entity)
+            response.close()
+            result
+          } else null
+        } catch {
+          case e: Exception => throw e
+        }
+      }
+    })
+  }
+
+  private[this] def getSubject: Subject = {
+    val enableLoginConfig = System.getProperty("java.security.auth.login.config")
+    if (null != enableLoginConfig) {
+      val loginConfig = Configuration.getConfiguration;
+      val lc = new LoginContext("httpClient", null, null, loginConfig)
+      lc.login()
+      return lc.getSubject
     }
+    new Subject()
   }
 
 }
