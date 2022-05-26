@@ -253,11 +253,11 @@ object HadoopUtils extends Logger {
   }
 
   def getRMWebAppProxyURL: String = {
-    val yarnPrefixUrl: String = InternalConfigHolder.get(CommonConfig.STREAMX_KNOX_PROXY_PREFIX)
-    if (StringUtils.isBlank(yarnPrefixUrl)) {
+    val proxyYarnUrl: String = InternalConfigHolder.get(CommonConfig.STREAMX_PROXY_YARN_URL)
+    if (StringUtils.isBlank(proxyYarnUrl)) {
       return getRMWebAppURL()
     }
-    yarnPrefixUrl
+    proxyYarnUrl
   }
 
   /**

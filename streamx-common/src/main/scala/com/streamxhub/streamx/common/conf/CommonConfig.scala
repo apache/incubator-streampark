@@ -40,11 +40,11 @@ object CommonConfig {
     defaultValue = "hdfs",
     classType = classOf[java.lang.String])
 
-  val STREAMX_KNOX_PROXY_PREFIX: InternalOption = InternalOption(
-    key = "streamx.knox.proxy-prefix",
+  val STREAMX_PROXY_YARN_URL: InternalOption = InternalOption(
+    key = "streamx.proxy.yarn-url",
     defaultValue = "",
     classType = classOf[java.lang.String],
-    description = "Knox proxy url prefix")
+    description = "proxy yarn url. ex: knox proxy or other")
 
   val DOCKER_IMAGE_NAMESPACE: InternalOption = InternalOption(
     key = "streamx.docker.register.image-namespace",
