@@ -206,6 +206,7 @@ object HadoopUtils extends Logger {
     Try {
       UserGroupInformation.setConfiguration(hadoopConf)
       val ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(principal, keytab)
+      UserGroupInformation.setLoginUser(ugi)
       logInfo("kerberos authentication successful")
       ugi
     }.recover { case e => throw e }
