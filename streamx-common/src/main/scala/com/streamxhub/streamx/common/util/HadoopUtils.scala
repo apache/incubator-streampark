@@ -19,10 +19,8 @@
 
 package com.streamxhub.streamx.common.util
 
-import com.ctc.wstx.api.ReaderConfig
 import com.ctc.wstx.io.{StreamBootstrapper, SystemId}
 import com.ctc.wstx.stax.WstxInputFactory
-import com.google.common.base.Strings
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.{CommonConfig, InternalConfigHolder}
 import org.apache.commons.collections.CollectionUtils
@@ -43,17 +41,15 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.protocol.HttpClientContext
 import org.apache.http.impl.client.HttpClients
 import org.codehaus.stax2.XMLStreamReader2
-import org.w3c.dom.{Document, Element}
 
-import java.io.{BufferedInputStream, File, FileInputStream, IOException, InputStream}
+import java.io.{BufferedInputStream, File, FileInputStream, IOException}
 import java.net.InetAddress
 import java.security.PrivilegedAction
 import java.util
 import java.util.concurrent.ConcurrentHashMap
-import java.util.{Enumeration, Timer, TimerTask, HashMap => JavaHashMap}
+import java.util.{Timer, TimerTask, HashMap => JavaHashMap}
 import javax.security.auth.kerberos.KerberosTicket
-import javax.xml.parsers.{DocumentBuilderFactory, ParserConfigurationException}
-import javax.xml.stream.{XMLInputFactory, XMLStreamConstants, XMLStreamException, XMLStreamReader}
+import javax.xml.stream.{XMLStreamConstants, XMLStreamException}
 import scala.collection.JavaConversions._
 import scala.util.control.Breaks._
 import scala.util.{Failure, Success, Try}
@@ -144,7 +140,7 @@ object HadoopUtils extends Logger {
           //HDFS default value change (with adding time unit) breaks old version MR tarball work with Hadoop 3.x
           //detail: https://issues.apache.org/jira/browse/HDFS-12920
           if (x.getName == "hdfs-default.xml" || x.getName == "hdfs-site.xml") {
-            val reader = parse(x, true)
+            val reader = parseHadoopConf(x)
             while (reader.hasNext) {
               if (reader.next() == XMLStreamConstants.START_ELEMENT) {
                 reader.getLocalName match {
@@ -183,15 +179,18 @@ object HadoopUtils extends Logger {
   }
 
   @throws[XMLStreamException]
-  private def parse(f: File, restricted: Boolean): XMLStreamReader2 = {
+  private[this] def parseHadoopConf(f: File): XMLStreamReader2 = {
     val is = new BufferedInputStream(new FileInputStream(f))
     val systemIdStr = new Path(f.getAbsolutePath).toString
     val systemId = SystemId.construct(systemIdStr)
     val readerConfig = XML_INPUT_FACTORY.createPrivateConfig
-    if (restricted) {
-      readerConfig.setProperty(XMLInputFactory.SUPPORT_DTD, false)
-    }
-    XML_INPUT_FACTORY.createSR(readerConfig, systemId, StreamBootstrapper.getInstance(null, systemId, is), false, true)
+    XML_INPUT_FACTORY.createSR(
+      readerConfig,
+      systemId,
+      StreamBootstrapper.getInstance(null, systemId, is),
+      false,
+      true
+    )
   }
 
   /**
