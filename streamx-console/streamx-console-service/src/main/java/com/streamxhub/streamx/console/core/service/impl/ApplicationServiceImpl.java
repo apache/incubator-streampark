@@ -221,7 +221,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 totalJmMemory += v.getJmMemory();
             }
             if (v.getTmMemory() != null) {
-                totalTmMemory += v.getTmMemory();
+                totalTmMemory += v.getTmMemory() * v.getTotalTM();
             }
             if (v.getTotalTM() != null) {
                 totalTm += v.getTotalTM();
