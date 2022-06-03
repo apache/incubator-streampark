@@ -40,6 +40,7 @@ import java.util.Date;
 @Slf4j
 public class JWTUtil {
 
+
     private static final long JWT_TIME_OUT = SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
 
     /**

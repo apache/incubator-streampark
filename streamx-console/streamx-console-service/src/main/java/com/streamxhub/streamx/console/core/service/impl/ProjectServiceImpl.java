@@ -221,6 +221,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         List<File> apps = new ArrayList<>();
         // 在项目路径下寻找编译完成的tar.gz(StreamX项目)文件或jar(普通,官方标准的flink工程)...
         findTarOrJar(apps, path);
+        if (apps.isEmpty()) {
+            throw new RuntimeException("[StreamX] can't find tar.gz or jar in " + path.getAbsolutePath());
+        }
         for (File app : apps) {
             String appPath = app.getAbsolutePath();
             // 1). tar.gz文件....

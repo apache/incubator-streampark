@@ -21,11 +21,11 @@
 package com.streamxhub.streamx.common.fs
 
 
-import com.streamxhub.streamx.common.fs.LfsOperatorTest.outputDir
+import com.streamxhub.streamx.common.fs.LfsOperatorTest.withTempDir
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.junit.jupiter.api.Assertions._
-import org.junit.jupiter.api.{AfterAll, AfterEach, BeforeEach, Test}
+import org.junit.jupiter.api.Test
 
 import java.io.{File, FileInputStream}
 import scala.language.implicitConversions
@@ -35,12 +35,14 @@ import scala.language.implicitConversions
  */
 object LfsOperatorTest {
 
-  val outputDir = "LfsOperatorTest-output/"
-
-  @AfterAll
-  def removeOutputDir(): Unit = {
-    val dir = new File(outputDir)
-    if (dir.exists) FileUtils.deleteDirectory(dir)
+  def withTempDir(block: String => Unit): Unit = {
+    val tempDirPath = Files.createTempDirectory("LfsOperatorTest-output")
+    try {
+      block(tempDirPath.toAbsolutePath.toString)
+    }
+    finally {
+      FileUtils.deleteQuietly(tempDirPath.toFile)
+    }
   }
 
 }

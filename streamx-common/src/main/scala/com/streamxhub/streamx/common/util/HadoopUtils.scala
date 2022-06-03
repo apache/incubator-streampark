@@ -19,6 +19,8 @@
 
 package com.streamxhub.streamx.common.util
 
+import com.ctc.wstx.io.{StreamBootstrapper, SystemId}
+import com.ctc.wstx.stax.WstxInputFactory
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.{CommonConfig, InternalConfigHolder}
 import org.apache.commons.collections.CollectionUtils
@@ -29,6 +31,7 @@ import org.apache.hadoop.hdfs.DistributedFileSystem
 import org.apache.hadoop.net.NetUtils
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.service.Service.STATE
+import org.apache.hadoop.util.StringInterner
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.conf.{HAUtil, YarnConfiguration}
