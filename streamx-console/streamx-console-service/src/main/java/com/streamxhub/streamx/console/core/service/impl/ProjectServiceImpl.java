@@ -285,9 +285,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 }
                 File target = tar == null ? jar : tar;
                 if (target == null) {
-                    throw new RuntimeException("[StreamX] can't find tar.gz or jar in " + file.getAbsolutePath());
+                    log.warn("[StreamX] can't find tar.gz or jar in {}", file.getAbsolutePath());
+                } else {
+                    list.add(target);
                 }
-                list.add(target);
             }
 
             if (file.isDirectory()) {

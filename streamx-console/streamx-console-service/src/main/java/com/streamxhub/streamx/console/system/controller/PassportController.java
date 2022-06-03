@@ -90,7 +90,6 @@ public class PassportController {
         this.userService.updateLoginTime(username);
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
         String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
-        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
         String expireTimeStr = DateUtils.formatFullTime(expireTime);
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
         String userId = RandomStringUtils.randomAlphanumeric(20);

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions._
 import org.junit.jupiter.api.Test
 
 import java.io.{File, FileInputStream}
+import java.nio.file.{Files, Paths}
 import scala.language.implicitConversions
 
 /**
@@ -49,21 +50,8 @@ object LfsOperatorTest {
 
 class LfsOperatorTest {
 
-  @BeforeEach
-  def createOutputDir(): Unit = {
-    val dir = new File(outputDir)
-    if (!dir.exists) dir.mkdirs else FileUtils.forceDelete(dir)
-  }
-
-  @AfterEach
-  def cleanOutputDir(): Unit = {
-    val dir = new File(outputDir)
-    if (dir.exists) FileUtils.deleteDirectory(dir)
-  }
-
-
   @Test
-  def testMkdirs(): Unit = {
+  def testMkdirs(): Unit = withTempDir { outputDir =>
     assertDoesNotThrow(LfsOperator.mkdirs(null))
     assertDoesNotThrow(LfsOperator.mkdirs(""))
     assertTrue(LfsOperator.exists(outputDir))
@@ -77,7 +65,7 @@ class LfsOperatorTest {
 
 
   @Test
-  def testExists(): Unit = {
+  def testExists(): Unit = withTempDir { outputDir =>
     assertDoesNotThrow {
       val dir = s"$outputDir/tmp"
       val f = new File(dir)
@@ -94,7 +82,7 @@ class LfsOperatorTest {
 
 
   @Test
-  def testMkCleanDirs(): Unit = {
+  def testMkCleanDirs(): Unit = withTempDir { outputDir =>
     assertDoesNotThrow {
       Array.fill(5)(genRandomFile(outputDir))
       assertEquals(new File(outputDir).list.length, 5)
@@ -118,7 +106,7 @@ class LfsOperatorTest {
 
 
   @Test
-  def listDir(): Unit = {
+  def listDir(): Unit = withTempDir { outputDir =>
     // list directory
     assertTrue {
       val expectFs = genRandomDir(outputDir)._2
@@ -141,7 +129,7 @@ class LfsOperatorTest {
 
 
   @Test
-  def testDelete(): Unit = {
+  def testDelete(): Unit = withTempDir { outputDir =>
     // delete directory
     assertFalse {
       val dir = s"$outputDir/tmp"
@@ -168,7 +156,7 @@ class LfsOperatorTest {
     f1.map(_.getName).sorted == f2.map(_.getName).sorted && f1.map(md5Hex).sorted == f2.map(md5Hex).sorted
 
   @Test
-  def testCopy(): Unit = {
+  def testCopy(): Unit = withTempDir { outputDir =>
     // copy file to file path or directory path
     assertDoesNotThrow {
       val file = genRandomFile(outputDir)
@@ -180,8 +168,11 @@ class LfsOperatorTest {
         assertTrue(file.length() == output.length())
       }
 
+      Files.createDirectory(Paths.get(outputDir, "out-1"))
       assertCopy(s"$outputDir/out-1", s"$outputDir/out-1/${file.getName}")
+      Files.createDirectory(Paths.get(outputDir, "out-2"))
       assertCopy(s"$outputDir/out-2/${file.getName}", s"$outputDir/out-2/${file.getName}")
+      Files.createDirectory(Paths.get(outputDir, "out-3"))
       assertCopy(s"$outputDir/out-3/114514.dat", s"$outputDir/out-3/114514.dat")
     }
 
@@ -231,7 +222,7 @@ class LfsOperatorTest {
 
 
   @Test
-  def testCopyDir(): Unit = {
+  def testCopyDir(): Unit = withTempDir { outputDir =>
     // copy dir
     assertDoesNotThrow {
       val sourceDir = genRandomDir(s"$outputDir/in-1")._1
@@ -272,7 +263,7 @@ class LfsOperatorTest {
 
 
   @Test
-  def testMove(): Unit = {
+  def testMove(): Unit = withTempDir { outputDir =>
     // move file to directory
     assertDoesNotThrow {
       val sourceFile = genRandomFile(outputDir)
