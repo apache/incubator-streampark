@@ -159,7 +159,7 @@ object HadoopUtils extends Logger {
                     }
                     if (name != null && value != null) {
                       if (value.matches("\\d+s$")) {
-                        conf.set(name, value.replaceAll("s$", ""))
+                        conf.set(name, value.dropRight(1))
                       } else {
                         conf.set(name, value)
                       }
@@ -178,8 +178,7 @@ object HadoopUtils extends Logger {
     configurationCache(confDir)
   }
 
-  @throws[XMLStreamException]
-  private[this] def parseHadoopConf(f: File): XMLStreamReader2 = {
+  @throws[XMLStreamException] private[this] def parseHadoopConf(f: File): XMLStreamReader2 = {
     val is = new BufferedInputStream(new FileInputStream(f))
     val systemIdStr = new Path(f.getAbsolutePath).toString
     val systemId = SystemId.construct(systemIdStr)
