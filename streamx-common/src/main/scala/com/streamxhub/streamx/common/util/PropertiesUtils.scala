@@ -174,19 +174,24 @@ object PropertiesUtils extends Logger {
       val line = scanner.nextLine()
       lineNo.incrementAndGet()
       // 1. check for comments
-      val comments = line.split("#", 2)
+      // [FLINK-27299] flink parsing parameter bug fixed.
+      val comments = line.split("^#|\\s+#", 2)
       val conf = comments(0).trim
       // 2. get key and value
       if (conf.nonEmpty) {
         val kv = conf.split(": ", 2)
         // skip line with no valid key-value pair
-        val key = kv(0).trim
-        val value = kv(1).trim
-        // sanity check
-        if (key.nonEmpty && value.nonEmpty) {
-          flinkConf += key -> value
+        if (kv.length == 2) {
+          val key = kv(0).trim
+          val value = kv(1).trim
+          // sanity check
+          if (key.nonEmpty && value.nonEmpty) {
+            flinkConf += key -> value
+          } else {
+            logWarn(s"Error after splitting key and value in configuration ${lineNo.get()}: $line")
+          }
         } else {
-          logWarn(s"Error after splitting key and value in configuration ${lineNo.get()}: $line")
+          logWarn(s"Error while trying to split key and value in configuration. $lineNo : $line")
         }
       }
     }
