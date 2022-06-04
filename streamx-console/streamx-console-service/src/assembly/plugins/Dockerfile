@@ -39,8 +39,6 @@ ENV MAVEN_HOME=/usr/share/java/maven-3
 ENV PATH $JAVA_HOME/bin:$PATH
 ENV PATH $MAVEN_HOME/bin:$PATH
 
-
-
 RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
     && tar zxvf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
     && rm "node-v$NODE_VERSION-linux-x64.tar.gz" \
