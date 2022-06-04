@@ -15,32 +15,45 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
-FROM maven:3.8.5-jdk-8 as deps-stage
+FROM alpine:3.16 as deps-stage
 COPY . /
 WORKDIR /
 RUN tar zxvf streamx-console/streamx-console-service/target/streamx-console-service-*.tar.gz \
 && mv streamx-console-service-* streamx
 
 
-FROM maven:3.8.5-jdk-8
+FROM docker:dind
 WORKDIR /streamx
 COPY --from=deps-stage /streamx /streamx
 
-ENV NODE_VERSION 16.1.0
-ENV NPM_VERSION 7.11.2
+ARG DB=localhost
+ENV NODE_VERSION=16.1.0
+ENV NPM_VERSION=7.11.2
 
 RUN sed -i -e 's/eval $NOHUP/eval/' bin/streamx.sh \
     && sed -i -e 's/StreamXConsole \\/StreamXConsole/' bin/streamx.sh \
-    && sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' bin/streamx.sh
+    && sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' bin/streamx.sh \
+    && sed -i -e 's/localhost/'$DB'/' conf/application.yml
+
+RUN apk add openjdk8 \
+    && apk add maven \
+    && apk add wget \
+    && apk add vim \
+    && apk add bash
+
+ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
+ENV MAVEN_HOME=/usr/share/java/maven-3
+ENV PATH $JAVA_HOME/bin:$PATH
+ENV PATH $MAVEN_HOME/bin:$PATH
+
+
 
 RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
     && tar zxvf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
     && rm "node-v$NODE_VERSION-linux-x64.tar.gz" \
     && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
-RUN echo Y|apt-get update \
-    && echo Y|apt-get install iputils-ping \
-    && echo Y|apt-get install vim \
-    && echo Y|apt-get install net-tools
+RUN mkdir -p ~/.kube \
+    && cat plugins/config >> ~/.kube/config
+
 EXPOSE 10000
-ENTRYPOINT bash bin/startup.sh
