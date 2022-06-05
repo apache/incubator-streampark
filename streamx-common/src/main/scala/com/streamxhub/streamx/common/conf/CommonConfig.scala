@@ -46,6 +46,12 @@ object CommonConfig {
     classType = classOf[java.lang.String],
     description = "proxy yarn url. ex: knox proxy or other")
 
+  val STREAM_YARN_AUTH: InternalOption = InternalOption(
+    key = "streamx.yarn.http-auth",
+    defaultValue = "",
+    classType = classOf[java.lang.String],
+    description = "yarn http auth type. ex: sample, kerberos")
+
   val DOCKER_IMAGE_NAMESPACE: InternalOption = InternalOption(
     key = "streamx.docker.register.image-namespace",
     defaultValue = "streamx",

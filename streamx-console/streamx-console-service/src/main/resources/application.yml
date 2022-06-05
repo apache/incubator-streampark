@@ -76,6 +76,9 @@ streamx:
   proxy:
     # knox 代理地址 https://cdpsit02.example.cn:8443/gateway/cdp-proxy/yarn
     yarn-url:
+  yarn:
+      # default sample, or kerberos
+    http-auth: sample
 
   # HADOOP_USER_NAME
   hadoop-user-name: root
