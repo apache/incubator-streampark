@@ -21,11 +21,15 @@ package com.streamxhub.streamx.common.util
 import org.apache.hadoop.yarn.api.records.YarnApplicationState._
 import org.apache.hadoop.yarn.api.records._
 import org.apache.hadoop.yarn.util.ConverterUtils
+import org.apache.http.client.config.RequestConfig
 
+import java.io.IOException
 import java.util
+import java.util.concurrent.Callable
 import java.util.{List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
+
 
 object YarnUtils {
 
@@ -80,4 +84,45 @@ object YarnUtils {
     }
   }
 
+  def httpYarnAppInfo(appId: String): String = {
+    if (null == appId) return null
+    defaultHttpRetryRequest("ws/v1/cluster/apps/%s".format(appId))
+  }
+
+  /**
+   * 获取app任务内proxy结果
+   *
+   * @param appId  applicationId
+   * @param subUrl subUrl， 相关app 完整子url
+   * @return
+   */
+  def httpYarnAppContent(appId: String, subUrl: String): String = {
+    if (null == appId) return null
+    defaultHttpRetryRequest(s"$appId/$subUrl")
+  }
+
+  private def defaultHttpRetryRequest(url: String): String = {
+    if (null == url) return null
+    val format = "%s/proxy/%s"
+    try {
+      defaultHttpRequest(format.format(HadoopUtils.getRMWebAppURL(), url))
+    } catch {
+      case e: IOException =>
+        defaultHttpRequest(format.format(HadoopUtils.getRMWebAppURL(true), url))
+    }
+  }
+
+  private def defaultHttpRequest(url: String): String = {
+    if (HadoopUtils.hasYarnHttpKerberosAuth) HadoopUtils.doAs(new Callable[String]() {
+      override def call(): String = AuthHttpClientUtils.httpGetRequest(url, RequestConfig.custom.setConnectTimeout(5000).build)
+    }) else {
+      HttpClientUtils.httpGetRequest(url, RequestConfig.custom.setConnectTimeout(5000).build)
+    }
+
+  }
+
+
 }
+
+
+

@@ -86,7 +86,7 @@ object HttpClientUtils {
     getResult(httpGet)
   }
 
-  private[this] def uriBuilder(url: String, params: util.Map[String, AnyRef]): URIBuilder = {
+  def uriBuilder(url: String, params: util.Map[String, AnyRef]): URIBuilder = {
     val uriBuilder = new URIBuilder
     uriBuilder.setPath(url)
     uriBuilder.setParameters(params2NVPS(params))
