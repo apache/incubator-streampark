@@ -26,10 +26,15 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.{ConfigOption, Configuration}
 import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
 import org.apache.flink.table.api.{SqlDialect, TableEnvironment}
+import org.apache.flink.table.catalog.hive.HiveCatalog
+import org.apache.flink.table.functions.UserDefinedFunction
+import org.apache.flink.table.module.hive.HiveModule
 
 import java.util
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import java.util.{HashMap => JavaHashMap, Map => JavaMap}
+import java.util.regex.Matcher
+import java.util.{Objects, HashMap => JavaHashMap, Map => JavaMap}
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
@@ -80,7 +85,6 @@ object FlinkSqlExecutor extends Logger {
       }
     }
 
-    //TODO registerHiveCatalog
     val insertArray = new ArrayBuffer[String]()
     SqlCommandParser.parseSQL(flinkSql).foreach(x => {
       val args = if (x.operands.isEmpty) null else x.operands.head
@@ -89,6 +93,69 @@ object FlinkSqlExecutor extends Logger {
         case USE =>
           context.useDatabase(args)
           logInfo(s"$command: $args")
+        case CREATE_CATALOG =>
+          val matcher: Matcher = x.command.matcher
+          val catalogName = matcher.group(1).trim
+          // [k1, v1, k2, v2]
+          val split: Array[String] = matcher.group(2).trim().replaceAll(",", " ").replace("=", " ").replace("'", " ").split("\\s+")
+          val catalogConf = mutable.HashMap[String, String]()
+          for (i <- split.indices) {
+            if (i % 2 == 0) catalogConf.put(split(i).trim, split(i + 1).trim)
+          }
+          val hiveCatalog = new HiveCatalog(catalogName, "default", catalogConf.getOrElse("conf", null), catalogConf.getOrElse("conf", null), catalogConf.getOrElse("version", null))
+          context.registerCatalog(catalogName, hiveCatalog)
+          context.loadModule(catalogName, if (catalogConf.contains("version")) new HiveModule(catalogConf("version")) else new HiveModule())
+          context.useCatalog(catalogName)
+        case CREATE_FUNCTION =>
+          val matcher = x.command.matcher
+          val funcType = matcher.group(1).toLowerCase().trim
+          val hasIfNotExist = Objects.equals(matcher.group(2).trim, "is not exists")
+          // 解析出注册的自定义函数的所有信息
+          val funcNameInfo = matcher.group(3).trim
+          var catalogName: String = ""
+          var databaseName: String = ""
+          var funcName: String = ""
+          if (funcNameInfo.contains(".")) {
+            val split = funcNameInfo.split("\\.")
+            if (split.size == 3) {
+              catalogName = split(0)
+              databaseName = split(1)
+              funcName = split(2)
+            } else if (split.size == 2) {
+              databaseName = split(0)
+              funcName = split(1)
+            }
+          } else {
+            funcName = funcNameInfo
+          }
+
+          // 如果原始 sql 语句中包含 if not exists 语句，则需要判断是否已经包含有对应函数名
+          val canCreate: Boolean = if (hasIfNotExist) {
+            if (context.listUserDefinedFunctions().contains(funcName)) false else true
+          } else {
+            true
+          }
+          if (canCreate) {
+            // 获取当前的 catalog 和数据库，注册完成之后，需要重新设置回去
+            val currentCatalog = context.getCurrentCatalog
+            val currentDatabase = context.getCurrentDatabase
+            val identifier = matcher.group(4).trim
+            if (catalogName.nonEmpty) context.useCatalog(catalogName)
+            if (databaseName.nonEmpty) context.useDatabase(databaseName)
+            val subClass = Class.forName(identifier).asSubclass(classOf[UserDefinedFunction])
+            // 注册函数
+            if (funcType.contains("temporary")) {
+              if (funcType.contains("system")) {
+                context.createTemporarySystemFunction(funcName, subClass)
+              } else {
+                context.createTemporaryFunction(funcName, subClass)
+              }
+            } else {
+              context.createFunction(funcName, subClass)
+            }
+            context.useCatalog(currentCatalog)
+            context.useDatabase(currentDatabase)
+          }
         case USE_CATALOG =>
           context.useCatalog(args)
           logInfo(s"$command: $args")
@@ -140,7 +207,8 @@ object FlinkSqlExecutor extends Logger {
             }
           }
           logInfo(s"$command: $args")
-        case DESC | DESCRIBE =>
+        case DESC | DESCRIBE
+        =>
           val schema = context.scan(args).getSchema
           val builder = new StringBuilder()
           builder.append("Column\tType\n")
@@ -152,17 +220,20 @@ object FlinkSqlExecutor extends Logger {
           val tableResult = context.executeSql(x.originSql)
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
-        case INSERT_INTO | INSERT_OVERWRITE => insertArray += x.originSql
+        case INSERT_INTO | INSERT_OVERWRITE
+        => insertArray += x.originSql
         case SELECT =>
           throw new Exception(s"[StreamX] Unsupported SELECT in current version.")
-        case BEGIN_STATEMENT_SET | END_STATEMENT_SET =>
+        case BEGIN_STATEMENT_SET | END_STATEMENT_SET
+        =>
           logWarn(s"SQL Client Syntax: ${x.command.name} ")
         case INSERT_INTO | INSERT_OVERWRITE |
-             CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
-             CREATE_CATALOG | DROP_CATALOG |
+             DROP_FUNCTION | ALTER_FUNCTION |
+             DROP_CATALOG |
              CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
              CREATE_VIEW | DROP_VIEW |
-             CREATE_DATABASE | DROP_DATABASE | ALTER_DATABASE =>
+             CREATE_DATABASE | DROP_DATABASE | ALTER_DATABASE
+        =>
           try {
             lock.lock()
             val result = context.executeSql(x.originSql)
@@ -174,7 +245,8 @@ object FlinkSqlExecutor extends Logger {
           }
         case _ => throw new Exception(s"[StreamX] Unsupported command: ${x.command}")
       }
-    })
+    }
+    )
 
     if (insertArray.nonEmpty) {
       val statementSet = context.createStatementSet()
