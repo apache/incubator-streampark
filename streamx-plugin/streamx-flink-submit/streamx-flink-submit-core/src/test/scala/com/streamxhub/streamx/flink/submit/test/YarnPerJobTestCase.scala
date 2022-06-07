@@ -48,7 +48,7 @@ import scala.collection.JavaConverters._
 /**
  * perJob 编程方式提交任务,
  */
-object YarnPreJobTestCase extends Logger {
+object YarnPerJobTestCase extends Logger {
 
   /**
    * 必须要在本机安装部署flink,并且配置FLINK_HOME
