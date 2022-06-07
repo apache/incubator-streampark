@@ -962,7 +962,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
                 Future<StopResponse> future = executorService.submit(() -> FlinkSubmitter.stop(stopInfo));
 
-                StopResponse stopResponse = future.get(60, TimeUnit.SECONDS);
+                StopResponse stopResponse = future.get(2, TimeUnit.MINUTES);
 
                 if (stopResponse != null && stopResponse.savePointDir() != null) {
                     String savePointDir = stopResponse.savePointDir();
@@ -1034,9 +1034,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean start(Application appParam, boolean auto) throws Exception {
 
         final Application application = getById(appParam.getId());
-        //手动启动的,将reStart清空
+
         assert application != null;
 
+        //手动启动的,将reStart清空
         if (!auto) {
             application.setRestartCount(0);
         } else {
@@ -1181,7 +1182,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             Future<SubmitResponse> future = executorService.submit(() -> FlinkSubmitter.submit(submitRequest));
 
-            SubmitResponse submitResponse = future.get(60, TimeUnit.SECONDS);
+            SubmitResponse submitResponse = future.get(2, TimeUnit.MINUTES);
 
             assert submitResponse != null;
 
