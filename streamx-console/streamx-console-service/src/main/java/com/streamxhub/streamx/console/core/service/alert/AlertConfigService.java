@@ -31,4 +31,6 @@ import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
  */
 public interface AlertConfigService extends IService<AlertConfig> {
     IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request);
+
+    boolean exist(AlertConfig alertConfig);
 }

@@ -115,7 +115,6 @@ public class K8sFlinkTrkMonitorWrapper {
         // correct corrupted data
         List<Application> correctApps = k8sApplication.stream()
             .filter(app -> Bridge.toTrkId(app).nonLegal())
-            .peek(app -> app.setState(FlinkAppState.DEPLOYED.getValue()))
             .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(correctApps)) {
             applicationService.saveOrUpdateBatch(correctApps);

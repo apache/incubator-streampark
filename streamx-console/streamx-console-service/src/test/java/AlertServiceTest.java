@@ -61,7 +61,7 @@ public class AlertServiceTest {
 
     public void before2() {
         alertTemplate = new AlertTemplate();
-        alertTemplate.setTitle("Notify: StreamX alert job for test");
+        alertTemplate.setTitle("告警: StreamX alert job for test");
         alertTemplate.setSubject("StreamX Alert: test-job OTHER");
         alertTemplate.setJobName("StreamX alert job for test");
         alertTemplate.setLink("http://127.0.0.1:8080");
@@ -81,9 +81,11 @@ public class AlertServiceTest {
 
         notifyService.loadTemplateFile();
         DingTalkParams dingTalkParams = new DingTalkParams();
-        dingTalkParams.setToken("sadfasdfasdfasfsadf");
-        dingTalkParams.setContacts("175xxxx1234");
-        dingTalkParams.setIsAtAll(false);
+        dingTalkParams.setSecretEnable(true);
+        dingTalkParams.setSecretToken("SECe831f7c573249dd15b6d3296a68662a7f952305a194ee93791f9db68f39a0b28");
+        dingTalkParams.setToken("e1cab58b634908034da475fe9a8aec6c3c975d1f1fb5c188e074c051b15fb314");
+        dingTalkParams.setContacts("18262800582");
+        dingTalkParams.setIsAtAll(true);
 
         params.setAlertType(2);
         params.setDingTalkParams(dingTalkParams);

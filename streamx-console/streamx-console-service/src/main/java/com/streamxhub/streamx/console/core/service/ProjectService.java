@@ -19,12 +19,13 @@
 
 package com.streamxhub.streamx.console.core.service;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,8 @@ import java.util.Map;
 public interface ProjectService extends IService<Project> {
 
     RestResponse create(Project project);
+
+    boolean update(Project projectParam);
 
     boolean delete(Long id);
 

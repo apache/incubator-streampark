@@ -21,10 +21,12 @@ package com.streamxhub.streamx.console.core.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @author weijinglun
  * @date 2022.01.14
  */
 public interface AlertConfigMapper extends BaseMapper<AlertConfig> {
+    AlertConfig getAlertConfByName(@Param("alertConfig") AlertConfig alertConfig);
 }

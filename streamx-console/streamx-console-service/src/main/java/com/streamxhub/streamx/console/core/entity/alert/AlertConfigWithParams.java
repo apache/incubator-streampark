@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.console.core.entity.alert;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.streamxhub.streamx.console.base.util.JsonUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -75,16 +75,16 @@ public class AlertConfigWithParams implements Serializable {
         BeanUtils.copyProperties(config, params, "emailParams", "dingTalkParams", "weComParams", "httpCallbackParams");
         try {
             if (StringUtils.isNotBlank(config.getEmailParams())) {
-                params.setEmailParams(JsonUtils.read(config.getEmailParams(), EmailParams.class));
+                params.setEmailParams(JacksonUtils.read(config.getEmailParams(), EmailParams.class));
             }
             if (StringUtils.isNotBlank(config.getDingTalkParams())) {
-                params.setDingTalkParams(JsonUtils.read(config.getDingTalkParams(), DingTalkParams.class));
+                params.setDingTalkParams(JacksonUtils.read(config.getDingTalkParams(), DingTalkParams.class));
             }
             if (StringUtils.isNotBlank(config.getWeComParams())) {
-                params.setWeComParams(JsonUtils.read(config.getWeComParams(), WeComParams.class));
+                params.setWeComParams(JacksonUtils.read(config.getWeComParams(), WeComParams.class));
             }
             if (StringUtils.isNotBlank(config.getHttpCallbackParams())) {
-                params.setHttpCallbackParams(JsonUtils.read(config.getHttpCallbackParams(), HttpCallbackParams.class));
+                params.setHttpCallbackParams(JacksonUtils.read(config.getHttpCallbackParams(), HttpCallbackParams.class));
             }
         } catch (JsonProcessingException e) {
             log.error("Json read failed", e);

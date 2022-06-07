@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.streamx.console.core.dao.FlinkClusterMapper">
+    <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.core.entity.FlinkCluster">
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="ADDRESS" jdbcType="VARCHAR" property="address"/>
+        <result column="CLUSTER_ID" jdbcType="VARCHAR" property="clusterId"/>
+        <result column="CLUSTER_NAME" jdbcType="VARCHAR" property="clusterName"/>
+        <result column="OPTIONS" jdbcType="LONGVARCHAR" property="options"/>
+        <result column="YARN_QUEUE" jdbcType="VARCHAR" property="yarnQueue"/>
+        <result column="EXECUTION_MODE" jdbcType="TINYINT" property="executionMode"/>
+        <result column="VERSION_ID" jdbcType="BIGINT" property="versionId"/>
+        <result column="K8S_NAMESPACE" jdbcType="VARCHAR" property="k8sNamespace"/>
+        <result column="SERVICE_ACCOUNT" jdbcType="VARCHAR" property="serviceAccount"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="USER_ID" jdbcType="BIGINT" property="userId"/>
+        <result column="FLINK_IMAGE" jdbcType="VARCHAR" property="flinkImage"/>
+        <result column="DYNAMIC_OPTIONS" jdbcType="LONGVARCHAR" property="dynamicOptions"/>
+        <result column="K8S_REST_EXPOSED_TYPE" jdbcType="TINYINT" property="k8sRestExposedType"/>
+        <result column="K8S_HADOOP_INTEGRATION" jdbcType="BOOLEAN" property="k8sHadoopIntegration"/>
+        <result column="FLAME_GRAPH" jdbcType="BOOLEAN" property="flameGraph"/>
+        <result column="K8S_CONF" jdbcType="VARCHAR" property="k8sConf"/>
+        <result column="RESOLVE_ORDER" jdbcType="INTEGER" property="resolveOrder"/>
+        <result column="EXCEPTION" jdbcType="LONGVARCHAR" property="exception"/>
+        <result column="CLUSTER_STATE" jdbcType="TINYINT" property="clusterState"/>
+        <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
+    </resultMap>
+</mapper>

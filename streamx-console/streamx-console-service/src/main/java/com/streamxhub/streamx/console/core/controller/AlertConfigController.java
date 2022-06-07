@@ -63,6 +63,13 @@ public class AlertConfigController {
         return RestResponse.create().data(save);
     }
 
+    @PostMapping(value = "exists")
+    public RestResponse exists(AlertConfigWithParams params) throws Exception {
+        AlertConfig alertConfig = AlertConfig.of(params);
+        boolean exist = alertConfigService.exist(alertConfig);
+        return RestResponse.create().data(exist);
+    }
+
     @PutMapping(value = "update")
     public RestResponse update(AlertConfigWithParams params) throws Exception {
         boolean update = alertConfigService.updateById(AlertConfig.of(params));

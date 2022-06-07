@@ -19,14 +19,12 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldStrategy;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.type.TypeReference;
+import static com.streamxhub.streamx.console.core.enums.FlinkAppState.of;
+
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.K8sFlinkConfig;
 import com.streamxhub.streamx.common.conf.Workspace;
+import com.streamxhub.streamx.common.enums.ApplicationType;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.FlinkK8sRestExposedType;
@@ -35,28 +33,36 @@ import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
-import com.streamxhub.streamx.console.base.util.JsonUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
-import com.streamxhub.streamx.console.core.enums.ApplicationType;
-import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.ResourceFrom;
 import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates;
-import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
-import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
+import com.streamxhub.streamx.flink.packer.maven.Artifact;
+import com.streamxhub.streamx.flink.packer.maven.DependencyInfo;
+
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.config.RequestConfig;
 
 import javax.annotation.Nonnull;
-import java.io.File;
+
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,8 +70,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static com.streamxhub.streamx.console.core.enums.FlinkAppState.of;
 
 /**
  * @author benjobs
@@ -123,9 +127,14 @@ public class Application implements Serializable {
 
     private Integer state;
     /**
-     * 是否需要重新发布(针对项目已更新,需要重新发布项目.)
+     * 任务的上线发布状态
      */
-    private Integer deploy;
+    private Integer launch;
+
+    /**
+     * 任务实现需要构建
+     */
+    private Boolean build;
 
     /**
      * 任务失败后的最大重启次数.
@@ -151,6 +160,7 @@ public class Application implements Serializable {
     private String module;
 
     private String options;
+    private String hotParams;
     private Integer resolveOrder;
     private Integer executionMode;
     private String dynamicOptions;
@@ -209,6 +219,11 @@ public class Application implements Serializable {
     private Integer tmMemory;
     private Integer totalTask;
 
+    /**
+     * remote 模式下与任务绑定的cluster
+     */
+    private Long flinkClusterId;
+
     private String description;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -247,7 +262,6 @@ public class Application implements Serializable {
 
     private transient Integer[] stateArray;
     private transient Integer[] jobTypeArray;
-
     private transient Boolean backUp = false;
     private transient Boolean restart = false;
     private transient String userName;
@@ -265,14 +279,15 @@ public class Application implements Serializable {
     private transient String createTimeFrom;
     private transient String createTimeTo;
     private transient String backUpDescription;
-
+    private transient String yarnQueue;
+    private transient String yarnSessionClusterId;
     /**
      * Flink Web UI Url
      */
     private transient String flinkRestUrl;
 
     /**
-     * refer to {@link com.streamxhub.streamx.flink.packer.pipeline.PipeStatus}
+     * refer to {@link com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline}
      */
     private transient Integer buildStatus;
     private transient AppControl appControl;
@@ -298,8 +313,7 @@ public class Application implements Serializable {
      */
     public static Integer shouldTracking(@Nonnull FlinkAppState state) {
         switch (state) {
-            case DEPLOYING:
-            case DEPLOYED:
+            case ADDED:
             case CREATED:
             case FINISHED:
             case FAILED:
@@ -318,13 +332,13 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public DeployState getDeployState() {
-        return DeployState.of(state);
+    public LaunchState getLaunchState() {
+        return LaunchState.of(state);
     }
 
     @JsonIgnore
-    public void setDeployState(DeployState deployState) {
-        this.deploy = deployState.get();
+    public void setLaunchState(LaunchState launchState) {
+        this.launch = launchState.get();
     }
 
     @JsonIgnore
@@ -375,9 +389,9 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getDistHome() {
         String path = String.format("%s/%s/%s",
-            Workspace.local().APP_LOCAL_DIST(),
-            projectId.toString(),
-            getModule()
+                Workspace.local().APP_LOCAL_DIST(),
+                projectId.toString(),
+                getModule()
         );
         log.info("local distHome:{}", path);
         return path;
@@ -386,8 +400,8 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getLocalAppHome() {
         String path = String.format("%s/%s",
-            Workspace.local().APP_WORKSPACE(),
-            id.toString()
+                Workspace.local().APP_WORKSPACE(),
+                id.toString()
         );
         log.info("local appHome:{}", path);
         return path;
@@ -396,9 +410,9 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getRemoteAppHome() {
         String path = String.format(
-            "%s/%s",
-            Workspace.remote().APP_WORKSPACE(),
-            id.toString()
+                "%s/%s",
+                Workspace.remote().APP_WORKSPACE(),
+                id.toString()
         );
         log.info("remote appHome:{}", path);
         return path;
@@ -416,6 +430,7 @@ public class Application implements Serializable {
             case KUBERNETES_NATIVE_SESSION:
             case YARN_PER_JOB:
             case YARN_SESSION:
+            case REMOTE:
             case LOCAL:
                 return getLocalAppHome();
             case YARN_APPLICATION:
@@ -431,15 +446,6 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public File getLocalFlinkSqlHome() {
-        File flinkSql = new File(Workspace.local().APP_WORKSPACE(), "flinksql");
-        if (!flinkSql.exists()) {
-            flinkSql.mkdirs();
-        }
-        return new File(flinkSql, id.toString());
-    }
-
-    @JsonIgnore
     public AppInfo httpYarnAppInfo() throws Exception {
         if (appId != null) {
             String format = "%s/ws/v1/cluster/apps/%s";
@@ -447,73 +453,99 @@ public class Application implements Serializable {
                 String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
                 return httpGetDoResult(url, AppInfo.class);
             } catch (IOException e) {
-                try {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                    return httpGetDoResult(url, AppInfo.class);
-                } catch (IOException e1) {
-                    throw e1;
-                }
-            }
-        }
-        return null;
-    }
-
-    @JsonIgnore
-    public JobsOverview httpJobsOverview() throws Exception {
-        if (appId != null) {
-            String format = "%s/proxy/%s/jobs/overview";
-            try {
-                String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
-                return httpGetDoResult(url, JobsOverview.class);
-            } catch (IOException e) {
-                try {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                    return httpGetDoResult(url, JobsOverview.class);
-                } catch (Exception e1) {
-                    throw e1;
-                }
-            }
-        }
-        return null;
-    }
-
-    @JsonIgnore
-    public Overview httpOverview() throws IOException {
-        String format = "%s/proxy/%s/overview";
-        try {
-            String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
-            return httpGetDoResult(url, Overview.class);
-        } catch (IOException e) {
-            try {
                 String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                return httpGetDoResult(url, Overview.class);
-            } catch (Exception e1) {
-                throw e1;
+                return httpGetDoResult(url, AppInfo.class);
             }
         }
+        return null;
     }
 
     @JsonIgnore
-    public CheckPoints httpCheckpoints() throws IOException {
-        String format = "%s/proxy/%s/jobs/%s/checkpoints";
-        try {
-            String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId, jobId);
-            return httpGetDoResult(url, CheckPoints.class);
-        } catch (IOException e) {
-            try {
-                String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId, jobId);
-                return httpGetDoResult(url, CheckPoints.class);
-            } catch (Exception e1) {
-                throw e1;
+    public Overview httpOverview(FlinkEnv env, FlinkCluster flinkCluster) throws IOException {
+        final String flinkUrl = "overview";
+        if (appId != null) {
+            if (getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
+                    getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
+                String format = "%s/proxy/%s/" + flinkUrl;
+                try {
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
+                    return httpGetDoResult(url, Overview.class);
+                } catch (IOException e) {
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
+                    return httpGetDoResult(url, Overview.class);
+                }
+                // TODO: yarn-session
+                //String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
+                //return httpGetDoResult(remoteUrl, Overview.class);
             }
         }
+        return null;
+    }
+
+    @JsonIgnore
+    public JobsOverview httpJobsOverview(FlinkEnv env, FlinkCluster flinkCluster) throws Exception {
+        final String flinkUrl = "jobs/overview";
+        if (ExecutionMode.isYarnMode(executionMode)) {
+            if (appId != null) {
+                String format = "%s/proxy/%s/" + flinkUrl;
+                JobsOverview jobsOverview;
+                try {
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
+                    jobsOverview = httpGetDoResult(url, JobsOverview.class);
+                } catch (IOException e) {
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
+                    jobsOverview = httpGetDoResult(url, JobsOverview.class);
+                }
+                if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
+                    //过滤出当前job
+                    List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(jobId)).collect(Collectors.toList());
+                    jobsOverview.setJobs(jobs);
+                }
+                return jobsOverview;
+            }
+        } else if (ExecutionMode.isRemoteMode(executionMode)) {
+            if (jobId != null) {
+                String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
+                JobsOverview jobsOverview = httpGetDoResult(remoteUrl, JobsOverview.class);
+                if (jobsOverview != null) {
+                    //过滤出当前job
+                    List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(jobId)).collect(Collectors.toList());
+                    jobsOverview.setJobs(jobs);
+                }
+                return jobsOverview;
+            }
+        }
+        return null;
+    }
+
+    @JsonIgnore
+    public CheckPoints httpCheckpoints(FlinkEnv env, FlinkCluster flinkCluster) throws IOException {
+        final String flinkUrl = "jobs/%s/checkpoints";
+        if (ExecutionMode.isYarnMode(executionMode)) {
+            if (appId != null) {
+                String format = "%s/proxy/%s/" + flinkUrl;
+                try {
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId, jobId);
+                    return httpGetDoResult(url, CheckPoints.class);
+                } catch (IOException e) {
+                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId, jobId);
+                    return httpGetDoResult(url, CheckPoints.class);
+                }
+            }
+        } else if (ExecutionMode.isRemoteMode(executionMode)) {
+            if (jobId != null) {
+                String remoteUrl = getFlinkClusterRestUrl(flinkCluster, String.format(flinkUrl, jobId));
+                return httpGetDoResult(remoteUrl, CheckPoints.class);
+            }
+        }
+        return null;
     }
 
     @JsonIgnore
     private <T> T httpGetDoResult(String url, Class<T> clazz) throws IOException {
-        String result = HttpClientUtils.httpGetRequest(url);
+        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
         if (result != null) {
-            return JsonUtils.read(result, clazz);
+            return JacksonUtils.read(result, clazz);
         }
         return null;
     }
@@ -526,7 +558,7 @@ public class Application implements Serializable {
     @JsonIgnore
     @SneakyThrows
     public Map<String, Object> getOptionMap() {
-        Map<String, Object> map = JsonUtils.read(getOptions(), Map.class);
+        Map<String, Object> map = JacksonUtils.read(getOptions(), Map.class);
         map.entrySet().removeIf(entry -> entry.getValue() == null);
         return map;
     }
@@ -556,13 +588,18 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
+    private String getFlinkClusterRestUrl(FlinkCluster cluster, String url) throws MalformedURLException {
+        return cluster.getActiveAddress().toURL() + "/" + url;
+    }
+
+    @JsonIgnore
     @SneakyThrows
     public Dependency getDependencyObject() {
         return Dependency.jsonToDependency(this.dependency);
     }
 
     @JsonIgnore
-    public JarPackDeps getJarPackDeps() {
+    public DependencyInfo getDependencyInfo() {
         return Application.Dependency.jsonToDependency(getDependency()).toJarPackDeps();
     }
 
@@ -573,7 +610,7 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public boolean isNeedRollback() {
-        return DeployState.NEED_ROLLBACK.get() == this.getDeploy();
+        return LaunchState.NEED_ROLLBACK.get() == this.getLaunch();
     }
 
     @JsonIgnore
@@ -607,8 +644,8 @@ public class Application implements Serializable {
         }
 
         if (!ObjectUtils.safeEquals(this.getResolveOrder(), other.getResolveOrder()) ||
-            !ObjectUtils.safeEquals(this.getExecutionMode(), other.getExecutionMode()) ||
-            !ObjectUtils.safeEquals(this.getK8sRestExposedType(), other.getK8sRestExposedType())) {
+                !ObjectUtils.safeEquals(this.getExecutionMode(), other.getExecutionMode()) ||
+                !ObjectUtils.safeEquals(this.getK8sRestExposedType(), other.getK8sRestExposedType())) {
             return false;
         }
 
@@ -671,6 +708,7 @@ public class Application implements Serializable {
             case YARN_SESSION:
             case KUBERNETES_NATIVE_SESSION:
             case KUBERNETES_NATIVE_APPLICATION:
+            case REMOTE:
                 return StorageType.LFS;
             default:
                 throw new UnsupportedOperationException("Unsupported ".concat(executionMode.getName()));
@@ -685,6 +723,55 @@ public class Application implements Serializable {
         return Workspace.of(getStorageType());
     }
 
+    @JsonIgnore
+    @SneakyThrows
+    public Map<String, Object> getHotParamsMap() {
+        if (this.hotParams != null) {
+            Map<String, Object> map = JacksonUtils.read(this.hotParams, Map.class);
+            map.entrySet().removeIf(entry -> entry.getValue() == null);
+            return map;
+        }
+        return Collections.EMPTY_MAP;
+    }
+
+    @JsonIgnore
+    @SneakyThrows
+    public void doSetHotParams() {
+        Map<String, String> hotParams = new HashMap<>();
+        ExecutionMode executionModeEnum = this.getExecutionModeEnum();
+        if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
+            if (StringUtils.isNotEmpty(this.getYarnQueue())) {
+                hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), this.getYarnQueue());
+            }
+        }
+        if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
+            if (StringUtils.isNotEmpty(this.getYarnSessionClusterId())) {
+                hotParams.put("yarn.application.id", this.getYarnSessionClusterId());
+            }
+        }
+        if (!hotParams.isEmpty()) {
+            this.setHotParams(JacksonUtils.write(hotParams));
+        }
+    }
+
+    @JsonIgnore
+    @SneakyThrows
+    public void updateHotParams(Application appParam) {
+        ExecutionMode executionModeEnum = appParam.getExecutionModeEnum();
+        Map<String, String> hotParams = new HashMap<>(0);
+        if (ExecutionMode.YARN_APPLICATION.equals(executionModeEnum)) {
+            if (StringUtils.isNotEmpty(appParam.getYarnQueue())) {
+                hotParams.put(ConfigConst.KEY_YARN_APP_QUEUE(), appParam.getYarnQueue());
+            }
+        }
+        if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
+            if (StringUtils.isNotEmpty(appParam.getYarnSessionClusterId())) {
+                hotParams.put(ConfigConst.KEY_YARN_APP_ID(), appParam.getYarnSessionClusterId());
+            }
+        }
+        this.setHotParams(JacksonUtils.write(hotParams));
+    }
+
     @Data
     public static class Dependency {
         private List<Pom> pom = Collections.emptyList();
@@ -694,7 +781,7 @@ public class Application implements Serializable {
         @SneakyThrows
         public static Dependency jsonToDependency(String dependency) {
             if (Utils.notEmpty(dependency)) {
-                return JsonUtils.read(dependency, new TypeReference<Dependency>() {
+                return JacksonUtils.read(dependency, new TypeReference<Dependency>() {
                 });
             }
             return new Dependency();
@@ -737,14 +824,14 @@ public class Application implements Serializable {
         }
 
         @JsonIgnore
-        public JarPackDeps toJarPackDeps() {
-            List<MavenArtifact> mvnArts = this.pom.stream()
-                .map(pom -> new MavenArtifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
-                .collect(Collectors.toList());
+        public DependencyInfo toJarPackDeps() {
+            List<Artifact> mvnArts = this.pom.stream()
+                    .map(pom -> new Artifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
+                    .collect(Collectors.toList());
             List<String> extJars = this.jar.stream()
-                .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
-                .collect(Collectors.toList());
-            return new JarPackDeps(mvnArts, extJars);
+                    .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
+                    .collect(Collectors.toList());
+            return new DependencyInfo(mvnArts, extJars);
         }
 
     }
@@ -759,10 +846,10 @@ public class Application implements Serializable {
         @Override
         public String toString() {
             return "{" +
-                "groupId='" + groupId + '\'' +
-                ", artifactId='" + artifactId + '\'' +
-                ", version='" + version + '\'' +
-                '}';
+                    "groupId='" + groupId + '\'' +
+                    ", artifactId='" + artifactId + '\'' +
+                    ", version='" + version + '\'' +
+                    '}';
         }
 
         private String getGav() {

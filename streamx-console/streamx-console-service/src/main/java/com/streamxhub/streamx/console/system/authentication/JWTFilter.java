@@ -19,10 +19,11 @@
 
 package com.streamxhub.streamx.console.system.authentication;
 
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.streamx.console.base.properties.ShiroProperties;
 import com.streamxhub.streamx.console.base.util.SpringContextUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
+
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -108,6 +109,12 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
             httpServletResponse.setStatus(HttpStatus.OK.value());
             return false;
         }
-        return super.preHandle(request, response);
+        boolean preHandleResult = super.preHandle(request, response);
+        int httpStatus = httpServletResponse.getStatus();
+        //避免http_status=401时，浏览器自动弹出认证框
+        if (!preHandleResult && httpStatus == 401) {
+            httpServletResponse.setHeader("WWW-Authenticate", null);
+        }
+        return preHandleResult;
     }
 }

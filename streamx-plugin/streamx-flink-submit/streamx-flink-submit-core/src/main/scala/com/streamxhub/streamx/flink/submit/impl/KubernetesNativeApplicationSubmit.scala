@@ -21,17 +21,16 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.ExecutionMode
-import com.streamxhub.streamx.flink.packer.pipeline.FlinkK8sApplicationBuildResponse
+import com.streamxhub.streamx.common.util.Utils
+import com.streamxhub.streamx.flink.packer.pipeline.DockerImageBuildResponse
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
-import com.streamxhub.streamx.flink.submit.domain._
+import com.streamxhub.streamx.flink.submit.bean._
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.configuration.{DeploymentOptionsInternal, PipelineOptions}
+import org.apache.flink.configuration.{Configuration, DeploymentOptions, DeploymentOptionsInternal, PipelineOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
-import org.apache.flink.util.IOUtils
-
-import scala.util.Try
 
 /**
  * kubernetes native application mode submit
@@ -40,25 +39,27 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
 
   // noinspection DuplicatedCode
   @throws[Exception]
-  override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
+  override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
+
     // require parameters
-    assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
+    require(
+      StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
+      s"[flink-submit] stop flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
+    )
 
     // check the last building result
-    checkBuildResult(submitRequest)
-    val buildResult = submitRequest.buildResult.asInstanceOf[FlinkK8sApplicationBuildResponse]
+    submitRequest.checkBuildResult()
 
-    // extract flink config
-    val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
+    val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
 
     // add flink pipeline.jars configuration
-    flinkConfig.set(PipelineOptions.JARS, Lists.newArrayList(buildResult.dockerInnerMainJarPath))
+    flinkConfig.safeSet(PipelineOptions.JARS, Lists.newArrayList(buildResult.dockerInnerMainJarPath))
     // add flink conf configuration, mainly to set the log4j configuration
     if (!flinkConfig.contains(DeploymentOptionsInternal.CONF_DIR)) {
-      flinkConfig.set(DeploymentOptionsInternal.CONF_DIR, s"${submitRequest.flinkVersion.flinkHome}/conf")
+      flinkConfig.safeSet(DeploymentOptionsInternal.CONF_DIR, s"${submitRequest.flinkVersion.flinkHome}/conf")
     }
     // add flink container image tag to flink configuration
-    flinkConfig.set(KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag)
+    flinkConfig.safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag)
 
     // retrieve k8s cluster and submit flink job on application mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
@@ -76,18 +77,19 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
       val result = SubmitResponse(clusterId, flinkConfig.toMap)
       logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
       result
-
     } catch {
       case e: Exception =>
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
         throw e
     } finally {
-      IOUtils.closeAll(clusterClient, clusterDescriptor)
+      Utils.close(clusterDescriptor, clusterClient)
     }
   }
 
-  override def doStop(stopInfo: StopRequest): StopResponse = {
-    super.doStop(ExecutionMode.KUBERNETES_NATIVE_APPLICATION, stopInfo)
+  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
+    flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
+    super.doStop(stopRequest, flinkConfig)
   }
+
 
 }

@@ -19,20 +19,23 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.google.common.collect.Sets;
 import com.streamxhub.streamx.console.core.service.SqlCompleteService;
+
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
@@ -89,10 +92,26 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
                 return num * -1;
             }
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            WordWithFrequency that = (WordWithFrequency) o;
+            return Objects.equals(word, that.word) && Objects.equals(count, that.count);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(word, count);
+        }
     }
 
     private static class SqlCompleteFstTree {
-
 
         // symbol reminder
         private static final String CHARACTER_NOTICE = "()\t<>\t\"\"\t''\t{}";
@@ -106,7 +125,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
             try {
                 Resource resource = new ClassPathResource("sql-rev.dict");
                 Scanner scanner = new Scanner(resource.getInputStream());
-                StringBuffer stringBuffer = new StringBuffer();
+                StringBuilder stringBuffer = new StringBuilder();
                 while (scanner.hasNextLine()) {
                     stringBuffer.append(scanner.nextLine()).append(SPLIT_CHAR);
                 }
@@ -114,7 +133,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
                 String dict = stringBuffer.toString();
                 Arrays.stream(dict.split(SPLIT_CHAR)).map(e -> e.trim().toLowerCase()).forEach(e -> this.initSearchTree(e, 1));
             } catch (IOException e) {
-                log.error("FstTree require reserved word init fail,{}", e);
+                log.error("FstTree require reserved word init fail, {}", e.getMessage());
             }
 
             Arrays.stream(CHARACTER_NOTICE.split(SPLIT_CHAR)).map(e -> e.trim().toLowerCase()).forEach(e -> this.initSearchTree(e, 1));
@@ -136,7 +155,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         /**
          * used to return FST depth
          */
-        private class Single {
+        private static class Single {
             public Integer loc = 0;
         }
 
@@ -220,7 +239,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
             List<WordWithFrequency> temp = new ArrayList<>();
             List<WordWithFrequency> tempNPreview = new ArrayList<>();
             SortedSet<WordWithFrequency> returnSource;
-            SqlCompleteFstTree.Single breLoc = new SqlCompleteFstTree.Single();
+            SqlCompleteFstTree.Single breLoc = new Single();
             this.getMaybeNodeList(word, tree, breLoc).forEach(each -> this.getDFSWord(temp, "", each));
             returnSource = temp.stream().map(e -> new WordWithFrequency(word.substring(0, breLoc.loc) + e.word, e.count)).collect(Collectors.toCollection(TreeSet::new));
 
@@ -263,8 +282,8 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         public List<String> getComplicate(String word) {
 
             word = word.toLowerCase();
-            SqlCompleteFstTree.Single searchFromHeadPassLength = new SqlCompleteFstTree.Single();
-            SqlCompleteFstTree.Single searchFromReversePassLength = new SqlCompleteFstTree.Single();
+            SqlCompleteFstTree.Single searchFromHeadPassLength = new Single();
+            SqlCompleteFstTree.Single searchFromReversePassLength = new Single();
 
             SortedSet<WordWithFrequency> head = tryComplicate(word, READ_FROM_HEAD, searchFromHeadPassLength);
 

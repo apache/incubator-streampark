@@ -19,9 +19,10 @@
 
 package com.streamxhub.streamx.console.core.metrics.flink;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;

@@ -19,8 +19,9 @@
 
 package com.streamxhub.streamx.console.system.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.system.entity.UserRole;
+
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 

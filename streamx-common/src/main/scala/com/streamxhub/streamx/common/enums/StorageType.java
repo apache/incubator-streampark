@@ -21,9 +21,18 @@ package com.streamxhub.streamx.common.enums;
 
 import org.apache.commons.lang3.StringUtils;
 
-public enum StorageType {
+import java.io.Serializable;
 
+public enum StorageType implements Serializable {
+
+    /**
+     * hdfs
+     */
     HDFS("hdfs"),
+
+    /**
+     * local File system
+     */
     LFS("lfs");
 
     private final String identifier;

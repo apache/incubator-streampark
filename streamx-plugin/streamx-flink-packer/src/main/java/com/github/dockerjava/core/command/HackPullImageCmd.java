@@ -28,7 +28,7 @@ import com.github.dockerjava.api.model.AuthConfig;
  *
  * @author Al-assad
  */
-public class HackPullImageCmd extends PullImageCmdImpl{
+public class HackPullImageCmd extends PullImageCmdImpl {
 
     public HackPullImageCmd(Exec exec, AuthConfig authConfig, String repository) {
         super(exec, authConfig, repository);

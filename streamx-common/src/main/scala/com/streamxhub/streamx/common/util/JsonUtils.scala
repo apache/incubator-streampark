@@ -21,13 +21,13 @@ package com.streamxhub.streamx.common.util
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 
 import java.text.SimpleDateFormat
+import scala.reflect.ClassTag
 
 object JsonUtils extends Serializable {
 
-  private val mapper = new ObjectMapper() with ScalaObjectMapper
+  private val mapper = new ObjectMapper()
 
   mapper.registerModule(DefaultScalaModule)
 
@@ -36,6 +36,7 @@ object JsonUtils extends Serializable {
 
   //该属性设置主要是将忽略空bean转json错误
   mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+
   //该属性设置主要是取消将对象的时间默认转换timesstamps(时间戳)形式
   mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
@@ -44,17 +45,19 @@ object JsonUtils extends Serializable {
   //所有日期都统一为以下样式：yyyy-MM-dd HH:mm:ss，这里可以不用我的DateTimeUtil.DATE_FORMAT，手动添加
   mapper.setDateFormat(new SimpleDateFormat(DateUtils.fullFormat))
 
-  def read[T](obj: AnyRef)(implicit manifest: Manifest[T]): T = {
+  def read[T](obj: AnyRef, clazz: Class[T]): T = {
     obj match {
-      case str: String => mapper.readValue[T](str)
-      case _ => mapper.readValue[T](write(obj))
+      case str: String => mapper.readValue(str, clazz)
+      case _ => mapper.readValue(write(obj), clazz)
     }
   }
+
+  def read[T](obj: AnyRef)(implicit classTag: ClassTag[T]): T = this.read(obj, classTag.runtimeClass).asInstanceOf[T]
 
   def write(obj: AnyRef): String = mapper.writeValueAsString(obj)
 
   implicit class Unmarshal(jsonStr: String) {
-    def fromJson[T]()(implicit manifest: Manifest[T]): T = read[T](jsonStr)
+    def fromJson[T]()(implicit classTag: ClassTag[T]): T = read[T](jsonStr)
   }
 
   implicit class Marshal(obj: AnyRef) {

@@ -21,6 +21,7 @@ package com.streamxhub.streamx.console.core.task;
 
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.service.FlameGraphService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -51,7 +52,7 @@ public class MetricsTask {
     @Scheduled(cron = "0 0 * * * ?")
     public void cleanFlameGraph() {
         // 1) clean file
-        String tempPath = WebUtils.getAppDir("temp");
+        String tempPath = WebUtils.getAppTempDir().getAbsolutePath();
         File temp = new File(tempPath);
         Arrays.stream(Objects.requireNonNull(temp.listFiles()))
             .filter(x -> x.getName().matches(FLAME_GRAPH_FILE_REGEXP))

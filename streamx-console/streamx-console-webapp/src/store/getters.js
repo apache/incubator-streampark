@@ -15,7 +15,9 @@ const getters = {
   userInfo: state => state.user.info,
   routers: state => state.user.routers,
   multiTab: state => state.app.multiTab,
-  applicationId: state => state.application.appId
+  applicationId: state => state.application.appId,
+  clusterId: state => state.cluster.clusterId,
+  projectId: state => state.project.projectId
 }
 
 export default getters

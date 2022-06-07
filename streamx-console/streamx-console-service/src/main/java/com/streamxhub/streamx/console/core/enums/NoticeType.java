@@ -27,9 +27,16 @@ import java.util.Arrays;
  */
 
 public enum NoticeType implements Serializable {
+    /**
+     * exception
+     */
     EXCEPTION(1),
+    /**
+     * message
+     */
     MESSAGE(2);
-    int value;
+
+    private final int value;
 
     public int get() {
         return this.value;

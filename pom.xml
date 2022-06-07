@@ -4,15 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.streamxhub.streamx</groupId>
     <artifactId>streamx</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>StreamX Parent</name>
-    <description>A magical framework that makes Flink development easier</description>
+    <description>A magical framework that make stream processing easier</description>
 
     <modules>
         <module>streamx-common</module>
         <module>streamx-flink</module>
-        <module>streamx-spark</module>
         <module>streamx-plugin</module>
         <module>streamx-console</module>
     </modules>
@@ -29,7 +28,7 @@
         <developer>
             <name>StreamX</name>
             <id>StreamX</id>
-            <email>benjobs@qq.com</email>
+            <email>benjobs@apache.org</email>
             <roles>
                 <role>Developer</role>
             </roles>
@@ -64,19 +63,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+        <scala.version>2.12.7</scala.version>
+        <scala.binary.version>2.12</scala.binary.version>
+        <scalatest.version>3.2.9</scalatest.version>
+        <scala.binary.flink.version>_${scala.binary.version}</scala.binary.flink.version>
+
         <flink.version>1.14.0</flink.version>
         <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
-
         <spark.version>2.2.0</spark.version>
         <hive.version>2.3.4</hive.version>
-        <async.client.version>2.12.3</async.client.version>
         <vertx.version>4.2.3</vertx.version>
         <hadoop.version>2.10.1</hadoop.version>
         <hbase.version>2.1.10</hbase.version>
-        <scala.version>2.11.12</scala.version>
-        <scala.binary.version>2.11</scala.binary.version>
-        <scalatest.version>3.2.9</scalatest.version>
-        <scala-async.version>0.9.7</scala-async.version>
         <junit.version>5.6.3</junit.version>
         <zkclient.version>0.11</zkclient.version>
         <curator.version>4.2.0</curator.version>
@@ -87,29 +85,23 @@
         <slf4j.version>1.7.32</slf4j.version>
         <logback.version>1.2.6</logback.version>
         <grpc.version>1.15.0</grpc.version>
-        <jackson.version>2.12.1</jackson.version>
-        <gson.version>2.8.5</gson.version>
+        <jackson.version>2.13.2</jackson.version>
         <guava.version>30.0-jre</guava.version>
         <caffeine.version>2.8.6</caffeine.version>
 
-        <checkstyle.version>3.1.2</checkstyle.version>
-        <puppycrawl.version>9.2</puppycrawl.version>
+        <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
+        <checkstyle.fails.on.error>true</checkstyle.fails.on.error>
+        <scalastyle-maven-plugin.version>1.0.0</scalastyle-maven-plugin.version>
+        <streamx.shaded.package>com.streamxhub.streamx.shaded</streamx.shaded.package>
+        <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
-        <clickhouse.version>0.1.53</clickhouse.version>
         <CodeCacheSize>512m</CodeCacheSize>
         <MaxMetaspace>512m</MaxMetaspace>
     </properties>
 
     <dependencies>
-
-        <!--jansi-->
-        <dependency>
-            <groupId>org.fusesource.jansi</groupId>
-            <artifactId>jansi</artifactId>
-            <version>2.3.4</version>
-        </dependency>
 
         <!--scala-->
         <dependency>
@@ -133,11 +125,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.scala-lang.modules</groupId>
-            <artifactId>scala-async_${scala.binary.version}</artifactId>
-            <version>${scala-async.version}</version>
-        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -224,6 +211,12 @@
                 <groupId>org.json4s</groupId>
                 <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
                 <version>3.7.0-M2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala-reflect</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -242,6 +235,20 @@
                 <groupId>com.fasterxml.jackson.module</groupId>
                 <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
                 <version>${jackson.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala-reflect</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala-compiler</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala-library</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!--mail-->
@@ -255,12 +262,6 @@
                     </exclusion>
                 </exclusions>
                 <version>0.1.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.scalaj</groupId>
-                <artifactId>scalaj-http_${scala.binary.version}</artifactId>
-                <version>2.4.2</version>
             </dependency>
 
             <dependency>
@@ -292,87 +293,6 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>4.5.13</version>
-            </dependency>
-
-            <!--flink-->
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-core</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-clients_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-scala_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-connector-elasticsearch5_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-connector-elasticsearch6_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-connector-jdbc_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <!--state backend-->
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.asynchttpclient</groupId>
-                <artifactId>async-http-client</artifactId>
-                <version>${async.client.version}</version>
-            </dependency>
-
-            <!--es sink need httpcomponents -->
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpasyncclient</artifactId>
-                <version>4.1.2</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.bahir</groupId>
-                <artifactId>flink-connector-redis_${scala.binary.version}</artifactId>
-                <version>1.0</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.flink</groupId>
-                        <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!--hadoop-->
@@ -412,7 +332,6 @@
                 <version>${hadoop.version}</version>
             </dependency>
 
-
             <!--hbase-->
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
@@ -444,12 +363,6 @@
                         <artifactId>slf4j-log4j12</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.influxdb</groupId>
-                <artifactId>influxdb-java</artifactId>
-                <version>${influxdb.version}</version>
             </dependency>
 
         </dependencies>
@@ -488,20 +401,14 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>${checkstyle.version}</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.puppycrawl.tools</groupId>
-                            <artifactId>checkstyle</artifactId>
-                            <version>${puppycrawl.version}</version>
-                        </dependency>
-                    </dependencies>
+                    <version>${maven-checkstyle-plugin.version}</version>
                     <configuration>
+                        <!--suppress UnresolvedMavenProperty -->
                         <configLocation>${maven.multiModuleProjectDirectory}/tools/checkstyle/checkstyle.xml</configLocation>
                         <encoding>UTF-8</encoding>
                         <consoleOutput>true</consoleOutput>
                         <includeTestSourceDirectory>false</includeTestSourceDirectory>
-                        <failOnViolation>true</failOnViolation>
+                        <failOnViolation>${checkstyle.fails.on.error}</failOnViolation>
                         <sourceDirectories>
                             <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
                             <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
@@ -535,7 +442,7 @@
                 <plugin>
                     <groupId>org.scalastyle</groupId>
                     <artifactId>scalastyle-maven-plugin</artifactId>
-                    <version>1.0.0</version>
+                    <version>${scalastyle-maven-plugin.version}</version>
                     <configuration>
                         <verbose>false</verbose>
                         <failOnViolation>true</failOnViolation>
@@ -543,6 +450,7 @@
                         <failOnWarning>false</failOnWarning>
                         <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
                         <testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
+                        <!--suppress UnresolvedMavenProperty -->
                         <configLocation>${maven.multiModuleProjectDirectory}/scalastyle-config.xml</configLocation>
                         <outputFile>${project.build.directory}/target/scalastyle-output.xml</outputFile>
                         <inputEncoding>UTF-8</inputEncoding>
@@ -774,5 +682,17 @@
         </plugins>
 
     </build>
+
+    <profiles>
+        <profile>
+            <id>flink-1.15</id>
+            <properties>
+                <streamx.flink.shims.version>1.15</streamx.flink.shims.version>
+                <flink.version>1.15.0</flink.version>
+                <scala.binary.flink.version/>
+                <flink.table.uber.artifact.id>flink-table-api-java-uber</flink.table.uber.artifact.id>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

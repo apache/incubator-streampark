@@ -15,4 +15,9 @@
         <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
+    <select id="getAlertConfByName" resultType="alertConfig" parameterType="alertConfig">
+        SELECT 1
+        FROM t_alert_config t
+        where t.ALERT_NAME = #{alertConfig.alertName}
+    </select>
 </mapper>

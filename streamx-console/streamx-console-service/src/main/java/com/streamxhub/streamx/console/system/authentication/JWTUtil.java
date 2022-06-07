@@ -19,15 +19,18 @@
 
 package com.streamxhub.streamx.console.system.authentication;
 
+import com.streamxhub.streamx.console.base.properties.ShiroProperties;
+import com.streamxhub.streamx.console.base.util.SpringContextUtils;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.streamxhub.streamx.console.base.properties.ShiroProperties;
-import com.streamxhub.streamx.console.base.util.SpringContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authc.AuthenticationException;
 
 import java.util.Date;
 
@@ -37,7 +40,8 @@ import java.util.Date;
 @Slf4j
 public class JWTUtil {
 
-    private static final long EXPIRE_TIME = SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
+
+    private static final long JWT_TIME_OUT = SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
 
     /**
      * 校验 token是否正确
@@ -52,8 +56,10 @@ public class JWTUtil {
             JWTVerifier verifier = JWT.require(algorithm).withClaim("username", username).build();
             verifier.verify(token);
             return true;
+        } catch (TokenExpiredException e) {
+            throw new AuthenticationException(e.getMessage());
         } catch (Exception e) {
-            log.info("token is invalid{}", e.getMessage());
+            log.info("token is invalid:{} , e:{}", e.getMessage(), e.getClass());
             return false;
         }
     }
@@ -81,9 +87,21 @@ public class JWTUtil {
      * @return token
      */
     public static String sign(String username, String secret) {
+        return sign(username, secret, getExpireTime());
+    }
+
+    /**
+     * 生成 token
+     *
+     * @param username     用户名
+     * @param secret       用户的密码
+     * @param expireTime   token过期时间
+     * @return token
+     */
+    public static String sign(String username, String secret, Long expireTime) {
         try {
             username = StringUtils.lowerCase(username);
-            Date date = new Date(System.currentTimeMillis() + EXPIRE_TIME);
+            Date date = new Date(expireTime);
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create().withClaim("username", username).withExpiresAt(date).sign(algorithm);
         } catch (Exception e) {
@@ -91,4 +109,12 @@ public class JWTUtil {
             return null;
         }
     }
+
+    /**
+     * 获取用户登录token 失效时间
+     */
+    private static Long getExpireTime() {
+        return System.currentTimeMillis() + JWT_TIME_OUT;
+    }
+
 }

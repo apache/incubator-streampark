@@ -19,11 +19,6 @@
 
 package com.streamxhub.streamx.console.system.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.util.ShaHashUtils;
 import com.streamxhub.streamx.console.system.dao.UserMapper;
@@ -35,6 +30,12 @@ import com.streamxhub.streamx.console.system.service.MenuService;
 import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserRoleService;
 import com.streamxhub.streamx.console.system.service.UserService;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -188,6 +189,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public Set<String> getPermissions(String username) {
         List<Menu> permissionList = this.menuService.findUserPermissions(username);
         return permissionList.stream().map(Menu::getPerms).collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<User> getNoTokenUser() {
+        List<User> users = this.baseMapper.getNoTokenUser();
+        if (!users.isEmpty()) {
+            users.forEach(u -> {
+                u.setPassword(null);
+                u.setSalt(null);
+                u.setRoleId(null);
+                u.setMobile(null);
+            });
+        }
+        return users;
     }
 
     private void setUserRoles(User user, String[] roles) {

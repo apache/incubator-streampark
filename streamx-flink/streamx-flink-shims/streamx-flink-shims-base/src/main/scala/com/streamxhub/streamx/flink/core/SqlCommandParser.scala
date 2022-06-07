@@ -21,8 +21,8 @@ package com.streamxhub.streamx.flink.core
 import com.streamxhub.streamx.common.enums.SqlErrorType
 import com.streamxhub.streamx.common.util.{Logger, SqlSplitter}
 import enumeratum.EnumEntry
-import java.util.regex.{Matcher, Pattern}
 
+import java.util.regex.{Matcher, Pattern}
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 
@@ -322,6 +322,30 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     }
   )
 
+  /**
+   * <pre>
+   * SQL Client execute each INSERT INTO statement as a single Flink job. However,
+   * this is sometimes not optimal because some part of the pipeline can be reused.
+   * SQL Client supports STATEMENT SET syntax to execute a set of SQL statements.
+   * This is an equivalent feature with StatementSet in Table API.
+   * The STATEMENT SET syntax encloses one or more INSERT INTO statements.
+   * All statements in a STATEMENT SET block are holistically optimized and executed as a single Flink job.
+   * Joint optimization and execution allows for reusing common intermediate results and can therefore significantly
+   * improve the efficiency of executing multiple queries.
+   * </pre>
+   */
+  case object BEGIN_STATEMENT_SET extends SqlCommand(
+    "begin statement set",
+    "BEGIN\\s+STATEMENT\\s+SET",
+    Converters.NO_OPERANDS
+  )
+
+  case object END_STATEMENT_SET extends SqlCommand(
+    "end statement set",
+    "END",
+    Converters.NO_OPERANDS
+  )
+
 }
 
 /**
@@ -350,7 +374,7 @@ object SqlError {
   private[core] val separator = "\001"
 
   def toString(sqlError: SqlError): String = {
-    s"${sqlError.errorType.errorType}${SqlError.separator}${sqlError.exception}${SqlError.separator}${sqlError.sql}"
+    s"${sqlError.errorType.getValue}${SqlError.separator}${sqlError.exception}${SqlError.separator}${sqlError.sql}"
   }
 
   def fromString(string: String): SqlError = {

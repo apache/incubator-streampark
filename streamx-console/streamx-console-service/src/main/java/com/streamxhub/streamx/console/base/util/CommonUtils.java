@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.console.base.util;
 
 import com.streamxhub.streamx.common.util.AssertUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.beans.BeanMap;
 
@@ -41,7 +42,11 @@ import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
-public class CommonUtils implements Serializable {
+public final class CommonUtils implements Serializable {
+
+    private CommonUtils() {
+
+    }
 
     private static final long serialVersionUID = 6458428317155311192L;
 

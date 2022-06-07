@@ -19,16 +19,20 @@
 
 package com.streamxhub.streamx.console.core.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
+
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * @author benjobs
  */
 public interface SettingService extends IService<Setting> {
 
-    String KEY_MAVEN_REPOSITORY = "maven.central.repository";
+    String KEY_MAVEN_REPOSITORY = "streamx.maven.central.repository";
+    String KEY_MAVEN_AUTH_USER = "streamx.maven.auth.user";
+    String KEY_MAVEN_AUTH_PASSWORD = "streamx.maven.auth.password";
+
     String KEY_STREAMX_ADDRESS = "streamx.console.webapp.address";
 
     String KEY_ALERT_EMAIL_HOST = "alert.email.host";
@@ -57,6 +61,10 @@ public interface SettingService extends IService<Setting> {
     String getStreamXAddress();
 
     String getMavenRepository();
+
+    String getMavenAuthUser();
+
+    String getMavenAuthPassword();
 
     SenderEmail getSenderEmail();
 

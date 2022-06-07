@@ -29,6 +29,8 @@ export default {
     GITCHECK: '/flink/project/gitcheck',
     EXISTS: '/flink/project/exists',
     CREATE: '/flink/project/create',
+    GET: '/flink/project/get',
+    UPDATE: '/flink/project/update',
     BUILD: '/flink/project/build',
     BUILDLOG: '/flink/project/buildlog',
     CLOSEBUILD: '/flink/project/closebuild',
@@ -78,9 +80,10 @@ export default {
     BACKUPS: '/flink/app/backups',
     ROLLBACK: '/flink/app/rollback',
     REVOKE: '/flink/app/revoke',
-    STARTLOG: '/flink/app/startlog',
+    OPTIONLOG: '/flink/app/optionlog',
     DOWNLOG: '/flink/app/downlog',
-    CHECKJAR: '/flink/app/checkjar'
+    CHECKJAR: '/flink/app/checkjar',
+    VERIFYSCHEMA: '/flink/app/verifySchema'
   },
   Config: {
     GET: '/flink/conf/get',
@@ -98,6 +101,17 @@ export default {
     SYNC: '/flink/env/sync',
     UPDATE: '/flink/env/update',
     DEFAULT: '/flink/env/default',
+  },
+  FlinkCluster: {
+    LIST: '/flink/cluster/list',
+    ACTIVEURL: '/flink/cluster/activeUrl',
+    CREATE:  '/flink/cluster/create',
+    CHECK: '/flink/cluster/check',
+    GET: '/flink/cluster/get',
+    UPDATE: '/flink/cluster/update',
+    START: '/flink/cluster/start',
+    SHUTDOWN: '/flink/cluster/shutdown',
+    DELETE: '/flink/cluster/delete'
   },
   AppBuild: {
     BUILD: '/flink/pipe/build',
@@ -139,10 +153,19 @@ export default {
     PASSWORD: '/user/password',
     RESET: '/user/password/reset',
     GET: '/user/get',
+    GET_NOTOKEN_USER: '/user/getNoTokenUser',
     POST: '/user/post',
     DELETE: '/user/delete',
     CHECK_NAME: '/user/check/name',
     CHECK_PASSWORD: '/user/check/password'
+  },
+  Token: {
+    LIST: '/token/list',
+    DELETE: '/token/delete',
+    CREATE: '/token/create',
+    CHECK: '/token/check',
+    CURL: '/token/curl',
+    TOGGLE: '/token/toggle'
   },
   Role: {
     POST: '/role/post',

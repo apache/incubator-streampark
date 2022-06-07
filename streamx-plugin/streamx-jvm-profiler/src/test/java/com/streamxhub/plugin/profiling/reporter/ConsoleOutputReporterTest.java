@@ -20,6 +20,7 @@
 package com.streamxhub.plugin.profiling.reporter;
 
 import com.streamxhub.streamx.plugin.profiling.reporter.ConsoleOutputReporter;
+
 import org.junit.Test;
 
 import java.util.HashMap;

@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.servlet.Filter;
+
 import java.util.LinkedHashMap;
 
 /**
@@ -50,9 +51,18 @@ public class ShiroConfig {
 
         LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         // 所有请求都要经过 jwt过滤器
+        filterChainDefinitionMap.put("/doc.html", "anon");
+        filterChainDefinitionMap.put("/swagger-ui.html", "anon");
+        filterChainDefinitionMap.put("/swagger-resources", "anon");
+        filterChainDefinitionMap.put("/swagger-resources/configuration/security", "anon");
+        filterChainDefinitionMap.put("/swagger-resources/configuration/ui", "anon");
+        filterChainDefinitionMap.put("/v2/api-docs", "anon");
+        filterChainDefinitionMap.put("/webjars/**", "anon");
+
         filterChainDefinitionMap.put("/**", "jwt");
 
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
+
         return shiroFilterFactoryBean;
     }
 

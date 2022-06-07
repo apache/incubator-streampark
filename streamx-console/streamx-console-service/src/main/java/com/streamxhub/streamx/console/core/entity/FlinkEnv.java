@@ -19,12 +19,13 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.streamxhub.streamx.common.domain.FlinkVersion;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
+
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import net.minidev.json.annotate.JsonIgnore;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -63,6 +64,8 @@ public class FlinkEnv implements Serializable {
 
     private transient FlinkVersion flinkVersion;
 
+    private transient String streamxScalaVersion = scala.util.Properties.versionNumberString();
+
     public void doSetFlinkConf() throws IOException {
         assert this.flinkHome != null;
         File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
@@ -75,6 +78,15 @@ public class FlinkEnv implements Serializable {
         assert this.flinkHome != null;
         this.setVersion(this.getFlinkVersion().version());
         this.setScalaVersion(this.getFlinkVersion().scalaVersion());
+        if (!streamxScalaVersion.startsWith(this.getFlinkVersion().scalaVersion())) {
+            throw new UnsupportedOperationException(
+                String.format(
+                    "The current Scala version of StreamX is %s, but the scala version of Flink to be added is %s, which does not match, Please check",
+                    streamxScalaVersion,
+                    this.getFlinkVersion().scalaVersion()
+                )
+            );
+        }
     }
 
     @JsonIgnore

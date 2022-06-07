@@ -23,7 +23,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.streamxhub.streamx.console.base.util.JsonUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -95,16 +95,16 @@ public class AlertConfig implements Serializable {
         BeanUtils.copyProperties(params, alertConfig, "emailParams", "dingTalkParams", "weComParams", "httpCallbackParams");
         try {
             if (params.getEmailParams() != null) {
-                alertConfig.setEmailParams(JsonUtils.write(params.getEmailParams()));
+                alertConfig.setEmailParams(JacksonUtils.write(params.getEmailParams()));
             }
             if (params.getDingTalkParams() != null) {
-                alertConfig.setDingTalkParams(JsonUtils.write(params.getDingTalkParams()));
+                alertConfig.setDingTalkParams(JacksonUtils.write(params.getDingTalkParams()));
             }
             if (params.getWeComParams() != null) {
-                alertConfig.setWeComParams(JsonUtils.write(params.getWeComParams()));
+                alertConfig.setWeComParams(JacksonUtils.write(params.getWeComParams()));
             }
             if (params.getHttpCallbackParams() != null) {
-                alertConfig.setHttpCallbackParams(JsonUtils.write(params.getHttpCallbackParams()));
+                alertConfig.setHttpCallbackParams(JacksonUtils.write(params.getHttpCallbackParams()));
             }
         } catch (JsonProcessingException e) {
             log.error("Json write failed", e);

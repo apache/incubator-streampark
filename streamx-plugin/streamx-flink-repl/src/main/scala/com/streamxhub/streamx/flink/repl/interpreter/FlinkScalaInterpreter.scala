@@ -20,19 +20,21 @@
 package com.streamxhub.streamx.flink.repl.interpreter
 
 import com.streamxhub.streamx.common.util.{ClassLoaderUtils, DependencyUtils, HadoopUtils, Utils}
-import com.streamxhub.streamx.flink.repl.interpreter.FlinkShell._
+import com.streamxhub.streamx.flink.repl.shell.{FlinkILoop, FlinkShell}
+import com.streamxhub.streamx.flink.repl.shell.FlinkShell._
 import com.streamxhub.streamx.flink.repl.shims.FlinkShims
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.{ExecutionEnvironmentFactory, ExecutionEnvironment => JExecutionEnvironment}
-import org.apache.flink.api.scala.{ExecutionEnvironment, FlinkILoop}
+import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.core.execution.{JobClient, JobListener}
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironmentFactory, StreamExecutionEnvironment => JStreamExecutionEnvironment}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.conf.{Configuration => HdfsConfig}
 import org.apache.hadoop.fs.{FileSystem, Path}
@@ -65,7 +67,6 @@ class FlinkScalaInterpreter(properties: Properties) {
   private var cluster: Option[ClusterClient[_]] = _
   private var configuration: Configuration = _
   private var mode: ExecutionMode.Value = _
-  private var batchEnv: ExecutionEnvironment = _
   private var streamEnv: StreamExecutionEnvironment = _
   var jobClient: JobClient = _
   var flinkHome: String = _
@@ -100,7 +101,6 @@ class FlinkScalaInterpreter(properties: Properties) {
         }
       }
     }
-    this.batchEnv.registerJobListener(jobListener)
     this.streamEnv.registerJobListener(jobListener)
   }
 
@@ -269,7 +269,6 @@ class FlinkScalaInterpreter(properties: Properties) {
     flinkILoop.intp.beQuietDuring {
       // set execution environment
       flinkILoop.intp.bind("env", flinkILoop.scalaSenv)
-      flinkILoop.intp.bind("benv", flinkILoop.scalaBenv)
 
       val packageImports = Seq[String](
         "org.apache.flink.core.fs._",
@@ -306,13 +305,10 @@ class FlinkScalaInterpreter(properties: Properties) {
     flinkILoop.intp.setContextClassLoader()
     reader.postInit()
 
-    this.batchEnv = flinkILoop.scalaBenv
     this.streamEnv = flinkILoop.scalaSenv
     val timeType = properties.getProperty("flink.senv.timecharacteristic", "EventTime")
     this.streamEnv.getJavaEnv.setStreamTimeCharacteristic(TimeCharacteristic.valueOf(timeType))
-    this.batchEnv.setParallelism(configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM))
     this.streamEnv.setParallelism(configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM))
-
     setAsContext()
   }
 
@@ -328,13 +324,9 @@ class FlinkScalaInterpreter(properties: Properties) {
     method.setAccessible(true)
     method.invoke(null, streamFactory)
 
-    val batchFactory = new ExecutionEnvironmentFactory() {
-      override def createExecutionEnvironment: JExecutionEnvironment = batchEnv.getJavaEnv
-    }
     //StreamExecutionEnvironment
     method = classOf[JExecutionEnvironment].getDeclaredMethod("initializeContextEnvironment", classOf[ExecutionEnvironmentFactory])
     method.setAccessible(true)
-    method.invoke(null, batchFactory)
   }
 
   // for use in java side
@@ -458,8 +450,6 @@ class FlinkScalaInterpreter(properties: Properties) {
     }
 
   }
-
-  def getExecutionEnvironment(): ExecutionEnvironment = this.batchEnv
 
   def getStreamExecutionEnvironment(): StreamExecutionEnvironment = this.streamEnv
 

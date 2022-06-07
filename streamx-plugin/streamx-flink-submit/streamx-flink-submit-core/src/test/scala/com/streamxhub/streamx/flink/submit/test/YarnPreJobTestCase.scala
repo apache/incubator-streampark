@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.submit.test
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.core.conf.FlinkRunOption
-import com.streamxhub.streamx.flink.submit.domain
+import com.streamxhub.streamx.flink.submit.bean
 import org.apache.commons.cli.Options
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.{CliFrontendParser, CustomCommandLine}
@@ -151,7 +151,7 @@ object YarnPreJobTestCase extends Logger {
 
     val clusterDescriptor = {
       val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[YarnClusterDescriptor]
-      val flinkDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+      val flinkDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist.*\\.jar")) match {
         case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $FLINK_HOME/lib")
         case array if array.length == 1 => s"$FLINK_HOME/lib/${array.head}"
         case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $FLINK_HOME/lib,[${more.mkString(",")}]")
@@ -194,7 +194,7 @@ object YarnPreJobTestCase extends Logger {
       logInfo("------------------<<applicationId>>-------------------")
       logInfo(s"Flink Job Started: applicationId: $applicationId ")
       logInfo("-------------------------------------")
-      domain.SubmitResponse(applicationId.toString, flinkConfig.toMap)
+      bean.SubmitResponse(applicationId.toString, flinkConfig.toMap)
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }

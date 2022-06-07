@@ -23,7 +23,7 @@ import com.github.dockerjava.api.command.PushImageCmd
 import com.github.dockerjava.core.command.{HackBuildImageCmd, HackPullImageCmd, HackPushImageCmd}
 import com.google.common.collect.Sets
 import com.streamxhub.streamx.common.conf.CommonConfig.DOCKER_IMAGE_NAMESPACE
-import com.streamxhub.streamx.common.conf.{ConfigHub, Workspace}
+import com.streamxhub.streamx.common.conf.InternalConfigHolder
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.fs.LfsOperator
 import com.streamxhub.streamx.common.util.ThreadUtils
@@ -43,36 +43,35 @@ import scala.language.postfixOps
  *
  * @author Al-assad
  */
-class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) extends BuildPipeline {
+class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest) extends BuildPipeline {
 
-  override def pipeType: PipeType = PipeType.FLINK_NATIVE_K8S_APPLICATION
+  override def pipeType: PipelineType = PipelineType.FLINK_NATIVE_K8S_APPLICATION
 
   private var dockerProcessWatcher: DockerProgressWatcher = new SilentDockerProgressWatcher
 
   // non-thread-safe
   private val dockerProcess = new DockerResolveProgress(DockerPullProgress.empty(), DockerBuildProgress.empty(), DockerPushProgress.empty())
 
-  override protected def offerBuildParam: FlinkK8sApplicationBuildRequest = params
+  override protected def offerBuildParam: FlinkK8sApplicationBuildRequest = request
 
   def registerDockerProgressWatcher(watcher: DockerProgressWatcher): Unit = {
     dockerProcessWatcher = watcher
   }
 
-  @throws[Throwable]
-  override protected def buildProcess(): FlinkK8sApplicationBuildResponse = {
+  @throws[Throwable] override protected def buildProcess(): DockerImageBuildResponse = {
 
     // Step-1: init build workspace of flink job
     // the sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/
     val buildWorkspace =
     execStep(1) {
-      val buildWorkspace = s"${Workspace.local.APP_WORKSPACE}/${params.clusterId}@${params.k8sNamespace}"
+      val buildWorkspace = s"${request.workspace}/${request.clusterId}@${request.k8sNamespace}"
       LfsOperator.mkCleanDirs(buildWorkspace)
       logInfo(s"recreate building workspace: $buildWorkspace")
       buildWorkspace
     }.getOrElse(throw getError.exception)
 
     // Step-2: export k8s pod template files
-    val podTemplatePaths = params.flinkPodTemplate match {
+    val podTemplatePaths = request.flinkPodTemplate match {
       case podTemplate if podTemplate.isEmpty =>
         skipStep(2)
         Map[String, String]()
@@ -88,19 +87,13 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
     // the output shaded jar file name like: streamx-flinkjob_myjob-test.jar
     val (shadedJar, extJarLibs) =
     execStep(3) {
-      val appName = BuildPipelineHelper.letAppNameSafe(params.appName)
-      val shadedJarOutputPath = s"$buildWorkspace/streamx-flinkjob_$appName.jar"
-
-      val (shadedJar, extJarLibs) = params.developmentMode match {
+      val shadedJarOutputPath = request.getShadedJarPath(buildWorkspace)
+      val (shadedJar, extJarLibs) = request.developmentMode match {
         case DevelopmentMode.FLINKSQL =>
-          val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(params)
-          val (jarPackDeps, extJarLibs) = params.jarPackDeps.clearExtJarLibs
-          val shadedJar = MavenTool.buildFatJar(jarPackDeps.merge(providedLibs), shadedJarOutputPath)
-          shadedJar -> extJarLibs
-
+          val shadedJar = MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)
+          shadedJar -> request.dependencyInfo.extJarLibs
         case DevelopmentMode.CUSTOMCODE =>
-          val providedLibs = BuildPipelineHelper.extractFlinkProvidedLibs(params)
-          val shadedJar = MavenTool.buildFatJar(params.jarPackDeps.merge(providedLibs), shadedJarOutputPath)
+          val shadedJar = MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)
           shadedJar -> Set[String]()
       }
       logInfo(s"output shaded flink job jar: ${shadedJar.getAbsolutePath}")
@@ -111,16 +104,16 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
     val (dockerfile, dockerFileTemplate) =
       execStep(4) {
         val dockerFileTemplate = {
-          if (params.integrateWithHadoop) {
+          if (request.integrateWithHadoop) {
             FlinkHadoopDockerfileTemplate.fromSystemHadoopConf(
               buildWorkspace,
-              params.flinkBaseImage,
+              request.flinkBaseImage,
               shadedJar.getAbsolutePath,
               extJarLibs)
           } else {
             FlinkDockerfileTemplate(
               buildWorkspace,
-              params.flinkBaseImage,
+              request.flinkBaseImage,
               shadedJar.getAbsolutePath,
               extJarLibs)
           }
@@ -130,10 +123,10 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
         dockerFile -> dockerFileTemplate
       }.getOrElse(throw getError.exception)
 
-    val authConf = params.dockerAuthConfig
-    val baseImageTag = params.flinkBaseImage
+    val authConf = request.dockerAuthConfig
+    val baseImageTag = request.flinkBaseImage
     val pushImageTag = {
-      val expectedImageTag = s"streamxflinkjob-${params.k8sNamespace}-${params.clusterId}"
+      val expectedImageTag = s"streamxflinkjob-${request.k8sNamespace}-${request.clusterId}"
       compileTag(expectedImageTag, authConf.registerAddress)
     }
 
@@ -200,7 +193,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
       }(err => throw new Exception(s"push docker image failed. tag=${pushImageTag}", err))
     }.getOrElse(throw getError.exception)
 
-    FlinkK8sApplicationBuildResponse(buildWorkspace, pushImageTag, podTemplatePaths, dockerFileTemplate.innerMainJarPath)
+    DockerImageBuildResponse(buildWorkspace, pushImageTag, podTemplatePaths, dockerFileTemplate.innerMainJarPath)
   }
 
 
@@ -208,7 +201,7 @@ class FlinkK8sApplicationBuildPipeline(params: FlinkK8sApplicationBuildRequest) 
    * compile image tag with namespace and remote address.
    */
   private[this] def compileTag(tag: String, registerAddress: String): String = {
-    val imgNamespace: String = ConfigHub.get(DOCKER_IMAGE_NAMESPACE)
+    val imgNamespace: String = InternalConfigHolder.get(DOCKER_IMAGE_NAMESPACE)
     var tagName = if (tag.contains("/")) tag else s"$imgNamespace/$tag"
     if (registerAddress.nonEmpty && !tagName.startsWith(registerAddress)) {
       tagName = s"$registerAddress/$tagName"
@@ -232,6 +225,6 @@ object FlinkK8sApplicationBuildPipeline {
 
   implicit val executor: ExecutionContext = ExecutionContext.fromExecutorService(execPool)
 
-  def of(params: FlinkK8sApplicationBuildRequest): FlinkK8sApplicationBuildPipeline = new FlinkK8sApplicationBuildPipeline(params)
+  def of(request: FlinkK8sApplicationBuildRequest): FlinkK8sApplicationBuildPipeline = new FlinkK8sApplicationBuildPipeline(request)
 
 }

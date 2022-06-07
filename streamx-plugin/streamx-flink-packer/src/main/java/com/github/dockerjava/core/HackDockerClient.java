@@ -41,9 +41,7 @@ public class HackDockerClient extends DockerClientImpl {
     public static HackDockerClient getInstance(DockerClientConfig dockerClientConfig, DockerHttpClient dockerHttpClient) {
         HackDockerClient client = new HackDockerClient(dockerClientConfig);
         client.dockerCmdExecFactory = new DefaultDockerCmdExecFactory(dockerHttpClient, dockerClientConfig.getObjectMapper());
-        if (client.dockerCmdExecFactory instanceof DockerClientConfigAware) {
-            ((DockerClientConfigAware) client.dockerCmdExecFactory).init(dockerClientConfig);
-        }
+        ((DockerClientConfigAware) client.dockerCmdExecFactory).init(dockerClientConfig);
         return client;
     }
 

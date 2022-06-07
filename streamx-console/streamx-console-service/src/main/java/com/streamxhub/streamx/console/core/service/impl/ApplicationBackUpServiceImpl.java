@@ -19,12 +19,6 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
@@ -36,14 +30,21 @@ import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
 import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
-import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
+import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -114,7 +115,12 @@ public class ApplicationBackUpServiceImpl
                     // 1) 在回滚时判断当前生效的项目是否需要备份.如需要则先执行备份...
                     if (backParam.isBackup()) {
                         application.setBackUpDescription(backParam.getDescription());
-                        backup(application);
+                        if (application.isFlinkSqlJob()) {
+                            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+                            backup(application, flinkSql);
+                        } else {
+                            backup(application, null);
+                        }
                     }
 
                     //2) 恢复 配置和SQL
@@ -156,7 +162,7 @@ public class ApplicationBackUpServiceImpl
                         applicationService.update(new UpdateWrapper<Application>()
                             .lambda()
                             .eq(Application::getId, application.getId())
-                            .set(Application::getDeploy, DeployState.NEED_RESTART_AFTER_ROLLBACK.get())
+                            .set(Application::getLaunch, LaunchState.NEED_RESTART.get())
                         );
                     } catch (Exception e) {
                         //1. TODO: 如果失败,则要恢复第4第5步操作.
@@ -193,44 +199,11 @@ public class ApplicationBackUpServiceImpl
     public void rollbackFlinkSql(Application application, FlinkSql sql) {
         ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
         assert backUp != null;
-        FsOperator fsOperator = application.getFsOperator();
-        if (!fsOperator.exists(backUp.getPath())) {
-            return;
-        }
         try {
             FlinkTrackingTask.refreshTracking(backUp.getAppId(), () -> {
                 // 回滚 config 和 sql
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
-                String appHome = null;
-                String backUpPath = null;
-                switch (application.getExecutionModeEnum()) {
-                    case KUBERNETES_NATIVE_APPLICATION:
-                    case KUBERNETES_NATIVE_SESSION:
-                    case YARN_PER_JOB:
-                    case YARN_SESSION:
-                    case LOCAL:
-                        if (application.isFlinkSqlJob()) {
-                            appHome = application.getLocalFlinkSqlHome().getAbsolutePath();
-                        } else {
-                            appHome = application.getDistHome();
-                        }
-                        backUpPath = backUp.getPath() + "/" + application.getId();
-                        break;
-                    case YARN_APPLICATION:
-                        appHome = application.getAppHome();
-                        backUpPath = backUp.getPath();
-                        break;
-                    default:
-                }
-                // 2) 删除当前项目
-                fsOperator.delete(appHome);
-                try {
-                    // 5)将备份的文件copy到有效项目目录下.
-                    fsOperator.copyDir(backUpPath, appHome);
-                } catch (Exception e) {
-                    throw e;
-                }
                 return null;
             });
         } catch (Exception e) {
@@ -265,27 +238,9 @@ public class ApplicationBackUpServiceImpl
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public void backup(Application application) {
+    public void backup(Application application, FlinkSql flinkSql) {
         //1) 基础的配置文件备份
-        String appHome = null;
-        switch (application.getExecutionModeEnum()) {
-            case KUBERNETES_NATIVE_APPLICATION:
-            case KUBERNETES_NATIVE_SESSION:
-            case YARN_PER_JOB:
-            case YARN_SESSION:
-            case LOCAL:
-                if (application.isFlinkSqlJob()) {
-                    appHome = application.getLocalFlinkSqlHome().getAbsolutePath();
-                } else {
-                    appHome = application.getDistHome();
-                }
-                break;
-            case YARN_APPLICATION:
-                appHome = application.getAppHome();
-                break;
-            default:
-        }
-
+        String appHome = (application.isCustomCodeJob() && application.isCICDJob()) ? application.getDistHome() : application.getAppHome();
         FsOperator fsOperator = application.getFsOperator();
         if (fsOperator.exists(appHome)) {
             // 3) 需要备份的做备份,移动文件到备份目录...
@@ -293,12 +248,9 @@ public class ApplicationBackUpServiceImpl
             if (config != null) {
                 application.setConfigId(config.getId());
             }
-
             //2) FlinkSQL任务需要备份sql和依赖.
             int version = 1;
-            if (application.isFlinkSqlJob()) {
-                FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-                assert flinkSql != null;
+            if (flinkSql != null) {
                 application.setSqlId(flinkSql.getId());
                 version = flinkSql.getVersion();
             } else if (config != null) {

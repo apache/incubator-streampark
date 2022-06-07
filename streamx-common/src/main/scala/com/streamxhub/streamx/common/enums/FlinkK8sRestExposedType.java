@@ -19,16 +19,30 @@
 
 package com.streamxhub.streamx.common.enums;
 
+import java.io.Serializable;
+
 /**
  * kubernetes.rest-service.exposed.type
  */
-public enum FlinkK8sRestExposedType {
+public enum FlinkK8sRestExposedType implements Serializable {
 
+    /**
+     * LoadBalancer
+     */
     LoadBalancer("LoadBalancer", 0),
+
+    /**
+     * ClusterIP
+     */
     ClusterIP("ClusterIP", 1),
+
+    /**
+     * NodePort
+     */
     NodePort("NodePort", 2);
 
     private final String name;
+
     private final Integer value;
 
     FlinkK8sRestExposedType(String name, Integer value) {

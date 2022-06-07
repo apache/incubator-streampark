@@ -141,7 +141,6 @@ PRG_DIR=`dirname "$PRG"`
 APP_HOME=`cd "$PRG_DIR/.." >/dev/null; pwd`
 APP_BASE="$APP_HOME"
 APP_CONF="$APP_BASE"/conf
-APP_BIN="$APP_BASE"/bin
 APP_LIB="$APP_BASE"/lib
 APP_LOG="$APP_BASE"/logs
 APP_PID="$APP_BASE"/.pid
@@ -263,58 +262,6 @@ fi
 
 # ----- Execute The Requested Command -----------------------------------------
 
-supports_hyperlinks() {
-  # $FORCE_HYPERLINK must be set and be non-zero (this acts as a logic bypass)
-  if [ -n "$FORCE_HYPERLINK" ]; then
-    [ "$FORCE_HYPERLINK" != 0 ]
-    return $?
-  fi
-
-  # If stdout is not a tty, it doesn't support hyperlinks
-  [[ ${have_tty} -eq 1 ]] || return 1
-
-  # DomTerm terminal emulator (domterm.org)
-  if [ -n "$DOMTERM" ]; then
-    return 0
-  fi
-
-  # VTE-based terminals above v0.50 (Gnome Terminal, Guake, ROXTerm, etc)
-  if [ -n "$VTE_VERSION" ]; then
-    [ $VTE_VERSION -ge 5000 ]
-    return $?
-  fi
-
-  # If $TERM_PROGRAM is set, these terminals support hyperlinks
-  case "$TERM_PROGRAM" in
-  Hyper|iTerm.app|terminology|WezTerm) return 0 ;;
-  esac
-
-  # kitty supports hyperlinks
-  if [ "$TERM" = xterm-kitty ]; then
-    return 0
-  fi
-
-  # Windows Terminal or Konsole also support hyperlinks
-  if [ -n "$WT_SESSION" ] || [ -n "$KONSOLE_VERSION" ]; then
-    return 0
-  fi
-
-  return 1
-}
-
-fmt_underline() {
-  [[ ${have_tty} -eq 1 ]] && printf '\033[4m%s\033[24m\n' "$*" || printf '%s\n' "$*"
-}
-
-# shellcheck disable=SC2016 # backtick in single-quote
-fmt_code() {
-  [[ ${have_tty} -eq 1 ]] && printf '`\033[2m%s\033[22m`\n' "$*" || printf '`%s`\n' "$*"
-}
-
-fmt_error() {
-  printf '%sError: %s%s\n' "$BOLD$RED" "$*" "$RESET" >&2
-}
-
 print_logo() {
   printf '\n'
   printf '%s           %s.+. %s   %s     %s     %s          %s                         %s\n' $RAINBOW $RESET
@@ -327,7 +274,7 @@ print_logo() {
   printf '  • WebSite: %s http://www.streamxhub.com%s\n'                              $BLUE   $RESET
   printf '  • GitHub : %s http://github.com/streamxhub/streamx%s\n'                   $BLUE   $RESET
   printf '  • Gitee  : %s http://gitee.com/streamxhub/streamx%s\n'                    $BLUE   $RESET
-  printf '          %s ────────  Make stream processing easier ô‿ô!%s\n\n'            $GREEN  $RESET
+  printf '          %s ────────  Make stream processing easier ô~ô!%s\n\n'            $GREEN  $RESET
 }
 
 # shellcheck disable=SC2120
@@ -373,48 +320,16 @@ start() {
     echo_w "Using APP_PID:   $APP_PID"
   fi
 
-  shift
-
-  if [[ $# -eq 0 ]]; then
-    #default application.yml
-    PROPER="${APP_CONF}/application.yml"
+  PROPER="${APP_CONF}/application.yml"
+  if [[ ! -f "$PROPER" ]] ; then
+    PROPER="${APP_CONF}/application.properties"
     if [[ ! -f "$PROPER" ]] ; then
-      PROPER="${APP_CONF}/application.properties"
-      if [[ ! -f "$PROPER" ]] ; then
-        echo_r "Usage: properties file (application.properties|application.yml) not found! ";
-      else
-        echo_g "Usage: properties file:application.properties ";
-      fi
+      echo_r "Usage: properties file (application.properties|application.yml) not found! ";
     else
-      echo_g "Usage: properties file:application.yml ";
+      echo_g "Usage: properties file:application.properties ";
     fi
   else
-    #Solve the path problem, arbitrary path, ignore prefix, only take the content after conf/
-    PROPER=$(echo "$1"|awk -F 'conf/' '{print $2}')
-    PROPER=${APP_CONF}/$PROPER
-  fi
-
-  # shellcheck disable=SC2126
-  ymlFile=$(echo "${PROPER}"|grep "\.yml$"|wc -l)
-  if [[ $ymlFile -eq 1 ]]; then
-    #source yaml.sh
-    # shellcheck disable=SC1090
-    source "${APP_BIN}"/yaml.sh
-    yaml_get "${PROPER}"
-    # shellcheck disable=SC2046
-    # shellcheck disable=SC2116
-    # shellcheck disable=SC2154
-    PROFILE=$(echo "${spring_profiles_active}")
-    if [[ ! "${PROFILE}" == "" ]];then
-      PROFILE="${APP_CONF}/application-${PROFILE}.yml"
-      PROPER="${PROFILE},${PROPER}"
-    fi
-  else
-    PROFILE=$(grep 'spring.profiles.active' "${PROPER}" | grep -v '^#' | awk -F'=' '{print $2}')
-    if [[ ! "${PROFILE}" == "" ]];then
-      PROPER="${APP_CONF}/application-${PROFILE}.properties"
-      PROPER="${PROFILE},${PROPER}"
-    fi
+    echo_g "Usage: properties file:application.yml ";
   fi
 
   if [ "${HADOOP_HOME}"x == ""x ]; then
@@ -426,7 +341,7 @@ start() {
   #
   # classpath options:
   # 1): java env (lib and jre/lib)
-  # 2): Streamx
+  # 2): StreamX
   # 3): hadoop conf
 
   APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
@@ -467,6 +382,7 @@ start() {
   eval $NOHUP "\"$RUNJAVA\"" $JAVA_OPTS \
     -classpath "\"$APP_CLASSPATH\"" \
     -Dapp.home="\"${APP_HOME}\"" \
+    -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
     -Dspring.config.location="\"${PROPER}\"" \
     -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
     -Dpid="\"${APP_PID}\"" \
@@ -480,6 +396,7 @@ start() {
          # shellcheck disable=SC2236
          if [ -f "$APP_PID" ]; then
            if [ -s "$APP_PID" ]; then
+             # shellcheck disable=SC2006
              echo_g "StreamX start successful. pid: `cat "$APP_PID"`"
              STARTED=1
              break
@@ -488,6 +405,7 @@ start() {
          if [ $SLEEP_INTERVAL -gt 0 ]; then
            sleep 1
          fi
+         # shellcheck disable=SC2006
          SLEEP_INTERVAL=`expr $SLEEP_INTERVAL - 1 `
       done
       if [ $STARTED -eq 0 ] ;then
@@ -536,10 +454,14 @@ stop() {
         echo "PID file found but either no matching process was found or the current user does not have permission to stop the process. Stop aborted."
         exit 1
       else
+        # shellcheck disable=SC2046
+        # shellcheck disable=SC2006
         kill -15 `cat "$APP_PID"` >/dev/null 2>&1
         if [ -f "$APP_PID" ]; then
           while [ $SLEEP -ge 0 ]; do
              if [ -f "$APP_PID" ]; then
+               # shellcheck disable=SC2046
+               # shellcheck disable=SC2006
                kill -0 `cat "$APP_PID"` >/dev/null 2>&1
                if [ $? -gt 0 ]; then
                  rm -f "$APP_PID" >/dev/null 2>&1
@@ -565,6 +487,7 @@ stop() {
           #stop failed.normal kill failed? Try a force kill.
           if [ -f "$APP_PID" ]; then
             if [ -s "$APP_PID" ]; then
+              # shellcheck disable=SC2046
               kill -0 `cat "$APP_PID"` >/dev/null 2>&1
               if [ $? -eq 0 ]; then
                 FORCE=1
@@ -575,6 +498,7 @@ stop() {
           if [ $FORCE -eq 1 ]; then
             KILL_SLEEP_INTERVAL=5
             if [ -f "$APP_PID" ]; then
+              # shellcheck disable=SC2006
               PID=`cat "$APP_PID"`
               echo_y "Killing StreamX with the PID: $PID"
               kill -9 "$PID" >/dev/null 2>&1

@@ -57,8 +57,14 @@
           :key="index"
           v-for="(item, index) in dataSource">
           <a-list-item-meta>
-            <svg-icon class="avatar" v-if="item.type === 1" name="flink" size="large" slot="avatar"></svg-icon>
-            <svg-icon class="avatar" v-if="item.type === 2" name="spark" size="large" slot="avatar"></svg-icon>
+            <a-badge class="build-badge" v-if="item.buildState === -2" slot="avatar" count="NEW" title="this project has changed,need rebuild">
+              <svg-icon class="avatar" v-if="item.type === 1" name="flink" size="large"></svg-icon>
+              <svg-icon class="avatar" v-if="item.type === 2" name="spark" size="large"></svg-icon>
+            </a-badge>
+            <template v-else>
+              <svg-icon class="avatar" v-if="item.type === 1" name="flink" size="large" slot="avatar"></svg-icon>
+              <svg-icon class="avatar" v-if="item.type === 2" name="spark" size="large" slot="avatar"></svg-icon>
+            </template>
             <a slot="title">
               {{ item.name }}
               <a-badge
@@ -120,6 +126,9 @@
               <p v-if="item.buildState === -1">
                 <a-tag color="#C0C0C0">NOT BUILD</a-tag>
               </p>
+              <p v-if="item.buildState === -2">
+                <a-tag color="#FFA500">NEED REBUILD</a-tag>
+              </p>
               <p v-else-if="item.buildState === 0">
                 <a-tag color="#1AB58E" class="status-processing-building">BUILDING</a-tag>
               </p>
@@ -133,32 +142,71 @@
           </div>
 
           <div class="operation">
-            <a-icon
-              v-if="item.buildState === 0"
-              type="sync"
-              style="color:#4a9ff5"
-              spin
-              @click="handleSeeLog(item)" />
-            <a-popconfirm
-              v-else
-              v-permit="'project:build'"
-              title="Are you sure build this project?"
-              cancel-text="No"
-              ok-text="Yes"
-              @confirm="handleBuild(item)">
-              <svg-icon
-                name="thunderbolt"/>
-            </a-popconfirm>
-            <a-popconfirm
-              title="Are you sure delete this project ?"
-              cancel-text="No"
-              ok-text="Yes"
-              @confirm="handleDelete(item)">
-              <svg-icon
-                name="remove"
-                v-permit="'project:delete'"
-                style="margin-left:10px;"/>
-            </a-popconfirm>
+
+            <a-tooltip
+              title="See Build log"
+              v-if="item.buildState === 0">
+              <a-button
+                shape="circle"
+                size="small"
+                style="margin-left: 8px"
+                @click.native="handleSeeLog(item)"
+                class="control-button ctl-btn-color">
+                <a-icon
+                  spin
+                  type="sync"
+                  style="color:#4a9ff5"/>
+              </a-button>
+            </a-tooltip>
+
+            <a-tooltip
+              title="Build Project"
+              v-if="item.buildState !== 0"
+              v-permit="'project:build'">
+              <a-popconfirm
+                title="Are you sure build this project?"
+                cancel-text="No"
+                ok-text="Yes"
+                @confirm="handleBuild(item)">
+                <a-button
+                  shape="circle"
+                  size="small"
+                  style="margin-left: 8px"
+                  class="control-button ctl-btn-color">
+                  <a-icon type="thunderbolt" />
+                </a-button>
+              </a-popconfirm>
+            </a-tooltip>
+
+            <a-tooltip title="Update Project">
+              <a-button
+                v-permit="'project:update'"
+                @click.native="handleEdit(item)"
+                shape="circle"
+                size="small"
+                style="margin-left: 8px"
+                class="control-button ctl-btn-color">
+                <a-icon type="edit"/>
+              </a-button>
+            </a-tooltip>
+
+            <a-tooltip title="Delete Project">
+              <a-popconfirm
+                title="Are you sure delete this project ?"
+                cancel-text="No"
+                ok-text="Yes"
+                @confirm="handleDelete(item)">
+                <a-button
+                  type="danger"
+                  shape="circle"
+                  size="small"
+                  style="margin-left: 8px"
+                  class="control-button">
+                  <a-icon type="delete"/>
+                </a-button>
+              </a-popconfirm>
+            </a-tooltip>
+
           </div>
 
         </a-list-item>
@@ -186,6 +234,7 @@
 <script>
 import { build, buildlog, list,remove,closebuild } from '@api/project'
 import Ellipsis from '@comp/Ellipsis'
+import {mapActions} from 'vuex'
 import { Terminal } from 'xterm'
 import 'xterm/css/xterm.css'
 
@@ -237,6 +286,8 @@ export default {
   },
 
   methods: {
+    ...mapActions(['SetProjectId']),
+
     handleSearch (value) {
       this.paginationInfo = null
       this.handleFetch({
@@ -263,6 +314,11 @@ export default {
 
     handleAdd () {
       this.$router.push({ 'path': '/flink/project/add' })
+    },
+
+    handleEdit(item) {
+      this.SetProjectId(item.id)
+      this.$router.push({'path': '/flink/project/edit'})
     },
 
     handleDelete(item) {
@@ -433,7 +489,7 @@ export default {
 }
 
 .operation {
-  width: 80px;
+  width: 120px;
 }
 
 .ant-tag {
@@ -465,5 +521,11 @@ export default {
     border-color: #1AB58E;
     box-shadow: 0 0 10px #1AB58E, inset 0 0 5px #1AB58E;
   }
+}
+
+.build-badge {
+  font-size : 12px;
+  -webkit-transform : scale(0.84,0.84) ;
+  *font-size:10px;
 }
 </style>

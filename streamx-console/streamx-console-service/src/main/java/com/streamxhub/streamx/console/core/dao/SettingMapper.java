@@ -19,8 +19,9 @@
 
 package com.streamxhub.streamx.console.core.dao;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.streamxhub.streamx.console.core.entity.Setting;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -33,6 +34,6 @@ public interface SettingMapper extends BaseMapper<Setting> {
     @Select("select * from t_setting where `key`=#{key}")
     Setting get(@Param("key") String key);
 
-    @Update("update t_setting set `value`=#{setting.value} where `key`=#{setting.key}")
+    @Update("update t_setting set `value` = #{setting.value} where `key` = #{setting.key}")
     void updateByKey(@Param("setting") Setting setting);
 }

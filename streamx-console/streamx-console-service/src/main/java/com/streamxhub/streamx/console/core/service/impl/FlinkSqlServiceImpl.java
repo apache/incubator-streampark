@@ -19,11 +19,6 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
 import com.streamxhub.streamx.console.core.dao.FlinkSqlMapper;
@@ -38,6 +33,12 @@ import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.flink.core.SqlError;
 import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,7 +74,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     @Override
     public FlinkSql getEffective(Long appId, boolean decode) {
         FlinkSql flinkSql = baseMapper.getEffective(appId);
-        if (decode) {
+        if (flinkSql != null && decode) {
             flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
         }
         return flinkSql;
@@ -81,34 +82,25 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public void create(FlinkSql flinkSql, CandidateType type) {
+    public void create(FlinkSql flinkSql) {
         Integer version = this.baseMapper.getLastVersion(flinkSql.getAppId());
         flinkSql.setVersion(version == null ? 1 : version + 1);
         String sql = DeflaterUtils.zipString(flinkSql.getSql());
         flinkSql.setSql(sql);
         this.save(flinkSql);
-        this.setCandidateOrEffective(type, flinkSql.getAppId(), flinkSql.getId());
+        this.setCandidate(CandidateType.NEW, flinkSql.getAppId(), flinkSql.getId());
     }
 
     @Override
-    public void setCandidateOrEffective(CandidateType candidateType, Long appId, Long sqlId) {
-        if (CandidateType.NONE.equals(candidateType)) {
-            this.toEffective(appId, sqlId);
-        } else {
-            this.setCandidate(appId, sqlId, candidateType);
-        }
-    }
-
-    @Transactional(rollbackFor = {Exception.class})
-    public void setCandidate(Long appId, Long sqlId, CandidateType candidateType) {
+    public void setCandidate(CandidateType candidateType, Long appId, Long sqlId) {
         LambdaUpdateWrapper<FlinkSql> updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
         updateWrapper.set(FlinkSql::getCandidate, 0)
-            .eq(FlinkSql::getAppId, appId);
+                .eq(FlinkSql::getAppId, appId);
         this.update(updateWrapper);
 
         updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
         updateWrapper.set(FlinkSql::getCandidate, candidateType.get())
-            .eq(FlinkSql::getId, sqlId);
+                .eq(FlinkSql::getId, sqlId);
         this.update(updateWrapper);
     }
 
@@ -120,14 +112,14 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
         List<FlinkSql> sqlList = this.baseMapper.selectList(wrapper);
         FlinkSql effective = getEffective(application.getId(), false);
-
-        for (FlinkSql sql : sqlList) {
-            if (sql.getId().equals(effective.getId())) {
-                sql.setEffective(true);
-                break;
+        if (effective != null && !sqlList.isEmpty()) {
+            for (FlinkSql sql : sqlList) {
+                if (sql.getId().equals(effective.getId())) {
+                    sql.setEffective(true);
+                    break;
+                }
             }
         }
-
         return sqlList;
     }
 
@@ -164,12 +156,6 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             //检查并备份当前的任务.
             FlinkSql effectiveSql = getEffective(application.getId(), false);
             assert effectiveSql != null;
-            if (!isFlinkSqlBacked(effectiveSql)) {
-                log.info("current job version:{}, Backing up...", sql.getVersion());
-                backUpService.backup(application);
-            } else {
-                log.info("current job version:{}, already backed", sql.getVersion());
-            }
             //回滚历史版本的任务
             backUpService.rollbackFlinkSql(application, sql);
         } catch (Exception e) {

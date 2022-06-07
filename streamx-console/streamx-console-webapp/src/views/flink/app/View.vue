@@ -16,8 +16,7 @@
                 Task Slots
                 <strong>{{ metrics.totalSlot }}</strong>
               </span>
-              <a-divider
-                type="vertical"/>
+              <a-divider type="vertical"/>
               <span>
                 Task Managers
                 <strong>{{ metrics.totalTM }}</strong>
@@ -81,8 +80,7 @@
                 suffix="MB"
                 :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}"/>
             </a-card>
-            <a-divider
-              style="margin-bottom: 10px"/>
+            <a-divider style="margin-bottom: 10px"/>
             <div>
               <span>
                 Total TaskManager Mem
@@ -132,27 +130,23 @@
                 </a-card>
               </a-col>
             </a-row>
-            <a-divider
-              style="margin-bottom: 10px"/>
+            <a-divider style="margin-bottom: 10px"/>
             <div>
               <span>
                 Total Task
                 <strong>{{ metrics.task.total }}</strong>
               </span>
-              <a-divider
-                type="vertical"/>
+              <a-divider type="vertical"/>
               <span>
                 Running Task
                 <strong>{{ metrics.task.running }}</strong>
               </span>
-              <a-divider
-                type="vertical"/>
+              <a-divider type="vertical"/>
               <span>
                 Task Slots
                 <strong>{{ metrics.totalSlot }}</strong>
               </span>
-              <a-divider
-                type="vertical"/>
+              <a-divider type="vertical"/>
               <span>
                 Task Managers
                 <strong>{{ metrics.totalTM }}</strong>
@@ -202,15 +196,13 @@
                 </a-card>
               </a-col>
             </a-row>
-            <a-divider
-              style="margin-bottom: 10px"/>
+            <a-divider style="margin-bottom: 10px"/>
             <div>
               <span>
                 Total JobManager Mem
                 <strong>{{ metrics.jmMemory }} MB</strong>
               </span>
-              <a-divider
-                type="vertical"/>
+              <a-divider type="vertical"/>
               <span>
                 Total TaskManager Mem
                 <strong>{{ metrics.tmMemory }} MB</strong>
@@ -241,7 +233,7 @@
           slot="expandedRowRender"
           class="expanded-table"
           slot-scope="record"
-          v-if="record.state === 7"
+          v-if="record.state === 5"
           row-key="id"
           :columns="innerColumns"
           :data-source="record.expanded"
@@ -297,10 +289,10 @@
           <!--有条件搜索-->
           <template v-if="searchText && searchedColumn === column.dataIndex">
             <span
-              :class="{pointer: record.state === 6 || record.state === 7 || record['optionState'] === 4 }"
+              :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
               @click="handleView(record)">
               <template
-                v-if="record.deploy === 0"
+                v-if="record.launch === 0"
                 v-for="(fragment, i) in text
                   .toString()
                   .substr(0,(text.length > 30 ? 30: text.length ))
@@ -348,7 +340,7 @@
           <template v-else>
             <span
               v-if="column.dataIndex === 'jobName'"
-              :class="{pointer: record.state === 6 || record.state === 7 || record['optionState'] === 4 }"
+              :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
               @click="handleView(record)">
               <ellipsis
                 :length="30"
@@ -363,6 +355,19 @@
                 {{ text }}
               </ellipsis>
             </span>
+          </template>
+
+          <template v-if="record['jobType'] === 1">
+            <a-badge
+              class="build-badge"
+              v-if="record.launch === 5"
+              count="NEW"
+              title="the associated project has changed and this job need to be rechecked"/>
+            <a-badge
+              class="build-badge"
+              v-else-if="record.launch >= 2"
+              count="NEW"
+              title="the application has changed."/>
           </template>
         </template>
 
@@ -389,15 +394,14 @@
         </template>
 
         <template
-          slot="deployState"
+          slot="launchState"
           slot-scope="text, record">
           <a-space size="small">
             <State
-              option="deploy"
-              :title="handleDeployTitle(record.deploy)"
+              option="launch"
+              :title="handleLaunchTitle(record.launch)"
               :data="record"/>
             <State
-              v-if="record.executionMode === 5 || record.executionMode === 6"
               option="build"
               click="openBuildProgressDetailDrawer(record)"
               :data="record"/>
@@ -422,7 +426,6 @@
 
           <a-tooltip title="Edit Application">
             <a-button
-              v-if="record.deploy !== 6"
               v-permit="'app:update'"
               @click.native="handleEdit(record)"
               shape="circle"
@@ -433,20 +436,20 @@
             </a-button>
           </a-tooltip>
 
-          <a-tooltip title="Build Application">
+          <a-tooltip title="Launch Application">
             <a-button
-              v-if="record.executionMode === 5 || record.executionMode === 6"
-              @click.native="handleCheckBuildApp(record)"
+              v-if="(record.launch === -1 || record.launch === 1 || record.launch === 4) && record['optionState'] === 0"
+              @click.native="handleCheckLaunchApp(record)"
               shape="circle"
               size="small"
               class="control-button ctl-btn-color">
-              <a-icon type="gold"/>
+              <a-icon type="cloud-upload"/>
             </a-button>
           </a-tooltip>
 
-          <a-tooltip title="Building Progress Detail">
+          <a-tooltip title="Launching Progress Detail">
             <a-button
-              v-if="(record.executionMode === 5 || record.executionMode === 6) && record.buildStatus != null"
+              v-if="record.launch === -1 || record.launch === 2 || record['optionState'] === 1"
               @click.native="openBuildProgressDetailDrawer(record)"
               shape="circle"
               size="small"
@@ -455,42 +458,7 @@
             </a-button>
           </a-tooltip>
 
-          <a-tooltip title="Deploy Application">
-            <a-button
-              v-show="(record.executionMode === 2 || record.executionMode === 3 || record.executionMode === 4) && (record.deploy === 2 || record.deploy === 3) && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record['optionState'] === 0)"
-              v-permit="'app:deploy'"
-              @click.native="handleDeploy(record)"
-              shape="circle"
-              size="small"
-              class="control-button ctl-btn-color">
-              <a-icon type="build"/>
-            </a-button>
-          </a-tooltip>
-
-          <a-tooltip title="Revoke Deploy">
-            <a-button
-              v-if="(record.executionMode === 2 || record.executionMode === 3 || record.executionMode === 4) && record.deploy === 6"
-              v-permit="'app:update'"
-              @click.native="handleRevoke(record)"
-              shape="circle"
-              size="small"
-              class="control-button ctl-btn-color">
-              <a-icon type="rollback"/>
-            </a-button>
-          </a-tooltip>
-
-          <a-tooltip title="Sync Application State">
-            <a-button
-              v-if="record.state === 1 || record['deploy'] === 1"
-              click="handleSeeLog(record)"
-              shape="circle"
-              size="small"
-              class="control-button ctl-btn-color">
-              <a-icon type="cloud-sync"/>
-            </a-button>
-          </a-tooltip>
-
-          <a-tooltip title="Run Application">
+          <a-tooltip title="Start Application">
             <a-button
               v-show="handleIsStart(record)"
               v-permit="'app:start'"
@@ -504,7 +472,7 @@
 
           <a-tooltip title="Stop Application">
             <a-button
-              v-show="record.state === 7 && record['optionState'] === 0"
+              v-show="record.state === 5 && record['optionState'] === 0"
               v-permit="'app:cancel'"
               @click.native="handleCancel(record)"
               shape="circle"
@@ -539,13 +507,13 @@
 
           <a-tooltip title="Remapping Application">
             <a-button
-              v-if="record.state !== 7 && optionApps.deploy.get(record.id) === undefined && optionApps.stoping.get(record.id) === undefined && optionApps.starting.get(record.id) === undefined && record['optionState'] === 0 && (record['executionMode'] === 2 || record['executionMode'] === 3 || record['executionMode'] === 4)"
+              v-if="handleCanRemapping(record)"
               v-permit="'app:mapping'"
               @click.native="handleMapping(record)"
               shape="circle"
               size="small"
               class="control-button ctl-btn-color">
-              <a-icon type="fork"/>
+              <a-icon type="deployment-unit"/>
             </a-button>
           </a-tooltip>
 
@@ -554,6 +522,7 @@
               title="Are you sure delete this job ?"
               cancel-text="No"
               ok-text="Yes"
+              v-permit="'app:delete'"
               @confirm="handleDelete(record)">
               <a-button
                 type="danger"
@@ -572,7 +541,7 @@
       <!-- app building progress detail-->
       <template>
         <a-drawer
-          title="Application Building Progress"
+          title="Application Launching Progress"
           placement="right"
           width="500"
           :closable="true"
@@ -586,7 +555,7 @@
           <template v-if="appBuildDetail.pipeline != null">
             <a-row>
               <a-progress
-                v-if="appBuildDetail.pipeline.isErr"
+                v-if="appBuildDetail.pipeline.hasError"
                 :percent="appBuildDetail.pipeline.percent"
                 status="exception"/>
               <a-progress
@@ -648,7 +617,8 @@
                 </template>
                 <!-- docker resolved detail --->
                 <template v-if="appBuildDetail.pipeline.pipeType === 2 && appBuildDetail.docker !== null">
-                  <template v-if="item.seq === 5 && appBuildDetail.docker.pull !== null && appBuildDetail.docker.pull.layers !== null">
+                  <template
+                    v-if="item.seq === 5 && appBuildDetail.docker.pull !== null && appBuildDetail.docker.pull.layers !== null">
                     <template v-for="layer in appBuildDetail.docker.pull.layers">
                       <a-row :key="layer.layerId" style="margin-bottom: 5px;">
                         <a-space size="small">
@@ -656,7 +626,9 @@
                           <a-tag color="blue"> {{ layer.layerId }}</a-tag>
                           <a-tag>{{ layer.status }}</a-tag>
                           <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
+                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{
+                              layer.totalMb
+                            }} MB</span>
                           </template>
                         </a-space>
                       </a-row>
@@ -670,21 +642,23 @@
                     </template>
                   </template>
 
-                  <template v-else-if="item.seq === 6 && appBuildDetail.docker.build !== null && appBuildDetail.docker.build.steps != null">
+                  <template
+                    v-else-if="item.seq === 6 && appBuildDetail.docker.build !== null && appBuildDetail.docker.build.steps != null">
                     <a-list
                       bordered
                       :data-source="appBuildDetail.docker.build.steps"
                       size="small">
                       <a-list-item slot="renderItem" slot-scope="step">
                         <a-space>
-                          <a-icon type="arrow-right" />
+                          <a-icon type="arrow-right"/>
                           <span style="font-size: 12px">{{ step }}</span>
                         </a-space>
                       </a-list-item>
                     </a-list>
                   </template>
 
-                  <template v-else-if="item.seq === 7 && appBuildDetail.docker.push !== null && appBuildDetail.docker.push.layers !== null">
+                  <template
+                    v-else-if="item.seq === 7 && appBuildDetail.docker.push !== null && appBuildDetail.docker.push.layers !== null">
                     <template v-for="layer in appBuildDetail.docker.push.layers">
                       <a-row :key="layer.layerId" style="margin-bottom: 5px;">
                         <a-space size="small">
@@ -692,7 +666,9 @@
                           <a-tag color="blue"> {{ layer.layerId }}</a-tag>
                           <a-tag>{{ layer.status }}</a-tag>
                           <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
+                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{
+                              layer.totalMb
+                            }} MB</span>
                           </template>
                         </a-space>
                       </a-row>
@@ -722,14 +698,15 @@
             :closable="true"
             :visible="appBuildErrorLogDrawerVisual"
             @close="closeBuildErrorLogDrawer">
-            <template v-if="appBuildDetail.pipeline != null && (appBuildDetail.pipeline.errSummary != null || appBuildDetail.pipeline.errStack != null)">
+            <template
+              v-if="appBuildDetail.pipeline != null && appBuildDetail.pipeline.hasError">
               <h3>Error Summary</h3>
               <br/>
-              <p>{{ appBuildDetail.pipeline.errSummary }}</p>
+              <p>{{ appBuildDetail.pipeline.errorSummary }}</p>
               <a-divider/>
               <h3>Error Stack</h3>
               <br/>
-              <pre style="font-size: 12px">{{ appBuildDetail.pipeline.errStack }}</pre>
+              <pre style="font-size: 12px">{{ appBuildDetail.pipeline.errorStack }}</pre>
             </template>
             <template v-else>
               <a-empty/>
@@ -738,6 +715,7 @@
 
           <!-- bottom tools -->
           <div
+            v-if="appBuildDetail.pipeline != null && appBuildDetail.pipeline.hasError"
             :style="{
               position: 'absolute',
               bottom: 0,
@@ -748,7 +726,7 @@
               left: 0,
               background: '#fff',
               borderRadius: '0 0 4px 4px'}">
-            <a-button type="primary" @click="openBuildErrorLogDrawer">
+            <a-button type="primary" @click.native="openBuildErrorLogDrawer">
               <a-icon type="warning"/>
               Error Log
             </a-button>
@@ -763,9 +741,9 @@
         okText="Yes"
         cancelText="Cancel"
         :visible="forceBuildAppModalVisual"
-        @ok="handleBuildApp(application, true)"
+        @ok="handleLaunchApp(application, true)"
         @cancel="closeCheckForceBuildModel">
-        <p>The current build of the application is in progress.</p>
+        <p>The current launch of the application is in progress.</p>
         <p>are you sure you want to force another build?</p>
       </a-modal>
 
@@ -790,88 +768,6 @@
         <p>Are you sure to force the application to run?</p>
       </a-modal>
 
-      <a-modal
-        v-model="deployVisible"
-        on-ok="handleDeployOk">
-        <template
-          slot="title">
-          <svg-icon
-            slot="icon"
-            name="deploy"/>
-          Launch Application
-        </template>
-        <template
-          slot="footer">
-          <a-button
-            key="back"
-            @click="handleDeployCancel">
-            Cancel
-          </a-button>
-          <a-button
-            key="submit"
-            type="primary"
-            :loading="loading"
-            @click="handleDeployOk">
-            Apply
-          </a-button>
-        </template>
-        <a-form
-          @submit="handleDeployOk"
-          :form="formDeploy">
-          <a-form-item
-            v-if="application && application.state === 7 "
-            label="restart"
-            :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
-            <a-switch
-              checked-children="ON"
-              un-checked-children="OFF"
-              placeholder="restarting this application"
-              v-model="restart"
-              v-decorator="['restart']"/>
-            <span
-              class="conf-switch"
-              style="color:darkgrey"> restart application after deploy</span>
-          </a-form-item>
-          <a-form-item
-            v-if="restart"
-            label="Savepoint"
-            :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
-            <a-switch
-              checked-children="ON"
-              un-checked-children="OFF"
-              v-model="savePoint"
-              v-decorator="['savePoint']"/>
-            <span
-              class="conf-switch"
-              style="color:darkgrey"> trigger savePoint before taking stoping </span>
-          </a-form-item>
-          <a-form-item
-            v-if="restart"
-            label="ignore restored"
-            :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
-            <a-switch
-              checked-children="ON"
-              un-checked-children="OFF"
-              v-model="allowNonRestoredState"
-              v-decorator="['allowNonRestoredState']"/>
-            <span
-              class="conf-switch"
-              style="color:darkgrey"> ignore savepoint then cannot be restored </span>
-          </a-form-item>
-          <a-form-item
-            label="backup desc"
-            :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
-            <a-textarea
-              rows="3"
-              placeholder="Before launching the new version, the current task will be backed up. Please enter the backup information of the current task"
-              v-decorator="['description',{ rules: [{ required: true, message: 'Please enter a backup description' } ]}]"/>
-          </a-form-item>
-        </a-form>
-      </a-modal>
       <a-modal
         v-model="startVisible"
         on-ok="handleStartOk">
@@ -1014,6 +910,19 @@
               style="color:darkgrey"> trigger savePoint before taking stoping </span>
           </a-form-item>
           <a-form-item
+            label="Custom SavePoint"
+            style="margin-bottom: 10px"
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
+            v-show="savePoint">
+            <a-input
+              type="text"
+              placeholder="Entry the custom savepoint path"
+              v-model="customSavepoint"
+              v-decorator="['customSavepoint']"/>
+            <div style="color:darkgrey">cancel job with savepoint path.</div>
+          </a-form-item>
+          <a-form-item
             label="Drain"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
@@ -1026,19 +935,6 @@
             <span
               class="conf-switch"
               style="color:darkgrey"> Send max watermark before stoping</span>
-          </a-form-item>
-          <a-form-item
-            label="Custom SavePoint"
-            style="margin-bottom: 10px"
-            :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
-            v-show="savePoint">
-            <a-input
-              type="text"
-              placeholder="Entry the custom savepoint path"
-              v-model="customSavepoint"
-              v-decorator="['customSavepoint']"/>
-            <div style="color:darkgrey">Custom savepoint path is not supported on YARN mode.</div>
           </a-form-item>
         </a-form>
 
@@ -1146,21 +1042,34 @@
   </div>
 </template>
 <script>
-  import Ellipsis from '@/components/Ellipsis'
-  import State from './State'
-  import {mapActions} from 'vuex'
-  import {cancel, clean, dashboard, deploy, list, mapping, remove, revoke, start, yarn, downLog} from '@api/application'
-  import {history, latest} from '@api/savepoint'
-  import {flamegraph} from '@api/metrics'
-  import {weburl} from '@api/setting'
-  import {build, detail as buildDetail} from '@api/appbuild'
-  import {Terminal} from 'xterm'
-  import 'xterm/css/xterm.css'
-  import {baseUrl} from '@/api/baseUrl'
-  import SvgIcon from '@/components/SvgIcon'
-  import storage from '@/utils/storage'
+import Ellipsis from '@/components/Ellipsis'
+import State from './State'
+import {mapActions} from 'vuex'
+import {
+  cancel,
+  clean,
+  dashboard,
+  downLog,
+  list,
+  mapping,
+  remove,
+  revoke,
+  start,
+  yarn,
+  verifySchema
+} from '@api/application'
+import {history, latest} from '@api/savepoint'
+import {flamegraph} from '@api/metrics'
+import {weburl} from '@api/setting'
+import {build, detail as buildDetail} from '@/api/appBuild'
+import {activeURL} from '@/api/flinkCluster'
+import {Terminal} from 'xterm'
+import 'xterm/css/xterm.css'
+import {baseUrl} from '@/api/baseUrl'
+import SvgIcon from '@/components/SvgIcon'
+import storage from '@/utils/storage'
 
-  export default {
+export default {
   components: {Ellipsis, State, SvgIcon},
   data() {
     return {
@@ -1185,7 +1094,6 @@
       filteredInfo: null,
       queryInterval: 2000,
       yarn: null,
-      deployVisible: false,
       stopVisible: false,
       startVisible: false,
       mappingVisible: false,
@@ -1208,7 +1116,7 @@
       optionApps: {
         'starting': new Map(),
         'stoping': new Map(),
-        'deploy': new Map()
+        'launch': new Map()
       },
       searchedColumn: null,
       paginationInfo: null,
@@ -1264,7 +1172,7 @@
       return [{
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 240,
+        width: 280,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -1272,87 +1180,87 @@
         },
         onFilter: (value, record) =>
             record.jobName
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase()),
-          onFilterDropdownVisibleChange: visible => {
-            if (visible) {
-              setTimeout(() => {
-                this.searchInput.focus()
-              }, 0)
-            }
-          },
-        }, {
-          title: 'Flink Version',
-          dataIndex: 'flinkVersion',
-          width: 120
-        }, {
-          title: 'Start Time',
-          dataIndex: 'startTime',
-          sorter: true,
-          sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
-          width: 180
-        }, {
-          title: 'Duration',
-          dataIndex: 'duration',
-          sorter: true,
-          sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
-          scopedSlots: {customRender: 'duration'},
-          width: 150
-        }, {
-          title: 'Task',
-          dataIndex: 'task',
-          width: 100,
-        }, {
-          title: 'Run Status',
-          dataIndex: 'state',
-          width: 120,
-          scopedSlots: {customRender: 'state'},
-          filters: [
-            {text: 'ADDED', value: 0},
-            {text: 'DEPLOYING', value: 1},
-            {text: 'DEPLOYED', value: 2},
-            {text: 'CREATED', value: 4},
-            {text: 'STARTING', value: 5},
-            {text: 'RUNNING', value: 7},
-            {text: 'FAILED', value: 9},
-            {text: 'CANCELED', value: 11},
-            {text: 'FINISHED', value: 12},
-            {text: 'SUSPENDED', value: 13},
-            {text: 'LOST', value: 15},
-            {text: 'SILENT', value: 19},
-            {text: 'TERMINATED', value: 20},
-            {text: 'FINISHED', value: 21},
-          ]
-        }, {
-          title: 'Deploy | Build Status',
-          dataIndex: 'deploy',
-          width: 250,
-          scopedSlots: {customRender: 'deployState'}
-        }, {
-          dataIndex: 'operation',
-          key: 'operation',
-          fixed: 'right',
-          scopedSlots: {customRender: 'operation'},
-          slots: {title: 'customOperation'},
-          width: 200
-        }]
-      }
-    },
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus()
+            }, 0)
+          }
+        },
+      }, {
+        title: 'Flink Version',
+        dataIndex: 'flinkVersion',
+        width: 120
+      }, {
+        title: 'Start Time',
+        dataIndex: 'startTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
+        width: 180
+      }, {
+        title: 'Duration',
+        dataIndex: 'duration',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
+        scopedSlots: {customRender: 'duration'},
+        width: 150
+      }, {
+        title: 'Task',
+        dataIndex: 'task',
+        width: 100,
+      }, {
+        title: 'Run Status',
+        dataIndex: 'state',
+        width: 120,
+        scopedSlots: {customRender: 'state'},
+        filters: [
+          {text: 'ADDED', value: 0},
+          {text: 'DEPLOYING', value: 1},
+          {text: 'DEPLOYED', value: 2},
+          {text: 'CREATED', value: 4},
+          {text: 'STARTING', value: 5},
+          {text: 'RUNNING', value: 7},
+          {text: 'FAILED', value: 9},
+          {text: 'CANCELED', value: 11},
+          {text: 'FINISHED', value: 12},
+          {text: 'SUSPENDED', value: 13},
+          {text: 'LOST', value: 15},
+          {text: 'SILENT', value: 19},
+          {text: 'TERMINATED', value: 20},
+          {text: 'FINISHED', value: 21},
+        ]
+      }, {
+        title: 'Launch | Build',
+        dataIndex: 'launch',
+        width: 250,
+        scopedSlots: {customRender: 'launchState'}
+      }, {
+        dataIndex: 'operation',
+        key: 'operation',
+        fixed: 'right',
+        scopedSlots: {customRender: 'operation'},
+        slots: {title: 'customOperation'},
+        width: 220
+      }]
+    }
+  },
 
-    mounted() {
+  mounted() {
+    this.handleDashboard()
+    this.handleFetch(true)
+    const timer = window.setInterval(() => {
       this.handleDashboard()
-      this.handleFetch(true)
-      const timer = window.setInterval(() => {
-        this.handleDashboard()
-        this.handleFetch(false)
-      }, this.queryInterval)
-      this.$once('hook:beforeDestroy', () => {
-        clearInterval(timer)
-        clearInterval(this.appBuildDtlReqTimer)
-      })
-      this.handleResize()
-    },
+      this.handleFetch(false)
+    }, this.queryInterval)
+    this.$once('hook:beforeDestroy', () => {
+      clearInterval(timer)
+      clearInterval(this.appBuildDtlReqTimer)
+    })
+    this.handleResize()
+  },
 
   beforeMount() {
     this.formDeploy = this.$form.createForm(this)
@@ -1372,87 +1280,21 @@
       }
     },
 
-    handleDeploy(app) {
-      if (this.optionApps.deploy.get(app.id) === undefined || app['optionState'] === 0) {
-        this.deployVisible = true
-        this.application = app
-      }
-    },
-
-    handleDeployTitle(deploy) {
-      switch (deploy) {
+    handleLaunchTitle(launch) {
+      switch (launch) {
         case -1:
-          return 'dependency changed,but download dependency failed'
+          return 'launch failed'
         case 1:
-          return 'deploying'
+          return 'need relaunch'
         case 2:
-          return 'application is updated,need relaunch'
+          return 'launching'
         case 3:
-          return 'dependency is updated,need relaunch'
+          return 'launch finished,need restart'
         case 4:
-          return 'config is updated,need restart'
-        case 5:
-          return 'flink sql is updated,need restart'
-        case 6:
-          return 'application is deployed to workspace,need restart'
-        case 7:
-          return 'application is rollbacked,need restart'
+          return 'application is rollbacked,need relaunch'
       }
     },
 
-    handleDeployCancel() {
-      this.deployVisible = false
-      setTimeout(() => {
-        this.application = null
-        this.restart = false
-        this.allowNonRestoredState = false
-        this.savePoint = true
-        this.formDeploy.resetFields()
-      }, 1000)
-    },
-
-    handleDeployOk() {
-      this.formDeploy.validateFields((err, values) => {
-        if (!err) {
-          const id = this.application.id
-          const savePoint = this.savePoint
-          const description = values.description
-          const restart = this.restart
-          const allowNonRestoredState = this.allowNonRestoredState
-          this.handleDeployCancel()
-          this.optionApps.deploy.set(id, new Date().getTime())
-          this.handleMapUpdate('deploy')
-          this.$swal.fire({
-            icon: 'success',
-            title: 'The current job is deploying',
-            showConfirmButton: false,
-            timer: 2000
-          }).then((r) => {
-            this.socketId = this.uuid()
-            storage.set(this.storageKey,this.socketId)
-            deploy({
-              id: id,
-              restart: restart,
-              savePointed: savePoint,
-              allowNonRestored: allowNonRestoredState,
-              backUpDescription: description,
-              socketId: this.socketId
-            }).then((resp) => {
-              if(!resp.data) {
-                this.$swal.fire(
-                    'Failed',
-                    'deploy failed,' + resp.message.replaceAll(/\[StreamX]/g,''),
-                    'error'
-                )
-              } else if(!restart) {
-                this.optionApps.deploy.delete(id)
-                this.handleMapUpdate('deploy')
-              }
-            })
-          })
-        }
-      })
-    },
 
     handleMapping(app) {
       this.mappingVisible = true
@@ -1500,35 +1342,36 @@
       this.forceBuildAppModalVisual = false
     },
 
-    handleCheckBuildApp(app) {
+
+    handleCheckLaunchApp(app) {
       this.application = app
       if (app['appControl']['allowBuild'] === true) {
-        this.handleBuildApp(app, false)
+        this.handleLaunchApp(app, false)
       } else {
         this.showCheckForceBuildModel()
       }
     },
 
-    handleBuildApp(app, force) {
+    handleLaunchApp(app, force) {
       this.closeCheckForceBuildModel()
       this.$swal.fire({
         icon: 'success',
-        title: 'Current Application is Building',
+        title: 'Current Application is launching',
         showConfirmButton: false,
         timer: 2000
       }).then((e) =>
-        build({
-          appId: app.id,
-          forceBuild: force
-        }).then((resp) => {
-          if (!resp.data) {
-            this.$swal.fire(
-              'Failed',
-              'build application failed, ' + resp.message.replaceAll(/\[StreamX]/g, ''),
-              'error'
-            )
-          }
-        })
+          build({
+            appId: app.id,
+            forceBuild: force
+          }).then((resp) => {
+            if (!resp.data) {
+              this.$swal.fire(
+                  'Failed',
+                  'lanuch application failed, ' + resp.message.replaceAll(/\[StreamX]/g, ''),
+                  'error'
+              )
+            }
+          })
       )
     },
 
@@ -1543,15 +1386,17 @@
 
     openBuildProgressDetailDrawer(app) {
       this.appBuildDrawerVisual = true
-      clearInterval(this.appBuildDtlReqTimer)
-      this.appBuildDtlReqTimer = window.setInterval(
-        () => this.handleFetchBuildDetail(app),
-        this.queryInterval)
+      if (this.appBuildDtlReqTimer) {
+        clearInterval(this.appBuildDtlReqTimer)
+      }
+      this.handleFetchBuildDetail(app)
+      this.appBuildDtlReqTimer = window.setInterval(() => this.handleFetchBuildDetail(app), 500)
     },
 
     closeBuildProgressDrawer() {
       this.appBuildDrawerVisual = false
       clearInterval(this.appBuildDtlReqTimer)
+      this.appBuildDtlReqTimer = null
       this.appBuildDetail.pipeline = null
       this.appBuildDetail.docker = null
     },
@@ -1636,22 +1481,67 @@
       }
     },
 
-      handleIsStart(app) {
-        const status = app.state === 0 ||
-          app.state === 2 ||
+    handleIsStart(app) {
+      /**
+       * FAILED(7),
+       * CANCELED(9),
+       * FINISHED(10),
+       * SUSPENDED(11),
+       * LOST(13),
+       * OTHER(15),
+       * REVOKED(16),
+       * TERMINATED(18),
+       * POS_TERMINATED(19),
+       * SUCCEEDED(20),
+       * KILLED(-9)
+       * @type {boolean}
+       */
+      const status = app.state === 0 ||
+          app.state === 7 ||
           app.state === 9 ||
+          app.state === 10 ||
           app.state === 11 ||
-          app.state === 12 ||
           app.state === 13 ||
-          app.state === 15 ||
+          app.state === 16 ||
+          app.state === 18 ||
+          app.state === 19 ||
           app.state === 20 ||
-          app.state === 21 || false
+          app.state === -9 || false
 
-      const optionState = this.optionApps.starting.get(app.id) == undefined || app['optionState'] == 0 || false
+      /**
+       *
+       * // 部署失败
+       * FAILED(-1),
+       * // 完结
+       * DONE(0),
+       * // 任务修改完毕需要重新发布
+       * NEED_LAUNCH(1),
+       * // 上线中
+       * LAUNCHING(2),
+       * // 上线完毕,需要重启
+       * NEED_RESTART(3),
+       * //需要回滚
+       * NEED_ROLLBACK(4),
+       * // 项目发生变化,任务需检查(是否需要重新选择jar)
+       * NEED_CHECK(5),
+       * // 发布的任务已经撤销
+       * REVOKED(10);
+       */
 
-      return status && optionState
+      const launch = app.launch === 0 || app.launch === 3
+
+      const optionState = !this.optionApps.starting.get(app.id) || app['optionState'] === 0 || false
+
+      return status && launch && optionState
     },
 
+    handleCanRemapping(record) {
+      return record.state !== 5 &&
+      !this.optionApps.launch.get(record.id) &&
+      !this.optionApps.stoping.get(record.id) &&
+      !this.optionApps.starting.get(record.id) &&
+      record['optionState'] === 0
+    },
 
     showForceStartAppModal() {
       this.forceStartAppModalVisual = true
@@ -1663,7 +1553,7 @@
 
     handleAppCheckStart(app) {
       // when then app is building, show forced starting modal
-      if ((app.executionMode === 5 || app.executionMode === 6) && app['appControl']['allowStart'] === false) {
+      if (app['appControl']['allowStart'] === false) {
         this.application = app
         this.handleFetchBuildDetail(app)
         this.showForceStartAppModal()
@@ -1676,12 +1566,12 @@
       this.closeForceStartAppModal()
       if (app.flinkVersion == null) {
         this.$swal.fire(
-          'Failed',
-          'please set flink version first.',
-          'error'
+            'Failed',
+            'please set flink version first.',
+            'error'
         )
       } else {
-        if (this.optionApps.starting.get(app.id) === undefined || app['optionState'] === 0) {
+        if ( !this.optionApps.starting.get(app.id) || app['optionState'] === 0) {
           this.application = app
           latest({
             appId: this.application.id
@@ -1731,34 +1621,44 @@
           this.handleMapUpdate('starting')
           this.handleStartCancel()
 
-            this.$swal.fire({
-              icon: 'success',
-              title: 'The current job is starting',
-              showConfirmButton: false,
-              timer: 2000
-            }).then((r) => {
-              start({
-                id: id,
-                savePointed: savePointed,
-                savePoint: savePoint,
-                flameGraph: flameGraph,
-                allowNonRestored: allowNonRestoredState
-              }).then((resp) => {
-                if (!resp.data) {
-                  this.$swal.fire(
-                    'Failed',
-                    'startup failed,' + resp.message.replaceAll(/\[StreamX]/g,''),
-                    'error'
-                  )
-                }
-              })
+          this.$swal.fire({
+            icon: 'success',
+            title: 'The current job is starting',
+            showConfirmButton: false,
+            timer: 2000
+          }).then((r) => {
+            start({
+              id: id,
+              savePointed: savePointed,
+              savePoint: savePoint,
+              flameGraph: flameGraph,
+              allowNonRestored: allowNonRestoredState
+            }).then((resp) => {
+              if (!resp.data) {
+                this.$swal.fire({
+                  title: 'Failed',
+                  icon: 'error',
+                  width: this.exceptionPropWidth(),
+                  html: '<pre class="propException"> startup failed, ' + resp.message.replaceAll(/\[StreamX]/g, '') + '</pre>',
+                  showCancelButton: true,
+                  confirmButtonColor: '#55BDDDFF',
+                  confirmButtonText: 'Detail',
+                  cancelButtonText: 'Close'
+                }).then((isConfirm) =>{
+                  if (isConfirm.value) {
+                    this.SetAppId(id)
+                    this.$router.push({'path': '/flink/app/detail'})
+                  }
+                })
+              }
             })
+          })
         }
       })
     },
 
     handleCancel(app) {
-      if (this.optionApps.stoping.get(app.id) === undefined || app['optionState'] === 0) {
+      if (!this.optionApps.stoping.get(app.id) || app['optionState'] === 0) {
         this.stopVisible = true
         this.application = app
       }
@@ -1775,26 +1675,49 @@
     },
 
     handleStopOk() {
+      const customSavePoint = this.customSavepoint
       const id = this.application.id
       const savePointed = this.savePoint
       const drain = this.drain
-      const customSavePoint = this.customSavepoint
       this.optionApps.stoping.set(id, new Date().getTime())
       this.handleMapUpdate('stoping')
       this.handleStopCancel()
 
+      const stopReq = {
+        id: id,
+        savePointed: savePointed,
+        drain: drain,
+        savePoint: customSavePoint
+      }
+
+      if ( customSavePoint != null ) {
+        verifySchema({
+          'path': customSavePoint
+        }).then(resp => {
+          if (resp.data === false) {
+            this.$swal.fire(
+                'Failed',
+                'custom savePoint path is invalid, ' + resp.message,
+                'error'
+            )
+          } else {
+            this.handleStopAction(stopReq)
+          }
+        })
+      } else {
+        this.handleStopAction(stopReq)
+      }
+
+    },
+
+    handleStopAction(stopReq) {
       this.$swal.fire({
         icon: 'success',
         title: 'The current job is canceling',
         showConfirmButton: false,
         timer: 2000
       }).then((result) => {
-        cancel({
-          id: id,
-          savePointed: savePointed,
-          drain: drain,
-          savePoint: customSavePoint
-        }).then((resp) => {
+        cancel(stopReq).then((resp) => {
           if (resp.status === 'error') {
             this.$swal.fire(
                 'Failed',
@@ -1844,13 +1767,12 @@
 
     handleCanDelete(app) {
       return app.state === 0 ||
-          app.state === 2 ||
+          app.state === 7 ||
           app.state === 9 ||
-          app.state === 11 ||
-          app.state === 12 ||
-          app.state === 15 ||
-          app.state === 20 ||
-          app.state === 21 || false
+          app.state === 10 ||
+          app.state === 13 ||
+          app.state === 18 ||
+          app.state === 19 || false
     },
 
     handleDelete(app) {
@@ -1939,22 +1861,22 @@
             'availableSlot': x.availableSlot
           }]
           if (x['optionState'] === 0) {
-            if (this.optionApps.starting.get(x.id) !== undefined) {
+            if (this.optionApps.starting.get(x.id)) {
               if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
                 this.optionApps.starting.delete(x.id)
                 this.handleMapUpdate('starting')
               }
             }
-            if (this.optionApps.stoping.get(x.id) !== undefined) {
+            if (this.optionApps.stoping.get(x.id)) {
               if (timestamp - this.optionApps.stoping.get(x.id) > this.queryInterval) {
                 this.optionApps.stoping.delete(x.id)
                 this.handleMapUpdate('stoping')
               }
             }
-            if (this.optionApps.deploy.get(x.id) !== undefined) {
-              if (timestamp - this.optionApps.deploy.get(x.id) > this.queryInterval) {
-                this.optionApps.deploy.delete(x.id)
-                this.handleMapUpdate('deploy')
+            if (this.optionApps.launch.get(x.id)) {
+              if (timestamp - this.optionApps.launch.get(x.id) > this.queryInterval) {
+                this.optionApps.launch.delete(x.id)
+                this.handleMapUpdate('launch')
               }
             }
           }
@@ -1975,7 +1897,7 @@
     },
 
     handleExpandIcon(props) {
-      if (props.record.state === 7) {
+      if (props.record.state === 5) {
         if (props.expanded) {
           return <a class="expand-icon-open" onClick={(e) => {
             props.onExpand(props.record, e)
@@ -1995,11 +1917,17 @@
     },
 
     handleView(params) {
-      if (params.state === 6 || params.state === 7 || params['optionState'] === 4) {
-        // yarn-pre-job|yarn-session|yarn-application
+      // 任务正在运行中, 重启中, 正在 savePoint 中
+      if (params.state === 4 || params.state === 5 || params['optionState'] === 4) {
+        // yarn-per-job|yarn-session|yarn-application
         const executionMode = params['executionMode']
-        if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
-          if(this.yarn == null) {
+        if (executionMode === 1) {
+          activeURL({id: params.flinkClusterId}).then((resp) => {
+            const url = resp.data + '/#/job/' + params.jobId + '/overview'
+            window.open(url)
+          })
+        } else if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
+          if (this.yarn == null) {
             yarn({}).then((resp) => {
               this.yarn = resp.data
               const url = this.yarn + '/proxy/' + params['appId'] + '/'
@@ -2019,21 +1947,10 @@
 
     handleEdit(app) {
       this.SetAppId(app.id)
-      //appType         STREAMX_FLINK(1, "StreamX Flink"), APACHE_FLINK(2, "Apache Flink"),
-      //jobType         CUSTOMCODE("Custom Code", 1), FLINKSQL("Flink SQL", 2)
-      //ResourceFrom    CICD(1),UPLOAD(2)
       if (app.appType === 1) {
+        // jobType( 1 custom code 2: flinkSQL)
         this.$router.push({'path': '/flink/app/edit_streamx'})
-        if (app.jobType === 1) {
-          if (app.resourceForm === 1) {
-            this.$router.push({'path': '/flink/app/edit_streamx'})
-          } else {
-            this.$router.push({'path': '/flink/app/edit_flink'})
-          }
-        } else {
-          this.$router.push({'path': '/flink/app/edit_streamx'})
-        }
-      } else {
+      } else if (app.appType === 2) { //Apache Flink
         this.$router.push({'path': '/flink/app/edit_flink'})
       }
     },

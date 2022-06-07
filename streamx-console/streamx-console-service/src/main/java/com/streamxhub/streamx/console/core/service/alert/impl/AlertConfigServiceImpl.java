@@ -63,4 +63,10 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
 
         return result;
     }
+
+    @Override
+    public boolean exist(AlertConfig alertConfig) {
+        AlertConfig confByName = this.baseMapper.getAlertConfByName(alertConfig);
+        return confByName == null ? false : true;
+    }
 }
