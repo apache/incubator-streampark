@@ -36,9 +36,9 @@ import java.lang.{Boolean => JavaBool}
 import scala.collection.JavaConversions._
 
 /**
- * yarn PreJob mode submit
+ * yarn PerJob mode submit
  */
-object YarnPreJobSubmit extends YarnSubmitTrait {
+object YarnPerJobSubmit extends YarnSubmitTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     //execution.target
