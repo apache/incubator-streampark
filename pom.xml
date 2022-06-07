@@ -15,7 +15,6 @@
         <module>streamx-plugin</module>
         <module>streamx-console</module>
     </modules>
-
     <url>https://github.com/streamxhub/streamx</url>
 
     <scm>

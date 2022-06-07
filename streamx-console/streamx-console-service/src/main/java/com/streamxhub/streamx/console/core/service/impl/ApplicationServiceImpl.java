@@ -709,7 +709,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
                 FlinkSql sql = new FlinkSql(appParam);
                 flinkSqlService.create(sql);
-                if (changedType.isDependencyChanged()) {
+                if (changedType.isDependencyChanged() || changedType.isAllChanged()) {
                     application.setBuild(true);
                 }
             } else {
