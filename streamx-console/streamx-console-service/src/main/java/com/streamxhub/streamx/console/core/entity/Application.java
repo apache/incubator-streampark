@@ -30,9 +30,9 @@ import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.FlinkK8sRestExposedType;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
@@ -447,37 +447,19 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public AppInfo httpYarnAppInfo() throws Exception {
-        if (appId != null) {
-            String format = "%s/ws/v1/cluster/apps/%s";
-            try {
-                String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
-                return httpGetDoResult(url, AppInfo.class);
-            } catch (IOException e) {
-                String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                return httpGetDoResult(url, AppInfo.class);
-            }
-        }
-        return null;
+        String appInfo = YarnUtils.httpYarnAppInfo(appId);
+        return convert(appInfo, AppInfo.class);
     }
 
     @JsonIgnore
     public Overview httpOverview(FlinkEnv env, FlinkCluster flinkCluster) throws IOException {
         final String flinkUrl = "overview";
-        if (appId != null) {
-            if (getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
-                    getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
-                String format = "%s/proxy/%s/" + flinkUrl;
-                try {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
-                    return httpGetDoResult(url, Overview.class);
-                } catch (IOException e) {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                    return httpGetDoResult(url, Overview.class);
-                }
-                // TODO: yarn-session
-                //String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
-                //return httpGetDoResult(remoteUrl, Overview.class);
-            }
+        if (getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
+            getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
+            return convert(YarnUtils.httpYarnAppContent(appId, flinkUrl), Overview.class);
+            // TODO: yarn-session
+            //String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
+            //return httpGetDoResult(remoteUrl, Overview.class);
         }
         return null;
     }
@@ -486,23 +468,13 @@ public class Application implements Serializable {
     public JobsOverview httpJobsOverview(FlinkEnv env, FlinkCluster flinkCluster) throws Exception {
         final String flinkUrl = "jobs/overview";
         if (ExecutionMode.isYarnMode(executionMode)) {
-            if (appId != null) {
-                String format = "%s/proxy/%s/" + flinkUrl;
-                JobsOverview jobsOverview;
-                try {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
-                    jobsOverview = httpGetDoResult(url, JobsOverview.class);
-                } catch (IOException e) {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                    jobsOverview = httpGetDoResult(url, JobsOverview.class);
-                }
-                if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
-                    //过滤出当前job
-                    List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(jobId)).collect(Collectors.toList());
-                    jobsOverview.setJobs(jobs);
-                }
-                return jobsOverview;
+            JobsOverview jobsOverview = convert(YarnUtils.httpYarnAppContent(appId, flinkUrl), JobsOverview.class);
+            if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
+                //过滤出当前job
+                List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(jobId)).collect(Collectors.toList());
+                jobsOverview.setJobs(jobs);
             }
+            return jobsOverview;
         } else if (ExecutionMode.isRemoteMode(executionMode)) {
             if (jobId != null) {
                 String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
@@ -522,16 +494,7 @@ public class Application implements Serializable {
     public CheckPoints httpCheckpoints(FlinkEnv env, FlinkCluster flinkCluster) throws IOException {
         final String flinkUrl = "jobs/%s/checkpoints";
         if (ExecutionMode.isYarnMode(executionMode)) {
-            if (appId != null) {
-                String format = "%s/proxy/%s/" + flinkUrl;
-                try {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId, jobId);
-                    return httpGetDoResult(url, CheckPoints.class);
-                } catch (IOException e) {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId, jobId);
-                    return httpGetDoResult(url, CheckPoints.class);
-                }
-            }
+            return convert(YarnUtils.httpYarnAppContent(appId, String.format(flinkUrl, jobId)), CheckPoints.class);
         } else if (ExecutionMode.isRemoteMode(executionMode)) {
             if (jobId != null) {
                 String remoteUrl = getFlinkClusterRestUrl(flinkCluster, String.format(flinkUrl, jobId));
@@ -544,10 +507,15 @@ public class Application implements Serializable {
     @JsonIgnore
     private <T> T httpGetDoResult(String url, Class<T> clazz) throws IOException {
         String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
-        if (result != null) {
-            return JacksonUtils.read(result, clazz);
+        return convert(result, clazz);
+    }
+
+    @JsonIgnore
+    private <T> T convert(String content, Class<T> clazz) throws IOException {
+        if (null == content) {
+            return null;
         }
-        return null;
+        return JacksonUtils.read(content, clazz);
     }
 
     @JsonIgnore

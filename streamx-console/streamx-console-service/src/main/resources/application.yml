@@ -76,6 +76,9 @@ streamx:
   proxy:
     # knox 代理地址 https://cdpsit02.example.cn:8443/gateway/cdp-proxy/yarn
     yarn-url:
+  yarn:
+      # default sample, or kerberos
+    http-auth: sample
 
   # HADOOP_USER_NAME
   hadoop-user-name: root
@@ -135,3 +138,19 @@ streamx:
       /*.less,
       /
 
+##AD认证
+ldap:
+  ##AD服务器IP，默认端口389
+  urls: ldap://99.99.99.99:389
+  ##登录账号
+  username: cn=Manager,dc=streamx,dc=com
+  ##密码
+  password: streamx
+  #distinguishedName的部分节点
+  embedded:
+    base-dn: dc=streamx,dc=com
+  user:
+    identity:
+      attribute: cn
+    email:
+      attribute: mail

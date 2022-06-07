@@ -27,11 +27,11 @@ import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.system.authentication.JWTToken;
 import com.streamxhub.streamx.console.system.authentication.JWTUtil;
 import com.streamxhub.streamx.console.system.entity.User;
+import com.streamxhub.streamx.console.system.ldap.LdapService;
 import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserService;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -63,38 +63,38 @@ public class PassportController {
     @Autowired
     private ShiroProperties properties;
 
+    @Autowired
+    private LdapService ldapService;
+
     @PostMapping("signin")
     public RestResponse signin(
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
 
-        username = StringUtils.lowerCase(username);
         User user = this.userService.findByName(username);
 
-        if (user == null) {
-            return RestResponse.create().put("code", 0);
+        if (null == user) {
+            String ldap = ldapService.ldapLogin(username, password);
+            if (ldap.isEmpty() || ldap.contains("null")) {
+                return RestResponse.create().put("code", 0);
+            }
+
+            User newUser = new User();
+            newUser.setUsername(username);
+            newUser.setRoleId("100001");
+            newUser.setNickName(username);
+            newUser.setPassword(password);
+            newUser.setStatus("1");
+            newUser.setSex("1");
+            this.userService.createUser(newUser);
+
+            Map<String, Object> userInfo = generateUserInfo(username, password, newUser);
+
+            return new RestResponse().data(userInfo);
+
         }
 
-        String salt = user.getSalt();
-        password = ShaHashUtils.encrypt(salt, password);
-
-        if (!StringUtils.equals(user.getPassword(), password)) {
-            return RestResponse.create().put("code", 0);
-        }
-
-        if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.create().put("code", 1);
-        }
-
-        // 更新用户登录时间
-        this.userService.updateLoginTime(username);
-        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
-        String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
-        String expireTimeStr = DateUtils.formatFullTime(expireTime);
-        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
-        String userId = RandomStringUtils.randomAlphanumeric(20);
-        user.setId(userId);
-        Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
+        Map<String, Object> userInfo = generateUserInfo(username, password, user);
         return new RestResponse().data(userInfo);
     }
 
@@ -107,15 +107,27 @@ public class PassportController {
     /**
      * 生成前端需要的用户信息，包括： 1. token 2. Vue Router 3. 用户角色 4. 用户权限 5. 前端系统个性化配置信息
      *
-     * @param token token
-     * @param user  用户信息
-     * @return UserInfo
+     * @param username 用户名
+     * @param username 密码
+     * @param user     用户信息
+     * @return Map<String, Object>
      */
-    private Map<String, Object> generateUserInfo(JWTToken token, User user) {
-        String username = user.getUsername();
+    private Map<String, Object> generateUserInfo(String username, String password, User user) throws Exception {
+        String salt = user.getSalt();
+        password = ShaHashUtils.encrypt(salt, password);
+
+        // 更新用户登录时间
+        this.userService.updateLoginTime(username);
+        String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
+        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
+        String expireTimeStr = DateUtils.formatFullTime(expireTime);
+        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
+        String userId = RandomStringUtils.randomAlphanumeric(20);
+        user.setId(userId);
+
         Map<String, Object> userInfo = new HashMap<>(8);
-        userInfo.put("token", token.getToken());
-        userInfo.put("expire", token.getExpireAt());
+        userInfo.put("token", jwtToken.getToken());
+        userInfo.put("expire", jwtToken.getExpireAt());
 
         Set<String> roles = this.roleService.getUserRoleName(username);
         userInfo.put("roles", roles);
@@ -127,4 +139,5 @@ public class PassportController {
         userInfo.put("user", user);
         return userInfo;
     }
+
 }

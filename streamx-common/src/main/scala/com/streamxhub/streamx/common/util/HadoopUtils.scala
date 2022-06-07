@@ -44,9 +44,9 @@ import org.codehaus.stax2.XMLStreamReader2
 
 import java.io.{BufferedInputStream, File, FileInputStream, IOException}
 import java.net.InetAddress
-import java.security.PrivilegedAction
+import java.security.{PrivilegedAction, PrivilegedExceptionAction}
 import java.util
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent._
 import java.util.{Timer, TimerTask, HashMap => JavaHashMap}
 import javax.security.auth.kerberos.KerberosTicket
 import javax.xml.stream.{XMLStreamConstants, XMLStreamException}
@@ -315,6 +315,26 @@ object HadoopUtils extends Logger {
       return getRMWebAppURL()
     }
     proxyYarnUrl
+  }
+
+  /**
+   * hadoop.http.authentication.type<br>
+   * 获取 yarn http 认证方式.<br> ex: sample, kerberos
+   *
+   * @return
+   */
+  def hasYarnHttpKerberosAuth: Boolean = {
+    val yarnHttpAuth: String = InternalConfigHolder.get[String](CommonConfig.STREAM_YARN_AUTH)
+    "kerberos".equalsIgnoreCase(yarnHttpAuth)
+  }
+
+  @throws(classOf[IOException])
+  def doAs[T](action: Callable[T]): T = dos(action)
+
+  private[this] def dos[T](action: Callable[T]) = {
+    getUgi().doAs(new PrivilegedExceptionAction[T] {
+      override def run(): T = action.call()
+    })
   }
 
   /**
