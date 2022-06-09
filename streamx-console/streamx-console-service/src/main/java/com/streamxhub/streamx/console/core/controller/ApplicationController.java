@@ -182,8 +182,18 @@ public class ApplicationController {
         @ApiImplicitParam(name = "drain", value = "取消前发送最大 watermark", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false")})
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse cancel(@ApiIgnore Application app) {
+    public RestResponse cancel(@ApiIgnore Application app) throws Exception {
         applicationService.cancel(app);
+        return RestResponse.create();
+    }
+
+    /**
+     * 强制停止.(正常启动或者停止一直在进行中)
+     * @param app
+     * @return
+     */
+    public RestResponse forcedStop(Application app) {
+        applicationService.forcedStop(app);
         return RestResponse.create();
     }
 

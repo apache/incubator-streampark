@@ -44,7 +44,7 @@ object FlinkSubmitter extends Logger {
 
   private[this] val SHUTDOWN_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.bean.ShutDownRequest"
 
-  @throws[Exception] def submit(submitRequest: SubmitRequest): SubmitResponse = {
+  def submit(submitRequest: SubmitRequest): SubmitResponse = {
     FlinkShimsProxy.proxy(submitRequest.flinkVersion, (classLoader: ClassLoader) => {
       val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
       val requestClass = classLoader.loadClass(SUBMIT_REQUEST_CLASS_NAME)
@@ -55,7 +55,7 @@ object FlinkSubmitter extends Logger {
     })
   }
 
-  @throws[Exception] def stop(stopRequest: StopRequest): StopResponse = {
+  def stop(stopRequest: StopRequest): StopResponse = {
     FlinkShimsProxy.proxy(stopRequest.flinkVersion, (classLoader: ClassLoader) => {
       val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
       val requestClass = classLoader.loadClass(STOP_REQUEST_CLASS_NAME)
@@ -68,7 +68,7 @@ object FlinkSubmitter extends Logger {
     })
   }
 
-  @throws[Exception] def deploy(deployRequest: DeployRequest): DeployResponse = {
+  def deploy(deployRequest: DeployRequest): DeployResponse = {
     FlinkShimsProxy.proxy(deployRequest.flinkVersion, (classLoader: ClassLoader) => {
       val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
       val requestClass = classLoader.loadClass(DEPLOY_REQUEST_CLASS_NAME)
@@ -79,7 +79,7 @@ object FlinkSubmitter extends Logger {
     })
   }
 
-  @throws[Exception] def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
+  def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
     FlinkShimsProxy.proxy(shutDownRequest.flinkVersion, (classLoader: ClassLoader) => {
       val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
       val requestClass = classLoader.loadClass(SHUTDOWN_REQUEST_CLASS_NAME)
