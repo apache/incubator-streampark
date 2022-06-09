@@ -36,7 +36,6 @@ public class CompletableFutureTimeout {
 
         static final ScheduledThreadPoolExecutor DELAYER;
 
-        // 注意，这里使用一个线程就可以搞定 因为这个线程并不真的执行请求 而是仅仅抛出一个异常
         static {
             DELAYER = new ScheduledThreadPoolExecutor(
                 1,
@@ -63,8 +62,7 @@ public class CompletableFutureTimeout {
     }
 
     public static <T> CompletableFuture<T> timeoutAfter(long timeout, TimeUnit unit) {
-        CompletableFuture<T> result = new CompletableFuture<T>();
-        // timeout 时间后 抛出TimeoutException 类似于sentinel / watcher
+        CompletableFuture<T> result = new CompletableFuture<>();
         CompletableFutureTimeout.Delayer.DELAYER.schedule(() -> result.completeExceptionally(new TimeoutException()), timeout, unit);
         return result;
     }
