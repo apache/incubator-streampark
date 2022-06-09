@@ -23,8 +23,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 public class CompletableFutureTimeout {
@@ -38,9 +38,10 @@ public class CompletableFutureTimeout {
 
         // 注意，这里使用一个线程就可以搞定 因为这个线程并不真的执行请求 而是仅仅抛出一个异常
         static {
-            (DELAYER = new ScheduledThreadPoolExecutor(
-                1, new CompletableFutureTimeout.Delayer.DaemonThreadFactory())).
-                setRemoveOnCancelPolicy(true);
+            DELAYER = new ScheduledThreadPoolExecutor(
+                1,
+                new CompletableFutureTimeout.Delayer.DaemonThreadFactory());
+            DELAYER.setRemoveOnCancelPolicy(true);
         }
 
         static ScheduledFuture<?> delay(Runnable command,
