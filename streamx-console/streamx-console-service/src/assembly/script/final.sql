@@ -497,7 +497,7 @@ DROP TABLE IF EXISTS `t_setting`;
 CREATE TABLE `t_setting` (
 `NUM` int DEFAULT NULL,
 `KEY` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-`VALUE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`VALUE` TEXT COLLATE utf8mb4_general_ci DEFAULT NULL,
 `TITLE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `TYPE` tinyint NOT NULL COMMENT '1: input 2: boolean 3: number',
