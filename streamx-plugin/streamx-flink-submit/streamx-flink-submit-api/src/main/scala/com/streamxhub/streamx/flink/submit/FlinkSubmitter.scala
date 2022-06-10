@@ -55,15 +55,15 @@ object FlinkSubmitter extends Logger {
     })
   }
 
-  def stop(stopRequest: StopRequest): StopResponse = {
+  def cancel(stopRequest: CancelRequest): CancelResponse = {
     FlinkShimsProxy.proxy(stopRequest.flinkVersion, (classLoader: ClassLoader) => {
       val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
       val requestClass = classLoader.loadClass(STOP_REQUEST_CLASS_NAME)
-      val method = submitClass.getDeclaredMethod("stop", requestClass)
+      val method = submitClass.getDeclaredMethod("cancel", requestClass)
       method.setAccessible(true)
       val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, stopRequest))
       if (obj == null) null; else {
-        FlinkShimsProxy.getObject[StopResponse](this.getClass.getClassLoader, obj)
+        FlinkShimsProxy.getObject[CancelResponse](this.getClass.getClassLoader, obj)
       }
     })
   }

@@ -19,23 +19,6 @@
 
 package com.streamxhub.streamx.flink.submit.bean
 
-import com.streamxhub.streamx.common.conf.K8sFlinkConfig
-import com.streamxhub.streamx.common.domain.FlinkVersion
-import com.streamxhub.streamx.common.enums.ExecutionMode
-
-import java.util.{Map => JavaMap}
-import javax.annotation.Nullable
-
-case class StopRequest(flinkVersion: FlinkVersion,
-                       executionMode: ExecutionMode,
-                       clusterId: String,
-                       jobId: String,
-                       withSavePoint: Boolean,
-                       withDrain: Boolean,
-                       customSavePointPath: String,
-                       kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
-                       @Nullable dynamicOption: String,
-                       @Nullable extraParameter: JavaMap[String, Any]
-                      ) {
+case class CancelResponse(savePointDir: String) {
 
 }

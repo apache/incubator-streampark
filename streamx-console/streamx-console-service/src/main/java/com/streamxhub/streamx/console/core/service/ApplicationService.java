@@ -45,7 +45,7 @@ public interface ApplicationService extends IService<Application> {
 
     void starting(Application app);
 
-    boolean start(Application app, boolean auto) throws Exception;
+    void start(Application app, boolean auto) throws Exception;
 
     void restart(Application application) throws Exception;
 

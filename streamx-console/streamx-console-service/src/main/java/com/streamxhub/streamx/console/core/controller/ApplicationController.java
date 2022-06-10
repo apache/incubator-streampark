@@ -192,7 +192,8 @@ public class ApplicationController {
      * @param app
      * @return
      */
-    public RestResponse forcedStop(Application app) {
+    @PostMapping("stop")
+    public RestResponse stop(Application app) {
         applicationService.forcedStop(app);
         return RestResponse.create();
     }

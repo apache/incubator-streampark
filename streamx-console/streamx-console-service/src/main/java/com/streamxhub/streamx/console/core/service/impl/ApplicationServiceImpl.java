@@ -31,6 +31,7 @@ import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.HdfsOperator;
+import com.streamxhub.streamx.common.util.CompletableFutureUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
 import com.streamxhub.streamx.common.util.FlinkUtils;
@@ -39,7 +40,6 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.util.CompletableFutureTimeout;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
@@ -84,9 +84,9 @@ import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildResult;
 import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse;
 import com.streamxhub.streamx.flink.submit.FlinkSubmitter;
+import com.streamxhub.streamx.flink.submit.bean.CancelRequest;
+import com.streamxhub.streamx.flink.submit.bean.CancelResponse;
 import com.streamxhub.streamx.flink.submit.bean.KubernetesSubmitParam;
-import com.streamxhub.streamx.flink.submit.bean.StopRequest;
-import com.streamxhub.streamx.flink.submit.bean.StopResponse;
 import com.streamxhub.streamx.flink.submit.bean.SubmitRequest;
 import com.streamxhub.streamx.flink.submit.bean.SubmitResponse;
 
@@ -120,6 +120,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -129,7 +130,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 
 /**
  * @author benjobs
@@ -205,9 +205,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         this.baseMapper.resetOptionState();
     }
 
-    private volatile Map<Long, CompletableFuture> startFutureMap = new HashMap<>();
+    private volatile Map<Long, CompletableFuture> startFutureMap = new ConcurrentHashMap<>();
 
-    private volatile Map<Long, CompletableFuture> cancelFutureMap = new HashMap<>();
+    private volatile Map<Long, CompletableFuture> cancelFutureMap = new ConcurrentHashMap<>();
 
     @Override
     public Map<String, Serializable> dashboard() {
@@ -389,7 +389,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             } else {
                 FlinkTrackingTask.stopTracking(paramApp.getId());
             }
-
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -424,12 +423,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             log.error(ExceptionUtils.stringifyException(e));
             throw e;
         }
-    }
-
-    @RefreshCache
-    private void updateState(Application application, FlinkAppState state) {
-        application.setState(state.getValue());
-        updateById(application);
     }
 
     private void removeApp(Application application) {
@@ -785,32 +778,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return build;
     }
 
-    @RefreshCache
     @Override
     public void forcedStop(Application app) {
-        Application application = getById(app);
-        CompletableFuture future = startFutureMap.remove(app.getId());
-        if (future != null) {
+        CompletableFuture future;
+        if ((future = startFutureMap.remove(app.getId())) != null) {
             future.cancel(true);
         }
-
-        future = cancelFutureMap.remove(app.getId());
-        if (future != null) {
+        if ((future = cancelFutureMap.remove(app.getId())) != null) {
             future.cancel(true);
-        }
-
-        application.setOptionState(OptionState.NONE.getValue());
-        application.setState(FlinkAppState.CANCELED.getValue());
-        updateById(application);
-        savePointService.obsolete(application.getId());
-
-        // retracking flink job on kubernetes and logging exception
-        if (isKubernetesApp(application)) {
-            TrkId trkid = toTrkId(application);
-            k8sFlinkTrkMonitor.unTrackingJob(trkid);
-            k8sFlinkTrkMonitor.trackingJob(trkid);
-        } else {
-            FlinkTrackingTask.stopTracking(application.getId());
         }
     }
 
@@ -978,7 +953,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        StopRequest stopInfo = new StopRequest(
+        CancelRequest stopInfo = new CancelRequest(
             flinkEnv.getFlinkVersion(),
             ExecutionMode.of(application.getExecutionMode()),
             application.getAppId(),
@@ -991,60 +966,67 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             extraParameter
         );
 
-        CompletableFuture<StopResponse> future = CompletableFuture.supplyAsync(() -> FlinkSubmitter.stop(stopInfo), executorService);
+        CompletableFuture<CancelResponse> cancelFuture = CompletableFuture.supplyAsync(() -> FlinkSubmitter.cancel(stopInfo), executorService);
 
-        cancelFutureMap.put(application.getId(), future);
+        cancelFutureMap.put(application.getId(), cancelFuture);
 
-        future
-            .acceptEither(
-                CompletableFutureTimeout.timeoutAfter(10L, TimeUnit.MINUTES),
-                stopResponse -> {
-                    if (stopResponse != null && stopResponse.savePointDir() != null) {
-                        String savePointDir = stopResponse.savePointDir();
-                        log.info("savePoint path:{}", savePointDir);
-                        SavePoint savePoint = new SavePoint();
-                        Date now = new Date();
-                        savePoint.setPath(savePointDir);
-                        savePoint.setAppId(application.getId());
-                        savePoint.setLatest(true);
-                        savePoint.setType(CheckPointType.SAVEPOINT.get());
-                        savePoint.setTriggerTime(now);
-                        savePoint.setCreateTime(now);
-                        savePointService.save(savePoint);
-                    }
-                })
-            .exceptionally(e -> {
-                log.error("stop flink job fail. {}", e);
-                application.setOptionState(OptionState.NONE.getValue());
-                application.setState(FlinkAppState.FAILED.getValue());
-                updateById(application);
-
-                // 保持savepoint失败.则将之前的统统设置为过期
-                if (appParam.getSavePointed()) {
-                    savePointService.obsolete(application.getId());
+        CompletableFutureUtils.runTimeout(
+            cancelFuture,
+            10L,
+            TimeUnit.MINUTES,
+            cancelResponse -> {
+                if (cancelResponse != null && cancelResponse.savePointDir() != null) {
+                    String savePointDir = cancelResponse.savePointDir();
+                    log.info("savePoint path:{}", savePointDir);
+                    SavePoint savePoint = new SavePoint();
+                    Date now = new Date();
+                    savePoint.setPath(savePointDir);
+                    savePoint.setAppId(application.getId());
+                    savePoint.setLatest(true);
+                    savePoint.setType(CheckPointType.SAVEPOINT.get());
+                    savePoint.setTriggerTime(now);
+                    savePoint.setCreateTime(now);
+                    savePointService.save(savePoint);
                 }
-
-                // retracking flink job on kubernetes and logging exception
-                if (isKubernetesApp(application)) {
-                    TrkId trkid = toTrkId(application);
-                    k8sFlinkTrkMonitor.unTrackingJob(trkid);
-                    k8sFlinkTrkMonitor.trackingJob(trkid);
+            },
+            e -> {
+                if (e.getCause() instanceof CancellationException) {
+                    updateToStoped(application);
                 } else {
-                    FlinkTrackingTask.stopTracking(application.getId());
-                }
+                    log.error("stop flink job fail. {}", e);
+                    application.setOptionState(OptionState.NONE.getValue());
+                    application.setState(FlinkAppState.FAILED.getValue());
+                    updateById(application);
 
-                ApplicationLog log = new ApplicationLog();
-                log.setAppId(application.getId());
-                log.setYarnAppId(application.getClusterId());
-                log.setOptionTime(new Date());
-                String exception = ExceptionUtils.stringifyException(e);
-                log.setException(exception);
-                log.setSuccess(false);
-                applicationLogService.save(log);
-                return null;
-            })
-            .whenComplete((t, e) -> cancelFutureMap.remove(application.getId()))
-            .get();
+                    // 保持savepoint失败.则将之前的统统设置为过期
+                    if (appParam.getSavePointed()) {
+                        savePointService.obsolete(application.getId());
+                    }
+
+                    // retracking flink job on kubernetes and logging exception
+                    if (isKubernetesApp(application)) {
+                        TrkId trkid = toTrkId(application);
+                        k8sFlinkTrkMonitor.unTrackingJob(trkid);
+                        k8sFlinkTrkMonitor.trackingJob(trkid);
+                    } else {
+                        FlinkTrackingTask.stopTracking(application.getId());
+                    }
+
+                    ApplicationLog log = new ApplicationLog();
+                    log.setAppId(application.getId());
+                    log.setYarnAppId(application.getClusterId());
+                    log.setOptionTime(new Date());
+                    String exception = ExceptionUtils.stringifyException(e);
+                    log.setException(exception);
+                    log.setSuccess(false);
+                    applicationLogService.save(log);
+                }
+            }
+        ).whenComplete((t, e) -> {
+            cancelFuture.cancel(true);
+            cancelFutureMap.remove(application.getId());
+        });
+
     }
 
     @Override
@@ -1069,7 +1051,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     @RefreshCache
-    public boolean start(Application appParam, boolean auto) throws Exception {
+    public void start(Application appParam, boolean auto) throws Exception {
 
         final Application application = getById(appParam.getId());
 
@@ -1080,7 +1062,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setRestartCount(0);
         } else {
             if (!application.isNeedRestartOnFailed()) {
-                return false;
+                return;
             }
             application.setRestartCount(application.getRestartCount() + 1);
             application.setSavePointed(true);
@@ -1221,66 +1203,86 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         startFutureMap.put(application.getId(), future);
 
-        return future
-            .applyToEither(
-                CompletableFutureTimeout.timeoutAfter(2L, TimeUnit.MINUTES),
-                submitResponse -> {
-                    if (submitResponse.flinkConfig() != null) {
-                        String jmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_JM_PROCESS_MEMORY());
-                        if (jmMemory != null) {
-                            application.setJmMemory(FlinkMemorySize.parse(jmMemory).getMebiBytes());
-                        }
-                        String tmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_TM_PROCESS_MEMORY());
-                        if (tmMemory != null) {
-                            application.setTmMemory(FlinkMemorySize.parse(tmMemory).getMebiBytes());
-                        }
+        CompletableFutureUtils.runTimeout(
+            future,
+            2L,
+            TimeUnit.MINUTES,
+            submitResponse -> {
+                if (submitResponse.flinkConfig() != null) {
+                    String jmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_JM_PROCESS_MEMORY());
+                    if (jmMemory != null) {
+                        application.setJmMemory(FlinkMemorySize.parse(jmMemory).getMebiBytes());
                     }
-                    application.setAppId(submitResponse.clusterId());
-                    if (StringUtils.isNoneEmpty(submitResponse.jobId())) {
-                        application.setJobId(submitResponse.jobId());
+                    String tmMemory = submitResponse.flinkConfig().get(ConfigConst.KEY_FLINK_TM_PROCESS_MEMORY());
+                    if (tmMemory != null) {
+                        application.setTmMemory(FlinkMemorySize.parse(tmMemory).getMebiBytes());
                     }
-                    application.setFlameGraph(appParam.getFlameGraph());
-                    applicationLog.setYarnAppId(submitResponse.clusterId());
-                    application.setStartTime(new Date());
-                    application.setEndTime(null);
-                    if (isKubernetesApp(application)) {
-                        application.setLaunch(LaunchState.DONE.get());
-                    }
-                    updateById(application);
-
-                    //2) 启动完成将任务加入到监控中...
-                    if (isKubernetesApp(application)) {
-                        k8sFlinkTrkMonitor.trackingJob(toTrkId(application));
-                    } else {
-                        FlinkTrackingTask.setOptionState(appParam.getId(), OptionState.STARTING);
-                        FlinkTrackingTask.addTracking(application);
-                    }
-
-                    applicationLog.setSuccess(true);
-                    applicationLogService.save(applicationLog);
-                    //将savepoint设置为过期
-                    savePointService.obsolete(application.getId());
-                    return true;
                 }
-            ).exceptionally(e -> {
-                String exception = ExceptionUtils.stringifyException(e);
-                applicationLog.setException(exception);
-                applicationLog.setSuccess(false);
-                applicationLogService.save(applicationLog);
-                Application app = getById(appParam.getId());
-                app.setState(FlinkAppState.FAILED.getValue());
-                app.setOptionState(OptionState.NONE.getValue());
-                updateById(app);
-                if (isKubernetesApp(app)) {
-                    k8sFlinkTrkMonitor.unTrackingJob(toTrkId(app));
+                application.setAppId(submitResponse.clusterId());
+                if (StringUtils.isNoneEmpty(submitResponse.jobId())) {
+                    application.setJobId(submitResponse.jobId());
+                }
+                application.setFlameGraph(appParam.getFlameGraph());
+                applicationLog.setYarnAppId(submitResponse.clusterId());
+                application.setStartTime(new Date());
+                application.setEndTime(null);
+                if (isKubernetesApp(application)) {
+                    application.setLaunch(LaunchState.DONE.get());
+                }
+                updateById(application);
+
+                //2) 启动完成将任务加入到监控中...
+                if (isKubernetesApp(application)) {
+                    k8sFlinkTrkMonitor.trackingJob(toTrkId(application));
                 } else {
-                    FlinkTrackingTask.stopTracking(appParam.getId());
+                    FlinkTrackingTask.setOptionState(appParam.getId(), OptionState.STARTING);
+                    FlinkTrackingTask.addTracking(application);
                 }
-                return false;
-            })
-            .whenComplete((t, e) -> startFutureMap.remove(application.getId()))
-            .get();
 
+                applicationLog.setSuccess(true);
+                applicationLogService.save(applicationLog);
+                //将savepoint设置为过期
+                savePointService.obsolete(application.getId());
+            }, e -> {
+                if (e.getCause() instanceof CancellationException) {
+                    updateToStoped(application);
+                } else {
+                    String exception = ExceptionUtils.stringifyException(e);
+                    applicationLog.setException(exception);
+                    applicationLog.setSuccess(false);
+                    applicationLogService.save(applicationLog);
+                    Application app = getById(appParam.getId());
+                    app.setState(FlinkAppState.FAILED.getValue());
+                    app.setOptionState(OptionState.NONE.getValue());
+                    updateById(app);
+                    if (isKubernetesApp(app)) {
+                        k8sFlinkTrkMonitor.unTrackingJob(toTrkId(app));
+                    } else {
+                        FlinkTrackingTask.stopTracking(appParam.getId());
+                    }
+                }
+            }
+        ).whenComplete((t, e) -> {
+            future.cancel(true);
+            startFutureMap.remove(application.getId());
+        });
+
+    }
+
+    private void updateToStoped(Application app) {
+        Application application = getById(app);
+        application.setOptionState(OptionState.NONE.getValue());
+        application.setState(FlinkAppState.CANCELED.getValue());
+        updateById(application);
+        savePointService.obsolete(application.getId());
+        // retracking flink job on kubernetes and logging exception
+        if (isKubernetesApp(application)) {
+            TrkId trkid = toTrkId(application);
+            k8sFlinkTrkMonitor.unTrackingJob(trkid);
+            k8sFlinkTrkMonitor.trackingJob(trkid);
+        } else {
+            FlinkTrackingTask.stopTracking(application.getId());
+        }
     }
 
     private Boolean checkJobName(String jobName) {

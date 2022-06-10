@@ -20,7 +20,6 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import java.io.File
-import java.util
 
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.{Logger, Utils}
@@ -44,8 +43,8 @@ import scala.language.postfixOps
 import scala.util.Try
 
 /**
-  * kubernetes native session mode submit
-  */
+ * kubernetes native session mode submit
+ */
 object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Logger {
 
   @throws[Exception]
@@ -59,8 +58,8 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   }
 
   /**
-    * Submit flink session job via rest api.
-    */
+   * Submit flink session job via rest api.
+   */
   @throws[Exception] def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, fatJar: File): SubmitResponse = {
     Try {
       // get jm rest url of flink session cluster
@@ -81,8 +80,8 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   }
 
   /**
-    * Submit flink session job with building JobGraph via ClusterClient api.
-    */
+   * Submit flink session job with building JobGraph via ClusterClient api.
+   */
   @throws[Exception] def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration, jarFile: File): SubmitResponse = {
     // retrieve k8s cluster and submit flink job on session mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
@@ -115,9 +114,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     }
   }
 
-  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
+  override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
     flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
-    super.doStop(stopRequest, flinkConfig)
+    super.doCancel(cancelRequest, flinkConfig)
   }
 
   def deploy(deployRequest: DeployRequest): DeployResponse = {
@@ -141,12 +140,12 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     var client: ClusterClient[String] = null
     var kubeClient: FlinkKubeClient = null
     try {
-      val flinkConfig = extractConfiguration(deployRequest.flinkVersion.flinkHome,
-        null,
-        deployRequest.flameGraph,
+      val flinkConfig = extractConfiguration(
+        deployRequest.flinkVersion.flinkHome,
         deployRequest.dynamicOption,
         deployRequest.extraParameter,
         deployRequest.resolveOrder)
+
       flinkConfig
         .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
         .safeSet(KubernetesConfigOptions.NAMESPACE, deployRequest.k8sDeployParam.kubernetesNamespace)
