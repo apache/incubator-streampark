@@ -86,9 +86,9 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     }
   }
 
-  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
+  override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
     flinkConfig.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
-    super.doStop(stopRequest, flinkConfig)
+    super.doCancel(cancelRequest, flinkConfig)
   }
 
 

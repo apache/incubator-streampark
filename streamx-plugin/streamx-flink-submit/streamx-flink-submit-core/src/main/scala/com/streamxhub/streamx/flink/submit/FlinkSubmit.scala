@@ -38,16 +38,16 @@ object FlinkSubmit {
     }
   }
 
-  def stop(stopInfo: StopRequest): StopResponse = {
-    stopInfo.executionMode match {
-      case ExecutionMode.LOCAL => LocalSubmit.stop(stopInfo)
-      case ExecutionMode.REMOTE => RemoteSubmit.stop(stopInfo)
-      case ExecutionMode.YARN_APPLICATION => YarnApplicationSubmit.stop(stopInfo)
-      case ExecutionMode.YARN_SESSION => YarnSessionSubmit.stop(stopInfo)
-      case ExecutionMode.YARN_PER_JOB | ExecutionMode.YARN_SESSION => YarnPerJobSubmit.stop(stopInfo)
-      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.stop(stopInfo)
-      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationSubmit.stop(stopInfo)
-      case _ => throw new UnsupportedOperationException(s"Unsupported ${stopInfo.executionMode} Submit ")
+  def cancel(cancelRequest: CancelRequest): CancelResponse = {
+    cancelRequest.executionMode match {
+      case ExecutionMode.LOCAL => LocalSubmit.cancel(cancelRequest)
+      case ExecutionMode.REMOTE => RemoteSubmit.cancel(cancelRequest)
+      case ExecutionMode.YARN_APPLICATION => YarnApplicationSubmit.cancel(cancelRequest)
+      case ExecutionMode.YARN_SESSION => YarnSessionSubmit.cancel(cancelRequest)
+      case ExecutionMode.YARN_PER_JOB | ExecutionMode.YARN_SESSION => YarnPerJobSubmit.cancel(cancelRequest)
+      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.cancel(cancelRequest)
+      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationSubmit.cancel(cancelRequest)
+      case _ => throw new UnsupportedOperationException(s"Unsupported ${cancelRequest.executionMode} Submit ")
     }
   }
 

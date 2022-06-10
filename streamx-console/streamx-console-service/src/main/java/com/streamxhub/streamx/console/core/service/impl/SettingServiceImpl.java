@@ -89,7 +89,6 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             settings.get(setting.getKey()).setValue(value);
             return true;
         } catch (Exception e) {
-            log.error("update setting failed , msg : {}", e.getMessage());
             return false;
         }
     }

@@ -29,10 +29,9 @@ import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.util.HadoopUtils
 import org.apache.flink.yarn.YarnClusterDescriptor
-import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnConfigOptionsInternal, YarnDeploymentTarget}
+import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.security.UserGroupInformation
-import org.apache.hadoop.yarn.api.records.{ApplicationId, ApplicationReport, FinalApplicationStatus}
-import org.apache.hadoop.yarn.client.api.YarnClient
+import org.apache.hadoop.yarn.api.records.{ApplicationId, FinalApplicationStatus}
 import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException
 import org.apache.hadoop.yarn.util.ConverterUtils
 
@@ -41,14 +40,14 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Submit Job to YARN Session Cluster
-  */
+ * Submit Job to YARN Session Cluster
+ */
 object YarnSessionSubmit extends YarnSubmitTrait {
 
   /**
-    * @param submitRequest
-    * @param flinkConfig
-    */
+   * @param submitRequest
+   * @param flinkConfig
+   */
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
@@ -63,9 +62,9 @@ object YarnSessionSubmit extends YarnSubmitTrait {
   }
 
   /**
-    * @param deployRequest
-    * @param flinkConfig
-    */
+   * @param deployRequest
+   * @param flinkConfig
+   */
   def setConfig(deployRequest: DeployRequest, flinkConfig: Configuration): Unit = {
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(deployRequest.flinkVersion.flinkHome)
     val currentUser = UserGroupInformation.getCurrentUser
@@ -139,8 +138,8 @@ object YarnSessionSubmit extends YarnSubmitTrait {
     }
   }
 
-  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
-    flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, stopRequest.extraParameter.get(KEY_YARN_APP_ID).toString)
+  override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
+    flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.extraParameter.get(KEY_YARN_APP_ID).toString)
     flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     logInfo(
       s"""
@@ -155,9 +154,9 @@ object YarnSessionSubmit extends YarnSubmitTrait {
       val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
       client = clusterDescriptor.retrieve(yarnClusterDescriptor._1).getClusterClient
-      val jobID = JobID.fromHexString(stopRequest.jobId)
-      val actionResult = cancelJob(stopRequest, jobID, client)
-      StopResponse(actionResult)
+      val jobID = JobID.fromHexString(cancelRequest.jobId)
+      val actionResult = cancelJob(cancelRequest, jobID, client)
+      CancelResponse(actionResult)
     } catch {
       case e: Exception => logError(s"stop flink yarn session job fail")
         e.printStackTrace()
@@ -184,8 +183,6 @@ object YarnSessionSubmit extends YarnSubmitTrait {
     var client: ClusterClient[ApplicationId] = null
     try {
       val flinkConfig = extractConfiguration(deployRequest.flinkVersion.flinkHome,
-        null,
-        deployRequest.flameGraph,
         deployRequest.dynamicOption,
         deployRequest.extraParameter,
         deployRequest.resolveOrder)

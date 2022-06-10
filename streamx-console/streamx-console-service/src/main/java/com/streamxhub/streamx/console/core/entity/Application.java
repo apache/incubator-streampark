@@ -229,6 +229,9 @@ public class Application implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date optionTime;
+
     /**
      * The exposed type of the rest service of K8s(kubernetes.rest-service.exposed.type)
      */
@@ -290,6 +293,7 @@ public class Application implements Serializable {
      * refer to {@link com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline}
      */
     private transient Integer buildStatus;
+
     private transient AppControl appControl;
 
     public void setK8sNamespace(String k8sNamespace) {

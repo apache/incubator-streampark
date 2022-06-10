@@ -166,6 +166,20 @@ public class ApplicationController {
     }
 
     @ApiAccess
+    @ApiOperation(value = "App Cancel", notes = "App Cancel", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "id", value = "app Id", required = true, paramType = "form", dataType = "Long"),
+        @ApiImplicitParam(name = "savePointed", value = "trigger savePoint before taking stoping", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
+        @ApiImplicitParam(name = "savePoint", value = "savepoint path", paramType = "form", dataType = "String", defaultValue = "hdfs:///tm/xxx"),
+        @ApiImplicitParam(name = "drain", value = "取消前发送最大 watermark", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false")})
+    @PostMapping("cancel")
+    @RequiresPermissions("app:cancel")
+    public RestResponse cancel(@ApiIgnore Application app) throws Exception {
+        applicationService.cancel(app);
+        return RestResponse.create();
+    }
+
+    @ApiAccess
     @PostMapping("clean")
     @RequiresPermissions("app:clean")
     public RestResponse clean(Application app) {
@@ -173,17 +187,15 @@ public class ApplicationController {
         return RestResponse.create().data(true);
     }
 
-    @ApiAccess
-    @ApiOperation(value = "App Cancel", notes = "App Cancel", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "id", value = "app Id", required = true, paramType = "form", dataType = "Long"),
-        @ApiImplicitParam(name = "savePointed", value = "trigger savePoint before taking stoping", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
-        @ApiImplicitParam(name = "savePoint", value = "savepoint path", required = false, paramType = "form", dataType = "String", defaultValue = "hdfs:///tm/xxx"),
-        @ApiImplicitParam(name = "drain", value = "取消前发送最大 watermark", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false")})
-    @PostMapping("cancel")
+    /**
+     * 强制停止.(正常启动或者停止一直在进行中)
+     * @param app
+     * @return
+     */
+    @PostMapping("forcedStop")
     @RequiresPermissions("app:cancel")
-    public RestResponse cancel(@ApiIgnore Application app) {
-        applicationService.cancel(app);
+    public RestResponse forcedStop(Application app) {
+        applicationService.forcedStop(app);
         return RestResponse.create();
     }
 

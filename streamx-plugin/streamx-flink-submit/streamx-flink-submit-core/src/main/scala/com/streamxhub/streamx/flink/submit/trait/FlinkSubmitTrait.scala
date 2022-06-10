@@ -120,28 +120,28 @@ trait FlinkSubmitTrait extends Logger {
 
   def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
 
-  @throws[Exception] def stop(stopRequest: StopRequest): StopResponse = {
+  @throws[Exception] def cancel(cancelRequest: CancelRequest): CancelResponse = {
     logInfo(
       s"""
-         |----------------------------------------- flink stop --------------------------------------
-         |     userFlinkHome  : ${stopRequest.flinkVersion.flinkHome}
-         |     flinkVersion   : ${stopRequest.flinkVersion.version}
-         |     withSavePoint  : ${stopRequest.withSavePoint}
-         |     withDrain      : ${stopRequest.withDrain}
-         |     k8sNamespace   : ${stopRequest.kubernetesNamespace}
-         |     appId          : ${stopRequest.clusterId}
-         |     jobId          : ${stopRequest.jobId}
+         |----------------------------------------- flink job cancel --------------------------------------
+         |     userFlinkHome  : ${cancelRequest.flinkVersion.flinkHome}
+         |     flinkVersion   : ${cancelRequest.flinkVersion.version}
+         |     withSavePoint  : ${cancelRequest.withSavePoint}
+         |     withDrain      : ${cancelRequest.withDrain}
+         |     k8sNamespace   : ${cancelRequest.kubernetesNamespace}
+         |     appId          : ${cancelRequest.clusterId}
+         |     jobId          : ${cancelRequest.jobId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
     val flinkConf = new Configuration()
-    doStop(stopRequest, flinkConf)
+    doCancel(cancelRequest, flinkConf)
   }
 
   @throws[Exception]
   def doSubmit(submitRequest: SubmitRequest, flinkConf: Configuration): SubmitResponse
 
   @throws[Exception]
-  def doStop(stopRequest: StopRequest, flinkConf: Configuration): StopResponse
+  def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse
 
   def trySubmit(submitRequest: SubmitRequest,
                 flinkConfig: Configuration,
@@ -323,74 +323,52 @@ trait FlinkSubmitTrait extends Logger {
   }
 
   private[submit] def extractConfiguration(flinkHome: String,
-                                           savePoint: String,
-                                           flameGraph: JavaMap[String, java.io.Serializable],
                                            dynamicOption: Array[String],
                                            extraParameter: JavaMap[String, Any],
-                                           resolveOrder: ResolveOrder,
-                                           otherParam: (String, String)*): Configuration = {
+                                           resolveOrder: ResolveOrder): Configuration = {
     val commandLine = {
-        val customCommandLines = getCustomCommandLines(flinkHome)
-        //merge options....
-        val customCommandLineOptions = new Options
-        for (customCommandLine <- customCommandLines) {
-          customCommandLine.addGeneralOptions(customCommandLineOptions)
-          customCommandLine.addRunOptions(customCommandLineOptions)
-        }
-        val commandLineOptions = FlinkRunOption.mergeOptions(CliFrontendParser.getRunCommandOptions, customCommandLineOptions)
+      val customCommandLines = getCustomCommandLines(flinkHome)
 
-        //read and verify user config...
-        val cliArgs = {
-          val optionMap = new mutable.HashMap[String, Any]()
-          //fromSavePoint
-          if (savePoint != null) {
-            optionMap += s"-${FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt}" -> savePoint
+      val customCommandLineOptions = new Options
+      for (customCommandLine <- customCommandLines) {
+        customCommandLine.addGeneralOptions(customCommandLineOptions)
+        customCommandLine.addRunOptions(customCommandLineOptions)
+      }
+      val commandLineOptions = FlinkRunOption.mergeOptions(CliFrontendParser.getRunCommandOptions, customCommandLineOptions)
+
+      //read and verify user config...
+      val cliArgs = {
+        val optionMap = new mutable.HashMap[String, Any]()
+        Seq("-e", "--executor", "-t", "--target").foreach(optionMap.remove)
+        val array = new ArrayBuffer[String]()
+        optionMap.foreach(x => {
+          array += x._1
+          x._2 match {
+            case v: String => array += v
+            case _ =>
           }
+        })
 
-          Seq("-e", "--executor", "-t", "--target").foreach(optionMap.remove)
-          otherParam.foreach(optionMap +=)
-
-          val array = new ArrayBuffer[String]()
-          optionMap.foreach(x => {
-            array += x._1
-            x._2 match {
-              case v: String => array += v
-              case _ =>
-            }
-          })
-
-          //-jvm profile support
-          if (Utils.notEmpty(flameGraph)) {
-            val buffer = new StringBuffer()
-            flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
-            val param = buffer.toString.dropRight(1)
-
-            /**
-              * 不要问我javaagent路径为什么这么写,魔鬼在细节中.
-              */
-            array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/$jvmProfilerJar=$param"
-          }
-
-          //页面定义的参数优先级大于app配置文件,属性参数...
-          if (MapUtils.isNotEmpty(extraParameter)) {
-            extraParameter.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
-          }
-
-          //-D 其他动态参数配置....
-          if (dynamicOption != null && dynamicOption.nonEmpty) {
-            dynamicOption
-              .filter(!_.matches("(^-D|^)classloader.resolve-order.*"))
-              .foreach(x => array += x.replaceFirst("^-D|^", "-D"))
-          }
-
-          array += s"-Dclassloader.resolve-order=${resolveOrder.getName}"
-
-          array.toArray
+        //页面定义的参数优先级大于app配置文件,属性参数...
+        if (MapUtils.isNotEmpty(extraParameter)) {
+          extraParameter.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
         }
 
-        logger.info(s"cliArgs: ${cliArgs.mkString(" ")}")
+        //-D 其他动态参数配置....
+        if (dynamicOption != null && dynamicOption.nonEmpty) {
+          dynamicOption
+            .filter(!_.matches("(^-D|^)classloader.resolve-order.*"))
+            .foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+        }
 
-        FlinkRunOption.parse(commandLineOptions, cliArgs, true)
+        array += s"-Dclassloader.resolve-order=${resolveOrder.getName}"
+
+        array.toArray
+      }
+
+      logger.info(s"cliArgs: ${cliArgs.mkString(" ")}")
+
+      FlinkRunOption.parse(commandLineOptions, cliArgs, true)
     }
     val activeCommandLine = validateAndGetActiveCommandLine(getCustomCommandLines(flinkHome), commandLine)
     val flinkConfig = applyConfiguration(flinkHome, activeCommandLine, commandLine)
@@ -415,78 +393,6 @@ trait FlinkSubmitTrait extends Logger {
     })
     configuration.addAll(customConfiguration)
     configuration
-  }
-
-  private[this] def getEffectiveCommandLine(flinkHome: String,
-                                            savePoint: String,
-                                            flameGraph: JavaMap[String, java.io.Serializable],
-                                            dynamicOption: Array[String],
-                                            extraParameter: JavaMap[String, Any],
-                                            resolveOrder: ResolveOrder,
-                                            otherParam: (String, String)
-                                           ): CommandLine = {
-
-    val customCommandLines = getCustomCommandLines(flinkHome)
-    //merge options....
-    val customCommandLineOptions = new Options
-    for (customCommandLine <- customCommandLines) {
-      customCommandLine.addGeneralOptions(customCommandLineOptions)
-      customCommandLine.addRunOptions(customCommandLineOptions)
-    }
-    val commandLineOptions = FlinkRunOption.mergeOptions(CliFrontendParser.getRunCommandOptions, customCommandLineOptions)
-
-    //read and verify user config...
-    val cliArgs = {
-      val optionMap = new mutable.HashMap[String, Any]()
-      //fromSavePoint
-      if (savePoint != null) {
-        optionMap += s"-${FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt}" -> savePoint
-      }
-
-      Seq("-e", "--executor", "-t", "--target").foreach(optionMap.remove)
-      optionMap +=otherParam
-
-      val array = new ArrayBuffer[String]()
-      optionMap.foreach(x => {
-        array += x._1
-        x._2 match {
-          case v: String => array += v
-          case _ =>
-        }
-      })
-
-      //-jvm profile support
-      if (Utils.notEmpty(flameGraph)) {
-        val buffer = new StringBuffer()
-        flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
-        val param = buffer.toString.dropRight(1)
-
-        /**
-          * 不要问我javaagent路径为什么这么写,魔鬼在细节中.
-          */
-        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/$jvmProfilerJar=$param"
-      }
-
-      //页面定义的参数优先级大于app配置文件,属性参数...
-      if (MapUtils.isNotEmpty(extraParameter)) {
-        extraParameter.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
-      }
-
-      //-D 其他动态参数配置....
-      if (dynamicOption != null && dynamicOption.nonEmpty) {
-        dynamicOption
-          .filter(!_.matches("(^-D|^)classloader.resolve-order.*"))
-          .foreach(x => array += x.replaceFirst("^-D|^", "-D"))
-      }
-
-      array += s"-Dclassloader.resolve-order=${resolveOrder.getName}"
-
-      array.toArray
-    }
-
-    logger.info(s"cliArgs: ${cliArgs.mkString(" ")}")
-
-    FlinkRunOption.parse(commandLineOptions, cliArgs, true)
   }
 
   private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
@@ -555,39 +461,39 @@ trait FlinkSubmitTrait extends Logger {
     }
   }
 
-  private[submit] def cancelJob(stopRequest: StopRequest, jobID: JobID, client: ClusterClient[_]): String = {
+  private[submit] def cancelJob(cancelRequest: CancelRequest, jobID: JobID, client: ClusterClient[_]): String = {
     val savePointDir = {
-      if (!stopRequest.withSavePoint) null; else {
-        if (StringUtils.isNotEmpty(stopRequest.customSavePointPath)) {
-          stopRequest.customSavePointPath
+      if (!cancelRequest.withSavePoint) null; else {
+        if (StringUtils.isNotEmpty(cancelRequest.customSavePointPath)) {
+          cancelRequest.customSavePointPath
         } else {
           val configDir = getOptionFromDefaultFlinkConfig[String](
-            stopRequest.flinkVersion.flinkHome,
+            cancelRequest.flinkVersion.flinkHome,
             ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
               .stringType()
               .defaultValue {
-                if (stopRequest.executionMode == ExecutionMode.YARN_APPLICATION) {
+                if (cancelRequest.executionMode == ExecutionMode.YARN_APPLICATION) {
                   Workspace.remote.APP_SAVEPOINTS
                 } else null
               }
           )
           if (StringUtils.isEmpty(configDir)) {
-            throw new FlinkException(s"[StreamX] executionMode: ${stopRequest.executionMode.getName}, savePoint path is null or invalid.")
+            throw new FlinkException(s"[StreamX] executionMode: ${cancelRequest.executionMode.getName}, savePoint path is null or invalid.")
           } else configDir
         }
       }
     }
 
-    val clientTimeout = getOptionFromDefaultFlinkConfig(stopRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
+    val clientTimeout = getOptionFromDefaultFlinkConfig(cancelRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
 
     val clientWrapper = new ClusterClientWrapper(client)
 
-    (Try(stopRequest.withSavePoint).getOrElse(false), Try(stopRequest.withDrain).getOrElse(false)) match {
+    (Try(cancelRequest.withSavePoint).getOrElse(false), Try(cancelRequest.withDrain).getOrElse(false)) match {
       case (false, false) =>
         clientWrapper.cancel(jobID).get()
         null
       case (true, false) => clientWrapper.cancelWithSavepoint(jobID, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
-      case (_, _) => clientWrapper.stopWithSavepoint(jobID, stopRequest.withDrain, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      case (_, _) => clientWrapper.stopWithSavepoint(jobID, cancelRequest.withDrain, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
     }
   }
 
