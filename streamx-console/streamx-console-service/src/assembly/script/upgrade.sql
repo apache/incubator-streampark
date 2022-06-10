@@ -282,3 +282,9 @@ COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
 -- ------------------------------------- version: 1.2.3 END ---------------------------------------
+
+-- ------------------------------------- version: 1.2.4 START ---------------------------------------
+
+ALTER TABLE `t_flink_app` ADD COLUMN `OPTION_TIME` datetime DEFAULT NULL AFTER `CREATE_TIME`;
+
+-- ------------------------------------- version: 1.2.4 END ---------------------------------------

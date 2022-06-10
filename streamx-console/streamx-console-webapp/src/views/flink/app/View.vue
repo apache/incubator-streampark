@@ -470,7 +470,7 @@
             </a-button>
           </a-tooltip>
 
-          <a-tooltip title="Stop Application">
+          <a-tooltip title="Cancel Application">
             <a-button
               v-show="record.state === 5 && record['optionState'] === 0"
               v-permit="'app:cancel'"
@@ -533,6 +533,19 @@
               </a-button>
             </a-popconfirm>
           </template>
+
+          <a-tooltip title="Forced Stop Application">
+            <a-button
+              type="danger"
+              shape="circle"
+              size="small"
+              v-show="handleCanStop(record)"
+              v-permit="'app:cancel'"
+              @click.native="handleForcedStop(record)"
+              class="control-button">
+              <a-icon type="pause-circle"/>
+            </a-button>
+          </a-tooltip>
 
         </template>
 
@@ -1050,6 +1063,7 @@ import {
   clean,
   dashboard,
   downLog,
+  forcedStop,
   list,
   mapping,
   remove,
@@ -1763,6 +1777,71 @@ export default {
           },
           {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
       )
+    },
+
+    handleCanStop(app) {
+      const optionTime = new Date(app['optionTime']).getTime()
+      const nowTime = new Date().getTime()
+      if (nowTime - optionTime >= 20 * 1000) {
+        const state = app['optionState']
+        if (state === 0) {
+          return app.state === 3 || app.state === 4 || app.state === 8 || false
+        }
+        return true
+      }
+      return false
+    },
+
+    handleForcedStop(app) {
+      let option = 'starting'
+      const optionState = app['optionState']
+      if (optionState === 0) {
+        switch (app.state) {
+          case 3:
+            option = 'starting'
+            break
+          case 4:
+            option = 'restarting'
+            break
+          case 8:
+            option = 'cancelling'
+            break
+        }
+      } else {
+        switch (optionState) {
+          case 1:
+            option = 'launching'
+            break
+          case 2:
+            option = 'cancelling'
+            break
+          case 3:
+            option = 'starting'
+            break
+          case 4:
+            option = 'savepointing'
+            break
+        }
+      }
+
+      this.$swal.fire({
+        title: 'Are you sure?',
+        text: `current job is ${option}, are you sure forced stop?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, forced stop!',
+        denyButtonText: `No, cancel`,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.$swal.fire('forced stoping', '', 'success')
+          forcedStop({
+            id: app.id
+          }).then((resp) => {
+          })
+        }
+      })
     },
 
     handleCanDelete(app) {

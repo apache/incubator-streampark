@@ -780,12 +780,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public void forcedStop(Application app) {
-        CompletableFuture future;
-        if ((future = startFutureMap.remove(app.getId())) != null) {
-            future.cancel(true);
+        CompletableFuture startFuture = startFutureMap.remove(app.getId());
+        CompletableFuture cancelFuture = cancelFutureMap.remove(app.getId());
+        if (startFuture != null) {
+            startFuture.cancel(true);
         }
-        if ((future = cancelFutureMap.remove(app.getId())) != null) {
-            future.cancel(true);
+        if (cancelFuture != null) {
+            cancelFuture.cancel(true);
+        }
+        if (startFuture == null && cancelFuture == null) {
+            this.updateToStoped(app);
         }
     }
 
@@ -896,6 +900,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         } else {
             application.setOptionState(OptionState.CANCELLING.getValue());
         }
+        application.setOptionTime(new Date());
         this.baseMapper.updateById(application);
         //此步骤可能会比较耗时,重新开启一个线程去执行
 
@@ -1045,6 +1050,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Application application = getById(appParam.getId());
         assert application != null;
         application.setState(FlinkAppState.STARTING.getValue());
+        application.setOptionTime(new Date());
         updateById(application);
     }
 
@@ -1273,6 +1279,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Application application = getById(app);
         application.setOptionState(OptionState.NONE.getValue());
         application.setState(FlinkAppState.CANCELED.getValue());
+        application.setOptionTime(new Date());
         updateById(application);
         savePointService.obsolete(application.getId());
         // retracking flink job on kubernetes and logging exception

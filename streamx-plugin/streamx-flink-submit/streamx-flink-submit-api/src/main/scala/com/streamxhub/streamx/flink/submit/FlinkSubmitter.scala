@@ -96,8 +96,7 @@ object FlinkSubmitter extends Logger {
    */
   @Nonnull def extractDynamicOption(dynamicOption: Array[String]): Map[String, String] = {
     dynamicOption match {
-      case x if Utils.isEmpty(x) =>
-        Map.empty
+      case x if Utils.isEmpty(x) => Map.empty
       case _ =>
         Try(dynamicOption
           .filter(_ != null)
