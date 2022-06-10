@@ -19,10 +19,15 @@
 
 package com.streamxhub.streamx.console.system.authentication;
 
+import com.streamxhub.streamx.console.base.util.WebUtils;
+import com.streamxhub.streamx.console.system.entity.AccessToken;
 import com.streamxhub.streamx.console.system.entity.User;
+import com.streamxhub.streamx.console.system.service.AccessTokenService;
 import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserService;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -47,6 +52,9 @@ public class ShiroRealm extends AuthorizingRealm {
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private AccessTokenService accessTokenService;
 
     @Override
     public boolean supports(AuthenticationToken token) {
@@ -83,22 +91,28 @@ public class ShiroRealm extends AuthorizingRealm {
      * @throws AuthenticationException 认证相关异常
      */
     @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken)
-        throws AuthenticationException {
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
         // 这里的 token是从 JWTFilter 的 executeLogin 方法传递过来的，已经经过了解密
         String token = (String) authenticationToken.getCredentials();
         String username = JWTUtil.getUsername(token);
         if (StringUtils.isBlank(username)) {
-            throw new AuthenticationException("token校验不通过");
+            throw new AuthenticationException("Token verification failed");
         }
         // 通过用户名查询用户信息
         User user = userService.findByName(username);
 
         if (user == null) {
-            throw new AuthenticationException("用户名或密码错误");
+            throw new AuthenticationException("ERROR Incorrect username or password!");
         }
+
         if (!JWTUtil.verify(token, username, user.getPassword())) {
-            throw new AuthenticationException("token校验不通过");
+            //校验是否属于api的token，权限是否有效
+            String tokenDb = WebUtils.encryptToken(token);
+            boolean effective = accessTokenService.checkTokenEffective(user.getUserId(), tokenDb);
+            if (!effective) {
+                throw new AuthenticationException("Token checked failed: 1-[Browser Request] please check the username or password; 2-[Api Request] please check the user status or accessToken status");
+            }
+            SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
         }
         return new SimpleAuthenticationInfo(token, token, "streamx_shiro_realm");
     }

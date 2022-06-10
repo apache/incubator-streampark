@@ -19,9 +19,11 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
@@ -29,6 +31,7 @@ import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.metrics.flink.MailTemplate;
 import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.SettingService;
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +40,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 
 /**
@@ -52,6 +59,8 @@ import java.util.TimeZone;
 @Slf4j
 @Service
 public class AlertServiceImpl implements AlertService {
+
+    private static final String CONFIG_TEMPLATE = "email.html";
 
     private Template template;
 
@@ -63,27 +72,28 @@ public class AlertServiceImpl implements AlertService {
     @PostConstruct
     public void initConfig() throws Exception {
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
-        String template = "email.html";
-        Enumeration<URL> urls = ClassLoader.getSystemResources(template);
-        if (urls != null) {
-            if (!urls.hasMoreElements()) {
-                urls = Thread.currentThread().getContextClassLoader().getResources(template);
-            }
-
-            if (urls.hasMoreElements()) {
-                URL url = urls.nextElement();
-                if (url.getPath().contains(".jar")) {
-                    configuration.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
-                } else {
-                    File file = new File(url.getPath());
-                    configuration.setDirectoryForTemplateLoading(file.getParentFile());
+        configuration.setDefaultEncoding(StandardCharsets.UTF_8.name());
+        if (Objects.isNull(this.template = loadingConf(configuration))){
+            Enumeration<URL> urls = ClassLoader.getSystemResources(CONFIG_TEMPLATE);
+            if (urls != null) {
+                if (!urls.hasMoreElements()) {
+                    urls = Thread.currentThread().getContextClassLoader().getResources(CONFIG_TEMPLATE);
                 }
-                configuration.setDefaultEncoding("UTF-8");
-                this.template = configuration.getTemplate(template);
+
+                if (urls.hasMoreElements()) {
+                    URL url = urls.nextElement();
+                    if (url.getPath().contains(".jar")) {
+                        configuration.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
+                    } else {
+                        File file = new File(url.getPath());
+                        configuration.setDirectoryForTemplateLoading(file.getParentFile());
+                    }
+                    this.template = configuration.getTemplate(CONFIG_TEMPLATE);
+                }
+            } else {
+                log.error("email.html not found!");
+                throw new ExceptionInInitializerError("email.html not found!");
             }
-        } else {
-            log.error("email.html not found!");
-            throw new ExceptionInInitializerError("email.html not found!");
         }
     }
 
@@ -139,8 +149,7 @@ public class AlertServiceImpl implements AlertService {
             htmlEmail.setAuthentication(this.senderEmail.getUserName(), this.senderEmail.getPassword());
             htmlEmail.setFrom(this.senderEmail.getFrom());
             if (this.senderEmail.isSsl()) {
-                htmlEmail.setSSLOnConnect(true);
-                htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
+                htmlEmail.setSSLOnConnect(true).setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
             } else {
                 htmlEmail.setSmtpPort(this.senderEmail.getSmtpPort());
             }
@@ -149,7 +158,7 @@ public class AlertServiceImpl implements AlertService {
             htmlEmail.addTo(mails);
             htmlEmail.send();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -161,14 +170,21 @@ public class AlertServiceImpl implements AlertService {
             duration = application.getEndTime().getTime() - application.getStartTime().getTime();
         }
         duration = duration / 1000 / 60;
-        String format = "%s/proxy/%s/";
-        String url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
+
+        // TODO: modify url for both k8s and yarn execute mode, the k8s mode is different from yarn, when the flink job failed ,
+        //  the k8s pod is missing , so we should look for  a more reasonable url for k8s
+        String url = "";
+        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            String format = "%s/proxy/%s/";
+            url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
+        }
 
         MailTemplate template = new MailTemplate();
         template.setJobName(application.getJobName());
         template.setLink(url);
         template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-        template.setEndTime(DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+        template.setEndTime(DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(),
+            DateUtils.fullFormat(), TimeZone.getDefault()));
         template.setDuration(DateUtils.toRichTimeDuration(duration));
         boolean needRestart = application.isNeedRestartOnFailed() && application.getRestartCount() > 0;
         template.setRestart(needRestart);
@@ -177,6 +193,18 @@ public class AlertServiceImpl implements AlertService {
             template.setTotalRestart(application.getRestartSize());
         }
         return template;
+    }
+
+    private Template loadingConf(Configuration configuration) {
+        try {
+            File file = WebUtils.getAppConfDir();
+            log.info("loading email config... dir :{}", file.getPath());
+            configuration.setDirectoryForTemplateLoading(file);
+            return configuration.getTemplate(CONFIG_TEMPLATE);
+        } catch (IOException e){
+            log.warn("loading email error :{}", e.getMessage());
+        }
+        return null;
     }
 
 }

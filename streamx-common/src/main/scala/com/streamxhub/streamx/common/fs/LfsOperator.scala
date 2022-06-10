@@ -81,34 +81,28 @@ object LfsOperator extends FsOperator with Logger {
 
     val srcFile = new File(srcPath)
     if (!srcFile.exists) return
-    require(srcFile.isFile, s"[streamx] $srcPath must be a file.")
+    require(srcFile.isFile, s"[StreamX] $srcPath must be a file.")
 
     val dstFile = {
-      val dst = new File(dstPath)
-      val inferDstIsDir = {
-        if (dst.exists && dst.isDirectory) true
-        else {
-          srcFile.getName -> dst.getName match {
-            case (src, dst) if src == dst => false
-            case (src, dst) if getSuffix(src) == getSuffix(dst) => false
-            case _ => true
-          }
-        }
+      new File(dstPath) match {
+        case f if f.exists() =>
+          if (f.isDirectory) new File(f, srcFile.getName) else f
+        case f =>
+          require(f.getParentFile.exists(), "[StreamX] dstPath is invalid and does not exist. Please check")
+          f
       }
-      if (inferDstIsDir) new File(dstPath, srcFile.getName) else dst
     }
 
-    val shouldCopy = if (!overwrite && dstFile.exists) false else true
-    if (!shouldCopy) return
+    require(srcFile.getCanonicalPath != dstFile.getCanonicalPath)
 
-    FileUtils.copyFile(srcFile, dstFile)
-    if (delSrc) FileUtils.forceDelete(srcFile)
-  }
+    val shouldCopy = if (overwrite) true; else {
+      if (!dstFile.exists()) true else dstFile.getName != srcFile.getName
+    }
 
-
-  private[this] def getSuffix(filename: String): String = {
-    if (filename.contains(".")) filename.substring(filename.lastIndexOf("."), filename.length).toLowerCase
-    else filename
+    if (shouldCopy) {
+      FileUtils.copyFile(srcFile, dstFile)
+      if (delSrc) FileUtils.forceDelete(srcFile)
+    }
   }
 
 
@@ -116,7 +110,7 @@ object LfsOperator extends FsOperator with Logger {
     if (isAnyBank(srcPath, dstPath)) return
     val srcFile = new File(srcPath)
     if (!srcFile.exists) return
-    require(srcFile.isDirectory, s"[streamx] $srcPath must be a directory.")
+    require(srcFile.isDirectory, s"[StreamX] $srcPath must be a directory.")
 
     val dstFile = new File(dstPath)
     val shouldCopy = {
@@ -130,16 +124,16 @@ object LfsOperator extends FsOperator with Logger {
   }
 
   override def fileMd5(path: String): String = {
-    require(path != null && path.nonEmpty, s"[streamx] LFsOperator.fileMd5: file must not be null.")
+    require(path != null && path.nonEmpty, s"[StreamX] LFsOperator.fileMd5: file must not be null.")
     val file = new File(path)
-    require(file.exists, s"[streamx] LFsOperator.fileMd5: file must exists.")
+    require(file.exists, s"[StreamX] LFsOperator.fileMd5: file must exists.")
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
 
   /**
    * Force delete directory and recreate it.
    */
-  def mkCleanDirs(path: String): Unit = {
+  override def mkCleanDirs(path: String): Unit = {
     delete(path)
     mkdirs(path)
   }

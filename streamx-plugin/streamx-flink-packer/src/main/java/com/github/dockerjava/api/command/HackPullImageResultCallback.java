@@ -36,7 +36,7 @@ public class HackPullImageResultCallback extends PullImageResultCallback {
     @Override
     public void onNext(PullResponseItem item) {
         super.onNext(item);
-        if (item.getStatus() != null && item.getId() != null){
+        if (item.getStatus() != null && item.getId() != null) {
             listener.watchPullProcess(item);
         }
     }

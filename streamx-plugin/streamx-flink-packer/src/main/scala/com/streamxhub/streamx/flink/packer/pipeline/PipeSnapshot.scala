@@ -19,10 +19,10 @@
 
 package com.streamxhub.streamx.flink.packer.pipeline
 
-import com.streamxhub.streamx.flink.packer.pipeline.BuildPipelineHelper.calPercent
+import com.streamxhub.streamx.common.util.Utils
 
-import java.util.{Map => JavaMap}
 import java.lang.{Long => JavaLong}
+import java.util.{Map => JavaMap}
 import scala.collection.JavaConverters._
 
 /**
@@ -34,26 +34,26 @@ import scala.collection.JavaConverters._
  * @author Al-assad
  */
 case class PipeSnapshot(appName: String,
-                        pipeType: PipeType,
-                        pipeStatus: PipeStatus,
+                        pipeType: PipelineType,
+                        pipeStatus: PipelineStatus,
                         curStep: Int,
                         allSteps: Int,
-                        stepStatus: Map[Int, (PipeStepStatus, Long)],
-                        error: PipeErr,
+                        stepStatus: Map[Int, (PipelineStepStatus, Long)],
+                        error: PipeError,
                         emitTime: Long) {
 
-  def percent(): Double = calPercent(curStep, allSteps)
+  def percent(): Double = Utils.calPercent(curStep, allSteps)
 
-  def stepStatusAsJava: JavaMap[Integer, (PipeStepStatus, JavaLong)] = {
-    stepStatus.toSeq.map(e => new Integer(e._1) -> (e._2._1 -> new JavaLong(e._2._2))).toMap.asJava
+  def stepStatusAsJava: JavaMap[Integer, (PipelineStepStatus, JavaLong)] = {
+    stepStatus.toSeq.map(e => Integer.valueOf(e._1) -> (e._2._1 -> JavaLong.valueOf(e._2._2))).toMap.asJava
   }
 
-  def pureStepStatusAsJava: JavaMap[Integer, PipeStepStatus] = {
-    stepStatus.toSeq.map(e => new Integer(e._1) -> e._2._1).toMap.asJava
+  def pureStepStatusAsJava: JavaMap[Integer, PipelineStepStatus] = {
+    stepStatus.toSeq.map(e => Integer.valueOf(e._1) -> e._2._1).toMap.asJava
   }
 
   def stepStatusTimestampAsJava: JavaMap[Integer, JavaLong] = {
-    stepStatus.toSeq.map(e => new Integer(e._1) -> new JavaLong(e._2._2)).toMap.asJava
+    stepStatus.toSeq.map(e => Integer.valueOf(e._1) -> JavaLong.valueOf(e._2._2)).toMap.asJava
   }
 
 }

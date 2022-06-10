@@ -19,10 +19,11 @@
 
 package com.streamxhub.streamx.console.core.dao;
 
+import com.streamxhub.streamx.console.core.entity.Project;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.streamxhub.streamx.console.core.entity.Project;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 
@@ -33,12 +34,12 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
     IPage<Project> findProject(Page<Project> page, @Param("project") Project project);
 
-    @Update("update t_flink_project set BUILDSTATE=2 where id=#{project.id}")
+    @Update("update t_flink_project set BUILD_STATE=2 where id=#{project.id}")
     void failureBuild(@Param("project") Project project);
 
-    @Update("update t_flink_project set lastBuild=now(),BUILDSTATE=1 where id=#{project.id}")
+    @Update("update t_flink_project set LAST_BUILD = now(),BUILD_STATE=1 where id=#{project.id}")
     void successBuild(@Param("project") Project project);
 
-    @Update("update t_flink_project set BUILDSTATE=0 where id=#{project.id}")
+    @Update("update t_flink_project set BUILD_STATE=0 where id=#{project.id}")
     void startBuild(@Param("project") Project project);
 }

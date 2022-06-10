@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import api from './index'
 import http from '@/utils/request'
 
@@ -27,6 +28,10 @@ export function getExecUser () {
 
 export function list (queryParam) {
   return http.post(api.User.LIST, queryParam)
+}
+
+export function getNoTokenUser(queryParam) {
+  return http.post(api.User.GET_NOTOKEN_USER, queryParam)
 }
 
 export function update (queryParam) {

@@ -19,11 +19,13 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.console.core.dao.FlinkEnvMapper;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
+import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -65,30 +67,27 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
         if (count == 0) {
             version.setIsDefault(true);
         }
-        try {
-            version.setCreateTime(new Date());
-            version.doSetVersion();
-            version.doSetFlinkConf();
-            return save(version);
-        } catch (Exception e) {
-            throw e;
-        }
+        version.setCreateTime(new Date());
+        version.doSetFlinkConf();
+        version.doSetVersion();
+        return save(version);
     }
 
     @Override
     public void update(FlinkEnv version) throws IOException {
         FlinkEnv flinkEnv = super.getById(version.getId());
-        if (flinkEnv == null){
+        if (flinkEnv == null) {
             throw new RuntimeException("flink home message lost, please check database status!");
         }
         flinkEnv.setDescription(version.getDescription());
         flinkEnv.setFlinkName(version.getFlinkName());
         if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
             flinkEnv.setFlinkHome(version.getFlinkHome());
-            flinkEnv.doSetVersion();
             flinkEnv.doSetFlinkConf();
+            version.doSetVersion();
         }
         updateById(flinkEnv);
+        FlinkTrackingTask.getFlinkEnvMap().put(flinkEnv.getId(), version);
     }
 
     @Override

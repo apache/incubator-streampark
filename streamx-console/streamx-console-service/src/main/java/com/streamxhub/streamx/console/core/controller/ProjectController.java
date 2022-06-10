@@ -19,12 +19,13 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.ProjectService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,18 @@ public class ProjectController {
     @RequiresPermissions("project:create")
     public RestResponse create(Project project) {
         return projectService.create(project);
+    }
+
+    @PostMapping("update")
+    @RequiresPermissions("project:update")
+    public RestResponse update(Project project) {
+        boolean update = projectService.update(project);
+        return RestResponse.create().data(update);
+    }
+
+    @PostMapping("get")
+    public RestResponse get(Long id) {
+        return RestResponse.create().data(projectService.getById(id));
     }
 
     @PostMapping("build")

@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.packer
 
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
-import com.streamxhub.streamx.common.conf.{CommonConfig, ConfigHub}
+import com.streamxhub.streamx.common.conf.{CommonConfig, InternalConfigHolder}
 import com.streamxhub.streamx.flink.packer.docker.DockerRetriever.dockerClientConf
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.must.Matchers
@@ -31,13 +31,13 @@ import java.time.Duration
 
 class DockerClientTest extends AnyWordSpec with BeforeAndAfterAll with Matchers {
 
-  "Docker Client Config" when{
+  "Docker Client Config" when {
     val dockerHttpClientBuilder: ApacheDockerHttpClient.Builder = new ApacheDockerHttpClient.Builder()
       .dockerHost(dockerClientConf.getDockerHost)
       .sslConfig(dockerClientConf.getSSLConfig)
-      .maxConnections(ConfigHub.get(CommonConfig.DOCKER_MAX_CONNECTIONS))
-      .connectionTimeout(Duration.ofSeconds(ConfigHub.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC)))
-      .responseTimeout(Duration.ofSeconds(ConfigHub.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT_SEC)))
+      .maxConnections(InternalConfigHolder.get(CommonConfig.DOCKER_MAX_CONNECTIONS))
+      .connectionTimeout(Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC)))
+      .responseTimeout(Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT_SEC)))
   }
 
 }

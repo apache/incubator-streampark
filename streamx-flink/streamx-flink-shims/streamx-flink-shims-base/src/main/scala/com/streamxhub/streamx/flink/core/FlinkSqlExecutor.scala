@@ -38,8 +38,7 @@ object FlinkSqlExecutor extends Logger {
   private[this] val lock = new ReentrantReadWriteLock().writeLock
 
   /**
-   * all the available sql config options. see
-   * https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html
+   * all the available sql config options. see: https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/table/config
    */
   lazy val tableConfigOptions: JavaMap[String, ConfigOption[_]] = {
     def extractConfig(clazz: Class[_]): JavaMap[String, ConfigOption[_]] = {
@@ -116,7 +115,7 @@ object FlinkSqlExecutor extends Logger {
           callback(s"$command: ${modules.mkString("\n")}")
         case SET =>
           if (!tableConfigOptions.containsKey(args)) {
-            throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html")
+            throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/table/config")
           }
           val operand = x.operands(1)
           if (TableConfigOptions.TABLE_SQL_DIALECT.key().equalsIgnoreCase(args)) {
@@ -156,6 +155,8 @@ object FlinkSqlExecutor extends Logger {
         case INSERT_INTO | INSERT_OVERWRITE => insertArray += x.originSql
         case SELECT =>
           throw new Exception(s"[StreamX] Unsupported SELECT in current version.")
+        case BEGIN_STATEMENT_SET | END_STATEMENT_SET =>
+          logWarn(s"SQL Client Syntax: ${x.command.name} ")
         case INSERT_INTO | INSERT_OVERWRITE |
              CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
              CREATE_CATALOG | DROP_CATALOG |

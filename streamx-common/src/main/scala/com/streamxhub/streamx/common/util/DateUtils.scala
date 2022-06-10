@@ -40,6 +40,10 @@ object DateUtils {
     df.parse(date)
   }
 
+  def stringToDate(date: String): Date = {
+    parse(date)
+  }
+
   def milliSecond2Date(time: Long): Date = new Date(time)
 
   def second2Date(time: Long): Date = milliSecond2Date(time * 1000)
@@ -188,9 +192,9 @@ object DateUtils {
     localDateTime.format(dateTimeFormatter)
   }
 
-  private def getDateFormat(date: Date, dateFormatType: String) = {
-    val simformat = new SimpleDateFormat(dateFormatType)
-    simformat.format(date)
+  private def getDateFormat(date: Date, dateFormatType: String): String = {
+    val format = new SimpleDateFormat(dateFormatType)
+    format.format(date)
   }
 
   @throws[ParseException] def formatCSTTime(date: String, format: String): String = {

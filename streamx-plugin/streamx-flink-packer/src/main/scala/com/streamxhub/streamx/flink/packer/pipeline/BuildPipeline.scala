@@ -20,11 +20,12 @@
 package com.streamxhub.streamx.flink.packer.pipeline
 
 import com.streamxhub.streamx.common.util.{Logger, ThreadUtils}
+import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline.executor
 
-import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
+import java.util.concurrent.{Callable, LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -37,7 +38,7 @@ trait BuildPipelineProcess {
   /**
    * the type of pipeline
    */
-  def pipeType: PipeType
+  def pipeType: PipelineType
 
   /**
    * the actual build process.
@@ -63,18 +64,18 @@ trait BuildPipelineExpose {
   /**
    * get current state of the pipeline instance
    */
-  def getPipeStatus: PipeStatus
+  def getPipeStatus: PipelineStatus
 
   /**
    * get error of pipeline instance
    */
-  def getError: PipeErr
+  def getError: PipeError
 
   /**
    * get all of the steps status
    * StepSeq -> (PipeStepStatus -> status update timestamp)
    */
-  def getStepsStatus: Map[Int, (PipeStepStatus, Long)]
+  def getStepsStatus: Map[Int, (PipelineStepStatus, Long)]
 
   /**
    * get current build step index
@@ -91,7 +92,7 @@ trait BuildPipelineExpose {
    */
   def launch(): BuildResult
 
-  def as[T <: BuildPipeline](clz: Class[T]): T = this.asInstanceOf[T]
+  def as[T <: BuildPipeline](implicit clz: Class[T]): T = this.asInstanceOf[T]
 }
 
 
@@ -102,14 +103,14 @@ trait BuildPipelineExpose {
  */
 trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with Logger {
 
-  protected var pipeStatus: PipeStatus = PipeStatus.pending
+  protected var pipeStatus: PipelineStatus = PipelineStatus.pending
 
-  protected var error: PipeErr = PipeErr.empty()
+  protected var error: PipeError = PipeError.empty()
 
   protected var curStep: Int = 0
 
-  protected val stepsStatus: mutable.Map[Int, (PipeStepStatus, Long)] =
-    mutable.Map(pipeType.getSteps.asScala.map(e => e._1.toInt -> (PipeStepStatus.waiting -> System.currentTimeMillis)).toSeq: _*)
+  protected val stepsStatus: mutable.Map[Int, (PipelineStepStatus, Long)] =
+    mutable.Map(pipeType.getSteps.asScala.map(e => e._1.toInt -> (PipelineStepStatus.waiting -> System.currentTimeMillis)).toSeq: _*)
 
   /**
    * use to identify the log record that belongs to which pipeline instance
@@ -126,30 +127,30 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
   protected def execStep[R](seq: Int)(process: => R): Option[R] = {
     Try {
       curStep = seq
-      stepsStatus(seq) = PipeStepStatus.running -> System.currentTimeMillis
+      stepsStatus(seq) = PipelineStepStatus.running -> System.currentTimeMillis
       logInfo(s"building pipeline step[$seq/$allSteps] running => ${pipeType.getSteps.get(seq)}")
       watcher.onStepStateChange(snapshot)
       process
     } match {
       case Success(result) =>
-        stepsStatus(seq) = PipeStepStatus.success -> System.currentTimeMillis
+        stepsStatus(seq) = PipelineStepStatus.success -> System.currentTimeMillis
         logInfo(s"building pipeline step[$seq/$allSteps] success")
         watcher.onStepStateChange(snapshot)
         Some(result)
       case Failure(cause) =>
-        stepsStatus(seq) = PipeStepStatus.failure-> System.currentTimeMillis
-        pipeStatus = PipeStatus.failure
-        error = PipeErr.of(cause.getMessage, cause)
+        stepsStatus(seq) = PipelineStepStatus.failure -> System.currentTimeMillis
+        pipeStatus = PipelineStatus.failure
+        error = PipeError.of(cause.getMessage, cause)
         logInfo(s"building pipeline step[$seq/$allSteps] failure => ${pipeType.getSteps.get(seq)}")
         watcher.onStepStateChange(snapshot)
         None
     }
   }
 
-  protected def skipStep(seq: Int): Unit = {
-    curStep = seq
-    stepsStatus(seq) = PipeStepStatus.skipped -> System.currentTimeMillis
-    logInfo(s"building pipeline step[$seq/$allSteps] skipped => ${pipeType.getSteps.get(seq)}")
+  protected def skipStep(step: Int): Unit = {
+    curStep = step
+    stepsStatus(step) = PipelineStepStatus.skipped -> System.currentTimeMillis
+    logInfo(s"building pipeline step[$step/$allSteps] skipped => ${pipeType.getSteps.get(step)}")
     watcher.onStepStateChange(snapshot)
   }
 
@@ -157,19 +158,22 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
    * Launch the building pipeline.
    */
   override def launch(): BuildResult = {
-    logInfo(s"building pipeline is launching, params=${offerBuildParam.toString}")
-    pipeStatus = PipeStatus.running
-    watcher.onStart(snapshot)
-
-    Try(buildProcess()) match {
+    pipeStatus = PipelineStatus.running
+    Try {
+      watcher.onStart(snapshot)
+      logInfo(s"building pipeline is launching, params=${offerBuildParam.toString}")
+      executor.submit(new Callable[BuildResult] {
+        override def call(): BuildResult = buildProcess()
+      }).get(5, TimeUnit.MINUTES)
+    } match {
       case Success(result) =>
-        pipeStatus = PipeStatus.success
+        pipeStatus = PipelineStatus.success
         logInfo(s"building pipeline has finished successfully.")
         watcher.onFinish(snapshot, result)
         result
       case Failure(cause) =>
-        pipeStatus = PipeStatus.failure
-        error = PipeErr.of(cause.getMessage, cause)
+        pipeStatus = PipelineStatus.failure
+        error = PipeError.of(cause.getMessage, cause)
         // log and print error trace stack
         logError(s"building pipeline has failed.", cause)
         val result = ErrorResult()
@@ -178,11 +182,11 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
     }
   }
 
-  override def getPipeStatus: PipeStatus = pipeStatus
+  override def getPipeStatus: PipelineStatus = pipeStatus
 
-  override def getError: PipeErr = error.copy()
+  override def getError: PipeError = error.copy()
 
-  override def getStepsStatus: Map[Int, (PipeStepStatus, Long)] = stepsStatus.toMap
+  override def getStepsStatus: Map[Int, (PipelineStepStatus, Long)] = stepsStatus.toMap
 
   override def getCurStep: Int = curStep
 
@@ -222,6 +226,6 @@ object BuildPipeline {
     new ThreadPoolExecutor.AbortPolicy
   )
 
-  implicit val executor: ExecutionContext = ExecutionContext.fromExecutorService(execPool)
+  implicit val executor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(execPool)
 
 }

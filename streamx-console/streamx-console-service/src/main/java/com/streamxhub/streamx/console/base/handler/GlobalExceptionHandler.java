@@ -19,9 +19,12 @@
 
 package com.streamxhub.streamx.console.base.handler;
 
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import com.streamxhub.streamx.console.base.domain.ResponseCode;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.base.exception.ApiException;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
+
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -30,6 +33,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -37,6 +41,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Path;
+
 import java.util.List;
 import java.util.Set;
 
@@ -57,6 +62,20 @@ public class GlobalExceptionHandler {
     public RestResponse handleParamsInvalidException(ServiceException e) {
         log.info("系统错误：{}", e.getMessage());
         return new RestResponse().message(e.getMessage());
+    }
+
+    @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
+        log.info("不支持的request method，异常信息：{}", e.getMessage());
+        return new RestResponse().message("不支持的request method，异常信息：" + e.getMessage());
+    }
+
+    @ExceptionHandler(value = ApiException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public RestResponse handleException(ApiException e) {
+        log.info("api exception：{}", e.getMessage());
+        return RestResponse.fail("api fail, msg:" + e.getMessage(), ResponseCode.CODE_FAIL);
     }
 
     /**
@@ -90,8 +109,7 @@ public class GlobalExceptionHandler {
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
         for (ConstraintViolation<?> violation : violations) {
             Path path = violation.getPropertyPath();
-            String[] pathArr =
-                StringUtils.splitByWholeSeparatorPreserveAllTokens(path.toString(), StringPool.DOT);
+            String[] pathArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(path.toString(), StringPool.DOT);
             message.append(pathArr[1]).append(violation.getMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));

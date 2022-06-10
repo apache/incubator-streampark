@@ -8,6 +8,7 @@
         <result column="ARGS" jdbcType="LONGVARCHAR" property="args"/>
         <result column="OPTIONS" jdbcType="LONGVARCHAR" property="options"/>
         <result column="DYNAMIC_OPTIONS" jdbcType="LONGVARCHAR" property="dynamicOptions"/>
+        <result column="HOT_PARAMS" jdbcType="VARCHAR" property="hotParams"/>
         <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="VERSION_ID" jdbcType="BIGINT" property="versionId"/>
@@ -32,7 +33,8 @@
         <result column="CP_FAILURE_ACTION" jdbcType="INTEGER" property="cpFailureAction"/>
         <result column="RESTART_SIZE" jdbcType="INTEGER" property="restartSize"/>
         <result column="RESTART_COUNT" jdbcType="INTEGER" property="restartCount"/>
-        <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
+        <result column="LAUNCH" jdbcType="INTEGER" property="launch"/>
+        <result column="BUILD" jdbcType="BOOLEAN" property="build"/>
         <result column="FLAME_GRAPH" jdbcType="BOOLEAN" property="flameGraph"/>
         <result column="RESOLVE_ORDER" jdbcType="INTEGER" property="resolveOrder"/>
         <result column="TOTAL_TM" jdbcType="INTEGER" property="totalTM"/>
@@ -50,6 +52,8 @@
         <result column="K8S_JM_POD_TEMPLATE" jdbcType="LONGVARCHAR" property="k8sJmPodTemplate"/>
         <result column="K8S_TM_POD_TEMPLATE" jdbcType="LONGVARCHAR" property="k8sTmPodTemplate"/>
         <result column="K8S_HADOOP_INTEGRATION" jdbcType="TINYINT" property="k8sHadoopIntegration"/>
+        <result column="REST_URL" jdbcType="VARCHAR" property="restUrl"/>
+        <result column="REST_PORT" jdbcType="INTEGER" property="restPort"/>
     </resultMap>
 
     <select id="page" resultType="application" parameterType="application">
@@ -113,8 +117,8 @@
             <if test="application.state != null">
                 state=#{application.state},
             </if>
-            <if test="application.deploy != null">
-                deploy=#{application.deploy},
+            <if test="application.launch != null">
+                launch=#{application.launch},
             </if>
             <if test="application.optionState != null">
                 option_state=#{application.optionState},

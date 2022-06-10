@@ -40,9 +40,9 @@ object Workspace {
 
 case class Workspace(storageType: StorageType) {
 
-  private[this] def getConfigValue[T](option: ConfigOption): T = {
+  private[this] def getConfigValue[T](option: InternalOption): T = {
     val s = SystemPropertyUtils.get(option.key)
-    val v = ConfigHub.get(option).asInstanceOf[T]
+    val v = InternalConfigHolder.get(option).asInstanceOf[T]
     val d = option.defaultValue.asInstanceOf[T]
     (s, v) match {
       case (null, null) => d
@@ -69,7 +69,7 @@ case class Workspace(storageType: StorageType) {
               if (p.startsWith(defaultFs)) {
                 p
               } else {
-                var path = URI.create(p).getPath
+                val path = URI.create(p).getPath
                 s"${HdfsUtils.getDefaultFS}$path"
               }
             } else {
@@ -80,6 +80,8 @@ case class Workspace(storageType: StorageType) {
   }
 
   lazy val APP_PLUGINS = s"$WORKSPACE/plugins"
+
+  lazy val APP_CLIENT = s"$WORKSPACE/client"
 
   /**
    * 存放不同版本flink相关的jar

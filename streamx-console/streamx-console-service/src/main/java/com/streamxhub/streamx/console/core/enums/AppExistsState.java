@@ -52,7 +52,7 @@ public enum AppExistsState implements Serializable {
      */
     INVALID(4);
 
-    int value;
+    private final int value;
 
     AppExistsState(int value) {
         this.value = value;

@@ -19,8 +19,9 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.streamxhub.streamx.common.conf.Workspace;
+
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,6 +62,7 @@ public class ApplicationBackUp {
             case KUBERNETES_NATIVE_SESSION:
             case YARN_PER_JOB:
             case YARN_SESSION:
+            case REMOTE:
             case LOCAL:
                 this.path = String.format(
                     "%s/%d/%d",

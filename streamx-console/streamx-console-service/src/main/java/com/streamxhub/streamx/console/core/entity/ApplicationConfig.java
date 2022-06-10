@@ -19,15 +19,21 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
+import com.streamxhub.streamx.common.util.DeflaterUtils;
+import com.streamxhub.streamx.common.util.PropertiesUtils;
+
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.streamxhub.streamx.common.util.DeflaterUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.Map;
+
+import scala.collection.JavaConversions;
 
 /**
  * @author benjobs
@@ -70,5 +76,18 @@ public class ApplicationConfig {
         application.setConfig(encode);
         application.setConfigId(this.id);
         application.setFormat(this.format);
+    }
+
+    @JsonIgnore
+    public Map<String, String> readConfig() {
+        switch (this.getFormat()) {
+            case 1:
+                return JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(this.content)));
+            case 2:
+                return JavaConversions.mapAsJavaMap(PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(this.content)));
+            default:
+                break;
+        }
+        return null;
     }
 }

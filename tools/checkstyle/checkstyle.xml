@@ -18,7 +18,7 @@
   -->
 
 <!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
-    "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+    "http://checkstyle.org/dtds/configuration_1_3.dtd">
 <module name="Checker">
 
     <property name="charset" value="UTF-8"/>
@@ -31,11 +31,6 @@
     <module name="Header">
         <property name="headerFile" value="tools/checkstyle/checkstyle-license-header.txt"/>
         <property name="fileExtensions" value="java"/>
-    </module>
-  
-    <module name="NewlineAtEndOfFile">
-        <!-- windows can use \r\n vs \n, so enforce the most used one ie UNIx style -->
-        <property name="lineSeparator" value="lf"/>
     </module>
 
     <property name="localeLanguage" value="en"/>
@@ -64,7 +59,20 @@
         <property name="max" value="3000"/>
     </module>
 
+    <module name="SuppressWarningsFilter"/>
     <module name="TreeWalker">
+        <module name="SuppressWarningsHolder"/>
+        <module name="ImportOrder">
+            <property name="severity" value="error"/>
+            <property name="staticGroups" value="com.streamxhub.streamx,com.streamxhub.streamx.shade,*,javax,java,scala"/>
+            <property name="groups" value="com.streamxhub.streamx,com.streamxhub.streamx.shade,*,javax,java,scala"/>
+            <property name="separated" value="true"/>
+            <property name="sortStaticImportsAlphabetically" value="true"/>
+            <property name="option" value="top"/>
+            <property name="tokens" value="STATIC_IMPORT, IMPORT"/>
+            <message key="import.ordering" value="Import {0} appears after other imports that it should precede"/>
+        </module>
+
         <!-- Prohibit T.getT() methods for standard boxed types -->
         <module name="Regexp">
             <property name="format" value="Boolean\.getBoolean"/>
@@ -234,7 +242,6 @@
             <property name="ignoreComments" value="true"/>
         </module>
 
-
         <module name="RegexpSinglelineJava">
             <property name="format" value="Objects\.toStringHelper"/>
             <property name="message" value="Avoid using Object.toStringHelper. Use ToStringBuilder instead."/>
@@ -303,11 +310,8 @@
         </module>
 
         <module name="PackageName">
-            <!-- Validates identifiers for package names against the supplied expression. -->
-            <!-- Here the default checkstyle rule restricts package name parts to seven characters, this is not in line with common practice at Google. -->
-            <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
+            <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]{1,})*$"/>
             <property name="severity" value="error"/>
-            <message key="name.invalidPattern" value="Package name ''{0}'' must match pattern ''{1}''."/>
         </module>
 
         <module name="ConstantNameCheck">

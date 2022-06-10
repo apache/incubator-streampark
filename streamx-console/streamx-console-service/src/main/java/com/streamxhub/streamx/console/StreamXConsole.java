@@ -20,12 +20,12 @@
 package com.streamxhub.streamx.console;
 
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -46,7 +46,7 @@ import java.lang.management.RuntimeMXBean;
  *      GitHub :  https://github.com/streamxhub/streamx
  *      Gitee  :  https://gitee.com/streamxhub/streamx
  *
- *      [StreamX] Make Flink|Spark easier ô‿ô!
+ *      [StreamX] Make stream processing easier ô~ô!
  *
  *      十步杀一人 千里不留行 事了拂衣去 深藏身与名
  *
@@ -55,7 +55,6 @@ import java.lang.management.RuntimeMXBean;
  * @author benjobs
  */
 @Slf4j
-@CrossOrigin
 @SpringBootApplication
 @EnableScheduling
 public class StreamXConsole {
@@ -83,8 +82,8 @@ public class StreamXConsole {
         String name = runtime.getName();
         try {
             return Integer.parseInt(name.substring(0, name.indexOf('@')));
-        } catch (Exception ignored) {
-            ignored.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return -1;
     }

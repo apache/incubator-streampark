@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.packer
 
-import com.streamxhub.streamx.flink.packer.maven.{JarPackDeps, MavenArtifact, MavenTool}
+import com.streamxhub.streamx.flink.packer.maven.{Artifact, DependencyInfo, MavenTool}
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.must.Matchers
@@ -51,6 +51,7 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
       "with jarlibs" in {
         val fatJarPath = outputDir.concat("fat-1.jar")
         val fatJar = MavenTool.buildFatJar(
+          null,
           Set(
             path("jars/commons-cli-1.4.jar"),
             path("jars/commons-dbutils-1.7.jar")),
@@ -61,7 +62,7 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
       }
       "with jarlibs under directory" in {
         val fatJarPath = outputDir.concat("fat-2.jar")
-        val fatJar = MavenTool.buildFatJar(Set(path("jars/")), fatJarPath)
+        val fatJar = MavenTool.buildFatJar(null, Set(path("jars/")), fatJarPath)
         fatJar.exists() mustBe true
         assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-cli-1.4.jar")), "org/apache/commons/cli/DefaultParser.class"))
         assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-dbutils-1.7.jar")), "org/apache/commons/dbutils/DbUtils.class"))
@@ -70,8 +71,9 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
       "with jarlibs and maven artifacts" in {
         val fatJarPath = outputDir.concat("fat-3.jar")
         val fatJar = MavenTool.buildFatJar(
-          JarPackDeps(
-            Set(MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")),
+          null,
+          DependencyInfo(
+            Set(Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")),
             Set(path("jars/commons-dbutils-1.7.jar"))
           ),
           fatJarPath)
@@ -84,7 +86,7 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
 
     "resolve artifacts" should {
       "with single artifact" in {
-        val jars = MavenTool.resolveArtifacts(Set(MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")))
+        val jars = MavenTool.resolveArtifacts(Set(Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")))
         val expectJars = Array(
           "force-shading-1.13.0.jar",
           "flink-connector-base-1.13.0.jar",
@@ -95,15 +97,17 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
       }
       "with mutiply artifact" in {
         val jars = MavenTool.resolveArtifacts(Set(
-          MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0"),
-          MavenArtifact.of("org.apache.flink:flink-connector-base:1.13.0")
+          Artifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0"),
+          Artifact.of("org.apache.flink:flink-connector-base:1.13.0")
         ))
         val expectJars = Array(
           "flink-core-1.13.0.jar",
           "force-shading-1.13.0.jar",
           "flink-connector-base-1.13.0.jar",
           "kafka-clients-2.4.1.jar")
+        // scalastyle:off println
         jars.foreach(jar => println(jar.getName))
+        // scalastyle:on println
         jars.forall(_.exists) mustBe true
         jars.map(_.getName).sameElements(expectJars) mustBe true
         FileUtils.deleteDirectory(new File(outputDir))

@@ -54,4 +54,5 @@ public class JWTToken implements AuthenticationToken {
     public Object getCredentials() {
         return token;
     }
+
 }

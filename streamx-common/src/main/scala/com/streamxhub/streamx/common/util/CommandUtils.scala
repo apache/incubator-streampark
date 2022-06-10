@@ -19,74 +19,85 @@
 package com.streamxhub.streamx.common.util
 
 import java.io._
-import java.lang.{Iterable => JavaIter}
+import java.lang.{Iterable => JavaIterable}
 import java.util.Scanner
 import java.util.function.Consumer
 import scala.collection.JavaConversions._
-import scala.util.control.Breaks._
 import scala.util.{Failure, Success, Try}
 
 object CommandUtils extends Logger {
 
-  def execute(command: String): String = {
-    val buffer = new StringBuffer()
+  @throws[Exception] def execute(command: String): (Int, String) = {
     Try {
+      val buffer = new StringBuffer()
       val process: Process = Runtime.getRuntime.exec(command)
-      val reader: BufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream))
-      breakable {
-        while (true) {
-          val line: String = reader.readLine()
-          if (line == null) {
-            break
-          } else {
-            buffer.append(line).append("\n")
-          }
-        }
+      val reader = new InputStreamReader(process.getInputStream)
+      val scanner = new Scanner(reader)
+      while (scanner.hasNextLine) {
+        buffer.append(scanner.nextLine()).append("\n")
       }
-      if (process != null) {
-        process.waitFor()
-        process.getErrorStream.close()
-        process.getInputStream.close()
-        process.getOutputStream.close()
-      }
-      if (reader != null) {
-        reader.close()
-      }
+      val code = waitFor(process)
+      reader.close()
+      scanner.close()
+      code -> buffer.toString
     } match {
-      case Success(_) =>
-      case Failure(e) => e.printStackTrace()
+      case Success(v) => v
+      case Failure(e) => throw e
     }
-    buffer.toString
   }
 
-  def execute(commands: JavaIter[String], consumer: Consumer[String]): Unit = {
+  def execute(directory: String, commands: JavaIterable[String], consumer: Consumer[String]): Int = {
     Try {
       require(commands != null && commands.nonEmpty, "[StreamX] CommandUtils.execute: commands must not be null.")
       logDebug(s"Command execute:\n${commands.mkString("\n")} ")
-      val process = Utils.isWindows match {
-        case x if x => Runtime.getRuntime.exec("cmd /k ", null, null)
-        case _ => Runtime.getRuntime.exec("/bin/bash ", null, null)
+
+      //1) init
+      lazy val process = {
+        val interpreters = if (Utils.isWindows) List("cmd", "/k") else List("/bin/bash")
+        val builder = new ProcessBuilder(interpreters).redirectErrorStream(true)
+        if (directory != null) {
+          builder.directory(new File(directory))
+        }
+        builder.start
       }
-      val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
-      commands.foreach(out.println)
-      commands.last.toLowerCase.trim match {
-        case "exit" =>
-        case _ => out.println("exit")
+
+      // 2) input
+      def input(): Unit = {
+        val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
+        // scalastyle:off println
+        commands.foreach(out.println)
+        if (!commands.last.equalsIgnoreCase("exit")) {
+          out.println("exit")
+        }
+        // scalastyle:on println
+        out.close()
       }
-      val scanner = new Scanner(process.getInputStream)
-      while (scanner.hasNextLine) {
-        consumer.accept(scanner.nextLine)
+
+      //3) out
+      def output(): Unit = {
+        val scanner = new Scanner(process.getInputStream)
+        while (scanner.hasNextLine) {
+          consumer.accept(scanner.nextLine)
+        }
+        scanner.close()
       }
-      process.waitFor
-      scanner.close()
-      process.getErrorStream.close()
-      process.getInputStream.close()
-      process.getOutputStream.close()
-      process.destroy()
+
+      input()
+      output()
+      waitFor(process)
     } match {
-      case Success(_) =>
+      case Success(code) => code
       case Failure(e) => throw e
     }
+  }
+
+  private[this] def waitFor(process: Process): Int = {
+    val code = process.waitFor()
+    process.getErrorStream.close()
+    process.getInputStream.close()
+    process.getOutputStream.close()
+    process.destroy()
+    code
   }
 
 }

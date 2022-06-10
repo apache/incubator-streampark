@@ -19,9 +19,14 @@
 
 package com.streamxhub.streamx.console.core.enums;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public enum CheckPointStatus {
+/**
+ * @author benjobs
+ */
+
+public enum CheckPointStatus implements Serializable {
     /**
      * IN_PROGRESS
      */
@@ -36,7 +41,7 @@ public enum CheckPointStatus {
      */
     FAILED(3);
 
-    int value;
+    private final int value;
 
     public int get() {
         return this.value;

@@ -19,16 +19,14 @@
 
 package com.streamxhub.streamx.console.base.util;
 
-/**
- * @date: 13-3-6 - 上午11:17
- * @version: V1.0
- * @company: damai
- */
-
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-public class ObjectUtils {
+public final class ObjectUtils {
+
+    private ObjectUtils() {
+
+    }
 
     private static final int INITIAL_HASH = 7;
     private static final int MULTIPLIER = 31;

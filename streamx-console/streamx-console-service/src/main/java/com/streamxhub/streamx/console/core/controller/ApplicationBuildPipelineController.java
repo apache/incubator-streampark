@@ -19,14 +19,21 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
+import com.streamxhub.streamx.console.base.domain.ApiDocConstant;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.core.annotation.ApiAccess;
 import com.streamxhub.streamx.console.core.entity.AppBuildDockerResolvedDetail;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeType;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineType;
+
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +62,9 @@ public class ApplicationBuildPipelineController {
     @Autowired
     private ApplicationService applicationService;
 
+    @Autowired
+    private FlinkSqlService flinkSqlService;
+
     /**
      * Launch application building pipeline.
      *
@@ -62,6 +72,12 @@ public class ApplicationBuildPipelineController {
      * @param forceBuild forced start pipeline or not
      * @return Whether the pipeline was successfully started
      */
+    @ApiAccess
+    @ApiOperation(value = "Launch application", notes = "Launch application", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "appId", value = "APP_ID", required = true, paramType = "form", dataType = "Long"),
+        @ApiImplicitParam(name = "forceBuild", value = "FORCE_BUILD", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
+    })
     @PostMapping("/build")
     @RequiresPermissions("app:create")
     public RestResponse buildApplication(Long appId, boolean forceBuild) {
@@ -70,6 +86,17 @@ public class ApplicationBuildPipelineController {
                 return RestResponse.create().data(false);
             }
             Application app = applicationService.getById(appId);
+            // 检查是否需要走build这一步流程(jar和pom发生变化了则需要走build流程, 其他普通参数修改了,不需要走build流程)
+            boolean needBuild = applicationService.checkBuildAndUpdate(app);
+            if (!needBuild) {
+                return RestResponse.create().data(true);
+            }
+
+            //回滚任务.
+            if (app.isNeedRollback() && app.isFlinkSqlJob()) {
+                flinkSqlService.rollback(app);
+            }
+
             boolean actionResult = appBuildPipeService.buildApplication(app);
             return RestResponse.create().data(actionResult);
         } catch (Exception e) {
@@ -83,14 +110,15 @@ public class ApplicationBuildPipelineController {
      * @param appId application id
      * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
      */
+    @ApiAccess
     @PostMapping("/detail")
     @RequiresPermissions("app:view")
     public RestResponse getBuildProgressDetail(Long appId) {
-        Map<String, Object> details = new HashMap<>();
+        Map<String, Object> details = new HashMap<>(0);
         Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
         details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
 
-        if (pipeline.isPresent() && PipeType.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
+        if (pipeline.isPresent() && PipelineType.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
             DockerResolvedSnapshot dockerProgress = appBuildPipeService.getDockerProgressDetailSnapshot(appId);
             details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));
         }

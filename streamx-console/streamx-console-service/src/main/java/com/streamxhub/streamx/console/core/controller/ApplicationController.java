@@ -19,12 +19,13 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.console.base.domain.ApiDocConstant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.core.annotation.ApiAccess;
 import com.streamxhub.streamx.console.core.entity.AppControl;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
@@ -34,7 +35,12 @@ import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationLogService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +49,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,6 +80,7 @@ public class ApplicationController {
     @Autowired
     private AppBuildPipeService appBuildPipeService;
 
+    @ApiAccess
     @PostMapping("get")
     @RequiresPermissions("app:detail")
     public RestResponse get(Application app) {
@@ -79,6 +88,7 @@ public class ApplicationController {
         return RestResponse.create().data(application);
     }
 
+    @ApiAccess
     @PostMapping("create")
     @RequiresPermissions("app:create")
     public RestResponse create(Application app) throws IOException {
@@ -99,6 +109,7 @@ public class ApplicationController {
         return RestResponse.create().data(map);
     }
 
+    @ApiAccess
     @PostMapping("list")
     @RequiresPermissions("app:view")
     public RestResponse list(Application app, RestRequest request) {
@@ -106,22 +117,14 @@ public class ApplicationController {
 
         List<Application> appRecords = applicationList.getRecords();
         List<Long> appIds = appRecords.stream().map(Application::getId).collect(Collectors.toList());
-        Map<Long, PipeStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
+        Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
 
         // add building pipeline status info and app control info
-        appRecords = appRecords.stream()
-            .peek(e -> {
-                if (pipeStates.containsKey(e.getId())) {
-                    e.setBuildStatus(pipeStates.get(e.getId()).getCode());
-                }
-            })
-            .peek(e -> e.setAppControl(
-                new AppControl()
-                    .setAllowBuild(e.getBuildStatus() == null || !PipeStatus.running.getCode().equals(e.getBuildStatus()))
-                    .setAllowStart(PipeStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack())
-                    .setAllowStop(e.isRunning()))
-            )
-            .collect(Collectors.toList());
+        appRecords = appRecords.stream().peek(e -> {
+            if (pipeStates.containsKey(e.getId())) {
+                e.setBuildStatus(pipeStates.get(e.getId()).getCode());
+            }
+        }).peek(e -> e.setAppControl(new AppControl().setAllowBuild(e.getBuildStatus() == null || !PipelineStatus.running.getCode().equals(e.getBuildStatus())).setAllowStart(PipelineStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack()).setAllowStop(e.isRunning()))).collect(Collectors.toList());
 
         applicationList.setRecords(appRecords);
         return RestResponse.create().data(applicationList);
@@ -134,32 +137,24 @@ public class ApplicationController {
         return RestResponse.create().data(flag);
     }
 
-    @PostMapping("deploy")
-    @RequiresPermissions("app:deploy")
-    public RestResponse deploy(Application app, String socketId) {
-        Application application = applicationService.getById(app.getId());
-        assert application != null;
-        try {
-            applicationService.checkEnv(app);
-            application.setBackUp(true);
-            application.setBackUpDescription(app.getBackUpDescription());
-            applicationService.deploy(application, socketId);
-            return RestResponse.create().data(true);
-        } catch (Exception e) {
-            return RestResponse.create().data(false).message(e.getMessage());
-        }
-    }
-
     @PostMapping("revoke")
-    @RequiresPermissions("app:deploy")
+    @RequiresPermissions("app:launch")
     public RestResponse revoke(Application app) throws Exception {
         applicationService.revoke(app);
         return RestResponse.create();
     }
 
+    @ApiAccess
+    @ApiOperation(value = "App Start", notes = "App Start", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "id", value = "app Id", required = true, paramType = "form", dataType = "Long"),
+        @ApiImplicitParam(name = "savePointed", value = "从savepoint或最新checkpoint恢复app", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
+        @ApiImplicitParam(name = "savePoint", value = "手动填写savepoint或最新checkpoint", required = true, paramType = "form", dataType = "String", defaultValue = ""),
+        @ApiImplicitParam(name = "flameGraph", value = "flame Graph support", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
+        @ApiImplicitParam(name = "allowNonRestored", value = "ignore savepoint then cannot be restored", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false")})
     @PostMapping("start")
     @RequiresPermissions("app:start")
-    public RestResponse start(Application app) {
+    public RestResponse start(@ApiIgnore Application app) {
         try {
             applicationService.checkEnv(app);
             applicationService.starting(app);
@@ -170,6 +165,7 @@ public class ApplicationController {
         }
     }
 
+    @ApiAccess
     @PostMapping("clean")
     @RequiresPermissions("app:clean")
     public RestResponse clean(Application app) {
@@ -177,16 +173,23 @@ public class ApplicationController {
         return RestResponse.create().data(true);
     }
 
+    @ApiAccess
+    @ApiOperation(value = "App Cancel", notes = "App Cancel", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "id", value = "app Id", required = true, paramType = "form", dataType = "Long"),
+        @ApiImplicitParam(name = "savePointed", value = "trigger savePoint before taking stoping", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
+        @ApiImplicitParam(name = "savePoint", value = "savepoint path", required = false, paramType = "form", dataType = "String", defaultValue = "hdfs:///tm/xxx"),
+        @ApiImplicitParam(name = "drain", value = "取消前发送最大 watermark", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false")})
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse cancel(Application app) {
+    public RestResponse cancel(@ApiIgnore Application app) {
         applicationService.cancel(app);
         return RestResponse.create();
     }
 
     @PostMapping("yarn")
     public RestResponse yarn() {
-        return RestResponse.create().data(HadoopUtils.getRMWebAppURL(false));
+        return RestResponse.create().data(HadoopUtils.getRMWebAppProxyURL());
     }
 
     @PostMapping("name")
@@ -226,8 +229,8 @@ public class ApplicationController {
         return RestResponse.create();
     }
 
-    @PostMapping("startlog")
-    public RestResponse startlog(ApplicationLog applicationLog, RestRequest request) {
+    @PostMapping("optionlog")
+    public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.page(applicationLog, request);
         return RestResponse.create().data(applicationList);
     }
@@ -263,9 +266,31 @@ public class ApplicationController {
     }
 
     @PostMapping("downlog")
-    public RestResponse downlog(Long id) throws Exception {
+    public RestResponse downlog(Long id) {
         applicationService.tailMvnDownloading(id);
         return RestResponse.create();
+    }
+
+    @PostMapping("verifySchema")
+    public RestResponse verifySchema(String path) {
+        final URI uri = URI.create(path);
+        final String scheme = uri.getScheme();
+        final String pathPart = uri.getPath();
+        RestResponse restResponse = RestResponse.create().data(true);
+        String error;
+        if (scheme == null) {
+            error = "The scheme (hdfs://, file://, etc) is null. Please specify the file system scheme explicitly in the URI.";
+            restResponse.data(false).message(error);
+        }
+        if (pathPart == null) {
+            error = "The path to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
+            restResponse.data(false).message(error);
+        }
+        if (pathPart.length() == 0 || pathPart.equals("/")) {
+            error = "Cannot use the root directory for checkpoints.";
+            restResponse.data(false).message(error);
+        }
+        return restResponse;
     }
 
 }

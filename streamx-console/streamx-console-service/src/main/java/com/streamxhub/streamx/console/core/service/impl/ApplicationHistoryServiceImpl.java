@@ -19,10 +19,13 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
+import static com.streamxhub.streamx.common.enums.StorageType.LFS;
+
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.LfsOperator;
 import com.streamxhub.streamx.console.core.service.ApplicationHistoryService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -32,8 +35,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.streamxhub.streamx.common.enums.StorageType.LFS;
 
 /**
  * @author Al-assad

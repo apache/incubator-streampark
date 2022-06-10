@@ -19,13 +19,15 @@
 
 package com.streamxhub.streamx.console.core.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
+import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerResolvedSnapshot;
-import com.streamxhub.streamx.flink.packer.pipeline.PipeStatus;
+import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
+
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.annotation.Nonnull;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,7 +41,7 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
      * Build application.
      * This is an async call method.
      */
-    boolean buildApplication(@Nonnull Application app);
+    boolean buildApplication(@Nonnull Application app) throws Exception;
 
     /**
      * Get current build pipeline instance of specified application
@@ -62,6 +64,11 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
     /**
      * list pipeline status on application id list
      */
-    Map<Long, PipeStatus> listPipelineStatus(List<Long> appIds);
+    Map<Long, PipelineStatus> listPipelineStatus(List<Long> appIds);
 
+    /**
+     * delete appBuildPipeline By application
+     * @param appId
+     */
+    void removeApp(Long appId);
 }

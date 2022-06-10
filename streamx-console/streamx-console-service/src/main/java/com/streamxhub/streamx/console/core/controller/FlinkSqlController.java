@@ -27,6 +27,8 @@ import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.service.SqlCompleteService;
 import com.streamxhub.streamx.flink.core.SqlError;
+
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -35,11 +37,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.List;
 
 /**
  * @author benjobs
  */
+@Api(tags = "[flink sql]相关操作", consumes = "Content-Type=application/x-www-form-urlencoded")
 @Slf4j
 @Validated
 @RestController
@@ -64,7 +68,7 @@ public class FlinkSqlController {
             RestResponse response = RestResponse.create()
                 .data(false)
                 .message(sqlError.exception())
-                .put("type", sqlError.errorType().errorType)
+                .put("type", sqlError.errorType().getValue())
                 .put("start", start)
                 .put("end", end);
             //语法异常

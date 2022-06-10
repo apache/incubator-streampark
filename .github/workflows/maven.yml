@@ -20,5 +20,6 @@ jobs:
           distribution: 'adopt'
           cache: maven
       - name: Build with Maven
-        run: mvn -B package -DskipTests --file pom.xml
-
+        run: mvn -B clean package -DskipTests
+      - name: Test with Maven
+        run: mvn -B test -pl '!streamx-plugin/streamx-jvm-profiler,!streamx-console/streamx-console-service' -am

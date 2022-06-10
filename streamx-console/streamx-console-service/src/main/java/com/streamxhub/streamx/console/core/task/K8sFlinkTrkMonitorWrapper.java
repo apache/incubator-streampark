@@ -21,11 +21,8 @@ package com.streamxhub.streamx.console.core.task;
 
 import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.common.collect.Lists;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.flink.kubernetes.FlinkTrkConf;
@@ -35,15 +32,19 @@ import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+
+import javax.annotation.Nonnull;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import scala.Enumeration;
 
 /**
@@ -116,7 +117,6 @@ public class K8sFlinkTrkMonitorWrapper {
         // correct corrupted data
         List<Application> correctApps = k8sApplication.stream()
             .filter(app -> Bridge.toTrkId(app).nonLegal())
-            .peek(app -> app.setState(FlinkAppState.DEPLOYED.getValue()))
             .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(correctApps)) {
             applicationService.saveOrUpdateBatch(correctApps);

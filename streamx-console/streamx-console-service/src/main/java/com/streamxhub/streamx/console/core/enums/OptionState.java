@@ -37,7 +37,7 @@ public enum OptionState implements Serializable {
     /**
      * Application which is currently action: deploying.
      */
-    DEPLOYING(1),
+    LAUNCHING(1),
     /**
      * Application which is currently action: cancelling.
      */
@@ -53,7 +53,7 @@ public enum OptionState implements Serializable {
      */
     SAVEPOINTING(4);
 
-    int value;
+    private final int value;
 
     OptionState(int value) {
         this.value = value;

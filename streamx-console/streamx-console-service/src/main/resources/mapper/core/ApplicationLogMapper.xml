@@ -8,7 +8,7 @@
         <result column="YARN_APP_ID" jdbcType="VARCHAR" property="yarnAppId"/>
         <result column="SUCCESS" jdbcType="INTEGER" property="success"/>
         <result column="EXCEPTION" jdbcType="LONGVARCHAR" property="exception"/>
-        <result column="START_TIME" jdbcType="DATE" property="startTime"/>
+        <result column="OPTION_TIME" jdbcType="DATE" property="optionTime"/>
     </resultMap>
 
 </mapper>

@@ -22,9 +22,6 @@ package com.streamxhub.streamx.console.core.task;
 import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.fromK8sFlinkJobState;
 import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.google.common.eventbus.Subscribe;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -41,11 +38,17 @@ import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.google.common.eventbus.Subscribe;
+
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
 import scala.Enumeration;
 
 /**
@@ -106,7 +109,8 @@ public class K8sFlinkChangeEventListener {
 
         // email alerts when necessary
         FlinkAppState state = FlinkAppState.of(app.getState());
-        if (FlinkAppState.FAILED.equals(state) || FlinkAppState.LOST.equals(state)) {
+        if (FlinkAppState.FAILED.equals(state) || FlinkAppState.LOST.equals(state)
+            || FlinkAppState.RESTARTING.equals(state) || FlinkAppState.FINISHED.equals(state)) {
             Application finalApp = app;
             executor.execute(() -> alertService.alert(finalApp, state));
         }

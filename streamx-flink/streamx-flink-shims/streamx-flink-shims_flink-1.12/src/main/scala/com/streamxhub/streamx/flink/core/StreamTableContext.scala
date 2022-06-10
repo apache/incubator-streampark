@@ -21,9 +21,10 @@ package com.streamxhub.streamx.flink.core
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.graph.StreamGraph
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.table.api.StatementSet
+import org.apache.flink.table.api.{StatementSet, Table}
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.descriptors.{ConnectorDescriptor, StreamTableDescriptor}
+import org.apache.flink.table.sources.TableSource
 
 /**
  * 融合了流(stream)和table的api
@@ -53,10 +54,23 @@ class StreamTableContext(override val parameter: ParameterTool,
 
   @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
 
-  def getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
+  def $getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
 
-  def getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(jobName, clearTransformations)
+  def $getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph = this.streamEnv.getStreamGraph(jobName, clearTransformations)
 
   override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
 
+  @deprecated override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
+
+  @deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit = tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
+
+  @deprecated override def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
+
+  @deprecated override def explain(table: Table): String = tableEnv.explain(table)
+
+  @deprecated override def explain(table: Table, extended: Boolean): String = tableEnv.explain(table, extended)
+
+  @deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
+
+  @deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
 }
