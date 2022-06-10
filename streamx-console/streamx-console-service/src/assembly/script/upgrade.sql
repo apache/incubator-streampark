@@ -282,3 +282,4 @@ COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
 -- ------------------------------------- version: 1.2.3 END ---------------------------------------
+alter table t_setting modify column `VALUE` text ;
