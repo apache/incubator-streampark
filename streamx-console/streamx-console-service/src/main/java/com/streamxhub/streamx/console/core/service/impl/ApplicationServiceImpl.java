@@ -154,9 +154,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         new ThreadPoolExecutor.AbortPolicy()
     );
 
-    private static final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z0-9_\\-\\s]+$");
+    private static final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z\\d_\\-\\s]+$");
 
-    private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("^[^\\s]+(\\s[^\\s]+)*$");
+    private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("^\\S+(\\s\\S+)*$");
 
     @Autowired
     private ProjectService projectService;
@@ -225,7 +225,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 totalJmMemory += v.getJmMemory();
             }
             if (v.getTmMemory() != null) {
-                totalTmMemory += v.getTmMemory() * v.getTotalTM();
+                totalTmMemory += v.getTmMemory() * (v.getTotalTM() == null ? 1 : v.getTotalTM());
             }
             if (v.getTotalTM() != null) {
                 totalTm += v.getTotalTM();
@@ -237,7 +237,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 availableSlot += v.getAvailableSlot();
             }
             if (v.getState() == FlinkAppState.RUNNING.getValue()) {
-                runningJob++;
+                runningJob ++;
             }
             JobsOverview.Task task = v.getOverview();
             if (task != null) {

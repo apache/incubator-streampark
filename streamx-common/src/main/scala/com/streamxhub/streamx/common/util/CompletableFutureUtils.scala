@@ -19,8 +19,9 @@
 
 package com.streamxhub.streamx.common.util
 
-import java.util.concurrent.{CompletableFuture, ScheduledThreadPoolExecutor, ThreadFactory, TimeUnit, TimeoutException}
+import java.util.concurrent.{Callable, CompletableFuture, ScheduledThreadPoolExecutor, ThreadFactory, TimeUnit, TimeoutException}
 import java.util.function.Consumer
+import java.util.function.{Function => JavaFunc}
 
 object CompletableFutureUtils {
 
@@ -43,16 +44,18 @@ object CompletableFutureUtils {
 
   def setTimeout[T](timeout: Long, unit: TimeUnit): CompletableFuture[T] = {
     val result = new CompletableFuture[T]
-    completableDelayer.schedule(() => result.completeExceptionally(new TimeoutException), timeout, unit)
+    completableDelayer.schedule(new Callable[Boolean] {
+      override def call(): Boolean = result.completeExceptionally(new TimeoutException)
+    }, timeout, unit)
     result
   }
 
   def supplyTimeout[T](future: CompletableFuture[T],
                        timeout: Long,
                        unit: TimeUnit,
-                       handle: Function[T, T],
-                       exceptionally: Function[Throwable, T]): CompletableFuture[T] = {
-    future.applyToEither(setTimeout(timeout, unit), handle.apply).exceptionally(exceptionally.apply)
+                       handle: JavaFunc[T, T],
+                       exceptionally: JavaFunc[Throwable, T]): CompletableFuture[T] = {
+    future.applyToEither(setTimeout(timeout, unit), handle).exceptionally(exceptionally)
   }
 
   def runTimeout[T](future: CompletableFuture[T],
@@ -60,7 +63,15 @@ object CompletableFutureUtils {
                     unit: TimeUnit,
                     handle: Consumer[T],
                     exceptionally: Consumer[Throwable]): CompletableFuture[Unit] = {
-    future.applyToEither(setTimeout(timeout, unit), t => handle.accept(t)).exceptionally(e => exceptionally.accept(e))
+    future.applyToEither(setTimeout(timeout, unit), new JavaFunc[T, Unit] {
+      override def apply(t: T): Unit = {
+        handle.accept(t)
+      }
+    }).exceptionally(new JavaFunc[Throwable, Unit] {
+      override def apply(t: Throwable): Unit = {
+        exceptionally.accept(t)
+      }
+    })
   }
 
 }
