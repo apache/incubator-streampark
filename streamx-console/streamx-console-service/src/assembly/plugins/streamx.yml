@@ -18,12 +18,23 @@ spec:
         env: test
     spec:
       containers:
-        - name: streamx
-          image: streamxhub/streamx-console:dev
+        - image: streamxhub/streamx-console:dev
+          name: streamx
           ports:
             - name: webui
               containerPort: 10000
               protocol: TCP
+          securityContext:
+            privileged: false
+          command: ["bash","bin/startup.sh"]
+          volumeMounts:
+            - mountPath: /var/run/docker.sock
+              name: volume-docker
+      volumes:
+        - hostPath:
+            path: /var/run/docker.sock
+            type: ""
+          name: volume-docker
 ---
 apiVersion: v1
 kind: Service
