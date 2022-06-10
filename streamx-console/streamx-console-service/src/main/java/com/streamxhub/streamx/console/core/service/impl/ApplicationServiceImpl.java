@@ -237,7 +237,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 availableSlot += v.getAvailableSlot();
             }
             if (v.getState() == FlinkAppState.RUNNING.getValue()) {
-                runningJob ++;
+                runningJob++;
             }
             JobsOverview.Task task = v.getOverview();
             if (task != null) {
