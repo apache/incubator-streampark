@@ -40,7 +40,7 @@ object FlinkSubmitter extends Logger {
 
   private[this] val DEPLOY_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.bean.DeployRequest"
 
-  private[this] val STOP_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.bean.StopRequest"
+  private[this] val CANCEL_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.bean.CancelRequest"
 
   private[this] val SHUTDOWN_REQUEST_CLASS_NAME = "com.streamxhub.streamx.flink.submit.bean.ShutDownRequest"
 
@@ -58,7 +58,7 @@ object FlinkSubmitter extends Logger {
   def cancel(stopRequest: CancelRequest): CancelResponse = {
     FlinkShimsProxy.proxy(stopRequest.flinkVersion, (classLoader: ClassLoader) => {
       val submitClass = classLoader.loadClass(FLINK_SUBMIT_CLASS_NAME)
-      val requestClass = classLoader.loadClass(STOP_REQUEST_CLASS_NAME)
+      val requestClass = classLoader.loadClass(CANCEL_REQUEST_CLASS_NAME)
       val method = submitClass.getDeclaredMethod("cancel", requestClass)
       method.setAccessible(true)
       val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, stopRequest))

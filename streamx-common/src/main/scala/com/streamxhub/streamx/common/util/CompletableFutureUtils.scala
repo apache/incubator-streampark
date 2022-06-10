@@ -20,8 +20,7 @@
 package com.streamxhub.streamx.common.util
 
 import java.util.concurrent.{Callable, CompletableFuture, ScheduledThreadPoolExecutor, ThreadFactory, TimeUnit, TimeoutException}
-import java.util.function.Consumer
-import java.util.function.{Function => JavaFunc}
+import java.util.function.{Consumer, Function => JavaFunc}
 
 object CompletableFutureUtils {
 

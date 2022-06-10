@@ -52,11 +52,9 @@ public class CompletableFutureTest {
                 }
             }
         ).get();
-
         if (future.isCancelled()) {
             System.out.println("cancelled...");
         }
-
     }
 
     private void runStop(CompletableFuture<String> future, int sec) {
