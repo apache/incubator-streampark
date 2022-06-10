@@ -23,7 +23,7 @@ services:
     image: streamxhub/streamx-console:dev
     build:
       context: .
-      dockerfile: docker/server/Dockerfile-01
+      dockerfile: docker/compose/Dockerfile
       args:
         DB: database
     ports:
