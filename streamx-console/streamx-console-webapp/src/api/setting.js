@@ -26,7 +26,7 @@ export function get (params) {
 }
 
 export function weburl() {
-  return http.post(api.SETTING.WEBURL, {})
+  return http.post(api.SETTING.WEB_URL, {})
 }
 
 export function all (params) {

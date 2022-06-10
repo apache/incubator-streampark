@@ -164,7 +164,7 @@ object DateUtils {
       case "" => null
       case x: String =>
         val num = x.replaceAll("\\s+|[a-z|A-Z]+$", "").toInt
-        val unit = x.replaceAll("^[0-9]+|\\s+", "") match {
+        val unit = x.replaceAll("^\\d+|\\s+", "") match {
           case "" => null
           case "s" => TimeUnit.SECONDS
           case "m" | "min" => TimeUnit.MINUTES

@@ -38,12 +38,12 @@ import scala.util.Try
  */
 trait YarnSubmitTrait extends FlinkSubmitTrait {
 
-  override def doStop(stopRequest: StopRequest, flinkConf: Configuration): StopResponse = {
+  override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
 
-    val jobID = getJobID(stopRequest.jobId)
+    val jobID = getJobID(cancelRequest.jobId)
 
     val clusterClient = {
-      flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, stopRequest.clusterId)
+      flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, cancelRequest.clusterId)
       val clusterClientFactory = new YarnClusterClientFactory
       val applicationId = clusterClientFactory.getClusterId(flinkConf)
       if (applicationId == null) {
@@ -53,10 +53,10 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor.retrieve(applicationId).getClusterClient
     }
     Try {
-      val savepointDir = cancelJob(stopRequest, jobID, clusterClient)
-      StopResponse(savepointDir)
+      val savepointDir = cancelJob(cancelRequest, jobID, clusterClient)
+      CancelResponse(savepointDir)
     }.recover {
-      case e => throw new FlinkException(s"[StreamX] Triggering a savepoint for the job ${stopRequest.jobId} failed. detail: ${ExceptionUtils.stringifyException(e)}");
+      case e => throw new FlinkException(s"[StreamX] Triggering a savepoint for the job ${cancelRequest.jobId} failed. detail: ${ExceptionUtils.stringifyException(e)}");
     }.get
   }
 

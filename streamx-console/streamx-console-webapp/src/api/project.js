@@ -26,7 +26,7 @@ export function branches (params) {
 }
 
 export function gitcheck (params) {
-  return http.post(api.Project.GITCHECK, params)
+  return http.post(api.Project.GIT_CHECK, params)
 }
 
 export function exists (params) {
@@ -54,15 +54,15 @@ export function build (params) {
 }
 
 export function buildlog (params) {
-  return http.post(api.Project.BUILDLOG, params)
+  return http.post(api.Project.BUILD_LOG, params)
 }
 
 export function closebuild(params) {
-  return http.post(api.Project.CLOSEBUILD, params)
+  return http.post(api.Project.CLOSE_BUILD, params)
 }
 
 export function fileList (params) {
-  return http.post(api.Project.FILELIST, params)
+  return http.post(api.Project.FILE_LIST, params)
 }
 
 export function modules (params) {
@@ -70,7 +70,7 @@ export function modules (params) {
 }
 
 export function listConf (params) {
-  return http.post(api.Project.LISTCONF, params)
+  return http.post(api.Project.LIST_CONF, params)
 }
 
 export function jars (params) {

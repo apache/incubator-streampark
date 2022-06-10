@@ -79,16 +79,16 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   }
 
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
-  @throws[Exception] override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
+  @throws[Exception] override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
 
     require(
-      StringUtils.isNotBlank(stopRequest.clusterId),
+      StringUtils.isNotBlank(cancelRequest.clusterId),
       s"[flink-submit] stop flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
     )
 
     flinkConfig
-      .safeSet(KubernetesConfigOptions.CLUSTER_ID, stopRequest.clusterId)
-      .safeSet(KubernetesConfigOptions.NAMESPACE, stopRequest.kubernetesNamespace)
+      .safeSet(KubernetesConfigOptions.CLUSTER_ID, cancelRequest.clusterId)
+      .safeSet(KubernetesConfigOptions.NAMESPACE, cancelRequest.kubernetesNamespace)
 
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var client: ClusterClient[String] = null
@@ -96,12 +96,12 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     try {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
-      val jobID = JobID.fromHexString(stopRequest.jobId)
-      val actionResult = cancelJob(stopRequest, jobID, client)
-      StopResponse(actionResult)
+      val jobID = JobID.fromHexString(cancelRequest.jobId)
+      val actionResult = cancelJob(cancelRequest, jobID, client)
+      CancelResponse(actionResult)
     } catch {
       case e: Exception =>
-        logger.error(s"[flink-submit] stop flink job failed, mode=${flinkConfig.get(DeploymentOptions.TARGET)}, stopRequest=${stopRequest}")
+        logger.error(s"[flink-submit] stop flink job failed, mode=${flinkConfig.get(DeploymentOptions.TARGET)}, cancelRequest=${cancelRequest}")
         throw e
     } finally {
       if (client != null) client.close()

@@ -22,16 +22,12 @@
 import api from './index'
 import http from '@/utils/request'
 
-export function getExecUser () {
-  return http.post(api.User.EXECUSER)
-}
-
 export function list (queryParam) {
   return http.post(api.User.LIST, queryParam)
 }
 
 export function getNoTokenUser(queryParam) {
-  return http.post(api.User.GET_NOTOKEN_USER, queryParam)
+  return http.post(api.User.GET_NO_TOKEN_USER, queryParam)
 }
 
 export function update (queryParam) {

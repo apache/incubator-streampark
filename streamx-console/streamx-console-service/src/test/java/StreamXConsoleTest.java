@@ -43,8 +43,7 @@ public class StreamXConsoleTest {
         application.setSavePointed(false);
         application.setAllowNonRestored(false);
 
-        boolean status = applicationService.start(application, false);
-        System.out.println(status);
+        applicationService.start(application, false);
     }
 
 }

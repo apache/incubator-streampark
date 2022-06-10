@@ -21,23 +21,23 @@
 
 export default {
   Passport: {
-    SIGNIN: '/passport/signin',
-    SIGNOUT: '/passport/signout'
+    SIGN_IN: '/passport/signin',
+    SIGN_OUT: '/passport/signout'
   },
   Project: {
     BRANCHES: '/flink/project/branches',
-    GITCHECK: '/flink/project/gitcheck',
+    GIT_CHECK: '/flink/project/gitcheck',
     EXISTS: '/flink/project/exists',
     CREATE: '/flink/project/create',
     GET: '/flink/project/get',
     UPDATE: '/flink/project/update',
     BUILD: '/flink/project/build',
-    BUILDLOG: '/flink/project/buildlog',
-    CLOSEBUILD: '/flink/project/closebuild',
+    BUILD_LOG: '/flink/project/buildlog',
+    CLOSE_BUILD: '/flink/project/closebuild',
     LIST: '/flink/project/list',
-    FILELIST: '/flink/project/filelist',
+    FILE_LIST: '/flink/project/filelist',
     MODULES: '/flink/project/modules',
-    LISTCONF: '/flink/project/listconf',
+    LIST_CONF: '/flink/project/listconf',
     JARS: '/flink/project/jars',
     DELETE: '/flink/project/delete',
     SELECT: '/flink/project/select'
@@ -49,9 +49,9 @@ export default {
     SUBMIT: '/flink/notebook/submit'
   },
   Metrics: {
-    FLAMEGRAPH: '/metrics/flamegraph',
+    FLAME_GRAPH: '/metrics/flamegraph',
     NOTICE: '/metrics/notice',
-    DELNOTICE: '/metrics/delnotice'
+    DEL_NOTICE: '/metrics/delnotice'
   },
   SavePoint: {
     LATEST: '/flink/savepoint/latest',
@@ -59,7 +59,7 @@ export default {
     DELETE: '/flink/savepoint/delete'
   },
   Application: {
-    READCONF: '/flink/app/readConf',
+    READ_CONF: '/flink/app/readConf',
     UPDATE: '/flink/app/update',
     UPLOAD: '/flink/app/upload',
     DEPLOY: '/flink/app/deploy',
@@ -70,20 +70,21 @@ export default {
     DASHBOARD: '/flink/app/dashboard',
     MAIN: '/flink/app/main',
     NAME: '/flink/app/name',
-    CHECKNAME: '/flink/app/checkName',
+    CHECK_NAME: '/flink/app/checkName',
     CANCEL: '/flink/app/cancel',
+    FORCED_STOP: '/flink/app/forcedStop',
     DELETE: '/flink/app/delete',
-    DELETEBAK: '/flink/app/deletebak',
+    DELETE_BAK: '/flink/app/deletebak',
     CREATE: '/flink/app/create',
     START: '/flink/app/start',
     CLEAN: '/flink/app/clean',
     BACKUPS: '/flink/app/backups',
     ROLLBACK: '/flink/app/rollback',
     REVOKE: '/flink/app/revoke',
-    OPTIONLOG: '/flink/app/optionlog',
-    DOWNLOG: '/flink/app/downlog',
-    CHECKJAR: '/flink/app/checkjar',
-    VERIFYSCHEMA: '/flink/app/verifySchema'
+    OPTION_LOG: '/flink/app/optionlog',
+    DOWN_LOG: '/flink/app/downlog',
+    CHECK_JAR: '/flink/app/checkjar',
+    VERIFY_SCHEMA: '/flink/app/verifySchema'
   },
   Config: {
     GET: '/flink/conf/get',
@@ -104,7 +105,7 @@ export default {
   },
   FlinkCluster: {
     LIST: '/flink/cluster/list',
-    ACTIVEURL: '/flink/cluster/activeUrl',
+    ACTIVE_URL: '/flink/cluster/activeUrl',
     CREATE:  '/flink/cluster/create',
     CHECK: '/flink/cluster/check',
     GET: '/flink/cluster/get',
@@ -140,20 +141,19 @@ export default {
   },
   SETTING: {
     GET: '/flink/setting/get',
-    WEBURL: '/flink/setting/weburl',
+    WEB_URL: '/flink/setting/weburl',
     ALL: '/flink/setting/all',
     CHECK_HADOOP: '/flink/setting/checkHadoop',
     SYNC: '/flink/setting/sync',
     UPDATE: '/flink/setting/update'
   },
   User: {
-    EXECUSER: '/user/execUser',
     LIST: '/user/list',
     UPDATE: '/user/update',
     PASSWORD: '/user/password',
     RESET: '/user/password/reset',
     GET: '/user/get',
-    GET_NOTOKEN_USER: '/user/getNoTokenUser',
+    GET_NO_TOKEN_USER: '/user/getNoTokenUser',
     POST: '/user/post',
     DELETE: '/user/delete',
     CHECK_NAME: '/user/check/name',
