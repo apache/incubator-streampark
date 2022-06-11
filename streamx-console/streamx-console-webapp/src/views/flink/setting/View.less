@@ -36,6 +36,12 @@
       .ant-input {
         text-align: right;
       }
+
+      .ant-list-item-action {
+        .ctl-btn-color {
+          background: none !important;
+        }
+      }
     }
 
     .ant-tag {
@@ -69,19 +75,19 @@
       padding-bottom: 0 !important;
     }
   }
-  
+
   .version-select {
     .ant-select-selection--multiple .ant-select-selection__choice {
       border: unset !important;
     }
   }
-  
+
   .sql-box,.pom-box {
     height: 550px;
     width: 100%;
     overflow: hidden;
   }
-  
+
   .pod-template-box,.jm-pod-template-box,.tm-pod-template-box {
     resize: vertical;
     outline: none;
@@ -89,72 +95,72 @@
     width: 100%;
     overflow: auto;
   }
-  
+
   .syntax-true {
     border: 1px solid @border-color-base ;
   }
-  
+
   .syntax-false {
     border: 1px solid red;
   }
-  
+
   .cluster_controller {
-  
+
     .sql-keyword {
       color: RED;
     }
-  
+
     .ant-alert.ant-alert-no-icon {
       padding: 6px 15px;
     }
-  
+
     .ant-list-item-meta-description {
       margin-left: 20px;
     }
-  
+
     .ant-list-item-content {
       margin-right: 20px;
     }
-  
+
     .conf-item {
       margin-bottom: 0;
     }
-  
+
     .conf-desc {
       color: darkgrey;
       margin-bottom: 0
     }
-  
+
     .sql-desc {
       color: #666;
       line-height: 25px;
     }
-  
+
     .conf-switch {
       color: darkgrey;
       margin-left: 5px;
     }
-  
+
     .ant-input-number {
       width: 100%;
     }
-  
+
     .ant-tabs-bar {
       margin: 0 !important;
       border-bottom: none !important;
     }
-  
+
     .ant-form-explain {
       margin-top: -5px;
     }
-  
+
     .ant-switch-loading, .ant-switch-disabled {
       cursor: not-allowed;
       opacity: unset !important;
     }
-  
+
   }
-  
+
   .flinksql-tool {
     z-index: 99;
     bottom: 50px;
@@ -164,11 +170,11 @@
     height: 26px;
     padding: 0 10px;
   }
-  
+
   .flinksql-tool-item {
     font-size: 12px;
   }
-  
+
   .pod-template-tool {
     z-index: 99;
     position: absolute;
@@ -179,11 +185,11 @@
     height: 26px;
     padding: 0 10px;
   }
-  
+
   .pod-template-tool-item{
     font-size: 12px;
   }
-  
+
   .pod-template-tool-drawer-submit-cancel {
     position: absolute;
     right: 0;
@@ -195,9 +201,9 @@
     text-align: right;
     z-index: 1;
   }
-  
+
   .cluster_controller,.bigScreen-sql-model {
-  
+
     .format-sql {
       color: dimgrey;
       z-index: 99;
@@ -208,7 +214,7 @@
       cursor: pointer;
       font-weight: bold;
     }
-  
+
     .big-screen {
       color: dimgrey;
       z-index: 99;
@@ -218,11 +224,11 @@
       right: 20px;
       cursor: pointer;
     }
-  
+
     .big-screen:hover,.format-sql:hover {
       color: #1890ff;
     }
-  
+
     .apply-pom, .apply-testing, .verify-sql {
       z-index: 99;
       position: absolute;
@@ -234,7 +240,7 @@
       padding: 0 12px;
       font-size: 12px;
     }
-  
+
     .uploadjar-box {
       margin-top: 10px;
       width: 100%;
@@ -242,7 +248,7 @@
       background-color: @background-color-base;
       display: inline-block;
     }
-  
+
     .dependency-box {
       margin-top: 15px;
       width: 100%;
@@ -251,7 +257,7 @@
       border: 1px solid @border-color-base;
       display: inline-block;
       margin-bottom: -25px;
-  
+
       .dependency-item {
         position: relative;
         border: unset;
@@ -260,7 +266,7 @@
         padding: 0 6px;
         width: unset;
         float: left;
-  
+
         .ant-alert-close-icon {
           position: relative;
           left: 5px;
@@ -268,11 +274,11 @@
         }
       }
     }
-  
+
     .tag-dependency-pom:hover {
       cursor: pointer;
     }
-  
+
     .form-required > .ant-form-item-label > label::before {
       display: inline-block;
       margin-right: 4px;
@@ -282,7 +288,7 @@
       line-height: 1;
       content: '*';
     }
-  
+
     .tag-dependency {
       padding: 1px 1px !important;
       font-size: 10px;
@@ -290,20 +296,20 @@
       margin-right: 0px;
       line-height: 12px;
     }
-  
+
     .note-info {
       color: #666;
       line-height: 25px;
       display: inline-table
     }
-  
+
     .note-elem {
       border: 1px solid @border-color-base;
       background-color: @background-color-base;
       padding: 0px 4px;
       border-radius: 4px;
     }
-  
+
     .sql-desc {
       color: red;
       line-height: 25px;
@@ -311,20 +317,20 @@
       margin-bottom: 10px;
       word-wrap: break-word;
     }
-  
+
     .tag-note {
       padding: 2px 2px !important;
       border-radius: 2px;
       line-height: 12px;
     }
-  
+
     .icon-close {
       color: rgba(0, 0, 0, 0.45);
       font-size: 12px
     }
-  
+
   }
-  
+
   .slide-fade-enter-active {
     transition: all .3s ease;
   }
