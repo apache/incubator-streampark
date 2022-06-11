@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.streamxhub.streamx</groupId>
     <artifactId>streamx</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.2.4</version>
     <packaging>pom</packaging>
     <name>StreamX Parent</name>
     <description>A magical framework that make stream processing easier</description>

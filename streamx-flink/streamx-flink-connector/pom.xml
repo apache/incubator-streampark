@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-flink</artifactId>
-        <version>1.2.4-SNAPSHOT</version>
+        <version>1.2.4</version>
     </parent>
 
     <artifactId>streamx-flink-connector_${scala.binary.version}</artifactId>
@@ -220,9 +220,20 @@
     </dependencies>
 
     <profiles>
+        <profile>
+            <id>connector_2.12</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>scala.binary.version</name>
+                    <value>2.12</value>
+                </property>
+            </activation>
+            <modules></modules>
+        </profile>
 
         <profile>
-            <id>flink-connector_2.11</id>
+            <id>connector_2.11</id>
             <activation>
                 <property>
                     <name>scala.binary.version</name>
@@ -234,7 +245,6 @@
                 <module>streamx-flink-connector-redis</module>
             </modules>
         </profile>
-
     </profiles>
 
 </project>
