@@ -40,7 +40,6 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks.{break, breakable}
 import scala.util.{Success, Try}
 
-
 object YarnUtils extends Logger {
 
   private[this] var rmHttpURL: String = _
@@ -257,14 +256,15 @@ object YarnUtils extends Logger {
   }
 
   private[this] def defaultHttpRequest(url: String): String = {
+    val config = RequestConfig.custom.setConnectTimeout(5000).build
     if (hasYarnHttpKerberosAuth) {
       HadoopUtils.getUgi().doAs(new PrivilegedExceptionAction[String] {
         override def run(): String = {
-          AuthHttpClientUtils.httpGetRequest(url, RequestConfig.custom.setConnectTimeout(5000).build)
+          HttpClientUtils.httpAuthGetRequest(url, config)
         }
       })
     } else {
-      HttpClientUtils.httpGetRequest(url, RequestConfig.custom.setConnectTimeout(5000).build)
+      HttpClientUtils.httpGetRequest(url, config)
     }
   }
 
