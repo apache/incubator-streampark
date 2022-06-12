@@ -1782,7 +1782,7 @@ export default {
     handleCanStop(app) {
       const optionTime = new Date(app['optionTime']).getTime()
       const nowTime = new Date().getTime()
-      if (nowTime - optionTime >= 20 * 1000) {
+      if (nowTime - optionTime >= 60 * 1000) {
         const state = app['optionState']
         if (state === 0) {
           return app.state === 3 || app.state === 4 || app.state === 8 || false

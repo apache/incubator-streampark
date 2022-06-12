@@ -21,8 +21,8 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.DateUtils;
-import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
@@ -176,7 +176,7 @@ public class AlertServiceImpl implements AlertService {
         String url = "";
         if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
             String format = "%s/proxy/%s/";
-            url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
+            url = String.format(format, YarnUtils.getRMWebAppURL(false), application.getAppId());
         }
 
         MailTemplate template = new MailTemplate();
