@@ -19,6 +19,7 @@
 
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
+import com.streamxhub.streamx.common.util.YarnUtils;
 
 import org.apache.hadoop.yarn.api.records.NodeState;
 import org.apache.hadoop.yarn.exceptions.YarnException;
@@ -46,7 +47,7 @@ public class YarnTest {
          * 将hadoop的配置文件放到一个目录下,
          * 在运行该类的时候加上jvm级别的参数(idea里的 vmOption ) -DHADOOP_CONF_DIR=${目录}
          */
-        String url = HadoopUtils.getRMWebAppURL(true);
+        String url = YarnUtils.getRMWebAppURL(true);
         System.out.println(url);
     }
 
