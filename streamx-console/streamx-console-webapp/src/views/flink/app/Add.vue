@@ -1842,6 +1842,9 @@
           this.form.getFieldDecorator('jobType', {initialValue: 'customcode'})
           this.form.getFieldDecorator('resourceFrom', {initialValue: 'cvs'})
           this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.defaultValue)
+          if (this.executionMode === 6) {
+            initPodTemplateEditor(this)
+          }
         }
       },
 
@@ -1855,6 +1858,12 @@
           this.$nextTick(()=> {
             initFlinkSqlEditor(this, this.controller.flinkSql.value)
             this.selectedHistoryUploadJars = []
+            if (this.executionMode === 6) {
+              initPodTemplateEditor(this)
+            }
+          })
+        } else {
+          this.$nextTick(() => {
             if (this.executionMode === 6) {
               initPodTemplateEditor(this)
             }
