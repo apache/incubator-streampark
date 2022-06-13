@@ -176,7 +176,7 @@ public class AlertServiceImpl implements AlertService {
         String url = "";
         if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
             String format = "%s/proxy/%s/";
-            url = String.format(format, YarnUtils.getRMWebAppURL(false), application.getAppId());
+            url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
         }
 
         MailTemplate template = new MailTemplate();

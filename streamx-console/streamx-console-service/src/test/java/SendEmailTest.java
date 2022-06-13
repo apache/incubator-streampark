@@ -131,7 +131,7 @@ public class SendEmailTest {
         }
         duration = duration / 1000 / 60;
         String format = "%s/proxy/%s/";
-        String url = String.format(format, YarnUtils.getRMWebAppURL(false), application.getAppId());
+        String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
 
         MailTemplate template = new MailTemplate();
         template.setJobName(application.getJobName());

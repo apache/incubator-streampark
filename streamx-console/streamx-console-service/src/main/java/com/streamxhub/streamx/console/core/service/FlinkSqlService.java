@@ -22,7 +22,7 @@ package com.streamxhub.streamx.console.core.service;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
-import com.streamxhub.streamx.flink.core.SqlError;
+import com.streamxhub.streamx.flink.core.FlinkSqlValidationResult;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -35,13 +35,10 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
     /**
      * @param flinkSql
-     * @param latest   是否latest
      */
     void create(FlinkSql flinkSql);
 
     /**
-     * @param latest true  表示设置新增的的记录为 "latest"<br>
-     *               false 表示设置新增的的记录为 "Effective"<br>
      * @param sqlId
      * @param appId
      */
@@ -77,5 +74,5 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
     void rollback(Application application);
 
-    SqlError verifySql(String sql, Long versionId);
+    FlinkSqlValidationResult verifySql(String sql, Long versionId);
 }

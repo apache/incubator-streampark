@@ -38,7 +38,7 @@ import java.util.{HashMap => JavaHashMap, List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks.{break, breakable}
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 object YarnUtils extends Logger {
 
@@ -107,28 +107,19 @@ object YarnUtils extends Logger {
     }
   }
 
-  def httpYarnAppInfo(appId: String): String = {
-    if (null == appId) return null
-    defaultHttpRetryRequest("ws/v1/cluster/apps/%s".format(appId))
-  }
-
   /**
    * <pre>
    *
-   * @param getLatest :
-   *                  默认单例模式,如果getLatest=true则再次寻找活跃节点返回,主要是考虑到主备的情况,
-   *                  如: 第一次获取的时候返回的是一个当前的活跃节点,之后可能这个活跃节点挂了,就不能提供服务了,
-   *                  此时在调用该方法,只需要传入true即可再次获取一个最新的活跃节点返回
    * @return
    * </pre>
    */
-  def getRMWebAppURL(getLatest: Boolean = false): String = {
+  def getRMWebAppURL(): String = {
 
     if (StringUtils.isNotBlank(PROXY_YARN_URL)) {
       return PROXY_YARN_URL
     }
 
-    if (rmHttpURL == null || getLatest) {
+    if (rmHttpURL == null) {
       synchronized {
         val conf = HadoopUtils.hadoopConf
         val useHttps = YarnConfiguration.useHttps(conf)
@@ -236,33 +227,39 @@ object YarnUtils extends Logger {
 
   /**
    *
-   * @param url  url
+   * @param url url
    * @return
    */
-  def httpRequest(url: String): String = {
-    if (url == url) return null
-    defaultHttpRetryRequest(url)
-  }
+  def restRequest(url: String): String = {
+    if (url == null) return null
 
-  private[this] def defaultHttpRetryRequest(url: String): String = {
-    if (null == url) return null
-    val format = "%s/%s"
-    Try(defaultHttpRequest(format.format(getRMWebAppURL(), url))).getOrElse {
-      defaultHttpRequest(format.format(getRMWebAppURL(true), url))
-    }
-  }
-
-  private[this] def defaultHttpRequest(url: String): String = {
-    val config = RequestConfig.custom.setConnectTimeout(5000).build
-    if (hasYarnHttpKerberosAuth) {
-      HadoopUtils.getUgi().doAs(new PrivilegedExceptionAction[String] {
-        override def run(): String = {
-          HttpClientUtils.httpAuthGetRequest(url, config)
+    def request(url: String): String = {
+      val config = RequestConfig.custom.setConnectTimeout(5000).build
+      if (hasYarnHttpKerberosAuth) {
+        HadoopUtils.getUgi().doAs(new PrivilegedExceptionAction[String] {
+          override def run(): String = {
+            Try(HttpClientUtils.httpAuthGetRequest(url, config)) match {
+              case Success(v) => v
+              case Failure(e) =>
+                logError("yarnUtils authRestRequest error, detail: ", e)
+                null
+            }
+          }
+        })
+      } else {
+        Try(HttpClientUtils.httpGetRequest(url, config)) match {
+          case Success(v) => v
+          case Failure(e) =>
+            logError("yarnUtils restRequest error, detail: ", e)
+            null
         }
-      })
-    } else {
-      HttpClientUtils.httpGetRequest(url, config)
+      }
     }
+
+    if (url.startsWith("http://") || url.startsWith("https://")) request(url) else {
+      request(s"${getRMWebAppURL()}/$url")
+    }
+
   }
 
 }

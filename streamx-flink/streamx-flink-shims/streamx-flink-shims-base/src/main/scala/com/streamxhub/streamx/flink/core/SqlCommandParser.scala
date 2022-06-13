@@ -18,32 +18,35 @@
  */
 package com.streamxhub.streamx.flink.core
 
-import com.streamxhub.streamx.common.enums.SqlErrorType
+import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType
 import com.streamxhub.streamx.common.util.{Logger, SqlSplitter}
 import enumeratum.EnumEntry
+import org.apache.flink.table.api.ValidationException
 
 import java.util.regex.{Matcher, Pattern}
+import java.lang.{Boolean => JavaBool}
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.Breaks.{break, breakable}
 
 object SqlCommandParser extends Logger {
 
   def parseSQL(sql: String): List[SqlCommandCall] = {
-    val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
+    val sqlEmptyError = "verify failed: flink sql cannot be empty."
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
     val lines = SqlSplitter.splitSql(sql)
     lines match {
-      case stmts if stmts.isEmpty => throw new IllegalArgumentException(sqlEmptyError)
+      case stmts if stmts.isEmpty => throw new ValidationException(sqlEmptyError)
       case stmts =>
         val calls = new ArrayBuffer[SqlCommandCall]
         for (stmt <- stmts) {
           parseLine(stmt) match {
             case Some(x) => calls += x
-            case _ => throw new IllegalArgumentException(SqlError(SqlErrorType.UNSUPPORTED_SQL, exception = s"unsupported sql", sql = stmt).toString)
+            case _ => throw new ValidationException(s"unsupported sql: $stmt")
           }
         }
         calls.toList match {
-          case Nil => throw new IllegalArgumentException(SqlError(SqlErrorType.SYNTAX_ERROR, exception = "no executable sql", sql = "").toString)
+          case Nil => throw new ValidationException(s"flink sql syntax error, no executable sql")
           case r => r
         }
     }
@@ -52,15 +55,14 @@ object SqlCommandParser extends Logger {
   private[this] def parseLine(sqlLine: String): Option[SqlCommandCall] = {
     val stmt = sqlLine.trim
     // parse
-    val sqlCommands = SqlCommand.values.filter(_.matches(stmt))
-    if (sqlCommands.isEmpty) None else {
-      val sqlCommand = sqlCommands.head
+    val sqlCommand = SqlCommand.get(stmt)
+    if (sqlCommand == null) None else {
       val matcher = sqlCommand.matcher
       val groups = new Array[String](matcher.groupCount)
       for (i <- groups.indices) {
         groups(i) = matcher.group(i + 1)
       }
-      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlCommand, x, sqlLine))
+      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlCommand, x, sqlLine.trim))
     }
   }
 
@@ -87,6 +89,19 @@ sealed abstract class SqlCommand(
 }
 
 object SqlCommand extends enumeratum.Enum[SqlCommand] {
+
+  def get(stmt: String): SqlCommand = {
+    var cmd: SqlCommand = null
+    breakable {
+      this.values.foreach(x => {
+        if (x.matches(stmt)) {
+          cmd = x
+          break()
+        }
+      })
+    }
+    cmd
+  }
 
   val values: immutable.IndexedSeq[SqlCommand] = findValues
 
@@ -174,7 +189,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   case object ALTER_FUNCTION extends SqlCommand(
     "alter function",
-    "(ALTER\\s+FUNCTION.*)"
+    "(ALTER\\s+FUNCTION\\s+.*)"
   )
 
   //----DROP Statements----
@@ -196,13 +211,12 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   case object DROP_VIEW extends SqlCommand(
     "drop view",
-    "DROP\\s+VIEW\\s+(.*)"
+    "(DROP\\s+VIEW\\s+.*)"
   )
-
 
   case object DROP_FUNCTION extends SqlCommand(
     "drop function",
-    "DROP\\s+FUNCTION\\s+(.*)"
+    "(DROP\\s+FUNCTION\\s+.*)"
   )
 
   //----SHOW Statements ---
@@ -213,7 +227,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   )
 
   case object SHOW_CURRENT_CATALOG extends SqlCommand(
-    "show current catalogs",
+    "show current catalog",
     "SHOW\\s+CURRENT\\s+CATALOG",
     Converters.NO_OPERANDS
   )
@@ -258,25 +272,25 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   //---- INSERT Statement #
   case object INSERT_INTO extends SqlCommand(
     "insert into",
-    "(INSERT\\s+INTO.*)"
+    "(INSERT\\s+INTO\\s+.*)"
   )
 
   case object INSERT_OVERWRITE extends SqlCommand(
     "insert overwrite",
-    "(INSERT\\s+OVERWRITE.*)"
+    "(INSERT\\s+OVERWRITE\\s+.*)"
   )
 
 
   //---- SELECT Statements #
   case object SELECT extends SqlCommand(
     "select",
-    "(SELECT.*)"
+    "(SELECT\\s+.*)"
   )
 
   //---- USE Statements #
   case object USE_CATALOG extends SqlCommand(
     "use catalog",
-    "USE\\s+CATALOG\\s+(.*)"
+    "(USE\\s+CATALOG\\s+.*)"
   )
 
   case object USE extends SqlCommand(
@@ -287,12 +301,12 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   case object DESC extends SqlCommand(
     "desc",
-    "DESC\\s+(.*)"
+    "(DESC\\s+.*)"
   )
 
   case object DESCRIBE extends SqlCommand(
     "describe",
-    "DESCRIBE\\s+(.*)"
+    "(DESCRIBE\\s+.*)"
   )
 
   /**
@@ -309,8 +323,8 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "set",
     "SET(\\s+(\\S+)\\s*=(.*))?", {
       case a if a.length < 3 => None
-      case a if a.head == null => Some(Array[String](a.head))
-      case a => Some(Array[String](a(1), a(2)))
+      case a if a.head == null => Some(Array[String](cleanUp(a.head)))
+      case a => Some(Array[String](cleanUp(a(1)), cleanUp(a(2))))
     }
   )
 
@@ -346,6 +360,8 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     Converters.NO_OPERANDS
   )
 
+  private[this] def cleanUp(sql: String): String = sql.trim.replaceAll("^('|\\\")|('|\\\")$", "")
+
 }
 
 /**
@@ -357,33 +373,4 @@ case class SqlCommandCall(command: SqlCommand, operands: Array[String], originSq
   }
 }
 
-
-case class SqlError(
-                     errorType: SqlErrorType,
-                     exception: String = null,
-                     sql: String = null
-                   ) {
-
-  override def toString: String = SqlError.toString(this)
-
-}
-
-object SqlError {
-
-  //不可见分隔符.
-  private[core] val separator = "\001"
-
-  def toString(sqlError: SqlError): String = {
-    s"${sqlError.errorType.getValue}${SqlError.separator}${sqlError.exception}${SqlError.separator}${sqlError.sql}"
-  }
-
-  def fromString(string: String): SqlError = {
-    string match {
-      case null => null
-      case x => x.split(separator) match {
-        case Array(a, b, c) => SqlError(SqlErrorType.of(a.toInt), b, c)
-      }
-    }
-  }
-
-}
+case class FlinkSqlValidationResult(success: JavaBool = true, failedType: FlinkSqlValidationFailedType = null, exception: Throwable = null, sql: String = null)
