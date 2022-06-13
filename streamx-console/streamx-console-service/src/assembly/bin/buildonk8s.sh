@@ -62,10 +62,6 @@ else
   RESET=""
 fi
 
-
-
-
-
 echo_r () {
     # Color red: Error, Failed
     [[ $# -ne 1 ]] && return 1
