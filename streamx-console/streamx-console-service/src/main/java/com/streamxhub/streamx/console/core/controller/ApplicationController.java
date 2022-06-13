@@ -201,7 +201,7 @@ public class ApplicationController {
 
     @PostMapping("yarn")
     public RestResponse yarn() {
-        return RestResponse.create().data(YarnUtils.getRMWebAppProxyURL());
+        return RestResponse.create().data(YarnUtils.getRMWebAppURL(false));
     }
 
     @PostMapping("name")

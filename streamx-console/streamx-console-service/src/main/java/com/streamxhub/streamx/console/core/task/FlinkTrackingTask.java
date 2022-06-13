@@ -136,11 +136,11 @@ public class FlinkTrackingTask {
 
     private static ApplicationService applicationService;
 
-    private static final Map<String, Long> CHECK_POINT_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Long> CHECK_POINT_MAP = new ConcurrentHashMap<>(0);
 
-    private static final Map<String, Counter> CHECK_POINT_FAILED_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Counter> CHECK_POINT_FAILED_MAP = new ConcurrentHashMap<>(0);
 
-    private static final Map<Long, OptionState> OPTIONING = new ConcurrentHashMap<>();
+    private static final Map<Long, OptionState> OPTIONING = new ConcurrentHashMap<>(0);
 
     private Long lastTrackTime = 0L;
 
@@ -265,9 +265,8 @@ public class FlinkTrackingTask {
      * @throws Exception
      */
     private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
-        FlinkEnv flinkEnv = getFlinkEnvCache(application);
-        FlinkCluster flinkCluster = getFlinkClusterCache(application);
-        JobsOverview jobsOverview = application.httpJobsOverview(flinkEnv, flinkCluster);
+        FlinkCluster flinkCluster = getFlinkCluster(application);
+        JobsOverview jobsOverview = application.httpJobsOverview(flinkCluster);
         Optional<JobsOverview.Job> optional;
         if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
             optional = jobsOverview.getJobs().size() > 1 ? jobsOverview.getJobs().stream().filter(a -> StringUtils.equals(application.getJobId(), a.getId())).findFirst() : jobsOverview.getJobs().stream().findFirst();
@@ -328,9 +327,8 @@ public class FlinkTrackingTask {
 
         // 3) overview,刚启动第一次获取Overview信息.
         if (STARTING_CACHE.getIfPresent(application.getId()) != null) {
-            FlinkEnv flinkEnv = getFlinkEnvCache(application);
-            FlinkCluster flinkCluster = getFlinkClusterCache(application);
-            Overview override = application.httpOverview(flinkEnv, flinkCluster);
+            FlinkCluster flinkCluster = getFlinkCluster(application);
+            Overview override = application.httpOverview(flinkCluster);
             if (override != null && override.getSlotsTotal() > 0) {
                 STARTING_CACHE.invalidate(application.getId());
                 application.setTotalTM(override.getTaskmanagers());
@@ -347,9 +345,8 @@ public class FlinkTrackingTask {
      * @throws IOException
      */
     private void handleCheckPoints(Application application) throws Exception {
-        FlinkEnv flinkEnv = getFlinkEnvCache(application);
-        FlinkCluster flinkCluster = getFlinkClusterCache(application);
-        CheckPoints checkPoints = application.httpCheckpoints(flinkEnv, flinkCluster);
+        FlinkCluster flinkCluster = getFlinkCluster(application);
+        CheckPoints checkPoints = application.httpCheckpoints(flinkCluster);
         if (checkPoints != null) {
             CheckPoints.Latest latest = checkPoints.getLatest();
             if (latest != null) {
@@ -720,7 +717,7 @@ public class FlinkTrackingTask {
         return K8sFlinkTrkMonitorWrapper.isKubernetesApp(app);
     }
 
-    private FlinkEnv getFlinkEnvCache(Application application) {
+    private FlinkEnv getFlinkEnv(Application application) {
         FlinkEnv flinkEnv = FLINK_ENV_MAP.get(application.getVersionId());
         if (flinkEnv == null) {
             flinkEnv = flinkEnvService.getByAppId(application.getId());
@@ -729,7 +726,7 @@ public class FlinkTrackingTask {
         return flinkEnv;
     }
 
-    private FlinkCluster getFlinkClusterCache(Application application) {
+    private FlinkCluster getFlinkCluster(Application application) {
         if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
             FlinkCluster flinkCluster = FLINK_CLUSTER_MAP.get(application.getFlinkClusterId());
             if (flinkCluster == null) {
