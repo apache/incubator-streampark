@@ -1550,11 +1550,11 @@ export default {
     },
 
     handleCanRemapping(record) {
-      return record.state !== 5 &&
-      !this.optionApps.launch.get(record.id) &&
-      !this.optionApps.stoping.get(record.id) &&
-      !this.optionApps.starting.get(record.id) &&
-      record['optionState'] === 0
+      return record.state === 7 &&
+        record.state === 0 &&
+        record.state === 10 &&
+        record.state === 11 &&
+        record.state === 13
     },
 
     showForceStartAppModal() {

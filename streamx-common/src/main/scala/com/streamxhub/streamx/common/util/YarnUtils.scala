@@ -44,6 +44,8 @@ object YarnUtils extends Logger {
 
   private[this] var rmHttpURL: String = _
 
+  lazy val PROXY_YARN_URL = InternalConfigHolder.get[String](CommonConfig.STREAMX_PROXY_YARN_URL)
+
   /**
    * hadoop.http.authentication.type<br>
    * 获取 yarn http 认证方式.<br> ex: sample, kerberos
@@ -110,14 +112,6 @@ object YarnUtils extends Logger {
     defaultHttpRetryRequest("ws/v1/cluster/apps/%s".format(appId))
   }
 
-  def getRMWebAppProxyURL: String = {
-    val proxyYarnUrl: String = InternalConfigHolder.get(CommonConfig.STREAMX_PROXY_YARN_URL)
-    if (StringUtils.isBlank(proxyYarnUrl)) {
-      return getRMWebAppURL()
-    }
-    proxyYarnUrl
-  }
-
   /**
    * <pre>
    *
@@ -129,6 +123,11 @@ object YarnUtils extends Logger {
    * </pre>
    */
   def getRMWebAppURL(getLatest: Boolean = false): String = {
+
+    if (StringUtils.isNotBlank(PROXY_YARN_URL)) {
+      return PROXY_YARN_URL
+    }
+
     if (rmHttpURL == null || getLatest) {
       synchronized {
         val conf = HadoopUtils.hadoopConf
@@ -236,20 +235,18 @@ object YarnUtils extends Logger {
   def getYarnAppTrackingUrl(applicationId: ApplicationId): String = HadoopUtils.yarnClient.getApplicationReport(applicationId).getTrackingUrl
 
   /**
-   * 获取app任务内proxy结果
    *
-   * @param appId  applicationId
-   * @param subUrl subUrl， 相关app 完整子url
+   * @param url  url
    * @return
    */
-  def httpYarnAppContent(appId: String, subUrl: String): String = {
-    if (null == appId) return null
-    defaultHttpRetryRequest(s"$appId/$subUrl")
+  def httpRequest(url: String): String = {
+    if (url == url) return null
+    defaultHttpRetryRequest(url)
   }
 
   private[this] def defaultHttpRetryRequest(url: String): String = {
     if (null == url) return null
-    val format = "%s/proxy/%s"
+    val format = "%s/%s"
     Try(defaultHttpRequest(format.format(getRMWebAppURL(), url))).getOrElse {
       defaultHttpRequest(format.format(getRMWebAppURL(true), url))
     }
