@@ -115,20 +115,16 @@ object YarnUtils extends Logger {
   /**
    * <pre>
    *
-   * @param getLatest :
-   *                  默认单例模式,如果getLatest=true则再次寻找活跃节点返回,主要是考虑到主备的情况,
-   *                  如: 第一次获取的时候返回的是一个当前的活跃节点,之后可能这个活跃节点挂了,就不能提供服务了,
-   *                  此时在调用该方法,只需要传入true即可再次获取一个最新的活跃节点返回
    * @return
    * </pre>
    */
-  def getRMWebAppURL(getLatest: Boolean = false): String = {
+  def getRMWebAppURL(): String = {
 
     if (StringUtils.isNotBlank(PROXY_YARN_URL)) {
       return PROXY_YARN_URL
     }
 
-    if (rmHttpURL == null || getLatest) {
+    if (rmHttpURL == null) {
       synchronized {
         val conf = HadoopUtils.hadoopConf
         val useHttps = YarnConfiguration.useHttps(conf)
@@ -242,8 +238,6 @@ object YarnUtils extends Logger {
   def restRequest(url: String): String = {
     if (url == null) return null
 
-    def getUrl(url: String, getLatest: Boolean = false): String = s"${getRMWebAppURL(getLatest)}/$url"
-
     def request(url: String): String = {
       val config = RequestConfig.custom.setConnectTimeout(5000).build
       if (hasYarnHttpKerberosAuth) {
@@ -258,7 +252,7 @@ object YarnUtils extends Logger {
     }
 
     if (url.startsWith("http://") || url.startsWith("https://")) request(url) else {
-      Try(request(getUrl(url))).getOrElse(request(getUrl(url, true)))
+      request(s"${getRMWebAppURL()}/$url")
     }
 
   }
