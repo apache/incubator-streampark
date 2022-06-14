@@ -462,7 +462,7 @@ public class Application implements Serializable {
                 getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
                 String format = "proxy/%s/overview";
                 String reqURL = String.format(format, appId);
-                return convert(YarnUtils.httpRequest(reqURL), Overview.class);
+                return convert(YarnUtils.restRequest(reqURL), Overview.class);
                 // TODO: yarn-session
                 //String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
                 //return httpGetDoResult(remoteUrl, Overview.class);
@@ -477,7 +477,7 @@ public class Application implements Serializable {
         if (ExecutionMode.isYarnMode(executionMode)) {
             String format = "proxy/%s/" + flinkUrl;
             String reqURL = String.format(format, appId);
-            JobsOverview jobsOverview = convert(YarnUtils.httpRequest(reqURL), JobsOverview.class);
+            JobsOverview jobsOverview = convert(YarnUtils.restRequest(reqURL), JobsOverview.class);
             if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
                 //过滤出当前job
                 List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(jobId)).collect(Collectors.toList());
@@ -505,7 +505,7 @@ public class Application implements Serializable {
         if (ExecutionMode.isYarnMode(executionMode)) {
             String format = "proxy/%s/" + flinkUrl;
             String reqURL = String.format(format, appId);
-            return convert(YarnUtils.httpRequest(reqURL), CheckPoints.class);
+            return convert(YarnUtils.restRequest(reqURL), CheckPoints.class);
         } else if (ExecutionMode.isRemoteMode(executionMode)) {
             if (jobId != null) {
                 String remoteUrl = getFlinkClusterRestUrl(flinkCluster, String.format(flinkUrl, jobId));

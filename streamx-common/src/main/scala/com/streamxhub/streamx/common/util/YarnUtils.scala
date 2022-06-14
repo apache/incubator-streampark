@@ -108,8 +108,8 @@ object YarnUtils extends Logger {
   }
 
   def httpYarnAppInfo(appId: String): String = {
-    if (null == appId) return null
-    defaultHttpRetryRequest("ws/v1/cluster/apps/%s".format(appId))
+    if (appId == null) return null
+    restRequest("ws/v1/cluster/apps/%s".format(appId))
   }
 
   /**
@@ -236,33 +236,31 @@ object YarnUtils extends Logger {
 
   /**
    *
-   * @param url  url
+   * @param url url
    * @return
    */
-  def httpRequest(url: String): String = {
-    if (url == url) return null
-    defaultHttpRetryRequest(url)
-  }
+  def restRequest(url: String): String = {
+    if (url == null) return null
 
-  private[this] def defaultHttpRetryRequest(url: String): String = {
-    if (null == url) return null
-    val format = "%s/%s"
-    Try(defaultHttpRequest(format.format(getRMWebAppURL(), url))).getOrElse {
-      defaultHttpRequest(format.format(getRMWebAppURL(true), url))
-    }
-  }
+    def getUrl(url: String, getLatest: Boolean = false): String = s"${getRMWebAppURL(getLatest)}/$url"
 
-  private[this] def defaultHttpRequest(url: String): String = {
-    val config = RequestConfig.custom.setConnectTimeout(5000).build
-    if (hasYarnHttpKerberosAuth) {
-      HadoopUtils.getUgi().doAs(new PrivilegedExceptionAction[String] {
-        override def run(): String = {
-          HttpClientUtils.httpAuthGetRequest(url, config)
-        }
-      })
-    } else {
-      HttpClientUtils.httpGetRequest(url, config)
+    def request(url: String): String = {
+      val config = RequestConfig.custom.setConnectTimeout(5000).build
+      if (hasYarnHttpKerberosAuth) {
+        HadoopUtils.getUgi().doAs(new PrivilegedExceptionAction[String] {
+          override def run(): String = {
+            HttpClientUtils.httpAuthGetRequest(url, config)
+          }
+        })
+      } else {
+        HttpClientUtils.httpGetRequest(url, config)
+      }
     }
+
+    if (url.startsWith("http://") || url.startsWith("https://")) request(url) else {
+      Try(request(getUrl(url))).getOrElse(request(getUrl(url, true)))
+    }
+
   }
 
 }
