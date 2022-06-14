@@ -47,7 +47,7 @@ public class YarnTest {
          * 将hadoop的配置文件放到一个目录下,
          * 在运行该类的时候加上jvm级别的参数(idea里的 vmOption ) -DHADOOP_CONF_DIR=${目录}
          */
-        String url = YarnUtils.getRMWebAppURL(true);
+        String url = YarnUtils.getRMWebAppURL();
         System.out.println(url);
     }
 
