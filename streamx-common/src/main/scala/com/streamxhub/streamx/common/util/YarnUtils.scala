@@ -107,11 +107,6 @@ object YarnUtils extends Logger {
     }
   }
 
-  def httpYarnAppInfo(appId: String): String = {
-    if (appId == null) return null
-    restRequest("ws/v1/cluster/apps/%s".format(appId))
-  }
-
   /**
    * <pre>
    *

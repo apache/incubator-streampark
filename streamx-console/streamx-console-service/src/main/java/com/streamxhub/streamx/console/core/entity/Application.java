@@ -451,8 +451,8 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public AppInfo httpYarnAppInfo() throws Exception {
-        String appInfo = YarnUtils.httpYarnAppInfo(appId);
-        return convert(appInfo, AppInfo.class);
+        String reqURL = "ws/v1/cluster/apps/".concat(appId);
+        return yarnRestRequest(reqURL, AppInfo.class);
     }
 
     @JsonIgnore
@@ -462,7 +462,7 @@ public class Application implements Serializable {
                 getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
                 String format = "proxy/%s/overview";
                 String reqURL = String.format(format, appId);
-                return convert(YarnUtils.restRequest(reqURL), Overview.class);
+                return yarnRestRequest(reqURL, Overview.class);
                 // TODO: yarn-session
                 //String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
                 //return httpGetDoResult(remoteUrl, Overview.class);
@@ -477,7 +477,7 @@ public class Application implements Serializable {
         if (ExecutionMode.isYarnMode(executionMode)) {
             String format = "proxy/%s/" + flinkUrl;
             String reqURL = String.format(format, appId);
-            JobsOverview jobsOverview = convert(YarnUtils.restRequest(reqURL), JobsOverview.class);
+            JobsOverview jobsOverview = yarnRestRequest(reqURL, JobsOverview.class);
             if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
                 //过滤出当前job
                 List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(jobId)).collect(Collectors.toList());
@@ -487,7 +487,7 @@ public class Application implements Serializable {
         } else if (ExecutionMode.isRemoteMode(executionMode)) {
             if (jobId != null) {
                 String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
-                JobsOverview jobsOverview = httpGetDoResult(remoteUrl, JobsOverview.class);
+                JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
                 if (jobsOverview != null) {
                     //过滤出当前job
                     List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(jobId)).collect(Collectors.toList());
@@ -505,28 +505,32 @@ public class Application implements Serializable {
         if (ExecutionMode.isYarnMode(executionMode)) {
             String format = "proxy/%s/" + flinkUrl;
             String reqURL = String.format(format, appId);
-            return convert(YarnUtils.restRequest(reqURL), CheckPoints.class);
+            return yarnRestRequest(reqURL, CheckPoints.class);
         } else if (ExecutionMode.isRemoteMode(executionMode)) {
             if (jobId != null) {
                 String remoteUrl = getFlinkClusterRestUrl(flinkCluster, String.format(flinkUrl, jobId));
-                return httpGetDoResult(remoteUrl, CheckPoints.class);
+                return httpRestRequest(remoteUrl, CheckPoints.class);
             }
         }
         return null;
     }
 
     @JsonIgnore
-    private <T> T httpGetDoResult(String url, Class<T> clazz) throws IOException {
-        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
-        return convert(result, clazz);
+    private <T> T yarnRestRequest(String url, Class<T> clazz) throws IOException {
+        String result = YarnUtils.restRequest(url);
+        if (null == result) {
+            return null;
+        }
+        return JacksonUtils.read(result, clazz);
     }
 
     @JsonIgnore
-    private <T> T convert(String content, Class<T> clazz) throws IOException {
-        if (null == content) {
+    private <T> T httpRestRequest(String url, Class<T> clazz) throws IOException {
+        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
+        if (null == result) {
             return null;
         }
-        return JacksonUtils.read(content, clazz);
+        return JacksonUtils.read(result, clazz);
     }
 
     @JsonIgnore
