@@ -25,6 +25,7 @@ import enumeratum.EnumEntry
 import java.util.regex.{Matcher, Pattern}
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.Breaks.{break, breakable}
 
 object SqlCommandParser extends Logger {
 
@@ -52,15 +53,14 @@ object SqlCommandParser extends Logger {
   private[this] def parseLine(sqlLine: String): Option[SqlCommandCall] = {
     val stmt = sqlLine.trim
     // parse
-    val sqlCommands = SqlCommand.values.filter(_.matches(stmt))
-    if (sqlCommands.isEmpty) None else {
-      val sqlCommand = sqlCommands.head
+    val sqlCommand = SqlCommand.get(stmt)
+    if (sqlCommand == null) None else {
       val matcher = sqlCommand.matcher
       val groups = new Array[String](matcher.groupCount)
       for (i <- groups.indices) {
         groups(i) = matcher.group(i + 1)
       }
-      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlCommand, x, sqlLine))
+      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlCommand, x, sqlLine.trim))
     }
   }
 
@@ -87,6 +87,19 @@ sealed abstract class SqlCommand(
 }
 
 object SqlCommand extends enumeratum.Enum[SqlCommand] {
+
+  def get(stmt: String): SqlCommand = {
+    var cmd: SqlCommand = null
+    breakable {
+      this.values.foreach(x => {
+        if (x.matches(stmt)) {
+          cmd = x
+          break()
+        }
+      })
+    }
+    cmd
+  }
 
   val values: immutable.IndexedSeq[SqlCommand] = findValues
 
@@ -174,7 +187,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   case object ALTER_FUNCTION extends SqlCommand(
     "alter function",
-    "(ALTER\\s+FUNCTION.*)"
+    "(ALTER\\s+FUNCTION\\s+.*)"
   )
 
   //----DROP Statements----
@@ -196,13 +209,12 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   case object DROP_VIEW extends SqlCommand(
     "drop view",
-    "DROP\\s+VIEW\\s+(.*)"
+    "(DROP\\s+VIEW\\s+.*)"
   )
-
 
   case object DROP_FUNCTION extends SqlCommand(
     "drop function",
-    "DROP\\s+FUNCTION\\s+(.*)"
+    "(DROP\\s+FUNCTION\\s+.*)"
   )
 
   //----SHOW Statements ---
@@ -213,7 +225,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   )
 
   case object SHOW_CURRENT_CATALOG extends SqlCommand(
-    "show current catalogs",
+    "show current catalog",
     "SHOW\\s+CURRENT\\s+CATALOG",
     Converters.NO_OPERANDS
   )
@@ -258,25 +270,25 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   //---- INSERT Statement #
   case object INSERT_INTO extends SqlCommand(
     "insert into",
-    "(INSERT\\s+INTO.*)"
+    "(INSERT\\s+INTO\\s+.*)"
   )
 
   case object INSERT_OVERWRITE extends SqlCommand(
     "insert overwrite",
-    "(INSERT\\s+OVERWRITE.*)"
+    "(INSERT\\s+OVERWRITE\\s+.*)"
   )
 
 
   //---- SELECT Statements #
   case object SELECT extends SqlCommand(
     "select",
-    "(SELECT.*)"
+    "(SELECT\\s+.*)"
   )
 
   //---- USE Statements #
   case object USE_CATALOG extends SqlCommand(
     "use catalog",
-    "USE\\s+CATALOG\\s+(.*)"
+    "(USE\\s+CATALOG\\s+.*)"
   )
 
   case object USE extends SqlCommand(
@@ -287,12 +299,12 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   case object DESC extends SqlCommand(
     "desc",
-    "DESC\\s+(.*)"
+    "(DESC\\s+.*)"
   )
 
   case object DESCRIBE extends SqlCommand(
     "describe",
-    "DESCRIBE\\s+(.*)"
+    "(DESCRIBE\\s+.*)"
   )
 
   /**
@@ -309,8 +321,8 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "set",
     "SET(\\s+(\\S+)\\s*=(.*))?", {
       case a if a.length < 3 => None
-      case a if a.head == null => Some(Array[String](a.head))
-      case a => Some(Array[String](a(1), a(2)))
+      case a if a.head == null => Some(Array[String](cleanUp(a.head)))
+      case a => Some(Array[String](cleanUp(a(1)), cleanUp(a(2))))
     }
   )
 
@@ -345,6 +357,8 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "END",
     Converters.NO_OPERANDS
   )
+
+  private[this] def cleanUp(sql: String): String = sql.trim.replaceAll("^('|\\\")|('|\\\")$", "")
 
 }
 
