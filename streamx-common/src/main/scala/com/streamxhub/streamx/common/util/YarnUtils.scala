@@ -38,7 +38,7 @@ import java.util.{HashMap => JavaHashMap, List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks.{break, breakable}
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 object YarnUtils extends Logger {
 
@@ -243,11 +243,21 @@ object YarnUtils extends Logger {
       if (hasYarnHttpKerberosAuth) {
         HadoopUtils.getUgi().doAs(new PrivilegedExceptionAction[String] {
           override def run(): String = {
-            HttpClientUtils.httpAuthGetRequest(url, config)
+            Try(HttpClientUtils.httpAuthGetRequest(url, config)) match {
+              case Success(v) => v
+              case Failure(e) =>
+                logError("yarnUtils authRestRequest error, detail: ", e)
+                null
+            }
           }
         })
       } else {
-        HttpClientUtils.httpGetRequest(url, config)
+        Try(HttpClientUtils.httpGetRequest(url, config)) match {
+          case Success(v) => v
+          case Failure(e) =>
+            logError("yarnUtils restRequest error, detail: ", e)
+            null
+        }
       }
     }
 

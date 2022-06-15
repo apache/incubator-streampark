@@ -607,7 +607,6 @@ public class FlinkTrackingTask {
             return;
         }
         log.info("flinkTrackingTask setOptioning");
-        Long optioningTime = System.currentTimeMillis();
         OPTIONING.put(appId, state);
         //从streamx停止
         if (state.equals(OptionState.CANCELLING)) {
