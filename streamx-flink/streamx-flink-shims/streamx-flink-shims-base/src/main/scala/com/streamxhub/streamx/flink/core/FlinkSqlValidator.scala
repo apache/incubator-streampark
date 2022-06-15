@@ -16,7 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.enums.SqlErrorType
@@ -24,27 +23,34 @@ import com.streamxhub.streamx.common.util.{ExceptionUtils, Logger}
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
+import org.apache.calcite.sql.parser.SqlParser.Config
 import org.apache.flink.sql.parser.validate.FlinkSqlConformance
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
-import org.apache.flink.table.api.{EnvironmentSettings, TableException}
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
+import org.apache.flink.table.api.{EnvironmentSettings, TableException}
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
-import org.apache.flink.table.planner.parse.CalciteParser
 import org.apache.flink.table.planner.utils.TableConfigUtils
+
+import scala.util.{Failure, Try}
 
 object FlinkSqlValidator extends Logger {
 
-  private[this] lazy val parser = {
+  private[this] val FLINK112_CALCITE_PARSER_CLASS = "org.apache.flink.table.planner.calcite.CalciteParser"
+
+  private[this] val FLINK113_CALCITE_PARSER_CLASS = "org.apache.flink.table.planner.parse.CalciteParser"
+
+  private[this] lazy val sqlParserConfig = {
     val tableConfig = StreamTableEnvironment.create(
       StreamExecutionEnvironment.getExecutionEnvironment,
       EnvironmentSettings
         .newInstance
+        .useBlinkPlanner
         .inStreamingMode
         .build
     ).getConfig
 
-    val sqlParserConfig = TableConfigUtils.getCalciteConfig(tableConfig).getSqlParserConfig.getOrElse {
+    TableConfigUtils.getCalciteConfig(tableConfig).getSqlParserConfig.getOrElse {
       val conformance = tableConfig.getSqlDialect match {
         case HIVE => FlinkSqlConformance.HIVE
         case DEFAULT => FlinkSqlConformance.DEFAULT
@@ -61,7 +67,6 @@ object FlinkSqlValidator extends Logger {
         .withLex(Lex.JAVA)
         .withIdentifierMaxLength(256)
     }
-    new CalciteParser(sqlParserConfig)
   }
 
   def verifySql(sql: String): SqlError = {
@@ -70,7 +75,6 @@ object FlinkSqlValidator extends Logger {
       for (call <- sqlCommands) {
         lazy val args = call.operands.head
         lazy val command = call.command
-        lazy val last = call.operands.last
         command match {
           case SET =>
             if (!FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
@@ -88,8 +92,14 @@ object FlinkSqlValidator extends Logger {
                 sql = sql.replaceFirst(";|$", ";")
               )
             }
+          case SHOW_CURRENT_CATALOG | SHOW_CURRENT_DATABASE =>
+            return SqlError(
+              SqlErrorType.UNSUPPORTED_SQL,
+              exception = s"$args unsupported in current flink version",
+              sql = sql.replaceFirst(";|$", ";")
+            )
           case
-            SHOW_CATALOGS | SHOW_CURRENT_CATALOG | SHOW_DATABASES | SHOW_CURRENT_DATABASE |
+            SHOW_CATALOGS | SHOW_DATABASES |
             SHOW_TABLES | SHOW_VIEWS | SHOW_FUNCTIONS | SHOW_MODULES |
             CREATE_FUNCTION | CREATE_CATALOG | CREATE_TABLE | CREATE_VIEW | CREATE_DATABASE |
             DROP_CATALOG | DROP_DATABASE | DROP_TABLE | DROP_VIEW | DROP_FUNCTION |
@@ -98,19 +108,21 @@ object FlinkSqlValidator extends Logger {
             SELECT | INSERT_INTO | INSERT_OVERWRITE |
             BEGIN_STATEMENT_SET | END_STATEMENT_SET |
             EXPLAIN | DESC | DESCRIBE =>
-            try {
-              command match {
-                case CREATE_VIEW => parser.parse(last)
-                case _ => parser.parse(args)
-              }
-            } catch {
-              case e: Throwable =>
+            Try {
+              val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_CALCITE_PARSER_CLASS))
+              val parser = calciteClass.getConstructor(Array(classOf[Config]): _*).newInstance(sqlParserConfig)
+              val method = parser.getClass.getDeclaredMethod("parse", classOf[String])
+              method.setAccessible(true)
+              method.invoke(parser, call.originSql)
+            } match {
+              case Failure(e) =>
                 logError(s"verify error:${ExceptionUtils.stringifyException(e)}")
-                return SqlError(
+                SqlError(
                   SqlErrorType.SYNTAX_ERROR,
-                  e.getMessage,
-                  args.trim.replaceFirst(";|$", ";")
+                  e.getLocalizedMessage,
+                  call.originSql
                 )
+              case _ =>
             }
           case _ => return SqlError(
             SqlErrorType.UNSUPPORTED_SQL,
@@ -122,7 +134,7 @@ object FlinkSqlValidator extends Logger {
     } catch {
       case exception: Exception =>
         logError(s"verify error:${ExceptionUtils.stringifyException(exception)}")
-        SqlError.fromString(exception.getLocalizedMessage)
+        SqlError.fromString(exception.getMessage)
     }
   }
 
