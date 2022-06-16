@@ -18,11 +18,13 @@
  */
 package com.streamxhub.streamx.flink.core
 
-import com.streamxhub.streamx.common.enums.SqlErrorType
+import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType
 import com.streamxhub.streamx.common.util.{Logger, SqlSplitter}
 import enumeratum.EnumEntry
+import org.apache.flink.table.api.ValidationException
 
 import java.util.regex.{Matcher, Pattern}
+import java.lang.{Boolean => JavaBool}
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks.{break, breakable}
@@ -30,21 +32,21 @@ import scala.util.control.Breaks.{break, breakable}
 object SqlCommandParser extends Logger {
 
   def parseSQL(sql: String): List[SqlCommandCall] = {
-    val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
+    val sqlEmptyError = "verify failed: flink sql cannot be empty."
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
     val lines = SqlSplitter.splitSql(sql)
     lines match {
-      case stmts if stmts.isEmpty => throw new IllegalArgumentException(sqlEmptyError)
+      case stmts if stmts.isEmpty => throw new ValidationException(sqlEmptyError)
       case stmts =>
         val calls = new ArrayBuffer[SqlCommandCall]
         for (stmt <- stmts) {
           parseLine(stmt) match {
             case Some(x) => calls += x
-            case _ => throw new IllegalArgumentException(SqlError(SqlErrorType.UNSUPPORTED_SQL, exception = s"unsupported sql", sql = stmt).toString)
+            case _ => throw new ValidationException(s"unsupported sql: $stmt")
           }
         }
         calls.toList match {
-          case Nil => throw new IllegalArgumentException(SqlError(SqlErrorType.SYNTAX_ERROR, exception = "no executable sql", sql = "").toString)
+          case Nil => throw new ValidationException(s"flink sql syntax error, no executable sql")
           case r => r
         }
     }
@@ -371,21 +373,4 @@ case class SqlCommandCall(command: SqlCommand, operands: Array[String], originSq
   }
 }
 
-
-case class SqlError(
-                     errorType: SqlErrorType,
-                     exception: String = null,
-                     sql: String = null
-                   ) {
-
-  override def toString: String = SqlError.toString(this)
-
-}
-
-object SqlError {
-
-  def toString(sqlError: SqlError): String = {
-    s"${sqlError.errorType.toString}: ${sqlError.sql}\nerror: ${sqlError.exception}"
-  }
-
-}
+case class FlinkSqlValidationResult(success: JavaBool = true, failedType: FlinkSqlValidationFailedType = null, exception: Throwable = null, sql: String = null)

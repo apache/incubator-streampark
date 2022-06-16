@@ -24,7 +24,7 @@ import java.io.Serializable;
 /**
  * @author benjobs
  */
-public enum SqlErrorType implements Serializable {
+public enum FlinkSqlValidationFailedType implements Serializable {
     /**
      * 基本检验失败(如为null等)
      */
@@ -48,12 +48,12 @@ public enum SqlErrorType implements Serializable {
 
     private final int value;
 
-    SqlErrorType(int value) {
+    FlinkSqlValidationFailedType(int value) {
         this.value = value;
     }
 
-    public static SqlErrorType of(Integer value) {
-        for (SqlErrorType type : values()) {
+    public static FlinkSqlValidationFailedType of(Integer value) {
+        for (FlinkSqlValidationFailedType type : values()) {
             if (type.value == value) {
                 return type;
             }

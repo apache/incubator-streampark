@@ -18,7 +18,7 @@
  */
 package com.streamxhub.streamx.flink.core
 
-import com.streamxhub.streamx.common.enums.SqlErrorType
+import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType
 import com.streamxhub.streamx.common.util.{ExceptionUtils, Logger}
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.calcite.config.Lex
@@ -28,7 +28,7 @@ import org.apache.flink.sql.parser.validate.FlinkSqlConformance
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.table.api.{EnvironmentSettings, SqlParserException, TableException}
+import org.apache.flink.table.api.{EnvironmentSettings, SqlParserException, ValidationException}
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 import org.apache.flink.table.planner.utils.TableConfigUtils
 
@@ -55,12 +55,7 @@ object FlinkSqlValidator extends Logger {
         case HIVE => FlinkSqlConformance.HIVE
         case DEFAULT => FlinkSqlConformance.DEFAULT
         case _ =>
-          throw new TableException(
-            SqlError(
-              SqlErrorType.UNSUPPORTED_DIALECT,
-              s"Unsupported SQL dialect ${tableConfig.getSqlDialect}"
-            ).toString
-          )
+          throw new UnsupportedOperationException(s"unsupported dialect: ${tableConfig.getSqlDialect}")
       }
       SqlParser.config
         .withParserFactory(FlinkSqlParserFactories.create(conformance))
@@ -70,36 +65,25 @@ object FlinkSqlValidator extends Logger {
     }
   }
 
-  def verifySql(sql: String): SqlError = {
+  def verifySql(sql: String): FlinkSqlValidationResult = {
     val sqlCommands = SqlCommandParser.parseSQL(sql)
     for (call <- sqlCommands) {
       lazy val args = call.operands.head
       lazy val command = call.command
       command match {
-        case SET =>
+        case SET | RESET =>
           if (!FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
-            return SqlError(
-              SqlErrorType.SYNTAX_ERROR,
-              exception = s"$args is not a valid table/sql config",
-              sql = sql.replaceFirst(";|$", ";")
-            )
+            if (command == RESET && "ALL" != args) {
+              return FlinkSqlValidationResult(
+                false,
+                FlinkSqlValidationFailedType.SYNTAX_ERROR,
+                exception = new ValidationException(s"$args is not a valid table/sql config"),
+                sql = sql.replaceFirst(";|$", ";")
+              )
+            }
           }
-        case RESET =>
-          if (args != "ALL" && !FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
-            return SqlError(
-              SqlErrorType.SYNTAX_ERROR,
-              exception = s"$args is not a valid table/sql config",
-              sql = sql.replaceFirst(";|$", ";")
-            )
-          }
-        case SHOW_CURRENT_CATALOG | SHOW_CURRENT_DATABASE =>
-          return SqlError(
-            SqlErrorType.UNSUPPORTED_SQL,
-            exception = s"$args unsupported in current flink version",
-            sql = sql.replaceFirst(";|$", ";")
-          )
         case
-          SHOW_CATALOGS | SHOW_DATABASES |
+          SHOW_CATALOGS | SHOW_DATABASES | SHOW_CURRENT_CATALOG | SHOW_CURRENT_DATABASE |
           SHOW_TABLES | SHOW_VIEWS | SHOW_FUNCTIONS | SHOW_MODULES |
           CREATE_FUNCTION | CREATE_CATALOG | CREATE_TABLE | CREATE_VIEW | CREATE_DATABASE |
           DROP_CATALOG | DROP_DATABASE | DROP_TABLE | DROP_VIEW | DROP_FUNCTION |
@@ -117,24 +101,27 @@ object FlinkSqlValidator extends Logger {
           } match {
             case Failure(e) =>
               val exception = ExceptionUtils.findThrowable(e, classOf[SqlParserException]) match {
-                case null => ExceptionUtils.stringifyException(e)
-                case e => ExceptionUtils.stringifyException(e.get())
+                case null => e
+                case e => e.get()
               }
-              return SqlError(
-                SqlErrorType.SYNTAX_ERROR,
+              return FlinkSqlValidationResult(
+                false,
+                FlinkSqlValidationFailedType.SYNTAX_ERROR,
                 exception,
                 call.originSql
               )
             case _ =>
           }
         case _ =>
-          return SqlError(
-            SqlErrorType.UNSUPPORTED_SQL,
+          return FlinkSqlValidationResult(
+            false,
+            FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
+            new ValidationException(s"unsupported sql: ${call.originSql}"),
             sql = sql.replaceFirst(";|$", ";")
           )
       }
     }
-    null
+    FlinkSqlValidationResult()
   }
 
 }
