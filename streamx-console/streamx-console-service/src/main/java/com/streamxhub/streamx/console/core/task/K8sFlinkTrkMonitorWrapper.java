@@ -51,10 +51,10 @@ import scala.Enumeration;
  * Flink K8s Tracking Monitor Wrapper.
  * <p>
  * todo Notes
- * Currentlty Tracking Monitor of Flink on K8s and on YARN are independent
+ * Currently Tracking Monitor of Flink on K8s and on YARN are independent
  * of each other, this is because the tracking behavior of Flink on K8s is
  * quite difference.
- * Mybe we need to refactor to a unified Flink Tracking Monitor in the
+ * Maybe we need to refactor to a unified Flink Tracking Monitor in the
  * future, both tracking-on-k8s and tracking-on-yarn will exist as plugins
  * for this unified implementation.
  * <p>

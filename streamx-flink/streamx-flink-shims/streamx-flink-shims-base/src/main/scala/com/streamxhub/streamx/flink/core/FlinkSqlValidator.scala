@@ -66,7 +66,7 @@ object FlinkSqlValidator extends Logger {
   }
 
   def verifySql(sql: String): FlinkSqlValidationResult = {
-    val sqlCommands = SqlCommandParser.parseSQL(sql)
+    val sqlCommands = SqlCommandParser.parseSQL(sql, r => return r)
     for (call <- sqlCommands) {
       lazy val args = call.operands.head
       lazy val command = call.command
@@ -76,7 +76,7 @@ object FlinkSqlValidator extends Logger {
             if (command == RESET && "ALL" != args) {
               return FlinkSqlValidationResult(
                 false,
-                FlinkSqlValidationFailedType.SYNTAX_ERROR,
+                FlinkSqlValidationFailedType.VERIFY_FAILED,
                 exception = new ValidationException(s"$args is not a valid table/sql config"),
                 sql = sql.replaceFirst(";|$", ";")
               )

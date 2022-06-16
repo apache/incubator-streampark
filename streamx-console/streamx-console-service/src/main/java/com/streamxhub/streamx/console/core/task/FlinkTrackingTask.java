@@ -94,7 +94,7 @@ public class FlinkTrackingTask {
     /**
      * 记录第一次跟踪任务的状态,因为在任务启动后会在第一次跟踪时会获取任务的overview
      */
-    private static final Cache<Long, Byte> STARTING_CACHE = Caffeine.newBuilder().expireAfterWrite(3, TimeUnit.MINUTES).build();
+    private static final Cache<Long, Byte> STARTING_CACHE = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 
     /**
      * 跟踪任务列表
@@ -279,12 +279,18 @@ public class FlinkTrackingTask {
             FlinkAppState currentState = FlinkAppState.of(jobOverview.getState());
 
             if (!FlinkAppState.OTHER.equals(currentState)) {
-                // 1) set info from JobOverview
-                handleJobOverview(application, jobOverview);
-
-                //2) CheckPoints
-                handleCheckPoints(application);
-
+                try {
+                    // 1) set info from JobOverview
+                    handleJobOverview(application, jobOverview);
+                } catch (Exception e) {
+                    log.error("get flink jobOverview error: {}", e);
+                }
+                try {
+                    //2) CheckPoints
+                    handleCheckPoints(application);
+                } catch (Exception e) {
+                    log.error("get flink checkPoints error: {}", e);
+                }
                 //3) savePoint obsolete check and NEED_START check
                 OptionState optionState = OPTIONING.get(application.getId());
                 // cpu分支预测,将Running的状态单独拿出来
@@ -305,12 +311,7 @@ public class FlinkTrackingTask {
      * @throws IOException
      */
     private void handleJobOverview(Application application, JobsOverview.Job jobOverview) throws IOException {
-        // 1) jobId以restapi返回的状态为准
-        application.setJobId(jobOverview.getId());
-        application.setTotalTask(jobOverview.getTasks().getTotal());
-        application.setOverview(jobOverview.getTasks());
-
-        // 2) duration
+        // 1) duration
         long startTime = jobOverview.getStartTime();
         long endTime = jobOverview.getEndTime();
         if (application.getStartTime() == null) {
@@ -325,16 +326,20 @@ public class FlinkTrackingTask {
         }
         application.setDuration(jobOverview.getDuration());
 
-        // 3) overview,刚启动第一次获取Overview信息.
+        // 2) overview,刚启动第一次获取Overview信息.
         if (STARTING_CACHE.getIfPresent(application.getId()) != null) {
+            application.setJobId(jobOverview.getId());
+            application.setTotalTask(jobOverview.getTasks().getTotal());
+            application.setOverview(jobOverview.getTasks());
+
             FlinkCluster flinkCluster = getFlinkCluster(application);
             Overview override = application.httpOverview(flinkCluster);
             if (override != null && override.getSlotsTotal() > 0) {
-                STARTING_CACHE.invalidate(application.getId());
                 application.setTotalTM(override.getTaskmanagers());
                 application.setTotalSlot(override.getSlotsTotal());
                 application.setAvailableSlot(override.getSlotsAvailable());
             }
+            STARTING_CACHE.invalidate(application.getId());
         }
     }
 

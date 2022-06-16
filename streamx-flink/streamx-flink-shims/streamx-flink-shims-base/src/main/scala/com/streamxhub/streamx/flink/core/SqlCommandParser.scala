@@ -31,22 +31,59 @@ import scala.util.control.Breaks.{break, breakable}
 
 object SqlCommandParser extends Logger {
 
-  def parseSQL(sql: String): List[SqlCommandCall] = {
+  def parseSQL(sql: String, validationCallback: FlinkSqlValidationResult => Unit = null): List[SqlCommandCall] = {
     val sqlEmptyError = "verify failed: flink sql cannot be empty."
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
     val lines = SqlSplitter.splitSql(sql)
     lines match {
-      case stmts if stmts.isEmpty => throw new ValidationException(sqlEmptyError)
+      case stmts if stmts.isEmpty =>
+        if (validationCallback != null) {
+          validationCallback(
+            FlinkSqlValidationResult(
+              false,
+              FlinkSqlValidationFailedType.VERIFY_FAILED,
+              new ValidationException(sqlEmptyError)
+            )
+          )
+          null
+        } else {
+          throw new ValidationException(sqlEmptyError)
+        }
       case stmts =>
         val calls = new ArrayBuffer[SqlCommandCall]
         for (stmt <- stmts) {
           parseLine(stmt) match {
             case Some(x) => calls += x
-            case _ => throw new ValidationException(s"unsupported sql: $stmt")
+            case _ =>
+              if (validationCallback != null) {
+                validationCallback(
+                  FlinkSqlValidationResult(
+                    false,
+                    FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
+                    new ValidationException(s"unsupported sql"),
+                    sql = stmt
+                  )
+                )
+              } else {
+                throw new ValidationException(s"unsupported sql: $stmt")
+              }
           }
         }
+
         calls.toList match {
-          case Nil => throw new ValidationException(s"flink sql syntax error, no executable sql")
+          case Nil =>
+            if (validationCallback != null) {
+              validationCallback(
+                FlinkSqlValidationResult(
+                  false,
+                  FlinkSqlValidationFailedType.VERIFY_FAILED,
+                  new ValidationException("flink sql syntax error, no executable sql")
+                )
+              )
+              null
+            } else {
+              throw new ValidationException("flink sql syntax error, no executable sql")
+            }
           case r => r
         }
     }
@@ -373,4 +410,7 @@ case class SqlCommandCall(command: SqlCommand, operands: Array[String], originSq
   }
 }
 
-case class FlinkSqlValidationResult(success: JavaBool = true, failedType: FlinkSqlValidationFailedType = null, exception: Throwable = null, sql: String = null)
+case class FlinkSqlValidationResult(success: JavaBool = true,
+                                    failedType: FlinkSqlValidationFailedType = null,
+                                    exception: Throwable = null,
+                                    sql: String = null)

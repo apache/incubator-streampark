@@ -172,11 +172,11 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
                 Class<?> clazz = classLoader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
                 Method method = clazz.getDeclaredMethod("verifySql", String.class);
                 method.setAccessible(true);
-                Object sqlError = method.invoke(null, sql);
-                if (sqlError == null) {
+                Object result = method.invoke(null, sql);
+                if (result == null) {
                     return null;
                 }
-                return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), sqlError);
+                return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), result);
             } catch (Throwable e) {
                 log.error("verifySql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
             }
