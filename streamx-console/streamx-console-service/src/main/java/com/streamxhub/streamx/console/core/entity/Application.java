@@ -504,7 +504,7 @@ public class Application implements Serializable {
         final String flinkUrl = "jobs/%s/checkpoints";
         if (ExecutionMode.isYarnMode(executionMode)) {
             String format = "proxy/%s/" + flinkUrl;
-            String reqURL = String.format(format, appId);
+            String reqURL = String.format(format, appId, jobId);
             return yarnRestRequest(reqURL, CheckPoints.class);
         } else if (ExecutionMode.isRemoteMode(executionMode)) {
             if (jobId != null) {
