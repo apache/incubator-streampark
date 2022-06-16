@@ -384,20 +384,8 @@ case class SqlError(
 
 object SqlError {
 
-  //不可见分隔符.
-  private[core] val separator = "\001"
-
   def toString(sqlError: SqlError): String = {
-    s"${sqlError.errorType.getValue}${SqlError.separator}${sqlError.exception}${SqlError.separator}${sqlError.sql}"
-  }
-
-  def fromString(string: String): SqlError = {
-    string match {
-      case null => null
-      case x => x.split(separator) match {
-        case Array(a, b, c) => SqlError(SqlErrorType.of(a.toInt), b, c)
-      }
-    }
+    s"${sqlError.errorType.toString}: ${sqlError.sql}\nerror: ${sqlError.exception}"
   }
 
 }

@@ -28,7 +28,7 @@ import org.apache.flink.sql.parser.validate.FlinkSqlConformance
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.table.api.{EnvironmentSettings, TableException}
+import org.apache.flink.table.api.{EnvironmentSettings, SqlParserException, TableException}
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 import org.apache.flink.table.planner.utils.TableConfigUtils
 
@@ -58,7 +58,8 @@ object FlinkSqlValidator extends Logger {
           throw new TableException(
             SqlError(
               SqlErrorType.UNSUPPORTED_DIALECT,
-              s"Unsupported SQL dialect:${tableConfig.getSqlDialect}").toString
+              s"Unsupported SQL dialect ${tableConfig.getSqlDialect}"
+            ).toString
           )
       }
       SqlParser.config
@@ -70,72 +71,70 @@ object FlinkSqlValidator extends Logger {
   }
 
   def verifySql(sql: String): SqlError = {
-    try {
-      val sqlCommands = SqlCommandParser.parseSQL(sql)
-      for (call <- sqlCommands) {
-        lazy val args = call.operands.head
-        lazy val command = call.command
-        command match {
-          case SET =>
-            if (!FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
-              return SqlError(
-                SqlErrorType.SYNTAX_ERROR,
-                exception = s"$args is not a valid table/sql config",
-                sql = sql.replaceFirst(";|$", ";")
-              )
-            }
-          case RESET =>
-            if (args != "ALL" && !FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
-              return SqlError(
-                SqlErrorType.SYNTAX_ERROR,
-                exception = s"$args is not a valid table/sql config",
-                sql = sql.replaceFirst(";|$", ";")
-              )
-            }
-          case SHOW_CURRENT_CATALOG | SHOW_CURRENT_DATABASE =>
+    val sqlCommands = SqlCommandParser.parseSQL(sql)
+    for (call <- sqlCommands) {
+      lazy val args = call.operands.head
+      lazy val command = call.command
+      command match {
+        case SET =>
+          if (!FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
             return SqlError(
-              SqlErrorType.UNSUPPORTED_SQL,
-              exception = s"$args unsupported in current flink version",
+              SqlErrorType.SYNTAX_ERROR,
+              exception = s"$args is not a valid table/sql config",
               sql = sql.replaceFirst(";|$", ";")
             )
-          case
-            SHOW_CATALOGS | SHOW_DATABASES |
-            SHOW_TABLES | SHOW_VIEWS | SHOW_FUNCTIONS | SHOW_MODULES |
-            CREATE_FUNCTION | CREATE_CATALOG | CREATE_TABLE | CREATE_VIEW | CREATE_DATABASE |
-            DROP_CATALOG | DROP_DATABASE | DROP_TABLE | DROP_VIEW | DROP_FUNCTION |
-            ALTER_DATABASE | ALTER_TABLE | ALTER_FUNCTION |
-            USE | USE_CATALOG |
-            SELECT | INSERT_INTO | INSERT_OVERWRITE |
-            BEGIN_STATEMENT_SET | END_STATEMENT_SET |
-            EXPLAIN | DESC | DESCRIBE =>
-            Try {
-              val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_CALCITE_PARSER_CLASS))
-              val parser = calciteClass.getConstructor(Array(classOf[Config]): _*).newInstance(sqlParserConfig)
-              val method = parser.getClass.getDeclaredMethod("parse", classOf[String])
-              method.setAccessible(true)
-              method.invoke(parser, call.originSql)
-            } match {
-              case Failure(e) =>
-                logError(s"verify error:${ExceptionUtils.stringifyException(e)}")
-                SqlError(
-                  SqlErrorType.SYNTAX_ERROR,
-                  e.getLocalizedMessage,
-                  call.originSql
-                )
-              case _ =>
-            }
-          case _ => return SqlError(
+          }
+        case RESET =>
+          if (args != "ALL" && !FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
+            return SqlError(
+              SqlErrorType.SYNTAX_ERROR,
+              exception = s"$args is not a valid table/sql config",
+              sql = sql.replaceFirst(";|$", ";")
+            )
+          }
+        case SHOW_CURRENT_CATALOG | SHOW_CURRENT_DATABASE =>
+          return SqlError(
+            SqlErrorType.UNSUPPORTED_SQL,
+            exception = s"$args unsupported in current flink version",
+            sql = sql.replaceFirst(";|$", ";")
+          )
+        case
+          SHOW_CATALOGS | SHOW_DATABASES |
+          SHOW_TABLES | SHOW_VIEWS | SHOW_FUNCTIONS | SHOW_MODULES |
+          CREATE_FUNCTION | CREATE_CATALOG | CREATE_TABLE | CREATE_VIEW | CREATE_DATABASE |
+          DROP_CATALOG | DROP_DATABASE | DROP_TABLE | DROP_VIEW | DROP_FUNCTION |
+          ALTER_DATABASE | ALTER_TABLE | ALTER_FUNCTION |
+          USE | USE_CATALOG |
+          SELECT | INSERT_INTO | INSERT_OVERWRITE |
+          BEGIN_STATEMENT_SET | END_STATEMENT_SET |
+          EXPLAIN | DESC | DESCRIBE =>
+          Try {
+            val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_CALCITE_PARSER_CLASS))
+            val parser = calciteClass.getConstructor(Array(classOf[Config]): _*).newInstance(sqlParserConfig)
+            val method = parser.getClass.getDeclaredMethod("parse", classOf[String])
+            method.setAccessible(true)
+            method.invoke(parser, call.originSql)
+          } match {
+            case Failure(e) =>
+              val exception = ExceptionUtils.findThrowable(e, classOf[SqlParserException]) match {
+                case null => ExceptionUtils.stringifyException(e)
+                case e => ExceptionUtils.stringifyException(e.get())
+              }
+              return SqlError(
+                SqlErrorType.SYNTAX_ERROR,
+                exception,
+                call.originSql
+              )
+            case _ =>
+          }
+        case _ =>
+          return SqlError(
             SqlErrorType.UNSUPPORTED_SQL,
             sql = sql.replaceFirst(";|$", ";")
           )
-        }
       }
-      null
-    } catch {
-      case exception: Exception =>
-        logError(s"verify error:${ExceptionUtils.stringifyException(exception)}")
-        SqlError.fromString(exception.getMessage)
     }
+    null
   }
 
 }
