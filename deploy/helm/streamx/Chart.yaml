@@ -16,44 +16,9 @@
 #  limitations under the License.
 ###############################################################################
 
-version: '3.8'
-
-services:
-  streamx-server:
-    image: streamxhub/streamx-console:dev
-    build:
-      context: .
-      dockerfile: docker/compose/Dockerfile
-      args:
-        DB: database
-    ports:
-      - 10000:10000
-    depends_on:
-      - database
-    restart: unless-stopped
-
-  database:
-    image: mysql-5.7:dev
-    build:
-      context: .
-      dockerfile: docker/mysql/Dockerfile
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    ports:
-      - 3306:3306
-    volumes:
-      - mysql-data:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: streamx
-      MYSQL_USER: streamx
-      MYSQL_PASSWORD: 123456
-    healthcheck:
-      test: [ "CMD", "mysqladmin" ,"-uroot","-p123456","ping", "-h", "localhost" ]
-      timeout: 20s
-      retries: 10
-    restart: unless-stopped
-
-
-volumes:
-  mysql-data:
+apiVersion: v2
+name: streamx
+description: A Helm chart for the Streamxhub streamx
+type: application
+version: 1.2.4
+appVersion: 1.2.4
