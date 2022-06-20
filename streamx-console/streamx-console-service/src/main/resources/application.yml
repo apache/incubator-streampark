@@ -89,8 +89,6 @@ streamx:
 
   # remote docker register namespace for streamx
   docker:
-    register:
-      image-namespace: streamx
     # instantiating DockerHttpClient
     http-client:
       max-connections: 10000

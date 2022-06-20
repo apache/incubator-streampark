@@ -32,26 +32,27 @@ import javax.annotation.Nullable
  * @param registerUsername login username of docker image regoster.
  * @param registerPassword login password of docker image regoster.
  */
-case class DockerAuthConf(@Nullable registerAddress: String, registerUsername: String, registerPassword: String) {
+case class DockerConf(@Nullable registerAddress: String,
+                      imageNamespace: String,
+                      registerUsername: String,
+                      registerPassword: String) {
 
   /**
    * covert to com.github.docker.java.api.model.AuthConfig
    */
-  def toDockerAuthConf: AuthConfig = new AuthConfig()
+  def toAuthConf: AuthConfig = new AuthConfig()
     .withRegistryAddress(registerAddress)
     .withUsername(registerUsername)
     .withPassword(registerPassword)
 
 }
 
-object DockerAuthConf {
-  /**
-   * use dockerhub as remote image register
-   */
-  def withDockerHubRegister(registerUsername: String, registerPassword: String): DockerAuthConf =
-    DockerAuthConf("", registerUsername, registerPassword)
+object DockerConf {
 
-  def of(@Nullable registerAddress: String, registerUsername: String, registerPassword: String): DockerAuthConf =
-    DockerAuthConf(registerAddress, registerUsername, registerPassword)
+  def of(@Nullable registerAddress: String,
+         imageNameSpace: String,
+         registerUsername: String,
+         registerPassword: String): DockerConf =
+    DockerConf(registerAddress, imageNameSpace, registerUsername, registerPassword)
 }
 

@@ -54,12 +54,6 @@ object CommonConfig {
     classType = classOf[String],
     description = "yarn http auth type. ex: sample, kerberos")
 
-  val DOCKER_IMAGE_NAMESPACE: InternalOption = InternalOption(
-    key = "streamx.docker.register.image-namespace",
-    defaultValue = "streamx",
-    classType = classOf[String],
-    description = "namespace for docker image used in docker building env and target image register")
-
   val DOCKER_MAX_CONNECTIONS: InternalOption = InternalOption(
     key = "streamx.docker.http-client.max-connections",
     defaultValue = 100,
