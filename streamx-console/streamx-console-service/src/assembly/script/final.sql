@@ -522,6 +522,7 @@ INSERT INTO `t_setting` VALUES (10, 'alert.email.ssl', 'false', 'Alert Email Is 
 INSERT INTO `t_setting` VALUES (11, 'docker.register.address', NULL, 'Docker Register Address', 'Docker容器服务地址', 1);
 INSERT INTO `t_setting` VALUES (12, 'docker.register.user', NULL, 'Docker Register User', 'Docker容器服务认证用户名', 1);
 INSERT INTO `t_setting` VALUES (13, 'docker.register.password', NULL, 'Docker Register Password', 'Docker容器服务认证密码', 1);
+INSERT INTO `t_setting` VALUES (14, 'docker.register.namespace', NULL, 'Namespace for docker image used in docker building env and target image register', 'Docker命名空间', 1);
 COMMIT;
 
 -- ----------------------------

@@ -48,7 +48,7 @@ import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.service.MessageService;
 import com.streamxhub.streamx.console.core.service.SettingService;
-import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf;
+import com.streamxhub.streamx.flink.packer.docker.DockerConf;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildResult;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerBuildSnapshot;
@@ -383,8 +383,9 @@ public class ApplBuildPipeServiceImpl
                         app.getFlinkImage(),
                         app.getK8sPodTemplates(),
                         app.getK8sHadoopIntegration() != null ? app.getK8sHadoopIntegration() : false,
-                        DockerAuthConf.of(
+                        DockerConf.of(
                                 settingService.getDockerRegisterAddress(),
+                                settingService.getDockerRegisterNamespace(),
                                 settingService.getDockerRegisterUser(),
                                 settingService.getDockerRegisterPassword()
                         )

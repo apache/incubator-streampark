@@ -50,6 +50,7 @@ import sun from '@/assets/icons/sun.svg?inline'
 import moon from '@/assets/icons/moon.svg?inline'
 import user from '@/assets/icons/user.svg?inline'
 import docker from '@/assets/icons/docker.svg?inline'
+import namespace from '@/assets/icons/namespace.svg?inline'
 import auth from '@/assets/icons/auth.svg?inline'
 import password from '@/assets/icons/password.svg?inline'
 
@@ -98,6 +99,7 @@ export {
   moon,
   user,
   docker,
+  namespace,
   auth,
   password
 }
