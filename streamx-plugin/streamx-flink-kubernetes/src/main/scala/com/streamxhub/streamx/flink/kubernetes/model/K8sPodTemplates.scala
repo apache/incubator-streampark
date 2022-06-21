@@ -34,7 +34,7 @@ case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "",
 
   def isEmpty: Boolean = !nonEmpty
 
-  override def hashCode(): Int = 13 * podTemplate.hashCode + 17 * jmPodTemplate.hashCode + 31 * tmPodTemplate
+  override def hashCode(): Int = 13 * podTemplate.hashCode + 17 * jmPodTemplate.hashCode + 31 * tmPodTemplate.hashCode
 
   override def equals(obj: Any): Boolean = {
     if (!obj.isInstanceOf[K8sPodTemplates]) false; else {
