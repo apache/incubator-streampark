@@ -52,7 +52,7 @@ object SqlSplitter {
    */
   def splitSql(sql: String): List[String] = {
     val queries = ListBuffer[String]()
-    val lastIdx = if (sql != null && sql.nonEmpty) sql.length - 1 else 0
+    val lastIndex = if (sql != null && sql.nonEmpty) sql.length - 1 else 0
     var query = new StringBuilder
 
     var multiLineComment = false
@@ -68,7 +68,7 @@ object SqlSplitter {
         if (singleLineComment && (ch == '\n')) {
           singleLineComment = false
           query += ch
-          if (idx == lastIdx && query.toString.trim.nonEmpty) {
+          if (idx == lastIndex && query.toString.trim.nonEmpty) {
             // add query when it is the end of sql.
             queries += query.toString
           }
@@ -100,7 +100,7 @@ object SqlSplitter {
         }
 
         // single line comment or multiple line comment start mark
-        if (!singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment && idx < lastIdx) {
+        if (!singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment && idx < lastIndex) {
           if (isSingleLineComment(sql.charAt(idx), sql.charAt(idx + 1))) {
             singleLineComment = true
           } else if (sql.charAt(idx) == '/' && sql.length > (idx + 2)
@@ -115,7 +115,7 @@ object SqlSplitter {
             queries += query.toString
             query = new StringBuilder
           }
-        } else if (idx == lastIdx) {
+        } else if (idx == lastIndex) {
           // meet the last character
           if (!singleLineComment && !multiLineComment) {
             query += ch
@@ -163,7 +163,7 @@ object SqlSplitter {
    * @param text
    * @return
    */
-  private[streamx] def extractLineBreaks(text: String) = {
+  private[this] def extractLineBreaks(text: String) = {
     val builder = new StringBuilder
     for (i <- 0 until text.length) {
       if (text.charAt(i) == '\n') {
@@ -173,9 +173,9 @@ object SqlSplitter {
     builder.toString
   }
 
-  private[streamx] def isSingleLineComment(text: String) = text.trim.startsWith("--")
+  private[this] def isSingleLineComment(text: String) = text.trim.startsWith("--")
 
-  private[streamx] def isMultipleLineComment(text: String) = text.trim.startsWith("/*") && text.trim.endsWith("*/")
+  private[this] def isMultipleLineComment(text: String) = text.trim.startsWith("/*") && text.trim.endsWith("*/")
 
   /**
    * check single-line comment
@@ -184,7 +184,7 @@ object SqlSplitter {
    * @param nextChar
    * @return
    */
-  private[streamx] def isSingleLineComment(curChar: Char, nextChar: Char): Boolean = {
+  private[this] def isSingleLineComment(curChar: Char, nextChar: Char): Boolean = {
     var flag = false
     for (singleCommentPrefix <- singleLineCommentPrefixList) {
       if (singleCommentPrefix.length == 1) {
@@ -200,4 +200,5 @@ object SqlSplitter {
     }
     flag
   }
+
 }

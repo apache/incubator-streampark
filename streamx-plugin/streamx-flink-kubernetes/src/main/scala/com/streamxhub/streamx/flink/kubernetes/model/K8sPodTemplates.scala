@@ -19,6 +19,8 @@
 
 package com.streamxhub.streamx.flink.kubernetes.model
 
+import scala.util.Try
+
 /**
  * Pod template for flink k8s cluster
  *
@@ -31,6 +33,18 @@ case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "",
     Option(tmPodTemplate).exists(_.trim.nonEmpty)
 
   def isEmpty: Boolean = !nonEmpty
+
+  override def hashCode(): Int = 13 * podTemplate.hashCode + 17 * jmPodTemplate.hashCode + 31 * tmPodTemplate.hashCode
+
+  override def equals(obj: Any): Boolean = {
+    if (!obj.isInstanceOf[K8sPodTemplates]) false; else {
+      val that = obj.asInstanceOf[K8sPodTemplates]
+      Try(podTemplate.trim).getOrElse("") == Try(that.podTemplate.trim).getOrElse("") &&
+        Try(jmPodTemplate.trim).getOrElse("") == Try(that.jmPodTemplate.trim).getOrElse("") &&
+        Try(tmPodTemplate.trim).getOrElse("") == Try(that.tmPodTemplate.trim).getOrElse("")
+    }
+  }
+
 }
 
 object K8sPodTemplates {
@@ -40,7 +54,7 @@ object K8sPodTemplates {
   def of(podTemplate: String, jmPodTemplate: String, tmPodTemplate: String): K8sPodTemplates =
     K8sPodTemplates(safeGet(podTemplate), safeGet(jmPodTemplate), safeGet(tmPodTemplate))
 
-  private[this] def safeGet(content: String) = {
+  private[this] def safeGet(content: String): String = {
     content match {
       case null => ""
       case x if x.trim.isEmpty => ""

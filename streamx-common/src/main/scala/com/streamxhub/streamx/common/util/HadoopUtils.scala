@@ -19,8 +19,6 @@
 
 package com.streamxhub.streamx.common.util
 
-import com.ctc.wstx.io.{StreamBootstrapper, SystemId}
-import com.ctc.wstx.stax.WstxInputFactory
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.{CommonConfig, InternalConfigHolder}
 import org.apache.commons.collections.CollectionUtils
@@ -30,19 +28,16 @@ import org.apache.hadoop.fs._
 import org.apache.hadoop.hdfs.DistributedFileSystem
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.service.Service.STATE
-import org.apache.hadoop.util.StringInterner
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.conf.YarnConfiguration
-import org.codehaus.stax2.XMLStreamReader2
 
-import java.io.{BufferedInputStream, File, FileInputStream, IOException}
-import java.security.{PrivilegedAction}
+import java.io.{File, IOException}
+import java.security.PrivilegedAction
 import java.util
 import java.util.concurrent._
 import java.util.{Timer, TimerTask}
 import javax.security.auth.kerberos.KerberosTicket
-import javax.xml.stream.{XMLStreamConstants, XMLStreamException}
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
@@ -64,8 +59,6 @@ object HadoopUtils extends Logger {
   private[this] var reusableHdfs: FileSystem = _
 
   private[this] var tgt: KerberosTicket = _
-
-  private[this] val XML_INPUT_FACTORY = new WstxInputFactory
 
   private lazy val hadoopUserName: String = InternalConfigHolder.get(CommonConfig.STREAMX_HADOOP_USER_NAME)
 
@@ -126,60 +119,32 @@ object HadoopUtils extends Logger {
       val files = hadoopConfDir.listFiles().filter(x => x.isFile && confName.contains(x.getName)).toList
       val conf = new Configuration()
       if (CollectionUtils.isNotEmpty(files)) {
-        files.foreach(x => {
-          //HDFS default value change (with adding time unit) breaks old version MR tarball work with Hadoop 3.x
-          //detail: https://issues.apache.org/jira/browse/HDFS-12920
-          if (x.getName == "hdfs-default.xml" || x.getName == "hdfs-site.xml") {
-            val reader = parseHadoopConf(x)
-            while (reader.hasNext) {
-              if (reader.next() == XMLStreamConstants.START_ELEMENT) {
-                reader.getLocalName match {
-                  case "property" =>
-                    val attrCount = reader.getAttributeCount
-                    var name: String = null
-                    var value: String = null
-                    for (i <- 0 until attrCount) {
-                      val propertyAttr = reader.getAttributeLocalName(i)
-                      propertyAttr match {
-                        case "name" =>
-                          name = StringInterner.weakIntern(reader.getAttributeValue(i))
-                        case "value" =>
-                          value = StringInterner.weakIntern(reader.getAttributeValue(i))
-                      }
-                    }
-                    if (name != null && value != null) {
-                      if (value.matches("\\d+s$")) {
-                        conf.set(name, value.dropRight(1))
-                      } else {
-                        conf.set(name, value)
-                      }
-                    }
-                  case _ =>
-                }
-              }
-            }
-          } else {
-            conf.addResource(new Path(x.getAbsolutePath))
+        files.foreach(x => conf.addResource(new Path(x.getAbsolutePath)))
+        //HDFS default value change (with adding time unit) breaks old version MR tarball work with Hadoop 3.x
+        //detail: https://issues.apache.org/jira/browse/HDFS-12920
+        val rewriteNames = List(
+          "dfs.blockreport.initialDelay",
+          "dfs.datanode.directoryscan.interval",
+          "dfs.heartbeat.interval",
+          "dfs.namenode.decommission.interval",
+          "dfs.namenode.replication.interval",
+          "dfs.namenode.checkpoint.period",
+          "dfs.namenode.checkpoint.check.period",
+          "dfs.client.datanode-restart.timeout",
+          "dfs.ha.log-roll.period",
+          "dfs.ha.tail-edits.period",
+          "dfs.datanode.bp-ready.timeout"
+        )
+        rewriteNames.foreach(n => {
+          conf.get(n) match {
+            case null =>
+            case v if v.matches("\\d+s$") => conf.set(n, v.dropRight(1))
           }
         })
       }
       configurationCache.put(confDir, conf)
     }
     configurationCache(confDir)
-  }
-
-  @throws[XMLStreamException] private[this] def parseHadoopConf(f: File): XMLStreamReader2 = {
-    val is = new BufferedInputStream(new FileInputStream(f))
-    val systemIdStr = new Path(f.getAbsolutePath).toString
-    val systemId = SystemId.construct(systemIdStr)
-    val readerConfig = XML_INPUT_FACTORY.createPrivateConfig
-    XML_INPUT_FACTORY.createSR(
-      readerConfig,
-      systemId,
-      StreamBootstrapper.getInstance(null, systemId, is),
-      false,
-      true
-    )
   }
 
   /**

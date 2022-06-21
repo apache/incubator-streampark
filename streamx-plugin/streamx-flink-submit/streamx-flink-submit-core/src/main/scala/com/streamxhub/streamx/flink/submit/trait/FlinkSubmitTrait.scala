@@ -126,7 +126,9 @@ trait FlinkSubmitTrait extends Logger {
          |----------------------------------------- flink job cancel --------------------------------------
          |     userFlinkHome  : ${cancelRequest.flinkVersion.flinkHome}
          |     flinkVersion   : ${cancelRequest.flinkVersion.version}
+         |     clusterId      : ${cancelRequest.clusterId}
          |     withSavePoint  : ${cancelRequest.withSavePoint}
+         |     savePointPath  : ${cancelRequest.customSavePointPath}
          |     withDrain      : ${cancelRequest.withDrain}
          |     k8sNamespace   : ${cancelRequest.kubernetesNamespace}
          |     appId          : ${cancelRequest.clusterId}
