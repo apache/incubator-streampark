@@ -47,20 +47,49 @@ case class ErrorResult(pass: Boolean = false) extends BuildResult {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 case class SimpleBuildResponse(workspacePath: String = null,
-                               pass: Boolean = true) extends FlinkBuildResult
+                               pass: Boolean = true) extends FlinkBuildResult {
+  override def toString: String =
+    s"""
+       |{
+       |workspacePath: $workspacePath,
+       |pass: $pass
+       |}
+       |""".stripMargin
+}
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 case class ShadedBuildResponse(workspacePath: String,
                                shadedJarPath: String,
-                               pass: Boolean = true) extends FlinkBuildResult
+                               pass: Boolean = true) extends FlinkBuildResult {
+  override def toString: String =
+    s"""
+       |{
+       |workspacePath: $workspacePath,
+       |shadedJarPath: $shadedJarPath,
+       |pass: $pass
+       |}
+       |""".stripMargin
+
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 case class DockerImageBuildResponse(workspacePath: String,
                                     flinkImageTag: String,
                                     podTemplatePaths: Map[String, String],
                                     dockerInnerMainJarPath: String,
-                                    pass: Boolean = true) extends FlinkBuildResult
+                                    pass: Boolean = true) extends FlinkBuildResult {
+  override def toString: String =
+    s"""
+       |{
+       |workspacePath: $workspacePath,
+       |flinkImageTag: $flinkImageTag,
+       |podTemplatePaths: ${podTemplatePaths.mkString(",")},
+       |dockerInnerMainJarPath: $dockerInnerMainJarPath
+       |pass: $pass
+       |}
+       |""".stripMargin
+}
 
 
 

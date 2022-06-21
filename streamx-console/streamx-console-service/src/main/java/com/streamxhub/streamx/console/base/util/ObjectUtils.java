@@ -284,6 +284,18 @@ public final class ObjectUtils {
         return false;
     }
 
+    public static boolean safeTrimEquals(Object o1, Object o2) {
+        boolean equals = safeEquals(o1, o2);
+        if (!equals) {
+            if (o1 != null && o2 != null) {
+                if (o1 instanceof String && o2 instanceof String) {
+                    return o1.toString().trim().equals(o2.toString().trim());
+                }
+            }
+        }
+        return equals;
+    }
+
     /**
      * Return as hash code for the given object; typically the value of <code>
      * {@link Object#hashCode()}</code>. If the object is an array, this method will delegate to any
