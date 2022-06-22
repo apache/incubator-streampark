@@ -2247,7 +2247,6 @@
 
       handleSubmitCustomJob(values) {
         const options = this.handleFormValue(values)
-        debugger
         const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
         let config = this.configOverride || this.app.config
         if (config != null && config.trim() !== '') {
