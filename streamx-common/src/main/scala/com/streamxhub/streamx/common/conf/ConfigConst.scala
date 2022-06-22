@@ -116,8 +116,6 @@ object ConfigConst {
 
   val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
-  val KEY_FLINK_SAVEPOINT_PATH = "execution.savepoint.path"
-
   // --checkpoints--
   val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"
 
@@ -136,6 +134,8 @@ object ConfigConst {
   val KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN = "flink.checkpoints.minPauseBetween"
 
   //---state---
+
+  val KEY_FLINK_STATE_SAVEPOINTS_DIR = "flink.state.savepoints.dir"
 
   val KEY_FLINK_STATE_CHECKPOINTS_DIR = "flink.state.checkpoints.dir"
 

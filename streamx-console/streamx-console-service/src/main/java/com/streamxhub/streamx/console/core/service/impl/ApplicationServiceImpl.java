@@ -912,25 +912,28 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (appParam.getSavePointed()) {
             customSavepoint = appParam.getSavePoint();
         }
+
         if (appParam.getSavePointed() && StringUtils.isBlank(customSavepoint)) {
-            if (isKubernetesApp(application)) {
-                customSavepoint = FlinkSubmitter
-                    .extractDynamicOptionAsJava(application.getDynamicOptions())
-                    .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
-            } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
-                FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-                assert cluster != null;
-                Map<String, String> config = cluster.getFlinkConfig();
-                if (!config.isEmpty()) {
-                    customSavepoint = config.get("state.savepoints.dir");
-                }
-            } else if (application.isStreamXJob() || application.isFlinkSqlJob()) {
-                ApplicationConfig applicationConfig = configService.getEffective(application.getId());
-                if (applicationConfig != null) {
-                    Map<String, String> map = applicationConfig.readConfig();
-                    boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()));
-                    if (checkpointEnable) {
-                        customSavepoint = map.get("flink.state.savepoints.dir");
+            customSavepoint = FlinkSubmitter
+                .extractDynamicOptionAsJava(application.getDynamicOptions())
+                .get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+
+            if (StringUtils.isBlank(customSavepoint)) {
+                if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+                    FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+                    assert cluster != null;
+                    Map<String, String> config = cluster.getFlinkConfig();
+                    if (!config.isEmpty()) {
+                        customSavepoint = config.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+                    }
+                } else if (application.isStreamXJob() || application.isFlinkSqlJob()) {
+                    ApplicationConfig applicationConfig = configService.getEffective(application.getId());
+                    if (applicationConfig != null) {
+                        Map<String, String> map = applicationConfig.readConfig();
+                        boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()));
+                        if (checkpointEnable) {
+                            customSavepoint = map.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR());
+                        }
                     }
                 }
             }
