@@ -988,7 +988,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             cancelResponse -> {
                 if (cancelResponse != null && cancelResponse.savePointDir() != null) {
                     String savePointDir = cancelResponse.savePointDir();
-                    log.info("savePoint path:{}", savePointDir);
+                    log.info("savePoint path: {}", savePointDir);
                     SavePoint savePoint = new SavePoint();
                     Date now = new Date();
                     savePoint.setPath(savePointDir);
