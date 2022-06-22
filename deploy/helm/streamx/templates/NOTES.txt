@@ -19,16 +19,17 @@
 
 Access streamx UI URL by:
 
+ChartVersion:{{ .Chart.Version}}
+appVersion:{{ .Chart.Version }}
+
 {{- if .Values.ingress.enabled }}
 
   streamx UI URL: https://{{ .Values.ingress.host }}/streamx
 
 {{- else if eq .Values.service.type "NodePort" }}
 
-  NODE_IP=$(kubectl get no -n {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
-  NODE_PORT=$(kubectl get svc {{ .Values.service.name }} -n {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}")
-  echo http://$NODE_IP:$NODE_PORT/streamx
-
-  streamx UI URL: http://$NODE_IP:$NODE_PORT/streamx
+  You can try the following command to get the ip, port of streamx:
+  kubectl get no -n {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}"
+  kubectl get svc {{ .Values.service.name }} -n {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}"
 
 {{- end }}
