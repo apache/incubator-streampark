@@ -812,6 +812,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public Application getApp(Application appParam) {
         Application application = this.baseMapper.getApp(appParam);
         ApplicationConfig config = configService.getEffective(appParam.getId());
+        config = config == null ? configService.getLatest(appParam.getId()) : config;
         if (config != null) {
             config.setToApplication(application);
         }
@@ -998,7 +999,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (e.getCause() instanceof CancellationException) {
                     updateToStoped(application);
                 } else {
-                    log.error("stop flink job fail. {}", e);
+                    log.error("stop flink job fail.", e);
                     application.setOptionState(OptionState.NONE.getValue());
                     application.setState(FlinkAppState.FAILED.getValue());
                     updateById(application);
