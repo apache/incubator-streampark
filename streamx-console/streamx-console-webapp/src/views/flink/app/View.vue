@@ -1995,27 +1995,31 @@ export default {
       }
     },
 
-    handleView(params) {
+    handleView(app) {
       // 任务正在运行中, 重启中, 正在 savePoint 中
-      if (params.state === 4 || params.state === 5 || params['optionState'] === 4) {
+      if (app.state === 4 || app.state === 5 || app['optionState'] === 4) {
         // yarn-per-job|yarn-session|yarn-application
-        const executionMode = params['executionMode']
+        const executionMode = app['executionMode']
         if (executionMode === 1) {
-          activeURL({id: params.flinkClusterId}).then((resp) => {
-            const url = resp.data + '/#/job/' + params.jobId + '/overview'
+          activeURL({id: app.flinkClusterId}).then((resp) => {
+            const url = resp.data + '/#/job/' + app.jobId + '/overview'
             window.open(url)
           })
         } else if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
           if (this.yarn == null) {
             yarn({}).then((resp) => {
               this.yarn = resp.data
-              const url = this.yarn + '/proxy/' + params['appId'] + '/'
+              const url = this.yarn + '/proxy/' + app['appId'] + '/'
               window.open(url)
             })
           } else {
-            const url = this.yarn + '/proxy/' + params['appId'] + '/'
+            const url = this.yarn + '/proxy/' + app['appId'] + '/'
             window.open(url)
           }
+        } else {
+            if (app.flinkRestUrl != null) {
+              window.open(app.flinkRestUrl)
+            }
         }
       }
     },
