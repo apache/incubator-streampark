@@ -2373,7 +2373,6 @@
           params.k8sTmPodTemplate = this.tmPodTemplate
           params.k8sHadoopIntegration = this.useSysHadoopConf
         }
-        console.log('获取params：' +JSON.stringify( params))
 
         // common params...
         const resourceFrom = values.resourceFrom

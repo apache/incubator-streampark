@@ -30,6 +30,18 @@
       </a-form-item>
 
       <a-form-item
+        label="Application Type"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-alert
+          type="info">
+          <template slot="message">
+            <svg-icon name="flink" style="color: #108ee9"/>&nbsp;&nbsp;StreamX Flink
+          </template>
+        </a-alert>
+      </a-form-item>
+
+      <a-form-item
         label="Execution Mode"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -2235,6 +2247,7 @@
 
       handleSubmitCustomJob(values) {
         const options = this.handleFormValue(values)
+        debugger
         const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
         let config = this.configOverride || this.app.config
         if (config != null && config.trim() !== '') {
