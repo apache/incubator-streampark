@@ -578,12 +578,12 @@ public class Application implements Serializable {
     @JsonIgnore
     @SneakyThrows
     public Dependency getDependencyObject() {
-        return Dependency.jsonToDependency(this.dependency);
+        return Dependency.toDependency(this.dependency);
     }
 
     @JsonIgnore
     public DependencyInfo getDependencyInfo() {
-        return Application.Dependency.jsonToDependency(getDependency()).toJarPackDeps();
+        return Application.Dependency.toDependency(getDependency()).toJarPackDeps();
     }
 
     @JsonIgnore
@@ -627,8 +627,8 @@ public class Application implements Serializable {
         }
 
         if (!ObjectUtils.safeEquals(this.getResolveOrder(), other.getResolveOrder()) ||
-                !ObjectUtils.safeEquals(this.getExecutionMode(), other.getExecutionMode()) ||
-                !ObjectUtils.safeEquals(this.getK8sRestExposedType(), other.getK8sRestExposedType())) {
+            !ObjectUtils.safeEquals(this.getExecutionMode(), other.getExecutionMode()) ||
+            !ObjectUtils.safeEquals(this.getK8sRestExposedType(), other.getK8sRestExposedType())) {
             return false;
         }
 
@@ -762,7 +762,7 @@ public class Application implements Serializable {
 
         @JsonIgnore
         @SneakyThrows
-        public static Dependency jsonToDependency(String dependency) {
+        public static Dependency toDependency(String dependency) {
             if (Utils.notEmpty(dependency)) {
                 return JacksonUtils.read(dependency, new TypeReference<Dependency>() {
                 });
@@ -786,34 +786,17 @@ public class Application implements Serializable {
                 return false;
             }
 
-            Map<String, String> jarMap = new HashMap<>(jar.size());
-            jar.forEach(x -> jarMap.put(x, x));
-
-            Map<String, String> jarMap2 = new HashMap<>(other.jar.size());
-            other.jar.forEach(x -> jarMap2.put(x, x));
-
-            for (Map.Entry<String, String> entry : jarMap.entrySet()) {
-                if (!jarMap2.containsKey(entry.getKey())) {
-                    return false;
-                }
-            }
-
-            Map<String, Pom> pomMap = new HashMap<>(pom.size());
-            pom.forEach(x -> pomMap.put(x.getGav(), x));
-
-            Map<String, Pom> pomMap2 = new HashMap<>(other.pom.size());
-            other.pom.forEach(x -> pomMap2.put(x.getGav(), x));
-            return Pom.checkPom(pomMap, pomMap2);
+            return pom.containsAll(other.pom) && jar.containsAll(other.jar);
         }
 
         @JsonIgnore
         public DependencyInfo toJarPackDeps() {
             List<Artifact> mvnArts = this.pom.stream()
-                    .map(pom -> new Artifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
-                    .collect(Collectors.toList());
+                .map(pom -> new Artifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
+                .collect(Collectors.toList());
             List<String> extJars = this.jar.stream()
-                    .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
-                    .collect(Collectors.toList());
+                .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
+                .collect(Collectors.toList());
             return new DependencyInfo(mvnArts, extJars);
         }
 
@@ -824,57 +807,26 @@ public class Application implements Serializable {
         private String groupId;
         private String artifactId;
         private String version;
-        private List<Pom> exclusions = Collections.emptyList();
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            return this.toString().equals(o.toString());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(groupId, artifactId, version);
+        }
 
         @Override
         public String toString() {
-            return "{" +
-                    "groupId='" + groupId + '\'' +
-                    ", artifactId='" + artifactId + '\'' +
-                    ", version='" + version + '\'' +
-                    '}';
-        }
-
-        private String getGav() {
-            return this.groupId + ":" + this.artifactId + ":" + this.version;
-        }
-
-        private String getGa() {
-            return this.groupId + ":" + this.artifactId;
-        }
-
-        public boolean eq(Pom other) {
-            if (other == null) {
-                return false;
-            }
-            if (!this.getGav().equals(other.getGav())) {
-                return false;
-            }
-
-            if (exclusions.size() != other.exclusions.size()) {
-                return false;
-            }
-
-            Map<String, Pom> pomMap = new HashMap<>(exclusions.size());
-            exclusions.forEach(x -> pomMap.put(x.getGa(), x));
-
-            Map<String, Pom> pomMap2 = new HashMap<>(other.exclusions.size());
-            other.exclusions.forEach(x -> pomMap2.put(x.getGa(), x));
-
-            return checkPom(pomMap, pomMap2);
-        }
-
-        public static boolean checkPom(Map<String, Pom> pomMap, Map<String, Pom> pomMap2) {
-            for (Map.Entry<String, Pom> entry : pomMap.entrySet()) {
-                Pom pom = pomMap2.get(entry.getKey());
-                if (pom == null) {
-                    return false;
-                }
-                if (!entry.getValue().eq(pom)) {
-                    return false;
-                }
-            }
-            return true;
+            return groupId + ":" + artifactId + ":" + version;
         }
 
         @JsonIgnore
