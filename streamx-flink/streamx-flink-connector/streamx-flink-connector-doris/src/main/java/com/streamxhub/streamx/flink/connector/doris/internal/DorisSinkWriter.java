@@ -23,6 +23,7 @@ import com.streamxhub.streamx.common.enums.Semantic;
 import com.streamxhub.streamx.connector.doris.conf.DorisConfig;
 import com.streamxhub.streamx.flink.connector.doris.bean.DorisSinkBufferEntry;
 import com.streamxhub.streamx.flink.connector.doris.bean.LoadStstusFailedException;
+
 import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.metrics.Counter;
 import org.apache.flink.util.concurrent.ExecutorThreadFactory;
@@ -34,7 +35,12 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class DorisSinkWriter implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -54,7 +60,7 @@ public class DorisSinkWriter implements Serializable {
     private transient Counter totalFlushFailedTimes;
 
     private final Map<String, DorisSinkBufferEntry> bufferMap = new ConcurrentHashMap<>();
-    private long FLUSH_QUEUE_POLL_TIMEOUT = 3000;
+    private Long timeout = 3000L;
     private volatile boolean closed = false;
     private volatile boolean flushThreadAlive = false;
     private volatile Throwable flushException;
@@ -215,7 +221,7 @@ public class DorisSinkWriter implements Serializable {
     }
 
     private boolean asyncFlush() throws Exception {
-        final DorisSinkBufferEntry flushData = flushQueue.poll(FLUSH_QUEUE_POLL_TIMEOUT, TimeUnit.MILLISECONDS);
+        final DorisSinkBufferEntry flushData = flushQueue.poll(timeout, TimeUnit.MILLISECONDS);
         if (flushData == null || flushData.getBatchCount() == 0) {
             return true;
         }
@@ -252,7 +258,7 @@ public class DorisSinkWriter implements Serializable {
                 }
             }
             try {
-                Thread.sleep(1000l * (i + 1));
+                Thread.sleep(1000L * (i + 1));
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
                 throw new IOException("Unable to flush, interrupted while doing another attempt", ex);
@@ -275,7 +281,6 @@ public class DorisSinkWriter implements Serializable {
         checkFlushException();
     }
 
-
     private void checkFlushException() {
         if (flushException != null) {
             StackTraceElement[] stack = Thread.currentThread().getStackTrace();
@@ -293,11 +298,10 @@ public class DorisSinkWriter implements Serializable {
     }
 
     public void setBufferedBatchMap(Map<String, DorisSinkBufferEntry> newBufferMap) {
-        if (Semantic.EXACTLY_ONCE.equals(semantic)){
+        if (Semantic.EXACTLY_ONCE.equals(semantic)) {
             bufferMap.clear();
             bufferMap.putAll(newBufferMap);
         }
-
     }
 
 }

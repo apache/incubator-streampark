@@ -19,12 +19,13 @@
 
 package com.streamxhub.streamx.flink.connector.doris.internal;
 
-import com.google.common.base.Strings;
 import com.streamxhub.streamx.common.enums.Semantic;
 import com.streamxhub.streamx.connector.doris.conf.DorisConfig;
 import com.streamxhub.streamx.flink.connector.doris.bean.DorisSinkBufferEntry;
 import com.streamxhub.streamx.flink.connector.doris.bean.DorisSinkRowDataWithMeta;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
+
+import com.google.common.base.Strings;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeHint;
@@ -64,7 +65,6 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
         this.dorisSinkWriter = new DorisSinkWriter(dorisConfig);
     }
 
-
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
@@ -96,7 +96,6 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
         totalInvokeRowsTime.inc(System.nanoTime() - start);
         return;
     }
-
 
     @Override
     public void close() throws Exception {

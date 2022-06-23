@@ -21,10 +21,9 @@ package com.streamxhub.streamx.flink.connector.doris.sink;
 
 import com.streamxhub.streamx.flink.connector.doris.internal.DorisSinkFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
+
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
-
-import java.util.Properties;
 
 /**
  * @param <T>
@@ -33,9 +32,6 @@ import java.util.Properties;
 public class DorisSink<T> {
 
     private final StreamingContext context;
-    private String alias = "";
-    private Properties properties = new Properties();
-
     public DorisSink(StreamingContext context) {
         this.context = context;
     }

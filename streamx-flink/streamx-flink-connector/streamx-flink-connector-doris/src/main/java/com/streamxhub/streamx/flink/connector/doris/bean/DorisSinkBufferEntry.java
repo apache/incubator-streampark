@@ -20,10 +20,12 @@
 package com.streamxhub.streamx.flink.connector.doris.bean;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
+/**
+ * doris sink buffer
+ */
 public class DorisSinkBufferEntry implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -91,7 +93,6 @@ public class DorisSinkBufferEntry implements Serializable {
         this.table = table;
     }
 
-
     public String getLabelPrefix() {
         return labelPrefix;
     }
@@ -99,7 +100,6 @@ public class DorisSinkBufferEntry implements Serializable {
     public void setLabelPrefix(String labelPrefix) {
         this.labelPrefix = labelPrefix;
     }
-
 
     public void addToBuffer(byte[] bytes) {
         incBatchCount();

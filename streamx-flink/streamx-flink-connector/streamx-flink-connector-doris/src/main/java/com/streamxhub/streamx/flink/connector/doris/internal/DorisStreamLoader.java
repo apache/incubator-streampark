@@ -24,6 +24,7 @@ import com.streamxhub.streamx.flink.connector.doris.bean.DorisSinkBufferEntry;
 import com.streamxhub.streamx.flink.connector.doris.bean.LoadStstusFailedException;
 import com.streamxhub.streamx.flink.connector.doris.bean.RespContent;
 import com.streamxhub.streamx.flink.connector.doris.util.DorisDelimiterParser;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpHeaders;
@@ -95,7 +96,7 @@ public class DorisStreamLoader implements Serializable {
                     throw new RuntimeException(errMsg);
                 } else if (RESULT_LABEL_EXISTED.equals(respContent.getStatus())) {
                     LOG.error(String.format("Stream Load response: \n%s\n", loadResponse.respContent));
-                    checkLableState(host,bufferEntity.getDatabase(), bufferEntity.getLabel());
+                    checkLableState(host, bufferEntity.getDatabase(), bufferEntity.getLabel());
                 }
                 return respContent;
             } catch (IOException e) {
@@ -104,7 +105,7 @@ public class DorisStreamLoader implements Serializable {
         }
     }
 
-    private void checkLableState(String host,String database, String label) throws IOException {
+    private void checkLableState(String host, String database, String label) throws IOException {
         int tries = 0;
         while (tries < 10) {
             try {
@@ -113,7 +114,7 @@ public class DorisStreamLoader implements Serializable {
                 return;
             }
             try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-                HttpGet httpGet = new HttpGet(String.format(GET_LOAD_STATUS_URL,host,database,label));
+                HttpGet httpGet = new HttpGet(String.format(GET_LOAD_STATUS_URL, host, database, label));
                 httpGet.setHeader(HttpHeaders.AUTHORIZATION, getBasicAuthHeader(dorisConfig.user(), dorisConfig.password()));
                 httpGet.setHeader("Connection", "close");
                 try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
@@ -122,18 +123,18 @@ public class DorisStreamLoader implements Serializable {
                     if (response.getEntity() != null) {
                         loadResult = EntityUtils.toString(response.getEntity());
                     }
-                     if (statusCode != 200 ) {
+                    if (statusCode != 200) {
                         throw new LoadStstusFailedException(String.format("Failed to flush data to doris, Error " +
                             "could not get the final state of label[%s].\n", label), null);
                     }
                     Map<String, Object> result = OBJECT_MAPPER.readValue(loadResult, HashMap.class);
-                    String labelState = (String)result.get("state");
+                    String labelState = (String) result.get("state");
                     if (null == labelState) {
                         throw new LoadStstusFailedException(String.format("Failed to flush data to doris, Error " +
-                            "could not get the final state of label[%s]. response[%s]\n", label,loadResult),null);
+                            "could not get the final state of label[%s]. response[%s]\n", label, loadResult), null);
                     }
                     LOG.info(String.format("Checking label[%s] state[%s]\n", label, labelState));
-                    switch(labelState) {
+                    switch (labelState) {
                         case LAEBL_STATE_VISIBLE:
                             return;
                         case LAEBL_STATE_COMMITTED:
@@ -173,8 +174,9 @@ public class DorisStreamLoader implements Serializable {
             final HttpPut put = new HttpPut(loadUrl);
             final Properties properties = dorisConfig.loadProperties();
             properties.forEach((k, v) -> put.setHeader(k.toString(), v.toString()));
-            if (properties.containsKey("columns"))
+            if (properties.containsKey("columns")) {
                 put.setHeader("timeout", dorisConfig.timeout() + "");
+            }
             put.setHeader(HttpHeaders.EXPECT, "100-continue");
             put.setHeader(HttpHeaders.AUTHORIZATION, getBasicAuthHeader(dorisConfig.user(), dorisConfig.password()));
             put.setHeader("label", label);
@@ -191,8 +193,7 @@ public class DorisStreamLoader implements Serializable {
         }
     }
 
-
-    private byte[] joinRows(List<byte[]> rows, int totalBytes)  {
+    private byte[] joinRows(List<byte[]> rows, int totalBytes) {
         if (DorisConfig.CSV().equalsIgnoreCase(dorisConfig.loadFormat())) {
             byte[] lineDelimiter = DorisDelimiterParser.parse(dorisConfig.rowDelimiter()).getBytes(StandardCharsets.UTF_8);
             ByteBuffer bos = ByteBuffer.allocate(totalBytes + rows.size() * lineDelimiter.length);
@@ -222,7 +223,7 @@ public class DorisStreamLoader implements Serializable {
     }
 
     private String getWorkerHost() {
-        for (int pos=0; pos <dorisConfig.getLoadUrlSize(); pos++) {
+        for (int pos = 0; pos < dorisConfig.getLoadUrlSize(); pos++) {
             String host = dorisConfig.getHostUrl();
             if (tryHttpConnection(host)) {
                 return host;
@@ -234,7 +235,7 @@ public class DorisStreamLoader implements Serializable {
     private boolean tryHttpConnection(String host) {
         try {
             URL url = new URL(host);
-            HttpURLConnection co =  (HttpURLConnection) url.openConnection();
+            HttpURLConnection co = (HttpURLConnection) url.openConnection();
             co.setConnectTimeout(dorisConfig.timeout());
             co.connect();
             co.disconnect();
