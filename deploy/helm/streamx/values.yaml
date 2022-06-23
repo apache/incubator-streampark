@@ -42,8 +42,6 @@ spec:
   #     memory: "1Gi"
   #     cpu: "500m"
 
-
-
 ingress:
   enabled: false
   host: "streamxhub.org"
