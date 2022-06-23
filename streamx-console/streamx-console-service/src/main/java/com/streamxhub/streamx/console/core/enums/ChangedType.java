@@ -70,16 +70,8 @@ public enum ChangedType implements Serializable {
         return !noChanged();
     }
 
-    public boolean isSqlChanged() {
-        return this.equals(SQL);
-    }
-
     public boolean isDependencyChanged() {
-        return this.equals(DEPENDENCY);
-    }
-
-    public boolean isAllChanged() {
-        return this.equals(ALL);
+        return this.equals(ALL) || this.equals(DEPENDENCY);
     }
 
     @Override

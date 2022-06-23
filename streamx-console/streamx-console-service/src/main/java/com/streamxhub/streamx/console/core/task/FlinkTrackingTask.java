@@ -198,11 +198,11 @@ public class FlinkTrackingTask {
 
     private void tracking() {
         lastTrackTime = System.currentTimeMillis();
-        TRACKING_MAP.entrySet().stream()
-                .filter(trkElement -> !isKubernetesMode(trkElement.getValue().getExecutionMode()))
-                .forEach(trkElement -> EXECUTOR.execute(() -> {
-                    long key = trkElement.getKey();
-                    Application application = trkElement.getValue();
+        for (Map.Entry<Long, Application> entry : TRACKING_MAP.entrySet()) {
+            if (!isKubernetesMode(entry.getValue().getExecutionMode())) {
+                EXECUTOR.execute(() -> {
+                    long key = entry.getKey();
+                    Application application = entry.getValue();
                     final StopFrom stopFrom = STOP_FROM_MAP.getOrDefault(key, null) == null ? StopFrom.NONE : STOP_FROM_MAP.get(key);
                     final OptionState optionState = OPTIONING.get(key);
                     try {
@@ -254,7 +254,9 @@ public class FlinkTrackingTask {
                             }
                         }
                     }
-                }));
+                });
+            }
+        }
     }
 
     /**
@@ -379,7 +381,7 @@ public class FlinkTrackingTask {
                             //x分钟之内超过Y次CheckPoint失败触发动作
                             long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
                             if (minute <= application.getCpFailureRateInterval()
-                                    && counter.getCount() >= application.getCpMaxFailureInterval()) {
+                                && counter.getCount() >= application.getCpMaxFailureInterval()) {
                                 CHECK_POINT_FAILED_MAP.remove(application.getJobId());
                                 if (application.getCpFailureAction() == 1) {
                                     alertService.alert(application, CheckPointStatus.FAILED);
@@ -577,7 +579,7 @@ public class FlinkTrackingTask {
     private static List<Application> getAllApplications() {
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1)
-                .notIn("execution_mode", ExecutionMode.getKubernetesMode());
+            .notIn("execution_mode", ExecutionMode.getKubernetesMode());
         return applicationService.list(queryWrapper);
     }
 
