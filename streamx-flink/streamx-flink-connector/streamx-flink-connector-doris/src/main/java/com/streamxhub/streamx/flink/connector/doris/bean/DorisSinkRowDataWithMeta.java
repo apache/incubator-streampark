@@ -1,8 +1,5 @@
 package com.streamxhub.streamx.flink.connector.doris.bean;
 
-import com.streamxhub.streamx.common.conf.ConfigConst;
-import com.streamxhub.streamx.flink.connector.doris.sink.DorisJavaSink;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

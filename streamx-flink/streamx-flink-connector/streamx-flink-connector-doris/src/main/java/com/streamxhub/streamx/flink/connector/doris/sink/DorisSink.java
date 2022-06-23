@@ -30,13 +30,13 @@ import java.util.Properties;
  * @param <T>
  * @author wudi
  */
-public class DorisJavaSink<T> {
+public class DorisSink<T> {
 
     private final StreamingContext context;
     private String alias = "";
     private Properties properties = new Properties();
 
-    public DorisJavaSink(StreamingContext context) {
+    public DorisSink(StreamingContext context) {
         this.context = context;
     }
 
