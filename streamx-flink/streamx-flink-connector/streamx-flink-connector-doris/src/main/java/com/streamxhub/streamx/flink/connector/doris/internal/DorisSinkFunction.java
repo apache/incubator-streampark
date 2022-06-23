@@ -109,6 +109,7 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
         if (Semantic.EXACTLY_ONCE.equals(Semantic.of(dorisConfig.semantic()))) {
             // save state
             checkpointedState.add(dorisSinkWriter.getBufferedBatchMap());
+            flushPreviousState();
             return;
         }
     }
@@ -124,5 +125,14 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
                 );
             checkpointedState = context.getOperatorStateStore().getListState(descriptor);
         }
+    }
+
+    private void flushPreviousState() throws Exception {
+        // flush the batch saved at the previous checkpoint
+        for (Map<String, DorisSinkBufferEntry> state : checkpointedState.get()) {
+            dorisSinkWriter.setBufferedBatchMap(state);
+            dorisSinkWriter.flush(null, true);
+        }
+        checkpointedState.clear();
     }
 }
