@@ -21,8 +21,9 @@ import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
-import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
+import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.apache.commons.mail.EmailException;

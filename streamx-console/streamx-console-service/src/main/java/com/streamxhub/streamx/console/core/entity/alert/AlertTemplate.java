@@ -24,6 +24,7 @@ import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+
 import lombok.Data;
 
 import java.io.Serializable;

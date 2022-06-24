@@ -233,6 +233,7 @@ export default {
     handleIntroduction() {
       const env = this.envs.filter((x) => x.env === this.env)[0]
       this.introduction = env.introduction()
+      console.log(this.introduction)
     },
     handleChangeEnv(env) {
       this.env = env

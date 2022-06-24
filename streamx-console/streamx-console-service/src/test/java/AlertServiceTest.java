@@ -16,7 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
@@ -24,6 +23,8 @@ import com.streamxhub.streamx.console.core.entity.alert.DingTalkParams;
 import com.streamxhub.streamx.console.core.entity.alert.WeComParams;
 import com.streamxhub.streamx.console.core.service.alert.impl.DingTalkAlertNotifyServiceImpl;
 import com.streamxhub.streamx.console.core.service.alert.impl.WeComAlertNotifyServiceImpl;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.web.client.RestTemplate;

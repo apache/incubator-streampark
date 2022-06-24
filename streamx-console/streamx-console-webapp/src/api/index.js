@@ -102,6 +102,16 @@ export default {
     UPDATE: '/flink/env/update',
     DEFAULT: '/flink/env/default',
   },
+  AlertConf: {
+    ADD: '/flink/alert/conf/add',
+    EXISTS: '/flink/alert/conf/exists',
+    UPDATE:  '/flink/alert/conf/update',
+    GET: '/flink/alert/conf/get',
+    LIST: '/flink/alert/conf/list',
+    LIST_WITHOUTPAGE: '/flink/alert/conf/listWithOutPage',
+    DELETE: '/flink/alert/conf/delete',
+    SEND: '/flink/alert/conf/send'
+  },
   FlinkCluster: {
     LIST: '/flink/cluster/list',
     ACTIVEURL: '/flink/cluster/activeUrl',
@@ -153,19 +163,10 @@ export default {
     PASSWORD: '/user/password',
     RESET: '/user/password/reset',
     GET: '/user/get',
-    GET_NOTOKEN_USER: '/user/getNoTokenUser',
     POST: '/user/post',
     DELETE: '/user/delete',
     CHECK_NAME: '/user/check/name',
     CHECK_PASSWORD: '/user/check/password'
-  },
-  Token: {
-    LIST: '/token/list',
-    DELETE: '/token/delete',
-    CREATE: '/token/create',
-    CHECK: '/token/check',
-    CURL: '/token/curl',
-    TOGGLE: '/token/toggle'
   },
   Role: {
     POST: '/role/post',

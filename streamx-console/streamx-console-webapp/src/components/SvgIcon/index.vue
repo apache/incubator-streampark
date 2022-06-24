@@ -1,5 +1,6 @@
 <template>
   <span :class="'svg-icon-'.concat(size).concat(border? ' svg-icon-border':'')" class="anticon">
+    <alertsetting v-if="name==='alertsetting'"></alertsetting>
     <analyse v-if="name==='analyse'"></analyse>
     <flink v-if="name==='flink'"></flink>
     <spark v-if="name==='spark'"></spark>
@@ -51,6 +52,7 @@
 
 <script>
 import {
+  alertsetting,
   analyse,
   deploy,
   flink,
@@ -102,6 +104,7 @@ import {
 export default {
   name: 'SvgIcon',
   components: {
+    alertsetting,
     analyse,
     deploy,
     flink,

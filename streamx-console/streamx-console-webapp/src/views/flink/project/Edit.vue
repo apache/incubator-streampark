@@ -210,8 +210,6 @@ export default {
       get({ id: projectId }).then((resp) => {
         this.project = resp.data
         this.handleReset()
-      }).then(() => {
-        this.handleBranches()
       }).catch((error) => {
         this.$message.error(error.message)
       })

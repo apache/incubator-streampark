@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
@@ -28,17 +27,21 @@ import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.service.alert.AlertConfigService;
 import com.streamxhub.streamx.console.core.service.alert.AlertService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 /**
@@ -57,34 +60,41 @@ public class AlertConfigController {
     @Autowired
     private AlertService alertService;
     @PostMapping(value = "add")
-    public RestResponse addAlertConf(AlertConfigWithParams params) throws Exception {
+    public RestResponse addAlertConf(@RequestBody AlertConfigWithParams params) throws Exception {
+        log.info("接收到告警配置：{}", params);
         AlertConfig alertConfig = AlertConfig.of(params);
         boolean save = alertConfigService.save(alertConfig);
         return RestResponse.create().data(save);
     }
 
     @PostMapping(value = "exists")
-    public RestResponse exists(AlertConfigWithParams params) throws Exception {
+    public RestResponse exists(@RequestBody AlertConfigWithParams params) throws Exception {
         AlertConfig alertConfig = AlertConfig.of(params);
         boolean exist = alertConfigService.exist(alertConfig);
         return RestResponse.create().data(exist);
     }
 
-    @PutMapping(value = "update")
-    public RestResponse update(AlertConfigWithParams params) throws Exception {
+    @PostMapping(value = "update")
+    public RestResponse update(@RequestBody AlertConfigWithParams params) throws Exception {
         boolean update = alertConfigService.updateById(AlertConfig.of(params));
         return RestResponse.create().data(update);
     }
 
     @PostMapping("get")
-    public RestResponse get(AlertConfigWithParams params) throws Exception {
+    public RestResponse get(@RequestBody AlertConfigWithParams params) throws Exception {
         AlertConfig alertConfig = alertConfigService.getById(params.getId());
         return RestResponse.create().data(AlertConfigWithParams.of(alertConfig));
     }
 
     @PostMapping(value = "list")
-    public RestResponse list(AlertConfigWithParams params, RestRequest request) throws Exception {
+    public RestResponse list(@RequestBody AlertConfigWithParams params, RestRequest request) throws Exception {
         IPage<AlertConfigWithParams> page = alertConfigService.page(params, request);
+        return RestResponse.create().data(page);
+    }
+
+    @PostMapping(value = "listWithOutPage")
+    public RestResponse listWithOutPage() throws Exception {
+        List<AlertConfig> page = alertConfigService.list();
         return RestResponse.create().data(page);
     }
 
@@ -98,7 +108,7 @@ public class AlertConfigController {
      * send alert message for test
      */
     @PostMapping("send")
-    public RestResponse sendAlert(AlertConfigWithParams params) throws Exception {
+    public RestResponse sendAlert(@RequestBody AlertConfigWithParams params) throws Exception {
         AlertTemplate alertTemplate = new AlertTemplate();
         alertTemplate.setTitle("Notify: StreamX alert job for test");
         alertTemplate.setJobName("StreamX alert job for test");

@@ -16,8 +16,8 @@
     </resultMap>
 
     <select id="getAlertConfByName" resultType="alertConfig" parameterType="alertConfig">
-        SELECT 1
+        SELECT ID
         FROM t_alert_config t
-        where t.ALERT_NAME = #{alertConfig.alertName}
+        where t.ALERT_NAME = #{alertConfig.alertName} limit 1;
     </select>
 </mapper>

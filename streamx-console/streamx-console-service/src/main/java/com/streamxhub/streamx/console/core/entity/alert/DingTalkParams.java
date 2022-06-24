@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+
 import java.io.Serializable;
 
 /**
@@ -39,6 +40,11 @@ public class DingTalkParams implements Serializable {
      * 报警人手机号, 多个用','分割
      */
     private String contacts;
+
+    /**
+     * 钉钉告警url
+     */
+    private String alertDingURL;
 
     /**
      * 是否@所有人

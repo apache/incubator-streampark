@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.console.core.service.alert.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
@@ -27,6 +26,8 @@ import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.entity.alert.RobotResponse;
 import com.streamxhub.streamx.console.core.entity.alert.WeComParams;
 import com.streamxhub.streamx.console.core.service.alert.AlertNotifyService;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
+
 import java.util.HashMap;
 import java.util.Map;
 

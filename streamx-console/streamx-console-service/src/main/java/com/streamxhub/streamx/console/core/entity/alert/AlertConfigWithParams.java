@@ -19,8 +19,9 @@
 
 package com.streamxhub.streamx.console.core.entity.alert;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.streamxhub.streamx.console.base.util.JacksonUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

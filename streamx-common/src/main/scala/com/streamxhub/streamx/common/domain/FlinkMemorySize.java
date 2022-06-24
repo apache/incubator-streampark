@@ -19,13 +19,22 @@
 
 package com.streamxhub.streamx.common.domain;
 
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.BYTES;
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.GIGA_BYTES;
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.KILO_BYTES;
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.MEGA_BYTES;
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.TERA_BYTES;
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.hasUnit;
+
 import com.streamxhub.streamx.common.util.AssertUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.IntStream;
-
-import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.*;
 
 /**
  * MemorySize is a representation of a number of bytes, viewable in different units.

@@ -44,7 +44,7 @@
         <result column="JM_MEMORY" jdbcType="INTEGER" property="jmMemory"/>
         <result column="TM_MEMORY" jdbcType="INTEGER" property="tmMemory"/>
         <result column="OPTION_STATE" jdbcType="INTEGER" property="optionState"/>
-        <result column="ALERT_ID" jdbcType="VARCHAR" property="alertId"/>
+        <result column="ALERT_ID" jdbcType="BIGINT" property="alertId"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
         <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
         <result column="K8S_REST_EXPOSED_TYPE" jdbcType="INTEGER" property="k8sRestExposedType"/>

@@ -18,6 +18,7 @@
  */
 
 import com.streamxhub.streamx.console.core.enums.AlertType;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

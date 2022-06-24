@@ -26,6 +26,7 @@ import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.entity.alert.DingTalkParams;
 import com.streamxhub.streamx.console.core.entity.alert.RobotResponse;
 import com.streamxhub.streamx.console.core.service.alert.AlertNotifyService;
+
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
@@ -40,6 +41,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.annotation.PostConstruct;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

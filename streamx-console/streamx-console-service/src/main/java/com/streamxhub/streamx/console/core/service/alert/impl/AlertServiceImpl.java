@@ -22,13 +22,14 @@ package com.streamxhub.streamx.console.core.service.alert.impl;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.enums.AlertType;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.service.alert.AlertConfigService;
 import com.streamxhub.streamx.console.core.service.alert.AlertNotifyService;
 import com.streamxhub.streamx.console.core.service.alert.AlertService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

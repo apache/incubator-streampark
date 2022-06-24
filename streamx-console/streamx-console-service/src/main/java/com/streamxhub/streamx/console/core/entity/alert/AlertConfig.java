@@ -19,11 +19,12 @@
 
 package com.streamxhub.streamx.console.core.entity.alert;
 
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
