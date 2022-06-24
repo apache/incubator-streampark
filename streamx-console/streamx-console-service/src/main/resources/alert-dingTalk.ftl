@@ -1,4 +1,4 @@
-> StreamX , Make Flink|Spark easier!
+> StreamX , Make stream processing easier!
 
 # ${subject}
 

@@ -55,7 +55,7 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
     @PostConstruct
     public void loadTemplateFile() throws Exception {
-        String template = "email.html";
+        String template = "alert-email.ftl";
         this.template = FreemarkerUtils.loadTemplateFile(template);
     }
 
