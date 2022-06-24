@@ -30,24 +30,6 @@
       </a-form-item>
 
       <a-form-item
-        label="Execution Mode"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-select
-          placeholder="Execution Mode"
-          v-decorator="[ 'executionMode' ]"
-          @change="handleChangeMode">
-          <a-select-option
-            v-for="(o,index) in executionModes"
-            :key="`execution_mode_${index}`"
-            :disabled="o.disabled"
-            :value="o.value">
-            {{ o.mode }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-
-      <a-form-item
         label="Application Type"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -72,6 +54,24 @@
             <svg-icon name="upload" style="color: #108ee9"/>&nbsp;&nbsp;Upload (upload local job)
           </template>
         </a-alert>
+      </a-form-item>
+
+      <a-form-item
+        label="Execution Mode"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          placeholder="Execution Mode"
+          v-decorator="[ 'executionMode' ]"
+          @change="handleChangeMode">
+          <a-select-option
+            v-for="(o,index) in executionModes"
+            :key="`execution_mode_${index}`"
+            :disabled="o.disabled"
+            :value="o.value">
+            {{ o.mode }}
+          </a-select-option>
+        </a-select>
       </a-form-item>
 
       <a-form-item
@@ -753,11 +753,38 @@
       </template>
 
       <a-form-item
+        label="Kubernetes Pod Template"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-tabs type="card" v-model="controller.podTemplateTab">
+          <a-tab-pane
+            key="pod-template"
+            tab="Pod Template"
+            forceRender>
+            <div class="pod-template-box syntax-true"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="jm-pod-template"
+            tab="JM Pod Template"
+            forceRender>
+            <div class="jm-pod-template-box syntax-true"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="tm-pod-template"
+            tab="TM Pod Template"
+            forceRender>
+            <div class="tm-pod-template-box syntax-true"></div>
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-item>
+
+      <a-form-item
         label="Dynamic Option"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
-          rows="4"
+          rows="8"
           name="dynamicOptions"
           placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
           v-decorator="['dynamicOptions']" />
@@ -775,37 +802,10 @@
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
-          rows="4"
+          rows="8"
           name="args"
           placeholder="<arguments>"
           v-decorator="['args']" />
-      </a-form-item>
-
-      <a-form-item
-        label="Kubernetes Pod Template"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
-        <a-tabs type="card" v-model="controller.podTemplateTab">
-          <a-tab-pane
-            key="pod-template"
-            tab="Pod Template"
-            forceRender>
-            <div class="pod-template-box syntax-true" style="height: 300px"></div>
-          </a-tab-pane>
-          <a-tab-pane
-            key="jm-pod-template"
-            tab="JM Pod Template"
-            forceRender>
-            <div class="jm-pod-template-box syntax-true" style="height: 300px"></div>
-          </a-tab-pane>
-          <a-tab-pane
-            key="tm-pod-template"
-            tab="TM Pod Template"
-            forceRender>
-            <div class="tm-pod-template-box syntax-true" style="height: 300px"></div>
-          </a-tab-pane>
-        </a-tabs>
       </a-form-item>
 
       <a-form-item

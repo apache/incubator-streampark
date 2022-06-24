@@ -23,7 +23,7 @@ import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.domain.FlinkVersion
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
-import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf
+import com.streamxhub.streamx.flink.packer.docker.DockerConf
 import com.streamxhub.streamx.flink.packer.maven.DependencyInfo
 
 import scala.collection.mutable.ArrayBuffer
@@ -115,10 +115,8 @@ case class FlinkK8sApplicationBuildRequest(appName: String,
                                            flinkBaseImage: String,
                                            flinkPodTemplate: K8sPodTemplates,
                                            integrateWithHadoop: Boolean = false,
-                                           dockerAuthConfig: DockerAuthConf
-                                          ) extends FlinkK8sBuildParam {
-
-}
+                                           dockerConfig: DockerConf
+                                          ) extends FlinkK8sBuildParam
 
 case class FlinkRemotePerJobBuildRequest(appName: String,
                                          workspace: String,
@@ -129,10 +127,7 @@ case class FlinkRemotePerJobBuildRequest(appName: String,
                                          developmentMode: DevelopmentMode,
                                          flinkVersion: FlinkVersion,
                                          dependencyInfo: DependencyInfo
-                                  ) extends FlinkBuildParam {
-
-
-}
+                                  ) extends FlinkBuildParam
 
 
 case class FlinkYarnApplicationBuildRequest(appName: String,

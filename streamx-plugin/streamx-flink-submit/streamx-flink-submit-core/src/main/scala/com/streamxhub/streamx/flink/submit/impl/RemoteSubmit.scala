@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
-import com.streamxhub.streamx.flink.submit.bean.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.bean.{CancelRequest, CancelResponse, SubmitRequest, SubmitResponse}
 import com.streamxhub.streamx.flink.submit.tool.FlinkSessionSubmitHelper
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
@@ -61,11 +61,11 @@ object RemoteSubmit extends FlinkSubmitTrait {
 
   }
 
-  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
+  override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
     flinkConfig
-      .safeSet(DeploymentOptions.TARGET, stopRequest.executionMode.getName)
-      .safeSet(RestOptions.ADDRESS, stopRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
-      .safeSet[JavaInt](RestOptions.PORT, stopRequest.extraParameter.get(RestOptions.PORT.key()).toString.toInt)
+      .safeSet(DeploymentOptions.TARGET, cancelRequest.executionMode.getName)
+      .safeSet(RestOptions.ADDRESS, cancelRequest.extraParameter.get(RestOptions.ADDRESS.key()).toString)
+      .safeSet[JavaInt](RestOptions.PORT, cancelRequest.extraParameter.get(RestOptions.PORT.key()).toString.toInt)
     logInfo(
       s"""
          |------------------------------------------------------------------
@@ -77,9 +77,9 @@ object RemoteSubmit extends FlinkSubmitTrait {
     var client: ClusterClient[StandaloneClusterId] = null
     try {
       client = standAloneDescriptor._2.retrieve(standAloneDescriptor._1).getClusterClient
-      val jobID = JobID.fromHexString(stopRequest.jobId)
-      val actionResult = cancelJob(stopRequest, jobID, client)
-      StopResponse(actionResult)
+      val jobID = JobID.fromHexString(cancelRequest.jobId)
+      val actionResult = cancelJob(cancelRequest, jobID, client)
+      CancelResponse(actionResult)
     } catch {
       case e: Exception =>
         logError(s"stop flink standalone job fail")

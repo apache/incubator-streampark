@@ -18,6 +18,8 @@
  */
 package com.streamxhub.streamx.common.conf
 
+import java.lang.{Integer => JavaInt, Long => JavaLong}
+
 /**
  * Common Configuration
  *
@@ -28,64 +30,64 @@ object CommonConfig {
   val STREAMX_WORKSPACE_LOCAL: InternalOption = InternalOption(
     key = "streamx.workspace.local",
     defaultValue = "/streamx",
-    classType = classOf[java.lang.String])
+    classType = classOf[String])
 
   val STREAMX_WORKSPACE_REMOTE: InternalOption = InternalOption(
     key = "streamx.workspace.remote",
     defaultValue = "/streamx",
-    classType = classOf[java.lang.String])
+    classType = classOf[String])
 
   val STREAMX_HADOOP_USER_NAME: InternalOption = InternalOption(
     key = "streamx.hadoop-user-name",
     defaultValue = "hdfs",
-    classType = classOf[java.lang.String])
+    classType = classOf[String])
 
   val STREAMX_PROXY_YARN_URL: InternalOption = InternalOption(
     key = "streamx.proxy.yarn-url",
     defaultValue = "",
-    classType = classOf[java.lang.String],
+    classType = classOf[String],
     description = "proxy yarn url. ex: knox proxy or other")
 
-  val DOCKER_IMAGE_NAMESPACE: InternalOption = InternalOption(
-    key = "streamx.docker.register.image-namespace",
-    defaultValue = "streamx",
-    classType = classOf[java.lang.String],
-    description = "namespace for docker image used in docker building env and target image register")
+  val STREAM_YARN_AUTH: InternalOption = InternalOption(
+    key = "streamx.yarn.http-auth",
+    defaultValue = "",
+    classType = classOf[String],
+    description = "yarn http auth type. ex: sample, kerberos")
 
   val DOCKER_MAX_CONNECTIONS: InternalOption = InternalOption(
     key = "streamx.docker.http-client.max-connections",
     defaultValue = 100,
-    classType = classOf[java.lang.Integer],
+    classType = classOf[JavaInt],
     description = "instantiating max connections for DockerHttpClient")
 
   val DOCKER_CONNECTION_TIMEOUT_SEC: InternalOption = InternalOption(
     key = "streamx.docker.http-client.connection-timeout-sec",
     defaultValue = 100L,
-    classType = classOf[java.lang.Long],
+    classType = classOf[JavaLong],
     description = "instantiating connection timeout for DockerHttpClient")
 
   val DOCKER_RESPONSE_TIMEOUT_SEC: InternalOption = InternalOption(
     key = "streamx.docker.http-client.response-timeout-sec",
     defaultValue = 120L,
-    classType = classOf[java.lang.Long],
+    classType = classOf[JavaLong],
     description = "instantiating connection timeout for DockerHttpClient")
 
   val MAVEN_REMOTE_URL: InternalOption = InternalOption(
     key = "streamx.maven.central.repository",
     defaultValue = "https://repo1.maven.org/maven2/",
-    classType = classOf[java.lang.String],
+    classType = classOf[String],
     description = "maven repository used for built-in compilation")
 
   val MAVEN_AUTH_USER: InternalOption = InternalOption(
     key = "streamx.maven.auth.user",
     defaultValue = null,
-    classType = classOf[java.lang.String],
+    classType = classOf[String],
     description = "maven repository used for built-in compilation")
 
   val MAVEN_AUTH_PASSWORD: InternalOption = InternalOption(
     key = "streamx.maven.auth.password",
     defaultValue = null,
-    classType = classOf[java.lang.String],
+    classType = classOf[String],
     description = "maven repository used for built-in compilation")
 
 }

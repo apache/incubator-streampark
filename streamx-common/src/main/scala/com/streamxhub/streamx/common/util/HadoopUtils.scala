@@ -19,8 +19,6 @@
 
 package com.streamxhub.streamx.common.util
 
-import com.ctc.wstx.io.{StreamBootstrapper, SystemId}
-import com.ctc.wstx.stax.WstxInputFactory
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.{CommonConfig, InternalConfigHolder}
 import org.apache.commons.collections.CollectionUtils
@@ -28,30 +26,19 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
 import org.apache.hadoop.hdfs.DistributedFileSystem
-import org.apache.hadoop.net.NetUtils
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.service.Service.STATE
-import org.apache.hadoop.util.StringInterner
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.hadoop.yarn.client.api.YarnClient
-import org.apache.hadoop.yarn.conf.{HAUtil, YarnConfiguration}
-import org.apache.hadoop.yarn.util.RMHAUtils
-import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.protocol.HttpClientContext
-import org.apache.http.impl.client.HttpClients
-import org.codehaus.stax2.XMLStreamReader2
+import org.apache.hadoop.yarn.conf.YarnConfiguration
 
-import java.io.{BufferedInputStream, File, FileInputStream, IOException}
-import java.net.InetAddress
+import java.io.{File, IOException}
 import java.security.PrivilegedAction
 import java.util
-import java.util.concurrent.ConcurrentHashMap
-import java.util.{Timer, TimerTask, HashMap => JavaHashMap}
+import java.util.concurrent._
+import java.util.{Timer, TimerTask}
 import javax.security.auth.kerberos.KerberosTicket
-import javax.xml.stream.{XMLStreamConstants, XMLStreamException}
 import scala.collection.JavaConversions._
-import scala.util.control.Breaks._
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -73,10 +60,6 @@ object HadoopUtils extends Logger {
 
   private[this] var tgt: KerberosTicket = _
 
-  private[this] var rmHttpURL: String = _
-
-  private[this] val XML_INPUT_FACTORY = new WstxInputFactory
-
   private lazy val hadoopUserName: String = InternalConfigHolder.get(CommonConfig.STREAMX_HADOOP_USER_NAME)
 
   private[this] lazy val configurationCache: util.Map[String, Configuration] = new ConcurrentHashMap[String, Configuration]()
@@ -94,7 +77,7 @@ object HadoopUtils extends Logger {
       } else null
   }
 
-  private[this] def getUgi(): UserGroupInformation = {
+  def getUgi(): UserGroupInformation = {
     if (ugi == null) {
       ugi = {
         val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
@@ -136,61 +119,32 @@ object HadoopUtils extends Logger {
       val files = hadoopConfDir.listFiles().filter(x => x.isFile && confName.contains(x.getName)).toList
       val conf = new Configuration()
       if (CollectionUtils.isNotEmpty(files)) {
-        files.foreach(x => {
-          //HDFS default value change (with adding time unit) breaks old version MR tarball work with Hadoop 3.x
-          //detail: https://issues.apache.org/jira/browse/HDFS-12920
-          if (x.getName == "hdfs-default.xml" || x.getName == "hdfs-site.xml") {
-            val reader = parseHadoopConf(x)
-            while (reader.hasNext) {
-              if (reader.next() == XMLStreamConstants.START_ELEMENT) {
-                reader.getLocalName match {
-                  case "property" =>
-                    val attrCount = reader.getAttributeCount
-                    var name: String = null
-                    var value: String = null
-                    for (i <- 0 until attrCount) {
-                      val propertyAttr = reader.getAttributeLocalName(i)
-                      propertyAttr match {
-                        case "name" =>
-                          name = StringInterner.weakIntern(reader.getAttributeValue(i))
-                        case "value" =>
-                          value = StringInterner.weakIntern(reader.getAttributeValue(i))
-                      }
-                    }
-                    if (name != null && value != null) {
-                      if (value.matches("\\d+s$")) {
-                        conf.set(name, value.replaceAll("s$", ""))
-                      } else {
-                        conf.set(name, value)
-                      }
-                    }
-                  case _ =>
-                }
-              }
-            }
-          } else {
-            conf.addResource(new Path(x.getAbsolutePath))
+        files.foreach(x => conf.addResource(new Path(x.getAbsolutePath)))
+        //HDFS default value change (with adding time unit) breaks old version MR tarball work with Hadoop 3.x
+        //detail: https://issues.apache.org/jira/browse/HDFS-12920
+        val rewriteNames = List(
+          "dfs.blockreport.initialDelay",
+          "dfs.datanode.directoryscan.interval",
+          "dfs.heartbeat.interval",
+          "dfs.namenode.decommission.interval",
+          "dfs.namenode.replication.interval",
+          "dfs.namenode.checkpoint.period",
+          "dfs.namenode.checkpoint.check.period",
+          "dfs.client.datanode-restart.timeout",
+          "dfs.ha.log-roll.period",
+          "dfs.ha.tail-edits.period",
+          "dfs.datanode.bp-ready.timeout"
+        )
+        rewriteNames.foreach(n => {
+          conf.get(n) match {
+            case null =>
+            case v if v.matches("\\d+s$") => conf.set(n, v.dropRight(1))
           }
         })
       }
       configurationCache.put(confDir, conf)
     }
     configurationCache(confDir)
-  }
-
-  @throws[XMLStreamException]
-  private[this] def parseHadoopConf(f: File): XMLStreamReader2 = {
-    val is = new BufferedInputStream(new FileInputStream(f))
-    val systemIdStr = new Path(f.getAbsolutePath).toString
-    val systemId = SystemId.construct(systemIdStr)
-    val readerConfig = XML_INPUT_FACTORY.createPrivateConfig
-    XML_INPUT_FACTORY.createSR(
-      readerConfig,
-      systemId,
-      StreamBootstrapper.getInstance(null, systemId, is),
-      false,
-      true
-    )
   }
 
   /**
@@ -310,136 +264,11 @@ object HadoopUtils extends Logger {
     reusableYarnClient
   }
 
-  def getRMWebAppProxyURL: String = {
-    val proxyYarnUrl: String = InternalConfigHolder.get(CommonConfig.STREAMX_PROXY_YARN_URL)
-    if (StringUtils.isBlank(proxyYarnUrl)) {
-      return getRMWebAppURL()
-    }
-    proxyYarnUrl
-  }
-
-  /**
-   * <pre>
-   *
-   * @param getLatest :
-   *                  默认单例模式,如果getLatest=true则再次寻找活跃节点返回,主要是考虑到主备的情况,
-   *                  如: 第一次获取的时候返回的是一个当前的活跃节点,之后可能这个活跃节点挂了,就不能提供服务了,
-   *                  此时在调用该方法,只需要传入true即可再次获取一个最新的活跃节点返回
-   * @return
-   * </pre>
-   */
-  def getRMWebAppURL(getLatest: Boolean = false): String = {
-    if (rmHttpURL == null || getLatest) {
-      synchronized {
-        val conf = hadoopConf
-        val useHttps = YarnConfiguration.useHttps(conf)
-        val (addressPrefix, defaultPort, protocol) = useHttps match {
-          case x if x => (YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS, "8090", "https://")
-          case _ => (YarnConfiguration.RM_WEBAPP_ADDRESS, "8088", "http://")
-        }
-
-        rmHttpURL = Option(conf.get("yarn.web-proxy.address", null)) match {
-          case Some(proxy) => s"$protocol$proxy"
-          case _ =>
-            val name = if (!HAUtil.isHAEnabled(conf)) addressPrefix else {
-              val yarnConf = new YarnConfiguration(conf)
-              val activeRMId = {
-                Option(RMHAUtils.findActiveRMHAId(yarnConf)) match {
-                  case Some(x) =>
-                    logInfo("findActiveRMHAId successful")
-                    x
-                  case None =>
-                    //If you don't know why, don't modify it
-                    logWarn(s"findActiveRMHAId is null,config yarn.acl.enable:${yarnConf.get("yarn.acl.enable")},now http try it.")
-                    // url ==> rmId
-                    val idUrlMap = new JavaHashMap[String, String]
-                    val rmIds = HAUtil.getRMHAIds(conf)
-                    rmIds.foreach(id => {
-                      val address = conf.get(HAUtil.addSuffix(addressPrefix, id)) match {
-                        case null =>
-                          val hostname = conf.get(HAUtil.addSuffix("yarn.resourcemanager.hostname", id))
-                          s"$hostname:$defaultPort"
-                        case x => x
-                      }
-                      idUrlMap.put(s"$protocol$address", id)
-                    })
-                    var rmId: String = null
-                    val rpcTimeoutForChecks = yarnConf.getInt(
-                      CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
-                      CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT
-                    )
-                    breakable(idUrlMap.foreach(x => {
-                      //test yarn url
-                      val activeUrl = httpTestYarnRMUrl(x._1, rpcTimeoutForChecks)
-                      if (activeUrl != null) {
-                        rmId = idUrlMap(activeUrl)
-                        break
-                      }
-                    }))
-                    rmId
-                }
-              }
-              require(activeRMId != null, "[StreamX] HadoopUtils.getRMWebAppURL: can not found yarn active node")
-              logInfo(s"current activeRMHAId: $activeRMId")
-              val appActiveRMKey = HAUtil.addSuffix(addressPrefix, activeRMId)
-              val hostnameActiveRMKey = HAUtil.addSuffix(YarnConfiguration.RM_HOSTNAME, activeRMId)
-              if (null == HAUtil.getConfValueForRMInstance(appActiveRMKey, yarnConf) && null != HAUtil.getConfValueForRMInstance(hostnameActiveRMKey, yarnConf)) {
-                logInfo(s"Find rm web address by : $hostnameActiveRMKey")
-                hostnameActiveRMKey
-              } else {
-                logInfo(s"Find rm web address by : $appActiveRMKey")
-                appActiveRMKey
-              }
-            }
-
-            val inetSocketAddress = conf.getSocketAddr(name, s"0.0.0.0:$defaultPort", defaultPort.toInt)
-
-            val address = NetUtils.getConnectAddress(inetSocketAddress)
-
-            val buffer = new StringBuilder(protocol)
-            val resolved = address.getAddress
-            if (resolved != null && !resolved.isAnyLocalAddress && !resolved.isLoopbackAddress) {
-              buffer.append(address.getHostName)
-            } else {
-              Try(InetAddress.getLocalHost.getCanonicalHostName) match {
-                case Success(value) => buffer.append(value)
-                case _ => buffer.append(address.getHostName)
-              }
-            }
-            buffer
-              .append(":")
-              .append(address.getPort)
-              .toString()
-        }
-        logInfo(s"yarn resourceManager webapp url:$rmHttpURL")
-      }
-    }
-    rmHttpURL
-  }
-
-  private[this] def httpTestYarnRMUrl(url: String, timeout: Int): String = {
-    val httpClient = HttpClients.createDefault();
-    val context = HttpClientContext.create()
-    val httpGet = new HttpGet(url)
-    val requestConfig = RequestConfig
-      .custom()
-      .setSocketTimeout(timeout)
-      .setConnectTimeout(timeout)
-      .build()
-    httpGet.setConfig(requestConfig)
-    Try(httpClient.execute(httpGet, context)) match {
-      case Success(_) => context.getTargetHost.toString
-      case _ => null
-    }
-  }
-
   def toApplicationId(appId: String): ApplicationId = {
     require(appId != null, "[StreamX] HadoopUtils.toApplicationId: applicationId muse not be null")
     val timestampAndId = appId.split("_")
     ApplicationId.newInstance(timestampAndId(1).toLong, timestampAndId.last.toInt)
   }
-
-  def getYarnAppTrackingUrl(applicationId: ApplicationId): String = yarnClient.getApplicationReport(applicationId).getTrackingUrl
 
   @throws[IOException] def downloadJar(jarOnHdfs: String): String = {
     val tmpDir = FileUtils.createTempDir()

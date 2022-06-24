@@ -36,9 +36,9 @@ import java.lang.{Boolean => JavaBool}
 import scala.collection.JavaConversions._
 
 /**
- * yarn PreJob mode submit
+ * yarn PerJob mode submit
  */
-object YarnPreJobSubmit extends YarnSubmitTrait {
+object YarnPerJobSubmit extends YarnSubmitTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     //execution.target
@@ -119,11 +119,11 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     }
   }
 
-  override def doStop(stopRequest: StopRequest, flinkConfig: Configuration): StopResponse = {
-    val response = super.doStop(stopRequest, flinkConfig)
+  override def doCancel(cancelRequest: CancelRequest, flinkConfig: Configuration): CancelResponse = {
+    val response = super.doCancel(cancelRequest, flinkConfig)
     val clusterClientFactory = new YarnClusterClientFactory
     val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfig)
-    clusterDescriptor.killCluster(ApplicationId.fromString(stopRequest.clusterId))
+    clusterDescriptor.killCluster(ApplicationId.fromString(cancelRequest.clusterId))
     response
   }
 

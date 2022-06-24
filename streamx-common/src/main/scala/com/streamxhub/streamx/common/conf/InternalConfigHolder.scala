@@ -21,6 +21,13 @@ package com.streamxhub.streamx.common.conf
 
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
 
+import java.lang.{
+  Boolean => JavaBool,
+  Double => JavaDouble,
+  Float => JavaFloat,
+  Integer => JavaInt,
+  Long => JavaLong
+}
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.{Nonnull, Nullable}
@@ -176,7 +183,6 @@ object InternalConfigHolder extends Logger {
   }
 
 
-
 }
 
 
@@ -190,12 +196,12 @@ object Converter {
       case c if c == classOf[Boolean] => v.toBoolean.asInstanceOf[T]
       case c if c == classOf[Float] => v.toFloat.asInstanceOf[T]
       case c if c == classOf[Double] => v.toDouble.asInstanceOf[T]
-      case c if c == classOf[java.lang.String] => v.asInstanceOf[T]
-      case c if c == classOf[java.lang.Integer] => java.lang.Integer.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[java.lang.Long] => java.lang.Long.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[java.lang.Boolean] => java.lang.Boolean.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[java.lang.Float] => java.lang.Float.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[java.lang.Double] => java.lang.Double.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[String] => v.asInstanceOf[T]
+      case c if c == classOf[JavaInt] => JavaInt.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[JavaLong] => JavaLong.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[JavaBool] => JavaBool.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[JavaFloat] => JavaFloat.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[JavaDouble] => JavaDouble.valueOf(v).asInstanceOf[T]
       case _ =>
         throw new IllegalArgumentException(s"Unsupported type: $classType")
     }

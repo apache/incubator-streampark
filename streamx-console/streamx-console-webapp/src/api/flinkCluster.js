@@ -26,7 +26,7 @@ export function list(params) {
 }
 
 export function activeURL(params) {
-  return http.post(api.FlinkCluster.ACTIVEURL, params)
+  return http.post(api.FlinkCluster.ACTIVE_URL, params)
 }
 
 export function check(params) {

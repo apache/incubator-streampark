@@ -45,6 +45,7 @@
     <moon v-if="name==='moon'"></moon>
     <user v-if="name==='user'"></user>
     <docker v-if="name==='docker'"></docker>
+    <namespace v-if="name==='namespace'"></namespace>
     <auth v-if="name==='auth'"></auth>
     <password v-if="name==='password'"></password>
   </span>
@@ -97,6 +98,7 @@ import {
   moon,
   user,
   docker,
+  namespace,
   auth,
   password
 } from '@/core/icons'
@@ -149,6 +151,7 @@ export default {
     moon,
     user,
     docker,
+    namespace,
     auth,
     password
   },

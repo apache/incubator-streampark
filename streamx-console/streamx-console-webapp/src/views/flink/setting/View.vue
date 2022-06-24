@@ -76,6 +76,12 @@
                   v-if="item.key === 'docker.register.address'"></svg-icon>
                 <svg-icon
                   class="avatar"
+                  name="namespace"
+                  size="large"
+                  slot="avatar"
+                  v-if="item.key === 'docker.register.namespace'"></svg-icon>
+                <svg-icon
+                  class="avatar"
                   name="auth"
                   size="large"
                   slot="avatar"
