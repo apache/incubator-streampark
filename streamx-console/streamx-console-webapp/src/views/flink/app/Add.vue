@@ -717,7 +717,7 @@
             :step="1"
             placeholder="checkpoint failure rate interval"
             allow-clear
-            v-decorator="['cpMaxFailureInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            v-decorator="['cpMaxFailureInterval',{ rules: [ { validator: handleCheckCheckpoint , trigger:'change'} ]}]"
             style="width: calc(33% - 70px)"/>
           <a-button style="width: 70px">
             minute
@@ -726,14 +726,14 @@
             :min="1"
             :step="1"
             placeholder="max failures per interval"
-            v-decorator="['cpFailureRateInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            v-decorator="['cpFailureRateInterval',{ rules: [ { validator: handleCheckCheckpoint , trigger:'change'} ]}]"
             style="width: calc(33% - 70px); margin-left: 1%"/>
           <a-button style="width: 70px">
             count
           </a-button>
           <a-select
             placeholder="trigger action"
-            v-decorator="['cpFailureAction',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            v-decorator="['cpFailureAction',{ rules: [ { validator: handleCheckCheckpoint , trigger:'change' } ]}]"
             allow-clear
             style="width: 32%;margin-left: 1%">
             <a-select-option
@@ -790,7 +790,7 @@
             type="text"
             placeholder="Please enter email,separate multiple emails with comma(,)"
             allowClear
-            v-decorator="[ 'alertEmail' ]">
+            v-decorator="[ 'alertEmail', { rules: [ { validator: handleCheckCheckpoint} ]} ]">
             <svg-icon name="mail" slot="prefix"/>
           </a-input>
         </a-form-item>
@@ -2213,7 +2213,7 @@
         }
       },
 
-      handleCheckCheckPoint(rule, value, callback) {
+      handleCheckCheckpoint(rule, value, callback) {
         const cpMaxFailureInterval = this.form.getFieldValue('cpMaxFailureInterval')
         const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval')
         const cpFailureAction = this.form.getFieldValue('cpFailureAction')
@@ -2224,10 +2224,10 @@
             if (alertEmail == null) {
               this.form.setFields({
                 alertEmail: {
-                  errors: [new Error('checkPoint Failure trigger is alert,alertEmail must not be empty')]
+                  errors: [new Error('checkPoint failure trigger is alert,email must not be empty')]
                 }
               })
-              callback(new Error('trigger action is alert,alertEmail must not be empty'))
+              callback(new Error('trigger action is alert,email must not be empty'))
             } else {
               callback()
             }
