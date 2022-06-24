@@ -1,3 +1,5 @@
+CREATE database IF NOT EXISTS streamx;
+use streamx;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -93,6 +95,7 @@ CREATE TABLE `t_flink_app` (
 `OPTION_STATE` tinyint DEFAULT NULL,
 `TRACKING` tinyint DEFAULT NULL,
 `CREATE_TIME` datetime DEFAULT NULL,
+`OPTION_TIME` datetime DEFAULT NULL,
 `LAUNCH` tinyint DEFAULT '1',
 `BUILD` tinyint DEFAULT '1',
 `START_TIME` datetime DEFAULT NULL,
@@ -113,7 +116,7 @@ KEY `INX_TRACK` (`TRACKING`) USING BTREE
 -- Records of t_flink_app
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_app` VALUES (100000, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, NULL , NULL, 100000, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '0', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL);
+INSERT INTO `t_flink_app` VALUES (100000, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, NULL , NULL, 100000, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '0', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), NULL, 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -495,7 +498,7 @@ DROP TABLE IF EXISTS `t_setting`;
 CREATE TABLE `t_setting` (
 `NUM` int DEFAULT NULL,
 `KEY` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-`VALUE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`VALUE` text COLLATE utf8mb4_general_ci DEFAULT NULL,
 `TITLE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `TYPE` tinyint NOT NULL COMMENT '1: input 2: boolean 3: number',
@@ -519,6 +522,7 @@ INSERT INTO `t_setting` VALUES (10, 'alert.email.ssl', 'false', 'Alert Email Is 
 INSERT INTO `t_setting` VALUES (11, 'docker.register.address', NULL, 'Docker Register Address', 'Docker容器服务地址', 1);
 INSERT INTO `t_setting` VALUES (12, 'docker.register.user', NULL, 'Docker Register User', 'Docker容器服务认证用户名', 1);
 INSERT INTO `t_setting` VALUES (13, 'docker.register.password', NULL, 'Docker Register Password', 'Docker容器服务认证密码', 1);
+INSERT INTO `t_setting` VALUES (14, 'docker.register.namespace', NULL, 'Namespace for docker image used in docker building env and target image register', 'Docker命名空间', 1);
 COMMIT;
 
 -- ----------------------------

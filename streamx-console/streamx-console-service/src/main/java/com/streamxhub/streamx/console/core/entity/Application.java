@@ -30,9 +30,9 @@ import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.FlinkK8sRestExposedType;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
@@ -229,6 +229,9 @@ public class Application implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date optionTime;
+
     /**
      * The exposed type of the rest service of K8s(kubernetes.rest-service.exposed.type)
      */
@@ -290,6 +293,7 @@ public class Application implements Serializable {
      * refer to {@link com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline}
      */
     private transient Integer buildStatus;
+
     private transient AppControl appControl;
 
     public void setK8sNamespace(String k8sNamespace) {
@@ -447,33 +451,18 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public AppInfo httpYarnAppInfo() throws Exception {
-        if (appId != null) {
-            String format = "%s/ws/v1/cluster/apps/%s";
-            try {
-                String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
-                return httpGetDoResult(url, AppInfo.class);
-            } catch (IOException e) {
-                String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                return httpGetDoResult(url, AppInfo.class);
-            }
-        }
-        return null;
+        String reqURL = "ws/v1/cluster/apps/".concat(appId);
+        return yarnRestRequest(reqURL, AppInfo.class);
     }
 
     @JsonIgnore
-    public Overview httpOverview(FlinkEnv env, FlinkCluster flinkCluster) throws IOException {
-        final String flinkUrl = "overview";
+    public Overview httpOverview(FlinkCluster flinkCluster) throws IOException {
         if (appId != null) {
             if (getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
-                    getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
-                String format = "%s/proxy/%s/" + flinkUrl;
-                try {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
-                    return httpGetDoResult(url, Overview.class);
-                } catch (IOException e) {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                    return httpGetDoResult(url, Overview.class);
-                }
+                getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
+                String format = "proxy/%s/overview";
+                String reqURL = String.format(format, appId);
+                return yarnRestRequest(reqURL, Overview.class);
                 // TODO: yarn-session
                 //String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
                 //return httpGetDoResult(remoteUrl, Overview.class);
@@ -483,30 +472,22 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public JobsOverview httpJobsOverview(FlinkEnv env, FlinkCluster flinkCluster) throws Exception {
+    public JobsOverview httpJobsOverview(FlinkCluster flinkCluster) throws Exception {
         final String flinkUrl = "jobs/overview";
         if (ExecutionMode.isYarnMode(executionMode)) {
-            if (appId != null) {
-                String format = "%s/proxy/%s/" + flinkUrl;
-                JobsOverview jobsOverview;
-                try {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
-                    jobsOverview = httpGetDoResult(url, JobsOverview.class);
-                } catch (IOException e) {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
-                    jobsOverview = httpGetDoResult(url, JobsOverview.class);
-                }
-                if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
-                    //过滤出当前job
-                    List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(jobId)).collect(Collectors.toList());
-                    jobsOverview.setJobs(jobs);
-                }
-                return jobsOverview;
+            String format = "proxy/%s/" + flinkUrl;
+            String reqURL = String.format(format, appId);
+            JobsOverview jobsOverview = yarnRestRequest(reqURL, JobsOverview.class);
+            if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(getExecutionModeEnum())) {
+                //过滤出当前job
+                List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(jobId)).collect(Collectors.toList());
+                jobsOverview.setJobs(jobs);
             }
+            return jobsOverview;
         } else if (ExecutionMode.isRemoteMode(executionMode)) {
             if (jobId != null) {
                 String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
-                JobsOverview jobsOverview = httpGetDoResult(remoteUrl, JobsOverview.class);
+                JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
                 if (jobsOverview != null) {
                     //过滤出当前job
                     List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(jobId)).collect(Collectors.toList());
@@ -519,35 +500,37 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public CheckPoints httpCheckpoints(FlinkEnv env, FlinkCluster flinkCluster) throws IOException {
+    public CheckPoints httpCheckpoints(FlinkCluster flinkCluster) throws IOException {
         final String flinkUrl = "jobs/%s/checkpoints";
         if (ExecutionMode.isYarnMode(executionMode)) {
-            if (appId != null) {
-                String format = "%s/proxy/%s/" + flinkUrl;
-                try {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId, jobId);
-                    return httpGetDoResult(url, CheckPoints.class);
-                } catch (IOException e) {
-                    String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId, jobId);
-                    return httpGetDoResult(url, CheckPoints.class);
-                }
-            }
+            String format = "proxy/%s/" + flinkUrl;
+            String reqURL = String.format(format, appId, jobId);
+            return yarnRestRequest(reqURL, CheckPoints.class);
         } else if (ExecutionMode.isRemoteMode(executionMode)) {
             if (jobId != null) {
                 String remoteUrl = getFlinkClusterRestUrl(flinkCluster, String.format(flinkUrl, jobId));
-                return httpGetDoResult(remoteUrl, CheckPoints.class);
+                return httpRestRequest(remoteUrl, CheckPoints.class);
             }
         }
         return null;
     }
 
     @JsonIgnore
-    private <T> T httpGetDoResult(String url, Class<T> clazz) throws IOException {
-        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
-        if (result != null) {
-            return JacksonUtils.read(result, clazz);
+    private <T> T yarnRestRequest(String url, Class<T> clazz) throws IOException {
+        String result = YarnUtils.restRequest(url);
+        if (null == result) {
+            return null;
         }
-        return null;
+        return JacksonUtils.read(result, clazz);
+    }
+
+    @JsonIgnore
+    private <T> T httpRestRequest(String url, Class<T> clazz) throws IOException {
+        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
+        if (null == result) {
+            return null;
+        }
+        return JacksonUtils.read(result, clazz);
     }
 
     @JsonIgnore
@@ -595,12 +578,12 @@ public class Application implements Serializable {
     @JsonIgnore
     @SneakyThrows
     public Dependency getDependencyObject() {
-        return Dependency.jsonToDependency(this.dependency);
+        return Dependency.toDependency(this.dependency);
     }
 
     @JsonIgnore
     public DependencyInfo getDependencyInfo() {
-        return Application.Dependency.jsonToDependency(getDependency()).toJarPackDeps();
+        return Application.Dependency.toDependency(getDependency()).toJarPackDeps();
     }
 
     @JsonIgnore
@@ -644,8 +627,8 @@ public class Application implements Serializable {
         }
 
         if (!ObjectUtils.safeEquals(this.getResolveOrder(), other.getResolveOrder()) ||
-                !ObjectUtils.safeEquals(this.getExecutionMode(), other.getExecutionMode()) ||
-                !ObjectUtils.safeEquals(this.getK8sRestExposedType(), other.getK8sRestExposedType())) {
+            !ObjectUtils.safeEquals(this.getExecutionMode(), other.getExecutionMode()) ||
+            !ObjectUtils.safeEquals(this.getK8sRestExposedType(), other.getK8sRestExposedType())) {
             return false;
         }
 
@@ -779,7 +762,7 @@ public class Application implements Serializable {
 
         @JsonIgnore
         @SneakyThrows
-        public static Dependency jsonToDependency(String dependency) {
+        public static Dependency toDependency(String dependency) {
             if (Utils.notEmpty(dependency)) {
                 return JacksonUtils.read(dependency, new TypeReference<Dependency>() {
                 });
@@ -803,34 +786,17 @@ public class Application implements Serializable {
                 return false;
             }
 
-            Map<String, String> jarMap = new HashMap<>(jar.size());
-            jar.forEach(x -> jarMap.put(x, x));
-
-            Map<String, String> jarMap2 = new HashMap<>(other.jar.size());
-            other.jar.forEach(x -> jarMap2.put(x, x));
-
-            for (Map.Entry<String, String> entry : jarMap.entrySet()) {
-                if (!jarMap2.containsKey(entry.getKey())) {
-                    return false;
-                }
-            }
-
-            Map<String, Pom> pomMap = new HashMap<>(pom.size());
-            pom.forEach(x -> pomMap.put(x.getGav(), x));
-
-            Map<String, Pom> pomMap2 = new HashMap<>(other.pom.size());
-            other.pom.forEach(x -> pomMap2.put(x.getGav(), x));
-            return Pom.checkPom(pomMap, pomMap2);
+            return pom.containsAll(other.pom) && jar.containsAll(other.jar);
         }
 
         @JsonIgnore
         public DependencyInfo toJarPackDeps() {
             List<Artifact> mvnArts = this.pom.stream()
-                    .map(pom -> new Artifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
-                    .collect(Collectors.toList());
+                .map(pom -> new Artifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
+                .collect(Collectors.toList());
             List<String> extJars = this.jar.stream()
-                    .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
-                    .collect(Collectors.toList());
+                .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
+                .collect(Collectors.toList());
             return new DependencyInfo(mvnArts, extJars);
         }
 
@@ -841,57 +807,26 @@ public class Application implements Serializable {
         private String groupId;
         private String artifactId;
         private String version;
-        private List<Pom> exclusions = Collections.emptyList();
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            return this.toString().equals(o.toString());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(groupId, artifactId, version);
+        }
 
         @Override
         public String toString() {
-            return "{" +
-                    "groupId='" + groupId + '\'' +
-                    ", artifactId='" + artifactId + '\'' +
-                    ", version='" + version + '\'' +
-                    '}';
-        }
-
-        private String getGav() {
-            return this.groupId + ":" + this.artifactId + ":" + this.version;
-        }
-
-        private String getGa() {
-            return this.groupId + ":" + this.artifactId;
-        }
-
-        public boolean eq(Pom other) {
-            if (other == null) {
-                return false;
-            }
-            if (!this.getGav().equals(other.getGav())) {
-                return false;
-            }
-
-            if (exclusions.size() != other.exclusions.size()) {
-                return false;
-            }
-
-            Map<String, Pom> pomMap = new HashMap<>(exclusions.size());
-            exclusions.forEach(x -> pomMap.put(x.getGa(), x));
-
-            Map<String, Pom> pomMap2 = new HashMap<>(other.exclusions.size());
-            other.exclusions.forEach(x -> pomMap2.put(x.getGa(), x));
-
-            return checkPom(pomMap, pomMap2);
-        }
-
-        public static boolean checkPom(Map<String, Pom> pomMap, Map<String, Pom> pomMap2) {
-            for (Map.Entry<String, Pom> entry : pomMap.entrySet()) {
-                Pom pom = pomMap2.get(entry.getKey());
-                if (pom == null) {
-                    return false;
-                }
-                if (!entry.getValue().eq(pom)) {
-                    return false;
-                }
-            }
-            return true;
+            return groupId + ":" + artifactId + ":" + version;
         }
 
         @JsonIgnore

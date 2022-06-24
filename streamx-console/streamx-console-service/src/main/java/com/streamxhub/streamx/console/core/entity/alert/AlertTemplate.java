@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.console.core.entity.alert;
 
 import com.streamxhub.streamx.common.util.DateUtils;
-import com.streamxhub.streamx.common.util.HadoopUtils;
+import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
@@ -61,7 +61,7 @@ public class AlertTemplate implements Serializable {
         }
         duration = duration / 1000 / 60;
         String format = "%s/proxy/%s/";
-        String url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
+        String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
 
         AlertTemplate template = new AlertTemplate();
         template.setJobName(application.getJobName());

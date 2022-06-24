@@ -282,6 +282,8 @@ COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- ------------------------------------- version: 1.2.4 START ---------------------------------------
+
 DROP TABLE IF EXISTS `t_alert_config`;
 CREATE TABLE `t_alert_config`
 (
@@ -304,4 +306,7 @@ CREATE TABLE `t_alert_config`
 alter table t_flink_app add column ALERT_ID bigint after END_TIME;
 alter table t_flink_app drop column ALERT_EMAIL;
 
+ALTER TABLE `t_flink_app` ADD COLUMN `OPTION_TIME` datetime DEFAULT NULL AFTER `CREATE_TIME`;
+ALTER TABLE t_setting modify column `VALUE` text ;
+INSERT INTO `t_setting` VALUES (14, 'docker.register.namespace', NULL, 'Docker Register Image namespace', 'Docker命名空间', 1);
 -- ------------------------------------- version: 1.2.4 END ---------------------------------------

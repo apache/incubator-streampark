@@ -45,7 +45,7 @@ public interface ApplicationService extends IService<Application> {
 
     void starting(Application app);
 
-    boolean start(Application app, boolean auto) throws Exception;
+    void start(Application app, boolean auto) throws Exception;
 
     void restart(Application application) throws Exception;
 
@@ -53,7 +53,7 @@ public interface ApplicationService extends IService<Application> {
 
     AppExistsState checkExists(Application app);
 
-    void cancel(Application app);
+    void cancel(Application app) throws Exception;
 
     void updateTracking(Application application);
 
@@ -89,4 +89,6 @@ public interface ApplicationService extends IService<Application> {
     List<Application> getByProjectId(Long id);
 
     boolean checkBuildAndUpdate(Application app);
+
+    void forcedStop(Application app);
 }
