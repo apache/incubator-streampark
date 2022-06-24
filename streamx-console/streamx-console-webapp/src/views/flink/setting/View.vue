@@ -5,126 +5,243 @@
         <a-card
           :bordered="false"
           class="system_setting">
-          <a-list>
-            <a-list-item v-for="(item,index) in settings" :key="index">
-              <a-list-item-meta style="width: 50%">
-                <svg-icon
-                  class="avatar"
-                  name="maven"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'streamx.maven.central.repository'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="user"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'streamx.maven.auth.user'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="mvnpass"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'streamx.maven.auth.password'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="http"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="host"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.host'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="port"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.port'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="mail"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.from'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="user"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.userName'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="keys"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.password'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="ssl"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.ssl'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="docker"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'docker.register.address'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="namespace"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'docker.register.namespace'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="auth"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'docker.register.user'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="password"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'docker.register.password'"></svg-icon>
-                <span slot="title">{{ item.title }}</span>
-                <span slot="description">{{ item.description }}</span>
-              </a-list-item-meta>
-              <div class="list-content" style="width: 50%">
-                <div class="list-content-item" style="width: 100%">
-                  <template v-if="item.type === 1">
-                    <input
-                      :type="item.key === 'streamx.maven.auth.password' ? 'password': 'text'"
-                      v-if="item.editable"
-                      :value="item.value"
-                      :class="item.key.replace(/\./g,'_')"
-                      class="ant-input"/>
-                    <div v-else style="width: 100%;text-align: right">
-                      <span v-if="item.key === 'streamx.maven.auth.password' && item.value !== null"> ******** </span>
-                      <span v-else>{{ item.value }}</span>
+          <a-collapse class="collapse" v-model="collapseActive">
+            <a-collapse-panel key="1" header="Maven Setting.">
+              <a-list>
+                <a-list-item v-for="(item,index) in settings" :key="index" v-if="item.key.indexOf('streamx.maven') > -1">
+                  <a-list-item-meta style="width: 50%">
+                    <svg-icon
+                      class="avatar"
+                      name="maven"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'streamx.maven.central.repository'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="user"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'streamx.maven.auth.user'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="mvnpass"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'streamx.maven.auth.password'"></svg-icon>
+                    <span slot="title">{{ item.title }}</span>
+                    <span slot="description">{{ item.description }}</span>
+                  </a-list-item-meta>
+                  <div class="list-content" style="width: 50%">
+                    <div class="list-content-item" style="width: 100%">
+                      <template v-if="item.type === 1">
+                        <input
+                          :type="item.key === 'streamx.maven.auth.password' ? 'password': 'text'"
+                          v-if="item.editable"
+                          :value="item.value"
+                          :class="item.key.replace(/\./g,'_')"
+                          class="ant-input"/>
+                        <div v-else style="width: 100%;text-align: right">
+                          <span v-if="item.key === 'streamx.maven.auth.password' && item.value !== null"> ******** </span>
+                          <span v-else>{{ item.value }}</span>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <a-switch
+                          checked-children="ON"
+                          un-checked-children="OFF"
+                          style="float: right;margin-right: 30px"
+                          :default-checked="item.value === 'true'"
+                          @change="handleSwitch(item)"/>
+                      </template>
                     </div>
-                  </template>
-                  <template v-else>
-                    <a-switch
-                      checked-children="ON"
-                      un-checked-children="OFF"
-                      style="float: right;margin-right: 30px"
-                      :default-checked="item.value === 'true'"
-                      @change="handleSwitch(item)"/>
-                  </template>
-                </div>
-              </div>
-              <div slot="actions" v-if="item.type === 1">
-                <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
-                <a v-else @click="handleSubmit(item)">Submit</a>
-              </div>
-            </a-list-item>
-          </a-list>
+                  </div>
+                  <div slot="actions" v-if="item.type === 1">
+                    <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
+                    <a v-else @click="handleSubmit(item)">Submit</a>
+                  </div>
+                </a-list-item>
+              </a-list>
+            </a-collapse-panel>
+            <a-collapse-panel key="2" header="Docker Setting.">
+              <a-list>
+                <a-list-item v-for="(item,index) in settings" :key="index" v-if="item.key.indexOf('docker.register') > -1">
+                  <a-list-item-meta style="width: 50%">
+                    <svg-icon
+                      class="avatar"
+                      name="docker"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'docker.register.address'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="namespace"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'docker.register.namespace'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="auth"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'docker.register.user'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="password"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'docker.register.password'"></svg-icon>
+                    <span slot="title">{{ item.title }}</span>
+                    <span slot="description">{{ item.description }}</span>
+                  </a-list-item-meta>
+                  <div class="list-content" style="width: 50%">
+                    <div class="list-content-item" style="width: 100%">
+                      <template v-if="item.type === 1">
+                        <input
+                          :type="item.key === 'docker.register.password' ? 'password': 'text'"
+                          v-if="item.editable"
+                          :value="item.value"
+                          :class="item.key.replace(/\./g,'_')"
+                          class="ant-input"/>
+                        <div v-else style="width: 100%;text-align: right">
+                          <span v-if="item.key === 'docker.register.password' && item.value !== null"> ******** </span>
+                          <span v-else>{{ item.value }}</span>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <a-switch
+                          checked-children="ON"
+                          un-checked-children="OFF"
+                          style="float: right;margin-right: 30px"
+                          :default-checked="item.value === 'true'"
+                          @change="handleSwitch(item)"/>
+                      </template>
+                    </div>
+                  </div>
+                  <div slot="actions" v-if="item.type === 1">
+                    <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
+                    <a v-else @click="handleSubmit(item)">Submit</a>
+                  </div>
+                </a-list-item>
+              </a-list>
+            </a-collapse-panel>
+            <a-collapse-panel key="3" header="Sender Email Setting.">
+              <a-list>
+                <a-list-item v-for="(item,index) in settings" :key="index" v-if="item.key.indexOf('alert.email') > -1">
+                  <a-list-item-meta style="width: 50%">
+                    <svg-icon
+                      class="avatar"
+                      name="host"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.host'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="port"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.port'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="mail"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.from'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="user"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.userName'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="keys"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.password'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="ssl"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.ssl'"></svg-icon>
+                    <span slot="title">{{ item.title }}</span>
+                    <span slot="description">{{ item.description }}</span>
+                  </a-list-item-meta>
+                  <div class="list-content" style="width: 50%">
+                    <div class="list-content-item" style="width: 100%">
+                      <template v-if="item.type === 1">
+                        <input
+                          :type="item.key === 'alert.email.password' ? 'password': 'text'"
+                          v-if="item.editable"
+                          :value="item.value"
+                          :class="item.key.replace(/\./g,'_')"
+                          class="ant-input"/>
+                        <div v-else style="width: 100%;text-align: right">
+                          <span v-if="item.key === 'alert.email.password' && item.value !== null"> ******** </span>
+                          <span v-else>{{ item.value }}</span>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <a-switch
+                          checked-children="ON"
+                          un-checked-children="OFF"
+                          style="float: right;margin-right: 30px"
+                          :default-checked="item.value === 'true'"
+                          @change="handleSwitch(item)"/>
+                      </template>
+                    </div>
+                  </div>
+                  <div slot="actions" v-if="item.type === 1">
+                    <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
+                    <a v-else @click="handleSubmit(item)">Submit</a>
+                  </div>
+                </a-list-item>
+              </a-list>
+            </a-collapse-panel>
+            <a-collapse-panel key="4" header="Console Setting.">
+              <a-list>
+                <a-list-item v-for="(item,index) in settings" :key="index" v-if="item.key.indexOf('streamx.console') > -1">
+                  <a-list-item-meta style="width: 50%">
+                    <svg-icon
+                      class="avatar"
+                      name="http"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
+                    <span slot="title">{{ item.title }}</span>
+                    <span slot="description">{{ item.description }}</span>
+                  </a-list-item-meta>
+                  <div class="list-content" style="width: 50%">
+                    <div class="list-content-item" style="width: 100%">
+                      <template v-if="item.type === 1">
+                        <input
+                          type="text"
+                          v-if="item.editable"
+                          :value="item.value"
+                          :class="item.key.replace(/\./g,'_')"
+                          class="ant-input"/>
+                        <div v-else style="width: 100%;text-align: right">
+                          <span>{{ item.value }}</span>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <a-switch
+                          checked-children="ON"
+                          un-checked-children="OFF"
+                          style="float: right;margin-right: 30px"
+                          :default-checked="item.value === 'true'"
+                          @change="handleSwitch(item)"/>
+                      </template>
+                    </div>
+                  </div>
+                  <div slot="actions" v-if="item.type === 1">
+                    <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
+                    <a v-else @click="handleSubmit(item)">Submit</a>
+                  </div>
+                </a-list-item>
+              </a-list>
+            </a-collapse-panel>
+          </a-collapse>
         </a-card>
       </a-tab-pane>
       <a-tab-pane key="flink" tab="Flink Home">
@@ -752,6 +869,7 @@ export default {
   components: {SvgIcon, addCluster},
   data() {
     return {
+      collapseActive: ['1', '2', '3' , '4'],
       activeKey:'system',
       settings: [],
       flinks: [],

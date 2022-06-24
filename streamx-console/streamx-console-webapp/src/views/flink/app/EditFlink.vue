@@ -396,7 +396,7 @@
             :step="1"
             placeholder="checkpoint failure rate interval"
             allow-clear
-            v-decorator="['cpMaxFailureInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            v-decorator="['cpMaxFailureInterval',{ rules: [ { validator: handleCheckCheckPoint , trigger:'change'} ]}]"
             style="width: calc(33% - 70px)"/>
           <a-button style="width: 70px">
             minute
@@ -405,7 +405,7 @@
             :min="1"
             :step="1"
             placeholder="max failures per interval"
-            v-decorator="['cpFailureRateInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            v-decorator="['cpFailureRateInterval',{ rules: [ { validator: handleCheckCheckPoint, trigger:'change'} ]}]"
             style="width: calc(33% - 70px); margin-left: 1%"/>
           <a-button style="width: 70px">
             count
@@ -413,7 +413,7 @@
           <a-select
             placeholder="trigger action"
             allowClear
-            v-decorator="['cpFailureAction',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            v-decorator="['cpFailureAction',{ rules: [ { validator: handleCheckCheckPoint, trigger:'change'} ]}]"
             allow-clear
             style="width: 32%;margin-left: 1%">
             <a-select-option
