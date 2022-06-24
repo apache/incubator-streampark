@@ -49,7 +49,7 @@ public class SendEmailTest {
     @Before
     public void initConfig() throws Exception {
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
-        String template = "email.html";
+        String template = "alert-email.ftl";
         Enumeration<URL> urls = ClassLoader.getSystemResources(template);
         if (urls != null) {
             if (!urls.hasMoreElements()) {
@@ -69,7 +69,7 @@ public class SendEmailTest {
                 this.template = configuration.getTemplate(template);
             }
         } else {
-            throw new ExceptionInInitializerError("email.html not found!");
+            throw new ExceptionInInitializerError("alert-email.ftl not found!");
         }
         senderEmail = new SenderEmail();
         senderEmail.setFrom("****@domain.com");

@@ -244,6 +244,69 @@
           </a-collapse>
         </a-card>
       </a-tab-pane>
+      <a-tab-pane key="alert" tab="Alert Setting">
+        <a-card
+          :bordered="false"
+          class="system_setting">
+          <div
+            v-permit="'project:create'">
+            <a-button
+              type="dashed"
+              style="width: 100%;margin-top: 20px"
+              icon="plus"
+              @click="handleAlertFormVisible(true)">
+              Add New
+            </a-button>
+          </div>
+
+          <a-list>
+            <a-list-item v-for="(item,index) in alerts" :key="index">
+              <a-list-item-meta style="width: 40%">
+                <svg-icon class="avatar" name="flink" size="large" slot="avatar"></svg-icon>
+                <span slot="title">{{ item.alertName }}</span>
+              </a-list-item-meta>
+
+              <div class="list-content" style="width: 40%">
+                <span slot="title" text-align center>Alert Type</span><br><br>
+                <svg-icon role="img" v-if="item.alertType === 1 || item.alertType === 3 || item.alertType === 5 || item.alertType === 9 || item.alertType === 7 || item.alertType === 13 || item.alertType === 15" name="mail" size="middle"/>
+                <svg-icon role="img" v-if="item.alertType === 2 || item.alertType === 3 || item.alertType === 6 || item.alertType === 10 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15" name="dingTalk" size="middle"/>
+                <svg-icon role="img" v-if="item.alertType === 4 || item.alertType === 5 || item.alertType === 6 || item.alertType === 12 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15" name="wechat" size="middle"/>
+                <svg-icon role="img" v-if="item.alertType === 8 || item.alertType === 9 || item.alertType === 10 || item.alertType === 12 || item.alertType === 11 || item.alertType === 14 || item.alertType === 15" name="sms" size="middle"/>
+              </div>
+
+              <div slot="actions">
+                <a-tooltip title="Edit Alert Config">
+                  <a-button
+                    @click.native="handleEditAlertConf(item)"
+                    shape="circle"
+                    size="large"
+                    style="margin-left: 3px"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="edit"/>
+                  </a-button>
+                </a-tooltip>
+                <template>
+                  <a-popconfirm
+                    title="Are you sure delete this alert conf ?"
+                    cancel-text="No"
+                    ok-text="Yes"
+                    @confirm="handleDeleteAlertConf(item)">
+                    <a-button
+                      type="danger"
+                      shape="circle"
+                      size="large"
+                      style="margin-left: 3px"
+                      class="control-button">
+                      <a-icon type="delete"/>
+                    </a-button>
+                  </a-popconfirm>
+                </template>
+              </div>
+            </a-list-item>
+          </a-list>
+
+        </a-card>
+      </a-tab-pane>
       <a-tab-pane key="flink" tab="Flink Home">
         <a-card
           :bordered="false"
@@ -296,70 +359,6 @@
           </a-list>
         </a-card>
       </a-tab-pane>
-
-      <!-- 告警配置 -->
-      <a-tab-pane key="alert" tab="Alert Setting">
-        <a-card
-          :bordered="false"
-          class="system_setting">
-          <div
-            v-permit="'project:create'">
-            <a-button
-              type="dashed"
-              style="width: 100%;margin-top: 20px"
-              icon="plus"
-              @click="handleAlertFormVisible(true)">
-              Add New
-            </a-button>
-          </div>
-          <a-list>
-            <a-list-item v-for="(item,index) in alerts" :key="index">
-              <a-list-item-meta style="width: 40%">
-                <svg-icon class="avatar" name="flink" size="large" slot="avatar"></svg-icon>
-                <span slot="title">{{ item.alertName }}</span>
-              </a-list-item-meta>
-
-              <div class="list-content" style="width: 40%">
-                <span slot="title" text-align center>Alert Type</span><br><br>
-                <svg-icon role="img" v-if="item.alertType === 1 || item.alertType === 3 || item.alertType === 5 || item.alertType === 9 || item.alertType === 7 || item.alertType === 13 || item.alertType === 15" name="mail" size="middle"/>
-                <svg-icon role="img" v-if="item.alertType === 2 || item.alertType === 3 || item.alertType === 6 || item.alertType === 10 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15" name="dingding" size="middle"/>
-                <svg-icon role="img" v-if="item.alertType === 4 || item.alertType === 5 || item.alertType === 6 || item.alertType === 12 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15" name="wechat" size="middle"/>
-                <svg-icon role="img" v-if="item.alertType === 8 || item.alertType === 9 || item.alertType === 10 || item.alertType === 12 || item.alertType === 11 || item.alertType === 14 || item.alertType === 15" name="sms" size="middle"/>
-              </div>
-
-              <div slot="actions">
-                <a-tooltip title="Edit Alert Config">
-                  <a-button
-                    @click.native="handleEditAlertConf(item)"
-                    shape="circle"
-                    size="large"
-                    style="margin-left: 3px"
-                    class="control-button ctl-btn-color">
-                    <a-icon type="edit"/>
-                  </a-button>
-                </a-tooltip>
-                <template>
-                  <a-popconfirm
-                    title="Are you sure delete this alert conf ?"
-                    cancel-text="No"
-                    ok-text="Yes"
-                    @confirm="handleDeleteAlertConf(item)">
-                    <a-button
-                      type="danger"
-                      shape="circle"
-                      size="large"
-                      style="margin-left: 3px"
-                      class="control-button">
-                      <a-icon type="delete"/>
-                    </a-button>
-                  </a-popconfirm>
-                </template>
-              </div>
-            </a-list-item>
-          </a-list>
-        </a-card>
-      </a-tab-pane>
-
       <a-tab-pane key="cluster" tab="Flink Cluster">
         <a-card
           :bordered="false"
@@ -497,7 +496,7 @@
                     size="large"
                     style="margin-left: 3px"
                     class="control-button ctl-btn-color"
-                    :href="item.address" 
+                    :href="item.address"
                     target="_blank">
                     <a-icon type="eye"/>
                   </a-button>
@@ -625,7 +624,7 @@
 
     <a-modal
       v-model="alertFormVisible"
-      width="1200px"
+      width="850px"
       class="full-modal">
       <template
         slot="title">
@@ -650,7 +649,7 @@
             v-decorator="['alertName',{ rules: [{validator: handleCheckAlertName,required: true , message: 'Alert Name is required'}]} ]"/>
           <span
             class="conf-switch"
-            style="color:darkgrey">the alert name, e.g: dingdingAlert </span>
+            style="color:darkgrey">the alert name, e.g: streamx team alert </span>
         </a-form-item>
 
         <a-form-item
@@ -676,6 +675,7 @@
           </a-select>
         </a-form-item>
 
+        <a-divider v-if="alertType.indexOf(1)>-1"><svg-icon role="img" name="mail"/>  E-mail </a-divider>
         <a-form-item
           v-if="alertType.indexOf(1)>-1"
           label="Alert Email"
@@ -686,9 +686,10 @@
             placeholder="Please enter email,separate multiple emails with comma(,)"
             allowClear
             v-decorator="[ 'alertEmail', {rules: [{ required: true, message: 'email address is required' }]} ]">
-            <svg-icon name="mail" slot="prefix"/>
           </a-input>
         </a-form-item>
+
+        <a-divider v-if="alertType.indexOf(2)>-1"><svg-icon role="img" name="dingding"/> Ding Talk </a-divider>
 
         <a-form-item
           v-if="alertType.indexOf(2)>-1"
@@ -715,7 +716,19 @@
         </a-form-item>
 
         <a-form-item
-          label="IsAll"
+          v-if="alertType.indexOf(2)>-1"
+          label="DingTalk User"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-input
+            type="text"
+            placeholder="Please enter DingTalk receive user"
+            allowClear
+            v-decorator="[ 'alertDingUser', {rules: [{ required: false, message: 'DingTalk receive user is required' }]} ]"/>
+        </a-form-item>
+
+        <a-form-item
+          label="At All User"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
           v-show="alertType.indexOf(2)>-1">
@@ -731,7 +744,7 @@
         </a-form-item>
 
         <a-form-item
-          label="SecretEnable"
+          label="Secret Enable"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
           v-show="alertType.indexOf(2)>-1">
@@ -748,7 +761,7 @@
 
         <a-form-item
           v-if="alertType.indexOf(2)>-1 && secretEnable === true"
-          label="DingTalk SecretToken"
+          label="Secret Token"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
           <a-input
@@ -758,17 +771,7 @@
             v-decorator="[ 'alertSecretToken', {rules: [{ required: true, message: 'DingTalk SecretToken is required' }]} ]"/>
         </a-form-item>
 
-        <a-form-item
-          v-if="alertType.indexOf(2)>-1"
-          label="DingTalk User"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
-          <a-input
-            type="text"
-            placeholder="Please enter DingTalk receive user"
-            allowClear
-            v-decorator="[ 'alertDingUser', {rules: [{ required: false, message: 'DingTalk receive user is required' }]} ]"/>
-        </a-form-item>
+        <a-divider v-if="alertType.indexOf(4)>-1"><svg-icon role="img" name="wechat"/> WeChat </a-divider>
 
         <a-form-item
           v-if="alertType.indexOf(4)>-1"
@@ -780,6 +783,8 @@
             placeholder="Please enter WeChart Token"
             v-decorator="['weToken', {rules: [{ required: true, message: 'WeChat Token is required' }]} ]"/>
         </a-form-item>
+
+        <a-divider v-if="alertType.indexOf(8)>-1"><svg-icon role="img" name="sms"/> SMS </a-divider>
 
         <a-form-item
           v-if="alertType.indexOf(8)>-1"
@@ -904,7 +909,7 @@ export default {
       alert: true,
       alertTypes: [
         {name: 'E-mail', value: 1, disabled: false},
-        {name: 'Ding Ding Task', value: 2, disabled: false},
+        {name: 'Ding Talk', value: 2, disabled: false},
         {name: 'Wechat', value: 4, disabled: false},
         {name: 'SMS', value: 8, disabled: false}
       ],
@@ -1373,7 +1378,7 @@ export default {
               }
             })
           }
-          
+
         }
       }).catch((err) => {
         callback(new Error('提交表单异常' + err))

@@ -68,7 +68,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
 
     @PostConstruct
     public void loadTemplateFile() throws Exception {
-        String template = "dingTalkAlertTemplate.txt";
+        String template = "alert-dingTalk.ftl";
         this.template = FreemarkerUtils.loadTemplateFile(template);
     }
 
