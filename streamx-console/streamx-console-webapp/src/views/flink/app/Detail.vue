@@ -13,16 +13,15 @@
           shape="circle"
           icon="arrow-left"
           @click="handleGoBack()"
-          style="float: right;margin-top: -8px"/>
+          style="float: right;margin-top: -8px" />
         <a-button
           type="danger"
           icon="cloud"
           @click="handleView"
           :disabled="this.app.state !== 5 || (this.yarn === null && this.app.flinkRestUrl === null)"
-          style="float: right;margin-top: -8px;margin-right: 20px">Flink Web UI
-        </a-button>
+          style="float: right;margin-top: -8px;margin-right: 20px">Flink Web UI</a-button>
         <a-divider
-          style="margin-top: 5px;margin-bottom: -5px"/>
+          style="margin-top: 5px;margin-bottom: -5px" />
       </template>
 
       <a-descriptions-item
@@ -73,19 +72,19 @@
         label="Status">
         <State
           option="state"
-          :data="app"/>
+          :data="app" />
       </a-descriptions-item>
       <a-descriptions-item
         label="Start Time">
         <template v-if="app.startTime">
-          <a-icon type="clock-circle"/>
+          <a-icon type="clock-circle" />
           {{ app.startTime }}
         </template>
       </a-descriptions-item>
       <a-descriptions-item
         v-if="app.endTime"
         label="End Time">
-        <a-icon type="clock-circle"/>
+        <a-icon type="clock-circle" />
         {{ app.endTime }}
       </a-descriptions-item>
       <a-descriptions-item
@@ -98,51 +97,12 @@
         :span="3">
         {{ app.description }}
       </a-descriptions-item>
-
-      <a-descriptions-item
-        :span="3">
-        <template slot="label">
-          Rest Api
-          <a-tooltip placement="top">
-            <template slot="title">
-              <span>Rest API external call interface,other third-party systems easy to access streamx</span>
-            </template>
-            <a-icon type="question-circle" style="color: red"/>
-          </a-tooltip>
-        </template>
-        <a-button
-          type="primary"
-          shape="round"
-          icon="copy"
-          size="default"
-          style="margin:0 3px;padding: 0 5px"
-          @click.native="handleCopyCurl(api.Application.START.toString())">Copy Start cURL
-        </a-button>
-        <a-button
-          type="primary"
-          shape="round"
-          icon="copy"
-          size="default"
-          style="margin:0 3px;padding: 0 5px"
-          @click.native="handleCopyCurl(api.Application.CANCEL.toString())">Copy Cancel cURL
-        </a-button>
-        <a-button
-          type="link"
-          shape="round"
-          icon="link"
-          size="default"
-          @click.native="handleDocPage()"
-          style="margin:0 3px;padding: 0 5px">Api Doc Center
-        </a-button>
-      </a-descriptions-item>
-
     </a-descriptions>
-
     <a-divider
-      style="margin-top: 20px;margin-bottom: -17px"/>
+      style="margin-top: 20px;margin-bottom: -17px" />
     <a-tabs
       v-if="app"
-      :defaultActiveKey="1"
+      defaultActiveKey="1"
       style="margin-top: 15px"
       :animated="animated"
       :tab-bar-gutter="tabBarGutter"
@@ -231,7 +191,7 @@
                 slot="createTime"
                 slot-scope="text, record">
                 <a-icon
-                  type="clock-circle"/>
+                  type="clock-circle" />
                 {{ record.createTime }}
               </template>
               <template
@@ -307,7 +267,7 @@
                 slot="triggerTime"
                 slot-scope="text, record">
                 <a-icon
-                  type="clock-circle"/>
+                  type="clock-circle" />
                 {{ record.triggerTime }}
               </template>
               <template
@@ -460,7 +420,7 @@
                 slot="optionTime"
                 slot-scope="text, record">
                 <a-icon
-                  type="clock-circle"/>
+                  type="clock-circle" />
                 {{ record.optionTime }}
               </template>
               <template
@@ -539,7 +499,7 @@
           </a-button>
           <a-icon
             type="clock-circle"
-            style="color:darkgrey"/>
+            style="color:darkgrey" />
           <span
             style="color:darkgrey">{{ compare.createTime }}</span>
         </a-form-item>
@@ -593,7 +553,7 @@
         slot="title">
         <svg-icon
           name="code"
-          style="color:RED"/>&nbsp; Exception Info
+          style="color:RED" />&nbsp; Exception Info
       </template>
       <template
         slot="footer">
@@ -672,19 +632,19 @@
       @close="handleEditConfClose"
       @ok="handleEditConfOk"
       :visiable="confVisiable"
-      :read-only="true"/>
+      :read-only="true" />
 
     <Different ref="different"/>
 
   </a-card>
 </template>
 <script>
-import {mapActions, mapGetters} from 'vuex'
-import {backUps, get, optionLog, removeBak, rollback, yarn} from '@api/application'
+import { mapActions, mapGetters } from 'vuex'
+import {get, backUps, optionLog, removeBak, rollback, yarn} from '@api/application'
 import State from './State'
 import configOptions from './Option'
-import {get as getVer, list as listVer, remove as removeConf} from '@api/config'
-import {history, remove as removeSp} from '@api/savepoint'
+import { get as getVer, list as listVer, remove as removeConf } from '@api/config'
+import { history, remove as removeSp } from '@api/savepoint'
 import Mergely from './Mergely'
 import Different from './Different'
 import notification from 'ant-design-vue/lib/notification'
@@ -693,9 +653,6 @@ import SvgIcon from '@/components/SvgIcon'
 import storage from '@/utils/storage'
 import {DEFAULT_THEME} from '@/store/mutation-types'
 import {activeURL} from '@/api/flinkCluster'
-import {baseUrl} from '@/api/baseUrl'
-import api from '@/api/index'
-import {copyCurl, check as checkToken} from '@/api/token'
 
 const Base64 = require('js-base64').Base64
 configOptions.push(
@@ -711,14 +668,11 @@ configOptions.push(
 
 export default {
 
-  components: {SvgIcon, State, Mergely, Different},
+  components: {SvgIcon, State, Mergely ,Different },
+
   data() {
     return {
-      api,
-      baseUrl: baseUrl(),
       app: null,
-      curlTemplate: `curl -X POST '{requestUrl}' \\\n-H 'Content-Type: application/x-www-form-urlencoded' \\\n-H 'Authorization: {替换成accessToken}' \\\n{form-data} -i
-      `,
       options: {},
       defaultConfigId: null,
       allConfigVersions: null,
@@ -811,7 +765,7 @@ export default {
           lineHeight: 24,
           automaticLayout: true,
           cursorBlinking: 'line',
-          cursorStyle: 'line',
+          cursorStyle:'line',
           cursorWidth: 3,
           renderFinalNewline: true,
           renderLineHighlight: 'all',
@@ -845,33 +799,33 @@ export default {
           {
             title: 'Version',
             dataIndex: 'version',
-            scopedSlots: {customRender: 'version'}
+            scopedSlots: { customRender: 'version' }
           },
           {
             title: 'Conf Format',
             dataIndex: 'format',
-            scopedSlots: {customRender: 'format'}
+            scopedSlots: { customRender: 'format' }
           },
           {
             title: 'Effective',
             dataIndex: 'effective',
-            scopedSlots: {customRender: 'effective'}
+            scopedSlots: { customRender: 'effective' }
           },
           {
             title: 'Candidate',
             dataIndex: 'candidate',
-            scopedSlots: {customRender: 'candidate'}
+            scopedSlots: { customRender: 'candidate' }
           },
           {
             title: 'Modify Time',
             dataIndex: 'createTime',
-            scopedSlots: {customRender: 'createTime'}
+            scopedSlots: { customRender: 'createTime' }
           },
           {
             title: 'Operation',
             dataIndex: 'operation',
             key: 'operation',
-            scopedSlots: {customRender: 'operation'},
+            scopedSlots: { customRender: 'operation' },
             fixed: 'right',
             width: 150
           }
@@ -885,24 +839,24 @@ export default {
           {
             title: 'Trigger Time',
             dataIndex: 'triggerTime',
-            scopedSlots: {customRender: 'triggerTime'},
+            scopedSlots: { customRender: 'triggerTime' },
             width: 250
           },
           {
             title: 'Type',
             dataIndex: 'type',
-            scopedSlots: {customRender: 'type'}
+            scopedSlots: { customRender: 'type' }
           },
           {
             title: 'Latest',
             dataIndex: 'latest',
-            scopedSlots: {customRender: 'latest'}
+            scopedSlots: { customRender: 'latest' }
           },
           {
             title: 'Operation',
             dataIndex: 'operation',
             key: 'operation',
-            scopedSlots: {customRender: 'operation'},
+            scopedSlots: { customRender: 'operation' },
             fixed: 'right',
             width: 150
           }
@@ -922,18 +876,18 @@ export default {
             title: 'Version',
             dataIndex: 'version',
             width: '10%',
-            scopedSlots: {customRender: 'version'}
+            scopedSlots: { customRender: 'version' }
           },
           {
             title: 'Backup Time',
             dataIndex: 'createTime',
-            scopedSlots: {customRender: 'createTime'}
+            scopedSlots: { customRender: 'createTime' }
           },
           {
             title: 'Operation',
             dataIndex: 'operation',
             key: 'operation',
-            scopedSlots: {customRender: 'operation'},
+            scopedSlots: { customRender: 'operation' },
             fixed: 'right',
             width: 150
           }
@@ -943,23 +897,23 @@ export default {
             title: 'Application Id',
             dataIndex: 'yarnAppId',
             width: '40%',
-            scopedSlots: {customRender: 'yarnAppId'}
+            scopedSlots: { customRender: 'yarnAppId' }
           },
           {
             title: 'Start Status',
             dataIndex: 'success',
-            scopedSlots: {customRender: 'success'}
+            scopedSlots: { customRender: 'success' }
           },
           {
             title: 'Option Time',
             dataIndex: 'optionTime',
-            scopedSlots: {customRender: 'optionTime'}
+            scopedSlots: { customRender: 'optionTime' }
           },
           {
             title: 'Operation',
             dataIndex: 'operation',
             key: 'operation',
-            scopedSlots: {customRender: 'operation'},
+            scopedSlots: { customRender: 'operation' },
             fixed: 'right',
             width: 150
           }
@@ -987,6 +941,7 @@ export default {
   mounted() {
     const appId = this.applicationId()
     if (appId) {
+      console.log('获取到appId' + appId)
       this.CleanAppId()
       this.handleGet(appId)
       const timer = window.setInterval(() => this.handleGet(appId), 5000)
@@ -1001,51 +956,8 @@ export default {
   methods: {
     ...mapActions(['CleanAppId']),
     ...mapGetters(['applicationId']),
-
-    handleDocPage() {
-      const res = baseUrl().split(':')[1] + ':10000/doc.html'
-      window.open(res)
-    },
-
-    handleCopyCurl(urlPath) {
-      checkToken({}).then((resp) => {
-        const result = parseInt(resp.data)
-        if (result === 0) {
-          this.$swal.fire({
-            icon: 'error',
-            title: 'access token is null,please contact the administrator to add.',
-            showConfirmButton: true,
-            timer: 3500
-          })
-        } else if (result === 1) {
-          this.$swal.fire({
-            icon: 'error',
-            title: 'access token is invalid,please contact the administrator.',
-            showConfirmButton: true,
-            timer: 3500
-          })
-        } else {
-          const params = {
-            appId: this.app.id,
-            baseUrl: baseUrl(),
-            path: urlPath
-          }
-          copyCurl({...params}).then((resp) => {
-            const oTextarea = document.createElement('textarea')
-            oTextarea.value = resp.data
-            document.body.appendChild(oTextarea)
-            // 选择对象
-            oTextarea.select()
-            document.execCommand('Copy')
-            this.$message.success('copy successful')
-            oTextarea.remove()
-          })
-        }
-      })
-    },
-
     handleGet(appId) {
-      get({id: appId}).then((resp) => {
+      get({ id: appId }).then((resp) => {
         if (!this.app) {
           this.app = resp.data
           this.options = JSON.parse(this.app.options || '{}')
@@ -1091,8 +1003,8 @@ export default {
         params.pageNum = this.pagination.config.defaultCurrent
       }
       this.handlePagerLoading()
-      listVer({...params}).then((resp) => {
-        const pagination = {...this.pagination.config}
+      listVer({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.config }
         pagination.total = parseInt(resp.data.total)
         resp.data.records.forEach((value, index) => {
           if (value.effective) {
@@ -1120,7 +1032,7 @@ export default {
 
     handleView() {
       if (this.app.executionMode === 1) {
-        activeURL({id: this.app.id}).then((resp) => {
+        activeURL({ id: this.app.id }).then((resp) =>{
           const url = resp.data + '/#/job/' + this.app.jobId + '/overview'
           window.open(url)
         })
@@ -1150,8 +1062,8 @@ export default {
         params.pageNum = this.pagination.savePoints.defaultCurrent
       }
       this.handlePagerLoading()
-      history({...params}).then((resp) => {
-        const pagination = {...this.pagination.savePoints}
+      history({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.savePoints }
         pagination.total = parseInt(resp.data.total)
         this.savePoints = resp.data.records
         this.pagination.savePoints = pagination
@@ -1175,8 +1087,8 @@ export default {
         params.pageNum = this.pagination.backUp.defaultCurrent
       }
       this.handlePagerLoading()
-      backUps({...params}).then((resp) => {
-        const pagination = {...this.pagination.backUp}
+      backUps({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.backUp }
         pagination.total = parseInt(resp.data.total)
         this.backUpList = resp.data.records
         this.pagination.backUp = pagination
@@ -1200,8 +1112,8 @@ export default {
         params.pageNum = this.pagination.optionLog.defaultCurrent
       }
       this.handlePagerLoading()
-      optionLog({...params}).then((resp) => {
-        const pagination = {...this.pagination.optionLog}
+      optionLog({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.optionLog }
         pagination.total = parseInt(resp.data.total)
         this.optionLogList = resp.data.records
         this.pagination.optionLog = pagination
@@ -1412,7 +1324,7 @@ export default {
 
     handleChangeTab(key) {
       this.activeTab = key
-      this.$nextTick(() => {
+      this.$nextTick(()=>{
         if (this.activeTab === '3') {
           this.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), this.editor.option)
           this.editor.flinkSql.updateOptions({
@@ -1431,16 +1343,16 @@ export default {
     },
 
     handleLogMonaco() {
-      monaco.languages.register({id: 'log'})
+      monaco.languages.register({ id: 'log' })
       monaco.languages.setMonarchTokensProvider('log', {
         tokenizer: {
           root: [
-            [/.*\.Exception.*/, 'log-error'],
-            [/.*Caused\s+by:.*/, 'log-error'],
+            [/.*\.Exception.*/,'log-error'],
+            [/.*Caused\s+by:.*/,'log-error'],
             [/\s+at\s+.*/, 'log-info'],
             [/http:\/\/(.*):\d+(.*)\/application_\d+_\d+/, 'yarn-info'],
             [/Container\s+id:\s+container_\d+_\d+_\d+_\d+/, 'yarn-info'],
-            [/yarn\s+logs\s+-applicationId\s+application_\d+_\d+/, 'yarn-info'],
+            [/yarn\s+logs\s+-applicationId\s+application_\d+_\d+/ , 'yarn-info'],
             [/\[20\d+-\d+-\d+\s+\d+:\d+:\d+\d+|.\d+]/, 'log-date'],
             [/\[[a-zA-Z 0-9:]+]/, 'log-date'],
           ]
@@ -1451,11 +1363,11 @@ export default {
         base: storage.get(DEFAULT_THEME) === 'dark' ? 'vs-dark' : 'vs',
         inherit: true,
         rules: [
-          {token: 'log-info', foreground: '808080'},
-          {token: 'log-error', foreground: 'ff0000', fontStyle: 'bold'},
-          {token: 'log-notice', foreground: 'FFA500'},
-          {token: 'yarn-info', foreground: '0066FF', fontStyle: 'bold'},
-          {token: 'log-date', foreground: '008800'},
+          { token: 'log-info', foreground: '808080' },
+          { token: 'log-error', foreground: 'ff0000', fontStyle: 'bold' },
+          { token: 'log-notice', foreground: 'FFA500' },
+          { token: 'yarn-info', foreground: '0066FF', fontStyle: 'bold'},
+          { token: 'log-date', foreground: '008800' },
         ]
       })
     }

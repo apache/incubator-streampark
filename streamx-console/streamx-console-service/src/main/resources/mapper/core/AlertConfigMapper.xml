@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.streamxhub.streamx.console.core.dao.AlertConfigMapper">
+    <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.core.entity.alert.AlertConfig">
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="USER_ID" jdbcType="BIGINT" property="userId"/>
+        <result column="ALERT_NAME" jdbcType="VARCHAR" property="alertName"/>
+        <result column="ALERT_TYPE" jdbcType="INTEGER" property="alertType"/>
+        <result column="EMAIL_PARAMS" jdbcType="VARCHAR" property="emailParams"/>
+        <result column="DING_TALK_PARAMS" jdbcType="VARCHAR" property="dingTalkParams"/>
+        <result column="WE_COM_PARAMS" jdbcType="VARCHAR" property="weComParams"/>
+        <result column="HTTP_CALLBACK_PARAMS" jdbcType="VARCHAR" property="httpCallbackParams"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
+    </resultMap>
+
+    <select id="getAlertConfByName" resultType="alertConfig" parameterType="alertConfig">
+        SELECT ID
+        FROM t_alert_config t
+        where t.ALERT_NAME = #{alertConfig.alertName} limit 1;
+    </select>
+</mapper>

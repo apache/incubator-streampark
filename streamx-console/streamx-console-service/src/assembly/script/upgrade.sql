@@ -281,9 +281,30 @@ INSERT INTO `t_role_menu` VALUES (100061, 100000, 100042);
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
--- ------------------------------------- version: 1.2.3 END ---------------------------------------
 
 -- ------------------------------------- version: 1.2.4 START ---------------------------------------
+
+DROP TABLE IF EXISTS `t_alert_config`;
+CREATE TABLE `t_alert_config`
+(
+  `ID`                   bigint   NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `USER_ID`              bigint                                  DEFAULT NULL,
+  `ALERT_NAME`           varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '报警组名称',
+  `ALERT_TYPE`           int                                     DEFAULT 0 COMMENT '报警类型',
+  `EMAIL_PARAMS`         varchar(255) COLLATE utf8mb4_general_ci COMMENT '邮件报警配置信息',
+  `SMS_PARAMS`           text COLLATE utf8mb4_general_ci COMMENT '短信报警配置信息',
+  `DING_TALK_PARAMS`     text COLLATE utf8mb4_general_ci COMMENT '钉钉报警配置信息',
+  `WE_COM_PARAMS`        varchar(255) COLLATE utf8mb4_general_ci COMMENT '企微报警配置信息',
+  `HTTP_CALLBACK_PARAMS` text COLLATE utf8mb4_general_ci COMMENT '报警http回调配置信息',
+  `CREATE_TIME`          datetime NOT NULL                       DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `MODIFY_TIME`          datetime NOT NULL                       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  INDEX `INX_USER_ID` (`USER_ID`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
+
+alter table t_flink_app add column ALERT_ID bigint after END_TIME;
+alter table t_flink_app drop column ALERT_EMAIL;
 
 ALTER TABLE `t_flink_app` ADD COLUMN `OPTION_TIME` datetime DEFAULT NULL AFTER `CREATE_TIME`;
 ALTER TABLE t_setting modify column `VALUE` text ;

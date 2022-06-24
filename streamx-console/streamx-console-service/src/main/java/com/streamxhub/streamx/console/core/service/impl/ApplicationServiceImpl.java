@@ -635,7 +635,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             //以下参数发生改变不影响正在运行的任务
             application.setDescription(appParam.getDescription());
-            application.setAlertEmail(appParam.getAlertEmail());
+            application.setAlertId(appParam.getAlertId());
             application.setRestartSize(appParam.getRestartSize());
             application.setCpFailureAction(appParam.getCpFailureAction());
             application.setCpFailureRateInterval(appParam.getCpFailureRateInterval());

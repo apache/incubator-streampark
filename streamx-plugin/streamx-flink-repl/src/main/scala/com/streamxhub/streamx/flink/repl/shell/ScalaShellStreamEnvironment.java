@@ -27,11 +27,10 @@ import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.graph.StreamGraph;
 import org.apache.flink.util.JarUtils;
+import static org.apache.flink.util.Preconditions.checkNotNull;
 
 import java.net.URL;
 import java.util.List;
-
-import static org.apache.flink.util.Preconditions.checkNotNull;
 
 /**
  * A {@link StreamExecutionEnvironment} for the Scala shell.

@@ -18,12 +18,11 @@
  */
 
 import com.streamxhub.streamx.common.util.DateUtils;
-import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
+import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
-import com.streamxhub.streamx.console.core.metrics.flink.MailTemplate;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -87,7 +86,7 @@ public class SendEmailTest {
         application.setStartTime(new Date());
         application.setJobName("Test My Job");
         application.setAppId("1234567890");
-        application.setAlertEmail("******");
+        application.setAlertId(1);
 
         application.setRestartCount(5);
         application.setRestartSize(100);
@@ -98,31 +97,29 @@ public class SendEmailTest {
 
         FlinkAppState appState = FlinkAppState.FAILED;
 
-        if (Utils.notEmpty(application.getAlertEmail())) {
-            try {
-                MailTemplate mail = getAlertBaseInfo(application);
-                mail.setType(1);
-                mail.setTitle("Notify: " + application.getJobName().concat(" " + appState.name()));
-                mail.setStatus(appState.name());
+        try {
+            AlertTemplate mail = getAlertBaseInfo(application);
+            mail.setType(1);
+            mail.setTitle("Notify: " + application.getJobName().concat(" " + appState.name()));
+            mail.setStatus(appState.name());
 
-                StringWriter writer = new StringWriter();
-                Map<String, MailTemplate> out = new HashMap<String, MailTemplate>();
-                out.put("mail", mail);
+            StringWriter writer = new StringWriter();
+            Map<String, AlertTemplate> out = new HashMap<String, AlertTemplate>();
+            out.put("mail", mail);
 
-                template.process(out, writer);
-                String html = writer.toString();
-                System.out.println(html);
-                writer.close();
+            template.process(out, writer);
+            String html = writer.toString();
+            System.out.println(html);
+            writer.close();
 
-                String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
-                sendEmail(subject, html, application.getAlertEmail().split(","));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
+            sendEmail(subject, html, "****@domain.com");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private MailTemplate getAlertBaseInfo(Application application) {
+    private AlertTemplate getAlertBaseInfo(Application application) {
         long duration;
         if (application.getEndTime() == null) {
             duration = System.currentTimeMillis() - application.getStartTime().getTime();
@@ -133,7 +130,7 @@ public class SendEmailTest {
         String format = "%s/proxy/%s/";
         String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
 
-        MailTemplate template = new MailTemplate();
+        AlertTemplate template = new AlertTemplate();
         template.setJobName(application.getJobName());
         template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
         template.setDuration(DateUtils.toRichTimeDuration(duration));

@@ -17,24 +17,23 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.service;
+package com.streamxhub.streamx.console.core.entity.alert;
 
-import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
-import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
+
+import java.io.Serializable;
 
 /**
- * @author benjobs
+ * @author weijinglun
+ * @date 2022.01.14
  */
-public interface AlertService {
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class EmailParams implements Serializable {
 
-    /**
-     * alert
-     *
-     * @param application
-     */
-    void alert(Application application, CheckPointStatus checkPointStatus);
-
-    void alert(Application application, FlinkAppState appState);
-
+    @NotBlank(message = "The address of email must not be empty")
+    private String contacts;
 }

@@ -149,9 +149,9 @@ public class Application implements Serializable {
     private Integer optionState;
 
     /**
-     * 失败告警的通知邮箱
+     * 失败告警配置id
      */
-    private String alertEmail;
+    private Integer alertId;
 
     private String args;
     /**

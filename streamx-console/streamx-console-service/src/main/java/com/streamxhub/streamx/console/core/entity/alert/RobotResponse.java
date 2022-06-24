@@ -17,28 +17,21 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.metrics.flink;
+package com.streamxhub.streamx.console.core.entity.alert;
 
 import lombok.Data;
 
-import java.io.Serializable;
-
 /**
- * @author benjobs
+ * The robot alarm response of DingTalk And WeCom
+ *
+ * @author weijinglun
+ * @date 2022.01.17
  */
 @Data
-public class MailTemplate implements Serializable {
-    private String title;
-    private String jobName;
-    private String status;
-    private Integer type;
-    private String startTime;
-    private String endTime;
-    private String duration;
-    private String link;
-    private String cpFailureRateInterval;
-    private Integer cpMaxFailureInterval;
-    private Boolean restart;
-    private Integer restartIndex;
-    private Integer totalRestart;
+public class RobotResponse {
+
+    private Integer errcode;
+
+    private String errmsg;
+
 }

@@ -759,12 +759,29 @@
       <!--告警方式-->
       <template>
         <a-form-item
-          v-if="1===2"
+          label="Fault Alert Template"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            placeholder="Alert Template"
+            v-decorator="[ 'alertId', {rules: [{ required: false}] }]">
+            <a-select-option
+              v-for="(o,index) in alerts"
+              :key="`alertType_${index}`"
+              :value="o.id">
+              {{ o.alertName }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </template>
+
+      <!-- <template>
+        <a-form-item
           label="Fault Alert Type"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
-            placeholder="Alert Type"
+            placeholder="Alert Template"
             mode="multiple"
             @change="handleChangeAlertType"
             v-decorator="[ 'alertType', {rules: [{ required: true, message: 'Alert Type is required' }] }]">
@@ -774,15 +791,16 @@
               :disabled="o.disabled"
               :value="o.value">
               <svg-icon role="img" v-if="o.value === 1" name="mail"/>
-              <svg-icon role="img" v-if="o.value === 2" name="sms"/>
-              <svg-icon role="img" v-if="o.value === 3" name="dingding"/>
+              <svg-icon role="img" v-if="o.value === 2" name="dingding"/>
               <svg-icon role="img" v-if="o.value === 4" name="wechat"/>
+              <svg-icon role="img" v-if="o.value === 8" name="sms"/>
               {{ o.name }}
             </a-select-option>
           </a-select>
         </a-form-item>
 
         <a-form-item
+          v-if="alertType.indexOf(1)>-1"
           label="Alert Email"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -796,7 +814,7 @@
         </a-form-item>
 
         <a-form-item
-          v-if="alertType.indexOf(2)>-1"
+          v-if="alertType.indexOf(8)>-1"
           label="SMS"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -808,7 +826,7 @@
         </a-form-item>
 
         <a-form-item
-          v-if="alertType.indexOf(2)>-1"
+          v-if="alertType.indexOf(8)>-1"
           label="SMS Template"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -819,7 +837,7 @@
         </a-form-item>
 
         <a-form-item
-          v-if="alertType.indexOf(3)>-1"
+          v-if="alertType.indexOf(2)>-1"
           label="DingTask Url"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -831,7 +849,7 @@
         </a-form-item>
 
         <a-form-item
-          v-if="alertType.indexOf(3)>-1"
+          v-if="alertType.indexOf(2)>-1"
           label="DingTask User"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -841,8 +859,7 @@
             allowClear
             v-decorator="[ 'alertDingUser', {rules: [{ required: true, message: 'DingTask receive user is required' }]} ]"/>
         </a-form-item>
-
-      </template>
+      </template> -->
 
       <a-form-item
         class="conf-item"
@@ -1537,6 +1554,12 @@
     verifySQL
   } from './AddEdit'
 
+  import {
+    get as getAlert,
+    listWithOutPage as listWithOutPageAlert,
+    send as sendAlert
+  } from '@/api/alertConf'
+
   import {toPomString} from './Pom'
   import storage from '@/utils/storage'
 
@@ -1591,11 +1614,12 @@
         alert: true,
         alertTypes: [
           {name: 'E-mail', value: 1, disabled: false},
-          {name: 'SMS', value: 2, disabled: true},
-          {name: 'Ding Ding Task', value: 3, disabled: true},
+          {name: 'Ding Ding Task', value: 2, disabled: false},
           {name: 'Wechat', value: 4, disabled: true},
+          {name: 'SMS', value: 8, disabled: false}
         ],
         alertType: [],
+        alerts: [],
         configOverride: null,
         configSource: [],
         configItems: [],
@@ -1698,6 +1722,7 @@
 
     mounted() {
       this.select()
+      this.handleAlertConfigAll()
     },
 
     beforeMount() {
@@ -1777,6 +1802,12 @@
     },
 
     methods: {
+      handleAlertConfigAll() {
+        listWithOutPageAlert().then((resp) => {
+          this.alerts = resp.data
+        })
+      },
+
       filterOption(input, option) {
         return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
       },
@@ -2359,7 +2390,7 @@
           resolveOrder: values.resolveOrder,
           k8sRestExposedType: values.k8sRestExposedType,
           restartSize: values.restartSize,
-          alertEmail: values.alertEmail || null,
+          alertId: values.alertId,
           description: values.description,
           k8sNamespace: values.k8sNamespace || null,
           clusterId: values.clusterId || null,
@@ -2459,7 +2490,7 @@
           resolveOrder: values.resolveOrder,
           k8sRestExposedType: values.k8sRestExposedType,
           restartSize: values.restartSize,
-          alertEmail: values.alertEmail,
+          alertId: values.alertId,
           description: values.description || null,
           k8sNamespace: values.k8sNamespace || null,
           clusterId: values.clusterId || null,
@@ -2734,7 +2765,7 @@
         this.closeTemplateHostAliasDrawer(visualType)
       },
 
-      handleRefreshHostAliasPreview() {historyRecord
+      handleRefreshHostAliasPreview() {
         previewHostAlias({hosts: this.selectedPodTemplateHostAlias.join(',')})
           .then((resp) => {
             this.hostAliasPreview = resp.data

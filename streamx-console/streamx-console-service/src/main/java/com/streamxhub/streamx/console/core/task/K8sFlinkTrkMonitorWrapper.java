@@ -23,8 +23,8 @@ import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.toK
 
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.alert.AlertService;
 import com.streamxhub.streamx.flink.kubernetes.FlinkTrkConf;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitorFactory;

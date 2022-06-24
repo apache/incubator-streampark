@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.flink.connector.hbase.bean;
 
 import com.streamxhub.streamx.common.util.HBaseClient;
+
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;

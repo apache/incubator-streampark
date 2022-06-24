@@ -36,11 +36,11 @@ import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
-import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.FlinkClusterService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
+import com.streamxhub.streamx.console.core.service.alert.AlertService;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -733,7 +733,7 @@ public class FlinkTrackingTask {
     }
 
     private FlinkCluster getFlinkCluster(Application application) {
-        if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
+        if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum()) || ExecutionMode.isSessionMode(application.getExecutionModeEnum())) {
             FlinkCluster flinkCluster = FLINK_CLUSTER_MAP.get(application.getFlinkClusterId());
             if (flinkCluster == null) {
                 flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());

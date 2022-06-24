@@ -21,6 +21,7 @@ package com.streamxhub.streamx.flink.connector.kafka.sink;
 
 import com.streamxhub.streamx.flink.connector.kafka.bean.KafkaEqualityPartitioner;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
+
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;

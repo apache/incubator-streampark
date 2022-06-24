@@ -478,417 +478,420 @@
 </template>
 
 <script>
-  import Ellipsis from '@/components/Ellipsis'
-  import {list as listFlinkEnv} from '@/api/flinkEnv'
-  import {
-    list as listCluster,
-    create as createCluster,
-    check as checkCluster
-  } from '@/api/flinkCluster'
-  import {checkHadoop} from '@api/setting'
-  import Mergely from '../app/Mergely.vue'
-  import configOptions from '../app/Option'
-  import SvgIcon from '@/components/SvgIcon'
-  import { sysHadoopConf } from '@api/config'
+import Ellipsis from '@/components/Ellipsis'
+import {list as listFlinkEnv} from '@/api/flinkEnv'
+import {
+  list as listCluster,
+  create as createCluster,
+  check as checkCluster
+} from '@/api/flinkCluster'
+import {checkHadoop} from '@api/setting'
+import Mergely from '../app/Mergely.vue'
+import configOptions from '../app/Option'
+import SvgIcon from '@/components/SvgIcon'
+import { sysHadoopConf } from '@api/config'
 
-  import {
-    k8sNamespaces as histK8sNamespaces,
-    sessionClusterIds as histSessionClusterIds,
-    flinkBaseImages as histFlinkBaseImages
-  } from '@/api/flinkHistory'
+import {
+  k8sNamespaces as histK8sNamespaces,
+  sessionClusterIds as histSessionClusterIds,
+  flinkBaseImages as histFlinkBaseImages
+} from '@/api/flinkHistory'
 
-  const Base64 = require('js-base64').Base64
+const Base64 = require('js-base64').Base64
 
-  export default {
-    name: 'AddCluster',
-    components: {Mergely, Ellipsis, SvgIcon},
-    data() {
-      return {
-        versionId: null,
-        scalaVersion: null,
-        flinkEnvs: [],
-        clusters: [],
-        resolveOrder: [
-          {name: 'parent-first', order: 0},
-          {name: 'child-first', order: 1}
-        ],
-        k8sRestExposedType: [
-          {name: 'LoadBalancer', order: 0},
-          {name: 'ClusterIP', order: 1},
-          {name: 'NodePort', order: 2}
-        ],
-        executionModes: [
-          {mode: 'remote (standalone)', value: 1, disabled: false},
-          {mode: 'yarn session', value: 3, disabled: false},
-          {mode: 'kubernetes session', value: 5, disabled: false}
-        ],
-        useSysHadoopConf: false,
-        flinkClusterVisible: false,
-        configItems: [],
-        totalItems: [],
-        jmMemoryItems: [],
-        tmMemoryItems: [],
-        form: null,
-        options: configOptions,
-        optionsKeyMapping: {},
-        dependency: [],
-        loading: false,
-        submitting: false,
-        executionMode: null,
-        controller: {
-          tagCount: {
-            total: 1,
-            run: 1,
-            jm: 1,
-            tm: 1
-          },
-          visiable: {
-            conf: false,
-            bigScreen: false
-          },
-          dependency: {
-            pom: new Map(),
-            jar: new Map()
-          },
-          pom: {
-            value: null,
-            error: null,
-            defaultValue: ''
-          }
+export default {
+  name: 'AddCluster',
+  components: {Mergely, Ellipsis, SvgIcon},
+  data() {
+    return {
+      versionId: null,
+      scalaVersion: null,
+      flinkEnvs: [],
+      clusters: [],
+      resolveOrder: [
+        {name: 'parent-first', order: 0},
+        {name: 'child-first', order: 1}
+      ],
+      k8sRestExposedType: [
+        {name: 'LoadBalancer', order: 0},
+        {name: 'ClusterIP', order: 1},
+        {name: 'NodePort', order: 2}
+      ],
+      executionModes: [
+        {mode: 'remote (standalone)', value: 1, disabled: false},
+        {mode: 'yarn session', value: 3, disabled: false},
+        {mode: 'kubernetes session', value: 5, disabled: false}
+      ],
+      useSysHadoopConf: false,
+      flinkClusterVisible: false,
+      configItems: [],
+      totalItems: [],
+      jmMemoryItems: [],
+      tmMemoryItems: [],
+      form: null,
+      options: configOptions,
+      optionsKeyMapping: {},
+      dependency: [],
+      loading: false,
+      submitting: false,
+      executionMode: null,
+      controller: {
+        tagCount: {
+          total: 1,
+          run: 1,
+          jm: 1,
+          tm: 1
         },
-        historyRecord: {
-          k8sNamespace: [],
-          k8sSessionClusterId: [],
-          flinkImage: [],
-          podTemplate:[],
-          jmPodTemplate:[],
-          tmPodTemplate:[]
+        visiable: {
+          conf: false,
+          bigScreen: false
         },
-        hadoopConfDrawer: {
-          visual: false,
-          content: {}
+        dependency: {
+          pom: new Map(),
+          jar: new Map()
+        },
+        pom: {
+          value: null,
+          error: null,
+          defaultValue: ''
         }
+      },
+      historyRecord: {
+        k8sNamespace: [],
+        k8sSessionClusterId: [],
+        flinkImage: [],
+        podTemplate:[],
+        jmPodTemplate:[],
+        tmPodTemplate:[]
+      },
+      hadoopConfDrawer: {
+        visual: false,
+        content: {}
+      }
+    }
+  },
+
+  beforeMount() {
+    this.handleInitForm()
+  },
+
+  filters: {
+    description(option) {
+      if (option.unit) {
+        return option.description + ' (Unit ' + option.unit + ')'
+      } else {
+        return option.description
+      }
+    }
+  },
+
+  computed: {
+    dynamicOptions() {
+      return function (group) {
+        return this.options.filter(x => x.group === group)
       }
     },
-
-    beforeMount() {
-      this.handleInitForm()
-    },
-
-    filters: {
-      description(option) {
-        if (option.unit) {
-          return option.description + ' (Unit ' + option.unit + ')'
-        } else {
-          return option.description
-        }
+    hasOptions() {
+      return function (items) {
+        return this.options.filter(x => items.includes(x.key))
       }
+    }
+  },
+
+  methods: {
+    filterOption(input, option) {
+      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
 
-    computed: {
-      dynamicOptions() {
-        return function (group) {
-          return this.options.filter(x => x.group === group)
+    handleInitForm() {
+      this.form = this.$form.createForm(this)
+      this.optionsKeyMapping = new Map()
+      this.options.forEach((item, index, array) => {
+        this.optionsKeyMapping.set(item.key, item)
+        this.form.getFieldDecorator(item.key, {initialValue: item.defaultValue, preserve: true})
+      })
+      this.form.getFieldDecorator('resolveOrder', {initialValue: 0})
+      this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
+      this.form.getFieldDecorator('restartSize', {initialValue: 0})
+      this.executionMode = null
+      listFlinkEnv().then((resp) => {
+        if (resp.data.length > 0) {
+          this.flinkEnvs = resp.data
+          const v = this.flinkEnvs.filter((v) => {
+            return v.isDefault
+          })[0]
+          this.form.getFieldDecorator('versionId', {initialValue: v.id})
+          this.versionId = v.id
+          this.scalaVersion = v.scalaVersion
         }
-      },
-      hasOptions() {
-        return function (items) {
-          return this.options.filter(x => items.includes(x.key))
-        }
-      }
+      })
+      histK8sNamespaces().then((resp) => {
+        this.historyRecord.k8sNamespace = resp.data
+      })
+      histSessionClusterIds({'executionMode': 5}).then((resp) => {
+        this.historyRecord.k8sSessionClusterId = resp.data
+      })
+      histFlinkBaseImages().then((resp) => {
+        this.historyRecord.flinkImage = resp.data
+      })
     },
 
-    methods: {
-      filterOption(input, option) {
-        return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
-      },
+    handleClusterFormVisible(flag) {
+      this.clusterId = null
+      this.flinkClusterVisible = flag
+      this.form.resetFields()
+    },
 
-      handleInitForm() {
-        this.form = this.$form.createForm(this)
-        this.optionsKeyMapping = new Map()
-        this.options.forEach((item, index, array) => {
-          this.optionsKeyMapping.set(item.key, item)
-          this.form.getFieldDecorator(item.key, {initialValue: item.defaultValue, preserve: true})
-        })
-        this.form.getFieldDecorator('resolveOrder', {initialValue: 0})
-        this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
-        this.form.getFieldDecorator('restartSize', {initialValue: 0})
-        this.executionMode = null
-        listFlinkEnv().then((resp) => {
-          if (resp.data.length > 0) {
-            this.flinkEnvs = resp.data
-            const v = this.flinkEnvs.filter((v) => {
-              return v.isDefault
-            })[0]
-            this.form.getFieldDecorator('versionId', {initialValue: v.id})
-            this.versionId = v.id
-            this.scalaVersion = v.scalaVersion
-          }
-        })
-        histK8sNamespaces().then((resp) => {
-          this.historyRecord.k8sNamespace = resp.data
-        })
-        histSessionClusterIds({'executionMode': 5}).then((resp) => {
-          this.historyRecord.k8sSessionClusterId = resp.data
-        })
-        histFlinkBaseImages().then((resp) => {
-          this.historyRecord.flinkImage = resp.data
-        })
-      },
-
-      handleClusterFormVisible(flag) {
-        this.clusterId = null
-        this.flinkClusterVisible = flag
-        this.form.resetFields()
-      },
-
-      handleSubmitCluster(e) {
-        e.preventDefault()
-        this.form.validateFields((err, values) => {
-          if (!err) {
-            const options = this.handleFormValue(values)
-            var params = {}
-            if(values.executionMode === 1){
-              params = {
-                clusterId: values.clusterId || null,
-                clusterName: values.clusterName,
-                executionMode: values.executionMode,
-                versionId: values.versionId,
-                address: values.address,
-                description: values.description,
-              }
-            }else if(values.executionMode === 3){
-              params = {
-                clusterId: values.clusterId || null,
-                clusterName: values.clusterName,
-                executionMode: values.executionMode,
-                versionId: values.versionId,
-                options: JSON.stringify(options),
-                yarnQueue: this.handleYarnQueue(values),
-                dynamicOptions: values.dynamicOptions,
-                resolveOrder: values.resolveOrder,
-                address: values.address,
-                flameGraph: values.flameGraph,
-                description: values.description
-              }
-            }else if(values.executionMode === 5){
-              params = {
-                clusterId: values.clusterId || null,
-                clusterName: values.clusterName,
-                executionMode: values.executionMode,
-                versionId: values.versionId,
-                options: JSON.stringify(options),
-                dynamicOptions: values.dynamicOptions,
-                resolveOrder: values.resolveOrder,
-                k8sRestExposedType: values.k8sRestExposedType,
-                k8sNamespace: values.k8sNamespace || null,
-                serviceAccount: values.serviceAccount,
-                k8sConf: values.kubeConfFile,
-                flinkImage: values.flinkImage || null,
-                address: values.address,
-                flameGraph: values.flameGraph,
-                description: values.description
-              }
-            }else{
-              this.$message.error('error executionMode.')
+    handleSubmitCluster(e) {
+      e.preventDefault()
+      this.form.validateFields((err, values) => {
+        console.log(JSON.stringify(values))
+        if (!err) {
+          const options = this.handleFormValue(values)
+          var params = {}
+          if(values.executionMode === 1){
+            params = {
+              clusterId: values.clusterId || null,
+              clusterName: values.clusterName,
+              executionMode: values.executionMode,
+              versionId: values.versionId,
+              address: values.address,
+              description: values.description,
             }
-            checkCluster(params).then((resp)=> {
-              if (resp.data === 'success') {
-                createCluster(params).then((resp)=>{
-                  if (resp.data.status) {
-                    this.$swal.fire({
-                      icon: 'success',
-                      title: values.clusterName.concat(' create successful!'),
-                      showConfirmButton: false,
-                      timer: 2000
-                    })
-                    this.$router.push({'path': '/flink/setting?activeKey=cluster'})
-                    this.flinkClusterVisible = false
-                    this.handleClusterAll()
-                  } else {
-                    this.$swal.fire(
+          }else if(values.executionMode === 3){
+            params = {
+              clusterId: values.clusterId || null,
+              clusterName: values.clusterName,
+              executionMode: values.executionMode,
+              versionId: values.versionId,
+              options: JSON.stringify(options),
+              yarnQueue: this.handleYarnQueue(values),
+              dynamicOptions: values.dynamicOptions,
+              resolveOrder: values.resolveOrder,
+              address: values.address,
+              flameGraph: values.flameGraph,
+              description: values.description
+            }
+          }else if(values.executionMode === 5){
+            params = {
+              clusterId: values.clusterId || null,
+              clusterName: values.clusterName,
+              executionMode: values.executionMode,
+              versionId: values.versionId,
+              options: JSON.stringify(options),
+              dynamicOptions: values.dynamicOptions,
+              resolveOrder: values.resolveOrder,
+              k8sRestExposedType: values.k8sRestExposedType,
+              k8sNamespace: values.k8sNamespace || null,
+              serviceAccount: values.serviceAccount,
+              k8sConf: values.kubeConfFile,
+              flinkImage: values.flinkImage || null,
+              address: values.address,
+              flameGraph: values.flameGraph,
+              description: values.description
+            }
+          }else{
+            this.$message.error('error executionMode.')
+          }
+          checkCluster(params).then((resp)=> {
+            if (resp.data === 'success') {
+              createCluster(params).then((resp)=>{
+                if (resp.data.status) {
+                  this.$swal.fire({
+                    icon: 'success',
+                    title: values.clusterName.concat(' create successful!'),
+                    showConfirmButton: false,
+                    timer: 2000
+                  })
+                  this.$router.push({'path': '/flink/setting?activeKey=cluster'})
+                  this.flinkClusterVisible = false
+                  this.handleClusterAll()
+                } else {
+                  this.$swal.fire(
                       resp.data.msg
-                    )
-                  }
-                })
-              } else if(resp.data === 'exists'){
+                  )
+                }
+              })
+            } else if(resp.data === 'exists'){
                 this.$swal.fire(
-                  'Failed',
-                  'the cluster name: ' + values.clusterName + ' is already exists,please check',
-                  'error'
+                    'Failed',
+                    'the cluster name: ' + values.clusterName + ' is already exists,please check',
+                    'error'
                 )
-              } else {
-                this.$swal.fire(
+            } else {
+              this.$swal.fire(
                   'Failed',
                   'the address is invalid or connection failure, please check',
                   'error'
-                )
-              }
-            })
-          }
-        })
-      },
-
-      handleClusterAll() {
-        listCluster({}).then((resp)=>{
-          this.clusters = resp.data
-        })
-      },
-
-      handleChangeMode(mode) {
-        this.executionMode = mode
-      },
-
-      handleFlinkVersion(id) {
-        this.versionId = id
-        this.scalaVersion = this.flinkEnvs.find(v => v.id === id).scalaVersion
-      },
-
-      handleChangeJmMemory(value) {
-        this.jmMemoryItems = value
-      },
-
-      handleChangeTmMemory(value) {
-        this.tmMemoryItems = value
-      },
-
-      handleChangeProcess(value) {
-        this.totalItems = value
-      },
-
-      handleCheckExecMode(rule, value, callback) {
-        if (value === null || value === undefined || value === '') {
-          callback(new Error('Execution Mode is required'))
-        } else {
-          if (value === 2 || value === 3 || value === 4) {
-            checkHadoop().then((resp) => {
-              if (resp.data) {
-                callback()
-              } else {
-                callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
-              }
-            }).catch((err) => {
-              callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
-            })
-          } else {
-            callback()
-          }
+              )
+            }
+          })
         }
-      },
+      })
+    },
 
-      handleCheckYarnSessionClusterId(rule, value, callback) {
-        if (value === null || value === undefined || value === '') {
-          callback(new Error('Yarn session clusterId is required'))
-        } else {
-          if (!value.startsWith('application')) {
-            callback(new Error("Yarn session clusterId is invalid, clusterId must start with 'application'.Please check"))
-          } else {
-            callback()
-          }
-        }
-      },
+    handleClusterAll() {
+      listCluster({}).then((resp)=>{
+        this.clusters = resp.data
+      })
+    },
 
-      handleCheckKubernetesClusterId(rule, value, callback) {
-        const clusterIdReg = /^[a-z]([-a-z0-9]*[a-z0-9])?$/
-        if (value === null || value === undefined || value === '') {
-          callback(new Error('Kubernetes clusterId is required'))
-        } else {
-          if (!clusterIdReg.test(value)) {
-            callback(new Error("Kubernetes clusterId is invalid, clusterId must consist of lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character.Please check"))
-          } else {
-            callback()
-          }
-        }
-      },
+    handleChangeMode(mode) {
+      this.executionMode = mode
+    },
 
-      handleYarnQueue(values) {
-        if ( this.executionMode === 3 ) {
-          const queue = values['yarnQueue']
-          if (queue != null && queue !== '' && queue !== undefined) {
-            return queue
-          }
-          return 'default'
-        }
-      },
+    handleFlinkVersion(id) {
+      this.versionId = id
+      this.scalaVersion = this.flinkEnvs.find(v => v.id === id).scalaVersion
+    },
 
-      handleFormValue(values) {
-        const options = {}
-        for (const k in values) {
-          const v = values[k]
-          if (v != null && v !== '' && v !== undefined) {
-            if (k === 'parallelism') {
-              options['parallelism.default'] = v
-            } else if (k === 'slot') {
-              options['taskmanager.numberOfTaskSlots'] = v
+    handleChangeJmMemory(value) {
+      this.jmMemoryItems = value
+    },
+
+    handleChangeTmMemory(value) {
+      this.tmMemoryItems = value
+    },
+
+    handleChangeProcess(value) {
+      this.totalItems = value
+    },
+
+    handleCheckExecMode(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Execution Mode is required'))
+      } else {
+        if (value === 2 || value === 3 || value === 4) {
+          checkHadoop().then((resp) => {
+            if (resp.data) {
+              callback()
             } else {
-              if (this.configItems.includes(k)) {
-                options[k] = v
-              } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
-                const opt = this.optionsKeyMapping.get(k)
-                const unit = opt['unit'] || ''
-                const name = opt['name']
-                if (typeof v === 'string') {
-                  options[name] = v.replace(/[k|m|g]b$/g, '') + unit
-                } else if (typeof v === 'number') {
-                  options[name] = v + unit
-                } else {
-                  options[name] = v
-                }
+              callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+            }
+          }).catch((err) => {
+            callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+          })
+        } else {
+          callback()
+        }
+      }
+    },
+
+    handleCheckYarnSessionClusterId(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Yarn session clusterId is required'))
+      } else {
+        if (!value.startsWith('application')) {
+          callback(new Error("Yarn session clusterId is invalid, clusterId must start with 'application'.Please check"))
+        } else {
+          callback()
+        }
+      }
+    },
+
+    handleCheckKubernetesClusterId(rule, value, callback) {
+      const clusterIdReg = /^[a-z]([-a-z0-9]*[a-z0-9])?$/
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Kubernetes clusterId is required'))
+      } else {
+        if (!clusterIdReg.test(value)) {
+          callback(new Error("Kubernetes clusterId is invalid, clusterId must consist of lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character.Please check"))
+        } else {
+          callback()
+        }
+      }
+    },
+
+    handleYarnQueue(values) {
+      if ( this.executionMode === 3 ) {
+        const queue = values['yarnQueue']
+        if (queue != null && queue !== '' && queue !== undefined) {
+          return queue
+        }
+        return 'default'
+      }
+    },
+
+    handleFormValue(values) {
+      const options = {}
+      for (const k in values) {
+        const v = values[k]
+        if (v != null && v !== '' && v !== undefined) {
+          if (k === 'parallelism') {
+            options['parallelism.default'] = v
+          } else if (k === 'slot') {
+            options['taskmanager.numberOfTaskSlots'] = v
+          } else {
+            if (this.configItems.includes(k)) {
+              options[k] = v
+            } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
+              const opt = this.optionsKeyMapping.get(k)
+              const unit = opt['unit'] || ''
+              const name = opt['name']
+              if (typeof v === 'string') {
+                options[name] = v.replace(/[k|m|g]b$/g, '') + unit
+              } else if (typeof v === 'number') {
+                options[name] = v + unit
+              } else {
+                options[name] = v
               }
             }
           }
         }
-        return options
-      },
-
-      handleGoBack() {
-        this.$router.push({'path': '/flink/setting?activeKey=cluster'})
-        // this.$emit('changeVisble')
-      },
-
-      handleUseSysHadoopConf(value) {
-        this.useSysHadoopConf = value
-      },
-
-      handleSelectHistoryK8sNamespace(value) {
-        this.form.setFieldsValue({'k8sNamespace': value})
-      },
-
-      handleSelectHistoryServiceAccount(value) {
-        this.form.setFieldsValue({'serviceAccount': value})
-      },
-
-      handleSelectHistoryKubeConfFile(value) {
-        this.form.setFieldsValue({'kubeConfFile': value})
-      },
-
-      handleSelectHistoryK8sSessionClusterId(value) {
-        this.form.setFieldsValue({'clusterId': value})
-      },
-
-      handleSelectHistoryFlinkImage(value) {
-        this.form.setFieldsValue({'flinkImage': value})
-      },
-
-      showSysHadoopConfDrawer() {
-        this.hadoopConfDrawer.visual = true
-        if (this.hadoopConfDrawer.content == null
-          || Object.keys(this.hadoopConfDrawer.content).length === 0
-          || this.hadoopConfDrawer.content.size === 0) {
-          sysHadoopConf().then((resp) => {
-            this.hadoopConfDrawer.content = resp.data
-          })
-        }
-      },
-
-      closeSysHadoopConfDrawer(){
-        this.hadoopConfDrawer.visual = false
       }
-    }
+      return options
+    },
 
+    handleGoBack() {
+      console.log('---zoussguo111-')
+      this.$router.push({'path': '/flink/setting?activeKey=cluster'})
+      // this.$emit('changeVisble')
+      console.log('---zoussguo-')
+    },
+
+    handleUseSysHadoopConf(value) {
+      this.useSysHadoopConf = value
+    },
+
+    handleSelectHistoryK8sNamespace(value) {
+      this.form.setFieldsValue({'k8sNamespace': value})
+    },
+
+    handleSelectHistoryServiceAccount(value) {
+      this.form.setFieldsValue({'serviceAccount': value})
+    },
+
+    handleSelectHistoryKubeConfFile(value) {
+      this.form.setFieldsValue({'kubeConfFile': value})
+    },
+
+    handleSelectHistoryK8sSessionClusterId(value) {
+      this.form.setFieldsValue({'clusterId': value})
+    },
+
+    handleSelectHistoryFlinkImage(value) {
+      this.form.setFieldsValue({'flinkImage': value})
+    },
+
+    showSysHadoopConfDrawer() {
+      this.hadoopConfDrawer.visual = true
+      if (this.hadoopConfDrawer.content == null
+        || Object.keys(this.hadoopConfDrawer.content).length === 0
+        || this.hadoopConfDrawer.content.size === 0) {
+        sysHadoopConf().then((resp) => {
+          this.hadoopConfDrawer.content = resp.data
+        })
+      }
+    },
+
+    closeSysHadoopConfDrawer(){
+      this.hadoopConfDrawer.visual = false
+    }
   }
+
+}
 </script>
 
 <style lang='less'>
-  @import "View";
+@import "View";
 </style>

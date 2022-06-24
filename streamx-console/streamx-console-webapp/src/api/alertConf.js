@@ -21,27 +21,30 @@
 import api from './index'
 import http from '@/utils/request'
 
-
-export function list (queryParam) {
-  return http.post(api.Token.LIST, queryParam)
+export function add(params) {
+  return http.postJson(api.AlertConf.ADD, params)
 }
 
-export function create (queryParam) {
-  return http.post(api.Token.CREATE, queryParam)
+export function exists(params) {
+  return http.postJson(api.AlertConf.EXISTS, params)
 }
 
-export function check(queryParam) {
-  return http.post(api.Token.CHECK, queryParam)
+export function update(params) {
+  return http.postJson(api.AlertConf.UPDATE, params)
 }
 
-export function deleteToken (queryParam) {
-  return http.delete(api.Token.DELETE, queryParam)
+export function get(params) {
+  return http.postJson(api.AlertConf.GET, params)
 }
 
-export function copyCurl (queryParam) {
-  return http.post(api.Token.CURL, queryParam)
+export function listWithOutPage(params) {
+  return http.post(api.AlertConf.LIST_WITHOUTPAGE, params)
 }
 
-export function toggle (queryParam) {
-  return http.post(api.Token.TOGGLE, queryParam)
+export function remove(params) {
+  return http.delete(api.AlertConf.DELETE, params)
+}
+
+export function send(params) {
+  return http.postJson(api.AlertConf.SEND, params)
 }
