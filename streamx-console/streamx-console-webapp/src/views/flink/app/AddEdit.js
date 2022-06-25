@@ -241,7 +241,8 @@ export function formatSql(vue) {
 }
 
 export function sqlNotEmpty(vue) {
-    return vue.controller.flinkSql.value != null && vue.controller.flinkSql.value.trim() !== ''
+  const flinkSql = vue.controller.flinkSql.value
+  return flinkSql != undefined && flinkSql != null && flinkSql.trim().length > 0
 }
 
 export function bigScreenOk(vue, callback) {
