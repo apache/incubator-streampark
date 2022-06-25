@@ -70,7 +70,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
 
     @PostConstruct
     public void loadTemplateFile() throws Exception {
-        String template = "dingTalk.ftl";
+        String template = "alert-dingTalk.ftl";
         this.template = FreemarkerUtils.loadTemplateFile(template);
     }
 
@@ -81,7 +81,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
             // handling contacts
             List<String> contactList = new ArrayList<>();
             String contacts = dingTalkParams.getContacts();
-            if (!StringUtils.isEmpty(contacts)) {
+            if (StringUtils.hasLength(contacts)) {
                 Collections.addAll(contactList, contacts.split(","));
             }
             String title = alertTemplate.getTitle();

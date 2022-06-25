@@ -66,7 +66,7 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
 
     @PostConstruct
     public void loadTemplateFile() {
-        String template = "lark.ftl";
+        String template = "alert-lark.ftl";
         this.template = FreemarkerUtils.loadTemplateFile(template);
     }
 
@@ -83,9 +83,9 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
             });
 
             Map<String, Object> body = new HashMap<>();
-            // 验签
+            // get sign
             if (larkParams.getSecretEnable()) {
-                long timestamp = System.currentTimeMillis() / 1000 - 8 * 3600;
+                long timestamp = System.currentTimeMillis() / 1000;
                 String sign = getSign(larkParams.getSecretToken(), timestamp);
                 body.put("timestamp", timestamp);
                 body.put("sign", sign);

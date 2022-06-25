@@ -8,7 +8,7 @@
       "elements": [
         {
           "tag": "plain_text",
-          "content": "StreamX, Make Flink|Spark easier!"
+          "content": "StreamX , Make stream processing easier!"
         }
       ]
     },

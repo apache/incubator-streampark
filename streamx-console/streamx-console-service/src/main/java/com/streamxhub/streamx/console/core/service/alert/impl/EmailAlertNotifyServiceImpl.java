@@ -57,7 +57,7 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
     @PostConstruct
     public void loadTemplateFile() throws Exception {
-        String template = "email.ftl";
+        String template = "alert-email.ftl";
         this.template = FreemarkerUtils.loadTemplateFile(template);
     }
 
@@ -67,7 +67,7 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
             this.senderEmail = settingService.getSenderEmail();
         }
         String contacts = alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
-        if (this.senderEmail != null && !StringUtils.isEmpty(contacts)) {
+        if (this.senderEmail != null && StringUtils.hasLength(contacts)) {
             String[] emails = contacts.split(",");
             return sendEmail(template, emails);
         }

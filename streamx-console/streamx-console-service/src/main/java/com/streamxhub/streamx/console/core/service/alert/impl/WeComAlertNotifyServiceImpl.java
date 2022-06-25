@@ -59,7 +59,7 @@ public class WeComAlertNotifyServiceImpl implements AlertNotifyService {
 
     @PostConstruct
     public void loadTemplateFile() throws Exception {
-        String template = "weCom.ftl";
+        String template = "alert-weCom.ftl";
         this.template = FreemarkerUtils.loadTemplateFile(template);
     }
 

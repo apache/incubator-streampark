@@ -45,7 +45,7 @@ public class SendEmailTest {
 
     @Before
     public void initConfig() throws Exception {
-        this.template = FreemarkerUtils.loadTemplateFile("email.ftl");
+        this.template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
         senderEmail = new SenderEmail();
         senderEmail.setFrom("****@domain.com");
         senderEmail.setUserName("******");

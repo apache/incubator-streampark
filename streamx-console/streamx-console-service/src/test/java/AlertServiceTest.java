@@ -16,7 +16,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import com.streamxhub.streamx.common.util.DateUtils;
+import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.entity.alert.DingTalkParams;
@@ -28,7 +30,9 @@ import com.streamxhub.streamx.console.core.service.alert.impl.WeComAlertNotifySe
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
@@ -43,6 +47,11 @@ public class AlertServiceTest {
     AlertConfigWithParams params = new AlertConfigWithParams();
     ObjectMapper mapper = new ObjectMapper();
     RestTemplate restTemplate = new RestTemplate();
+
+    @BeforeClass
+    public static void init() {
+        new FreemarkerUtils().setResourceLoader(new DefaultResourceLoader());
+    }
 
     @Before
     public void before1() {
@@ -84,8 +93,8 @@ public class AlertServiceTest {
 
         notifyService.loadTemplateFile();
         DingTalkParams dingTalkParams = new DingTalkParams();
-        dingTalkParams.setToken("8a8243b2e63dbe5a38cccbea980709aefc7402c4c089641cfe1a637017bc7941");
-        dingTalkParams.setContacts("17536078593");
+        dingTalkParams.setToken("your_token");
+        dingTalkParams.setContacts("175xxxx1234");
         dingTalkParams.setIsAtAll(true);
 
         params.setAlertType(2);
@@ -100,7 +109,7 @@ public class AlertServiceTest {
         notifyService.loadTemplateFile();
 
         WeComParams weComParams = new WeComParams();
-        weComParams.setToken("sadfasdfasdfasfsadf");
+        weComParams.setToken("your_token");
 
         params.setAlertType(4);
         params.setWeComParams(weComParams);
@@ -114,9 +123,7 @@ public class AlertServiceTest {
         notifyService.loadTemplateFile();
 
         LarkParams larkParams = new LarkParams();
-        larkParams.setToken("461a0d34-fbe3-438d-9c64-1a8b86370424");
-        larkParams.setSecretEnable(true);
-        larkParams.setSecretToken("aYslYFMEoztTVeOeHp1eBf");
+        larkParams.setToken("your_token");
 
         params.setAlertType(16);
         params.setLarkParams(larkParams);
