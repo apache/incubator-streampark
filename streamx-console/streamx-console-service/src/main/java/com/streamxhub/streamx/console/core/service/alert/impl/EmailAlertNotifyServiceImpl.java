@@ -30,6 +30,7 @@ import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.mail.HtmlEmail;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -44,6 +45,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@Lazy
 public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
     private Template template;
@@ -55,7 +57,7 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
     @PostConstruct
     public void loadTemplateFile() throws Exception {
-        String template = "alert-email.ftl";
+        String template = "email.ftl";
         this.template = FreemarkerUtils.loadTemplateFile(template);
     }
 

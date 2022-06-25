@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -50,6 +51,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@Lazy
 public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
     @Autowired
     private RestTemplate alertRestTemplate;

@@ -30,7 +30,6 @@ import org.springframework.beans.BeanUtils;
 import java.io.Serializable;
 
 /**
- *
  * @author weijinglun
  * @date 2022.01.14
  */
@@ -68,12 +67,17 @@ public class AlertConfigWithParams implements Serializable {
      */
     private HttpCallbackParams httpCallbackParams;
 
+    /**
+     * 飞书报警配置信息
+     */
+    private LarkParams larkParams;
+
     public static AlertConfigWithParams of(AlertConfig config) {
         if (config == null) {
             return null;
         }
         AlertConfigWithParams params = new AlertConfigWithParams();
-        BeanUtils.copyProperties(config, params, "emailParams", "dingTalkParams", "weComParams", "httpCallbackParams");
+        BeanUtils.copyProperties(config, params, "emailParams", "dingTalkParams", "weComParams", "httpCallbackParams", "larkParams");
         try {
             if (StringUtils.isNotBlank(config.getEmailParams())) {
                 params.setEmailParams(JacksonUtils.read(config.getEmailParams(), EmailParams.class));
@@ -86,6 +90,9 @@ public class AlertConfigWithParams implements Serializable {
             }
             if (StringUtils.isNotBlank(config.getHttpCallbackParams())) {
                 params.setHttpCallbackParams(JacksonUtils.read(config.getHttpCallbackParams(), HttpCallbackParams.class));
+            }
+            if (StringUtils.isNotBlank(config.getLarkParams())) {
+                params.setLarkParams(JacksonUtils.read(config.getLarkParams(), LarkParams.class));
             }
         } catch (JsonProcessingException e) {
             log.error("Json read failed", e);

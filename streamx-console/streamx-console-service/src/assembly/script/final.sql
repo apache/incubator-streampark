@@ -657,6 +657,7 @@ CREATE TABLE `t_alert_config`
   `DING_TALK_PARAMS`     text COLLATE utf8mb4_general_ci COMMENT '钉钉报警配置信息',
   `WE_COM_PARAMS`        varchar(255) COLLATE utf8mb4_general_ci COMMENT '企微报警配置信息',
   `HTTP_CALLBACK_PARAMS` text COLLATE utf8mb4_general_ci COMMENT '报警http回调配置信息',
+  `LARK_PARAMS`          text COLLATE utf8mb4_general_ci COMMENT '飞书报警配置信息',
   `CREATE_TIME`          datetime NOT NULL                       DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `MODIFY_TIME`          datetime NOT NULL                       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   INDEX `INX_USER_ID` (`USER_ID`) USING BTREE

@@ -23,118 +23,104 @@ import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
-import com.streamxhub.streamx.console.core.entity.alert.DingTalkParams;
-import com.streamxhub.streamx.console.core.entity.alert.RobotResponse;
+import com.streamxhub.streamx.console.core.entity.alert.LarkParams;
+import com.streamxhub.streamx.console.core.entity.alert.LarkRobotResponse;
 import com.streamxhub.streamx.console.core.service.alert.AlertNotifyService;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.net.util.Base64;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 
 /**
  * @author weijinglun
- * @date 2022.01.14
+ * @date 2022.06.24
  */
 @Slf4j
 @Service
 @Lazy
-public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
+public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
     private Template template;
-
     private final RestTemplate alertRestTemplate;
+    private final ObjectMapper mapper;
 
-    public DingTalkAlertNotifyServiceImpl(RestTemplate alertRestTemplate) {
+    public LarkAlertNotifyServiceImpl(RestTemplate alertRestTemplate, ObjectMapper mapper) {
         this.alertRestTemplate = alertRestTemplate;
+        this.mapper = mapper;
     }
 
     @PostConstruct
-    public void loadTemplateFile() throws Exception {
-        String template = "dingTalk.ftl";
+    public void loadTemplateFile() {
+        String template = "lark.ftl";
         this.template = FreemarkerUtils.loadTemplateFile(template);
     }
 
     @Override
     public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate) {
-        DingTalkParams dingTalkParams = alertConfig.getDingTalkParams();
+        LarkParams larkParams = alertConfig.getLarkParams();
+        if (larkParams.getIsAtAll()) {
+            alertTemplate.setAtAll(true);
+        }
         try {
-            // handling contacts
-            List<String> contactList = new ArrayList<>();
-            String contacts = dingTalkParams.getContacts();
-            if (!StringUtils.isEmpty(contacts)) {
-                Collections.addAll(contactList, contacts.split(","));
-            }
-            String title = alertTemplate.getTitle();
-            if (contactList.size() > 0) {
-                StringJoiner joiner = new StringJoiner(",@", title + " @", "");
-                contactList.forEach(joiner::add);
-                title = joiner.toString();
-            }
-            Map<String, Object> contactMap = new HashMap<>();
-            contactMap.put("atMobiles", contactList);
-            contactMap.put("isAtAll", BooleanUtils.toBoolean(dingTalkParams.getIsAtAll()));
-
             // format markdown
             String markdown = FreemarkerUtils.format(template, alertTemplate);
-
-            Map<String, String> content = new HashMap<>();
-            content.put("title", title);
-            content.put("text", markdown);
+            Map<String, Object> cardMap = mapper.readValue(markdown, new TypeReference<Map<String, Object>>() {
+            });
 
             Map<String, Object> body = new HashMap<>();
-            body.put("msgtype", "markdown");
-            body.put("markdown", content);
-            body.put("at", contactMap);
-
-            sendMessage(dingTalkParams, body);
+            // 验签
+            if (larkParams.getSecretEnable()) {
+                long timestamp = System.currentTimeMillis() / 1000 - 8 * 3600;
+                String sign = getSign(larkParams.getSecretToken(), timestamp);
+                body.put("timestamp", timestamp);
+                body.put("sign", sign);
+            }
+            body.put("msg_type", "interactive");
+            body.put("card", cardMap);
+            sendMessage(larkParams, body);
             return true;
         } catch (Exception e) {
-            log.error("Failed send dingTalk alert", e);
+            log.error("Failed send lark alert", e);
             return false;
         }
     }
 
-    private RobotResponse sendMessage(DingTalkParams params, Map<String, Object> body) throws ServiceException {
+    private LarkRobotResponse sendMessage(LarkParams params, Map<String, Object> body) throws ServiceException {
         // get webhook url
         String url = getWebhook(params);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        RobotResponse robotResponse;
+        LarkRobotResponse robotResponse;
         try {
-            robotResponse = alertRestTemplate.postForObject(url, entity, RobotResponse.class);
+            robotResponse = alertRestTemplate.postForObject(url, entity, LarkRobotResponse.class);
         } catch (Exception e) {
-            log.error("Failed to request DingTalk robot alarm, url:{}", url, e);
-            throw new ServiceException(String.format("Failed to request DingTalk robot alert, url:%s", url), e);
+            log.error("Failed to request Lark robot alarm, url:{}", url, e);
+            throw new ServiceException(String.format("Failed to request Lark robot alert, url:%s", url), e);
         }
 
         if (robotResponse == null) {
-            throw new ServiceException(String.format("Failed to request DingTalk robot alert, url:%s", url));
+            throw new ServiceException(String.format("Failed to request Lark robot alert, url:%s", url));
         }
-        if (robotResponse.getErrcode() != 0) {
-            throw new ServiceException(String.format("Failed to request DingTalk robot alert, url:%s, errorCode:%d, errorMsg:%s",
-                    url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
+        if (robotResponse.getStatusCode() == null || robotResponse.getStatusCode() != 0) {
+            throw new ServiceException(String.format("Failed to request Lark robot alert, url:%s, errorCode:%d, errorMsg:%s",
+                    url, robotResponse.getCode(), robotResponse.getMsg()));
         }
         return robotResponse;
     }
@@ -142,25 +128,13 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
     /**
      * Gets webhook.
      *
-     * @param params {@link  DingTalkParams}
+     * @param params {@link  LarkParams}
      * @return the webhook
      */
-    private String getWebhook(DingTalkParams params) {
-        String urlPef = "https://oapi.dingtalk.com/robot/send?access_token=";
-        if (StringUtils.hasLength(params.getAlertDingURL())) {
-            urlPef = params.getAlertDingURL();
-        }
-
-        String url;
-        if (params.getSecretEnable()) {
-            Long timestamp = System.currentTimeMillis();
-            url = String.format(urlPef + "%s&timestamp=%d&sign=%s",
-                    params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
-        } else {
-            url = String.format(urlPef + "%s", params.getToken());
-        }
+    private String getWebhook(LarkParams params) {
+        String url = String.format("https://open.feishu.cn/open-apis/bot/v2/hook/%s", params.getToken());
         if (log.isDebugEnabled()) {
-            log.debug("The alarm robot url of DingTalk contains signature is {}", url);
+            log.debug("The alarm robot url of Lark is {}", url);
         }
         return url;
     }
@@ -168,7 +142,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
     /**
      * Calculate the signature
      * <p>Reference documentation</p>
-     * <a href="https://open.dingtalk.com/document/group/customize-robot-security-settings">Customize Robot Security Settings</a>
+     * <a href="https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN#348211be">Customize Robot Security Settings</a>
      *
      * @param secret    secret
      * @param timestamp current timestamp
@@ -180,7 +154,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
             byte[] signData = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
-            String sign = URLEncoder.encode(new String(Base64.encodeBase64(signData)), "UTF-8");
+            String sign = new String(Base64.encodeBase64(signData));
             if (log.isDebugEnabled()) {
                 log.debug("Calculate the signature success, sign:{}", sign);
             }

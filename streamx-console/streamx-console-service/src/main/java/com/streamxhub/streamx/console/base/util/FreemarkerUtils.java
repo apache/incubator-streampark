@@ -24,12 +24,11 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.ui.freemarker.SpringTemplateLoader;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.URL;
-import java.util.Enumeration;
 
 /**
  * @author WeiJinglun
@@ -37,28 +36,22 @@ import java.util.Enumeration;
  */
 @Slf4j
 public class FreemarkerUtils {
-    public static Template loadTemplateFile(String fileName) throws Exception {
-        Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
-        Enumeration<URL> urls = ClassLoader.getSystemResources(fileName);
-        if (urls != null) {
-            if (!urls.hasMoreElements()) {
-                urls = Thread.currentThread().getContextClassLoader().getResources(fileName);
-            }
+    private static final Configuration CONFIGURATION;
 
-            if (urls.hasMoreElements()) {
-                URL url = urls.nextElement();
-                if (url.getPath().contains(".jar")) {
-                    configuration.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
-                } else {
-                    File file = new File(url.getPath());
-                    configuration.setDirectoryForTemplateLoading(file.getParentFile());
-                }
-                configuration.setDefaultEncoding("UTF-8");
-                return configuration.getTemplate(fileName);
-            }
+    static {
+        SpringTemplateLoader templateLoader = new SpringTemplateLoader(new DefaultResourceLoader(), "classpath:alert-template");
+        CONFIGURATION = new Configuration(Configuration.VERSION_2_3_28);
+        CONFIGURATION.setTemplateLoader(templateLoader);
+        CONFIGURATION.setDefaultEncoding("UTF-8");
+    }
+
+    public static Template loadTemplateFile(String fileName) throws ExceptionInInitializerError {
+        try {
+            return CONFIGURATION.getTemplate(fileName);
+        } catch (IOException e) {
+            log.error("{} not found!", fileName);
+            throw new ExceptionInInitializerError(fileName + " not found!");
         }
-        log.error("{} not found!", fileName);
-        throw new ExceptionInInitializerError(fileName + " not found!");
     }
 
     public static Template loadTemplateString(String template) throws Exception {
@@ -75,7 +68,7 @@ public class FreemarkerUtils {
             template.process(dataModel, writer);
             result = writer.toString();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return result;
     }

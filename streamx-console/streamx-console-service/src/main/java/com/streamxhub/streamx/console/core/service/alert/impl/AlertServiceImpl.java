@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service.alert.impl;
 
+import com.streamxhub.streamx.console.base.util.SpringContextUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
@@ -36,8 +37,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author weijinglun
@@ -46,9 +45,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Service
 public class AlertServiceImpl implements AlertService {
-    @Autowired
-    public Map<String, AlertNotifyService> notifyServiceMap = new ConcurrentHashMap<>();
-
     @Autowired
     private AlertConfigService alertConfigService;
 
@@ -83,16 +79,9 @@ public class AlertServiceImpl implements AlertService {
 
         boolean result = true;
         for (AlertType alertType : alertTypes) {
-            result &= getNotifyService(alertType).doAlert(params, alertTemplate);
+            result &= SpringContextUtils.getBean(alertType.getServiceType(), AlertNotifyService.class)
+                    .doAlert(params, alertTemplate);
         }
         return result;
-    }
-
-    private AlertNotifyService getNotifyService(AlertType type) {
-        AlertNotifyService service = notifyServiceMap.get(type.getServiceType());
-        if (service == null) {
-            throw new SecurityException("Unsupported notify method : " + type);
-        }
-        return service;
     }
 }

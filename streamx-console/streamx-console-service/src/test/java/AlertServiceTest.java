@@ -20,8 +20,10 @@ import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.entity.alert.DingTalkParams;
+import com.streamxhub.streamx.console.core.entity.alert.LarkParams;
 import com.streamxhub.streamx.console.core.entity.alert.WeComParams;
 import com.streamxhub.streamx.console.core.service.alert.impl.DingTalkAlertNotifyServiceImpl;
+import com.streamxhub.streamx.console.core.service.alert.impl.LarkAlertNotifyServiceImpl;
 import com.streamxhub.streamx.console.core.service.alert.impl.WeComAlertNotifyServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,10 +84,8 @@ public class AlertServiceTest {
 
         notifyService.loadTemplateFile();
         DingTalkParams dingTalkParams = new DingTalkParams();
-        dingTalkParams.setSecretEnable(true);
-        dingTalkParams.setSecretToken("SECe831f7c573249dd15b6d3296a68662a7f952305a194ee93791f9db68f39a0b28");
-        dingTalkParams.setToken("e1cab58b634908034da475fe9a8aec6c3c975d1f1fb5c188e074c051b15fb314");
-        dingTalkParams.setContacts("18262800582");
+        dingTalkParams.setToken("8a8243b2e63dbe5a38cccbea980709aefc7402c4c089641cfe1a637017bc7941");
+        dingTalkParams.setContacts("17536078593");
         dingTalkParams.setIsAtAll(true);
 
         params.setAlertType(2);
@@ -96,7 +96,7 @@ public class AlertServiceTest {
 
     @Test
     public void weComAlertTest() throws Exception {
-        WeComAlertNotifyServiceImpl notifyService = new WeComAlertNotifyServiceImpl(restTemplate, mapper);
+        WeComAlertNotifyServiceImpl notifyService = new WeComAlertNotifyServiceImpl(restTemplate);
         notifyService.loadTemplateFile();
 
         WeComParams weComParams = new WeComParams();
@@ -104,6 +104,22 @@ public class AlertServiceTest {
 
         params.setAlertType(4);
         params.setWeComParams(weComParams);
+
+        notifyService.doAlert(params, alertTemplate);
+    }
+
+    @Test
+    public void larkAlertTest() throws Exception {
+        LarkAlertNotifyServiceImpl notifyService = new LarkAlertNotifyServiceImpl(restTemplate, mapper);
+        notifyService.loadTemplateFile();
+
+        LarkParams larkParams = new LarkParams();
+        larkParams.setToken("461a0d34-fbe3-438d-9c64-1a8b86370424");
+        larkParams.setSecretEnable(true);
+        larkParams.setSecretToken("aYslYFMEoztTVeOeHp1eBf");
+
+        params.setAlertType(16);
+        params.setLarkParams(larkParams);
 
         notifyService.doAlert(params, alertTemplate);
     }
