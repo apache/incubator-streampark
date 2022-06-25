@@ -1,6 +1,6 @@
 <template>
   <span :class="'svg-icon-'.concat(size).concat(border? ' svg-icon-border':'')" class="anticon">
-    <alertsetting v-if="name==='alertsetting'"></alertsetting>
+    <alarm v-if="name==='alarm'"></alarm>
     <analyse v-if="name==='analyse'"></analyse>
     <flink v-if="name==='flink'"></flink>
     <spark v-if="name==='spark'"></spark>
@@ -14,10 +14,13 @@
     <deploy v-if="name==='deploy'"></deploy>
     <stream v-if="name==='stream'"></stream>
     <format v-if="name==='format'"></format>
-    <dingding v-if="name==='dingding'"></dingding>
+    <dingtalk v-if="name==='dingtalk'"></dingtalk>
+    <lark v-if="name==='lark'"></lark>
     <mail v-if="name==='mail'"></mail>
     <sms v-if="name==='sms'"></sms>
+    <message v-if="name==='message'"></message>
     <wechat v-if="name==='wechat'"></wechat>
+    <wecom v-if="name==='wecom'"></wecom>
     <host v-if="name==='host'"></host>
     <keys v-if="name==='keys'"></keys>
     <port v-if="name==='port'"></port>
@@ -53,7 +56,7 @@
 
 <script>
 import {
-  alertsetting,
+  alarm,
   analyse,
   deploy,
   flink,
@@ -67,10 +70,13 @@ import {
   workspace,
   threshold,
   format,
-  dingding,
+  dingtalk,
+  lark,
   mail,
   sms,
+  message,
   wechat,
+  wecom,
   host,
   keys,
   port,
@@ -106,7 +112,7 @@ import {
 export default {
   name: 'SvgIcon',
   components: {
-    alertsetting,
+    alarm,
     analyse,
     deploy,
     flink,
@@ -120,10 +126,13 @@ export default {
     workspace,
     threshold,
     format,
-    dingding,
+    dingtalk,
+    lark,
     mail,
     sms,
+    message,
     wechat,
+    wecom,
     host,
     keys,
     port,
