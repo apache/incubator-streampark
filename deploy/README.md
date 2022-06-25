@@ -15,7 +15,6 @@ After installed docker-compose, it is recommended to modify some configurations 
     Hyper-V mode: Click Docker Desktop -> Settings -> Resources -> Memory modified it
     WSL 2 mode: see WSL 2 utility VM for more detail.
 
-
 After complete the configuration, we can get the docker-compose.yaml file from download page form its source package, and make sure you get the right version. After download the package, you can run the commands as below.
 
 1.Environment build via mvn
@@ -40,11 +39,44 @@ docker-compose up -d
 ## QuickStart in Kubernetes
 
 ### Prerequisites
-
     Helm version 3.1.0+
     Kubernetes version 1.12+
 ### Install Streamx
+#### Installing the Chart
 
+To install the chart with the release name my-release:
+```
+helm repo add 
+helm install my-streamx /streamx
+```
+These commands deploy Streamx on the Kubernetes cluster in the default configuration. The Parameters section lists the parameters that can be configured during installation.
 
+    Tip: List all releases using helm list
 
+Uninstalling the Chart
 
+To uninstall/delete the my-release deployment:
+
+helm delete my-streamx
+
+The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+#### Uninstalling the Chart
+
+To uninstall/delete the my-release deployment:
+```
+helm delete my-streamx
+```
+The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+## Build Private Image
+1.Execution of scripts
+```
+cd ./plugins
+bash ./buildPrivateImage
+```
+2.Enter the appropriate parameters
+
+    Enter private warehouse address
+    Enter username password
+    Enter the name of the mirror that matches the private repository requirements

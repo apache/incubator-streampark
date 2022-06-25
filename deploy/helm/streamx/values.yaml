@@ -62,3 +62,7 @@ streamxDefaultConfiguration:
   # logback-spring.xml: |+
   #   ...
 
+streamxServiceAccount:
+  create: true
+  annotations: {}
+  name: "streamx"

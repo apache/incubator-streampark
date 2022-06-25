@@ -47,6 +47,7 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
+      serviceAccountName: {{ include "streamx.serviceAccountName" . }}
 
       containers:
         - image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion}}
