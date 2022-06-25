@@ -22,18 +22,18 @@ package com.streamxhub.streamx.flink.connector.doris.bean;
 import java.io.IOException;
 import java.util.Map;
 
-public class LoadStstusFailedException extends IOException {
+public class LoadStatusFailedException extends IOException {
 
     static final long serialVersionUID = 1L;
     private final Map<String, Object> response;
     private boolean reCreateLabel;
 
-    public LoadStstusFailedException(String message, Map<String, Object> response) {
+    public LoadStatusFailedException(String message, Map<String, Object> response) {
         super(message);
         this.response = response;
     }
 
-    public LoadStstusFailedException(String message, Map<String, Object> response, boolean reCreateLabel) {
+    public LoadStatusFailedException(String message, Map<String, Object> response, boolean reCreateLabel) {
         super(message);
         this.response = response;
         this.reCreateLabel = reCreateLabel;

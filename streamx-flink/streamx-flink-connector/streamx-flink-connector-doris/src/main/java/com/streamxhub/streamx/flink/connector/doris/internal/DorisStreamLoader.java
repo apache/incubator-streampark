@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.connector.doris.internal;
 
 import com.streamxhub.streamx.connector.doris.conf.DorisConfig;
 import com.streamxhub.streamx.flink.connector.doris.bean.DorisSinkBufferEntry;
-import com.streamxhub.streamx.flink.connector.doris.bean.LoadStstusFailedException;
+import com.streamxhub.streamx.flink.connector.doris.bean.LoadStatusFailedException;
 import com.streamxhub.streamx.flink.connector.doris.bean.RespContent;
 import com.streamxhub.streamx.flink.connector.doris.util.DorisDelimiterParser;
 
@@ -124,13 +124,13 @@ public class DorisStreamLoader implements Serializable {
                         loadResult = EntityUtils.toString(response.getEntity());
                     }
                     if (statusCode != 200) {
-                        throw new LoadStstusFailedException(String.format("Failed to flush data to doris, Error " +
+                        throw new LoadStatusFailedException(String.format("Failed to flush data to doris, Error " +
                             "could not get the final state of label[%s].\n", label), null);
                     }
                     Map<String, Object> result = OBJECT_MAPPER.readValue(loadResult, HashMap.class);
                     String labelState = (String) result.get("state");
                     if (null == labelState) {
-                        throw new LoadStstusFailedException(String.format("Failed to flush data to doris, Error " +
+                        throw new LoadStatusFailedException(String.format("Failed to flush data to doris, Error " +
                             "could not get the final state of label[%s]. response[%s]\n", label, loadResult), null);
                     }
                     LOG.info(String.format("Checking label[%s] state[%s]\n", label, labelState));
@@ -142,11 +142,11 @@ public class DorisStreamLoader implements Serializable {
                         case RESULT_LABEL_PREPARE:
                             continue;
                         case RESULT_LABEL_ABORTED:
-                            throw new LoadStstusFailedException(String.format("Failed to flush data to doris, Error " +
+                            throw new LoadStatusFailedException(String.format("Failed to flush data to doris, Error " +
                                 "label[%s] state[%s]\n", label, labelState), null, true);
                         case RESULT_LABEL_UNKNOWN:
                         default:
-                            throw new LoadStstusFailedException(String.format("Failed to flush data to doris, Error " +
+                            throw new LoadStatusFailedException(String.format("Failed to flush data to doris, Error " +
                                 "label[%s] state[%s]\n", label, labelState), null);
                     }
                 }

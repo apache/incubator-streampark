@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.connector.doris.internal;
 import com.streamxhub.streamx.common.enums.Semantic;
 import com.streamxhub.streamx.connector.doris.conf.DorisConfig;
 import com.streamxhub.streamx.flink.connector.doris.bean.DorisSinkBufferEntry;
-import com.streamxhub.streamx.flink.connector.doris.bean.LoadStstusFailedException;
+import com.streamxhub.streamx.flink.connector.doris.bean.LoadStatusFailedException;
 
 import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.metrics.Counter;
@@ -65,7 +65,7 @@ public class DorisSinkWriter implements Serializable {
     private volatile boolean flushThreadAlive = false;
     private volatile Throwable flushException;
 
-    final LinkedBlockingDeque<DorisSinkBufferEntry> flushQueue = new LinkedBlockingDeque<>(1);
+    final LinkedBlockingDeque<DorisSinkBufferEntry> flushQueue = new LinkedBlockingDeque<>(10);
 
     private static final String COUNTER_TOTAL_FLUSH_BYTES = "totalFlushBytes";
     private static final String COUNTER_TOTAL_FLUSH_ROWS = "totalFlushRows";
@@ -251,7 +251,7 @@ public class DorisSinkWriter implements Serializable {
                 if (i >= dorisConfig.sinkMaxRetries()) {
                     throw e;
                 }
-                if (e instanceof LoadStstusFailedException && ((LoadStstusFailedException) e).needReCreateLabel()) {
+                if (e instanceof LoadStatusFailedException && ((LoadStatusFailedException) e).needReCreateLabel()) {
                     String oldLabel = flushData.getLabel();
                     flushData.reGenerateLabel();
                     LOG.warn(String.format("Batch label changed from [%s] to [%s]", oldLabel, flushData.getLabel()));
@@ -292,9 +292,7 @@ public class DorisSinkWriter implements Serializable {
     }
 
     public Map<String, DorisSinkBufferEntry> getBufferedBatchMap() {
-        Map<String, DorisSinkBufferEntry> clone = new HashMap<>();
-        clone.putAll(bufferMap);
-        return clone;
+        return new HashMap<>(bufferMap);
     }
 
     public void setBufferedBatchMap(Map<String, DorisSinkBufferEntry> newBufferMap) {
