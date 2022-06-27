@@ -68,7 +68,7 @@ spec:
               mountPath: "/certs"
               readOnly: true
             - name: flink-operator-config-volume
-              mountPath: /opt/flink-operator/conf
+              mountPath: /opt/streamx/conf
 
       volumes:
         - name: streamx-default-config-volume
@@ -79,11 +79,11 @@ spec:
                 path: application.yaml
               - key: logback-spring.xml
                 path: logback-spring.xml
-
-        - hostPath:
+        - name: volume-docker
+          hostPath:
             path: /var/run/docker.sock
             type: ""
-          name: volume-docker
+
 
 
 
