@@ -60,9 +60,8 @@ spec:
             privileged: false
           command: ["bash","bin/startup.sh"]
           volumeMounts:
-            - mountPath: /var/run/docker.sock
-              name: volume-docker
-
+            - name: volume-docker
+              mountPath: /var/run/docker.sock
             - name: keystore
               mountPath: "/certs"
               readOnly: true
