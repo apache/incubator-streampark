@@ -65,7 +65,7 @@ spec:
             - name: keystore
               mountPath: "/certs"
               readOnly: true
-            - name: streamx-operator-config-volume
+            - name: streamx-default-config-volume
               mountPath: /opt/streamx/conf
       volumes:
         - name: streamx-default-config-volume
