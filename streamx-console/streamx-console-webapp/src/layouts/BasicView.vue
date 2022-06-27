@@ -3,7 +3,7 @@
     :class="['layout', device]">
     <!-- SideMenu -->
     <a-drawer
-      v-if="isMobile()"
+      v-if="!isInIframe && isMobile()"
       placement="left"
       wrap-class-name="drawer-sider dark"
       :closable="false"
@@ -19,7 +19,7 @@
     </a-drawer>
 
     <side-menu
-      v-else-if="isSideMenu()"
+      v-else-if="!isInIframe && isSideMenu()"
       mode="inline"
       :menus="menus"
       theme="dark"
@@ -31,6 +31,7 @@
       :style="{ paddingLeft: contentPaddingLeft, minHeight: '100vh' }">
       <!-- layout header -->
       <global-header
+        v-if="!isInIframe"
         :mode="layoutMode"
         :menus="menus"
         theme="dark"
@@ -67,6 +68,8 @@ import SideMenu from '@/components/Menu/SideMenu'
 import GlobalHeader from '@/components/GlobalHeader'
 import GlobalFooter from '@/components/GlobalFooter'
 
+import { isInIframe } from '@/adapter'
+
 export default {
   name: 'BasicView',
   mixins: [mixin, mixinDevice],
@@ -79,6 +82,7 @@ export default {
   },
   data () {
     return {
+      isInIframe,
       production: config.production,
       collapsed: false,
       menus: []

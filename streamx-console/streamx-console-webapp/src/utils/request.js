@@ -1,11 +1,10 @@
 import axios from 'axios'
 import $qs from 'qs'
-import notification from 'ant-design-vue/es/notification'
+import {notification, message, Modal} from '@/adapter'
 import {INVALID, TOKEN} from '@/store/mutation-types'
 import storage from '@/utils/storage'
 import store from '@/store'
 import moment from 'moment'
-import {message, Modal} from 'ant-design-vue'
 
 import {baseUrl} from '@/api/baseUrl'
 
@@ -23,9 +22,9 @@ const http = axios.create({
 // request interceptor
 http.interceptors.request.use(config => {
   const expire = store.getters.expire
-  const now = moment().format('YYYYMMDDHHmmss')
+  const now = moment().format('YYYY-MM-DD HH:mm:ss')
   // 让token早10秒种过期，提升“请重新登录”弹窗体验
-  if (now - expire >= -10) {
+  if (now > expire) {
     Modal.error({
       title: 'Sign in expired',
       content: 'Sorry, Sign in has expired. Please Sign in again',

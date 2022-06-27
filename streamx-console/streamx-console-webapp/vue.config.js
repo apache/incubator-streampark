@@ -32,11 +32,22 @@ function resolve (dir) {
   return path.join(__dirname, dir)
 }
 
+const publicPath = '/streamx'
+
 // vue.config.js
 module.exports = {
 
   devServer: {
-    port: process.env['VUE_APP_PORT']
+    port: process.env['VUE_APP_PORT'],
+    proxy: {
+      '/streamx-api': {
+        target: `http://127.0.0.1:10000`,
+        changeOrigin: true,
+        pathRewrite: {
+          '^/streamx-api': '/'
+        }
+      }
+    }
   },
 
   pluginOptions: {
@@ -126,7 +137,7 @@ module.exports = {
   lintOnSave: undefined,
   // babel-loader no-ignore node_modules/*
   transpileDependencies: [],
-  publicPath: '/',
+  publicPath,
   productionSourceMap: false
 }
 

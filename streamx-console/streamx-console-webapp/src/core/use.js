@@ -14,6 +14,7 @@ import './directives/permission'
 import VueParticles from 'vue-particles'
 import http from '@/utils/request'
 import util from '@/utils/util'
+import Adapter, { isInIframe } from '@/adapter'
 //sweetalert
 import VueSweetalert2 from 'vue-sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
@@ -21,12 +22,17 @@ import 'sweetalert2/dist/sweetalert2.min.css'
 VueClipboard.config.autoSetContainer = true
 
 Vue.use(Antd)
+
+if (isInIframe) {
+  Vue.use(Adapter)
+} else {
+  Vue.use(VueSweetalert2)
+}
+
 Vue.use(VueParticles)
 Vue.use(VueClipboard)
 Vue.use(PermissionHelper)
 Vue.use(VueCropper)
-
-Vue.use(VueSweetalert2)
 
 Vue.prototype.$post = http.post
 Vue.prototype.$get = http.get
