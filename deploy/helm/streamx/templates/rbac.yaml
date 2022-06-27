@@ -21,12 +21,6 @@ RBAC rules used to create the operator (cluster)role based on the scope
 {{- define "streamx.rbacRules" }}
 rules:
   - apiGroups:
-      - streamx
-    resources:
-      - "*"
-    verbs:
-      - "*"
-  - apiGroups:
       - ""
     resources:
       - pods
@@ -37,26 +31,6 @@ rules:
       - configmaps
       - secrets
       - nodes
-    verbs:
-      - "*"
-  - apiGroups:
-      - apps
-    resources:
-      - deployments
-      - replicasets
-    verbs:
-      - "*"
-  - apiGroups:
-      - extensions
-    resources:
-      - deployments
-      - ingresses
-    verbs:
-      - "*"
-  - apiGroups:
-      - networking.k8s.io
-    resources:
-      - ingresses
     verbs:
       - "*"
 {{- end }}
@@ -102,7 +76,7 @@ Cluster scoped RBAC.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: streamx
+  name: streamx-cluster
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "streamx.labels" . | nindent 4 }}
@@ -117,7 +91,7 @@ metadata:
     {{- include "streamx.labels" . | nindent 4 }}
 roleRef:
   kind: ClusterRole
-  name: streamx
+  name: streamx-cluster
   apiGroup: rbac.authorization.k8s.io
 subjects:
   - kind: ServiceAccount
