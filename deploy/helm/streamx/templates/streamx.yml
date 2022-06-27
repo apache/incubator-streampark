@@ -62,8 +62,6 @@ spec:
           volumeMounts:
             - name: volume-docker
               mountPath: /var/run/docker.sock
-            - name: keystore
-              mountPath: "/certs"
               readOnly: true
             - name: streamx-default-config-volume
               mountPath: /opt/streamx/conf
@@ -80,7 +78,5 @@ spec:
           hostPath:
             path: /var/run/docker.sock
             type: ""
-
-
 
 
