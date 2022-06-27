@@ -48,7 +48,6 @@ spec:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
       serviceAccountName: {{ include "streamx.serviceAccountName" . }}
-
       containers:
         - image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion}}
           name: {{ .Chart.Name }}
@@ -67,13 +66,12 @@ spec:
             - name: keystore
               mountPath: "/certs"
               readOnly: true
-            - name: flink-operator-config-volume
+            - name: streamx-operator-config-volume
               mountPath: /opt/streamx/conf
-
       volumes:
         - name: streamx-default-config-volume
           configMap:
-            name: flink-default-config
+            name: streamx-default-config
             items:
               - key: application.yaml
                 path: application.yaml
