@@ -20,7 +20,6 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType;
-import com.streamxhub.streamx.common.util.ExceptionUtils;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -61,34 +60,20 @@ public class FlinkSqlController {
     public RestResponse verify(String sql, Long versionId) {
         FlinkSqlValidationResult flinkSqlValidationResult = flinkSqlService.verifySql(sql, versionId);
         if (!flinkSqlValidationResult.success()) {
-            String[] array = flinkSqlValidationResult.sql().trim().split("\n");
-            String start = array[0].trim();
-            String end = array.length > 1 ? array[array.length - 1].trim() : null;
-
             //记录错误类型,出错的sql,原因,错误的开始行和结束行内容(用于前端查找mod节点)
-            String exception = ExceptionUtils.stringifyException(flinkSqlValidationResult.exception());
+            String exception = flinkSqlValidationResult.exception();
             RestResponse response = RestResponse.create()
                 .data(false)
                 .message(exception)
                 .put("type", flinkSqlValidationResult.failedType().getValue())
-                .put("start", start)
-                .put("end", end);
+                .put("start", flinkSqlValidationResult.errorLineStart())
+                .put("end", flinkSqlValidationResult.errorLineEnd());
             //语法异常
             if (flinkSqlValidationResult.failedType().equals(FlinkSqlValidationFailedType.SYNTAX_ERROR)) {
-                String cleanUpError = exception.replaceAll("[\r\n]", "");
-                String sqlParseFailedRegexp = "SQL\\sparse\\sfailed\\.\\sEncountered\\s\"(.*)\"\\sat\\sline\\s\\d,\\scolumn\\s\\d.*";
-                if (cleanUpError.matches(sqlParseFailedRegexp)) {
-                    String[] lineColumn = cleanUpError
-                        .replaceAll("^.*\\sat\\sline\\s", "")
-                        .replaceAll(",\\scolumn\\s", ",")
-                        .replaceAll("\\.(.*)", "")
-                        .trim()
-                        .split(",");
-
-                    //记录第几行出错.
-                    response.put("line", lineColumn[0])
-                        .put("column ", lineColumn[1]);
-                }
+                //记录第几行出错.
+                response
+                    .put("line", flinkSqlValidationResult.errorLineStart())
+                    .put("column ", flinkSqlValidationResult.errorLineEnd());
             }
             return response;
         } else {

@@ -42,12 +42,12 @@ object SqlCommandParser extends Logger {
             FlinkSqlValidationResult(
               false,
               FlinkSqlValidationFailedType.VERIFY_FAILED,
-              new ValidationException(sqlEmptyError)
+              sqlEmptyError
             )
           )
           null
         } else {
-          throw new ValidationException(sqlEmptyError)
+          throw new IllegalArgumentException(sqlEmptyError)
         }
       case stmts =>
         val calls = new ArrayBuffer[SqlCommandCall]
@@ -60,12 +60,14 @@ object SqlCommandParser extends Logger {
                   FlinkSqlValidationResult(
                     false,
                     FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
-                    new ValidationException(s"unsupported sql"),
-                    sql = stmt
+                    s"unsupported sql",
+                    stmt._1,
+                    stmt._2,
+                    sql = stmt._3
                   )
                 )
               } else {
-                throw new ValidationException(s"unsupported sql: $stmt")
+                throw new UnsupportedOperationException(s"unsupported sql: $stmt")
               }
           }
         }
@@ -77,20 +79,20 @@ object SqlCommandParser extends Logger {
                 FlinkSqlValidationResult(
                   false,
                   FlinkSqlValidationFailedType.VERIFY_FAILED,
-                  new ValidationException("flink sql syntax error, no executable sql")
+                  "flink sql syntax error, no executable sql"
                 )
               )
               null
             } else {
-              throw new ValidationException("flink sql syntax error, no executable sql")
+              throw new UnsupportedOperationException("flink sql syntax error, no executable sql")
             }
           case r => r
         }
     }
   }
 
-  private[this] def parseLine(sqlLine: String): Option[SqlCommandCall] = {
-    val stmt = sqlLine.trim
+  private[this] def parseLine(sqlLine: (Int, Int, String)): Option[SqlCommandCall] = {
+    val stmt = sqlLine._3.trim
     // parse
     val sqlCommand = SqlCommand.get(stmt)
     if (sqlCommand == null) None else {
@@ -99,7 +101,7 @@ object SqlCommandParser extends Logger {
       for (i <- groups.indices) {
         groups(i) = matcher.group(i + 1)
       }
-      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlCommand, x, sqlLine.trim))
+      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlLine._1, sqlLine._2, sqlCommand, x, sqlLine._3.trim))
     }
   }
 
@@ -404,13 +406,16 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 /**
  * Call of SQL command with operands and command type.
  */
-case class SqlCommandCall(command: SqlCommand, operands: Array[String], originSql: String) {
-  def this(command: SqlCommand) {
-    this(command, new Array[String](0), null)
-  }
+case class SqlCommandCall(lineStart: Int,
+                          lineEnd: Int,
+                          command: SqlCommand,
+                          operands: Array[String],
+                          originSql: String) {
 }
 
 case class FlinkSqlValidationResult(success: JavaBool = true,
                                     failedType: FlinkSqlValidationFailedType = null,
-                                    exception: Throwable = null,
+                                    exception: String = null,
+                                    errorLineStart: Int = 0,
+                                    errorLineEnd: Int = 0,
                                     sql: String = null)

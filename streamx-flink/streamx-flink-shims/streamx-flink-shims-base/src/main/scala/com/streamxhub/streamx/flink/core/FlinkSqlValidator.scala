@@ -77,7 +77,9 @@ object FlinkSqlValidator extends Logger {
               return FlinkSqlValidationResult(
                 false,
                 FlinkSqlValidationFailedType.VERIFY_FAILED,
-                exception = new ValidationException(s"$args is not a valid table/sql config"),
+                exception = s"$args is not a valid table/sql config",
+                call.lineStart,
+                call.lineEnd,
                 sql = sql.replaceFirst(";|$", ";")
               )
             }
@@ -100,23 +102,43 @@ object FlinkSqlValidator extends Logger {
             method.invoke(parser, call.originSql)
           } match {
             case Failure(e) =>
-              val exception = ExceptionUtils.findThrowable(e, classOf[SqlParserException]) match {
-                case null => e
-                case e => e.get()
+              val exception = ExceptionUtils.stringifyException(e)
+              val cleanUpError = exception.replaceAll("[\r\n]", "")
+              val regexp = "(.*?)at\\sline\\s(\\d+),\\scolumn\\s(\\d+).*"
+              if (cleanUpError.matches(regexp)) {
+                val lineColumn = cleanUpError
+                  .replaceAll("^.*\\sat\\sline\\s", "")
+                  .replaceAll(",\\scolumn\\s", ",")
+                  .replaceAll("\\.(.*)", "")
+                  .trim()
+                  .split(",")
+                return FlinkSqlValidationResult(
+                  false,
+                  FlinkSqlValidationFailedType.SYNTAX_ERROR,
+                  ExceptionUtils.stringifyException(e),
+                  call.lineStart + lineColumn(0).toInt,
+                  lineColumn(0).toInt,
+                  call.originSql
+                )
+              } else {
+                return FlinkSqlValidationResult(
+                  false,
+                  FlinkSqlValidationFailedType.SYNTAX_ERROR,
+                  exception,
+                  call.lineStart,
+                  call.lineEnd,
+                  call.originSql
+                )
               }
-              return FlinkSqlValidationResult(
-                false,
-                FlinkSqlValidationFailedType.SYNTAX_ERROR,
-                exception,
-                call.originSql
-              )
             case _ =>
           }
         case _ =>
           return FlinkSqlValidationResult(
             false,
             FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
-            new ValidationException(s"unsupported sql: ${call.originSql}"),
+            s"unsupported sql: ${call.originSql}",
+            call.lineStart,
+            call.lineEnd,
             sql = sql.replaceFirst(";|$", ";")
           )
       }
