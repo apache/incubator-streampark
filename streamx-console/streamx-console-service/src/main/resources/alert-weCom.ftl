@@ -27,5 +27,5 @@
 > Best Wishes!
 > StreamX Team
 
-[Details](${link})    [Website](http://www.streamxhub.com)    [GitHub](https://github.com/streamxhub/streamx)
+<#if link??>[Details](${link})    </#if>[Website](http://www.streamxhub.com)    [GitHub](https://github.com/streamxhub/streamx)
 

@@ -83,9 +83,9 @@ public class AlertServiceTest {
         notifyService.loadTemplateFile();
         DingTalkParams dingTalkParams = new DingTalkParams();
         dingTalkParams.setSecretEnable(true);
-        dingTalkParams.setSecretToken("SECe831f7c573249dd15b6d3296a68662a7f952305a194ee93791f9db68f39a0b28");
-        dingTalkParams.setToken("e1cab58b634908034da475fe9a8aec6c3c975d1f1fb5c188e074c051b15fb314");
-        dingTalkParams.setContacts("18262800582");
+        dingTalkParams.setSecretToken("***");
+        dingTalkParams.setToken("***");
+        dingTalkParams.setContacts("130-0000-0000");
         dingTalkParams.setIsAtAll(true);
 
         params.setAlertType(2);
@@ -100,7 +100,7 @@ public class AlertServiceTest {
         notifyService.loadTemplateFile();
 
         WeComParams weComParams = new WeComParams();
-        weComParams.setToken("sadfasdfasdfasfsadf");
+        weComParams.setToken("***");
 
         params.setAlertType(4);
         params.setWeComParams(weComParams);

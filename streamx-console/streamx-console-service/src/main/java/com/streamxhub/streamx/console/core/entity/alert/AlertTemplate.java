@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.entity.alert;
 
+import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -60,12 +61,18 @@ public class AlertTemplate implements Serializable {
             duration = application.getEndTime().getTime() - application.getStartTime().getTime();
         }
         duration = duration / 1000 / 60;
-        String format = "%s/proxy/%s/";
-        String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
 
         AlertTemplate template = new AlertTemplate();
         template.setJobName(application.getJobName());
-        template.setLink(url);
+
+        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            String format = "%s/proxy/%s/";
+            String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
+            template.setLink(url);
+        } else {
+            template.setLink(null);
+        }
+
         template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
         template.setEndTime(DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
         template.setDuration(DateUtils.toRichTimeDuration(duration));
