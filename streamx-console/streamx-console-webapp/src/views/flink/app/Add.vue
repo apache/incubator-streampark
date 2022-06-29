@@ -1672,8 +1672,6 @@
           flinkSql: {
             defaultValue: '',
             value: null,
-            errorLine: null,
-            errorColumn: null,
             errorMsg: null,
             errorStart: null,
             errorEnd: null,
