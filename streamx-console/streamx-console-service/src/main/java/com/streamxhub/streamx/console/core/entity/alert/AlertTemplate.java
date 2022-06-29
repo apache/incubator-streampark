@@ -52,6 +52,7 @@ public class AlertTemplate implements Serializable {
     private Boolean restart;
     private Integer restartIndex;
     private Integer totalRestart;
+    private boolean atAll = false;
 
     private static AlertTemplate of(Application application) {
         long duration;

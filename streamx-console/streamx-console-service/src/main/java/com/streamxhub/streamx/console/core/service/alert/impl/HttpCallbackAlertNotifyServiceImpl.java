@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -50,6 +51,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@Lazy
 public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
     @Autowired
     private RestTemplate alertRestTemplate;
@@ -62,7 +64,7 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
         HttpCallbackParams httpCallbackParams = alertConfig.getHttpCallbackParams();
 
         String requestTemplate = httpCallbackParams.getRequestTemplate();
-        if (StringUtils.isEmpty(requestTemplate)) {
+        if (!StringUtils.hasLength(requestTemplate)) {
             return false;
         }
         try {
@@ -82,7 +84,7 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
         HttpHeaders headers = new HttpHeaders();
         String contentType = params.getContentType();
         MediaType mediaType = MediaType.APPLICATION_JSON;
-        if (!StringUtils.isEmpty(contentType)) {
+        if (StringUtils.hasLength(contentType)) {
             switch (contentType.toLowerCase()) {
                 case MediaType.APPLICATION_FORM_URLENCODED_VALUE:
                     mediaType = MediaType.APPLICATION_FORM_URLENCODED;
@@ -101,7 +103,7 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
         try {
             HttpMethod httpMethod = HttpMethod.POST;
             String method = params.getMethod();
-            if (StringUtils.isEmpty(method)) {
+            if (!StringUtils.hasLength(method)) {
                 if (HttpMethod.PUT.name().equalsIgnoreCase(method)) {
                     httpMethod = HttpMethod.PUT;
                 }

@@ -30,6 +30,7 @@ import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.mail.HtmlEmail;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -44,6 +45,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@Lazy
 public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
     private Template template;
@@ -65,7 +67,7 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
             this.senderEmail = settingService.getSenderEmail();
         }
         String contacts = alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
-        if (this.senderEmail != null && !StringUtils.isEmpty(contacts)) {
+        if (this.senderEmail != null && StringUtils.hasLength(contacts)) {
             String[] emails = contacts.split(",");
             return sendEmail(template, emails);
         }

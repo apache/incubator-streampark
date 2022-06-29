@@ -19,23 +19,20 @@
 
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.YarnUtils;
+import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 
-import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.StringWriter;
-import java.net.URL;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -48,29 +45,7 @@ public class SendEmailTest {
 
     @Before
     public void initConfig() throws Exception {
-        Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
-        String template = "alert-email.ftl";
-        Enumeration<URL> urls = ClassLoader.getSystemResources(template);
-        if (urls != null) {
-            if (!urls.hasMoreElements()) {
-                urls = Thread.currentThread().getContextClassLoader().getResources(template);
-            }
-        }
-        if (urls != null) {
-            if (urls.hasMoreElements()) {
-                URL url = urls.nextElement();
-                if (url.getPath().contains(".jar")) {
-                    configuration.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
-                } else {
-                    File file = new File(url.getPath());
-                    configuration.setDirectoryForTemplateLoading(file.getParentFile());
-                }
-                configuration.setDefaultEncoding("UTF-8");
-                this.template = configuration.getTemplate(template);
-            }
-        } else {
-            throw new ExceptionInInitializerError("alert-email.ftl not found!");
-        }
+        this.template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
         senderEmail = new SenderEmail();
         senderEmail.setFrom("****@domain.com");
         senderEmail.setUserName("******");

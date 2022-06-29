@@ -20,8 +20,10 @@ import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.entity.alert.DingTalkParams;
+import com.streamxhub.streamx.console.core.entity.alert.LarkParams;
 import com.streamxhub.streamx.console.core.entity.alert.WeComParams;
 import com.streamxhub.streamx.console.core.service.alert.impl.DingTalkAlertNotifyServiceImpl;
+import com.streamxhub.streamx.console.core.service.alert.impl.LarkAlertNotifyServiceImpl;
 import com.streamxhub.streamx.console.core.service.alert.impl.WeComAlertNotifyServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,10 +84,8 @@ public class AlertServiceTest {
 
         notifyService.loadTemplateFile();
         DingTalkParams dingTalkParams = new DingTalkParams();
-        dingTalkParams.setSecretEnable(true);
-        dingTalkParams.setSecretToken("***");
-        dingTalkParams.setToken("***");
-        dingTalkParams.setContacts("130-0000-0000");
+        dingTalkParams.setToken("your_token");
+        dingTalkParams.setContacts("175xxxx1234");
         dingTalkParams.setIsAtAll(true);
 
         params.setAlertType(2);
@@ -96,14 +96,28 @@ public class AlertServiceTest {
 
     @Test
     public void weComAlertTest() throws Exception {
-        WeComAlertNotifyServiceImpl notifyService = new WeComAlertNotifyServiceImpl(restTemplate, mapper);
+        WeComAlertNotifyServiceImpl notifyService = new WeComAlertNotifyServiceImpl(restTemplate);
         notifyService.loadTemplateFile();
 
         WeComParams weComParams = new WeComParams();
-        weComParams.setToken("***");
+        weComParams.setToken("your_token");
 
         params.setAlertType(4);
         params.setWeComParams(weComParams);
+
+        notifyService.doAlert(params, alertTemplate);
+    }
+
+    @Test
+    public void larkAlertTest() throws Exception {
+        LarkAlertNotifyServiceImpl notifyService = new LarkAlertNotifyServiceImpl(restTemplate, mapper);
+        notifyService.loadTemplateFile();
+
+        LarkParams larkParams = new LarkParams();
+        larkParams.setToken("your_token");
+
+        params.setAlertType(16);
+        params.setLarkParams(larkParams);
 
         notifyService.doAlert(params, alertTemplate);
     }
