@@ -133,7 +133,7 @@
           </a-input>
         </a-form-item>
 
-        <a-form-item 
+        <a-form-item
           v-if="app.executionMode === 6 || executionMode === 6"
           label="Kubernetes ClusterId"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -156,7 +156,7 @@
           </a-input>
         </a-form-item>
 
-        <a-form-item 
+        <a-form-item
           v-if="app.executionMode === 5 || executionMode === 5"
           label="Kubernetes ClusterId"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -1782,8 +1782,6 @@ export default {
         },
         flinkSql: {
           value: null,
-          errorLine: null,
-          errorColumn: null,
           errorMsg: null,
           errorStart: null,
           errorEnd: null,

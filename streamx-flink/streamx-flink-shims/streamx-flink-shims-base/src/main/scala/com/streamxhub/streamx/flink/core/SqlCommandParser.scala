@@ -21,7 +21,6 @@ package com.streamxhub.streamx.flink.core
 import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType
 import com.streamxhub.streamx.common.util.{Logger, SqlSplitter}
 import enumeratum.EnumEntry
-import org.apache.flink.table.api.ValidationException
 
 import java.util.regex.{Matcher, Pattern}
 import java.lang.{Boolean => JavaBool}
@@ -40,14 +39,14 @@ object SqlCommandParser extends Logger {
         if (validationCallback != null) {
           validationCallback(
             FlinkSqlValidationResult(
-              false,
-              FlinkSqlValidationFailedType.VERIFY_FAILED,
-              new ValidationException(sqlEmptyError)
+              success = false,
+              failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
+              exception = sqlEmptyError
             )
           )
           null
         } else {
-          throw new ValidationException(sqlEmptyError)
+          throw new IllegalArgumentException(sqlEmptyError)
         }
       case stmts =>
         val calls = new ArrayBuffer[SqlCommandCall]
@@ -58,14 +57,16 @@ object SqlCommandParser extends Logger {
               if (validationCallback != null) {
                 validationCallback(
                   FlinkSqlValidationResult(
-                    false,
-                    FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
-                    new ValidationException(s"unsupported sql"),
-                    sql = stmt
+                    success = false,
+                    failedType = FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
+                    lineStart = stmt._1,
+                    lineEnd = stmt._2,
+                    exception = s"unsupported sql",
+                    sql = stmt._3
                   )
                 )
               } else {
-                throw new ValidationException(s"unsupported sql: $stmt")
+                throw new UnsupportedOperationException(s"unsupported sql: $stmt")
               }
           }
         }
@@ -75,22 +76,22 @@ object SqlCommandParser extends Logger {
             if (validationCallback != null) {
               validationCallback(
                 FlinkSqlValidationResult(
-                  false,
-                  FlinkSqlValidationFailedType.VERIFY_FAILED,
-                  new ValidationException("flink sql syntax error, no executable sql")
+                  success = false,
+                  failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
+                  exception = "flink sql syntax error, no executable sql"
                 )
               )
               null
             } else {
-              throw new ValidationException("flink sql syntax error, no executable sql")
+              throw new UnsupportedOperationException("flink sql syntax error, no executable sql")
             }
           case r => r
         }
     }
   }
 
-  private[this] def parseLine(sqlLine: String): Option[SqlCommandCall] = {
-    val stmt = sqlLine.trim
+  private[this] def parseLine(sqlLine: (Int, Int, String)): Option[SqlCommandCall] = {
+    val stmt = sqlLine._3.trim
     // parse
     val sqlCommand = SqlCommand.get(stmt)
     if (sqlCommand == null) None else {
@@ -99,7 +100,7 @@ object SqlCommandParser extends Logger {
       for (i <- groups.indices) {
         groups(i) = matcher.group(i + 1)
       }
-      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlCommand, x, sqlLine.trim))
+      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlLine._1, sqlLine._2, sqlCommand, x, sqlLine._3.trim))
     }
   }
 
@@ -404,13 +405,19 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 /**
  * Call of SQL command with operands and command type.
  */
-case class SqlCommandCall(command: SqlCommand, operands: Array[String], originSql: String) {
-  def this(command: SqlCommand) {
-    this(command, new Array[String](0), null)
-  }
+case class SqlCommandCall(lineStart: Int,
+                          lineEnd: Int,
+                          command: SqlCommand,
+                          operands: Array[String],
+                          originSql: String) {
 }
 
 case class FlinkSqlValidationResult(success: JavaBool = true,
                                     failedType: FlinkSqlValidationFailedType = null,
-                                    exception: Throwable = null,
-                                    sql: String = null)
+                                    lineStart: Int = 0,
+                                    lineEnd: Int = 0,
+                                    errorLine: Int = 0,
+                                    errorColumn: Int = 0,
+                                    sql: String = null,
+                                    exception: String = null
+                                   )
