@@ -24,8 +24,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.SpringTemplateLoader;
 
@@ -38,12 +37,19 @@ import java.io.StringWriter;
  */
 @Slf4j
 @Component
-public class FreemarkerUtils implements ResourceLoaderAware {
-    private static Configuration configuration;
+public class FreemarkerUtils  {
+    private static final Configuration CONFIGURATION;
+
+    static {
+        SpringTemplateLoader templateLoader = new SpringTemplateLoader(new DefaultResourceLoader(), "classpath:alert-template");
+        CONFIGURATION = new Configuration(Configuration.VERSION_2_3_28);
+        CONFIGURATION.setTemplateLoader(templateLoader);
+        CONFIGURATION.setDefaultEncoding("UTF-8");
+    }
 
     public static Template loadTemplateFile(String fileName) throws ExceptionInInitializerError {
         try {
-            return configuration.getTemplate(fileName);
+            return CONFIGURATION.getTemplate(fileName);
         } catch (IOException e) {
             log.error("{} not found!", fileName);
             throw new ExceptionInInitializerError(fileName + " not found!");
@@ -67,13 +73,5 @@ public class FreemarkerUtils implements ResourceLoaderAware {
             log.error(e.getMessage());
         }
         return result;
-    }
-
-    @Override
-    public void setResourceLoader(ResourceLoader resourceLoader) {
-        SpringTemplateLoader templateLoader = new SpringTemplateLoader(resourceLoader, "classpath:alert-template");
-        FreemarkerUtils.configuration = new Configuration(Configuration.VERSION_2_3_28);
-        FreemarkerUtils.configuration.setTemplateLoader(templateLoader);
-        FreemarkerUtils.configuration.setDefaultEncoding("UTF-8");
     }
 }
