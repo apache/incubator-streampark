@@ -28,7 +28,7 @@ import org.apache.flink.sql.parser.validate.FlinkSqlConformance
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.table.api.{EnvironmentSettings, SqlParserException, ValidationException}
+import org.apache.flink.table.api.EnvironmentSettings
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 import org.apache.flink.table.planner.utils.TableConfigUtils
 
@@ -39,6 +39,8 @@ object FlinkSqlValidator extends Logger {
   private[this] val FLINK112_CALCITE_PARSER_CLASS = "org.apache.flink.table.planner.calcite.CalciteParser"
 
   private[this] val FLINK113_CALCITE_PARSER_CLASS = "org.apache.flink.table.planner.parse.CalciteParser"
+
+  private[this] val SYNTAX_ERROR_REGEXP = ".*at\\sline\\s(\\d+),\\scolumn\\s(\\d+).*".r
 
   private[this] lazy val sqlParserConfig = {
     val tableConfig = StreamTableEnvironment.create(
@@ -75,10 +77,12 @@ object FlinkSqlValidator extends Logger {
           if (!FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
             if (command == RESET && "ALL" != args) {
               return FlinkSqlValidationResult(
-                false,
-                FlinkSqlValidationFailedType.VERIFY_FAILED,
-                exception = new ValidationException(s"$args is not a valid table/sql config"),
-                sql = sql.replaceFirst(";|$", ";")
+                success = false,
+                failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
+                lineStart = call.lineStart,
+                lineEnd = call.lineEnd,
+                sql = sql.replaceFirst(";|$", ";"),
+                exception = s"$args is not a valid table/sql config"
               )
             }
           }
@@ -100,24 +104,41 @@ object FlinkSqlValidator extends Logger {
             method.invoke(parser, call.originSql)
           } match {
             case Failure(e) =>
-              val exception = ExceptionUtils.findThrowable(e, classOf[SqlParserException]) match {
-                case null => e
-                case e => e.get()
+              val exception = ExceptionUtils.stringifyException(e)
+              val causedBy = exception.drop(exception.indexOf("Caused by:"))
+              val cleanUpError = exception.replaceAll("[\r\n]", "")
+              if (SYNTAX_ERROR_REGEXP.findAllMatchIn(cleanUpError).nonEmpty) {
+                val SYNTAX_ERROR_REGEXP(line, column) = cleanUpError
+                return FlinkSqlValidationResult(
+                  success = false,
+                  failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
+                  lineStart = call.lineStart,
+                  lineEnd = call.lineEnd,
+                  errorLine = if (call.lineStart > 1) call.lineStart + line.toInt else line.toInt,
+                  errorColumn = column.toInt,
+                  sql = call.originSql,
+                  exception = causedBy
+                )
+              } else {
+                return FlinkSqlValidationResult(
+                  success = false,
+                  failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
+                  lineStart = call.lineStart,
+                  lineEnd = call.lineEnd,
+                  sql = call.originSql,
+                  exception = causedBy
+                )
               }
-              return FlinkSqlValidationResult(
-                false,
-                FlinkSqlValidationFailedType.SYNTAX_ERROR,
-                exception,
-                call.originSql
-              )
             case _ =>
           }
         case _ =>
           return FlinkSqlValidationResult(
-            false,
-            FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
-            new ValidationException(s"unsupported sql: ${call.originSql}"),
-            sql = sql.replaceFirst(";|$", ";")
+            success = false,
+            failedType = FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
+            lineStart = call.lineStart,
+            lineEnd = call.lineEnd,
+            sql = sql.replaceFirst(";|$", ";"),
+            exception = s"unsupported sql: ${call.originSql}"
           )
       }
     }

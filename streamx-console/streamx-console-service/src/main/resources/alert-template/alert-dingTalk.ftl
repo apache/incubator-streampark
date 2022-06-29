@@ -28,7 +28,9 @@
 > StreamX Team
 
 
+<#if link??>
 [Details](${link})
+</#if>
 [Website](http://www.streamxhub.com)
 [GitHub](https://github.com/streamxhub/streamx)
 

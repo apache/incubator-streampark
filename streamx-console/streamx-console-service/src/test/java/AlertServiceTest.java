@@ -16,7 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
@@ -95,6 +94,10 @@ public class AlertServiceTest {
         DingTalkParams dingTalkParams = new DingTalkParams();
         dingTalkParams.setToken("your_token");
         dingTalkParams.setContacts("175xxxx1234");
+        dingTalkParams.setSecretEnable(true);
+        dingTalkParams.setSecretToken("***");
+        dingTalkParams.setToken("***");
+        dingTalkParams.setContacts("130-0000-0000");
         dingTalkParams.setIsAtAll(true);
 
         params.setAlertType(2);

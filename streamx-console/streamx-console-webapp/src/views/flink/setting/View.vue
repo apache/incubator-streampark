@@ -268,10 +268,10 @@
 
               <div class="list-content" style="width: 40%">
                 <span slot="title" text-align center>Alert Type</span><br><br>
-                <svg-icon role="img" v-if="item.alertType === 1 || item.alertType === 3 || item.alertType === 5 || item.alertType === 9 || item.alertType === 7 || item.alertType === 13 || item.alertType === 15" name="mail" size="middle"/>
-                <svg-icon role="img" v-if="item.alertType === 2 || item.alertType === 3 || item.alertType === 6 || item.alertType === 10 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15" name="dingTalk" size="middle"/>
-                <svg-icon role="img" v-if="item.alertType === 4 || item.alertType === 5 || item.alertType === 6 || item.alertType === 12 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15" name="wechat" size="middle"/>
-                <svg-icon role="img" v-if="item.alertType === 8 || item.alertType === 9 || item.alertType === 10 || item.alertType === 12 || item.alertType === 11 || item.alertType === 14 || item.alertType === 15" name="sms" size="middle"/>
+                <svg-icon role="img" name="mail" size="middle" v-if="item.alertType === 1 || item.alertType === 3 || item.alertType === 5 || item.alertType === 9 || item.alertType === 7 || item.alertType === 13 || item.alertType === 15"/>
+                <svg-icon role="img" name="dingtalk" size="middle" v-if="item.alertType === 2 || item.alertType === 3 || item.alertType === 6 || item.alertType === 10 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15"/>
+                <svg-icon role="img" name="wecom" size="middle" v-if="item.alertType === 4 || item.alertType === 5 || item.alertType === 6 || item.alertType === 12 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15"/>
+                <svg-icon role="img" name="message" size="middle" v-if="item.alertType === 8 || item.alertType === 9 || item.alertType === 10 || item.alertType === 12 || item.alertType === 11 || item.alertType === 14 || item.alertType === 15"/>
               </div>
 
               <div slot="actions">
@@ -631,7 +631,7 @@
         <svg-icon
           slot="icon"
           size="middle"
-          name="alertsetting"/>
+          name="alarm"/>
         Alert Setting
       </template>
 
@@ -667,15 +667,15 @@
               :disabled="o.disabled"
               :value="o.value">
               <svg-icon role="img" v-if="o.value === 1" name="mail"/>
-              <svg-icon role="img" v-if="o.value === 2" name="dingding"/>
-              <svg-icon role="img" v-if="o.value === 4" name="wechat"/>
-              <svg-icon role="img" v-if="o.value === 8" name="sms"/>
+              <svg-icon role="img" v-if="o.value === 2" name="dingtalk"/>
+              <svg-icon role="img" v-if="o.value === 4" name="wecom"/>
+              <svg-icon role="img" v-if="o.value === 8" name="message"/>
               {{ o.name }}
             </a-select-option>
           </a-select>
         </a-form-item>
 
-        <a-divider v-if="alertType.indexOf(1)>-1"><svg-icon role="img" name="mail"/>  E-mail </a-divider>
+        <a-divider v-if="alertType.indexOf(1)>-1"><svg-icon role="img" name="mail" size="middle"/>  E-mail </a-divider>
         <a-form-item
           v-if="alertType.indexOf(1)>-1"
           label="Alert Email"
@@ -689,7 +689,7 @@
           </a-input>
         </a-form-item>
 
-        <a-divider v-if="alertType.indexOf(2)>-1"><svg-icon role="img" name="dingding"/> Ding Talk </a-divider>
+        <a-divider v-if="alertType.indexOf(2)>-1"><svg-icon role="img" name="dingtalk" size="middle"/> Ding Talk </a-divider>
 
         <a-form-item
           v-if="alertType.indexOf(2)>-1"
@@ -771,7 +771,7 @@
             v-decorator="[ 'alertSecretToken', {rules: [{ required: true, message: 'DingTalk SecretToken is required' }]} ]"/>
         </a-form-item>
 
-        <a-divider v-if="alertType.indexOf(4)>-1"><svg-icon role="img" name="wechat"/> WeChat </a-divider>
+        <a-divider v-if="alertType.indexOf(4)>-1"><svg-icon role="img" name="wecom" size="middle"/> WeChat </a-divider>
 
         <a-form-item
           v-if="alertType.indexOf(4)>-1"
@@ -784,7 +784,7 @@
             v-decorator="['weToken', {rules: [{ required: true, message: 'WeChat Token is required' }]} ]"/>
         </a-form-item>
 
-        <a-divider v-if="alertType.indexOf(8)>-1"><svg-icon role="img" name="sms"/> SMS </a-divider>
+        <a-divider v-if="alertType.indexOf(8)>-1"><svg-icon role="img" name="message" size="middle"/> SMS </a-divider>
 
         <a-form-item
           v-if="alertType.indexOf(8)>-1"
@@ -1619,4 +1619,10 @@ export default {
 
 <style lang="less">
 @import "View";
+
+.ant-divider-inner-text {
+  .svg-icon-middle {
+    vertical-align: top;
+  }
+}
 </style>

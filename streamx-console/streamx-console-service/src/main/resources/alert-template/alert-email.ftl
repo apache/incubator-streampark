@@ -987,16 +987,17 @@
                                                                                width="100%">
                                                                             <tbody>
                                                                             <tr>
-                                                                                <td style="border: 0 none transparent; text-align: center; font-family: Arial, Helvetica, sans-serif; font-size: 1em; padding: 15px 40px; font-weight: bold; background-color: rgb(243, 156, 18);"
-                                                                                    class="bmeButtonText">
+                                                                                <#if mail.link??>
+                                                                                    <td style="border: 0 none transparent; text-align: center; font-family: Arial, Helvetica, sans-serif; font-size: 1em; padding: 15px 40px; font-weight: bold; background-color: rgb(243, 156, 18);"
+                                                                                        class="bmeButtonText">
                                                                                             <span style="font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 1em; color: rgb(255, 255, 255);">
                                                                                                 <a href="${mail.link}"
                                                                                                    style="color:#FFFFFF;text-decoration:none;"
                                                                                                    target="_blank">Details</a>
                                                                                             </span>
-                                                                                </td>
-
-                                                                                <td width="10px"></td>
+                                                                                    </td>
+                                                                                    <td width="10px"></td>
+                                                                                </#if>
 
                                                                                 <td style="border: 0 none transparent; text-align: center; font-family: Arial, Helvetica, sans-serif; font-size: 1em; padding: 15px 40px; font-weight: bold; background-color: #1890ff;"
                                                                                     class="bmeButtonText">

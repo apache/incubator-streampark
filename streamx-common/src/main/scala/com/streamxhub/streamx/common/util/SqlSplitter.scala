@@ -18,7 +18,8 @@
  */
 package com.streamxhub.streamx.common.util
 
-import scala.collection.mutable.ListBuffer
+import java.util.Scanner
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.control.Breaks._
 
 /**
@@ -50,7 +51,7 @@ object SqlSplitter {
    * @param sql
    * @return
    */
-  def splitSql(sql: String): List[String] = {
+  def splitSql(sql: String): List[(Int, Int, String)] = {
     val queries = ListBuffer[String]()
     val lastIndex = if (sql != null && sql.nonEmpty) sql.length - 1 else 0
     var query = new StringBuilder
@@ -59,8 +60,35 @@ object SqlSplitter {
     var singleLineComment = false
     var singleQuoteString = false
     var doubleQuoteString = false
+    var lineNum: Int = 0
+    val lineNumMap = new collection.mutable.HashMap[Int, (Int, Int)]()
+
+    val scanner = new Scanner(sql)
+    val lineNotEmpty = new collection.mutable.HashMap[Int, Boolean]
+    var count = 0
+    while (scanner.hasNextLine) {
+      count += 1
+      val line = scanner.nextLine()
+      val nonEmpty = line.trim.nonEmpty || !line.trim.startsWith("--")
+      lineNotEmpty += count -> nonEmpty
+    }
+
+    def findStartLine(num: Int): Int = if (lineNotEmpty(num)) num else findStartLine(num + 1)
+
+    def markLineNumber(): Unit = {
+      if (lineNumMap.isEmpty) {
+        lineNumMap += (0 -> (1 -> lineNum))
+      } else {
+        val index = lineNumMap.size
+        val start = lineNumMap(lineNumMap.size - 1)._2 + 1
+        lineNumMap += (index -> (findStartLine(start) -> lineNum))
+      }
+    }
 
     for (idx <- 0 until sql.length) {
+
+      if (sql.charAt(idx) == '\n') lineNum += 1
+
       breakable {
         val ch = sql.charAt(idx)
 
@@ -110,12 +138,15 @@ object SqlSplitter {
         }
 
         if (ch == ';' && !singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment) {
+          markLineNumber()
           // meet the end of semicolon
           if (query.toString.trim.nonEmpty) {
             queries += query.toString
             query = new StringBuilder
           }
         } else if (idx == lastIndex) {
+          markLineNumber()
+
           // meet the last character
           if (!singleLineComment && !multiLineComment) {
             query += ch
@@ -134,7 +165,7 @@ object SqlSplitter {
       }
     }
 
-    val refinedQueries = ListBuffer[String]()
+    val refinedQueries = new collection.mutable.HashMap[Int, String]()
     for (i <- queries.indices) {
       val currStatement = queries(i)
       if (isSingleLineComment(currStatement) || isMultipleLineComment(currStatement)) {
@@ -150,10 +181,15 @@ object SqlSplitter {
         }
         // add some blank lines before the statement to keep the original line number
         val refinedQuery = linesPlaceholder + currStatement
-        refinedQueries += refinedQuery
+        refinedQueries += refinedQueries.size -> refinedQuery
       }
     }
-    refinedQueries.toList
+    val list = new ArrayBuffer[(Int, Int, String)]()
+    refinedQueries.foreach(x => {
+      val line = lineNumMap(x._1)
+      list += Tuple3(line._1, line._2, x._2)
+    })
+    list.toList
   }
 
 

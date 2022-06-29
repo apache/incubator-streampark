@@ -254,23 +254,6 @@ object ConfigConst {
   val KEY_INFLUX_FLUSH_DURATION = "flush.duration"
 
   /**
-   * about config doris
-   */
-  val DORIS_SINK_PREFIX = "doris.sink"
-  val DORIS_FENODES = "fenodes"
-  val DORIS_DATABASE = "database"
-  val DORIS_TABLE = "table"
-  val DORIS_USER = "user"
-  val DORIS_PASSWORD = "password"
-  val DORIS_BATCHSIZE = "batchSize"
-  val DORIS_DEFAULT_BATCHSIZE = "100"
-  val DORIS_INTERVALMS = "intervalMs"
-  val DORIS_DEFAULT_INTERVALMS = "3000"
-  val DORIS_MAXRETRIES = "maxRetries"
-  val DORIS_DEFAULT_MAXRETRIES = "1"
-  val DORIS_STREAM_LOAD_PROP_PREFIX = "streamLoad."
-
-  /**
    * flink config key
    */
   val KEY_FLINK_APPLICATION_ARGS = "$internal.application.program-args"
