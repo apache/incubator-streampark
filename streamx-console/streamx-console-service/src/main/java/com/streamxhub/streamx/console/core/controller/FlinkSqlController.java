@@ -19,7 +19,6 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
-import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.core.entity.Application;
