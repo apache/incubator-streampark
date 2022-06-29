@@ -25,7 +25,6 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.SpringTemplateLoader;
 
 import java.io.IOException;
@@ -36,7 +35,6 @@ import java.io.StringWriter;
  * @date 2022.01.17
  */
 @Slf4j
-@Component
 public class FreemarkerUtils  {
     private static final Configuration CONFIGURATION;
 
