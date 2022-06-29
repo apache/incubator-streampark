@@ -22,7 +22,9 @@ metadata:
   labels:
   {{- include "streamx.labels" . | nindent 4 }}
   annotations:
-  {{- toYaml . | nindent 4 }}
+    nginx.ingress.kubernetes.io/configuration-snippet: {{ .Values.nginx.ingress.kubernetes.configurationSnippet }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.nginx.ingress.kubernetes.proxyBbodySize }}
+    nginx.ingress.kubernetes.io/rewrite-target: {{ .Values.nginx.ingress.kubernetes.rewriteTarget }}
 spec:
   rules:
     - host: {{ .Values.ingress.host }}

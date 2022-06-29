@@ -60,7 +60,7 @@ app.kubernetes.io/name: {{ include "streamx.name" . }}
 Create the name of the operator service account to use
 */}}
 {{- define "streamx.serviceAccountName" -}}
-{{- if .Values.operatorServiceAccount.create }}
+{{- if .Values.streamxServiceAccount.create }}
 {{- default (include "streamx.fullname" .) .Values.streamxServiceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}

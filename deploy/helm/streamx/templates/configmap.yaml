@@ -23,18 +23,39 @@ metadata:
   labels:
   {{- include "streamx.labels" . | nindent 4 }}
 data:
-  application.yaml: |+
-    {{- if .Values.streamxDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/stremax-console-config/application.yaml"  | nindent 4 -}}
-    {{- end }}
-    {{- if index (.Values.streamxDefaultConfiguration) "application.yaml" }}
-    {{- index (.Values.streamxDefaultConfiguration) "application.yaml" | nindent 4 -}}
-  {{- end }}
+  application.yml: |+
+{{- if .Values.streamxDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streamx-console-config/application.yml"  | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.streamxDefaultConfiguration) "application.yml" }}
+    {{- index (.Values.streamxDefaultConfiguration) "application.yml" | nindent 4 -}}
+{{- end }}
   logback-spring.xml: |+
-    {{- if .Values.streamxDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/stremax-console-config/logback-spring.xml"  | nindent 4 -}}
-    {{- end }}
-    {{- if index (.Values.streamxDefaultConfiguration) "logback-spring.xml" }}
+{{- if .Values.streamxDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streamx-console-config/logback-spring.xml"  | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.streamxDefaultConfiguration) "logback-spring.xml" }}
     {{- index (.Values.streamxDefaultConfiguration) "logback-spring.xml" | nindent 4 -}}
-    {{- end }}
-    {{- end }}
+{{- end }}
+  kerberos.yml: |+
+{{- if .Values.streamxDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streamx-console-config/kerberos.yml"  | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.streamxDefaultConfiguration) "kerberos.yml" }}
+    {{- index (.Values.streamxDefaultConfiguration) "kerberos.yml" | nindent 4 -}}
+{{- end }}
+  spy.properties: |+
+{{- if .Values.streamxDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streamx-console-config/spy.properties"  | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.streamxDefaultConfiguration) "spy.properties" }}
+    {{- index (.Values.streamxDefaultConfiguration) "spy.properties" | nindent 4 -}}
+{{- end }}
+  ValidationMessages.properties: |+
+{{- if .Values.streamxDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streamx-console-config/ValidationMessages.properties"  | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.streamxDefaultConfiguration) "ValidationMessages.properties" }}
+    {{- index (.Values.streamxDefaultConfiguration) "ValidationMessages.properties" | nindent 4 -}}
+{{- end }}
+{{- end }}

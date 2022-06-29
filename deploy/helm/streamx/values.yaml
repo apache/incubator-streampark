@@ -14,11 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# When enabled RBAC is only created for said namespaces, otherwise it is done for the cluster scope.
+# watchNamespaces: ["streamx"]
+
 image:
   repository: "streamxhub/streamx"
   pullPolicy: "IfNotPresent"
   tag: "1.2.4"
   pullSecret: ""
+
+rbac:
+  create: false
 
 spec:
   replicaCount: 1
@@ -43,7 +50,7 @@ spec:
   #     cpu: "500m"
 
 ingress:
-  enabled: false
+  enabled: true
   host: "streamxhub.org"
   path: "/streamx"
   annotations: {}
@@ -63,6 +70,13 @@ streamxDefaultConfiguration:
   #   ...
 
 streamxServiceAccount:
-  create: true
+  create: false
   annotations: {}
   name: "streamx"
+
+nginx:
+  ingress:
+    kubernetes:
+      configurationSnippet: "rewrite ^(/streamx)$ $1/ permanent;"
+      proxyBbodySize: "1024m"
+      rewriteTarget: "/$2"

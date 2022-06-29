@@ -49,7 +49,7 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "streamx.serviceAccountName" . }}
       containers:
-        - image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion}}
+        - image: {{ .Values.image.repository }}:{{ .Values.image.tag}}
           name: {{ .Chart.Name }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -58,22 +58,29 @@ spec:
               protocol: TCP
           securityContext:
             privileged: false
-          command: ["bash","bin/startup.sh"]
+{{/*          command: ["bash","bin/startup.sh"]*/}}
+          command: ["bash","-c","while true; do sleep 3600; done"]
           volumeMounts:
             - name: volume-docker
               mountPath: /var/run/docker.sock
               readOnly: true
             - name: streamx-default-config-volume
-              mountPath: /opt/streamx/conf
+              mountPath: /streamx/conf
       volumes:
         - name: streamx-default-config-volume
           configMap:
-            name: streamx-default-config
+            name: streamx-console-config
             items:
-              - key: application.yaml
-                path: application.yaml
+              - key: application.yml
+                path: application.yml
               - key: logback-spring.xml
                 path: logback-spring.xml
+              - key: kerberos.yml
+                path: kerberos.yml
+              - key: spy.properties
+                path: spy.properties
+              - key: ValidationMessages.properties
+                path: ValidationMessages.properties
         - name: volume-docker
           hostPath:
             path: /var/run/docker.sock
