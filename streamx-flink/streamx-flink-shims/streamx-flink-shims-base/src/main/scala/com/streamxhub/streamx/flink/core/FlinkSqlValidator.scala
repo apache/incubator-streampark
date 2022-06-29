@@ -28,7 +28,7 @@ import org.apache.flink.sql.parser.validate.FlinkSqlConformance
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.table.api.{EnvironmentSettings, SqlParserException, ValidationException}
+import org.apache.flink.table.api.EnvironmentSettings
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 import org.apache.flink.table.planner.utils.TableConfigUtils
 
@@ -81,8 +81,8 @@ object FlinkSqlValidator extends Logger {
                 failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
                 lineStart = call.lineStart,
                 lineEnd = call.lineEnd,
-                exception = s"$args is not a valid table/sql config",
-                sql = sql.replaceFirst(";|$", ";")
+                sql = sql.replaceFirst(";|$", ";"),
+                exception = s"$args is not a valid table/sql config"
               )
             }
           }
@@ -116,8 +116,8 @@ object FlinkSqlValidator extends Logger {
                   lineEnd = call.lineEnd,
                   errorLine = if (call.lineStart > 1) call.lineStart + line.toInt else line.toInt,
                   errorColumn = column.toInt,
-                  exception = causedBy,
-                  sql = call.originSql
+                  sql = call.originSql,
+                  exception = causedBy
                 )
               } else {
                 return FlinkSqlValidationResult(
@@ -125,8 +125,8 @@ object FlinkSqlValidator extends Logger {
                   failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
                   lineStart = call.lineStart,
                   lineEnd = call.lineEnd,
-                  exception = causedBy,
-                  sql = call.originSql
+                  sql = call.originSql,
+                  exception = causedBy
                 )
               }
             case _ =>
