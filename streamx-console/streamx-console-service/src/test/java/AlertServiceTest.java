@@ -18,23 +18,29 @@
  */
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
-import com.streamxhub.streamx.console.core.entity.alert.DingTalkParams;
-import com.streamxhub.streamx.console.core.entity.alert.LarkParams;
-import com.streamxhub.streamx.console.core.entity.alert.WeComParams;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
+import com.streamxhub.streamx.console.core.entity.alert.*;
 import com.streamxhub.streamx.console.core.service.alert.impl.DingTalkAlertNotifyServiceImpl;
 import com.streamxhub.streamx.console.core.service.alert.impl.LarkAlertNotifyServiceImpl;
 import com.streamxhub.streamx.console.core.service.alert.impl.WeComAlertNotifyServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.net.util.Base64;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -94,10 +100,6 @@ public class AlertServiceTest {
         DingTalkParams dingTalkParams = new DingTalkParams();
         dingTalkParams.setToken("your_token");
         dingTalkParams.setContacts("175xxxx1234");
-        dingTalkParams.setSecretEnable(true);
-        dingTalkParams.setSecretToken("***");
-        dingTalkParams.setToken("***");
-        dingTalkParams.setContacts("130-0000-0000");
         dingTalkParams.setIsAtAll(true);
 
         params.setAlertType(2);

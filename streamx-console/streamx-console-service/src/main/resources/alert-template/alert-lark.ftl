@@ -131,7 +131,7 @@
     {
       "tag": "action",
       "actions": [
-        {
+<#if link??>{
           "tag": "button",
           "text": {
             "tag": "plain_text",
@@ -139,7 +139,7 @@
           },
           "type": "primary",
           "url": "${link}"
-        },
+        },</#if>
         {
           "tag": "button",
           "text": {

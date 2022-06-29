@@ -152,8 +152,8 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
         try {
             String stringToSign = timestamp + "\n" + secret;
             Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
-            byte[] signData = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
+            mac.init(new SecretKeySpec(stringToSign.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] signData = mac.doFinal(new byte[]{});
             String sign = new String(Base64.encodeBase64(signData));
             if (log.isDebugEnabled()) {
                 log.debug("Calculate the signature success, sign:{}", sign);
