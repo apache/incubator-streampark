@@ -194,7 +194,7 @@ export function syntaxError(vue) {
                     break
                 }
             }
-            //清空
+
             monaco.editor.setModelMarkers(model, 'sql', [{
                     startLineNumber: startLineNumber,
                     endLineNumber: endLineNumber + 1,

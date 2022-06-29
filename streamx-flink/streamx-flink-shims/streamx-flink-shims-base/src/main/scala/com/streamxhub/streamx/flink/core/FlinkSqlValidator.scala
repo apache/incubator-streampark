@@ -40,6 +40,8 @@ object FlinkSqlValidator extends Logger {
 
   private[this] val FLINK113_CALCITE_PARSER_CLASS = "org.apache.flink.table.planner.parse.CalciteParser"
 
+  private[this] val SYNTAX_ERROR_REGEXP = ".*at\\sline\\s(\\d+),\\scolumn\\s(\\d+).*".r
+
   private[this] lazy val sqlParserConfig = {
     val tableConfig = StreamTableEnvironment.create(
       StreamExecutionEnvironment.getExecutionEnvironment,
@@ -75,11 +77,11 @@ object FlinkSqlValidator extends Logger {
           if (!FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
             if (command == RESET && "ALL" != args) {
               return FlinkSqlValidationResult(
-                false,
-                FlinkSqlValidationFailedType.VERIFY_FAILED,
+                success = false,
+                failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
+                lineStart = call.lineStart,
+                lineEnd = call.lineEnd,
                 exception = s"$args is not a valid table/sql config",
-                call.lineStart,
-                call.lineEnd,
                 sql = sql.replaceFirst(";|$", ";")
               )
             }
@@ -103,43 +105,40 @@ object FlinkSqlValidator extends Logger {
           } match {
             case Failure(e) =>
               val exception = ExceptionUtils.stringifyException(e)
+              val causedBy = exception.drop(exception.indexOf("Caused by:"))
               val cleanUpError = exception.replaceAll("[\r\n]", "")
-              val regexp = "(.*?)at\\sline\\s(\\d+),\\scolumn\\s(\\d+).*"
-              if (cleanUpError.matches(regexp)) {
-                val lineColumn = cleanUpError
-                  .replaceAll("^.*\\sat\\sline\\s", "")
-                  .replaceAll(",\\scolumn\\s", ",")
-                  .replaceAll("\\.(.*)", "")
-                  .trim()
-                  .split(",")
+              if (SYNTAX_ERROR_REGEXP.findAllMatchIn(cleanUpError).nonEmpty) {
+                val SYNTAX_ERROR_REGEXP(line, column) = cleanUpError
                 return FlinkSqlValidationResult(
-                  false,
-                  FlinkSqlValidationFailedType.SYNTAX_ERROR,
-                  ExceptionUtils.stringifyException(e),
-                  call.lineStart + lineColumn(0).toInt,
-                  lineColumn(0).toInt,
-                  call.originSql
+                  success = false,
+                  failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
+                  lineStart = call.lineStart,
+                  lineEnd = call.lineEnd,
+                  errorLine = if (call.lineStart > 1) call.lineStart + line.toInt else line.toInt,
+                  errorColumn = column.toInt,
+                  exception = causedBy,
+                  sql = call.originSql
                 )
               } else {
                 return FlinkSqlValidationResult(
-                  false,
-                  FlinkSqlValidationFailedType.SYNTAX_ERROR,
-                  exception,
-                  call.lineStart,
-                  call.lineEnd,
-                  call.originSql
+                  success = false,
+                  failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
+                  lineStart = call.lineStart,
+                  lineEnd = call.lineEnd,
+                  exception = causedBy,
+                  sql = call.originSql
                 )
               }
             case _ =>
           }
         case _ =>
           return FlinkSqlValidationResult(
-            false,
-            FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
-            s"unsupported sql: ${call.originSql}",
-            call.lineStart,
-            call.lineEnd,
-            sql = sql.replaceFirst(";|$", ";")
+            success = false,
+            failedType = FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
+            lineStart = call.lineStart,
+            lineEnd = call.lineEnd,
+            sql = sql.replaceFirst(";|$", ";"),
+            exception = s"unsupported sql: ${call.originSql}"
           )
       }
     }

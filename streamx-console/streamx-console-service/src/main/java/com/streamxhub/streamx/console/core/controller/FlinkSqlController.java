@@ -66,14 +66,14 @@ public class FlinkSqlController {
                 .data(false)
                 .message(exception)
                 .put("type", flinkSqlValidationResult.failedType().getValue())
-                .put("start", flinkSqlValidationResult.errorLineStart())
-                .put("end", flinkSqlValidationResult.errorLineEnd());
+                .put("start", flinkSqlValidationResult.lineStart())
+                .put("end", flinkSqlValidationResult.lineEnd());
             //语法异常
             if (flinkSqlValidationResult.failedType().equals(FlinkSqlValidationFailedType.SYNTAX_ERROR)) {
                 //记录第几行出错.
                 response
-                    .put("line", flinkSqlValidationResult.errorLineStart())
-                    .put("column ", flinkSqlValidationResult.errorLineEnd());
+                    .put("line", flinkSqlValidationResult.errorLine())
+                    .put("column ", flinkSqlValidationResult.errorColumn());
             }
             return response;
         } else {

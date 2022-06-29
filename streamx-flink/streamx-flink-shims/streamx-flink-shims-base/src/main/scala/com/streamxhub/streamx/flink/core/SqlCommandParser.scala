@@ -21,7 +21,6 @@ package com.streamxhub.streamx.flink.core
 import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType
 import com.streamxhub.streamx.common.util.{Logger, SqlSplitter}
 import enumeratum.EnumEntry
-import org.apache.flink.table.api.ValidationException
 
 import java.util.regex.{Matcher, Pattern}
 import java.lang.{Boolean => JavaBool}
@@ -40,9 +39,9 @@ object SqlCommandParser extends Logger {
         if (validationCallback != null) {
           validationCallback(
             FlinkSqlValidationResult(
-              false,
-              FlinkSqlValidationFailedType.VERIFY_FAILED,
-              sqlEmptyError
+              success = false,
+              failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
+              exception = sqlEmptyError
             )
           )
           null
@@ -58,11 +57,11 @@ object SqlCommandParser extends Logger {
               if (validationCallback != null) {
                 validationCallback(
                   FlinkSqlValidationResult(
-                    false,
-                    FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
-                    s"unsupported sql",
-                    stmt._1,
-                    stmt._2,
+                    success = false,
+                    failedType = FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
+                    lineStart = stmt._1,
+                    lineEnd = stmt._2,
+                    exception = s"unsupported sql",
                     sql = stmt._3
                   )
                 )
@@ -77,9 +76,9 @@ object SqlCommandParser extends Logger {
             if (validationCallback != null) {
               validationCallback(
                 FlinkSqlValidationResult(
-                  false,
-                  FlinkSqlValidationFailedType.VERIFY_FAILED,
-                  "flink sql syntax error, no executable sql"
+                  success = false,
+                  failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
+                  exception = "flink sql syntax error, no executable sql"
                 )
               )
               null
@@ -415,7 +414,10 @@ case class SqlCommandCall(lineStart: Int,
 
 case class FlinkSqlValidationResult(success: JavaBool = true,
                                     failedType: FlinkSqlValidationFailedType = null,
-                                    exception: String = null,
-                                    errorLineStart: Int = 0,
-                                    errorLineEnd: Int = 0,
-                                    sql: String = null)
+                                    lineStart: Int = 0,
+                                    lineEnd: Int = 0,
+                                    errorLine: Int = 0,
+                                    errorColumn: Int = 0,
+                                    sql: String = null,
+                                    exception: String = null
+                                   )
