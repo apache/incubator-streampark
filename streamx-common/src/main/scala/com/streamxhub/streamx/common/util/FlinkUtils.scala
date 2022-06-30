@@ -18,19 +18,14 @@
  */
 package com.streamxhub.streamx.common.util
 
+import java.io.File
+
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.FunctionInitializationContext
-import java.io.File
-import java.util.regex.{Matcher, Pattern}
-
-import org.apache.commons.lang3.StringUtils
-
-import scala.collection.mutable.ListBuffer
-
 
 object FlinkUtils {
-  private lazy val ENV_JAVA_OPTS_PATTERN = Pattern.compile("-Denv.java.opts\\s*=\\s*\".*\"")
 
   def getUnionListState[R: TypeInformation](context: FunctionInitializationContext, descriptorName: String): ListState[R] = {
     context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(descriptorName, implicitly[TypeInformation[R]].getTypeClass))
@@ -46,13 +41,11 @@ object FlinkUtils {
 
   def parseDynamicOptions(dynamicParams: String): Array[String] = {
     if (StringUtils.isBlank(dynamicParams)) Array.empty[String] else {
-      val matcher: Matcher = ENV_JAVA_OPTS_PATTERN.matcher(dynamicParams)
-      val buffer = ListBuffer[String]()
-      val parsedParams = if (!matcher.find) dynamicParams.trim else {
-        buffer += matcher.group.replace("\"", "")
-        dynamicParams.replace(matcher.group, "").trim
-      }
-      buffer.++=(parsedParams.split("\\s+")).toArray
+      dynamicParams
+        .replace("-D", "\u0001\u0002-D")
+        .split("\u0001\u0002")
+        .map(_.trim.replace("\"", ""))
+        .filter(!_.equals(""))
     }
   }
 
