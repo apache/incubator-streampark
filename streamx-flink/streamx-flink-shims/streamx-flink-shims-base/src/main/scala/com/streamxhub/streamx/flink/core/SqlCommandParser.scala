@@ -19,6 +19,7 @@
 package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType
+import com.streamxhub.streamx.common.util.SqlSplitter.SqlSegment
 import com.streamxhub.streamx.common.util.{Logger, SqlSplitter}
 import enumeratum.EnumEntry
 
@@ -33,9 +34,9 @@ object SqlCommandParser extends Logger {
   def parseSQL(sql: String, validationCallback: FlinkSqlValidationResult => Unit = null): List[SqlCommandCall] = {
     val sqlEmptyError = "verify failed: flink sql cannot be empty."
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
-    val lines = SqlSplitter.splitSql(sql)
-    lines match {
-      case stmts if stmts.isEmpty =>
+    val sqlSegments = SqlSplitter.splitSql(sql)
+    sqlSegments match {
+      case s if s.isEmpty =>
         if (validationCallback != null) {
           validationCallback(
             FlinkSqlValidationResult(
@@ -48,10 +49,10 @@ object SqlCommandParser extends Logger {
         } else {
           throw new IllegalArgumentException(sqlEmptyError)
         }
-      case stmts =>
+      case segments =>
         val calls = new ArrayBuffer[SqlCommandCall]
-        for (stmt <- stmts) {
-          parseLine(stmt) match {
+        for (segment <- segments) {
+          parseLine(segment) match {
             case Some(x) => calls += x
             case _ =>
               if (validationCallback != null) {
@@ -59,14 +60,14 @@ object SqlCommandParser extends Logger {
                   FlinkSqlValidationResult(
                     success = false,
                     failedType = FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
-                    lineStart = stmt._1,
-                    lineEnd = stmt._2,
+                    lineStart = segment.start,
+                    lineEnd = segment.end,
                     exception = s"unsupported sql",
-                    sql = stmt._3
+                    sql = segment.sql
                   )
                 )
               } else {
-                throw new UnsupportedOperationException(s"unsupported sql: $stmt")
+                throw new UnsupportedOperationException(s"unsupported sql: ${segment.sql}")
               }
           }
         }
@@ -90,17 +91,16 @@ object SqlCommandParser extends Logger {
     }
   }
 
-  private[this] def parseLine(sqlLine: (Int, Int, String)): Option[SqlCommandCall] = {
-    val stmt = sqlLine._3.trim
+  private[this] def parseLine(sqlSegment: SqlSegment): Option[SqlCommandCall] = {
     // parse
-    val sqlCommand = SqlCommand.get(stmt)
+    val sqlCommand = SqlCommand.get(sqlSegment.sql.trim)
     if (sqlCommand == null) None else {
       val matcher = sqlCommand.matcher
       val groups = new Array[String](matcher.groupCount)
       for (i <- groups.indices) {
         groups(i) = matcher.group(i + 1)
       }
-      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlLine._1, sqlLine._2, sqlCommand, x, sqlLine._3.trim))
+      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlSegment.start, sqlSegment.end, sqlCommand, x, sqlSegment.sql.trim))
     }
   }
 

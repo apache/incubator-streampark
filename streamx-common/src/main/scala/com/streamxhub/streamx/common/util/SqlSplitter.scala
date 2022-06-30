@@ -19,7 +19,8 @@
 package com.streamxhub.streamx.common.util
 
 import java.util.Scanner
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
 
 /**
@@ -51,7 +52,7 @@ object SqlSplitter {
    * @param sql
    * @return
    */
-  def splitSql(sql: String): List[(Int, Int, String)] = {
+  def splitSql(sql: String): Set[SqlSegment] = {
     val queries = ListBuffer[String]()
     val lastIndex = if (sql != null && sql.nonEmpty) sql.length - 1 else 0
     var query = new StringBuilder
@@ -63,25 +64,43 @@ object SqlSplitter {
     var lineNum: Int = 0
     val lineNumMap = new collection.mutable.HashMap[Int, (Int, Int)]()
 
-    val scanner = new Scanner(sql)
-    val lineNotEmpty = new collection.mutable.HashMap[Int, Boolean]
-    var count = 0
-    while (scanner.hasNextLine) {
-      count += 1
-      val line = scanner.nextLine()
-      val nonEmpty = line.trim.nonEmpty || !line.trim.startsWith("--")
-      lineNotEmpty += count -> nonEmpty
+    // Whether each line of the record is empty. If it is empty, it is false. If it is not empty, it is true
+    val lineDescriptor = {
+      val scanner = new Scanner(sql)
+      val descriptor = new collection.mutable.HashMap[Int, Boolean]
+      var lineNumber = 0
+      var startComment = false
+      var hasComment = false
+
+      while (scanner.hasNextLine) {
+        lineNumber += 1
+        val line = scanner.nextLine().trim
+        val nonEmpty = line.nonEmpty && !line.startsWith("--")
+        if (line.startsWith("/*")) {
+          startComment = true
+          hasComment = true
+        }
+
+        descriptor += lineNumber -> (nonEmpty && !hasComment)
+
+        if (startComment && line.endsWith("*/")) {
+          startComment = false
+          hasComment = false
+        }
+      }
+      descriptor
     }
 
-    def findStartLine(num: Int): Int = if (lineNotEmpty(num)) num else findStartLine(num + 1)
+    def findStartLine(num: Int): Int = if (lineDescriptor(num)) num else findStartLine(num + 1)
 
     def markLineNumber(): Unit = {
+      val line = lineNum + 1
       if (lineNumMap.isEmpty) {
-        lineNumMap += (0 -> (1 -> lineNum))
+        lineNumMap += (0 -> (findStartLine(1) -> line))
       } else {
         val index = lineNumMap.size
         val start = lineNumMap(lineNumMap.size - 1)._2 + 1
-        lineNumMap += (index -> (findStartLine(start) -> lineNum))
+        lineNumMap += (index -> (findStartLine(start) -> line))
       }
     }
 
@@ -184,12 +203,17 @@ object SqlSplitter {
         refinedQueries += refinedQueries.size -> refinedQuery
       }
     }
-    val list = new ArrayBuffer[(Int, Int, String)]()
+
+    implicit object SqlOrdering extends Ordering[SqlSegment] {
+      override def compare(x: SqlSegment, y: SqlSegment): Int = x.start - y.start
+    }
+
+    val set = new mutable.TreeSet[SqlSegment]
     refinedQueries.foreach(x => {
       val line = lineNumMap(x._1)
-      list += Tuple3(line._1, line._2, x._2)
+      set += SqlSegment(line._1, line._2, x._2)
     })
-    list.toList
+    set.toSet
   }
 
 
@@ -236,5 +260,7 @@ object SqlSplitter {
     }
     flag
   }
+
+  case class SqlSegment(start: Int, end: Int, sql: String)
 
 }

@@ -114,7 +114,7 @@ object FlinkSqlValidator extends Logger {
                   failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
                   lineStart = call.lineStart,
                   lineEnd = call.lineEnd,
-                  errorLine = if (call.lineStart > 1) call.lineStart + line.toInt else line.toInt,
+                  errorLine = call.lineStart + line.toInt - 1,
                   errorColumn = column.toInt,
                   sql = call.originSql,
                   exception = causedBy
