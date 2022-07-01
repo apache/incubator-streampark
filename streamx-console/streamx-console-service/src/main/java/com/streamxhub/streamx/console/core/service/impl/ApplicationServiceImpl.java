@@ -34,7 +34,6 @@ import com.streamxhub.streamx.common.fs.HdfsOperator;
 import com.streamxhub.streamx.common.util.CompletableFutureUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
-import com.streamxhub.streamx.common.util.FlinkUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
@@ -1143,7 +1142,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             throw new UnsupportedOperationException("Unsupported...");
         }
 
-        String[] dynamicOption = FlinkUtils.parseDynamicOptions(application.getDynamicOptions());
+        Map<String, String> dynamicOption = FlinkSubmitter.extractDynamicOptionAsJava(application.getDynamicOptions());
 
         Map<String, Object> extraParameter = new HashMap<>(0);
         extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());

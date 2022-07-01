@@ -28,11 +28,11 @@ object DorisConfig {
 
   val JSON = "json"
 
-  def apply(properties: Properties = new Properties): DorisConfig =
-    new DorisConfig(properties)
+  def apply(properties: Properties = new Properties): DorisConfig = new DorisConfig(properties)
+
 }
 
-case class DorisConfig(parameters: Properties) {
+class DorisConfig(parameters: Properties) {
 
   val sinkOption: DorisSinkConfigOption = DorisSinkConfigOption(properties = parameters)
 
