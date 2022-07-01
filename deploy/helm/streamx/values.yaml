@@ -25,7 +25,7 @@ image:
   pullSecret: ""
 
 rbac:
-  create: false
+  create: true
 
 spec:
   replicaCount: 1
@@ -70,7 +70,7 @@ streamxDefaultConfiguration:
   #   ...
 
 streamxServiceAccount:
-  create: false
+  create: true
   annotations: {}
   name: "streamx"
 

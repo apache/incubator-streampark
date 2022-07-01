@@ -44,29 +44,20 @@ docker-compose up -d
 ### Install Streamx
 #### Installing the Chart
 
-To install the chart with the release name my-release:
+To install the chart with the release name `streamx`:
 ```
-helm repo add 
-helm install my-streamx /streamx
+cd helm
+helm install streamx streamx/ 
 ```
-These commands deploy Streamx on the Kubernetes cluster in the default configuration. The Parameters section lists the parameters that can be configured during installation.
-
-    Tip: List all releases using helm list
-
-Uninstalling the Chart
-
-To uninstall/delete the my-release deployment:
-
-helm delete my-streamx
-
-The command removes all the Kubernetes components associated with the chart and deletes the release.
 
 #### Uninstalling the Chart
 
-To uninstall/delete the my-release deployment:
+To uninstall/delete the `streamx` deployment:
+
 ```
-helm delete my-streamx
+helm uninstall streamx
 ```
+
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
 ## Build Private Image
