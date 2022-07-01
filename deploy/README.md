@@ -15,7 +15,7 @@ After installed docker-compose, it is recommended to modify some configurations 
     Hyper-V mode: Click Docker Desktop -> Settings -> Resources -> Memory modified it
     WSL 2 mode: see WSL 2 utility VM for more detail.
 
-After complete the configuration, we can get the docker-compose.yaml file from download page form its source package, and make sure you get the right version. After download the package, you can run the commands as below.
+After complete the configuration, we can get the streamx file from download page form its source package, and make sure you get the right version. After download the package, you can run the commands as below.
 
 1.Environment build via mvn
 ```
