@@ -1996,7 +1996,7 @@
 
       handleEditPom(pom) {
         const pomString = toPomString(pom)
-        this.activeTab = 'pom'
+        this.controller.activeTab = 'pom'
         this.controller.editor.pom.getModel().setValue(pomString)
       },
 
