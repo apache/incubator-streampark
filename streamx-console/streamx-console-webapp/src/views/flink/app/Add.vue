@@ -1996,8 +1996,8 @@
 
       handleEditPom(pom) {
         const pomString = toPomString(pom)
-        this.activeTab = 'pom'
-        this.editor.pom.getModel().setValue(pomString)
+        this.controller.activeTab = 'pom'
+        this.controller.editor.pom.getModel().setValue(pomString)
       },
 
       handleBeforeUpload(file) {

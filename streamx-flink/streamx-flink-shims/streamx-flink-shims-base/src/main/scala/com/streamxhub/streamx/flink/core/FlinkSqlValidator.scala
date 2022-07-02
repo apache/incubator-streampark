@@ -109,15 +109,16 @@ object FlinkSqlValidator extends Logger {
               val cleanUpError = exception.replaceAll("[\r\n]", "")
               if (SYNTAX_ERROR_REGEXP.findAllMatchIn(cleanUpError).nonEmpty) {
                 val SYNTAX_ERROR_REGEXP(line, column) = cleanUpError
+                val errorLine = call.lineStart + line.toInt - 1
                 return FlinkSqlValidationResult(
                   success = false,
                   failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
                   lineStart = call.lineStart,
                   lineEnd = call.lineEnd,
-                  errorLine = call.lineStart + line.toInt - 1,
+                  errorLine = errorLine,
                   errorColumn = column.toInt,
                   sql = call.originSql,
-                  exception = causedBy
+                  exception = causedBy.replaceAll(s"at\\sline\\s$line", s"at line $errorLine")
                 )
               } else {
                 return FlinkSqlValidationResult(
