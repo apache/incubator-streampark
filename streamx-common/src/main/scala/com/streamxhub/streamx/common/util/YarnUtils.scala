@@ -113,9 +113,9 @@ object YarnUtils extends Logger {
    * @return
    * </pre>
    */
-  def getRMWebAppURL(): String = {
+  def getRMWebAppURL(proxy: Boolean = false): String = {
 
-    if (StringUtils.isNotBlank(PROXY_YARN_URL)) {
+    if (proxy && StringUtils.isNotBlank(PROXY_YARN_URL)) {
       return PROXY_YARN_URL
     }
 
