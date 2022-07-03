@@ -1208,6 +1208,10 @@ export default {
         dataIndex: 'flinkVersion',
         width: 120
       }, {
+        title: 'User',
+        dataIndex: 'nickName',
+        width: 120
+      }, {
         title: 'Start Time',
         dataIndex: 'startTime',
         sorter: true,
