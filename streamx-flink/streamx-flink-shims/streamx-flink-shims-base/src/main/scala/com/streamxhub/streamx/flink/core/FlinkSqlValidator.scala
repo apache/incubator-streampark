@@ -98,7 +98,6 @@ object FlinkSqlValidator extends Logger {
           EXPLAIN | DESC | DESCRIBE =>
           Try {
             val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_CALCITE_PARSER_CLASS))
-            sqlParserConfigMap(sqlDialect.toUpperCase())
             sqlDialect.toUpperCase() match {
               case "HIVE" | "DEFAULT" =>
               case _ =>
