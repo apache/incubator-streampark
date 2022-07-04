@@ -388,7 +388,8 @@ public class ApplBuildPipeServiceImpl
                                 settingService.getDockerRegisterNamespace(),
                                 settingService.getDockerRegisterUser(),
                                 settingService.getDockerRegisterPassword()
-                        )
+                        ),
+                    app.getIngressTemplate()
                 );
                 log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
                 return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);

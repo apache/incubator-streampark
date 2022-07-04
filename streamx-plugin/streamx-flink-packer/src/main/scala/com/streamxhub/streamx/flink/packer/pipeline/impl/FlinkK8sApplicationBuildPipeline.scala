@@ -30,6 +30,8 @@ import com.streamxhub.streamx.flink.packer.docker._
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline.executor
 import com.streamxhub.streamx.flink.packer.pipeline._
+import org.apache.commons.lang3.StringUtils
+import com.streamxhub.streamx.flink.kubernetes.network.IngressTool
 
 import java.io.File
 import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
@@ -190,6 +192,19 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
           logInfo(s"already pushed docker image, imageTag=$pushImageTag")
       }(err => throw new Exception(s"push docker image failed. tag=${pushImageTag}", err))
     }.getOrElse(throw getError.exception)
+
+    // Step-8:  init build workspace of ingress
+    val ingressOutputPath = request.ingressTemplate match {
+      case ingress if StringUtils.isBlank(ingress) =>
+        skipStep(8)
+        ""
+      case _ =>
+        execStep(8) {
+          val ingressOutputPath = IngressTool.prepareIngressTemplateFiles(buildWorkspace, request.ingressTemplate)
+          logInfo(s"export flink ingress: ${ingressOutputPath}")
+          ingressOutputPath
+        }.getOrElse(throw getError.exception)
+    }
 
     DockerImageBuildResponse(buildWorkspace, pushImageTag, podTemplatePaths, dockerFileTemplate.innerMainJarPath)
   }

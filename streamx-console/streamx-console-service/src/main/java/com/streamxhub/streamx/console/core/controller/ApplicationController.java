@@ -92,6 +92,7 @@ public class ApplicationController {
     @PostMapping("create")
     @RequiresPermissions("app:create")
     public RestResponse create(Application app) throws IOException {
+        app.setDefaultModeIngress("flink.ziroom.com");
         boolean saved = applicationService.create(app);
         return RestResponse.create().data(saved);
     }
