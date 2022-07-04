@@ -268,6 +268,7 @@ public class Application implements Serializable {
     private transient Boolean backUp = false;
     private transient Boolean restart = false;
     private transient String userName;
+    private transient String nickName;
     private transient String config;
     private transient Long configId;
     private transient String flinkVersion;
