@@ -79,6 +79,7 @@ object YarnSessionSubmit extends YarnSubmitTrait {
     val providedLibs = {
       val array = ListBuffer(
         deployRequest.hdfsWorkspace.flinkLib,
+        deployRequest.hdfsWorkspace.flinkPlugins,
         deployRequest.hdfsWorkspace.appJars,
         deployRequest.hdfsWorkspace.appPlugins
       )
