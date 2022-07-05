@@ -34,6 +34,7 @@ import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.service.SettingService;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -44,7 +45,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Objects;
@@ -131,7 +134,7 @@ public class EnvInitializer implements ApplicationRunner {
     /**
      * @param storageType
      */
-    public synchronized void storageInitialize(StorageType storageType) {
+    public synchronized void storageInitialize(StorageType storageType) throws IOException {
         if (initialized.get(storageType) == null) {
             FsOperator fsOperator = FsOperator.of(storageType);
             Workspace workspace = Workspace.of(storageType);
@@ -177,39 +180,32 @@ public class EnvInitializer implements ApplicationRunner {
             String keepFile = ".gitkeep";
 
             String appClient = workspace.APP_CLIENT();
-            if (fsOperator.exists(appClient)) {
-                fsOperator.delete(appClient);
+            if (!fsOperator.exists(appClient)) {
+                fsOperator.mkdirs(appClient);
             }
-            fsOperator.mkdirs(appClient);
 
             File client = WebUtils.getAppClientDir();
             for (File file : Objects.requireNonNull(client.listFiles())) {
                 String plugin = appClient.concat("/").concat(file.getName());
-                if (!fsOperator.exists(plugin) && !keepFile.equals(file.getName())) {
-                    log.info("load client:{} to {}", file.getName(), appClient);
-                    fsOperator.upload(file.getAbsolutePath(), appClient);
+                if (!keepFile.equals(file.getName())) {
+                    checkOrElseUploadJar(fsOperator, file, plugin, appClient);
                 }
             }
 
             String appPlugins = workspace.APP_PLUGINS();
-            if (fsOperator.exists(appPlugins)) {
-                fsOperator.delete(appPlugins);
+            if (!fsOperator.exists(appPlugins)) {
+                fsOperator.mkdirs(appPlugins);
             }
-            fsOperator.mkdirs(appPlugins);
 
             File plugins = WebUtils.getAppPluginsDir();
             for (File file : Objects.requireNonNull(plugins.listFiles())) {
                 String plugin = appPlugins.concat("/").concat(file.getName());
-                if (!fsOperator.exists(plugin) && !keepFile.equals(file.getName())) {
-                    log.info("load plugin:{} to {}", file.getName(), appPlugins);
-                    fsOperator.upload(file.getAbsolutePath(), appPlugins);
+                if (!keepFile.equals(file.getName())) {
+                    checkOrElseUploadJar(fsOperator, file, plugin, appPlugins);
                 }
             }
 
             String appShims = workspace.APP_SHIMS();
-            if (fsOperator.exists(appShims)) {
-                fsOperator.delete(appShims);
-            }
 
             File[] shims = WebUtils.getAppLibDir().listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
             for (File file : Objects.requireNonNull(shims)) {
@@ -220,8 +216,8 @@ public class EnvInitializer implements ApplicationRunner {
                     if (!fsOperator.exists(shimsPath)) {
                         fsOperator.mkdirs(shimsPath);
                     }
-                    log.info("load shims:{} to {}", file.getName(), shimsPath);
-                    fsOperator.upload(file.getAbsolutePath(), shimsPath);
+                    String targetJar = shimsPath.concat("/").concat(file.getName());
+                    checkOrElseUploadJar(fsOperator, file, targetJar, shimsPath);
                 }
             }
             // create maven local repository dir
@@ -230,6 +226,27 @@ public class EnvInitializer implements ApplicationRunner {
                 FsOperator.lfs().mkdirs(localMavenRepo);
             }
             initialized.put(storageType, Boolean.TRUE);
+        }
+    }
+
+    private void checkOrElseUploadJar(FsOperator fsOperator, File localJar, String targetJar, String targetDir) throws IOException {
+        //1)文件不存直接上传
+        if (!fsOperator.exists(targetJar)) {
+            log.info("load jar:{} to {}", localJar.getName(), targetDir);
+            fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
+        } else {
+            //2) 文件已经存在则检查md5是否一致.不一致则重新上传
+            try (InputStream inputStream = new FileInputStream(localJar)) {
+                String md5 = DigestUtils.md5Hex(inputStream);
+                //2) md5不一致,则需重新上传.将本地temp/下的文件上传到upload目录下
+                if (!md5.equals(fsOperator.fileMd5(targetJar))) {
+                    log.info("load jar:{} to {}", localJar.getName(), targetDir);
+                    fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
+                }
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+                throw e;
+            }
         }
     }
 
