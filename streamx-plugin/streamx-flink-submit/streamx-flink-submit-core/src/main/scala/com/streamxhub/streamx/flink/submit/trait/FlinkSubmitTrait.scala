@@ -265,7 +265,7 @@ trait FlinkSubmitTrait extends Logger {
 
       Seq("-e", "--executor", "-t", "--target").foreach(optionMap.remove)
       if (submitRequest.executionMode != null) {
-        optionMap += "t" -> submitRequest.executionMode.getName
+        optionMap += "-t" -> submitRequest.executionMode.getName
       }
 
       val array = new ArrayBuffer[String]()
