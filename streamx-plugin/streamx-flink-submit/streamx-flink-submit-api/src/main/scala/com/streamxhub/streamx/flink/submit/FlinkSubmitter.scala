@@ -111,6 +111,5 @@ object FlinkSubmitter extends Logger {
     }
   }
 
-  @Nonnull def extractDynamicOptionAsJava(dynamicOptions: String): JavaMap[String, String] = new util.HashMap[String, String](extractDynamicOption(dynamicOptions).asJava)
-
+  @Nonnull def extractDynamicOptionAsJava(dynamicOptions: String): JavaMap[String, String] = extractDynamicOption(dynamicOptions).asJava
 }
