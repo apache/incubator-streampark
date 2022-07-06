@@ -74,5 +74,24 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     }
   }
 
+  def equals(file1: File, file2: File): Boolean = {
+    (file1, file2) match {
+      case (a, b) if a == null || b == null => false
+      case (a, b) if !a.exists() || !b.exists() => false
+      case (a, b) if a == b => true
+      case (a, b) =>
+        val in1 = new BufferedInputStream(new FileInputStream(a))
+        val in2 = new BufferedInputStream(new FileInputStream(b))
+        var c = 0
+        while ((c = in1.read) != -1) {
+          if (in2.read != c) {
+            Utils.close(in1, in2)
+            return false
+          }
+        }
+        Utils.close(in1, in2)
+        true
+    }
+  }
 
 }
