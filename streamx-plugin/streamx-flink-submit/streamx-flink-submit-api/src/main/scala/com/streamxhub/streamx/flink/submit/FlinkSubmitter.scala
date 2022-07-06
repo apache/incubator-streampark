@@ -23,6 +23,8 @@ import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.commons.lang3.StringUtils
+
+import java.util
 import java.util.regex.Pattern
 import java.util.{Map => JavaMap}
 import javax.annotation.Nonnull
@@ -109,6 +111,6 @@ object FlinkSubmitter extends Logger {
     }
   }
 
-  @Nonnull def extractDynamicOptionAsJava(dynamicOptions: String): JavaMap[String, String] = extractDynamicOption(dynamicOptions).asJava
+  @Nonnull def extractDynamicOptionAsJava(dynamicOptions: String): JavaMap[String, String] = new util.HashMap[String, String](extractDynamicOption(dynamicOptions).asJava)
 
 }
