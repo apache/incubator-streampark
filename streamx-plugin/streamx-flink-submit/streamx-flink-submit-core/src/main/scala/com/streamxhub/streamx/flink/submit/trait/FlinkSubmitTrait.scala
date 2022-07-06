@@ -277,15 +277,11 @@ trait FlinkSubmitTrait extends Logger {
         }
       })
 
-      //-jvm profile support
-      if (Utils.notEmpty(submitRequest.flameGraph)) {
+      //-jvm profile only on yarn support
+      if (Utils.notEmpty(submitRequest.flameGraph) && ExecutionMode.isYarnMode(submitRequest.executionMode)) {
         val buffer = new StringBuffer()
         submitRequest.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
         val param = buffer.toString.dropRight(1)
-
-        /**
-         * 不要问我javaagent路径为什么这么写,魔鬼在细节中.
-         */
         array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/$jvmProfilerJar=$param"
       }
 
