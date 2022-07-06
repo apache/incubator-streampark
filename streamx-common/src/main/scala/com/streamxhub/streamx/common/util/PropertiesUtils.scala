@@ -169,7 +169,7 @@ object PropertiesUtils extends Logger {
   def fromYamlFileAsJava(inputStream: InputStream): JavaMap[String, String] = new JavaMap[String, String](fromYamlFile(inputStream).asJava)
 
   /** Load properties present in the given file. */
-  def fromPropertiesFileAsJava(inputStream: InputStream): JavaMap[String, String] = fromPropertiesFileAsJava
+  def fromPropertiesFileAsJava(inputStream: InputStream): JavaMap[String, String] = new JavaMap[String, String](fromPropertiesFile(inputStream).asJava)
 
   /**
    *
