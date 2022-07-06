@@ -1208,26 +1208,9 @@ export default {
         dataIndex: 'flinkVersion',
         width: 120
       }, {
-        title: 'User',
+        title: 'Owner',
         dataIndex: 'nickName',
         width: 120
-      }, {
-        title: 'Start Time',
-        dataIndex: 'startTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
-        width: 180
-      }, {
-        title: 'Duration',
-        dataIndex: 'duration',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
-        scopedSlots: {customRender: 'duration'},
-        width: 150
-      }, {
-        title: 'Task',
-        dataIndex: 'task',
-        width: 100,
       }, {
         title: 'Run Status',
         dataIndex: 'state',
@@ -1254,6 +1237,23 @@ export default {
         dataIndex: 'launch',
         width: 250,
         scopedSlots: {customRender: 'launchState'}
+      }, {
+        title: 'Start Time',
+        dataIndex: 'startTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
+        width: 180
+      }, {
+        title: 'Duration',
+        dataIndex: 'duration',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
+        scopedSlots: {customRender: 'duration'},
+        width: 150
+      }, {
+        title: 'Task',
+        dataIndex: 'task',
+        width: 100,
       }, {
         dataIndex: 'operation',
         key: 'operation',

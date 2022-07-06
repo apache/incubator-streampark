@@ -24,6 +24,7 @@ import java.io._
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.{Properties, Scanner, HashMap => JavaMap, LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable.{Map => MutableMap}
 
 /**
@@ -154,6 +155,21 @@ object PropertiesUtils extends Logger {
     }
   }
 
+  def fromYamlTextAsJava(text: String): JavaMap[String, String] = new JavaMap[String, String](fromYamlText(text).asJava)
+
+  def fromPropertiesTextAsJava(conf: String): JavaMap[String, String] = new JavaMap[String, String](fromPropertiesText(conf).asJava)
+
+  /** Load Yaml present in the given file. */
+  def fromYamlFileAsJava(filename: String): JavaMap[String, String] = new JavaMap[String, String](fromYamlFile(filename).asJava)
+
+  /** Load properties present in the given file. */
+  def fromPropertiesFileAsJava(filename: String): JavaMap[String, String] = new JavaMap[String, String](fromPropertiesFile(filename).asJava)
+
+  /** Load Yaml present in the given file. */
+  def fromYamlFileAsJava(inputStream: InputStream): JavaMap[String, String] = new JavaMap[String, String](fromYamlFile(inputStream).asJava)
+
+  /** Load properties present in the given file. */
+  def fromPropertiesFileAsJava(inputStream: InputStream): JavaMap[String, String] = fromPropertiesFileAsJava
 
   /**
    *
