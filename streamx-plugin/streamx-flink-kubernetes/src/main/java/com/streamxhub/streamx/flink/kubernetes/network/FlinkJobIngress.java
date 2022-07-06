@@ -100,9 +100,6 @@ public class FlinkJobIngress {
             client.network().ingress().inNamespace(nameSpace).withName(ingressName).delete();
 
         }
-        //client.network().ingress().inNamespace(nameSpace).withName(ingressName).delete();
-
-
     }
 
     private static Boolean determineThePodSurvivalStatus(String name, String nameSpace){
