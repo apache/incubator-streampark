@@ -107,17 +107,17 @@ object YarnUtils extends Logger {
     }
   }
 
+  def getRMWebAppProxyURL: String = {
+    if (StringUtils.isNotBlank(PROXY_YARN_URL)) PROXY_YARN_URL else getRMWebAppURL()
+  }
+
   /**
    * <pre>
    *
    * @return
    * </pre>
    */
-  def getRMWebAppURL(proxy: Boolean = false): String = {
-
-    if (proxy && StringUtils.isNotBlank(PROXY_YARN_URL)) {
-      return PROXY_YARN_URL
-    }
+  def getRMWebAppURL(): String = {
 
     if (rmHttpURL == null) {
       synchronized {
