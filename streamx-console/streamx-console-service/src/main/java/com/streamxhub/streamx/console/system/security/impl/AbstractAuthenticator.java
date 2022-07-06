@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2019 The StreamX Project
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -6,7 +8,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,9 +29,8 @@ import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.security.Authenticator;
 import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserService;
+
 import org.apache.commons.lang3.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
@@ -38,7 +39,6 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class AbstractAuthenticator implements Authenticator {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractAuthenticator.class);
 
     @Autowired
     private UserService userService;
@@ -87,5 +87,4 @@ public abstract class AbstractAuthenticator implements Authenticator {
         userInfo.put("user", user);
         return userInfo;
     }
-
 }

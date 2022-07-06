@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2019 The StreamX Project
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -6,7 +8,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +21,8 @@ package com.streamxhub.streamx.console.system.security;
 
 import com.streamxhub.streamx.console.system.security.impl.ldap.LdapAuthenticator;
 import com.streamxhub.streamx.console.system.security.impl.pwd.PasswordAuthenticator;
-import org.apache.commons.lang.StringUtils;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SecurityConfig {
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Value("${security.authentication.type:PASSWORD}")
     private String type;
@@ -45,7 +48,7 @@ public class SecurityConfig {
 
     private void setAuthenticationType(String type) {
         if (StringUtils.isBlank(type)) {
-            logger.info("security.authentication.type configuration is empty, the default value 'PASSWORD'");
+            LOG.info("security.authentication.type configuration is empty, the default value 'PASSWORD'");
             this.authenticationType = AuthenticationType.PASSWORD;
             return;
         }
