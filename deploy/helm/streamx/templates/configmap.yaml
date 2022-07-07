@@ -1,0 +1,61 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- if .Values.streamxDefaultConfiguration.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: streamx-console-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "streamx.labels" . | nindent 4 }}
+data:
+  application.yml: |+
+{{- if .Values.streamxDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streamx-console-config/application.yml"  | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.streamxDefaultConfiguration) "application.yml" }}
+    {{- index (.Values.streamxDefaultConfiguration) "application.yml" | nindent 4 -}}
+{{- end }}
+  logback-spring.xml: |+
+{{- if .Values.streamxDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streamx-console-config/logback-spring.xml"  | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.streamxDefaultConfiguration) "logback-spring.xml" }}
+    {{- index (.Values.streamxDefaultConfiguration) "logback-spring.xml" | nindent 4 -}}
+{{- end }}
+  kerberos.yml: |+
+{{- if .Values.streamxDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streamx-console-config/kerberos.yml"  | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.streamxDefaultConfiguration) "kerberos.yml" }}
+    {{- index (.Values.streamxDefaultConfiguration) "kerberos.yml" | nindent 4 -}}
+{{- end }}
+  spy.properties: |+
+{{- if .Values.streamxDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streamx-console-config/spy.properties"  | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.streamxDefaultConfiguration) "spy.properties" }}
+    {{- index (.Values.streamxDefaultConfiguration) "spy.properties" | nindent 4 -}}
+{{- end }}
+  ValidationMessages.properties: |+
+{{- if .Values.streamxDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streamx-console-config/ValidationMessages.properties"  | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.streamxDefaultConfiguration) "ValidationMessages.properties" }}
+    {{- index (.Values.streamxDefaultConfiguration) "ValidationMessages.properties" | nindent 4 -}}
+{{- end }}
+{{- end }}

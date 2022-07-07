@@ -15,7 +15,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
-FROM maven:3.8.5-jdk-8
+FROM docker:dind
 WORKDIR /streamx
 COPY . /streamx
 
@@ -28,10 +28,16 @@ RUN sed -i -e 's/eval $NOHUP/eval/' bin/streamx.sh \
     && sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' bin/streamx.sh \
     && sed -i -e 's/localhost/'$DB'/' conf/application.yml
 
-RUN echo Y|apt-get update \
-    && echo Y|apt-get install iputils-ping \
-    && echo Y|apt-get install vim \
-    && echo Y|apt-get install net-tools
+RUN apk add openjdk8 \
+    && apk add maven \
+    && apk add wget \
+    && apk add vim \
+    && apk add bash
+
+ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
+ENV MAVEN_HOME=/usr/share/java/maven-3
+ENV PATH $JAVA_HOME/bin:$PATH
+ENV PATH $MAVEN_HOME/bin:$PATH
 
 RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
     && tar zxvf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
@@ -42,5 +48,3 @@ RUN mkdir -p ~/.kube \
     && cat plugins/config >> ~/.kube/config
 
 EXPOSE 10000
-ENTRYPOINT bash bin/startup.sh
-

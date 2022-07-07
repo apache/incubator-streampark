@@ -16,7 +16,7 @@
 #  limitations under the License.
 ###############################################################################
 FROM maven:3.8.5-jdk-8 as deps-stage
-COPY ../console /
+COPY . /
 WORKDIR /
 RUN tar zxvf streamx-console/streamx-console-service/target/streamx-console-service-*.tar.gz \
 && mv streamx-console-service-* streamx
