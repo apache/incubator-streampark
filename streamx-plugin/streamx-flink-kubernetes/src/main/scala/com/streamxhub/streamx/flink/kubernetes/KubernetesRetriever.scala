@@ -23,6 +23,7 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.tryWithResource
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
+import com.streamxhub.streamx.flink.kubernetes.network.FlinkJobIngress
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
 import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.{ClusterClientFactory, DefaultClusterClientServiceLoader}
@@ -126,12 +127,14 @@ object KubernetesRetriever extends Logger {
   /**
    * retrieve flink jobmanger rest url
    */
-  def retrieveFlinkRestUrl(clusterKey: ClusterKey): Option[String] = tryWithResource(
-    Try(KubernetesRetriever.newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode))
-      .getOrElse(return None)) {
-    client =>
-      val url = Try(client.getWebInterfaceURL).filter(_.nonEmpty).getOrElse(return None)
-      Some(url)
-  }
+  def retrieveFlinkRestUrl(clusterKey: ClusterKey): Option[String] = {
+    tryWithResource(
+      Try(KubernetesRetriever.newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode))
+        .getOrElse(return None)) {
+      client =>
+        val url = FlinkJobIngress.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
+        Some(url)
+    }
 
+  }
 }

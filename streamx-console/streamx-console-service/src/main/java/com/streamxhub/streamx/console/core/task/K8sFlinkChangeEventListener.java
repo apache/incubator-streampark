@@ -37,8 +37,8 @@ import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
-import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 import com.streamxhub.streamx.flink.kubernetes.network.FlinkJobIngress;
+import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;

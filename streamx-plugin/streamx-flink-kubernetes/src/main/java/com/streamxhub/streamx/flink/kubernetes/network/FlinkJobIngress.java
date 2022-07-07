@@ -21,9 +21,14 @@ package com.streamxhub.streamx.flink.kubernetes.network;
 
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.networking.v1beta1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import org.apache.flink.client.program.ClusterClient;
+import org.apache.flink.kubernetes.shaded.com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.flink.kubernetes.shaded.com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.flink.kubernetes.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
@@ -33,9 +38,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-/**
- * sdsd
- */
 public class FlinkJobIngress {
     public static void configureIngress(String domainName, String clusterId, String nameSpace)
             throws FileNotFoundException {
@@ -46,7 +48,7 @@ public class FlinkJobIngress {
             map.put("nginx.ingress.kubernetes.io/rewrite-target", "/$2");
             map.put("nginx.ingress.kubernetes.io/proxy-body-size", "1024m");
             map.put("nginx.ingress.kubernetes.io/configuration-snippet",
-                    "rewrite ^(/"+clusterId+")$ $1/ permanent;");
+                    "rewrite ^(/" + clusterId + ")$ $1/ permanent;");
             Map<String, String> map1 = new HashMap<>();
             map1.put("app", clusterId);
             map1.put("type", "flink-native-kubernetes");
@@ -84,7 +86,7 @@ public class FlinkJobIngress {
 
             client.network().ingress().inNamespace(nameSpace).create(ingress);
         }
-        }
+    }
 
     public static void configureIngress(String ingressOutput) throws FileNotFoundException {
         try (final KubernetesClient client = new DefaultKubernetesClient()) {
@@ -96,7 +98,7 @@ public class FlinkJobIngress {
 
     public static void deleteIngress(String ingressName, String nameSpace) {
         KubernetesClient client = new DefaultKubernetesClient();
-        if (determineThePodSurvivalStatus(ingressName,nameSpace)){
+        if (determineThePodSurvivalStatus(ingressName, nameSpace)){
             client.network().ingress().inNamespace(nameSpace).withName(ingressName).delete();
 
         }
@@ -124,10 +126,36 @@ public class FlinkJobIngress {
                 System.out.println(it.getStatus().getPhase());
             }
         }
-        if (cut>0){
-            return false;
-        }else{
-            return true;
+        return cut <= 0;
+    }
+
+    public static String ingressUrlAddress(String nameSpace, String clusterId, ClusterClient clusterClient) throws JsonProcessingException {
+        if (determineIfIngressExists(nameSpace, clusterId)){
+            KubernetesClient client = new DefaultKubernetesClient();
+            Ingress ingress = client.network().ingress().inNamespace(nameSpace).withName(clusterId).get();
+            String str = ingress.getMetadata().getAnnotations().get("field.cattle.io/publicEndpoints");
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<IgsMeta> ingressMetas = objectMapper.readValue(str, new TypeReference<List<IgsMeta>>(){});
+            String hostname = ingressMetas.get(0).hostname;
+            String path = ingressMetas.get(0).path;
+            String url = "https://" + hostname + path;
+            return url;
+        } else {
+            return clusterClient.getWebInterfaceURL();
         }
     }
+
+    public static Boolean determineIfIngressExists(String nameSpace, String clusterId){
+        try (KubernetesClient client = new DefaultKubernetesClient()){
+            client.extensions().ingresses()
+                .inNamespace(nameSpace)
+                .withName(clusterId)
+                .get().getMetadata().getName();
+        } catch (NullPointerException e){
+            return false;
+        }
+        return true;
+    }
+
 }
