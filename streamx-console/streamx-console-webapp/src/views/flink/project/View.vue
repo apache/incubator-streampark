@@ -299,8 +299,8 @@ export default {
 
     handleSearch (value) {
       this.paginationInfo = null
+      this.queryParams.name = value
       this.handleFetch({
-        name: value,
         ...this.queryParams
       }, true)
     },
