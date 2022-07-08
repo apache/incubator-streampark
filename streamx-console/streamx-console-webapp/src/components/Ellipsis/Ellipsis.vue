@@ -23,10 +23,6 @@ export default {
     tooltip: {
       type: Boolean
     },
-    placement: {
-      type: String,
-      default: 'top'
-    },
     length: {
       type: Number,
       required: true
@@ -46,9 +42,9 @@ export default {
         <span>{ cutStrByFullLength(str, this.length) + (fullLength > this.length ? '...' : '') }</span>
       )
     },
-    getTooltip (fullStr, fullLength, placement) {
+    getTooltip (fullStr, fullLength) {
       return (
-        <Tooltip placement={placement}>
+        <Tooltip>
           <template slot="title">{ fullStr }</template>
           { this.getStrDom(fullStr, fullLength) }
         </Tooltip>
@@ -56,10 +52,10 @@ export default {
     }
   },
   render () {
-    const { tooltip, length, placement } = this.$props
+    const { tooltip, length } = this.$props
     const str = this.$slots.default.map(vNode => vNode.text).join('')
     const fullLength = getStrFullLength(str)
-    const strDom = tooltip && fullLength > length ? this.getTooltip(str, fullLength, placement) : this.getStrDom(str, fullLength, placement)
+    const strDom = tooltip && fullLength > length ? this.getTooltip(str, fullLength) : this.getStrDom(str, fullLength)
     return (
       strDom
     )

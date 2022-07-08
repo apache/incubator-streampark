@@ -19,14 +19,13 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
-import com.streamxhub.streamx.common.enums.SqlErrorType;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.console.core.service.SqlCompleteService;
-import com.streamxhub.streamx.flink.core.SqlError;
+import com.streamxhub.streamx.flink.core.FlinkSqlValidationResult;
 
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -58,35 +57,21 @@ public class FlinkSqlController {
 
     @PostMapping("verify")
     public RestResponse verify(String sql, Long versionId) {
-        SqlError sqlError = flinkSqlService.verifySql(sql, versionId);
-        if (sqlError != null) {
-            String[] array = sqlError.sql().trim().split("\n");
-            String start = array[0].trim();
-            String end = array.length > 1 ? array[array.length - 1].trim() : null;
-
+        FlinkSqlValidationResult flinkSqlValidationResult = flinkSqlService.verifySql(sql, versionId);
+        if (!flinkSqlValidationResult.success()) {
             //记录错误类型,出错的sql,原因,错误的开始行和结束行内容(用于前端查找mod节点)
+            String exception = flinkSqlValidationResult.exception();
             RestResponse response = RestResponse.create()
                 .data(false)
-                .message(sqlError.exception())
-                .put("type", sqlError.errorType().getValue())
-                .put("start", start)
-                .put("end", end);
-            //语法异常
-            if (sqlError.errorType().equals(SqlErrorType.SYNTAX_ERROR)) {
-                String exception = sqlError.exception().replaceAll("[\r\n]", "");
-                String sqlParseFailedRegexp = "SQL\\sparse\\sfailed\\.\\sEncountered\\s\"(.*)\"\\sat\\sline\\s\\d,\\scolumn\\s\\d.*";
-                if (exception.matches(sqlParseFailedRegexp)) {
-                    String[] lineColumn = exception
-                        .replaceAll("^.*\\sat\\sline\\s", "")
-                        .replaceAll(",\\scolumn\\s", ",")
-                        .replaceAll("\\.(.*)", "")
-                        .trim()
-                        .split(",");
+                .message(exception)
+                .put("type", flinkSqlValidationResult.failedType().getValue())
+                .put("start", flinkSqlValidationResult.lineStart())
+                .put("end", flinkSqlValidationResult.lineEnd());
 
-                    //记录第几行出错.
-                    response.put("line", lineColumn[0])
-                        .put("column ", lineColumn[1]);
-                }
+            if (flinkSqlValidationResult.errorLine() > 0) {
+                response
+                    .put("start", flinkSqlValidationResult.errorLine())
+                    .put("end", flinkSqlValidationResult.errorLine() + 1);
             }
             return response;
         } else {

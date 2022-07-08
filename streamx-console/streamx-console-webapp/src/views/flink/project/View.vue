@@ -272,6 +272,15 @@ export default {
         defaultPageSize: 10,
         showQuickJumper: true,
         showSizeChanger: true,
+        onChange:(page,pageSize)=>{
+          this.queryParams.pageNum = page
+          this.handleFetch(this.queryParams, false)
+        },
+        onShowSizeChange:(current,size)=>{
+          this.queryParams.pageNum = 1
+          this.queryParams.pageSize = size
+          this.handleFetch(this.queryParams, false)
+        },
         showTotal: (total, range) => `display ${range[0]} ~ ${range[1]} record，total ${total} `
       }
     }
@@ -290,8 +299,8 @@ export default {
 
     handleSearch (value) {
       this.paginationInfo = null
+      this.queryParams.name = value
       this.handleFetch({
-        name: value,
         ...this.queryParams
       }, true)
     },
@@ -433,8 +442,8 @@ export default {
         params.pageNum = this.paginationInfo.current
       } else {
         // 如果分页信息为空，则设置为默认值
-        params.pageSize = this.pagination.defaultPageSize
-        params.pageNum = this.pagination.defaultCurrent
+        // params.pageSize = this.pagination.defaultPageSize
+        // params.pageNum = this.pagination.current
       }
       list({
         ...params

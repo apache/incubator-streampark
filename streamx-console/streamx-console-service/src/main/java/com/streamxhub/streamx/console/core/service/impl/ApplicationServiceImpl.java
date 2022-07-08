@@ -34,7 +34,6 @@ import com.streamxhub.streamx.common.fs.HdfsOperator;
 import com.streamxhub.streamx.common.util.CompletableFutureUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
-import com.streamxhub.streamx.common.util.FlinkUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
@@ -449,6 +448,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             // status of flink job on kubernetes mode had been automatically persisted to db in time.
             if (isKubernetesApp(record)) {
                 // set duration
+                String restUrl = k8sFlinkTrkMonitor.getRemoteRestUrl(toTrkId(record));
+                record.setFlinkRestUrl(restUrl);
                 if (record.getTracking() == 1 && record.getStartTime() != null && record.getStartTime().getTime() > 0) {
                     record.setDuration(now - record.getStartTime().getTime());
                 }
@@ -602,11 +603,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
 
             if (ExecutionMode.isKubernetesMode(appParam.getExecutionMode())) {
-                if (!ObjectUtils.safeEquals(application.getK8sRestExposedType(), appParam.getK8sRestExposedType()) ||
-                    !ObjectUtils.safeEquals(application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate()) ||
-                    !ObjectUtils.safeEquals(application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate()) ||
-                    !ObjectUtils.safeEquals(application.getK8sPodTemplates(), appParam.getK8sPodTemplates()) ||
-                    !ObjectUtils.safeEquals(application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())) {
+                if (!ObjectUtils.safeTrimEquals(application.getK8sRestExposedType(), appParam.getK8sRestExposedType()) ||
+                    !ObjectUtils.safeTrimEquals(application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate()) ||
+                    !ObjectUtils.safeTrimEquals(application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate()) ||
+                    !ObjectUtils.safeTrimEquals(application.getK8sPodTemplates(), appParam.getK8sPodTemplates()) ||
+                    !ObjectUtils.safeTrimEquals(application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())) {
                     application.setBuild(true);
                 }
             }
@@ -633,7 +634,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             //以下参数发生改变不影响正在运行的任务
             application.setDescription(appParam.getDescription());
-            application.setAlertEmail(appParam.getAlertEmail());
+            application.setAlertId(appParam.getAlertId());
             application.setRestartSize(appParam.getRestartSize());
             application.setCpFailureAction(appParam.getCpFailureAction());
             application.setCpFailureRateInterval(appParam.getCpFailureRateInterval());
@@ -812,6 +813,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public Application getApp(Application appParam) {
         Application application = this.baseMapper.getApp(appParam);
         ApplicationConfig config = configService.getEffective(appParam.getId());
+        config = config == null ? configService.getLatest(appParam.getId()) : config;
         if (config != null) {
             config.setToApplication(application);
         }
@@ -911,25 +913,28 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (appParam.getSavePointed()) {
             customSavepoint = appParam.getSavePoint();
         }
+
         if (appParam.getSavePointed() && StringUtils.isBlank(customSavepoint)) {
-            if (isKubernetesApp(application)) {
-                customSavepoint = FlinkSubmitter
-                    .extractDynamicOptionAsJava(application.getDynamicOptions())
-                    .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
-            } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
-                FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-                assert cluster != null;
-                Map<String, String> config = cluster.getFlinkConfig();
-                if (!config.isEmpty()) {
-                    customSavepoint = config.get("state.savepoints.dir");
-                }
-            } else if (application.isStreamXJob() || application.isFlinkSqlJob()) {
-                ApplicationConfig applicationConfig = configService.getEffective(application.getId());
-                if (applicationConfig != null) {
-                    Map<String, String> map = applicationConfig.readConfig();
-                    boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()));
-                    if (checkpointEnable) {
-                        customSavepoint = map.get("flink.state.savepoints.dir");
+            customSavepoint = FlinkSubmitter
+                .extractDynamicOptionAsJava(application.getDynamicOptions())
+                .get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+
+            if (StringUtils.isBlank(customSavepoint)) {
+                if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+                    FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+                    assert cluster != null;
+                    Map<String, String> config = cluster.getFlinkConfig();
+                    if (!config.isEmpty()) {
+                        customSavepoint = config.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+                    }
+                } else if (application.isStreamXJob() || application.isFlinkSqlJob()) {
+                    ApplicationConfig applicationConfig = configService.getEffective(application.getId());
+                    if (applicationConfig != null) {
+                        Map<String, String> map = applicationConfig.readConfig();
+                        boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()));
+                        if (checkpointEnable) {
+                            customSavepoint = map.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR());
+                        }
                     }
                 }
             }
@@ -982,7 +987,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             cancelResponse -> {
                 if (cancelResponse != null && cancelResponse.savePointDir() != null) {
                     String savePointDir = cancelResponse.savePointDir();
-                    log.info("savePoint path:{}", savePointDir);
+                    log.info("savePoint path: {}", savePointDir);
                     SavePoint savePoint = new SavePoint();
                     Date now = new Date();
                     savePoint.setPath(savePointDir);
@@ -998,7 +1003,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (e.getCause() instanceof CancellationException) {
                     updateToStoped(application);
                 } else {
-                    log.error("stop flink job fail. {}", e);
+                    log.error("stop flink job fail.", e);
                     application.setOptionState(OptionState.NONE.getValue());
                     application.setState(FlinkAppState.FAILED.getValue());
                     updateById(application);
@@ -1137,7 +1142,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             throw new UnsupportedOperationException("Unsupported...");
         }
 
-        String[] dynamicOption = FlinkUtils.parseDynamicOptions(application.getDynamicOptions());
+        Map<String, String> dynamicOption = FlinkSubmitter.extractDynamicOptionAsJava(application.getDynamicOptions());
 
         Map<String, Object> extraParameter = new HashMap<>(0);
         extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());

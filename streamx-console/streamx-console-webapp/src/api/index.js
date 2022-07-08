@@ -103,6 +103,16 @@ export default {
     UPDATE: '/flink/env/update',
     DEFAULT: '/flink/env/default',
   },
+  AlertConf: {
+    ADD: '/flink/alert/conf/add',
+    EXISTS: '/flink/alert/conf/exists',
+    UPDATE:  '/flink/alert/conf/update',
+    GET: '/flink/alert/conf/get',
+    LIST: '/flink/alert/conf/list',
+    LIST_WITHOUTPAGE: '/flink/alert/conf/listWithOutPage',
+    DELETE: '/flink/alert/conf/delete',
+    SEND: '/flink/alert/conf/send'
+  },
   FlinkCluster: {
     LIST: '/flink/cluster/list',
     ACTIVE_URL: '/flink/cluster/activeUrl',

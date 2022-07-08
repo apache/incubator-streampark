@@ -133,6 +133,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
+    public String getDockerRegisterNamespace() {
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_NAMESPACE, defaultSetting).getValue();
+    }
+
+    @Override
     public String getStreamXAddress() {
         return settings.getOrDefault(SettingService.KEY_STREAMX_ADDRESS, defaultSetting).getValue();
     }

@@ -44,7 +44,7 @@
         <result column="JM_MEMORY" jdbcType="INTEGER" property="jmMemory"/>
         <result column="TM_MEMORY" jdbcType="INTEGER" property="tmMemory"/>
         <result column="OPTION_STATE" jdbcType="INTEGER" property="optionState"/>
-        <result column="ALERT_EMAIL" jdbcType="VARCHAR" property="alertEmail"/>
+        <result column="ALERT_ID" jdbcType="BIGINT" property="alertId"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
         <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
         <result column="OPTION_TIME" jdbcType="DATE" property="optionTime"/>
@@ -58,7 +58,7 @@
     </resultMap>
 
     <select id="page" resultType="application" parameterType="application">
-        SELECT t.*,p.name as projectName,u.username,v.version as flinkVersion FROM t_flink_app t
+        SELECT t.*,p.name as projectName,u.username,case when trim(u.nick_name) = '' then u.username else u.nick_name end as nickname,v.version as flinkVersion FROM t_flink_app t
         inner join t_user u
         on t.user_id = u.user_id
         left join t_flink_env v

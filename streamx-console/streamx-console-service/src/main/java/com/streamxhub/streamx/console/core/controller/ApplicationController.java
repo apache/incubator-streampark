@@ -19,8 +19,8 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
-import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.domain.ApiDocConstant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
@@ -201,7 +201,7 @@ public class ApplicationController {
 
     @PostMapping("yarn")
     public RestResponse yarn() {
-        return RestResponse.create().data(HadoopUtils.getRMWebAppProxyURL());
+        return RestResponse.create().data(YarnUtils.getRMWebAppProxyURL());
     }
 
     @PostMapping("name")

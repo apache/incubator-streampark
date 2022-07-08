@@ -1,5 +1,6 @@
 <template>
   <span :class="'svg-icon-'.concat(size).concat(border? ' svg-icon-border':'')" class="anticon">
+    <alarm v-if="name==='alarm'"></alarm>
     <analyse v-if="name==='analyse'"></analyse>
     <flink v-if="name==='flink'"></flink>
     <spark v-if="name==='spark'"></spark>
@@ -13,10 +14,13 @@
     <deploy v-if="name==='deploy'"></deploy>
     <stream v-if="name==='stream'"></stream>
     <format v-if="name==='format'"></format>
-    <dingding v-if="name==='dingding'"></dingding>
+    <dingtalk v-if="name==='dingtalk'"></dingtalk>
+    <lark v-if="name==='lark'"></lark>
     <mail v-if="name==='mail'"></mail>
     <sms v-if="name==='sms'"></sms>
+    <message v-if="name==='message'"></message>
     <wechat v-if="name==='wechat'"></wechat>
+    <wecom v-if="name==='wecom'"></wecom>
     <host v-if="name==='host'"></host>
     <keys v-if="name==='keys'"></keys>
     <port v-if="name==='port'"></port>
@@ -44,6 +48,7 @@
     <moon v-if="name==='moon'"></moon>
     <user v-if="name==='user'"></user>
     <docker v-if="name==='docker'"></docker>
+    <namespace v-if="name==='namespace'"></namespace>
     <auth v-if="name==='auth'"></auth>
     <password v-if="name==='password'"></password>
   </span>
@@ -51,6 +56,7 @@
 
 <script>
 import {
+  alarm,
   analyse,
   deploy,
   flink,
@@ -64,10 +70,13 @@ import {
   workspace,
   threshold,
   format,
-  dingding,
+  dingtalk,
+  lark,
   mail,
   sms,
+  message,
   wechat,
+  wecom,
   host,
   keys,
   port,
@@ -95,6 +104,7 @@ import {
   moon,
   user,
   docker,
+  namespace,
   auth,
   password
 } from '@/core/icons'
@@ -102,6 +112,7 @@ import {
 export default {
   name: 'SvgIcon',
   components: {
+    alarm,
     analyse,
     deploy,
     flink,
@@ -115,10 +126,13 @@ export default {
     workspace,
     threshold,
     format,
-    dingding,
+    dingtalk,
+    lark,
     mail,
     sms,
+    message,
     wechat,
+    wecom,
     host,
     keys,
     port,
@@ -146,6 +160,7 @@ export default {
     moon,
     user,
     docker,
+    namespace,
     auth,
     password
   },

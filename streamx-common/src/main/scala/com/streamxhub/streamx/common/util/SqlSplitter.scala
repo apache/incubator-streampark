@@ -18,6 +18,8 @@
  */
 package com.streamxhub.streamx.common.util
 
+import java.util.Scanner
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
 
@@ -50,17 +52,62 @@ object SqlSplitter {
    * @param sql
    * @return
    */
-  def splitSql(sql: String): List[String] = {
+  def splitSql(sql: String): Set[SqlSegment] = {
     val queries = ListBuffer[String]()
-    val lastIdx = if (sql != null && sql.nonEmpty) sql.length - 1 else 0
+    val lastIndex = if (sql != null && sql.nonEmpty) sql.length - 1 else 0
     var query = new StringBuilder
 
     var multiLineComment = false
     var singleLineComment = false
     var singleQuoteString = false
     var doubleQuoteString = false
+    var lineNum: Int = 0
+    val lineNumMap = new collection.mutable.HashMap[Int, (Int, Int)]()
+
+    // Whether each line of the record is empty. If it is empty, it is false. If it is not empty, it is true
+    val lineDescriptor = {
+      val scanner = new Scanner(sql)
+      val descriptor = new collection.mutable.HashMap[Int, Boolean]
+      var lineNumber = 0
+      var startComment = false
+      var hasComment = false
+
+      while (scanner.hasNextLine) {
+        lineNumber += 1
+        val line = scanner.nextLine().trim
+        val nonEmpty = line.nonEmpty && !line.startsWith("--")
+        if (line.startsWith("/*")) {
+          startComment = true
+          hasComment = true
+        }
+
+        descriptor += lineNumber -> (nonEmpty && !hasComment)
+
+        if (startComment && line.endsWith("*/")) {
+          startComment = false
+          hasComment = false
+        }
+      }
+      descriptor
+    }
+
+    def findStartLine(num: Int): Int = if (lineDescriptor(num)) num else findStartLine(num + 1)
+
+    def markLineNumber(): Unit = {
+      val line = lineNum + 1
+      if (lineNumMap.isEmpty) {
+        lineNumMap += (0 -> (findStartLine(1) -> line))
+      } else {
+        val index = lineNumMap.size
+        val start = lineNumMap(lineNumMap.size - 1)._2 + 1
+        lineNumMap += (index -> (findStartLine(start) -> line))
+      }
+    }
 
     for (idx <- 0 until sql.length) {
+
+      if (sql.charAt(idx) == '\n') lineNum += 1
+
       breakable {
         val ch = sql.charAt(idx)
 
@@ -68,7 +115,7 @@ object SqlSplitter {
         if (singleLineComment && (ch == '\n')) {
           singleLineComment = false
           query += ch
-          if (idx == lastIdx && query.toString.trim.nonEmpty) {
+          if (idx == lastIndex && query.toString.trim.nonEmpty) {
             // add query when it is the end of sql.
             queries += query.toString
           }
@@ -100,7 +147,7 @@ object SqlSplitter {
         }
 
         // single line comment or multiple line comment start mark
-        if (!singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment && idx < lastIdx) {
+        if (!singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment && idx < lastIndex) {
           if (isSingleLineComment(sql.charAt(idx), sql.charAt(idx + 1))) {
             singleLineComment = true
           } else if (sql.charAt(idx) == '/' && sql.length > (idx + 2)
@@ -110,12 +157,15 @@ object SqlSplitter {
         }
 
         if (ch == ';' && !singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment) {
+          markLineNumber()
           // meet the end of semicolon
           if (query.toString.trim.nonEmpty) {
             queries += query.toString
             query = new StringBuilder
           }
-        } else if (idx == lastIdx) {
+        } else if (idx == lastIndex) {
+          markLineNumber()
+
           // meet the last character
           if (!singleLineComment && !multiLineComment) {
             query += ch
@@ -134,7 +184,7 @@ object SqlSplitter {
       }
     }
 
-    val refinedQueries = ListBuffer[String]()
+    val refinedQueries = new collection.mutable.HashMap[Int, String]()
     for (i <- queries.indices) {
       val currStatement = queries(i)
       if (isSingleLineComment(currStatement) || isMultipleLineComment(currStatement)) {
@@ -150,10 +200,20 @@ object SqlSplitter {
         }
         // add some blank lines before the statement to keep the original line number
         val refinedQuery = linesPlaceholder + currStatement
-        refinedQueries += refinedQuery
+        refinedQueries += refinedQueries.size -> refinedQuery
       }
     }
-    refinedQueries.toList
+
+    implicit object SqlOrdering extends Ordering[SqlSegment] {
+      override def compare(x: SqlSegment, y: SqlSegment): Int = x.start - y.start
+    }
+
+    val set = new mutable.TreeSet[SqlSegment]
+    refinedQueries.foreach(x => {
+      val line = lineNumMap(x._1)
+      set += SqlSegment(line._1, line._2, x._2)
+    })
+    set.toSet
   }
 
 
@@ -163,7 +223,7 @@ object SqlSplitter {
    * @param text
    * @return
    */
-  private[streamx] def extractLineBreaks(text: String) = {
+  private[this] def extractLineBreaks(text: String) = {
     val builder = new StringBuilder
     for (i <- 0 until text.length) {
       if (text.charAt(i) == '\n') {
@@ -173,9 +233,9 @@ object SqlSplitter {
     builder.toString
   }
 
-  private[streamx] def isSingleLineComment(text: String) = text.trim.startsWith("--")
+  private[this] def isSingleLineComment(text: String) = text.trim.startsWith("--")
 
-  private[streamx] def isMultipleLineComment(text: String) = text.trim.startsWith("/*") && text.trim.endsWith("*/")
+  private[this] def isMultipleLineComment(text: String) = text.trim.startsWith("/*") && text.trim.endsWith("*/")
 
   /**
    * check single-line comment
@@ -184,7 +244,7 @@ object SqlSplitter {
    * @param nextChar
    * @return
    */
-  private[streamx] def isSingleLineComment(curChar: Char, nextChar: Char): Boolean = {
+  private[this] def isSingleLineComment(curChar: Char, nextChar: Char): Boolean = {
     var flag = false
     for (singleCommentPrefix <- singleLineCommentPrefixList) {
       if (singleCommentPrefix.length == 1) {
@@ -200,4 +260,7 @@ object SqlSplitter {
     }
     flag
   }
+
+  case class SqlSegment(start: Int, end: Int, sql: String)
+
 }

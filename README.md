@@ -141,7 +141,7 @@ We have received some precious honors, which belong to everyone who contributes 
 
 ![](https://user-images.githubusercontent.com/13284744/142746797-85ebf7b4-4105-4b5b-a023-0689c7fd1d2d.png)
 
-![](https://user-images.githubusercontent.com/13284744/163530071-a5b6f334-9af5-439c-96c9-2bb9b4eec6a6.jpg)
+![](https://user-images.githubusercontent.com/13284744/174478150-78e078b2-739f-49a3-8d49-d4763a01268f.jpg)
 
 
 ## 🤝 Contribution
@@ -154,7 +154,9 @@ You can submit any ideas as [pull requests](https://github.com/streamxhub/stream
 
 Thank you to all the people who already contributed to StreamX!
 
-<a href="https://github.com/streamxhub/streamx/graphs/contributors"><img src="https://opencollective.com/streamx/contributors.svg?width=890" /></a>
+<a href="https://github.com/streamxhub/streamx/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=streamxhub/streamx" />
+</a>
 
 
 ## ⏰ Contributor Over Time

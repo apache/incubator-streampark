@@ -10,7 +10,7 @@
                 :value="metrics.availableSlot"
                 :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}"/>
             </a-card>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Task Slots
@@ -32,7 +32,7 @@
                 :value="metrics['runningJob']"
                 :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}"/>
             </a-card>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Total Task
@@ -56,7 +56,7 @@
                 suffix="MB"
                 :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}"/>
             </a-card>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Total JobManager Mem
@@ -80,7 +80,7 @@
                 suffix="MB"
                 :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}"/>
             </a-card>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Total TaskManager Mem
@@ -130,7 +130,7 @@
                 </a-card>
               </a-col>
             </a-row>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Total Task
@@ -196,7 +196,7 @@
                 </a-card>
               </a-col>
             </a-row>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Total JobManager Mem
@@ -522,7 +522,6 @@
               title="Are you sure delete this job ?"
               cancel-text="No"
               ok-text="Yes"
-              v-permit="'app:delete'"
               @confirm="handleDelete(record)">
               <a-button
                 type="danger"
@@ -826,9 +825,9 @@
           </a-form-item>
 
           <a-form-item
+            class="def-margin-bottom"
             v-if="savePoint && !latestSavePoint "
             label="savepoint"
-            style="margin-bottom: 10px"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
             <a-select
@@ -920,11 +919,11 @@
               v-decorator="['savePoint']"/>
             <span
               class="conf-switch"
-              style="color:darkgrey"> trigger savePoint before taking stoping </span>
+              style="color:darkgrey"> trigger savePoint before taking cancel </span>
           </a-form-item>
           <a-form-item
+            class="def-margin-bottom"
             label="Custom SavePoint"
-            style="margin-bottom: 10px"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
             v-show="savePoint">
@@ -1209,22 +1208,9 @@ export default {
         dataIndex: 'flinkVersion',
         width: 120
       }, {
-        title: 'Start Time',
-        dataIndex: 'startTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
-        width: 180
-      }, {
-        title: 'Duration',
-        dataIndex: 'duration',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
-        scopedSlots: {customRender: 'duration'},
-        width: 150
-      }, {
-        title: 'Task',
-        dataIndex: 'task',
-        width: 100,
+        title: 'Owner',
+        dataIndex: 'nickName',
+        width: 120
       }, {
         title: 'Run Status',
         dataIndex: 'state',
@@ -1251,6 +1237,23 @@ export default {
         dataIndex: 'launch',
         width: 250,
         scopedSlots: {customRender: 'launchState'}
+      }, {
+        title: 'Start Time',
+        dataIndex: 'startTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
+        width: 180
+      }, {
+        title: 'Duration',
+        dataIndex: 'duration',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
+        scopedSlots: {customRender: 'duration'},
+        width: 150
+      }, {
+        title: 'Task',
+        dataIndex: 'task',
+        width: 100,
       }, {
         dataIndex: 'operation',
         key: 'operation',
@@ -1550,11 +1553,11 @@ export default {
     },
 
     handleCanRemapping(record) {
-      return record.state !== 5 &&
-      !this.optionApps.launch.get(record.id) &&
-      !this.optionApps.stoping.get(record.id) &&
-      !this.optionApps.starting.get(record.id) &&
-      record['optionState'] === 0
+      return record.state === 7 &&
+        record.state === 0 &&
+        record.state === 10 &&
+        record.state === 11 &&
+        record.state === 13
     },
 
     showForceStartAppModal() {
@@ -1782,7 +1785,7 @@ export default {
     handleCanStop(app) {
       const optionTime = new Date(app['optionTime']).getTime()
       const nowTime = new Date().getTime()
-      if (nowTime - optionTime >= 20 * 1000) {
+      if (nowTime - optionTime >= 60 * 1000) {
         const state = app['optionState']
         if (state === 0) {
           return app.state === 3 || app.state === 4 || app.state === 8 || false
@@ -1995,27 +1998,31 @@ export default {
       }
     },
 
-    handleView(params) {
+    handleView(app) {
       // 任务正在运行中, 重启中, 正在 savePoint 中
-      if (params.state === 4 || params.state === 5 || params['optionState'] === 4) {
+      if (app.state === 4 || app.state === 5 || app['optionState'] === 4) {
         // yarn-per-job|yarn-session|yarn-application
-        const executionMode = params['executionMode']
+        const executionMode = app['executionMode']
         if (executionMode === 1) {
-          activeURL({id: params.flinkClusterId}).then((resp) => {
-            const url = resp.data + '/#/job/' + params.jobId + '/overview'
+          activeURL({id: app.flinkClusterId}).then((resp) => {
+            const url = resp.data + '/#/job/' + app.jobId + '/overview'
             window.open(url)
           })
         } else if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
           if (this.yarn == null) {
             yarn({}).then((resp) => {
               this.yarn = resp.data
-              const url = this.yarn + '/proxy/' + params['appId'] + '/'
+              const url = this.yarn + '/proxy/' + app['appId'] + '/'
               window.open(url)
             })
           } else {
-            const url = this.yarn + '/proxy/' + params['appId'] + '/'
+            const url = this.yarn + '/proxy/' + app['appId'] + '/'
             window.open(url)
           }
+        } else {
+            if (app.flinkRestUrl != null) {
+              window.open(app.flinkRestUrl)
+            }
         }
       }
     },

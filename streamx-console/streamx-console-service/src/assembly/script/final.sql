@@ -100,7 +100,7 @@ CREATE TABLE `t_flink_app` (
 `BUILD` tinyint DEFAULT '1',
 `START_TIME` datetime DEFAULT NULL,
 `END_TIME` datetime DEFAULT NULL,
-`ALERT_EMAIL` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`ALERT_ID` bigint DEFAULT NULL,
 `K8S_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
 `K8S_JM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
 `K8S_TM_POD_TEMPLATE` text COLLATE utf8mb4_general_ci,
@@ -522,6 +522,7 @@ INSERT INTO `t_setting` VALUES (10, 'alert.email.ssl', 'false', 'Alert Email Is 
 INSERT INTO `t_setting` VALUES (11, 'docker.register.address', NULL, 'Docker Register Address', 'Docker容器服务地址', 1);
 INSERT INTO `t_setting` VALUES (12, 'docker.register.user', NULL, 'Docker Register User', 'Docker容器服务认证用户名', 1);
 INSERT INTO `t_setting` VALUES (13, 'docker.register.password', NULL, 'Docker Register Password', 'Docker容器服务认证密码', 1);
+INSERT INTO `t_setting` VALUES (14, 'docker.register.namespace', NULL, 'Namespace for docker image used in docker building env and target image register', 'Docker命名空间', 1);
 COMMIT;
 
 -- ----------------------------
@@ -639,3 +640,27 @@ PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- ----------------------------
+-- Table of t_alert_config
+-- ----------------------------
+DROP TABLE IF EXISTS `t_alert_config`;
+CREATE TABLE `t_alert_config`
+(
+  `ID`                   bigint   NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `USER_ID`              bigint                                  DEFAULT NULL,
+  `ALERT_NAME`           varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '报警组名称',
+  `ALERT_TYPE`           int                                     DEFAULT 0 COMMENT '报警类型',
+  `EMAIL_PARAMS`         varchar(255) COLLATE utf8mb4_general_ci COMMENT '邮件报警配置信息',
+  `SMS_PARAMS`           text COLLATE utf8mb4_general_ci COMMENT '短信报警配置信息',
+  `DING_TALK_PARAMS`     text COLLATE utf8mb4_general_ci COMMENT '钉钉报警配置信息',
+  `WE_COM_PARAMS`        varchar(255) COLLATE utf8mb4_general_ci COMMENT '企微报警配置信息',
+  `HTTP_CALLBACK_PARAMS` text COLLATE utf8mb4_general_ci COMMENT '报警http回调配置信息',
+  `LARK_PARAMS`          text COLLATE utf8mb4_general_ci COMMENT '飞书报警配置信息',
+  `CREATE_TIME`          datetime NOT NULL                       DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `MODIFY_TIME`          datetime NOT NULL                       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  INDEX `INX_USER_ID` (`USER_ID`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;

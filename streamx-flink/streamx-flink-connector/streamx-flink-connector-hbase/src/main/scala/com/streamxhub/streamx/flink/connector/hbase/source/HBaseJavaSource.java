@@ -25,6 +25,7 @@ import com.streamxhub.streamx.flink.connector.hbase.function.HBaseQueryFunction;
 import com.streamxhub.streamx.flink.connector.hbase.function.HBaseResultFunction;
 import com.streamxhub.streamx.flink.connector.hbase.internal.HBaseSourceFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
+
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
 import java.util.Properties;

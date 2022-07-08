@@ -23,16 +23,17 @@ import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.commons.lang3.StringUtils
+
+import java.util
 import java.util.regex.Pattern
 import java.util.{Map => JavaMap}
 import javax.annotation.Nonnull
 import scala.collection.JavaConverters._
-import scala.util.Try
 
 object FlinkSubmitter extends Logger {
 
   // effective k-v regex pattern of submit.dynamicOption
-  private val DYNAMIC_OPTION_ITEM_PATTERN = Pattern.compile("(-D)?(\\S+)=(\\S+)")
+  private[this] lazy val DYNAMIC_OPTION_ITEM_PATTERN = Pattern.compile("(.*?)=(.*?)")
 
   private[this] val FLINK_SUBMIT_CLASS_NAME = "com.streamxhub.streamx.flink.submit.FlinkSubmit"
 
@@ -90,25 +91,6 @@ object FlinkSubmitter extends Logger {
     })
   }
 
-
-  /**
-   * extract flink configuration from submitRequest.dynamicOption
-   */
-  @Nonnull def extractDynamicOption(dynamicOption: Array[String]): Map[String, String] = {
-    dynamicOption match {
-      case x if Utils.isEmpty(x) => Map.empty
-      case _ =>
-        Try(dynamicOption
-          .filter(_ != null)
-          .map(_.trim)
-          .map(DYNAMIC_OPTION_ITEM_PATTERN.matcher(_))
-          .filter(_.matches())
-          .map(m => m.group(2) -> m.group(3))
-          .toMap
-        ).getOrElse(Map.empty)
-    }
-  }
-
   /**
    * extract flink configuration from application.dynamicOption
    */
@@ -116,11 +98,19 @@ object FlinkSubmitter extends Logger {
     if (StringUtils.isEmpty(dynamicOptions)) {
       Map.empty[String, String]
     } else {
-      extractDynamicOption(dynamicOptions.split("\\s+"))
+      dynamicOptions.split("\\s?-D") match {
+        case x if Utils.isEmpty(x) => Map.empty
+        case d =>
+          d.filter(_.nonEmpty)
+            .map(_.trim)
+            .map(DYNAMIC_OPTION_ITEM_PATTERN.matcher(_))
+            .filter(_.matches)
+            .map(m => m.group(1) -> m.group(2).replace("\"", "").trim)
+            .toMap
+      }
     }
   }
 
-  @Nonnull def extractDynamicOptionAsJava(dynamicOptions: String): JavaMap[String, String] = extractDynamicOption(dynamicOptions).asJava
-
+  @Nonnull def extractDynamicOptionAsJava(dynamicOptions: String): JavaMap[String, String] = new util.HashMap[String, String](extractDynamicOption(dynamicOptions).asJava)
 
 }
