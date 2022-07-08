@@ -143,30 +143,14 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   val values: immutable.IndexedSeq[SqlCommand] = findValues
 
-  //----CREATE Statements----
-
-  /**
-   * <pre>
-   * CREATE CATALOG catalog_name
-   * WITH (key1=val1, key2=val2, ...)
-   * </pre>
-   */
-  case object CREATE_CATALOG extends SqlCommand(
-    "create catalog",
-    "(CREATE\\s+CATALOG\\s+.*)"
+  //---- SELECT Statements ---------------------------------------------------------------------------------------------------------------------------------------
+  case object SELECT extends SqlCommand(
+    "select",
+    "(SELECT\\s+.*)"
   )
 
-  /**
-   * <pre>
-   * CREATE DATABASE [IF NOT EXISTS] [catalog_name.]db_name<br>
-   * [COMMENT database_comment]<br>
-   * WITH (key1=val1, key2=val2, ...)<br>
-   * </pre>
-   */
-  case object CREATE_DATABASE extends SqlCommand(
-    "create database",
-    "(CREATE\\s+DATABASE\\s+.*)"
-  )
+
+  //----CREATE Statements-------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * <pre>
@@ -186,6 +170,30 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "create table",
     "(CREATE\\s+(TEMPORARY\\s+|)TABLE\\s+.*)"
   )
+
+  /**
+   * <pre>
+   * CREATE CATALOG catalog_name
+   * WITH (key1=val1, key2=val2, ...)
+   * </pre>
+   */
+  case object CREATE_CATALOG extends SqlCommand(
+    "create catalog",
+    "CREATE\\s+CATALOG\\s+.*"
+  )
+
+  /**
+   * <pre>
+   * CREATE DATABASE [IF NOT EXISTS] [catalog_name.]db_name<br>
+   * [COMMENT database_comment]<br>
+   * WITH (key1=val1, key2=val2, ...)<br>
+   * </pre>
+   */
+  case object CREATE_DATABASE extends SqlCommand(
+    "create database",
+    "(CREATE\\s+DATABASE\\s+.*)"
+  )
+
 
   /**
    * <pre>
@@ -211,141 +219,107 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_FUNCTION extends SqlCommand(
     "create function",
-    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.*)"
+    "CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF NOT EXISTS\\s+|)([A-Za-z]+[A-Za-z\\d.\\-_]+)\\s+AS\\s+([A-Za-z].+)\\s+LANGUAGE\\s+(JAVA|SCALA|PYTHON)\\s*"
   )
 
-  //----ALTER Statements ---
-  case object ALTER_DATABASE extends SqlCommand(
-    "alter database",
-    "(ALTER\\s+DATABASE\\s+.*)"
+
+  //----DROP Statements-------------------------------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * DROP [TEMPORARY] TABLE [IF EXISTS] [catalog_name.][db_name.]table_name
+   */
+  case object DROP_TABLE extends SqlCommand(
+    "drop table",
+    "(DROP\\s+(TEMPORARY\\s+|)TABLE\\s+.*)"
   )
 
-  case object ALTER_TABLE extends SqlCommand(
-    "alter table",
-    "(ALTER\\s+TABLE\\s+.*)"
-  )
-
-  case object ALTER_FUNCTION extends SqlCommand(
-    "alter function",
-    "(ALTER\\s+FUNCTION\\s+.*)"
-  )
-
-  //----DROP Statements----
-
-  case object DROP_CATALOG extends SqlCommand(
-    "drop catalog",
-    "(DROP\\s+CATALOG\\s+.*)"
-  )
-
+  /**
+   * DROP DATABASE [IF EXISTS] [catalog_name.]db_name [ (RESTRICT | CASCADE) ]
+   */
   case object DROP_DATABASE extends SqlCommand(
     "drop database",
     "(DROP\\s+DATABASE\\s+.*)"
   )
 
-  case object DROP_TABLE extends SqlCommand(
-    "drop table",
-    "(DROP\\s+TABLE\\s+.*)"
-  )
-
+  /**
+   * DROP [TEMPORARY] VIEW  [IF EXISTS] [catalog_name.][db_name.]view_name
+   */
   case object DROP_VIEW extends SqlCommand(
     "drop view",
-    "(DROP\\s+VIEW\\s+.*)"
+    "(DROP\\s+(TEMPORARY\\s+|)VIEW\\s+.*)"
   )
 
+  /**
+   * DROP [TEMPORARY|TEMPORARY SYSTEM] FUNCTION [IF EXISTS] [catalog_name.][db_name.]function_name
+   */
   case object DROP_FUNCTION extends SqlCommand(
     "drop function",
-    "(DROP\\s+FUNCTION\\s+.*)"
-  )
-
-  //----SHOW Statements ---
-  case object SHOW_CATALOGS extends SqlCommand(
-    "show catalogs",
-    "SHOW\\s+CATALOGS",
-    Converters.NO_OPERANDS
-  )
-
-  case object SHOW_CURRENT_CATALOG extends SqlCommand(
-    "show current catalog",
-    "SHOW\\s+CURRENT\\s+CATALOG",
-    Converters.NO_OPERANDS
-  )
-
-  case object SHOW_DATABASES extends SqlCommand(
-    "show databases",
-    "SHOW\\s+DATABASES",
-    Converters.NO_OPERANDS
-  )
-
-  case object SHOW_CURRENT_DATABASE extends SqlCommand(
-    "show current database",
-    "SHOW\\s+CURRENT\\s+DATABASE",
-    Converters.NO_OPERANDS
-  )
-
-  case object SHOW_TABLES extends SqlCommand(
-    "show tables",
-    "SHOW\\s+TABLES",
-    Converters.NO_OPERANDS
-  )
-
-  case object SHOW_VIEWS extends SqlCommand(
-    "show views",
-    "SHOW\\s+VIEWS",
-    Converters.NO_OPERANDS
-  )
-
-  case object SHOW_FUNCTIONS extends SqlCommand(
-    "show functions",
-    "SHOW\\s+FUNCTIONS",
-    Converters.NO_OPERANDS
-  )
-
-  case object SHOW_MODULES extends SqlCommand(
-    "show modules",
-    "SHOW\\s+MODULES",
-    Converters.NO_OPERANDS
+    "(DROP\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.*)"
   )
 
 
-  //---- INSERT Statement #
-  case object INSERT_INTO extends SqlCommand(
-    "insert into",
-    "(INSERT\\s+INTO\\s+.*)"
+  //----ALTER Statements -------------------------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * ALTER TABLE [catalog_name.][db_name.]table_name RENAME TO new_table_name
+   * ALTER TABLE [catalog_name.][db_name.]table_name SET (key1=val1, key2=val2, ...)
+   */
+  case object ALTER_TABLE extends SqlCommand(
+    "alter table",
+    "(ALTER\\s+TABLE\\s+.*)"
   )
 
-  case object INSERT_OVERWRITE extends SqlCommand(
-    "insert overwrite",
-    "(INSERT\\s+OVERWRITE\\s+.*)"
+  /**
+   * ALTER DATABASE [catalog_name.]db_name SET (key1=val1, key2=val2, ...)
+   */
+  case object ALTER_DATABASE extends SqlCommand(
+    "alter database",
+    "(ALTER\\s+DATABASE\\s+.*)"
+  )
+
+  /**
+   * ALTER [TEMPORARY|TEMPORARY SYSTEM] FUNCTION
+   * [IF EXISTS] [catalog_name.][db_name.]function_name
+   * AS identifier [LANGUAGE JAVA|SCALA|PYTHON]
+   */
+  case object ALTER_FUNCTION extends SqlCommand(
+    "alter function",
+    "(ALTER\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.*)"
   )
 
 
-  //---- SELECT Statements #
-  case object SELECT extends SqlCommand(
-    "select",
-    "(SELECT\\s+.*)"
-  )
+  //---- INSERT Statement----------------------------------------------------------------------------------------------------------------------------
 
-  //---- USE Statements #
-  case object USE_CATALOG extends SqlCommand(
-    "use catalog",
-    "(USE\\s+CATALOG\\s+.*)"
-  )
-
-  case object USE extends SqlCommand(
-    "use",
-    "USE\\s+(?!CATALOG)(.*)"
+  /**
+   * INSERT { INTO | OVERWRITE } [catalog_name.][db_name.]table_name [PARTITION part_spec] [column_list] select_statement
+   * INSERT { INTO | OVERWRITE } [catalog_name.][db_name.]table_name VALUES values_row [, values_row ...]
+   */
+  case object INSERT extends SqlCommand(
+    "insert",
+    "(INSERT\\s+.*)"
   )
 
 
+  //---- DESCRIBE Statement----------------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * { DESCRIBE | DESC } [catalog_name.][db_name.]table_name
+   */
   case object DESC extends SqlCommand(
     "desc",
     "(DESC\\s+.*)"
   )
 
+  /**
+   * { DESCRIBE | DESC } [catalog_name.][db_name.]table_name
+   */
   case object DESCRIBE extends SqlCommand(
     "describe",
     "(DESCRIBE\\s+.*)"
   )
+
+
+  //---- DESCRIBE Statement----------------------------------------------------------------------------------------------------------------------------
 
   /**
    * <pre>
@@ -357,6 +331,139 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "(EXPLAIN\\s+PLAN\\s+FOR\\s+(SELECT\\s+.*|INSERT\\s+.*))"
   )
 
+
+  //---- USE Statements ----------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * USE CATALOG catalog_name
+   */
+  case object USE_CATALOG extends SqlCommand(
+    "use catalog",
+    "(USE\\s+CATALOG\\s+.*)"
+  )
+
+  /**
+   * USE MODULES module_name1[, module_name2, ...]
+   */
+  case object USE_MODULES extends SqlCommand(
+    "use catalog",
+    "(USE\\s+USE_MODULES\\s+.*)"
+  )
+
+  /**
+   * USE [catalog_name.]database_name
+   */
+  case object USE extends SqlCommand(
+    "use",
+    "USE\\s+(?!(CATALOG|MODULES)).*"
+  )
+
+
+  //----SHOW Statements ----------------------------------------------------------------------------------------------------------------
+
+  /**
+   * SHOW CATALOGS
+   */
+  case object SHOW_CATALOGS extends SqlCommand(
+    "show catalogs",
+    "SHOW\\s+CATALOGS",
+    Converters.NO_OPERANDS
+  )
+
+  /**
+   * SHOW CURRENT CATALOG
+   */
+  case object SHOW_CURRENT_CATALOG extends SqlCommand(
+    "show current catalog",
+    "SHOW\\s+CURRENT\\s+CATALOG",
+    Converters.NO_OPERANDS
+  )
+
+  /**
+   * SHOW DATABASES
+   */
+  case object SHOW_DATABASES extends SqlCommand(
+    "show databases",
+    "SHOW\\s+DATABASES",
+    Converters.NO_OPERANDS
+  )
+
+  /**
+   * SHOW CURRENT DATABASE
+   */
+  case object SHOW_CURRENT_DATABASE extends SqlCommand(
+    "show current database",
+    "SHOW\\s+CURRENT\\s+DATABASE",
+    Converters.NO_OPERANDS
+  )
+
+  /**
+   * SHOW TABLES
+   */
+  case object SHOW_TABLES extends SqlCommand(
+    "show tables",
+    "SHOW\\s+TABLES",
+    Converters.NO_OPERANDS
+  )
+
+  /**
+   * SHOW VIEWS
+   */
+  case object SHOW_VIEWS extends SqlCommand(
+    "show views",
+    "SHOW\\s+VIEWS",
+    Converters.NO_OPERANDS
+  )
+
+  /**
+   * SHOW [USER] FUNCTIONS
+   */
+  case object SHOW_FUNCTIONS extends SqlCommand(
+    "show functions",
+    "SHOW\\s+(USER\\s+|)FUNCTIONS",
+    Converters.NO_OPERANDS
+  )
+
+  /**
+   * SHOW [FULL] MODULES
+   */
+  case object SHOW_MODULES extends SqlCommand(
+    "show modules",
+    "SHOW\\s+(FULL\\s+|)MODULES",
+    Converters.NO_OPERANDS
+  )
+
+
+  //----LOAD Statements ----------------------------------------------------------------------------------------------------------------
+
+  /**
+   * LOAD MODULE module_name [WITH ('key1' = 'val1', 'key2' = 'val2', ...)]
+   */
+  case object LOAD extends SqlCommand(
+    "load modules",
+    "LOAD\\s+MODULE.*",
+    Converters.NO_OPERANDS
+  )
+
+
+  //----UNLOAD Statements ----------------------------------------------------------------------------------------------------------------
+
+  /**
+   * UNLOAD MODULE module_name
+   */
+  case object UNLOAD extends SqlCommand(
+    "load modules",
+    "UNLOAD\\s+MODULE.*",
+    Converters.NO_OPERANDS
+  )
+
+
+
+  // ----SET Statements --------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * SET ('key' = 'value')
+   */
   case object SET extends SqlCommand(
     "set",
     "SET(\\s+(\\S+)\\s*=(.*))?", {
@@ -366,39 +473,21 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     }
   )
 
+  // ----SET Statements --------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * RESET ('key')
+   */
   case object RESET extends SqlCommand(
     "reset",
-    "RESET\\s*(.*)", {
+    "RESET\\s+(.*)", {
       case x if x.head.nonEmpty => Some(Array[String](x.head))
       case _ => Some(Array[String]("ALL"))
     }
   )
 
-  /**
-   * <pre>
-   * SQL Client execute each INSERT INTO statement as a single Flink job. However,
-   * this is sometimes not optimal because some part of the pipeline can be reused.
-   * SQL Client supports STATEMENT SET syntax to execute a set of SQL statements.
-   * This is an equivalent feature with StatementSet in Table API.
-   * The STATEMENT SET syntax encloses one or more INSERT INTO statements.
-   * All statements in a STATEMENT SET block are holistically optimized and executed as a single Flink job.
-   * Joint optimization and execution allows for reusing common intermediate results and can therefore significantly
-   * improve the efficiency of executing multiple queries.
-   * </pre>
-   */
-  case object BEGIN_STATEMENT_SET extends SqlCommand(
-    "begin statement set",
-    "BEGIN\\s+STATEMENT\\s+SET",
-    Converters.NO_OPERANDS
-  )
 
-  case object END_STATEMENT_SET extends SqlCommand(
-    "end statement set",
-    "END",
-    Converters.NO_OPERANDS
-  )
-
-  private[this] def cleanUp(sql: String): String = sql.trim.replaceAll("^('|\\\")|('|\\\")$", "")
+  private[this] def cleanUp(sql: String): String = sql.trim.replaceAll("^(['\"])|(['\"])$", "")
 
 }
 
