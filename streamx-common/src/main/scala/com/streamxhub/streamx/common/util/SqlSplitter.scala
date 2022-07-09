@@ -91,7 +91,7 @@ object SqlSplitter {
       descriptor
     }
 
-    def findStartLine(num: Int): Int = if (lineDescriptor(num)) num else findStartLine(num + 1)
+    def findStartLine(num: Int): Int = if (num >= lineDescriptor.size || lineDescriptor(num)) num else findStartLine(num + 1)
 
     def markLineNumber(): Unit = {
       val line = lineNum + 1
