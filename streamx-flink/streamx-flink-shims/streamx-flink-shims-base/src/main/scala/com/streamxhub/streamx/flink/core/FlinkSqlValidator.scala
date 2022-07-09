@@ -20,6 +20,7 @@ package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType
 import com.streamxhub.streamx.common.util.{ExceptionUtils, Logger}
+import com.streamxhub.streamx.flink.core.FlinkSqlExecutor.logWarn
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
@@ -86,19 +87,9 @@ object FlinkSqlValidator extends Logger {
           if (command == SET && args == TableConfigOptions.TABLE_SQL_DIALECT.key()) {
             sqlDialect = call.operands.last
           }
-        case
-          SELECT |
-          CREATE_TABLE | CREATE_CATALOG | CREATE_DATABASE | CREATE_VIEW | CREATE_FUNCTION |
-          DROP_TABLE | DROP_DATABASE | DROP_VIEW | DROP_FUNCTION |
-          ALTER_TABLE | ALTER_DATABASE | ALTER_FUNCTION |
-          INSERT |
-          DESC | DESCRIBE |
-          EXPLAIN |
-          USE_CATALOG | USE_MODULES | USE |
-          SHOW_CATALOGS | SHOW_CURRENT_CATALOG | SHOW_DATABASES | SHOW_CURRENT_DATABASE | SHOW_TABLES | SHOW_VIEWS | SHOW_FUNCTIONS | SHOW_MODULES |
-          LOAD | UNLOAD |
-          SET | RESET
-        =>
+        case BEGIN_STATEMENT_SET | END_STATEMENT_SET =>
+          logWarn(s"SQL Client Syntax: ${call.command.name} ")
+        case _ =>
           Try {
             val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_CALCITE_PARSER_CLASS))
             sqlDialect.toUpperCase() match {
@@ -140,15 +131,6 @@ object FlinkSqlValidator extends Logger {
               }
             case _ =>
           }
-        case _ =>
-          return FlinkSqlValidationResult(
-            success = false,
-            failedType = FlinkSqlValidationFailedType.UNSUPPORTED_SQL,
-            lineStart = call.lineStart,
-            lineEnd = call.lineEnd,
-            sql = sql.replaceFirst(";|$", ";"),
-            exception = s"unsupported sql: ${call.originSql}"
-          )
       }
     }
     FlinkSqlValidationResult()
