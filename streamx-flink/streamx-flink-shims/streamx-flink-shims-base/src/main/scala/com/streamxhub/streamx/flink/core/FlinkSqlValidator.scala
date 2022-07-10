@@ -20,6 +20,7 @@ package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType
 import com.streamxhub.streamx.common.util.{ExceptionUtils, Logger}
+import com.streamxhub.streamx.flink.core.FlinkSqlExecutor.logWarn
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
