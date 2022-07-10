@@ -31,7 +31,7 @@ class FlinkSqlExecuteFunSuite extends AnyFunSuite {
   def execute(sql: String)(implicit func: String => Unit): Unit = {
     val args = ArrayBuffer(KEY_FLINK_SQL("--"), DeflaterUtils.zipString(sql.stripMargin))
     val context = new StreamTableContext(FlinkTableInitializer.initStreamTable(args.toArray, null, null))
-    FlinkSqlExecutor.executeSql("sql", context.parameter, context)
+    FlinkSqlExecutor.executeSql(KEY_FLINK_SQL(), context.parameter, context)
   }
 
   test("insert") {
