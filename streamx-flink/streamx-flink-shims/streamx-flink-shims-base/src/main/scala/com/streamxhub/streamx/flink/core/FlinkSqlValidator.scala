@@ -20,7 +20,6 @@ package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType
 import com.streamxhub.streamx.common.util.{ExceptionUtils, Logger}
-import com.streamxhub.streamx.flink.core.FlinkSqlExecutor.logWarn
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
@@ -33,7 +32,7 @@ import org.apache.flink.table.api.{PlannerType, SqlDialect, TableConfig}
 import org.apache.flink.table.api.config.TableConfigOptions
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 object FlinkSqlValidator extends Logger {
 
@@ -47,7 +46,6 @@ object FlinkSqlValidator extends Logger {
     def getConfig(sqlDialect: SqlDialect): Config = {
       val tableConfig = new TableConfig()
       tableConfig.getConfiguration.set(ExecutionOptions.RUNTIME_MODE, RuntimeExecutionMode.STREAMING)
-      tableConfig.getConfiguration.set(TableConfigOptions.TABLE_PLANNER, PlannerType.BLINK)
       tableConfig.getConfiguration.set(TableConfigOptions.TABLE_SQL_DIALECT, sqlDialect.name().toLowerCase())
       val conformance = sqlDialect match {
         case HIVE => FlinkSqlConformance.HIVE
