@@ -42,6 +42,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -303,6 +304,17 @@ public class ApplicationController {
             restResponse.data(false).message(error);
         }
         return restResponse;
+    }
+
+    @PostMapping("checkSavepointPath")
+    public RestResponse checkSavepointPath(Application app) throws Exception {
+        String error = applicationService.checkSavepointPath(app);
+
+        if (StringUtils.isBlank(error)) {
+            return RestResponse.create().data(true);
+        } else {
+            return RestResponse.create().data(false).message(error);
+        }
     }
 
 }
