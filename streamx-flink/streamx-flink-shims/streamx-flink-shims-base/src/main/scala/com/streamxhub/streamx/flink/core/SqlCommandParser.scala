@@ -26,16 +26,12 @@ import java.util.regex.{Matcher, Pattern}
 import java.lang.{Boolean => JavaBool}
 import java.util.Scanner
 import scala.collection.mutable.ListBuffer
-import scala.collection.{immutable, mutable}
+import scala.collection.immutable
 import scala.util.control.Breaks.{break, breakable}
 
 object SqlCommandParser extends Logger {
 
-  implicit object SqlOrdering extends Ordering[SqlCommandCall] {
-    override def compare(x: SqlCommandCall, y: SqlCommandCall): Int = x.lineStart - y.lineStart
-  }
-
-  def parseSQL(sql: String, validationCallback: FlinkSqlValidationResult => Unit = null): Set[SqlCommandCall] = {
+  def parseSQL(sql: String, validationCallback: FlinkSqlValidationResult => Unit = null): List[SqlCommandCall] = {
     val sqlEmptyError = "verify failed: flink sql cannot be empty."
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
     val sqlSegments = SqlSplitter.splitSql(sql)
@@ -54,7 +50,7 @@ object SqlCommandParser extends Logger {
           throw new IllegalArgumentException(sqlEmptyError)
         }
       case segments =>
-        val calls = new mutable.TreeSet[SqlCommandCall]
+        val calls = new ListBuffer[SqlCommandCall]
         for (segment <- segments) {
           parseLine(segment) match {
             case Some(x) => calls += x
@@ -76,7 +72,7 @@ object SqlCommandParser extends Logger {
           }
         }
 
-        calls.toSet match {
+        calls.toList match {
           case c if c.isEmpty =>
             if (validationCallback != null) {
               validationCallback(
@@ -90,7 +86,7 @@ object SqlCommandParser extends Logger {
             } else {
               throw new UnsupportedOperationException("flink sql syntax error, no executable sql")
             }
-          case r => r
+          case r => r.sortWith((a, b) => a.lineStart < b.lineStart)
         }
     }
   }
@@ -205,7 +201,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_VIEW extends SqlCommand(
     "create view",
-    "CREATE\\s+(TEMPORARY\\s+|)VIEW\\s+(\\S+)\\s+AS\\s+(.*)"
+    "CREATE\\s+(TEMPORARY\\s+|)VIEW\\s+(\\S+)\\s+AS\\s+SELECT\\s+(.*)"
   )
 
   /**
@@ -217,7 +213,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_FUNCTION extends SqlCommand(
     "create function",
-    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.*)"
+    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(.*)AS\\s+([A-Za-z].+)\\s+LANGUAGE\\s+(JAVA|SCALA|PYTHON)\\s+.*)"
   )
 
   //----DROP Statements----------------
@@ -585,7 +581,7 @@ object SqlSplitter {
    * @param sql
    * @return
    */
-  def splitSql(sql: String): Set[SqlSegment] = {
+  def splitSql(sql: String): List[SqlSegment] = {
     val queries = ListBuffer[String]()
     val lastIndex = if (sql != null && sql.nonEmpty) sql.length - 1 else 0
     var query = new StringBuilder
@@ -737,20 +733,17 @@ object SqlSplitter {
       }
     }
 
-    implicit object SqlOrdering extends Ordering[SqlSegment] {
-      override def compare(x: SqlSegment, y: SqlSegment): Int = x.start - y.start
-    }
-
-    val set = new mutable.TreeSet[SqlSegment]
+    val set = new ListBuffer[SqlSegment]
     refinedQueries.foreach(x => {
       val line = lineNumMap(x._1)
       set += SqlSegment(line._1, line._2, x._2)
     })
-    set.toSet
+    set.toList.sortWith((a, b) => a.start < b.start)
   }
 
   /**
    * extract line breaks
+   *
    * @param text
    * @return
    */

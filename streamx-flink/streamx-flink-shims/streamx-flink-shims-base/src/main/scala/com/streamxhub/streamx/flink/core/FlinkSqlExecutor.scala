@@ -170,8 +170,8 @@ object FlinkSqlExecutor extends Logger {
         case _ =>
       }
     } else {
-      logError("An 'INSERT' statement is required to trigger the execution of the FLink task.")
-      throw new RuntimeException("An INSERT statement is required to trigger the execution of the FLink task.")
+      logError("No 'INSERT' statement to trigger the execution of the Flink job.")
+      throw new RuntimeException("No 'INSERT' statement to trigger the execution of the Flink job.")
     }
 
     logInfo(s"\n\n\n==============flinkSql==============\n\n $flinkSql\n\n============================\n\n\n")
