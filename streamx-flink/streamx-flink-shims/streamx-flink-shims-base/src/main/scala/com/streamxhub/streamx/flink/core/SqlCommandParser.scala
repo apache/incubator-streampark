@@ -19,19 +19,23 @@
 package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType
-import com.streamxhub.streamx.common.util.SqlSplitter.SqlSegment
-import com.streamxhub.streamx.common.util.{Logger, SqlSplitter}
+import com.streamxhub.streamx.common.util.Logger
 import enumeratum.EnumEntry
 
 import java.util.regex.{Matcher, Pattern}
 import java.lang.{Boolean => JavaBool}
-import scala.collection.immutable
-import scala.collection.mutable.ArrayBuffer
+import java.util.Scanner
+import scala.collection.mutable.ListBuffer
+import scala.collection.{immutable, mutable}
 import scala.util.control.Breaks.{break, breakable}
 
 object SqlCommandParser extends Logger {
 
-  def parseSQL(sql: String, validationCallback: FlinkSqlValidationResult => Unit = null): List[SqlCommandCall] = {
+  implicit object SqlOrdering extends Ordering[SqlCommandCall] {
+    override def compare(x: SqlCommandCall, y: SqlCommandCall): Int = x.lineStart - y.lineStart
+  }
+
+  def parseSQL(sql: String, validationCallback: FlinkSqlValidationResult => Unit = null): Set[SqlCommandCall] = {
     val sqlEmptyError = "verify failed: flink sql cannot be empty."
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
     val sqlSegments = SqlSplitter.splitSql(sql)
@@ -50,7 +54,7 @@ object SqlCommandParser extends Logger {
           throw new IllegalArgumentException(sqlEmptyError)
         }
       case segments =>
-        val calls = new ArrayBuffer[SqlCommandCall]
+        val calls = new mutable.TreeSet[SqlCommandCall]
         for (segment <- segments) {
           parseLine(segment) match {
             case Some(x) => calls += x
@@ -72,8 +76,8 @@ object SqlCommandParser extends Logger {
           }
         }
 
-        calls.toList match {
-          case Nil =>
+        calls.toSet match {
+          case c if c.isEmpty =>
             if (validationCallback != null) {
               validationCallback(
                 FlinkSqlValidationResult(
@@ -92,7 +96,6 @@ object SqlCommandParser extends Logger {
   }
 
   private[this] def parseLine(sqlSegment: SqlSegment): Option[SqlCommandCall] = {
-    // parse
     val sqlCommand = SqlCommand.get(sqlSegment.sql.trim)
     if (sqlCommand == null) None else {
       val matcher = sqlCommand.matcher
@@ -149,9 +152,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "(SELECT\\s+.*)"
   )
 
-
   //----CREATE Statements----------------
-
 
   /**
    * <pre>
@@ -164,7 +165,6 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "(CREATE\\s+CATALOG\\s+.*)"
   )
 
-
   /**
    * <pre>
    * CREATE DATABASE [IF NOT EXISTS] [catalog_name.]db_name<br>
@@ -176,7 +176,6 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "create database",
     "(CREATE\\s+DATABASE\\s+.*)"
   )
-
 
   /**
    * <pre>
@@ -220,7 +219,6 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "create function",
     "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.*)"
   )
-
 
   //----DROP Statements----------------
 
@@ -276,7 +274,6 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "drop function",
     "(DROP\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.*)"
   )
-
 
   //----ALTER Statements
 
@@ -465,7 +462,6 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     Converters.NO_OPERANDS
   )
 
-
   //----LOAD Statements
 
   /**
@@ -504,7 +500,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     }
   )
 
-  // ----SET Statements --------------------------------------------------------------------------------------------------------------------
+  // ----SET Statements
 
   /**
    * RESET ('key')
@@ -541,7 +537,6 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     Converters.NO_OPERANDS
   )
 
-
   private[this] def cleanUp(sql: String): String = sql.trim.replaceAll("^(['\"])|(['\"])$", "")
 
 }
@@ -565,3 +560,236 @@ case class FlinkSqlValidationResult(success: JavaBool = true,
                                     sql: String = null,
                                     exception: String = null
                                    )
+
+case class SqlSegment(start: Int, end: Int, sql: String)
+
+object SqlSplitter {
+
+  private lazy val singleLineCommentPrefixList = Set[String]("--")
+
+  /**
+   * Split whole text into multiple sql statements.
+   * Two Steps:
+   * Step 1, split the whole text into multiple sql statements.
+   * Step 2, refine the results. Replace the preceding sql statements with empty lines, so that
+   * we can get the correct line number in the parsing error message.
+   * e.g:
+   * select a from table_1;
+   * select a from table_2;
+   * select a from table_3;
+   * The above text will be splitted into:
+   * sql_1: select a from table_1
+   * sql_2: \nselect a from table_2
+   * sql_3: \n\nselect a from table_3
+   *
+   * @param sql
+   * @return
+   */
+  def splitSql(sql: String): Set[SqlSegment] = {
+    val queries = ListBuffer[String]()
+    val lastIndex = if (sql != null && sql.nonEmpty) sql.length - 1 else 0
+    var query = new StringBuilder
+
+    var multiLineComment = false
+    var singleLineComment = false
+    var singleQuoteString = false
+    var doubleQuoteString = false
+    var lineNum: Int = 0
+    val lineNumMap = new collection.mutable.HashMap[Int, (Int, Int)]()
+
+    // Whether each line of the record is empty. If it is empty, it is false. If it is not empty, it is true
+    val lineDescriptor = {
+      val scanner = new Scanner(sql)
+      val descriptor = new collection.mutable.HashMap[Int, Boolean]
+      var lineNumber = 0
+      var startComment = false
+      var hasComment = false
+
+      while (scanner.hasNextLine) {
+        lineNumber += 1
+        val line = scanner.nextLine().trim
+        val nonEmpty = line.nonEmpty && !line.startsWith("--")
+        if (line.startsWith("/*")) {
+          startComment = true
+          hasComment = true
+        }
+
+        descriptor += lineNumber -> (nonEmpty && !hasComment)
+
+        if (startComment && line.endsWith("*/")) {
+          startComment = false
+          hasComment = false
+        }
+      }
+      descriptor
+    }
+
+    def findStartLine(num: Int): Int = if (num >= lineDescriptor.size || lineDescriptor(num)) num else findStartLine(num + 1)
+
+    def markLineNumber(): Unit = {
+      val line = lineNum + 1
+      if (lineNumMap.isEmpty) {
+        lineNumMap += (0 -> (findStartLine(1) -> line))
+      } else {
+        val index = lineNumMap.size
+        val start = lineNumMap(lineNumMap.size - 1)._2 + 1
+        lineNumMap += (index -> (findStartLine(start) -> line))
+      }
+    }
+
+    for (idx <- 0 until sql.length) {
+
+      if (sql.charAt(idx) == '\n') lineNum += 1
+
+      breakable {
+        val ch = sql.charAt(idx)
+
+        // end of single line comment
+        if (singleLineComment && (ch == '\n')) {
+          singleLineComment = false
+          query += ch
+          if (idx == lastIndex && query.toString.trim.nonEmpty) {
+            // add query when it is the end of sql.
+            queries += query.toString
+          }
+          break()
+        }
+
+        // end of multiple line comment
+        if (multiLineComment && (idx - 1) >= 0 && sql.charAt(idx - 1) == '/'
+          && (idx - 2) >= 0 && sql.charAt(idx - 2) == '*') {
+          multiLineComment = false
+        }
+
+        // single quote start or end mark
+        if (ch == '\'' && !(singleLineComment || multiLineComment)) {
+          if (singleQuoteString) {
+            singleQuoteString = false
+          } else if (!doubleQuoteString) {
+            singleQuoteString = true
+          }
+        }
+
+        // double quote start or end mark
+        if (ch == '"' && !(singleLineComment || multiLineComment)) {
+          if (doubleQuoteString && idx > 0) {
+            doubleQuoteString = false
+          } else if (!singleQuoteString) {
+            doubleQuoteString = true
+          }
+        }
+
+        // single line comment or multiple line comment start mark
+        if (!singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment && idx < lastIndex) {
+          if (isSingleLineComment(sql.charAt(idx), sql.charAt(idx + 1))) {
+            singleLineComment = true
+          } else if (sql.charAt(idx) == '/' && sql.length > (idx + 2)
+            && sql.charAt(idx + 1) == '*' && sql.charAt(idx + 2) != '+') {
+            multiLineComment = true
+          }
+        }
+
+        if (ch == ';' && !singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment) {
+          markLineNumber()
+          // meet the end of semicolon
+          if (query.toString.trim.nonEmpty) {
+            queries += query.toString
+            query = new StringBuilder
+          }
+        } else if (idx == lastIndex) {
+          markLineNumber()
+
+          // meet the last character
+          if (!singleLineComment && !multiLineComment) {
+            query += ch
+          }
+
+          if (query.toString.trim.nonEmpty) {
+            queries += query.toString
+            query = new StringBuilder
+          }
+        } else if (!singleLineComment && !multiLineComment) {
+          // normal case, not in single line comment and not in multiple line comment
+          query += ch
+        } else if (ch == '\n') {
+          query += ch
+        }
+      }
+    }
+
+    val refinedQueries = new collection.mutable.HashMap[Int, String]()
+    for (i <- queries.indices) {
+      val currStatement = queries(i)
+      if (isSingleLineComment(currStatement) || isMultipleLineComment(currStatement)) {
+        // transform comment line as blank lines
+        if (refinedQueries.nonEmpty) {
+          val lastRefinedQuery = refinedQueries.last
+          refinedQueries(refinedQueries.size - 1) = lastRefinedQuery + extractLineBreaks(currStatement)
+        }
+      } else {
+        var linesPlaceholder = ""
+        if (i > 0) {
+          linesPlaceholder = extractLineBreaks(refinedQueries(i - 1))
+        }
+        // add some blank lines before the statement to keep the original line number
+        val refinedQuery = linesPlaceholder + currStatement
+        refinedQueries += refinedQueries.size -> refinedQuery
+      }
+    }
+
+    implicit object SqlOrdering extends Ordering[SqlSegment] {
+      override def compare(x: SqlSegment, y: SqlSegment): Int = x.start - y.start
+    }
+
+    val set = new mutable.TreeSet[SqlSegment]
+    refinedQueries.foreach(x => {
+      val line = lineNumMap(x._1)
+      set += SqlSegment(line._1, line._2, x._2)
+    })
+    set.toSet
+  }
+
+  /**
+   * extract line breaks
+   * @param text
+   * @return
+   */
+  private[this] def extractLineBreaks(text: String) = {
+    val builder = new StringBuilder
+    for (i <- 0 until text.length) {
+      if (text.charAt(i) == '\n') {
+        builder.append('\n')
+      }
+    }
+    builder.toString
+  }
+
+  private[this] def isSingleLineComment(text: String) = text.trim.startsWith("--")
+
+  private[this] def isMultipleLineComment(text: String) = text.trim.startsWith("/*") && text.trim.endsWith("*/")
+
+  /**
+   * check single-line comment
+   *
+   * @param curChar
+   * @param nextChar
+   * @return
+   */
+  private[this] def isSingleLineComment(curChar: Char, nextChar: Char): Boolean = {
+    var flag = false
+    for (singleCommentPrefix <- singleLineCommentPrefixList) {
+      if (singleCommentPrefix.length == 1) {
+        if (curChar == singleCommentPrefix.charAt(0)) {
+          flag = true
+        }
+      }
+      if (singleCommentPrefix.length == 2) {
+        if (curChar == singleCommentPrefix.charAt(0) && nextChar == singleCommentPrefix.charAt(1)) {
+          flag = true
+        }
+      }
+    }
+    flag
+  }
+
+}
