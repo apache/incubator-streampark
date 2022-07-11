@@ -37,6 +37,7 @@ import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
+import com.streamxhub.streamx.flink.kubernetes.network.FlinkJobIngress;
 import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -111,6 +112,7 @@ public class K8sFlinkChangeEventListener {
         FlinkAppState state = FlinkAppState.of(app.getState());
         if (FlinkAppState.FAILED.equals(state) || FlinkAppState.LOST.equals(state)
             || FlinkAppState.RESTARTING.equals(state) || FlinkAppState.FINISHED.equals(state)) {
+            FlinkJobIngress.deleteIngress(app.getClusterId(), app.getK8sNamespace());
             Application finalApp = app;
             executor.execute(() -> alertService.alert(finalApp, state));
         }

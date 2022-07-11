@@ -80,7 +80,9 @@ import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
+import com.streamxhub.streamx.flink.kubernetes.network.FlinkJobIngress;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildResult;
+import com.streamxhub.streamx.flink.packer.pipeline.DockerImageBuildResponse;
 import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse;
 import com.streamxhub.streamx.flink.submit.FlinkSubmitter;
 import com.streamxhub.streamx.flink.submit.bean.CancelRequest;
@@ -1261,6 +1263,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             kubernetesSubmitParam,
             extraParameter
         );
+
+        DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
+
+        String ingressTemplates = application.getIngressTemplate();
+        String domainName = application.getDefaultModeIngress();
+        if (StringUtils.isNotBlank(ingressTemplates)) {
+            String ingressOutput = result.workspacePath() + "/ingress.yaml";
+            FlinkJobIngress.configureIngress(ingressOutput);
+        }
+        if (StringUtils.isNotBlank(domainName)) {
+            FlinkJobIngress.configureIngress(domainName, application.getClusterId(), application.getK8sNamespace());
+        }
 
         CompletableFuture<SubmitResponse> future = CompletableFuture.supplyAsync(() -> FlinkSubmitter.submit(submitRequest), executorService);
 

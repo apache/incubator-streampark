@@ -115,7 +115,8 @@ case class FlinkK8sApplicationBuildRequest(appName: String,
                                            flinkBaseImage: String,
                                            flinkPodTemplate: K8sPodTemplates,
                                            integrateWithHadoop: Boolean = false,
-                                           dockerConfig: DockerConf
+                                           dockerConfig: DockerConf,
+                                           ingressTemplate: String
                                           ) extends FlinkK8sBuildParam
 
 case class FlinkRemotePerJobBuildRequest(appName: String,

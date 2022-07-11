@@ -243,6 +243,9 @@ public class Application implements Serializable {
     private String k8sJmPodTemplate;
     private String k8sTmPodTemplate;
 
+    private String ingressTemplate;
+    private String defaultModeIngress;
+
     /**
      * 1: cicd (build from csv)
      * 2: upload (upload local jar job)
@@ -296,6 +299,22 @@ public class Application implements Serializable {
     private transient Integer buildStatus;
 
     private transient AppControl appControl;
+
+    public String getIngressTemplate() {
+        return ingressTemplate;
+    }
+
+    public void setIngressTemplate(String ingressTemplate) {
+        this.ingressTemplate = ingressTemplate;
+    }
+
+    public String getDefaultModeIngress() {
+        return defaultModeIngress;
+    }
+
+    public void setDefaultModeIngress(String defaultModeIngress) {
+        this.defaultModeIngress = defaultModeIngress;
+    }
 
     public void setK8sNamespace(String k8sNamespace) {
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE() : k8sNamespace;
