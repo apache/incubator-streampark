@@ -1040,6 +1040,58 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public String checkSavepointPath(Application appParam) throws Exception {
+        Application application = getById(appParam.getId());
+
+        String savepointPath = FlinkSubmitter
+            .extractDynamicOptionAsJava(application.getDynamicOptions())
+            .get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+
+        if (StringUtils.isBlank(savepointPath)) {
+            if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+                FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+                assert cluster != null;
+                Map<String, String> config = cluster.getFlinkConfig();
+                if (!config.isEmpty()) {
+                    savepointPath = config.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+                }
+            } else if (application.isStreamXJob() || application.isFlinkSqlJob()) {
+                ApplicationConfig applicationConfig = configService.getEffective(application.getId());
+                if (applicationConfig != null) {
+                    Map<String, String> map = applicationConfig.readConfig();
+                    boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()));
+                    if (checkpointEnable) {
+                        savepointPath = map.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR());
+                    }
+                }
+            } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+                FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
+                savepointPath = flinkEnv.convertFlinkYamlAsMap().get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+            }
+        }
+
+        if (StringUtils.isNotBlank(savepointPath)) {
+            final URI uri = URI.create(savepointPath);
+            final String scheme = uri.getScheme();
+            final String pathPart = uri.getPath();
+
+            String error = null;
+
+            if (scheme == null) {
+                error = "This state.savepoints.dir value " + savepointPath + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
+            } else if (pathPart == null) {
+                error = "This state.savepoints.dir value " + savepointPath + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
+            } else if (pathPart.length() == 0 || pathPart.equals("/")) {
+                error = "This state.savepoints.dir value " + savepointPath + " Cannot use the root directory for checkpoints.";
+            }
+
+            return error;
+        } else {
+            return "When custom savepoint is not set, state.savepoints.dir needs to be set in Dynamic Option or flick-conf.yaml of application";
+        }
+    }
+
+    @Override
     public void updateTracking(Application appParam) {
         this.baseMapper.updateTracking(appParam);
     }

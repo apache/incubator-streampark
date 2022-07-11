@@ -305,4 +305,15 @@ public class ApplicationController {
         return restResponse;
     }
 
+    @PostMapping("checkSavepointPath")
+    public RestResponse checkSavepointPath(Application app) throws Exception {
+        String error = applicationService.checkSavepointPath(app);
+
+        if (error == null) {
+            return RestResponse.create().data(true);
+        } else {
+            return RestResponse.create().data(false).message(error);
+        }
+    }
+
 }

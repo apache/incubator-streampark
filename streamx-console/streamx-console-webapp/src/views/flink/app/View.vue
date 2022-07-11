@@ -1075,6 +1075,7 @@ import {history, latest} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
 import {weburl} from '@api/setting'
 import {build, detail as buildDetail} from '@/api/appBuild'
+import {checkSavepointPath} from '@api/application'
 import {activeURL} from '@/api/flinkCluster'
 import {Terminal} from 'xterm'
 import 'xterm/css/xterm.css'
@@ -1722,9 +1723,20 @@ export default {
           }
         })
       } else {
-        this.handleStopAction(stopReq)
+        checkSavepointPath({
+            'id': this.application.id
+        }).then((resp) => {
+          if (resp.data === true) {
+            this.handleStopAction(stopReq)
+          } else {
+            this.$swal.fire(
+                'Failed',
+                resp.message,
+                'error'
+            )
+          }
+        })
       }
-
     },
 
     handleStopAction(stopReq) {
