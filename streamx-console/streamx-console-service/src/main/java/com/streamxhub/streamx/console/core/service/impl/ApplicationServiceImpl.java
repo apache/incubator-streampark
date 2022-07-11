@@ -1040,7 +1040,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    @RefreshCache
     public String checkSavepointPath(Application appParam) throws Exception {
         Application application = getById(appParam.getId());
 
