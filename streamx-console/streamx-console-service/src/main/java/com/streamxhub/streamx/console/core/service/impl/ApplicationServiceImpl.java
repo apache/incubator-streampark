@@ -1075,7 +1075,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             final String scheme = uri.getScheme();
             final String pathPart = uri.getPath();
 
-            String error = "";
+            String error = null;
 
             if (scheme == null) {
                 error = "This state.savepoints.dir value " + savepointPath + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
