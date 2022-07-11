@@ -1079,11 +1079,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             String error = "";
 
             if (scheme == null) {
-                error = "This state.savepoints.dir value "+ savepointPath + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
+                error = "This state.savepoints.dir value " + savepointPath + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
             } else if (pathPart == null) {
-                error = "This state.savepoints.dir value "+ savepointPath + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
+                error = "This state.savepoints.dir value " + savepointPath + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
             } else if (pathPart.length() == 0 || pathPart.equals("/")) {
-                error = "This state.savepoints.dir value "+ savepointPath + " Cannot use the root directory for checkpoints.";
+                error = "This state.savepoints.dir value " + savepointPath + " Cannot use the root directory for checkpoints.";
             }
 
             return error;
