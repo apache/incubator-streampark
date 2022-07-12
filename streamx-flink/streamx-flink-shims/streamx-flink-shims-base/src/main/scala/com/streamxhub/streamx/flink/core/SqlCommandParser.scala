@@ -201,7 +201,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_VIEW extends SqlCommand(
     "create view",
-    "CREATE\\s+(TEMPORARY\\s+|)VIEW\\s+(\\S+)\\s+AS\\s+SELECT\\s+(.*)"
+    "(CREATE\\s+(TEMPORARY\\s+|)VIEW\\s+(\\S+)\\s+AS\\s+SELECT\\s+.*)"
   )
 
   /**
@@ -213,7 +213,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_FUNCTION extends SqlCommand(
     "create function",
-    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(.*)AS\\s+([A-Za-z].+)\\s+LANGUAGE\\s+(JAVA|SCALA|PYTHON)\\s+.*)"
+    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(.*)\\s+AS\\s+.*)"
   )
 
   //----DROP Statements----------------
