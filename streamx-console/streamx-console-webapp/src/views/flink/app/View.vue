@@ -638,9 +638,8 @@
                           <a-tag color="blue"> {{ layer.layerId }}</a-tag>
                           <a-tag>{{ layer.status }}</a-tag>
                           <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{
-                              layer.totalMb
-                            }} MB</span>
+                            <span style="font-size: 12px; text-align: right">
+                              {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
                           </template>
                         </a-space>
                       </a-row>
@@ -678,9 +677,8 @@
                           <a-tag color="blue"> {{ layer.layerId }}</a-tag>
                           <a-tag>{{ layer.status }}</a-tag>
                           <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{
-                              layer.totalMb
-                            }} MB</span>
+                            <span style="font-size: 12px; text-align: right">
+                              {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
                           </template>
                         </a-space>
                       </a-row>
@@ -817,8 +815,8 @@
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
-              v-model="savePoint"
-              v-decorator="['savePoint']"/>
+              v-model="startSavePointed"
+              v-decorator="['startSavePointed']"/>
             <span
               class="conf-switch"
               style="color:darkgrey"> restore the application from savepoint or latest checkpoint</span>
@@ -826,7 +824,7 @@
 
           <a-form-item
             class="def-margin-bottom"
-            v-if="savePoint && !latestSavePoint "
+            v-if="startSavePointed && !latestSavePoint "
             label="savepoint"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
@@ -834,7 +832,7 @@
               v-if="historySavePoint && historySavePoint.length>0"
               mode="combobox"
               allow-clear
-              v-decorator="['savepoint',{ rules: [{ required: true } ]}]">
+              v-decorator="['startSavePoint',{ rules: [{ required: true } ]}]">
               <a-select-option
                 v-for="(k ,i) in historySavePoint"
                 :key="i"
@@ -855,14 +853,14 @@
               v-if="!historySavePoint || (historySavePoint && historySavePoint.length === 0)"
               type="text"
               placeholder="Please enter savepoint manually"
-              v-decorator="['savepoint',{ rules: [{ required: true } ]}]"/>
+              v-decorator="['startSavePoint',{ rules: [{ required: true } ]}]"/>
             <span
               class="conf-switch"
               style="color:darkgrey"> restore the application from savepoint or latest checkpoint</span>
           </a-form-item>
 
           <a-form-item
-            v-if="savePoint"
+            v-if="startSavePointed"
             label="ignore restored"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
@@ -915,8 +913,8 @@
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
-              v-model="savePoint"
-              v-decorator="['savePoint']"/>
+              v-model="stopSavePointed"
+              v-decorator="['stopSavePointed']"/>
             <span
               class="conf-switch"
               style="color:darkgrey"> trigger savePoint before taking cancel </span>
@@ -926,7 +924,7 @@
             label="Custom SavePoint"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
-            v-show="savePoint">
+            v-show="stopSavePointed">
             <a-input
               type="text"
               placeholder="Entry the custom savepoint path"
@@ -941,12 +939,12 @@
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
-              placeholder="Send max watermark before taking stoping"
+              placeholder="Send max watermark before job stopped"
               v-model="drain"
               v-decorator="['drain']"/>
             <span
               class="conf-switch"
-              style="color:darkgrey"> Send max watermark before stoping</span>
+              style="color:darkgrey"> Send max watermark before stopped</span>
           </a-form-item>
         </a-form>
 
@@ -1060,6 +1058,7 @@ import {mapActions} from 'vuex'
 import {
   cancel,
   clean,
+  checkSavepointPath,
   dashboard,
   downLog,
   forcedStop,
@@ -1075,7 +1074,6 @@ import {history, latest} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
 import {weburl} from '@api/setting'
 import {build, detail as buildDetail} from '@/api/appBuild'
-import {checkSavepointPath} from '@api/application'
 import {activeURL} from '@/api/flinkCluster'
 import {Terminal} from 'xterm'
 import 'xterm/css/xterm.css'
@@ -1116,7 +1114,8 @@ export default {
       formStartCheckPoint: null,
       formMapping: null,
       drain: false,
-      savePoint: true,
+      startSavePointed: true,
+      stopSavePointed: true,
       customSavepoint: null,
       flameGraph: false,
       restart: false,
@@ -1129,7 +1128,7 @@ export default {
       searchInput: null,
       optionApps: {
         'starting': new Map(),
-        'stoping': new Map(),
+        'stopping': new Map(),
         'launch': new Map()
       },
       searchedColumn: null,
@@ -1628,7 +1627,7 @@ export default {
         this.allowNonRestoredState = false
         this.formStartCheckPoint.resetFields()
         this.application = null
-        this.savePoint = true
+        this.startSavePointed = true
         this.flameGraph = false
       }, 1000)
     },
@@ -1637,9 +1636,9 @@ export default {
       this.formStartCheckPoint.validateFields((err, values) => {
         if (!err) {
           const id = this.application.id
-          const savePointed = this.savePoint
+          const savePointed = this.startSavePointed
           const flameGraph = this.flameGraph
-          const savePoint = savePointed ? (values['savepoint'] || this.latestSavePoint.savePoint) : null
+          const savePointPath = savePointed ? (values['startSavePoint'] || this.latestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
           this.optionApps.starting.set(id, new Date().getTime())
           this.handleMapUpdate('starting')
@@ -1654,7 +1653,7 @@ export default {
             start({
               id: id,
               savePointed: savePointed,
-              savePoint: savePoint,
+              savePoint: savePointPath,
               flameGraph: flameGraph,
               allowNonRestored: allowNonRestoredState
             }).then((resp) => {
@@ -1682,7 +1681,7 @@ export default {
     },
 
     handleCancel(app) {
-      if (!this.optionApps.stoping.get(app.id) || app['optionState'] === 0) {
+      if (!this.optionApps.stopping.get(app.id) || app['optionState'] === 0) {
         this.stopVisible = true
         this.application = app
       }
@@ -1693,7 +1692,7 @@ export default {
       setTimeout(() => {
         this.formStopSavePoint.resetFields()
         this.drain = false
-        this.savePoint = true
+        this.stopSavePointed = true
         this.application = null
       }, 1000)
     },
@@ -1701,10 +1700,10 @@ export default {
     handleStopOk() {
       const customSavePoint = this.customSavepoint
       const id = this.application.id
-      const savePointed = this.savePoint
+      const savePointed = this.stopSavePointed
       const drain = this.drain
-      this.optionApps.stoping.set(id, new Date().getTime())
-      this.handleMapUpdate('stoping')
+      this.optionApps.stopping.set(id, new Date().getTime())
+      this.handleMapUpdate('stopping')
       this.handleStopCancel()
 
       const stopReq = {
@@ -1714,34 +1713,38 @@ export default {
         savePoint: customSavePoint
       }
 
-      if ( customSavePoint != null ) {
-        verifySchema({
-          'path': customSavePoint
-        }).then(resp => {
-          if (resp.data === false) {
-            this.$swal.fire(
-                'Failed',
-                'custom savePoint path is invalid, ' + resp.message,
-                'error'
-            )
-          } else {
-            this.handleStopAction(stopReq)
-          }
-        })
+      if (savePointed) {
+        if ( customSavePoint != null ) {
+          verifySchema({
+            path: customSavePoint
+          }).then(resp => {
+            if (resp.data === false) {
+              this.$swal.fire(
+                  'Failed',
+                  'custom savePoint path is invalid, ' + resp.message,
+                  'error'
+              )
+            } else {
+              this.handleStopAction(stopReq)
+            }
+          })
+        } else {
+          checkSavepointPath({
+            id: id
+          }).then((resp) => {
+            if (resp.data === true) {
+              this.handleStopAction(stopReq)
+            } else {
+              this.$swal.fire(
+                  'Failed',
+                  resp.message,
+                  'error'
+              )
+            }
+          })
+        }
       } else {
-        checkSavepointPath({
-            'id': this.application.id
-        }).then((resp) => {
-          if (resp.data === true) {
-            this.handleStopAction(stopReq)
-          } else {
-            this.$swal.fire(
-                'Failed',
-                resp.message,
-                'error'
-            )
-          }
-        })
+        this.handleStopAction(stopReq)
       }
     },
 
@@ -1840,7 +1843,7 @@ export default {
             option = 'starting'
             break
           case 4:
-            option = 'savepointing'
+            option = 'savePointing'
             break
         }
       }
@@ -1856,7 +1859,7 @@ export default {
         cancelButtonColor: '#3085d6',
       }).then((result) => {
         if (result.isConfirmed) {
-          this.$swal.fire('forced stoping', '', 'success')
+          this.$swal.fire('forced stopping', '', 'success')
           forcedStop({
             id: app.id
           }).then((resp) => {
@@ -1967,10 +1970,10 @@ export default {
                 this.handleMapUpdate('starting')
               }
             }
-            if (this.optionApps.stoping.get(x.id)) {
-              if (timestamp - this.optionApps.stoping.get(x.id) > this.queryInterval) {
-                this.optionApps.stoping.delete(x.id)
-                this.handleMapUpdate('stoping')
+            if (this.optionApps.stopping.get(x.id)) {
+              if (timestamp - this.optionApps.stopping.get(x.id) > this.queryInterval) {
+                this.optionApps.stopping.delete(x.id)
+                this.handleMapUpdate('stopping')
               }
             }
             if (this.optionApps.launch.get(x.id)) {

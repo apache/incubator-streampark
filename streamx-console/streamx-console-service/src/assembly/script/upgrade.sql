@@ -285,20 +285,19 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- ------------------------------------- version: 1.2.4 START ---------------------------------------
 
 DROP TABLE IF EXISTS `t_alert_config`;
-CREATE TABLE `t_alert_config`
-(
+CREATE TABLE `t_alert_config` (
   `ID`                   bigint   NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `USER_ID`              bigint                                  DEFAULT NULL,
+  `USER_ID`              bigint   DEFAULT NULL,
   `ALERT_NAME`           varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '报警组名称',
-  `ALERT_TYPE`           int                                     DEFAULT 0 COMMENT '报警类型',
+  `ALERT_TYPE`           int DEFAULT 0 COMMENT '报警类型',
   `EMAIL_PARAMS`         varchar(255) COLLATE utf8mb4_general_ci COMMENT '邮件报警配置信息',
   `SMS_PARAMS`           text COLLATE utf8mb4_general_ci COMMENT '短信报警配置信息',
   `DING_TALK_PARAMS`     text COLLATE utf8mb4_general_ci COMMENT '钉钉报警配置信息',
   `WE_COM_PARAMS`        varchar(255) COLLATE utf8mb4_general_ci COMMENT '企微报警配置信息',
   `HTTP_CALLBACK_PARAMS` text COLLATE utf8mb4_general_ci COMMENT '报警http回调配置信息',
   `LARK_PARAMS`          text COLLATE utf8mb4_general_ci COMMENT '飞书报警配置信息',
-  `CREATE_TIME`          datetime NOT NULL                       DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `MODIFY_TIME`          datetime NOT NULL                       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  `CREATE_TIME`          datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `MODIFY_TIME`          datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   INDEX `INX_USER_ID` (`USER_ID`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
@@ -312,5 +311,5 @@ ALTER TABLE t_setting modify column `VALUE` text ;
 INSERT INTO `t_setting` VALUES (14, 'docker.register.namespace', NULL, 'Docker Register Image namespace', 'Docker命名空间', 1);
 ALTER TABLE `t_flink_app` ADD COLUMN `INGRESS_TEMPLATE` text COLLATE utf8mb4_general_ci COMMENT 'ingress模版文件';
 ALTER TABLE `t_flink_app` ADD COLUMN `DEFAULT_MODE_INGRESS` text COLLATE utf8mb4_general_ci COMMENT '配置ingress的域名';
-ALTER TABLE `t_flink_app` ADD COLUMN `MODIFY_TIME` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间' AFTER CREATE_TIME;
--- ------------------------------------- version: 1.2.4 END ---------------------------------------
+ALTER TABLE `t_flink_app` ADD COLUMN `MODIFY_TIME` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER CREATE_TIME;
+---------------------------------------- version: 1.2.4 END ---------------------------------------
