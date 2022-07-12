@@ -1060,6 +1060,7 @@ import {mapActions} from 'vuex'
 import {
   cancel,
   clean,
+  checkSavepointPath,
   dashboard,
   downLog,
   forcedStop,
@@ -1075,7 +1076,6 @@ import {history, latest} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
 import {weburl} from '@api/setting'
 import {build, detail as buildDetail} from '@/api/appBuild'
-import {checkSavepointPath} from '@api/application'
 import {activeURL} from '@/api/flinkCluster'
 import {Terminal} from 'xterm'
 import 'xterm/css/xterm.css'
@@ -1129,7 +1129,7 @@ export default {
       searchInput: null,
       optionApps: {
         'starting': new Map(),
-        'stoping': new Map(),
+        'stopping': new Map(),
         'launch': new Map()
       },
       searchedColumn: null,
@@ -1704,7 +1704,7 @@ export default {
       const savePointed = this.savePoint
       const drain = this.drain
       this.optionApps.stoping.set(id, new Date().getTime())
-      this.handleMapUpdate('stoping')
+      this.handleMapUpdate('stopping')
       this.handleStopCancel()
 
       const stopReq = {
@@ -1730,7 +1730,7 @@ export default {
         })
       } else {
         checkSavepointPath({
-            'id': this.application.id
+          'id': this.application.id
         }).then((resp) => {
           if (resp.data === true) {
             this.handleStopAction(stopReq)
@@ -1856,7 +1856,7 @@ export default {
         cancelButtonColor: '#3085d6',
       }).then((result) => {
         if (result.isConfirmed) {
-          this.$swal.fire('forced stoping', '', 'success')
+          this.$swal.fire('forced stopping', '', 'success')
           forcedStop({
             id: app.id
           }).then((resp) => {
@@ -1970,7 +1970,7 @@ export default {
             if (this.optionApps.stoping.get(x.id)) {
               if (timestamp - this.optionApps.stoping.get(x.id) > this.queryInterval) {
                 this.optionApps.stoping.delete(x.id)
-                this.handleMapUpdate('stoping')
+                this.handleMapUpdate('stopping')
               }
             }
             if (this.optionApps.launch.get(x.id)) {
