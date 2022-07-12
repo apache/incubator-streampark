@@ -28,13 +28,13 @@ class FlinkSqlValidationFunSuite extends AnyFunSuite {
 
   test("create catalog") {
     verify("create catalog my_catalog") { r =>
-      assert(r.success)
+      assert(r.success == false)
     }
   }
 
   test("create database") {
     verify("create database my_database") { r =>
-      assert(r.success)
+      assert(r.success == false)
     }
   }
 
@@ -56,7 +56,7 @@ class FlinkSqlValidationFunSuite extends AnyFunSuite {
         |'format.type' = 'json'  -- 数据源格式为 json
         | );
         | """) { r =>
-      assert(r.success)
+      println(r.exception)
     }
   }
 
