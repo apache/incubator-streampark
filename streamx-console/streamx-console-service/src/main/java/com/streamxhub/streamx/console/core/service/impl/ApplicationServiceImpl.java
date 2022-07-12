@@ -635,6 +635,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setK8sHadoopIntegration(appParam.getK8sHadoopIntegration());
 
             //以下参数发生改变不影响正在运行的任务
+            application.setModifyTime(new Date());
             application.setDescription(appParam.getDescription());
             application.setAlertId(appParam.getAlertId());
             application.setRestartSize(appParam.getRestartSize());
@@ -792,7 +793,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             cancelFuture.cancel(true);
         }
         if (startFuture == null && cancelFuture == null) {
-            this.updateToStoped(app);
+            this.updateToStopped(app);
         }
     }
 
@@ -1003,7 +1004,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             },
             e -> {
                 if (e.getCause() instanceof CancellationException) {
-                    updateToStoped(application);
+                    updateToStopped(application);
                 } else {
                     log.error("stop flink job fail.", e);
                     application.setOptionState(OptionState.NONE.getValue());
@@ -1322,7 +1323,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 savePointService.obsolete(application.getId());
             }, e -> {
                 if (e.getCause() instanceof CancellationException) {
-                    updateToStoped(application);
+                    updateToStopped(application);
                 } else {
                     String exception = ExceptionUtils.stringifyException(e);
                     applicationLog.setException(exception);
@@ -1346,7 +1347,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     }
 
-    private void updateToStoped(Application app) {
+    private void updateToStopped(Application app) {
         Application application = getById(app);
         application.setOptionState(OptionState.NONE.getValue());
         application.setState(FlinkAppState.CANCELED.getValue());

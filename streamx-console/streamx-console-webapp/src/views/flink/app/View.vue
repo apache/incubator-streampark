@@ -1245,6 +1245,12 @@ export default {
         sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
         width: 180
       }, {
+        title: 'Last Modified Time',
+        dataIndex: 'modifyTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'modifyTime' && sortedInfo.order,
+        width: 180
+      }, {
         title: 'Duration',
         dataIndex: 'duration',
         sorter: true,

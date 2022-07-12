@@ -232,6 +232,9 @@ public class Application implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date optionTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date modifyTime;
+
     /**
      * The exposed type of the rest service of K8s(kubernetes.rest-service.exposed.type)
      */
