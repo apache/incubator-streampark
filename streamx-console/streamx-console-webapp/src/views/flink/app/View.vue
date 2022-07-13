@@ -212,14 +212,36 @@
         </a-col>
       </template>
     </a-row>
+
     <a-card
       :bordered="false"
       style="margin-top: 20px">
+
+      <div slot="extra">
+        <a-input-group compact>
+          <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="width: 80px">
+            <a-select-option value="1">JAR</a-select-option>
+            <a-select-option value="2">SQL</a-select-option>
+          </a-select>
+          <a-input-search
+            placeholder="Search..."
+            v-model="searchText"
+            @change="handleSearch"
+            style="margin-left: 16px; width: 250px;" />
+          <a-button
+            type="primary"
+            icon="plus"
+            style="margin-left: 20px"
+            @click="handleAdd">
+            Add New
+          </a-button>
+        </a-input-group>
+      </div>
+
       <!-- 表格区域 -->
       <a-table
         ref="TableInfo"
         :columns="columns"
-        :expand-icon="handleExpandIcon"
         size="middle"
         row-key="id"
         class="app_list"
@@ -230,41 +252,11 @@
         :scroll="{ x: 700 }"
         @change="handleTableChange">
         <a-table
-          slot="expandedRowRender"
           class="expanded-table"
           slot-scope="record"
           v-if="record.state === 5"
           row-key="id"
-          :columns="innerColumns"
-          :data-source="record.expanded"
           :pagination="false"/>
-        <div
-          slot="filterDropdown"
-          slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
-          style="padding: 8px">
-          <a-input
-            v-ant-ref="c => (searchInput = c)"
-            :placeholder="`Search ${column.title}`"
-            :value="selectedKeys[0]"
-            style="width: 220px; margin-bottom: 8px; display: block;"
-            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
-            @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"/>
-          <a-button
-            type="primary"
-            icon="search"
-            size="small"
-            style="width: 90px; margin-right: 8px"
-            @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)">
-            Search
-          </a-button>
-          <a-button
-            size="small"
-            icon="rest"
-            style="width: 90px"
-            @click="() => handleReset(clearFilters)">
-            Reset
-          </a-button>
-        </div>
 
         <a-icon
           slot="filterIcon"
@@ -273,8 +265,8 @@
           :style="{ color: filtered ? '#108ee9' : undefined }"/>
 
         <template
-          slot="customRender"
-          slot-scope="text, record, index, column">
+          slot="jobName"
+          slot-scope="text, record">
           <span
             class="app_type app_jar"
             v-if="record['jobType'] === 1">
@@ -286,76 +278,11 @@
             SQL
           </span>
 
-          <!--有条件搜索-->
-          <template v-if="searchText && searchedColumn === column.dataIndex">
-            <span
-              :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
-              @click="handleView(record)">
-              <template
-                v-if="record.launch === 0"
-                v-for="(fragment, i) in text
-                  .toString()
-                  .substr(0,(text.length > 30 ? 30: text.length ))
-                  .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                <mark
-                  v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                  :key="i"
-                  class="highlight">
-                  {{ fragment }}
-                </mark>
-                <template v-else>
-                  {{ fragment }}
-                </template>
-              </template>
-              <template v-else>
-                <a-tooltip placement="top">
-                  <template slot="title">
-                    {{ text }}
-                  </template>
-                  <template
-                    v-for="(fragment, i) in
-                      text
-                        .toString()
-                        .substr(0,(text.length > 30 ? 30: text.length ))
-                        .toString()
-                        .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                    <mark
-                      v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                      :key="i"
-                      class="highlight">
-                      {{ fragment }}
-                    </mark>
-                    <template v-else>
-                      {{ fragment }}
-                    </template>
-                  </template>
-                </a-tooltip>
-              </template>
-              <span v-if="text.length>30">
-                ...
-              </span>
-            </span>
-          </template>
-          <!--无条件搜索-->
-          <template v-else>
-            <span
-              v-if="column.dataIndex === 'jobName'"
-              :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
-              @click="handleView(record)">
-              <ellipsis
-                :length="30"
-                tooltip>
-                {{ text }}
-              </ellipsis>
-            </span>
-            <span v-else>
-              <ellipsis
-                :length="30"
-                tooltip>
-                {{ text }}
-              </ellipsis>
-            </span>
-          </template>
+          <span
+            class="link"
+            :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
+            @click="handleView(record)">{{ record.jobName }}
+          </span>
 
           <template v-if="record['jobType'] === 1">
             <a-badge
@@ -369,6 +296,18 @@
               count="NEW"
               title="the application has changed."/>
           </template>
+
+        </template>
+
+        <template
+          slot="id"
+          slot-scope="text, record">
+          <span
+            class="link pointer"
+            v-clipboard:copy="record.id"
+            v-clipboard:success="handleCopySuccess">
+            {{ record.id }}
+          </span>
         </template>
 
         <template
@@ -396,28 +335,20 @@
         <template
           slot="launchState"
           slot-scope="text, record">
-          <a-space size="small">
-            <State
-              option="launch"
-              :title="handleLaunchTitle(record.launch)"
-              :data="record"/>
-            <State
-              option="build"
-              click="openBuildProgressDetailDrawer(record)"
-              :data="record"/>
-          </a-space>
+          <State
+            option="launch"
+            :title="handleLaunchTitle(record.launch)"
+            :data="record"/>
+          <a-divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus != null"/>
+          <State
+            option="build"
+            click="openBuildProgressDetailDrawer(record)"
+            :data="record"/>
         </template>
 
         <template
           slot="customOperation">
           Operation
-          <a-button
-            v-permit="'app:create'"
-            type="primary"
-            shape="circle"
-            icon="plus"
-            style="margin-left: 20px; width: 25px;height: 25px;min-width: 25px"
-            @click="handleAdd"/>
         </template>
 
         <template
@@ -1080,6 +1011,7 @@ import 'xterm/css/xterm.css'
 import {baseUrl} from '@/api/baseUrl'
 import SvgIcon from '@/components/SvgIcon'
 import storage from '@/utils/storage'
+import notification from 'ant-design-vue/lib/notification'
 
 export default {
   components: {Ellipsis, State, SvgIcon},
@@ -1102,6 +1034,7 @@ export default {
       },
       expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
+      jobType: null,
       sortedInfo: null,
       filteredInfo: null,
       queryInterval: 2000,
@@ -1125,13 +1058,11 @@ export default {
       historySavePoint: null,
       allowNonRestoredState: false,
       searchText: '',
-      searchInput: null,
       optionApps: {
         'starting': new Map(),
         'stopping': new Map(),
         'launch': new Map()
       },
-      searchedColumn: null,
       paginationInfo: null,
       stompClient: null,
       terminal: null,
@@ -1168,41 +1099,20 @@ export default {
   },
 
   computed: {
-    innerColumns() {
-      return [
-        {title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 280},
-        {title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory'},
-        {title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory'},
-        {title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM'},
-        {title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot'},
-        {title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot'}
-      ]
-    },
     columns() {
       let {sortedInfo, filteredInfo} = this
       sortedInfo = sortedInfo || {}
       filteredInfo = filteredInfo || {}
       return [{
+        title: 'ID',
+        dataIndex: 'id',
+        width: 100,
+        scopedSlots: {customRender: 'id'},
+      } , {
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 280,
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'customRender'
-        },
-        onFilter: (value, record) =>
-            record.jobName
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus()
-            }, 0)
-          }
-        },
+        width: 300,
+        scopedSlots: {customRender: 'jobName'},
       }, {
         title: 'Flink Version',
         dataIndex: 'flinkVersion',
@@ -1214,7 +1124,7 @@ export default {
       }, {
         title: 'Run Status',
         dataIndex: 'state',
-        width: 120,
+        width: 130,
         scopedSlots: {customRender: 'state'},
         filters: [
           {text: 'ADDED', value: 0},
@@ -1235,20 +1145,8 @@ export default {
       }, {
         title: 'Launch | Build',
         dataIndex: 'launch',
-        width: 250,
+        width: 220,
         scopedSlots: {customRender: 'launchState'}
-      }, {
-        title: 'Start Time',
-        dataIndex: 'startTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
-        width: 180
-      }, {
-        title: 'Last Modified Time',
-        dataIndex: 'modifyTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'modifyTime' && sortedInfo.order,
-        width: 180
       }, {
         title: 'Duration',
         dataIndex: 'duration',
@@ -1257,9 +1155,11 @@ export default {
         scopedSlots: {customRender: 'duration'},
         width: 150
       }, {
-        title: 'Task',
-        dataIndex: 'task',
-        width: 100,
+        title: 'Modified Time',
+        dataIndex: 'modifyTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'modifyTime' && sortedInfo.order,
+        width: 180
       }, {
         dataIndex: 'operation',
         key: 'operation',
@@ -1308,7 +1208,7 @@ export default {
         case -1:
           return 'launch failed'
         case 1:
-          return 'need relaunch'
+          return 'current job need relaunch'
         case 2:
           return 'launching'
         case 3:
@@ -1318,6 +1218,29 @@ export default {
       }
     },
 
+    handleChangeJobType(jobType) {
+      this.jobType = jobType
+      this.handleSearch()
+    },
+
+    handleCopySuccess() {
+      notification.success({
+        message: 'current jobId copied to clipboard Successfully',
+        duration: 1,
+      })
+    },
+
+    handleChangeJobType(jobType) {
+      this.jobType = jobType == 3 ? null : jobType
+      this.handleSearch()
+    },
+
+    handleCopySuccess() {
+      notification.success({
+        message: 'current jobId copied to clipboard Successfully',
+        duration: 1,
+      })
+    },
 
     handleMapping(app) {
       this.mappingVisible = true
@@ -1383,18 +1306,18 @@ export default {
         showConfirmButton: false,
         timer: 2000
       }).then((e) =>
-          build({
-            appId: app.id,
-            forceBuild: force
-          }).then((resp) => {
-            if (!resp.data) {
-              this.$swal.fire(
-                  'Failed',
-                  'lanuch application failed, ' + resp.message.replaceAll(/\[StreamX]/g, ''),
-                  'error'
-              )
-            }
-          })
+        build({
+          appId: app.id,
+          forceBuild: force
+        }).then((resp) => {
+          if (!resp.data) {
+            this.$swal.fire(
+              'Failed',
+              'lanuch application failed, ' + resp.message.replaceAll(/\[StreamX]/g, ''),
+              'error'
+            )
+          }
+        })
       )
     },
 
@@ -1520,16 +1443,16 @@ export default {
        * @type {boolean}
        */
       const status = app.state === 0 ||
-          app.state === 7 ||
-          app.state === 9 ||
-          app.state === 10 ||
-          app.state === 11 ||
-          app.state === 13 ||
-          app.state === 16 ||
-          app.state === 18 ||
-          app.state === 19 ||
-          app.state === 20 ||
-          app.state === -9 || false
+        app.state === 7 ||
+        app.state === 9 ||
+        app.state === 10 ||
+        app.state === 11 ||
+        app.state === 13 ||
+        app.state === 16 ||
+        app.state === 18 ||
+        app.state === 19 ||
+        app.state === 20 ||
+        app.state === -9 || false
 
       /**
        *
@@ -1589,9 +1512,9 @@ export default {
       this.closeForceStartAppModal()
       if (app.flinkVersion == null) {
         this.$swal.fire(
-            'Failed',
-            'please set flink version first.',
-            'error'
+          'Failed',
+          'please set flink version first.',
+          'error'
         )
       } else {
         if ( !this.optionApps.starting.get(app.id) || app['optionState'] === 0) {
@@ -1720,9 +1643,9 @@ export default {
           }).then(resp => {
             if (resp.data === false) {
               this.$swal.fire(
-                  'Failed',
-                  'custom savePoint path is invalid, ' + resp.message,
-                  'error'
+                'Failed',
+                'custom savePoint path is invalid, ' + resp.message,
+                'error'
               )
             } else {
               this.handleStopAction(stopReq)
@@ -1736,9 +1659,9 @@ export default {
               this.handleStopAction(stopReq)
             } else {
               this.$swal.fire(
-                  'Failed',
-                  resp.message,
-                  'error'
+                'Failed',
+                resp.message,
+                'error'
               )
             }
           })
@@ -1758,9 +1681,9 @@ export default {
         cancel(stopReq).then((resp) => {
           if (resp.status === 'error') {
             this.$swal.fire(
-                'Failed',
-                resp.exception,
-                'error'
+              'Failed',
+              resp.exception,
+              'error'
             )
           }
         })
@@ -1777,9 +1700,9 @@ export default {
         weburl({}).then((resp) => {
           if (resp.data == null || resp.data === '') {
             this.$swal.fire(
-                'Failed',
-                ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
-                'error'
+              'Failed',
+              ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
+              'error'
             )
             this.flameGraph = false
           }
@@ -1789,17 +1712,17 @@ export default {
 
     handleFlameGraph(app) {
       flamegraph({
-            appId: app.id,
-            width: document.documentElement.offsetWidth || document.body.offsetWidth
-          },
-          (resp) => {
-            if (resp != null) {
-              const blob = new Blob([resp], {type: 'image/svg+xml'})
-              const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
-              window.open(imageUrl)
-            }
-          },
-          {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
+          appId: app.id,
+          width: document.documentElement.offsetWidth || document.body.offsetWidth
+        },
+        (resp) => {
+          if (resp != null) {
+            const blob = new Blob([resp], {type: 'image/svg+xml'})
+            const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
+            window.open(imageUrl)
+          }
+        },
+        {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
       )
     },
 
@@ -1870,12 +1793,12 @@ export default {
 
     handleCanDelete(app) {
       return app.state === 0 ||
-          app.state === 7 ||
-          app.state === 9 ||
-          app.state === 10 ||
-          app.state === 13 ||
-          app.state === 18 ||
-          app.state === 19 || false
+        app.state === 7 ||
+        app.state === 9 ||
+        app.state === 10 ||
+        app.state === 13 ||
+        app.state === 18 ||
+        app.state === 19 || false
     },
 
     handleDelete(app) {
@@ -1893,35 +1816,21 @@ export default {
       })
     },
 
-    handleSearch(selectedKeys, confirm, dataIndex) {
-      confirm()
-      this.searchText = selectedKeys[0]
-      this.searchedColumn = dataIndex
-      this.queryParams[this.searchedColumn] = this.searchText
+    handleSearch() {
       const {sortedInfo} = this
       // 获取当前列的排序和列的过滤规则
       if (sortedInfo) {
         this.queryParams['sortField'] = sortedInfo.field
         this.queryParams['sortOrder'] = sortedInfo.order
       }
-    },
-
-    handleReset(clearFilters) {
-      clearFilters()
-      this.searchText = null
-      this.searchedColumn = null
-      // 重置列排序规则
-      this.sortedInfo = null
-      // 重置查询参数
-      this.queryParams = {}
+      this.queryParams['jobName'] = this.searchText
+      this.queryParams['jobType'] = this.jobType
+      this.handleFetch(false)
     },
 
     handleTableChange(pagination, filters, sorter) {
       this.sortedInfo = sorter
       this.paginationInfo = pagination
-      if (filters['jobType']) {
-        this.queryParams['jobTypeArray'] = filters['jobType']
-      }
       if (filters['state']) {
         this.queryParams['stateArray'] = filters['state']
       }
@@ -1999,26 +1908,6 @@ export default {
       })
     },
 
-    handleExpandIcon(props) {
-      if (props.record.state === 5) {
-        if (props.expanded) {
-          return <a class="expand-icon-open" onClick={(e) => {
-            props.onExpand(props.record, e)
-          }}>
-            <a-icon type="down"/>
-          </a>
-        } else {
-          return <a class="expand-icon-close" onClick={(e) => {
-            props.onExpand(props.record, e)
-          }}>
-            <a-icon type="right"/>
-          </a>
-        }
-      } else {
-        return ''
-      }
-    },
-
     handleView(app) {
       // 任务正在运行中, 重启中, 正在 savePoint 中
       if (app.state === 4 || app.state === 5 || app['optionState'] === 4) {
@@ -2041,9 +1930,9 @@ export default {
             window.open(url)
           }
         } else {
-            if (app.flinkRestUrl != null) {
-              window.open(app.flinkRestUrl)
-            }
+          if (app.flinkRestUrl != null) {
+            window.open(app.flinkRestUrl)
+          }
         }
       }
     },
