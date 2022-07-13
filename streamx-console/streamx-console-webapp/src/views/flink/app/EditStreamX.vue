@@ -142,6 +142,7 @@
             type="text"
             placeholder="Please enter Kubernetes clusterId"
             allowClear
+            @change="handleClusterId"
             v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
             <template v-if="(executionMode == null && app.executionMode === 5) || (executionMode !== null && executionMode === 5)">
               <a-dropdown slot="addonAfter" placement="bottomRight">
@@ -1981,6 +1982,10 @@ export default {
 
     handleChangeProcess(item) {
       this.totalItems = item
+    },
+
+    handleClusterId(e) {
+      this.form.setFieldsValue({jobName: e.target.value})
     },
 
     getExecutionCluster(executionMode){

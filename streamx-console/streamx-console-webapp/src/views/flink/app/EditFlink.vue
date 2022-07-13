@@ -150,7 +150,7 @@
           </a-input>
         </a-form-item>
 
-        <a-form-item 
+        <a-form-item
           v-if="app.executionMode === 6 || executionMode === 6"
           label="Kubernetes ClusterId"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -159,6 +159,7 @@
             type="text"
             placeholder="Please enter Kubernetes clusterId"
             allowClear
+            @change="handleClusterId"
             v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
             <template v-if="(executionMode == null && app.executionMode === 5) || (executionMode !== null && executionMode === 5)">
               <a-dropdown slot="addonAfter" placement="bottomRight">
@@ -173,7 +174,7 @@
           </a-input>
         </a-form-item>
 
-        <a-form-item 
+        <a-form-item
           v-if="app.executionMode === 5 || executionMode === 5"
           label="Kubernetes ClusterId"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -1052,6 +1053,10 @@ export default {
 
     handleFlinkVersion(id) {
       this.versionId = id
+    },
+
+    handleClusterId(e) {
+      this.form.setFieldsValue({jobName: e.target.value})
     },
 
     getExecutionCluster(executionMode){
