@@ -114,7 +114,7 @@
     <a-tag
       v-if="data['buildStatus'] === 2"
       color="#3498DB"
-      class="status-processing-deploying">RUNNING</a-tag>
+      class="status-processing-deploying">BUILDING</a-tag>
     <a-tag
       v-if="data['buildStatus'] === 3"
       color="#2ECC71">SUCCESS</a-tag>

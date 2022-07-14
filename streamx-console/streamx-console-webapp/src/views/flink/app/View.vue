@@ -219,10 +219,9 @@
 
       <div slot="extra">
         <a-input-group compact>
-          <a-select placeholder="Type" @change="handleChangeJobType" style="width: 80px">
+          <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="width: 80px">
             <a-select-option value="1">JAR</a-select-option>
             <a-select-option value="2">SQL</a-select-option>
-            <a-select-option value="3">ALL</a-select-option>
           </a-select>
           <a-input-search
             placeholder="Search..."
@@ -243,7 +242,6 @@
       <a-table
         ref="TableInfo"
         :columns="columns"
-        :expand-icon="handleExpandIcon"
         size="middle"
         row-key="id"
         class="app_list"
@@ -254,13 +252,10 @@
         :scroll="{ x: 700 }"
         @change="handleTableChange">
         <a-table
-          slot="expandedRowRender"
           class="expanded-table"
           slot-scope="record"
           v-if="record.state === 5"
           row-key="id"
-          :columns="innerColumns"
-          :data-source="record.expanded"
           :pagination="false"/>
 
         <a-icon
@@ -283,7 +278,11 @@
             SQL
           </span>
 
-          <a>{{ record.jobName }}</a>
+          <span
+            class="link"
+            :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
+            @click="handleView(record)">{{ record.jobName }}
+          </span>
 
           <template v-if="record['jobType'] === 1">
             <a-badge
@@ -303,7 +302,12 @@
         <template
           slot="id"
           slot-scope="text, record">
-          #<a v-clipboard:copy="record.id" v-clipboard:success="handleCopySuccess">{{ record.id }}</a>
+          <span
+            class="link pointer"
+            v-clipboard:copy="record.id"
+            v-clipboard:success="handleCopySuccess">
+            {{ record.id }}
+          </span>
         </template>
 
         <template
@@ -331,17 +335,15 @@
         <template
           slot="launchState"
           slot-scope="text, record">
-          <a-space size="small">
-            <State
-              option="launch"
-              :title="handleLaunchTitle(record.launch)"
-              :data="record"/>
-            <a-divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus != null"/>
-            <State
-              option="build"
-              click="openBuildProgressDetailDrawer(record)"
-              :data="record"/>
-          </a-space>
+          <State
+            option="launch"
+            :title="handleLaunchTitle(record.launch)"
+            :data="record"/>
+          <a-divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus != null"/>
+          <State
+            option="build"
+            click="openBuildProgressDetailDrawer(record)"
+            :data="record"/>
         </template>
 
         <template
@@ -1097,16 +1099,6 @@ export default {
   },
 
   computed: {
-    innerColumns() {
-      return [
-        {title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 280},
-        {title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory'},
-        {title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory'},
-        {title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM'},
-        {title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot'},
-        {title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot'}
-      ]
-    },
     columns() {
       let {sortedInfo, filteredInfo} = this
       sortedInfo = sortedInfo || {}
@@ -1119,7 +1111,7 @@ export default {
       } , {
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 280,
+        width: 300,
         scopedSlots: {customRender: 'jobName'},
       }, {
         title: 'Flink Version',
@@ -1132,7 +1124,7 @@ export default {
       }, {
         title: 'Run Status',
         dataIndex: 'state',
-        width: 120,
+        width: 130,
         scopedSlots: {customRender: 'state'},
         filters: [
           {text: 'ADDED', value: 0},
@@ -1226,9 +1218,8 @@ export default {
       }
     },
 
-
     handleChangeJobType(jobType) {
-      this.jobType = jobType == 3 ? null : jobType
+      this.jobType = jobType
       this.handleSearch()
     },
 
@@ -1303,18 +1294,18 @@ export default {
         showConfirmButton: false,
         timer: 2000
       }).then((e) =>
-          build({
-            appId: app.id,
-            forceBuild: force
-          }).then((resp) => {
-            if (!resp.data) {
-              this.$swal.fire(
-                  'Failed',
-                  'lanuch application failed, ' + resp.message.replaceAll(/\[StreamX]/g, ''),
-                  'error'
-              )
-            }
-          })
+        build({
+          appId: app.id,
+          forceBuild: force
+        }).then((resp) => {
+          if (!resp.data) {
+            this.$swal.fire(
+              'Failed',
+              'lanuch application failed, ' + resp.message.replaceAll(/\[StreamX]/g, ''),
+              'error'
+            )
+          }
+        })
       )
     },
 
@@ -1440,16 +1431,16 @@ export default {
        * @type {boolean}
        */
       const status = app.state === 0 ||
-          app.state === 7 ||
-          app.state === 9 ||
-          app.state === 10 ||
-          app.state === 11 ||
-          app.state === 13 ||
-          app.state === 16 ||
-          app.state === 18 ||
-          app.state === 19 ||
-          app.state === 20 ||
-          app.state === -9 || false
+        app.state === 7 ||
+        app.state === 9 ||
+        app.state === 10 ||
+        app.state === 11 ||
+        app.state === 13 ||
+        app.state === 16 ||
+        app.state === 18 ||
+        app.state === 19 ||
+        app.state === 20 ||
+        app.state === -9 || false
 
       /**
        *
@@ -1509,9 +1500,9 @@ export default {
       this.closeForceStartAppModal()
       if (app.flinkVersion == null) {
         this.$swal.fire(
-            'Failed',
-            'please set flink version first.',
-            'error'
+          'Failed',
+          'please set flink version first.',
+          'error'
         )
       } else {
         if ( !this.optionApps.starting.get(app.id) || app['optionState'] === 0) {
@@ -1640,9 +1631,9 @@ export default {
           }).then(resp => {
             if (resp.data === false) {
               this.$swal.fire(
-                  'Failed',
-                  'custom savePoint path is invalid, ' + resp.message,
-                  'error'
+                'Failed',
+                'custom savePoint path is invalid, ' + resp.message,
+                'error'
               )
             } else {
               this.handleStopAction(stopReq)
@@ -1656,9 +1647,9 @@ export default {
               this.handleStopAction(stopReq)
             } else {
               this.$swal.fire(
-                  'Failed',
-                  resp.message,
-                  'error'
+                'Failed',
+                resp.message,
+                'error'
               )
             }
           })
@@ -1678,9 +1669,9 @@ export default {
         cancel(stopReq).then((resp) => {
           if (resp.status === 'error') {
             this.$swal.fire(
-                'Failed',
-                resp.exception,
-                'error'
+              'Failed',
+              resp.exception,
+              'error'
             )
           }
         })
@@ -1697,9 +1688,9 @@ export default {
         weburl({}).then((resp) => {
           if (resp.data == null || resp.data === '') {
             this.$swal.fire(
-                'Failed',
-                ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
-                'error'
+              'Failed',
+              ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
+              'error'
             )
             this.flameGraph = false
           }
@@ -1709,17 +1700,17 @@ export default {
 
     handleFlameGraph(app) {
       flamegraph({
-            appId: app.id,
-            width: document.documentElement.offsetWidth || document.body.offsetWidth
-          },
-          (resp) => {
-            if (resp != null) {
-              const blob = new Blob([resp], {type: 'image/svg+xml'})
-              const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
-              window.open(imageUrl)
-            }
-          },
-          {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
+          appId: app.id,
+          width: document.documentElement.offsetWidth || document.body.offsetWidth
+        },
+        (resp) => {
+          if (resp != null) {
+            const blob = new Blob([resp], {type: 'image/svg+xml'})
+            const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
+            window.open(imageUrl)
+          }
+        },
+        {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
       )
     },
 
@@ -1790,12 +1781,12 @@ export default {
 
     handleCanDelete(app) {
       return app.state === 0 ||
-          app.state === 7 ||
-          app.state === 9 ||
-          app.state === 10 ||
-          app.state === 13 ||
-          app.state === 18 ||
-          app.state === 19 || false
+        app.state === 7 ||
+        app.state === 9 ||
+        app.state === 10 ||
+        app.state === 13 ||
+        app.state === 18 ||
+        app.state === 19 || false
     },
 
     handleDelete(app) {
@@ -1905,26 +1896,6 @@ export default {
       })
     },
 
-    handleExpandIcon(props) {
-      if (props.record.state === 5) {
-        if (props.expanded) {
-          return <a class="expand-icon-open" onClick={(e) => {
-            props.onExpand(props.record, e)
-          }}>
-            <a-icon type="down"/>
-          </a>
-        } else {
-          return <a class="expand-icon-close" onClick={(e) => {
-            props.onExpand(props.record, e)
-          }}>
-            <a-icon type="right"/>
-          </a>
-        }
-      } else {
-        return ''
-      }
-    },
-
     handleView(app) {
       // 任务正在运行中, 重启中, 正在 savePoint 中
       if (app.state === 4 || app.state === 5 || app['optionState'] === 4) {
@@ -1947,9 +1918,9 @@ export default {
             window.open(url)
           }
         } else {
-            if (app.flinkRestUrl != null) {
-              window.open(app.flinkRestUrl)
-            }
+          if (app.flinkRestUrl != null) {
+            window.open(app.flinkRestUrl)
+          }
         }
       }
     },
