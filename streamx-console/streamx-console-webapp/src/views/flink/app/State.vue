@@ -102,7 +102,7 @@
       color="#52c41a">LAUNCHING</a-tag>
     <a-tag
       v-if="data.launch === 3"
-      color="#fa8c16">WAITING</a-tag>
+      color="#fa8c16">PENDING</a-tag>
   </span>
   <span v-else-if="option === 'build'" class="app_state">
     <a-tag
