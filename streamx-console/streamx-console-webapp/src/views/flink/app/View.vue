@@ -1230,6 +1230,18 @@ export default {
       })
     },
 
+    handleChangeJobType(jobType) {
+      this.jobType = jobType == 3 ? null : jobType
+      this.handleSearch()
+    },
+
+    handleCopySuccess() {
+      notification.success({
+        message: 'current jobId copied to clipboard Successfully',
+        duration: 1,
+      })
+    },
+
     handleMapping(app) {
       this.mappingVisible = true
       this.application = app
