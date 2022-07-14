@@ -51,9 +51,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -68,6 +74,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * @author benjobs
@@ -244,7 +251,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             } else {
                 // 2) .jar文件(普通,官方标准的flink工程)
                 Utils.checkJarFile(app.toURI().toURL());
-                String moduleName = app.getName().replace(".jar", "");
+                String moduleName = getModuleName(app);
                 File distHome = project.getDistHome();
                 File targetDir = new File(distHome, moduleName);
                 if (!targetDir.exists()) {
@@ -295,6 +302,44 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 findTarOrJar(list, file);
             }
         }
+    }
+
+    /**
+     * 根据jar获取artifactId
+     *
+     * @param jarFile jar
+     * @return artifactId
+     */
+    private String getModuleName(File jarFile) {
+        String moduleName = null;
+        try {
+            File pomFile = Paths.get(jarFile.getParentFile().getParent(), "pom.xml").toFile();
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(pomFile);
+            NodeList project = doc.getElementsByTagName("project");
+            if (project.getLength() > 0) {
+                NodeList projectChildNodes = project.item(0).getChildNodes();
+                String artifactId = null;
+                for (int i = 0; i < projectChildNodes.getLength(); i++) {
+                    if ("artifactId".equals(projectChildNodes.item(i).getNodeName())) {
+                        artifactId = projectChildNodes.item(i).getTextContent();
+                    }
+                }
+                String regex = "^\\$\\{\\S+\\}$";
+                boolean artifactIdMatch = artifactId != null && Pattern.matches(regex, artifactId);
+                if (!artifactIdMatch) {
+                    moduleName = artifactId;
+                }
+            }
+        } catch (Exception ignored) {
+            log.warn("getArtifactId failed !");
+        }
+        if (moduleName == null) {
+            moduleName = jarFile.getName().replace(".jar", "");
+        }
+        return moduleName;
     }
 
     @Override
