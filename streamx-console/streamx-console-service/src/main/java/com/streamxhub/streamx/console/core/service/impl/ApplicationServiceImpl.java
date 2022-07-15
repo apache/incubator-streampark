@@ -39,6 +39,7 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
@@ -115,6 +116,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -442,6 +444,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public IPage<Application> page(Application appParam, RestRequest request) {
         Page<Application> page = new Page<>();
         SortUtils.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
+        if (CommonUtils.notEmpty(appParam.getStateArray())) {
+            if (Arrays.stream(appParam.getStateArray()).anyMatch(x -> x == FlinkAppState.FINISHED.getValue())) {
+                Integer[] newArray = CommonUtils.arrayInsertIndex(
+                    appParam.getStateArray(),
+                    appParam.getStateArray().length,
+                    FlinkAppState.POS_TERMINATED.getValue()
+                );
+                appParam.setStateArray(newArray);
+            }
+        }
         this.baseMapper.page(page, appParam);
         //瞒天过海,暗度陈仓,偷天换日,鱼目混珠.
         List<Application> records = page.getRecords();
