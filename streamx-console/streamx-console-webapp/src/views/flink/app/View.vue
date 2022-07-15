@@ -219,7 +219,7 @@
 
       <div slot="extra">
         <a-input-group compact>
-          <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="width: 80px">
+          <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="width: 90px">
             <a-select-option value="1">JAR</a-select-option>
             <a-select-option value="2">SQL</a-select-option>
           </a-select>
