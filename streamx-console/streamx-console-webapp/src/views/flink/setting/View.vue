@@ -889,268 +889,268 @@
 </template>
 
 <script>
-  import {all, update} from '@api/setting'
-  import {
-    list as listFlink,
-    create as createFlink,
-    get as getFlink,
-    update as updateFlink,
-    exists as existsEnv,
-    setDefault,
-    sync
-  } from '@/api/flinkEnv'
+import {all, update} from '@api/setting'
+import {
+  list as listFlink,
+  create as createFlink,
+  get as getFlink,
+  update as updateFlink,
+  exists as existsEnv,
+  setDefault,
+  sync
+} from '@/api/flinkEnv'
 
-  import {
-    list as listCluster,
-    create as createCluster,
-    get as getCluster,
-    update as updateCluster,
-    check as checkCluster,
-    start as startCluster,
-    shutdown as shutdownCluster,
-    remove as removeCluster
-  } from '@/api/flinkCluster'
+import {
+  list as listCluster,
+  create as createCluster,
+  get as getCluster,
+  update as updateCluster,
+  check as checkCluster,
+  start as startCluster,
+  shutdown as shutdownCluster,
+  remove as removeCluster
+} from '@/api/flinkCluster'
 
-  import {
-    add as addAlert,
-    exists as existsAlert,
-    update as updateAlert,
-    get as getAlert,
-    listWithOutPage as listWithOutPageAlert,
-    remove as removeAlert,
-    send as sendAlert
-  } from '@/api/alertConf'
+import {
+  add as addAlert,
+  exists as existsAlert,
+  update as updateAlert,
+  get as getAlert,
+  listWithOutPage as listWithOutPageAlert,
+  remove as removeAlert,
+  send as sendAlert
+} from '@/api/alertConf'
 
-  import SvgIcon from '@/components/SvgIcon'
-  import monaco from '@/views/flink/app/Monaco.yaml'
-  import addCluster from './AddCluster'
-  import { mapActions } from 'vuex'
-  import storage from '@/utils/storage'
-  import cluster from '@/store/modules/cluster'
-  import { Item } from 'ant-design-vue/es/vc-menu'
+import SvgIcon from '@/components/SvgIcon'
+import monaco from '@/views/flink/app/Monaco.yaml'
+import addCluster from './AddCluster'
+import { mapActions } from 'vuex'
+import storage from '@/utils/storage'
+import cluster from '@/store/modules/cluster'
+import { Item } from 'ant-design-vue/es/vc-menu'
 
-  export default {
-    name: 'Setting',
-    components: {SvgIcon, addCluster},
-    data() {
-      return {
-        collapseActive: ['1', '2', '3' , '4'],
-        activeKey:'system',
-        settings: [],
-        flinks: [],
-        alerts: [],
-        clusters: [],
-        cluster: null,
-        flinkName: null,
-        flinkHome: null,
-        flinkConf: null,
-        versionId: null,
-        alertId: null,
-        clusterId: null,
-        optionClusters: {
-          'starting': new Map(),
-          'created': new Map(),
-          'stoped': new Map()
-        },
-        flinkConfVisible: false,
-        flinkFormVisible: false,
-        alertFormVisible: false,
-        flinkClusterVisible: false,
-        executionMode: null,
-        executionModes: [
-          {mode: 'remote (standalone)', value: 1, disabled: false},
-          {mode: 'yarn session', value: 3, disabled: false},
-          {mode: 'kubernetes session', value: 5, disabled: false}
-        ],
-        resolveOrder: [
-          {name: 'parent-first', order: 0},
-          {name: 'child-first', order: 1}
-        ],
-        alert: true,
-        alertTypes: [
-          {name: 'E-mail', value: 1, disabled: false},
-          {name: 'Ding Talk', value: 2, disabled: false},
-          {name: 'Wechat', value: 4, disabled: false},
-          {name: 'SMS', value: 8, disabled: true},
-          {name: 'Lark', value: 16, disabled: false}
-        ],
-        alertType: [],
-        dingtalkIsAtAll: false,
-        larkIsAtAll: false,
-        dingtalkSecretEnable: false,
-        larkSecretEnable: false,
-        totalItems: [],
-        editor: null,
-        flinkForm: null,
-        alertForm: null,
-        clusterForm: null,
-        buttonAddVisiable: false
+export default {
+  name: 'Setting',
+  components: {SvgIcon, addCluster},
+  data() {
+    return {
+      collapseActive: ['1', '2', '3' , '4'],
+      activeKey:'system',
+      settings: [],
+      flinks: [],
+      alerts: [],
+      clusters: [],
+      cluster: null,
+      flinkName: null,
+      flinkHome: null,
+      flinkConf: null,
+      versionId: null,
+      alertId: null,
+      clusterId: null,
+      optionClusters: {
+        'starting': new Map(),
+        'created': new Map(),
+        'stoped': new Map()
+      },
+      flinkConfVisible: false,
+      flinkFormVisible: false,
+      alertFormVisible: false,
+      flinkClusterVisible: false,
+      executionMode: null,
+      executionModes: [
+        {mode: 'remote (standalone)', value: 1, disabled: false},
+        {mode: 'yarn session', value: 3, disabled: false},
+        {mode: 'kubernetes session', value: 5, disabled: false}
+      ],
+      resolveOrder: [
+        {name: 'parent-first', order: 0},
+        {name: 'child-first', order: 1}
+      ],
+      alert: true,
+      alertTypes: [
+        {name: 'E-mail', value: 1, disabled: false},
+        {name: 'Ding Talk', value: 2, disabled: false},
+        {name: 'Wechat', value: 4, disabled: false},
+        {name: 'SMS', value: 8, disabled: true},
+        {name: 'Lark', value: 16, disabled: false}
+      ],
+      alertType: [],
+      dingtalkIsAtAll: false,
+      larkIsAtAll: false,
+      dingtalkSecretEnable: false,
+      larkSecretEnable: false,
+      totalItems: [],
+      editor: null,
+      flinkForm: null,
+      alertForm: null,
+      clusterForm: null,
+      buttonAddVisiable: false
+    }
+  },
+
+  computed: {
+    myTheme() {
+      return this.$store.state.app.theme
+    },
+    dynamicOptions() {
+      return function (group) {
+        return this.options.filter(x => x.group === group)
       }
     },
+    getRestUrl(item){
+      return item.address
+    }
+  },
 
-    computed: {
-      myTheme() {
-        return this.$store.state.app.theme
-      },
-      dynamicOptions() {
-        return function (group) {
-          return this.options.filter(x => x.group === group)
-        }
-      },
-      getRestUrl(item){
-        return item.address
-      }
-    },
+  mounted() {
+    this.flinkForm = this.$form.createForm(this)
+    this.alertForm = this.$form.createForm(this)
+    this.clusterForm = this.$form.createForm(this)
+    this.handleSettingAll()
+    this.handleFlinkAll()
+    this.handleClusterAll()
+    this.handleAlertConfigAll()
+    this.showtabs()
+  },
 
-    mounted() {
-      this.flinkForm = this.$form.createForm(this)
-      this.alertForm = this.$form.createForm(this)
-      this.clusterForm = this.$form.createForm(this)
-      this.handleSettingAll()
-      this.handleFlinkAll()
-      this.handleClusterAll()
-      this.handleAlertConfigAll()
-      this.showtabs()
-    },
-
-    methods: {
-      ...mapActions(['SetClusterId']),
-      showtabs(){
-        if(this.$route.query.activeKey!=null){
+  methods: {
+    ...mapActions(['SetClusterId']),
+    showtabs(){
+      if(this.$route.query.activeKey!=null){
           this.activeKey = this.$route.query.activeKey
+      }
+    },
+    changeVisble(){
+      console.log('---zouguo-')
+      this.buttonAddVisiable = false
+      this.handleClusterAll()
+    },
+    handleAdd() {
+      this.$router.push({'path': '/flink/setting/add_cluster'})
+    },
+    handleEditCluster(item) {
+      this.SetClusterId(item.id)
+      this.$router.push({'path': '/flink/setting/edit_cluster'})
+    },
+    getOption() {
+      return {
+        theme: this.ideTheme(),
+        language: 'yaml',
+        selectOnLineNumbers: false,
+        foldingStrategy: 'indentation', // 代码分小段折叠
+        overviewRulerBorder: false, // 不要滚动条边框
+        autoClosingBrackets: true,
+        tabSize: 2, // tab 缩进长度
+        readOnly: true,
+        inherit: true,
+        scrollBeyondLastLine: false,
+        lineNumbersMinChars: 5,
+        lineHeight: 24,
+        automaticLayout: true,
+        cursorBlinking: 'line',
+        cursorStyle: 'line',
+        cursorWidth: 3,
+        renderFinalNewline: true,
+        renderLineHighlight: 'all',
+        quickSuggestionsDelay: 100,  //代码提示延时
+        scrollbar: {
+          useShadows: false,
+          vertical: 'visible',
+          horizontal: 'visible',
+          horizontalSliderSize: 5,
+          verticalSliderSize: 5,
+          horizontalScrollbarSize: 15,
+          verticalScrollbarSize: 15
         }
-      },
-      changeVisble(){
-        console.log('---zouguo-')
-        this.buttonAddVisiable = false
-        this.handleClusterAll()
-      },
-      handleAdd() {
-        this.$router.push({'path': '/flink/setting/add_cluster'})
-      },
-      handleEditCluster(item) {
-        this.SetClusterId(item.id)
-        this.$router.push({'path': '/flink/setting/edit_cluster'})
-      },
-      getOption() {
-        return {
-          theme: this.ideTheme(),
-          language: 'yaml',
-          selectOnLineNumbers: false,
-          foldingStrategy: 'indentation', // 代码分小段折叠
-          overviewRulerBorder: false, // 不要滚动条边框
-          autoClosingBrackets: true,
-          tabSize: 2, // tab 缩进长度
-          readOnly: true,
-          inherit: true,
-          scrollBeyondLastLine: false,
-          lineNumbersMinChars: 5,
-          lineHeight: 24,
-          automaticLayout: true,
-          cursorBlinking: 'line',
-          cursorStyle: 'line',
-          cursorWidth: 3,
-          renderFinalNewline: true,
-          renderLineHighlight: 'all',
-          quickSuggestionsDelay: 100,  //代码提示延时
-          scrollbar: {
-            useShadows: false,
-            vertical: 'visible',
-            horizontal: 'visible',
-            horizontalSliderSize: 5,
-            verticalSliderSize: 5,
-            horizontalScrollbarSize: 15,
-            verticalScrollbarSize: 15
-          }
-        }
-      },
-      handleCheckExecMode(rule, value, callback) {
-        if (value === null || value === undefined || value === '') {
-          callback(new Error('Execution Mode is required'))
-        } else {
-          if (value === 3) {
-            checkHadoop().then((resp) => {
-              if (resp.data) {
-                callback()
-              } else {
-                callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
-              }
-            }).catch((err) => {
+      }
+    },
+    handleCheckExecMode(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Execution Mode is required'))
+      } else {
+        if (value === 3) {
+          checkHadoop().then((resp) => {
+            if (resp.data) {
+              callback()
+            } else {
               callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
-            })
-          } else {
-            callback()
-          }
-        }
-      },
-
-      handleCheckAlertName(rule, alertName, callback) {
-        if (alertName === null || alertName === undefined || alertName === '') {
-          callback(new Error('Alert Name is required'))
+            }
+          }).catch((err) => {
+            callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+          })
         } else {
-          if(!this.alertId){
-            existsAlert({'alertName': alertName}).then((resp) => {
-              if (!resp.data) {
-                callback()
-              } else {
-                callback(new Error('Alert Name must be unique. The alert name already exists'))
-              }
-            }).catch((err) => {
-              callback(new Error('error happened ,caused by: ' + err))
-            })
-          }else{
-            callback()
-          }
+          callback()
         }
-      },
+      }
+    },
 
-      handleChangeAlertType(value) {
-        this.alertType = value
-      },
-
-      handleEditAlertType(value) {
-        this.alertType.push(value)
-      },
-
-      handleChangeMode(mode) {
-        this.executionMode = mode
-      },
-
-      handleSettingAll() {
-        all({}).then((resp) => {
-          this.settings = resp.data
-        })
-      },
-
-      handleChangeProcess(value) {
-        this.totalItems = value
-      },
-      handleEdit(setting) {
-        if (!setting.editable) {
-          setting.submitting = true
+    handleCheckAlertName(rule, alertName, callback) {
+      if (alertName === null || alertName === undefined || alertName === '') {
+        callback(new Error('Alert Name is required'))
+      } else {
+        if(!this.alertId){
+          existsAlert({'alertName': alertName}).then((resp) => {
+            if (!resp.data) {
+              callback()
+            } else {
+              callback(new Error('Alert Name must be unique. The alert name already exists'))
+            }
+          }).catch((err) => {
+            callback(new Error('error happened ,caused by: ' + err))
+          })
+        }else{
+          callback()
         }
-        setting.editable = !setting.editable
-      },
+      }
+    },
 
-      handleIsStart(item) {
-        /**
-         集群刚创建但未启动
-         CREATED(0),
-         集群已启动
-         STARTED(1),
-         集群已停止
-         STOPED(2);
-         */
-        return this.optionClusters.starting.get(item.id)
-      },
+    handleChangeAlertType(value) {
+      this.alertType = value
+    },
 
-      handleDeployCluser(item){
-        this.$swal.fire({
-          icon: 'success',
-          title: 'The current cluster is starting',
-          showConfirmButton: false,
-          timer: 2000
-        }).then((r) => {
+    handleEditAlertType(value) {
+      this.alertType.push(value)
+    },
+
+    handleChangeMode(mode) {
+      this.executionMode = mode
+    },
+
+    handleSettingAll() {
+      all({}).then((resp) => {
+        this.settings = resp.data
+      })
+    },
+
+    handleChangeProcess(value) {
+      this.totalItems = value
+    },
+    handleEdit(setting) {
+      if (!setting.editable) {
+        setting.submitting = true
+      }
+      setting.editable = !setting.editable
+    },
+
+    handleIsStart(item) {
+     /**
+      集群刚创建但未启动
+      CREATED(0),
+      集群已启动
+      STARTED(1),
+      集群已停止
+      STOPED(2);
+    */
+      return this.optionClusters.starting.get(item.id)
+    },
+
+    handleDeployCluser(item){
+      this.$swal.fire({
+        icon: 'success',
+        title: 'The current cluster is starting',
+        showConfirmButton: false,
+        timer: 2000
+      }).then((r) => {
           startCluster({id: item.id}).then((resp)=>{
             if(resp.data.status){
               this.optionClusters.starting.set(item.id,new Date().getTime())
@@ -1164,55 +1164,31 @@
               })
             } else {
               this.$swal.fire({
-                title: 'Failed',
-                icon: 'error',
-                width: this.exceptionPropWidth(),
-                html: '<pre class="propsException">' + resp.data.msg + '</pre>',
-                showCancelButton: true,
-                confirmButtonColor: '#55BDDDFF',
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Close'
-              })
+                  title: 'Failed',
+                  icon: 'error',
+                  width: this.exceptionPropWidth(),
+                  html: '<pre class="propsException">' + resp.data.msg + '</pre>',
+                  showCancelButton: true,
+                  confirmButtonColor: '#55BDDDFF',
+                  confirmButtonText: 'OK',
+                  cancelButtonText: 'Close'
+                })
             }
-          })
         })
-      },
+      })
+    },
 
-      handleShutdownCluster(item){
-        this.$swal.fire({
-          icon: 'success',
-          title: 'The current cluster is canceling',
-          showConfirmButton: false,
-          timer: 2000
-        }).then((result) => {
-          shutdownCluster({id: item.id}).then((resp) => {
-            if(resp.data.status){
-              this.optionClusters.starting.delete(item.id)
-              this.handleMapUpdate('starting')
-            }else{
-              this.$swal.fire({
-                title: 'Failed',
-                icon: 'error',
-                width: this.exceptionPropWidth(),
-                html: '<pre class="propsException">' + resp.data.msg + '</pre>',
-                showCancelButton: true,
-                confirmButtonColor: '#55BDDDFF',
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Close'
-              })
-            }
-          })
-        })
-      },
-
-      handleDelete(item){
-        removeCluster({
-          id: item.id
-        }).then((resp) => {
+    handleShutdownCluster(item){
+      this.$swal.fire({
+        icon: 'success',
+        title: 'The current cluster is canceling',
+        showConfirmButton: false,
+        timer: 2000
+      }).then((result) => {
+        shutdownCluster({id: item.id}).then((resp) => {
           if(resp.data.status){
             this.optionClusters.starting.delete(item.id)
             this.handleMapUpdate('starting')
-            this.handleClusterAll()
           }else{
             this.$swal.fire({
               title: 'Failed',
@@ -1226,234 +1202,237 @@
             })
           }
         })
-      },
+      })
+    },
 
-      handleMapUpdate(type) {
-        const map = this.optionClusters[type]
-        this.optionClusters[type] = new Map(map)
-      },
-
-      handleSubmit(setting) {
-        setting.submitting = false
-        setting.editable = false
-        const className = setting.key.replace(/\./g, '_')
-        const elem = document.querySelector('.' + className)
-        const value = elem.value
-        update({
-          key: setting.key,
-          value: value
-        }).then((resp) => {
-          this.handleSettingAll()
-        })
-      },
-
-      handleFlinkFormVisible(flag) {
-        this.versionId = null
-        this.flinkFormVisible = flag
-        this.flinkForm.resetFields()
-      },
-
-      handleAlertFormVisible(flag) {
-        this.alertId = null
-        this.alertFormVisible = flag
-        this.alertType = []
-        this.dingtalkIsAtAll = false
-        this.dingtalkSecretEnable = false
-        this.larkIsAtAll = false
-        this.larkSecretEnable = false
-        this.alertForm.resetFields()
-      },
-
-      handleEditFlink(item) {
-        this.versionId = item.id
-        this.flinkFormVisible = true
-        this.$nextTick(() => {
-          this.flinkForm.setFieldsValue({
-            'flinkName': item.flinkName,
-            'flinkHome': item.flinkHome,
-            'description': item.description || null
+    handleDelete(item){
+      removeCluster({
+        id: item.id
+      }).then((resp) => {
+        if(resp.data.status){
+          this.optionClusters.starting.delete(item.id)
+          this.handleMapUpdate('starting')
+          this.handleClusterAll()
+        }else{
+          this.$swal.fire({
+            title: 'Failed',
+            icon: 'error',
+            width: this.exceptionPropWidth(),
+            html: '<pre class="propsException">' + resp.data.msg + '</pre>',
+            showCancelButton: true,
+            confirmButtonColor: '#55BDDDFF',
+            confirmButtonText: 'OK',
+            cancelButtonText: 'Close'
           })
-        })
-      },
+        }
+      })
+    },
 
-      handleEditAlertConf(item){
-        this.alertId = item.id
-        this.alertFormVisible = true
-        const emailParams = JSON.parse(item.emailParams)
-        const dingTalkParams = JSON.parse(item.dingTalkParams)
-        const weComParams = JSON.parse(item.weComParams)
-        const larkParams = JSON.parse(item.larkParams)
-        const alertType = this.computeAlertType(item.alertType)
+    handleMapUpdate(type) {
+      const map = this.optionClusters[type]
+      this.optionClusters[type] = new Map(map)
+    },
 
-        console.log('告警类型：' + JSON.stringify(alertType))
-        alertType.forEach((value,i) => {
-          this.handleEditAlertType(value)
+    handleSubmit(setting) {
+      setting.submitting = false
+      setting.editable = false
+      const className = setting.key.replace(/\./g, '_')
+      const elem = document.querySelector('.' + className)
+      const value = elem.value
+      update({
+        key: setting.key,
+        value: value
+      }).then((resp) => {
+        this.handleSettingAll()
+      })
+    },
+
+    handleFlinkFormVisible(flag) {
+      this.versionId = null
+      this.flinkFormVisible = flag
+      this.flinkForm.resetFields()
+    },
+
+    handleAlertFormVisible(flag) {
+      this.alertId = null
+      this.alertFormVisible = flag
+      this.alertType = []
+      this.dingtalkIsAtAll = false
+      this.dingtalkSecretEnable = false
+      this.larkIsAtAll = false
+      this.larkSecretEnable = false
+      this.alertForm.resetFields()
+    },
+
+    handleEditFlink(item) {
+      this.versionId = item.id
+      this.flinkFormVisible = true
+      this.$nextTick(() => {
+        this.flinkForm.setFieldsValue({
+          'flinkName': item.flinkName,
+          'flinkHome': item.flinkHome,
+          'description': item.description || null
         })
-        this.dingtalkIsAtAll = dingTalkParams.isAtAll
-        this.dingtalkSecretEnable = dingTalkParams.secretEnable
-        this.larkIsAtAll = larkParams.isAtAll
-        this.larkSecretEnable = larkParams.secretEnable
-        this.$nextTick(() => {
-          this.alertForm.setFieldsValue({
-            'alertName': item.alertName,
-            'alertType': alertType,
-            'alertEmail': emailParams.contacts,
-            'alertDingURL': dingTalkParams.alertDingURL,
-            'dingtalkToken': dingTalkParams.token,
-            'dingtalkSecretToken': dingTalkParams.secretToken,
-            'alertDingUser': dingTalkParams.contacts,
-            'dingtalkIsAtAll': dingTalkParams.isAtAll,
-            'dingtalkSecretEnable': dingTalkParams.secretEnable,
-            'weToken': weComParams.token,
-            'larkToken': larkParams.token,
-            'larkIsAtAll': larkParams.isAtAll,
-            'larkSecretEnable':larkParams.secretEnable,
-            'larkSecretToken':larkParams.secretToken
+      })
+    },
+
+    handleEditAlertConf(item){
+      this.alertId = item.id
+      this.alertFormVisible = true
+      const emailParams = JSON.parse(item.emailParams)
+      const dingTalkParams = JSON.parse(item.dingTalkParams)
+      const weComParams = JSON.parse(item.weComParams)
+      const larkParams = JSON.parse(item.larkParams)
+      const alertType = this.computeAlertType(item.alertType)
+
+      console.log('告警类型：' + JSON.stringify(alertType))
+      alertType.forEach((value,i) => {
+        this.handleEditAlertType(value)
+      })
+      this.dingtalkIsAtAll = dingTalkParams.isAtAll
+      this.dingtalkSecretEnable = dingTalkParams.secretEnable
+      this.larkIsAtAll = larkParams.isAtAll
+      this.larkSecretEnable = larkParams.secretEnable
+      this.$nextTick(() => {
+        this.alertForm.setFieldsValue({
+          'alertName': item.alertName,
+          'alertType': alertType,
+          'alertEmail': emailParams.contacts,
+          'alertDingURL': dingTalkParams.alertDingURL,
+          'dingtalkToken': dingTalkParams.token,
+          'dingtalkSecretToken': dingTalkParams.secretToken,
+          'alertDingUser': dingTalkParams.contacts,
+          'dingtalkIsAtAll': dingTalkParams.isAtAll,
+          'dingtalkSecretEnable': dingTalkParams.secretEnable,
+          'weToken': weComParams.token,
+          'larkToken': larkParams.token,
+          'larkIsAtAll': larkParams.isAtAll,
+          'larkSecretEnable':larkParams.secretEnable,
+          'larkSecretToken':larkParams.secretToken
+        })
+      })
+    },
+
+    handleDeleteAlertConf(item) {
+      removeAlert({'id': item.id}).then((resp) => {
+        if (resp.data) {
+          this.$swal.fire({
+            icon: 'success',
+            title: 'Delete Alert Config  successful!',
+            showConfirmButton: false,
+            timer: 2000
           })
-        })
-      },
+        } else {
+          this.$swal.fire(
+            'Failed delete AlertConfig',
+            resp['message'].replaceAll(/\[StreamX]/g, ''),
+            'error'
+          )
+        }
+        this.handleAlertConfigAll()
+      })
+    },
 
-      handleDeleteAlertConf(item) {
-        removeAlert({'id': item.id}).then((resp) => {
-          if (resp.data) {
-            this.$swal.fire({
-              icon: 'success',
-              title: 'Delete Alert Config  successful!',
-              showConfirmButton: false,
-              timer: 2000
-            })
-          } else {
-            this.$swal.fire(
-              'Failed delete AlertConfig',
-              resp['message'].replaceAll(/\[StreamX]/g, ''),
-              'error'
-            )
-          }
-          this.handleAlertConfigAll()
-        })
-      },
+    handleClusterFormVisible(flag) {
+      this.clusterId = null
+      this.flinkClusterVisible = flag
+      this.clusterForm.resetFields()
+    },
+    handleFlinkAll() {
+      listFlink({}).then((resp) => {
+        this.flinks = resp.data
+      })
+    },
 
-      handleClusterFormVisible(flag) {
-        this.clusterId = null
-        this.flinkClusterVisible = flag
-        this.clusterForm.resetFields()
-      },
-      handleFlinkAll() {
-        listFlink({}).then((resp) => {
-          this.flinks = resp.data
-        })
-      },
-
-      handleClusterAll() {
-        listCluster({}).then((resp) => {
-          this.clusters = resp.data
-          let c
-          for(c in resp.data){
-            const cluster = resp.data[c]
-            if(resp.data[c].clusterState === 0){
+    handleClusterAll() {
+      listCluster({}).then((resp) => {
+        this.clusters = resp.data
+        let c
+        for(c in resp.data){
+          const cluster = resp.data[c]
+          if(resp.data[c].clusterState === 0){
               this.optionClusters.created.set(cluster.id,new Date().getTime())
-            }else if(resp.data[c].clusterState === 1){
+          }else if(resp.data[c].clusterState === 1){
               this.optionClusters.starting.set(cluster.id,new Date().getTime())
-            }else{
+          }else{
               this.optionClusters.stoped.set(cluster.id,new Date().getTime())
-            }
           }
-        })
-      },
+        }
+      })
+    },
 
 
-      computeAlertType(level){
+    computeAlertType(level){
         if (level === null) {
-          level = 0
+            level = 0
         }
         const result = new Array()
         while (level != 0) {
-          // 获取最低位的 1
-          const code = level & -level
-          result.push(code)
-          // 将最低位置 0
-          level ^= code
+            // 获取最低位的 1
+            const code = level & -level
+            result.push(code)
+            // 将最低位置 0
+            level ^= code
         }
         return result
-      },
+    },
 
-      handleAlertConfigAll() {
-        listWithOutPageAlert({}).then((resp) => {
-          console.log('获取告警列表：' + JSON.stringify(resp.data))
-          this.alerts = resp.data
-        })
-      },
+    handleAlertConfigAll() {
+      listWithOutPageAlert({}).then((resp) => {
+        console.log('获取告警列表：' + JSON.stringify(resp.data))
+        this.alerts = resp.data
+      })
+    },
 
-      handleSubmitAlertSetting(e) {
-        e.preventDefault()
-        this.alertForm.validateFields((err, values) => {
-          const param = {
-            id: this.alertId,
-            alertName: values.alertName,
-            userId: storage.get('USER_INFO').userId,
-            alertType: eval(values.alertType.join('+')),
-            emailParams: {contacts: values.alertEmail},
-            dingTalkParams: {
-              token: values.dingtalkToken,
-              contacts: values.alertDingUser,
-              isAtAll: values.dingtalkIsAtAll,
-              alertDingURL: values.alertDingURL,
-              secretEnable: values.dingtalkSecretEnable,
-              secretToken: values.dingtalkSecretToken
-            },
-            weComParams:{
-              token:values.weToken
-            },
-            larkParams:{
-              token: values.larkToken,
-              isAtAll: values.larkIsAtAll,
-              secretEnable: values.larkSecretEnable,
-              secretToken: values.larkSecretToken
-            }
+    handleSubmitAlertSetting(e) {
+      e.preventDefault()
+      this.alertForm.validateFields((err, values) => {
+        const param = {
+          id: this.alertId,
+          alertName: values.alertName,
+          userId: storage.get('USER_INFO').userId,
+          alertType: eval(values.alertType.join('+')),
+          emailParams: {contacts: values.alertEmail},
+          dingTalkParams: {
+            token: values.dingtalkToken,
+            contacts: values.alertDingUser,
+            isAtAll: values.dingtalkIsAtAll,
+            alertDingURL: values.alertDingURL,
+            secretEnable: values.dingtalkSecretEnable,
+            secretToken: values.dingtalkSecretToken
+          },
+          weComParams:{
+            token:values.weToken
+          },
+          larkParams:{
+            token: values.larkToken,
+            isAtAll: values.larkIsAtAll,
+            secretEnable: values.larkSecretEnable,
+            secretToken: values.larkSecretToken
           }
-          console.log('提交告警参数：' + JSON.stringify(param))
-          if (!err) {
-            if(!param.id){//添加新告警
-              existsAlert({'alertName': param.alertName}).then((resp)=>{
-                if(resp.data){
+        }
+        console.log('提交告警参数：' + JSON.stringify(param))
+        if (!err) {
+          if(!param.id){//添加新告警
+            existsAlert({'alertName': param.alertName}).then((resp)=>{
+              if(resp.data){
+                this.$swal.fire(
+                  'Failed create AlertConfig',
+                  'alertName ' + param.alertName + ' is already exists!',
+                  'error'
+                )
+              }else{
+                addAlert(param).then((resp) => {
+                if (!resp.data) {//告警添加失败
                   this.$swal.fire(
                     'Failed create AlertConfig',
-                    'alertName ' + param.alertName + ' is already exists!',
-                    'error'
-                  )
-                }else{
-                  addAlert(param).then((resp) => {
-                    if (!resp.data) {//告警添加失败
-                      this.$swal.fire(
-                        'Failed create AlertConfig',
-                        resp['message'].replaceAll(/\[StreamX]/g, ''),
-                        'error'
-                      )
-                    } else {//告警添加成功
-                      this.$swal.fire({
-                        icon: 'success',
-                        title: 'Create AlertConfig successful!',
-                        showConfirmButton: false,
-                        timer: 2000
-                      })
-                      this.alertFormVisible = false
-                      this.handleAlertConfigAll()
-                    }
-                  })
-                }
-              })
-            }else{//根据告警id更新告警参数
-              updateAlert(param).then((resp) => {
-                if (!resp.data) {//告警更新失败
-                  this.$swal.fire(
-                    'Failed update AlertConfig',
                     resp['message'].replaceAll(/\[StreamX]/g, ''),
                     'error'
                   )
-                } else {//告警更新成功
+                } else {//告警添加成功
                   this.$swal.fire({
                     icon: 'success',
-                    title: 'Update AlertConfig successful!',
+                    title: 'Create AlertConfig successful!',
                     showConfirmButton: false,
                     timer: 2000
                   })
@@ -1461,262 +1440,283 @@
                   this.handleAlertConfigAll()
                 }
               })
+              }
+            })
+          }else{//根据告警id更新告警参数
+            updateAlert(param).then((resp) => {
+              if (!resp.data) {//告警更新失败
+                this.$swal.fire(
+                  'Failed update AlertConfig',
+                  resp['message'].replaceAll(/\[StreamX]/g, ''),
+                  'error'
+                )
+              } else {//告警更新成功
+                this.$swal.fire({
+                  icon: 'success',
+                  title: 'Update AlertConfig successful!',
+                  showConfirmButton: false,
+                  timer: 2000
+                })
+                this.alertFormVisible = false
+                this.handleAlertConfigAll()
+              }
+            })
+          }
+
+        }
+      }).catch((err) => {
+        callback(new Error('提交表单异常' + err))
+      })
+      this.alertId = null
+    },
+
+    handleSubmitFlink(e) {
+      e.preventDefault()
+      this.flinkForm.validateFields((err, values) => {
+        if (!err) {
+          existsEnv({
+            id: this.versionId,
+            flinkName: values.flinkName,
+            flinkHome: values.flinkHome
+          }).then((resp) => {
+            if (resp.data) {
+              if (this.versionId == null) {
+                createFlink(values).then((resp) => {
+                  if (resp.data) {
+                    this.flinkFormVisible = false
+                    this.handleFlinkAll()
+                  } else {
+                    this.$swal.fire(
+                      'Failed',
+                      resp['message'].replaceAll(/\[StreamX]/g, ''),
+                      'error'
+                    )
+                  }
+                })
+              } else {
+                updateFlink({
+                  id: this.versionId,
+                  flinkName: values.flinkName,
+                  flinkHome: values.flinkHome,
+                  description: values.description || null
+                }).then((resp) => {
+                  if (resp.data) {
+                    this.flinkFormVisible = false
+                    this.$swal.fire({
+                      icon: 'success',
+                      title: values.flinkName.concat(' update successful!'),
+                      showConfirmButton: false,
+                      timer: 2000
+                    })
+                    this.handleFlinkAll()
+                  } else {
+                    this.$swal.fire(
+                      'Failed',
+                      resp['message'].replaceAll(/\[StreamX]/g, ''),
+                      'error'
+                    )
+                  }
+                })
+              }
+            } else {
+              if (resp.status === 'error') {
+                this.$swal.fire(
+                  'Failed',
+                  'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
+                  'error'
+                )
+              } else {
+                this.$swal.fire(
+                  'Failed',
+                  'flink name is already exists',
+                  'error'
+                )
+              }
             }
-
-          }
-        }).catch((err) => {
-          callback(new Error('提交表单异常' + err))
-        })
-        this.alertId = null
-      },
-
-      handleSubmitFlink(e) {
-        e.preventDefault()
-        this.flinkForm.validateFields((err, values) => {
-          if (!err) {
-            existsEnv({
-              id: this.versionId,
-              flinkName: values.flinkName,
-              flinkHome: values.flinkHome
-            }).then((resp) => {
-              if (resp.data) {
-                if (this.versionId == null) {
-                  createFlink(values).then((resp) => {
-                    if (resp.data) {
-                      this.flinkFormVisible = false
-                      this.handleFlinkAll()
-                    } else {
-                      this.$swal.fire(
-                        'Failed',
-                        resp['message'].replaceAll(/\[StreamX]/g, ''),
-                        'error'
-                      )
-                    }
-                  })
-                } else {
-                  updateFlink({
-                    id: this.versionId,
-                    flinkName: values.flinkName,
-                    flinkHome: values.flinkHome,
-                    description: values.description || null
-                  }).then((resp) => {
-                    if (resp.data) {
-                      this.flinkFormVisible = false
-                      this.$swal.fire({
-                        icon: 'success',
-                        title: values.flinkName.concat(' update successful!'),
-                        showConfirmButton: false,
-                        timer: 2000
-                      })
-                      this.handleFlinkAll()
-                    } else {
-                      this.$swal.fire(
-                        'Failed',
-                        resp['message'].replaceAll(/\[StreamX]/g, ''),
-                        'error'
-                      )
-                    }
-                  })
-                }
-              } else {
-                if (resp.status === 'error') {
-                  this.$swal.fire(
-                    'Failed',
-                    'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
-                    'error'
-                  )
-                } else {
-                  this.$swal.fire(
-                    'Failed',
-                    'flink name is already exists',
-                    'error'
-                  )
-                }
-              }
-            })
-          }
-        })
-      },
-
-      handleSubmitCluster(e) {
-        e.preventDefault()
-        this.clusterForm.validateFields((err, values) => {
-          if (!err) {
-            checkCluster({
-              id: this.clusterId,
-              clusterName: values.clusterName,
-              address: values.address
-            }).then((resp) => {
-              if (resp.data === 'success') {
-                if (this.clusterId == null) {
-                  createCluster({
-                    clusterName: values.clusterName,
-                    address: values.address,
-                    description: values.description || null
-                  }).then((resp) => {
-                    if (resp.data) {
-                      this.flinkClusterVisible = false
-                      this.handleClusterAll()
-                    } else {
-                      this.$swal.fire(
-                        'Failed',
-                        resp['message'].replaceAll(/\[StreamX]/g, ''),
-                        'error'
-                      )
-                    }
-                  })
-                } else {
-                  updateCluster({
-                    id: this.clusterId,
-                    clusterName: values.clusterName,
-                    address: values.address,
-                    description: values.description || null
-                  }).then((resp) => {
-                    if (resp.data) {
-                      this.clusterFormVisible = false
-                      this.$swal.fire({
-                        icon: 'success',
-                        title: values.clusterName.concat(' update successful!'),
-                        showConfirmButton: false,
-                        timer: 2000
-                      })
-                      this.handleClusterAll()
-                    } else {
-                      this.$swal.fire(
-                        'Failed',
-                        resp['message'].replaceAll(/\[StreamX]/g, ''),
-                        'error'
-                      )
-                    }
-                  })
-                }
-              } else {
-                if (resp.data === 'exists') {
-                  this.$swal.fire(
-                    'Failed',
-                    'the cluster name: ' + values.clusterName + ' is already exists,please check',
-                    'error'
-                  )
-                } else if (resp.data === 'fail') {
-                  this.$swal.fire(
-                    'Failed',
-                    'the address is invalid or connection failure, please check',
-                    'error'
-                  )
-                }
-              }
-            })
-          }
-        })
-      },
-
-      handleFlinkConf(flink) {
-        this.flinkConfVisible = true
-        this.versionId = flink.id
-        this.flinkName = flink.flinkName
-        getFlink({id: this.versionId}).then((resp) => {
-          this.flinkHome = resp.data.flinkHome
-          this.flinkConf = resp.data.flinkConf
-          this.handleInitEditor()
-        })
-      },
-
-      handleInitEditor() {
-        if (this.editor == null) {
-          this.editor = monaco.editor.create(document.querySelector('#conf'), this.getOption())
-          this.$nextTick(() => {
-            const elem = document.querySelector('#conf')
-            this.handleHeight(elem, 210)
           })
         }
-        this.$nextTick(() => {
-          this.editor.getModel().setValue(this.flinkConf)
-        })
-      },
+      })
+    },
 
-      handleSync() {
-        sync({id: this.versionId}).then((resp) => {
+    handleSubmitCluster(e) {
+      e.preventDefault()
+      this.clusterForm.validateFields((err, values) => {
+        if (!err) {
+          checkCluster({
+            id: this.clusterId,
+            clusterName: values.clusterName,
+            address: values.address
+          }).then((resp) => {
+            if (resp.data === 'success') {
+              if (this.clusterId == null) {
+                createCluster({
+                  clusterName: values.clusterName,
+                  address: values.address,
+                  description: values.description || null
+                }).then((resp) => {
+                  if (resp.data) {
+                    this.flinkClusterVisible = false
+                    this.handleClusterAll()
+                  } else {
+                    this.$swal.fire(
+                      'Failed',
+                      resp['message'].replaceAll(/\[StreamX]/g, ''),
+                      'error'
+                    )
+                  }
+                })
+              } else {
+                updateCluster({
+                  id: this.clusterId,
+                  clusterName: values.clusterName,
+                  address: values.address,
+                  description: values.description || null
+                }).then((resp) => {
+                  if (resp.data) {
+                    this.clusterFormVisible = false
+                    this.$swal.fire({
+                      icon: 'success',
+                      title: values.clusterName.concat(' update successful!'),
+                      showConfirmButton: false,
+                      timer: 2000
+                    })
+                    this.handleClusterAll()
+                  } else {
+                    this.$swal.fire(
+                      'Failed',
+                      resp['message'].replaceAll(/\[StreamX]/g, ''),
+                      'error'
+                    )
+                  }
+                })
+              }
+            } else {
+              if (resp.data === 'exists') {
+                this.$swal.fire(
+                  'Failed',
+                  'the cluster name: ' + values.clusterName + ' is already exists,please check',
+                  'error'
+                )
+              } else if (resp.data === 'fail') {
+                this.$swal.fire(
+                  'Failed',
+                  'the address is invalid or connection failure, please check',
+                  'error'
+                )
+              }
+            }
+          })
+        }
+      })
+    },
+
+    handleFlinkConf(flink) {
+      this.flinkConfVisible = true
+      this.versionId = flink.id
+      this.flinkName = flink.flinkName
+      getFlink({id: this.versionId}).then((resp) => {
+        this.flinkHome = resp.data.flinkHome
+        this.flinkConf = resp.data.flinkConf
+        this.handleInitEditor()
+      })
+    },
+
+    handleInitEditor() {
+      if (this.editor == null) {
+        this.editor = monaco.editor.create(document.querySelector('#conf'), this.getOption())
+        this.$nextTick(() => {
+          const elem = document.querySelector('#conf')
+          this.handleHeight(elem, 210)
+        })
+      }
+      this.$nextTick(() => {
+        this.editor.getModel().setValue(this.flinkConf)
+      })
+    },
+
+    handleSync() {
+      sync({id: this.versionId}).then((resp) => {
+        this.$swal.fire({
+          icon: 'success',
+          title: this.flinkName.concat(' conf sync successful!'),
+          showConfirmButton: false,
+          timer: 2000
+        })
+      })
+    },
+
+    handleSetDefault(item) {
+      if (item.isDefault) {
+        setDefault({id: item.id}).then((resp) => {
           this.$swal.fire({
             icon: 'success',
-            title: this.flinkName.concat(' conf sync successful!'),
+            title: item.flinkName.concat(' set default successful!'),
             showConfirmButton: false,
             timer: 2000
           })
-        })
-      },
-
-      handleSetDefault(item) {
-        if (item.isDefault) {
-          setDefault({id: item.id}).then((resp) => {
-            this.$swal.fire({
-              icon: 'success',
-              title: item.flinkName.concat(' set default successful!'),
-              showConfirmButton: false,
-              timer: 2000
-            })
-            this.handleFlinkAll()
-          })
-        }
-      },
-
-      handleSetDingtalkSecretEnable(checked) {
-        console.log('DingtalkSecretEnable是否选中:' + checked)
-        this.dingtalkSecretEnable = checked
-      },
-
-      handleSetLarkSecretEnable(checked) {
-        console.log('LarkSecretEnable是否选中:' + checked)
-        this.larkSecretEnable = checked
-      },
-
-      handleDingtalkIsAtAll(checked) {
-        console.log('dingtalkIsAtAll是否选中:' + checked)
-        this.dingtalkIsAtAll = checked
-      },
-
-      handleLarkIsAtAll(checked) {
-        console.log('larkIsAtAll是否选中:' + checked)
-        this.larkIsAtAll = checked
-      },
-
-      handleCloseConf() {
-        this.flinkConfVisible = false
-      },
-
-      handleHeight(elem, h) {
-        const height = document.documentElement.offsetHeight || document.body.offsetHeight
-        $(elem).css('height', (height - h) + 'px')
-      },
-
-      handleSwitch(setting) {
-        update({
-          key: setting.key,
-          value: setting.value !== 'true'
-        }).then((resp) => {
-          this.handleSettingAll()
+          this.handleFlinkAll()
         })
       }
     },
 
-    watch: {
-      myTheme() {
-        if (this.editor != null) {
-          this.editor.updateOptions({
-            theme: this.ideTheme()
-          })
-        }
-      }
+    handleSetDingtalkSecretEnable(checked) {
+      console.log('DingtalkSecretEnable是否选中:' + checked)
+      this.dingtalkSecretEnable = checked
     },
 
-  }
+    handleSetLarkSecretEnable(checked) {
+      console.log('LarkSecretEnable是否选中:' + checked)
+      this.larkSecretEnable = checked
+    },
+
+    handleDingtalkIsAtAll(checked) {
+      console.log('dingtalkIsAtAll是否选中:' + checked)
+      this.dingtalkIsAtAll = checked
+    },
+
+    handleLarkIsAtAll(checked) {
+      console.log('larkIsAtAll是否选中:' + checked)
+      this.larkIsAtAll = checked
+    },
+
+    handleCloseConf() {
+      this.flinkConfVisible = false
+    },
+
+    handleHeight(elem, h) {
+      const height = document.documentElement.offsetHeight || document.body.offsetHeight
+      $(elem).css('height', (height - h) + 'px')
+    },
+
+    handleSwitch(setting) {
+      update({
+        key: setting.key,
+        value: setting.value !== 'true'
+      }).then((resp) => {
+        this.handleSettingAll()
+      })
+    }
+  },
+
+  watch: {
+    myTheme() {
+      if (this.editor != null) {
+        this.editor.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+    }
+  },
+
+}
 </script>
 
 <style lang="less">
-  @import "View";
+@import "View";
 
-  .ant-divider-inner-text {
-    .svg-icon-middle {
-      vertical-align: top;
-    }
+.ant-divider-inner-text {
+  .svg-icon-middle {
+    vertical-align: top;
   }
+}
 </style>

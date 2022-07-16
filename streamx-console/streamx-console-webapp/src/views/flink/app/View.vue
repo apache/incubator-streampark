@@ -1111,8 +1111,12 @@ export default {
       } , {
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 320,
+        width: 300,
         scopedSlots: {customRender: 'jobName'},
+      }, {
+        title: 'Flink Version',
+        dataIndex: 'flinkVersion',
+        width: 120
       }, {
         title: 'Owner',
         dataIndex: 'nickName',
@@ -1120,7 +1124,7 @@ export default {
       }, {
         title: 'Run Status',
         dataIndex: 'state',
-        width: 120,
+        width: 130,
         scopedSlots: {customRender: 'state'},
         filters: [
           {text: 'ADDED', value: 0},
@@ -1150,14 +1154,14 @@ export default {
         dataIndex: 'modifyTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'modifyTime' && sortedInfo.order,
-        width: 170
+        width: 180
       }, {
         dataIndex: 'operation',
         key: 'operation',
         fixed: 'right',
         scopedSlots: {customRender: 'operation'},
         slots: {title: 'customOperation'},
-        width: 200
+        width: 220
       }]
     }
   },
