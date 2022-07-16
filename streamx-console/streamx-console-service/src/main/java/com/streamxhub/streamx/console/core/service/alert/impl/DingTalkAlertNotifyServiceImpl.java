@@ -31,6 +31,7 @@ import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.net.util.Base64;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -57,6 +58,7 @@ import java.util.StringJoiner;
  */
 @Slf4j
 @Service
+@Lazy
 public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
     private Template template;
 
@@ -68,7 +70,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
 
     @PostConstruct
     public void loadTemplateFile() throws Exception {
-        String template = "dingTalkAlertTemplate.txt";
+        String template = "alert-dingTalk.ftl";
         this.template = FreemarkerUtils.loadTemplateFile(template);
     }
 
@@ -79,7 +81,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
             // handling contacts
             List<String> contactList = new ArrayList<>();
             String contacts = dingTalkParams.getContacts();
-            if (!StringUtils.isEmpty(contacts)) {
+            if (StringUtils.hasLength(contacts)) {
                 Collections.addAll(contactList, contacts.split(","));
             }
             String title = alertTemplate.getTitle();
@@ -131,7 +133,8 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
             throw new ServiceException(String.format("Failed to request DingTalk robot alert, url:%s", url));
         }
         if (robotResponse.getErrcode() != 0) {
-            throw new ServiceException(String.format("Failed to request DingTalk robot alert, url:%s, errorCode:%d", url, robotResponse.getErrcode()));
+            throw new ServiceException(String.format("Failed to request DingTalk robot alert, url:%s, errorCode:%d, errorMsg:%s",
+                    url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
         }
         return robotResponse;
     }
@@ -143,13 +146,18 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
      * @return the webhook
      */
     private String getWebhook(DingTalkParams params) {
+        String urlPef = "https://oapi.dingtalk.com/robot/send?access_token=";
+        if (StringUtils.hasLength(params.getAlertDingURL())) {
+            urlPef = params.getAlertDingURL();
+        }
+
         String url;
         if (params.getSecretEnable()) {
             Long timestamp = System.currentTimeMillis();
-            url = String.format("https://oapi.dingtalk.com/robot/send?access_token=%s&timestamp=%d&sign=%s",
-                params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
+            url = String.format(urlPef + "%s&timestamp=%d&sign=%s",
+                    params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
         } else {
-            url = String.format("https://oapi.dingtalk.com/robot/send?access_token=%s", params.getToken());
+            url = String.format(urlPef + "%s", params.getToken());
         }
         if (log.isDebugEnabled()) {
             log.debug("The alarm robot url of DingTalk contains signature is {}", url);

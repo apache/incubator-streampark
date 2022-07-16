@@ -6,7 +6,7 @@
  * 自定义图标加载表
  * 所有图标均从这里加载，方便管理
  */
-import alertsetting from '@/assets/icons/alertsetting.svg?inline'
+import alarm from '@/assets/icons/alarm.svg?inline'
 import analyse from '@/assets/icons/analyse.svg' // path to your '*.svg?inline' file.
 import flink from '@/assets/icons/flink.svg?inline'
 import spark from '@/assets/icons/spark.svg?inline'
@@ -20,10 +20,13 @@ import deploy from '@/assets/icons/deploy.svg?inline'
 import stream from '@/assets/icons/stream.svg?inline'
 import threshold from '@/assets/icons/threshold.svg?inline'
 import format from '@/assets/icons/format.svg?inline'
-import dingding from '@/assets/icons/dingding.svg?inline'
+import dingtalk from '@/assets/icons/dingtalk.svg?inline'
 import mail from '@/assets/icons/mail.svg?inline'
 import sms from '@/assets/icons/sms.svg?inline'
+import message from '@/assets/icons/message.svg?inline'
 import wechat from '@/assets/icons/wechat.svg?inline'
+import wecom from '@/assets/icons/wecom.svg?inline'
+import lark from '@/assets/icons/lark.svg?inline'
 import host from '@/assets/icons/host.svg?inline'
 import keys from '@/assets/icons/keys.svg?inline'
 import port from '@/assets/icons/port.svg?inline'
@@ -56,7 +59,7 @@ import auth from '@/assets/icons/auth.svg?inline'
 import password from '@/assets/icons/password.svg?inline'
 
 export {
-  alertsetting,
+  alarm,
   analyse,
   flink,
   flinksql,
@@ -70,10 +73,12 @@ export {
   stream,
   threshold,
   format,
-  dingding,
+  dingtalk,
   mail,
   sms,
+  message,
   wechat,
+  wecom,
   host,
   keys,
   port,
@@ -103,5 +108,6 @@ export {
   docker,
   namespace,
   auth,
-  password
+  password,
+  lark
 }

@@ -53,6 +53,8 @@ public interface ApplicationService extends IService<Application> {
 
     AppExistsState checkExists(Application app);
 
+    String checkSavepointPath(Application app) throws Exception;
+
     void cancel(Application app) throws Exception;
 
     void updateTracking(Application application);

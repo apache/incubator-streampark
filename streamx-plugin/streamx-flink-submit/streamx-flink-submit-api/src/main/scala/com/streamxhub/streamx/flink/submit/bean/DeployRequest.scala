@@ -35,7 +35,7 @@ case class DeployRequest(flinkVersion: FlinkVersion,
                          executionMode: ExecutionMode,
                          resolveOrder: ResolveOrder,
                          flameGraph: JavaMap[String, java.io.Serializable],
-                         dynamicOption: Array[String],
+                         dynamicOption: JavaMap[String, String],
                          @Nullable k8sDeployParam: KubernetesDeployParam,
                          @Nullable extraParameter: JavaMap[String, Any]
                          ) {
@@ -56,6 +56,7 @@ case class DeployRequest(flinkVersion: FlinkVersion,
       flinkName,
       flinkHome,
       flinkLib = s"$flinkHdfsHome/lib",
+      flinkPlugins = s"$flinkHdfsHome/plugins",
       flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome),
       appJars = workspace.APP_JARS,
       appPlugins = workspace.APP_PLUGINS

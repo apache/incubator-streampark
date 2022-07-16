@@ -136,3 +136,21 @@ streamx:
       /*.less,
       /
 
+## Select the login mode: 1. PASSWORD 2.LDAP
+security:
+  authentication:
+    type: PASSWORD
+
+ldap:
+  ## AD server IP, default port 389
+  urls: ldap://99.99.99.99:389
+  ## Login Account
+  username: cn=Manager,dc=streamx,dc=com
+  password: streamx
+  embedded:
+    base-dn: dc=streamx,dc=com
+  user:
+    identity:
+      attribute: cn
+    email:
+      attribute: mail

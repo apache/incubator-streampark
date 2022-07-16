@@ -232,6 +232,9 @@ public class Application implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date optionTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date modifyTime;
+
     /**
      * The exposed type of the rest service of K8s(kubernetes.rest-service.exposed.type)
      */
@@ -242,6 +245,9 @@ public class Application implements Serializable {
     private String k8sPodTemplate;
     private String k8sJmPodTemplate;
     private String k8sTmPodTemplate;
+
+    private String ingressTemplate;
+    private String defaultModeIngress;
 
     /**
      * 1: cicd (build from csv)
@@ -268,6 +274,7 @@ public class Application implements Serializable {
     private transient Boolean backUp = false;
     private transient Boolean restart = false;
     private transient String userName;
+    private transient String nickName;
     private transient String config;
     private transient Long configId;
     private transient String flinkVersion;
@@ -295,6 +302,22 @@ public class Application implements Serializable {
     private transient Integer buildStatus;
 
     private transient AppControl appControl;
+
+    public String getIngressTemplate() {
+        return ingressTemplate;
+    }
+
+    public void setIngressTemplate(String ingressTemplate) {
+        this.ingressTemplate = ingressTemplate;
+    }
+
+    public String getDefaultModeIngress() {
+        return defaultModeIngress;
+    }
+
+    public void setDefaultModeIngress(String defaultModeIngress) {
+        this.defaultModeIngress = defaultModeIngress;
+    }
 
     public void setK8sNamespace(String k8sNamespace) {
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE() : k8sNamespace;

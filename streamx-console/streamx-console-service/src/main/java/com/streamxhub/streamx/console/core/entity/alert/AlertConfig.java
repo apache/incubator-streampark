@@ -79,6 +79,11 @@ public class AlertConfig implements Serializable {
     private String httpCallbackParams;
 
     /**
+     * 飞书报警配置信息
+     */
+    private String larkParams;
+
+    /**
      * 创建时间
      */
     private Date createTime;
@@ -93,7 +98,7 @@ public class AlertConfig implements Serializable {
             return null;
         }
         AlertConfig alertConfig = new AlertConfig();
-        BeanUtils.copyProperties(params, alertConfig, "emailParams", "dingTalkParams", "weComParams", "httpCallbackParams");
+        BeanUtils.copyProperties(params, alertConfig, "emailParams", "dingTalkParams", "weComParams", "httpCallbackParams", "larkParams");
         try {
             if (params.getEmailParams() != null) {
                 alertConfig.setEmailParams(JacksonUtils.write(params.getEmailParams()));
@@ -106,6 +111,9 @@ public class AlertConfig implements Serializable {
             }
             if (params.getHttpCallbackParams() != null) {
                 alertConfig.setHttpCallbackParams(JacksonUtils.write(params.getHttpCallbackParams()));
+            }
+            if (params.getLarkParams() != null) {
+                alertConfig.setLarkParams(JacksonUtils.write(params.getLarkParams()));
             }
         } catch (JsonProcessingException e) {
             log.error("Json write failed", e);

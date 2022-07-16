@@ -27,9 +27,9 @@ import com.streamxhub.streamx.console.core.entity.alert.RobotResponse;
 import com.streamxhub.streamx.console.core.entity.alert.WeComParams;
 import com.streamxhub.streamx.console.core.service.alert.AlertNotifyService;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -47,21 +47,19 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@Lazy
 public class WeComAlertNotifyServiceImpl implements AlertNotifyService {
     private Template template;
 
     private final RestTemplate alertRestTemplate;
 
-    private final ObjectMapper mapper;
-
-    public WeComAlertNotifyServiceImpl(RestTemplate alertRestTemplate, ObjectMapper mapper) {
+    public WeComAlertNotifyServiceImpl(RestTemplate alertRestTemplate) {
         this.alertRestTemplate = alertRestTemplate;
-        this.mapper = mapper;
     }
 
     @PostConstruct
     public void loadTemplateFile() throws Exception {
-        String template = "weComAlertTemplate.txt";
+        String template = "alert-weCom.ftl";
         this.template = FreemarkerUtils.loadTemplateFile(template);
     }
 
@@ -106,7 +104,8 @@ public class WeComAlertNotifyServiceImpl implements AlertNotifyService {
             throw new ServiceException(String.format("Failed to request WeCom robot alert, url:%s", url));
         }
         if (robotResponse.getErrcode() != 0) {
-            throw new ServiceException(String.format("Failed to request WeCom robot alert, url:%s, errorCode:{}", robotResponse.getErrcode()));
+            throw new ServiceException(String.format("Failed to request DingTalk robot alert, url:%s, errorCode:%d, errorMsg:%s",
+                    url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
         }
         return robotResponse;
     }

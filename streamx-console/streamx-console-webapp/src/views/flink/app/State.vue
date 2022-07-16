@@ -41,7 +41,7 @@
         v-if="data['state'] === 9">CANCELED</a-tag>
       <a-tag
         color="#1890ff"
-        v-if="data['state'] === 10">FINISHED</a-tag>
+        v-if="data['state'] === 10 || data['state'] === 19">FINISHED</a-tag>
       <a-tag
         color="#722ed1"
         v-if="data['state'] === 11">SUSPENDED</a-tag>
@@ -63,9 +63,6 @@
       <a-tag
         color="#8E50FF"
         v-if="data['state'] === 18">TERMINATED</a-tag>
-      <a-tag
-        color="#1890ff"
-        v-if="data['state'] === 19">FINISHED</a-tag>
     </div>
     <div v-else class="app_state">
       <a-tag
@@ -95,32 +92,32 @@
       color="#52c41a">DONE</a-tag>
     <a-tag
       v-if="data.launch === 1 || data.launch === 4"
-      color="#fa8c16">NEED LAUNCH</a-tag>
+      color="#fa8c16">WAITING</a-tag>
     <a-tag
       v-if="data.launch === 2"
       class="status-processing-deploying"
       color="#52c41a">LAUNCHING</a-tag>
     <a-tag
       v-if="data.launch === 3"
-      color="#fa8c16">NEED RESTART</a-tag>
+      color="#fa8c16">PENDING</a-tag>
   </span>
   <span v-else-if="option === 'build'" class="app_state">
     <a-tag
       v-if="data['buildStatus'] === 0"
-      color="#99A3A4">BUILD-UNKNOWN</a-tag>
+      color="#99A3A4">UNKNOWN</a-tag>
     <a-tag
       v-if="data['buildStatus'] === 1"
-      color="#F5B041">BUILD-PENDING</a-tag>
+      color="#F5B041">PENDING</a-tag>
     <a-tag
       v-if="data['buildStatus'] === 2"
       color="#3498DB"
-      class="status-processing-deploying">BUILD-RUNNING</a-tag>
+      class="status-processing-deploying">BUILDING</a-tag>
     <a-tag
       v-if="data['buildStatus'] === 3"
-      color="#2ECC71">BUILD-SUCCESS</a-tag>
+      color="#2ECC71">SUCCESS</a-tag>
     <a-tag
       v-if="data['buildStatus'] === 4"
-      color="#E74C3C">BUILD-FAILURE</a-tag>
+      color="#E74C3C">FAILURE</a-tag>
   </span>
   <span v-else>
     <div

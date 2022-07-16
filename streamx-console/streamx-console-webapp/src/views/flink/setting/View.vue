@@ -5,126 +5,307 @@
         <a-card
           :bordered="false"
           class="system_setting">
-          <a-list>
-            <a-list-item v-for="(item,index) in settings" :key="index">
-              <a-list-item-meta style="width: 50%">
-                <svg-icon
-                  class="avatar"
-                  name="maven"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'streamx.maven.central.repository'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="user"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'streamx.maven.auth.user'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="mvnpass"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'streamx.maven.auth.password'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="http"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="host"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.host'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="port"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.port'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="mail"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.from'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="user"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.userName'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="keys"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.password'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="ssl"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'alert.email.ssl'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="docker"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'docker.register.address'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="namespace"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'docker.register.namespace'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="auth"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'docker.register.user'"></svg-icon>
-                <svg-icon
-                  class="avatar"
-                  name="password"
-                  size="large"
-                  slot="avatar"
-                  v-if="item.key === 'docker.register.password'"></svg-icon>
-                <span slot="title">{{ item.title }}</span>
-                <span slot="description">{{ item.description }}</span>
-              </a-list-item-meta>
-              <div class="list-content" style="width: 50%">
-                <div class="list-content-item" style="width: 100%">
-                  <template v-if="item.type === 1">
-                    <input
-                      :type="item.key === 'streamx.maven.auth.password' ? 'password': 'text'"
-                      v-if="item.editable"
-                      :value="item.value"
-                      :class="item.key.replace(/\./g,'_')"
-                      class="ant-input"/>
-                    <div v-else style="width: 100%;text-align: right">
-                      <span v-if="item.key === 'streamx.maven.auth.password' && item.value !== null"> ******** </span>
-                      <span v-else>{{ item.value }}</span>
+          <a-collapse class="collapse" v-model="collapseActive">
+            <a-collapse-panel key="1" header="Maven Setting.">
+              <a-list>
+                <a-list-item v-for="(item,index) in settings" :key="index" v-if="item.key.indexOf('streamx.maven') > -1">
+                  <a-list-item-meta style="width: 50%">
+                    <svg-icon
+                      class="avatar"
+                      name="maven"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'streamx.maven.central.repository'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="user"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'streamx.maven.auth.user'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="mvnpass"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'streamx.maven.auth.password'"></svg-icon>
+                    <span slot="title">{{ item.title }}</span>
+                    <span slot="description">{{ item.description }}</span>
+                  </a-list-item-meta>
+                  <div class="list-content" style="width: 50%">
+                    <div class="list-content-item" style="width: 100%">
+                      <template v-if="item.type === 1">
+                        <input
+                          :type="item.key === 'streamx.maven.auth.password' ? 'password': 'text'"
+                          v-if="item.editable"
+                          :value="item.value"
+                          :class="item.key.replace(/\./g,'_')"
+                          class="ant-input"/>
+                        <div v-else style="width: 100%;text-align: right">
+                          <span v-if="item.key === 'streamx.maven.auth.password' && item.value !== null"> ******** </span>
+                          <span v-else>{{ item.value }}</span>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <a-switch
+                          checked-children="ON"
+                          un-checked-children="OFF"
+                          style="float: right;margin-right: 30px"
+                          :default-checked="item.value === 'true'"
+                          @change="handleSwitch(item)"/>
+                      </template>
                     </div>
-                  </template>
-                  <template v-else>
-                    <a-switch
-                      checked-children="ON"
-                      un-checked-children="OFF"
-                      style="float: right;margin-right: 30px"
-                      :default-checked="item.value === 'true'"
-                      @change="handleSwitch(item)"/>
-                  </template>
-                </div>
+                  </div>
+                  <div slot="actions" v-if="item.type === 1">
+                    <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
+                    <a v-else @click="handleSubmit(item)">Submit</a>
+                  </div>
+                </a-list-item>
+              </a-list>
+            </a-collapse-panel>
+            <a-collapse-panel key="2" header="Docker Setting.">
+              <a-list>
+                <a-list-item v-for="(item,index) in settings" :key="index" v-if="item.key.indexOf('docker.register') > -1">
+                  <a-list-item-meta style="width: 50%">
+                    <svg-icon
+                      class="avatar"
+                      name="docker"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'docker.register.address'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="namespace"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'docker.register.namespace'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="auth"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'docker.register.user'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="password"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'docker.register.password'"></svg-icon>
+                    <span slot="title">{{ item.title }}</span>
+                    <span slot="description">{{ item.description }}</span>
+                  </a-list-item-meta>
+                  <div class="list-content" style="width: 50%">
+                    <div class="list-content-item" style="width: 100%">
+                      <template v-if="item.type === 1">
+                        <input
+                          :type="item.key === 'docker.register.password' ? 'password': 'text'"
+                          v-if="item.editable"
+                          :value="item.value"
+                          :class="item.key.replace(/\./g,'_')"
+                          class="ant-input"/>
+                        <div v-else style="width: 100%;text-align: right">
+                          <span v-if="item.key === 'docker.register.password' && item.value !== null"> ******** </span>
+                          <span v-else>{{ item.value }}</span>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <a-switch
+                          checked-children="ON"
+                          un-checked-children="OFF"
+                          style="float: right;margin-right: 30px"
+                          :default-checked="item.value === 'true'"
+                          @change="handleSwitch(item)"/>
+                      </template>
+                    </div>
+                  </div>
+                  <div slot="actions" v-if="item.type === 1">
+                    <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
+                    <a v-else @click="handleSubmit(item)">Submit</a>
+                  </div>
+                </a-list-item>
+              </a-list>
+            </a-collapse-panel>
+            <a-collapse-panel key="3" header="Sender Email Setting.">
+              <a-list>
+                <a-list-item v-for="(item,index) in settings" :key="index" v-if="item.key.indexOf('alert.email') > -1">
+                  <a-list-item-meta style="width: 50%">
+                    <svg-icon
+                      class="avatar"
+                      name="host"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.host'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="port"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.port'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="mail"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.from'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="user"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.userName'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="keys"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.password'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
+                      name="ssl"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'alert.email.ssl'"></svg-icon>
+                    <span slot="title">{{ item.title }}</span>
+                    <span slot="description">{{ item.description }}</span>
+                  </a-list-item-meta>
+                  <div class="list-content" style="width: 50%">
+                    <div class="list-content-item" style="width: 100%">
+                      <template v-if="item.type === 1">
+                        <input
+                          :type="item.key === 'alert.email.password' ? 'password': 'text'"
+                          v-if="item.editable"
+                          :value="item.value"
+                          :class="item.key.replace(/\./g,'_')"
+                          class="ant-input"/>
+                        <div v-else style="width: 100%;text-align: right">
+                          <span v-if="item.key === 'alert.email.password' && item.value !== null"> ******** </span>
+                          <span v-else>{{ item.value }}</span>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <a-switch
+                          checked-children="ON"
+                          un-checked-children="OFF"
+                          style="float: right;margin-right: 30px"
+                          :default-checked="item.value === 'true'"
+                          @change="handleSwitch(item)"/>
+                      </template>
+                    </div>
+                  </div>
+                  <div slot="actions" v-if="item.type === 1">
+                    <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
+                    <a v-else @click="handleSubmit(item)">Submit</a>
+                  </div>
+                </a-list-item>
+              </a-list>
+            </a-collapse-panel>
+            <a-collapse-panel key="4" header="Console Setting.">
+              <a-list>
+                <a-list-item v-for="(item,index) in settings" :key="index" v-if="item.key.indexOf('streamx.console') > -1">
+                  <a-list-item-meta style="width: 50%">
+                    <svg-icon
+                      class="avatar"
+                      name="http"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
+                    <span slot="title">{{ item.title }}</span>
+                    <span slot="description">{{ item.description }}</span>
+                  </a-list-item-meta>
+                  <div class="list-content" style="width: 50%">
+                    <div class="list-content-item" style="width: 100%">
+                      <template v-if="item.type === 1">
+                        <input
+                          type="text"
+                          v-if="item.editable"
+                          :value="item.value"
+                          :class="item.key.replace(/\./g,'_')"
+                          class="ant-input"/>
+                        <div v-else style="width: 100%;text-align: right">
+                          <span>{{ item.value }}</span>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <a-switch
+                          checked-children="ON"
+                          un-checked-children="OFF"
+                          style="float: right;margin-right: 30px"
+                          :default-checked="item.value === 'true'"
+                          @change="handleSwitch(item)"/>
+                      </template>
+                    </div>
+                  </div>
+                  <div slot="actions" v-if="item.type === 1">
+                    <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
+                    <a v-else @click="handleSubmit(item)">Submit</a>
+                  </div>
+                </a-list-item>
+              </a-list>
+            </a-collapse-panel>
+          </a-collapse>
+        </a-card>
+      </a-tab-pane>
+      <a-tab-pane key="alert" tab="Alert Setting">
+        <a-card
+          :bordered="false"
+          class="system_setting">
+          <div
+            v-permit="'project:create'">
+            <a-button
+              type="dashed"
+              style="width: 100%;margin-top: 20px"
+              icon="plus"
+              @click="handleAlertFormVisible(true)">
+              Add New
+            </a-button>
+          </div>
+
+          <a-list>
+            <a-list-item v-for="(item,index) in alerts" :key="index">
+              <a-list-item-meta style="width: 40%">
+                <svg-icon class="avatar" name="flink" size="large" slot="avatar"></svg-icon>
+                <span slot="title">{{ item.alertName }}</span>
+              </a-list-item-meta>
+
+              <div class="list-content" style="width: 40%">
+                <span slot="title" text-align center>Alert Type</span><br><br>
+                <svg-icon role="img" name="mail" size="middle" v-if="computeAlertType(item.alertType).indexOf(1) > -1 "/>
+                <svg-icon role="img" name="dingtalk" size="middle" v-if="computeAlertType(item.alertType).indexOf(2) > -1 "/>
+                <svg-icon role="img" name="wecom" size="middle" v-if="computeAlertType(item.alertType).indexOf(4) > -1 "/>
+                <svg-icon role="img" name="message" size="middle" v-if="computeAlertType(item.alertType).indexOf(8) > -1 "/>
+                <svg-icon role="img" name="lark" size="middle" v-if="computeAlertType(item.alertType).indexOf(16) > -1 "/>
               </div>
-              <div slot="actions" v-if="item.type === 1">
-                <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
-                <a v-else @click="handleSubmit(item)">Submit</a>
+
+              <div slot="actions">
+                <a-tooltip title="Edit Alert Config">
+                  <a-button
+                    @click.native="handleEditAlertConf(item)"
+                    shape="circle"
+                    size="large"
+                    style="margin-left: 3px"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="edit"/>
+                  </a-button>
+                </a-tooltip>
+                <template>
+                  <a-popconfirm
+                    title="Are you sure delete this alert conf ?"
+                    cancel-text="No"
+                    ok-text="Yes"
+                    @confirm="handleDeleteAlertConf(item)">
+                    <a-button
+                      type="danger"
+                      shape="circle"
+                      size="large"
+                      style="margin-left: 3px"
+                      class="control-button">
+                      <a-icon type="delete"/>
+                    </a-button>
+                  </a-popconfirm>
+                </template>
               </div>
             </a-list-item>
           </a-list>
+
         </a-card>
       </a-tab-pane>
       <a-tab-pane key="flink" tab="Flink Home">
@@ -179,70 +360,6 @@
           </a-list>
         </a-card>
       </a-tab-pane>
-
-      <!-- 告警配置 -->
-      <a-tab-pane key="alert" tab="Alert Setting">
-        <a-card
-          :bordered="false"
-          class="system_setting">
-          <div
-            v-permit="'project:create'">
-            <a-button
-              type="dashed"
-              style="width: 100%;margin-top: 20px"
-              icon="plus"
-              @click="handleAlertFormVisible(true)">
-              Add New
-            </a-button>
-          </div>
-          <a-list>
-            <a-list-item v-for="(item,index) in alerts" :key="index">
-              <a-list-item-meta style="width: 40%">
-                <svg-icon class="avatar" name="flink" size="large" slot="avatar"></svg-icon>
-                <span slot="title">{{ item.alertName }}</span>
-              </a-list-item-meta>
-
-              <div class="list-content" style="width: 40%">
-                <span slot="title" text-align center>Alert Type</span><br><br>
-                <svg-icon role="img" v-if="item.alertType === 1 || item.alertType === 3 || item.alertType === 5 || item.alertType === 9 || item.alertType === 7 || item.alertType === 13 || item.alertType === 15" name="mail" size="middle"/>
-                <svg-icon role="img" v-if="item.alertType === 2 || item.alertType === 3 || item.alertType === 6 || item.alertType === 10 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15" name="dingding" size="middle"/>
-                <svg-icon role="img" v-if="item.alertType === 4 || item.alertType === 5 || item.alertType === 6 || item.alertType === 12 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15" name="wechat" size="middle"/>
-                <svg-icon role="img" v-if="item.alertType === 8 || item.alertType === 9 || item.alertType === 10 || item.alertType === 12 || item.alertType === 11 || item.alertType === 14 || item.alertType === 15" name="sms" size="middle"/>
-              </div>
-
-              <div slot="actions">
-                <a-tooltip title="Edit Alert Config">
-                  <a-button
-                    @click.native="handleEditAlertConf(item)"
-                    shape="circle"
-                    size="large"
-                    style="margin-left: 3px"
-                    class="control-button ctl-btn-color">
-                    <a-icon type="edit"/>
-                  </a-button>
-                </a-tooltip>
-                <template>
-                  <a-popconfirm
-                    title="Are you sure delete this alert conf ?"
-                    cancel-text="No"
-                    ok-text="Yes"
-                    @confirm="handleDeleteAlertConf(item)">
-                    <a-button
-                      type="danger"
-                      shape="circle"
-                      size="large"
-                      style="margin-left: 3px"
-                      class="control-button">
-                      <a-icon type="delete"/>
-                    </a-button>
-                  </a-popconfirm>
-                </template>
-              </div>
-            </a-list-item>
-          </a-list>
-        </a-card>
-      </a-tab-pane>
-
       <a-tab-pane key="cluster" tab="Flink Cluster">
         <a-card
           :bordered="false"
@@ -380,7 +497,7 @@
                     size="large"
                     style="margin-left: 3px"
                     class="control-button ctl-btn-color"
-                    :href="item.address" 
+                    :href="item.address"
                     target="_blank">
                     <a-icon type="eye"/>
                   </a-button>
@@ -508,14 +625,14 @@
 
     <a-modal
       v-model="alertFormVisible"
-      width="1200px"
+      width="850px"
       class="full-modal">
       <template
         slot="title">
         <svg-icon
           slot="icon"
           size="middle"
-          name="alertsetting"/>
+          name="alarm"/>
         Alert Setting
       </template>
 
@@ -533,7 +650,7 @@
             v-decorator="['alertName',{ rules: [{validator: handleCheckAlertName,required: true , message: 'Alert Name is required'}]} ]"/>
           <span
             class="conf-switch"
-            style="color:darkgrey">the alert name, e.g: dingdingAlert </span>
+            style="color:darkgrey">the alert name, e.g: streamx team alert </span>
         </a-form-item>
 
         <a-form-item
@@ -551,14 +668,16 @@
               :disabled="o.disabled"
               :value="o.value">
               <svg-icon role="img" v-if="o.value === 1" name="mail"/>
-              <svg-icon role="img" v-if="o.value === 2" name="dingding"/>
-              <svg-icon role="img" v-if="o.value === 4" name="wechat"/>
-              <svg-icon role="img" v-if="o.value === 8" name="sms"/>
+              <svg-icon role="img" v-if="o.value === 2" name="dingtalk"/>
+              <svg-icon role="img" v-if="o.value === 4" name="wecom"/>
+              <svg-icon role="img" v-if="o.value === 8" name="message"/>
+              <svg-icon role="img" v-if="o.value === 16" name="lark"/>
               {{ o.name }}
             </a-select-option>
           </a-select>
         </a-form-item>
 
+        <a-divider v-if="alertType.indexOf(1)>-1"><svg-icon role="img" name="mail" size="middle"/>  E-mail </a-divider>
         <a-form-item
           v-if="alertType.indexOf(1)>-1"
           label="Alert Email"
@@ -569,9 +688,10 @@
             placeholder="Please enter email,separate multiple emails with comma(,)"
             allowClear
             v-decorator="[ 'alertEmail', {rules: [{ required: true, message: 'email address is required' }]} ]">
-            <svg-icon name="mail" slot="prefix"/>
           </a-input>
         </a-form-item>
+
+        <a-divider v-if="alertType.indexOf(2)>-1"><svg-icon role="img" name="dingtalk" size="middle"/> Ding Talk </a-divider>
 
         <a-form-item
           v-if="alertType.indexOf(2)>-1"
@@ -594,51 +714,7 @@
             type="text"
             placeholder="Please enter the access token of DingTalk"
             allowClear
-            v-decorator="[ 'token', {rules: [{ required: true, message: 'DingTalk token is required' }]} ]"/>
-        </a-form-item>
-
-        <a-form-item
-          label="IsAll"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-          v-show="alertType.indexOf(2)>-1">
-          <a-tooltip title="Whether Notify All">
-            <a-switch
-              checked-children="ON"
-              un-checked-children="OFF"
-              allowClear
-              :checked="isAll"
-              @change="handleIsAll"
-              v-decorator="[ 'isAll' ]"/>
-          </a-tooltip>
-        </a-form-item>
-
-        <a-form-item
-          label="SecretEnable"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-          v-show="alertType.indexOf(2)>-1">
-          <a-tooltip title="DingTalk ecretToken is enable">
-            <a-switch
-              checked-children="ON"
-              un-checked-children="OFF"
-              :checked="secretEnable"
-              allowClear
-              @change="handleSetSecretEnable"
-              v-decorator="[ 'secretEnable' ]" />
-          </a-tooltip>
-        </a-form-item>
-
-        <a-form-item
-          v-if="alertType.indexOf(2)>-1 && secretEnable === true"
-          label="DingTalk SecretToken"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
-          <a-input
-            type="text"
-            placeholder="Please enter DingTalk SecretToken"
-            allowClear
-            v-decorator="[ 'alertSecretToken', {rules: [{ required: true, message: 'DingTalk SecretToken is required' }]} ]"/>
+            v-decorator="[ 'dingtalkToken', {rules: [{ required: true, message: 'DingTalk token is required' }]} ]"/>
         </a-form-item>
 
         <a-form-item
@@ -654,6 +730,52 @@
         </a-form-item>
 
         <a-form-item
+          label="At All User"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+          v-show="alertType.indexOf(2)>-1">
+          <a-tooltip title="Whether Notify All">
+            <a-switch
+              checked-children="ON"
+              un-checked-children="OFF"
+              allowClear
+              :checked="dingtalkIsAtAll"
+              @change="handleDingtalkIsAtAll"
+              v-decorator="[ 'dingtalkIsAtAll' ]"/>
+          </a-tooltip>
+        </a-form-item>
+
+        <a-form-item
+          label="Secret Enable"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+          v-show="alertType.indexOf(2)>-1">
+          <a-tooltip title="DingTalk ecretToken is enable">
+            <a-switch
+              checked-children="ON"
+              un-checked-children="OFF"
+              :checked="dingtalkSecretEnable"
+              allowClear
+              @change="handleSetDingtalkSecretEnable"
+              v-decorator="[ 'dingtalkSecretEnable' ]" />
+          </a-tooltip>
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(2)>-1 && dingtalkSecretEnable === true"
+          label="Secret Token"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-input
+            type="text"
+            placeholder="Please enter DingTalk SecretToken"
+            allowClear
+            v-decorator="[ 'dingtalkSecretToken', {rules: [{ required: true, message: 'DingTalk SecretToken is required' }]} ]"/>
+        </a-form-item>
+
+        <a-divider v-if="alertType.indexOf(4)>-1"><svg-icon role="img" name="wecom" size="middle"/> WeChat </a-divider>
+
+        <a-form-item
           v-if="alertType.indexOf(4)>-1"
           label="WeChat token"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -663,6 +785,8 @@
             placeholder="Please enter WeChart Token"
             v-decorator="['weToken', {rules: [{ required: true, message: 'WeChat Token is required' }]} ]"/>
         </a-form-item>
+
+        <a-divider v-if="alertType.indexOf(8)>-1"><svg-icon role="img" name="message" size="middle"/> SMS </a-divider>
 
         <a-form-item
           v-if="alertType.indexOf(8)>-1"
@@ -687,6 +811,64 @@
             v-decorator="['alertSmsTemplate', {rules: [{ required: true, message: 'SMS Template is required' }]} ]"/>
         </a-form-item>
 
+        <a-divider v-if="alertType.indexOf(16)>-1"><svg-icon role="img" name="lark" size="middle"/> Lark </a-divider>
+
+        <a-form-item
+          v-if="alertType.indexOf(16)>-1"
+          label="Lark Token"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-input
+            type="text"
+            placeholder="Please enter the access token of LarkTalk"
+            allowClear
+            v-decorator="[ 'larkToken', {rules: [{ required: true, message: 'Lark token is required' }]} ]"/>
+        </a-form-item>
+
+        <a-form-item
+          label="At All User"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+          v-show="alertType.indexOf(16)>-1">
+          <a-tooltip title="Whether Notify All">
+            <a-switch
+              checked-children="ON"
+              un-checked-children="OFF"
+              allowClear
+              :checked="larkIsAtAll"
+              @change="handleLarkIsAtAll"
+              v-decorator="[ 'larkIsAtAll' ]"/>
+          </a-tooltip>
+        </a-form-item>
+
+        <a-form-item
+          label="Secret Enable"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+          v-show="alertType.indexOf(16)>-1">
+          <a-tooltip title="Lark secretToken is enable">
+            <a-switch
+              checked-children="ON"
+              un-checked-children="OFF"
+              :checked="larkSecretEnable"
+              allowClear
+              @change="handleSetLarkSecretEnable"
+              v-decorator="[ 'larkSecretEnable' ]" />
+          </a-tooltip>
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(16)>-1 && larkSecretEnable === true"
+          label="Lark Secret Token"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-input
+            type="text"
+            placeholder="Please enter Lark SecretToken"
+            allowClear
+            v-decorator="[ 'larkSecretToken', {rules: [{ required: true, message: 'Lark SecretToken is required' }]} ]"/>
+        </a-form-item>
+
       </a-form>
 
       <template slot="footer">
@@ -707,264 +889,268 @@
 </template>
 
 <script>
-import {all, update} from '@api/setting'
-import {
-  list as listFlink,
-  create as createFlink,
-  get as getFlink,
-  update as updateFlink,
-  exists as existsEnv,
-  setDefault,
-  sync
-} from '@/api/flinkEnv'
+  import {all, update} from '@api/setting'
+  import {
+    list as listFlink,
+    create as createFlink,
+    get as getFlink,
+    update as updateFlink,
+    exists as existsEnv,
+    setDefault,
+    sync
+  } from '@/api/flinkEnv'
 
-import {
-  list as listCluster,
-  create as createCluster,
-  get as getCluster,
-  update as updateCluster,
-  check as checkCluster,
-  start as startCluster,
-  shutdown as shutdownCluster,
-  remove as removeCluster
-} from '@/api/flinkCluster'
+  import {
+    list as listCluster,
+    create as createCluster,
+    get as getCluster,
+    update as updateCluster,
+    check as checkCluster,
+    start as startCluster,
+    shutdown as shutdownCluster,
+    remove as removeCluster
+  } from '@/api/flinkCluster'
 
-import {
-  add as addAlert,
-  exists as existsAlert,
-  update as updateAlert,
-  get as getAlert,
-  listWithOutPage as listWithOutPageAlert,
-  remove as removeAlert,
-  send as sendAlert
-} from '@/api/alertConf'
+  import {
+    add as addAlert,
+    exists as existsAlert,
+    update as updateAlert,
+    get as getAlert,
+    listWithOutPage as listWithOutPageAlert,
+    remove as removeAlert,
+    send as sendAlert
+  } from '@/api/alertConf'
 
-import SvgIcon from '@/components/SvgIcon'
-import monaco from '@/views/flink/app/Monaco.yaml'
-import addCluster from './AddCluster'
-import { mapActions } from 'vuex'
-import storage from '@/utils/storage'
-import cluster from '@/store/modules/cluster'
-import { Item } from 'ant-design-vue/es/vc-menu'
+  import SvgIcon from '@/components/SvgIcon'
+  import monaco from '@/views/flink/app/Monaco.yaml'
+  import addCluster from './AddCluster'
+  import { mapActions } from 'vuex'
+  import storage from '@/utils/storage'
+  import cluster from '@/store/modules/cluster'
+  import { Item } from 'ant-design-vue/es/vc-menu'
 
-export default {
-  name: 'Setting',
-  components: {SvgIcon, addCluster},
-  data() {
-    return {
-      activeKey:'system',
-      settings: [],
-      flinks: [],
-      alerts: [],
-      clusters: [],
-      cluster: null,
-      flinkName: null,
-      flinkHome: null,
-      flinkConf: null,
-      versionId: null,
-      alertId: null,
-      clusterId: null,
-      optionClusters: {
-        'starting': new Map(),
-        'created': new Map(),
-        'stoped': new Map()
-      },
-      flinkConfVisible: false,
-      flinkFormVisible: false,
-      alertFormVisible: false,
-      flinkClusterVisible: false,
-      executionMode: null,
-      executionModes: [
-        {mode: 'remote (standalone)', value: 1, disabled: false},
-        {mode: 'yarn session', value: 3, disabled: false},
-        {mode: 'kubernetes session', value: 5, disabled: false}
-      ],
-      resolveOrder: [
-        {name: 'parent-first', order: 0},
-        {name: 'child-first', order: 1}
-      ],
-      alert: true,
-      alertTypes: [
-        {name: 'E-mail', value: 1, disabled: false},
-        {name: 'Ding Ding Task', value: 2, disabled: false},
-        {name: 'Wechat', value: 4, disabled: false},
-        {name: 'SMS', value: 8, disabled: false}
-      ],
-      alertType: [],
-      isAll: false,
-      secretEnable: false,
-      totalItems: [],
-      editor: null,
-      flinkForm: null,
-      alertForm: null,
-      clusterForm: null,
-      buttonAddVisiable: false
-    }
-  },
-
-  computed: {
-    myTheme() {
-      return this.$store.state.app.theme
-    },
-    dynamicOptions() {
-      return function (group) {
-        return this.options.filter(x => x.group === group)
-      }
-    },
-    getRestUrl(item){
-      return item.address
-    }
-  },
-
-  mounted() {
-    this.flinkForm = this.$form.createForm(this)
-    this.alertForm = this.$form.createForm(this)
-    this.clusterForm = this.$form.createForm(this)
-    this.handleSettingAll()
-    this.handleFlinkAll()
-    this.handleClusterAll()
-    this.handleAlertConfigAll()
-    this.showtabs()
-  },
-
-  methods: {
-    ...mapActions(['SetClusterId']),
-    showtabs(){
-      if(this.$route.query.activeKey!=null){
-          this.activeKey = this.$route.query.activeKey
-      }
-    },
-    changeVisble(){
-      console.log('---zouguo-')
-      this.buttonAddVisiable = false
-      this.handleClusterAll()
-    },
-    handleAdd() {
-      this.$router.push({'path': '/flink/setting/add_cluster'})
-    },
-    handleEditCluster(item) {
-      this.SetClusterId(item.id)
-      this.$router.push({'path': '/flink/setting/edit_cluster'})
-    },
-    getOption() {
+  export default {
+    name: 'Setting',
+    components: {SvgIcon, addCluster},
+    data() {
       return {
-        theme: this.ideTheme(),
-        language: 'yaml',
-        selectOnLineNumbers: false,
-        foldingStrategy: 'indentation', // 代码分小段折叠
-        overviewRulerBorder: false, // 不要滚动条边框
-        autoClosingBrackets: true,
-        tabSize: 2, // tab 缩进长度
-        readOnly: true,
-        inherit: true,
-        scrollBeyondLastLine: false,
-        lineNumbersMinChars: 5,
-        lineHeight: 24,
-        automaticLayout: true,
-        cursorBlinking: 'line',
-        cursorStyle: 'line',
-        cursorWidth: 3,
-        renderFinalNewline: true,
-        renderLineHighlight: 'all',
-        quickSuggestionsDelay: 100,  //代码提示延时
-        scrollbar: {
-          useShadows: false,
-          vertical: 'visible',
-          horizontal: 'visible',
-          horizontalSliderSize: 5,
-          verticalSliderSize: 5,
-          horizontalScrollbarSize: 15,
-          verticalScrollbarSize: 15
-        }
+        collapseActive: ['1', '2', '3' , '4'],
+        activeKey:'system',
+        settings: [],
+        flinks: [],
+        alerts: [],
+        clusters: [],
+        cluster: null,
+        flinkName: null,
+        flinkHome: null,
+        flinkConf: null,
+        versionId: null,
+        alertId: null,
+        clusterId: null,
+        optionClusters: {
+          'starting': new Map(),
+          'created': new Map(),
+          'stoped': new Map()
+        },
+        flinkConfVisible: false,
+        flinkFormVisible: false,
+        alertFormVisible: false,
+        flinkClusterVisible: false,
+        executionMode: null,
+        executionModes: [
+          {mode: 'remote (standalone)', value: 1, disabled: false},
+          {mode: 'yarn session', value: 3, disabled: false},
+          {mode: 'kubernetes session', value: 5, disabled: false}
+        ],
+        resolveOrder: [
+          {name: 'parent-first', order: 0},
+          {name: 'child-first', order: 1}
+        ],
+        alert: true,
+        alertTypes: [
+          {name: 'E-mail', value: 1, disabled: false},
+          {name: 'Ding Talk', value: 2, disabled: false},
+          {name: 'Wechat', value: 4, disabled: false},
+          {name: 'SMS', value: 8, disabled: true},
+          {name: 'Lark', value: 16, disabled: false}
+        ],
+        alertType: [],
+        dingtalkIsAtAll: false,
+        larkIsAtAll: false,
+        dingtalkSecretEnable: false,
+        larkSecretEnable: false,
+        totalItems: [],
+        editor: null,
+        flinkForm: null,
+        alertForm: null,
+        clusterForm: null,
+        buttonAddVisiable: false
       }
     },
-    handleCheckExecMode(rule, value, callback) {
-      if (value === null || value === undefined || value === '') {
-        callback(new Error('Execution Mode is required'))
-      } else {
-        if (value === 3) {
-          checkHadoop().then((resp) => {
-            if (resp.data) {
-              callback()
-            } else {
-              callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
-            }
-          }).catch((err) => {
-            callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
-          })
+
+    computed: {
+      myTheme() {
+        return this.$store.state.app.theme
+      },
+      dynamicOptions() {
+        return function (group) {
+          return this.options.filter(x => x.group === group)
+        }
+      },
+      getRestUrl(item){
+        return item.address
+      }
+    },
+
+    mounted() {
+      this.flinkForm = this.$form.createForm(this)
+      this.alertForm = this.$form.createForm(this)
+      this.clusterForm = this.$form.createForm(this)
+      this.handleSettingAll()
+      this.handleFlinkAll()
+      this.handleClusterAll()
+      this.handleAlertConfigAll()
+      this.showtabs()
+    },
+
+    methods: {
+      ...mapActions(['SetClusterId']),
+      showtabs(){
+        if(this.$route.query.activeKey!=null){
+          this.activeKey = this.$route.query.activeKey
+        }
+      },
+      changeVisble(){
+        console.log('---zouguo-')
+        this.buttonAddVisiable = false
+        this.handleClusterAll()
+      },
+      handleAdd() {
+        this.$router.push({'path': '/flink/setting/add_cluster'})
+      },
+      handleEditCluster(item) {
+        this.SetClusterId(item.id)
+        this.$router.push({'path': '/flink/setting/edit_cluster'})
+      },
+      getOption() {
+        return {
+          theme: this.ideTheme(),
+          language: 'yaml',
+          selectOnLineNumbers: false,
+          foldingStrategy: 'indentation', // 代码分小段折叠
+          overviewRulerBorder: false, // 不要滚动条边框
+          autoClosingBrackets: true,
+          tabSize: 2, // tab 缩进长度
+          readOnly: true,
+          inherit: true,
+          scrollBeyondLastLine: false,
+          lineNumbersMinChars: 5,
+          lineHeight: 24,
+          automaticLayout: true,
+          cursorBlinking: 'line',
+          cursorStyle: 'line',
+          cursorWidth: 3,
+          renderFinalNewline: true,
+          renderLineHighlight: 'all',
+          quickSuggestionsDelay: 100,  //代码提示延时
+          scrollbar: {
+            useShadows: false,
+            vertical: 'visible',
+            horizontal: 'visible',
+            horizontalSliderSize: 5,
+            verticalSliderSize: 5,
+            horizontalScrollbarSize: 15,
+            verticalScrollbarSize: 15
+          }
+        }
+      },
+      handleCheckExecMode(rule, value, callback) {
+        if (value === null || value === undefined || value === '') {
+          callback(new Error('Execution Mode is required'))
         } else {
-          callback()
+          if (value === 3) {
+            checkHadoop().then((resp) => {
+              if (resp.data) {
+                callback()
+              } else {
+                callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+              }
+            }).catch((err) => {
+              callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+            })
+          } else {
+            callback()
+          }
         }
-      }
-    },
+      },
 
-    handleCheckAlertName(rule, alertName, callback) {
-      if (alertName === null || alertName === undefined || alertName === '') {
-        callback(new Error('Alert Name is required'))
-      } else {
-        if(!this.alertId){
-          existsAlert({'alertName': alertName}).then((resp) => {
-            if (!resp.data) {
-              callback()
-            } else {
-              callback(new Error('Alert Name must be unique. The alert name already exists'))
-            }
-          }).catch((err) => {
-            callback(new Error('error happened ,caused by: ' + err))
-          })
-        }else{
-          callback()
+      handleCheckAlertName(rule, alertName, callback) {
+        if (alertName === null || alertName === undefined || alertName === '') {
+          callback(new Error('Alert Name is required'))
+        } else {
+          if(!this.alertId){
+            existsAlert({'alertName': alertName}).then((resp) => {
+              if (!resp.data) {
+                callback()
+              } else {
+                callback(new Error('Alert Name must be unique. The alert name already exists'))
+              }
+            }).catch((err) => {
+              callback(new Error('error happened ,caused by: ' + err))
+            })
+          }else{
+            callback()
+          }
         }
-      }
-    },
+      },
 
-    handleChangeAlertType(value) {
-      this.alertType = value
-    },
+      handleChangeAlertType(value) {
+        this.alertType = value
+      },
 
-    handleEditAlertType(value) {
-      this.alertType.push(value)
-    },
+      handleEditAlertType(value) {
+        this.alertType.push(value)
+      },
 
-    handleChangeMode(mode) {
-      this.executionMode = mode
-    },
+      handleChangeMode(mode) {
+        this.executionMode = mode
+      },
 
-    handleSettingAll() {
-      all({}).then((resp) => {
-        this.settings = resp.data
-      })
-    },
+      handleSettingAll() {
+        all({}).then((resp) => {
+          this.settings = resp.data
+        })
+      },
 
-    handleChangeProcess(value) {
-      this.totalItems = value
-    },
-    handleEdit(setting) {
-      if (!setting.editable) {
-        setting.submitting = true
-      }
-      setting.editable = !setting.editable
-    },
+      handleChangeProcess(value) {
+        this.totalItems = value
+      },
+      handleEdit(setting) {
+        if (!setting.editable) {
+          setting.submitting = true
+        }
+        setting.editable = !setting.editable
+      },
 
-    handleIsStart(item) {
-     /**
-      集群刚创建但未启动
-      CREATED(0),
-      集群已启动
-      STARTED(1),
-      集群已停止
-      STOPED(2);
-    */
-      return this.optionClusters.starting.get(item.id)
-    },
+      handleIsStart(item) {
+        /**
+         集群刚创建但未启动
+         CREATED(0),
+         集群已启动
+         STARTED(1),
+         集群已停止
+         STOPED(2);
+         */
+        return this.optionClusters.starting.get(item.id)
+      },
 
-    handleDeployCluser(item){
-      this.$swal.fire({
-        icon: 'success',
-        title: 'The current cluster is starting',
-        showConfirmButton: false,
-        timer: 2000
-      }).then((r) => {
+      handleDeployCluser(item){
+        this.$swal.fire({
+          icon: 'success',
+          title: 'The current cluster is starting',
+          showConfirmButton: false,
+          timer: 2000
+        }).then((r) => {
           startCluster({id: item.id}).then((resp)=>{
             if(resp.data.status){
               this.optionClusters.starting.set(item.id,new Date().getTime())
@@ -978,31 +1164,55 @@ export default {
               })
             } else {
               this.$swal.fire({
-                  title: 'Failed',
-                  icon: 'error',
-                  width: this.exceptionPropWidth(),
-                  html: '<pre class="propsException">' + resp.data.msg + '</pre>',
-                  showCancelButton: true,
-                  confirmButtonColor: '#55BDDDFF',
-                  confirmButtonText: 'OK',
-                  cancelButtonText: 'Close'
-                })
+                title: 'Failed',
+                icon: 'error',
+                width: this.exceptionPropWidth(),
+                html: '<pre class="propsException">' + resp.data.msg + '</pre>',
+                showCancelButton: true,
+                confirmButtonColor: '#55BDDDFF',
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Close'
+              })
             }
+          })
         })
-      })
-    },
+      },
 
-    handleShutdownCluster(item){
-      this.$swal.fire({
-        icon: 'success',
-        title: 'The current cluster is canceling',
-        showConfirmButton: false,
-        timer: 2000
-      }).then((result) => {
-        shutdownCluster({id: item.id}).then((resp) => {
+      handleShutdownCluster(item){
+        this.$swal.fire({
+          icon: 'success',
+          title: 'The current cluster is canceling',
+          showConfirmButton: false,
+          timer: 2000
+        }).then((result) => {
+          shutdownCluster({id: item.id}).then((resp) => {
+            if(resp.data.status){
+              this.optionClusters.starting.delete(item.id)
+              this.handleMapUpdate('starting')
+            }else{
+              this.$swal.fire({
+                title: 'Failed',
+                icon: 'error',
+                width: this.exceptionPropWidth(),
+                html: '<pre class="propsException">' + resp.data.msg + '</pre>',
+                showCancelButton: true,
+                confirmButtonColor: '#55BDDDFF',
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Close'
+              })
+            }
+          })
+        })
+      },
+
+      handleDelete(item){
+        removeCluster({
+          id: item.id
+        }).then((resp) => {
           if(resp.data.status){
             this.optionClusters.starting.delete(item.id)
             this.handleMapUpdate('starting')
+            this.handleClusterAll()
           }else{
             this.$swal.fire({
               title: 'Failed',
@@ -1016,216 +1226,234 @@ export default {
             })
           }
         })
-      })
-    },
+      },
 
-    handleDelete(item){
-      removeCluster({
-        id: item.id
-      }).then((resp) => {
-        if(resp.data.status){
-          this.optionClusters.starting.delete(item.id)
-          this.handleMapUpdate('starting')
-          this.handleClusterAll()
-        }else{
-          this.$swal.fire({
-            title: 'Failed',
-            icon: 'error',
-            width: this.exceptionPropWidth(),
-            html: '<pre class="propsException">' + resp.data.msg + '</pre>',
-            showCancelButton: true,
-            confirmButtonColor: '#55BDDDFF',
-            confirmButtonText: 'OK',
-            cancelButtonText: 'Close'
-          })
-        }
-      })
-    },
+      handleMapUpdate(type) {
+        const map = this.optionClusters[type]
+        this.optionClusters[type] = new Map(map)
+      },
 
-    handleMapUpdate(type) {
-      const map = this.optionClusters[type]
-      this.optionClusters[type] = new Map(map)
-    },
-
-    handleSubmit(setting) {
-      setting.submitting = false
-      setting.editable = false
-      const className = setting.key.replace(/\./g, '_')
-      const elem = document.querySelector('.' + className)
-      const value = elem.value
-      update({
-        key: setting.key,
-        value: value
-      }).then((resp) => {
-        this.handleSettingAll()
-      })
-    },
-
-    handleFlinkFormVisible(flag) {
-      this.versionId = null
-      this.flinkFormVisible = flag
-      this.flinkForm.resetFields()
-    },
-
-    handleAlertFormVisible(flag) {
-      this.alertId = null
-      this.alertFormVisible = flag
-      this.alertType = []
-      this.isAll = false
-      this.secretEnable = false
-      this.alertForm.resetFields()
-    },
-
-    handleEditFlink(item) {
-      this.versionId = item.id
-      this.flinkFormVisible = true
-      this.$nextTick(() => {
-        this.flinkForm.setFieldsValue({
-          'flinkName': item.flinkName,
-          'flinkHome': item.flinkHome,
-          'description': item.description || null
+      handleSubmit(setting) {
+        setting.submitting = false
+        setting.editable = false
+        const className = setting.key.replace(/\./g, '_')
+        const elem = document.querySelector('.' + className)
+        const value = elem.value
+        update({
+          key: setting.key,
+          value: value
+        }).then((resp) => {
+          this.handleSettingAll()
         })
-      })
-    },
+      },
 
-    handleEditAlertConf(item){
-      this.alertId = item.id
-      this.alertFormVisible = true
-      const alertType = []
-      const emailParams = JSON.parse(item.emailParams)
-      const dingTalkParams = JSON.parse(item.dingTalkParams)
-      const weComParams = JSON.parse(item.weComParams)
+      handleFlinkFormVisible(flag) {
+        this.versionId = null
+        this.flinkFormVisible = flag
+        this.flinkForm.resetFields()
+      },
 
-      if (item.alertType === 1  || item.alertType === 3 || item.alertType === 5 || item.alertType === 9 || item.alertType === 7 || item.alertType === 13 || item.alertType === 15) {
-        alertType.push(1)
-      }
-      if (item.alertType === 2 || item.alertType === 3 || item.alertType === 6 || item.alertType === 10 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15) {
-        alertType.push(2)
-      }
-      if (item.alertType === 4 || item.alertType === 5 || item.alertType === 6 || item.alertType === 12 || item.alertType === 7 || item.alertType === 14 || item.alertType === 15) {
-        alertType.push(4)
-      }
-      if (item.alertType === 8 || item.alertType === 9 || item.alertType === 10 || item.alertType === 12 || item.alertType === 11 || item.alertType === 14 || item.alertType === 15) {
-        alertType.push(8)
-      }
-      // console.log('当前告警：' + JSON.stringify(item))
-      console.log(JSON.stringify(alertType))
-      alertType.forEach((value,i) => {
-        this.handleEditAlertType(value)
-      })
-      this.isAll = dingTalkParams.isAtAll
-      this.secretEnable = dingTalkParams.secretEnable
-      this.$nextTick(() => {
-        this.alertForm.setFieldsValue({
-          'alertName': item.alertName,
-          'alertType': alertType,
-          'alertEmail': emailParams.contacts,
-          'alertDingURL': dingTalkParams.alertDingURL,
-          'token': dingTalkParams.token,
-          'alertSecretToken': dingTalkParams.secretToken,
-          'alertDingUser': dingTalkParams.contacts,
-          'weToken': weComParams.token
-        })
-      })
-    },
+      handleAlertFormVisible(flag) {
+        this.alertId = null
+        this.alertFormVisible = flag
+        this.alertType = []
+        this.dingtalkIsAtAll = false
+        this.dingtalkSecretEnable = false
+        this.larkIsAtAll = false
+        this.larkSecretEnable = false
+        this.alertForm.resetFields()
+      },
 
-    handleDeleteAlertConf(item) {
-      removeAlert({'id': item.id}).then((resp) => {
-        if (resp.data) {
-          this.$swal.fire({
-            icon: 'success',
-            title: 'Delete Alert Config  successful!',
-            showConfirmButton: false,
-            timer: 2000
+      handleEditFlink(item) {
+        this.versionId = item.id
+        this.flinkFormVisible = true
+        this.$nextTick(() => {
+          this.flinkForm.setFieldsValue({
+            'flinkName': item.flinkName,
+            'flinkHome': item.flinkHome,
+            'description': item.description || null
           })
-        } else {
-          this.$swal.fire(
-            'Failed delete AlertConfig',
-            resp['message'].replaceAll(/\[StreamX]/g, ''),
-            'error'
-          )
-        }
-        this.handleAlertConfigAll()
-      })
-    },
+        })
+      },
 
-    handleClusterFormVisible(flag) {
-      this.clusterId = null
-      this.flinkClusterVisible = flag
-      this.clusterForm.resetFields()
-    },
-    handleFlinkAll() {
-      listFlink({}).then((resp) => {
-        this.flinks = resp.data
-      })
-    },
+      handleEditAlertConf(item){
+        this.alertId = item.id
+        this.alertFormVisible = true
+        const emailParams = JSON.parse(item.emailParams)
+        const dingTalkParams = JSON.parse(item.dingTalkParams)
+        const weComParams = JSON.parse(item.weComParams)
+        const larkParams = JSON.parse(item.larkParams)
+        const alertType = this.computeAlertType(item.alertType)
 
-    handleClusterAll() {
-      listCluster({}).then((resp) => {
-        this.clusters = resp.data
-        let c
-        for(c in resp.data){
-          const cluster = resp.data[c]
-          if(resp.data[c].clusterState === 0){
+        console.log('告警类型：' + JSON.stringify(alertType))
+        alertType.forEach((value,i) => {
+          this.handleEditAlertType(value)
+        })
+        this.dingtalkIsAtAll = dingTalkParams.isAtAll
+        this.dingtalkSecretEnable = dingTalkParams.secretEnable
+        this.larkIsAtAll = larkParams.isAtAll
+        this.larkSecretEnable = larkParams.secretEnable
+        this.$nextTick(() => {
+          this.alertForm.setFieldsValue({
+            'alertName': item.alertName,
+            'alertType': alertType,
+            'alertEmail': emailParams.contacts,
+            'alertDingURL': dingTalkParams.alertDingURL,
+            'dingtalkToken': dingTalkParams.token,
+            'dingtalkSecretToken': dingTalkParams.secretToken,
+            'alertDingUser': dingTalkParams.contacts,
+            'dingtalkIsAtAll': dingTalkParams.isAtAll,
+            'dingtalkSecretEnable': dingTalkParams.secretEnable,
+            'weToken': weComParams.token,
+            'larkToken': larkParams.token,
+            'larkIsAtAll': larkParams.isAtAll,
+            'larkSecretEnable':larkParams.secretEnable,
+            'larkSecretToken':larkParams.secretToken
+          })
+        })
+      },
+
+      handleDeleteAlertConf(item) {
+        removeAlert({'id': item.id}).then((resp) => {
+          if (resp.data) {
+            this.$swal.fire({
+              icon: 'success',
+              title: 'Delete Alert Config  successful!',
+              showConfirmButton: false,
+              timer: 2000
+            })
+          } else {
+            this.$swal.fire(
+              'Failed delete AlertConfig',
+              resp['message'].replaceAll(/\[StreamX]/g, ''),
+              'error'
+            )
+          }
+          this.handleAlertConfigAll()
+        })
+      },
+
+      handleClusterFormVisible(flag) {
+        this.clusterId = null
+        this.flinkClusterVisible = flag
+        this.clusterForm.resetFields()
+      },
+      handleFlinkAll() {
+        listFlink({}).then((resp) => {
+          this.flinks = resp.data
+        })
+      },
+
+      handleClusterAll() {
+        listCluster({}).then((resp) => {
+          this.clusters = resp.data
+          let c
+          for(c in resp.data){
+            const cluster = resp.data[c]
+            if(resp.data[c].clusterState === 0){
               this.optionClusters.created.set(cluster.id,new Date().getTime())
-          }else if(resp.data[c].clusterState === 1){
+            }else if(resp.data[c].clusterState === 1){
               this.optionClusters.starting.set(cluster.id,new Date().getTime())
-          }else{
+            }else{
               this.optionClusters.stoped.set(cluster.id,new Date().getTime())
+            }
           }
+        })
+      },
+
+
+      computeAlertType(level){
+        if (level === null) {
+          level = 0
         }
-      })
-    },
+        const result = new Array()
+        while (level != 0) {
+          // 获取最低位的 1
+          const code = level & -level
+          result.push(code)
+          // 将最低位置 0
+          level ^= code
+        }
+        return result
+      },
 
-    handleAlertConfigAll() {
-      listWithOutPageAlert({}).then((resp) => {
-        this.alerts = resp.data
-      })
-    },
+      handleAlertConfigAll() {
+        listWithOutPageAlert({}).then((resp) => {
+          console.log('获取告警列表：' + JSON.stringify(resp.data))
+          this.alerts = resp.data
+        })
+      },
 
-    handleSubmitAlertSetting(e) {
-      e.preventDefault()
-      this.alertForm.validateFields((err, values) => {
-        const param = {
-          id: this.alertId,
-          alertName: values.alertName,
-          userId: storage.get('USER_INFO').userId,
-          alertType: eval(values.alertType.join('+')),
-          emailParams: {contacts: values.alertEmail},
-          dingTalkParams: {
-            token: values.token,
-            contacts: values.alertDingUser,
-            isAtAll: values.isAll,
-            alertDingURL: values.alertDingURL,
-            secretEnable: values.secretEnable,
-            secretToken: values.alertSecretToken
-          },
-          weComParams:{
-            token:values.weToken
+      handleSubmitAlertSetting(e) {
+        e.preventDefault()
+        this.alertForm.validateFields((err, values) => {
+          const param = {
+            id: this.alertId,
+            alertName: values.alertName,
+            userId: storage.get('USER_INFO').userId,
+            alertType: eval(values.alertType.join('+')),
+            emailParams: {contacts: values.alertEmail},
+            dingTalkParams: {
+              token: values.dingtalkToken,
+              contacts: values.alertDingUser,
+              isAtAll: values.dingtalkIsAtAll,
+              alertDingURL: values.alertDingURL,
+              secretEnable: values.dingtalkSecretEnable,
+              secretToken: values.dingtalkSecretToken
+            },
+            weComParams:{
+              token:values.weToken
+            },
+            larkParams:{
+              token: values.larkToken,
+              isAtAll: values.larkIsAtAll,
+              secretEnable: values.larkSecretEnable,
+              secretToken: values.larkSecretToken
+            }
           }
-        }
-        console.log('提交告警参数：' + JSON.stringify(param))
-        if (!err) {
-          if(!param.id){//添加新告警
-            existsAlert({'alertName': param.alertName}).then((resp)=>{
-              if(resp.data){
-                this.$swal.fire(
-                  'Failed create AlertConfig',
-                  'alertName ' + param.alertName + ' is already exists!',
-                  'error'
-                )
-              }else{
-                addAlert(param).then((resp) => {
-                if (!resp.data) {//告警添加失败
+          console.log('提交告警参数：' + JSON.stringify(param))
+          if (!err) {
+            if(!param.id){//添加新告警
+              existsAlert({'alertName': param.alertName}).then((resp)=>{
+                if(resp.data){
                   this.$swal.fire(
                     'Failed create AlertConfig',
+                    'alertName ' + param.alertName + ' is already exists!',
+                    'error'
+                  )
+                }else{
+                  addAlert(param).then((resp) => {
+                    if (!resp.data) {//告警添加失败
+                      this.$swal.fire(
+                        'Failed create AlertConfig',
+                        resp['message'].replaceAll(/\[StreamX]/g, ''),
+                        'error'
+                      )
+                    } else {//告警添加成功
+                      this.$swal.fire({
+                        icon: 'success',
+                        title: 'Create AlertConfig successful!',
+                        showConfirmButton: false,
+                        timer: 2000
+                      })
+                      this.alertFormVisible = false
+                      this.handleAlertConfigAll()
+                    }
+                  })
+                }
+              })
+            }else{//根据告警id更新告警参数
+              updateAlert(param).then((resp) => {
+                if (!resp.data) {//告警更新失败
+                  this.$swal.fire(
+                    'Failed update AlertConfig',
                     resp['message'].replaceAll(/\[StreamX]/g, ''),
                     'error'
                   )
-                } else {//告警添加成功
+                } else {//告警更新成功
                   this.$swal.fire({
                     icon: 'success',
-                    title: 'Create AlertConfig successful!',
+                    title: 'Update AlertConfig successful!',
                     showConfirmButton: false,
                     timer: 2000
                   })
@@ -1233,267 +1461,262 @@ export default {
                   this.handleAlertConfigAll()
                 }
               })
-              }
-            })
-          }else{//根据告警id更新告警参数
-            updateAlert(param).then((resp) => {
-              if (!resp.data) {//告警更新失败
-                this.$swal.fire(
-                  'Failed update AlertConfig',
-                  resp['message'].replaceAll(/\[StreamX]/g, ''),
-                  'error'
-                )
-              } else {//告警更新成功
-                this.$swal.fire({
-                  icon: 'success',
-                  title: 'Update AlertConfig successful!',
-                  showConfirmButton: false,
-                  timer: 2000
-                })
-                this.alertFormVisible = false
-                this.handleAlertConfigAll()
+            }
+
+          }
+        }).catch((err) => {
+          callback(new Error('提交表单异常' + err))
+        })
+        this.alertId = null
+      },
+
+      handleSubmitFlink(e) {
+        e.preventDefault()
+        this.flinkForm.validateFields((err, values) => {
+          if (!err) {
+            existsEnv({
+              id: this.versionId,
+              flinkName: values.flinkName,
+              flinkHome: values.flinkHome
+            }).then((resp) => {
+              if (resp.data) {
+                if (this.versionId == null) {
+                  createFlink(values).then((resp) => {
+                    if (resp.data) {
+                      this.flinkFormVisible = false
+                      this.handleFlinkAll()
+                    } else {
+                      this.$swal.fire(
+                        'Failed',
+                        resp['message'].replaceAll(/\[StreamX]/g, ''),
+                        'error'
+                      )
+                    }
+                  })
+                } else {
+                  updateFlink({
+                    id: this.versionId,
+                    flinkName: values.flinkName,
+                    flinkHome: values.flinkHome,
+                    description: values.description || null
+                  }).then((resp) => {
+                    if (resp.data) {
+                      this.flinkFormVisible = false
+                      this.$swal.fire({
+                        icon: 'success',
+                        title: values.flinkName.concat(' update successful!'),
+                        showConfirmButton: false,
+                        timer: 2000
+                      })
+                      this.handleFlinkAll()
+                    } else {
+                      this.$swal.fire(
+                        'Failed',
+                        resp['message'].replaceAll(/\[StreamX]/g, ''),
+                        'error'
+                      )
+                    }
+                  })
+                }
+              } else {
+                if (resp.status === 'error') {
+                  this.$swal.fire(
+                    'Failed',
+                    'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
+                    'error'
+                  )
+                } else {
+                  this.$swal.fire(
+                    'Failed',
+                    'flink name is already exists',
+                    'error'
+                  )
+                }
               }
             })
           }
-          
-        }
-      }).catch((err) => {
-        callback(new Error('提交表单异常' + err))
-      })
-      this.alertId = null
-    },
+        })
+      },
 
-    handleSubmitFlink(e) {
-      e.preventDefault()
-      this.flinkForm.validateFields((err, values) => {
-        if (!err) {
-          existsEnv({
-            id: this.versionId,
-            flinkName: values.flinkName,
-            flinkHome: values.flinkHome
-          }).then((resp) => {
-            if (resp.data) {
-              if (this.versionId == null) {
-                createFlink(values).then((resp) => {
-                  if (resp.data) {
-                    this.flinkFormVisible = false
-                    this.handleFlinkAll()
-                  } else {
-                    this.$swal.fire(
-                      'Failed',
-                      resp['message'].replaceAll(/\[StreamX]/g, ''),
-                      'error'
-                    )
-                  }
-                })
+      handleSubmitCluster(e) {
+        e.preventDefault()
+        this.clusterForm.validateFields((err, values) => {
+          if (!err) {
+            checkCluster({
+              id: this.clusterId,
+              clusterName: values.clusterName,
+              address: values.address
+            }).then((resp) => {
+              if (resp.data === 'success') {
+                if (this.clusterId == null) {
+                  createCluster({
+                    clusterName: values.clusterName,
+                    address: values.address,
+                    description: values.description || null
+                  }).then((resp) => {
+                    if (resp.data) {
+                      this.flinkClusterVisible = false
+                      this.handleClusterAll()
+                    } else {
+                      this.$swal.fire(
+                        'Failed',
+                        resp['message'].replaceAll(/\[StreamX]/g, ''),
+                        'error'
+                      )
+                    }
+                  })
+                } else {
+                  updateCluster({
+                    id: this.clusterId,
+                    clusterName: values.clusterName,
+                    address: values.address,
+                    description: values.description || null
+                  }).then((resp) => {
+                    if (resp.data) {
+                      this.clusterFormVisible = false
+                      this.$swal.fire({
+                        icon: 'success',
+                        title: values.clusterName.concat(' update successful!'),
+                        showConfirmButton: false,
+                        timer: 2000
+                      })
+                      this.handleClusterAll()
+                    } else {
+                      this.$swal.fire(
+                        'Failed',
+                        resp['message'].replaceAll(/\[StreamX]/g, ''),
+                        'error'
+                      )
+                    }
+                  })
+                }
               } else {
-                updateFlink({
-                  id: this.versionId,
-                  flinkName: values.flinkName,
-                  flinkHome: values.flinkHome,
-                  description: values.description || null
-                }).then((resp) => {
-                  if (resp.data) {
-                    this.flinkFormVisible = false
-                    this.$swal.fire({
-                      icon: 'success',
-                      title: values.flinkName.concat(' update successful!'),
-                      showConfirmButton: false,
-                      timer: 2000
-                    })
-                    this.handleFlinkAll()
-                  } else {
-                    this.$swal.fire(
-                      'Failed',
-                      resp['message'].replaceAll(/\[StreamX]/g, ''),
-                      'error'
-                    )
-                  }
-                })
+                if (resp.data === 'exists') {
+                  this.$swal.fire(
+                    'Failed',
+                    'the cluster name: ' + values.clusterName + ' is already exists,please check',
+                    'error'
+                  )
+                } else if (resp.data === 'fail') {
+                  this.$swal.fire(
+                    'Failed',
+                    'the address is invalid or connection failure, please check',
+                    'error'
+                  )
+                }
               }
-            } else {
-              if (resp.status === 'error') {
-                this.$swal.fire(
-                  'Failed',
-                  'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
-                  'error'
-                )
-              } else {
-                this.$swal.fire(
-                  'Failed',
-                  'flink name is already exists',
-                  'error'
-                )
-              }
-            }
+            })
+          }
+        })
+      },
+
+      handleFlinkConf(flink) {
+        this.flinkConfVisible = true
+        this.versionId = flink.id
+        this.flinkName = flink.flinkName
+        getFlink({id: this.versionId}).then((resp) => {
+          this.flinkHome = resp.data.flinkHome
+          this.flinkConf = resp.data.flinkConf
+          this.handleInitEditor()
+        })
+      },
+
+      handleInitEditor() {
+        if (this.editor == null) {
+          this.editor = monaco.editor.create(document.querySelector('#conf'), this.getOption())
+          this.$nextTick(() => {
+            const elem = document.querySelector('#conf')
+            this.handleHeight(elem, 210)
           })
         }
-      })
-    },
-
-    handleSubmitCluster(e) {
-      e.preventDefault()
-      this.clusterForm.validateFields((err, values) => {
-        if (!err) {
-          checkCluster({
-            id: this.clusterId,
-            clusterName: values.clusterName,
-            address: values.address
-          }).then((resp) => {
-            if (resp.data === 'success') {
-              if (this.clusterId == null) {
-                createCluster({
-                  clusterName: values.clusterName,
-                  address: values.address,
-                  description: values.description || null
-                }).then((resp) => {
-                  if (resp.data) {
-                    this.flinkClusterVisible = false
-                    this.handleClusterAll()
-                  } else {
-                    this.$swal.fire(
-                      'Failed',
-                      resp['message'].replaceAll(/\[StreamX]/g, ''),
-                      'error'
-                    )
-                  }
-                })
-              } else {
-                updateCluster({
-                  id: this.clusterId,
-                  clusterName: values.clusterName,
-                  address: values.address,
-                  description: values.description || null
-                }).then((resp) => {
-                  if (resp.data) {
-                    this.clusterFormVisible = false
-                    this.$swal.fire({
-                      icon: 'success',
-                      title: values.clusterName.concat(' update successful!'),
-                      showConfirmButton: false,
-                      timer: 2000
-                    })
-                    this.handleClusterAll()
-                  } else {
-                    this.$swal.fire(
-                      'Failed',
-                      resp['message'].replaceAll(/\[StreamX]/g, ''),
-                      'error'
-                    )
-                  }
-                })
-              }
-            } else {
-              if (resp.data === 'exists') {
-                this.$swal.fire(
-                  'Failed',
-                  'the cluster name: ' + values.clusterName + ' is already exists,please check',
-                  'error'
-                )
-              } else if (resp.data === 'fail') {
-                this.$swal.fire(
-                  'Failed',
-                  'the address is invalid or connection failure, please check',
-                  'error'
-                )
-              }
-            }
-          })
-        }
-      })
-    },
-
-    handleFlinkConf(flink) {
-      this.flinkConfVisible = true
-      this.versionId = flink.id
-      this.flinkName = flink.flinkName
-      getFlink({id: this.versionId}).then((resp) => {
-        this.flinkHome = resp.data.flinkHome
-        this.flinkConf = resp.data.flinkConf
-        this.handleInitEditor()
-      })
-    },
-
-    handleInitEditor() {
-      if (this.editor == null) {
-        this.editor = monaco.editor.create(document.querySelector('#conf'), this.getOption())
         this.$nextTick(() => {
-          const elem = document.querySelector('#conf')
-          this.handleHeight(elem, 210)
+          this.editor.getModel().setValue(this.flinkConf)
         })
-      }
-      this.$nextTick(() => {
-        this.editor.getModel().setValue(this.flinkConf)
-      })
-    },
+      },
 
-    handleSync() {
-      sync({id: this.versionId}).then((resp) => {
-        this.$swal.fire({
-          icon: 'success',
-          title: this.flinkName.concat(' conf sync successful!'),
-          showConfirmButton: false,
-          timer: 2000
-        })
-      })
-    },
-
-    handleSetDefault(item) {
-      if (item.isDefault) {
-        setDefault({id: item.id}).then((resp) => {
+      handleSync() {
+        sync({id: this.versionId}).then((resp) => {
           this.$swal.fire({
             icon: 'success',
-            title: item.flinkName.concat(' set default successful!'),
+            title: this.flinkName.concat(' conf sync successful!'),
             showConfirmButton: false,
             timer: 2000
           })
-          this.handleFlinkAll()
+        })
+      },
+
+      handleSetDefault(item) {
+        if (item.isDefault) {
+          setDefault({id: item.id}).then((resp) => {
+            this.$swal.fire({
+              icon: 'success',
+              title: item.flinkName.concat(' set default successful!'),
+              showConfirmButton: false,
+              timer: 2000
+            })
+            this.handleFlinkAll()
+          })
+        }
+      },
+
+      handleSetDingtalkSecretEnable(checked) {
+        console.log('DingtalkSecretEnable是否选中:' + checked)
+        this.dingtalkSecretEnable = checked
+      },
+
+      handleSetLarkSecretEnable(checked) {
+        console.log('LarkSecretEnable是否选中:' + checked)
+        this.larkSecretEnable = checked
+      },
+
+      handleDingtalkIsAtAll(checked) {
+        console.log('dingtalkIsAtAll是否选中:' + checked)
+        this.dingtalkIsAtAll = checked
+      },
+
+      handleLarkIsAtAll(checked) {
+        console.log('larkIsAtAll是否选中:' + checked)
+        this.larkIsAtAll = checked
+      },
+
+      handleCloseConf() {
+        this.flinkConfVisible = false
+      },
+
+      handleHeight(elem, h) {
+        const height = document.documentElement.offsetHeight || document.body.offsetHeight
+        $(elem).css('height', (height - h) + 'px')
+      },
+
+      handleSwitch(setting) {
+        update({
+          key: setting.key,
+          value: setting.value !== 'true'
+        }).then((resp) => {
+          this.handleSettingAll()
         })
       }
     },
 
-    handleSetSecretEnable(checked) {
-      console.log('SecretEnable是否选中:' + checked)
-      this.secretEnable = checked
-    },
-
-    handleIsAll(checked) {
-      console.log('isAll是否选中:' + checked)
-      this.isAll = checked
-    },
-
-    handleCloseConf() {
-      this.flinkConfVisible = false
-    },
-
-    handleHeight(elem, h) {
-      const height = document.documentElement.offsetHeight || document.body.offsetHeight
-      $(elem).css('height', (height - h) + 'px')
-    },
-
-    handleSwitch(setting) {
-      update({
-        key: setting.key,
-        value: setting.value !== 'true'
-      }).then((resp) => {
-        this.handleSettingAll()
-      })
-    }
-  },
-
-  watch: {
-    myTheme() {
-      if (this.editor != null) {
-        this.editor.updateOptions({
-          theme: this.ideTheme()
-        })
+    watch: {
+      myTheme() {
+        if (this.editor != null) {
+          this.editor.updateOptions({
+            theme: this.ideTheme()
+          })
+        }
       }
-    }
-  },
+    },
 
-}
+  }
 </script>
 
 <style lang="less">
-@import "View";
+  @import "View";
+
+  .ant-divider-inner-text {
+    .svg-icon-middle {
+      vertical-align: top;
+    }
+  }
 </style>

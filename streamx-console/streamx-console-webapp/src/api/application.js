@@ -124,3 +124,7 @@ export function checkJar(params) {
 export function verifySchema(params) {
   return http.post(api.Application.VERIFY_SCHEMA, params)
 }
+
+export function checkSavepointPath (params) {
+  return http.post(api.Application.CHECK_SAVEPOINT_PATH, params)
+}

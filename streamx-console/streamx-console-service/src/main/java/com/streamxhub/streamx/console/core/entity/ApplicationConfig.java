@@ -33,8 +33,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 
-import scala.collection.JavaConversions;
-
 /**
  * @author benjobs
  */
@@ -82,9 +80,9 @@ public class ApplicationConfig {
     public Map<String, String> readConfig() {
         switch (this.getFormat()) {
             case 1:
-                return JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(this.content)));
+                return PropertiesUtils.fromYamlTextAsJava(DeflaterUtils.unzipString(this.content));
             case 2:
-                return JavaConversions.mapAsJavaMap(PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(this.content)));
+                return PropertiesUtils.fromPropertiesTextAsJava(DeflaterUtils.unzipString(this.content));
             default:
                 break;
         }

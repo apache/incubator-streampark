@@ -12,7 +12,6 @@
         label="Development Mode"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-
         <a-alert
           v-if="app['jobType'] === 1"
           type="info" >
@@ -30,21 +29,15 @@
       </a-form-item>
 
       <a-form-item
-        label="Execution Mode"
+        label="Application Type"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-select
-          placeholder="Execution Mode"
-          v-decorator="[ 'executionMode' ]"
-          @change="handleChangeMode">
-          <a-select-option
-            v-for="(o,index) in executionModes"
-            :key="`execution_mode_${index}`"
-            :disabled="o.disabled"
-            :value="o.value">
-            {{ o.mode }}
-          </a-select-option>
-        </a-select>
+        <a-alert
+          type="info">
+          <template slot="message">
+            <svg-icon name="flink" style="color: #108ee9"/>&nbsp;&nbsp;StreamX Flink
+          </template>
+        </a-alert>
       </a-form-item>
 
       <a-form-item
@@ -60,6 +53,24 @@
             :key="`flink_version_${index}`"
             :value="v.id">
             {{ v.flinkName }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        label="Execution Mode"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          placeholder="Execution Mode"
+          v-decorator="[ 'executionMode' ]"
+          @change="handleChangeMode">
+          <a-select-option
+            v-for="(o,index) in executionModes"
+            :key="`execution_mode_${index}`"
+            :disabled="o.disabled"
+            :value="o.value">
+            {{ o.mode }}
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -90,11 +101,11 @@
           <a-select
             allowClear
             placeholder="Please enter Yarn Session clusterId"
-            v-decorator="[ 'flinkClusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
+            v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
             <a-select-option
               v-for="(v,index) in getExecutionCluster(executionMode)"
               :key="`cluster_${index}`"
-              :value="v.id">
+              :value="v.clusterId">
               {{ v.clusterName }}
             </a-select-option>
           </a-select>
@@ -131,6 +142,7 @@
             type="text"
             placeholder="Please enter Kubernetes clusterId"
             allowClear
+            @change="handleClusterId"
             v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
             <template v-if="(executionMode == null && app.executionMode === 5) || (executionMode !== null && executionMode === 5)">
               <a-dropdown slot="addonAfter" placement="bottomRight">
@@ -153,11 +165,11 @@
           <a-select
             allowClear
             placeholder="Please enter Kubernetes clusterId"
-            v-decorator="[ 'flinkClusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
+            v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
             <a-select-option
               v-for="(v,index) in getExecutionCluster(executionMode)"
               :key="`cluster_${index}`"
-              :value="v.id">
+              :value="v.clusterId">
               {{ v.clusterName }}
             </a-select-option>
           </a-select>
@@ -686,341 +698,6 @@
       </a-form-item>
 
       <a-form-item
-        label="Kubernetes Pod Template"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
-        <a-tabs type="card" v-model="controller.podTemplateTab">
-          <a-tab-pane
-            key="pod-template"
-            tab="Pod Template"
-            forceRender>
-            <a-button-group class="pod-template-tool">
-              <a-button
-                size="small"
-                type="primary"
-                icon="history"
-                class="pod-template-tool-item"
-                @click="showPodTemplateDrawer('ptVisual')">History
-              </a-button>
-              <a-button
-                type="default"
-                size="small"
-                icon="copy"
-                class="pod-template-tool-item"
-                @click="handleGetInitPodTemplate('ptVisual')">Init Content
-              </a-button>
-              <a-button
-                type="default"
-                size="small"
-                icon="share-alt"
-                class="pod-template-tool-item"
-                @click="showTemplateHostAliasDrawer('ptVisual')">Host Alias
-              </a-button>
-              <a-button
-                type="default"
-                size="small"
-                icon="hdd"
-                disabled
-                ghost
-                class="pod-template-tool-item">PVC
-              </a-button>
-            </a-button-group>
-            <a-drawer
-              title="Pod Template History"
-              placement="right"
-              :width="700"
-              item-layout="vertical"
-              :closable="false"
-              :visible="this.podTemplateDrawer.ptVisual"
-              @close="closePodTemplateDrawer('ptVisual')">
-              <template>
-                <a-empty v-if="historyRecord.podTemplate == null || historyRecord.podTemplate.length == 0"/>
-                <a-card
-                  title="pod-template.yaml"
-                  size="small"
-                  hoverable
-                  style="margin-bottom: 8px"
-                  v-for="(item,index) in historyRecord.podTemplate"
-                  :key="index">
-                  <a slot="extra" @click="handleChoicePodTemplate('ptVisual', item)">Choice</a>
-                  <pre style="font-size: 12px">{{ item }}</pre>
-                </a-card>
-              </template>
-            </a-drawer>
-            <a-drawer
-              title="Pod Template HostAlias"
-              placement="right"
-              :width="500"
-              item-layout="vertical"
-              :closable="false"
-              :visible="podTemplateHostAliasDrawer.ptVisual"
-              @close="closeTemplateHostAliasDrawer('ptVisual')">
-              <template>
-                <a-row>
-                  <p class="conf-desc">
-                    <span class="note-info" style="margin-bottom: 12px">
-                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
-                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
-                    </span>
-                  </p>
-                </a-row>
-                <a-row>
-                  <a-select
-                    mode="multiple"
-                    placeholder="Search System Hosts"
-                    :value="selectedPodTemplateHostAlias"
-                    style="width: 100%;"
-                    :showArrow="true"
-                    @change="handleSelectedTemplateHostAlias">
-                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
-                      <a-icon slot="suffixIcon" type="plus-circle"/>
-                      {{ item }}
-                    </a-select-option>
-                  </a-select>
-                </a-row>
-                <a-row style="margin-top: 30px">
-                  <a-card
-                    title="preview"
-                    size="small"
-                    hoverable>
-                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
-                  </a-card>
-                </a-row>
-              </template>
-              <div class="pod-template-tool-drawer-submit-cancel">
-                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('ptVisual')">
-                  Cancel
-                </a-button>
-                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('ptVisual')">
-                  Submit
-                </a-button>
-              </div>
-            </a-drawer>
-            <div class="pod-template-box syntax-true" />
-          </a-tab-pane>
-
-          <a-tab-pane
-            key="jm-pod-template"
-            tab="JM Pod Template"
-            forceRender>
-            <a-button-group class="pod-template-tool">
-              <a-button
-                size="small"
-                type="primary"
-                icon="history"
-                class="pod-template-tool-item"
-                @click="showPodTemplateDrawer('jmPtVisual')">History
-              </a-button>
-              <a-button
-                type="default"
-                size="small"
-                icon="copy"
-                class="pod-template-tool-item"
-                @click="handleGetInitPodTemplate('jmPtVisual')">Init Content
-              </a-button>
-              <a-button
-                type="default"
-                size="small"
-                icon="share-alt"
-                class="pod-template-tool-item"
-                @click="showTemplateHostAliasDrawer('jmPtVisual')">Host Alias
-              </a-button>
-              <a-button
-                type="default"
-                size="small"
-                icon="hdd"
-                disabled
-                ghost
-                class="pod-template-tool-item">PVC
-              </a-button>
-            </a-button-group>
-            <a-drawer
-              title="JobManager Pod Template History"
-              placement="right"
-              :width="700"
-              item-layout="vertical"
-              :closable="false"
-              :visible="this.podTemplateDrawer.jmPtVisual"
-              @close="closePodTemplateDrawer('jmPtVisual')">
-              <template>
-                <a-empty v-if="historyRecord.jmPodTemplate == null || historyRecord.jmPodTemplate.length == 0"/>
-                <a-card
-                  title="jm-pod-template.yaml"
-                  size="small"
-                  hoverable
-                  style="margin-bottom: 8px"
-                  v-for="(item,index) in historyRecord.jmPodTemplate"
-                  :key="index">
-                  <a slot="extra" @click="handleChoicePodTemplate('jmPtVisual', item)">Choice</a>
-                  <pre style="font-size: 12px">{{ item }}</pre>
-                </a-card>
-              </template>
-            </a-drawer>
-            <a-drawer
-              title="JM Pod Template HostAlias"
-              placement="right"
-              :width="500"
-              item-layout="vertical"
-              :closable="false"
-              :visible="podTemplateHostAliasDrawer.jmPtVisual"
-              @close="closeTemplateHostAliasDrawer('jmPtVisual')">
-              <template>
-                <a-row>
-                  <p class="conf-desc">
-                    <span class="note-info" style="margin-bottom: 12px">
-                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
-                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
-                    </span>
-                  </p>
-                </a-row>
-                <a-row>
-                  <a-select
-                    mode="multiple"
-                    placeholder="Search System Hosts"
-                    :value="selectedPodTemplateHostAlias"
-                    style="width: 100%;"
-                    :showArrow="true"
-                    @change="handleSelectedTemplateHostAlias">
-                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
-                      <a-icon slot="suffixIcon" type="plus-circle"/>
-                      {{ item }}
-                    </a-select-option>
-                  </a-select>
-                </a-row>
-                <a-row style="margin-top: 30px">
-                  <a-card
-                    title="preview"
-                    size="small"
-                    hoverable>
-                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
-                  </a-card>
-                </a-row>
-              </template>
-              <div class="pod-template-tool-drawer-submit-cancel">
-                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('jmPtVisual')">
-                  Cancel
-                </a-button>
-                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('jmPtVisual')">
-                  Submit
-                </a-button>
-              </div>
-            </a-drawer>
-            <div class="jm-pod-template-box syntax-true" />
-          </a-tab-pane>
-
-          <a-tab-pane
-            key="tm-pod-template"
-            tab="TM Pod Template"
-            forceRender>
-            <a-button-group class="pod-template-tool">
-              <a-button
-                size="small"
-                type="primary"
-                icon="history"
-                class="pod-template-tool-item"
-                @click="showPodTemplateDrawer('tmPtVisual')">History
-              </a-button>
-              <a-button
-                type="default"
-                size="small"
-                icon="copy"
-                class="pod-template-tool-item"
-                @click="handleGetInitPodTemplate('tmPtVisual')">Init Content
-              </a-button>
-              <a-button
-                type="default"
-                size="small"
-                icon="share-alt"
-                class="pod-template-tool-item"
-                @click="showTemplateHostAliasDrawer('tmPtVisual')">Host Alias
-              </a-button>
-              <a-button
-                type="default"
-                size="small"
-                icon="hdd"
-                disabled
-                ghost
-                class="pod-template-tool-item">PVC
-              </a-button>
-            </a-button-group>
-            <a-drawer
-              title="TaskManager Pod Template History"
-              placement="right"
-              :width="700"
-              item-layout="vertical"
-              :closable="false"
-              :visible="this.podTemplateDrawer.tmPtVisual"
-              @close="closePodTemplateDrawer('tmPtVisual')">
-              <template>
-                <a-empty v-if="historyRecord.tmPodTemplate == null || historyRecord.tmPodTemplate.length == 0"/>
-                <a-card
-                  title="tm-pod-template.yaml"
-                  size="small"
-                  hoverable
-                  style="margin-bottom: 8px"
-                  v-for="(item,index) in historyRecord.tmPodTemplate"
-                  :key="index">
-                  <a slot="extra" @click="handleChoicePodTemplate('tmPtVisual', item)">Choice</a>
-                  <pre style="font-size: 12px">{{ item }}</pre>
-                </a-card>
-              </template>
-            </a-drawer>
-            <a-drawer
-              title="Pod Template HostAlias"
-              placement="right"
-              :width="500"
-              item-layout="vertical"
-              :closable="false"
-              :visible="podTemplateHostAliasDrawer.tmPtVisual"
-              @close="closeTemplateHostAliasDrawer('tmPtVisual')">
-              <template>
-                <a-row>
-                  <p class="conf-desc">
-                    <span class="note-info" style="margin-bottom: 12px">
-                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
-                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
-                    </span>
-                  </p>
-                </a-row>
-                <a-row>
-                  <a-select
-                    mode="multiple"
-                    placeholder="Search System Hosts"
-                    :value="selectedPodTemplateHostAlias"
-                    style="width: 100%;"
-                    :showArrow="true"
-                    @change="handleSelectedTemplateHostAlias">
-                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
-                      <a-icon slot="suffixIcon" type="plus-circle"/>
-                      {{ item }}
-                    </a-select-option>
-                  </a-select>
-                </a-row>
-                <a-row style="margin-top: 30px">
-                  <a-card
-                    title="preview"
-                    size="small"
-                    hoverable>
-                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
-                  </a-card>
-                </a-row>
-              </template>
-              <div class="pod-template-tool-drawer-submit-cancel">
-                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('tmPtVisual')">
-                  Cancel
-                </a-button>
-                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('tmPtVisual')">
-                  Submit
-                </a-button>
-              </div>
-            </a-drawer>
-            <div class="tm-pod-template-box syntax-true" />
-          </a-tab-pane>
-        </a-tabs>
-      </a-form-item>
-
-      <a-form-item
         label="Fault Restart Size"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
@@ -1420,11 +1097,346 @@
       </template>
 
       <a-form-item
+        label="Kubernetes Pod Template"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-tabs type="card" v-model="controller.podTemplateTab">
+          <a-tab-pane
+            key="pod-template"
+            tab="Pod Template"
+            forceRender>
+            <a-button-group class="pod-template-tool">
+              <a-button
+                size="small"
+                type="primary"
+                icon="history"
+                class="pod-template-tool-item"
+                @click="showPodTemplateDrawer('ptVisual')">History
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="copy"
+                class="pod-template-tool-item"
+                @click="handleGetInitPodTemplate('ptVisual')">Init Content
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="share-alt"
+                class="pod-template-tool-item"
+                @click="showTemplateHostAliasDrawer('ptVisual')">Host Alias
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="hdd"
+                disabled
+                ghost
+                class="pod-template-tool-item">PVC
+              </a-button>
+            </a-button-group>
+            <a-drawer
+              title="Pod Template History"
+              placement="right"
+              :width="700"
+              item-layout="vertical"
+              :closable="false"
+              :visible="this.podTemplateDrawer.ptVisual"
+              @close="closePodTemplateDrawer('ptVisual')">
+              <template>
+                <a-empty v-if="historyRecord.podTemplate == null || historyRecord.podTemplate.length == 0"/>
+                <a-card
+                  title="pod-template.yaml"
+                  size="small"
+                  hoverable
+                  style="margin-bottom: 8px"
+                  v-for="(item,index) in historyRecord.podTemplate"
+                  :key="index">
+                  <a slot="extra" @click="handleChoicePodTemplate('ptVisual', item)">Choice</a>
+                  <pre style="font-size: 12px">{{ item }}</pre>
+                </a-card>
+              </template>
+            </a-drawer>
+            <a-drawer
+              title="Pod Template HostAlias"
+              placement="right"
+              :width="500"
+              item-layout="vertical"
+              :closable="false"
+              :visible="podTemplateHostAliasDrawer.ptVisual"
+              @close="closeTemplateHostAliasDrawer('ptVisual')">
+              <template>
+                <a-row>
+                  <p class="conf-desc">
+                    <span class="note-info" style="margin-bottom: 12px">
+                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                    </span>
+                  </p>
+                </a-row>
+                <a-row>
+                  <a-select
+                    mode="multiple"
+                    placeholder="Search System Hosts"
+                    :value="selectedPodTemplateHostAlias"
+                    style="width: 100%;"
+                    :showArrow="true"
+                    @change="handleSelectedTemplateHostAlias">
+                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
+                      <a-icon slot="suffixIcon" type="plus-circle"/>
+                      {{ item }}
+                    </a-select-option>
+                  </a-select>
+                </a-row>
+                <a-row style="margin-top: 30px">
+                  <a-card
+                    title="preview"
+                    size="small"
+                    hoverable>
+                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
+                  </a-card>
+                </a-row>
+              </template>
+              <div class="pod-template-tool-drawer-submit-cancel">
+                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('ptVisual')">
+                  Cancel
+                </a-button>
+                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('ptVisual')">
+                  Submit
+                </a-button>
+              </div>
+            </a-drawer>
+            <div class="pod-template-box syntax-true" />
+          </a-tab-pane>
+
+          <a-tab-pane
+            key="jm-pod-template"
+            tab="JM Pod Template"
+            forceRender>
+            <a-button-group class="pod-template-tool">
+              <a-button
+                size="small"
+                type="primary"
+                icon="history"
+                class="pod-template-tool-item"
+                @click="showPodTemplateDrawer('jmPtVisual')">History
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="copy"
+                class="pod-template-tool-item"
+                @click="handleGetInitPodTemplate('jmPtVisual')">Init Content
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="share-alt"
+                class="pod-template-tool-item"
+                @click="showTemplateHostAliasDrawer('jmPtVisual')">Host Alias
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="hdd"
+                disabled
+                ghost
+                class="pod-template-tool-item">PVC
+              </a-button>
+            </a-button-group>
+            <a-drawer
+              title="JobManager Pod Template History"
+              placement="right"
+              :width="700"
+              item-layout="vertical"
+              :closable="false"
+              :visible="this.podTemplateDrawer.jmPtVisual"
+              @close="closePodTemplateDrawer('jmPtVisual')">
+              <template>
+                <a-empty v-if="historyRecord.jmPodTemplate == null || historyRecord.jmPodTemplate.length == 0"/>
+                <a-card
+                  title="jm-pod-template.yaml"
+                  size="small"
+                  hoverable
+                  style="margin-bottom: 8px"
+                  v-for="(item,index) in historyRecord.jmPodTemplate"
+                  :key="index">
+                  <a slot="extra" @click="handleChoicePodTemplate('jmPtVisual', item)">Choice</a>
+                  <pre style="font-size: 12px">{{ item }}</pre>
+                </a-card>
+              </template>
+            </a-drawer>
+            <a-drawer
+              title="JM Pod Template HostAlias"
+              placement="right"
+              :width="500"
+              item-layout="vertical"
+              :closable="false"
+              :visible="podTemplateHostAliasDrawer.jmPtVisual"
+              @close="closeTemplateHostAliasDrawer('jmPtVisual')">
+              <template>
+                <a-row>
+                  <p class="conf-desc">
+                    <span class="note-info" style="margin-bottom: 12px">
+                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                    </span>
+                  </p>
+                </a-row>
+                <a-row>
+                  <a-select
+                    mode="multiple"
+                    placeholder="Search System Hosts"
+                    :value="selectedPodTemplateHostAlias"
+                    style="width: 100%;"
+                    :showArrow="true"
+                    @change="handleSelectedTemplateHostAlias">
+                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
+                      <a-icon slot="suffixIcon" type="plus-circle"/>
+                      {{ item }}
+                    </a-select-option>
+                  </a-select>
+                </a-row>
+                <a-row style="margin-top: 30px">
+                  <a-card
+                    title="preview"
+                    size="small"
+                    hoverable>
+                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
+                  </a-card>
+                </a-row>
+              </template>
+              <div class="pod-template-tool-drawer-submit-cancel">
+                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('jmPtVisual')">
+                  Cancel
+                </a-button>
+                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('jmPtVisual')">
+                  Submit
+                </a-button>
+              </div>
+            </a-drawer>
+            <div class="jm-pod-template-box syntax-true" />
+          </a-tab-pane>
+
+          <a-tab-pane
+            key="tm-pod-template"
+            tab="TM Pod Template"
+            forceRender>
+            <a-button-group class="pod-template-tool">
+              <a-button
+                size="small"
+                type="primary"
+                icon="history"
+                class="pod-template-tool-item"
+                @click="showPodTemplateDrawer('tmPtVisual')">History
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="copy"
+                class="pod-template-tool-item"
+                @click="handleGetInitPodTemplate('tmPtVisual')">Init Content
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="share-alt"
+                class="pod-template-tool-item"
+                @click="showTemplateHostAliasDrawer('tmPtVisual')">Host Alias
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                icon="hdd"
+                disabled
+                ghost
+                class="pod-template-tool-item">PVC
+              </a-button>
+            </a-button-group>
+            <a-drawer
+              title="TaskManager Pod Template History"
+              placement="right"
+              :width="700"
+              item-layout="vertical"
+              :closable="false"
+              :visible="this.podTemplateDrawer.tmPtVisual"
+              @close="closePodTemplateDrawer('tmPtVisual')">
+              <template>
+                <a-empty v-if="historyRecord.tmPodTemplate == null || historyRecord.tmPodTemplate.length == 0"/>
+                <a-card
+                  title="tm-pod-template.yaml"
+                  size="small"
+                  hoverable
+                  style="margin-bottom: 8px"
+                  v-for="(item,index) in historyRecord.tmPodTemplate"
+                  :key="index">
+                  <a slot="extra" @click="handleChoicePodTemplate('tmPtVisual', item)">Choice</a>
+                  <pre style="font-size: 12px">{{ item }}</pre>
+                </a-card>
+              </template>
+            </a-drawer>
+            <a-drawer
+              title="Pod Template HostAlias"
+              placement="right"
+              :width="500"
+              item-layout="vertical"
+              :closable="false"
+              :visible="podTemplateHostAliasDrawer.tmPtVisual"
+              @close="closeTemplateHostAliasDrawer('tmPtVisual')">
+              <template>
+                <a-row>
+                  <p class="conf-desc">
+                    <span class="note-info" style="margin-bottom: 12px">
+                      <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+                      Enter the host-ip mapping value in the format <b>[hostname:ip]</b>, e.g: chd01.streamx.com:192.168.112.233
+                    </span>
+                  </p>
+                </a-row>
+                <a-row>
+                  <a-select
+                    mode="multiple"
+                    placeholder="Search System Hosts"
+                    :value="selectedPodTemplateHostAlias"
+                    style="width: 100%;"
+                    :showArrow="true"
+                    @change="handleSelectedTemplateHostAlias">
+                    <a-select-option v-for="item in filteredPodTemplateHostAliasOptions" :key="item" :value="item">
+                      <a-icon slot="suffixIcon" type="plus-circle"/>
+                      {{ item }}
+                    </a-select-option>
+                  </a-select>
+                </a-row>
+                <a-row style="margin-top: 30px">
+                  <a-card
+                    title="preview"
+                    size="small"
+                    hoverable>
+                    <pre style="font-size: 12px">{{ hostAliasPreview }}</pre>
+                  </a-card>
+                </a-row>
+              </template>
+              <div class="pod-template-tool-drawer-submit-cancel">
+                <a-button :style="{ marginRight: '8px' }" @click="closeTemplateHostAliasDrawer('tmPtVisual')">
+                  Cancel
+                </a-button>
+                <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate('tmPtVisual')">
+                  Submit
+                </a-button>
+              </div>
+            </a-drawer>
+            <div class="tm-pod-template-box syntax-true" />
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-item>
+
+      <a-form-item
         label="Dynamic Option"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
-          rows="4"
+          rows="8"
           name="dynamicOptions"
           placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
           v-decorator="['dynamicOptions']" />
@@ -1442,7 +1454,7 @@
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
-          rows="4"
+          rows="8"
           name="args"
           placeholder="<arguments>"
           v-decorator="['args']" />
@@ -1595,1341 +1607,1332 @@
 </template>
 
 <script>
-  const Base64 = require('js-base64').Base64
-  import Ellipsis from '@/components/Ellipsis'
-  import { listConf } from '@api/project'
-  import { get, update, checkName, name, readConf, upload } from '@api/application'
-  import { history as confHistory, get as getVer, template, sysHadoopConf  } from '@api/config'
-  import { get as getSQL, history as sqlhistory } from '@/api/flinkSql'
-  import { mapActions, mapGetters } from 'vuex'
-  import Mergely from './Mergely'
-  import Different from './Different'
-  import configOptions from './Option'
-  import SvgIcon from '@/components/SvgIcon'
-  import { toPomString } from './Pom'
-  import {list as listFlinkEnv} from '@/api/flinkEnv'
-  import {list as listFlinkCluster} from '@/api/flinkCluster'
-  import {checkHadoop} from '@/api/setting'
-  import {
-    uploadJars as histUploadJars,
-    k8sNamespaces as histK8sNamespaces,
-    sessionClusterIds as histSessionClusterIds,
-    flinkBaseImages as histFlinkBaseImages,
-    flinkPodTemplates as histPodTemplates,
-    flinkJmPodTemplates as histJmPodTemplates,
-    flinkTmPodTemplates as histTmPodTemplates
-  } from '@/api/flinkHistory'
+const Base64 = require('js-base64').Base64
+import Ellipsis from '@/components/Ellipsis'
+import { listConf } from '@api/project'
+import { get, update, checkName, name, readConf, upload } from '@api/application'
+import { history as confHistory, get as getVer, template, sysHadoopConf  } from '@api/config'
+import { get as getSQL, history as sqlhistory } from '@/api/flinkSql'
+import { mapActions, mapGetters } from 'vuex'
+import Mergely from './Mergely'
+import Different from './Different'
+import configOptions from './Option'
+import SvgIcon from '@/components/SvgIcon'
+import { toPomString } from './Pom'
+import {list as listFlinkEnv} from '@/api/flinkEnv'
+import {list as listFlinkCluster} from '@/api/flinkCluster'
+import {checkHadoop} from '@/api/setting'
+import {
+  uploadJars as histUploadJars,
+  k8sNamespaces as histK8sNamespaces,
+  sessionClusterIds as histSessionClusterIds,
+  flinkBaseImages as histFlinkBaseImages,
+  flinkPodTemplates as histPodTemplates,
+  flinkJmPodTemplates as histJmPodTemplates,
+  flinkTmPodTemplates as histTmPodTemplates
+} from '@/api/flinkHistory'
 
-  import {
-    initFlinkSqlEditor,
-    initPodTemplateEditor,
-    disposeEditor,
-    verifySQL,
-    bigScreenOpen,
-    bigScreenOk,
-    applyPom,
-    formatSql,
-    updateDependency, checkPomScalaVersion
-  } from './AddEdit'
+import {
+  initFlinkSqlEditor,
+  initPodTemplateEditor,
+  disposeEditor,
+  verifySQL,
+  bigScreenOpen,
+  bigScreenOk,
+  applyPom,
+  formatSql,
+  updateDependency, checkPomScalaVersion
+} from './AddEdit'
 
-  import {
-    sysHosts,
-    initPodTemplate,
-    completeHostAliasToPodTemplate,
-    extractHostAliasFromPodTemplate,
-    previewHostAlias
-  } from '@/api/flinkPodtmpl'
+import {
+  sysHosts,
+  initPodTemplate,
+  completeHostAliasToPodTemplate,
+  extractHostAliasFromPodTemplate,
+  previewHostAlias
+} from '@/api/flinkPodtmpl'
 
-  import {
-    get as getAlert,
-    listWithOutPage as listWithOutPageAlert,
-    send as sendAlert
-  } from '@/api/alertConf'
+import {
+  get as getAlert,
+  listWithOutPage as listWithOutPageAlert,
+  send as sendAlert
+} from '@/api/alertConf'
 
 
 
-  export default {
-    name: 'EditStreamX',
-    components: { Mergely, Different, Ellipsis, SvgIcon },
-    data() {
-      return {
-        strategy: 1,
-        app: null,
-        compareDisabled: true,
-        compareVisible: false,
-        selectTagCount: {
-          count1: 1,
-          count2: 2
+export default {
+  name: 'EditStreamX',
+  components: { Mergely, Different, Ellipsis, SvgIcon },
+  data() {
+    return {
+      strategy: 1,
+      app: null,
+      compareDisabled: true,
+      compareVisible: false,
+      selectTagCount: {
+        count1: 1,
+        count2: 2
+      },
+      resolveOrder: [
+        { name: 'parent-first', order: 0 },
+        { name: 'child-first', order: 1 }
+      ],
+      k8sRestExposedType: [
+        {name: 'LoadBalancer', order: 0},
+        {name: 'ClusterIP', order: 1},
+        {name: 'NodePort', order: 2}
+      ],
+      executionModes: [
+        {mode: 'remote (standalone)', value: 1, disabled: false},
+        {mode: 'yarn application', value: 4, disabled: false},
+        {mode: 'yarn session', value: 3, disabled: false},
+        {mode: 'kubernetes session', value: 5, disabled: false},
+        {mode: 'kubernetes application', value: 6, disabled: false},
+        {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: false}
+      ],
+      cpTriggerAction: [
+        { name: 'alert', value: 1 },
+        { name: 'restart', value: 2 }
+      ],
+      runMaxTagCount: 1,
+      totalTagCount: 1,
+      jmMaxTagCount: 1,
+      tmMaxTagCount: 1,
+      switchDefaultValue: true,
+      compareConf: [],
+      compareSQL: [],
+      defaultConfigId: null,
+      defaultFlinkSqlId: null,
+      defaultOptions: {},
+      isSetConfig: false,
+      useSysHadoopConf: false,
+      configOverride: null,
+      configId: null,
+      versionId: null,
+      flinkEnvs: [],
+      flinkClusters: [],
+      configVersions: [],
+      flinkSqlHistory: [],
+      flinkSql: {},
+      configSource: [],
+      configItems: [],
+      totalItems: [],
+      jmMemoryItems: [],
+      tmMemoryItems: [],
+      form: null,
+      formCompare: null,
+      dependency: [],
+      uploadJars: [],
+      alert: true,
+      alertTypes: [
+        {name: 'E-mail', value: 1, disabled: false},
+        {name: 'Ding Ding Task', value: 2, disabled: false},
+        {name: 'Wechat', value: 4, disabled: true},
+        {name: 'SMS', value: 8, disabled: false},
+      ],
+      alertType: [],
+      alerts: [],
+      alertId: {},
+      selectAlert: {},
+      options: configOptions,
+      optionsKeyMapping: {},
+      optionsValueMapping: {},
+      loading: false,
+      submitting: false,
+      executionMode: null,
+      validateAgain: false,
+      podTemplate: null,
+      jmPodTemplate: null,
+      tmPodTemplate: null,
+      configuration: [
+        { key: 'tc', name: ' time characteristic' },
+        { key: 'cp', name: ' checkpoints' },
+        { key: 'rs', name: ' restart strategy' },
+        { key: 'sb', name: ' state backend' }
+      ],
+      controller: {
+        activeTab: 'pom',
+        podTemplateTab: 'pod-template',
+        tagCount: {
+          total: 1,
+          run: 1,
+          jm: 1,
+          tm: 1
         },
-        resolveOrder: [
-          { name: 'parent-first', order: 0 },
-          { name: 'child-first', order: 1 }
-        ],
-        k8sRestExposedType: [
-          {name: 'LoadBalancer', order: 0},
-          {name: 'ClusterIP', order: 1},
-          {name: 'NodePort', order: 2}
-        ],
-        executionModes: [
-          {mode: 'remote (standalone)', value: 1, disabled: false},
-          {mode: 'yarn application', value: 4, disabled: false},
-          {mode: 'yarn session', value: 3, disabled: false},
-          {mode: 'kubernetes session', value: 5, disabled: false},
-          {mode: 'kubernetes application', value: 6, disabled: false},
-          {mode: 'yarn per-job (deprecated, please use yarn-application mode)', value: 2, disabled: false}
-        ],
-        cpTriggerAction: [
-          { name: 'alert', value: 1 },
-          { name: 'restart', value: 2 }
-        ],
-        runMaxTagCount: 1,
-        totalTagCount: 1,
-        jmMaxTagCount: 1,
-        tmMaxTagCount: 1,
-        switchDefaultValue: true,
-        compareConf: [],
-        compareSQL: [],
-        defaultConfigId: null,
-        defaultFlinkSqlId: null,
-        defaultOptions: {},
-        isSetConfig: false,
-        useSysHadoopConf: false,
-        configOverride: null,
-        configId: null,
-        versionId: null,
-        flinkEnvs: [],
-        flinkClusters: [],
-        configVersions: [],
-        flinkSqlHistory: [],
-        flinkSql: {},
-        configSource: [],
-        configItems: [],
-        totalItems: [],
-        jmMemoryItems: [],
-        tmMemoryItems: [],
-        form: null,
-        formCompare: null,
-        dependency: [],
+        visiable: {
+          mergely: false,
+          bigScreen: false
+        },
+        modal: {
+          destroyOnClose: true,
+          bigScreen: {
+            style: {
+              height: null,
+              padding: '5px'
+            },
+            title: 'Flink SQL'
+          }
+        },
+        editor: {
+          flinkSql: null,
+          bigScreen: null,
+          pom: null,
+          podTemplate: null,
+          jmPodTemplate: null,
+          tmPodTemplate: null
+        },
+        flinkSql: {
+          value: null,
+          errorMsg: null,
+          errorStart: null,
+          errorEnd: null,
+          verified: false,
+          success: true
+        },
+        dependency: {
+          pom: new Map(),
+          jar: new Map()
+        },
+        pom: {
+          value: null,
+          error: null,
+          defaultValue: ''
+        }
+      },
+      renderFlinkSql: true,
+      selectedHistoryUploadJars: [],
+      historyRecord: {
         uploadJars: [],
-        alert: true,
-        alertTypes: [
-          {name: 'E-mail', value: 1, disabled: false},
-          {name: 'Ding Ding Task', value: 2, disabled: false},
-          {name: 'Wechat', value: 4, disabled: true},
-          {name: 'SMS', value: 8, disabled: false},
-        ],
-        alertType: [],
-        alerts: [],
-        alertId: {},
-        selectAlert: {},
-        options: configOptions,
-        optionsKeyMapping: {},
-        optionsValueMapping: {},
-        loading: false,
-        submitting: false,
-        executionMode: null,
-        validateAgain: false,
-        podTemplate: null,
-        jmPodTemplate: null,
-        tmPodTemplate: null,
-        configuration: [
-          { key: 'tc', name: ' time characteristic' },
-          { key: 'cp', name: ' checkpoints' },
-          { key: 'rs', name: ' restart strategy' },
-          { key: 'sb', name: ' state backend' }
-        ],
-        controller: {
-          activeTab: 'pom',
-          podTemplateTab: 'pod-template',
-          tagCount: {
-            total: 1,
-            run: 1,
-            jm: 1,
-            tm: 1
-          },
-          visiable: {
-            mergely: false,
-            bigScreen: false
-          },
-          modal: {
-            destroyOnClose: true,
-            bigScreen: {
-              style: {
-                height: null,
-                padding: '5px'
-              },
-              title: 'Flink SQL'
-            }
-          },
-          editor: {
-            flinkSql: null,
-            bigScreen: null,
-            pom: null,
-            podTemplate: null,
-            jmPodTemplate: null,
-            tmPodTemplate: null
-          },
-          flinkSql: {
-            value: null,
-            errorLine: null,
-            errorColumn: null,
-            errorMsg: null,
-            errorStart: null,
-            errorEnd: null,
-            verified: false,
-            success: true
-          },
-          dependency: {
-            pom: new Map(),
-            jar: new Map()
-          },
-          pom: {
-            value: null,
-            error: null,
-            defaultValue: ''
-          }
-        },
-        renderFlinkSql: true,
-        selectedHistoryUploadJars: [],
-        historyRecord: {
-          uploadJars: [],
-          k8sNamespace: [],
-          k8sSessionClusterId: [],
-          flinkImage: [],
-          podTemplate:[],
-          jmPodTemplate:[],
-          tmPodTemplate:[]
-        },
-        podTemplateDrawer: {
-          ptVisual: false,
-          jmPtVisual: false,
-          tmPtVisual: false
-        },
-        podTemplateHostAliasDrawer: {
-          ptVisual: false,
-          jmPtVisual: false,
-          tmPtVisual: false,
-        },
-        hadoopConfDrawer: {
-          visual: false,
-          content: {}
-        },
-        sysHostsAlias: [],
-        selectedPodTemplateHostAlias: [],
-        hostAliasPreview: '',
+        k8sNamespace: [],
+        k8sSessionClusterId: [],
+        flinkImage: [],
+        podTemplate:[],
+        jmPodTemplate:[],
+        tmPodTemplate:[]
+      },
+      podTemplateDrawer: {
+        ptVisual: false,
+        jmPtVisual: false,
+        tmPtVisual: false
+      },
+      podTemplateHostAliasDrawer: {
+        ptVisual: false,
+        jmPtVisual: false,
+        tmPtVisual: false,
+      },
+      hadoopConfDrawer: {
+        visual: false,
+        content: {}
+      },
+      sysHostsAlias: [],
+      selectedPodTemplateHostAlias: [],
+      hostAliasPreview: '',
+    }
+  },
+
+  computed: {
+    dynamicOptions() {
+      return function(group) {
+        return this.options.filter(x => x.group === group)
       }
     },
-
-    computed: {
-      dynamicOptions() {
-        return function(group) {
-          return this.options.filter(x => x.group === group)
-        }
-      },
-      hasOptions() {
-        return function(items) {
-          return this.options.filter(x => items.includes(x.key))
-        }
-      },
-      myTheme() {
-        return this.$store.state.app.theme
-      },
-      filteredHistoryUploadJarsOptions() {
-        return this.historyRecord.uploadJars.filter(o =>
-          !this.selectedHistoryUploadJars.includes(o) && !this.controller.dependency.jar.has(o))
-      },
-      filteredPodTemplateHostAliasOptions() {
-        return this.sysHostsAlias.filter(o => !this.selectedPodTemplateHostAlias.includes(o))
+    hasOptions() {
+      return function(items) {
+        return this.options.filter(x => items.includes(x.key))
       }
-
     },
+    myTheme() {
+      return this.$store.state.app.theme
+    },
+    filteredHistoryUploadJarsOptions() {
+      return this.historyRecord.uploadJars.filter(o =>
+        !this.selectedHistoryUploadJars.includes(o) && !this.controller.dependency.jar.has(o))
+    },
+    filteredPodTemplateHostAliasOptions() {
+      return this.sysHostsAlias.filter(o => !this.selectedPodTemplateHostAlias.includes(o))
+    }
 
-    mounted() {
-      const appId = this.applicationId()
-      if (appId) {
-        this.handleGet(appId)
-        this.CleanAppId()
+  },
+
+  mounted() {
+    const appId = this.applicationId()
+    if (appId) {
+      this.handleGet(appId)
+      this.CleanAppId()
+    } else {
+      this.$router.back(-1)
+    }
+  },
+
+  beforeMount() {
+    this.form = this.$form.createForm(this)
+    this.formCompare = this.$form.createForm(this)
+    this.optionsKeyMapping = new Map()
+    this.optionsValueMapping = new Map()
+    this.options.forEach((item, index, array) => {
+      console.table(index)
+      this.optionsKeyMapping.set(item.key, item)
+      this.optionsValueMapping.set(item.name, item.key)
+      this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
+    })
+    listFlinkEnv().then((resp)=>{
+      this.flinkEnvs = resp.data
+    })
+    listFlinkCluster().then((resp)=>{
+      this.flinkClusters = resp.data
+    })
+    listWithOutPageAlert().then((resp) => {
+      this.alerts = resp.data
+    })
+    // load history config records
+    histUploadJars().then((resp) => {
+      this.historyRecord.uploadJars = resp.data
+    })
+    histK8sNamespaces().then((resp) => {
+      this.historyRecord.k8sNamespace = resp.data
+    })
+    histSessionClusterIds({'executionMode': 5}).then((resp) => {
+      this.historyRecord.k8sSessionClusterId = resp.data
+    })
+    histFlinkBaseImages().then((resp) => {
+      this.historyRecord.flinkImage = resp.data
+    })
+  },
+
+  filters: {
+    description(option) {
+      if (option.unit) {
+        return option.description + ' (Unit ' + option.unit + ')'
       } else {
-        this.$router.back(-1)
+        return option.description
       }
+    }
+  },
+
+  methods: {
+    ...mapActions(['CleanAppId']),
+    ...mapGetters(['applicationId']),
+    filterOption(input, option) {
+      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
 
-    beforeMount() {
-      this.form = this.$form.createForm(this)
-      this.formCompare = this.$form.createForm(this)
-      this.optionsKeyMapping = new Map()
-      this.optionsValueMapping = new Map()
-      this.options.forEach((item, index, array) => {
-        console.table(index)
-        this.optionsKeyMapping.set(item.key, item)
-        this.optionsValueMapping.set(item.name, item.key)
-        this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
-      })
-      listFlinkEnv().then((resp)=>{
-        this.flinkEnvs = resp.data
-      })
-      listFlinkCluster().then((resp)=>{
-        this.flinkClusters = resp.data
-      })
-      listWithOutPageAlert().then((resp) => {
-        this.alerts = resp.data
-      })
-      // load history config records
-      histUploadJars().then((resp) => {
-        this.historyRecord.uploadJars = resp.data
-      })
-      histK8sNamespaces().then((resp) => {
-        this.historyRecord.k8sNamespace = resp.data
-      })
-      histSessionClusterIds({'executionMode': 5}).then((resp) => {
-        this.historyRecord.k8sSessionClusterId = resp.data
-      })
-      histFlinkBaseImages().then((resp) => {
-        this.historyRecord.flinkImage = resp.data
-      })
-    },
-
-    filters: {
-      description(option) {
-        if (option.unit) {
-          return option.description + ' (Unit ' + option.unit + ')'
-        } else {
-          return option.description
-        }
-      }
-    },
-
-    methods: {
-      ...mapActions(['CleanAppId']),
-      ...mapGetters(['applicationId']),
-      filterOption(input, option) {
-        return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
-      },
-
-      handleGet(appId) {
-        get({ id: appId }).then((resp) => {
-          this.app = resp.data
-          if (this.app.jobType === 2) {
-            sqlhistory({ id: appId }).then((resp) => {
-              this.flinkSqlHistory = resp.data
-            })
-          }
-          if(this.app.alertId){
-            this.selectAlert = this.alerts.filter(t => t.id == this.app.alertId)[0]
-            console.log('已选择告警：' + JSON.stringify(this.selectAlert))
-          }
-          if (this.app.config && this.app.config.trim() !== '') {
-            this.configOverride = Base64.decode(this.app.config)
-            this.isSetConfig = true
-          }
-          this.defaultOptions = JSON.parse(this.app.options || '{}')
-          this.configId = this.app.configId
-          this.executionMode = this.app.executionMode
-          this.versionId = this.app.versionId || null
-          this.defaultFlinkSqlId = this.app.sqlId || null
-          this.handleReset()
-          this.handleListConfVersion()
-          this.handleConfList()
-        }).catch((error) => {
-          this.$message.error(error.message)
-        })
-      },
-
-      handleCheckYarnSessionClusterId(rule, value, callback) {
-        if (value === null || value === undefined || value === '') {
-          callback(new Error('Yarn session clusterId is required'))
-        } else {
-          if (!value.startsWith('application')) {
-            callback(new Error("Yarn session clusterId is invalid, clusterId must start with 'application'.Please check"))
-          } else {
-            callback()
-          }
-        }
-      },
-
-      handleFlinkVersion(id) {
-        this.versionId = id
-        this.scalaVersion = this.flinkEnvs.find(v => v.id === id).scalaVersion
-        this.handleCheckPomScalaVersion()
-      },
-
-      handleChangeMode(mode) {
-        this.executionMode = mode
-        this.handleReset()
-      },
-
-      handleChangeConf(item) {
-        this.configItems = item
-      },
-
-      handleChangeJmMemory(item) {
-        this.jmMemoryItems = item
-      },
-
-      handleChangeTmMemory(item) {
-        this.tmMemoryItems = item
-      },
-
-      handleChangeProcess(item) {
-        this.totalItems = item
-      },
-
-      getExecutionCluster(executionMode){
-        return this.flinkClusters.filter(o => o.executionMode === executionMode && o.clusterState === 1)
-      },
-
-      handleChangeNewConfig(confFile) {
-        name({
-          config: confFile
-        }).then((resp) => {
-          this.form.setFieldsValue({ 'jobName': resp.data })
-        }).catch((error) => {
-          this.$message.error(error.message)
-        })
-        readConf({
-          config: confFile
-        }).then((resp) => {
-          this.configOverride = Base64.decode(resp.data)
-        }).catch((error) => {
-          this.$message.error(error.message)
-        })
-      },
-
-      handleCheckExecMode(rule, value, callback) {
-        if (value === null || value === undefined || value === '') {
-          callback(new Error('Execution Mode is required'))
-        } else {
-          if (value === 2 || value === 3 || value === 4) {
-            checkHadoop().then((resp) => {
-              if (resp.data) {
-                callback()
-              } else {
-                callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
-              }
-            }).catch((err) => {
-              callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
-            })
-          }
-        }
-      },
-
-      handleCheckJobName(rule, value, callback) {
-        if (!value) {
-          callback(new Error('application name is required'))
-        } else {
-          checkName({
-            id: this.app.id,
-            jobName: value
-          }).then((resp) => {
-            const exists = parseInt(resp.data)
-            if (exists === 0) {
-              callback()
-            } else if (exists === 1) {
-              callback(new Error('application name must be unique. The application name already exists'))
-            } else if (exists === 2) {
-              callback(new Error('The application name is already running in yarn,cannot be repeated. Please check'))
-            } else if (exists === 3) {
-              callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
-            } else {
-              callback(new Error('The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check'))
-            }
+    handleGet(appId) {
+      get({ id: appId }).then((resp) => {
+        this.app = resp.data
+        if (this.app.jobType === 2) {
+          sqlhistory({ id: appId }).then((resp) => {
+            this.flinkSqlHistory = resp.data
           })
         }
-      },
-
-      handleCheckCheckPoint (rule, value, callback) {
-        const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval') || null
-        const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval') || null
-        const cpFailureAction = this.form.getFieldValue('cpFailureAction') || null
-        if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
-          callback()
-          if (!this.validateAgain) {
-            this.validateAgain = true
-            this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
-            this.validateAgain = false
-          }
-        } else if(cpMaxFailureInterval == null && cpFailureRateInterval == null && cpFailureAction == null) {
-          callback()
-          if (!this.validateAgain) {
-            this.validateAgain = true
-            this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
-            this.validateAgain = false
-          }
-        } else {
-          callback(new Error('checkPoint failure options must be all required or all empty'))
-          if (!this.validateAgain) {
-            this.validateAgain = true
-            this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
-            this.validateAgain = false
-          }
+        if(this.app.alertId){
+          this.selectAlert = this.alerts.filter(t => t.id == this.app.alertId)[0]
+          console.log('已选择告警：' + JSON.stringify(this.selectAlert))
         }
-      },
+        if (this.app.config && this.app.config.trim() !== '') {
+          this.configOverride = Base64.decode(this.app.config)
+          this.isSetConfig = true
+        }
+        this.defaultOptions = JSON.parse(this.app.options || '{}')
+        this.configId = this.app.configId
+        this.executionMode = this.app.executionMode
+        this.versionId = this.app.versionId || null
+        this.defaultFlinkSqlId = this.app.sqlId || null
+        this.handleReset()
+        this.handleListConfVersion()
+        this.handleConfList()
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+    },
 
-      handleCheckAlertEmail(rule, value, callback) {
-        const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval')
-        const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval')
-        const cpFailureAction = this.form.getFieldValue('cpFailureAction')
+    handleCheckYarnSessionClusterId(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Yarn session clusterId is required'))
+      } else {
+        if (!value.startsWith('application')) {
+          callback(new Error("Yarn session clusterId is invalid, clusterId must start with 'application'.Please check"))
+        } else {
+          callback()
+        }
+      }
+    },
 
-        if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
-          if( cpFailureAction === 1) {
-            const alertEmail = this.form.getFieldValue('alertEmail')
-            if (alertEmail == null || alertEmail.trim() === '') {
-              callback(new Error('checkPoint Failure trigger is alert,alertEmail must not be empty'))
-            } else {
+    handleFlinkVersion(id) {
+      this.versionId = id
+      this.scalaVersion = this.flinkEnvs.find(v => v.id === id).scalaVersion
+      this.handleCheckPomScalaVersion()
+    },
+
+    handleChangeMode(mode) {
+      this.executionMode = mode
+      this.handleReset()
+    },
+
+    handleChangeConf(item) {
+      this.configItems = item
+    },
+
+    handleChangeJmMemory(item) {
+      this.jmMemoryItems = item
+    },
+
+    handleChangeTmMemory(item) {
+      this.tmMemoryItems = item
+    },
+
+    handleChangeProcess(item) {
+      this.totalItems = item
+    },
+
+    handleClusterId(e) {
+      this.form.setFieldsValue({jobName: e.target.value})
+    },
+
+    getExecutionCluster(executionMode){
+      return this.flinkClusters.filter(o => o.executionMode === executionMode && o.clusterState === 1)
+    },
+
+    handleChangeNewConfig(confFile) {
+      name({
+        config: confFile
+      }).then((resp) => {
+        this.form.setFieldsValue({ 'jobName': resp.data })
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+      readConf({
+        config: confFile
+      }).then((resp) => {
+        this.configOverride = Base64.decode(resp.data)
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+    },
+
+    handleCheckExecMode(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('Execution Mode is required'))
+      } else {
+        if (value === 2 || value === 3 || value === 4) {
+          checkHadoop().then((resp) => {
+            if (resp.data) {
               callback()
+            } else {
+              callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
             }
+          }).catch((err) => {
+            callback(new Error('Hadoop environment initialization failed, please check the environment settings'))
+          })
+        }
+      }
+    },
+
+    handleCheckJobName(rule, value, callback) {
+      if (!value) {
+        callback(new Error('application name is required'))
+      } else {
+        checkName({
+          id: this.app.id,
+          jobName: value
+        }).then((resp) => {
+          const exists = parseInt(resp.data)
+          if (exists === 0) {
+            callback()
+          } else if (exists === 1) {
+            callback(new Error('application name must be unique. The application name already exists'))
+          } else if (exists === 2) {
+            callback(new Error('The application name is already running in yarn,cannot be repeated. Please check'))
+          } else if (exists === 3) {
+            callback(new Error('The application name is already running in k8s,cannot be repeated. Please check'))
+          } else {
+            callback(new Error('The application name is invalid.characters must be (Chinese|English|"-"|"_"),two consecutive spaces cannot appear.Please check'))
+          }
+        })
+      }
+    },
+
+    handleCheckCheckPoint (rule, value, callback) {
+      const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval') || null
+      const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval') || null
+      const cpFailureAction = this.form.getFieldValue('cpFailureAction') || null
+      if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
+        callback()
+        if (!this.validateAgain) {
+          this.validateAgain = true
+          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+          this.validateAgain = false
+        }
+      } else if(cpMaxFailureInterval == null && cpFailureRateInterval == null && cpFailureAction == null) {
+        callback()
+        if (!this.validateAgain) {
+          this.validateAgain = true
+          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+          this.validateAgain = false
+        }
+      } else {
+        callback(new Error('checkPoint failure options must be all required or all empty'))
+        if (!this.validateAgain) {
+          this.validateAgain = true
+          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+          this.validateAgain = false
+        }
+      }
+    },
+
+    handleCheckAlertEmail(rule, value, callback) {
+      const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval')
+      const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval')
+      const cpFailureAction = this.form.getFieldValue('cpFailureAction')
+
+      if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
+        if( cpFailureAction === 1) {
+          const alertEmail = this.form.getFieldValue('alertEmail')
+          if (alertEmail == null || alertEmail.trim() === '') {
+            callback(new Error('checkPoint Failure trigger is alert,alertEmail must not be empty'))
           } else {
             callback()
           }
         } else {
           callback()
         }
-      },
+      } else {
+        callback()
+      }
+    },
 
-      handleFormatSql() {
-        formatSql(this)
-      },
+    handleFormatSql() {
+      formatSql(this)
+    },
 
-      handleVerifySql() {
-        verifySQL(this)
-      },
+    handleVerifySql() {
+      verifySQL(this)
+    },
 
-      handleBigScreenOpen() {
-        bigScreenOpen(this)
-      },
+    handleBigScreenOpen() {
+      bigScreenOpen(this)
+    },
 
-      handleBigScreenOk() {
-        bigScreenOk(this)
-      },
+    handleBigScreenOk() {
+      bigScreenOk(this)
+    },
 
-      handleBigScreenClose() {
-      },
+    handleBigScreenClose() {
+    },
 
-      handleChangeAlertType(value) {
-        this.alertType = value
-      },
+    handleChangeAlertType(value) {
+      this.alertType = value
+    },
 
-      handleInitDependency() {
-        this.controller.dependency.jar = new Map()
-        this.controller.dependency.pom = new Map()
-        this.handleDependencyJsonToPom(this.flinkSql.dependency,this.controller.dependency.pom,this.controller.dependency.jar)
+    handleInitDependency() {
+      this.controller.dependency.jar = new Map()
+      this.controller.dependency.pom = new Map()
+      this.handleDependencyJsonToPom(this.flinkSql.dependency,this.controller.dependency.pom,this.controller.dependency.jar)
+      this.handleUpdateDependency()
+    },
+
+    handleCheckPomScalaVersion() {
+      checkPomScalaVersion(this)
+    },
+
+    handleDependencyJsonToPom (json,pomMap,jarMap) {
+      if (json != null && json.trim() !== '') {
+        const deps = JSON.parse(json)
+        const pom = deps.pom
+        if (pom && pom.length > 0) {
+          pom.forEach(x => {
+            const groupId = x.groupId
+            const artifactId = x.artifactId
+            const version = x.version
+            const exclusions = x.exclusions || []
+
+            const id = groupId + '_' + artifactId
+            const mvnPom = {
+              'groupId': groupId,
+              'artifactId': artifactId,
+              'version': version
+            }
+            if (exclusions != null && exclusions.length > 0) {
+              exclusions.forEach(e => {
+                if (e != null && e.length > 0) {
+                  const e_group = e.groupId
+                  const e_artifact = e.artifactId
+                  mvnPom.exclusions.put({
+                    'groupId': e_group,
+                    'artifactId': e_artifact
+                  })
+                }
+              })
+            }
+            pomMap.set(id, mvnPom)
+          })
+        }
+        const jar = deps.jar
+        if (jar != null && jar.length > 0) {
+          jar.forEach(x => {
+            jarMap.set(x, x)
+          })
+        }
+      }
+    },
+
+    handleSQLConf(checked) {
+      if (checked) {
+        if (this.configOverride != null) {
+          this.controller.visiable.mergely = true
+          this.$refs.mergely.set(this.configOverride)
+        } else {
+          template({}).then((resp) => {
+            const sqlJobConfig = Base64.decode(resp.data)
+            this.controller.visiable.mergely = true
+            this.$refs.mergely.set(sqlJobConfig)
+          }).catch((error) => {
+            this.$message.error(error.message)
+          })
+        }
+      } else {
+        this.controller.visiable.mergely = false
+        this.configOverride = null
+        this.isSetConfig = false
+      }
+    },
+
+    handleApplyPom() {
+      applyPom(this)
+    },
+
+    handleK8sPodTemplateEditor(){
+      this.$nextTick(() => {
+        initPodTemplateEditor(this)
+      })
+    },
+
+    handleEditPom(pom) {
+      const pomString = toPomString(pom)
+      this.activeTab = 'pom'
+      this.controller.editor.pom.getModel().setValue(pomString)
+    },
+
+    handleUploadJar(info) {
+      const status = info.file.status
+      if (status === 'done') {
+        this.loading = false
+      } else if (status === 'error') {
+        this.loading = false
+        this.$message.error(`${info.file.name} file upload failed.`)
+      }
+    },
+
+    handleBeforeUpload(file) {
+      if (file.type !== 'application/java-archive') {
+        if (!/\.(jar|JAR)$/.test(file.name)) {
+          this.loading = false
+          this.$message.error('Only jar files can be uploaded! please check your file.')
+          return false
+        }
+      }
+      this.loading = true
+      return true
+    },
+
+    handleSearchHistoryUploadJars(selectedItems) {
+      this.selectedHistoryUploadJars = selectedItems
+    },
+
+    addHistoryUploadJar(item) {
+      this.controller.dependency.jar.set(item, item)
+      this.handleUpdateDependency()
+    },
+
+    deleteHistoryUploadJar(item){
+      this.controller.dependency.jar.delete(item)
+      this.handleUpdateDependency()
+    },
+
+    handleCustomRequest(data) {
+      const formData = new FormData()
+      formData.append('file', data.file)
+      upload(formData).then((response) => {
+        this.loading = false
+        this.controller.dependency.jar.set(data.file.name, data.file.name)
         this.handleUpdateDependency()
-      },
+      }).catch((error) => {
+        this.$message.error(error.message)
+        this.loading = false
+      })
+    },
 
-      handleCheckPomScalaVersion() {
-        checkPomScalaVersion(this)
-      },
+    handleRemovePom(pom) {
+      const id = pom.groupId + '_' + pom.artifactId
+      this.controller.dependency.pom.delete(id)
+      this.handleUpdateDependency()
+    },
 
-      handleDependencyJsonToPom (json,pomMap,jarMap) {
-        if (json != null && json.trim() !== '') {
-          const deps = JSON.parse(json)
-          const pom = deps.pom
-          if (pom && pom.length > 0) {
-            pom.forEach(x => {
-              const groupId = x.groupId
-              const artifactId = x.artifactId
-              const version = x.version
-              const exclusions = x.exclusions || []
+    handleRemoveJar(jar) {
+      this.controller.dependency.jar.delete(jar)
+      this.selectedHistoryUploadJars.splice(this.selectedHistoryUploadJars.indexOf(jar), 1)
+      this.handleUpdateDependency()
+    },
 
-              const id = groupId + '_' + artifactId
-              const mvnPom = {
-                'groupId': groupId,
-                'artifactId': artifactId,
-                'version': version
-              }
-              if (exclusions != null && exclusions.length > 0) {
-                exclusions.forEach(e => {
-                  if (e != null && e.length > 0) {
-                    const e_group = e.groupId
-                    const e_artifact = e.artifactId
-                    mvnPom.exclusions.put({
-                      'groupId': e_group,
-                      'artifactId': e_artifact
-                    })
+    handleUpdateDependency() {
+      updateDependency(this)
+    },
+
+    handleChangeStrategy(v) {
+      this.strategy = parseInt(v)
+    },
+
+    handleChangeConfig(v) {
+      getVer({ id: v }).then((resp) => {
+        this.configOverride = Base64.decode(resp.data.content)
+        this.configId = resp.data.id
+      })
+    },
+
+    handleChangeSQL(v) {
+      getSQL({ id: v }).then((resp) => {
+        this.flinkSql = resp.data
+        this.controller.flinkSql.value = Base64.decode(this.flinkSql.sql)
+        this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.value)
+        this.handleInitDependency()
+      })
+    },
+
+    handleEditConfig() {
+      this.controller.visiable.mergely = true
+      this.$refs.mergely.set(this.configOverride)
+    },
+
+    handleEditConfClose() {
+      this.controller.visiable.mergely = false
+      if (this.configOverride == null) {
+        this.isSetConfig = false
+      }
+    },
+
+    handleEditConfOk(value) {
+      if (value == null || value.trim() === '') {
+        this.isSetConfig = false
+        this.configOverride = null
+      } else {
+        this.isSetConfig = true
+        this.configOverride = value
+      }
+    },
+
+    handleSubmit(e) {
+      e.preventDefault()
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          if (!this.submitting) {
+            if (this.app.jobType === 1) {
+              this.handleSubmitCustomJob(values)
+            } else {
+              if (this.app.jobType === 2) {
+                verifySQL(this,(success) => {
+                  if (success) {
+                    this.handleSubmitSQL(values)
                   }
                 })
               }
-              pomMap.set(id, mvnPom)
-            })
-          }
-          const jar = deps.jar
-          if (jar != null && jar.length > 0) {
-            jar.forEach(x => {
-              jarMap.set(x, x)
-            })
+            }
           }
         }
-      },
+      })
+    },
 
-      handleSQLConf(checked) {
-        if (checked) {
-          if (this.configOverride != null) {
-            this.controller.visiable.mergely = true
-            this.$refs.mergely.set(this.configOverride)
+    handleYarnQueue(values) {
+      if ( this.executionMode === 4 ) {
+        const queue = values['yarnQueue']
+        if (queue != null && queue !== '' && queue !== undefined) {
+          return queue
+        }
+        return null
+      }
+    },
+
+    handleFormValue(values) {
+      const options = {}
+      for (const k in values) {
+        const v = values[k]
+        if (v != null && v !== '' && v !== undefined) {
+          if (k === 'parallelism') {
+            options['parallelism.default'] = v
+          } else if (k === 'slot') {
+            options['taskmanager.numberOfTaskSlots'] = v
           } else {
-            template({}).then((resp) => {
-              const sqlJobConfig = Base64.decode(resp.data)
-              this.controller.visiable.mergely = true
-              this.$refs.mergely.set(sqlJobConfig)
-            }).catch((error) => {
-              this.$message.error(error.message)
-            })
-          }
-        } else {
-          this.controller.visiable.mergely = false
-          this.configOverride = null
-          this.isSetConfig = false
-        }
-      },
-
-      handleApplyPom() {
-        applyPom(this)
-      },
-
-      handleK8sPodTemplateEditor(){
-        this.$nextTick(() => {
-          initPodTemplateEditor(this)
-        })
-      },
-
-      handleEditPom(pom) {
-        const pomString = toPomString(pom)
-        this.activeTab = 'pom'
-        this.controller.editor.pom.getModel().setValue(pomString)
-      },
-
-      handleUploadJar(info) {
-        const status = info.file.status
-        if (status === 'done') {
-          this.loading = false
-        } else if (status === 'error') {
-          this.loading = false
-          this.$message.error(`${info.file.name} file upload failed.`)
-        }
-      },
-
-      handleBeforeUpload(file) {
-        if (file.type !== 'application/java-archive') {
-          if (!/\.(jar|JAR)$/.test(file.name)) {
-            this.loading = false
-            this.$message.error('Only jar files can be uploaded! please check your file.')
-            return false
-          }
-        }
-        this.loading = true
-        return true
-      },
-
-      handleSearchHistoryUploadJars(selectedItems) {
-        this.selectedHistoryUploadJars = selectedItems
-      },
-
-      addHistoryUploadJar(item) {
-        this.controller.dependency.jar.set(item, item)
-        this.handleUpdateDependency()
-      },
-
-      deleteHistoryUploadJar(item){
-        this.controller.dependency.jar.delete(item)
-        this.handleUpdateDependency()
-      },
-
-      handleCustomRequest(data) {
-        const formData = new FormData()
-        formData.append('file', data.file)
-        upload(formData).then((response) => {
-          this.loading = false
-          this.controller.dependency.jar.set(data.file.name, data.file.name)
-          this.handleUpdateDependency()
-        }).catch((error) => {
-          this.$message.error(error.message)
-          this.loading = false
-        })
-      },
-
-      handleRemovePom(pom) {
-        const id = pom.groupId + '_' + pom.artifactId
-        this.controller.dependency.pom.delete(id)
-        this.handleUpdateDependency()
-      },
-
-      handleRemoveJar(jar) {
-        this.controller.dependency.jar.delete(jar)
-        this.selectedHistoryUploadJars.splice(this.selectedHistoryUploadJars.indexOf(jar), 1)
-        this.handleUpdateDependency()
-      },
-
-      handleUpdateDependency() {
-        updateDependency(this)
-      },
-
-      handleChangeStrategy(v) {
-        this.strategy = parseInt(v)
-      },
-
-      handleChangeConfig(v) {
-        getVer({ id: v }).then((resp) => {
-          this.configOverride = Base64.decode(resp.data.content)
-          this.configId = resp.data.id
-        })
-      },
-
-      handleChangeSQL(v) {
-        getSQL({ id: v }).then((resp) => {
-          this.flinkSql = resp.data
-          this.controller.flinkSql.value = Base64.decode(this.flinkSql.sql)
-          this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.value)
-          this.handleInitDependency()
-        })
-      },
-
-      handleEditConfig() {
-        this.controller.visiable.mergely = true
-        this.$refs.mergely.set(this.configOverride)
-      },
-
-      handleEditConfClose() {
-        this.controller.visiable.mergely = false
-        if (this.configOverride == null) {
-          this.isSetConfig = false
-        }
-      },
-
-      handleEditConfOk(value) {
-        if (value == null || value.trim() === '') {
-          this.isSetConfig = false
-          this.configOverride = null
-        } else {
-          this.isSetConfig = true
-          this.configOverride = value
-        }
-      },
-
-      handleSubmit(e) {
-        e.preventDefault()
-        this.form.validateFields((err, values) => {
-          if (!err) {
-            if (!this.submitting) {
-              if (this.app.jobType === 1) {
-                this.handleSubmitCustomJob(values)
+            if (this.configItems.includes(k)) {
+              options[k] = v
+            } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
+              const opt = this.optionsKeyMapping.get(k)
+              const unit = opt['unit'] || ''
+              const name = opt['name']
+              if (typeof v === 'string') {
+                options[name] = v.replace(/[k|m|g]b$/g, '') + unit
+              } else if (typeof v === 'number') {
+                options[name] = v + unit
               } else {
-                if (this.app.jobType === 2) {
-                  verifySQL(this,(success) => {
-                    if (success) {
-                      this.handleSubmitSQL(values)
-                    }
-                  })
-                }
-              }
-            }
-          }
-        })
-      },
-
-      handleYarnQueue(values) {
-        if ( this.executionMode === 4 ) {
-          const queue = values['yarnQueue']
-          if (queue != null && queue !== '' && queue !== undefined) {
-            return queue
-          }
-          return null
-        }
-      },
-
-      handleFormValue(values) {
-        const options = {}
-        for (const k in values) {
-          const v = values[k]
-          if (v != null && v !== '' && v !== undefined) {
-            if (k === 'parallelism') {
-              options['parallelism.default'] = v
-            } else if (k === 'slot') {
-              options['taskmanager.numberOfTaskSlots'] = v
-            } else {
-              if (this.configItems.includes(k)) {
-                options[k] = v
-              } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
-                const opt = this.optionsKeyMapping.get(k)
-                const unit = opt['unit'] || ''
-                const name = opt['name']
-                if (typeof v === 'string') {
-                  options[name] = v.replace(/[k|m|g]b$/g, '') + unit
-                } else if (typeof v === 'number') {
-                  options[name] = v + unit
-                } else {
-                  options[name] = v
-                }
+                options[name] = v
               }
             }
           }
         }
-        return options
-      },
+      }
+      return options
+    },
 
-      handleSubmitCustomJob(values) {
-        const options = this.handleFormValue(values)
-        const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
-        let config = this.configOverride || this.app.config
-        if (config != null && config.trim() !== '') {
-          config = Base64.encode(config)
+    handleSubmitCustomJob(values) {
+      const options = this.handleFormValue(values)
+      const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
+      let config = this.configOverride || this.app.config
+      if (config != null && config.trim() !== '') {
+        config = Base64.encode(config)
+      } else {
+        config = null
+      }
+      const configId = this.strategy === 1 ? this.configId : null
+      const params = {
+        id: this.app.id,
+        jobName: values.jobName,
+        format: format,
+        configId: configId,
+        versionId: values.versionId,
+        config: config,
+        args: values.args,
+        options: JSON.stringify(options),
+        yarnQueue: this.handleYarnQueue(values),
+        dynamicOptions: values.dynamicOptions,
+        cpMaxFailureInterval: values.cpMaxFailureInterval || null,
+        cpFailureRateInterval: values.cpFailureRateInterval || null,
+        cpFailureAction: values.cpFailureAction || null,
+        resolveOrder: values.resolveOrder,
+        k8sRestExposedType: values.k8sRestExposedType,
+        executionMode: values.executionMode,
+        restartSize: values.restartSize,
+        // alertEmail: values.alertEmail || null,
+        alertId: values.alertId,
+        description: values.description,
+        k8sNamespace: values.k8sNamespace || null,
+        clusterId: values.clusterId || null,
+        flinkClusterId: values.flinkClusterId || null,
+        flinkImage: values.flinkImage || null,
+        yarnSessionClusterId: values.yarnSessionClusterId || null
+      }
+      if (params.executionMode === 6) {
+        params.k8sPodTemplate = this.podTemplate
+        params.k8sJmPodTemplate = this.jmPodTemplate
+        params.k8sTmPodTemplate = this.tmPodTemplate
+        params.k8sHadoopIntegration = this.useSysHadoopConf
+      }
+      this.handleUpdateApp(params)
+    },
+
+    handleSubmitSQL(values) {
+      const options = this.handleFormValue(values)
+      //触发一次pom确认操作.
+      this.handleApplyPom()
+      // common params...
+      const dependency = {}
+      if (this.dependency !== null && this.dependency.length > 0) {
+        dependency.pom = this.dependency
+      }
+      if (this.uploadJars != null && this.uploadJars.length > 0) {
+        dependency.jar = this.uploadJars
+      }
+
+      let config = this.configOverride
+      if (config != null && config.trim() !== '') {
+        config = Base64.encode(config)
+      } else {
+        config = null
+      }
+
+      const params = {
+        id: this.app.id,
+        sqlId: this.defaultFlinkSqlId || null,
+        flinkSql: this.controller.flinkSql.value,
+        config: config,
+        format: this.isSetConfig ? 1 : null,
+        versionId: values.versionId,
+        jobName: values.jobName,
+        args: values.args || null,
+        dependency: dependency.pom === undefined && dependency.jar === undefined ? null : JSON.stringify(dependency),
+        options: JSON.stringify(options),
+        yarnQueue: this.handleYarnQueue(values),
+        cpMaxFailureInterval: values.cpMaxFailureInterval || null,
+        cpFailureRateInterval: values.cpFailureRateInterval || null,
+        cpFailureAction: values.cpFailureAction || null,
+        dynamicOptions: values.dynamicOptions || null,
+        resolveOrder: values.resolveOrder,
+        k8sRestExposedType: values.k8sRestExposedType,
+        restartSize: values.restartSize,
+        // alertEmail: values.alertEmail|| null,
+        alertId: values.alertId,
+        executionMode: values.executionMode,
+        description: values.description || null,
+        k8sNamespace: values.k8sNamespace || null,
+        clusterId: values.clusterId || null,
+        flinkClusterId: values.flinkClusterId || null,
+        flinkImage: values.flinkImage || null,
+        yarnSessionClusterId: values.yarnSessionClusterId || null
+      }
+      if (params.executionMode === 6) {
+        params.k8sPodTemplate = this.podTemplate
+        params.k8sJmPodTemplate = this.jmPodTemplate
+        params.k8sTmPodTemplate = this.tmPodTemplate
+        params.k8sHadoopIntegration = this.useSysHadoopConf
+      }
+      this.handleUpdateApp(params)
+    },
+
+    handleUpdateApp(params) {
+      this.submitting = true
+      update(params).then((resp) => {
+        this.submitting = false
+        const updated = resp.data
+        if (updated) {
+          this.$router.push({ path: '/flink/app' })
         } else {
-          config = null
+          console.log(updated)
         }
-        const configId = this.strategy === 1 ? this.configId : null
-        if(values.flinkClusterId){
-          const cluster = this.flinkClusters.filter(c => c.id === values.flinkClusterId && c.clusterState === 1)[0] || null
-          values.clusterId = cluster.clusterId
-          values.flinkClusterId = cluster.id
-          values.yarnSessionClusterId = cluster.clusterId
-        }
-        const params = {
-          id: this.app.id,
-          jobName: values.jobName,
-          format: format,
-          configId: configId,
-          versionId: values.versionId,
-          config: config,
-          args: values.args,
-          options: JSON.stringify(options),
-          yarnQueue: this.handleYarnQueue(values),
-          dynamicOptions: values.dynamicOptions,
-          cpMaxFailureInterval: values.cpMaxFailureInterval || null,
-          cpFailureRateInterval: values.cpFailureRateInterval || null,
-          cpFailureAction: values.cpFailureAction || null,
-          resolveOrder: values.resolveOrder,
-          k8sRestExposedType: values.k8sRestExposedType,
-          executionMode: values.executionMode,
-          restartSize: values.restartSize,
-          // alertEmail: values.alertEmail || null,
-          alertId: values.alertId,
-          description: values.description,
-          k8sNamespace: values.k8sNamespace || null,
-          clusterId: values.clusterId || null,
-          flinkClusterId: values.flinkClusterId || null,
-          flinkImage: values.flinkImage || null,
-          yarnSessionClusterId: values.yarnSessionClusterId || null
-        }
-        if (params.executionMode === 6) {
-          params.k8sPodTemplate = this.podTemplate
-          params.k8sJmPodTemplate = this.jmPodTemplate
-          params.k8sTmPodTemplate = this.tmPodTemplate
-          params.k8sHadoopIntegration = this.useSysHadoopConf
-        }
-        this.handleUpdateApp(params)
-      },
+      }).catch((error) => {
+        this.submitting = false
+        this.$message.error(error.message)
+      })
+    },
 
-      handleSubmitSQL(values) {
-        const options = this.handleFormValue(values)
-        //触发一次pom确认操作.
-        this.handleApplyPom()
-        // common params...
-        const dependency = {}
-        if (this.dependency !== null && this.dependency.length > 0) {
-          dependency.pom = this.dependency
-        }
-        if (this.uploadJars != null && this.uploadJars.length > 0) {
-          dependency.jar = this.uploadJars
-        }
-
-        let config = this.configOverride
-        if (config != null && config.trim() !== '') {
-          config = Base64.encode(config)
-        } else {
-          config = null
-        }
-        if(values.flinkClusterId){
-          const cluster = this.flinkClusters.filter(c => c.id === values.flinkClusterId && c.clusterState === 1)[0] || null
-          values.clusterId = cluster.clusterId
-          values.flinkClusterId = cluster.id
-          values.yarnSessionClusterId = cluster.clusterId
-        }
-        const params = {
-          id: this.app.id,
-          sqlId: this.defaultFlinkSqlId || null,
-          flinkSql: this.controller.flinkSql.value,
-          config: config,
-          format: this.isSetConfig ? 1 : null,
-          versionId: values.versionId,
-          jobName: values.jobName,
-          args: values.args || null,
-          dependency: dependency.pom === undefined && dependency.jar === undefined ? null : JSON.stringify(dependency),
-          options: JSON.stringify(options),
-          yarnQueue: this.handleYarnQueue(values),
-          cpMaxFailureInterval: values.cpMaxFailureInterval || null,
-          cpFailureRateInterval: values.cpFailureRateInterval || null,
-          cpFailureAction: values.cpFailureAction || null,
-          dynamicOptions: values.dynamicOptions || null,
-          resolveOrder: values.resolveOrder,
-          k8sRestExposedType: values.k8sRestExposedType,
-          restartSize: values.restartSize,
-          alertId: values.alertId,
-          executionMode: values.executionMode,
-          description: values.description || null,
-          k8sNamespace: values.k8sNamespace || null,
-          clusterId: values.clusterId || null,
-          flinkClusterId: values.flinkClusterId || null,
-          flinkImage: values.flinkImage || null,
-          yarnSessionClusterId: values.yarnSessionClusterId || null
-        }
-        if (params.executionMode === 6) {
-          params.k8sPodTemplate = this.podTemplate
-          params.k8sJmPodTemplate = this.jmPodTemplate
-          params.k8sTmPodTemplate = this.tmPodTemplate
-          params.k8sHadoopIntegration = this.useSysHadoopConf
-        }
-        console.log('sql提交参数：' + JSON.stringify(params))
-        this.handleUpdateApp(params)
-      },
-
-      handleUpdateApp(params) {
-        this.submitting = true
-        update(params).then((resp) => {
-          this.submitting = false
-          const updated = resp.data
-          if (updated) {
-            this.$router.push({ path: '/flink/app' })
-          } else {
-            console.log(updated)
+    handleListConfVersion() {
+      confHistory({ id: this.app.id }).then((resp) => {
+        resp.data.forEach((value, index) => {
+          if (value.effective) {
+            this.defaultConfigId = value.id
           }
-        }).catch((error) => {
-          this.submitting = false
-          this.$message.error(error.message)
         })
-      },
+        this.configVersions = resp.data
+      })
+    },
 
-      handleListConfVersion() {
-        confHistory({ id: this.app.id }).then((resp) => {
-          resp.data.forEach((value, index) => {
-            if (value.effective) {
-              this.defaultConfigId = value.id
-            }
-          })
-          this.configVersions = resp.data
-        })
-      },
+    handleConfList() {
+      listConf({
+        id: this.app.projectId,
+        module: this.app.module
+      }).then((resp) => {
+        this.configSource = resp.data
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+    },
 
-      handleConfList() {
-        listConf({
-          id: this.app.projectId,
-          module: this.app.module
-        }).then((resp) => {
-          this.configSource = resp.data
-        }).catch((error) => {
-          this.$message.error(error.message)
-        })
-      },
-
-      handleChangeConfCompact() {
-        this.$nextTick(() => {
-          const conf = this.form.getFieldValue('compare_conf')
-          if (conf.length > 2) {
-            while (conf.length > 2) {
-              conf.shift()
-            }
-            this.form.setFieldsValue({ 'compare_conf': conf })
+    handleChangeConfCompact() {
+      this.$nextTick(() => {
+        const conf = this.form.getFieldValue('compare_conf')
+        if (conf.length > 2) {
+          while (conf.length > 2) {
+            conf.shift()
           }
-          this.compareConf = conf
-          this.compareDisabled = conf.length !== 2
-        })
-      },
+          this.form.setFieldsValue({ 'compare_conf': conf })
+        }
+        this.compareConf = conf
+        this.compareDisabled = conf.length !== 2
+      })
+    },
 
-      handleChangeSQLCompact() {
-        this.$nextTick(() => {
-          const sqls = this.formCompare.getFieldValue('compare_sql')
-          if (sqls.length > 2) {
-            while (sqls.length > 2) {
-              sqls.shift()
-            }
-            this.formCompare.setFieldsValue({ 'compare_sql': sqls })
+    handleChangeSQLCompact() {
+      this.$nextTick(() => {
+        const sqls = this.formCompare.getFieldValue('compare_sql')
+        if (sqls.length > 2) {
+          while (sqls.length > 2) {
+            sqls.shift()
           }
-          this.compareSQL = sqls
-        })
-      },
+          this.formCompare.setFieldsValue({ 'compare_sql': sqls })
+        }
+        this.compareSQL = sqls
+      })
+    },
 
-      handleCompactConf() {
+    handleCompactConf() {
+      getVer({
+        id: this.compareConf[0]
+      }).then((resp) => {
+        const conf1 = Base64.decode(resp.data.content)
+        const ver1 = resp.data.version
         getVer({
-          id: this.compareConf[0]
+          id: this.compareConf[1]
         }).then((resp) => {
-          const conf1 = Base64.decode(resp.data.content)
-          const ver1 = resp.data.version
-          getVer({
-            id: this.compareConf[1]
-          }).then((resp) => {
-            const conf2 = Base64.decode(resp.data.content)
-            const ver2 = resp.data.version
-            this.confVisiable = true
-            this.$refs.different.different([{
-                name: 'Configuration',
-                format: 'yaml',
-                original: conf1,
-                modified: conf2,
-              }],
-              ver1,
-              ver2
-            )
-          })
-        })
-      },
-
-      handleCompactSQL() {
-        this.compareVisible = true
-      },
-
-      handleCompareCancel () {
-        this.compareVisible = false
-      },
-
-      handleCompareOk() {
-        getSQL({ id: this.compareSQL.join(',') }).then((resp) => {
-          const obj1 = resp.data[0]
-          const obj2 = resp.data[1]
-          const sql1 = Base64.decode(obj1.sql)
-          const sql2 = Base64.decode(obj2.sql)
-
-          const pomMap1 = new Map()
-          const jarMap1 = new Map()
-          this.handleDependencyJsonToPom(obj1.dependency,pomMap1,jarMap1)
-          let pom1 = ''
-          let jar1 = ''
-          pomMap1.forEach((v,k,map)=> pom1 += toPomString(v)  + '\n\n')
-          jarMap1.forEach((v,k,map) => jar1 += v + '\n')
-
-          const pomMap2 = new Map()
-          const jarMap2 = new Map()
-          this.handleDependencyJsonToPom(obj2.dependency,pomMap2,jarMap2)
-          let pom2 = ''
-          let jar2 = ''
-          pomMap2.forEach((v,k,map) => pom2 += toPomString(v) + '\n\n')
-          jarMap2.forEach((v,k,map) => jar2 += v + '\n')
-
-          this.handleCompareCancel()
-
+          const conf2 = Base64.decode(resp.data.content)
+          const ver2 = resp.data.version
+          this.confVisiable = true
           this.$refs.different.different([{
-              name: 'Flink SQL',
-              format: 'sql',
-              original: sql1,
-              modified: sql2,
-            }, {
-              name: 'Dependency',
-              format: 'xml',
-              original: pom1,
-              modified: pom2,
-            }, {
-              name: ' Jar ',
-              format: 'text',
-              original: jar1,
-              modified: jar2,
+              name: 'Configuration',
+              format: 'yaml',
+              original: conf1,
+              modified: conf2,
             }],
-            obj1.version,
-            obj2.version
+            ver1,
+            ver2
           )
         })
-      },
+      })
+    },
 
-      handleUseSysHadoopConf(value) {
-        this.useSysHadoopConf = value
-      },
+    handleCompactSQL() {
+      this.compareVisible = true
+    },
 
-      handleSelectHistoryK8sNamespace(value) {
-        this.form.setFieldsValue({'k8sNamespace': value})
-      },
+    handleCompareCancel () {
+      this.compareVisible = false
+    },
 
-      handleSelectHistoryK8sSessionClusterId(value) {
-        this.form.setFieldsValue({'clusterId': value})
-      },
+    handleCompareOk() {
+      getSQL({ id: this.compareSQL.join(',') }).then((resp) => {
+        const obj1 = resp.data[0]
+        const obj2 = resp.data[1]
+        const sql1 = Base64.decode(obj1.sql)
+        const sql2 = Base64.decode(obj2.sql)
 
-      handleSelectHistoryFlinkImage(value) {
-        this.form.setFieldsValue({'flinkImage': value})
-      },
+        const pomMap1 = new Map()
+        const jarMap1 = new Map()
+        this.handleDependencyJsonToPom(obj1.dependency,pomMap1,jarMap1)
+        let pom1 = ''
+        let jar1 = ''
+        pomMap1.forEach((v,k,map)=> pom1 += toPomString(v)  + '\n\n')
+        jarMap1.forEach((v,k,map) => jar1 += v + '\n')
 
-      showPodTemplateDrawer(visualType) {
-        this.podTemplateDrawer[visualType] = true
-        switch (visualType) {
-          case 'ptVisual':
-            if (this.historyRecord.podTemplate == null || this.historyRecord.podTemplate.length === 0) {
-              histPodTemplates().then((resp) => {
-                this.historyRecord.podTemplate = resp.data
-              })
-            }
-            break
-          case 'jmPtVisual':
-            if (this.historyRecord.jmPodTemplate == null || this.historyRecord.jmPodTemplate.length === 0) {
-              histJmPodTemplates().then((resp) => {
-                this.historyRecord.jmPodTemplate = resp.data
-              })
-            }
-            break
-          case 'tmPtVisual':
-            if (this.historyRecord.tmPodTemplate == null || this.historyRecord.tmPodTemplate.length === 0){
-              histTmPodTemplates().then((resp) => {
-                this.historyRecord.tmPodTemplate = resp.data
-              })
-            }
-            break
-        }
-      },
+        const pomMap2 = new Map()
+        const jarMap2 = new Map()
+        this.handleDependencyJsonToPom(obj2.dependency,pomMap2,jarMap2)
+        let pom2 = ''
+        let jar2 = ''
+        pomMap2.forEach((v,k,map) => pom2 += toPomString(v) + '\n\n')
+        jarMap2.forEach((v,k,map) => jar2 += v + '\n')
 
-      closePodTemplateDrawer(visualType) {
-        this.podTemplateDrawer[visualType] = false
-      },
+        this.handleCompareCancel()
 
-      handleChoicePodTemplate(visualType, content) {
-        switch (visualType) {
-          case 'ptVisual':
-            this.podTemplate = content
-            this.controller.editor.podTemplate.setValue(content)
-            break
-          case 'jmPtVisual':
-            this.jmPodTemplate = content
-            this.controller.editor.jmPodTemplate.setValue(content)
-            break
-          case 'tmPtVisual':
-            this.tmPodTemplate = content
-            this.controller.editor.tmPodTemplate.setValue(content)
-            break
-        }
-        this.closePodTemplateDrawer(visualType)
-      },
+        this.$refs.different.different([{
+            name: 'Flink SQL',
+            format: 'sql',
+            original: sql1,
+            modified: sql2,
+          }, {
+            name: 'Dependency',
+            format: 'xml',
+            original: pom1,
+            modified: pom2,
+          }, {
+            name: ' Jar ',
+            format: 'text',
+            original: jar1,
+            modified: jar2,
+          }],
+          obj1.version,
+          obj2.version
+        )
+      })
+    },
 
-      showSysHadoopConfDrawer() {
-        this.hadoopConfDrawer.visual = true
-        if (this.hadoopConfDrawer.content == null
-          || Object.keys(this.hadoopConfDrawer.content).length === 0
-          || this.hadoopConfDrawer.content.size === 0) {
-          sysHadoopConf().then((resp) => {
-            this.hadoopConfDrawer.content = resp.data
-          })
-        }
-      },
+    handleUseSysHadoopConf(value) {
+      this.useSysHadoopConf = value
+    },
 
-      closeSysHadoopConfDrawer(){
-        this.hadoopConfDrawer.visual = false
-      },
+    handleSelectHistoryK8sNamespace(value) {
+      this.form.setFieldsValue({'k8sNamespace': value})
+    },
 
-      handleGetInitPodTemplate(visualType) {
-        initPodTemplate().then((resp) => {
-          const content = resp.data
-          if (content != null && content !== '') {
-            switch (visualType) {
-              case 'ptVisual':
-                this.podTemplate = content
-                this.controller.editor.podTemplate.setValue(content)
-                break
-              case 'jmPtVisual':
-                this.jmPodTemplate = content
-                this.controller.editor.jmPodTemplate.setValue(content)
-                break
-              case 'tmPtVisual':
-                this.tmPodTemplate = content
-                this.controller.editor.tmPodTemplate.setValue(content)
-                break
-            }
+    handleSelectHistoryK8sSessionClusterId(value) {
+      this.form.setFieldsValue({'clusterId': value})
+    },
+
+    handleSelectHistoryFlinkImage(value) {
+      this.form.setFieldsValue({'flinkImage': value})
+    },
+
+    showPodTemplateDrawer(visualType) {
+      this.podTemplateDrawer[visualType] = true
+      switch (visualType) {
+        case 'ptVisual':
+          if (this.historyRecord.podTemplate == null || this.historyRecord.podTemplate.length === 0) {
+            histPodTemplates().then((resp) => {
+              this.historyRecord.podTemplate = resp.data
+            })
           }
-        }).catch((error) => {
-          this.$message.error(error.message)
-        })
-      },
-
-      showTemplateHostAliasDrawer(visualType) {
-        this.podTemplateHostAliasDrawer[visualType] = true
-        sysHosts().then((resp) => {
-          this.sysHostsAlias = resp.data
-        })
-        let tmplContent = ''
-        switch (visualType) {
-          case 'ptVisual':
-            tmplContent = this.podTemplate
-            break
-          case 'jmPtVisual':
-            tmplContent = this.jmPodTemplate
-            break
-          case 'tmPtVisual':
-            tmplContent = this.tmPodTemplate
-            break
-        }
-        if (tmplContent !== '') {
-          const param = {}
-          param['podTemplate'] = tmplContent
-          extractHostAliasFromPodTemplate(param).then((resp) => {
-            this.selectedPodTemplateHostAlias = resp.data
-            this.handleRefreshHostAliasPreview()
-          }).catch(err => {
-            this.selectedPodTemplateHostAlias = []
-          })
-        }
-      },
-
-      closeTemplateHostAliasDrawer(visualType) {
-        this.podTemplateHostAliasDrawer[visualType] = false
-        this.selectedPodTemplateHostAlias = []
-        this.hostAliasPreview = ''
-      },
-
-      handleSelectedTemplateHostAlias(items) {
-        this.selectedPodTemplateHostAlias = items
-        this.handleRefreshHostAliasPreview()
-      },
-
-      handleSubmitHostAliasToPodTemplate(visualType) {
-        const param = {
-          hosts: this.selectedPodTemplateHostAlias.join(','),
-        }
-        switch (visualType) {
-          case 'ptVisual':
-            param['podTemplate'] = this.podTemplate
-            break
-          case 'jmPtVisual':
-            param['podTemplate'] = this.jmPodTemplate
-            break
-          case 'tmPtVisual':
-            param['podTemplate'] = this.tmPodTemplate
-            break
-        }
-        completeHostAliasToPodTemplate(param).then((resp) => {
-          const content = resp.data
-          if (content != null && content !== '') {
-            switch (visualType) {
-              case 'ptVisual':
-                this.podTemplate = content
-                this.controller.editor.podTemplate.setValue(content)
-                break
-              case 'jmPtVisual':
-                this.jmPodTemplate = content
-                this.controller.editor.jmPodTemplate.setValue(content)
-                break
-              case 'tmPtVisual':
-                this.tmPodTemplate = content
-                this.controller.editor.tmPodTemplate.setValue(content)
-                break
-            }
+          break
+        case 'jmPtVisual':
+          if (this.historyRecord.jmPodTemplate == null || this.historyRecord.jmPodTemplate.length === 0) {
+            histJmPodTemplates().then((resp) => {
+              this.historyRecord.jmPodTemplate = resp.data
+            })
           }
-        }).catch((error) => {
-          this.$message.error(error.message)
-        })
-        this.closeTemplateHostAliasDrawer(visualType)
-      },
-
-      handleRefreshHostAliasPreview() {
-        previewHostAlias({hosts: this.selectedPodTemplateHostAlias.join(',')})
-          .then((resp) => {
-            this.hostAliasPreview = resp.data
-          })
-      },
-
-      handleReset() {
-        this.$nextTick(() => {
-          this.form.setFieldsValue({
-            'jobName': this.app.jobName,
-            'args': this.app.args,
-            'description': this.app.description,
-            'dynamicOptions': this.app.dynamicOptions,
-            'resolveOrder': this.app.resolveOrder,
-            'versionId': this.app.versionId || null,
-            'k8sRestExposedType': this.app.k8sRestExposedType,
-            'executionMode': this.executionMode || this.app.executionMode,
-            'yarnQueue': this.app.yarnQueue,
-            'restartSize': this.app.restartSize,
-            'alertId': this.selectAlert.id,
-            'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
-            'cpFailureRateInterval': this.app.cpFailureRateInterval,
-            'cpFailureAction': this.app.cpFailureAction,
-            'clusterId': this.app.clusterId,
-            'flinkClusterId': this.app.flinkClusterId,
-            'flinkImage': this.app.flinkImage,
-            'k8sNamespace': this.app.k8sNamespace,
-            'resource': this.app.resourceFrom,
-            'yarnSessionClusterId': this.app.yarnSessionClusterId
-          })
-        })
-
-        this.handleInitEditor()
-
-        let parallelism = null
-        let slot = null
-        this.totalItems = []
-        this.jmMemoryItems = []
-        this.tmMemoryItems = []
-        const fieldValueOptions = {}
-        for (const k in this.defaultOptions) {
-          const v = this.defaultOptions[k]
-          const key = this.optionsValueMapping.get(k)
-          fieldValueOptions[key] = v
-          if (k === 'jobmanager.memory.flink.size' || k === 'taskmanager.memory.flink.size' || k === 'jobmanager.memory.process.size' || k === 'taskmanager.memory.process.size') {
-            this.totalItems.push(key)
-          } else {
-            if (k.startsWith('jobmanager.memory.')) {
-              this.jmMemoryItems.push(key)
-            }
-            if (k.startsWith('taskmanager.memory.')) {
-              this.tmMemoryItems.push(key)
-            }
-            if (k === 'taskmanager.numberOfTaskSlots') {
-              slot = parseInt(v)
-            }
-            if (k === 'parallelism.default') {
-              parallelism = parseInt(v)
-            }
+          break
+        case 'tmPtVisual':
+          if (this.historyRecord.tmPodTemplate == null || this.historyRecord.tmPodTemplate.length === 0){
+            histTmPodTemplates().then((resp) => {
+              this.historyRecord.tmPodTemplate = resp.data
+            })
           }
-        }
-        this.$nextTick(() => {
-          this.form.setFieldsValue({ 'parallelism': parallelism })
-          this.form.setFieldsValue({ 'slot': slot })
-          this.form.setFieldsValue({ 'totalOptions': this.totalItems })
-          this.form.setFieldsValue({ 'jmOptions': this.jmMemoryItems })
-          this.form.setFieldsValue({ 'tmOptions': this.tmMemoryItems })
-          this.form.setFieldsValue(fieldValueOptions)
-        })
-      },
+          break
+      }
+    },
 
-      handleInitEditor() {
-        disposeEditor(this)
-        this.$nextTick(()=> {
-          if (this.app.jobType === 2) {
-            this.flinkSql.sql = this.app.flinkSql || null
-            this.flinkSql.dependency = this.app.dependency || null
-            initFlinkSqlEditor(this, this.controller.flinkSql.value || Base64.decode(this.flinkSql.sql))
-            this.handleInitDependency()
-          }
-          this.selectedHistoryUploadJars = []
-          if (this.executionMode === 6 || this.app.executionMode === 6) {
-            this.podTemplate = this.app.k8sPodTemplate
-            this.jmPodTemplate = this.app.k8sJmPodTemplate
-            this.tmPodTemplate = this.app.k8sTmPodTemplate
-            initPodTemplateEditor(this)
-            this.useSysHadoopConf = this.app.k8sHadoopIntegration
-          }
+    closePodTemplateDrawer(visualType) {
+      this.podTemplateDrawer[visualType] = false
+    },
+
+    handleChoicePodTemplate(visualType, content) {
+      switch (visualType) {
+        case 'ptVisual':
+          this.podTemplate = content
+          this.controller.editor.podTemplate.setValue(content)
+          break
+        case 'jmPtVisual':
+          this.jmPodTemplate = content
+          this.controller.editor.jmPodTemplate.setValue(content)
+          break
+        case 'tmPtVisual':
+          this.tmPodTemplate = content
+          this.controller.editor.tmPodTemplate.setValue(content)
+          break
+      }
+      this.closePodTemplateDrawer(visualType)
+    },
+
+    showSysHadoopConfDrawer() {
+      this.hadoopConfDrawer.visual = true
+      if (this.hadoopConfDrawer.content == null
+        || Object.keys(this.hadoopConfDrawer.content).length === 0
+        || this.hadoopConfDrawer.content.size === 0) {
+        sysHadoopConf().then((resp) => {
+          this.hadoopConfDrawer.content = resp.data
         })
       }
     },
 
-    watch: {
-      myTheme() {
+    closeSysHadoopConfDrawer(){
+      this.hadoopConfDrawer.visual = false
+    },
+
+    handleGetInitPodTemplate(visualType) {
+      initPodTemplate().then((resp) => {
+        const content = resp.data
+        if (content != null && content !== '') {
+          switch (visualType) {
+            case 'ptVisual':
+              this.podTemplate = content
+              this.controller.editor.podTemplate.setValue(content)
+              break
+            case 'jmPtVisual':
+              this.jmPodTemplate = content
+              this.controller.editor.jmPodTemplate.setValue(content)
+              break
+            case 'tmPtVisual':
+              this.tmPodTemplate = content
+              this.controller.editor.tmPodTemplate.setValue(content)
+              break
+          }
+        }
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+    },
+
+    showTemplateHostAliasDrawer(visualType) {
+      this.podTemplateHostAliasDrawer[visualType] = true
+      sysHosts().then((resp) => {
+        this.sysHostsAlias = resp.data
+      })
+      let tmplContent = ''
+      switch (visualType) {
+        case 'ptVisual':
+          tmplContent = this.podTemplate
+          break
+        case 'jmPtVisual':
+          tmplContent = this.jmPodTemplate
+          break
+        case 'tmPtVisual':
+          tmplContent = this.tmPodTemplate
+          break
+      }
+      if (tmplContent !== '') {
+        const param = {}
+        param['podTemplate'] = tmplContent
+        extractHostAliasFromPodTemplate(param).then((resp) => {
+          this.selectedPodTemplateHostAlias = resp.data
+          this.handleRefreshHostAliasPreview()
+        }).catch(err => {
+          this.selectedPodTemplateHostAlias = []
+        })
+      }
+    },
+
+    closeTemplateHostAliasDrawer(visualType) {
+      this.podTemplateHostAliasDrawer[visualType] = false
+      this.selectedPodTemplateHostAlias = []
+      this.hostAliasPreview = ''
+    },
+
+    handleSelectedTemplateHostAlias(items) {
+      this.selectedPodTemplateHostAlias = items
+      this.handleRefreshHostAliasPreview()
+    },
+
+    handleSubmitHostAliasToPodTemplate(visualType) {
+      const param = {
+        hosts: this.selectedPodTemplateHostAlias.join(','),
+      }
+      switch (visualType) {
+        case 'ptVisual':
+          param['podTemplate'] = this.podTemplate
+          break
+        case 'jmPtVisual':
+          param['podTemplate'] = this.jmPodTemplate
+          break
+        case 'tmPtVisual':
+          param['podTemplate'] = this.tmPodTemplate
+          break
+      }
+      completeHostAliasToPodTemplate(param).then((resp) => {
+        const content = resp.data
+        if (content != null && content !== '') {
+          switch (visualType) {
+            case 'ptVisual':
+              this.podTemplate = content
+              this.controller.editor.podTemplate.setValue(content)
+              break
+            case 'jmPtVisual':
+              this.jmPodTemplate = content
+              this.controller.editor.jmPodTemplate.setValue(content)
+              break
+            case 'tmPtVisual':
+              this.tmPodTemplate = content
+              this.controller.editor.tmPodTemplate.setValue(content)
+              break
+          }
+        }
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+      this.closeTemplateHostAliasDrawer(visualType)
+    },
+
+    handleRefreshHostAliasPreview() {
+      previewHostAlias({hosts: this.selectedPodTemplateHostAlias.join(',')})
+        .then((resp) => {
+          this.hostAliasPreview = resp.data
+        })
+    },
+
+    handleReset() {
+      this.$nextTick(() => {
+        this.form.setFieldsValue({
+          'jobName': this.app.jobName,
+          'args': this.app.args,
+          'description': this.app.description,
+          'dynamicOptions': this.app.dynamicOptions,
+          'resolveOrder': this.app.resolveOrder,
+          'versionId': this.app.versionId || null,
+          'k8sRestExposedType': this.app.k8sRestExposedType,
+          'executionMode': this.executionMode || this.app.executionMode,
+          'yarnQueue': this.app.yarnQueue,
+          'restartSize': this.app.restartSize,
+          'alertId': this.selectAlert.id,
+          'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
+          'cpFailureRateInterval': this.app.cpFailureRateInterval,
+          'cpFailureAction': this.app.cpFailureAction,
+          'clusterId': this.app.clusterId,
+          'flinkClusterId': this.app.flinkClusterId,
+          'flinkImage': this.app.flinkImage,
+          'k8sNamespace': this.app.k8sNamespace,
+          'resource': this.app.resourceFrom,
+          'yarnSessionClusterId': this.app.yarnSessionClusterId
+        })
+      })
+
+      this.handleInitEditor()
+
+      let parallelism = null
+      let slot = null
+      this.totalItems = []
+      this.jmMemoryItems = []
+      this.tmMemoryItems = []
+      const fieldValueOptions = {}
+      for (const k in this.defaultOptions) {
+        const v = this.defaultOptions[k]
+        const key = this.optionsValueMapping.get(k)
+        fieldValueOptions[key] = v
+        if (k === 'jobmanager.memory.flink.size' || k === 'taskmanager.memory.flink.size' || k === 'jobmanager.memory.process.size' || k === 'taskmanager.memory.process.size') {
+          this.totalItems.push(key)
+        } else {
+          if (k.startsWith('jobmanager.memory.')) {
+            this.jmMemoryItems.push(key)
+          }
+          if (k.startsWith('taskmanager.memory.')) {
+            this.tmMemoryItems.push(key)
+          }
+          if (k === 'taskmanager.numberOfTaskSlots') {
+            slot = parseInt(v)
+          }
+          if (k === 'parallelism.default') {
+            parallelism = parseInt(v)
+          }
+        }
+      }
+      this.$nextTick(() => {
+        this.form.setFieldsValue({ 'parallelism': parallelism })
+        this.form.setFieldsValue({ 'slot': slot })
+        this.form.setFieldsValue({ 'totalOptions': this.totalItems })
+        this.form.setFieldsValue({ 'jmOptions': this.jmMemoryItems })
+        this.form.setFieldsValue({ 'tmOptions': this.tmMemoryItems })
+        this.form.setFieldsValue(fieldValueOptions)
+      })
+    },
+
+    handleInitEditor() {
+      disposeEditor(this)
+      this.$nextTick(()=> {
         if (this.app.jobType === 2) {
-          this.controller.editor.flinkSql.updateOptions({
-            theme: this.ideTheme()
-          })
+          this.flinkSql.sql = this.app.flinkSql || null
+          this.flinkSql.dependency = this.app.dependency || null
+          initFlinkSqlEditor(this, this.controller.flinkSql.value || Base64.decode(this.flinkSql.sql))
+          this.handleInitDependency()
         }
-        if (this.controller.editor.podTemplate) {
-          this.controller.editor.podTemplate.updateOptions({
-            theme: this.ideTheme()
-          })
+        this.selectedHistoryUploadJars = []
+        if (this.executionMode === 6 || this.app.executionMode === 6) {
+          this.podTemplate = this.app.k8sPodTemplate
+          this.jmPodTemplate = this.app.k8sJmPodTemplate
+          this.tmPodTemplate = this.app.k8sTmPodTemplate
+          initPodTemplateEditor(this)
+          this.useSysHadoopConf = this.app.k8sHadoopIntegration
         }
-        if (this.controller.editor.jmPodTemplate) {
-          this.controller.editor.jmPodTemplate.updateOptions({
-            theme: this.ideTheme()
-          })
-        }
-        if (this.controller.editor.tmPodTemplate) {
-          this.controller.editor.tmPodTemplate.updateOptions({
-            theme: this.ideTheme()
-          })
-        }
-        this.$refs.mergely.theme()
-        this.$refs.different.theme()
+      })
+    }
+  },
+
+  watch: {
+    myTheme() {
+      if (this.app.jobType === 2) {
+        this.controller.editor.flinkSql.updateOptions({
+          theme: this.ideTheme()
+        })
       }
-    },
-  }
+      if (this.controller.editor.podTemplate) {
+        this.controller.editor.podTemplate.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      if (this.controller.editor.jmPodTemplate) {
+        this.controller.editor.jmPodTemplate.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      if (this.controller.editor.tmPodTemplate) {
+        this.controller.editor.tmPodTemplate.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      this.$refs.mergely.theme()
+      this.$refs.different.theme()
+    }
+  },
+}
 </script>
 <style lang='less'>
-  @import "AddEdit";
+@import "AddEdit";
 </style>

@@ -136,9 +136,9 @@ object HadoopUtils extends Logger {
           "dfs.datanode.bp-ready.timeout"
         )
         rewriteNames.foreach(n => {
-          conf.get(n) match {
-            case null =>
-            case v if v.matches("\\d+s$") => conf.set(n, v.dropRight(1))
+          Option(conf.get(n)) match {
+            case Some(v) if v.matches("\\d+s$") => conf.set(n, v.dropRight(1))
+            case _ =>
           }
         })
       }

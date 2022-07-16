@@ -237,7 +237,7 @@ public class ApplicationConfigServiceImpl
     public synchronized String readTemplate() {
         if (flinkConfTemplate == null) {
             try {
-                Resource resource = resourceLoader.getResource("classpath:flink-application.template");
+                Resource resource = resourceLoader.getResource("classpath:flink-application.conf");
                 Scanner scanner = new Scanner(resource.getInputStream());
                 StringBuilder stringBuffer = new StringBuilder();
                 while (scanner.hasNextLine()) {
@@ -248,7 +248,7 @@ public class ApplicationConfigServiceImpl
                 String template = stringBuffer.toString();
                 this.flinkConfTemplate = Base64.getEncoder().encodeToString(template.getBytes());
             } catch (Exception e) {
-                log.error("Read conf/flink-application.template failed, please check your deployment");
+                log.error("Read conf/flink-application.conf failed, please check your deployment");
                 e.printStackTrace();
             }
         }

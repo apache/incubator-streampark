@@ -55,7 +55,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
                          savePoint: String,
                          flameGraph: JavaMap[String, java.io.Serializable],
                          option: JavaMap[String, Any],
-                         dynamicOption: Array[String],
+                         dynamicOption: JavaMap[String, String],
                          args: String,
                          @Nullable buildResult: BuildResult,
                          @Nullable k8sSubmitParam: KubernetesSubmitParam,
@@ -154,6 +154,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
       flinkName,
       flinkHome,
       flinkLib = s"$flinkHdfsHome/lib",
+      flinkPlugins = s"$flinkHdfsHome/plugins",
       flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome),
       appJars = workspace.APP_JARS,
       appPlugins = workspace.APP_PLUGINS
@@ -191,6 +192,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
  * @param flinkHome
  * @param flinkDistJar
  * @param flinkLib
+ * @param flinkPlugins
  * @param appJars
  * @param appPlugins
  * #TODO: className provisional
@@ -199,5 +201,6 @@ case class HdfsWorkspace(flinkName: String,
                          flinkHome: String,
                          flinkDistJar: String,
                          flinkLib: String,
+                         flinkPlugins: String,
                          appJars: String,
                          appPlugins: String)

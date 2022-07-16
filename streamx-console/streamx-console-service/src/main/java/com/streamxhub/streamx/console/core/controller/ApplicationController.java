@@ -201,7 +201,7 @@ public class ApplicationController {
 
     @PostMapping("yarn")
     public RestResponse yarn() {
-        return RestResponse.create().data(YarnUtils.getRMWebAppURL());
+        return RestResponse.create().data(YarnUtils.getRMWebAppProxyURL());
     }
 
     @PostMapping("name")
@@ -303,6 +303,16 @@ public class ApplicationController {
             restResponse.data(false).message(error);
         }
         return restResponse;
+    }
+
+    @PostMapping("checkSavepointPath")
+    public RestResponse checkSavepointPath(Application app) throws Exception {
+        String error = applicationService.checkSavepointPath(app);
+        if (error == null) {
+            return RestResponse.create().data(true);
+        } else {
+            return RestResponse.create().data(false).message(error);
+        }
     }
 
 }
