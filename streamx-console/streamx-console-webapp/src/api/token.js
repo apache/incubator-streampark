@@ -44,4 +44,3 @@ export function copyCurl (queryParam) {
 export function toggle (queryParam) {
   return http.post(api.Token.TOGGLE, queryParam)
 }
-alarm.svg
