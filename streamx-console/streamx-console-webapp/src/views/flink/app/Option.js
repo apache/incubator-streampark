@@ -371,12 +371,12 @@ export default [
         unit: 'mb',
         group: 'taskmanager-memory',
         type: 'number',
-        min: 1,
+        min: 0,
         max: 102400,
         step: 1,
         defaultValue: 128,
         validator: (rule, value, callback) => {
-            if (!value) {
+          if (value === undefined || value === null) {
                 callback(new Error('managed.size is required or you can delete this option'))
             } else {
                 callback()
@@ -396,7 +396,7 @@ export default [
         step: 0.1,
         defaultValue: 0.4,
         validator: (rule, value, callback) => {
-            if (!value) {
+          if (value === undefined || value === null) {
                 callback(new Error('managed.fraction is required or you can delete this option'))
             } else {
                 callback()

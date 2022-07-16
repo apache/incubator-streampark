@@ -453,6 +453,7 @@
               title="Are you sure delete this job ?"
               cancel-text="No"
               ok-text="Yes"
+              v-permit="'app:delete'"
               @confirm="handleDelete(record)">
               <a-button
                 type="danger"
@@ -1111,12 +1112,8 @@ export default {
       } , {
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 300,
+        width: 320,
         scopedSlots: {customRender: 'jobName'},
-      }, {
-        title: 'Flink Version',
-        dataIndex: 'flinkVersion',
-        width: 120
       }, {
         title: 'Owner',
         dataIndex: 'nickName',
@@ -1124,7 +1121,7 @@ export default {
       }, {
         title: 'Run Status',
         dataIndex: 'state',
-        width: 130,
+        width: 120,
         scopedSlots: {customRender: 'state'},
         filters: [
           {text: 'ADDED', value: 0},
@@ -1154,14 +1151,14 @@ export default {
         dataIndex: 'modifyTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'modifyTime' && sortedInfo.order,
-        width: 180
+        width: 170
       }, {
         dataIndex: 'operation',
         key: 'operation',
         fixed: 'right',
         scopedSlots: {customRender: 'operation'},
         slots: {title: 'customOperation'},
-        width: 220
+        width: 200
       }]
     }
   },
