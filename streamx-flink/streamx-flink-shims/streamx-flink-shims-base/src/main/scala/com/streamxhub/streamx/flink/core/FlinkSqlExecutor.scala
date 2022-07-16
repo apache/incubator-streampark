@@ -21,22 +21,14 @@ package com.streamxhub.streamx.flink.core
 import com.streamxhub.streamx.common.conf.ConfigConst.KEY_FLINK_SQL
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.core.SqlCommand._
-import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.{ConfigOption, Configuration}
 import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
-import org.apache.flink.table.api.{SqlDialect, TableEnvironment}
-import org.apache.flink.table.catalog.ResolvedSchema
-import org.apache.flink.table.catalog.hive.HiveCatalog
-import org.apache.flink.table.functions.UserDefinedFunction
-import org.apache.flink.table.module.hive.HiveModule
-import org.apache.flink.types.Row
-import org.apache.flink.util.{CloseableIterator, ExceptionUtils}
+import org.apache.flink.table.api.TableEnvironment
 
 import java.util
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import java.util.regex.Matcher
-import java.util.{List, Objects, HashMap => JavaHashMap, Map => JavaMap}
+import java.util.{HashMap => JavaHashMap, Map => JavaMap}
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -139,20 +131,24 @@ object FlinkSqlExecutor extends Logger {
           val confDataField = classOf[Configuration].getDeclaredField("confData")
           confDataField.setAccessible(true)
           val confData = confDataField.get(context.getConfig.getConfiguration).asInstanceOf[util.HashMap[String, AnyRef]]
-          if (args.toUpperCase == "ALL") {
-            confData.synchronized {
-              confData.clear()
-            }
-          } else {
-            confData.synchronized {
-              confData.remove(args)
-            }
+          confData.synchronized {
+            confData.remove(args)
           }
           logInfo(s"$command: $args")
+        case RESET_ALL =>
+          val confDataField = classOf[Configuration].getDeclaredField("confData")
+          confDataField.setAccessible(true)
+          val confData = confDataField.get(context.getConfig.getConfiguration).asInstanceOf[util.HashMap[String, AnyRef]]
+          confData.synchronized {
+            confData.clear()
+          }
+          logInfo(s"$command: $args")
+        case BEGIN_STATEMENT_SET | END_STATEMENT_SET =>
+          logWarn(s"SQL Client Syntax: ${x.command.name} ")
         case INSERT => insertArray += x.originSql
         case SELECT =>
-          logError("The platform dose not support 'SELECT' statement now!")
-          throw new RuntimeException("The platform dose not support 'select' statement now!")
+          logError("StreamX dose not support 'SELECT' statement now!")
+          throw new RuntimeException("StreamX dose not support 'select' statement now!")
         case _ => try {
           lock.lock()
           val result = context.executeSql(x.originSql)
