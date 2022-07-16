@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- 开启YARN HA -->
+    <property>
+        <name>yarn.resourcemanager.ha.enabled</name>
+        <value>true</value>
+    </property>
+    <!-- 指定两个resourcemanager的名称 -->
+    <property>
+        <name>yarn.resourcemanager.ha.rm-ids</name>
+        <value>rm1,rm2</value>
+    </property>
+    <!-- 配置rm1，rm2的主机 -->
+    <property>
+        <name>yarn.resourcemanager.hostname.rm1</name>
+        <value>node01</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.hostname.rm2</name>
+        <value>node02</value>
+    </property>
+    <!--指定yarn的老大 resoucemanager的地址-->
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>node01</value>
+    </property>
+    <!--开启yarn恢复机制-->
+    <property>
+        <name>yarn.resourcemanager.recovery.enabled</name>
+        <value>true</value>
+    </property>
+    <!--执行rm恢复机制实现类-->
+    <property>
+        <name>yarn.resourcemanager.store.class</name>
+        <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore</value>
+    </property>
+    <!-- 配置zookeeper的地址 -->
+    <property>
+        <name>yarn.resourcemanager.zk-address</name>
+        <value>node01:2181,node02:2181,node03:2181</value>
+    </property>
+    <!-- 指定YARN HA的名称 -->
+    <property>
+        <name>yarn.resourcemanager.cluster-id</name>
+        <value>yarnHa</value>
+    </property>
+    <!--NodeManager获取数据的方式-->
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.scheduler.class</name>
+        <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.scheduler.monitor.enable</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.scheduler.monitor.policies</name>
+        <value>org.apache.hadoop.yarn.server.resourcemanager.monitor.capacity.ProportionalCapacityPreemptionPolicy</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.monitor.capacity.preemption.observe_only</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.local-dirs</name>
+        <value>/data/soft/hadoop-2.8.3/data/nm-local-dir</value>
+        <final>true</final>
+    </property>
+    <property>
+        <name>yarn.log-aggregation.retain-seconds</name>
+        <value>604800</value>
+    </property>
+    <!--  配置运行环境的classpath路径，将前面的换成实际环境的根目录即可  -->
+    <property>
+        <name>yarn.application.classpath</name>
+        <value>
+            $HADOOP_CONF_DIR,
+            $HADOOP_COMMON_HOME/share/hadoop/common/*,
+            $HADOOP_COMMON_HOME/share/hadoop/common/lib/*,
+            $HADOOP_HDFS_HOME/share/hadoop/hdfs/*,
+            $HADOOP_HDFS_HOME/share/hadoop/hdfs/lib/*,
+            $HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*,
+            $HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*,
+            $HADOOP_YARN_HOME/share/hadoop/yarn/*,
+            $HADOOP_YARN_HOME/share/hadoop/yarn/lib/*
+        </value>
+    </property>
+    <property>
+        <name>yarn.log.server.url</name>
+        <value>http://node01:19888/jobhistory/logs</value>
+    </property>
+    <property>
+        <description>The hostname of the Timeline service web application.</description>
+        <name>yarn.timeline-service.hostname</name>
+        <value>node01</value>
+    </property>
+    <property>
+        <description>Address for the Timeline server to start the RPC server.</description>
+        <name>yarn.timeline-service.address</name>
+        <value>${yarn.timeline-service.hostname}:10200</value>
+    </property>
+    <property>
+        <description>The http address of the Timeline service web application.</description>
+        <name>yarn.timeline-service.webapp.address</name>
+        <value>${yarn.timeline-service.hostname}:8188</value>
+    </property>
+    <property>
+        <description>The https address of the Timeline service web application.</description>
+        <name>yarn.timeline-service.webapp.https.address</name>
+        <value>${yarn.timeline-service.hostname}:8190</value>
+    </property>
+</configuration>
+

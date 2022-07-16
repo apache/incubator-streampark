@@ -19,45 +19,35 @@
 package com.streamxhub.streamx.flink.core.test
 
 import com.streamxhub.streamx.flink.core.{FlinkSqlValidationResult, FlinkSqlValidator}
+import org.apache.flink.util.FileUtils
 import org.scalatest.funsuite.AnyFunSuite
+
+import java.io.File
 
 // scalastyle:off println
 class FlinkSqlValidationFunSuite extends AnyFunSuite {
 
+  val sqlFilePath: String = new File("").getCanonicalPath + File.separator + "streamx-flink" + File.separator + "streamx-flink-shims" + File.separator + "streamx-flink-shims-test" + File.separator + "sqlFile" + File.separator
+
   def verify(sql: String)(func: FlinkSqlValidationResult => Unit): Unit = func(FlinkSqlValidator.verifySql(sql.stripMargin))
 
-  test("create catalog") {
-    verify("create catalog my_catalog") { r =>
-      assert(r.success == false)
+
+  test("validation") {
+    val sql = FileUtils.readFileUtf8(new File(sqlFilePath + "sql_syntax.sql"))
+    var allSuccess = true
+
+    verify(sql) { r => {
+      if (r.success == false) {
+        allSuccess = false
+        println(r.toString)
+      }
+    }
+    }
+
+    if (allSuccess) {
+      println("All sql syntax check pass!")
     }
   }
 
-  test("create database") {
-    verify("create database my_database") { r =>
-      assert(r.success == false)
-    }
-  }
-
-  test("create table") {
-    verify(
-      """
-        |CREATE TABLE user_log (
-        |    user_id VARCHAR,
-        |    item_id VARCHAR,
-        |    category_id VARCHAR,
-        |    behavior VARCHAR,
-        |    ts TIMESTAMP(3)
-        | ) WITH (
-        |'connector.type' = 'kafka', -- 使用 kafka connector
-        |'connector.version' = 'universal',  -- kafka 版本，universal 支持 0.11 以上的版本
-        |'connector.topic' = 'user_behavior',  -- kafka topic
-        |'connector.properties.bootstrap.servers'='kafka-1:9092,kafka-2:9092,kafka-3:9092',
-        |'connector.startup-mode' = 'earliest-offset', -- 从起始 offset 开始读取
-        |'format.type' = 'json'  -- 数据源格式为 json
-        | );
-        | """) { r =>
-      println(r.exception)
-    }
-  }
 
 }

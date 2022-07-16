@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2019 The StreamX Project
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.streamxhub.streamx;
 
 import org.junit.Test;
@@ -36,11 +55,11 @@ public class RegExpTest {
      * CREATE [TEMPORARY|TEMPORARY SYSTEM] FUNCTION [IF NOT EXISTS] [catalog_name.][db_name.]function_name AS identifier [LANGUAGE JAVA|SCALA|PYTHON]<br>
      * 示例：create function test_fun as com.flink.testFun
      */
-    private static final Pattern CREATE_FUNCTION = Pattern.compile("CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF NOT EXISTS\\s+|)([A-Za-z]+[A-Za-z\\d.\\-_]+)\\s+AS\\s+([A-Za-z].+)\\s+LANGUAGE\\s+(JAVA|SCALA|PYTHON)\\s*", DEFAULT_PATTERN_FLAGS);
+    private static final Pattern CREATE_FUNCTION = Pattern.compile("(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF NOT EXISTS\\s+|)([A-Za-z]+[A-Za-z\\d.\\-_]+)\\s+AS\\s+'([A-Za-z].+)'\\s+LANGUAGE\\s+(JAVA|SCALA|PYTHON)\\s*)", DEFAULT_PATTERN_FLAGS);
 
     @Test
     public void testCreateFunction() {
-        String str = "create   function if not exists hive.get_json_value as com.flink.function.JsonValueFunction language java";
+        String str = "create   function if not exists hive.get_json_value as 'com.flink.function.JsonValueFunction' language java";
         Matcher matcher = CREATE_FUNCTION.matcher(str);
         System.out.println(matcher.matches());
     }
@@ -68,6 +87,5 @@ public class RegExpTest {
         Matcher matcher = SHOW_FUNCTIONS.matcher(str);
         System.out.println(matcher.matches());
     }
-
 
 }
