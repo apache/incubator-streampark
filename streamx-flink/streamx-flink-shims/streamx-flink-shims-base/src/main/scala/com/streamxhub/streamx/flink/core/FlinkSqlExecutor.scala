@@ -23,8 +23,8 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.{ConfigOption, Configuration}
-import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
 import org.apache.flink.table.api.TableEnvironment
+import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
 
 import java.util
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -58,7 +58,7 @@ object FlinkSqlExecutor extends Logger {
     }
 
     val configOptions = new JavaHashMap[String, ConfigOption[_]]
-    val configList = scala.collection.immutable.List(
+    val configList = List(
       //classOf[PythonOptions],
       classOf[ExecutionConfigOptions],
       classOf[OptimizerConfigOptions],
@@ -173,8 +173,8 @@ object FlinkSqlExecutor extends Logger {
         case _ =>
       }
     } else {
-      logError("An 'INSERT' statement is required to trigger the execution of the FLink task.")
-      throw new RuntimeException("An INSERT statement is required to trigger the execution of the FLink task.")
+      logError("No 'INSERT' statement to trigger the execution of the Flink job.")
+      throw new RuntimeException("No 'INSERT' statement to trigger the execution of the Flink job.")
     }
 
     logInfo(s"\n\n\n==============flinkSql==============\n\n $flinkSql\n\n============================\n\n\n")

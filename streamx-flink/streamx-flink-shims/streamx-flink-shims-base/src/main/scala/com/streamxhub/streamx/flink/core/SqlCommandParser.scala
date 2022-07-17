@@ -218,7 +218,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_FUNCTION extends SqlCommand(
     "create function",
-    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF NOT EXISTS\\s+|)([A-Za-z]+[A-Za-z\\d.\\-_]+)\\s+AS\\s+'([A-Za-z].+)'\\s+LANGUAGE\\s+(JAVA|SCALA|PYTHON)\\s*)"
+    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF NOT EXISTS\\s+|)([A-Za-z]+[A-Za-z\\d.\\-_]+)\\s+AS\\s+.+)"
   )
 
 
