@@ -127,20 +127,16 @@ object FlinkSqlExecutor extends Logger {
           val operand = x.operands(1)
           context.getConfig.getConfiguration.setString(args, operand)
           logInfo(s"$command: $args --> $operand")
-        case RESET =>
+        case RESET | RESET_ALL =>
           val confDataField = classOf[Configuration].getDeclaredField("confData")
           confDataField.setAccessible(true)
           val confData = confDataField.get(context.getConfig.getConfiguration).asInstanceOf[util.HashMap[String, AnyRef]]
           confData.synchronized {
-            confData.remove(args)
-          }
-          logInfo(s"$command: $args")
-        case RESET_ALL =>
-          val confDataField = classOf[Configuration].getDeclaredField("confData")
-          confDataField.setAccessible(true)
-          val confData = confDataField.get(context.getConfig.getConfiguration).asInstanceOf[util.HashMap[String, AnyRef]]
-          confData.synchronized {
-            confData.clear()
+            if (x.command == RESET) {
+              confData.remove(args)
+            } else {
+              confData.clear()
+            }
           }
           logInfo(s"$command: $args")
         case BEGIN_STATEMENT_SET | END_STATEMENT_SET =>

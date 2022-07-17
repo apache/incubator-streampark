@@ -21,16 +21,12 @@ package com.streamxhub.streamx.flink.core.test
 import com.streamxhub.streamx.common.conf.ConfigConst.KEY_FLINK_SQL
 import com.streamxhub.streamx.common.util.DeflaterUtils
 import com.streamxhub.streamx.flink.core.{FlinkSqlExecutor, FlinkTableInitializer, StreamTableContext}
-import org.apache.flink.util.FileUtils
 import org.scalatest.funsuite.AnyFunSuite
 
-import java.io.File
 import scala.collection.mutable.ArrayBuffer
 
 // scalastyle:off println
 class FlinkSqlExecuteFunSuite extends AnyFunSuite {
-
-  val sqlFilePath: String = new File("").getCanonicalPath + File.separator + "streamx-flink" + File.separator + "streamx-flink-shims" + File.separator + "streamx-flink-shims-test" + File.separator + "sqlFile" + File.separator
 
   def execute(sql: String)(implicit func: String => Unit): Unit = {
     val args = ArrayBuffer(KEY_FLINK_SQL("--"), DeflaterUtils.zipString(sql.stripMargin))
@@ -38,11 +34,49 @@ class FlinkSqlExecuteFunSuite extends AnyFunSuite {
     FlinkSqlExecutor.executeSql(KEY_FLINK_SQL(), context.parameter, context)
   }
 
-
   test("execute") {
-    val sql = FileUtils.readFileUtf8(new File(sqlFilePath + "sql_execute.sql"))
-
-    execute(sql) { r =>
+    execute(
+      """
+        |-- set -------
+        |set 'table.local-time-zone' = 'GMT+08:00';
+        |
+        |-- reset -----
+        |reset 'table.local-time-zone';
+        |reset;
+        |
+        |CREATE temporary TABLE source_kafka1(
+        |    `id` int COMMENT '',
+        |    `name` string COMMENT '',
+        |    `age` int COMMENT '',
+        |    proc_time as PROCTIME()
+        |) WITH (
+        |    'connector' = 'kafka',
+        |    'topic' = 'source1',
+        |    'properties.bootstrap.servers' = 'node01:9092,node02:9092,node03:9092',
+        |    'properties.group.id' = 'test',
+        |    'scan.startup.mode' = 'latest-offset',
+        |    'format' = 'csv',
+        |    'csv.field-delimiter' = ' ',
+        |    'csv.ignore-parse-errors' = 'true',
+        |    'csv.allow-comments' = 'true'
+        |);
+        |
+        |create table sink_kafka1(
+        |    `id` int COMMENT '',
+        |    `name` string COMMENT '',
+        |    `age` int COMMENT ''
+        |) with (
+        |    'connector' = 'kafka',
+        |    'topic' = 'sink1',
+        |    'properties.bootstrap.servers' = 'node01:9092,node02:9092,node03:9092',
+        |    'format' = 'csv'
+        |);
+        |
+        |insert into sink_kafka1
+        |select id, name, age
+        |from source_kafka1;
+        |
+        |""".stripMargin) { r =>
       println(r)
     }
   }
