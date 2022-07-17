@@ -218,7 +218,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_FUNCTION extends SqlCommand(
     "create function",
-    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF NOT EXISTS\\s+|)([A-Za-z]+[A-Za-z\\d.\\-_]+)\\s+AS\\s+.+)"
+    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(.*)\\s+AS\\s+.*)"
   )
 
 
@@ -544,7 +544,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object RESET_ALL extends SqlCommand(
     "reset all",
-    "RESET\\s*",
+    "RESET",
     _ => Some(Array[String]("ALL"))
   )
 

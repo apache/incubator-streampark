@@ -19,33 +19,236 @@
 package com.streamxhub.streamx.flink.core.test
 
 import com.streamxhub.streamx.flink.core.{FlinkSqlValidationResult, FlinkSqlValidator}
-import org.apache.flink.util.FileUtils
 import org.scalatest.funsuite.AnyFunSuite
-
-import java.io.File
 
 // scalastyle:off println
 class FlinkSqlValidationFunSuite extends AnyFunSuite {
 
-  val sqlFilePath: String = new File("").getCanonicalPath + File.separator + "streamx-flink" + File.separator + "streamx-flink-shims" + File.separator + "streamx-flink-shims-test" + File.separator + "sqlFile" + File.separator
+  def verify(sql: String)(func: FlinkSqlValidationResult => Unit): Unit = {
 
-  def verify(sql: String)(func: FlinkSqlValidationResult => Unit): Unit = func(FlinkSqlValidator.verifySql(sql.stripMargin))
+    val insert =
+      """
+        |CREATE TABLE my_source ( `f` BIGINT ) WITH ( 'connector' = 'datagen' );
+        |create TABLE my_sink(`f` BIGINT ) with ('connector' = 'print');
+        |insert into my_sink select * from my_source;
+        |""".stripMargin
 
+    func(FlinkSqlValidator.verifySql(
+      s"""
+         |$sql
+         |$insert
+         |""".stripMargin))
+  }
 
-  test("validation") {
-    val sql = FileUtils.readFileUtf8(new File(sqlFilePath + "sql_syntax.sql"))
-    var allSuccess = true
-
-    verify(sql) { r => {
-      if (r.success == false) {
-        allSuccess = false
-        println(r.toString)
-      }
+  test("select") {
+    verify(
+      """
+        |-- select ---
+        |select id, name, age, fetch_millisecond() as millisecond
+        |from source_kafka1;
+        |""".stripMargin) { r =>
+      assert(r.success == true)
     }
-    }
+  }
 
-    if (allSuccess) {
-      println("All sql syntax check pass!")
+  test("set_reset") {
+    verify(
+      """
+        |-- set -------
+        |set 'table.local-time-zone' = 'GMT+08:00';
+        |
+        |-- reset -----
+        |reset 'table.local-time-zone';
+        |reset;
+        |""".stripMargin) { r =>
+      assert(r.success == true)
+    }
+  }
+
+  test("create") {
+    verify(
+      """
+        |-- create --
+        |CREATE TABLE Orders (
+        |    `user` BIGINT,
+        |    product STRING,
+        |    order_time TIMESTAMP(3)
+        |) WITH (
+        |    'connector' = 'kafka',
+        |    'scan.startup.mode' = 'earliest-offset'
+        |);
+        |
+        |create catalog hive with (
+        |    'type' = 'hive',
+        |    'hadoop-conf-dir' = '$path',
+        |    'hive-conf-dir' = '$path'
+        |);
+        |create database test;
+        |
+        |create view test_view as
+        |select id, name, age, fetch_millisecond() as millisecond
+        |from source_kafka1;
+        |
+        |create function fetch_millisecond as 'com.streamxhub.streamx.flink.core.test.FetchMillisecond' language java;
+        |create temporary function fetch_millisecond as 'com.streamxhub.streamx.flink.core.test.FetchMillisecond' language java;
+        |create TEMPORARY SYSTEM function fetch_millisecond as 'com.streamxhub.streamx.flink.core.test.FetchMillisecond' language java;
+        |
+        |""".stripMargin) { r =>
+      assert(r.success == true)
+    }
+  }
+
+  test("drop") {
+    verify(
+      """
+        |drop catalog hive;
+        |drop catalog IF EXISTS hive;
+        |
+        |drop table test;
+        |drop TEMPORARY table test;
+        |drop table IF EXISTS test;
+        |drop TEMPORARY table IF EXISTS test;
+        |drop TEMPORARY table IF EXISTS test.test;
+        |drop TEMPORARY table IF EXISTS hive.test.test;
+        |
+        |drop database test;
+        |drop database if exists test;
+        |drop database if exists hive.test;
+        |drop database if exists hive.test RESTRICT;
+        |drop database if exists hive.test CASCADE;
+        |
+        |drop view test_view;
+        |drop TEMPORARY view test_view;
+        |drop view IF EXISTS test_view;
+        |drop TEMPORARY view IF EXISTS test_view;
+        |drop view test.test_view;
+        |
+        |drop function test_function;
+        |drop TEMPORARY function test_function;
+        |drop TEMPORARY SYSTEM function test_function;
+        |drop function IF EXISTS test_function;
+        |
+        |""".stripMargin) { r =>
+      assert(r.success == true)
+    }
+  }
+
+  test("alter") {
+    verify(
+      """
+        |alter table test rename to test1;
+        |alter table test set ('k' = 'v');
+        |
+        |alter view test_view rename to test_view2;
+        |alter view test_view as
+        |select id, name, age, fetch_millisecond() as millisecond
+        |from source_kafka1;
+        |
+        |alter temporary function fetch_millisecond as 'com.streamxhub.streamx.flink.core.test.FetchMillisecond' language java;
+        |alter TEMPORARY SYSTEM function fetch_millisecond as 'com.streamxhub.streamx.flink.core.test.FetchMillisecond' language java;
+        |
+        |""".stripMargin) { r =>
+      assert(r.success == true)
+    }
+  }
+
+  test("desc") {
+    verify(
+      """
+        |-- desc ---
+        |DESCRIBE test;
+        |desc test;
+        |desc test.test;
+        |""".stripMargin) { r =>
+      assert(r.success == true)
+    }
+  }
+
+  test("explain") {
+    verify(
+      """
+        |-- explain ---
+        |EXPLAIN PLAN FOR
+        |select id, name, age, fetch_millisecond() as millisecond
+        |from source_kafka1;
+        |
+        |EXPLAIN ESTIMATED_COST
+        |select id, name, age, fetch_millisecond() as millisecond
+        |from source_kafka1;
+        |""".stripMargin) { r =>
+      assert(r.success == true)
+    }
+  }
+
+  test("use") {
+    verify(
+      """
+        |-- use ---
+        |use catalog hive;
+        |
+        |use modules hive;
+        |use modules hive, core;
+        |
+        |use test;
+        |use hive.test;
+        |
+        |""".stripMargin) { r =>
+      assert(r.success == true)
+    }
+  }
+
+  test("show") {
+    verify(
+      """
+        |-- show ---
+        |show catalogs;
+        |
+        |show current catalog;
+        |
+        |show databases;
+        |
+        |show current database;
+        |
+        |show tables;
+        |show tables from db1;
+        |show tables from db1 like '%n';
+        |show tables from db1 not like '%n';
+        |
+        |show create table test;
+        |
+        |show columns from orders;
+        |show columns from database1.orders;
+        |show columns from catalog1.database1.orders;
+        |show columns from orders like '%r';
+        |show columns from orders not like '%_r';
+        |
+        |show views;
+        |
+        |show create view test_view;
+        |
+        |show functions;
+        |show user functions;
+        |
+        |show modules;
+        |show full modules;
+        |
+        |""".stripMargin) { r =>
+      assert(r.success == true)
+    }
+  }
+
+  test("load") {
+    verify(
+      """
+        |-- load ---
+        |load module hive;
+        |load module hive with ('hive-version' = '2.3.6');
+        |
+        |-- unload ---
+        |unload module hive;
+        |
+        |""".stripMargin) { r =>
+      assert(r.success == true)
     }
   }
 
