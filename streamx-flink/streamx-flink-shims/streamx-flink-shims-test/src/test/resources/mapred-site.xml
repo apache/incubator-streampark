@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!--指定mapreduce运行在yarn上-->
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
+    <!-- 记录已运行完的MapReduce信息到指定的HDFS目录下 -->
+    <property>
+        <name>mapreduce.jobhistory.address</name>
+        <value>node01:10020</value>
+    </property>
+    <property>
+        <name>mapreduce.jobhistory.webapp.address</name>
+        <value>node01:19888</value>
+    </property>
+    <property>
+        <name>mapreduce.cluster.local.dir</name>
+        <value>
+            /data/soft/hadoop-2.8.3/mapred/local
+        </value>
+    </property>
+    <!-- mapred存放控制文件所使用的文件夹，可配置多块硬盘，逗号分隔 -->
+    <property>
+        <name>mapreduce.jobtracker.system.dir</name>
+        <value>${hadoop.tmp.dir}/mapred/system</value>
+    </property>
+    <property>　　　
+        <name>mapreduce.jobtracker.heartbeats.in.second</name>
+        　　<value>100</value>　　　　　　　
+    </property>
+    <property>
+        <name>mapreduce.tasktracker.outofband.heartbeat</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>mapreduce.jobtracker.staging.root.dir</name>
+        <value>${hadoop.tmp.dir}/mapred/staging</value>
+    </property>
+    <property>
+        <name>mapreduce.cluster.temp.dir</name>
+        <value>${hadoop.tmp.dir}/mapred/temp</value>
+    </property>
+    <property>
+        <name>mapreduce.map.output.compress</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>mapreduce.map.output.compress.codec</name>
+        <value>com.hadoop.compression.lzo.LzoCodec</value>
+    </property>
+    <property>
+        <name>mapreduce.output.fileoutputformat.compress</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>mapreduce.output.fileoutputformat.compress.type</name>
+        <value>BLOCK</value>
+    </property>
+    <property>
+        <name>mapreduce.output.fileoutputformat.compress.codec</name>
+        <value>com.hadoop.compression.lzo.LzoCodec</value>
+    </property>
+    <property>
+        <name>mapreduce.task.timeout</name>
+        <value>180000</value>
+    </property>
+    <property>
+        <name>mapreduce.jobtracker.taskscheduler</name>
+        <value>org.apache.hadoop.mapred.FairScheduler</value>
+    </property>
+</configuration>
+

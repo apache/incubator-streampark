@@ -22,11 +22,11 @@ import com.streamxhub.streamx.common.enums.FlinkSqlValidationFailedType
 import com.streamxhub.streamx.common.util.Logger
 import enumeratum.EnumEntry
 
-import java.util.regex.{Matcher, Pattern}
 import java.lang.{Boolean => JavaBool}
 import java.util.Scanner
-import scala.collection.mutable.ListBuffer
+import java.util.regex.{Matcher, Pattern}
 import scala.collection.immutable
+import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks.{break, breakable}
 
 object SqlCommandParser extends Logger {
@@ -99,7 +99,9 @@ object SqlCommandParser extends Logger {
       for (i <- groups.indices) {
         groups(i) = matcher.group(i + 1)
       }
-      sqlCommand.converter(groups).map(x => SqlCommandCall(sqlSegment.start, sqlSegment.end, sqlCommand, x, sqlSegment.sql.trim))
+      sqlCommand.converter(groups).map(x =>
+        SqlCommandCall(sqlSegment.start, sqlSegment.end, sqlCommand, x, sqlSegment.sql.trim)
+      )
     }
   }
 
@@ -142,40 +144,19 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   val values: immutable.IndexedSeq[SqlCommand] = findValues
 
-  //---- SELECT Statements
+  //---- SELECT Statements--------------------------------------------------------------------------------------------------------------------------------
   case object SELECT extends SqlCommand(
     "select",
-    "(SELECT\\s+.*)"
+    "(SELECT\\s+.+)"
   )
 
-  //----CREATE Statements----------------
+
+
+  //----CREATE Statements--------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * <pre>
-   * CREATE CATALOG catalog_name
-   * WITH (key1=val1, key2=val2, ...)
-   * </pre>
-   */
-  case object CREATE_CATALOG extends SqlCommand(
-    "create catalog",
-    "(CREATE\\s+CATALOG\\s+.*)"
-  )
-
-  /**
-   * <pre>
-   * CREATE DATABASE [IF NOT EXISTS] [catalog_name.]db_name<br>
-   * [COMMENT database_comment]<br>
-   * WITH (key1=val1, key2=val2, ...)<br>
-   * </pre>
-   */
-  case object CREATE_DATABASE extends SqlCommand(
-    "create database",
-    "(CREATE\\s+DATABASE\\s+.*)"
-  )
-
-  /**
-   * <pre>
-   * CREATE TABLE [IF NOT EXISTS] [catalog_name.][db_name.]table_name
+   * CREATE [TEMPORARY] TABLE [IF NOT EXISTS] [catalog_name.][db_name.]table_name
    * (
    * { <physical_column_definition> | <metadata_column_definition> | <computed_column_definition> }[ , ...n]
    * [ <watermark_definition> ]
@@ -189,8 +170,32 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_TABLE extends SqlCommand(
     "create table",
-    "(CREATE\\s+(TEMPORARY\\s+|)TABLE\\s+.*)"
+    "(CREATE\\s+(TEMPORARY\\s+|)TABLE\\s+.+)"
   )
+
+  /**
+   * <pre>
+   * CREATE CATALOG catalog_name
+   * WITH (key1=val1, key2=val2, ...)
+   * </pre>
+   */
+  case object CREATE_CATALOG extends SqlCommand(
+    "create catalog",
+    "(CREATE\\s+CATALOG\\s+.+)"
+  )
+
+  /**
+   * <pre>
+   * CREATE DATABASE [IF NOT EXISTS] [catalog_name.]db_name<br>
+   * [COMMENT database_comment]<br>
+   * WITH (key1=val1, key2=val2, ...)<br>
+   * </pre>
+   */
+  case object CREATE_DATABASE extends SqlCommand(
+    "create database",
+    "(CREATE\\s+DATABASE\\s+.+)"
+  )
+
 
   /**
    * <pre>
@@ -201,7 +206,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_VIEW extends SqlCommand(
     "create view",
-    "(CREATE\\s+(TEMPORARY\\s+|)VIEW\\s+(\\S+)\\s+AS\\s+SELECT\\s+.*)"
+    "(CREATE\\s+(TEMPORARY\\s+|)VIEW\\s+(\\S+)\\s+AS\\s+SELECT\\s+.+)"
   )
 
   /**
@@ -213,10 +218,11 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_FUNCTION extends SqlCommand(
     "create function",
-    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(.*)\\s+AS\\s+.*)"
+    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF NOT EXISTS\\s+|)([A-Za-z]+[A-Za-z\\d.\\-_]+)\\s+AS\\s+.+)"
   )
 
-  //----DROP Statements----------------
+
+  //----DROP Statements--------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * <pre>
@@ -236,15 +242,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object DROP_CATALOG extends SqlCommand(
     "drop catalog",
-    "(DROP\\s+CATALOG\\s+.*)"
-  )
-
-  /**
-   * <strong>DROP DATABASE [IF EXISTS] [catalog_name.]db_name [ (RESTRICT | CASCADE) ]</strong>
-   */
-  case object DROP_DATABASE extends SqlCommand(
-    "drop database",
-    "(DROP\\s+DATABASE\\s+.*)"
+    "(DROP\\s+CATALOG\\s+.+)"
   )
 
   /**
@@ -252,7 +250,15 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object DROP_TABLE extends SqlCommand(
     "drop table",
-    "(DROP\\s+(TEMPORARY\\s+|)TABLE\\s+.*)"
+    "(DROP\\s+(TEMPORARY\\s+|)TABLE\\s+.+)"
+  )
+
+  /**
+   * <strong>DROP DATABASE [IF EXISTS] [catalog_name.]db_name [ (RESTRICT | CASCADE) ]</strong>
+   */
+  case object DROP_DATABASE extends SqlCommand(
+    "drop database",
+    "(DROP\\s+DATABASE\\s+.+)"
   )
 
   /**
@@ -260,7 +266,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object DROP_VIEW extends SqlCommand(
     "drop view",
-    "(DROP\\s+(TEMPORARY\\s+|)VIEW\\s+.*)"
+    "(DROP\\s+(TEMPORARY\\s+|)VIEW\\s+.+)"
   )
 
   /**
@@ -268,18 +274,11 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object DROP_FUNCTION extends SqlCommand(
     "drop function",
-    "(DROP\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.*)"
+    "(DROP\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.+)"
   )
 
-  //----ALTER Statements
 
-  /**
-   * <strong>ALTER DATABASE [catalog_name.]db_name SET (key1=val1, key2=val2, ...)</strong>
-   */
-  case object ALTER_DATABASE extends SqlCommand(
-    "alter database",
-    "(ALTER\\s+DATABASE\\s+.*)"
-  )
+  //----ALTER Statements--------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * <strong>ALTER TABLE [catalog_name.][db_name.]table_name RENAME TO new_table_name</strong>
@@ -288,9 +287,8 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object ALTER_TABLE extends SqlCommand(
     "alter table",
-    "(ALTER\\s+TABLE\\s+.*)"
+    "(ALTER\\s+TABLE\\s+.+)"
   )
-
 
   /**
    * <strong>ALTER VIEW [catalog_name.][db_name.]view_name RENAME TO new_view_name</strong>
@@ -299,7 +297,15 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object ALTER_VIEW extends SqlCommand(
     "alter view",
-    "(ALTER\\s+VIEW\\s+.*)"
+    "(ALTER\\s+VIEW\\s+.+)"
+  )
+
+  /**
+   * <strong>ALTER DATABASE [catalog_name.]db_name SET (key1=val1, key2=val2, ...)</strong>
+   */
+  case object ALTER_DATABASE extends SqlCommand(
+    "alter database",
+    "(ALTER\\s+DATABASE\\s+.+)"
   )
 
   /**
@@ -311,11 +317,11 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object ALTER_FUNCTION extends SqlCommand(
     "alter function",
-    "(ALTER\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.*)"
+    "(ALTER\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.+)"
   )
 
 
-  //---- INSERT Statement
+  //---- INSERT Statement--------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * INSERT { INTO | OVERWRITE } [catalog_name.][db_name.]table_name [PARTITION part_spec] [column_list] select_statement
@@ -323,17 +329,17 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object INSERT extends SqlCommand(
     "insert",
-    "(INSERT\\s+(INTO|OVERWRITE)\\s+.*)"
+    "(INSERT\\s+(INTO|OVERWRITE)\\s+.+)"
   )
 
-  //---- DESCRIBE Statement
+  //---- DESCRIBE Statement--------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * { DESCRIBE | DESC } [catalog_name.][db_name.]table_name
    */
   case object DESC extends SqlCommand(
     "desc",
-    "(DESC\\s+.*)"
+    "(DESC\\s+.+)"
   )
 
   /**
@@ -341,31 +347,43 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object DESCRIBE extends SqlCommand(
     "describe",
-    "(DESCRIBE\\s+.*)"
+    "(DESCRIBE\\s+.+)"
   )
 
 
-  //---- DESCRIBE Statement
+  //---- EXPLAIN Statement--------------------------------------------------------------------------------------------------------------------------------
 
   /**
+   * For flink-1.13.x：EXPLAIN PLAN FOR `<query_statement_or_insert_statement>` <br>
+   * For flink-1.14.x：EXPLAIN ESTIMATED_COST, CHANGELOG_MODE, JSON_EXECUTION_PLAN `<query_statement_or_insert_statement>`<br>
+   * For flink-1.15.x：<br>
    * <pre>
-   * EXPLAIN PLAN FOR <query_statement_or_insert_statement>
+   * EXPLAIN [([ExplainDetail[, ExplainDetail]*]) | PLAN FOR] <query_statement_or_insert_statement_or_statement_set>
+   *
+   * statement_set:
+   * EXECUTE STATEMENT SET
+   * BEGIN
+   * insert_statement;
+   * ...
+   * insert_statement;
+   * END;
    * </pre>
+   * Recommended not to use the form of flink-1.15.x
    */
   case object EXPLAIN extends SqlCommand(
-    "explain plan for",
-    "(EXPLAIN\\s+PLAN\\s+FOR\\s+(SELECT\\s+.*|INSERT\\s+.*))"
+    "explain",
+    "(EXPLAIN\\s+.+)"
   )
 
 
-  //---- USE Statements
+  //---- USE Statements--------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * USE CATALOG catalog_name
    */
   case object USE_CATALOG extends SqlCommand(
     "use catalog",
-    "(USE\\s+CATALOG\\s+.*)"
+    "(USE\\s+CATALOG\\s+.+)"
   )
 
   /**
@@ -373,26 +391,25 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object USE_MODULES extends SqlCommand(
     "use modules",
-    "(USE\\s+MODULES\\s+.*)"
+    "(USE\\s+MODULES\\s+.+)"
   )
 
   /**
    * USE [catalog_name.]database_name
    */
-  case object USE extends SqlCommand(
-    "use",
-    "USE\\s+.*"
+  case object USE_DATABASE extends SqlCommand(
+    "use database",
+    "(USE\\s+(?!(CATALOG|MODULES)).+)"
   )
 
-  //----SHOW Statements
+  //----SHOW Statements--------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * SHOW CATALOGS
    */
   case object SHOW_CATALOGS extends SqlCommand(
     "show catalogs",
-    "SHOW\\s+CATALOGS",
-    Converters.NO_OPERANDS
+    "(SHOW\\s+CATALOGS\\s*)"
   )
 
   /**
@@ -400,8 +417,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object SHOW_CURRENT_CATALOG extends SqlCommand(
     "show current catalog",
-    "SHOW\\s+CURRENT\\s+CATALOG",
-    Converters.NO_OPERANDS
+    "(SHOW\\s+CURRENT\\s+CATALOG\\s*)"
   )
 
   /**
@@ -409,8 +425,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object SHOW_DATABASES extends SqlCommand(
     "show databases",
-    "SHOW\\s+DATABASES",
-    Converters.NO_OPERANDS
+    "(SHOW\\s+DATABASES\\s*)"
   )
 
   /**
@@ -418,17 +433,32 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object SHOW_CURRENT_DATABASE extends SqlCommand(
     "show current database",
-    "SHOW\\s+CURRENT\\s+DATABASE",
-    Converters.NO_OPERANDS
+    "(SHOW\\s+CURRENT\\s+DATABASE\\s*)"
   )
 
   /**
-   * SHOW TABLES
+   * SHOW TABLES,support from flink-1.13.x<br>
+   * SHOW TABLES [ ( FROM | IN ) [catalog_name.]database_name ] [ [NOT] LIKE `<sql_like_pattern`> ],support from flink-1.15.x
    */
   case object SHOW_TABLES extends SqlCommand(
     "show tables",
-    "SHOW\\s+TABLES",
-    Converters.NO_OPERANDS
+    "(SHOW\\s+TABLES.*)"
+  )
+
+  /**
+   * SHOW CREATE TABLE，flink-1.14.x support.
+   */
+  case object SHOW_CREATE_TABLE extends SqlCommand(
+    "show create table",
+    "(SHOW\\s+CREATE\\s+TABLE\\s+.+)"
+  )
+
+  /**
+   * SHOW COLUMNS ( FROM | IN ) [`[`catalog_name.]database.]`<table_name>` [ [NOT] LIKE `<sql_like_pattern>`]，flink-1.15.x support.
+   */
+  case object SHOW_COLUMNS extends SqlCommand(
+    "show columns",
+    "(SHOW\\s+COLUMNS\\s+.+)"
   )
 
   /**
@@ -436,8 +466,15 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object SHOW_VIEWS extends SqlCommand(
     "show views",
-    "SHOW\\s+VIEWS",
-    Converters.NO_OPERANDS
+    "(SHOW\\s+VIEWS\\s*)"
+  )
+
+  /**
+   * SHOW CREATE VIEW
+   */
+  case object SHOW_CREATE_VIEW extends SqlCommand(
+    "show create view",
+    "(SHOW\\s+CREATE\\s+VIEW\\s+.+)"
   )
 
   /**
@@ -445,8 +482,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object SHOW_FUNCTIONS extends SqlCommand(
     "show functions",
-    "SHOW\\s+(USER\\s+|)FUNCTIONS",
-    Converters.NO_OPERANDS
+    "(SHOW\\s+(USER\\s+|)FUNCTIONS\\s*)"
   )
 
   /**
@@ -454,35 +490,32 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object SHOW_MODULES extends SqlCommand(
     "show modules",
-    "SHOW\\s+(FULL\\s+|)MODULES",
-    Converters.NO_OPERANDS
+    "(SHOW\\s+(FULL\\s+|)MODULES\\s*)"
   )
 
-  //----LOAD Statements
+  //----LOAD Statements--------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * LOAD MODULE module_name [WITH ('key1' = 'val1', 'key2' = 'val2', ...)]
    */
   case object LOAD_MODULE extends SqlCommand(
-    "load modules",
-    "(LOAD\\s+MODULE\\s+.*)",
-    Converters.NO_OPERANDS
+    "load module",
+    "(LOAD\\s+MODULE\\s+.+)"
   )
 
 
-  //----UNLOAD Statements
+  //----UNLOAD Statements--------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * UNLOAD MODULE module_name
    */
   case object UNLOAD_MODULE extends SqlCommand(
     "unload module",
-    "(UNLOAD\\s+MODULE\\s+.*)",
-    Converters.NO_OPERANDS
+    "(UNLOAD\\s+MODULE\\s+.+)"
   )
 
 
-  // ----SET Statements
+  // ----SET Statements--------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * SET ('key' = 'value')
@@ -496,20 +529,28 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     }
   )
 
-  // ----SET Statements
+  // ----RESET Statements--------------------------------------------------------------------------------------------------------------------------------
 
   /**
    * RESET ('key')
    */
   case object RESET extends SqlCommand(
     "reset",
-    "RESET\\s+(.*)", {
-      case x if x.head.nonEmpty => Some(Array[String](x.head))
-      case _ => Some(Array[String]("ALL"))
-    }
+    "RESET\\s+'(.*)'"
   )
 
   /**
+   * RESET
+   */
+  case object RESET_ALL extends SqlCommand(
+    "reset all",
+    "RESET\\s*",
+    _ => Some(Array[String]("ALL"))
+  )
+
+
+  // ----INSERT SET Statements--------------------------------------------------------------------------------------------------------------------------------
+  /*
    * <pre>
    * SQL Client execute each INSERT INTO statement as a single Flink job. However,
    * this is sometimes not optimal because some part of the pipeline can be reused.
@@ -521,12 +562,21 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    * improve the efficiency of executing multiple queries.
    * </pre>
    */
+
+  /**
+   * This is SQL Client's syntax，don't use in our platform.
+   */
+  @deprecated
   case object BEGIN_STATEMENT_SET extends SqlCommand(
     "begin statement set",
     "BEGIN\\s+STATEMENT\\s+SET",
     Converters.NO_OPERANDS
   )
 
+  /**
+   * This is SQL Client's syntax，don't use in our platform.
+   */
+  @deprecated
   case object END_STATEMENT_SET extends SqlCommand(
     "end statement set",
     "END",

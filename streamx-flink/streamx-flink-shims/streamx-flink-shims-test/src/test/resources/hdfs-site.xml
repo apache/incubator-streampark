@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <!-- namenode名称，高可用配置，和fs.defaultFS配置成一样，注意此处修改之后，其他位置的hadoopCluster也要修改 -->
+        <name>dfs.nameservices</name>
+        <value>hadoopCluster</value>
+    </property>
+    <!--ns下有两个namenode,分别是nn1,nn2-->
+    <property>
+        <name>dfs.ha.namenodes.hadoopCluster</name>
+        <value>nn1,nn2</value>
+    </property>
+    <!--nn1的RPC通信地址-->
+    <property>
+        <name>dfs.namenode.rpc-address.hadoopCluster.nn1</name>
+        <value>node01:9000</value>
+    </property>
+    <!--nn2的RPC通信地址-->
+    <property>
+        <name>dfs.namenode.rpc-address.hadoopCluster.nn2</name>
+        <value>node02:9000</value>
+    </property>
+    <!--nn1的http通信地址-->
+    <property>
+        <name>dfs.namenode.http-address.hadoopCluster.nn1</name>
+        <value>node01:50070</value>
+    </property>
+    <!--nn2的http通信地址-->
+    <property>
+        <name>dfs.namenode.http-address.hadoopCluster.nn2</name>
+        <value>node02:50070</value>
+    </property>
+    <property>
+        <name>dfs.namenode.servicerpc-address.hadoopCluster.nn1</name>
+        <value>node01:53310</value>
+    </property>
+    <property>
+        <name>dfs.namenode.servicerpc-address.hadoopCluster.nn2</name>
+        <value>node02:53310</value>
+    </property>
+    <!--配置namenode数据存放的位置,可以不配置，如果不配置，默认用的是core-site.xml里配置的hadoop.tmp.dir的路径-->
+    <property>
+        <name>dfs.namenode.name.dir.hadoopCluster</name>
+        <value>file:/data/soft/hadoop-2.8.3/data/nn</value>
+        <final>true</final>
+    </property>
+    <!--指定namenode的元数据在JournalNode上的存放位置,这样，namenode2可以从jn集群里获取最新的namenode的信息，达到热备的效果-->
+    <property>
+        <name>dfs.namenode.shared.edits.dir</name>
+        <value>qjournal://node01:8485;node02:8485;node03:8485/hadoopCluster</value>
+    </property>
+    <!-- 为了避免Hadoop NameNode单点故障，一般会在集群中部署两个NameNode，该参数设置为true的时候表示开启高可用，
+                          即当当前活跃的NameNode故障时，另外一个NameNode会自动从备用状态转为活跃状态提供服务 -->
+    <property>
+        <name>dfs.ha.automatic-failover.enabled</name>
+        <value>true</value>
+    </property>
+    <!--配置切换的实现方式-->
+    <property>
+        <name>dfs.client.failover.proxy.provider.hadoopCluster</name>
+        <value>
+            org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider
+        </value>
+    </property>
+    <!--指定JournalNode存放数据的位置-->
+    <property>
+        <name>dfs.journalnode.edits.dir</name>
+        <value>/data/soft/hadoop-2.8.3/data/tmp/journal</value>
+    </property>
+    <!--配置隔离机制-->
+    <property>
+        <name>dfs.ha.fencing.methods</name>
+        <value>sshfence</value>
+    </property>
+    <!--配置隔离机制的ssh登录秘钥所在的位置-->
+    <property>
+        <name>dfs.ha.fencing.ssh.private-key-files</name>
+        <value>/root/.ssh/id_rsa</value>
+    </property>
+    <!-- 指定HDFS DataNode数据存储的路径，一般建议一台机器挂载多个盘，一方面可以增大存储容量，另一方面可以减少磁盘单点故障以及磁盘读写压力-->
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>/data/soft/hadoop-2.8.3/data/dn</value>
+        <final>true</final>
+    </property>
+    <!-- 做checkpoint操作时，secondary namenode的本地工作目录 -->
+    <property>
+        <name>dfs.namenode.checkpoint.dir.hadoopCluster</name>
+        <value>/data/soft/hadoop-2.8.3/data/dfs/namesecondary</value>
+        <final>true</final>
+    </property>
+    <!-- 每个数据块保留的备份数据，用来保证数据的高可用 -->
+    <property>
+        <name>dfs.replication</name>
+        <value>3</value>
+        <final>true</final>
+    </property>
+    <!-- 限制HDFS负载均衡运行时占用的最大带宽 -->
+    <property>
+        <name>dfs.datanode.balance.bandwidthPerSec</name>
+        <value>104857600</value>
+    </property>
+    <!-- 配合HBase或者其他dfs客户端使用，表示开启短路径读，可以用来优化客户端性能，需要配合dfs.domain.socket.path使用 -->
+    <property>
+        <name>dfs.client.read.shortcircuit</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>dfs.domain.socket.path</name>
+        <value>/data/soft/hadoop-2.8.3/dn_socket</value>
+    </property>
+    <!--设置hdfs的操作权限，false表示任何用户都可以在hdfs上操作文件-->
+    <property>
+        <name>dfs.permissions</name>
+        <value>false</value>
+    </property>
+    <property>
+        <!-- datanode 本地磁盘之间容量均衡 -->
+        <name>dfs.datanode.fsdataset.volume.choosing.policy</name>
+        <value>org.apache.hadoop.hdfs.server.datanode.fsdataset.AvailableSpaceVolumeChoosingPolicy</value>
+    </property>
+    <property>
+        <!--上述均衡策略的阈值 100GB -->
+        <name>>dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold</name>
+        <value>1073741824</value>
+    </property>
+</configuration>
+
