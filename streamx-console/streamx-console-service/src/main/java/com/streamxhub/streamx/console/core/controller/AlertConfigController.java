@@ -112,7 +112,6 @@ public class AlertConfigController {
         AlertTemplate alertTemplate = new AlertTemplate();
         alertTemplate.setTitle("Notify: StreamX alert job for test");
         alertTemplate.setJobName("StreamX alert job for test");
-        alertTemplate.setLink("http://127.0.0.1:8080");
         alertTemplate.setStatus("TEST");
         Date date = new Date();
         alertTemplate.setStartTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
