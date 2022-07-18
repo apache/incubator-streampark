@@ -1332,19 +1332,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     private String getSavePointPath(Application appParam) throws Exception {
         Application application = getById(appParam.getId());
+
+        //1) 动态参数优先级最高,读取动态参数中是否设置: -Dstate.savepoints.dir
         String savepointPath = FlinkSubmitter
             .extractDynamicOptionAsJava(application.getDynamicOptions())
             .get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
 
+        // 2) Application conf配置优先级第二,如果是 streamx|flinksql 类型的任务,则看任务定义时是否配置了Application conf,
+        // 如配置了并开启了checkpoints则读取state.savepoints.dir
         if (StringUtils.isBlank(savepointPath)) {
-            if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
-                FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-                assert cluster != null;
-                Map<String, String> config = cluster.getFlinkConfig();
-                if (!config.isEmpty()) {
-                    savepointPath = config.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
-                }
-            } else if (application.isStreamXJob() || application.isFlinkSqlJob()) {
+            if (application.isStreamXJob() || application.isFlinkSqlJob()) {
                 ApplicationConfig applicationConfig = configService.getEffective(application.getId());
                 if (applicationConfig != null) {
                     Map<String, String> map = applicationConfig.readConfig();
@@ -1353,11 +1350,26 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         savepointPath = map.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR());
                     }
                 }
-            } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            }
+        }
+
+        // 3) 以上都未获取到savepoint, 则按照部署类型来尝试获取savepoint路径(remote|on yarn)
+        if (StringUtils.isBlank(savepointPath)) {
+            // 3.1) 如果是remote模式,则通过restapi请求flink webui接口,获取savepoint路径
+            if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+                FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+                assert cluster != null;
+                Map<String, String> config = cluster.getFlinkConfig();
+                if (!config.isEmpty()) {
+                    savepointPath = config.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+                }
+            } else if(ExecutionMode.isYarnMode(application.getExecutionMode())) {
+                // 3.2) 如是 on yarn模式. 则读取绑定的flink里的flink-conf.yml中的savepoint
                 FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
                 savepointPath = flinkEnv.convertFlinkYamlAsMap().get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
             }
         }
+
         return savepointPath;
     }
 

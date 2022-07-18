@@ -23,8 +23,8 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.{ConfigOption, Configuration}
-import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
 import org.apache.flink.table.api.TableEnvironment
+import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
 
 import java.util
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -118,6 +118,7 @@ object FlinkSqlExecutor extends Logger {
           val tableResult = context.executeSql(x.originSql)
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
+
         //For specific statement, such as: SET、RESET、INSERT、SELECT
         case SET =>
           if (!tableConfigOptions.containsKey(args)) {
@@ -126,17 +127,15 @@ object FlinkSqlExecutor extends Logger {
           val operand = x.operands(1)
           context.getConfig.getConfiguration.setString(args, operand)
           logInfo(s"$command: $args --> $operand")
-        case RESET =>
+        case RESET | RESET_ALL =>
           val confDataField = classOf[Configuration].getDeclaredField("confData")
           confDataField.setAccessible(true)
           val confData = confDataField.get(context.getConfig.getConfiguration).asInstanceOf[util.HashMap[String, AnyRef]]
-          if (args.toUpperCase == "ALL") {
-            confData.synchronized {
-              confData.clear()
-            }
-          } else {
-            confData.synchronized {
+          confData.synchronized {
+            if (x.command == RESET) {
               confData.remove(args)
+            } else {
+              confData.clear()
             }
           }
           logInfo(s"$command: $args")
@@ -176,5 +175,6 @@ object FlinkSqlExecutor extends Logger {
 
     logInfo(s"\n\n\n==============flinkSql==============\n\n $flinkSql\n\n============================\n\n\n")
   }
+
 
 }

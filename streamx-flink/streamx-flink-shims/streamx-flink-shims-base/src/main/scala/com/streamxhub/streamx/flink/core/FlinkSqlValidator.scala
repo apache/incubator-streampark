@@ -74,7 +74,7 @@ object FlinkSqlValidator extends Logger {
       lazy val command = call.command
       command match {
         case SET | RESET =>
-          if (args != "ALL" && !FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
+          if (!FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
             return FlinkSqlValidationResult(
               success = false,
               failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,

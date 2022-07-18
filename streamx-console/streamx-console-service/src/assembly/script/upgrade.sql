@@ -283,6 +283,8 @@ COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ------------------------------------- version: 1.2.4 START ---------------------------------------
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS `t_alert_config`;
 CREATE TABLE `t_alert_config` (
@@ -303,13 +305,38 @@ CREATE TABLE `t_alert_config` (
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci;
 
-alter table t_flink_app add column ALERT_ID bigint after END_TIME;
-alter table t_flink_app drop column ALERT_EMAIL;
+BEGIN;
+-- 增加 ALERT_ID 字段
+ALTER TABLE t_flink_app ADD COLUMN ALERT_ID bigint AFTER END_TIME;
+
+-- 转存历史邮件报警配置
+INSERT INTO t_alert_config(USER_ID, ALERT_NAME, ALERT_TYPE, EMAIL_PARAMS)
+SELECT a.USER_ID, concat('emailAlertConf-', (@rownum := @rownum + 1)) AS ALERT_NAME, 1 as ALERT_TYPE, a.ALERT_EMAIL
+from (select USER_ID, ALERT_EMAIL from t_flink_app where ALERT_EMAIL is not null group by USER_ID, ALERT_EMAIL) a,
+     (select @rownum := 0) t;
+
+-- 更新原表邮件配置 id
+UPDATE t_flink_app a INNER JOIN t_alert_config b ON a.ALERT_EMAIL = b.EMAIL_PARAMS
+    SET a.ALERT_ID = b.ID
+WHERE a.ALERT_EMAIL = b.EMAIL_PARAMS;
+
+-- 调整报警配置表 params 内容
+UPDATE t_alert_config
+SET EMAIL_PARAMS     = concat('{"contacts":"', EMAIL_PARAMS, '"}'),
+    DING_TALK_PARAMS = '{}',
+    WE_COM_PARAMS='{}',
+    LARK_PARAMS='{}'
+WHERE ALERT_TYPE = 1;
+-- 删除原 ALERT_EMAIL 字段
+ALTER TABLE t_flink_app DROP COLUMN ALERT_EMAIL;
 
 ALTER TABLE `t_flink_app` ADD COLUMN `OPTION_TIME` datetime DEFAULT NULL AFTER `CREATE_TIME`;
-ALTER TABLE t_setting modify column `VALUE` text ;
+ALTER TABLE t_setting modify COLUMN `VALUE` text ;
 INSERT INTO `t_setting` VALUES (14, 'docker.register.namespace', NULL, 'Docker Register Image namespace', 'Docker命名空间', 1);
 ALTER TABLE `t_flink_app` ADD COLUMN `INGRESS_TEMPLATE` text COLLATE utf8mb4_general_ci COMMENT 'ingress模版文件';
 ALTER TABLE `t_flink_app` ADD COLUMN `DEFAULT_MODE_INGRESS` text COLLATE utf8mb4_general_ci COMMENT '配置ingress的域名';
 ALTER TABLE `t_flink_app` ADD COLUMN `MODIFY_TIME` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER CREATE_TIME;
+COMMIT;
+
+SET FOREIGN_KEY_CHECKS = 1;
 ---------------------------------------- version: 1.2.4 END ---------------------------------------

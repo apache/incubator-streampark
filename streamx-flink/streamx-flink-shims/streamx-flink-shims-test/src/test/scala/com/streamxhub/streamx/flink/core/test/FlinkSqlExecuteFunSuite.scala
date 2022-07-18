@@ -34,35 +34,49 @@ class FlinkSqlExecuteFunSuite extends AnyFunSuite {
     FlinkSqlExecutor.executeSql(KEY_FLINK_SQL(), context.parameter, context)
   }
 
-  test("insert") {
+  test("execute") {
     execute(
       """
-        |CREATE TABLE source_table (
-        |id INT,
-        |score INT,
-        |address STRING
+        |-- set -------
+        |set 'table.local-time-zone' = 'GMT+08:00';
+        |
+        |-- reset -----
+        |reset 'table.local-time-zone';
+        |reset;
+        |
+        |CREATE temporary TABLE source_kafka1(
+        |    `id` int COMMENT '',
+        |    `name` string COMMENT '',
+        |    `age` int COMMENT '',
+        |    proc_time as PROCTIME()
         |) WITH (
-        |'connector' = 'datagen',
-        |'rows-per-second'='5',
-        |'fields.id.kind'='sequence',
-        |'fields.id.start'='1',
-        |'fields.id.end'='100',
-        |'fields.score.min'='1',
-        |'fields.score.max'='100',
-        |'fields.address.length'='10'
+        |    'connector' = 'kafka',
+        |    'topic' = 'source1',
+        |    'properties.bootstrap.servers' = 'node01:9092,node02:9092,node03:9092',
+        |    'properties.group.id' = 'test',
+        |    'scan.startup.mode' = 'latest-offset',
+        |    'format' = 'csv',
+        |    'csv.field-delimiter' = ' ',
+        |    'csv.ignore-parse-errors' = 'true',
+        |    'csv.allow-comments' = 'true'
         |);
         |
-        |CREATE TABLE sink_table (
-        |id INT,
-        |score INT,
-        |address STRING
-        |) WITH (
-        |'connector' = 'print'
+        |create table sink_kafka1(
+        |    `id` int COMMENT '',
+        |    `name` string COMMENT '',
+        |    `age` int COMMENT ''
+        |) with (
+        |    'connector' = 'kafka',
+        |    'topic' = 'sink1',
+        |    'properties.bootstrap.servers' = 'node01:9092,node02:9092,node03:9092',
+        |    'format' = 'csv'
         |);
         |
-        |insert into sink_table
-        |select * from source_table;
-        |""") { r =>
+        |insert into sink_kafka1
+        |select id, name, age
+        |from source_kafka1;
+        |
+        |""".stripMargin) { r =>
       println(r)
     }
   }
