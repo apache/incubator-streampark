@@ -30,11 +30,13 @@ import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.FlinkK8sRestExposedType;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
+import com.streamxhub.streamx.common.fs.LfsOperator;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.ResourceFrom;
@@ -416,9 +418,9 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getDistHome() {
         String path = String.format("%s/%s/%s",
-                Workspace.local().APP_LOCAL_DIST(),
-                projectId.toString(),
-                getModule()
+            Workspace.local().APP_LOCAL_DIST(),
+            projectId.toString(),
+            getModule()
         );
         log.info("local distHome:{}", path);
         return path;
@@ -427,8 +429,8 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getLocalAppHome() {
         String path = String.format("%s/%s",
-                Workspace.local().APP_WORKSPACE(),
-                id.toString()
+            Workspace.local().APP_WORKSPACE(),
+            id.toString()
         );
         log.info("local appHome:{}", path);
         return path;
@@ -437,9 +439,9 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getRemoteAppHome() {
         String path = String.format(
-                "%s/%s",
-                Workspace.remote().APP_WORKSPACE(),
-                id.toString()
+            "%s/%s",
+            Workspace.remote().APP_WORKSPACE(),
+            id.toString()
         );
         log.info("remote appHome:{}", path);
         return path;
@@ -563,6 +565,7 @@ public class Application implements Serializable {
 
     @JsonIgnore
     @SneakyThrows
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getOptionMap() {
         Map<String, Object> map = JacksonUtils.read(getOptions(), Map.class);
         map.entrySet().removeIf(entry -> entry.getValue() == null);
@@ -731,6 +734,7 @@ public class Application implements Serializable {
 
     @JsonIgnore
     @SneakyThrows
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getHotParamsMap() {
         if (this.hotParams != null) {
             Map<String, Object> map = JacksonUtils.read(this.hotParams, Map.class);
@@ -782,6 +786,7 @@ public class Application implements Serializable {
     public static class Dependency {
         private List<Pom> pom = Collections.emptyList();
         private List<String> jar = Collections.emptyList();
+        private List<String> jarMd5 = Collections.emptyList();
 
         @JsonIgnore
         @SneakyThrows
@@ -793,6 +798,11 @@ public class Application implements Serializable {
             return new Dependency();
         }
 
+        public void extractJarMd5() {
+            jarMd5 = jar.stream().map(jarFile -> LfsOperator.fileMd5(WebUtils.getAppTempDir() + "/" + jarFile)).collect(Collectors.toList());
+        }
+
+        @JsonIgnore
         public boolean isEmpty() {
             return pom.isEmpty() && jar.isEmpty();
         }
@@ -804,12 +814,20 @@ public class Application implements Serializable {
             if (this.isEmpty() && other.isEmpty()) {
                 return true;
             }
-
-            if (this.pom.size() != other.pom.size() || this.jar.size() != other.jar.size()) {
+            if (other.jarMd5 == null || other.jarMd5.size() != other.jar.size()) {
+                return false;
+            }
+            if (this.pom.size() != other.pom.size() || this.jar.size() != other.jar.size() || this.jarMd5.size() != other.jarMd5.size()) {
                 return false;
             }
 
-            return pom.containsAll(other.pom) && jar.containsAll(other.jar);
+            for (int i = 0; i < jar.size(); i++) {
+                if (!jar.get(i).equals(other.jar.get(i)) || !jarMd5.get(i).equals(other.jarMd5.get(i))) {
+                    return false;
+                }
+            }
+
+            return pom.containsAll(other.pom);
         }
 
         @JsonIgnore
