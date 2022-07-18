@@ -19,9 +19,10 @@
 
 package com.streamxhub.streamx.flink.kubernetes.model
 
-/**
- * author:Al-assad
- *
- * @param updateTime last update time for current key
- */
-case class TrkIdCV(updateTime: Long)
+case class CheckpointCV(
+                         id: Integer,
+                         checkpointPath: String,
+                         isSavepoint: Boolean,
+                         checkpointType: String,
+                         pollAckTime: Long
+                       )

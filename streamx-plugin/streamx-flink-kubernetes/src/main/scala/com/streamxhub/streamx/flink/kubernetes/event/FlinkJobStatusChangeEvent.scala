@@ -19,11 +19,11 @@
 
 package com.streamxhub.streamx.flink.kubernetes.event
 
-import com.streamxhub.streamx.flink.kubernetes.model.{JobStatusCV, TrkId}
+import com.streamxhub.streamx.flink.kubernetes.model.{JobStatusCV, TrackId}
 
 /**
  * Notification of flink job state changes from k8s clusters.
  *
  * @author Al-assad
  */
-case class FlinkJobStatusChangeEvent(trkId: TrkId, jobStatus: JobStatusCV) extends BuildInEvent
+case class FlinkJobStatusChangeEvent(trackId: TrackId, jobStatus: JobStatusCV) extends BuildInEvent

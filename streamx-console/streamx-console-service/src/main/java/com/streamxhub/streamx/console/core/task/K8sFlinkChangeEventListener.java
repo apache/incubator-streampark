@@ -37,7 +37,7 @@ import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent;
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
-import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
+import com.streamxhub.streamx.flink.kubernetes.model.TrackId;
 import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -53,7 +53,7 @@ import java.util.concurrent.TimeUnit;
 import scala.Enumeration;
 
 /**
- * Event Listener for K8sFlinkTrkMonitor
+ * Event Listener for K8sFlinkTrackMonitor
  *
  * @author Al-assad
  */
@@ -85,14 +85,14 @@ public class K8sFlinkChangeEventListener {
     @Subscribe
     public void persistentK8sFlinkJobStatusChange(FlinkJobStatusChangeEvent event) {
         JobStatusCV jobStatus = event.jobStatus();
-        TrkId trkId = event.trkId();
-        ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trkId.executeMode());
+        TrackId trackId = event.trackId();
+        ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trackId.executeMode());
 
         // get pre application record
         QueryWrapper<Application> query = new QueryWrapper<>();
         query.eq("execution_mode", mode.getMode())
-            .eq("cluster_id", trkId.clusterId())
-            .eq("k8s_namespace", trkId.namespace());
+            .eq("cluster_id", trackId.clusterId())
+            .eq("k8s_namespace", trackId.namespace());
         if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(mode)) {
             query.eq("job_id", jobStatus.jobId());
         }

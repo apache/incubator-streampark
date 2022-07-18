@@ -22,7 +22,10 @@ package com.streamxhub.streamx.console.core.task;
 import static com.streamxhub.streamx.common.enums.ExecutionMode.isKubernetesMode;
 
 import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
+import com.streamxhub.streamx.common.util.YarnUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
@@ -48,6 +51,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.config.RequestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -66,6 +70,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <pre><b>
@@ -268,7 +273,7 @@ public class FlinkTrackingTask {
      */
     private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
         FlinkCluster flinkCluster = getFlinkCluster(application);
-        JobsOverview jobsOverview = application.httpJobsOverview(flinkCluster);
+        JobsOverview jobsOverview = httpJobsOverview(application, flinkCluster);
         Optional<JobsOverview.Job> optional;
         if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
             optional = jobsOverview.getJobs().size() > 1 ? jobsOverview.getJobs().stream().filter(a -> StringUtils.equals(application.getJobId(), a.getId())).findFirst() : jobsOverview.getJobs().stream().findFirst();
@@ -335,7 +340,7 @@ public class FlinkTrackingTask {
             application.setOverview(jobOverview.getTasks());
 
             FlinkCluster flinkCluster = getFlinkCluster(application);
-            Overview override = application.httpOverview(flinkCluster);
+            Overview override = httpOverview(application, flinkCluster);
             if (override != null && override.getSlotsTotal() > 0) {
                 application.setTotalTM(override.getTaskmanagers());
                 application.setTotalSlot(override.getSlotsTotal());
@@ -353,7 +358,7 @@ public class FlinkTrackingTask {
      */
     private void handleCheckPoints(Application application) throws Exception {
         FlinkCluster flinkCluster = getFlinkCluster(application);
-        CheckPoints checkPoints = application.httpCheckpoints(flinkCluster);
+        CheckPoints checkPoints = httpCheckpoints(application, flinkCluster);
         if (checkPoints != null) {
             CheckPoints.Latest latest = checkPoints.getLatest();
             if (latest != null) {
@@ -519,7 +524,7 @@ public class FlinkTrackingTask {
             this.persistentAndClean(application);
         } else {
             // 2)到yarn的restApi中查询状态
-            AppInfo appInfo = application.httpYarnAppInfo();
+            AppInfo appInfo = httpYarnAppInfo(application);
             if (appInfo == null) {
                 if (!ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
                     throw new RuntimeException("flinkTrackingTask getFromYarnRestApi failed ");
@@ -715,12 +720,12 @@ public class FlinkTrackingTask {
     }
 
     private static boolean isKubernetesApp(Application application) {
-        return K8sFlinkTrkMonitorWrapper.isKubernetesApp(application);
+        return K8sFlinkTrackMonitorWrapper.isKubernetesApp(application);
     }
 
     private static boolean isKubernetesApp(Long appId) {
         Application app = TRACKING_MAP.get(appId);
-        return K8sFlinkTrkMonitorWrapper.isKubernetesApp(app);
+        return K8sFlinkTrackMonitorWrapper.isKubernetesApp(app);
     }
 
     private FlinkEnv getFlinkEnv(Application application) {
@@ -746,6 +751,85 @@ public class FlinkTrackingTask {
 
     public static Map<Long, FlinkEnv> getFlinkEnvMap() {
         return FLINK_ENV_MAP;
+    }
+
+    private AppInfo httpYarnAppInfo(Application application) throws Exception {
+        String reqURL = "ws/v1/cluster/apps/".concat(application.getAppId());
+        return yarnRestRequest(reqURL, AppInfo.class);
+    }
+
+    private Overview httpOverview(Application application, FlinkCluster flinkCluster) throws IOException {
+        String appId = application.getAppId();
+        if (appId != null) {
+            if (application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
+                application.getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
+                String format = "proxy/%s/overview";
+                String reqURL = String.format(format, appId);
+                return yarnRestRequest(reqURL, Overview.class);
+                // TODO: yarn-session
+                //String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
+                //return httpGetDoResult(remoteUrl, Overview.class);
+            }
+        }
+        return null;
+    }
+
+    private JobsOverview httpJobsOverview(Application application, FlinkCluster flinkCluster) throws Exception {
+        final String flinkUrl = "jobs/overview";
+        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            String format = "proxy/%s/" + flinkUrl;
+            String reqURL = String.format(format, application.getAppId());
+            JobsOverview jobsOverview = yarnRestRequest(reqURL, JobsOverview.class);
+            if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+                //过滤出当前job
+                List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).collect(Collectors.toList());
+                jobsOverview.setJobs(jobs);
+            }
+            return jobsOverview;
+        } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+            if (application.getJobId() != null) {
+                String remoteUrl = flinkCluster.getActiveAddress().toURL() + "/" + flinkUrl;
+                JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
+                if (jobsOverview != null) {
+                    //过滤出当前job
+                    List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).collect(Collectors.toList());
+                    jobsOverview.setJobs(jobs);
+                }
+                return jobsOverview;
+            }
+        }
+        return null;
+    }
+
+    private CheckPoints httpCheckpoints(Application application, FlinkCluster flinkCluster) throws IOException {
+        final String flinkUrl = "jobs/%s/checkpoints";
+        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            String format = "proxy/%s/" + flinkUrl;
+            String reqURL = String.format(format, application.getAppId(), application.getJobId());
+            return yarnRestRequest(reqURL, CheckPoints.class);
+        } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+            if (application.getJobId() != null) {
+                String remoteUrl = flinkCluster.getActiveAddress().toURL() + "/" + String.format(flinkUrl, application.getJobId());
+                return httpRestRequest(remoteUrl, CheckPoints.class);
+            }
+        }
+        return null;
+    }
+
+    private <T> T yarnRestRequest(String url, Class<T> clazz) throws IOException {
+        String result = YarnUtils.restRequest(url);
+        if (null == result) {
+            return null;
+        }
+        return JacksonUtils.read(result, clazz);
+    }
+
+    private <T> T httpRestRequest(String url, Class<T> clazz) throws IOException {
+        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
+        if (null == result) {
+            return null;
+        }
+        return JacksonUtils.read(result, clazz);
     }
 
 }

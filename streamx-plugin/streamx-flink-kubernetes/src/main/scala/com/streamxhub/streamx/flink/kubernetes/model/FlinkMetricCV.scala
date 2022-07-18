@@ -32,9 +32,6 @@ case class FlinkMetricCV(totalJmMemory: Integer = 0,
                          finishedJob: Integer = 0,
                          cancelledJob: Integer = 0,
                          failedJob: Integer = 0,
-                         checkpointPath: String = null,
-                         isSavepoint: Boolean = false,
-                         checkpointType: String = null,
                          pollAckTime: Long) {
 
   def +(another: FlinkMetricCV): FlinkMetricCV = {
@@ -63,10 +60,7 @@ case class FlinkMetricCV(totalJmMemory: Integer = 0,
       runningJob == another.runningJob &&
       finishedJob == another.finishedJob &&
       cancelledJob == another.cancelledJob &&
-      failedJob == another.failedJob &&
-      checkpointPath == another.checkpointPath &&
-      isSavepoint == another.isSavepoint &&
-      checkpointType == another.checkpointType
+      failedJob == another.failedJob
   }
 
   def nonEqualsPayload(another: FlinkMetricCV): Boolean = !equalsPayload(another)

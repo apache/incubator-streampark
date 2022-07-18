@@ -19,15 +19,11 @@
 
 package com.streamxhub.streamx.flink.kubernetes.event
 
-import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
-import com.streamxhub.streamx.flink.kubernetes.model.TrackId
+import com.streamxhub.streamx.flink.kubernetes.model.{CheckpointCV, TrackId}
 
 /**
- * Notification of expecting changes to flink job state cache
  * held internally by K8sFlinkMonitor.
  *
- * @author Al-assad
+ * @author benjobs
  */
-case class FlinkJobOperaEvent(trackId: TrackId, expectJobState: FlinkJobOpera) extends BuildInEvent
-
-case class FlinkJobOpera(expect: FlinkJobState.Value, pollTime: Long)
+case class FlinkJobCheckpointChangeEvent(trackId: TrackId, checkpoint: CheckpointCV) extends BuildInEvent

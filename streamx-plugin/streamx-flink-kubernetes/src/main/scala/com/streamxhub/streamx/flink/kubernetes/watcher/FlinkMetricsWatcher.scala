@@ -21,8 +21,8 @@ package com.streamxhub.streamx.flink.kubernetes.watcher
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkClusterMetricChangeEvent
-import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, TrkId}
-import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrkCachePool, KubernetesRetriever, MetricWatcherConf}
+import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, TrackId}
+import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackCachePool, KubernetesRetriever, MetricWatcherConfig}
 import org.apache.flink.configuration.{JobManagerOptions, MemorySize, TaskManagerOptions}
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
@@ -42,13 +42,13 @@ import scala.util.{Failure, Success, Try}
  */
 //noinspection DuplicatedCode
 @ThreadSafe
-class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf)
-                        (implicit val cachePool: FlinkTrkCachePool,
+class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.defaultConf)
+                        (implicit val cachePool: FlinkTrackCachePool,
                          implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
 
 
-  private val trkTaskExecPool = Executors.newWorkStealingPool()
-  private implicit val trkTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trkTaskExecPool)
+  private val trackTaskExecPool = Executors.newWorkStealingPool()
+  private implicit val trackTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trackTaskExecPool)
 
   private val timerExec = Executors.newSingleThreadScheduledExecutor()
   private var timerSchedule: ScheduledFuture[_] = _
@@ -62,7 +62,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
   // noinspection DuplicatedCode
   override def start(): Unit = this.synchronized {
     if (!isStarted) {
-      timerSchedule = timerExec.scheduleAtFixedRate(() => trackingTask(), 0, conf.sglTrkTaskIntervalSec, TimeUnit.SECONDS)
+      timerSchedule = timerExec.scheduleAtFixedRate(() => watch(), 0, conf.requestIntervalSec, TimeUnit.SECONDS)
       isStarted = true
       logInfo("[flink-k8s] FlinkMetricWatcher started.")
     }
@@ -89,19 +89,19 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
       isStarted = false
     }
     Try(timerExec.shutdownNow())
-    Try(trkTaskExecutor.shutdownNow())
+    Try(trackTaskExecutor.shutdownNow())
     logInfo("[flink-k8s] FlinkMetricWatcher closed.")
   }
 
   /**
    * single flink metrics tracking task
    */
-  private def trackingTask(): Unit = {
+  override def watch(): Unit = {
     // get all legal tracking cluster key
-    val trkIds: Set[TrkId] = Try(cachePool.collectTrks()).filter(_.nonEmpty).getOrElse(return)
+    val trackIds: Set[TrackId] = Try(cachePool.collectTracks()).filter(_.nonEmpty).getOrElse(return)
     // retrieve flink metrics in thread pool
-    val trkFutures: Set[Future[Option[(ClusterKey, FlinkMetricCV)]]] =
-      trkIds.map(id => {
+    val futures: Set[Future[Option[(ClusterKey, FlinkMetricCV)]]] =
+      trackIds.map(id => {
         val future = Future(collectMetrics(id))
         future.filter(_.nonEmpty).foreach {
           result =>
@@ -120,12 +120,12 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
       })
     // blocking until all future are completed or timeout is reached
     Try {
-      val futureHold = Future.sequence(trkFutures)
-      Await.ready(futureHold, conf.sglTrkTaskTimeoutSec seconds)
+      val futureHold = Future.sequence(futures)
+      Await.ready(futureHold, conf.requestTimeoutSec seconds)
     }.failed.map { _ =>
       logError(s"[FlinkMetricWatcher] tracking flink metrics on kubernetes mode timeout," +
-        s" limitSeconds=${conf.sglTrkTaskTimeoutSec}," +
-        s" trackingClusterKeys=${trkIds.mkString(",")}")
+        s" limitSeconds=${conf.requestTimeoutSec}," +
+        s" trackingClusterKeys=${trackIds.mkString(",")}")
     }
   }
 
@@ -137,7 +137,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
    * This method can be called directly from outside, without affecting the
    * current cachePool result.
    */
-  def collectMetrics(id: TrkId): Option[(ClusterKey, FlinkMetricCV)] = {
+  def collectMetrics(id: TrackId): Option[(ClusterKey, FlinkMetricCV)] = {
     // get flink rest api
     val clusterKey: ClusterKey = ClusterKey.of(id)
     val flinkJmRestUrl = cachePool.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
@@ -146,16 +146,6 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
     val flinkOverview: FlinkRestOverview = Try(
       FlinkRestOverview.as(
         Request.get(s"$flinkJmRestUrl/overview")
-          .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-          .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
-          .execute.returnContent.asString(StandardCharsets.UTF_8)
-      )
-    ).getOrElse(return None)
-
-    // call flink rest overview api
-    val checkpoint: Checkpoint = Try(
-      Checkpoint.as(
-          Request.get(s"$flinkJmRestUrl/jobs/${id.jobId}/checkpoints")
           .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
           .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
           .execute.returnContent.asString(StandardCharsets.UTF_8)
@@ -187,9 +177,6 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
         finishedJob = flinkOverview.jobsFinished,
         cancelledJob = flinkOverview.jobsCancelled,
         failedJob = flinkOverview.jobsFailed,
-        checkpointPath = checkpoint.externalPath,
-        isSavepoint = checkpoint.isSavepoint,
-        checkpointType = checkpoint.checkpointType,
         pollAckTime = ackTime)
     }
     Some(clusterKey -> flinkMetricCV)
@@ -232,37 +219,6 @@ object FlinkRestOverview {
   }
 
 }
-
-
-private[kubernetes] case class Checkpoint(id: Long,
-                                          status: String,
-                                          externalPath: String,
-                                          isSavepoint: Boolean,
-                                          checkpointType: String)
-
-
-object Checkpoint {
-
-  @transient
-  implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
-
-  def as(json: String): Checkpoint = {
-    Try(parse(json)) match {
-      case Success(ok) =>
-        val completed = ok \ "latest" \ "completed"
-        Checkpoint(
-          id = (completed \ "id").extractOpt[Long].getOrElse(0L),
-          status = (completed \ "status").extractOpt[String].getOrElse(null),
-          externalPath = (completed \ "external_path").extractOpt[String].getOrElse(null),
-          isSavepoint = (completed \ "is_savepoint").extractOpt[Boolean].getOrElse(false),
-          checkpointType = (completed \ "checkpoint_type").extractOpt[String].getOrElse(null)
-        )
-      case Failure(_) => null
-    }
-  }
-
-}
-
 
 /**
  * bean for response message of flink-rest/jobmanager/config

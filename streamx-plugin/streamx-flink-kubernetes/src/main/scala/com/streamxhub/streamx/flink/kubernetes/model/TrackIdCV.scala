@@ -16,15 +16,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.streamxhub.streamx.flink.packer.docker
 
-import com.streamxhub.streamx.common.util.Logger
-
+package com.streamxhub.streamx.flink.kubernetes.model
 
 /**
- * @author Al-assad
+ * author:Al-assad
+ *
+ * @param updateTime last update time for current key
  */
-object DockerTool extends Logger {
-
-
-}
+case class TrackIdCV(updateTime: Long)

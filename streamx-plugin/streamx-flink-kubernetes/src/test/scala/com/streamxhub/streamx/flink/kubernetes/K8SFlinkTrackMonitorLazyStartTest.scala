@@ -20,40 +20,40 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper._
-import com.streamxhub.streamx.flink.kubernetes.model.TrkId
+import com.streamxhub.streamx.flink.kubernetes.helper.TrackMonitorDebugHelper._
+import com.streamxhub.streamx.flink.kubernetes.model.TrackId
 import org.junit.jupiter.api.{BeforeEach, Test}
 
 import scala.language.implicitConversions
 import scala.util.Try
 
-class K8sFlinkTrkMonitorLazyStartTest {
+class K8SFlinkTrackMonitorLazyStartTest {
 
-  implicit var trkMonitor: K8sFlinkTrkMonitor = _
+  implicit var trackMonitor: K8sFlinkTrackMonitor = _
 
-  private val trkIds = Array(
-    TrkId.onSession("default", "flink-session", "2333"),
-    TrkId.onApplication("default", "flink-app2"),
-    TrkId.onApplication("default", "flink-app4"))
+  private val trackIds = Array(
+    TrackId.onSession("default", "flink-session", "2333"),
+    TrackId.onApplication("default", "flink-app2"),
+    TrackId.onApplication("default", "flink-app4"))
 
 
   @BeforeEach
   private def init(): Unit = {
-    if (trkMonitor != null) Try(trkMonitor.close())
-    trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf, lazyStart = true)
+    if (trackMonitor != null) Try(trackMonitor.close())
+    trackMonitor = K8sFlinkTrackMonitorFactory.createInstance(FlinkTrackConfig.debugConf, lazyStart = true)
   }
 
   // test lazy start
   @Test def testMonitorLazyStart(): Unit = {
-    watchTrkIdsCacheSize
+    watchTrackIdsCacheSize
     watchJobStatusCacheSize
     watchAggClusterMetricsCache
     watchK8sEventCache
-    trkIds.foreach(trkMonitor.trackingJob)
+    trackIds.foreach(trackMonitor.trackingJob)
     Thread.sleep(30 * 1000)
-    trkMonitor.trackingJob(TrkId.onApplication("default", "flink-app3"))
+    trackMonitor.trackingJob(TrackId.onApplication("default", "flink-app3"))
     Thread.sleep(20 * 1000)
-    trkMonitor.unTrackingJob(TrkId.onApplication("default", "flink-app3"))
+    trackMonitor.unTrackingJob(TrackId.onApplication("default", "flink-app3"))
     while (true) {}
   }
 
