@@ -89,7 +89,8 @@
         <caffeine.version>2.8.6</caffeine.version>
 
         <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
-        <checkstyle.fails.on.error>true</checkstyle.fails.on.error>
+        <checkstyle.fails.on.error>ture</checkstyle.fails.on.error>
+        <scalastyle.fails.on.error>true</scalastyle.fails.on.error>
         <scalastyle-maven-plugin.version>1.0.0</scalastyle-maven-plugin.version>
         <streamx.shaded.package>com.streamxhub.streamx.shaded</streamx.shaded.package>
         <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
@@ -444,7 +445,7 @@
                     <version>${scalastyle-maven-plugin.version}</version>
                     <configuration>
                         <verbose>false</verbose>
-                        <failOnViolation>true</failOnViolation>
+                        <failOnViolation>${scalastyle.fails.on.error}</failOnViolation>
                         <includeTestSourceDirectory>false</includeTestSourceDirectory>
                         <failOnWarning>false</failOnWarning>
                         <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
