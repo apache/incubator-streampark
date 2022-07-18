@@ -54,6 +54,7 @@ import scala.Enumeration;
 
 /**
  * Event Listener for K8sFlinkTrkMonitor
+ *
  * @author Al-assad
  */
 public class K8sFlinkChangeEventListener {
@@ -156,7 +157,6 @@ public class K8sFlinkChangeEventListener {
         return app;
     }
 
-
     /**
      * Catch FlinkClusterMetricChangeEvent then storage it persistently to db.
      * Actually update com.streamxhub.streamx.console.core.entity.Application records.
@@ -178,6 +178,7 @@ public class K8sFlinkChangeEventListener {
             .set("total_tm", metrics.totalTm())
             .set("total_slot", metrics.totalSlot())
             .set("available_slot", metrics.availableSlot());
+
         update.eq("execution_mode", mode.getMode())
             .eq("cluster_id", clusterKey.clusterId())
             .eq("k8s_namespace", clusterKey.namespace())

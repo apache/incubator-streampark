@@ -80,14 +80,14 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
   /**
    * collect all legal tracking ids, and covert to ClusterKey
    */
-  private[kubernetes] def collectTrkClusterKeys(): Set[ClusterKey] = collectAllTrackIds().filter(_.isLegal).map(_.toClusterKey)
+  private[kubernetes] def collectTrks(): Set[TrkId] = collectAllTrackIds().filter(_.isLegal)
 
   /**
    * collect the aggregation of flink metrics that in tracking
    */
   def collectAccMetric(): FlinkMetricCV = {
     // get cluster metrics that in tracking
-    collectTrkClusterKeys() match {
+    collectTrks() match {
       case k if k.isEmpty => FlinkMetricCV.empty
       case k =>
         flinkMetrics.getAllPresent(k) match {
@@ -110,7 +110,9 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
    */
   def refreshClusterRestUrl(clusterKey: ClusterKey): Option[String] = {
     val restUrl = KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
-    if (restUrl.nonEmpty) clusterRestUrls.put(clusterKey, restUrl.get)
+    if (restUrl.nonEmpty) {
+      clusterRestUrls.put(clusterKey, restUrl.get)
+    }
     restUrl
   }
 

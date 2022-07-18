@@ -21,12 +21,13 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
-import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
+import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, TrkId}
 import org.junit.jupiter.api.Test
 
 /**
  * test single tracking task
  */
+// scalastyle:off println
 class SingleTrackingTaskTest {
 
   val trkMonitor: DefaultK8sFlinkTrkMonitor = K8sFlinkTrkMonitorFactory.createInstance().asInstanceOf[DefaultK8sFlinkTrkMonitor]
@@ -48,12 +49,12 @@ class SingleTrackingTaskTest {
   // retrieve flink metric
   @Test def testSingleTrackingFlinkMetrics(): Unit = {
     // session
-    var metrics = trkMonitor.metricsWatcher.collectMetrics(ClusterKey(SESSION, "flink-session", "default"))
+    var metrics = trkMonitor.metricsWatcher.collectMetrics(TrkId(SESSION, "flink-session", "default", "60dd003f048a5b2f92f0874e6612146c"))
     println(s"result1 = ${metrics.map(_.toString).getOrElse("empty result")}")
     // application
-    metrics = trkMonitor.metricsWatcher.collectMetrics(ClusterKey(APPLICATION, "flink-app2", "default"))
+    metrics = trkMonitor.metricsWatcher.collectMetrics(TrkId(APPLICATION, "flink-app2", "default", "60dd003f048a5b2f92f0874e6612146c"))
     println(s"result2 = ${metrics.map(_.toString).getOrElse("empty result")}")
-    metrics = trkMonitor.metricsWatcher.collectMetrics(ClusterKey(APPLICATION, "flink-app3", "default"))
+    metrics = trkMonitor.metricsWatcher.collectMetrics(TrkId(APPLICATION, "flink-app3", "default", "60dd003f048a5b2f92f0874e6612146c"))
     println(s"result3 = ${metrics.map(_.toString).getOrElse("empty result")}")
   }
 
