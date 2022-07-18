@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
-import com.streamxhub.streamx.flink.kubernetes.network.FlinkJobIngress
+import com.streamxhub.streamx.flink.kubernetes.IngressController
 import com.streamxhub.streamx.flink.packer.pipeline.DockerImageBuildResponse
 import com.streamxhub.streamx.flink.submit.bean._
 import org.apache.commons.lang3.StringUtils
@@ -99,7 +99,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val jobID = JobID.fromHexString(cancelRequest.jobId)
       val actionResult = cancelJob(cancelRequest, jobID, client)
-      FlinkJobIngress.deleteIngress(cancelRequest.clusterId, cancelRequest.kubernetesNamespace)
+      IngressController.deleteIngress(cancelRequest.clusterId, cancelRequest.kubernetesNamespace)
       CancelResponse(actionResult)
     } catch {
       case e: Exception =>

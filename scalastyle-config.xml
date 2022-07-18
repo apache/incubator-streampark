@@ -220,7 +220,7 @@ This file is divided into 3 sections:
     <!-- Doesn't seem super big deal here ... -->
     <check level="error" class="org.scalastyle.file.FileLengthChecker" enabled="true">
         <parameters>
-            <parameter name="maxFileLength">800</parameter>
+            <parameter name="maxFileLength">1200</parameter>
         </parameters>
     </check>
 

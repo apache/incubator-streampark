@@ -25,8 +25,7 @@ import com.google.common.collect.Sets
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.fs.LfsOperator
 import com.streamxhub.streamx.common.util.ThreadUtils
-import com.streamxhub.streamx.flink.kubernetes.PodTemplateTool
-import com.streamxhub.streamx.flink.kubernetes.network.FlinkJobIngress
+import com.streamxhub.streamx.flink.kubernetes.{IngressController, PodTemplateTool}
 import com.streamxhub.streamx.flink.packer.docker._
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.packer.pipeline.BuildPipeline.executor
@@ -200,7 +199,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
         ""
       case _ =>
         execStep(8) {
-          val ingressOutputPath = FlinkJobIngress.prepareIngressTemplateFiles(buildWorkspace, request.ingressTemplate)
+          val ingressOutputPath = IngressController.prepareIngressTemplateFiles(buildWorkspace, request.ingressTemplate)
           logInfo(s"export flink ingress: ${ingressOutputPath}")
           ingressOutputPath
         }.getOrElse(throw getError.exception)

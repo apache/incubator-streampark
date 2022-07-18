@@ -78,10 +78,10 @@ import com.streamxhub.streamx.console.core.service.SavePointService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.flink.core.conf.ParameterCli;
+import com.streamxhub.streamx.flink.kubernetes.IngressController;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
-import com.streamxhub.streamx.flink.kubernetes.network.FlinkJobIngress;
 import com.streamxhub.streamx.flink.packer.pipeline.BuildResult;
 import com.streamxhub.streamx.flink.packer.pipeline.DockerImageBuildResponse;
 import com.streamxhub.streamx.flink.packer.pipeline.ShadedBuildResponse;
@@ -1203,6 +1203,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         BuildResult buildResult = buildPipeline.getBuildResult();
         if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
             buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
+        } else {
+            if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
+                DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
+                String ingressTemplates = application.getIngressTemplate();
+                String domainName = application.getDefaultModeIngress();
+                if (StringUtils.isNotBlank(ingressTemplates)) {
+                    String ingressOutput = result.workspacePath() + "/ingress.yaml";
+                    IngressController.configureIngress(ingressOutput);
+                }
+                if (StringUtils.isNotBlank(domainName)) {
+                    IngressController.configureIngress(domainName, application.getClusterId(), application.getK8sNamespace());
+                }
+            }
         }
 
         SubmitRequest submitRequest = new SubmitRequest(
@@ -1223,18 +1236,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             kubernetesSubmitParam,
             extraParameter
         );
-
-        DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
-
-        String ingressTemplates = application.getIngressTemplate();
-        String domainName = application.getDefaultModeIngress();
-        if (StringUtils.isNotBlank(ingressTemplates)) {
-            String ingressOutput = result.workspacePath() + "/ingress.yaml";
-            FlinkJobIngress.configureIngress(ingressOutput);
-        }
-        if (StringUtils.isNotBlank(domainName)) {
-            FlinkJobIngress.configureIngress(domainName, application.getClusterId(), application.getK8sNamespace());
-        }
 
         CompletableFuture<SubmitResponse> future = CompletableFuture.supplyAsync(() -> FlinkSubmitter.submit(submitRequest), executorService);
 
