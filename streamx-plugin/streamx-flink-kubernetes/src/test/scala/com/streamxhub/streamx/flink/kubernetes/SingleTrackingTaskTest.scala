@@ -35,26 +35,26 @@ class SingleTrackingTaskTest {
   // retrieve flink job status  info
   @Test def testSingleTrackingFlinkJobStatus(): Unit = {
     // test session job
-    val jobStatus1 = trackMonitor.jobStatusWatcher.touchSessionAllJob("flink-session", "default")
+    val jobStatus1 = trackMonitor.jobStatusWatcher.touchSessionAllJob("flink-session", "default", 0L)
     println("result1 = ")
     jobStatus1.foreach(println)
 
     // test application job
-    val jobStatus2 = trackMonitor.jobStatusWatcher.touchApplicationJob("flink-app2", "default")
+    val jobStatus2 = trackMonitor.jobStatusWatcher.touchApplicationJob("flink-app2", "default", 0L, "60dd003f048a5b2f92f0874e6612146c")
     println(s"result2 = ${jobStatus2.map(_.toString).getOrElse("empty result")}")
-    val jobStatus3 = trackMonitor.jobStatusWatcher.touchApplicationJob("flink-app3", "default")
+    val jobStatus3 = trackMonitor.jobStatusWatcher.touchApplicationJob("flink-app3", "default", 0L, "60dd003f048a5b2f92f0874e6612146c")
     println(s"result3 = ${jobStatus3.map(_.toString).getOrElse("empty result")}")
   }
 
   // retrieve flink metric
   @Test def testSingleTrackingFlinkMetrics(): Unit = {
     // session
-    var metrics = trackMonitor.metricsWatcher.collectMetrics(TrackId(SESSION, "flink-session", "default", "60dd003f048a5b2f92f0874e6612146c"))
+    var metrics = trackMonitor.metricsWatcher.collectMetrics(TrackId(SESSION, "flink-session", "default", 0L, "60dd003f048a5b2f92f0874e6612146c"))
     println(s"result1 = ${metrics.map(_.toString).getOrElse("empty result")}")
     // application
-    metrics = trackMonitor.metricsWatcher.collectMetrics(TrackId(APPLICATION, "flink-app2", "default", "60dd003f048a5b2f92f0874e6612146c"))
+    metrics = trackMonitor.metricsWatcher.collectMetrics(TrackId(APPLICATION, "flink-app2", "default", 0L, "60dd003f048a5b2f92f0874e6612146c"))
     println(s"result2 = ${metrics.map(_.toString).getOrElse("empty result")}")
-    metrics = trackMonitor.metricsWatcher.collectMetrics(TrackId(APPLICATION, "flink-app3", "default", "60dd003f048a5b2f92f0874e6612146c"))
+    metrics = trackMonitor.metricsWatcher.collectMetrics(TrackId(APPLICATION, "flink-app3", "default", 0L, "60dd003f048a5b2f92f0874e6612146c"))
     println(s"result3 = ${metrics.map(_.toString).getOrElse("empty result")}")
   }
 

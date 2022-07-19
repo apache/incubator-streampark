@@ -38,7 +38,7 @@ import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 /**
- * auther:Al-assad
+ * author:Al-assad
  */
 //noinspection DuplicatedCode
 @ThreadSafe

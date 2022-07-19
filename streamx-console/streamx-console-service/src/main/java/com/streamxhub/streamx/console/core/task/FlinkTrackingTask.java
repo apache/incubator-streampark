@@ -29,8 +29,6 @@ import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
-import com.streamxhub.streamx.console.core.entity.SavePoint;
-import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.OptionState;
@@ -48,7 +46,6 @@ import com.streamxhub.streamx.console.core.service.alert.AlertService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
@@ -132,6 +129,9 @@ public class FlinkTrackingTask {
     @Autowired
     private FlinkClusterService flinkClusterService;
 
+    @Autowired
+    private CheckpointProcessor checkpointProcessor;
+
     /**
      * 常用版本更新
      */
@@ -140,10 +140,6 @@ public class FlinkTrackingTask {
     private static final Map<Long, FlinkCluster> FLINK_CLUSTER_MAP = new ConcurrentHashMap<>(0);
 
     private static ApplicationService applicationService;
-
-    private static final Map<String, Long> CHECK_POINT_MAP = new ConcurrentHashMap<>(0);
-
-    private static final Map<String, Counter> CHECK_POINT_FAILED_MAP = new ConcurrentHashMap<>(0);
 
     private static final Map<Long, OptionState> OPTIONING = new ConcurrentHashMap<>(0);
 
@@ -360,46 +356,7 @@ public class FlinkTrackingTask {
         FlinkCluster flinkCluster = getFlinkCluster(application);
         CheckPoints checkPoints = httpCheckpoints(application, flinkCluster);
         if (checkPoints != null) {
-            CheckPoints.Latest latest = checkPoints.getLatest();
-            if (latest != null) {
-                CheckPoints.CheckPoint checkPoint = latest.getCompleted();
-                if (checkPoint != null) {
-                    CheckPointStatus status = checkPoint.getCheckPointStatus();
-                    if (CheckPointStatus.COMPLETED.equals(status)) {
-                        Long latestId = CHECK_POINT_MAP.get(application.getJobId());
-                        if (latestId == null || latestId < checkPoint.getId()) {
-                            SavePoint savePoint = new SavePoint();
-                            savePoint.setAppId(application.getId());
-                            savePoint.setLatest(true);
-                            savePoint.setType(checkPoint.getCheckPointType().get());
-                            savePoint.setPath(checkPoint.getExternalPath());
-                            savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
-                            savePoint.setCreateTime(new Date());
-                            savePointService.save(savePoint);
-                            CHECK_POINT_MAP.put(application.getJobId(), checkPoint.getId());
-                        }
-                    } else if (CheckPointStatus.FAILED.equals(status) && application.cpFailedTrigger()) {
-                        Counter counter = CHECK_POINT_FAILED_MAP.get(application.getJobId());
-                        if (counter == null) {
-                            CHECK_POINT_FAILED_MAP.put(application.getJobId(), new Counter(checkPoint.getTriggerTimestamp()));
-                        } else {
-                            //x分钟之内超过Y次CheckPoint失败触发动作
-                            long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
-                            if (minute <= application.getCpFailureRateInterval()
-                                && counter.getCount() >= application.getCpMaxFailureInterval()) {
-                                CHECK_POINT_FAILED_MAP.remove(application.getJobId());
-                                if (application.getCpFailureAction() == 1) {
-                                    alertService.alert(application, CheckPointStatus.FAILED);
-                                } else {
-                                    applicationService.restart(application);
-                                }
-                            } else {
-                                counter.add();
-                            }
-                        }
-                    }
-                }
-            }
+            checkpointProcessor.process(application.getId(), checkPoints);
         }
     }
 
@@ -698,25 +655,6 @@ public class FlinkTrackingTask {
 
     public static Application getTracking(Long appId) {
         return TRACKING_MAP.get(appId);
-    }
-
-    @Data
-    public static class Counter {
-        private Long timestamp;
-        private Integer count;
-
-        public Counter(Long timestamp) {
-            this.timestamp = timestamp;
-            this.count = 1;
-        }
-
-        public void add() {
-            this.count += 1;
-        }
-
-        public long getDuration(Long currentTimestamp) {
-            return (currentTimestamp - this.getTimestamp()) / 1000 / 60;
-        }
     }
 
     private static boolean isKubernetesApp(Application application) {

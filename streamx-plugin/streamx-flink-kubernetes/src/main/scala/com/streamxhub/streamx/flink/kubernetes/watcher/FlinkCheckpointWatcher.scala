@@ -37,7 +37,7 @@ import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 /**
- * auther: benjobs
+ * author: benjobs
  */
 
 @ThreadSafe
@@ -135,13 +135,16 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
           .execute.returnContent.asString(StandardCharsets.UTF_8)
       )
     ).getOrElse(return None)
-    val ackTime = System.currentTimeMillis
+
     val checkpointCV = CheckpointCV(
+      appId = id.appId,
       id = checkpoint.id,
-      checkpointPath = checkpoint.externalPath,
+      externalPath = checkpoint.externalPath,
       isSavepoint = checkpoint.isSavepoint,
       checkpointType = checkpoint.checkpointType,
-      pollAckTime = ackTime)
+      status = checkpoint.status,
+      triggerTimestamp = checkpoint.triggerTimestamp
+    )
     Some(checkpointCV)
   }
 
@@ -151,7 +154,8 @@ private[kubernetes] case class Checkpoint(id: Long,
                                           status: String,
                                           externalPath: String,
                                           isSavepoint: Boolean,
-                                          checkpointType: String)
+                                          checkpointType: String,
+                                          triggerTimestamp: Long)
 
 
 object Checkpoint {
@@ -168,7 +172,8 @@ object Checkpoint {
           status = (completed \ "status").extractOpt[String].getOrElse(null),
           externalPath = (completed \ "external_path").extractOpt[String].getOrElse(null),
           isSavepoint = (completed \ "is_savepoint").extractOpt[Boolean].getOrElse(false),
-          checkpointType = (completed \ "checkpoint_type").extractOpt[String].getOrElse(null)
+          checkpointType = (completed \ "checkpoint_type").extractOpt[String].getOrElse(null),
+          triggerTimestamp = (completed \ "trigger_timestamp").extractOpt[Long].getOrElse(0L)
         )
       case Failure(_) => null
     }

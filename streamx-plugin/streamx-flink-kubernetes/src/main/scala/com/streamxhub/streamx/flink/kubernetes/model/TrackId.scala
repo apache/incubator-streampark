@@ -21,7 +21,6 @@ package com.streamxhub.streamx.flink.kubernetes.model
 
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 
-import javax.annotation.Nullable
 import scala.util.Try
 
 /**
@@ -31,7 +30,8 @@ import scala.util.Try
 case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
                    namespace: String = "default",
                    clusterId: String,
-                   @Nullable jobId: String) {
+                   appId: Long,
+                   jobId: String) {
 
   /**
    * check whether fields of trackId are legal
@@ -65,11 +65,11 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
 }
 
 object TrackId {
-  def onSession(namespace: String, clusterId: String, jobId: String): TrackId = {
-    this (FlinkK8sExecuteMode.SESSION, namespace, clusterId, jobId)
+  def onSession(namespace: String, clusterId: String, appId: Long, jobId: String): TrackId = {
+    this (FlinkK8sExecuteMode.SESSION, namespace, clusterId, appId, jobId)
   }
 
-  def onApplication(namespace: String, clusterId: String): TrackId = {
-    this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, "")
+  def onApplication(namespace: String, clusterId: String, appId: Long, jobId: String): TrackId = {
+    this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, jobId)
   }
 }

@@ -40,7 +40,7 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
   // cache for tracking identifiers
   val trackIds: Cache[TrackId, TrackIdCV] = Caffeine.newBuilder.build()
 
-  // cache for flink Jobmanager rest url
+  // cache for flink Job-manager rest url
   val clusterRestUrls: Cache[ClusterKey, String] = Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build()
 
   // cache for tracking flink job status

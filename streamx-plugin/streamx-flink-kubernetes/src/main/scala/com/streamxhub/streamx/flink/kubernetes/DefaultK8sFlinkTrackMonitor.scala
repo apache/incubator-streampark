@@ -103,11 +103,11 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
       trackId.executeMode match {
         case SESSION =>
           jobStatusWatcher
-            .touchSessionJob(trackId.clusterId, trackId.namespace, Set(trackId.jobId))
+            .touchSessionJob(trackId.clusterId, trackId.namespace, trackId.appId, trackId.jobId)
             .exists(e => nonLost(e._2.jobState))
         case APPLICATION =>
           jobStatusWatcher
-            .touchApplicationJob(trackId.clusterId, trackId.namespace)
+            .touchApplicationJob(trackId.clusterId, trackId.namespace, trackId.appId, trackId.jobId)
             .exists(e => nonLost(e._2.jobState))
         case _ => false
       }

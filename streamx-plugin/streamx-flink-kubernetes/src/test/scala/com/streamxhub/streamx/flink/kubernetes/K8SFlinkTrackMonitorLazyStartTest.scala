@@ -32,9 +32,9 @@ class K8SFlinkTrackMonitorLazyStartTest {
   implicit var trackMonitor: K8sFlinkTrackMonitor = _
 
   private val trackIds = Array(
-    TrackId.onSession("default", "flink-session", "2333"),
-    TrackId.onApplication("default", "flink-app2"),
-    TrackId.onApplication("default", "flink-app4"))
+    TrackId.onSession("default", "flink-session", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"),
+    TrackId.onApplication("default", "flink-app2", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"),
+    TrackId.onApplication("default", "flink-app4", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"))
 
 
   @BeforeEach
@@ -51,9 +51,9 @@ class K8SFlinkTrackMonitorLazyStartTest {
     watchK8sEventCache
     trackIds.foreach(trackMonitor.trackingJob)
     Thread.sleep(30 * 1000)
-    trackMonitor.trackingJob(TrackId.onApplication("default", "flink-app3"))
+    trackMonitor.trackingJob(TrackId.onApplication("default", "flink-app3", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"))
     Thread.sleep(20 * 1000)
-    trackMonitor.unTrackingJob(TrackId.onApplication("default", "flink-app3"))
+    trackMonitor.unTrackingJob(TrackId.onApplication("default", "flink-app3", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"))
     while (true) {}
   }
 

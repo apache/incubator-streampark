@@ -58,6 +58,7 @@ import scala.Enumeration;
  * future, both tracking-on-k8s and tracking-on-yarn will exist as plugins
  * for this unified implementation.
  * <p>
+ *
  * @author Al-assad
  */
 @Configuration
@@ -72,6 +73,12 @@ public class K8sFlinkTrackMonitorWrapper {
     @Lazy
     @Autowired
     private AlertService alertService;
+
+
+    @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+    @Lazy
+    @Autowired
+    private CheckpointProcessor checkpointProcessor;
 
     /**
      * Register FlinkTrackMonitor bean for tracking flink job on kubernetes.
@@ -95,7 +102,7 @@ public class K8sFlinkTrackMonitorWrapper {
 
     private void initK8sFlinkTrackMonitor(@Nonnull K8sFlinkTrackMonitor trackMonitor) {
         // register change event listener
-        trackMonitor.registerListener(new K8sFlinkChangeEventListener(applicationService, alertService));
+        trackMonitor.registerListener(new K8sFlinkChangeEventListener(applicationService, alertService, checkpointProcessor));
         // recovery tracking list
         List<TrackId> k8sApp = getK8sTrackingApplicationFromDB();
         k8sApp.forEach(trackMonitor::trackingJob);
@@ -137,9 +144,9 @@ public class K8sFlinkTrackMonitorWrapper {
         public static TrackId toTrackId(@Nonnull Application app) {
             Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
             if (FlinkK8sExecuteMode.APPLICATION().equals(mode)) {
-                return TrackId.onApplication(app.getK8sNamespace(), app.getClusterId());
+                return TrackId.onApplication(app.getK8sNamespace(), app.getClusterId(), app.getId(), app.getJobId());
             } else if (FlinkK8sExecuteMode.SESSION().equals(mode)) {
-                return TrackId.onSession(app.getK8sNamespace(), app.getClusterId(), app.getJobId());
+                return TrackId.onSession(app.getK8sNamespace(), app.getClusterId(),  app.getId(), app.getJobId());
             } else {
                 throw new IllegalArgumentException("Illegal K8sExecuteMode, mode=" + app.getExecutionMode());
             }

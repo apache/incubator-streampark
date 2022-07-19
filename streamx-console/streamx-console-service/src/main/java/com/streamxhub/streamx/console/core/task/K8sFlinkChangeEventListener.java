@@ -27,12 +27,14 @@ import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.OptionState;
+import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.alert.AlertService;
 import com.streamxhub.streamx.flink.kubernetes.IngressController;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkClusterMetricChangeEvent;
+import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobCheckpointChangeEvent;
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent;
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
@@ -62,6 +64,8 @@ public class K8sFlinkChangeEventListener {
     private final ApplicationService applicationService;
     private final AlertService alertService;
 
+    private final CheckpointProcessor checkpointProcessor;
+
     private final ExecutorService executor = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors(),
         100,
@@ -72,9 +76,12 @@ public class K8sFlinkChangeEventListener {
         new ThreadPoolExecutor.AbortPolicy()
     );
 
-    public K8sFlinkChangeEventListener(ApplicationService applicationService, AlertService alertService) {
+    public K8sFlinkChangeEventListener(ApplicationService applicationService,
+                                       AlertService alertService,
+                                       CheckpointProcessor checkpointProcessor) {
         this.applicationService = applicationService;
         this.alertService = alertService;
+        this.checkpointProcessor = checkpointProcessor;
     }
 
     /**
@@ -185,6 +192,25 @@ public class K8sFlinkChangeEventListener {
             .eq("tracking", 1);
 
         applicationService.update(update);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    @Subscribe
+    public void persistentK8sFlinkCheckpointChange(FlinkJobCheckpointChangeEvent event) {
+        CheckPoints.CheckPoint completed = new CheckPoints.CheckPoint();
+        completed.setCheckpointType(event.checkpoint().checkpointType());
+        completed.setExternalPath(event.checkpoint().externalPath());
+        completed.setIsSavepoint(event.checkpoint().isSavepoint());
+        completed.setStatus(event.checkpoint().status());
+        completed.setTriggerTimestamp(event.checkpoint().triggerTimestamp());
+
+        CheckPoints.Latest latest = new CheckPoints.Latest();
+        latest.setCompleted(completed);
+
+        CheckPoints checkPoint = new CheckPoints();
+        checkPoint.setLatest(latest);
+
+        checkpointProcessor.process(event.trackId().appId(), checkPoint);
     }
 
 }

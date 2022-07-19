@@ -34,7 +34,7 @@ import scala.util.Try
  * Currently only flink-native-application mode events would be tracked.
  * The results of traced events would written into cachePool.
  *
- * auther:Al-assad
+ * author:Al-assad
  */
 @ThreadSafe
 class FlinkK8sEventWatcher(implicit cachePool: FlinkTrackCachePool) extends Logger with FlinkWatcher {
