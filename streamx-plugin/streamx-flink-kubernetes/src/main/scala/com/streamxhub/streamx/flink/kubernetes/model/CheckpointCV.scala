@@ -17,13 +17,11 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.kubernetes.event
+package com.streamxhub.streamx.flink.kubernetes.model
 
-import com.streamxhub.streamx.flink.kubernetes.model.{JobStatusCV, TrackId}
-
-/**
- * Notification of flink job state changes from k8s clusters.
- *
- * @author Al-assad
- */
-case class FlinkJobStatusChangeEvent(trackId: TrackId, jobStatus: JobStatusCV) extends BuildInEvent
+case class CheckpointCV(id: Long,
+                        status: String,
+                        externalPath: String,
+                        isSavepoint: Boolean,
+                        checkpointType: String,
+                        triggerTimestamp: Long)

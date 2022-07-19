@@ -30,6 +30,6 @@ case class ClusterKey(executeMode: FlinkK8sExecuteMode.Value,
                       clusterId: String)
 
 object ClusterKey {
-  def of(trkId: TrkId): ClusterKey = ClusterKey(trkId.executeMode, trkId.namespace, trkId.clusterId)
+  def of(trackId: TrackId): ClusterKey = ClusterKey(trackId.executeMode, trackId.namespace, trackId.clusterId)
 }
 

@@ -24,4 +24,4 @@ package com.streamxhub.streamx.flink.kubernetes.model
  *
  * @param updateTime last update time for current key
  */
-case class TrkIdCV(updateTime: Long)
+case class TrackIdCV(updateTime: Long)

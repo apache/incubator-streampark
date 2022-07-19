@@ -16,15 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.streamxhub.streamx.flink.packer.docker
 
-import com.streamxhub.streamx.common.util.Logger
+package com.streamxhub.streamx.flink.kubernetes.event
 
+import com.streamxhub.streamx.flink.kubernetes.model.{CheckpointCV, TrackId}
 
 /**
- * @author Al-assad
+ * held internally by K8sFlinkMonitor.
+ *
+ * @author benjobs
  */
-object DockerTool extends Logger {
-
-
-}
+case class FlinkJobCheckpointChangeEvent(trackId: TrackId, checkpoint: CheckpointCV) extends BuildInEvent

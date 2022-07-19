@@ -35,16 +35,16 @@ import scala.util.Try
  * Tracking info cache pool on flink kubernetes mode.
  * author:Al-assad
  */
-class FlinkTrkCachePool extends Logger with AutoCloseable {
+class FlinkTrackCachePool extends Logger with AutoCloseable {
 
   // cache for tracking identifiers
-  val trackIds: Cache[TrkId, TrkIdCV] = Caffeine.newBuilder.build()
+  val trackIds: Cache[TrackId, TrackIdCV] = Caffeine.newBuilder.build()
 
-  // cache for flink Jobmanager rest url
+  // cache for flink Job-manager rest url
   val clusterRestUrls: Cache[ClusterKey, String] = Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build()
 
   // cache for tracking flink job status
-  val jobStatuses: Cache[TrkId, JobStatusCV] = Caffeine.newBuilder.build()
+  val jobStatuses: Cache[TrackId, JobStatusCV] = Caffeine.newBuilder.build()
 
   // cache for tracking kubernetes events with Deployment kind
   val k8sDeploymentEvents: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
@@ -64,30 +64,30 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
   /**
    * collect all tracking identifiers
    */
-  def collectAllTrackIds(): Set[TrkId] = {
+  def collectAllTrackIds(): Set[TrackId] = {
     trackIds.asMap().keySet().asScala.toSet
   }
 
   /**
-   * determines whether the specified TrkId is in the trace
+   * determines whether the specified TrackId is in the trace
    */
-  def isInTracking(trkId: TrkId): Boolean = {
-    if (Try(trkId.nonLegal).getOrElse(true)) false; else {
-      trackIds.getIfPresent(trkId) != null
+  def isInTracking(trackId: TrackId): Boolean = {
+    if (Try(trackId.nonLegal).getOrElse(true)) false; else {
+      trackIds.getIfPresent(trackId) != null
     }
   }
 
   /**
    * collect all legal tracking ids, and covert to ClusterKey
    */
-  private[kubernetes] def collectTrkClusterKeys(): Set[ClusterKey] = collectAllTrackIds().filter(_.isLegal).map(_.toClusterKey)
+  private[kubernetes] def collectTracks(): Set[TrackId] = collectAllTrackIds().filter(_.isLegal)
 
   /**
    * collect the aggregation of flink metrics that in tracking
    */
   def collectAccMetric(): FlinkMetricCV = {
     // get cluster metrics that in tracking
-    collectTrkClusterKeys() match {
+    collectTracks() match {
       case k if k.isEmpty => FlinkMetricCV.empty
       case k =>
         flinkMetrics.getAllPresent(k) match {
@@ -110,7 +110,9 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
    */
   def refreshClusterRestUrl(clusterKey: ClusterKey): Option[String] = {
     val restUrl = KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
-    if (restUrl.nonEmpty) clusterRestUrls.put(clusterKey, restUrl.get)
+    if (restUrl.nonEmpty) {
+      clusterRestUrls.put(clusterKey, restUrl.get)
+    }
     restUrl
   }
 

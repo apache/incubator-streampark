@@ -26,27 +26,27 @@ package com.streamxhub.streamx.common.conf
  */
 object K8sFlinkConfig {
 
-  val jobStatusTrkTaskTimeoutSec: InternalOption = InternalOption(
+  val jobStatusTrackTaskTimeoutSec: InternalOption = InternalOption(
     key = "streamx.flink-k8s.tracking.polling-task-timeout-sec.job-status",
     defaultValue = 120L,
     classType = classOf[java.lang.Long],
     description = "run timeout seconds of single flink-k8s metrics tracking task")
 
-  val metricTrkTaskTimeoutSec: InternalOption = InternalOption(
+  val metricTrackTaskTimeoutSec: InternalOption = InternalOption(
     key = "streamx.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric",
     defaultValue = 120L,
     classType = classOf[java.lang.Long],
     description = "run timeout seconds of single flink-k8s job status tracking task")
 
-  val jobStatueTrkTaskIntervalSec: InternalOption = InternalOption(
+  val jobStatueTrackTaskIntervalSec: InternalOption = InternalOption(
     key = "streamx.flink-k8s.tracking.polling-interval-sec.job-status",
     defaultValue = 5L,
     classType = classOf[java.lang.Long],
     description = "interval seconds between two single flink-k8s metrics tracking task")
 
-  val metricTrkTaskIntervalSec: InternalOption = InternalOption(
+  val metricTrackTaskIntervalSec: InternalOption = InternalOption(
     key = "streamx.flink-k8s.tracking.polling-interval-sec.cluster-metric",
-    defaultValue = 10L,
+    defaultValue = 5L,
     classType = classOf[java.lang.Long],
     description = "interval seconds between two single flink-k8s metrics tracking task")
 

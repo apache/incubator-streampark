@@ -49,6 +49,8 @@ trait FlinkWatcher extends AutoCloseable {
     start()
   }
 
+  def watch(): Unit
+
   /**
    * Runnable streamline syntax
    */
