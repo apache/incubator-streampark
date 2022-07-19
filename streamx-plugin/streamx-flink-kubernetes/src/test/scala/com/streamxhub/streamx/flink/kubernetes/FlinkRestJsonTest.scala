@@ -42,8 +42,7 @@ class FlinkRestJsonTest {
         |}
         |""".stripMargin
 
-    val overview = FlinkRestOverview.as(json)
-
+    val overview = FlinkRestOverview.as(json).get
     println(overview.slotsAvailable)
   }
 

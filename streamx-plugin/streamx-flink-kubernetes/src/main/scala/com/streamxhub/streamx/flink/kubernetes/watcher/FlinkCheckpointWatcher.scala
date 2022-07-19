@@ -126,6 +126,7 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
    *
    */
   def collect(id: TrackId): Option[CheckpointCV] = {
+
     val trackId = if (id.jobId == null) {
       val jobDetail = cachePool.jobStatuses.asMap().filter(_._1.appId == id.appId).head._1
       if (jobDetail != null) {
