@@ -22,8 +22,8 @@ package com.streamxhub.streamx.flink.kubernetes
 
 import com.google.common.eventbus.Subscribe
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
-import com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper.{watchAggClusterMetricsCache, watchJobStatusCache, watchJobStatusCacheSize, watchTrkIdsCache}
-import com.streamxhub.streamx.flink.kubernetes.model.TrkId
+import com.streamxhub.streamx.flink.kubernetes.helper.TrackMonitorDebugHelper.{watchAggClusterMetricsCache, watchJobStatusCache, watchJobStatusCacheSize, watchTrackIdsCache}
+import com.streamxhub.streamx.flink.kubernetes.model.TrackId
 import org.junit.jupiter.api.Assertions.{assertFalse, assertTrue}
 import org.junit.jupiter.api.{BeforeEach, Test}
 import org.scalatest.Assertions.assertThrows
@@ -33,32 +33,34 @@ import scala.language.implicitConversions
 import scala.util.Try
 
 /**
- * test FlinkTrkMonitor tracking feature
+ * test FlinkTrackMonitor tracking feature
  */
-class K8sFlinkTrkMonitorTrackingTest {
 
-  implicit var trkMonitor: DefaultK8sFlinkTrkMonitor = _
+// scalastyle:off println
+class K8SFlinkTrackMonitorTrackingTest {
 
-  private val trkIds = Array(
-    TrkId.onSession("default", "flink-session", "2333"),
-    TrkId.onApplication("default", "flink-app2"),
-    TrkId.onApplication("default", "flink-app3"),
-    TrkId.onApplication("default", "flink-app4"))
+  implicit var trackMonitor: DefaultK8sFlinkTrackMonitor = _
+
+  private val trackIds = Array(
+    TrackId.onSession("default", "flink-session", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"),
+    TrackId.onApplication("default", "flink-app2", 0L),
+    TrackId.onApplication("default", "flink-app3", 0L),
+    TrackId.onApplication("default", "flink-app4", 0L))
 
 
   @BeforeEach
   private def init(): Unit = {
-    if (trkMonitor != null) Try(trkMonitor.close())
-    trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf).asInstanceOf[DefaultK8sFlinkTrkMonitor]
+    if (trackMonitor != null) Try(trackMonitor.close())
+    trackMonitor = K8sFlinkTrackMonitorFactory.createInstance(FlinkTrackConfig.debugConf).asInstanceOf[DefaultK8sFlinkTrackMonitor]
   }
 
 
   @Test def testMonitor(): Unit = {
     watchJobStatusCache
     watchAggClusterMetricsCache
-    watchTrkIdsCache
-    trkMonitor.start()
-    trkIds.foreach(trkMonitor.trackingJob)
+    watchTrackIdsCache
+    trackMonitor.start()
+    trackIds.foreach(trackMonitor.trackingJob)
     while (true) {}
   }
 
@@ -67,14 +69,14 @@ class K8sFlinkTrkMonitorTrackingTest {
     watchAggClusterMetricsCache
     watchJobStatusCacheSize
 
-    trkMonitor.start()
-    trkIds.foreach(trkMonitor.trackingJob)
+    trackMonitor.start()
+    trackIds.foreach(trackMonitor.trackingJob)
     Thread.sleep(20 * 1000)
-    trkMonitor.stop()
+    trackMonitor.stop()
     Thread.sleep(10 * 1000)
-    trkMonitor.start()
+    trackMonitor.start()
     Thread.sleep(20 * 1000)
-    trkMonitor.close()
+    trackMonitor.close()
     assertThrows(classOf[RejectedExecutionException])
   }
 
@@ -82,27 +84,27 @@ class K8sFlinkTrkMonitorTrackingTest {
   @Test def testTrackingAndUnTracking(): Unit = {
     watchJobStatusCacheSize
     watchAggClusterMetricsCache
-    watchTrkIdsCache
+    watchTrackIdsCache
 
-    val trkId = TrkId.onApplication("default", "flink-app3")
-    trkMonitor.start()
-    trkMonitor.trackingJob(trkId)
-    assertTrue(trkMonitor.isInTracking(trkId))
+    val trackId = TrackId.onApplication("default", "flink-app3", 0L)
+    trackMonitor.start()
+    trackMonitor.trackingJob(trackId)
+    assertTrue(trackMonitor.isInTracking(trackId))
     Thread.sleep(10 * 1000)
 
-    trkMonitor.unTrackingJob(trkId)
-    assertFalse(trkMonitor.isInTracking(trkId))
+    trackMonitor.unTrackingJob(trackId)
+    assertFalse(trackMonitor.isInTracking(trackId))
     Thread.sleep(10 * 1000)
   }
 
   // test change event subscribe
   @Test def testStatusEventsSubscribe(): Unit = {
     //    watchK8sEventCache
-    watchTrkIdsCache
+    watchTrackIdsCache
     watchJobStatusCache
-    trkMonitor.registerListener(new ChangeEventListener())
-    trkMonitor.start()
-    trkIds.foreach(trkMonitor.trackingJob)
+    trackMonitor.registerListener(new ChangeEventListener())
+    trackMonitor.start()
+    trackIds.foreach(trackMonitor.trackingJob)
     while (true) {}
 
   }
@@ -115,11 +117,11 @@ class K8sFlinkTrkMonitorTrackingTest {
 
   // test checkIsInRemoteCluster
   @Test def testCheckIsInRemoteCluster(): Unit = {
-    val check = (trkId: TrkId) => println(s"[check-is-in-remote-cluster] trkId=$trkId, isExists=${trkMonitor.checkIsInRemoteCluster(trkId)}")
-    check(TrkId.onSession("default", "flink-session", "7ff03ff5d0b3c66d65a7b4f3ad6ca2a4"))
-    check(TrkId.onSession("default", "flink-session", "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"))
-    check(TrkId.onApplication("default", "flink-app3"))
-    check(TrkId.onApplication("default", "flink-app4"))
+    val check = (trackId: TrackId) => println(s"[check-is-in-remote-cluster] trackId=$trackId, isExists=${trackMonitor.checkIsInRemoteCluster(trackId)}")
+    check(TrackId.onSession("default", "flink-session", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a4"))
+    check(TrackId.onSession("default", "flink-session", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"))
+    check(TrackId.onApplication("default", "flink-app3", 0L))
+    check(TrackId.onApplication("default", "flink-app4", 0L))
   }
 
 

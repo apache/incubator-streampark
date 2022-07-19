@@ -22,12 +22,13 @@ package com.streamxhub.streamx.console.core.task;
 import static com.streamxhub.streamx.common.enums.ExecutionMode.isKubernetesMode;
 
 import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
+import com.streamxhub.streamx.common.util.YarnUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
-import com.streamxhub.streamx.console.core.entity.SavePoint;
-import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.OptionState;
@@ -45,9 +46,9 @@ import com.streamxhub.streamx.console.core.service.alert.AlertService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.config.RequestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -66,6 +67,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <pre><b>
@@ -127,6 +129,9 @@ public class FlinkTrackingTask {
     @Autowired
     private FlinkClusterService flinkClusterService;
 
+    @Autowired
+    private CheckpointProcessor checkpointProcessor;
+
     /**
      * 常用版本更新
      */
@@ -135,10 +140,6 @@ public class FlinkTrackingTask {
     private static final Map<Long, FlinkCluster> FLINK_CLUSTER_MAP = new ConcurrentHashMap<>(0);
 
     private static ApplicationService applicationService;
-
-    private static final Map<String, Long> CHECK_POINT_MAP = new ConcurrentHashMap<>(0);
-
-    private static final Map<String, Counter> CHECK_POINT_FAILED_MAP = new ConcurrentHashMap<>(0);
 
     private static final Map<Long, OptionState> OPTIONING = new ConcurrentHashMap<>(0);
 
@@ -268,7 +269,7 @@ public class FlinkTrackingTask {
      */
     private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
         FlinkCluster flinkCluster = getFlinkCluster(application);
-        JobsOverview jobsOverview = application.httpJobsOverview(flinkCluster);
+        JobsOverview jobsOverview = httpJobsOverview(application, flinkCluster);
         Optional<JobsOverview.Job> optional;
         if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
             optional = jobsOverview.getJobs().size() > 1 ? jobsOverview.getJobs().stream().filter(a -> StringUtils.equals(application.getJobId(), a.getId())).findFirst() : jobsOverview.getJobs().stream().findFirst();
@@ -335,7 +336,7 @@ public class FlinkTrackingTask {
             application.setOverview(jobOverview.getTasks());
 
             FlinkCluster flinkCluster = getFlinkCluster(application);
-            Overview override = application.httpOverview(flinkCluster);
+            Overview override = httpOverview(application, flinkCluster);
             if (override != null && override.getSlotsTotal() > 0) {
                 application.setTotalTM(override.getTaskmanagers());
                 application.setTotalSlot(override.getSlotsTotal());
@@ -353,48 +354,9 @@ public class FlinkTrackingTask {
      */
     private void handleCheckPoints(Application application) throws Exception {
         FlinkCluster flinkCluster = getFlinkCluster(application);
-        CheckPoints checkPoints = application.httpCheckpoints(flinkCluster);
+        CheckPoints checkPoints = httpCheckpoints(application, flinkCluster);
         if (checkPoints != null) {
-            CheckPoints.Latest latest = checkPoints.getLatest();
-            if (latest != null) {
-                CheckPoints.CheckPoint checkPoint = latest.getCompleted();
-                if (checkPoint != null) {
-                    CheckPointStatus status = checkPoint.getCheckPointStatus();
-                    if (CheckPointStatus.COMPLETED.equals(status)) {
-                        Long latestId = CHECK_POINT_MAP.get(application.getJobId());
-                        if (latestId == null || latestId < checkPoint.getId()) {
-                            SavePoint savePoint = new SavePoint();
-                            savePoint.setAppId(application.getId());
-                            savePoint.setLatest(true);
-                            savePoint.setType(checkPoint.getCheckPointType().get());
-                            savePoint.setPath(checkPoint.getExternalPath());
-                            savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
-                            savePoint.setCreateTime(new Date());
-                            savePointService.save(savePoint);
-                            CHECK_POINT_MAP.put(application.getJobId(), checkPoint.getId());
-                        }
-                    } else if (CheckPointStatus.FAILED.equals(status) && application.cpFailedTrigger()) {
-                        Counter counter = CHECK_POINT_FAILED_MAP.get(application.getJobId());
-                        if (counter == null) {
-                            CHECK_POINT_FAILED_MAP.put(application.getJobId(), new Counter(checkPoint.getTriggerTimestamp()));
-                        } else {
-                            //x分钟之内超过Y次CheckPoint失败触发动作
-                            long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
-                            if (minute <= application.getCpFailureRateInterval()
-                                && counter.getCount() >= application.getCpMaxFailureInterval()) {
-                                CHECK_POINT_FAILED_MAP.remove(application.getJobId());
-                                if (application.getCpFailureAction() == 1) {
-                                    alertService.alert(application, CheckPointStatus.FAILED);
-                                } else {
-                                    applicationService.restart(application);
-                                }
-                            } else {
-                                counter.add();
-                            }
-                        }
-                    }
-                }
-            }
+            checkpointProcessor.process(application.getId(), checkPoints);
         }
     }
 
@@ -519,7 +481,7 @@ public class FlinkTrackingTask {
             this.persistentAndClean(application);
         } else {
             // 2)到yarn的restApi中查询状态
-            AppInfo appInfo = application.httpYarnAppInfo();
+            AppInfo appInfo = httpYarnAppInfo(application);
             if (appInfo == null) {
                 if (!ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
                     throw new RuntimeException("flinkTrackingTask getFromYarnRestApi failed ");
@@ -695,32 +657,13 @@ public class FlinkTrackingTask {
         return TRACKING_MAP.get(appId);
     }
 
-    @Data
-    public static class Counter {
-        private Long timestamp;
-        private Integer count;
-
-        public Counter(Long timestamp) {
-            this.timestamp = timestamp;
-            this.count = 1;
-        }
-
-        public void add() {
-            this.count += 1;
-        }
-
-        public long getDuration(Long currentTimestamp) {
-            return (currentTimestamp - this.getTimestamp()) / 1000 / 60;
-        }
-    }
-
     private static boolean isKubernetesApp(Application application) {
-        return K8sFlinkTrkMonitorWrapper.isKubernetesApp(application);
+        return K8sFlinkTrackMonitorWrapper.isKubernetesApp(application);
     }
 
     private static boolean isKubernetesApp(Long appId) {
         Application app = TRACKING_MAP.get(appId);
-        return K8sFlinkTrkMonitorWrapper.isKubernetesApp(app);
+        return K8sFlinkTrackMonitorWrapper.isKubernetesApp(app);
     }
 
     private FlinkEnv getFlinkEnv(Application application) {
@@ -746,6 +689,85 @@ public class FlinkTrackingTask {
 
     public static Map<Long, FlinkEnv> getFlinkEnvMap() {
         return FLINK_ENV_MAP;
+    }
+
+    private AppInfo httpYarnAppInfo(Application application) throws Exception {
+        String reqURL = "ws/v1/cluster/apps/".concat(application.getAppId());
+        return yarnRestRequest(reqURL, AppInfo.class);
+    }
+
+    private Overview httpOverview(Application application, FlinkCluster flinkCluster) throws IOException {
+        String appId = application.getAppId();
+        if (appId != null) {
+            if (application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
+                application.getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
+                String format = "proxy/%s/overview";
+                String reqURL = String.format(format, appId);
+                return yarnRestRequest(reqURL, Overview.class);
+                // TODO: yarn-session
+                //String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
+                //return httpGetDoResult(remoteUrl, Overview.class);
+            }
+        }
+        return null;
+    }
+
+    private JobsOverview httpJobsOverview(Application application, FlinkCluster flinkCluster) throws Exception {
+        final String flinkUrl = "jobs/overview";
+        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            String format = "proxy/%s/" + flinkUrl;
+            String reqURL = String.format(format, application.getAppId());
+            JobsOverview jobsOverview = yarnRestRequest(reqURL, JobsOverview.class);
+            if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+                //过滤出当前job
+                List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).collect(Collectors.toList());
+                jobsOverview.setJobs(jobs);
+            }
+            return jobsOverview;
+        } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+            if (application.getJobId() != null) {
+                String remoteUrl = flinkCluster.getActiveAddress().toURL() + "/" + flinkUrl;
+                JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
+                if (jobsOverview != null) {
+                    //过滤出当前job
+                    List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).collect(Collectors.toList());
+                    jobsOverview.setJobs(jobs);
+                }
+                return jobsOverview;
+            }
+        }
+        return null;
+    }
+
+    private CheckPoints httpCheckpoints(Application application, FlinkCluster flinkCluster) throws IOException {
+        final String flinkUrl = "jobs/%s/checkpoints";
+        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            String format = "proxy/%s/" + flinkUrl;
+            String reqURL = String.format(format, application.getAppId(), application.getJobId());
+            return yarnRestRequest(reqURL, CheckPoints.class);
+        } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+            if (application.getJobId() != null) {
+                String remoteUrl = flinkCluster.getActiveAddress().toURL() + "/" + String.format(flinkUrl, application.getJobId());
+                return httpRestRequest(remoteUrl, CheckPoints.class);
+            }
+        }
+        return null;
+    }
+
+    private <T> T yarnRestRequest(String url, Class<T> clazz) throws IOException {
+        String result = YarnUtils.restRequest(url);
+        if (null == result) {
+            return null;
+        }
+        return JacksonUtils.read(result, clazz);
+    }
+
+    private <T> T httpRestRequest(String url, Class<T> clazz) throws IOException {
+        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
+        if (null == result) {
+            return null;
+        }
+        return JacksonUtils.read(result, clazz);
     }
 
 }

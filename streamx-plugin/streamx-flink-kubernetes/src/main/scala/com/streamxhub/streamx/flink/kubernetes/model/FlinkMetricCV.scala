@@ -21,6 +21,7 @@ package com.streamxhub.streamx.flink.kubernetes.model
 
 /**
  * flink cluster metric info
+ *
  * @author Al-assad
  */
 case class FlinkMetricCV(totalJmMemory: Integer = 0,
@@ -45,7 +46,7 @@ case class FlinkMetricCV(totalJmMemory: Integer = 0,
       finishedJob + another.finishedJob,
       cancelledJob + another.cancelledJob,
       failedJob + another.failedJob,
-      math.max(pollAckTime, another.pollAckTime)
+      pollAckTime = math.max(pollAckTime, another.pollAckTime)
     )
   }
 
@@ -62,8 +63,6 @@ case class FlinkMetricCV(totalJmMemory: Integer = 0,
       cancelledJob == another.cancelledJob &&
       failedJob == another.failedJob
   }
-
-  def nonEqualsPayload(another: FlinkMetricCV): Boolean = !equalsPayload(another)
 
 }
 

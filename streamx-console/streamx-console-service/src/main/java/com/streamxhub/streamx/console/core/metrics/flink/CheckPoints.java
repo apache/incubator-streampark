@@ -34,8 +34,6 @@ import java.util.List;
 @Data
 public class CheckPoints implements Serializable {
 
-    private Counts counts;
-
     private List<CheckPoint> history;
 
     private Latest latest;
@@ -91,17 +89,4 @@ public class CheckPoints implements Serializable {
         private CheckPoint completed;
     }
 
-    @Data
-    public static class Counts implements Serializable {
-        private Integer completed;
-
-        private Integer failed;
-
-        @JsonProperty("in_progress")
-        private Integer inProgress;
-
-        private Integer restored;
-
-        private Integer total;
-    }
 }

@@ -25,12 +25,12 @@ import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.alert.AlertService;
-import com.streamxhub.streamx.flink.kubernetes.FlinkTrkConf;
-import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
-import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitorFactory;
+import com.streamxhub.streamx.flink.kubernetes.FlinkTrackConfig;
+import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrackMonitor;
+import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrackMonitorFactory;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode;
-import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
+import com.streamxhub.streamx.flink.kubernetes.model.TrackId;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
@@ -58,10 +58,11 @@ import scala.Enumeration;
  * future, both tracking-on-k8s and tracking-on-yarn will exist as plugins
  * for this unified implementation.
  * <p>
+ *
  * @author Al-assad
  */
 @Configuration
-public class K8sFlinkTrkMonitorWrapper {
+public class K8sFlinkTrackMonitorWrapper {
 
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     @Lazy
@@ -73,38 +74,44 @@ public class K8sFlinkTrkMonitorWrapper {
     @Autowired
     private AlertService alertService;
 
+
+    @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+    @Lazy
+    @Autowired
+    private CheckpointProcessor checkpointProcessor;
+
     /**
-     * Register FlinkTrkMonitor bean for tracking flink job on kubernetes.
+     * Register FlinkTrackMonitor bean for tracking flink job on kubernetes.
      */
     @Bean(destroyMethod = "close")
-    public K8sFlinkTrkMonitor registerFlinkTrackingMonitor() {
+    public K8sFlinkTrackMonitor registerFlinkTrackingMonitor() {
         // lazy start tracking monitor
-        K8sFlinkTrkMonitor trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.fromConfigHub(), true);
-        initK8sFlinkTrkMonitor(trkMonitor);
+        K8sFlinkTrackMonitor trackMonitor = K8sFlinkTrackMonitorFactory.createInstance(FlinkTrackConfig.fromConfigHub(), true);
+        initK8sFlinkTrackMonitor(trackMonitor);
 
         /* Dev scaffold: watch flink k8s tracking cache,
-           see com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper for items.
+           see com.streamxhub.streamx.flink.kubernetes.helper.TrackMonitorDebugHelper for items.
            Example:
-               TrkMonitorDebugHelper.watchTrkIdsCache(trkMonitor);
-               TrkMonitorDebugHelper.watchJobStatusCache(trkMonitor);
-               TrkMonitorDebugHelper.watchAggClusterMetricsCache(trkMonitor);
-               TrkMonitorDebugHelper.watchClusterMetricsCache(trkMonitor);
+               TrackMonitorDebugHelper.watchTrackIdsCache(trackMonitor);
+               TrackMonitorDebugHelper.watchJobStatusCache(trackMonitor);
+               TrackMonitorDebugHelper.watchAggClusterMetricsCache(trackMonitor);
+               TrackMonitorDebugHelper.watchClusterMetricsCache(trackMonitor);
         */
-        return trkMonitor;
+        return trackMonitor;
     }
 
-    private void initK8sFlinkTrkMonitor(@Nonnull K8sFlinkTrkMonitor trkMonitor) {
+    private void initK8sFlinkTrackMonitor(@Nonnull K8sFlinkTrackMonitor trackMonitor) {
         // register change event listener
-        trkMonitor.registerListener(new K8sFlinkChangeEventListener(applicationService, alertService));
+        trackMonitor.registerListener(new K8sFlinkChangeEventListener(applicationService, alertService, checkpointProcessor));
         // recovery tracking list
-        List<TrkId> k8sApp = getK8sTrackingApplicationFromDB();
-        k8sApp.forEach(trkMonitor::trackingJob);
+        List<TrackId> k8sApp = getK8sTrackingApplicationFromDB();
+        k8sApp.forEach(trackMonitor::trackingJob);
     }
 
     /**
      * get flink-k8s job tracking application from db.
      */
-    private List<TrkId> getK8sTrackingApplicationFromDB() {
+    private List<TrackId> getK8sTrackingApplicationFromDB() {
         // query k8s executiion mode application from db
         final QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper
@@ -116,7 +123,7 @@ public class K8sFlinkTrkMonitorWrapper {
         }
         // correct corrupted data
         List<Application> correctApps = k8sApplication.stream()
-            .filter(app -> Bridge.toTrkId(app).nonLegal())
+            .filter(app -> Bridge.toTrackId(app).nonLegal())
             .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(correctApps)) {
             applicationService.saveOrUpdateBatch(correctApps);
@@ -124,7 +131,7 @@ public class K8sFlinkTrkMonitorWrapper {
         // filter out the application that should be tracking
         return k8sApplication.stream()
             .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getFlinkAppStateEnum())))
-            .map(Bridge::toTrkId)
+            .map(Bridge::toTrackId)
             .collect(Collectors.toList());
     }
 
@@ -133,13 +140,13 @@ public class K8sFlinkTrkMonitorWrapper {
      */
     public static class Bridge {
 
-        // covert Application to TrkId
-        public static TrkId toTrkId(@Nonnull Application app) {
+        // covert Application to TrackId
+        public static TrackId toTrackId(@Nonnull Application app) {
             Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
             if (FlinkK8sExecuteMode.APPLICATION().equals(mode)) {
-                return TrkId.onApplication(app.getK8sNamespace(), app.getClusterId());
+                return TrackId.onApplication(app.getK8sNamespace(), app.getClusterId(), app.getId());
             } else if (FlinkK8sExecuteMode.SESSION().equals(mode)) {
-                return TrkId.onSession(app.getK8sNamespace(), app.getClusterId(), app.getJobId());
+                return TrackId.onSession(app.getK8sNamespace(), app.getClusterId(),  app.getId(), app.getJobId());
             } else {
                 throw new IllegalArgumentException("Illegal K8sExecuteMode, mode=" + app.getExecutionMode());
             }

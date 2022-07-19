@@ -29,6 +29,7 @@ import scala.collection.JavaConverters._
 /**
  * @author Al-assad
  */
+// scalastyle:off println
 class PodTemplateParserTest {
 
 

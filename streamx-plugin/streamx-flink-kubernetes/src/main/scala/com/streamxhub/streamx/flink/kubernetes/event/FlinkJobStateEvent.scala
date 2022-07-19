@@ -17,11 +17,15 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.kubernetes.model
+package com.streamxhub.streamx.flink.kubernetes.event
+
+import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
+import com.streamxhub.streamx.flink.kubernetes.model.TrackId
 
 /**
- * author:Al-assad
+ * Notification of expecting changes to flink job state cache
+ * held internally by K8sFlinkMonitor.
  *
- * @param updateTime last update time for current key
+ * @author Al-assad
  */
-case class TrkIdCV(updateTime: Long)
+case class FlinkJobStateEvent(trackId: TrackId, jobState: FlinkJobState.Value, pollTime: Long) extends BuildInEvent
