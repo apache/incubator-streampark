@@ -16,15 +16,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.streamxhub.streamx.flink.packer.docker
 
-import com.streamxhub.streamx.common.util.Logger
+package com.streamxhub.streamx.flink.kubernetes.model
 
-
-/**
- * @author Al-assad
- */
-object DockerTool extends Logger {
-
-
-}
+case class CheckpointCV(id: Long,
+                        status: String,
+                        externalPath: String,
+                        isSavepoint: Boolean,
+                        checkpointType: String,
+                        triggerTimestamp: Long)
