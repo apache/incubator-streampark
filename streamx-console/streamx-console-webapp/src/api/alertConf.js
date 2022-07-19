@@ -46,5 +46,5 @@ export function remove(params) {
 }
 
 export function send(params) {
-  return http.postJson(api.AlertConf.SEND, params)
+  return http.post(api.AlertConf.SEND, params)
 }

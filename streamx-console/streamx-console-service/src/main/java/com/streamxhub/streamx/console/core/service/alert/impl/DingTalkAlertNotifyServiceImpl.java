@@ -134,7 +134,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
         }
         if (robotResponse.getErrcode() != 0) {
             throw new ServiceException(String.format("Failed to request DingTalk robot alert, url:%s, errorCode:%d, errorMsg:%s",
-                    url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
+                url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
         }
         return robotResponse;
     }
@@ -154,10 +154,10 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
         String url;
         if (params.getSecretEnable()) {
             Long timestamp = System.currentTimeMillis();
-            url = String.format(urlPef + "%s&timestamp=%d&sign=%s",
-                    params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
+            url = String.format("%s%s&timestamp=%d&sign=%s",
+                urlPef, params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
         } else {
-            url = String.format(urlPef + "%s", params.getToken());
+            url = String.format("%s%s", urlPef, params.getToken());
         }
         if (log.isDebugEnabled()) {
             log.debug("The alarm robot url of DingTalk contains signature is {}", url);
