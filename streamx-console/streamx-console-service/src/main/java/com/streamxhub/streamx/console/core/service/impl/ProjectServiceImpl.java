@@ -28,6 +28,7 @@ import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.GZipUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
+import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
@@ -43,11 +44,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.console.system.service.TeamUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,6 +90,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Autowired
     private ApplicationService applicationService;
 
+    @Autowired
+    private TeamUserService groupUserService;
+
     private final ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
         200,
@@ -99,10 +105,14 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public RestResponse create(Project project) {
+        RestResponse response = RestResponse.create();
+        if (project.getTeamId() == null) {
+            return response.message("请选择团队").data(false);
+        }
         QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(Project::getName, project.getName());
+        queryWrapper.eq(true, "team_id", project.getTeamId());
         int count = count(queryWrapper);
-        RestResponse response = RestResponse.create();
         if (count == 0) {
             project.setDate(new Date());
             boolean status = save(project);
@@ -172,6 +182,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public IPage<Project> page(Project project, RestRequest request) {
+        List<Long> groupIdList = groupUserService.getTeamIdList();
+        project.setTeamIdList(groupIdList);
         Page<Project> page = new Page<>();
         SortUtils.handlePageSort(request, page, "date", Constant.ORDER_DESC, false);
         return this.baseMapper.findProject(page, project);
@@ -342,8 +354,14 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             }
         }
         LambdaQueryWrapper<Project> wrapper = new QueryWrapper<Project>().lambda()
-            .eq(Project::getName, project.getName());
+            .eq(Project::getName, project.getName())
+            .eq(Project::getTeamId, project.getTeamId());
         return this.baseMapper.selectCount(wrapper) > 0;
+    }
+
+    @Override
+    public Long getCountByTeam(Long teamId) {
+        return baseMapper.getCountByTeam(teamId);
     }
 
     @Override

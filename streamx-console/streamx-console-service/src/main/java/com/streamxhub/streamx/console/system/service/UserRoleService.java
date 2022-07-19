@@ -32,4 +32,18 @@ public interface UserRoleService extends IService<UserRole> {
     void deleteUserRolesByUserId(String[] userIds);
 
     List<String> findUserIdsByRoleId(String[] roleIds);
+
+    List<Long> listRoleIdListByUserId(Long userId);
+
+    Boolean isManageTeam(String username);
+
+    /**
+     * 判断当前用户是否有管理Team的权限
+     * @return
+     */
+    Boolean isManageTeam();
+
+    List<Long> getRoleIdListByCurrentUser();
+
+    List<Long> getRoleIdListByUserId(Long userId);
 }

@@ -18,37 +18,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import api from './index'
-import http from '@/utils/request'
+package com.streamxhub.streamx.console.system.service;
 
-export function roleMenu (queryParam) {
-  return http.post(api.Role.MENU, queryParam)
-}
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.streamx.console.system.entity.TeamUser;
 
-export function list (queryParam) {
-  return http.post(api.Role.LIST, queryParam)
-}
+import java.util.List;
 
-export function listByUser (queryParam) {
-  return http.post(api.Role.LIST_BY_USER, queryParam)
-}
+/**
+ * @author benjobs
+ */
+public interface TeamUserService extends IService<TeamUser> {
 
-export function remove (queryParam) {
-  return http.delete(api.Role.DELETE, queryParam)
-}
 
-export function update (queryParam) {
-  return http.put(api.Role.UPDATE, queryParam)
-}
+    List<Long> getTeamIdList();
 
-export function checkName (queryParam) {
-  return http.post(api.Role.CHECK_NAME, queryParam)
-}
+    List<Long> getTeamIdList(Long userId);
 
-export function post (queryParam) {
-  return http.post(api.Role.POST, queryParam)
-}
+    void deleteTeamUsersByUserId(String[] strings);
 
-export function $export (queryParam) {
-  return http.export(api.Role.EXPORT, queryParam)
+    Long getCountByTeam(Long teamId);
 }

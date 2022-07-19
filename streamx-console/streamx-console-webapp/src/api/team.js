@@ -21,34 +21,54 @@
 import api from './index'
 import http from '@/utils/request'
 
-export function roleMenu (queryParam) {
-  return http.post(api.Role.MENU, queryParam)
+export function getExecTeam () {
+  return http.post(api.Team.EXECTeam)
 }
 
 export function list (queryParam) {
-  return http.post(api.Role.LIST, queryParam)
+  return http.post(api.Team.LIST, queryParam)
 }
 
 export function listByUser (queryParam) {
-  return http.post(api.Role.LIST_BY_USER, queryParam)
-}
-
-export function remove (queryParam) {
-  return http.delete(api.Role.DELETE, queryParam)
+  return http.post(api.Team.LIST_BY_USER, queryParam)
 }
 
 export function update (queryParam) {
-  return http.put(api.Role.UPDATE, queryParam)
+  return http.put(api.Team.UPDATE, queryParam)
 }
 
-export function checkName (queryParam) {
-  return http.post(api.Role.CHECK_NAME, queryParam)
+export function password (queryParam) {
+  return http.put(api.Team.PASSWORD, queryParam)
+}
+
+export function reset (queryParam) {
+  return http.put(api.Team.RESET, queryParam)
+}
+
+export function get (queryParam) {
+  return http.get(api.Team.GET, queryParam)
+}
+
+export function checkTeamName (queryParam) {
+  return http.post(api.Team.CHECK_NAME, queryParam)
+}
+
+export function checkTeamCode (queryParam) {
+  return http.post(api.Team.CHECK_CODE, queryParam)
 }
 
 export function post (queryParam) {
-  return http.post(api.Role.POST, queryParam)
+  return http.post(api.Team.POST, queryParam)
+}
+
+export function getRouter (queryParam) {
+  return http.post(api.Menu.ROUTER, queryParam)
 }
 
 export function $export (queryParam) {
-  return http.export(api.Role.EXPORT, queryParam)
+  return http.export(api.Team.EXPORT, queryParam)
+}
+
+export function remove (queryParam) {
+  return http.delete(api.Team.DELETE, queryParam)
 }

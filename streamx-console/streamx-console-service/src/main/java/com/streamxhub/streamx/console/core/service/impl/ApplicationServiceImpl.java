@@ -77,6 +77,7 @@ import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
+import com.streamxhub.streamx.console.system.service.TeamUserService;
 import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.IngressController;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
@@ -202,6 +203,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private FlinkClusterService flinkClusterService;
+
+    @Autowired
+    private TeamUserService teamUserService;
 
     @PostConstruct
     public void resetOptionState() {
@@ -428,6 +432,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
     }
 
+    @Override
+    public Long getCountByTeam(Long teamId) {
+        return baseMapper.getCountByTeam(teamId);
+    }
+
     private void removeApp(Application application) {
         Long appId = application.getId();
         removeById(appId);
@@ -443,6 +452,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
         Page<Application> page = new Page<>();
+        List<Long> teamList = teamUserService.getTeamIdList();
+        appParam.setTeamIdList(teamList);
         SortUtils.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
         if (CommonUtils.notEmpty(appParam.getStateArray())) {
             if (Arrays.stream(appParam.getStateArray()).anyMatch(x -> x == FlinkAppState.FINISHED.getValue())) {
@@ -475,6 +486,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             app.setFlinkVersion(record.getFlinkVersion());
             app.setProjectName(record.getProjectName());
+            app.setTeamName(record.getTeamName());
             return app;
         }).collect(Collectors.toList());
         page.setRecords(newRecords);

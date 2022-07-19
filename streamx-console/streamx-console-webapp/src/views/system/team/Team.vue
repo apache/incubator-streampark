@@ -12,36 +12,27 @@
               :md="8"
               :sm="24">
               <a-form-item
-                label="Team"
-                :label-col="{span: 4}"
-                :wrapper-col="{span: 18, offset: 2}">
-                <a-select
-                  v-model="queryParams.teamId"
-                  :allow-clear="true"
-                  style="width: 100%" >
-                  <a-select-option key="" >
-                    All Team
-                  </a-select-option>
-                  <a-select-option
-                    v-for="t in teamData"
-                    :key="t.teamId">
-                    {{ t.teamName }}
-                  </a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-
-            <a-col
-              :md="8"
-              :sm="24">
-              <a-form-item
-                label="User Name"
+                label="Team Name"
                 :label-col="{span: 4}"
                 :wrapper-col="{span: 18, offset: 2}">
                 <a-input
-                  v-model="queryParams.username" />
+                  v-model="queryParams.teamName" />
               </a-form-item>
             </a-col>
+            <template>
+              <a-col
+                :md="8"
+                :sm="24">
+                <a-form-item
+                  label="Create Time"
+                  :label-col="{span: 4}"
+                  :wrapper-col="{span: 18, offset: 2}">
+                  <range-date
+                    @change="handleDateChange"
+                    ref="createTime" />
+                </a-form-item>
+              </a-col>
+            </template>
           </div>
           <a-col
             :md="8"
@@ -79,49 +70,13 @@
       :loading="loading"
       :scroll="{ x: 900 }"
       @change="handleTableChange">
-      <template
-        slot="email"
-        slot-scope="text">
-        <a-popover
-          placement="topLeft">
-          <template
-            slot="content">
-            <div>
-              {{ text }}
-            </div>
-          </template>
-          <p
-            style="width: 150px;margin-bottom: 0">
-            {{ text }}
-          </p>
-        </a-popover>
-      </template>
+
       <template
         slot="operation"
         slot-scope="text, record">
-        <svg-icon
-          v-permit="'user:update'"
-          v-if="(record.username !== 'admin' || userName === 'admin')"
-          name="edit"
-          border
-          @click.native="handleEdit(record)"
-          title="修改用户" />
-        <svg-icon
-          name="see"
-          border
-          @click.native="handleView(record)"
-          title="查看" />
-        <svg-icon
-          v-permit="'user:reset'"
-          v-if="(record.username !== 'admin' || userName === 'admin')"
-          name="resetpass"
-          border
-          @click.native="resetPassword(record)"
-          title="reset password" />
         <a-popconfirm
-          v-permit="'user:delete'"
-          v-if="record.username !== 'admin'"
-          title="Are you sure delete this user ?"
+          v-permit="'team:delete'"
+          title="Are you sure delete this team ?"
           cancel-text="No"
           ok-text="Yes"
           @confirm="handleDelete(record)">
@@ -130,11 +85,6 @@
       </template>
     </a-table>
 
-    <!-- 用户信息查看 -->
-    <user-info
-      :data="userInfo.data"
-      :visible="userInfo.visible"
-      @close="handleUserInfoClose" />
     <!-- 新增用户 -->
     <user-add
       @close="handleUserAddClose"
@@ -150,35 +100,26 @@
 </template>
 
 <script>
-import UserInfo from './UserInfo'
-import UserAdd from './UserAdd'
-import UserEdit from './UserEdit'
+
+import UserAdd from './TeamAdd'
 import RangeDate from '@/components/DateTime/RangeDate'
 import SvgIcon from '@/components/SvgIcon'
 
-import { list, deleteUser, reset as resetPassword } from '@/api/user'
-import { listByUser as getUserTeam } from '@/api/team'
+import { list, remove} from '@/api/team'
 import storage from '@/utils/storage'
 import {USER_NAME} from '@/store/mutation-types'
-import TagSelectOption from '@/components/TagSelect/TagSelectOption'
-
 
 export default {
-  name: 'User',
-  components: {TagSelectOption, UserInfo, UserAdd, UserEdit, RangeDate, SvgIcon },
+  name: 'Team',
+  components: { UserAdd, RangeDate, SvgIcon },
   data () {
     return {
-      userInfo: {
-        visible: false,
-        data: {}
-      },
       userAdd: {
         visible: false
       },
       userEdit: {
         visible: false
       },
-      teamData: [],
       queryParams: {},
       filteredInfo: null,
       sortedInfo: null,
@@ -201,38 +142,16 @@ export default {
       sortedInfo = sortedInfo || {}
       filteredInfo = filteredInfo || {}
       return [{
-        title: 'User Name',
-        dataIndex: 'username',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'username' && sortedInfo.order
-      }, {
-        title: 'Nick Name',
-        dataIndex: 'nickName'
+        title: 'Team Code',
+        dataIndex: 'teamCode'
       },  {
-        title: 'Team',
+        title: 'Team Name',
         dataIndex: 'teamName'
-      }, {
-        title: 'Status',
-        dataIndex: 'status',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '0': return <a-tag color="red"> Locked </a-tag>
-            case '1': return <a-tag color="cyan"> Effective </a-tag>
-            default: return text
-          }
-        },
-        filters: [
-          { text: 'Effective', value: '1' },
-          { text: 'Locked', value: '0' }
-        ],
-        filterMultiple: false,
-        filteredValue: filteredInfo.status || null,
-        onFilter: (value, record) => value
-      }, {
+      },  {
         title: 'Create Time',
         dataIndex: 'createTime',
         sorter: true,
-        sortOrder: sortedInfo.columnKey === 'createTime' && sortedInfo.order
+        sortOrder: sortedInfo.columnKey === 'create_time' && sortedInfo.order
       },
       {
         title: 'Operation',
@@ -246,19 +165,10 @@ export default {
   },
 
   mounted () {
-    getUserTeam(
-      { 'pageSize': '9999' }
-    ).then((resp) => {
-      this.teamData = resp.data.records
-      this.search()
-    })
+    this.fetch()
   },
 
   methods: {
-    handleView (record) {
-      this.userInfo.data = record
-      this.userInfo.visible = true
-    },
     handleAdd () {
       this.userAdd.visible = true
     },
@@ -267,12 +177,15 @@ export default {
     },
     handleUserAddSuccess () {
       this.userAdd.visible = false
-      this.$message.success('新增用户成功')
+      this.$message.success('新增Team成功')
       this.search()
     },
     handleEdit (record) {
-      this.$refs.userEdit.setFormValues(record)
-      this.userEdit.visible = true
+      // this.SetAppId(app.id)
+      this.$router.push({'path': '/system/role'})
+
+      // this.$refs.userEdit.setFormValues(record)
+      // this.userEdit.visible = true
     },
     handleUserEditClose () {
       this.userEdit.visible = false
@@ -282,9 +195,6 @@ export default {
       this.$message.success('修改用户成功')
       this.search()
     },
-    handleUserInfoClose () {
-      this.userInfo.visible = false
-    },
     handleDateChange (value) {
       if (value) {
         this.queryParams.createTimeFrom = value[0]
@@ -292,18 +202,18 @@ export default {
       }
     },
     handleDelete (record) {
-      deleteUser({
-        userId: record.userId
+      remove({
+        teamId: record.teamId
       }).then((resp) => {
-        if (resp.status === 'success') {
+        if (resp.message === 'success') {
           this.$message.success('delete successful')
           this.search()
         } else {
-          this.$message.error('delete failed')
+          this.$message.error(resp.message)
         }
       })
-    },
 
+    },
     resetPassword (user) {
       this.$swal.fire({
         title: 'reset password, are yor sure?',
@@ -361,7 +271,6 @@ export default {
       this.paginationInfo = pagination
       this.filteredInfo = filters
       this.sortedInfo = sorter
-      this.userInfo.visible = false
       this.fetch({
         sortField: sorter.field,
         sortOrder: sorter.order,

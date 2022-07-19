@@ -32,6 +32,13 @@
             <if test="role.createTimeTo!= null and role.createTimeTo !=''">
                 And t.create_time &lt; #{role.createTimeTo}
             </if>
+
+            <if test="role.roleIdList != null and role.roleIdList.size > 0">
+                AND role_id IN
+                <foreach item="item" index="index" collection="role.roleIdList" open="("  close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
         </where>
         <if test="role.sortField != null and role.sortField != ''">
             order by t.${role.sortField} ${role.sortOrder}

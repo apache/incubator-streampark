@@ -19,13 +19,14 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,9 @@ public class ProjectController {
     @PostMapping("create")
     @RequiresPermissions("project:create")
     public RestResponse create(Project project) {
+        if (project.getTeamId() == null || project.getTeamId() <= 0L) {
+            return RestResponse.create().message("请选择项目团队").data(false);
+        }
         return projectService.create(project);
     }
 
@@ -139,7 +143,9 @@ public class ProjectController {
     }
 
     @PostMapping("select")
-    public RestResponse select() {
-        return RestResponse.create().data(projectService.list());
+    public RestResponse select(Long teamId) {
+        QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("team_id",teamId);
+        return RestResponse.create().data(projectService.list(queryWrapper));
     }
 }

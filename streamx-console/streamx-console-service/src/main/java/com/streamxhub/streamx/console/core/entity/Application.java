@@ -93,6 +93,8 @@ public class Application implements Serializable {
      */
     private Long userId;
 
+    private Long teamId;
+
     /**
      * 前端和程序在yarn中显示的名称
      */
@@ -291,6 +293,9 @@ public class Application implements Serializable {
     private transient String backUpDescription;
     private transient String yarnQueue;
     private transient String yarnSessionClusterId;
+    private transient List<Long> teamIdList;
+    private transient String teamName;
+
     /**
      * Flink Web UI Url
      */

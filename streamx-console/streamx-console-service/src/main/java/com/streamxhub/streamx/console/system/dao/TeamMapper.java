@@ -18,37 +18,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import api from './index'
-import http from '@/utils/request'
+package com.streamxhub.streamx.console.system.dao;
 
-export function roleMenu (queryParam) {
-  return http.post(api.Role.MENU, queryParam)
-}
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.streamxhub.streamx.console.system.entity.Team;
+import com.streamxhub.streamx.console.system.entity.User;
+import org.apache.ibatis.annotations.Param;
 
-export function list (queryParam) {
-  return http.post(api.Role.LIST, queryParam)
-}
+/**
+ * @author daixinyu
+ */
+public interface TeamMapper extends BaseMapper<Team> {
 
-export function listByUser (queryParam) {
-  return http.post(api.Role.LIST_BY_USER, queryParam)
-}
+    IPage<Team> findTeamList(Page<User> page,@Param("team") Team team);
 
-export function remove (queryParam) {
-  return http.delete(api.Role.DELETE, queryParam)
-}
-
-export function update (queryParam) {
-  return http.put(api.Role.UPDATE, queryParam)
-}
-
-export function checkName (queryParam) {
-  return http.post(api.Role.CHECK_NAME, queryParam)
-}
-
-export function post (queryParam) {
-  return http.post(api.Role.POST, queryParam)
-}
-
-export function $export (queryParam) {
-  return http.export(api.Role.EXPORT, queryParam)
 }
