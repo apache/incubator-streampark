@@ -120,7 +120,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             case APPLICATION =>
               // scalastyle:off awaitready
               touchApplicationJob(clusterKey.clusterId, clusterKey.namespace).toArray
-              // scalastyle:on awaitready
+            // scalastyle:on awaitready
           }
         }
         future.filter(_.nonEmpty).foreach {
@@ -267,7 +267,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
     // whether deployment exists on kubernetes cluster
     lazy val isDeployExists = KubernetesRetriever.isDeploymentExists(clusterId, namespace)
-    // relavant deployment event
+    // relevant deployment event
     lazy val deployEvent = cachePool.k8sDeploymentEvents.getIfPresent(K8sEventKey(namespace, clusterId))
     lazy val preCache: JobStatusCV = cachePool.jobStatuses.getIfPresent(TrackId.onApplication(namespace, clusterId))
 
@@ -291,11 +291,24 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     }
     val nonFirstSilent = jobState == FlinkJobState.SILENT && preCache != null && preCache.jobState == FlinkJobState.SILENT
     if (nonFirstSilent) {
-      Some(TrackId.onApplication(namespace, clusterId) ->
-        JobStatusCV(jobState = jobState, jobId = "", pollEmitTime = preCache.pollEmitTime, pollAckTime = preCache.pollAckTime))
+      Some(
+        TrackId.onApplication(namespace, clusterId) ->
+          JobStatusCV(
+            jobState = jobState,
+            jobId = "",
+            pollEmitTime = preCache.pollEmitTime,
+            pollAckTime = preCache.pollAckTime)
+      )
     } else {
-      Some(TrackId.onApplication(namespace, clusterId) ->
-        JobStatusCV(jobState = jobState, jobId = "", pollEmitTime = pollEmitTime, pollAckTime = System.currentTimeMillis))
+      Some(
+        TrackId.onApplication(namespace, clusterId) ->
+          JobStatusCV(
+            jobState = jobState,
+            jobId = "",
+            pollEmitTime = pollEmitTime,
+            pollAckTime = System.currentTimeMillis
+          )
+      )
     }
   }
 

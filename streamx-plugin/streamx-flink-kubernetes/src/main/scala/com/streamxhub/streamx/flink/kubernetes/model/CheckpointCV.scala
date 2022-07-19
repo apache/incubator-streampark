@@ -19,10 +19,8 @@
 
 package com.streamxhub.streamx.flink.kubernetes.model
 
-case class CheckpointCV(
-                         id: Integer,
-                         checkpointPath: String,
-                         isSavepoint: Boolean,
-                         checkpointType: String,
-                         pollAckTime: Long
-                       )
+case class CheckpointCV(id: Long,
+                        checkpointPath: String,
+                        isSavepoint: Boolean,
+                        checkpointType: String,
+                        pollAckTime: Long)

@@ -98,7 +98,9 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrackCachePool) extends Logg
     //  return
     // just tracking every flink-k8s-native event :)
     cachePool.k8sDeploymentEvents.put(
-      K8sEventKey(namespace, clusterId), K8sDeploymentEventCV(action, event, System.currentTimeMillis()))
+      K8sEventKey(namespace, clusterId),
+      K8sDeploymentEventCV(action, event, System.currentTimeMillis())
+    )
   }
 
 
