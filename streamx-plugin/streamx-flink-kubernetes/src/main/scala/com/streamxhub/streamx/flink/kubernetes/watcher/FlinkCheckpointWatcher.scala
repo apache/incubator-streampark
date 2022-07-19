@@ -124,8 +124,7 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
    *
    */
   def collect(id: TrackId): Option[CheckpointCV] = {
-    val clusterKey: ClusterKey = ClusterKey.of(id)
-    val flinkJmRestUrl = cachePool.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
+    val flinkJmRestUrl = cachePool.getClusterRestUrl(ClusterKey.of(id)).filter(_.nonEmpty).getOrElse(return None)
     // call flink rest overview api
     val checkpoint: Checkpoint = Try(
       Checkpoint.as(
@@ -137,7 +136,6 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
     ).getOrElse(return None)
 
     val checkpointCV = CheckpointCV(
-      appId = id.appId,
       id = checkpoint.id,
       externalPath = checkpoint.externalPath,
       isSavepoint = checkpoint.isSavepoint,

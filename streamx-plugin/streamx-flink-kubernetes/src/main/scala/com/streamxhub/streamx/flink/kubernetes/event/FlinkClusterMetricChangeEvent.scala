@@ -19,9 +19,9 @@
 
 package com.streamxhub.streamx.flink.kubernetes.event
 
-import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV}
+import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, TrackId}
 
 /**
  * @author Al-assad
  */
-case class FlinkClusterMetricChangeEvent(clusterKey: ClusterKey, metrics: FlinkMetricCV) extends BuildInEvent
+case class FlinkClusterMetricChangeEvent(trackId: TrackId, metrics: FlinkMetricCV) extends BuildInEvent

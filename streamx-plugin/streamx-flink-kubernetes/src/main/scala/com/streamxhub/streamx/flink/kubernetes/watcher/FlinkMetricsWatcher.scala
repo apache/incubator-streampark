@@ -113,7 +113,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
               preMetric == null || preMetric.nonEqualsPayload(metric)
             }
             if (isMetricChanged) {
-              eventBus.postAsync(FlinkClusterMetricChangeEvent(clusterKey, metric))
+              eventBus.postAsync(FlinkClusterMetricChangeEvent(id, metric))
             }
         }
         future

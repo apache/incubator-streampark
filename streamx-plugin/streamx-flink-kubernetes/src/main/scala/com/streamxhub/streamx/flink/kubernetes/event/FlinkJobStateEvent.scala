@@ -28,6 +28,4 @@ import com.streamxhub.streamx.flink.kubernetes.model.TrackId
  *
  * @author Al-assad
  */
-case class FlinkJobOperaEvent(trackId: TrackId, expectJobState: FlinkJobOpera) extends BuildInEvent
-
-case class FlinkJobOpera(expect: FlinkJobState.Value, pollTime: Long)
+case class FlinkJobStateEvent(trackId: TrackId, jobState: FlinkJobState.Value, pollTime: Long) extends BuildInEvent

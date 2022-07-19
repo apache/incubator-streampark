@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.kubernetes
 import com.google.common.eventbus.Subscribe
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
-import com.streamxhub.streamx.flink.kubernetes.event.{BuildInEvent, FlinkJobOperaEvent, FlinkJobStatusChangeEvent}
+import com.streamxhub.streamx.flink.kubernetes.event.{BuildInEvent, FlinkJobStateEvent, FlinkJobStatusChangeEvent}
 import com.streamxhub.streamx.flink.kubernetes.model._
 import com.streamxhub.streamx.flink.kubernetes.watcher.{FlinkCheckpointWatcher, FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
@@ -135,30 +135,30 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
      * trigger a new FlinkJobStatusChangeEvent.
      */
     // noinspection UnstableApiUsage
-    @Subscribe def catchFlinkJobOperaEvent(event: FlinkJobOperaEvent): Unit = {
+    @Subscribe def catchFlinkJobStateEvent(event: FlinkJobStateEvent): Unit = {
       if (!Try(event.trackId.nonLegal).getOrElse(true)) {
 
         val preCache = trackCache.jobStatuses.getIfPresent(event.trackId)
 
         // determine if the current event should be ignored
-        val shouldIgnore: Boolean = (preCache, event.expectJobState) match {
+        val shouldIgnore: Boolean = (preCache, event) match {
           case (preCache, _) if preCache == null => false
           // discard current event when the job state is consistent
-          case (preCache, expectJobState) if preCache.jobState == expectJobState.expect => true
+          case (preCache, event) if preCache.jobState == event.jobState => true
           // discard current event when current event is too late
-          case (preCache, expectJobState) if expectJobState.pollTime <= preCache.pollAckTime => true
+          case (preCache, event) if event.pollTime <= preCache.pollAckTime => true
           case _ => false
         }
         if (!shouldIgnore) {
           // update relevant cache
           val newCache = {
             if (preCache != null) {
-              preCache.copy(jobState = event.expectJobState.expect)
+              preCache.copy(jobState = event.jobState)
             } else {
               JobStatusCV(
-                jobState = event.expectJobState.expect,
+                jobState = event.jobState,
                 jobId = event.trackId.jobId,
-                pollEmitTime = event.expectJobState.pollTime,
+                pollEmitTime = event.pollTime,
                 pollAckTime = System.currentTimeMillis)
             }
           }
