@@ -40,9 +40,9 @@ class SingleTrackingTaskTest {
     jobStatus1.foreach(println)
 
     // test application job
-    val jobStatus2 = trackMonitor.jobStatusWatcher.touchApplicationJob("flink-app2", "default", 0L, "60dd003f048a5b2f92f0874e6612146c")
+    val jobStatus2 = trackMonitor.jobStatusWatcher.touchApplicationJob("flink-app2", "default", 0L)
     println(s"result2 = ${jobStatus2.map(_.toString).getOrElse("empty result")}")
-    val jobStatus3 = trackMonitor.jobStatusWatcher.touchApplicationJob("flink-app3", "default", 0L, "60dd003f048a5b2f92f0874e6612146c")
+    val jobStatus3 = trackMonitor.jobStatusWatcher.touchApplicationJob("flink-app3", "default", 0L)
     println(s"result3 = ${jobStatus3.map(_.toString).getOrElse("empty result")}")
   }
 

@@ -124,26 +124,29 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
    *
    */
   def collect(id: TrackId): Option[CheckpointCV] = {
-    val flinkJmRestUrl = cachePool.getClusterRestUrl(ClusterKey.of(id)).filter(_.nonEmpty).getOrElse(return None)
-    // call flink rest overview api
-    val checkpoint: Checkpoint = Try(
-      Checkpoint.as(
-        Request.get(s"$flinkJmRestUrl/jobs/${id.jobId}/checkpoints")
-          .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-          .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
-          .execute.returnContent.asString(StandardCharsets.UTF_8)
-      )
-    ).getOrElse(return None)
+    val jobDetail = cachePool.jobStatuses.getIfPresent(id)
+    if (jobDetail != null) {
+      val flinkJmRestUrl = cachePool.getClusterRestUrl(ClusterKey.of(id)).filter(_.nonEmpty).getOrElse(return None)
+      // call flink rest overview api
+      val checkpoint: Checkpoint = Try(
+        Checkpoint.as(
+          Request.get(s"$flinkJmRestUrl/jobs/${jobDetail.jobId}/checkpoints")
+            .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
+            .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+            .execute.returnContent.asString(StandardCharsets.UTF_8)
+        )
+      ).getOrElse(return None)
 
-    val checkpointCV = CheckpointCV(
-      id = checkpoint.id,
-      externalPath = checkpoint.externalPath,
-      isSavepoint = checkpoint.isSavepoint,
-      checkpointType = checkpoint.checkpointType,
-      status = checkpoint.status,
-      triggerTimestamp = checkpoint.triggerTimestamp
-    )
-    Some(checkpointCV)
+      val checkpointCV = CheckpointCV(
+        id = checkpoint.id,
+        externalPath = checkpoint.externalPath,
+        isSavepoint = checkpoint.isSavepoint,
+        checkpointType = checkpoint.checkpointType,
+        status = checkpoint.status,
+        triggerTimestamp = checkpoint.triggerTimestamp
+      )
+      Some(checkpointCV)
+    } else None
   }
 
 }

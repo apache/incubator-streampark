@@ -43,9 +43,9 @@ class K8SFlinkTrackMonitorTrackingTest {
 
   private val trackIds = Array(
     TrackId.onSession("default", "flink-session", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"),
-    TrackId.onApplication("default", "flink-app2", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"),
-    TrackId.onApplication("default", "flink-app3", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"),
-    TrackId.onApplication("default", "flink-app4", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"))
+    TrackId.onApplication("default", "flink-app2", 0L),
+    TrackId.onApplication("default", "flink-app3", 0L),
+    TrackId.onApplication("default", "flink-app4", 0L))
 
 
   @BeforeEach
@@ -86,7 +86,7 @@ class K8SFlinkTrackMonitorTrackingTest {
     watchAggClusterMetricsCache
     watchTrackIdsCache
 
-    val trackId = TrackId.onApplication("default", "flink-app3", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2")
+    val trackId = TrackId.onApplication("default", "flink-app3", 0L)
     trackMonitor.start()
     trackMonitor.trackingJob(trackId)
     assertTrue(trackMonitor.isInTracking(trackId))
@@ -120,8 +120,8 @@ class K8SFlinkTrackMonitorTrackingTest {
     val check = (trackId: TrackId) => println(s"[check-is-in-remote-cluster] trackId=$trackId, isExists=${trackMonitor.checkIsInRemoteCluster(trackId)}")
     check(TrackId.onSession("default", "flink-session", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a4"))
     check(TrackId.onSession("default", "flink-session", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"))
-    check(TrackId.onApplication("default", "flink-app3", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"))
-    check(TrackId.onApplication("default", "flink-app4", 0L, "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"))
+    check(TrackId.onApplication("default", "flink-app3", 0L))
+    check(TrackId.onApplication("default", "flink-app4", 0L))
   }
 
 

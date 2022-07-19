@@ -118,7 +118,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             case SESSION =>
               touchSessionJob(trackId.clusterId, trackId.namespace, trackId.appId, trackId.jobId)
             case APPLICATION =>
-              touchApplicationJob(trackId.clusterId, trackId.namespace, trackId.appId, trackId.jobId)
+              touchApplicationJob(trackId.clusterId, trackId.namespace, trackId.appId)
           }
         }
 
@@ -218,20 +218,20 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    */
   def touchApplicationJob(@Nonnull clusterId: String,
                           @Nonnull namespace: String,
-                          @Nonnull appId: Long,
-                          @Nonnull jobId: String
+                          @Nonnull appId: Long
                          ): Option[(TrackId, JobStatusCV)] = {
     implicit val pollEmitTime: Long = System.currentTimeMillis
-    lazy val k8sInferResult = inferApplicationFlinkJobStateFromK8sEvent(clusterId, namespace, appId, jobId)
+    lazy val k8sInferResult = inferApplicationFlinkJobStateFromK8sEvent(clusterId, namespace, appId)
     val jobDetails = listJobsDetails(ClusterKey(APPLICATION, namespace, clusterId)).getOrElse(return k8sInferResult).jobs
     if (jobDetails.isEmpty) {
       k8sInferResult
     } else {
       // just receive the first result
-      Some(TrackId.onApplication(namespace, clusterId, appId, jobId) -> jobDetails.iterator.next.toJobStatusCV(pollEmitTime, System.currentTimeMillis))
+      val jobDetail = jobDetails.iterator.next.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
+      val trackId = TrackId.onApplication(namespace, clusterId, appId)
+      Some(trackId.copy(jobId = jobDetail.jobId) -> jobDetail)
     }
   }
-
 
   /**
    * list flink jobs details
@@ -270,15 +270,14 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    */
   private def inferApplicationFlinkJobStateFromK8sEvent(@Nonnull clusterId: String,
                                                         @Nonnull namespace: String,
-                                                        appId: Long,
-                                                        jobId: String)
+                                                        appId: Long)
                                                        (implicit pollEmitTime: Long): Option[(TrackId, JobStatusCV)] = {
 
     // whether deployment exists on kubernetes cluster
     lazy val isDeployExists = KubernetesRetriever.isDeploymentExists(clusterId, namespace)
     // relevant deployment event
     lazy val deployEvent = cachePool.k8sDeploymentEvents.getIfPresent(K8sEventKey(namespace, clusterId))
-    lazy val preCache: JobStatusCV = cachePool.jobStatuses.getIfPresent(TrackId.onApplication(namespace, clusterId, appId, jobId))
+    lazy val preCache: JobStatusCV = cachePool.jobStatuses.getIfPresent(TrackId.onApplication(namespace, clusterId, appId))
 
     // infer from k8s deployment and event
     val jobState = {
@@ -298,22 +297,23 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         inferSilentOrLostFromPreCache(preCache)
       }
     }
+
     val nonFirstSilent = jobState == FlinkJobState.SILENT && preCache != null && preCache.jobState == FlinkJobState.SILENT
     if (nonFirstSilent) {
       Some(
-        TrackId.onApplication(namespace, clusterId, appId, jobId) ->
+        TrackId.onApplication(namespace, clusterId, appId) ->
           JobStatusCV(
             jobState = jobState,
-            jobId = "",
+            jobId = null,
             pollEmitTime = preCache.pollEmitTime,
             pollAckTime = preCache.pollAckTime)
       )
     } else {
       Some(
-        TrackId.onApplication(namespace, clusterId, appId, jobId) ->
+        TrackId.onApplication(namespace, clusterId, appId) ->
           JobStatusCV(
             jobState = jobState,
-            jobId = "",
+            jobId = null,
             pollEmitTime = pollEmitTime,
             pollAckTime = System.currentTimeMillis
           )

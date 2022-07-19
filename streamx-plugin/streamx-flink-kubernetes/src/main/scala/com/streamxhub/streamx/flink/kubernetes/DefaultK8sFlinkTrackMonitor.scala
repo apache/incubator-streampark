@@ -107,7 +107,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
             .exists(e => nonLost(e._2.jobState))
         case APPLICATION =>
           jobStatusWatcher
-            .touchApplicationJob(trackId.clusterId, trackId.namespace, trackId.appId, trackId.jobId)
+            .touchApplicationJob(trackId.clusterId, trackId.namespace, trackId.appId)
             .exists(e => nonLost(e._2.jobState))
         case _ => false
       }
@@ -137,9 +137,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
     // noinspection UnstableApiUsage
     @Subscribe def catchFlinkJobStateEvent(event: FlinkJobStateEvent): Unit = {
       if (!Try(event.trackId.nonLegal).getOrElse(true)) {
-
         val preCache = trackCache.jobStatuses.getIfPresent(event.trackId)
-
         // determine if the current event should be ignored
         val shouldIgnore: Boolean = (preCache, event) match {
           case (preCache, _) if preCache == null => false

@@ -69,7 +69,7 @@ object TrackId {
     this (FlinkK8sExecuteMode.SESSION, namespace, clusterId, appId, jobId)
   }
 
-  def onApplication(namespace: String, clusterId: String, appId: Long, jobId: String): TrackId = {
-    this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, jobId)
+  def onApplication(namespace: String, clusterId: String, appId: Long): TrackId = {
+    this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, null)
   }
 }
