@@ -73,7 +73,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         assert flinkEnv != null;
         int cpThreshold = Integer.parseInt(
             flinkEnv.convertFlinkYamlAsMap()
-                .getOrDefault("state.checkpoints.num-retained", "1")
+                .getOrDefault("state.checkpoints.num-retained", "5")
         );
 
         if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
