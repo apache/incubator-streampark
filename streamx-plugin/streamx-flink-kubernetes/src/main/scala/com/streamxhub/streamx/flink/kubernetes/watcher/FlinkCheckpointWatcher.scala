@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.kubernetes.watcher
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobCheckpointChangeEvent
-import com.streamxhub.streamx.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId, TrackIdCV}
+import com.streamxhub.streamx.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId}
 import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackCachePool, KubernetesRetriever, MetricWatcherConfig}
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
@@ -34,7 +34,6 @@ import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 import javax.annotation.concurrent.ThreadSafe
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
-import scala.collection.JavaConversions._
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
@@ -125,18 +124,7 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
    * in case of the relevant flink rest api require failure).
    *
    */
-  def collect(id: TrackId): Option[CheckpointCV] = {
-
-    val trackId = if (id.jobId == null) {
-      val jobDetail = cachePool.jobStatuses.asMap().filter(_._1.appId == id.appId).head._1
-      if (jobDetail != null) {
-        val copyId = id.copy(jobId = jobDetail.jobId)
-        cachePool.trackIds.invalidate(id)
-        cachePool.trackIds.put(copyId, TrackIdCV(System.currentTimeMillis()))
-        copyId
-      } else id
-    } else id
-
+  def collect(trackId: TrackId): Option[CheckpointCV] = {
     if (trackId.jobId != null) {
       val flinkJmRestUrl = cachePool.getClusterRestUrl(ClusterKey.of(trackId)).filter(_.nonEmpty).getOrElse(return None)
       // call flink rest overview api

@@ -24,11 +24,7 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.model._
 
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicReference
-import java.util.function.UnaryOperator
-import javax.annotation.concurrent.ThreadSafe
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.util.Try
 
 /**
@@ -38,7 +34,7 @@ import scala.util.Try
 class FlinkTrackCachePool extends Logger with AutoCloseable {
 
   // cache for tracking identifiers
-  val trackIds: Cache[TrackId, TrackIdCV] = Caffeine.newBuilder.build()
+  val trackIds: TrackIdCache = TrackIdCache.build()
 
   // cache for flink Job-manager rest url
   val clusterRestUrls: Cache[ClusterKey, String] = Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build()
@@ -52,9 +48,6 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
   // cache for last each flink cluster metrics (such as a session cluster or a application cluster)
   val flinkMetrics: Cache[ClusterKey, FlinkMetricCV] = Caffeine.newBuilder().build()
 
-  // cache for last aggregate flink cluster metrics
-  // val flinkMetricsAgg: SglValCache[FlinkMetricCV] = SglValCache[FlinkMetricCV](FlinkMetricCV.empty)
-
   override def close(): Unit = {
     jobStatuses.cleanUp()
     k8sDeploymentEvents.cleanUp()
@@ -64,16 +57,14 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
   /**
    * collect all tracking identifiers
    */
-  def collectAllTrackIds(): Set[TrackId] = {
-    trackIds.asMap().keySet().asScala.toSet
-  }
+  def collectAllTrackIds(): Set[TrackId] = trackIds.getAll()
 
   /**
    * determines whether the specified TrackId is in the trace
    */
   def isInTracking(trackId: TrackId): Boolean = {
     if (Try(trackId.nonLegal).getOrElse(true)) false; else {
-      trackIds.getIfPresent(trackId) != null
+      trackIds.get(trackId) != null
     }
   }
 
@@ -100,13 +91,13 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
   }
 
   /**
-   * get flink jobmanager rest url from cache which will auto refresh when it it empty.
+   * get flink job-manager rest url from cache which will auto refresh when it it empty.
    */
   def getClusterRestUrl(clusterKey: ClusterKey): Option[String] =
     Option(clusterRestUrls.getIfPresent(clusterKey)).filter(_.nonEmpty).orElse(refreshClusterRestUrl(clusterKey))
 
   /**
-   * refresh flink jobmanager rest url from remote flink cluster, and cache it.
+   * refresh flink job-manager rest url from remote flink cluster, and cache it.
    */
   def refreshClusterRestUrl(clusterKey: ClusterKey): Option[String] = {
     val restUrl = KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
@@ -118,20 +109,31 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
 
 }
 
-/**
- * Thread-safe single value cache
- */
-@ThreadSafe
-case class SglValCache[T](initElement: T)(implicit manifest: Manifest[T]) {
 
-  private val value = new AtomicReference[T](initElement)
+class TrackIdCache {
+  case class CacheKey(key: java.lang.Long) extends Serializable
 
-  def get: T = value.get()
+  lazy val cache: Cache[CacheKey, TrackId] = Caffeine.newBuilder.build()
 
-  def set(newVal: T): Unit = value.set(newVal)
+  def update(k: TrackId): Unit = {
+    cache.invalidate(k)
+    cache.put(CacheKey(k.appId), k)
+  }
 
-  def update(func: T => T): Unit = value.updateAndGet(new UnaryOperator[T] {
-    override def apply(t: T): T = func(t)
-  })
+  def set(k: TrackId): Unit = cache.put(CacheKey(k.appId), k)
 
+  def invalidate(k: TrackId): Unit = cache.invalidate(CacheKey(k.appId))
+
+  def get(k: TrackId): TrackId = cache.getIfPresent(CacheKey(k.appId))
+
+  def getAll(): Set[TrackId] = cache.asMap().values().toSet
+
+  def cleanUp(): Unit = cache.cleanUp()
+
+}
+
+object TrackIdCache {
+  def build(): TrackIdCache = {
+    new TrackIdCache()
+  }
 }

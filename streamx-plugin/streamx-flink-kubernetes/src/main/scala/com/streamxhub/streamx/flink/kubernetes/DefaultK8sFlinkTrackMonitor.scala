@@ -71,7 +71,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
 
   def trackingJob(trackId: TrackId): Unit = {
     if (!Try(trackId.nonLegal).getOrElse(true)) {
-      trackCache.trackIds.put(trackId, TrackIdCV(System.currentTimeMillis()))
+      trackCache.trackIds.set(trackId)
     }
   }
 
