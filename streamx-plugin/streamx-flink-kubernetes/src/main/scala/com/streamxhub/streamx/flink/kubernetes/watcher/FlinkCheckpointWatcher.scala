@@ -21,18 +21,20 @@ package com.streamxhub.streamx.flink.kubernetes.watcher
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobCheckpointChangeEvent
-import com.streamxhub.streamx.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId}
+import com.streamxhub.streamx.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId, TrackIdCV}
 import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackCachePool, KubernetesRetriever, MetricWatcherConfig}
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
+import org.json4s.JsonAST.JNothing
 import org.json4s.jackson.JsonMethods.parse
-import org.json4s.DefaultFormats
+import org.json4s.{DefaultFormats, JNull}
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 import javax.annotation.concurrent.ThreadSafe
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
+import scala.collection.JavaConversions._
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
@@ -124,17 +126,29 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
    *
    */
   def collect(id: TrackId): Option[CheckpointCV] = {
-    val jobDetail = cachePool.jobStatuses.getIfPresent(id)
-    if (jobDetail != null) {
-      val flinkJmRestUrl = cachePool.getClusterRestUrl(ClusterKey.of(id)).filter(_.nonEmpty).getOrElse(return None)
+    val trackId = if (id.jobId == null) {
+      val jobDetail = cachePool.jobStatuses.asMap().filter(_._1.appId == id.appId).head._1
+      if (jobDetail != null) {
+        val copyId = id.copy(jobId = jobDetail.jobId)
+        cachePool.trackIds.invalidate(id)
+        cachePool.trackIds.put(copyId, TrackIdCV(System.currentTimeMillis()))
+        copyId
+      } else id
+    } else id
+
+    if (trackId.jobId != null) {
+      val flinkJmRestUrl = cachePool.getClusterRestUrl(ClusterKey.of(trackId)).filter(_.nonEmpty).getOrElse(return None)
       // call flink rest overview api
       val checkpoint: Checkpoint = Try(
         Checkpoint.as(
-          Request.get(s"$flinkJmRestUrl/jobs/${jobDetail.jobId}/checkpoints")
+          Request.get(s"$flinkJmRestUrl/jobs/${trackId.jobId}/checkpoints")
             .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
             .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
             .execute.returnContent.asString(StandardCharsets.UTF_8)
-        )
+        ) match {
+          case Some(c) => c
+          case _ => return None
+        }
       ).getOrElse(return None)
 
       val checkpointCV = CheckpointCV(
@@ -164,19 +178,24 @@ object Checkpoint {
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
 
-  def as(json: String): Checkpoint = {
+  def as(json: String): Option[Checkpoint] = {
     Try(parse(json)) match {
       case Success(ok) =>
         val completed = ok \ "latest" \ "completed"
-        Checkpoint(
-          id = (completed \ "id").extractOpt[Long].getOrElse(0L),
-          status = (completed \ "status").extractOpt[String].getOrElse(null),
-          externalPath = (completed \ "external_path").extractOpt[String].getOrElse(null),
-          isSavepoint = (completed \ "is_savepoint").extractOpt[Boolean].getOrElse(false),
-          checkpointType = (completed \ "checkpoint_type").extractOpt[String].getOrElse(null),
-          triggerTimestamp = (completed \ "trigger_timestamp").extractOpt[Long].getOrElse(0L)
-        )
-      case Failure(_) => null
+        completed match {
+          case JNull | JNothing => None
+          case _ =>
+            val cp = Checkpoint(
+              id = (completed \ "id").extractOpt[Long].getOrElse(0L),
+              status = (completed \ "status").extractOpt[String].getOrElse(null),
+              externalPath = (completed \ "external_path").extractOpt[String].getOrElse(null),
+              isSavepoint = (completed \ "is_savepoint").extractOpt[Boolean].getOrElse(false),
+              checkpointType = (completed \ "checkpoint_type").extractOpt[String].getOrElse(null),
+              triggerTimestamp = (completed \ "trigger_timestamp").extractOpt[Long].getOrElse(0L)
+            )
+            Some(cp)
+        }
+      case Failure(_) => None
     }
   }
 

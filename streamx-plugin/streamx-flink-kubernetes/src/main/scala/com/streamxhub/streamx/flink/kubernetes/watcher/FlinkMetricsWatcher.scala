@@ -143,13 +143,11 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
     val flinkJmRestUrl = cachePool.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
 
     // call flink rest overview api
-    val flinkOverview: FlinkRestOverview = Try(
-      FlinkRestOverview.as(
-        Request.get(s"$flinkJmRestUrl/overview")
-          .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-          .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
-          .execute.returnContent.asString(StandardCharsets.UTF_8)
-      )
+    val flinkOverview: FlinkRestOverview = FlinkRestOverview.as(
+      Request.get(s"$flinkJmRestUrl/overview")
+        .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
+        .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+        .execute.returnContent.asString(StandardCharsets.UTF_8)
     ).getOrElse(return None)
 
     // call flink rest jm config api
@@ -201,10 +199,10 @@ object FlinkRestOverview {
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
 
-  def as(json: String): FlinkRestOverview = {
+  def as(json: String): Option[FlinkRestOverview] = {
     Try(parse(json)) match {
       case Success(ok) =>
-        FlinkRestOverview(
+        val overview = FlinkRestOverview(
           (ok \ "taskmanagers").extractOpt[Integer].getOrElse(0),
           (ok \ "slots-total").extractOpt[Integer].getOrElse(0),
           (ok \ "slots-available").extractOpt[Integer].getOrElse(0),
@@ -214,7 +212,8 @@ object FlinkRestOverview {
           (ok \ "jobs-failed").extractOpt[Integer].getOrElse(0),
           (ok \ "flink-version").extractOpt[String].orNull
         )
-      case Failure(_) => null
+        Some(overview)
+      case Failure(_) => None
     }
   }
 

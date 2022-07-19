@@ -37,9 +37,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class CheckpointProcessor {
 
-    private static final Map<String, Long> CHECK_POINT_MAP = new ConcurrentHashMap<>(0);
+    private final Map<Long, Long> checkPointCache = new ConcurrentHashMap<>(0);
 
-    private static final Map<String, Counter> CHECK_POINT_FAILED_MAP = new ConcurrentHashMap<>(0);
+    private final Map<Long, Counter> checkPointFailedCache = new ConcurrentHashMap<>(0);
 
     @Autowired
     private ApplicationService applicationService;
@@ -58,7 +58,13 @@ public class CheckpointProcessor {
             if (checkPoint != null) {
                 CheckPointStatus status = checkPoint.getCheckPointStatus();
                 if (CheckPointStatus.COMPLETED.equals(status)) {
-                    Long latestId = CHECK_POINT_MAP.get(application.getJobId());
+                    Long latestId = checkPointCache.get(appId);
+                    if (latestId == null) {
+                        SavePoint savePoint = savePointService.getLatest(appId);
+                        if (savePoint != null) {
+                            latestId = savePoint.getId();
+                        }
+                    }
                     if (latestId == null || latestId < checkPoint.getId()) {
                         SavePoint savePoint = new SavePoint();
                         savePoint.setAppId(application.getId());
@@ -68,18 +74,18 @@ public class CheckpointProcessor {
                         savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
                         savePoint.setCreateTime(new Date());
                         savePointService.save(savePoint);
-                        CHECK_POINT_MAP.put(application.getJobId(), checkPoint.getId());
+                        checkPointCache.put(application.getId(), checkPoint.getId());
                     }
                 } else if (CheckPointStatus.FAILED.equals(status) && application.cpFailedTrigger()) {
-                    Counter counter = CHECK_POINT_FAILED_MAP.get(application.getJobId());
+                    Counter counter = checkPointFailedCache.get(appId);
                     if (counter == null) {
-                        CHECK_POINT_FAILED_MAP.put(application.getJobId(), new Counter(checkPoint.getTriggerTimestamp()));
+                        checkPointFailedCache.put(appId, new Counter(checkPoint.getTriggerTimestamp()));
                     } else {
                         //x分钟之内超过Y次CheckPoint失败触发动作
                         long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
                         if (minute <= application.getCpFailureRateInterval()
                             && counter.count >= application.getCpMaxFailureInterval()) {
-                            CHECK_POINT_FAILED_MAP.remove(application.getJobId());
+                            checkPointFailedCache.remove(appId);
                             if (application.getCpFailureAction() == 1) {
                                 alertService.alert(application, CheckPointStatus.FAILED);
                             } else {

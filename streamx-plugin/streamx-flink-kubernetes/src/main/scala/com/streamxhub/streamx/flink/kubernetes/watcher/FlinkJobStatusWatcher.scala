@@ -28,7 +28,7 @@ import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackCacheP
 import io.fabric8.kubernetes.client.Watcher.Action
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
-import org.json4s.DefaultFormats
+import org.json4s.{DefaultFormats, JNothing, JNull}
 import org.json4s.JsonAST.JArray
 import org.json4s.jackson.JsonMethods.parse
 
@@ -124,10 +124,10 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
         future.filter(_.nonEmpty).foreach {
           tracks =>
-            implicit val preCache: mutable.Map[TrackId, JobStatusCV] =
-              cachePool.jobStatuses.getAllPresent(tracks.map(_._1).toSet.asJava).asScala
+            implicit val preCache: mutable.Map[TrackId, JobStatusCV] = cachePool.jobStatuses.getAllPresent(tracks.map(_._1).toSet.asJava).asScala
             // put job status to cache
             cachePool.jobStatuses.putAll(tracks.toMap.asJava)
+
             // publish JobStatusChangeEvent when necessary
             tracks.filter(e =>
               preCache.get(e._1) match {
@@ -261,7 +261,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
       .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
       .execute.returnContent().asString(StandardCharsets.UTF_8)
-  )
+  ).getOrElse(null)
 
   /**
    * Infer the current flink state from the last relevant k8s events.
@@ -404,13 +404,14 @@ private[kubernetes] object JobDetails {
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
 
-  def as(json: String): JobDetails = {
+  def as(json: String): Option[JobDetails] = {
 
-    JobDetails(Try(parse(json)) match {
+    Try(parse(json)) match {
       case Success(ok) =>
         ok \ "jobs" match {
+          case JNothing | JNull => None
           case JArray(arr) =>
-            arr.map(x => {
+            val details = arr.map(x => {
               val task = x \ "tasks"
               JobDetail(
                 (x \ "jid").extractOpt[String].orNull,
@@ -435,10 +436,11 @@ private[kubernetes] object JobDetails {
                 )
               )
             }).toArray
-          case _ => null
+            Some(JobDetails(details))
+          case _ => None
         }
-      case Failure(_) => null
-    })
+      case Failure(_) => None
+    }
 
   }
 

@@ -88,7 +88,7 @@ public class K8sFlinkChangeEventListener {
      */
     @SuppressWarnings("UnstableApiUsage")
     @Subscribe
-    public void persistentK8sFlinkJobStatusChange(FlinkJobStatusChangeEvent event) {
+    public void subscribeJobStatusChange(FlinkJobStatusChangeEvent event) {
         JobStatusCV jobStatus = event.jobStatus();
         TrackId trackId = event.trackId();
         // get pre application record
@@ -119,7 +119,7 @@ public class K8sFlinkChangeEventListener {
      */
     @SuppressWarnings("UnstableApiUsage")
     @Subscribe
-    public void persistentK8sFlinkMetricsChange(FlinkClusterMetricChangeEvent event) {
+    public void subscribeMetricsChange(FlinkClusterMetricChangeEvent event) {
         FlinkMetricCV metrics = event.metrics();
         TrackId trackId = event.trackId();
         ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trackId.executeMode());
@@ -142,8 +142,9 @@ public class K8sFlinkChangeEventListener {
 
     @SuppressWarnings("UnstableApiUsage")
     @Subscribe
-    public void persistentK8sFlinkCheckpointChange(FlinkJobCheckpointChangeEvent event) {
+    public void subscribeCheckpointChange(FlinkJobCheckpointChangeEvent event) {
         CheckPoints.CheckPoint completed = new CheckPoints.CheckPoint();
+        completed.setId(event.checkpoint().id());
         completed.setCheckpointType(event.checkpoint().checkpointType());
         completed.setExternalPath(event.checkpoint().externalPath());
         completed.setIsSavepoint(event.checkpoint().isSavepoint());
@@ -152,7 +153,6 @@ public class K8sFlinkChangeEventListener {
 
         CheckPoints.Latest latest = new CheckPoints.Latest();
         latest.setCompleted(completed);
-
         CheckPoints checkPoint = new CheckPoints();
         checkPoint.setLatest(latest);
 
