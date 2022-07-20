@@ -37,10 +37,10 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
   val trackIds: TrackIdCache = TrackIdCache.build()
 
   // cache for flink Job-manager rest url
-  val clusterRestUrls: Cache[ClusterKey, String] = Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build()
+  val endpoints: EndpointCache = EndpointCache.build()
 
   // cache for tracking flink job status
-  val jobStatuses: Cache[TrackId, JobStatusCV] = Caffeine.newBuilder.build()
+  val jobStatuses: JobStatusCache = JobStatusCache.build()
 
   // cache for tracking kubernetes events with Deployment kind
   val k8sDeploymentEvents: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
@@ -94,7 +94,7 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
    * get flink job-manager rest url from cache which will auto refresh when it it empty.
    */
   def getClusterRestUrl(clusterKey: ClusterKey): Option[String] =
-    Option(clusterRestUrls.getIfPresent(clusterKey)).filter(_.nonEmpty).orElse(refreshClusterRestUrl(clusterKey))
+    Option(endpoints.get(clusterKey)).filter(_.nonEmpty).orElse(refreshClusterRestUrl(clusterKey))
 
   /**
    * refresh flink job-manager rest url from remote flink cluster, and cache it.
@@ -102,18 +102,19 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
   def refreshClusterRestUrl(clusterKey: ClusterKey): Option[String] = {
     val restUrl = KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
     if (restUrl.nonEmpty) {
-      clusterRestUrls.put(clusterKey, restUrl.get)
+      endpoints.put(clusterKey, restUrl.get)
     }
     restUrl
   }
 
 }
 
+//----cache----
 
 class TrackIdCache {
   case class CacheKey(key: java.lang.Long) extends Serializable
 
-  lazy val cache: Cache[CacheKey, TrackId] = Caffeine.newBuilder.build()
+  private[this] lazy val cache: Cache[CacheKey, TrackId] = Caffeine.newBuilder.build()
 
   def update(k: TrackId): Unit = {
     cache.invalidate(k)
@@ -136,4 +137,48 @@ object TrackIdCache {
   def build(): TrackIdCache = {
     new TrackIdCache()
   }
+}
+
+class JobStatusCache {
+
+  private[this] lazy val cache: Cache[TrackId, JobStatusCV] = Caffeine.newBuilder.build()
+
+  def putAll(kvs: Map[TrackId, JobStatusCV]): Unit = cache.putAll(kvs)
+
+  def put(k: TrackId, v: JobStatusCV): Unit = cache.put(k, v)
+
+  def asMap(): Map[TrackId, JobStatusCV] = cache.asMap().toMap
+
+  def getAsMap(trackIds: Set[TrackId]): Map[TrackId, JobStatusCV] = cache.getAllPresent(trackIds).toMap
+
+  def get(trackId: TrackId): JobStatusCV = cache.getIfPresent(trackId)
+
+  def invalidate(trackId: TrackId): Unit = cache.invalidate(trackId)
+
+  def cleanUp(): Unit = cache.cleanUp()
+
+}
+
+object JobStatusCache {
+
+  def build(): JobStatusCache = new JobStatusCache()
+
+}
+
+class EndpointCache {
+
+  private[this] lazy val cache: Cache[ClusterKey, String] = Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build()
+
+  def invalidate(trackId: TrackId): Unit = cache.invalidate(trackId.toClusterKey)
+
+  def put(clusterKey: ClusterKey, url: String): Unit = cache.put(clusterKey, url)
+
+  def get(key: ClusterKey): String = cache.getIfPresent(key)
+
+}
+
+object EndpointCache {
+
+  def build(): EndpointCache = new EndpointCache()
+
 }
