@@ -254,15 +254,15 @@ class FlinkRestJsonTest {
         |[
         |    {
         |        "addresses":[
-        |            "10.216.138.27",
-        |            "10.216.138.28",
-        |            "10.216.138.67"
+        |            "192.168.0.1",
+        |            "192.168.0.2",
+        |            "192.168.0.3"
         |        ],
         |        "port":80,
         |        "protocol":"HTTP",
         |        "serviceName":"native-flink:statebackend12788-rest",
         |        "ingressName":"native-flink:statebackend12788",
-        |        "hostname":"flink.ziroom.com",
+        |        "hostname":"streamx.com",
         |        "path":"/native-flink/statebackend12788/",
         |        "allNodes":false
         |    },
@@ -273,7 +273,7 @@ class FlinkRestJsonTest {
         |        "protocol":"HTTP",
         |        "serviceName":"native-flink:statebackend12788-rest",
         |        "ingressName":"native-flink:statebackend12788",
-        |        "hostname":"flink.ziroom.com",
+        |        "hostname":"streamx.com",
         |        "path":"/native-flink/statebackend12788(/|$)(.*)",
         |        "allNodes":false
         |    }
