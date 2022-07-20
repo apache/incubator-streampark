@@ -25,7 +25,6 @@ import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLIC
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model._
 import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackCachePool, IngressController, JobStatusWatcherConfig, KubernetesRetriever}
-import io.fabric8.kubernetes.client.Watcher.Action
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
 import org.json4s.{DefaultFormats, JNothing, JNull}
@@ -36,7 +35,6 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 import javax.annotation.Nonnull
 import javax.annotation.concurrent.ThreadSafe
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.duration.DurationLong
@@ -124,9 +122,9 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
         future.filter(_.nonEmpty).foreach { tracks =>
 
-          implicit val preCache: mutable.Map[TrackId, JobStatusCV] = cachePool.jobStatuses.getAllPresent(tracks.map(_._1).toSet.asJava).asScala
+          implicit val preCache: Map[TrackId, JobStatusCV] = cachePool.jobStatuses.getAsMap(tracks.map(_._1).toSet)
           // put job status to cache
-          cachePool.jobStatuses.putAll(tracks.toMap.asJava)
+          cachePool.jobStatuses.putAll(tracks.toMap)
 
           // set jobId to trackIds
           tracks.foreach(x => cachePool.trackIds.update(x._1.copy(jobId = x._2.jobId)))
@@ -146,7 +144,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             .foreach { id =>
               cachePool.trackIds.invalidate(id)
               if (id.executeMode == APPLICATION) {
-                cachePool.clusterRestUrls.invalidate(id.toClusterKey)
+                cachePool.endpoints.invalidate(id.toClusterKey)
               }
             }
         }
@@ -178,7 +176,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     val rsMap = touchSessionAllJob(clusterId, namespace, appId).toMap
     val id = TrackId.onSession(namespace, clusterId, appId, jobId)
     val jobState = rsMap.get(id).filter(_.jobState != FlinkJobState.SILENT).getOrElse {
-      val preCache = cachePool.jobStatuses.getIfPresent(id)
+      val preCache = cachePool.jobStatuses.get(id)
       val state = inferSilentOrLostFromPreCache(preCache)
       val nonFirstSilent = state == FlinkJobState.SILENT && preCache != null && preCache.jobState == FlinkJobState.SILENT
       if (nonFirstSilent) {
@@ -279,8 +277,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     // whether deployment exists on kubernetes cluster
     lazy val isDeployExists = KubernetesRetriever.isDeploymentExists(clusterId, namespace)
     // relevant deployment event
-    lazy val deployEvent = cachePool.k8sDeploymentEvents.getIfPresent(K8sEventKey(namespace, clusterId))
-    lazy val preCache: JobStatusCV = cachePool.jobStatuses.getIfPresent(TrackId.onApplication(namespace, clusterId, appId))
+    lazy val deployEvent = cachePool.k8sDeploymentEvents.get(K8sEventKey(namespace, clusterId))
+    lazy val preCache: JobStatusCV = cachePool.jobStatuses.get(TrackId.onApplication(namespace, clusterId, appId))
 
     // infer from k8s deployment and event
     val jobState = {
