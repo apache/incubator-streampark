@@ -78,19 +78,25 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     (file1, file2) match {
       case (a, b) if a == null || b == null => false
       case (a, b) if !a.exists() || !b.exists() => false
-      case (a, b) if a == b => true
+      case (a, b) if a.getAbsolutePath == b.getAbsolutePath => true
       case (a, b) =>
-        val in1 = new BufferedInputStream(new FileInputStream(a))
-        val in2 = new BufferedInputStream(new FileInputStream(b))
-        var c = 0
-        while ((c = in1.read) != -1) {
-          if (in2.read != c) {
-            Utils.close(in1, in2)
-            return false
+        val first = new BufferedInputStream(new FileInputStream(a))
+        val second = new BufferedInputStream(new FileInputStream(b))
+        if (first.available() != second.available()) false; else {
+          while (true) {
+            val firRead = first.read()
+            val secRead = second.read()
+            if (firRead != secRead) {
+              Utils.close(first, second)
+              return false
+            }
+            if (firRead == -1) {
+              Utils.close(first, second)
+              return true;
+            }
           }
+          true
         }
-        Utils.close(in1, in2)
-        true
     }
   }
 
