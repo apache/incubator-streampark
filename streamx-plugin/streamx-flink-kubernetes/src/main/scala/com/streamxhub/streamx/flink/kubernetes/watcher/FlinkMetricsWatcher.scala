@@ -109,7 +109,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
             // update current flink cluster metrics on cache
             cachePool.flinkMetrics.put(clusterKey, metric)
             val isMetricChanged = {
-              val preMetric = cachePool.flinkMetrics.getIfPresent(clusterKey)
+              val preMetric = cachePool.flinkMetrics.get(clusterKey)
               preMetric == null || !preMetric.equalsPayload(metric)
             }
             if (isMetricChanged) {

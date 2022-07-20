@@ -85,15 +85,15 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
 
   override def isInTracking(trackId: TrackId): Boolean = trackCache.isInTracking(trackId)
 
-  override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = Option(trackCache.jobStatuses.getIfPresent(trackId))
+  override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = Option(trackCache.jobStatuses.get(trackId))
 
-  override def getJobStatus(trackIds: Set[TrackId]): Map[TrackId, JobStatusCV] = trackCache.jobStatuses.getAllPresent(trackIds.asJava).asScala.toMap
+  override def getJobStatus(trackIds: Set[TrackId]): Map[TrackId, JobStatusCV] = trackCache.jobStatuses.getAsMap(trackIds)
 
-  override def getAllJobStatus: Map[TrackId, JobStatusCV] = Map(trackCache.jobStatuses.asMap().asScala.toSeq: _*)
+  override def getAllJobStatus: Map[TrackId, JobStatusCV] = trackCache.jobStatuses.asMap()
 
   override def getAccClusterMetrics: FlinkMetricCV = trackCache.collectAccMetric()
 
-  override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(trackCache.flinkMetrics.getIfPresent(clusterKey))
+  override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(trackCache.flinkMetrics.get(clusterKey))
 
   override def getAllTrackingIds: Set[TrackId] = trackCache.collectAllTrackIds()
 
@@ -122,8 +122,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
     }
   }
 
-  @Nullable override def getRemoteRestUrl(trackId: TrackId): String = trackCache.clusterRestUrls.getIfPresent(ClusterKey.of(trackId))
-
+  @Nullable override def getRemoteRestUrl(trackId: TrackId): String = trackCache.endpoints.get(trackId.toClusterKey)
 
   /**
    * Build-in Event Listener of K8sFlinkTrackMonitor.
@@ -137,7 +136,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
     // noinspection UnstableApiUsage
     @Subscribe def catchFlinkJobStateEvent(event: FlinkJobStateEvent): Unit = {
       if (!Try(event.trackId.nonLegal).getOrElse(true)) {
-        val preCache = trackCache.jobStatuses.getIfPresent(event.trackId)
+        val preCache = trackCache.jobStatuses.get(event.trackId)
         // determine if the current event should be ignored
         val shouldIgnore: Boolean = (preCache, event) match {
           case (preCache, _) if preCache == null => false
