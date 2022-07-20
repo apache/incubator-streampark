@@ -64,7 +64,6 @@ object KubernetesRetriever extends Logger {
     Try(newK8sClient().getVersion != null).getOrElse(false)
   }
 
-
   private val clusterClientServiceLoader = new DefaultClusterClientServiceLoader()
 
   /**
@@ -88,8 +87,8 @@ object KubernetesRetriever extends Logger {
     }
     // retrieve flink cluster client
     val clientFactory: ClusterClientFactory[String] = clusterClientServiceLoader.getClusterClientFactory(flinkConfig)
-    val clusterProvider: KubernetesClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
-      .asInstanceOf[KubernetesClusterDescriptor]
+
+    val clusterProvider: KubernetesClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[KubernetesClusterDescriptor]
 
     Try {
       clusterProvider
@@ -102,7 +101,6 @@ object KubernetesRetriever extends Logger {
         throw e
     }
   }
-
 
   /**
    * check whether deployment exists on kubernetes cluster
