@@ -25,16 +25,16 @@ import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.commons.io.FileUtils
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.kubernetes.shaded.com.fasterxml.jackson.core.`type`.TypeReference
-import org.apache.flink.kubernetes.shaded.com.fasterxml.jackson.databind.ObjectMapper
+import org.json4s.jackson.JsonMethods.parse
+import org.json4s.{DefaultFormats, JArray}
 
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConverters._
+import scala.language.postfixOps
 
 object IngressController {
 
@@ -123,11 +123,14 @@ object IngressController {
       val client = new DefaultKubernetesClient
       val ingress = client.network.ingress.inNamespace(nameSpace).withName(clusterId).get
       val publicEndpoints = ingress.getMetadata.getAnnotations.get("field.cattle.io/publicEndpoints")
-      val objectMapper = new ObjectMapper
-      val ingressMetas = objectMapper.readValue(publicEndpoints, new TypeReference[util.List[IngressMeta]]() {})
-      val hostname = ingressMetas.get(0).hostname
-      val path = ingressMetas.get(0).path
-      s"https://$hostname$path"
+      IngressMeta.as(publicEndpoints) match {
+        case Some(metas) =>
+          val ingressMeta = metas.head
+          val hostname = ingressMeta.hostname
+          val path = ingressMeta.path
+          s"https://$hostname$path"
+        case None => throw new RuntimeException("[StreamX] get ingressUrlAddress error.")
+      }
     } else {
       clusterClient.getWebInterfaceURL
     }
@@ -161,11 +164,40 @@ object IngressController {
 
 case class IngressMeta(
                         addresses: List[String],
-                        port: Int,
+                        port: Integer,
                         protocol: String,
                         serviceName: String,
                         ingressName: String,
                         hostname: String,
                         path: String,
-                        allNodes: Boolean
-                      )
+                        allNodes: Boolean)
+
+object IngressMeta {
+
+  @transient implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
+
+  def as(json: String): Option[List[IngressMeta]] = {
+    Try(parse(json)) match {
+      case Success(ok) =>
+        ok match {
+          case JArray(arr) =>
+            val list = arr.map(x => {
+              IngressMeta(
+                addresses = (x \ "addresses").extractOpt[List[String]].getOrElse(List.empty[String]),
+                port = (x \ "port").extractOpt[Integer].getOrElse(0),
+                protocol = (x \ "protocol").extractOpt[String].getOrElse(null),
+                serviceName = (x \ "serviceName").extractOpt[String].getOrElse(null),
+                ingressName = (x \ "ingressName").extractOpt[String].getOrElse(null),
+                hostname = (x \ "hostname").extractOpt[String].getOrElse(null),
+                path = (x \ "path").extractOpt[String].getOrElse(null),
+                allNodes = (x \ "allNodes").extractOpt[Boolean].getOrElse(false)
+              )
+            })
+            Some(list)
+          case _ => None
+        }
+      case Failure(_) => None
+    }
+  }
+
+}
