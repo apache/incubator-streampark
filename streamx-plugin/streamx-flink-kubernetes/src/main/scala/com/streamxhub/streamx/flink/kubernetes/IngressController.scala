@@ -25,7 +25,6 @@ import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.commons.io.FileUtils
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.kubernetes.shaded.com.fasterxml.jackson.core.JsonProcessingException
 import org.apache.flink.kubernetes.shaded.com.fasterxml.jackson.core.`type`.TypeReference
 import org.apache.flink.kubernetes.shaded.com.fasterxml.jackson.databind.ObjectMapper
 

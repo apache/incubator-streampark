@@ -138,8 +138,7 @@ trait K8sFlinkTrackMonitor extends Logger with AutoCloseable {
  * This is the entry point for external calls to the
  * streamx.flink.kubernetes package.
  */
-@Public
-object K8sFlinkTrackMonitorFactory {
+@Public object K8sFlinkTrackMonitorFactory {
 
   /**
    * Create FlinkTrackMonitor instance.
