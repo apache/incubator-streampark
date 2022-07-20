@@ -248,4 +248,40 @@ class FlinkRestJsonTest {
     println(checkpoint)
   }
 
+  @Test def testIngress(): Unit = {
+    val json =
+      """
+        |[
+        |    {
+        |        "addresses":[
+        |            "10.216.138.27",
+        |            "10.216.138.28",
+        |            "10.216.138.67"
+        |        ],
+        |        "port":80,
+        |        "protocol":"HTTP",
+        |        "serviceName":"native-flink:statebackend12788-rest",
+        |        "ingressName":"native-flink:statebackend12788",
+        |        "hostname":"flink.ziroom.com",
+        |        "path":"/native-flink/statebackend12788/",
+        |        "allNodes":false
+        |    },
+        |    {
+        |        "addresses":[
+        |        ],
+        |        "port":80,
+        |        "protocol":"HTTP",
+        |        "serviceName":"native-flink:statebackend12788-rest",
+        |        "ingressName":"native-flink:statebackend12788",
+        |        "hostname":"flink.ziroom.com",
+        |        "path":"/native-flink/statebackend12788(/|$)(.*)",
+        |        "allNodes":false
+        |    }
+        |]
+        |""".stripMargin
+
+    val ingressMeta = IngressMeta.as(json)
+    println(ingressMeta.get)
+  }
+
 }
