@@ -70,7 +70,7 @@ object IngressController {
         .addNewPath()
         .withPath(s"/$nameSpace/$clusterId" + "(/|$)(.*)")
         .withNewBackend()
-        .withServiceName("$clusterId-rest")
+        .withServiceName(s"$clusterId-rest")
         .withServicePort(new IntOrString("rest"))
         .endBackend()
         .endPath()
