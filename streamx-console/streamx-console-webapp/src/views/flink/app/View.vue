@@ -220,16 +220,14 @@
       <div slot="extra">
         <a-input-group compact>
           <a-select placeholder="Team" allowClear @change="handleChangeTeam" style="width: 140px">
-            <a-select-option v-for="t in teamData" :value="t.teamId"> {{ t.teamName }}</a-select-option>
+            <a-select-option v-for="t in teamData" :key="t.teamId"> {{ t.teamName }} </a-select-option>
           </a-select>
-
           <a-select placeholder="User" allowClear @change="handleChangeUser" style="margin-left: 16px;width: 120px">
-            <a-select-option v-for="u in users" :value="u.userId">
-              <span  v-if="u.nickName==''">{{ u.username }}</span>
-              <span  v-if="u.nickName!=''">{{ u.nickName }}</span>
+            <a-select-option v-for="u in users" :key="u.userId">
+              <span v-if="u.nickName==''"> {{ u.username }} </span>
+              <span v-if="u.nickName!=''"> {{ u.nickName }} </span>
             </a-select-option>
           </a-select>
-
           <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="margin-left: 16px;width: 90px">
             <a-select-option value="1">JAR</a-select-option>
             <a-select-option value="2">SQL</a-select-option>
