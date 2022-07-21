@@ -139,7 +139,7 @@ abstract class FlinkTableTrait(val parameter: ParameterTool,
   override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
 
   /**
-   * deprecated!!! what are you fucking for??? don't call this method
+   * deprecated!!! Calling this method is not recommended!
    *
    * @param name
    * @param dataStream
