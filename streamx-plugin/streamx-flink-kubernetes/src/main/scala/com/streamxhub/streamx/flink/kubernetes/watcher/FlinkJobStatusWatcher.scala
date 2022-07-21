@@ -144,7 +144,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             .foreach { id =>
               cachePool.trackIds.invalidate(id)
               if (id.executeMode == APPLICATION) {
-                cachePool.endpoints.invalidate(id)
+                cachePool.endpoints.invalidate(id.toClusterKey)
               }
             }
         }
