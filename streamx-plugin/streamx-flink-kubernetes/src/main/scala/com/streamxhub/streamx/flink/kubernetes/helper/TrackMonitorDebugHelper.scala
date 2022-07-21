@@ -22,7 +22,6 @@ package com.streamxhub.streamx.flink.kubernetes.helper
 import com.streamxhub.streamx.flink.kubernetes.{DefaultK8sFlinkTrackMonitor, K8sFlinkTrackMonitor}
 
 import java.util.{Timer, TimerTask}
-import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 
 /**
