@@ -71,6 +71,7 @@
         label="Role"
         v-bind="formItemLayout">
         <a-select
+          @change="handleRoleChange"
           mode="multiple"
           :allow-clear="true"
           style="width: 100%"
@@ -79,6 +80,22 @@
             v-for="r in roleData"
             :key="r.roleId">
             {{ r.roleName }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item
+        v-if="!roles.includes('100000')"
+        label="Team"
+        v-bind="formItemLayout">
+        <a-select
+          mode="multiple"
+          :allow-clear="true"
+          style="width: 100%"
+          v-decorator="['teamId',{rules: [{ required: true, message: 'please select team' }]}]">
+          <a-select-option
+            v-for="t in teamData"
+            :key="t.teamId">
+            {{ t.teamName }}
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -133,7 +150,8 @@
   </a-drawer>
 </template>
 <script>
-import { list as getRole } from '@/api/role'
+import { listByUser as getRole } from '@/api/role'
+import { listByUser as getUserTeam } from '@/api/team'
 import { checkUserName, post } from '@/api/user'
 
 const formItemLayout = {
@@ -152,10 +170,12 @@ export default {
     return {
       loading: false,
       roleData: [],
+      teamData: [],
       formItemLayout,
       form: this.$form.createForm(this),
       validateStatus: '',
-      help: ''
+      help: '',
+      roles: []
     }
   },
   methods: {
@@ -169,13 +189,20 @@ export default {
       this.reset()
       this.$emit('close')
     },
-    handleSubmit () {
+    handleRoleChange(role) {
+      this.roles = role
+      debugger
+    },
+    handleSubmit() {
       if (this.validateStatus !== 'success') {
         this.handleUserNameBlur()
       }
       this.form.validateFields((err, user) => {
         if (!err && this.validateStatus === 'success') {
           user.roleId = user.roleId.join(',')
+          if (user != undefined && user.teamId != undefined) {
+            user.teamId = user.teamId.join(',')
+          }
           post({
             ...user
           }).then((r) => {
@@ -225,6 +252,11 @@ export default {
           { 'pageSize': '9999' }
         ).then((resp) => {
           this.roleData = resp.data.records
+        })
+        getUserTeam(
+          {'pageSize': '9999'}
+        ).then((resp) => {
+          this.teamData = resp.data.records
         })
       }
     }

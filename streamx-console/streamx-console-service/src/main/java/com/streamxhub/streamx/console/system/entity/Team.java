@@ -17,33 +17,42 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.service;
+package com.streamxhub.streamx.console.system.entity;
 
-import com.streamxhub.streamx.console.system.entity.UserRole;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-
+import java.util.Date;
 import java.util.List;
 
-public interface UserRoleService extends IService<UserRole> {
+/**
+ * @author daixinyu
+ */
+@Data
+@TableName("t_team")
+@Slf4j
+public class Team {
 
-    void deleteUserRolesByRoleId(String[] roleIds);
+    @TableId(value = "TEAM_ID", type = IdType.AUTO)
+    private Long teamId;
 
-    void deleteUserRolesByUserId(String[] userIds);
+    private String teamCode;
 
-    List<String> findUserIdsByRoleId(String[] roleIds);
+    @TableId(value = "TEAM_NAME")
+    private String teamName;
 
-    List<Long> listRoleIdListByUserId(Long userId);
+    private Date createTime;
 
-    Boolean isManageTeam(String username);
+    // 排序字段
+    private transient String sortField;
 
-    /**
-     * 判断当前用户是否有管理Team的权限
-     * @return
-     */
-    Boolean isManageTeam();
+    // 排序规则 ascend 升序 descend 降序
+    private transient String sortOrder;
 
-    List<Long> getRoleIdListByCurrentUser();
-
-    List<Long> getRoleIdListByUserId(Long userId);
+    private transient String createTimeFrom;
+    private transient String createTimeTo;
+    private transient List<Long> teamIdList;
 }

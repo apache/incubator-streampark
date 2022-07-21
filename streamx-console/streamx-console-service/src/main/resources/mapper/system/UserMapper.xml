@@ -18,9 +18,12 @@
     </resultMap>
 
     <select id="findUserDetail" resultType="user" parameterType="user">
-        SELECT *
+        SELECT a.*
         FROM
-        t_user
+        t_user a
+        <if test="user.teamIdList != null and user.teamIdList.size>0">
+             join t_team_user b on a.user_id=b.user_id
+        </if>
         <where>
             <if test="user.username != null and user.username != ''">
                 AND username like '%${user.username}%'
@@ -36,6 +39,14 @@
             </if>
             <if test="user.status != null and user.status != ''">
                 AND status = #{user.status}
+            </if>
+
+            <if test="user.teamIdList != null and user.teamIdList.size>0">
+                AND b.team_id IN
+                <foreach item="item" index="index" collection="user.teamIdList" open="("  close=")" separator=",">
+                    #{item}
+                </foreach>
+                GROUP BY a.USER_ID
             </if>
         </where>
         <if test="user.sortField != null and user.sortField != ''">

@@ -3,6 +3,7 @@
 <mapper namespace="com.streamxhub.streamx.console.core.dao.ProjectMapper">
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.core.entity.Project">
         <id column="ID" jdbcType="INTEGER" property="id"/>
+        <result column="TEAM_ID" jdbcType="BIGINT" property="teamId"/>
         <result column="NAME" jdbcType="VARCHAR" property="name"/>
         <result column="URL" jdbcType="VARCHAR" property="url"/>
         <result column="REPOSITORY" jdbcType="INTEGER" property="repository"/>
@@ -19,7 +20,8 @@
     </resultMap>
 
     <select id="findProject" resultType="project" parameterType="project">
-        SELECT * FROM t_flink_project t
+        SELECT *,b.team_name as teamName FROM t_flink_project t
+        left join t_team b on t.team_id = b.team_id
         <where>
             <if test="project.name != null and project.name != ''">
                 AND t.name like '%${project.name}%'
@@ -27,7 +29,17 @@
             <if test="project.buildState != null">
                 AND t.build_state = #{project.buildState}
             </if>
+            <if test="project.teamIdList != null and project.teamIdList.size>0">
+                AND t.team_id IN
+                <foreach item="item" index="index" collection="project.teamIdList" open="("  close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
         </where>
+    </select>
+    <select id="getCountByTeam" resultType="java.lang.Long">
+        select count(1) as count
+        from t_flink_project where team_id = #{teamId}
     </select>
 
 

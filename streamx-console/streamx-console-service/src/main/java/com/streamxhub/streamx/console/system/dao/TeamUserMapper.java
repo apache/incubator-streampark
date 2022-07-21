@@ -17,33 +17,23 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.service;
+package com.streamxhub.streamx.console.system.dao;
 
-import com.streamxhub.streamx.console.system.entity.UserRole;
+import com.streamxhub.streamx.console.system.entity.TeamUser;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-public interface UserRoleService extends IService<UserRole> {
+/**
+ * @author daixinyu
+ */
+public interface TeamUserMapper extends BaseMapper<TeamUser> {
 
-    void deleteUserRolesByRoleId(String[] roleIds);
+    void deleteByUserId(Long valueOf);
 
-    void deleteUserRolesByUserId(String[] userIds);
+    List<Long> selectTeamIdList(Long userId);
 
-    List<String> findUserIdsByRoleId(String[] roleIds);
-
-    List<Long> listRoleIdListByUserId(Long userId);
-
-    Boolean isManageTeam(String username);
-
-    /**
-     * 判断当前用户是否有管理Team的权限
-     * @return
-     */
-    Boolean isManageTeam();
-
-    List<Long> getRoleIdListByCurrentUser();
-
-    List<Long> getRoleIdListByUserId(Long userId);
+    Long getCountByTeam(@Param("teamId") Long teamId);
 }
