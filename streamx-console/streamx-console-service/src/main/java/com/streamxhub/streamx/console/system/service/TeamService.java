@@ -19,31 +19,32 @@
 
 package com.streamxhub.streamx.console.system.service;
 
-import com.streamxhub.streamx.console.system.entity.UserRole;
+import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.system.entity.Team;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
-public interface UserRoleService extends IService<UserRole> {
+/**
+ * @author benjobs
+ */
+public interface TeamService extends IService<Team> {
 
-    void deleteUserRolesByRoleId(String[] roleIds);
+    String deleteTeamBeforeCheck(Long teamId);
 
-    void deleteUserRolesByUserId(String[] userIds);
+    IPage<Team> findTeamsByNowUser(Team team, RestRequest request);
 
-    List<String> findUserIdsByRoleId(String[] roleIds);
+    IPage<Team> findTeamsByUser(String username, Team team, RestRequest request);
 
-    List<Long> listRoleIdListByUserId(Long userId);
+    IPage<Team> findTeams(Team group, RestRequest restRequest);
 
-    Boolean isManageTeam(String username);
+    void createTeam(Team team);
 
-    /**
-     * 判断当前用户是否有管理Team的权限
-     * @return
-     */
-    Boolean isManageTeam();
+    Team findByName(String teamName);
 
-    List<Long> getRoleIdListByCurrentUser();
+    Team findByCode(String teamCode);
 
-    List<Long> getRoleIdListByUserId(Long userId);
+    List<Team> findTeamByUser(String username);
 }

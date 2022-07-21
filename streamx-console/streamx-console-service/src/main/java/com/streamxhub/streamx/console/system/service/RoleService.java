@@ -34,6 +34,8 @@ public interface RoleService extends IService<Role> {
 
     IPage<Role> findRoles(Role role, RestRequest request);
 
+    IPage<Role> findRolesByUser();
+
     List<Role> findUserRole(String userName);
 
     Role findByName(String roleName);

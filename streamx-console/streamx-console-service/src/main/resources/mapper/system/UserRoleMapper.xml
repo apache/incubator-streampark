@@ -22,5 +22,9 @@
         FROM t_user_role
         WHERE role_id = #{roleId}
     </delete>
+    <select id="selectRoleIdList" resultType="java.lang.Long">
+        select role_id
+        from t_user_role where user_id=#{userId}
+    </select>
 
 </mapper>

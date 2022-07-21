@@ -17,33 +17,25 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.service;
+package com.streamxhub.streamx.console.system.entity;
 
-import com.streamxhub.streamx.console.system.entity.UserRole;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import java.util.Date;
 
-import java.util.List;
+/**
+ * @author benjobs
+ */
+@Data
+@TableName("t_team_user")
+@Slf4j
+public class TeamUser {
 
-public interface UserRoleService extends IService<UserRole> {
+    private Long teamId;
 
-    void deleteUserRolesByRoleId(String[] roleIds);
+    private Long userId;
 
-    void deleteUserRolesByUserId(String[] userIds);
-
-    List<String> findUserIdsByRoleId(String[] roleIds);
-
-    List<Long> listRoleIdListByUserId(Long userId);
-
-    Boolean isManageTeam(String username);
-
-    /**
-     * 判断当前用户是否有管理Team的权限
-     * @return
-     */
-    Boolean isManageTeam();
-
-    List<Long> getRoleIdListByCurrentUser();
-
-    List<Long> getRoleIdListByUserId(Long userId);
+    private Date createTime;
 }

@@ -42,4 +42,6 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
     @Update("update t_flink_project set BUILD_STATE=0 where id=#{project.id}")
     void startBuild(@Param("project") Project project);
+
+    Long getCountByTeam(@Param("teamId") Long teamId);
 }

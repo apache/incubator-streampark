@@ -63,6 +63,12 @@ public class RestResponse extends HashMap<String, Object> {
         return this;
     }
 
+    public RestResponse error(String message){
+        this.put("status", "error");
+        this.put("message", message);
+        return this;
+    }
+
     @Override
     public RestResponse put(String key, Object value) {
         super.put(key, value);

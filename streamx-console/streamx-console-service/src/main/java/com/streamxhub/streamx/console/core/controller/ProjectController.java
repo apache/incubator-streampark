@@ -25,7 +25,6 @@ import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * @author benjobs
@@ -52,6 +52,9 @@ public class ProjectController {
     @PostMapping("create")
     @RequiresPermissions("project:create")
     public RestResponse create(Project project) {
+        if (project.getTeamId() == null || project.getTeamId() <= 0L) {
+            return RestResponse.create().message("请选择项目团队").data(false);
+        }
         return projectService.create(project);
     }
 
@@ -91,8 +94,7 @@ public class ProjectController {
     @PostMapping("list")
     @RequiresPermissions("project:view")
     public RestResponse list(Project project, RestRequest restRequest) {
-        IPage<Project> page = projectService.page(project, restRequest);
-        return RestResponse.create().data(page);
+        return RestResponse.create().data(projectService.page(project, restRequest));
     }
 
     @PostMapping("branches")
@@ -139,7 +141,7 @@ public class ProjectController {
     }
 
     @PostMapping("select")
-    public RestResponse select() {
-        return RestResponse.create().data(projectService.list());
+    public RestResponse select(Long teamId) {
+        return RestResponse.create().data(projectService.listByTeam(teamId));
     }
 }

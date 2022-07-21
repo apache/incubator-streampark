@@ -219,7 +219,18 @@
 
       <div slot="extra">
         <a-input-group compact>
-          <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="width: 90px">
+          <a-select placeholder="Team" allowClear @change="handleChangeTeam" style="width: 140px">
+            <a-select-option v-for="t in teamData" :value="t.teamId"> {{ t.teamName }}</a-select-option>
+          </a-select>
+
+          <a-select placeholder="User" allowClear @change="handleChangeUser" style="margin-left: 16px;width: 120px">
+            <a-select-option v-for="u in users" :value="u.userId">
+              <span  v-if="u.nickName==''">{{ u.username }}</span>
+              <span  v-if="u.nickName!=''">{{ u.nickName }}</span>
+            </a-select-option>
+          </a-select>
+
+          <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="margin-left: 16px;width: 90px">
             <a-select-option value="1">JAR</a-select-option>
             <a-select-option value="2">SQL</a-select-option>
           </a-select>
@@ -227,7 +238,7 @@
             placeholder="Search..."
             v-model="searchText"
             @change="handleSearch"
-            style="margin-left: 16px; width: 250px;" />
+            style="margin-left: 16px; width: 250px;"/>
           <a-button
             type="primary"
             icon="plus"
@@ -1013,6 +1024,8 @@ import {baseUrl} from '@/api/baseUrl'
 import SvgIcon from '@/components/SvgIcon'
 import storage from '@/utils/storage'
 import notification from 'ant-design-vue/lib/notification'
+import {listByUser as getUserTeam} from '@/api/team'
+import {list as listUser} from '@/api/user'
 
 export default {
   components: {Ellipsis, State, SvgIcon},
@@ -1033,9 +1046,13 @@ export default {
           running: 0
         }
       },
+      teamData: [],
+      users: [],
       expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
       jobType: null,
+      teamId: null,
+      userId: null,
       sortedInfo: null,
       filteredInfo: null,
       queryInterval: 2000,
@@ -1109,7 +1126,7 @@ export default {
         dataIndex: 'id',
         width: 100,
         scopedSlots: {customRender: 'id'},
-      } , {
+      }, {
         title: 'Application Name',
         dataIndex: 'jobName',
         width: 320,
@@ -1165,6 +1182,15 @@ export default {
 
   mounted() {
     this.handleDashboard()
+    listUser({'pageSize': '9999'}).then((resp) => {
+      this.users = resp.data.records
+    })
+
+    getUserTeam(
+      {'pageSize': '9999'}
+    ).then((resp) => {
+      this.teamData = resp.data.records
+    })
     this.handleFetch(true)
     const timer = window.setInterval(() => {
       this.handleDashboard()
@@ -1212,6 +1238,14 @@ export default {
 
     handleChangeJobType(jobType) {
       this.jobType = jobType
+      this.handleSearch()
+    },
+    handleChangeTeam(team) {
+      this.teamId = team
+      this.handleSearch()
+    },
+    handleChangeUser(user) {
+      this.userId = user
       this.handleSearch()
     },
 
@@ -1497,7 +1531,7 @@ export default {
           'error'
         )
       } else {
-        if ( !this.optionApps.starting.get(app.id) || app['optionState'] === 0) {
+        if (!this.optionApps.starting.get(app.id) || app['optionState'] === 0) {
           this.application = app
           latest({
             appId: this.application.id
@@ -1570,7 +1604,7 @@ export default {
                   confirmButtonColor: '#55BDDDFF',
                   confirmButtonText: 'Detail',
                   cancelButtonText: 'Close'
-                }).then((isConfirm) =>{
+                }).then((isConfirm) => {
                   if (isConfirm.value) {
                     this.SetAppId(id)
                     this.$router.push({'path': '/flink/app/detail'})
@@ -1617,7 +1651,7 @@ export default {
       }
 
       if (savePointed) {
-        if ( customSavePoint != null ) {
+        if (customSavePoint != null) {
           verifySchema({
             path: customSavePoint
           }).then(resp => {
@@ -1805,6 +1839,8 @@ export default {
       }
       this.queryParams['jobName'] = this.searchText
       this.queryParams['jobType'] = this.jobType
+      this.queryParams['teamId'] = this.teamId
+      this.queryParams['userId'] = this.userId
       this.handleFetch(false)
     },
 

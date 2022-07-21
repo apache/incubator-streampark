@@ -19,31 +19,22 @@
 
 package com.streamxhub.streamx.console.system.service;
 
-import com.streamxhub.streamx.console.system.entity.UserRole;
+import com.streamxhub.streamx.console.system.entity.TeamUser;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
-public interface UserRoleService extends IService<UserRole> {
+/**
+ * @author benjobs
+ */
+public interface TeamUserService extends IService<TeamUser> {
 
-    void deleteUserRolesByRoleId(String[] roleIds);
+    List<Long> getTeamIdList();
 
-    void deleteUserRolesByUserId(String[] userIds);
+    List<Long> getTeamIdList(Long userId);
 
-    List<String> findUserIdsByRoleId(String[] roleIds);
+    void deleteTeamUsersByUserId(String[] strings);
 
-    List<Long> listRoleIdListByUserId(Long userId);
-
-    Boolean isManageTeam(String username);
-
-    /**
-     * 判断当前用户是否有管理Team的权限
-     * @return
-     */
-    Boolean isManageTeam();
-
-    List<Long> getRoleIdListByCurrentUser();
-
-    List<Long> getRoleIdListByUserId(Long userId);
+    Long getCountByTeam(Long teamId);
 }
