@@ -277,7 +277,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     // whether deployment exists on kubernetes cluster
     lazy val isDeployExists = KubernetesRetriever.isDeploymentExists(clusterId, namespace)
     // relevant deployment event
-    lazy val deployEvent = cachePool.k8sDeploymentEvents.getIfPresent(K8sEventKey(namespace, clusterId))
+    lazy val deployEvent = cachePool.k8sDeploymentEvents.get(K8sEventKey(namespace, clusterId))
     lazy val preCache: JobStatusCV = cachePool.jobStatuses.get(TrackId.onApplication(namespace, clusterId, appId))
 
     // infer from k8s deployment and event

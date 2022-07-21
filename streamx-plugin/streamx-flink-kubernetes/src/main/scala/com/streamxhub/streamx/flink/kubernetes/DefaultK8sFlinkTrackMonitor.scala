@@ -93,7 +93,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
 
   override def getAccClusterMetrics: FlinkMetricCV = trackCache.collectAccMetric()
 
-  override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(trackCache.flinkMetrics.getIfPresent(clusterKey))
+  override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(trackCache.flinkMetrics.get(clusterKey))
 
   override def getAllTrackingIds: Set[TrackId] = trackCache.collectAllTrackIds()
 

@@ -43,10 +43,10 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
   val jobStatuses: JobStatusCache = JobStatusCache.build()
 
   // cache for tracking kubernetes events with Deployment kind
-  val k8sDeploymentEvents: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
+  val k8sDeploymentEvents: K8sDeploymentEventCache = K8sDeploymentEventCache.build()
 
   // cache for last each flink cluster metrics (such as a session cluster or a application cluster)
-  val flinkMetrics: Cache[ClusterKey, FlinkMetricCV] = Caffeine.newBuilder().build()
+  val flinkMetrics: MetricCache = MetricCache.build()
 
   override def close(): Unit = {
     jobStatuses.cleanUp()
@@ -81,7 +81,7 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
     collectTracks() match {
       case k if k.isEmpty => FlinkMetricCV.empty
       case k =>
-        flinkMetrics.getAllPresent(k) match {
+        flinkMetrics.getAll(k) match {
           case m if m.isEmpty => FlinkMetricCV.empty
           case m =>
             // aggregate metrics
@@ -180,5 +180,46 @@ class EndpointCache {
 object EndpointCache {
 
   def build(): EndpointCache = new EndpointCache()
+
+}
+
+class K8sDeploymentEventCache {
+  def put(k: K8sEventKey, v: K8sDeploymentEventCV): Unit = cache.put(k, v)
+
+  def get(k: K8sEventKey): K8sDeploymentEventCV = cache.getIfPresent(k)
+
+  def asMap(): Map[K8sEventKey, K8sDeploymentEventCV] = cache.asMap().toMap
+
+  def cleanUp(): Unit = cache.cleanUp()
+
+
+  val cache: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
+
+}
+
+object K8sDeploymentEventCache {
+  def build(): K8sDeploymentEventCache = new K8sDeploymentEventCache()
+
+}
+
+class MetricCache {
+
+  private[this] lazy val cache: Cache[ClusterKey, FlinkMetricCV] = Caffeine.newBuilder().build()
+
+  def put(k: ClusterKey, v: FlinkMetricCV): Unit = cache.put(k, v)
+
+  def asMap(): Map[ClusterKey, FlinkMetricCV] = cache.asMap().toMap
+
+  def getAll(k: Set[TrackId]): Map[ClusterKey, FlinkMetricCV] = cache.getAllPresent(k).toMap
+
+  def get(key: ClusterKey): FlinkMetricCV = cache.getIfPresent(key)
+
+  def invalidate(key: ClusterKey): Unit = cache.invalidate(key)
+
+}
+
+object MetricCache {
+
+  def build(): MetricCache = new MetricCache()
 
 }
