@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.console.core.service.alert;
 
 import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 
@@ -34,4 +35,6 @@ public interface AlertConfigService extends IService<AlertConfig> {
     IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request);
 
     boolean exist(AlertConfig alertConfig);
+
+    boolean deleteById(Long id) throws AlertException;
 }

@@ -31,6 +31,8 @@ public interface ResponseCode {
     Long CODE_SUCCESS = 2000L;
     Long CODE_FAIL = 2001L;
 
+    Long ALERT_FAIL = 2002L;
+
     /**
      * 预占：3000-4000为accessToken异常
      */
