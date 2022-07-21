@@ -169,9 +169,9 @@ class EndpointCache {
 
   private[this] lazy val cache: Cache[ClusterKey, String] = Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build()
 
-  def invalidate(trackId: TrackId): Unit = cache.invalidate(trackId.toClusterKey)
+  def invalidate(k: ClusterKey): Unit = cache.invalidate(k)
 
-  def put(clusterKey: ClusterKey, url: String): Unit = cache.put(clusterKey, url)
+  def put(k: ClusterKey, v: String): Unit = cache.put(k, v)
 
   def get(key: ClusterKey): String = cache.getIfPresent(key)
 
