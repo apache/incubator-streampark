@@ -132,6 +132,6 @@ object KubernetesRetriever extends Logger {
         val url = IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
         Some(url)
     }
-
   }
+
 }
