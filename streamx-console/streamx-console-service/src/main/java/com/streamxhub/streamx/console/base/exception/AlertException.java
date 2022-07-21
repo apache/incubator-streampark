@@ -17,22 +17,20 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.service.alert;
-
-import com.streamxhub.streamx.console.base.exception.AlertException;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
+package com.streamxhub.streamx.console.base.exception;
 
 /**
+ * 报警异常
+ *
  * @author weijinglun
- * @date 2022.01.14
+ * @date 2022.07.21
  */
-public interface AlertNotifyService {
-    /**
-     * alert
-     *
-     * @param template
-     */
-    boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template) throws AlertException;
+public class AlertException extends RuntimeException {
+    public AlertException(String message) {
+        super(message);
+    }
 
+    public AlertException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

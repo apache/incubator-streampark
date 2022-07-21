@@ -100,7 +100,7 @@ public class AlertConfigController {
 
     @DeleteMapping("delete")
     public RestResponse deleteAlertConf(@NotNull(message = "id must not be empty") Long id) {
-        boolean result = alertConfigService.removeById(id);
+        boolean result = alertConfigService.deleteById(id);
         return RestResponse.create().data(result);
     }
 
@@ -108,11 +108,11 @@ public class AlertConfigController {
      * send alert message for test
      */
     @PostMapping("send")
-    public RestResponse sendAlert(Long id) throws Exception {
+    public RestResponse sendAlert(Long id) {
         AlertTemplate alertTemplate = new AlertTemplate();
         alertTemplate.setTitle("Notify: StreamX alert job for test");
         alertTemplate.setJobName("StreamX alert job for test");
-        alertTemplate.setSubject(String.format("StreamX Alert: Test"));
+        alertTemplate.setSubject("StreamX Alert: Test");
         alertTemplate.setStatus("TEST");
         alertTemplate.setType(1);
         alertTemplate.setRestart(false);
