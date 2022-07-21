@@ -21,10 +21,13 @@ package com.streamxhub.streamx.console.core.service.alert.impl;
 
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.AlertConfigMapper;
+import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.alert.AlertConfigService;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -33,6 +36,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +51,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, AlertConfig> implements AlertConfigService {
+
+    @Autowired
+    private ApplicationService applicationService;
+
     @Override
     public IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request) {
         Page<AlertConfig> page = new Page<>();
@@ -69,5 +77,15 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
     public boolean exist(AlertConfig alertConfig) {
         AlertConfig confByName = this.baseMapper.getAlertConfByName(alertConfig);
         return confByName != null;
+    }
+
+    @Override
+    public boolean deleteById(Long id) throws AlertException {
+        int count = applicationService.count(applicationService.lambdaQuery()
+                .eq(Application::getAlertId, id));
+        if (count > 0) {
+            throw new AlertException(String.format("AlertId:%d, this is bound by application. Please clear the configuration first", id));
+        }
+        return removeById(id);
     }
 }

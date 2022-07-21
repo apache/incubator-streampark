@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service.alert.impl;
 
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
@@ -75,7 +75,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
     }
 
     @Override
-    public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate) {
+    public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate) throws AlertException {
         DingTalkParams dingTalkParams = alertConfig.getDingTalkParams();
         try {
             // handling contacts
@@ -108,13 +108,14 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
 
             sendMessage(dingTalkParams, body);
             return true;
+        } catch (AlertException alertException) {
+            throw alertException;
         } catch (Exception e) {
-            log.error("Failed send dingTalk alert", e);
-            return false;
+            throw new AlertException("Failed send dingTalk alert", e);
         }
     }
 
-    private RobotResponse sendMessage(DingTalkParams params, Map<String, Object> body) throws ServiceException {
+    private void sendMessage(DingTalkParams params, Map<String, Object> body) throws AlertException {
         // get webhook url
         String url = getWebhook(params);
         HttpHeaders headers = new HttpHeaders();
@@ -126,17 +127,15 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
             robotResponse = alertRestTemplate.postForObject(url, entity, RobotResponse.class);
         } catch (Exception e) {
             log.error("Failed to request DingTalk robot alarm, url:{}", url, e);
-            throw new ServiceException(String.format("Failed to request DingTalk robot alert, url:%s", url), e);
+            throw new AlertException(String.format("Failed to request DingTalk robot alert, url:%s", url), e);
         }
-
         if (robotResponse == null) {
-            throw new ServiceException(String.format("Failed to request DingTalk robot alert, url:%s", url));
+            throw new AlertException(String.format("Failed to request DingTalk robot alert, url:%s", url));
         }
         if (robotResponse.getErrcode() != 0) {
-            throw new ServiceException(String.format("Failed to request DingTalk robot alert, url:%s, errorCode:%d, errorMsg:%s",
-                url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
+            throw new AlertException(String.format("Failed to request DingTalk robot alert, url:%s, errorCode:%d, errorMsg:%s",
+                    url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
         }
-        return robotResponse;
     }
 
     /**
@@ -155,7 +154,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
         if (params.getSecretEnable()) {
             Long timestamp = System.currentTimeMillis();
             url = String.format("%s%s&timestamp=%d&sign=%s",
-                urlPef, params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
+                    urlPef, params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
         } else {
             url = String.format("%s%s", urlPef, params.getToken());
         }
@@ -174,7 +173,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
      * @param timestamp current timestamp
      * @return Signature information calculated from timestamp
      */
-    private String getSign(String secret, Long timestamp) {
+    private String getSign(String secret, Long timestamp) throws AlertException {
         try {
             String stringToSign = timestamp + "\n" + secret;
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -186,8 +185,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
             }
             return sign;
         } catch (Exception e) {
-            log.error("Calculate the signature failed.", e);
-            return null;
+            throw new AlertException("Calculate the signature failed.", e);
         }
     }
 }

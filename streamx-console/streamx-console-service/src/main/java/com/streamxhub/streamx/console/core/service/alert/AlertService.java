@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service.alert;
 
+import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
@@ -39,7 +40,5 @@ public interface AlertService {
 
     void alert(Application application, FlinkAppState appState);
 
-    void alert(Application application, AlertTemplate alertTemplate);
-
-    boolean alert(AlertConfigWithParams params, AlertTemplate alertTemplate);
+    boolean alert(AlertConfigWithParams params, AlertTemplate alertTemplate) throws AlertException;
 }
