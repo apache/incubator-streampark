@@ -93,4 +93,6 @@ public interface ApplicationService extends IService<Application> {
     boolean checkBuildAndUpdate(Application app);
 
     void forcedStop(Application app);
+
+    Long getCountByTeam(Long teamId);
 }

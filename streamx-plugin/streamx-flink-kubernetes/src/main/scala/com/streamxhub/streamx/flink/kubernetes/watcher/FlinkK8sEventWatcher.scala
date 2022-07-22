@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.kubernetes.watcher
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey}
-import com.streamxhub.streamx.flink.kubernetes.{FlinkTrkCachePool, KubernetesRetriever}
+import com.streamxhub.streamx.flink.kubernetes.{FlinkTrackCachePool, KubernetesRetriever}
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.{KubernetesClient, Watcher}
 import org.apache.flink.kubernetes.kubeclient.resources.{CompKubernetesDeployment, CompatibleKubernetesWatcher}
@@ -34,10 +34,10 @@ import scala.util.Try
  * Currently only flink-native-application mode events would be tracked.
  * The results of traced events would written into cachePool.
  *
- * auther:Al-assad
+ * author:Al-assad
  */
 @ThreadSafe
-class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger with FlinkWatcher {
+class FlinkK8sEventWatcher(implicit cachePool: FlinkTrackCachePool) extends Logger with FlinkWatcher {
 
   private var k8sClient: KubernetesClient = _
 
@@ -53,7 +53,7 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger
         logError("[flink-k8s] FlinkK8sEventWatcher fails to start.")
         return
       }
-      prepareEventWatcher(k8sClient)
+      watch()
       isStarted = true
       logInfo("[flink-k8s] FlinkK8sEventWatcher started.")
     }
@@ -80,7 +80,7 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger
     }
   }
 
-  private def prepareEventWatcher(k8sClient: KubernetesClient): Unit = {
+  override def watch(): Unit = {
     // watch k8s deployment events
     k8sClient.apps().deployments()
       .withLabel("type", "flink-native-kubernetes")
@@ -94,11 +94,13 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger
   private def handleDeploymentEvent(action: Watcher.Action, event: Deployment): Unit = {
     val clusterId = event.getMetadata.getName
     val namespace = event.getMetadata.getNamespace
-    // if (!cachePool.isInTracking(TrkId.onApplication(namespace, clusterId)))
+    // if (!cachePool.isInTracking(TrackId.onApplication(namespace, clusterId)))
     //  return
     // just tracking every flink-k8s-native event :)
     cachePool.k8sDeploymentEvents.put(
-      K8sEventKey(namespace, clusterId), K8sDeploymentEventCV(action, event, System.currentTimeMillis()))
+      K8sEventKey(namespace, clusterId),
+      K8sDeploymentEventCV(action, event, System.currentTimeMillis())
+    )
   }
 
 

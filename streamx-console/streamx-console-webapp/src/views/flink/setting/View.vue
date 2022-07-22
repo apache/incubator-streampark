@@ -276,6 +276,16 @@
               </div>
 
               <div slot="actions">
+                <a-tooltip title="Alert Test">
+                  <a-button
+                    @click.native="handleTestAlarm(item)"
+                    shape="circle"
+                    size="large"
+                    style="margin-left: 3px"
+                    class="control-button ctl-btn-color">
+                    <svg-icon role="img" name="testalarm" size="middle"/>
+                  </a-button>
+                </a-tooltip>
                 <a-tooltip title="Edit Alert Config">
                   <a-button
                     @click.native="handleEditAlertConf(item)"
@@ -1276,23 +1286,56 @@ export default {
       })
     },
 
+    handleTestAlarm(item){
+      console.log('发送测试告警数据：' + JSON.stringify(item))
+
+      sendAlert({'id':item.id}).then(resp=>{
+        if (resp.data) {
+          this.$swal.fire({
+            icon: 'success',
+            title: 'Test Alert Config  successful!',
+            showConfirmButton: false,
+            timer: 2000
+          })
+        } else {
+          this.$swal.fire(
+            'The AlertConfig can\'t Trigger,plaese check you Conf',
+            'error'
+          )
+        }
+        this.handleAlertConfigAll()
+      })
+    },
+
     handleEditAlertConf(item){
       this.alertId = item.id
       this.alertFormVisible = true
-      const emailParams = JSON.parse(item.emailParams)
-      const dingTalkParams = JSON.parse(item.dingTalkParams)
-      const weComParams = JSON.parse(item.weComParams)
-      const larkParams = JSON.parse(item.larkParams)
       const alertType = this.computeAlertType(item.alertType)
-
-      console.log('告警类型：' + JSON.stringify(alertType))
       alertType.forEach((value,i) => {
         this.handleEditAlertType(value)
       })
-      this.dingtalkIsAtAll = dingTalkParams.isAtAll
-      this.dingtalkSecretEnable = dingTalkParams.secretEnable
-      this.larkIsAtAll = larkParams.isAtAll
-      this.larkSecretEnable = larkParams.secretEnable
+      var emailParams = {}
+      var dingTalkParams = {}
+      var weComParams = {}
+      var larkParams = {}
+      if (alertType.indexOf(1) > -1){
+        emailParams = JSON.parse(item.emailParams)
+      }
+      if (alertType.indexOf(2) > -1) {
+        dingTalkParams = JSON.parse(item.dingTalkParams)
+        this.dingtalkIsAtAll = dingTalkParams.isAtAll
+        this.dingtalkSecretEnable = dingTalkParams.secretEnable
+      }
+      if (alertType.indexOf(4) > -1) {
+        weComParams = JSON.parse(item.weComParams)
+      }
+      if (alertType.indexOf(16) > -1) {
+        larkParams = JSON.parse(item.larkParams)
+        this.larkIsAtAll = larkParams.isAtAll
+        this.larkSecretEnable = larkParams.secretEnable
+      }
+
+      console.log('告警参数：' + JSON.stringify(item))
       this.$nextTick(() => {
         this.alertForm.setFieldsValue({
           'alertName': item.alertName,
@@ -1379,7 +1422,6 @@ export default {
 
     handleAlertConfigAll() {
       listWithOutPageAlert({}).then((resp) => {
-        console.log('获取告警列表：' + JSON.stringify(resp.data))
         this.alerts = resp.data
       })
     },
@@ -1411,7 +1453,7 @@ export default {
             secretToken: values.larkSecretToken
           }
         }
-        console.log('提交告警参数：' + JSON.stringify(param))
+        console.log('更新告警参数：' + JSON.stringify(param))
         if (!err) {
           if(!param.id){//添加新告警
             existsAlert({'alertName': param.alertName}).then((resp)=>{
@@ -1660,22 +1702,18 @@ export default {
     },
 
     handleSetDingtalkSecretEnable(checked) {
-      console.log('DingtalkSecretEnable是否选中:' + checked)
       this.dingtalkSecretEnable = checked
     },
 
     handleSetLarkSecretEnable(checked) {
-      console.log('LarkSecretEnable是否选中:' + checked)
       this.larkSecretEnable = checked
     },
 
     handleDingtalkIsAtAll(checked) {
-      console.log('dingtalkIsAtAll是否选中:' + checked)
       this.dingtalkIsAtAll = checked
     },
 
     handleLarkIsAtAll(checked) {
-      console.log('larkIsAtAll是否选中:' + checked)
       this.larkIsAtAll = checked
     },
 

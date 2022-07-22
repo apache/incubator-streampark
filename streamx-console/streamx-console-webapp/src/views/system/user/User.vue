@@ -12,6 +12,29 @@
               :md="8"
               :sm="24">
               <a-form-item
+                label="Team"
+                :label-col="{span: 4}"
+                :wrapper-col="{span: 18, offset: 2}">
+                <a-select
+                  v-model="queryParams.teamId"
+                  :allow-clear="true"
+                  style="width: 100%" >
+                  <a-select-option key="" >
+                    All Team
+                  </a-select-option>
+                  <a-select-option
+                    v-for="t in teamData"
+                    :key="t.teamId">
+                    {{ t.teamName }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+
+            <a-col
+              :md="8"
+              :sm="24">
+              <a-form-item
                 label="User Name"
                 :label-col="{span: 4}"
                 :wrapper-col="{span: 18, offset: 2}">
@@ -19,20 +42,6 @@
                   v-model="queryParams.username" />
               </a-form-item>
             </a-col>
-            <template>
-              <a-col
-                :md="8"
-                :sm="24">
-                <a-form-item
-                  label="Create Time"
-                  :label-col="{span: 4}"
-                  :wrapper-col="{span: 18, offset: 2}">
-                  <range-date
-                    @change="handleDateChange"
-                    ref="createTime" />
-                </a-form-item>
-              </a-col>
-            </template>
           </div>
           <a-col
             :md="8"
@@ -148,12 +157,15 @@ import RangeDate from '@/components/DateTime/RangeDate'
 import SvgIcon from '@/components/SvgIcon'
 
 import { list, deleteUser, reset as resetPassword } from '@/api/user'
+import { listByUser as getUserTeam } from '@/api/team'
 import storage from '@/utils/storage'
 import {USER_NAME} from '@/store/mutation-types'
+import TagSelectOption from '@/components/TagSelect/TagSelectOption'
+
 
 export default {
   name: 'User',
-  components: { UserInfo, UserAdd, UserEdit, RangeDate, SvgIcon },
+  components: {TagSelectOption, UserInfo, UserAdd, UserEdit, RangeDate, SvgIcon },
   data () {
     return {
       userInfo: {
@@ -166,6 +178,7 @@ export default {
       userEdit: {
         visible: false
       },
+      teamData: [],
       queryParams: {},
       filteredInfo: null,
       sortedInfo: null,
@@ -195,6 +208,9 @@ export default {
       }, {
         title: 'Nick Name',
         dataIndex: 'nickName'
+      },  {
+        title: 'Team',
+        dataIndex: 'teamName'
       }, {
         title: 'Status',
         dataIndex: 'status',
@@ -230,7 +246,12 @@ export default {
   },
 
   mounted () {
-    this.fetch()
+    getUserTeam(
+      { 'pageSize': '9999' }
+    ).then((resp) => {
+      this.teamData = resp.data.records
+      this.search()
+    })
   },
 
   methods: {

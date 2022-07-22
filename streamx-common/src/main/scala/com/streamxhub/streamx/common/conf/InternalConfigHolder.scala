@@ -78,9 +78,9 @@ object InternalConfigHolder extends Logger {
    * When using this api, the type must be explicitly declared and the relevant type will be
    * automatically converted to some extent.
    * 1) in scala:
-   * val result: Long = ConfigHub.get(K8sFlinkConfig.sglMetricTrkTaskTimeoutSec)
+   * val result: Long = ConfigHub.get(K8sFlinkConfig.sglMetricTrackTaskTimeoutSec)
    * 2) in java:
-   * Long result = ConfigHub.get(K8sFlinkConfig.sglMetricTrkTaskTimeoutSec());
+   * Long result = ConfigHub.get(K8sFlinkConfig.sglMetricTrackTaskTimeoutSec());
    *
    * @return return the defaultValue of ConfigOption when the value has not been overwritten.
    */

@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.flink.kubernetes.event
 
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
-import com.streamxhub.streamx.flink.kubernetes.model.TrkId
+import com.streamxhub.streamx.flink.kubernetes.model.TrackId
 
 /**
  * Notification of expecting changes to flink job state cache
@@ -28,8 +28,4 @@ import com.streamxhub.streamx.flink.kubernetes.model.TrkId
  *
  * @author Al-assad
  */
-case class FlinkJobOperaEvent(trkId: TrkId, expectJobState: FlinkJobOpera) extends BuildInEvent {
-  def this(trkId: TrkId, expectJobState: FlinkJobState.Value) = this(trkId, FlinkJobOpera(expectJobState, System.currentTimeMillis))
-}
-
-case class FlinkJobOpera(expect: FlinkJobState.Value, pollTime: Long)
+case class FlinkJobStateEvent(trackId: TrackId, jobState: FlinkJobState.Value, pollTime: Long) extends BuildInEvent

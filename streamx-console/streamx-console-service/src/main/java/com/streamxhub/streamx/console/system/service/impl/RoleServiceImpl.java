@@ -76,6 +76,21 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     @Override
+    public IPage<Role> findRolesByUser() {
+        Role role = new Role();
+        // 如果用户是Admin ，则可以获取所有角色
+        // 如果用户是非Admin，则可以获取自己所属的角色
+        if (!userRoleService.isManageTeam()) {
+            role.setRoleIdList(userRoleService.getRoleIdListByCurrentUser());
+        }
+
+        Page<Role> page = new Page<>();
+        page.setCurrent(1);
+        page.setSize(9999);
+        return this.baseMapper.findRole(page, role);
+    }
+
+    @Override
     public List<Role> findUserRole(String userName) {
         return baseMapper.findUserRole(userName);
     }

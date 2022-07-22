@@ -27,20 +27,20 @@ import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.OptionState;
+import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.alert.AlertService;
 import com.streamxhub.streamx.flink.kubernetes.IngressController;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkClusterMetricChangeEvent;
+import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobCheckpointChangeEvent;
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent;
-import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
-import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
+import com.streamxhub.streamx.flink.kubernetes.model.TrackId;
 import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.common.eventbus.Subscribe;
 
@@ -53,13 +53,16 @@ import java.util.concurrent.TimeUnit;
 import scala.Enumeration;
 
 /**
- * Event Listener for K8sFlinkTrkMonitor
+ * Event Listener for K8sFlinkTrackMonitor
+ *
  * @author Al-assad
  */
 public class K8sFlinkChangeEventListener {
 
     private final ApplicationService applicationService;
     private final AlertService alertService;
+
+    private final CheckpointProcessor checkpointProcessor;
 
     private final ExecutorService executor = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors(),
@@ -71,9 +74,12 @@ public class K8sFlinkChangeEventListener {
         new ThreadPoolExecutor.AbortPolicy()
     );
 
-    public K8sFlinkChangeEventListener(ApplicationService applicationService, AlertService alertService) {
+    public K8sFlinkChangeEventListener(ApplicationService applicationService,
+                                       AlertService alertService,
+                                       CheckpointProcessor checkpointProcessor) {
         this.applicationService = applicationService;
         this.alertService = alertService;
+        this.checkpointProcessor = checkpointProcessor;
     }
 
     /**
@@ -82,25 +88,14 @@ public class K8sFlinkChangeEventListener {
      */
     @SuppressWarnings("UnstableApiUsage")
     @Subscribe
-    public void persistentK8sFlinkJobStatusChange(FlinkJobStatusChangeEvent event) {
+    public void subscribeJobStatusChange(FlinkJobStatusChangeEvent event) {
         JobStatusCV jobStatus = event.jobStatus();
-        TrkId trkId = event.trkId();
-        ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trkId.executeMode());
-
+        TrackId trackId = event.trackId();
         // get pre application record
-        QueryWrapper<Application> query = new QueryWrapper<>();
-        query.eq("execution_mode", mode.getMode())
-            .eq("cluster_id", trkId.clusterId())
-            .eq("k8s_namespace", trkId.namespace());
-        if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(mode)) {
-            query.eq("job_id", jobStatus.jobId());
-        }
-        query.orderByDesc("create_time").last("limit 1");
-        Application app = applicationService.getOne(query);
+        Application app = applicationService.getById(trackId.appId());
         if (app == null) {
             return;
         }
-
         // update application record
         app = updateApplicationWithJobStatusCV(app, jobStatus);
         // when a flink job status change event can be received, it means
@@ -116,6 +111,52 @@ public class K8sFlinkChangeEventListener {
             Application finalApp = app;
             executor.execute(() -> alertService.alert(finalApp, state));
         }
+    }
+
+    /**
+     * Catch FlinkClusterMetricChangeEvent then storage it persistently to db.
+     * Actually update com.streamxhub.streamx.console.core.entity.Application records.
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    @Subscribe
+    public void subscribeMetricsChange(FlinkClusterMetricChangeEvent event) {
+        FlinkMetricCV metrics = event.metrics();
+        TrackId trackId = event.trackId();
+        ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trackId.executeMode());
+        // discard session mode change
+        if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(mode)) {
+            return;
+        }
+
+        UpdateWrapper<Application> update = new UpdateWrapper<>();
+        update.set("jm_memory", metrics.totalJmMemory())
+            .set("tm_memory", metrics.totalTmMemory())
+            .set("total_tm", metrics.totalTm())
+            .set("total_slot", metrics.totalSlot())
+            .set("available_slot", metrics.availableSlot());
+
+        update.eq("id", trackId.appId());
+
+        applicationService.update(update);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    @Subscribe
+    public void subscribeCheckpointChange(FlinkJobCheckpointChangeEvent event) {
+        CheckPoints.CheckPoint completed = new CheckPoints.CheckPoint();
+        completed.setId(event.checkpoint().id());
+        completed.setCheckpointType(event.checkpoint().checkpointType());
+        completed.setExternalPath(event.checkpoint().externalPath());
+        completed.setIsSavepoint(event.checkpoint().isSavepoint());
+        completed.setStatus(event.checkpoint().status());
+        completed.setTriggerTimestamp(event.checkpoint().triggerTimestamp());
+
+        CheckPoints.Latest latest = new CheckPoints.Latest();
+        latest.setCompleted(completed);
+        CheckPoints checkPoint = new CheckPoints();
+        checkPoint.setLatest(latest);
+
+        checkpointProcessor.process(event.trackId().appId(), checkPoint);
     }
 
     private Application updateApplicationWithJobStatusCV(Application app, JobStatusCV jobStatus) {
@@ -154,36 +195,6 @@ public class K8sFlinkChangeEventListener {
         app.setDuration(duration > 0 ? duration : 0);
 
         return app;
-    }
-
-
-    /**
-     * Catch FlinkClusterMetricChangeEvent then storage it persistently to db.
-     * Actually update com.streamxhub.streamx.console.core.entity.Application records.
-     */
-    @SuppressWarnings("UnstableApiUsage")
-    @Subscribe
-    public void persistentK8sFlinkMetricsChange(FlinkClusterMetricChangeEvent event) {
-        FlinkMetricCV metrics = event.metrics();
-        ClusterKey clusterKey = event.clusterKey();
-        ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(clusterKey.executeMode());
-        // discard session mode change
-        if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(mode)) {
-            return;
-        }
-
-        UpdateWrapper<Application> update = new UpdateWrapper<>();
-        update.set("jm_memory", metrics.totalJmMemory())
-            .set("tm_memory", metrics.totalTmMemory())
-            .set("total_tm", metrics.totalTm())
-            .set("total_slot", metrics.totalSlot())
-            .set("available_slot", metrics.availableSlot());
-        update.eq("execution_mode", mode.getMode())
-            .eq("cluster_id", clusterKey.clusterId())
-            .eq("k8s_namespace", clusterKey.namespace())
-            .eq("tracking", 1);
-
-        applicationService.update(update);
     }
 
 }

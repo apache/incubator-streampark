@@ -19,30 +19,27 @@
 
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.common.util.Utils
+import com.streamxhub.streamx.common.util.Utils._
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.commons.io.FileUtils
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.kubernetes.shaded.com.fasterxml.jackson.core.JsonProcessingException
-import org.apache.flink.kubernetes.shaded.com.fasterxml.jackson.core.`type`.TypeReference
-import org.apache.flink.kubernetes.shaded.com.fasterxml.jackson.databind.ObjectMapper
+import org.json4s.jackson.JsonMethods.parse
+import org.json4s.{DefaultFormats, JArray}
 
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConverters._
+import scala.language.postfixOps
 
 object IngressController {
 
-  @throws[FileNotFoundException]
   def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
-    Utils.tryWithResource(new DefaultKubernetesClient) { client =>
+    tryWithResource(new DefaultKubernetesClient) { client =>
       val annotMap = Map[String, String](
         "nginx.ingress.kubernetes.io/rewrite-target" -> "/$2",
         "nginx.ingress.kubernetes.io/proxy-body-size" -> "1024m",
@@ -53,42 +50,40 @@ object IngressController {
         "type" -> "flink-native-kubernetes",
         "component" -> "ingress"
       )
-      val ingress =
-        new IngressBuilder()
-          .withNewMetadata()
-          .withName(clusterId)
-          .addToAnnotations(annotMap.asJava)
-          .addToLabels(labelsMap.asJava)
-          .endMetadata()
-          .withNewSpec()
-          .addNewRule()
-          .withHost(domainName)
-          .withNewHttp()
-          .addNewPath()
-          .withPath(s"/$nameSpace/$clusterId/")
-          .withNewBackend()
-          .withServiceName(s"$clusterId-rest")
-          .withServicePort(new IntOrString("rest"))
-          .endBackend()
-          .endPath()
-          .addNewPath()
-          .withPath(s"/$nameSpace/$clusterId" + "(/|$)(.*)")
-          .withNewBackend()
-          .withServiceName("$clusterId-rest")
-          .withServicePort(new IntOrString("rest"))
-          .endBackend()
-          .endPath()
-          .endHttp()
-          .endRule()
-          .endSpec()
-          .build();
+      val ingress = new IngressBuilder()
+        .withNewMetadata()
+        .withName(clusterId)
+        .addToAnnotations(annotMap.asJava)
+        .addToLabels(labelsMap.asJava)
+        .endMetadata()
+        .withNewSpec()
+        .addNewRule()
+        .withHost(domainName)
+        .withNewHttp()
+        .addNewPath()
+        .withPath(s"/$nameSpace/$clusterId/")
+        .withNewBackend()
+        .withServiceName(s"$clusterId-rest")
+        .withServicePort(new IntOrString("rest"))
+        .endBackend()
+        .endPath()
+        .addNewPath()
+        .withPath(s"/$nameSpace/$clusterId" + "(/|$)(.*)")
+        .withNewBackend()
+        .withServiceName(s"$clusterId-rest")
+        .withServicePort(new IntOrString("rest"))
+        .endBackend()
+        .endPath()
+        .endHttp()
+        .endRule()
+        .endSpec()
+        .build();
       client.network.ingress.inNamespace(nameSpace).create(ingress)
     }
   }
 
-  @throws[FileNotFoundException]
   def configureIngress(ingressOutput: String): Unit = {
-    Utils.close {
+    close {
       val client = new DefaultKubernetesClient
       client.network.ingress
         .load(Files.newInputStream(Paths.get(ingressOutput)))
@@ -99,7 +94,7 @@ object IngressController {
 
   def deleteIngress(ingressName: String, nameSpace: String): Unit = {
     if (determineThePodSurvivalStatus(ingressName, nameSpace)) {
-      Utils.close {
+      close {
         val client = new DefaultKubernetesClient
         client.network.ingress.inNamespace(nameSpace).withName(ingressName).delete
         client
@@ -108,7 +103,7 @@ object IngressController {
   }
 
   private[this] def determineThePodSurvivalStatus(name: String, nameSpace: String): Boolean = { // getpod by deploymentName
-    Utils.tryWithResource(new DefaultKubernetesClient()) { client =>
+    tryWithResource(new DefaultKubernetesClient()) { client =>
       Try {
         client.apps()
           .deployments()
@@ -123,24 +118,26 @@ object IngressController {
     }
   }
 
-  @throws[JsonProcessingException]
   def ingressUrlAddress(nameSpace: String, clusterId: String, clusterClient: ClusterClient[_]): String = {
     if (determineIfIngressExists(nameSpace, clusterId)) {
       val client = new DefaultKubernetesClient
       val ingress = client.network.ingress.inNamespace(nameSpace).withName(clusterId).get
       val publicEndpoints = ingress.getMetadata.getAnnotations.get("field.cattle.io/publicEndpoints")
-      val objectMapper = new ObjectMapper
-      val ingressMetas = objectMapper.readValue(publicEndpoints, new TypeReference[util.List[IngressMeta]]() {})
-      val hostname = ingressMetas.get(0).hostname
-      val path = ingressMetas.get(0).path
-      s"https://$hostname$path"
+      IngressMeta.as(publicEndpoints) match {
+        case Some(metas) =>
+          val ingressMeta = metas.head
+          val hostname = ingressMeta.hostname
+          val path = ingressMeta.path
+          s"https://$hostname$path"
+        case None => throw new RuntimeException("[StreamX] get ingressUrlAddress error.")
+      }
     } else {
       clusterClient.getWebInterfaceURL
     }
   }
 
   def determineIfIngressExists(nameSpace: String, clusterId: String): Boolean = {
-    Utils.tryWithResource(new DefaultKubernetesClient) { client =>
+    tryWithResource(new DefaultKubernetesClient) { client =>
       Try {
         client.extensions.ingresses
           .inNamespace(nameSpace)
@@ -166,12 +163,41 @@ object IngressController {
 
 
 case class IngressMeta(
-                    addresses: List[String],
-                    port: Int,
-                    protocol: String,
-                    serviceName: String,
-                    ingressName: String,
-                    hostname: String,
-                    path: String,
-                    allNodes: Boolean
-                  )
+                        addresses: List[String],
+                        port: Integer,
+                        protocol: String,
+                        serviceName: String,
+                        ingressName: String,
+                        hostname: String,
+                        path: String,
+                        allNodes: Boolean)
+
+object IngressMeta {
+
+  @transient implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
+
+  def as(json: String): Option[List[IngressMeta]] = {
+    Try(parse(json)) match {
+      case Success(ok) =>
+        ok match {
+          case JArray(arr) =>
+            val list = arr.map(x => {
+              IngressMeta(
+                addresses = (x \ "addresses").extractOpt[List[String]].getOrElse(List.empty[String]),
+                port = (x \ "port").extractOpt[Integer].getOrElse(0),
+                protocol = (x \ "protocol").extractOpt[String].getOrElse(null),
+                serviceName = (x \ "serviceName").extractOpt[String].getOrElse(null),
+                ingressName = (x \ "ingressName").extractOpt[String].getOrElse(null),
+                hostname = (x \ "hostname").extractOpt[String].getOrElse(null),
+                path = (x \ "path").extractOpt[String].getOrElse(null),
+                allNodes = (x \ "allNodes").extractOpt[Boolean].getOrElse(false)
+              )
+            })
+            Some(list)
+          case _ => None
+        }
+      case Failure(_) => None
+    }
+  }
+
+}

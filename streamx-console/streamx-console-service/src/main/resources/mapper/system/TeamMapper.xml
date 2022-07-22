@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.streamx.console.system.dao.TeamMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.system.entity.Team">
+        <id column="team_id" property="teamId"/>
+        <result column="team_name" property="teamName"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <select id="findTeamList" resultType="com.streamxhub.streamx.console.system.entity.Team">
+        SELECT *
+        FROM
+        t_team
+        <where>
+            <if test="team.teamName != null and team.teamName != ''">
+                AND team_name like '%${team.teamName}%'
+            </if>
+            <if test="team.createTimeFrom != null and team.createTimeFrom !=''">
+                And create_time &gt; #{team.createTimeFrom}
+            </if>
+            <if test="team.createTimeTo!= null and team.createTimeTo !=''">
+                And create_time &lt; #{team.createTimeTo}
+            </if>
+
+            <if test="team.teamIdList != null and team.teamIdList.size>0">
+                AND team_id IN
+                <foreach item="item" index="index" collection="team.teamIdList" open="("  close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+
+        </where>
+        <if test="team.sortField != null and team.sortField != ''">
+            order by ${team.sortField} ${team.sortOrder}
+        </if>
+
+    </select>
+
+
+</mapper>
