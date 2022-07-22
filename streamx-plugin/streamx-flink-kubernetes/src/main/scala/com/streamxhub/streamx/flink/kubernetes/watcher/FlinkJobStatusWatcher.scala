@@ -120,29 +120,28 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
         future.filter(_.nonEmpty).foreach { tracks =>
 
-          implicit val preCache: Map[TrackId, JobStatusCV] = cachePool.jobStatuses.getAsMap(tracks.map(_._1).toSet)
+          val preCache: Map[TrackId, JobStatusCV] = cachePool.jobStatuses.getAsMap(tracks.map(_._1).toSet)
           // put job status to cache
           cachePool.jobStatuses.putAll(tracks.toMap)
-
           // set jobId to trackIds
           tracks.foreach(x => cachePool.trackIds.update(x._1.copy(jobId = x._2.jobId)))
 
           // publish JobStatusChangeEvent when necessary
-          tracks.filter(e =>
+          tracks.filter(e => {
             preCache.get(e._1) match {
-              case cv if cv.isEmpty || cv.get.jobState != e._2.jobState => true
-              case _ => false
-            }).map(e => FlinkJobStatusChangeEvent(e._1, e._2))
+              case Some(pre) => pre.jobState != e._2.jobState
+              case _ => FlinkJobState.isEndState(e._2.jobState)
+            }
+          }).map(e => FlinkJobStatusChangeEvent(e._1, e._2))
             .foreach(eventBus.postSync)
 
           // remove trackId from cache of job that needs to be untracked
           tracks
             .filter(r => FlinkJobState.isEndState(r._2.jobState))
-            .map(_._1)
-            .foreach { id =>
-              cachePool.trackIds.invalidate(id)
-              if (id.executeMode == APPLICATION) {
-                cachePool.endpoints.invalidate(id.toClusterKey)
+            .foreach { x =>
+              cachePool.trackIds.invalidate(x._1)
+              if (x._1.executeMode == APPLICATION) {
+                cachePool.endpoints.invalidate(x._1.toClusterKey)
               }
             }
         }

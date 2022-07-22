@@ -41,7 +41,6 @@ import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrackId;
 import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.common.eventbus.Subscribe;
 
 import java.util.Date;
@@ -97,11 +96,11 @@ public class K8sFlinkChangeEventListener {
             return;
         }
         // update application record
-        app = updateApplicationWithJobStatusCV(app, jobStatus);
+        updateApplicationWithJobStatusCV(app, jobStatus);
         // when a flink job status change event can be received, it means
         // that the operation command sent by streamx has been completed.
         app.setOptionState(OptionState.NONE.getValue());
-        applicationService.saveOrUpdate(app);
+        applicationService.update(app);
 
         // email alerts when necessary
         FlinkAppState state = FlinkAppState.of(app.getState());
@@ -127,17 +126,13 @@ public class K8sFlinkChangeEventListener {
         if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(mode)) {
             return;
         }
-
-        UpdateWrapper<Application> update = new UpdateWrapper<>();
-        update.set("jm_memory", metrics.totalJmMemory())
-            .set("tm_memory", metrics.totalTmMemory())
-            .set("total_tm", metrics.totalTm())
-            .set("total_slot", metrics.totalSlot())
-            .set("available_slot", metrics.availableSlot());
-
-        update.eq("id", trackId.appId());
-
-        applicationService.update(update);
+        Application app = applicationService.getById(trackId.appId());
+        app.setJmMemory(metrics.totalJmMemory());
+        app.setTmMemory(metrics.totalTmMemory());
+        app.setTotalTM(metrics.totalTm());
+        app.setTotalSlot(metrics.totalSlot());
+        app.setAvailableSlot(metrics.availableSlot());
+        applicationService.update(app);
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -159,7 +154,7 @@ public class K8sFlinkChangeEventListener {
         checkpointProcessor.process(event.trackId().appId(), checkPoint);
     }
 
-    private Application updateApplicationWithJobStatusCV(Application app, JobStatusCV jobStatus) {
+    private void updateApplicationWithJobStatusCV(Application app, JobStatusCV jobStatus) {
         // infer the final flink job state
         Enumeration.Value state = jobStatus.jobState();
         Enumeration.Value preState = toK8sFlinkJobState(FlinkAppState.of(app.getState()));
@@ -193,8 +188,6 @@ public class K8sFlinkChangeEventListener {
         app.setStartTime(new Date(startTime > 0 ? startTime : 0));
         app.setEndTime(endTime > 0 && endTime >= startTime ? new Date(endTime) : null);
         app.setDuration(duration > 0 ? duration : 0);
-
-        return app;
     }
 
 }
