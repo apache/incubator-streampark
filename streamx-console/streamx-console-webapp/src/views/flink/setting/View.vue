@@ -1679,9 +1679,9 @@ export default {
     handleSync() {
       sync({id: this.versionId}).then((resp) => {
           getFlink({id: this.versionId}).then((resp) => {
-            this.flinkHome = resp.data.flinkHome
-            this.flinkConf = resp.data.flinkConf
-            this.handleInitEditor()
+              this.flinkHome = resp.data.flinkHome
+              this.flinkConf = resp.data.flinkConf
+              this.handleInitEditor()
           }),
         this.$swal.fire({
           icon: 'success',
