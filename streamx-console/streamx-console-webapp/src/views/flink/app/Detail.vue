@@ -26,6 +26,15 @@
       </template>
 
       <a-descriptions-item
+        label="ID">
+        <span
+          class="link pointer"
+          v-clipboard:copy="app.id"
+          v-clipboard:success="handleCopySuccess">
+          {{ app.id }}
+        </span>
+      </a-descriptions-item>
+      <a-descriptions-item
         label="Application Name">
         {{ app.jobName }}
       </a-descriptions-item>
@@ -687,7 +696,6 @@ import {get as getVer, list as listVer, remove as removeConf} from '@api/config'
 import {history, remove as removeSp} from '@api/savepoint'
 import Mergely from './Mergely'
 import Different from './Different'
-import notification from 'ant-design-vue/lib/notification'
 import * as monaco from 'monaco-editor'
 import SvgIcon from '@/components/SvgIcon'
 import storage from '@/utils/storage'
@@ -1249,15 +1257,11 @@ export default {
     },
 
     handleCopySuccess() {
-      notification.success({
-        message: 'The savepoint path copied to clipboard Successfully'
-      })
+      this.$message.success('copied to clipboard successfully')
     },
 
     handleCopyError() {
-      notification.error({
-        message: 'The savepoint path copied to clipboard failed'
-      })
+      this.$message.error('copied to clipboard failed')
     },
 
     handleCompare(record) {
