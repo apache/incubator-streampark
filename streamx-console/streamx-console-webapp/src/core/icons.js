@@ -46,7 +46,7 @@ import rollback from '@/assets/icons/rollback.svg?inline'
 import upload from '@/assets/icons/upload.svg?inline'
 import plus from '@/assets/icons/plus.svg?inline'
 import flame from '@/assets/icons/flame.svg?inline'
-import code from '@/assets/icons/code.svg?inline'
+import icode from '@/assets/icons/code.svg?inline'
 import copy from '@/assets/icons/copy.svg?inline'
 import swap from '@/assets/icons/swap.svg?inline'
 import github from '@/assets/icons/github.svg?inline'
@@ -99,7 +99,7 @@ export {
   upload,
   plus,
   flame,
-  code,
+  icode,
   copy,
   swap,
   github,
