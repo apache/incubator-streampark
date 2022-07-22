@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.kubernetes.watcher
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey}
-import com.streamxhub.streamx.flink.kubernetes.{FlinkTrackCachePool, KubernetesRetriever}
+import com.streamxhub.streamx.flink.kubernetes.{FlinkTrackController, KubernetesRetriever}
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.{KubernetesClient, Watcher}
 import org.apache.flink.kubernetes.kubeclient.resources.{CompKubernetesDeployment, CompatibleKubernetesWatcher}
@@ -37,7 +37,7 @@ import scala.util.Try
  * author:Al-assad
  */
 @ThreadSafe
-class FlinkK8sEventWatcher(implicit cachePool: FlinkTrackCachePool) extends Logger with FlinkWatcher {
+class FlinkK8sEventWatcher(implicit trackController: FlinkTrackController) extends Logger with FlinkWatcher {
 
   private var k8sClient: KubernetesClient = _
 
@@ -97,7 +97,7 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrackCachePool) extends Logg
     // if (!cachePool.isInTracking(TrackId.onApplication(namespace, clusterId)))
     //  return
     // just tracking every flink-k8s-native event :)
-    cachePool.k8sDeploymentEvents.put(
+    trackController.k8sDeploymentEvents.put(
       K8sEventKey(namespace, clusterId),
       K8sDeploymentEventCV(action, event, System.currentTimeMillis())
     )

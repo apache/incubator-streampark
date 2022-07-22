@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.kubernetes.watcher
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobCheckpointChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId}
-import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackCachePool, KubernetesRetriever, MetricWatcherConfig}
+import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackController, KubernetesRetriever, MetricWatcherConfig}
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
 import org.json4s.JsonAST.JNothing
@@ -43,7 +43,7 @@ import scala.util.{Failure, Success, Try}
 
 @ThreadSafe
 class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.defaultConf)
-                            (implicit val cachePool: FlinkTrackCachePool,
+                            (implicit val trackController: FlinkTrackController,
                              implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
 
   private val trackTaskExecPool = Executors.newWorkStealingPool()
@@ -97,7 +97,7 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
    */
   override def watch(): Unit = {
     // get all legal tracking cluster key
-    val trackIds: Set[TrackId] = Try(cachePool.collectTracks()).filter(_.nonEmpty).getOrElse(return)
+    val trackIds: Set[TrackId] = Try(trackController.collectTracks()).filter(_.nonEmpty).getOrElse(return)
     // retrieve flink metrics in thread pool
     val futures: Set[Future[Option[CheckpointCV]]] =
       trackIds.map(id => {
@@ -126,7 +126,7 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
    */
   def collect(trackId: TrackId): Option[CheckpointCV] = {
     if (trackId.jobId != null) {
-      val flinkJmRestUrl = cachePool.getClusterRestUrl(ClusterKey.of(trackId)).filter(_.nonEmpty).getOrElse(return None)
+      val flinkJmRestUrl = trackController.getClusterRestUrl(ClusterKey.of(trackId)).filter(_.nonEmpty).getOrElse(return None)
       // call flink rest overview api
       val checkpoint: Checkpoint = Try(
         Checkpoint.as(

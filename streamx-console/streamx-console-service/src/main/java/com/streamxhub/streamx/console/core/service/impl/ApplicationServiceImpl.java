@@ -968,7 +968,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        CancelRequest stopInfo = new CancelRequest(
+        CancelRequest cancelRequest = new CancelRequest(
             flinkEnv.getFlinkVersion(),
             ExecutionMode.of(application.getExecutionMode()),
             application.getAppId(),
@@ -981,7 +981,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             extraParameter
         );
 
-        CompletableFuture<CancelResponse> cancelFuture = CompletableFuture.supplyAsync(() -> FlinkSubmitter.cancel(stopInfo), executorService);
+        CompletableFuture<CancelResponse> cancelFuture = CompletableFuture.supplyAsync(() -> FlinkSubmitter.cancel(cancelRequest), executorService);
 
         cancelFutureMap.put(application.getId(), cancelFuture);
 
@@ -1002,6 +1002,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     savePoint.setTriggerTime(now);
                     savePoint.setCreateTime(now);
                     savePointService.save(savePoint);
+                }
+                if (isKubernetesApp(application)) {
+                    k8SFlinkTrackMonitor.unTrackingJob(toTrackId(application));
                 }
             },
             e -> {

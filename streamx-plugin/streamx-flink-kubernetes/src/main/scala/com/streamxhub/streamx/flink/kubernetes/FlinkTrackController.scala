@@ -31,22 +31,24 @@ import scala.util.Try
  * Tracking info cache pool on flink kubernetes mode.
  * author:Al-assad
  */
-class FlinkTrackCachePool extends Logger with AutoCloseable {
+class FlinkTrackController extends Logger with AutoCloseable {
 
   // cache for tracking identifiers
-  val trackIds: TrackIdCache = TrackIdCache.build()
+  lazy val trackIds: TrackIdCache = TrackIdCache.build()
+
+  lazy val canceling: TrackIdCache = TrackIdCache.build()
 
   // cache for flink Job-manager rest url
-  val endpoints: EndpointCache = EndpointCache.build()
+  lazy val endpoints: EndpointCache = EndpointCache.build()
 
   // cache for tracking flink job status
-  val jobStatuses: JobStatusCache = JobStatusCache.build()
+  lazy val jobStatuses: JobStatusCache = JobStatusCache.build()
 
   // cache for tracking kubernetes events with Deployment kind
-  val k8sDeploymentEvents: K8sDeploymentEventCache = K8sDeploymentEventCache.build()
+  lazy val k8sDeploymentEvents: K8sDeploymentEventCache = K8sDeploymentEventCache.build()
 
   // cache for last each flink cluster metrics (such as a session cluster or a application cluster)
-  val flinkMetrics: MetricCache = MetricCache.build()
+  lazy val flinkMetrics: MetricCache = MetricCache.build()
 
   override def close(): Unit = {
     jobStatuses.cleanUp()
@@ -65,6 +67,16 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
   def isInTracking(trackId: TrackId): Boolean = {
     if (Try(trackId.nonLegal).getOrElse(true)) false; else {
       trackIds.get(trackId) != null
+    }
+  }
+
+  def unTracking(trackId: TrackId): Unit = {
+    if (!Try(trackId.nonLegal).getOrElse(true)) {
+      trackIds.invalidate(trackId)
+      canceling.invalidate(trackId)
+      jobStatuses.invalidate(trackId)
+      flinkMetrics.invalidate(ClusterKey.of(trackId))
+      IngressController.deleteIngress(trackId.clusterId, trackId.namespace)
     }
   }
 
@@ -93,8 +105,9 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
   /**
    * get flink job-manager rest url from cache which will auto refresh when it it empty.
    */
-  def getClusterRestUrl(clusterKey: ClusterKey): Option[String] =
+  def getClusterRestUrl(clusterKey: ClusterKey): Option[String] = {
     Option(endpoints.get(clusterKey)).filter(_.nonEmpty).orElse(refreshClusterRestUrl(clusterKey))
+  }
 
   /**
    * refresh flink job-manager rest url from remote flink cluster, and cache it.
@@ -126,6 +139,8 @@ class TrackIdCache {
   def invalidate(k: TrackId): Unit = cache.invalidate(CacheKey(k.appId))
 
   def get(k: TrackId): TrackId = cache.getIfPresent(CacheKey(k.appId))
+
+  def has(k: TrackId): Boolean = get(k) != null
 
   def getAll(): Set[TrackId] = cache.asMap().values().toSet
 
