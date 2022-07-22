@@ -20,12 +20,10 @@
 package com.streamxhub.streamx.console.core.entity;
 
 import com.streamxhub.streamx.common.util.DeflaterUtils;
-import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.core.enums.ChangedType;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Data;
 
 import java.util.Base64;
@@ -69,14 +67,7 @@ public class FlinkSql {
     public FlinkSql(Application application) {
         this.appId = application.getId();
         this.sql = application.getFlinkSql();
-        //Calculate the md5 value of the added jar file
-        Application.Dependency aDependency = Application.Dependency.toDependency(application.getDependency());
-        aDependency.extractJarMd5();
-        try {
-            this.dependency = JacksonUtils.write(aDependency);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("dependency must be sequenced as json", e);
-        }
+        this.dependency = application.getDependency();
         this.createTime = new Date();
     }
 
