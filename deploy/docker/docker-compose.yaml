@@ -20,10 +20,9 @@ version: '3.8'
 
 services:
   streamx-server:
-    image: streamxhub/streamx-console:dev
     build:
       context: ../..
-      dockerfile: ../docker/compose/Dockerfile
+      dockerfile: deploy/docker/compose/Dockerfile
       args:
         DB: database
     ports:
@@ -33,10 +32,9 @@ services:
     restart: unless-stopped
 
   database:
-    image: mysql-5.7:dev
     build:
       context: ../..
-      dockerfile: ../docker/mysql/Dockerfile
+      dockerfile: deploy/docker/mysql/Dockerfile
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
       - 3306:3306
