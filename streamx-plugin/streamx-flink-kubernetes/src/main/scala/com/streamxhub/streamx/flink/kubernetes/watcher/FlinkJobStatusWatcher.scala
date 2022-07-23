@@ -246,7 +246,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         clusterRestUrl = trackController.refreshClusterRestUrl(clusterKey).getOrElse(return None)
         Try(callJobsOverviewsApi(clusterRestUrl))
           .recover { case ex =>
-            logInfo(s"failed to list remote flink jobs on kubernetes-native-mode cluster, errorStack=${ex.getMessage}")
+            logInfo(s"failed to list remote flink jobs on kubernetes-native-mode cluster, errorStack: ${ex.getMessage}")
             IngressController.deleteIngress(clusterKey.clusterId, clusterKey.namespace)
             None
           }.get

@@ -97,7 +97,7 @@ object KubernetesRetriever extends Logger {
     } match {
       case Success(v) => v
       case Failure(e) =>
-        logError(s"Get flinkClient error, the error is:$e")
+        logError(s"Get flinkClient error, the error is: $e")
         throw e
     }
   }

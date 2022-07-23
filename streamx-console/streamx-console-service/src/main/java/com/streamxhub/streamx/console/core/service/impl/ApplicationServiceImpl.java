@@ -1003,6 +1003,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     savePoint.setCreateTime(now);
                     savePointService.save(savePoint);
                 }
+                if (isKubernetesApp(application)) {
+                    k8SFlinkTrackMonitor.unTrackingJob(toTrackId(application));
+                }
             },
             e -> {
                 if (e.getCause() instanceof CancellationException) {
