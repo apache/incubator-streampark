@@ -119,33 +119,31 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         }
 
         future.filter(_.nonEmpty).foreach { tracks =>
-
           val preCache: Map[TrackId, JobStatusCV] = cachePool.jobStatuses.getAsMap(tracks.map(_._1).toSet)
-          // put job status to cache
-          cachePool.jobStatuses.putAll(tracks.toMap)
-          // set jobId to trackIds
-          tracks.foreach(x => cachePool.trackIds.update(x._1.copy(jobId = x._2.jobId)))
-
-          // publish JobStatusChangeEvent when necessary
-          tracks.filter(e => {
-            preCache.get(e._1) match {
-              case Some(pre) => pre.jobState != e._2.jobState
-              case _ => FlinkJobState.isEndState(e._2.jobState)
-            }
-          }).map(e => FlinkJobStatusChangeEvent(e._1, e._2))
-            .foreach(eventBus.postSync)
-
           // remove trackId from cache of job that needs to be untracked
-          tracks
-            .filter(r => FlinkJobState.isEndState(r._2.jobState))
-            .foreach { x =>
+          tracks.foreach { x =>
+            val eventChanged = preCache.get(x._1) match {
+              case Some(pre) => pre.jobState != x._2.jobState
+              case _ => FlinkJobState.isEndState(x._2.jobState)
+            }
+            if (eventChanged) {
+              eventBus.postSync(FlinkJobStatusChangeEvent(x._1, x._2))
+            }
+
+            if (FlinkJobState.isEndState(x._2.jobState)) {
               cachePool.trackIds.invalidate(x._1)
+              cachePool.jobStatuses.invalidate(x._1)
               if (x._1.executeMode == APPLICATION) {
                 cachePool.endpoints.invalidate(x._1.toClusterKey)
               }
+            } else {
+              // put job status to cache
+              cachePool.jobStatuses.putAll(tracks.toMap)
+              // set jobId to trackIds
+              tracks.foreach(x => cachePool.trackIds.update(x._1.copy(jobId = x._2.jobId)))
             }
+          }
         }
-
         future
       })
 
@@ -219,15 +217,19 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
                           @Nonnull appId: Long
                          ): Option[(TrackId, JobStatusCV)] = {
     implicit val pollEmitTime: Long = System.currentTimeMillis
+    val jobDetails = listJobsDetails(ClusterKey(APPLICATION, namespace, clusterId))
     lazy val k8sInferResult = inferApplicationFlinkJobStateFromK8sEvent(clusterId, namespace, appId)
-    val jobDetails = listJobsDetails(ClusterKey(APPLICATION, namespace, clusterId)).getOrElse(return k8sInferResult).jobs
-    if (jobDetails.isEmpty) {
-      k8sInferResult
-    } else {
-      // just receive the first result
-      val jobDetail = jobDetails.iterator.next.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
-      val trackId = TrackId.onApplication(namespace, clusterId, appId)
-      Some(trackId.copy(jobId = jobDetail.jobId) -> jobDetail)
+    jobDetails match {
+      case Some(details) =>
+        if (details.jobs.isEmpty) {
+          k8sInferResult
+        } else {
+          // just receive the first result
+          val jobDetail = details.jobs.head.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
+          val trackId = TrackId.onApplication(namespace, clusterId, appId)
+          Some(trackId.copy(jobId = jobDetail.jobId) -> jobDetail)
+        }
+      case _ => k8sInferResult
     }
   }
 
@@ -241,25 +243,26 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     Try(callJobsOverviewsApi(clusterRestUrl))
       .recover { case _ =>
         clusterRestUrl = cachePool.refreshClusterRestUrl(clusterKey).getOrElse(return None)
-        callJobsOverviewsApi(clusterRestUrl)
-      }
-      .recover { case ex =>
-        logInfo(s"failed to list remote flink jobs on kubernetes-native-mode cluster, errorStack=${ex.getMessage}")
-        IngressController.deleteIngress(clusterKey.clusterId, clusterKey.namespace)
-        return None
-      }
-      .toOption
+        Try(callJobsOverviewsApi(clusterRestUrl))
+          .recover { case ex =>
+            logInfo(s"failed to list remote flink jobs on kubernetes-native-mode cluster, errorStack=${ex.getMessage}")
+            IngressController.deleteIngress(clusterKey.clusterId, clusterKey.namespace)
+            None
+          }.get
+      }.get
   }
 
   /**
    * list flink jobs details from rest api
    */
-  @throws[Exception] private def callJobsOverviewsApi(restUrl: String): JobDetails = JobDetails.as(
-    Request.get(s"$restUrl/jobs/overview")
-      .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-      .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
-      .execute.returnContent().asString(StandardCharsets.UTF_8)
-  ).getOrElse(null)
+  @throws[Exception] private def callJobsOverviewsApi(restUrl: String): Option[JobDetails] = {
+    JobDetails.as(
+      Request.get(s"$restUrl/jobs/overview")
+        .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
+        .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+        .execute.returnContent().asString(StandardCharsets.UTF_8)
+    )
+  }
 
   /**
    * Infer the current flink state from the last relevant k8s events.
