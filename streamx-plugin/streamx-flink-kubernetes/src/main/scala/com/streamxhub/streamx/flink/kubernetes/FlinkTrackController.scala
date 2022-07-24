@@ -76,6 +76,7 @@ class FlinkTrackController extends Logger with AutoCloseable {
       canceling.invalidate(trackId)
       jobStatuses.invalidate(trackId)
       flinkMetrics.invalidate(ClusterKey.of(trackId))
+      IngressController.deleteIngress(trackId.clusterId, trackId.namespace)
     }
   }
 
