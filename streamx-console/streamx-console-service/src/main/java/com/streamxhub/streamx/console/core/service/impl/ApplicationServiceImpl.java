@@ -39,6 +39,7 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.exception.ApplicationException;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
@@ -295,7 +296,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public String upload(MultipartFile file) throws Exception {
+    public String upload(MultipartFile file) throws ApplicationException {
         File temp = WebUtils.getAppTempDir();
         File saveFile = new File(temp, Objects.requireNonNull(file.getOriginalFilename()));
         // delete when exists
@@ -303,7 +304,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             saveFile.delete();
         }
         // save file to temp dir
-        file.transferTo(saveFile);
+        try {
+            file.transferTo(saveFile);
+        } catch (Exception e) {
+            throw new ApplicationException(e);
+        }
         return saveFile.getAbsolutePath();
     }
 
@@ -330,7 +335,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      * @param appParma
      */
     @Override
-    public void revoke(Application appParma) throws Exception {
+    public void revoke(Application appParma) throws ApplicationException {
         Application application = getById(appParma.getId());
         assert application != null;
 
@@ -351,10 +356,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!application.isRunning()) {
             updateWrapper.set(Application::getState, FlinkAppState.REVOKED.getValue());
         }
-        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
-            baseMapper.update(application, updateWrapper);
-            return null;
-        });
+        try {
+            FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                baseMapper.update(application, updateWrapper);
+                return null;
+            });
+        } catch (Exception e) {
+            throw new ApplicationException(e);
+        }
     }
 
     @Override
@@ -410,7 +419,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean checkEnv(Application appParam) throws Exception {
+    public boolean checkEnv(Application appParam) throws ApplicationException {
         Application application = getById(appParam.getId());
         try {
             FlinkEnv flinkEnv;
@@ -428,7 +437,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             return true;
         } catch (Exception e) {
             log.error(ExceptionUtils.stringifyException(e));
-            throw e;
+            throw new ApplicationException(e);
         }
     }
 

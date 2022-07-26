@@ -22,29 +22,29 @@ import api from './index'
 import http from '@/utils/request'
 
 export function add(params) {
-  return http.postJson(api.AlertConf.ADD, params)
+  return http.postJson(api.Alert.ADD, params)
 }
 
 export function exists(params) {
-  return http.postJson(api.AlertConf.EXISTS, params)
+  return http.postJson(api.Alert.EXISTS, params)
 }
 
 export function update(params) {
-  return http.postJson(api.AlertConf.UPDATE, params)
+  return http.postJson(api.Alert.UPDATE, params)
 }
 
 export function get(params) {
-  return http.postJson(api.AlertConf.GET, params)
+  return http.postJson(api.Alert.GET, params)
 }
 
 export function listWithOutPage(params) {
-  return http.post(api.AlertConf.LIST_WITHOUTPAGE, params)
+  return http.post(api.Alert.LIST_WITHOUTPAGE, params)
 }
 
 export function remove(params) {
-  return http.delete(api.AlertConf.DELETE, params)
+  return http.delete(api.Alert.DELETE, params)
 }
 
 export function send(params) {
-  return http.post(api.AlertConf.SEND, params)
+  return http.post(api.Alert.SEND, params)
 }

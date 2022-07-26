@@ -21,9 +21,8 @@ package com.streamxhub.streamx.console.base.handler;
 
 import com.streamxhub.streamx.console.base.domain.ResponseCode;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.exception.ApiException;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
@@ -54,36 +53,29 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(Exception e) {
-        log.info("系统内部异常，异常信息：", e);
-        return new RestResponse().message("系统内部异常");
+        log.info("internal server error：", e);
+        return new RestResponse().message("internal server error");
     }
 
-    @ExceptionHandler(value = ServiceException.class)
+    @ExceptionHandler(value = InternalException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public RestResponse handleParamsInvalidException(ServiceException e) {
-        log.info("系统错误：{}", e.getMessage());
+    public RestResponse handleParamsInvalidException(InternalException e) {
+        log.info("internal server error：{}", e.getMessage());
         return new RestResponse().message(e.getMessage());
     }
 
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
-        log.info("不支持的request method，异常信息：{}", e.getMessage());
-        return new RestResponse().message("不支持的request method，异常信息：" + e.getMessage());
+        log.info("not supported request method，exception：{}", e.getMessage());
+        return new RestResponse().message("not supported request method，exception：" + e.getMessage());
     }
 
     @ExceptionHandler(value = ApiException.class)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(ApiException e) {
         log.info("api exception：{}", e.getMessage());
-        return RestResponse.fail("api fail, msg:" + e.getMessage(), ResponseCode.CODE_FAIL);
-    }
-
-    @ExceptionHandler(value = AlertException.class)
-    @ResponseStatus(HttpStatus.OK)
-    public RestResponse handleException(AlertException e) {
-        log.info("alert exception：{}", e.getMessage());
-        return RestResponse.fail(e.getMessage(), ResponseCode.ALERT_FAIL);
+        return RestResponse.fail("api fail, exception:\n" + e.getMessage(), ResponseCode.CODE_API_FAIL);
     }
 
     /**

@@ -23,7 +23,7 @@ import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationBackUpMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -224,7 +224,7 @@ public class ApplicationBackUpServiceImpl
     }
 
     @Override
-    public Boolean delete(Long id) throws ServiceException {
+    public Boolean delete(Long id) throws InternalException {
         ApplicationBackUp backUp = getById(id);
         try {
             Application application = applicationService.getById(backUp.getAppId());
@@ -232,7 +232,7 @@ public class ApplicationBackUpServiceImpl
             removeById(id);
             return true;
         } catch (Exception e) {
-            throw new ServiceException(e.getMessage());
+            throw new InternalException(e.getMessage());
         }
     }
 

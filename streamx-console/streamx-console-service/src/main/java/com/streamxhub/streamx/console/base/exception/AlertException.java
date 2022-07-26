@@ -25,7 +25,7 @@ package com.streamxhub.streamx.console.base.exception;
  * @author weijinglun
  * @date 2022.07.21
  */
-public class AlertException extends RuntimeException {
+public class AlertException extends ApiException {
     public AlertException(String message) {
         super(message);
     }

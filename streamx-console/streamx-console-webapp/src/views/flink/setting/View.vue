@@ -706,6 +706,7 @@
         <a-form-item
           v-if="alertType.indexOf(2)>-1"
           label="DingTalk Url"
+          defaultValue="https://oapi.dingtalk.com/robot/send"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
           <a-input
@@ -717,14 +718,43 @@
 
         <a-form-item
           v-if="alertType.indexOf(2)>-1"
-          label="DingTalk Token"
+          label="Access Token"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
           <a-input
             type="text"
             placeholder="Please enter the access token of DingTalk"
             allowClear
-            v-decorator="[ 'dingtalkToken', {rules: [{ required: true, message: 'DingTalk token is required' }]} ]"/>
+            v-decorator="[ 'dingtalkToken', {rules: [{ required: true, message: 'Access token is required' }]} ]"/>
+        </a-form-item>
+
+        <a-form-item
+          label="Secret Enable"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+          v-show="alertType.indexOf(2)>-1">
+          <a-tooltip title="DingTalk ecretToken is enable">
+            <a-switch
+              checked-children="ON"
+              un-checked-children="OFF"
+              :checked="dingtalkSecretEnable"
+              allowClear
+              @change="handleSetDingtalkSecretEnable"
+              v-decorator="[ 'dingtalkSecretEnable' ]" />
+          </a-tooltip>
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(2)>-1"
+          label="Secret Token"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-input
+            :disabled="!dingtalkSecretEnable"
+            type="text"
+            placeholder="Please enter DingTalk SecretToken"
+            allowClear
+            v-decorator="[ 'dingtalkSecretToken', {rules: [{ required: dingtalkSecretEnable, message: 'DingTalk SecretToken is required' }]} ]"/>
         </a-form-item>
 
         <a-form-item
@@ -753,34 +783,6 @@
               @change="handleDingtalkIsAtAll"
               v-decorator="[ 'dingtalkIsAtAll' ]"/>
           </a-tooltip>
-        </a-form-item>
-
-        <a-form-item
-          label="Secret Enable"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-          v-show="alertType.indexOf(2)>-1">
-          <a-tooltip title="DingTalk ecretToken is enable">
-            <a-switch
-              checked-children="ON"
-              un-checked-children="OFF"
-              :checked="dingtalkSecretEnable"
-              allowClear
-              @change="handleSetDingtalkSecretEnable"
-              v-decorator="[ 'dingtalkSecretEnable' ]" />
-          </a-tooltip>
-        </a-form-item>
-
-        <a-form-item
-          v-if="alertType.indexOf(2)>-1 && dingtalkSecretEnable === true"
-          label="Secret Token"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
-          <a-input
-            type="text"
-            placeholder="Please enter DingTalk SecretToken"
-            allowClear
-            v-decorator="[ 'dingtalkSecretToken', {rules: [{ required: true, message: 'DingTalk SecretToken is required' }]} ]"/>
         </a-form-item>
 
         <a-divider v-if="alertType.indexOf(4)>-1"><svg-icon role="img" name="wecom" size="middle"/> WeChat </a-divider>
@@ -929,7 +931,7 @@ import {
   listWithOutPage as listWithOutPageAlert,
   remove as removeAlert,
   send as sendAlert
-} from '@/api/alertConf'
+} from '@/api/alert'
 
 import SvgIcon from '@/components/SvgIcon'
 import monaco from '@/views/flink/app/Monaco.yaml'
@@ -1223,17 +1225,6 @@ export default {
           this.optionClusters.starting.delete(item.id)
           this.handleMapUpdate('starting')
           this.handleClusterAll()
-        }else{
-          this.$swal.fire({
-            title: 'Failed',
-            icon: 'error',
-            width: this.exceptionPropWidth(),
-            html: '<pre class="propsException">' + resp.data.msg + '</pre>',
-            showCancelButton: true,
-            confirmButtonColor: '#55BDDDFF',
-            confirmButtonText: 'OK',
-            cancelButtonText: 'Close'
-          })
         }
       })
     },
@@ -1287,9 +1278,7 @@ export default {
     },
 
     handleTestAlarm(item){
-      console.log('发送测试告警数据：' + JSON.stringify(item))
-
-      sendAlert({'id':item.id}).then(resp=>{
+      sendAlert({ id : item.id }).then(resp=>{
         if (resp.data) {
           this.$swal.fire({
             icon: 'success',
@@ -1297,14 +1286,9 @@ export default {
             showConfirmButton: false,
             timer: 2000
           })
-        } else {
-          this.$swal.fire(
-            'The AlertConfig can\'t Trigger,plaese check you Conf',
-            'error'
-          )
         }
         this.handleAlertConfigAll()
-      })
+      }).catch(err => {})
     },
 
     handleEditAlertConf(item){
