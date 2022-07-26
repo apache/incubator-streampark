@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 import com.streamxhub.streamx.console.core.entity.ResponseResult;
 import com.streamxhub.streamx.console.core.service.FlinkClusterService;
@@ -97,7 +97,7 @@ public class FlinkClusterController {
     }
 
     @PostMapping("get")
-    public RestResponse get(Long id) throws ServiceException {
+    public RestResponse get(Long id) throws InternalException {
         FlinkCluster cluster = flinkClusterService.getById(id);
         return RestResponse.create().data(cluster);
     }

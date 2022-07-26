@@ -24,7 +24,8 @@ import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.domain.ApiDocConstant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.ApplicationException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.core.annotation.ApiAccess;
 import com.streamxhub.streamx.console.core.entity.AppControl;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -251,13 +252,13 @@ public class ApplicationController {
     }
 
     @PostMapping("delete")
-    public RestResponse delete(Application app) throws ServiceException {
+    public RestResponse delete(Application app) throws InternalException {
         Boolean deleted = applicationService.delete(app);
         return RestResponse.create().data(deleted);
     }
 
     @PostMapping("deletebak")
-    public RestResponse deleteBak(ApplicationBackUp backUp) throws ServiceException {
+    public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
         Boolean deleted = backUpService.delete(backUp.getId());
         return RestResponse.create().data(deleted);
     }
@@ -275,7 +276,7 @@ public class ApplicationController {
 
     @PostMapping("upload")
     @RequiresPermissions("app:create")
-    public RestResponse upload(MultipartFile file) throws Exception {
+    public RestResponse upload(MultipartFile file) throws ApplicationException {
         String uploadPath = applicationService.upload(file);
         return RestResponse.create().data(uploadPath);
     }

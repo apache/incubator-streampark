@@ -112,15 +112,15 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
         try {
             robotResponse = alertRestTemplate.postForObject(url, entity, LarkRobotResponse.class);
         } catch (Exception e) {
-            log.error("Failed to request Lark robot alarm, url:{}", url, e);
-            throw new AlertException(String.format("Failed to request Lark robot alert, url:%s", url), e);
+            log.error("Failed to request Lark robot alarm,\nurl:{}", url, e);
+            throw new AlertException(String.format("Failed to request Lark robot alert,\nurl:%s", url), e);
         }
 
         if (robotResponse == null) {
-            throw new AlertException(String.format("Failed to request Lark robot alert, url:%s", url));
+            throw new AlertException(String.format("Failed to request Lark robot alert,\nurl:%s", url));
         }
         if (robotResponse.getStatusCode() == null || robotResponse.getStatusCode() != 0) {
-            throw new AlertException(String.format("Failed to request Lark robot alert, url:%s, errorCode:%d, errorMsg:%s",
+            throw new AlertException(String.format("Failed to request Lark robot alert,\nurl:%s,\nerrorCode:%d,\nerrorMsg:%s",
                     url, robotResponse.getCode(), robotResponse.getMsg()));
         }
     }

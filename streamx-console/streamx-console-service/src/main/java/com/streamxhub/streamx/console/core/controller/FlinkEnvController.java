@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 
@@ -91,7 +91,7 @@ public class FlinkEnvController {
     }
 
     @PostMapping("default")
-    public RestResponse setDefault(Long id) throws ServiceException {
+    public RestResponse setDefault(Long id) throws InternalException {
         flinkEnvService.setDefault(id);
         return RestResponse.create();
     }

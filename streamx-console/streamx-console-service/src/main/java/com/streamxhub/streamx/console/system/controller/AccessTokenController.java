@@ -22,7 +22,7 @@ package com.streamxhub.streamx.console.system.controller;
 import com.streamxhub.streamx.common.util.CURLBuilder;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.core.enums.AccessTokenState;
 import com.streamxhub.streamx.console.core.service.CommonService;
 import com.streamxhub.streamx.console.system.entity.AccessToken;
@@ -60,7 +60,7 @@ public class AccessTokenController {
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
     public RestResponse createToken(@NotBlank(message = "{required}") Long userId, String expireTime, String description)
-        throws ServiceException {
+        throws InternalException {
         return accessTokenService.generateToken(userId, expireTime, description);
     }
 

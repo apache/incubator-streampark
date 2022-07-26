@@ -113,11 +113,11 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     public RestResponse toggleToken(Long tokenId) {
         AccessToken tokenInfo = baseMapper.getById(tokenId);
         if (Objects.isNull(tokenInfo)) {
-            return RestResponse.fail("accessToken could not be found!", ResponseCode.CODE_ACCESS_TOKEN_LOCKED);
+            return RestResponse.fail("accessToken could not be found!", ResponseCode.CODE_API_FAIL);
         }
 
         if (User.STATUS_LOCK.equals(tokenInfo.getUserStatus())) {
-            return RestResponse.fail("user status is locked, could not operate this accessToken!", ResponseCode.CODE_ACCESS_TOKEN_LOCKED);
+            return RestResponse.fail("user status is locked, could not operate this accessToken!", ResponseCode.CODE_API_FAIL);
         }
 
         Integer status = tokenInfo.getStatus().equals(AccessToken.STATUS_ENABLE) ? AccessToken.STATUS_DISABLE : AccessToken.STATUS_ENABLE;

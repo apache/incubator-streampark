@@ -1671,13 +1671,6 @@ export default {
         timer: 2000
       }).then((result) => {
         cancel(stopReq).then((resp) => {
-          if (resp.status === 'error') {
-            this.$swal.fire(
-              'Failed',
-              resp.exception,
-              'error'
-            )
-          }
         })
       })
     },

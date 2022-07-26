@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.core.controller;
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
@@ -51,8 +52,8 @@ import java.util.TimeZone;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("flink/alert/conf")
-public class AlertConfigController {
+@RequestMapping("flink/alert")
+public class AlertController {
 
     @Autowired
     private AlertConfigService alertConfigService;
@@ -108,7 +109,7 @@ public class AlertConfigController {
      * send alert message for test
      */
     @PostMapping("send")
-    public RestResponse sendAlert(Long id) {
+    public RestResponse sendAlert(Long id) throws AlertException {
         AlertTemplate alertTemplate = new AlertTemplate();
         alertTemplate.setTitle("Notify: StreamX alert job for test");
         alertTemplate.setJobName("StreamX alert job for test");
@@ -120,7 +121,6 @@ public class AlertConfigController {
         alertTemplate.setStartTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setDuration(DateUtils.toRichTimeDuration(0));
-
         boolean alert = alertService.alert(AlertConfigWithParams.of(alertConfigService.getById(id)), alertTemplate);
         return RestResponse.create().data(alert);
     }

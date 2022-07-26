@@ -1656,7 +1656,7 @@ import {
   get as getAlert,
   listWithOutPage as listWithOutPageAlert,
   send as sendAlert
-} from '@/api/alertConf'
+} from '@/api/alert'
 
 
 

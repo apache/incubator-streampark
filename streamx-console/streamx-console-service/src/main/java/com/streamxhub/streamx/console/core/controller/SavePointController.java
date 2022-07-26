@@ -21,7 +21,7 @@ package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
@@ -65,7 +65,7 @@ public class SavePointController {
 
     @PostMapping("delete")
     @RequiresPermissions("savepoint:delete")
-    public RestResponse delete(Long id) throws ServiceException {
+    public RestResponse delete(Long id) throws InternalException {
         SavePoint savePoint = savePointService.getById(id);
         assert savePoint != null;
         Application application = applicationService.getById(savePoint.getAppId());

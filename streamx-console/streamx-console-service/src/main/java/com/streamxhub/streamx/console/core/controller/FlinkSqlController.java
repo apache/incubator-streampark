@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
@@ -80,7 +80,7 @@ public class FlinkSqlController {
     }
 
     @PostMapping("get")
-    public RestResponse get(String id) throws ServiceException {
+    public RestResponse get(String id) throws InternalException {
         String[] array = id.split(",");
         FlinkSql flinkSql1 = flinkSqlService.getById(array[0]);
         flinkSql1.base64Encode();

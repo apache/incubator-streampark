@@ -115,12 +115,12 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
             ResponseExtractor<ResponseEntity<Object>> responseExtractor = alertRestTemplate.responseEntityExtractor(Object.class);
             response = alertRestTemplate.execute(url, httpMethod, requestCallback, responseExtractor);
         } catch (Exception e) {
-            log.error("Failed to request httpCallback alert, url:{}", url, e);
-            throw new AlertException(String.format("Failed to request httpCallback alert, url:%s", url), e);
+            log.error("Failed to request httpCallback alert,\nurl:{}", url, e);
+            throw new AlertException(String.format("Failed to request httpCallback alert,\nurl:%s", url), e);
         }
 
         if (response == null) {
-            throw new AlertException(String.format("Failed to request httpCallback alert, url:%s", url));
+            throw new AlertException(String.format("Failed to request httpCallback alert,\nurl:%s", url));
         }
 
         return response;

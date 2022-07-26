@@ -97,15 +97,15 @@ public class WeComAlertNotifyServiceImpl implements AlertNotifyService {
         try {
             robotResponse = alertRestTemplate.postForObject(url, entity, RobotResponse.class);
         } catch (Exception e) {
-            log.error("Failed to request DingTalk robot alarm, url:{}", url, e);
-            throw new AlertException(String.format("Failed to request WeCom robot alert, url:%s", url), e);
+            log.error("Failed to request DingTalk robot alarm,\nurl:{}", url, e);
+            throw new AlertException(String.format("Failed to request WeCom robot alert,\nurl:%s", url), e);
         }
 
         if (robotResponse == null) {
-            throw new AlertException(String.format("Failed to request WeCom robot alert, url:%s", url));
+            throw new AlertException(String.format("Failed to request WeCom robot alert,\nurl:%s", url));
         }
         if (robotResponse.getErrcode() != 0) {
-            throw new AlertException(String.format("Failed to request DingTalk robot alert, url:%s, errorCode:%d, errorMsg:%s",
+            throw new AlertException(String.format("Failed to request DingTalk robot alert,\nurl:%s,\nerrorCode:%d,\nerrorMsg:%s",
                     url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
         }
     }

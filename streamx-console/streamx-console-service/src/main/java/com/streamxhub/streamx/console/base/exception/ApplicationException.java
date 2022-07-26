@@ -17,21 +17,19 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.base.domain;
+package com.streamxhub.streamx.console.base.exception;
 
-/**
- * @author xianwei.yang
- * 业务响应code
- */
-public interface ResponseCode {
+public class ApplicationException extends ApiException {
+    public ApplicationException(String message) {
+        super(message);
+    }
 
-    /**
-     * default
-     */
-    Long CODE_SUCCESS = 200L;
+    public ApplicationException(Throwable cause) {
+        super(cause);
+    }
 
-    Long CODE_FAIL = 500L;
-
-    Long CODE_API_FAIL = 501L;
-
+    public ApplicationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
+
