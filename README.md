@@ -11,12 +11,14 @@
 <br/>
 
 <p align="center">
-  <a href="https://www.apache.org/licenses/LICENSE-2.0.html"><img src="https://img.shields.io/badge/license-Apache%202-4EB1BA.svg"></a>
   <img src="https://tokei.rs/b1/github/streamxhub/streamx">
   <img src="https://img.shields.io/github/v/release/streamxhub/streamx.svg">
   <img src="https://img.shields.io/github/stars/streamxhub/streamx">
   <img src="https://img.shields.io/github/forks/streamxhub/streamx">
+  <img src="https://img.shields.io/github/issues/streamxhub/streamx">
+  <img src="https://img.shields.io/github/downloads/streamxhub/streamx/total.svg">
   <img src="https://img.shields.io/github/languages/count/streamxhub/streamx">
+  <a href="https://www.apache.org/licenses/LICENSE-2.0.html"><img src="https://img.shields.io/badge/license-Apache%202-4EB1BA.svg"></a>
 </p>
 
 <div align="center">
