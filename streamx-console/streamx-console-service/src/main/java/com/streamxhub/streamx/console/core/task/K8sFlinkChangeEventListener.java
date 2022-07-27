@@ -100,7 +100,7 @@ public class K8sFlinkChangeEventListener {
         // when a flink job status change event can be received, it means
         // that the operation command sent by streamx has been completed.
         app.setOptionState(OptionState.NONE.getValue());
-        applicationService.update(app);
+        applicationService.updateById(app);
 
         // email alerts when necessary
         FlinkAppState state = FlinkAppState.of(app.getState());
@@ -132,7 +132,7 @@ public class K8sFlinkChangeEventListener {
         app.setTotalTM(metrics.totalTm());
         app.setTotalSlot(metrics.totalSlot());
         app.setAvailableSlot(metrics.availableSlot());
-        applicationService.update(app);
+        applicationService.updateById(app);
     }
 
     @SuppressWarnings("UnstableApiUsage")
