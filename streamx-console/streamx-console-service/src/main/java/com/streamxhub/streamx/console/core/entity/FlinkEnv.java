@@ -25,11 +25,11 @@ import com.streamxhub.streamx.common.util.PropertiesUtils;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.streamxhub.streamx.console.base.exception.ApiException;
 import lombok.Data;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -66,16 +66,17 @@ public class FlinkEnv implements Serializable {
 
     private transient String streamxScalaVersion = scala.util.Properties.versionNumberString();
 
-    public void doSetFlinkConf() throws IOException {
-        assert this.flinkHome != null;
-        File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
-        assert yaml.exists();
-        String flinkConf = FileUtils.readFileToString(yaml);
-        this.flinkConf = DeflaterUtils.zipString(flinkConf);
+    public void doSetFlinkConf() throws ApiException {
+        try {
+            File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
+            String flinkConf = FileUtils.readFileToString(yaml);
+            this.flinkConf = DeflaterUtils.zipString(flinkConf);
+        } catch (Exception e) {
+          throw new ApiException(e);
+        }
     }
 
     public void doSetVersion() {
-        assert this.flinkHome != null;
         this.setVersion(this.getFlinkVersion().version());
         this.setScalaVersion(this.getFlinkVersion().scalaVersion());
         if (!streamxScalaVersion.startsWith(this.getFlinkVersion().scalaVersion())) {
