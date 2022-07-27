@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.streamxhub.streamx.console.base.exception.ApiException;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.service.CommonService;
@@ -59,7 +60,9 @@ public class CommonServiceImpl implements CommonService {
     public String getSqlClientJar(FlinkEnv flinkEnv) {
         if (sqlClientJar == null) {
             File localClient = WebUtils.getAppClientDir();
-            assert localClient.exists();
+            if (!localClient.exists()) {
+                throw new ApiException("[StreamX] " + localClient + " no exists. please check.");
+            }
             List<String> jars =
                 Arrays.stream(Objects.requireNonNull(localClient.list())).filter(x -> x.matches("streamx-flink-sqlclient_" + flinkEnv.getScalaVersion() + "-.*\\.jar"))
                     .collect(Collectors.toList());

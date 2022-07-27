@@ -81,7 +81,6 @@ http.interceptors.response.use((response) => {
 }, error => {
   if (error.response) {
     if (error.response.data.code == 501) {
-      debugger
       let width = document.documentElement.clientWidth || document.body.clientWidth
       if (width > 1200) {
         width = 1080
