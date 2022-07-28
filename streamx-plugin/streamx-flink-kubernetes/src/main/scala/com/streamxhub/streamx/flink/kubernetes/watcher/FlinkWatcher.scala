@@ -26,6 +26,9 @@ import scala.language.implicitConversions
  */
 trait FlinkWatcher extends AutoCloseable {
 
+
+  @volatile private[watcher] var isStarted = false
+
   /**
    * Start watcher process.
    * This method should be a thread-safe implementation of

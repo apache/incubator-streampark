@@ -61,9 +61,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   private val timerExec = Executors.newSingleThreadScheduledExecutor()
   private var timerSchedule: ScheduledFuture[_] = _
 
-  // status of whether FlinkJobWatcher has already started
-  @volatile private var isStarted = false
-
   /**
    * stop watcher process
    */
@@ -90,14 +87,13 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   /**
    * closes resource, relinquishing any underlying resources.
    */
-  //noinspection DuplicatedCode
   override def close(): Unit = this.synchronized {
     if (isStarted) {
       timerSchedule.cancel(true)
       isStarted = false
     }
-    Try(timerExec.shutdownNow())
-    Try(trackTaskExecutor.shutdownNow())
+    timerExec.shutdownNow()
+    trackTaskExecutor.shutdownNow()
     logInfo("[flink-k8s] FlinkJobStatusWatcher closed.")
   }
 
@@ -121,8 +117,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       future onComplete (_.getOrElse(None) match {
         case Some(jobState) =>
           val trackId = id.copy(jobId = jobState.jobId)
-          val last: JobStatusCV = trackController.jobStatuses.get(trackId)
-          if (last == null || last.jobState != jobState.jobState) {
+          val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
+          if (latest == null || latest.jobState != jobState.jobState) {
             eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
           }
           if (FlinkJobState.isEndState(jobState.jobState)) {
@@ -236,15 +232,13 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     // get flink rest api
     var clusterRestUrl = trackController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
     // list flink jobs from rest api
-    Try(callJobsOverviewsApi(clusterRestUrl))
-      .recover { case _ =>
-        clusterRestUrl = trackController.refreshClusterRestUrl(clusterKey).getOrElse(return None)
-        Try(callJobsOverviewsApi(clusterRestUrl))
-          .recover { case ex =>
-            logInfo(s"failed to list remote flink jobs on kubernetes-native-mode cluster, errorStack=${ex.getMessage}")
-            None
-          }.get
+    Try(callJobsOverviewsApi(clusterRestUrl)).recover { case _ =>
+      clusterRestUrl = trackController.refreshClusterRestUrl(clusterKey).getOrElse(return None)
+      Try(callJobsOverviewsApi(clusterRestUrl)).recover { case ex =>
+        logInfo(s"failed to list remote flink jobs on kubernetes-native-mode cluster, errorStack=${ex.getMessage}")
+        None
       }.get
+    }.get
   }
 
   /**
@@ -272,7 +266,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     // relevant deployment event
 
     // infer from k8s deployment and event
-    val preCache: JobStatusCV = trackController.jobStatuses.get(trackId)
+    val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
 
     val jobState = {
       if (isDeployExists) {
@@ -292,19 +286,19 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
           }
         } else {
           // determine if the state should be SILENT or LOST
-          inferSilentOrLostFromPreCache(preCache)
+          inferSilentOrLostFromPreCache(latest)
         }
       }
     }
 
-    val nonFirstSilent = jobState == SILENT && preCache != null && preCache.jobState == SILENT
+    val nonFirstSilent = jobState == SILENT && latest != null && latest.jobState == SILENT
     if (nonFirstSilent) {
       Some(
         JobStatusCV(
           jobState = jobState,
           jobId = null,
-          pollEmitTime = preCache.pollEmitTime,
-          pollAckTime = preCache.pollAckTime
+          pollEmitTime = latest.pollEmitTime,
+          pollAckTime = latest.pollAckTime
         )
       )
     } else {
