@@ -19,6 +19,8 @@
 
 package com.streamxhub.streamx.flink.kubernetes.model
 
+import java.util.Objects
+
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.flink.api.common.JobID
 
@@ -62,6 +64,20 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
    */
   def belongTo(clusterKey: ClusterKey): Boolean =
     executeMode == clusterKey.executeMode && namespace == clusterKey.namespace && clusterId == clusterKey.clusterId
+
+  override def hashCode(): Int = {
+    Objects.hash(executeMode, clusterId, namespace, appId)
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (this == null || obj == null) return false
+    if (!obj.isInstanceOf[TrackId]) return false
+    val that = obj.asInstanceOf[TrackId]
+    this.executeMode == that.executeMode &&
+      this.clusterId == that.clusterId &&
+      this.namespace == that.namespace &&
+      this.appId == that.appId
+  }
 
 }
 
