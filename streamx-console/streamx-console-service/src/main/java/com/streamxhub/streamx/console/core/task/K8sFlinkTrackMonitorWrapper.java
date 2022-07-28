@@ -144,7 +144,7 @@ public class K8sFlinkTrackMonitorWrapper {
         public static TrackId toTrackId(@Nonnull Application app) {
             Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
             if (FlinkK8sExecuteMode.APPLICATION().equals(mode)) {
-                return TrackId.onApplication(app.getK8sNamespace(), app.getClusterId(), app.getId());
+                return TrackId.onApplication(app.getK8sNamespace(), app.getClusterId(), app.getId(), null);
             } else if (FlinkK8sExecuteMode.SESSION().equals(mode)) {
                 return TrackId.onSession(app.getK8sNamespace(), app.getClusterId(),  app.getId(), app.getJobId());
             } else {

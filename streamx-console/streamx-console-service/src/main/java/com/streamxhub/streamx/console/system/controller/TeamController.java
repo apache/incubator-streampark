@@ -53,38 +53,38 @@ public class TeamController {
     @RequiresPermissions("team:view")
     public RestResponse teamList(RestRequest restRequest, Team team) {
         IPage<Team> groupList = teamService.findTeams(team, restRequest);
-        return RestResponse.create().data(groupList);
+        return RestResponse.success(groupList);
     }
 
     @PostMapping("/listByUser")
     public RestResponse listByUser(RestRequest restRequest, Team team) {
         IPage<Team> teamList = teamService.findTeamsByNowUser(team, restRequest);
-        return RestResponse.create().data(teamList);
+        return RestResponse.success(teamList);
     }
 
     @PostMapping("post")
     @RequiresPermissions("team:add")
     public RestResponse addTeam(@Valid Team team) throws Exception {
         this.teamService.createTeam(team);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("team:delete")
     public RestResponse deleteTeam(Long teamId) {
         String result = this.teamService.deleteTeamBeforeCheck(teamId);
-        return RestResponse.create().message(result);
+        return RestResponse.success().message(result);
     }
 
     @PostMapping("check/name")
     public RestResponse checkTeamName(@NotBlank(message = "{required}") String teamName) {
         boolean result = this.teamService.findByName(teamName) == null;
-        return RestResponse.create().data(result);
+        return RestResponse.success(result);
     }
 
     @PostMapping("check/code")
     public RestResponse checkTeamCode(@NotBlank(message = "{required}") String teamCode) {
         boolean result = this.teamService.findByCode(teamCode) == null;
-        return RestResponse.create().data(result);
+        return RestResponse.success(result);
     }
 }

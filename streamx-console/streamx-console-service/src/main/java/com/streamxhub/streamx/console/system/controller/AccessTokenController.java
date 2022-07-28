@@ -67,7 +67,7 @@ public class AccessTokenController {
     @PostMapping(value = "check")
     public RestResponse checkToken() {
         User user = commonService.getCurrentUser();
-        RestResponse restResponse = RestResponse.create();
+        RestResponse restResponse = RestResponse.success();
         if (user != null) {
             AccessToken accessToken = accessTokenService.getByUserId(user.getUserId());
             if (accessToken == null) {
@@ -90,7 +90,7 @@ public class AccessTokenController {
     @RequiresPermissions("token:view")
     public RestResponse tokenList(RestRequest restRequest, AccessToken accessToken) {
         IPage<AccessToken> accessTokens = accessTokenService.findAccessTokens(accessToken, restRequest);
-        return RestResponse.create().data(accessTokens);
+        return RestResponse.success(accessTokens);
     }
 
     /**
@@ -111,7 +111,7 @@ public class AccessTokenController {
     @RequiresPermissions("token:delete")
     public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
         boolean res = accessTokenService.deleteToken(tokenId);
-        return RestResponse.create().data(res);
+        return RestResponse.success(res);
     }
 
     /**

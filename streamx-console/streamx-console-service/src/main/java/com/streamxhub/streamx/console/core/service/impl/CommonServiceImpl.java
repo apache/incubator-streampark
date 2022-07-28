@@ -67,10 +67,10 @@ public class CommonServiceImpl implements CommonService {
                 Arrays.stream(Objects.requireNonNull(localClient.list())).filter(x -> x.matches("streamx-flink-sqlclient_" + flinkEnv.getScalaVersion() + "-.*\\.jar"))
                     .collect(Collectors.toList());
             if (jars.isEmpty()) {
-                throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localClient);
+                throw new ApiException("[StreamX] can no found streamx-flink-sqlclient jar in " + localClient);
             }
             if (jars.size() > 1) {
-                throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localClient);
+                throw new ApiException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localClient);
             }
             sqlClientJar = jars.get(0);
         }
