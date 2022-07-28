@@ -118,7 +118,11 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         case Some(jobState) =>
           val trackId = id.copy(jobId = jobState.jobId)
           val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
-          if (latest == null || latest.jobState != jobState.jobState) {
+          if (latest == null || latest.jobState != jobState.jobState || latest.jobId != jobState.jobId) {
+            // put job status to cache
+            trackController.jobStatuses.put(trackId, jobState)
+            // set jobId to trackIds
+            trackController.trackIds.update(trackId)
             eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
           }
           if (FlinkJobState.isEndState(jobState.jobState)) {
@@ -127,11 +131,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             if (trackId.executeMode == APPLICATION) {
               trackController.endpoints.invalidate(trackId.toClusterKey)
             }
-          } else {
-            // put job status to cache
-            trackController.jobStatuses.put(trackId, jobState)
-            // set jobId to trackIds
-            trackController.trackIds.update(trackId)
           }
         case _ =>
       })
