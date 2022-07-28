@@ -63,6 +63,23 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
   def belongTo(clusterKey: ClusterKey): Boolean =
     executeMode == clusterKey.executeMode && namespace == clusterKey.namespace && clusterId == clusterKey.clusterId
 
+  override def hashCode(): Int = {
+    13 * (if (executeMode == null) 0 else executeMode.hashCode)
+    +17 * (if (clusterId == null) 0 else clusterId.hashCode)
+    +31 * (if (namespace == null) 0 else namespace.hashCode)
+    +37 * appId.hashCode
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null) return false
+    if (!obj.isInstanceOf[TrackId]) return false
+    val that = obj.asInstanceOf[TrackId]
+    this.executeMode == that.executeMode &&
+      this.clusterId == that.clusterId &&
+      this.namespace == that.namespace &&
+      this.appId == that.appId
+  }
+
 }
 
 object TrackId {
