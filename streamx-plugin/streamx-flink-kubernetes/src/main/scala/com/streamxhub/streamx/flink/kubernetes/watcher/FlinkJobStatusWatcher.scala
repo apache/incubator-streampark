@@ -67,7 +67,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   /**
    * stop watcher process
    */
-  //noinspection DuplicatedCode
   override def start(): Unit = this.synchronized {
     if (!isStarted) {
       timerSchedule = timerExec.scheduleAtFixedRate(() => watch(), 0, conf.requestIntervalSec, TimeUnit.SECONDS)

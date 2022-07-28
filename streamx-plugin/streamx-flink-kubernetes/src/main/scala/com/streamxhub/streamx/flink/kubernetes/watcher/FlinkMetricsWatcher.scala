@@ -40,7 +40,6 @@ import scala.util.{Failure, Success, Try}
 /**
  * author:Al-assad
  */
-//noinspection DuplicatedCode
 @ThreadSafe
 class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.defaultConf)
                         (implicit val trackController: FlinkTrackController,

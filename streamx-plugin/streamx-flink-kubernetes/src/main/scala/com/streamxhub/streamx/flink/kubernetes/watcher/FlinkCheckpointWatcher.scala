@@ -40,7 +40,6 @@ import scala.util.{Failure, Success, Try}
 /**
  * author: benjobs
  */
-
 @ThreadSafe
 class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.defaultConf)
                             (implicit val trackController: FlinkTrackController,
