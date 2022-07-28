@@ -55,33 +55,23 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
   /**
    * start watcher process
    */
-  override def start(): Unit = this.synchronized {
-    if (!isStarted) {
-      timerSchedule = timerExec.scheduleAtFixedRate(() => watch(), 0, conf.requestIntervalSec, TimeUnit.SECONDS)
-      isStarted = true
-      logInfo("[flink-k8s] FlinkMetricWatcher started.")
-    }
+  override def doStart(): Unit = {
+    timerSchedule = timerExec.scheduleAtFixedRate(() => doWatch(), 0, conf.requestIntervalSec, TimeUnit.SECONDS)
+    logInfo("[flink-k8s] FlinkMetricWatcher started.")
   }
 
   /**
    * stop watcher process
    */
-  override def stop(): Unit = this.synchronized {
-    if (isStarted) {
-      timerSchedule.cancel(true)
-      isStarted = false
-      logInfo("[flink-k8s] FlinkMetricWatcher stopped.")
-    }
+  override def doStop(): Unit = {
+    timerSchedule.cancel(true)
+    logInfo("[flink-k8s] FlinkMetricWatcher stopped.")
   }
 
   /**
    * closes resource, relinquishing any underlying resources.
    */
-  override def close(): Unit = this.synchronized {
-    if (isStarted) {
-      timerSchedule.cancel(true)
-      isStarted = false
-    }
+  override def doClose(): Unit = {
     timerExec.shutdownNow()
     trackTaskExecutor.shutdownNow()
     logInfo("[flink-k8s] FlinkMetricWatcher closed.")
@@ -90,7 +80,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
   /**
    * single flink metrics tracking task
    */
-  override def watch(): Unit = {
+  override def doWatch(): Unit = {
     // get all legal tracking cluster key
     val trackIds: Set[TrackId] = Try(trackController.collectTracks()).filter(_.nonEmpty).getOrElse(return)
     // retrieve flink metrics in thread pool

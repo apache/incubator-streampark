@@ -64,34 +64,24 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   /**
    * stop watcher process
    */
-  override def start(): Unit = this.synchronized {
-    if (!isStarted) {
-      timerSchedule = timerExec.scheduleAtFixedRate(() => watch(), 0, conf.requestIntervalSec, TimeUnit.SECONDS)
-      isStarted = true
-      logInfo("[flink-k8s] FlinkJobStatusWatcher started.")
-    }
+  override def doStart(): Unit = {
+    timerSchedule = timerExec.scheduleAtFixedRate(() => doWatch(), 0, conf.requestIntervalSec, TimeUnit.SECONDS)
+    logInfo("[flink-k8s] FlinkJobStatusWatcher started.")
   }
 
   /**
    * stop watcher process
    */
-  override def stop(): Unit = this.synchronized {
-    if (isStarted) {
-      // interrupt all running threads
-      timerSchedule.cancel(true)
-      isStarted = false
-      logInfo("[flink-k8s] FlinkJobStatusWatcher stopped.")
-    }
+  override def doStop(): Unit = {
+    // interrupt all running threads
+    timerSchedule.cancel(true)
+    logInfo("[flink-k8s] FlinkJobStatusWatcher stopped.")
   }
 
   /**
    * closes resource, relinquishing any underlying resources.
    */
-  override def close(): Unit = this.synchronized {
-    if (isStarted) {
-      timerSchedule.cancel(true)
-      isStarted = false
-    }
+  override def doClose(): Unit = {
     timerExec.shutdownNow()
     trackTaskExecutor.shutdownNow()
     logInfo("[flink-k8s] FlinkJobStatusWatcher closed.")
@@ -100,7 +90,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   /**
    * single flink job status tracking task
    */
-  override def watch(): Unit = {
+  override def doWatch(): Unit = {
     // get all legal tracking ids
     val trackIds = Try(trackController.collectAllTrackIds()).filter(_.nonEmpty).getOrElse(return)
 
