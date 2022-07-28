@@ -92,11 +92,10 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
         })
         future
       })
+
     // blocking until all future are completed or timeout is reached
-    Try {
-      val futureHold = Future.sequence(futures)
-      Await.ready(futureHold, conf.requestTimeoutSec seconds)
-    }.failed.map { _ =>
+    Try(Await.ready(Future.sequence(futures), conf.requestTimeoutSec seconds))
+      .failed.map { _ =>
       logError(s"[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode timeout," +
         s" limitSeconds=${conf.requestTimeoutSec}," +
         s" trackingClusterKeys=${trackIds.mkString(",")}")

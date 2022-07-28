@@ -129,11 +129,12 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     }
 
     // blocking until all future are completed or timeout is reached
-    val allFutureHold = Future.sequence(tracksFuture)
-    Try(Await.ready(allFutureHold, conf.requestTimeoutSec seconds)).failed.map(_ =>
+    Try(Await.ready(Future.sequence(tracksFuture), conf.requestTimeoutSec seconds))
+      .failed.map { _ =>
       logInfo(s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
         s" limitSeconds=${conf.requestTimeoutSec}," +
-        s" trackIds=${trackIds.mkString(",")}"))
+        s" trackIds=${trackIds.mkString(",")}")
+    }
   }
 
   /**
