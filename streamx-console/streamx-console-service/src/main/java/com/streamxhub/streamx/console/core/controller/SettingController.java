@@ -53,35 +53,35 @@ public class SettingController {
     public RestResponse all() {
         LambdaQueryWrapper<Setting> query = new QueryWrapper<Setting>().lambda().orderByAsc(Setting::getNum);
         List<Setting> setting = settingService.list(query);
-        return RestResponse.create().data(setting);
+        return RestResponse.success(setting);
     }
 
     @PostMapping("get")
     public RestResponse get(String key) {
         Setting setting = settingService.get(key);
-        return RestResponse.create().data(setting);
+        return RestResponse.success(setting);
     }
 
     @PostMapping("weburl")
     public RestResponse weburl() {
         String url = settingService.getStreamXAddress();
-        return RestResponse.create().data(url == null ? null : url.trim());
+        return RestResponse.success(url == null ? null : url.trim());
     }
 
     @PostMapping("update")
     @RequiresPermissions("setting:update")
     public RestResponse update(Setting setting) {
         boolean updated = settingService.update(setting);
-        return RestResponse.create().data(updated);
+        return RestResponse.success(updated);
     }
 
     @PostMapping("checkHadoop")
     public RestResponse checkHadoop() {
         try {
             HadoopUtils.hdfs().getStatus();
-            return RestResponse.create().data(true);
+            return RestResponse.success(true);
         } catch (Exception e) {
-            return RestResponse.create().data(false).message(e.getMessage());
+            return RestResponse.success(false).message(e.getMessage());
         }
     }
 

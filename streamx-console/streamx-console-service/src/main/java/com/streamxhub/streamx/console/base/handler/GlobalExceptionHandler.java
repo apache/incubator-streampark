@@ -54,21 +54,21 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(Exception e) {
         log.info("internal server error：", e);
-        return new RestResponse().message("internal server error");
+        return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
     }
 
     @ExceptionHandler(value = InternalException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleParamsInvalidException(InternalException e) {
         log.info("internal server error：{}", e.getMessage());
-        return new RestResponse().message(e.getMessage());
+        return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
     }
 
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
         log.info("not supported request method，exception：{}", e.getMessage());
-        return new RestResponse().message("not supported request method，exception：" + e.getMessage());
+        return RestResponse.fail("not supported request method，exception：" + e.getMessage(), ResponseCode.CODE_FAIL);
     }
 
     @ExceptionHandler(value = ApiException.class)
@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
             message.append(error.getField()).append(error.getDefaultMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
-        return new RestResponse().message(message.toString());
+        return RestResponse.fail(message.toString(), ResponseCode.CODE_FAIL);
     }
 
     /**
@@ -113,7 +113,7 @@ public class GlobalExceptionHandler {
             message.append(pathArr[1]).append(violation.getMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
-        return new RestResponse().message(message.toString());
+        return RestResponse.fail(message.toString(), ResponseCode.CODE_FAIL);
     }
 
     @ExceptionHandler(value = UnauthorizedException.class)
