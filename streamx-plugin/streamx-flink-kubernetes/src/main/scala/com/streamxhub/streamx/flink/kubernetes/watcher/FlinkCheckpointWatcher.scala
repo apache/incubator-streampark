@@ -102,9 +102,10 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
     val futures: Set[Future[Option[CheckpointCV]]] =
       trackIds.map(id => {
         val future = Future(collect(id))
-        future.filter(_.nonEmpty).foreach {
-          result => eventBus.postAsync(FlinkJobCheckpointChangeEvent(id, result.get))
-        }
+        future onComplete (_.getOrElse(None) match {
+          case Some(cp) => eventBus.postAsync(FlinkJobCheckpointChangeEvent(id, cp))
+          case _ =>
+        })
         future
       })
     // blocking until all future are completed or timeout is reached
