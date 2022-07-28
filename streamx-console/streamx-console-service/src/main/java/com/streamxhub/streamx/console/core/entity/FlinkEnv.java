@@ -19,10 +19,10 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
-import com.streamxhub.streamx.console.base.exception.ApiException;
 import com.streamxhub.streamx.common.domain.FlinkVersion;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
+import com.streamxhub.streamx.console.base.exception.ApiException;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
