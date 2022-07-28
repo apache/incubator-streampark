@@ -123,11 +123,11 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         case Some(jobState) =>
           val trackId = id.copy(jobId = jobState.jobId)
           val last: JobStatusCV = trackController.jobStatuses.get(trackId)
-          // remove trackId from cache of job that needs to be untracked
           if (last == null || last.jobState != jobState.jobState) {
             eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
           }
           if (FlinkJobState.isEndState(jobState.jobState)) {
+            // remove trackId from cache of job that needs to be untracked
             trackController.unTracking(trackId)
             if (trackId.executeMode == APPLICATION) {
               trackController.endpoints.invalidate(trackId.toClusterKey)
@@ -136,7 +136,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             // put job status to cache
             trackController.jobStatuses.put(trackId, jobState)
             // set jobId to trackIds
-            trackController.trackIds.update(trackId.copy(jobId = jobState.jobId))
+            trackController.trackIds.update(trackId)
           }
         case _ =>
       })
