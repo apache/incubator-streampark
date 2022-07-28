@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.flink.kubernetes.model
 
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
+import org.apache.flink.api.common.JobID
 
 import scala.util.Try
 
@@ -69,7 +70,7 @@ object TrackId {
     this (FlinkK8sExecuteMode.SESSION, namespace, clusterId, appId, jobId)
   }
 
-  def onApplication(namespace: String, clusterId: String, appId: Long): TrackId = {
-    this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, null)
+  def onApplication(namespace: String, clusterId: String, appId: Long, jobId: String = null): TrackId = {
+    this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, jobId)
   }
 }

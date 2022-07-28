@@ -67,9 +67,7 @@ public class SavePointController {
     @RequiresPermissions("savepoint:delete")
     public RestResponse delete(Long id) throws InternalException {
         SavePoint savePoint = savePointService.getById(id);
-        assert savePoint != null;
         Application application = applicationService.getById(savePoint.getAppId());
-        assert application != null;
         Boolean deleted = savePointService.delete(id, application);
         return RestResponse.create().data(deleted);
     }
