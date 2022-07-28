@@ -2315,7 +2315,7 @@
         if(values.flinkClusterId){
           const cluster = this.flinkClusters.filter(c => c.id === values.flinkClusterId && c.clusterState === 1)[0] || null
           values.clusterId = cluster.id
-          values.flinkClusterId = cluster.clusterId
+          values.flinkClusterId = cluster.id
           values.yarnSessionClusterId = cluster.clusterId
         }
         const params = {
@@ -2412,7 +2412,7 @@
         if(values.flinkClusterId){
           const cluster = this.flinkClusters.filter(c => c.id === values.flinkClusterId && c.clusterState === 1)[0] || null
           values.clusterId = cluster.id
-          values.flinkClusterId = cluster.clusterId
+          values.flinkClusterId = cluster.id
           values.yarnSessionClusterId = cluster.clusterId
         }
 
