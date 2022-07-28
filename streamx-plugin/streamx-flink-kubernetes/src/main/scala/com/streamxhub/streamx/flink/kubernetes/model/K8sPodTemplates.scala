@@ -19,6 +19,8 @@
 
 package com.streamxhub.streamx.flink.kubernetes.model
 
+import java.util.Objects
+
 import scala.util.Try
 
 /**
@@ -34,7 +36,7 @@ case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "",
 
   def isEmpty: Boolean = !nonEmpty
 
-  override def hashCode(): Int = 13 * podTemplate.hashCode + 17 * jmPodTemplate.hashCode + 31 * tmPodTemplate.hashCode
+  override def hashCode(): Int = Objects.hash(podTemplate, jmPodTemplate, tmPodTemplate)
 
   override def equals(obj: Any): Boolean = {
     if (!obj.isInstanceOf[K8sPodTemplates]) false; else {
