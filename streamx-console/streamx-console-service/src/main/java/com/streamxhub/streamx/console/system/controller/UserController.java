@@ -65,34 +65,34 @@ public class UserController {
     @RequiresPermissions("user:view")
     public RestResponse userList(RestRequest restRequest, User user) {
         IPage<User> userList = userService.findUserDetail(user, restRequest);
-        return RestResponse.create().data(userList);
+        return RestResponse.success(userList);
     }
 
     @PostMapping("post")
     @RequiresPermissions("user:add")
     public RestResponse addUser(@Valid User user) throws Exception {
         this.userService.createUser(user);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("user:update")
     public RestResponse updateUser(@Valid User user) throws Exception {
         this.userService.updateUser(user);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("user:delete")
     public RestResponse deleteUsers(Long userId) {
         this.userService.removeById(userId);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PutMapping("profile")
     public RestResponse updateProfile(@Valid User user) throws Exception {
         this.userService.updateProfile(user);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PutMapping("avatar")
@@ -101,19 +101,19 @@ public class UserController {
         @NotBlank(message = "{required}") String avatar)
         throws Exception {
         this.userService.updateAvatar(username, avatar);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PostMapping("getNoTokenUser")
     public RestResponse getNoTokenUser() {
         List<User> userList = this.userService.getNoTokenUser();
-        return RestResponse.create().data(userList);
+        return RestResponse.success(userList);
     }
 
     @PostMapping("check/name")
     public RestResponse checkUserName(@NotBlank(message = "{required}") String username) {
         boolean result = this.userService.findByName(username) == null;
-        return RestResponse.create().data(result);
+        return RestResponse.success(result);
     }
 
     @PostMapping("check/password")
@@ -125,7 +125,7 @@ public class UserController {
         String salt = user.getSalt();
         String encryptPassword = ShaHashUtils.encrypt(salt, password);
         boolean result = StringUtils.equals(user.getPassword(), encryptPassword);
-        return RestResponse.create().data(result);
+        return RestResponse.success(result);
     }
 
     @PutMapping("password")
@@ -134,7 +134,7 @@ public class UserController {
         @NotBlank(message = "{required}") String password)
         throws Exception {
         userService.updatePassword(username, password);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PutMapping("password/reset")
@@ -143,7 +143,7 @@ public class UserController {
         throws Exception {
         String[] usernameArr = usernames.split(StringPool.COMMA);
         this.userService.resetPassword(usernameArr);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
 }

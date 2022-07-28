@@ -40,7 +40,6 @@ import scala.util.{Failure, Success, Try}
 /**
  * author:Al-assad
  */
-//noinspection DuplicatedCode
 @ThreadSafe
 class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.defaultConf)
                         (implicit val trackController: FlinkTrackController,
@@ -100,12 +99,12 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
     // get all legal tracking cluster key
     val trackIds: Set[TrackId] = Try(trackController.collectTracks()).filter(_.nonEmpty).getOrElse(return)
     // retrieve flink metrics in thread pool
-    val futures: Set[Future[Option[(ClusterKey, FlinkMetricCV)]]] =
+    val futures: Set[Future[Option[FlinkMetricCV]]] =
       trackIds.map(id => {
         val future = Future(collectMetrics(id))
-        future.filter(_.nonEmpty).foreach {
-          result =>
-            val (clusterKey, metric) = result.get._1 -> result.get._2
+        future onComplete (_.getOrElse(None) match {
+          case Some(metric) =>
+            val clusterKey = id.toClusterKey
             // update current flink cluster metrics on cache
             trackController.flinkMetrics.put(clusterKey, metric)
             val isMetricChanged = {
@@ -115,7 +114,8 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
             if (isMetricChanged) {
               eventBus.postAsync(FlinkClusterMetricChangeEvent(id, metric))
             }
-        }
+          case _ =>
+        })
         future
       })
     // blocking until all future are completed or timeout is reached
@@ -137,7 +137,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
    * This method can be called directly from outside, without affecting the
    * current cachePool result.
    */
-  def collectMetrics(id: TrackId): Option[(ClusterKey, FlinkMetricCV)] = {
+  def collectMetrics(id: TrackId): Option[FlinkMetricCV] = {
     // get flink rest api
     val clusterKey: ClusterKey = ClusterKey.of(id)
     val flinkJmRestUrl = trackController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
@@ -177,7 +177,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
         failedJob = flinkOverview.jobsFailed,
         pollAckTime = ackTime)
     }
-    Some(clusterKey -> flinkMetricCV)
+    Some(flinkMetricCV)
   }
 
 }

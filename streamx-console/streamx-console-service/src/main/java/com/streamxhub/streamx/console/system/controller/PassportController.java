@@ -67,7 +67,7 @@ public class PassportController {
         @NotBlank(message = "{required}") String password) throws Exception {
 
         if (StringUtils.isEmpty(username)) {
-            return RestResponse.create().put("code", 0);
+            return RestResponse.success().put("code", 0);
         }
 
         // verify username and password

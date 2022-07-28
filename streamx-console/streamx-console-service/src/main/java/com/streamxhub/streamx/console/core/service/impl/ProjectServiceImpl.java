@@ -103,7 +103,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public RestResponse create(Project project) {
-        RestResponse response = RestResponse.create();
+        RestResponse response = RestResponse.success();
         if (project.getTeamId() == null) {
             return response.message("请选择团队").data(false);
         }

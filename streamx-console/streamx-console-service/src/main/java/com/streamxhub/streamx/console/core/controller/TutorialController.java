@@ -47,6 +47,6 @@ public class TutorialController {
     @PostMapping("get")
     public RestResponse get(String name) throws IOException {
         Tutorial tutorial = tutorialService.getByName(name);
-        return RestResponse.create().data(tutorial);
+        return RestResponse.success(tutorial);
     }
 }

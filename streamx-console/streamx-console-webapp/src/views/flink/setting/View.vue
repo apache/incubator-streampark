@@ -283,7 +283,7 @@
                     size="large"
                     style="margin-left: 3px"
                     class="control-button ctl-btn-color">
-                    <svg-icon role="img" name="testalarm" size="middle"/>
+                    <a-icon type="thunderbolt" />
                   </a-button>
                 </a-tooltip>
                 <a-tooltip title="Edit Alert Config">

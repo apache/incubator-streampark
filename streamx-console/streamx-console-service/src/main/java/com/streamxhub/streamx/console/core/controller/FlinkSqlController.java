@@ -61,7 +61,7 @@ public class FlinkSqlController {
         if (!flinkSqlValidationResult.success()) {
             //记录错误类型,出错的sql,原因,错误的开始行和结束行内容(用于前端查找mod节点)
             String exception = flinkSqlValidationResult.exception();
-            RestResponse response = RestResponse.create()
+            RestResponse response = RestResponse.success()
                 .data(false)
                 .message(exception)
                 .put("type", flinkSqlValidationResult.failedType().getValue())
@@ -75,7 +75,7 @@ public class FlinkSqlController {
             }
             return response;
         } else {
-            return RestResponse.create().data(true);
+            return RestResponse.success(true);
         }
     }
 
@@ -85,22 +85,22 @@ public class FlinkSqlController {
         FlinkSql flinkSql1 = flinkSqlService.getById(array[0]);
         flinkSql1.base64Encode();
         if (array.length == 1) {
-            return RestResponse.create().data(flinkSql1);
+            return RestResponse.success(flinkSql1);
         }
         FlinkSql flinkSql2 = flinkSqlService.getById(array[1]);
         flinkSql2.base64Encode();
-        return RestResponse.create().data(new FlinkSql[]{flinkSql1, flinkSql2});
+        return RestResponse.success(new FlinkSql[]{flinkSql1, flinkSql2});
     }
 
     @PostMapping("history")
     public RestResponse sqlhistory(Application application) {
         List<FlinkSql> sqlList = flinkSqlService.history(application);
-        return RestResponse.create().data(sqlList);
+        return RestResponse.success(sqlList);
     }
 
     @PostMapping("sqlComplete")
     public RestResponse getSqlComplete(@NotNull(message = "{required}") String sql) {
-        return RestResponse.create().put("word", sqlComplete.getComplete(sql));
+        return RestResponse.success().put("word", sqlComplete.getComplete(sql));
     }
 
 }
