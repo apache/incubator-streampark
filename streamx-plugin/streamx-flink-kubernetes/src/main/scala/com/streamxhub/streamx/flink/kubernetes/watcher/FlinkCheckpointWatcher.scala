@@ -174,5 +174,3 @@ object Checkpoint {
   }
 
 }
-
-
