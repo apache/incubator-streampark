@@ -29,7 +29,7 @@ import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
  * @param jobName      flink job name
  * @param jobStartTime flink job starting timestamp
  * @param pollEmitTime tracking polling emit timestamp
- * @param pollAckTime  traking polling result receive timestamp
+ * @param pollAckTime  tracking polling result receive timestamp
  */
 case class JobStatusCV(jobState: FlinkJobState.Value,
                        jobId: String,

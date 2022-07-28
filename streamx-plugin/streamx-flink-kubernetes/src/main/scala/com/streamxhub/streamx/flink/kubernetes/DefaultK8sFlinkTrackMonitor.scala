@@ -127,9 +127,9 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
     // noinspection UnstableApiUsage
     @Subscribe def subscribeFlinkJobStateEvent(event: FlinkJobStateEvent): Unit = {
       if (!Try(event.trackId.nonLegal).getOrElse(true)) {
-        val preCache = trackController.jobStatuses.get(event.trackId)
+        val latest = trackController.jobStatuses.get(event.trackId)
         // determine if the current event should be ignored
-        val shouldIgnore: Boolean = (preCache, event) match {
+        val shouldIgnore: Boolean = (latest, event) match {
           case (preCache, _) if preCache == null => false
           // discard current event when the job state is consistent
           case (preCache, event) if preCache.jobState == event.jobState => true
@@ -140,8 +140,8 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
         if (!shouldIgnore) {
           // update relevant cache
           val newCache = {
-            if (preCache != null) {
-              preCache.copy(jobState = event.jobState)
+            if (latest != null) {
+              latest.copy(jobState = event.jobState)
             } else {
               JobStatusCV(
                 jobState = event.jobState,
