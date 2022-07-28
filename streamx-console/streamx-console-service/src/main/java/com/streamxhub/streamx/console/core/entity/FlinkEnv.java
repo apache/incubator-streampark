@@ -19,13 +19,13 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
+import com.streamxhub.streamx.console.base.exception.ApiException;
 import com.streamxhub.streamx.common.domain.FlinkVersion;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.streamxhub.streamx.console.base.exception.ApiException;
 import lombok.Data;
 import org.apache.commons.io.FileUtils;
 
@@ -72,7 +72,7 @@ public class FlinkEnv implements Serializable {
             String flinkConf = FileUtils.readFileToString(yaml);
             this.flinkConf = DeflaterUtils.zipString(flinkConf);
         } catch (Exception e) {
-          throw new ApiException(e);
+            throw new ApiException(e);
         }
     }
 
