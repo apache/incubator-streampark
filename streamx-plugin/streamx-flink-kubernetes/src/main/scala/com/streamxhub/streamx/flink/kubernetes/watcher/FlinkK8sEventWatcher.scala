@@ -41,9 +41,6 @@ class FlinkK8sEventWatcher(implicit trackController: FlinkTrackController) exten
 
   private var k8sClient: KubernetesClient = _
 
-  // status of whether FlinkK8sEventWatcher has already started
-  @volatile private var isStarted = false
-
   /**
    * start watcher process
    */
@@ -102,6 +99,5 @@ class FlinkK8sEventWatcher(implicit trackController: FlinkTrackController) exten
       K8sDeploymentEventCV(action, event, System.currentTimeMillis())
     )
   }
-
 
 }

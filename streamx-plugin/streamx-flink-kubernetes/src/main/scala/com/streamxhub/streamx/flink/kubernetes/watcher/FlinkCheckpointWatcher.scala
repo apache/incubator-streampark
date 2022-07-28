@@ -51,13 +51,9 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
   private val timerExec = Executors.newSingleThreadScheduledExecutor()
   private var timerSchedule: ScheduledFuture[_] = _
 
-  // status of whether FlinkJobWatcher has already started
-  @volatile private var isStarted = false
-
   /**
    * start watcher process
    */
-  // noinspection DuplicatedCode
   override def start(): Unit = this.synchronized {
     if (!isStarted) {
       timerSchedule = timerExec.scheduleAtFixedRate(() => watch(), 0, conf.requestIntervalSec, TimeUnit.SECONDS)
@@ -80,14 +76,13 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
   /**
    * closes resource, relinquishing any underlying resources.
    */
-  // noinspection DuplicatedCode
   override def close(): Unit = this.synchronized {
     if (isStarted) {
       timerSchedule.cancel(true)
       isStarted = false
     }
-    Try(timerExec.shutdownNow())
-    Try(trackTaskExecutor.shutdownNow())
+    timerExec.shutdownNow()
+    trackTaskExecutor.shutdownNow()
     logInfo("[flink-k8s] FlinkCheckpointWatcher closed.")
   }
 

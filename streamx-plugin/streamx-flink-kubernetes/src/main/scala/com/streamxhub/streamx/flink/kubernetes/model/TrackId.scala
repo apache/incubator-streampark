@@ -20,7 +20,6 @@
 package com.streamxhub.streamx.flink.kubernetes.model
 
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
-import org.apache.flink.api.common.JobID
 
 import scala.util.Try
 
@@ -38,13 +37,9 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
    * check whether fields of trackId are legal
    */
   def isLegal: Boolean = {
-    executeMode match {
-      case FlinkK8sExecuteMode.APPLICATION =>
-        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false)
-      case FlinkK8sExecuteMode.SESSION =>
-        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false) && Try(jobId.nonEmpty).getOrElse(false)
-      case _ => false
-    }
+    Try(namespace.nonEmpty).getOrElse(false) &&
+      Try(clusterId.nonEmpty).getOrElse(false) &&
+      Try(jobId.nonEmpty).getOrElse(false)
   }
 
   /**
