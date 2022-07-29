@@ -30,6 +30,7 @@ import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.enums.FlinkFinalStatus;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.OptionState;
 import com.streamxhub.streamx.console.core.enums.StopFrom;
@@ -515,6 +516,14 @@ public class FlinkTrackingTask {
                         if (flinkAppState.equals(FlinkAppState.FAILED)) {
                             applicationService.start(application, true);
                         }
+                    }
+                    String finalStatus = appInfo.getApp().getFinalStatus();
+                    FlinkFinalStatus flinkFinalStatus = FlinkFinalStatus.of(finalStatus);
+                    if (flinkFinalStatus.equals(FlinkFinalStatus.OTHER)) {
+                        return;
+                    }
+                    if (finalStatus.equals(FlinkFinalStatus.FAILED) || finalStatus.equals(FlinkFinalStatus.KILLED)) {
+                        alertService.alert(application, FlinkAppState.FAILED);
                     }
                 } catch (Exception e) {
                     if (!ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
