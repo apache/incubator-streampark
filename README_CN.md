@@ -115,7 +115,7 @@ Make stream processing easier
 
 ### 🚀 快速上手
 
-请查看[官网文档](http://www.streamxhub.com/zh/doc/)了解更多信息
+请查看[官网文档](https://www.streamxhub.com/docs/intro)了解更多信息
 
 
 ## 💋 谁在使用
