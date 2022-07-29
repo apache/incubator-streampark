@@ -65,13 +65,13 @@ class FlinkTrackController extends Logger with AutoCloseable {
    * determines whether the specified TrackId is in the trace
    */
   def isInTracking(trackId: TrackId): Boolean = {
-    if (Try(trackId.nonLegal).getOrElse(true)) false; else {
+    if (!trackId.isLegal) false; else {
       trackIds.get(trackId) != null
     }
   }
 
   def unTracking(trackId: TrackId): Unit = {
-    if (!Try(trackId.nonLegal).getOrElse(true)) {
+    if (trackId.isLegal) {
       trackIds.invalidate(trackId)
       canceling.invalidate(trackId)
       jobStatuses.invalidate(trackId)
@@ -83,7 +83,7 @@ class FlinkTrackController extends Logger with AutoCloseable {
   /**
    * collect all legal tracking ids, and covert to ClusterKey
    */
-  private[kubernetes] def collectTracks(): Set[TrackId] = collectAllTrackIds().filter(_.isLegal)
+  private[kubernetes] def collectTracks(): Set[TrackId] = collectAllTrackIds().filter(_.isActive)
 
   /**
    * collect the aggregation of flink metrics that in tracking
