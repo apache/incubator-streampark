@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 
@@ -48,13 +48,13 @@ public class FlinkEnvController {
     @PostMapping("list")
     public RestResponse list() {
         List<FlinkEnv> list = flinkEnvService.list();
-        return RestResponse.create().data(list);
+        return RestResponse.success(list);
     }
 
     @PostMapping("exists")
     public RestResponse exists(FlinkEnv version) {
         boolean checked = flinkEnvService.exists(version);
-        return RestResponse.create().data(checked);
+        return RestResponse.success(checked);
     }
 
     @PostMapping("create")
@@ -62,22 +62,22 @@ public class FlinkEnvController {
         try {
             flinkEnvService.create(version);
         } catch (Exception e) {
-            return RestResponse.create().data(false).message(e.getMessage());
+            return RestResponse.success(false).message(e.getMessage());
         }
-        return RestResponse.create().data(true);
+        return RestResponse.success(true);
     }
 
     @PostMapping("get")
     public RestResponse get(Long id) throws Exception {
         FlinkEnv flinkEnv = flinkEnvService.getById(id);
         flinkEnv.unzipFlinkConf();
-        return RestResponse.create().data(flinkEnv);
+        return RestResponse.success(flinkEnv);
     }
 
     @PostMapping("sync")
     public RestResponse sync(Long id) throws Exception {
         flinkEnvService.syncConf(id);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PostMapping("update")
@@ -85,15 +85,15 @@ public class FlinkEnvController {
         try {
             flinkEnvService.update(version);
         } catch (Exception e) {
-            return RestResponse.create().data(false).message(e.getMessage());
+            return RestResponse.success(false).message(e.getMessage());
         }
-        return RestResponse.create().data(true);
+        return RestResponse.success(true);
     }
 
     @PostMapping("default")
-    public RestResponse setDefault(Long id) throws ServiceException {
+    public RestResponse setDefault(Long id) throws InternalException {
         flinkEnvService.setDefault(id);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
 }

@@ -853,7 +853,7 @@ import {
   get as getAlert,
   listWithOutPage as listWithOutPageAlert,
   send as sendAlert
-} from '@/api/alertConf'
+} from '@/api/alert'
 
 export default {
   name: 'EditFlink',
@@ -1186,30 +1186,17 @@ export default {
       const formData = new FormData()
       formData.append('file', data.file)
       upload(formData).then((resp) => {
-        if (resp.status == 'error') {
-          this.$swal.fire({
-            title: 'Failed',
-            icon: 'error',
-            width: this.exceptionPropWidth(),
-            html: '<pre class="propException">' + resp['exception'] + '</pre>',
-            focusConfirm: false
-          })
-        } else {
-          this.loading = false
-          const path = resp.data
-          this.uploadJar = data.file.name
-          this.form.setFieldsValue({ 'jar': this.uploadJar })
-          main({
-            jar: path
-          }).then((resp) => {
-            this.form.setFieldsValue({'mainClass': resp.data})
-          }).catch((error) => {
-            this.$message.error(error.message)
-          })
-        }
-      }).catch((error) => {
-        this.$message.error(error.message)
         this.loading = false
+        const path = resp.data
+        this.uploadJar = data.file.name
+        this.form.setFieldsValue({ 'jar': this.uploadJar })
+        main({
+          jar: path
+        }).then((resp) => {
+          this.form.setFieldsValue({'mainClass': resp.data})
+        }).catch((error) => {
+          this.$message.error(error.message)
+        })
       })
     },
 

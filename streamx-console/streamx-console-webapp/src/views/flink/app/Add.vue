@@ -1490,7 +1490,7 @@
     get as getAlert,
     listWithOutPage as listWithOutPageAlert,
     send as sendAlert
-  } from '@/api/alertConf'
+  } from '@/api/alert'
 
   import {toPomString} from './Pom'
   import storage from '@/utils/storage'
@@ -1973,26 +1973,16 @@
         const formData = new FormData()
         formData.append('file', data.file)
         upload(formData).then((resp) => {
-          if (resp.status == 'error') {
-            this.$swal.fire({
-              title: 'Failed',
-              icon: 'error',
-              width: this.exceptionPropWidth(),
-              html: '<pre class="propException">' + resp['exception'] + '</pre>',
-              focusConfirm: false
-            })
-          } else {
-            this.loading = false
-            const path = resp.data
-            this.uploadJar = data.file.name
-            main({
-              jar: path
-            }).then((resp) => {
-              this.form.setFieldsValue({'mainClass': resp.data})
-            }).catch((error) => {
-              this.$message.error(error.message)
-            })
-          }
+          this.loading = false
+          const path = resp.data
+          this.uploadJar = data.file.name
+          main({
+            jar: path
+          }).then((resp) => {
+            this.form.setFieldsValue({'mainClass': resp.data})
+          }).catch((error) => {
+            this.$message.error(error.message)
+          })
         }).catch((error) => {
           this.$message.error(error.message)
           this.loading = false
@@ -2315,7 +2305,7 @@
         if(values.flinkClusterId){
           const cluster = this.flinkClusters.filter(c => c.id === values.flinkClusterId && c.clusterState === 1)[0] || null
           values.clusterId = cluster.id
-          values.flinkClusterId = cluster.clusterId
+          values.flinkClusterId = cluster.id
           values.yarnSessionClusterId = cluster.clusterId
         }
         const params = {
@@ -2412,7 +2402,7 @@
         if(values.flinkClusterId){
           const cluster = this.flinkClusters.filter(c => c.id === values.flinkClusterId && c.clusterState === 1)[0] || null
           values.clusterId = cluster.id
-          values.flinkClusterId = cluster.clusterId
+          values.flinkClusterId = cluster.id
           values.yarnSessionClusterId = cluster.clusterId
         }
 

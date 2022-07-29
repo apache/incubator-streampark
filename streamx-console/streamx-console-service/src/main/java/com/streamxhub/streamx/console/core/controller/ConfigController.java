@@ -54,31 +54,31 @@ public class ConfigController {
     @PostMapping("get")
     public RestResponse get(Long id) {
         ApplicationConfig config = applicationConfigService.get(id);
-        return RestResponse.create().data(config);
+        return RestResponse.success(config);
     }
 
     @PostMapping("template")
     public RestResponse template() {
         String config = applicationConfigService.readTemplate();
-        return RestResponse.create().data(config);
+        return RestResponse.success(config);
     }
 
     @PostMapping("list")
     public RestResponse list(ApplicationConfig config, RestRequest request) {
         IPage<ApplicationConfig> page = applicationConfigService.page(config, request);
-        return RestResponse.create().data(page);
+        return RestResponse.success(page);
     }
 
     @PostMapping("history")
     public RestResponse history(Application application) {
         List<ApplicationConfig> history = applicationConfigService.history(application);
-        return RestResponse.create().data(history);
+        return RestResponse.success(history);
     }
 
     @PostMapping("delete")
     public RestResponse delete(Long id) {
         Boolean deleted = applicationConfigService.removeById(id);
-        return RestResponse.create().data(deleted);
+        return RestResponse.success(deleted);
     }
 
     @PostMapping("sysHadoopConf")
@@ -87,7 +87,7 @@ public class ConfigController {
         Map<String, Map<String, String>> result = ImmutableMap.of(
             "hadoop", HadoopConfigUtils.readSystemHadoopConf(),
             "hive", HadoopConfigUtils.readSystemHiveConf());
-        return RestResponse.create().data(result);
+        return RestResponse.success(result);
     }
 
 }

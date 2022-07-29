@@ -60,21 +60,21 @@ public class MenuController {
     @PostMapping("router")
     public RestResponse getUserRouters() {
         ArrayList<VueRouter<Menu>> routers = this.menuService.getUserRouters(commonService.getCurrentUser());
-        return RestResponse.create().data(routers);
+        return RestResponse.success(routers);
     }
 
     @PostMapping("list")
     @RequiresPermissions("menu:view")
     public RestResponse menuList(Menu menu) {
         Map<String, Object> maps = this.menuService.findMenus(menu);
-        return RestResponse.create().data(maps);
+        return RestResponse.success(maps);
     }
 
     @PostMapping("post")
     @RequiresPermissions("menu:add")
     public RestResponse addMenu(@Valid Menu menu) {
         this.menuService.createMenu(menu);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @DeleteMapping("delete")
@@ -83,14 +83,14 @@ public class MenuController {
         throws Exception {
         String[] ids = menuIds.split(StringPool.COMMA);
         this.menuService.deleteMenus(ids);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("menu:update")
     public RestResponse updateMenu(@Valid Menu menu) throws Exception {
         this.menuService.updateMenu(menu);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
 }

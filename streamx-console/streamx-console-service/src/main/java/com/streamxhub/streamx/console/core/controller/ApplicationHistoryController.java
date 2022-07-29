@@ -62,14 +62,14 @@ public class ApplicationHistoryController {
     @RequiresPermissions("app:create")
     public RestResponse listUploadJars() {
         List<String> jars = applicationHistoryService.listUploadJars(StorageType.LFS, DEFAULT_HISTORY_RECORD_LIMIT);
-        return RestResponse.create().data(jars);
+        return RestResponse.success(jars);
     }
 
     @PostMapping("k8sNamespaces")
     @RequiresPermissions("app:create")
     public RestResponse listK8sNamespace() {
         List<String> namespaces = applicationMapper.getRecentK8sNamespace(DEFAULT_HISTORY_RECORD_LIMIT);
-        return RestResponse.create().data(namespaces);
+        return RestResponse.success(namespaces);
     }
 
     @PostMapping("sessionClusterIds")
@@ -86,35 +86,35 @@ public class ApplicationHistoryController {
                 clusterIds = new ArrayList<>(0);
                 break;
         }
-        return RestResponse.create().data(clusterIds);
+        return RestResponse.success(clusterIds);
     }
 
     @PostMapping("flinkBaseImages")
     @RequiresPermissions("app:create")
     public RestResponse listFlinkBaseImage() {
         List<String> images = applicationMapper.getRecentFlinkBaseImage(DEFAULT_HISTORY_RECORD_LIMIT);
-        return RestResponse.create().data(images);
+        return RestResponse.success(images);
     }
 
     @PostMapping("flinkPodTemplates")
     @RequiresPermissions("app:create")
     public RestResponse listPodTemplate() {
         List<String> templates = applicationMapper.getRecentK8sPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
-        return RestResponse.create().data(templates);
+        return RestResponse.success(templates);
     }
 
     @PostMapping("flinkJmPodTemplates")
     @RequiresPermissions("app:create")
     public RestResponse listJmPodTemplate() {
         List<String> templates = applicationMapper.getRecentK8sJmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
-        return RestResponse.create().data(templates);
+        return RestResponse.success(templates);
     }
 
     @PostMapping("flinkTmPodTemplates")
     @RequiresPermissions("app:create")
     public RestResponse listTmPodTemplate() {
         List<String> templates = applicationMapper.getRecentK8sTmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
-        return RestResponse.create().data(templates);
+        return RestResponse.success(templates);
     }
 
 }

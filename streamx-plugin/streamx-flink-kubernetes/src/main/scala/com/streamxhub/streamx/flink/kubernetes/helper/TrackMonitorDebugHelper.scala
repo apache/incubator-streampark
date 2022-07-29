@@ -48,8 +48,8 @@ object TrackMonitorDebugHelper {
   // print all cluster metrics for each flink cluster
   def watchClusterMetricsCache(implicit trackMonitor: K8sFlinkTrackMonitor): Unit =
     new Timer().scheduleAtFixedRate(() => println(s"[flink-k8s][metric]-${System.currentTimeMillis} => " +
-      s"count=${trackMonitor.asInstanceOf[DefaultK8sFlinkTrackMonitor].trackCache.flinkMetrics.asMap().size} | " +
-      s"${trackMonitor.asInstanceOf[DefaultK8sFlinkTrackMonitor].trackCache.flinkMetrics.asMap().mkString(",")}"), 0, 1500)
+      s"count=${trackMonitor.asInstanceOf[DefaultK8sFlinkTrackMonitor].trackController.flinkMetrics.asMap().size} | " +
+      s"${trackMonitor.asInstanceOf[DefaultK8sFlinkTrackMonitor].trackController.flinkMetrics.asMap().mkString(",")}"), 0, 1500)
 
   // print job cache detail
   def watchJobStatusCache(implicit trackMonitor: K8sFlinkTrackMonitor): Unit =
@@ -73,8 +73,8 @@ object TrackMonitorDebugHelper {
   // print k8s event cache detail
   def watchK8sEventCache(implicit trackMonitor: K8sFlinkTrackMonitor): Unit = {
     new Timer().scheduleAtFixedRate(() => println(s"[flink-k8s][k8s-event]-${System.currentTimeMillis} => " +
-      s"count=${trackMonitor.asInstanceOf[DefaultK8sFlinkTrackMonitor].trackCache.k8sDeploymentEvents.asMap().size} | " +
-      s"${trackMonitor.asInstanceOf[DefaultK8sFlinkTrackMonitor].trackCache.k8sDeploymentEvents.asMap().mkString(",")}"), 0, 1500)
+      s"count=${trackMonitor.asInstanceOf[DefaultK8sFlinkTrackMonitor].trackController.k8sDeploymentEvents.asMap().size} | " +
+      s"${trackMonitor.asInstanceOf[DefaultK8sFlinkTrackMonitor].trackController.k8sDeploymentEvents.asMap().mkString(",")}"), 0, 1500)
   }
   // scalastyle:on println
 

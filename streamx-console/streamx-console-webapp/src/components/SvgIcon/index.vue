@@ -1,7 +1,6 @@
 <template>
   <span :class="'svg-icon-'.concat(size).concat(border? ' svg-icon-border':'')" class="anticon">
     <alarm v-if="name==='alarm'"></alarm>
-    <testalarm v-if="name==='testalarm'"></testalarm>
     <analyse v-if="name==='analyse'"></analyse>
     <flink v-if="name==='flink'"></flink>
     <spark v-if="name==='spark'"></spark>
@@ -40,7 +39,7 @@
     <upload v-if="name==='upload'"></upload>
     <plus v-if="name==='plus'"></plus>
     <flame v-if="name==='flame'"></flame>
-    <code v-if="name==='icode'"></code>
+    <icode v-if="name==='code'"></icode>
     <copy v-if="name==='copy'"></copy>
     <swap v-if="name==='swap'"></swap>
     <github v-if="name==='github'"></github>
@@ -58,7 +57,6 @@
 <script>
 import {
   alarm,
-  testalarm,
   analyse,
   deploy,
   flink,
@@ -97,7 +95,7 @@ import {
   upload,
   plus,
   flame,
-  code,
+  icode,
   copy,
   swap,
   github,
@@ -115,7 +113,6 @@ export default {
   name: 'SvgIcon',
   components: {
     alarm,
-    testalarm,
     analyse,
     deploy,
     flink,
@@ -154,7 +151,7 @@ export default {
     upload,
     plus,
     flame,
-    code,
+    icode,
     copy,
     swap,
     github,

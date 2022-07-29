@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
-import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, TrackId}
+import com.streamxhub.streamx.flink.kubernetes.model.TrackId
 import org.junit.jupiter.api.Test
 
 /**
@@ -40,9 +40,9 @@ class SingleTrackingTaskTest {
     jobStatus1.foreach(println)
 
     // test application job
-    val jobStatus2 = trackMonitor.jobStatusWatcher.touchApplicationJob("flink-app2", "default", 0L)
+    val jobStatus2 = trackMonitor.jobStatusWatcher.touchApplicationJob(TrackId.onApplication("flink-app2", "default", 0L, null))
     println(s"result2 = ${jobStatus2.map(_.toString).getOrElse("empty result")}")
-    val jobStatus3 = trackMonitor.jobStatusWatcher.touchApplicationJob("flink-app3", "default", 0L)
+    val jobStatus3 = trackMonitor.jobStatusWatcher.touchApplicationJob(TrackId.onApplication("flink-app3", "default", 0L, null))
     println(s"result3 = ${jobStatus3.map(_.toString).getOrElse("empty result")}")
   }
 

@@ -37,13 +37,9 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
    * check whether fields of trackId are legal
    */
   def isLegal: Boolean = {
-    executeMode match {
-      case FlinkK8sExecuteMode.APPLICATION =>
-        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false)
-      case FlinkK8sExecuteMode.SESSION =>
-        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false) && Try(jobId.nonEmpty).getOrElse(false)
-      case _ => false
-    }
+    Try(namespace.nonEmpty).getOrElse(false) &&
+      Try(clusterId.nonEmpty).getOrElse(false) &&
+      Try(jobId.nonEmpty).getOrElse(false)
   }
 
   /**
@@ -69,7 +65,7 @@ object TrackId {
     this (FlinkK8sExecuteMode.SESSION, namespace, clusterId, appId, jobId)
   }
 
-  def onApplication(namespace: String, clusterId: String, appId: Long): TrackId = {
-    this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, null)
+  def onApplication(namespace: String, clusterId: String, appId: Long, jobId: String = null): TrackId = {
+    this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, jobId)
   }
 }

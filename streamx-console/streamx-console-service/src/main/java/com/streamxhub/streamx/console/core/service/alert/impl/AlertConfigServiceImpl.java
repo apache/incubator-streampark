@@ -30,6 +30,7 @@ import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.alert.AlertConfigService;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -81,8 +82,7 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
 
     @Override
     public boolean deleteById(Long id) throws AlertException {
-        int count = applicationService.count(applicationService.lambdaQuery()
-                .eq(Application::getAlertId, id));
+        int count = applicationService.count(new LambdaQueryWrapper<Application>().eq(id != null, Application::getAlertId, id));
         if (count > 0) {
             throw new AlertException(String.format("AlertId:%d, this is bound by application. Please clear the configuration first", id));
         }
