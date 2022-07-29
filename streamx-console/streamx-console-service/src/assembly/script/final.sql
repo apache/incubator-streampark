@@ -702,7 +702,7 @@ CREATE TABLE `t_team`
 -- Records of t_team
 -- ----------------------------
 BEGIN;
-insert into streamx.t_team values (1,'bigdata','BIGDATA','2022-02-21 18:00:00');
+insert into t_team values (1,'bigdata','BIGDATA','2022-02-21 18:00:00');
 COMMIT;
 
 -- ----------------------------
