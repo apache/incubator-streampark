@@ -71,6 +71,8 @@ object ConfigConst {
 
   val KEY_SECURITY_KERBEROS_ENABLE = "security.kerberos.login.enable"
 
+  val KEY_SECURITY_KERBEROS_DEBUG = "security.kerberos.login.debug"
+
   val KEY_SECURITY_KERBEROS_KEYTAB = "security.kerberos.login.keytab"
 
   val KEY_SECURITY_KERBEROS_PRINCIPAL = "security.kerberos.login.principal"
