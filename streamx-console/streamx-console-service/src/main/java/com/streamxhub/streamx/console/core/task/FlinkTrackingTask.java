@@ -523,7 +523,7 @@ public class FlinkTrackingTask {
                     if (flinkFinalStatus.equals(FlinkFinalStatus.OTHER)) {
                         return;
                     }
-                    if (finalStatus.equals(FlinkFinalStatus.FAILED) || finalStatus.equals(FlinkFinalStatus.KILLED)) {
+                    if (flinkFinalStatus.equals(FlinkFinalStatus.FAILED) || flinkFinalStatus.equals(FlinkFinalStatus.KILLED)) {
                         alertService.alert(application, FlinkAppState.FAILED);
                     }
                 } catch (Exception e) {
