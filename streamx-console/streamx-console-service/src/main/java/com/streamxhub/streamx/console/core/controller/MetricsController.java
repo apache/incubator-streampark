@@ -67,12 +67,12 @@ public class MetricsController {
     public RestResponse notice(Integer type, RestRequest request) {
         NoticeType noticeType = NoticeType.of(type);
         IPage<Message> pages = messageService.getUnRead(noticeType, request);
-        return RestResponse.create().data(pages);
+        return RestResponse.success(pages);
     }
 
     @PostMapping("delnotice")
     public RestResponse delNotice(Long id) {
-        return RestResponse.create().data(messageService.removeById(id));
+        return RestResponse.success(messageService.removeById(id));
     }
 
     @PostMapping("report")
@@ -90,7 +90,7 @@ public class MetricsController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PostMapping("flamegraph")

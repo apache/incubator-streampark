@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.core.controller;
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
@@ -51,8 +52,8 @@ import java.util.TimeZone;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("flink/alert/conf")
-public class AlertConfigController {
+@RequestMapping("flink/alert")
+public class AlertController {
 
     @Autowired
     private AlertConfigService alertConfigService;
@@ -64,51 +65,51 @@ public class AlertConfigController {
         log.info("接收到告警配置：{}", params);
         AlertConfig alertConfig = AlertConfig.of(params);
         boolean save = alertConfigService.save(alertConfig);
-        return RestResponse.create().data(save);
+        return RestResponse.success(save);
     }
 
     @PostMapping(value = "exists")
     public RestResponse exists(@RequestBody AlertConfigWithParams params) throws Exception {
         AlertConfig alertConfig = AlertConfig.of(params);
         boolean exist = alertConfigService.exist(alertConfig);
-        return RestResponse.create().data(exist);
+        return RestResponse.success(exist);
     }
 
     @PostMapping(value = "update")
     public RestResponse update(@RequestBody AlertConfigWithParams params) throws Exception {
         boolean update = alertConfigService.updateById(AlertConfig.of(params));
-        return RestResponse.create().data(update);
+        return RestResponse.success(update);
     }
 
     @PostMapping("get")
     public RestResponse get(@RequestBody AlertConfigWithParams params) throws Exception {
         AlertConfig alertConfig = alertConfigService.getById(params.getId());
-        return RestResponse.create().data(AlertConfigWithParams.of(alertConfig));
+        return RestResponse.success(AlertConfigWithParams.of(alertConfig));
     }
 
     @PostMapping(value = "list")
     public RestResponse list(@RequestBody AlertConfigWithParams params, RestRequest request) throws Exception {
         IPage<AlertConfigWithParams> page = alertConfigService.page(params, request);
-        return RestResponse.create().data(page);
+        return RestResponse.success(page);
     }
 
     @PostMapping(value = "listWithOutPage")
     public RestResponse listWithOutPage() throws Exception {
         List<AlertConfig> page = alertConfigService.list();
-        return RestResponse.create().data(page);
+        return RestResponse.success(page);
     }
 
     @DeleteMapping("delete")
     public RestResponse deleteAlertConf(@NotNull(message = "id must not be empty") Long id) {
         boolean result = alertConfigService.deleteById(id);
-        return RestResponse.create().data(result);
+        return RestResponse.success(result);
     }
 
     /**
      * send alert message for test
      */
     @PostMapping("send")
-    public RestResponse sendAlert(Long id) {
+    public RestResponse sendAlert(Long id) throws AlertException {
         AlertTemplate alertTemplate = new AlertTemplate();
         alertTemplate.setTitle("Notify: StreamX alert job for test");
         alertTemplate.setJobName("StreamX alert job for test");
@@ -120,9 +121,8 @@ public class AlertConfigController {
         alertTemplate.setStartTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setDuration(DateUtils.toRichTimeDuration(0));
-
         boolean alert = alertService.alert(AlertConfigWithParams.of(alertConfigService.getById(id)), alertTemplate);
-        return RestResponse.create().data(alert);
+        return RestResponse.success(alert);
     }
 
 }

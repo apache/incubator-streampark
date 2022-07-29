@@ -53,7 +53,7 @@ public class ProjectController {
     @RequiresPermissions("project:create")
     public RestResponse create(Project project) {
         if (project.getTeamId() == null || project.getTeamId() <= 0L) {
-            return RestResponse.create().message("请选择项目团队").data(false);
+            return RestResponse.success().message("请选择项目团队").data(false);
         }
         return projectService.create(project);
     }
@@ -62,86 +62,86 @@ public class ProjectController {
     @RequiresPermissions("project:update")
     public RestResponse update(Project project) {
         boolean update = projectService.update(project);
-        return RestResponse.create().data(update);
+        return RestResponse.success(update);
     }
 
     @PostMapping("get")
     public RestResponse get(Long id) {
-        return RestResponse.create().data(projectService.getById(id));
+        return RestResponse.success(projectService.getById(id));
     }
 
     @PostMapping("build")
     @RequiresPermissions("project:build")
     public RestResponse build(Long id, String socketId) throws Exception {
         projectService.build(id, socketId);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PostMapping("buildlog")
     @RequiresPermissions("project:build")
     public RestResponse buildLog(Long id) throws Exception {
         projectService.tailBuildLog(id);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PostMapping("closebuild")
     @RequiresPermissions("project:build")
     public RestResponse closeBuild(Long id) {
         projectService.closeBuildLog(id);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PostMapping("list")
     @RequiresPermissions("project:view")
     public RestResponse list(Project project, RestRequest restRequest) {
-        return RestResponse.create().data(projectService.page(project, restRequest));
+        return RestResponse.success(projectService.page(project, restRequest));
     }
 
     @PostMapping("branches")
     public RestResponse branches(Project project) {
         List<String> branches = project.getAllBranches();
-        return RestResponse.create().data(branches);
+        return RestResponse.success(branches);
     }
 
     @PostMapping("delete")
     @RequiresPermissions("project:delete")
     public RestResponse delete(Long id) {
         Boolean deleted = projectService.delete(id);
-        return RestResponse.create().data(deleted);
+        return RestResponse.success(deleted);
     }
 
     @PostMapping("gitcheck")
     public RestResponse gitCheck(Project project) {
         GitAuthorizedError error = project.gitCheck();
-        return RestResponse.create().data(error.getType());
+        return RestResponse.success(error.getType());
     }
 
     @PostMapping("exists")
     public RestResponse exists(Project project) {
         boolean exists = projectService.checkExists(project);
-        return RestResponse.create().data(exists);
+        return RestResponse.success(exists);
     }
 
     @PostMapping("modules")
     public RestResponse modules(Long id) {
         List<String> result = projectService.modules(id);
-        return RestResponse.create().data(result);
+        return RestResponse.success(result);
     }
 
     @PostMapping("jars")
     public RestResponse jars(Project project) {
         List<String> result = projectService.jars(project);
-        return RestResponse.create().data(result);
+        return RestResponse.success(result);
     }
 
     @PostMapping("listconf")
     public RestResponse listConf(Project project) {
         List<Map<String, Object>> list = projectService.listConf(project);
-        return RestResponse.create().data(list);
+        return RestResponse.success(list);
     }
 
     @PostMapping("select")
     public RestResponse select(Long teamId) {
-        return RestResponse.create().data(projectService.listByTeam(teamId));
+        return RestResponse.success(projectService.listByTeam(teamId));
     }
 }

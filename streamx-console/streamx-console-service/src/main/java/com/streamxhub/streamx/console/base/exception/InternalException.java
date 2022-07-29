@@ -22,15 +22,15 @@ package com.streamxhub.streamx.console.base.exception;
 /**
  * 系统内部异常
  */
-public class ServiceException extends Exception {
+public class InternalException extends Exception {
 
     private static final long serialVersionUID = -994962710559017255L;
 
-    public ServiceException(String message) {
+    public InternalException(String message) {
         super(message);
     }
 
-    public ServiceException(String message, Throwable cause) {
+    public InternalException(String message, Throwable cause) {
         super(message, cause);
     }
 }

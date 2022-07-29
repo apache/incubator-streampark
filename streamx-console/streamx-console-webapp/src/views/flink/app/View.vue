@@ -224,11 +224,11 @@
           </a-select>
           <a-select placeholder="User" allowClear @change="handleChangeUser" style="margin-left: 16px;width: 120px">
             <a-select-option v-for="u in users" :key="u.userId">
-              <span v-if="u.nickName==''"> {{ u.username }} </span>
-              <span v-if="u.nickName!=''"> {{ u.nickName }} </span>
+              <span v-if="u.nickName"> {{ u.nickName }} </span>
+              <span v-else> {{ u.username }} </span>
             </a-select-option>
           </a-select>
-          <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="margin-left: 16px;width: 90px">
+          <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="margin-left: 16px;width: 80px">
             <a-select-option value="1">JAR</a-select-option>
             <a-select-option value="2">SQL</a-select-option>
           </a-select>
@@ -236,7 +236,7 @@
             placeholder="Search..."
             v-model="searchText"
             @change="handleSearch"
-            style="margin-left: 16px; width: 250px;"/>
+            style="width: 250px;"/>
           <a-button
             type="primary"
             icon="plus"
@@ -306,17 +306,6 @@
               title="the application has changed."/>
           </template>
 
-        </template>
-
-        <template
-          slot="id"
-          slot-scope="text, record">
-          <span
-            class="link pointer"
-            v-clipboard:copy="record.id"
-            v-clipboard:success="handleCopySuccess">
-            {{ record.id }}
-          </span>
         </template>
 
         <template
@@ -1021,7 +1010,6 @@ import 'xterm/css/xterm.css'
 import {baseUrl} from '@/api/baseUrl'
 import SvgIcon from '@/components/SvgIcon'
 import storage from '@/utils/storage'
-import notification from 'ant-design-vue/lib/notification'
 import {listByUser as getUserTeam} from '@/api/team'
 import {list as listUser} from '@/api/user'
 
@@ -1119,20 +1107,19 @@ export default {
       let {sortedInfo, filteredInfo} = this
       sortedInfo = sortedInfo || {}
       filteredInfo = filteredInfo || {}
-      return [{
-        title: 'ID',
-        dataIndex: 'id',
-        width: 100,
-        scopedSlots: {customRender: 'id'},
-      }, {
+      return [ {
         title: 'Application Name',
         dataIndex: 'jobName',
         width: 320,
         scopedSlots: {customRender: 'jobName'},
+      },  {
+        title: 'Flink Version',
+        dataIndex: 'flinkVersion',
+        width: 130
       }, {
         title: 'Owner',
         dataIndex: 'nickName',
-        width: 120
+        width: 130
       }, {
         title: 'Run Status',
         dataIndex: 'state',
@@ -1245,13 +1232,6 @@ export default {
     handleChangeUser(user) {
       this.userId = user
       this.handleSearch()
-    },
-
-    handleCopySuccess() {
-      notification.success({
-        message: 'current jobId copied to clipboard Successfully',
-        duration: 1,
-      })
     },
 
     handleMapping(app) {
@@ -1691,13 +1671,6 @@ export default {
         timer: 2000
       }).then((result) => {
         cancel(stopReq).then((resp) => {
-          if (resp.status === 'error') {
-            this.$swal.fire(
-              'Failed',
-              resp.exception,
-              'error'
-            )
-          }
         })
       })
     },

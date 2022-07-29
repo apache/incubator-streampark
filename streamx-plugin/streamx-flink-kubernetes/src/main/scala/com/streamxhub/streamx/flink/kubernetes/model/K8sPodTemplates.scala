@@ -19,6 +19,8 @@
 
 package com.streamxhub.streamx.flink.kubernetes.model
 
+import com.streamxhub.streamx.common.util.Utils
+
 import scala.util.Try
 
 /**
@@ -34,14 +36,15 @@ case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "",
 
   def isEmpty: Boolean = !nonEmpty
 
-  override def hashCode(): Int = 13 * podTemplate.hashCode + 17 * jmPodTemplate.hashCode + 31 * tmPodTemplate.hashCode
+  override def hashCode(): Int = Utils.hashCode(podTemplate, jmPodTemplate, tmPodTemplate)
 
   override def equals(obj: Any): Boolean = {
-    if (!obj.isInstanceOf[K8sPodTemplates]) false; else {
-      val that = obj.asInstanceOf[K8sPodTemplates]
-      Try(podTemplate.trim).getOrElse("") == Try(that.podTemplate.trim).getOrElse("") &&
-        Try(jmPodTemplate.trim).getOrElse("") == Try(that.jmPodTemplate.trim).getOrElse("") &&
-        Try(tmPodTemplate.trim).getOrElse("") == Try(that.tmPodTemplate.trim).getOrElse("")
+    obj match {
+      case that: K8sPodTemplates =>
+        Try(podTemplate.trim).getOrElse("") == Try(that.podTemplate.trim).getOrElse("") &&
+          Try(jmPodTemplate.trim).getOrElse("") == Try(that.jmPodTemplate.trim).getOrElse("") &&
+          Try(tmPodTemplate.trim).getOrElse("") == Try(that.tmPodTemplate.trim).getOrElse("")
+      case _ => false
     }
   }
 

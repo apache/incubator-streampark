@@ -22,7 +22,7 @@ package com.streamxhub.streamx.console.system.controller;
 import com.streamxhub.streamx.common.util.CURLBuilder;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.core.enums.AccessTokenState;
 import com.streamxhub.streamx.console.core.service.CommonService;
 import com.streamxhub.streamx.console.system.entity.AccessToken;
@@ -60,14 +60,14 @@ public class AccessTokenController {
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
     public RestResponse createToken(@NotBlank(message = "{required}") Long userId, String expireTime, String description)
-        throws ServiceException {
+        throws InternalException {
         return accessTokenService.generateToken(userId, expireTime, description);
     }
 
     @PostMapping(value = "check")
     public RestResponse checkToken() {
         User user = commonService.getCurrentUser();
-        RestResponse restResponse = RestResponse.create();
+        RestResponse restResponse = RestResponse.success();
         if (user != null) {
             AccessToken accessToken = accessTokenService.getByUserId(user.getUserId());
             if (accessToken == null) {
@@ -90,7 +90,7 @@ public class AccessTokenController {
     @RequiresPermissions("token:view")
     public RestResponse tokenList(RestRequest restRequest, AccessToken accessToken) {
         IPage<AccessToken> accessTokens = accessTokenService.findAccessTokens(accessToken, restRequest);
-        return RestResponse.create().data(accessTokens);
+        return RestResponse.success(accessTokens);
     }
 
     /**
@@ -111,7 +111,7 @@ public class AccessTokenController {
     @RequiresPermissions("token:delete")
     public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
         boolean res = accessTokenService.deleteToken(tokenId);
-        return RestResponse.create().data(res);
+        return RestResponse.success(res);
     }
 
     /**

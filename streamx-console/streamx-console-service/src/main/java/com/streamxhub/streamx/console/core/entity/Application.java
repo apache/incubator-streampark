@@ -30,9 +30,11 @@ import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.FlinkK8sRestExposedType;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
+import com.streamxhub.streamx.common.util.FileUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.ResourceFrom;
@@ -54,10 +56,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -413,9 +417,9 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getDistHome() {
         String path = String.format("%s/%s/%s",
-                Workspace.local().APP_LOCAL_DIST(),
-                projectId.toString(),
-                getModule()
+            Workspace.local().APP_LOCAL_DIST(),
+            projectId.toString(),
+            getModule()
         );
         log.info("local distHome:{}", path);
         return path;
@@ -424,8 +428,8 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getLocalAppHome() {
         String path = String.format("%s/%s",
-                Workspace.local().APP_WORKSPACE(),
-                id.toString()
+            Workspace.local().APP_WORKSPACE(),
+            id.toString()
         );
         log.info("local appHome:{}", path);
         return path;
@@ -434,9 +438,9 @@ public class Application implements Serializable {
     @JsonIgnore
     public String getRemoteAppHome() {
         String path = String.format(
-                "%s/%s",
-                Workspace.remote().APP_WORKSPACE(),
-                id.toString()
+            "%s/%s",
+            Workspace.remote().APP_WORKSPACE(),
+            id.toString()
         );
         log.info("remote appHome:{}", path);
         return path;
@@ -476,6 +480,7 @@ public class Application implements Serializable {
 
     @JsonIgnore
     @SneakyThrows
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getOptionMap() {
         Map<String, Object> map = JacksonUtils.read(getOptions(), Map.class);
         map.entrySet().removeIf(entry -> entry.getValue() == null);
@@ -639,6 +644,7 @@ public class Application implements Serializable {
 
     @JsonIgnore
     @SneakyThrows
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getHotParamsMap() {
         if (this.hotParams != null) {
             Map<String, Object> map = JacksonUtils.read(this.hotParams, Map.class);
@@ -716,8 +722,15 @@ public class Application implements Serializable {
             if (this.pom.size() != other.pom.size() || this.jar.size() != other.jar.size()) {
                 return false;
             }
-
-            return pom.containsAll(other.pom) && jar.containsAll(other.jar);
+            File localJar = WebUtils.getAppTempDir();
+            File localUploads = new File(Workspace.local().APP_UPLOADS());
+            HashSet<String> otherJars = new HashSet<>(other.jar);
+            for (String jarName : jar) {
+                if (!otherJars.contains(jarName) || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {
+                    return false;
+                }
+            }
+            return new HashSet<>(pom).containsAll(other.pom);
         }
 
         @JsonIgnore

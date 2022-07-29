@@ -86,25 +86,24 @@ public class AlertServiceImpl implements AlertService {
             try {
                 // 处理每种报警类型的异常,并收集异常
                 boolean alertRes = SpringContextUtils
-                        .getBean(alertType.getServiceType(), AlertNotifyService.class)
-                        .doAlert(params, alertTemplate);
+                    .getBean(alertType.getServiceType(), AlertNotifyService.class)
+                    .doAlert(params, alertTemplate);
                 return new Tuple2<Boolean, AlertException>(alertRes, null);
             } catch (AlertException e) {
-                return new Tuple2<Boolean, AlertException>(false, e);
+                return new Tuple2<>(false, e);
             }
-        }).reduce(new Tuple2<Boolean, AlertException>(true, null),
-                (tp1, tp2) -> {
-                    boolean alertResult = tp1.f0 & tp2.f0;
-                    if (tp1.f1 == null && tp2.f1 == null) {
-                        return new Tuple2<>(tp1.f0 & tp2.f0, null);
-                    }
-                    if (tp1.f1 != null && tp2.f1 != null) {
-                        // 合并多个异常的 message 信息,只保留第一个异常的详细内容
-                        AlertException alertException = new AlertException(tp1.f1.getMessage() + "\n" + tp2.f1.getMessage(), tp1.f1);
-                        return new Tuple2<>(alertResult, alertException);
-                    }
-                    return new Tuple2<>(alertResult, tp1.f1 == null ? tp2.f1 : tp1.f1);
-                });
+        }).reduce(new Tuple2<>(true, null), (tp1, tp2) -> {
+            boolean alertResult = tp1.f0 & tp2.f0;
+            if (tp1.f1 == null && tp2.f1 == null) {
+                return new Tuple2<>(tp1.f0 & tp2.f0, null);
+            }
+            if (tp1.f1 != null && tp2.f1 != null) {
+                // 合并多个异常的 message 信息,只保留第一个异常的详细内容
+                AlertException alertException = new AlertException(tp1.f1.getMessage() + "\n" + tp2.f1.getMessage(), tp1.f1);
+                return new Tuple2<>(alertResult, alertException);
+            }
+            return new Tuple2<>(alertResult, tp1.f1 == null ? tp2.f1 : tp1.f1);
+        });
         if (reduce.f1 != null) {
             throw reduce.f1;
         }

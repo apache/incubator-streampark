@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 import com.streamxhub.streamx.console.core.entity.ResponseResult;
 import com.streamxhub.streamx.console.core.service.FlinkClusterService;
@@ -51,26 +51,26 @@ public class FlinkClusterController {
     @PostMapping("list")
     public RestResponse list() {
         List<FlinkCluster> flinkClusters = flinkClusterService.list();
-        return RestResponse.create().data(flinkClusters);
+        return RestResponse.success(flinkClusters);
     }
 
     @PostMapping("activeUrl")
     public RestResponse activeUrl(Long id) throws MalformedURLException {
         FlinkCluster cluster = flinkClusterService.getById(id);
-        return RestResponse.create().data(cluster.getActiveAddress().toURL());
+        return RestResponse.success(cluster.getActiveAddress().toURL());
     }
 
     @PostMapping("check")
     public RestResponse check(FlinkCluster cluster) {
         String checkResult = flinkClusterService.check(cluster);
-        return RestResponse.create().data(checkResult);
+        return RestResponse.success(checkResult);
     }
 
     @PostMapping("create")
     @RequiresPermissions("cluster:create")
     public RestResponse create(FlinkCluster cluster) {
         ResponseResult result = flinkClusterService.create(cluster);
-        return RestResponse.create().data(result);
+        return RestResponse.success(result);
     }
 
     @PostMapping("update")
@@ -93,33 +93,33 @@ public class FlinkClusterController {
         flinkCluster.setResolveOrder(cluster.getResolveOrder());
         flinkCluster.setServiceAccount(cluster.getServiceAccount());
         flinkCluster.setDescription(cluster.getDescription());
-        return RestResponse.create().data(flinkClusterService.update(flinkCluster));
+        return RestResponse.success(flinkClusterService.update(flinkCluster));
     }
 
     @PostMapping("get")
-    public RestResponse get(Long id) throws ServiceException {
+    public RestResponse get(Long id) throws InternalException {
         FlinkCluster cluster = flinkClusterService.getById(id);
-        return RestResponse.create().data(cluster);
+        return RestResponse.success(cluster);
     }
 
     @PostMapping("start")
     public RestResponse start(FlinkCluster flinkCluster) {
         FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
         ResponseResult start = flinkClusterService.start(cluster);
-        return RestResponse.create().data(start);
+        return RestResponse.success(start);
     }
 
     @PostMapping("shutdown")
     public RestResponse shutdown(FlinkCluster flinkCluster) {
         FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
         ResponseResult shutdown = flinkClusterService.shutdown(cluster);
-        return RestResponse.create().data(shutdown);
+        return RestResponse.success(shutdown);
     }
 
     @PostMapping("delete")
     public RestResponse delete(FlinkCluster flinkCluster) {
         FlinkCluster cluster = flinkClusterService.getById(flinkCluster.getId());
         ResponseResult delete = flinkClusterService.delete(cluster);
-        return RestResponse.create().data(delete);
+        return RestResponse.success(delete);
     }
 }

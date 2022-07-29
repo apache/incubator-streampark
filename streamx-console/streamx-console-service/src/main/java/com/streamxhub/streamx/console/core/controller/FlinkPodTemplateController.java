@@ -50,12 +50,12 @@ public class FlinkPodTemplateController {
         // hostname -> ipv4
         Map<String, String> hostMap = HostsUtils.getSystemHostsAsJava(true);
         List<String> friendlyHosts = hostMap.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).collect(Collectors.toList());
-        return RestResponse.create().data(friendlyHosts);
+        return RestResponse.success(friendlyHosts);
     }
 
     @PostMapping("init")
     public RestResponse getInitContent() {
-        return RestResponse.create().data(PodTemplateParser.getInitPodTemplateContent());
+        return RestResponse.success(PodTemplateParser.getInitPodTemplateContent());
     }
 
     /**
@@ -65,7 +65,7 @@ public class FlinkPodTemplateController {
     public RestResponse completeHostAlias(String hosts, String podTemplate) {
         Map<String, String> hostMap = covertHostsParamToMap(hosts);
         String completedPodTemplate = PodTemplateParser.completeHostAliasSpec(hostMap, podTemplate);
-        return RestResponse.create().data(completedPodTemplate);
+        return RestResponse.success(completedPodTemplate);
     }
 
     private Map<String, String> covertHostsParamToMap(String hosts) {
@@ -85,7 +85,7 @@ public class FlinkPodTemplateController {
     public RestResponse extractHostAlias(String podTemplate) {
         Map<String, String> hosts = PodTemplateParser.extractHostAliasMap(podTemplate);
         List<String> friendlyHosts = hosts.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).collect(Collectors.toList());
-        return RestResponse.create().data(friendlyHosts);
+        return RestResponse.success(friendlyHosts);
     }
 
     /**
@@ -95,7 +95,7 @@ public class FlinkPodTemplateController {
     public RestResponse previewHostAlias(String hosts) {
         Map<String, String> hostMap = covertHostsParamToMap(hosts);
         String podTemplate = PodTemplateParser.previewHostAliasSpec(hostMap);
-        return RestResponse.create().data(podTemplate);
+        return RestResponse.success(podTemplate);
     }
 
 }
