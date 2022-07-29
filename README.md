@@ -124,7 +124,7 @@ respect,Thanks to [Apache Flink](http://flink.apache.org) for creating a great p
 
 ### 🚀 Quick Start
 
-click [Document](http://www.streamxhub.com/zh-CN/docs/intro/) for more information
+click [Document](https://www.streamxhub.com/docs/intro) for more information
 
 
 ## 💋 our users
