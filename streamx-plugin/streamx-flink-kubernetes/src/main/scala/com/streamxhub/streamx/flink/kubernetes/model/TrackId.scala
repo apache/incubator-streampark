@@ -19,8 +19,6 @@
 
 package com.streamxhub.streamx.flink.kubernetes.model
 
-import java.util.Objects
-
 import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 
@@ -36,19 +34,17 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
                    appId: Long,
                    jobId: String) {
 
-  /**
-   * check whether fields of trackId are legal
-   */
   def isLegal: Boolean = {
-    Try(namespace.nonEmpty).getOrElse(false) &&
-      Try(clusterId.nonEmpty).getOrElse(false) &&
-      Try(jobId.nonEmpty).getOrElse(false)
+    executeMode match {
+      case FlinkK8sExecuteMode.APPLICATION =>
+        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false)
+      case FlinkK8sExecuteMode.SESSION =>
+        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false) && Try(jobId.nonEmpty).getOrElse(false)
+      case _ => false
+    }
   }
 
-  /**
-   * check whether fields of trackId are no legal
-   */
-  def nonLegal: Boolean = !isLegal
+  def isActive: Boolean = isLegal && Try(jobId.nonEmpty).getOrElse(false)
 
   /**
    * covert to ClusterKey

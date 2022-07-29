@@ -69,7 +69,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
   }
 
   def trackingJob(trackId: TrackId): Unit = {
-    if (!Try(trackId.nonLegal).getOrElse(true)) {
+    if (trackId.isLegal) {
       trackController.trackIds.set(trackId)
     }
   }
@@ -93,7 +93,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
   override def getAllTrackingIds: Set[TrackId] = trackController.collectAllTrackIds()
 
   override def checkIsInRemoteCluster(trackId: TrackId): Boolean = {
-    if (Try(trackId.nonLegal).getOrElse(true)) false; else {
+    if (!trackId.isLegal) false; else {
       val nonLost = (state: FlinkJobState.Value) => state != FlinkJobState.LOST || state != FlinkJobState.SILENT
       trackId.executeMode match {
         case SESSION =>
@@ -126,7 +126,7 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
      */
     // noinspection UnstableApiUsage
     @Subscribe def subscribeFlinkJobStateEvent(event: FlinkJobStateEvent): Unit = {
-      if (!Try(event.trackId.nonLegal).getOrElse(true)) {
+      if (event.trackId.isLegal) {
         val latest = trackController.jobStatuses.get(event.trackId)
         // determine if the current event should be ignored
         val shouldIgnore: Boolean = (latest, event) match {

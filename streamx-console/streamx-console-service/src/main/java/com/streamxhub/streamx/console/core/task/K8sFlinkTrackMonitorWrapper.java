@@ -123,7 +123,7 @@ public class K8sFlinkTrackMonitorWrapper {
         }
         // correct corrupted data
         List<Application> correctApps = k8sApplication.stream()
-            .filter(app -> Bridge.toTrackId(app).nonLegal())
+            .filter(app -> !Bridge.toTrackId(app).isLegal())
             .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(correctApps)) {
             applicationService.saveOrUpdateBatch(correctApps);
