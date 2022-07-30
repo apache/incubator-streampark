@@ -21,7 +21,6 @@ package com.streamxhub.streamx.flink.kubernetes.watcher
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
-import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState._
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model._
@@ -154,10 +153,10 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
     val rsMap = touchSessionAllJob(clusterId, namespace, appId).toMap
     val id = TrackId.onSession(namespace, clusterId, appId, jobId)
-    val jobState = rsMap.get(id).filter(_.jobState != SILENT).getOrElse {
+    val jobState = rsMap.get(id).filter(_.jobState != FlinkJobState.SILENT).getOrElse {
       val preCache = trackController.jobStatuses.get(id)
       val state = inferSilentOrLostFromPreCache(preCache)
-      val nonFirstSilent = state == SILENT && preCache != null && preCache.jobState == SILENT
+      val nonFirstSilent = state == FlinkJobState.SILENT && preCache != null && preCache.jobState == FlinkJobState.SILENT
       if (nonFirstSilent) {
         JobStatusCV(jobState = state, jobId = id.jobId, pollEmitTime = preCache.pollEmitTime, pollAckTime = preCache.pollAckTime)
       } else {
@@ -254,7 +253,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     // infer from k8s deployment and event
     val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
     val jobState = {
-      if (trackController.canceling.has(trackId)) CANCELED else {
+      if (trackController.canceling.has(trackId)) FlinkJobState.CANCELED else {
         // whether deployment exists on kubernetes cluster
         val isDeployExists = KubernetesRetriever.isDeploymentExists(trackId.clusterId, trackId.namespace)
         if (isDeployExists) {
@@ -285,7 +284,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       pollAckTime = System.currentTimeMillis
     )
 
-    if (jobState == SILENT && latest != null && latest.jobState == SILENT) {
+    if (jobState == FlinkJobState.SILENT && latest != null && latest.jobState == FlinkJobState.SILENT) {
       Some(jobStatusCV.copy(pollEmitTime = latest.pollEmitTime, pollAckTime = latest.pollAckTime))
     } else {
       Some(jobStatusCV)
@@ -293,17 +292,17 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   }
 
   private[this] def inferSilentOrLostFromPreCache(preCache: JobStatusCV) = preCache match {
-    case preCache if preCache == null => SILENT
-    case preCache if preCache.jobState == SILENT &&
-      System.currentTimeMillis() - preCache.pollAckTime >= conf.silentStateJobKeepTrackingSec * 1000 => LOST
-    case _ => SILENT
+    case preCache if preCache == null => FlinkJobState.SILENT
+    case preCache if preCache.jobState == FlinkJobState.SILENT &&
+      System.currentTimeMillis() - preCache.pollAckTime >= conf.silentStateJobKeepTrackingSec * 1000 => FlinkJobState.LOST
+    case _ => FlinkJobState.SILENT
   }
 
 }
 
 object FlinkJobStatusWatcher {
 
-  private val effectEndStates: Seq[Value] = FlinkJobState.endingStates.filter(_ != LOST)
+  private val effectEndStates: Seq[FlinkJobState.Value] = FlinkJobState.endingStates.filter(_ != FlinkJobState.LOST)
 
   /**
    * infer flink job state before persistence.
@@ -312,13 +311,13 @@ object FlinkJobStatusWatcher {
    * @param current  current flink job state
    * @param previous previous flink job state from persistent storage
    */
-  def inferFlinkJobStateFromPersist(current: Value, previous: Value): Value = {
+  def inferFlinkJobStateFromPersist(current: FlinkJobState.Value, previous: FlinkJobState.Value): FlinkJobState.Value = {
     current match {
-      case LOST => if (effectEndStates.contains(current)) previous else TERMINATED
-      case POS_TERMINATED | TERMINATED => previous match {
-        case CANCELLING => CANCELED
-        case FAILING => FAILED
-        case _ => if (current == POS_TERMINATED) FINISHED else TERMINATED
+      case FlinkJobState.LOST => if (effectEndStates.contains(current)) previous else FlinkJobState.TERMINATED
+      case FlinkJobState.POS_TERMINATED | FlinkJobState.TERMINATED => previous match {
+        case FlinkJobState.CANCELLING => FlinkJobState.CANCELED
+        case FlinkJobState.FAILING => FlinkJobState.FAILED
+        case _ => if (current == FlinkJobState.POS_TERMINATED) FlinkJobState.FINISHED else FlinkJobState.TERMINATED
       }
       case _ => current
     }
