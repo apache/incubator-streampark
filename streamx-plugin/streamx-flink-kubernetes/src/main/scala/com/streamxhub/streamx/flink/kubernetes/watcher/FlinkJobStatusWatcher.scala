@@ -251,55 +251,44 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   private def inferApplicationFlinkJobStateFromK8sEvent(@Nonnull trackId: TrackId)
                                                        (implicit pollEmitTime: Long): Option[JobStatusCV] = {
 
-    // whether deployment exists on kubernetes cluster
-    val isDeployExists = KubernetesRetriever.isDeploymentExists(trackId.clusterId, trackId.namespace)
-    // relevant deployment event
-
     // infer from k8s deployment and event
     val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
-
     val jobState = {
-      if (isDeployExists) {
-        FlinkJobState.K8S_INITIALIZING
-      } else {
-        val deployEvent = trackController.k8sDeploymentEvents.get(K8sEventKey(trackId.namespace, trackId.clusterId))
-        if (trackController.canceling.has(trackId)) {
-          POS_TERMINATED
-        } else if (deployEvent != null) {
-          // no exists k8s deployment, infer from last deployment event
-          val isDelete = deployEvent.action == Action.DELETED
-          val isDeployAvailable = deployEvent.event.getStatus.getConditions.exists(_.getReason == "MinimumReplicasAvailable")
-          (isDelete, isDeployAvailable) match {
-            case (true, true) => FlinkJobState.POS_TERMINATED // maybe FINISHED or CANCEL
-            case (true, false) => FlinkJobState.FAILED
-            case _ => FlinkJobState.K8S_INITIALIZING
-          }
+      if (trackController.canceling.has(trackId)) CANCELED else {
+        // whether deployment exists on kubernetes cluster
+        val isDeployExists = KubernetesRetriever.isDeploymentExists(trackId.clusterId, trackId.namespace)
+        if (isDeployExists) {
+          FlinkJobState.K8S_INITIALIZING
         } else {
-          // determine if the state should be SILENT or LOST
-          inferSilentOrLostFromPreCache(latest)
+          val deployEvent = trackController.k8sDeploymentEvents.get(K8sEventKey(trackId.namespace, trackId.clusterId))
+          if (deployEvent != null) {
+            // no exists k8s deployment, infer from last deployment event
+            val isDelete = deployEvent.action == Action.DELETED
+            val isDeployAvailable = deployEvent.event.getStatus.getConditions.exists(_.getReason == "MinimumReplicasAvailable")
+            (isDelete, isDeployAvailable) match {
+              case (true, true) => FlinkJobState.POS_TERMINATED // maybe FINISHED or CANCEL
+              case (true, false) => FlinkJobState.FAILED
+              case _ => FlinkJobState.K8S_INITIALIZING
+            }
+          } else {
+            // determine if the state should be SILENT or LOST
+            inferSilentOrLostFromPreCache(latest)
+          }
         }
       }
     }
 
-    val nonFirstSilent = jobState == SILENT && latest != null && latest.jobState == SILENT
-    if (nonFirstSilent) {
-      Some(
-        JobStatusCV(
-          jobState = jobState,
-          jobId = null,
-          pollEmitTime = latest.pollEmitTime,
-          pollAckTime = latest.pollAckTime
-        )
-      )
+    val jobStatusCV = JobStatusCV(
+      jobState = jobState,
+      jobId = null,
+      pollEmitTime = pollEmitTime,
+      pollAckTime = System.currentTimeMillis
+    )
+
+    if (jobState == SILENT && latest != null && latest.jobState == SILENT) {
+      Some(jobStatusCV.copy(pollEmitTime = latest.pollEmitTime, pollAckTime = latest.pollAckTime))
     } else {
-      Some(
-        JobStatusCV(
-          jobState = jobState,
-          jobId = null,
-          pollEmitTime = pollEmitTime,
-          pollAckTime = System.currentTimeMillis
-        )
-      )
+      Some(jobStatusCV)
     }
   }
 
@@ -320,18 +309,18 @@ object FlinkJobStatusWatcher {
    * infer flink job state before persistence.
    * so drama, so sad.
    *
-   * @param curState current flink job state
-   * @param preState previous flink job state from persistent storage
+   * @param current  current flink job state
+   * @param previous previous flink job state from persistent storage
    */
-  def inferFlinkJobStateFromPersist(curState: Value, preState: Value): Value = {
-    curState match {
-      case LOST => if (effectEndStates.contains(curState)) preState else TERMINATED
-      case POS_TERMINATED | TERMINATED => preState match {
+  def inferFlinkJobStateFromPersist(current: Value, previous: Value): Value = {
+    current match {
+      case LOST => if (effectEndStates.contains(current)) previous else TERMINATED
+      case POS_TERMINATED | TERMINATED => previous match {
         case CANCELLING => CANCELED
         case FAILING => FAILED
-        case _ => if (curState == POS_TERMINATED) FINISHED else TERMINATED
+        case _ => if (current == POS_TERMINATED) FINISHED else TERMINATED
       }
-      case _ => curState
+      case _ => current
     }
   }
 
