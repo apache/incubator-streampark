@@ -28,8 +28,8 @@ import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.configuration.ExecutionOptions
 import org.apache.flink.sql.parser.validate.FlinkSqlConformance
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
-import org.apache.flink.table.api.{SqlDialect, TableConfig}
 import org.apache.flink.table.api.config.TableConfigOptions
+import org.apache.flink.table.api.{SqlDialect, TableConfig}
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 
 import scala.util.{Failure, Try}
@@ -68,7 +68,6 @@ object FlinkSqlValidator extends Logger {
   def verifySql(sql: String): FlinkSqlValidationResult = {
     val sqlCommands = SqlCommandParser.parseSQL(sql, r => return r)
     var sqlDialect = "default"
-    var hasInsert = false
     for (call <- sqlCommands) {
       val args = call.operands.head
       lazy val command = call.command
@@ -90,9 +89,6 @@ object FlinkSqlValidator extends Logger {
         case BEGIN_STATEMENT_SET | END_STATEMENT_SET =>
           logWarn(s"SQL Client Syntax: ${call.command.name} ")
         case _ =>
-          if (command == INSERT) {
-            hasInsert = true
-          }
           Try {
             val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_CALCITE_PARSER_CLASS))
             sqlDialect.toUpperCase() match {
@@ -136,18 +132,7 @@ object FlinkSqlValidator extends Logger {
           }
       }
     }
-
-    if (hasInsert) {
-      FlinkSqlValidationResult()
-    } else {
-      FlinkSqlValidationResult(
-        success = false,
-        failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
-        lineStart = sqlCommands.head.lineStart,
-        lineEnd = sqlCommands.last.lineEnd,
-        exception = "No 'INSERT' statement to trigger the execution of the Flink job."
-      )
-    }
+    FlinkSqlValidationResult()
   }
 
 }

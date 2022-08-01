@@ -145,6 +145,8 @@ object FlinkSqlExecutor extends Logger {
         case SELECT =>
           logError("StreamX dose not support 'SELECT' statement now!")
           throw new RuntimeException("StreamX dose not support 'select' statement now!")
+
+        // other syntax, don't need specific handle
         case _ => try {
           lock.lock()
           val result = context.executeSql(x.originSql)
@@ -157,6 +159,7 @@ object FlinkSqlExecutor extends Logger {
       }
     })
 
+    // Insert statements are not required
     if (insertArray.nonEmpty) {
       val statementSet = context.createStatementSet()
       insertArray.foreach(statementSet.addInsertSql)
@@ -168,9 +171,6 @@ object FlinkSqlExecutor extends Logger {
           }
         case _ =>
       }
-    } else {
-      logError("No 'INSERT' statement to trigger the execution of the Flink job.")
-      throw new RuntimeException("No 'INSERT' statement to trigger the execution of the Flink job.")
     }
 
     logInfo(s"\n\n\n==============flinkSql==============\n\n $flinkSql\n\n============================\n\n\n")
