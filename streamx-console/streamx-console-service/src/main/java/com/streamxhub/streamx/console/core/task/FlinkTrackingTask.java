@@ -490,7 +490,6 @@ public class FlinkTrackingTask {
             } else {
                 try {
                     String state = appInfo.getApp().getState();
-                    log.info("appid:" + appInfo.getApp().getId() + ",state:" + appInfo.getApp().getState() + ",final:" + appInfo.getApp().getFinalStatus());
                     FlinkAppState flinkAppState = FlinkAppState.of(state);
                     if (FlinkAppState.OTHER.equals(flinkAppState)) {
                         return;
@@ -507,24 +506,26 @@ public class FlinkTrackingTask {
                     if (FlinkAppState.SUCCEEDED.equals(flinkAppState)) {
                         flinkAppState = FlinkAppState.FINISHED;
                     }
+                    //使用finalStatus判断Job状态
+                    if (flinkAppState.equals(FlinkAppState.FINISHED)) {
+                        String finalStatus = appInfo.getApp().getFinalStatus();
+                        FlinkFinalStatus flinkFinalStatus = FlinkFinalStatus.of(finalStatus);
+                        if (flinkFinalStatus.equals(FlinkFinalStatus.FAILED)) {
+                            flinkAppState = FlinkAppState.FAILED;
+                        } else if (flinkFinalStatus.equals(FlinkFinalStatus.KILLED)) {
+                            flinkAppState = FlinkAppState.CANCELED;
+                        }
+                    }
                     application.setState(flinkAppState.getValue());
                     //能运行到这一步,说明到YARN REST api中成功查询到信息
                     cleanOptioning(optionState, application.getId());
                     this.persistentAndClean(application);
 
-                    if (flinkAppState.equals(FlinkAppState.FAILED) || flinkAppState.equals(FlinkAppState.LOST)) {
+                    if (flinkAppState.equals(FlinkAppState.FAILED) || flinkAppState.equals(FlinkAppState.LOST) || flinkAppState.equals(FlinkAppState.CANCELED)) {
                         alertService.alert(application, flinkAppState);
                         if (flinkAppState.equals(FlinkAppState.FAILED)) {
                             applicationService.start(application, true);
                         }
-                    }
-                    String finalStatus = appInfo.getApp().getFinalStatus();
-                    FlinkFinalStatus flinkFinalStatus = FlinkFinalStatus.of(finalStatus);
-                    if (flinkFinalStatus.equals(FlinkFinalStatus.OTHER)) {
-                        return;
-                    }
-                    if (flinkFinalStatus.equals(FlinkFinalStatus.FAILED) || flinkFinalStatus.equals(FlinkFinalStatus.KILLED)) {
-                        alertService.alert(application, FlinkAppState.FAILED);
                     }
                 } catch (Exception e) {
                     if (!ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
