@@ -561,7 +561,7 @@
                 <template v-if="appBuildDetail.pipeline.pipeType === 2 && appBuildDetail.docker !== null">
                   <template
                     v-if="item.seq === 5 && appBuildDetail.docker.pull !== null && appBuildDetail.docker.pull.layers !== null">
-                    <template v-for="layer in appBuildDetail.docker.pull.layers">
+                    <template v-for="(layer,index) in appBuildDetail.docker.pull.layers">
                       <a-row :key="layer.layerId" style="margin-bottom: 5px;">
                         <a-space size="small">
                           <a-icon type="arrow-right"/>
@@ -574,7 +574,7 @@
                         </a-space>
                       </a-row>
                       <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                        <a-row :key="layer.layerId" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
+                        <a-row :key="index" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
                           <a-progress
                             :percent="layer.percent"
                             status="active"/>
@@ -600,7 +600,7 @@
 
                   <template
                     v-else-if="item.seq === 7 && appBuildDetail.docker.push !== null && appBuildDetail.docker.push.layers !== null">
-                    <template v-for="layer in appBuildDetail.docker.push.layers">
+                    <template v-for="(layer,index) in appBuildDetail.docker.push.layers">
                       <a-row :key="layer.layerId" style="margin-bottom: 5px;">
                         <a-space size="small">
                           <a-icon type="arrow-right"/>
@@ -613,7 +613,7 @@
                         </a-space>
                       </a-row>
                       <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                        <a-row :key="layer.layerId" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
+                        <a-row :key="index" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
                           <a-progress
                             :percent="layer.percent"
                             status="active"/>
