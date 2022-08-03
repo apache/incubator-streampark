@@ -62,6 +62,8 @@ object HadoopUtils extends Logger {
 
   private lazy val hadoopUserName: String = InternalConfigHolder.get(CommonConfig.STREAMX_HADOOP_USER_NAME)
 
+  private[this] lazy val debugKerberos = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_DEBUG, "false")
+
   private[this] lazy val configurationCache: util.Map[String, Configuration] = new ConcurrentHashMap[String, Configuration]()
 
   private[this] lazy val kerberosConf: Map[String, String] = SystemPropertyUtils.get("app.home", null) match {
@@ -211,8 +213,8 @@ object HadoopUtils extends Logger {
       System.setProperty("java.security.krb5.conf", krb5)
       System.setProperty("java.security.krb5.conf.path", krb5)
     }
-    System.setProperty("sun.security.spnego.debug", "true")
-    System.setProperty("sun.security.krb5.debug", "true")
+    System.setProperty("sun.security.spnego.debug", debugKerberos)
+    System.setProperty("sun.security.krb5.debug", debugKerberos)
     hadoopConf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
     Try {
       UserGroupInformation.setConfiguration(hadoopConf)

@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service.alert.impl;
 
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
@@ -71,7 +71,7 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
     }
 
     @Override
-    public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate) {
+    public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate) throws AlertException {
         LarkParams larkParams = alertConfig.getLarkParams();
         if (larkParams.getIsAtAll()) {
             alertTemplate.setAtAll(true);
@@ -94,13 +94,14 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
             body.put("card", cardMap);
             sendMessage(larkParams, body);
             return true;
+        } catch (AlertException alertException) {
+            throw alertException;
         } catch (Exception e) {
-            log.error("Failed send lark alert", e);
-            return false;
+            throw new AlertException("Failed send lark alert", e);
         }
     }
 
-    private LarkRobotResponse sendMessage(LarkParams params, Map<String, Object> body) throws ServiceException {
+    private void sendMessage(LarkParams params, Map<String, Object> body) throws AlertException {
         // get webhook url
         String url = getWebhook(params);
         HttpHeaders headers = new HttpHeaders();
@@ -111,18 +112,17 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
         try {
             robotResponse = alertRestTemplate.postForObject(url, entity, LarkRobotResponse.class);
         } catch (Exception e) {
-            log.error("Failed to request Lark robot alarm, url:{}", url, e);
-            throw new ServiceException(String.format("Failed to request Lark robot alert, url:%s", url), e);
+            log.error("Failed to request Lark robot alarm,\nurl:{}", url, e);
+            throw new AlertException(String.format("Failed to request Lark robot alert,\nurl:%s", url), e);
         }
 
         if (robotResponse == null) {
-            throw new ServiceException(String.format("Failed to request Lark robot alert, url:%s", url));
+            throw new AlertException(String.format("Failed to request Lark robot alert,\nurl:%s", url));
         }
         if (robotResponse.getStatusCode() == null || robotResponse.getStatusCode() != 0) {
-            throw new ServiceException(String.format("Failed to request Lark robot alert, url:%s, errorCode:%d, errorMsg:%s",
+            throw new AlertException(String.format("Failed to request Lark robot alert,\nurl:%s,\nerrorCode:%d,\nerrorMsg:%s",
                     url, robotResponse.getCode(), robotResponse.getMsg()));
         }
-        return robotResponse;
     }
 
     /**
@@ -148,7 +148,7 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
      * @param timestamp current timestamp
      * @return Signature information calculated from timestamp
      */
-    private String getSign(String secret, Long timestamp) {
+    private String getSign(String secret, Long timestamp) throws AlertException {
         try {
             String stringToSign = timestamp + "\n" + secret;
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -160,8 +160,7 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
             }
             return sign;
         } catch (Exception e) {
-            log.error("Calculate the signature failed.", e);
-            return null;
+            throw new AlertException("Calculate the signature failed.", e);
         }
     }
 }

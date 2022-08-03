@@ -24,6 +24,7 @@
         <result column="MAIN_CLASS" jdbcType="VARCHAR" property="mainClass"/>
         <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
         <result column="USER_ID" jdbcType="BIGINT" property="userId"/>
+        <result column="TEAM_ID" jdbcType="BIGINT" property="teamId"/>
         <result column="START_TIME" jdbcType="DATE" property="startTime"/>
         <result column="END_TIME" jdbcType="DATE" property="endTime"/>
         <result column="DURATION" jdbcType="BIGINT" property="duration"/>
@@ -58,13 +59,15 @@
     </resultMap>
 
     <select id="page" resultType="application" parameterType="application">
-        SELECT t.*,p.name as projectName,u.username,case when trim(u.nick_name) = '' then u.username else u.nick_name end as nickname,v.version as flinkVersion FROM t_flink_app t
+        SELECT t.*,p.name as projectName,u.username,case when trim(u.nick_name) = '' then u.username else u.nick_name end as nickname,v.version as flinkVersion,f.team_name as teamName FROM t_flink_app t
         inner join t_user u
         on t.user_id = u.user_id
         left join t_flink_env v
         on t.version_id = v.id
         left join t_flink_project p
         on t.project_id = p.id
+        left join t_team f
+        on t.team_id = f.team_id
         <where>
             <if test="application.jobType != null and application.jobType != ''">
                 AND t.job_type = #{application.jobType}
@@ -90,9 +93,24 @@
             <if test="application.state != null and application.state != ''">
                 AND t.state = #{application.state}
             </if>
+
+            <if test="application.userId != null and application.userId != ''">
+                AND t.user_id = #{application.userId}
+            </if>
+
+            <if test="application.teamId != null and application.teamId != ''">
+                AND t.team_id = #{application.teamId}
+            </if>
             <if test="application.stateArray != null and application.stateArray.length>0">
                 AND t.state IN
                 <foreach item="item" index="index" collection="application.stateArray" open="("  close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="application.teamIdList != null and application.teamIdList.size>0">
+                AND t.team_id IN
+                <foreach item="item" index="index" collection="application.teamIdList" open="("  close=")" separator=",">
                     #{item}
                 </foreach>
             </if>
@@ -104,6 +122,10 @@
         FROM t_flink_app t left join t_flink_project p
         on t.project_id = p.id
         where t.id = #{application.id}
+    </select>
+    <select id="getCountByTeam" resultType="java.lang.Long">
+        select count(1) as count
+        from t_flink_app where team_id=#{teamId}
     </select>
 
     <update id="updateTracking" parameterType="application">

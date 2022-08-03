@@ -40,6 +40,13 @@ public class RestResponse extends HashMap<String, Object> {
         return resp;
     }
 
+    public static RestResponse success() {
+        RestResponse resp = new RestResponse();
+        resp.put("status", STATUS_SUCCESS);
+        resp.put("code", ResponseCode.CODE_SUCCESS);
+        return resp;
+    }
+
     public static RestResponse fail(String message, Long code) {
         RestResponse resp = new RestResponse();
         resp.put("status", STATUS_FAIL);
@@ -47,10 +54,6 @@ public class RestResponse extends HashMap<String, Object> {
         resp.put("code", code);
         resp.put("data", null);
         return resp;
-    }
-
-    public static RestResponse create() {
-        return new RestResponse();
     }
 
     public RestResponse message(String message) {

@@ -20,48 +20,48 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.flink.kubernetes.event.BuildInEvent
-import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrkId}
+import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrackId}
 
 /**
- * AOP for FlinkTrkMonitor used to trigger the run behavior.
+ * AOP for FlinkTrackMonitor used to trigger the run behavior.
  * What more, this AOP has the ability to automatically recover
- * the FlinkTrkMonitor's internal FlinkWatcher.
+ * the FlinkTrackMonitor's internal FlinkWatcher.
  *
  * author:Al-assad
  */
-trait K8sFlinkTrkMonitorLazyStartAop extends K8sFlinkTrkMonitor {
+trait K8sFlinkTrackMonitorLazyStartAop extends K8sFlinkTrackMonitor {
 
-  abstract override def trackingJob(trkId: TrkId): Unit = {
+  abstract override def trackingJob(trackId: TrackId): Unit = {
     start()
-    super.trackingJob(trkId)
+    super.trackingJob(trackId)
   }
 
-  abstract override def unTrackingJob(trkId: TrkId): Unit = {
+  abstract override def unTrackingJob(trackId: TrackId): Unit = {
     start()
-    super.unTrackingJob(trkId)
+    super.unTrackingJob(trackId)
   }
 
-  abstract override def isInTracking(trkId: TrkId): Boolean = {
+  abstract override def isInTracking(trackId: TrackId): Boolean = {
     start()
-    super.isInTracking(trkId)
+    super.isInTracking(trackId)
   }
 
-  abstract override def getAllTrackingIds: Set[TrkId] = {
+  abstract override def getAllTrackingIds: Set[TrackId] = {
     start()
     super.getAllTrackingIds
   }
 
-  abstract override def getJobStatus(trkId: TrkId): Option[JobStatusCV] = {
+  abstract override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = {
     start()
-    super.getJobStatus(trkId)
+    super.getJobStatus(trackId)
   }
 
-  abstract override def getJobStatus(trkIds: Set[TrkId]): Map[TrkId, JobStatusCV] = {
+  abstract override def getJobStatus(trackIds: Set[TrackId]): Map[TrackId, JobStatusCV] = {
     start()
-    super.getJobStatus(trkIds)
+    super.getJobStatus(trackIds)
   }
 
-  abstract override def getAllJobStatus: Map[TrkId, JobStatusCV] = {
+  abstract override def getAllJobStatus: Map[TrackId, JobStatusCV] = {
     start()
     super.getAllJobStatus
   }
@@ -76,9 +76,9 @@ trait K8sFlinkTrkMonitorLazyStartAop extends K8sFlinkTrkMonitor {
     super.getClusterMetrics(clusterKey)
   }
 
-  abstract override def checkIsInRemoteCluster(trkId: TrkId): Boolean = {
+  abstract override def checkIsInRemoteCluster(trackId: TrackId): Boolean = {
     start()
-    super.checkIsInRemoteCluster(trkId)
+    super.checkIsInRemoteCluster(trackId)
   }
 
   abstract override def postEvent(event: BuildInEvent, sync: Boolean): Unit = {

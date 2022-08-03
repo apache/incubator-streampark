@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
+import java.util.concurrent.atomic.AtomicBoolean
 import scala.language.implicitConversions
 
 /**
@@ -26,28 +27,53 @@ import scala.language.implicitConversions
  */
 trait FlinkWatcher extends AutoCloseable {
 
+  private[this] val started: AtomicBoolean = new AtomicBoolean(false)
+
   /**
    * Start watcher process.
    * This method should be a thread-safe implementation of
-   * light locking and can be called idempotently.
+   * light locking and can be called idempotent.
    */
-  def start(): Unit
+  def start(): Unit = this.synchronized {
+    if (!started.getAndSet(true)) {
+      this.doStart()
+    }
+  }
 
   /**
    * Stop watcher process.
    * This method should be a thread-safe implementation of
-   * light locking and can be called idempotently.
+   * light locking and can be called idempotent.
    */
-  def stop(): Unit
+  def stop(): Unit = this.synchronized {
+    if (started.getAndSet(false)) {
+      doStop()
+    }
+  }
+
+  override def close(): Unit = this.synchronized {
+    if (started.get()) {
+      this.doStop()
+    }
+    doClose()
+  }
 
   /**
    * This method should be a thread-safe implementation of
-   * light locking and can be called idempotently.
+   * light locking and can be called idempotent.
    */
-  def restart(): Unit = {
+  def restart(): Unit = this.synchronized {
     stop()
     start()
   }
+
+  def doStart(): Unit
+
+  def doStop(): Unit
+
+  def doClose(): Unit
+
+  def doWatch(): Unit
 
   /**
    * Runnable streamline syntax

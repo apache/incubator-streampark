@@ -21,7 +21,7 @@ package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.event.BuildInEvent
-import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrkId}
+import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrackId}
 import org.apache.flink.annotation.Public
 
 import javax.annotation.Nullable
@@ -36,8 +36,7 @@ import javax.annotation.Nullable
  * author:Al-assad
  */
 @Public
-trait K8sFlinkTrkMonitor extends Logger with AutoCloseable {
-
+trait K8sFlinkTrackMonitor extends Logger with AutoCloseable {
 
   /**
    * Register listener to EventBus.
@@ -67,43 +66,43 @@ trait K8sFlinkTrkMonitor extends Logger with AutoCloseable {
   /**
    * add tracking for the specified flink job which on k8s cluster.
    *
-   * @param trkId identifier of flink job
+   * @param trackId identifier of flink job
    */
-  def trackingJob(trkId: TrkId): Unit
+  def trackingJob(trackId: TrackId): Unit
 
   /**
    * remove tracking for the specified flink job which on k8s cluster.
    *
-   * @param trkId identifier of flink job
+   * @param trackId identifier of flink job
    */
-  def unTrackingJob(trkId: TrkId): Unit
+  def unTrackingJob(trackId: TrackId): Unit
 
   /**
    * check whether the specified flink job is in tracking.
    *
-   * @param trkId identifier of flink job
+   * @param trackId identifier of flink job
    */
-  def isInTracking(trkId: TrkId): Boolean
+  def isInTracking(trackId: TrackId): Boolean
 
   /**
-   * collect all TrkId which in tracking
+   * collect all TrackId which in tracking
    */
-  def getAllTrackingIds: Set[TrkId]
-
-  /**
-   * get flink status
-   */
-  def getJobStatus(trkId: TrkId): Option[JobStatusCV]
+  def getAllTrackingIds: Set[TrackId]
 
   /**
    * get flink status
    */
-  def getJobStatus(trkIds: Set[TrkId]): Map[TrkId, JobStatusCV]
+  def getJobStatus(trackId: TrackId): Option[JobStatusCV]
+
+  /**
+   * get flink status
+   */
+  def getJobStatus(trackIds: Set[TrackId]): Map[TrackId, JobStatusCV]
 
   /**
    * get all flink status in tracking result pool
    */
-  def getAllJobStatus: Map[TrkId, JobStatusCV]
+  def getAllJobStatus: Map[TrackId, JobStatusCV]
 
   /**
    * get flink cluster metrics aggregation
@@ -118,10 +117,10 @@ trait K8sFlinkTrkMonitor extends Logger with AutoCloseable {
   /**
    * check whether flink job is in remote kubernetes cluster
    */
-  def checkIsInRemoteCluster(trkId: TrkId): Boolean
+  def checkIsInRemoteCluster(trackId: TrackId): Boolean
 
   /**
-   * post event to build-in EventBus of K8sFlinkTrkMonitor
+   * post event to build-in EventBus of K8sFlinkTrackMonitor
    *
    * @param sync should this event be consumed sync or async
    */
@@ -130,30 +129,29 @@ trait K8sFlinkTrkMonitor extends Logger with AutoCloseable {
   /**
    * get flink web rest url of k8s cluster
    */
-  @Nullable def getRemoteRestUrl(trkId: TrkId): String
+  @Nullable def getRemoteRestUrl(trackId: TrackId): String
 
 }
 
 /**
- * Factory of FlinkTrkMonitor.
+ * Factory of FlinkTrackMonitor.
  * This is the entry point for external calls to the
  * streamx.flink.kubernetes package.
  */
-@Public
-object K8sFlinkTrkMonitorFactory {
+@Public object K8sFlinkTrackMonitorFactory {
 
   /**
-   * Create FlinkTRKMonitor instance.
+   * Create FlinkTrackMonitor instance.
    *
    * @param conf      onfiguration
    * @param lazyStart Whether monitor will performs delayed auto-start when necessary.
-   *                  In this case, there is no need to display the call to FlinkTrkMonitor.start(),
+   *                  In this case, there is no need to display the call to FlinkTrackMonitor.start(),
    *                  useless the monitor is expected to start immediately.
    */
-  def createInstance(conf: FlinkTrkConf = FlinkTrkConf.defaultConf, lazyStart: Boolean = false): K8sFlinkTrkMonitor =
+  def createInstance(conf: FlinkTrackConfig = FlinkTrackConfig.defaultConf, lazyStart: Boolean = false): K8sFlinkTrackMonitor =
     if (lazyStart) {
-      new DefaultK8sFlinkTrkMonitor(conf) with K8sFlinkTrkMonitorLazyStartAop
+      new DefaultK8sFlinkTrackMonitor(conf) with K8sFlinkTrackMonitorLazyStartAop
     } else {
-      new DefaultK8sFlinkTrkMonitor(conf)
+      new DefaultK8sFlinkTrackMonitor(conf)
     }
 }

@@ -62,7 +62,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     public RestResponse generateToken(Long userId, String expireTime, String description) {
         User user = userService.getById(userId);
         if (Objects.isNull(user)) {
-            return RestResponse.create().put("code", 0).message("user not available");
+            return RestResponse.success().put("code", 0).message("user not available");
         }
 
         if (StringUtils.isEmpty(expireTime)) {
@@ -82,7 +82,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         accessToken.setStatus(AccessToken.STATUS_ENABLE);
 
         this.save(accessToken);
-        return RestResponse.create().data(accessToken);
+        return RestResponse.success().data(accessToken);
     }
 
     @Override
@@ -113,11 +113,11 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     public RestResponse toggleToken(Long tokenId) {
         AccessToken tokenInfo = baseMapper.getById(tokenId);
         if (Objects.isNull(tokenInfo)) {
-            return RestResponse.fail("accessToken could not be found!", ResponseCode.CODE_ACCESS_TOKEN_LOCKED);
+            return RestResponse.fail("accessToken could not be found!", ResponseCode.CODE_API_FAIL);
         }
 
         if (User.STATUS_LOCK.equals(tokenInfo.getUserStatus())) {
-            return RestResponse.fail("user status is locked, could not operate this accessToken!", ResponseCode.CODE_ACCESS_TOKEN_LOCKED);
+            return RestResponse.fail("user status is locked, could not operate this accessToken!", ResponseCode.CODE_API_FAIL);
         }
 
         Integer status = tokenInfo.getStatus().equals(AccessToken.STATUS_ENABLE) ? AccessToken.STATUS_DISABLE : AccessToken.STATUS_ENABLE;

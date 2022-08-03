@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service.alert;
 
+import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 
@@ -32,6 +33,6 @@ public interface AlertNotifyService {
      *
      * @param template
      */
-    boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template);
+    boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template) throws AlertException;
 
 }

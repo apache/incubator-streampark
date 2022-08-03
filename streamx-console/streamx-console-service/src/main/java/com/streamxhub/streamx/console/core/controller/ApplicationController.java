@@ -24,7 +24,8 @@ import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.domain.ApiDocConstant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.ApplicationException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.core.annotation.ApiAccess;
 import com.streamxhub.streamx.console.core.entity.AppControl;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -85,28 +86,31 @@ public class ApplicationController {
     @RequiresPermissions("app:detail")
     public RestResponse get(Application app) {
         Application application = applicationService.getApp(app);
-        return RestResponse.create().data(application);
+        return RestResponse.success(application);
     }
 
     @ApiAccess
     @PostMapping("create")
     @RequiresPermissions("app:create")
     public RestResponse create(Application app) throws IOException {
+        if (app.getTeamId() == null || app.getTeamId() <= 0L) {
+            return RestResponse.success(false).message("请选择团队");
+        }
         boolean saved = applicationService.create(app);
-        return RestResponse.create().data(saved);
+        return RestResponse.success(saved);
     }
 
     @PostMapping("update")
     @RequiresPermissions("app:update")
     public RestResponse update(Application app) {
         applicationService.update(app);
-        return RestResponse.create().data(true);
+        return RestResponse.success(true);
     }
 
     @PostMapping("dashboard")
     public RestResponse dashboard() {
         Map<String, Serializable> map = applicationService.dashboard();
-        return RestResponse.create().data(map);
+        return RestResponse.success(map);
     }
 
     @ApiAccess
@@ -127,21 +131,21 @@ public class ApplicationController {
         }).peek(e -> e.setAppControl(new AppControl().setAllowBuild(e.getBuildStatus() == null || !PipelineStatus.running.getCode().equals(e.getBuildStatus())).setAllowStart(PipelineStatus.success.getCode().equals(e.getBuildStatus()) && !e.shouldBeTrack()).setAllowStop(e.isRunning()))).collect(Collectors.toList());
 
         applicationList.setRecords(appRecords);
-        return RestResponse.create().data(applicationList);
+        return RestResponse.success(applicationList);
     }
 
     @PostMapping("mapping")
     @RequiresPermissions("app:mapping")
     public RestResponse mapping(Application app) {
         boolean flag = applicationService.mapping(app);
-        return RestResponse.create().data(flag);
+        return RestResponse.success(flag);
     }
 
     @PostMapping("revoke")
     @RequiresPermissions("app:launch")
     public RestResponse revoke(Application app) throws Exception {
         applicationService.revoke(app);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @ApiAccess
@@ -159,9 +163,9 @@ public class ApplicationController {
             applicationService.checkEnv(app);
             applicationService.starting(app);
             applicationService.start(app, false);
-            return RestResponse.create().data(true);
+            return RestResponse.success(true);
         } catch (Exception e) {
-            return RestResponse.create().data(false).message(e.getMessage());
+            return RestResponse.success(false).message(e.getMessage());
         }
     }
 
@@ -176,7 +180,7 @@ public class ApplicationController {
     @RequiresPermissions("app:cancel")
     public RestResponse cancel(@ApiIgnore Application app) throws Exception {
         applicationService.cancel(app);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @ApiAccess
@@ -184,7 +188,7 @@ public class ApplicationController {
     @RequiresPermissions("app:clean")
     public RestResponse clean(Application app) {
         applicationService.clean(app);
-        return RestResponse.create().data(true);
+        return RestResponse.success(true);
     }
 
     /**
@@ -196,67 +200,67 @@ public class ApplicationController {
     @RequiresPermissions("app:cancel")
     public RestResponse forcedStop(Application app) {
         applicationService.forcedStop(app);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PostMapping("yarn")
     public RestResponse yarn() {
-        return RestResponse.create().data(YarnUtils.getRMWebAppProxyURL());
+        return RestResponse.success(YarnUtils.getRMWebAppProxyURL());
     }
 
     @PostMapping("name")
     public RestResponse yarnName(Application app) {
         String yarnName = applicationService.getYarnName(app);
-        return RestResponse.create().data(yarnName);
+        return RestResponse.success(yarnName);
     }
 
     @PostMapping("checkName")
     public RestResponse checkName(Application app) {
         AppExistsState exists = applicationService.checkExists(app);
-        return RestResponse.create().data(exists.get());
+        return RestResponse.success(exists.get());
     }
 
     @PostMapping("readConf")
     public RestResponse readConf(Application app) throws IOException {
         String config = applicationService.readConf(app);
-        return RestResponse.create().data(config);
+        return RestResponse.success(config);
     }
 
     @PostMapping("main")
     public RestResponse getMain(Application application) {
         String mainClass = applicationService.getMain(application);
-        return RestResponse.create().data(mainClass);
+        return RestResponse.success(mainClass);
     }
 
     @PostMapping("backups")
     public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
         IPage<ApplicationBackUp> backups = backUpService.page(backUp, request);
-        return RestResponse.create().data(backups);
+        return RestResponse.success(backups);
     }
 
     @PostMapping("rollback")
     public RestResponse rollback(ApplicationBackUp backUp) {
         //TODO: next version implementation
         //backUpService.rollback(backUp);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PostMapping("optionlog")
     public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.page(applicationLog, request);
-        return RestResponse.create().data(applicationList);
+        return RestResponse.success(applicationList);
     }
 
     @PostMapping("delete")
-    public RestResponse delete(Application app) throws ServiceException {
+    public RestResponse delete(Application app) throws InternalException {
         Boolean deleted = applicationService.delete(app);
-        return RestResponse.create().data(deleted);
+        return RestResponse.success(deleted);
     }
 
     @PostMapping("deletebak")
-    public RestResponse deleteBak(ApplicationBackUp backUp) throws ServiceException {
+    public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
         Boolean deleted = backUpService.delete(backUp.getId());
-        return RestResponse.create().data(deleted);
+        return RestResponse.success(deleted);
     }
 
     @PostMapping("checkjar")
@@ -264,23 +268,23 @@ public class ApplicationController {
         File file = new File(jar);
         try {
             Utils.checkJarFile(file.toURI().toURL());
-            return RestResponse.create().data(true);
+            return RestResponse.success(true);
         } catch (IOException e) {
-            return RestResponse.create().data(file).message(e.getLocalizedMessage());
+            return RestResponse.success(file).message(e.getLocalizedMessage());
         }
     }
 
     @PostMapping("upload")
     @RequiresPermissions("app:create")
-    public RestResponse upload(MultipartFile file) throws Exception {
+    public RestResponse upload(MultipartFile file) throws ApplicationException {
         String uploadPath = applicationService.upload(file);
-        return RestResponse.create().data(uploadPath);
+        return RestResponse.success(uploadPath);
     }
 
     @PostMapping("downlog")
     public RestResponse downlog(Long id) {
         applicationService.tailMvnDownloading(id);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PostMapping("verifySchema")
@@ -288,7 +292,7 @@ public class ApplicationController {
         final URI uri = URI.create(path);
         final String scheme = uri.getScheme();
         final String pathPart = uri.getPath();
-        RestResponse restResponse = RestResponse.create().data(true);
+        RestResponse restResponse = RestResponse.success(true);
         String error;
         if (scheme == null) {
             error = "The scheme (hdfs://, file://, etc) is null. Please specify the file system scheme explicitly in the URI.";
@@ -309,9 +313,9 @@ public class ApplicationController {
     public RestResponse checkSavepointPath(Application app) throws Exception {
         String error = applicationService.checkSavepointPath(app);
         if (error == null) {
-            return RestResponse.create().data(true);
+            return RestResponse.success(true);
         } else {
-            return RestResponse.create().data(false).message(error);
+            return RestResponse.success(false).message(error);
         }
     }
 

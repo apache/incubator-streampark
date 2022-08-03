@@ -19,24 +19,35 @@
 
 package com.streamxhub.streamx.console.system.service.impl;
 
+import com.streamxhub.streamx.console.core.service.CommonService;
 import com.streamxhub.streamx.console.system.dao.UserRoleMapper;
 import com.streamxhub.streamx.console.system.entity.UserRole;
 import com.streamxhub.streamx.console.system.service.UserRoleService;
+import com.streamxhub.streamx.console.system.service.UserService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole>
     implements UserRoleService {
+
+    @Autowired
+    private CommonService commonService;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     @Transactional
@@ -58,5 +69,34 @@ public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole>
         return list.stream()
             .map(userRole -> String.valueOf(userRole.getUserId()))
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Long> listRoleIdListByUserId(Long userId) {
+        QueryWrapper<UserRole> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(true, "user_id", userId);
+        return list(queryWrapper).stream().map(userRole -> userRole.getRoleId()).collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean isManageTeam(String username) {
+        Set<String> permissions = userService.getPermissions(username);
+        return permissions.contains("team:view");
+    }
+
+    @Override
+    public Boolean isManageTeam(){
+        return isManageTeam(commonService.getCurrentUser().getUsername());
+    }
+
+    @Override
+    public List<Long> getRoleIdListByCurrentUser() {
+        Long userId = commonService.getCurrentUser().getUserId();
+        return getRoleIdListByUserId(userId);
+    }
+
+    @Override
+    public List<Long> getRoleIdListByUserId(Long userId) {
+        return baseMapper.selectRoleIdList(userId);
     }
 }

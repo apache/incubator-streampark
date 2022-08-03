@@ -21,7 +21,7 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
@@ -73,7 +73,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         assert flinkEnv != null;
         int cpThreshold = Integer.parseInt(
             flinkEnv.convertFlinkYamlAsMap()
-                .getOrDefault("state.checkpoints.num-retained", "1")
+                .getOrDefault("state.checkpoints.num-retained", "5")
         );
 
         if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
@@ -105,7 +105,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean delete(Long id, Application application) throws ServiceException {
+    public Boolean delete(Long id, Application application) throws InternalException {
         SavePoint savePoint = getById(id);
         try {
             if (CommonUtils.notEmpty(savePoint.getPath())) {
@@ -114,7 +114,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             removeById(id);
             return true;
         } catch (Exception e) {
-            throw new ServiceException(e.getMessage());
+            throw new InternalException(e.getMessage());
         }
     }
 

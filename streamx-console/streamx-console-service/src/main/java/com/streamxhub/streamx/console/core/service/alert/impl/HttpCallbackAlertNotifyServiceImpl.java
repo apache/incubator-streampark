@@ -19,7 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service.alert.impl;
 
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
 import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
@@ -60,7 +60,7 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
     private ObjectMapper mapper;
 
     @Override
-    public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate) {
+    public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate) throws AlertException {
         HttpCallbackParams httpCallbackParams = alertConfig.getHttpCallbackParams();
 
         String requestTemplate = httpCallbackParams.getRequestTemplate();
@@ -73,13 +73,15 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
             Map<String, Object> body = mapper.readValue(format, new TypeReference<Map<String, Object>>() {
             });
             sendMessage(httpCallbackParams, body);
+            return true;
+        } catch (AlertException alertException) {
+            throw alertException;
         } catch (Exception e) {
-            log.error("Failed send httpCallback alert", e);
+            throw new AlertException("Failed send httpCallback alert", e);
         }
-        return false;
     }
 
-    private Object sendMessage(HttpCallbackParams params, Map<String, Object> body) throws ServiceException {
+    private Object sendMessage(HttpCallbackParams params, Map<String, Object> body) throws AlertException {
         String url = params.getUrl();
         HttpHeaders headers = new HttpHeaders();
         String contentType = params.getContentType();
@@ -113,12 +115,12 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
             ResponseExtractor<ResponseEntity<Object>> responseExtractor = alertRestTemplate.responseEntityExtractor(Object.class);
             response = alertRestTemplate.execute(url, httpMethod, requestCallback, responseExtractor);
         } catch (Exception e) {
-            log.error("Failed to request httpCallback alert, url:{}", url, e);
-            throw new ServiceException(String.format("Failed to request httpCallback alert, url:%s", url), e);
+            log.error("Failed to request httpCallback alert,\nurl:{}", url, e);
+            throw new AlertException(String.format("Failed to request httpCallback alert,\nurl:%s", url), e);
         }
 
         if (response == null) {
-            throw new ServiceException(String.format("Failed to request httpCallback alert, url:%s", url));
+            throw new AlertException(String.format("Failed to request httpCallback alert,\nurl:%s", url));
         }
 
         return response;

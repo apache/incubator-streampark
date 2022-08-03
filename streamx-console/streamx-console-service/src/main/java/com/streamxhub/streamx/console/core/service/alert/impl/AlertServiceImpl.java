@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service.alert.impl;
 
+import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.SpringContextUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
@@ -32,6 +33,7 @@ import com.streamxhub.streamx.console.core.service.alert.AlertNotifyService;
 import com.streamxhub.streamx.console.core.service.alert.AlertService;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -60,28 +62,52 @@ public class AlertServiceImpl implements AlertService {
         alert(application, alertTemplate);
     }
 
-    @Override
-    public void alert(Application application, AlertTemplate alertTemplate) {
+    private void alert(Application application, AlertTemplate alertTemplate) {
         Integer alertId = application.getAlertId();
         if (alertId == null) {
             return;
         }
         AlertConfig alertConfig = alertConfigService.getById(alertId);
-        alert(AlertConfigWithParams.of(alertConfig), alertTemplate);
+        try {
+            alert(AlertConfigWithParams.of(alertConfig), alertTemplate);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
-    public boolean alert(AlertConfigWithParams params, AlertTemplate alertTemplate) {
+    public boolean alert(AlertConfigWithParams params, AlertTemplate alertTemplate) throws AlertException {
         List<AlertType> alertTypes = AlertType.decode(params.getAlertType());
         if (CollectionUtils.isEmpty(alertTypes)) {
             return true;
         }
-
-        boolean result = true;
-        for (AlertType alertType : alertTypes) {
-            result &= SpringContextUtils.getBean(alertType.getServiceType(), AlertNotifyService.class)
+        // 没有使用线程池,保证报警能够成功发送
+        Tuple2<Boolean, AlertException> reduce = alertTypes.stream().map(alertType -> {
+            try {
+                // 处理每种报警类型的异常,并收集异常
+                boolean alertRes = SpringContextUtils
+                    .getBean(alertType.getServiceType(), AlertNotifyService.class)
                     .doAlert(params, alertTemplate);
+                return new Tuple2<Boolean, AlertException>(alertRes, null);
+            } catch (AlertException e) {
+                return new Tuple2<>(false, e);
+            }
+        }).reduce(new Tuple2<>(true, null), (tp1, tp2) -> {
+            boolean alertResult = tp1.f0 & tp2.f0;
+            if (tp1.f1 == null && tp2.f1 == null) {
+                return new Tuple2<>(tp1.f0 & tp2.f0, null);
+            }
+            if (tp1.f1 != null && tp2.f1 != null) {
+                // 合并多个异常的 message 信息,只保留第一个异常的详细内容
+                AlertException alertException = new AlertException(tp1.f1.getMessage() + "\n" + tp2.f1.getMessage(), tp1.f1);
+                return new Tuple2<>(alertResult, alertException);
+            }
+            return new Tuple2<>(alertResult, tp1.f1 == null ? tp2.f1 : tp1.f1);
+        });
+        if (reduce.f1 != null) {
+            throw reduce.f1;
         }
-        return result;
+
+        return reduce.f0;
     }
 }

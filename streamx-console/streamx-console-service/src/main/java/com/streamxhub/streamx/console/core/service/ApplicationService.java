@@ -20,6 +20,7 @@
 package com.streamxhub.streamx.console.core.service;
 
 import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.exception.ApplicationException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.AppExistsState;
 
@@ -73,18 +74,18 @@ public interface ApplicationService extends IService<Application> {
 
     void tailMvnDownloading(Long id);
 
-    String upload(MultipartFile file) throws Exception;
+    String upload(MultipartFile file) throws ApplicationException;
 
     /**
      * 将 latest的设置为Effective的,(此时才真正变成当前生效的)
      */
     void toEffective(Application application);
 
-    void revoke(Application app) throws Exception;
+    void revoke(Application app) throws ApplicationException;
 
     Boolean delete(Application app);
 
-    boolean checkEnv(Application app) throws Exception;
+    boolean checkEnv(Application app) throws ApplicationException;
 
     void updateLaunch(Application application);
 
@@ -93,4 +94,6 @@ public interface ApplicationService extends IService<Application> {
     boolean checkBuildAndUpdate(Application app);
 
     void forcedStop(Application app);
+
+    Long getCountByTeam(Long teamId);
 }

@@ -61,13 +61,19 @@ public class RoleController {
     @RequiresPermissions("role:view")
     public RestResponse roleList(RestRequest restRequest, Role role) {
         IPage<Role> roleList = roleService.findRoles(role, restRequest);
-        return RestResponse.create().data(roleList);
+        return RestResponse.success(roleList);
+    }
+
+    @PostMapping("listByUser")
+    public RestResponse listByUser() {
+        IPage<Role> roleList = roleService.findRolesByUser();
+        return RestResponse.success(roleList);
     }
 
     @PostMapping("check/name")
     public RestResponse checkRoleName(@NotBlank(message = "{required}") String roleName) {
         Role result = this.roleService.findByName(roleName);
-        return RestResponse.create().data(result == null);
+        return RestResponse.success(result == null);
     }
 
     @PostMapping("menu")
@@ -76,28 +82,28 @@ public class RoleController {
         List<String> roleMenus = list.stream()
             .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
             .collect(Collectors.toList());
-        return RestResponse.create().data(roleMenus);
+        return RestResponse.success(roleMenus);
     }
 
     @PostMapping("post")
     @RequiresPermissions("role:add")
     public RestResponse addRole(@Valid Role role) {
         this.roleService.createRole(role);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("role:delete")
     public RestResponse deleteRole(Long roleId) {
         this.roleService.removeById(roleId);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("role:update")
     public RestResponse updateRole(Role role) throws Exception {
         this.roleService.updateRole(role);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
 }

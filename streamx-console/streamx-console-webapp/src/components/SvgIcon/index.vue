@@ -40,7 +40,7 @@
     <upload v-if="name==='upload'"></upload>
     <plus v-if="name==='plus'"></plus>
     <flame v-if="name==='flame'"></flame>
-    <code v-if="name==='icode'"></code>
+    <icode v-if="name==='code'"></icode>
     <copy v-if="name==='copy'"></copy>
     <swap v-if="name==='swap'"></swap>
     <github v-if="name==='github'"></github>
@@ -97,7 +97,7 @@ import {
   upload,
   plus,
   flame,
-  code,
+  icode,
   copy,
   swap,
   github,
@@ -154,7 +154,7 @@ export default {
     upload,
     plus,
     flame,
-    code,
+    icode,
     copy,
     swap,
     github,

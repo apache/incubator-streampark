@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.core.service.alert.impl;
 
+import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
@@ -62,19 +63,22 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
     }
 
     @Override
-    public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template) {
+    public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template) throws AlertException {
         if (this.senderEmail == null) {
             this.senderEmail = settingService.getSenderEmail();
         }
-        String contacts = alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
-        if (this.senderEmail != null && StringUtils.hasLength(contacts)) {
-            String[] emails = contacts.split(",");
-            return sendEmail(template, emails);
+        if (this.senderEmail == null) {
+            throw new AlertException("Please configure first mail sender");
         }
-        return false;
+        String contacts = alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
+        if (!StringUtils.hasLength(contacts)) {
+            throw new AlertException("Please configure a valid contacts");
+        }
+        String[] emails = contacts.split(",");
+        return sendEmail(template, emails);
     }
 
-    private boolean sendEmail(AlertTemplate mail, String... mails) {
+    private boolean sendEmail(AlertTemplate mail, String... mails) throws AlertException {
         log.info(mail.getSubject());
         try {
             Map<String, AlertTemplate> out = new HashMap<>(16);
@@ -98,8 +102,7 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
             htmlEmail.send();
             return true;
         } catch (Exception e) {
-            log.error("Failed send email alert", e);
-            return false;
+            throw new AlertException("Failed send email alert", e);
         }
     }
 

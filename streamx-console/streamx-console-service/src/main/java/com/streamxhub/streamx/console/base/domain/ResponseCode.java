@@ -28,12 +28,10 @@ public interface ResponseCode {
     /**
      * default
      */
-    Long CODE_SUCCESS = 2000L;
-    Long CODE_FAIL = 2001L;
+    Long CODE_SUCCESS = 200L;
 
-    /**
-     * 预占：3000-4000为accessToken异常
-     */
-    Long CODE_ACCESS_TOKEN_LOCKED = 3001L;
+    Long CODE_FAIL = 500L;
+
+    Long CODE_API_FAIL = 501L;
 
 }

@@ -100,6 +100,22 @@
         </a-form-item>
       </template>
 
+      <a-form-item
+        label="Team"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          :allow-clear="true"
+          @change="handleChangeTeam"
+          v-decorator="['teamId',{rules: [{ required: true, message: 'please select team' }]}]">
+          <a-select-option
+            v-for="t in teamData"
+            :key="t.teamId">
+            {{ t.teamName }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
       <template v-if="executionMode === 5|| executionMode === 6">
         <a-form-item
           label="Kubernetes Namespace"
@@ -1428,6 +1444,7 @@
 <script>
   import Ellipsis from '@/components/Ellipsis'
   import {jars, listConf, modules, select} from '@api/project'
+  import {listByUser as getUserTeam} from '@/api/team'
   import {create, checkName, main, name, readConf, upload} from '@api/application'
   import {list as listFlinkEnv} from '@/api/flinkEnv'
   import {list as listFlinkCluster} from '@/api/flinkCluster'
@@ -1473,7 +1490,7 @@
     get as getAlert,
     listWithOutPage as listWithOutPageAlert,
     send as sendAlert
-  } from '@/api/alertConf'
+  } from '@/api/alert'
 
   import {toPomString} from './Pom'
   import storage from '@/utils/storage'
@@ -1489,6 +1506,8 @@
         resourceFrom: null,
         tableEnv: 1,
         projectList: [],
+        teamData: [],
+        teamId: null,
         projectId: null,
         versionId: null,
         scalaVersion: null,
@@ -1735,6 +1754,12 @@
         }).catch((error) => {
           this.$message.error(error.message)
         })
+
+        getUserTeam(
+           {'pageSize': '9999'}
+        ).then((resp) => {
+            this.teamData = resp.data.records
+        })
       },
 
       handleInitForm() {
@@ -1818,7 +1843,16 @@
       handleTableEnv(value) {
         this.tableEnv = value
       },
-
+      handleChangeTeam(value) {
+            this.teamId = value
+            select({
+              teamId: value
+            }).then((resp) => {
+              this.projectList = resp.data
+            }).catch((error) => {
+              this.$message.error(error.message)
+            })
+       },
       handleChangeProject(value) {
         this.projectId = value
         modules({
@@ -1939,26 +1973,16 @@
         const formData = new FormData()
         formData.append('file', data.file)
         upload(formData).then((resp) => {
-          if (resp.status == 'error') {
-            this.$swal.fire({
-              title: 'Failed',
-              icon: 'error',
-              width: this.exceptionPropWidth(),
-              html: '<pre class="propException">' + resp['exception'] + '</pre>',
-              focusConfirm: false
-            })
-          } else {
-            this.loading = false
-            const path = resp.data
-            this.uploadJar = data.file.name
-            main({
-              jar: path
-            }).then((resp) => {
-              this.form.setFieldsValue({'mainClass': resp.data})
-            }).catch((error) => {
-              this.$message.error(error.message)
-            })
-          }
+          this.loading = false
+          const path = resp.data
+          this.uploadJar = data.file.name
+          main({
+            jar: path
+          }).then((resp) => {
+            this.form.setFieldsValue({'mainClass': resp.data})
+          }).catch((error) => {
+            this.$message.error(error.message)
+          })
         }).catch((error) => {
           this.$message.error(error.message)
           this.loading = false
@@ -2281,7 +2305,7 @@
         if(values.flinkClusterId){
           const cluster = this.flinkClusters.filter(c => c.id === values.flinkClusterId && c.clusterState === 1)[0] || null
           values.clusterId = cluster.id
-          values.flinkClusterId = cluster.clusterId
+          values.flinkClusterId = cluster.id
           values.yarnSessionClusterId = cluster.clusterId
         }
         const params = {
@@ -2307,7 +2331,8 @@
           clusterId: values.clusterId || null,
           flinkClusterId: values.flinkClusterId || null,
           flinkImage: values.flinkImage || null,
-          yarnSessionClusterId: values.yarnSessionClusterId || null
+          yarnSessionClusterId: values.yarnSessionClusterId || null,
+          teamId: values.teamId
         }
         if (params.executionMode === 6) {
           params.k8sPodTemplate = this.podTemplate
@@ -2377,7 +2402,7 @@
         if(values.flinkClusterId){
           const cluster = this.flinkClusters.filter(c => c.id === values.flinkClusterId && c.clusterState === 1)[0] || null
           values.clusterId = cluster.id
-          values.flinkClusterId = cluster.clusterId
+          values.flinkClusterId = cluster.id
           values.yarnSessionClusterId = cluster.clusterId
         }
 
@@ -2407,7 +2432,8 @@
           clusterId: values.clusterId || null,
           flinkClusterId: values.flinkClusterId || null,
           flinkImage: values.flinkImage || null,
-          yarnSessionClusterId: values.yarnSessionClusterId || null
+          yarnSessionClusterId: values.yarnSessionClusterId || null,
+          teamId: values.teamId
         }
         if (params.executionMode === 6) {
           params.k8sPodTemplate = this.podTemplate

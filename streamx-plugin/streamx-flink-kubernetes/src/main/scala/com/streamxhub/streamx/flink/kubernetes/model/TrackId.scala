@@ -19,23 +19,21 @@
 
 package com.streamxhub.streamx.flink.kubernetes.model
 
+import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 
-import javax.annotation.Nullable
 import scala.util.Try
 
 /**
  * tracking identifier for flink on kubernetes
  * author:Al-assad
  */
-case class TrkId(executeMode: FlinkK8sExecuteMode.Value,
-                 namespace: String = "default",
-                 clusterId: String,
-                 @Nullable jobId: String) {
+case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
+                   namespace: String = "default",
+                   clusterId: String,
+                   appId: Long,
+                   jobId: String) {
 
-  /**
-   * check whether fields of trackId are legal
-   */
   def isLegal: Boolean = {
     executeMode match {
       case FlinkK8sExecuteMode.APPLICATION =>
@@ -46,10 +44,7 @@ case class TrkId(executeMode: FlinkK8sExecuteMode.Value,
     }
   }
 
-  /**
-   * check whether fields of trackId are no legal
-   */
-  def nonLegal: Boolean = !isLegal
+  def isActive: Boolean = isLegal && Try(jobId.nonEmpty).getOrElse(false)
 
   /**
    * covert to ClusterKey
@@ -62,14 +57,29 @@ case class TrkId(executeMode: FlinkK8sExecuteMode.Value,
   def belongTo(clusterKey: ClusterKey): Boolean =
     executeMode == clusterKey.executeMode && namespace == clusterKey.namespace && clusterId == clusterKey.clusterId
 
-}
-
-object TrkId {
-  def onSession(namespace: String, clusterId: String, jobId: String): TrkId = {
-    this (FlinkK8sExecuteMode.SESSION, namespace, clusterId, jobId)
+  override def hashCode(): Int = {
+    Utils.hashCode(executeMode, clusterId, namespace, appId)
   }
 
-  def onApplication(namespace: String, clusterId: String): TrkId = {
-    this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, "")
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case that: TrackId =>
+        this.executeMode == that.executeMode &&
+          this.clusterId == that.clusterId &&
+          this.namespace == that.namespace &&
+          this.appId == that.appId
+      case _ => false
+    }
+  }
+
+}
+
+object TrackId {
+  def onSession(namespace: String, clusterId: String, appId: Long, jobId: String): TrackId = {
+    this (FlinkK8sExecuteMode.SESSION, namespace, clusterId, appId, jobId)
+  }
+
+  def onApplication(namespace: String, clusterId: String, appId: Long, jobId: String = null): TrackId = {
+    this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, jobId)
   }
 }

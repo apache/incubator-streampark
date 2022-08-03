@@ -17,11 +17,21 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.kubernetes.model
+package com.streamxhub.streamx.console.system.dao;
+
+import com.streamxhub.streamx.console.system.entity.Team;
+import com.streamxhub.streamx.console.system.entity.User;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Param;
 
 /**
- * author:Al-assad
- *
- * @param updateTime last update time for current key
+ * @author daixinyu
  */
-case class TrkIdCV(updateTime: Long)
+public interface TeamMapper extends BaseMapper<Team> {
+
+    IPage<Team> findTeamList(Page<User> page, @Param("team") Team team);
+
+}

@@ -219,7 +219,16 @@
 
       <div slot="extra">
         <a-input-group compact>
-          <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="width: 90px">
+          <a-select placeholder="Team" allowClear @change="handleChangeTeam" style="width: 140px">
+            <a-select-option v-for="t in teamData" :key="t.teamId"> {{ t.teamName }} </a-select-option>
+          </a-select>
+          <a-select placeholder="User" allowClear @change="handleChangeUser" style="margin-left: 16px;width: 120px">
+            <a-select-option v-for="u in users" :key="u.userId">
+              <span v-if="u.nickName"> {{ u.nickName }} </span>
+              <span v-else> {{ u.username }} </span>
+            </a-select-option>
+          </a-select>
+          <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="margin-left: 16px;width: 80px">
             <a-select-option value="1">JAR</a-select-option>
             <a-select-option value="2">SQL</a-select-option>
           </a-select>
@@ -227,7 +236,7 @@
             placeholder="Search..."
             v-model="searchText"
             @change="handleSearch"
-            style="margin-left: 16px; width: 250px;" />
+            style="width: 250px;"/>
           <a-button
             type="primary"
             icon="plus"
@@ -297,17 +306,6 @@
               title="the application has changed."/>
           </template>
 
-        </template>
-
-        <template
-          slot="id"
-          slot-scope="text, record">
-          <span
-            class="link pointer"
-            v-clipboard:copy="record.id"
-            v-clipboard:success="handleCopySuccess">
-            {{ record.id }}
-          </span>
         </template>
 
         <template
@@ -563,7 +561,7 @@
                 <template v-if="appBuildDetail.pipeline.pipeType === 2 && appBuildDetail.docker !== null">
                   <template
                     v-if="item.seq === 5 && appBuildDetail.docker.pull !== null && appBuildDetail.docker.pull.layers !== null">
-                    <template v-for="layer in appBuildDetail.docker.pull.layers">
+                    <template v-for="(layer,index) in appBuildDetail.docker.pull.layers">
                       <a-row :key="layer.layerId" style="margin-bottom: 5px;">
                         <a-space size="small">
                           <a-icon type="arrow-right"/>
@@ -576,7 +574,7 @@
                         </a-space>
                       </a-row>
                       <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                        <a-row :key="layer.layerId" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
+                        <a-row :key="index" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
                           <a-progress
                             :percent="layer.percent"
                             status="active"/>
@@ -602,7 +600,7 @@
 
                   <template
                     v-else-if="item.seq === 7 && appBuildDetail.docker.push !== null && appBuildDetail.docker.push.layers !== null">
-                    <template v-for="layer in appBuildDetail.docker.push.layers">
+                    <template v-for="(layer,index) in appBuildDetail.docker.push.layers">
                       <a-row :key="layer.layerId" style="margin-bottom: 5px;">
                         <a-space size="small">
                           <a-icon type="arrow-right"/>
@@ -615,7 +613,7 @@
                         </a-space>
                       </a-row>
                       <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                        <a-row :key="layer.layerId" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
+                        <a-row :key="index" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
                           <a-progress
                             :percent="layer.percent"
                             status="active"/>
@@ -1012,7 +1010,8 @@ import 'xterm/css/xterm.css'
 import {baseUrl} from '@/api/baseUrl'
 import SvgIcon from '@/components/SvgIcon'
 import storage from '@/utils/storage'
-import notification from 'ant-design-vue/lib/notification'
+import {listByUser as getUserTeam} from '@/api/team'
+import {list as listUser} from '@/api/user'
 
 export default {
   components: {Ellipsis, State, SvgIcon},
@@ -1033,9 +1032,13 @@ export default {
           running: 0
         }
       },
+      teamData: [],
+      users: [],
       expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
       jobType: null,
+      teamId: null,
+      userId: null,
       sortedInfo: null,
       filteredInfo: null,
       queryInterval: 2000,
@@ -1104,20 +1107,19 @@ export default {
       let {sortedInfo, filteredInfo} = this
       sortedInfo = sortedInfo || {}
       filteredInfo = filteredInfo || {}
-      return [{
-        title: 'ID',
-        dataIndex: 'id',
-        width: 100,
-        scopedSlots: {customRender: 'id'},
-      } , {
+      return [ {
         title: 'Application Name',
         dataIndex: 'jobName',
         width: 320,
         scopedSlots: {customRender: 'jobName'},
+      },  {
+        title: 'Flink Version',
+        dataIndex: 'flinkVersion',
+        width: 130
       }, {
         title: 'Owner',
         dataIndex: 'nickName',
-        width: 120
+        width: 130
       }, {
         title: 'Run Status',
         dataIndex: 'state',
@@ -1165,6 +1167,15 @@ export default {
 
   mounted() {
     this.handleDashboard()
+    listUser({'pageSize': '9999'}).then((resp) => {
+      this.users = resp.data.records
+    })
+
+    getUserTeam(
+      {'pageSize': '9999'}
+    ).then((resp) => {
+      this.teamData = resp.data.records
+    })
     this.handleFetch(true)
     const timer = window.setInterval(() => {
       this.handleDashboard()
@@ -1214,12 +1225,13 @@ export default {
       this.jobType = jobType
       this.handleSearch()
     },
-
-    handleCopySuccess() {
-      notification.success({
-        message: 'current jobId copied to clipboard Successfully',
-        duration: 1,
-      })
+    handleChangeTeam(team) {
+      this.teamId = team
+      this.handleSearch()
+    },
+    handleChangeUser(user) {
+      this.userId = user
+      this.handleSearch()
     },
 
     handleMapping(app) {
@@ -1497,7 +1509,7 @@ export default {
           'error'
         )
       } else {
-        if ( !this.optionApps.starting.get(app.id) || app['optionState'] === 0) {
+        if (!this.optionApps.starting.get(app.id) || app['optionState'] === 0) {
           this.application = app
           latest({
             appId: this.application.id
@@ -1570,7 +1582,7 @@ export default {
                   confirmButtonColor: '#55BDDDFF',
                   confirmButtonText: 'Detail',
                   cancelButtonText: 'Close'
-                }).then((isConfirm) =>{
+                }).then((isConfirm) => {
                   if (isConfirm.value) {
                     this.SetAppId(id)
                     this.$router.push({'path': '/flink/app/detail'})
@@ -1617,7 +1629,7 @@ export default {
       }
 
       if (savePointed) {
-        if ( customSavePoint != null ) {
+        if (customSavePoint != null) {
           verifySchema({
             path: customSavePoint
           }).then(resp => {
@@ -1659,13 +1671,6 @@ export default {
         timer: 2000
       }).then((result) => {
         cancel(stopReq).then((resp) => {
-          if (resp.status === 'error') {
-            this.$swal.fire(
-              'Failed',
-              resp.exception,
-              'error'
-            )
-          }
         })
       })
     },
@@ -1805,6 +1810,8 @@ export default {
       }
       this.queryParams['jobName'] = this.searchText
       this.queryParams['jobType'] = this.jobType
+      this.queryParams['teamId'] = this.teamId
+      this.queryParams['userId'] = this.userId
       this.handleFetch(false)
     },
 

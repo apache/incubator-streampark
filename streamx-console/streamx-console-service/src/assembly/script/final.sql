@@ -109,6 +109,7 @@ CREATE TABLE `t_flink_app` (
 `FLINK_CLUSTER_ID` bigint DEFAULT NULL,
 `INGRESS_TEMPLATE` text COLLATE utf8mb4_general_ci,
 `DEFAULT_MODE_INGRESS` text COLLATE utf8mb4_general_ci,
+`TEAM_ID` bigint not null default 1 comment '任务所属组',
 PRIMARY KEY (`ID`) USING BTREE,
 KEY `INX_STATE` (`STATE`) USING BTREE,
 KEY `INX_JOB_TYPE` (`JOB_TYPE`) USING BTREE,
@@ -119,7 +120,7 @@ KEY `INX_TRACK` (`TRACKING`) USING BTREE
 -- Records of t_flink_app
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_app` VALUES (100000, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, NULL , NULL, 100000, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '0', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), NOW(), NULL, 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `t_flink_app` VALUES (100000, 2, 4, NULL, NULL, 'Flink SQL Demo', NULL, NULL, NULL, NULL, NULL, NULL , NULL, 100000, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, '0', 0, NULL, NULL, NULL, NULL, NULL, NULL, 'Flink SQL Demo', 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NOW(), NOW(), NULL, 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL,1);
 COMMIT;
 
 -- ----------------------------
@@ -227,6 +228,7 @@ CREATE TABLE `t_flink_project` (
 `LAST_BUILD` datetime DEFAULT NULL,
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `BUILD_STATE` tinyint DEFAULT '-1',
+`TEAM_ID` bigint not null DEFAULT 1 comment '项目所属组',
 PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -234,7 +236,7 @@ PRIMARY KEY (`ID`) USING BTREE
 -- Records of t_flink_project
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_project` VALUES (100000, 'streamx-quickstart', 'https://github.com/streamxhub/streamx-quickstart.git', 'main', NULL, NULL, NULL, NULL, 1, 1, NOW(), NULL, 'streamx-quickstart', 1);
+INSERT INTO `t_flink_project` VALUES (100000, 'streamx-quickstart', 'https://github.com/streamxhub/streamx-quickstart.git', 'main', NULL, NULL, NULL, NULL, 1, 1, NOW(), NULL, 'streamx-quickstart', 1,1);
 COMMIT;
 
 -- ----------------------------
@@ -367,6 +369,13 @@ INSERT INTO `t_menu` VALUES (100039, 100038, 'add', NULL, NULL, 'token:add', NUL
 INSERT INTO `t_menu` VALUES (100040, 100038, 'delete', NULL, NULL, 'token:delete', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100041, 100013, 'Add Cluster', '/flink/setting/add_cluster', 'flink/setting/AddCluster', 'cluster:create', '', '0', '0', null, NOW(), NOW());
 INSERT INTO `t_menu` VALUES (100042, 100013, 'Edit Cluster', '/flink/setting/edit_cluster', 'flink/setting/EditCluster', 'cluster:update', '', '0', '0', null, NOW(), NOW());
+INSERT INTO `t_menu` VALUES (100043, 100000, 'Team Management', '/system/team', 'system/team/Team', 'team:view', 'team', '0', '1', 1, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100044, 100043, 'add', NULL, NULL, 'team:add', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100045, 100043, 'update', NULL, NULL, 'team:update', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100046, 100043, 'delete', NULL, NULL, 'team:delete', NULL, '1', '1', NULL, NOW(), NULL);
+
+
+
 COMMIT;
 
 -- ----------------------------
@@ -492,6 +501,13 @@ INSERT INTO `t_role_menu` VALUES (100058, 100001, 100013);
 INSERT INTO `t_role_menu` VALUES (100059, 100001, 100015);
 INSERT INTO `t_role_menu` VALUES (100060, 100000, 100041);
 INSERT INTO `t_role_menu` VALUES (100061, 100000, 100042);
+INSERT INTO `t_role_menu` VALUES (100062, 100000, 100043);
+INSERT INTO `t_role_menu` VALUES (100063, 100000, 100044);
+INSERT INTO `t_role_menu` VALUES (100064, 100000, 100045);
+INSERT INTO `t_role_menu` VALUES (100065, 100000, 100046);
+
+
+
 COMMIT;
 
 -- ----------------------------
@@ -666,3 +682,39 @@ CREATE TABLE `t_alert_config` (
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci;
+
+
+-- ----------------------------
+-- Table of t_team
+-- ----------------------------
+DROP TABLE IF EXISTS `t_team`;
+CREATE TABLE `t_team`
+(
+    `TEAM_ID`     bigint       NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `TEAM_CODE`   varchar(255) NOT NULL COMMENT '团队标识 后续可以用于队列 资源隔离相关',
+    `TEAM_NAME`   varchar(255) NOT NULL COMMENT '团队名',
+    `CREATE_TIME` datetime     NOT NULL COMMENT '创建时间',
+    PRIMARY KEY (`TEAM_ID`) USING BTREE,
+    UNIQUE KEY `TEAM_CODE` (TEAM_CODE) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- Records of t_team
+-- ----------------------------
+BEGIN;
+insert into t_team values (1,'bigdata','BIGDATA','2022-02-21 18:00:00');
+COMMIT;
+
+-- ----------------------------
+-- Table of t_team_user
+-- ----------------------------
+DROP TABLE IF EXISTS `t_team_user`;
+CREATE TABLE `t_team_user`
+(
+    `TEAM_ID`    bigint   NOT NULL COMMENT 'teamId',
+    `USER_ID`     bigint   NOT NULL COMMENT 'userId',
+    `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
+    UNIQUE KEY `GROUP_USER` (`TEAM_ID`,`USER_ID`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+

@@ -20,9 +20,10 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.flink.kubernetes.watcher.{FlinkRestJmConfigItem, FlinkRestOverview, JobDetails}
+import com.streamxhub.streamx.flink.kubernetes.watcher.{Checkpoint, FlinkRestJmConfigItem, FlinkRestOverview, JobDetails}
 import org.junit.jupiter.api.Test
 
+// scalastyle:off println
 class FlinkRestJsonTest {
 
   @Test def flinkRestOverview(): Unit = {
@@ -41,8 +42,7 @@ class FlinkRestJsonTest {
         |}
         |""".stripMargin
 
-    val overview = FlinkRestOverview.as(json)
-
+    val overview = FlinkRestOverview.as(json).get
     println(overview.slotsAvailable)
   }
 
@@ -153,6 +153,135 @@ class FlinkRestJsonTest {
 
     val jobDetails = JobDetails.as(json)
     println(jobDetails)
+  }
+
+  @Test def testCheckpoint(): Unit = {
+    val json =
+      """
+        |{
+        |    "counts":{
+        |        "restored":0,
+        |        "total":1914,
+        |        "in_progress":0,
+        |        "completed":1914,
+        |        "failed":0
+        |    },
+        |    "summary":{
+        |        "state_size":{
+        |            "min":30751,
+        |            "max":31096,
+        |            "avg":31038
+        |        },
+        |        "end_to_end_duration":{
+        |            "min":63,
+        |            "max":6273,
+        |            "avg":135
+        |        },
+        |        "alignment_buffered":{
+        |            "min":0,
+        |            "max":0,
+        |            "avg":0
+        |        },
+        |        "processed_data":{
+        |            "min":0,
+        |            "max":0,
+        |            "avg":0
+        |        },
+        |        "persisted_data":{
+        |            "min":0,
+        |            "max":0,
+        |            "avg":0
+        |        }
+        |    },
+        |    "latest":{
+        |        "completed":{
+        |            "@class":"completed",
+        |            "id":1914,
+        |            "status":"COMPLETED",
+        |            "is_savepoint":false,
+        |            "trigger_timestamp":1658138497283,
+        |            "latest_ack_timestamp":1658138497372,
+        |            "state_size":31096,
+        |            "end_to_end_duration":89,
+        |            "alignment_buffered":0,
+        |            "processed_data":0,
+        |            "persisted_data":0,
+        |            "num_subtasks":1,
+        |            "num_acknowledged_subtasks":1,
+        |            "checkpoint_type":"CHECKPOINT",
+        |            "tasks":{
+        |            },
+        |            "external_path":"oss:///streamx/prod/checkpoints/60dd003f048a5b2f92f0874e6612146c/chk-1914",
+        |            "discarded":false
+        |        },
+        |        "savepoint":null,
+        |        "failed":null,
+        |        "restored":null
+        |    },
+        |    "history":[
+        |        {
+        |            "@class":"completed",
+        |            "id":1914,
+        |            "status":"COMPLETED",
+        |            "is_savepoint":false,
+        |            "trigger_timestamp":1658138497283,
+        |            "latest_ack_timestamp":1658138497372,
+        |            "state_size":31096,
+        |            "end_to_end_duration":89,
+        |            "alignment_buffered":0,
+        |            "processed_data":0,
+        |            "persisted_data":0,
+        |            "num_subtasks":1,
+        |            "num_acknowledged_subtasks":1,
+        |            "checkpoint_type":"CHECKPOINT",
+        |            "tasks":{
+        |
+        |            },
+        |            "external_path":"oss:///streamx/prod/checkpoints/60dd003f048a5b2f92f0874e6612146c/chk-1914",
+        |            "discarded":false
+        |        }
+        |    ]
+        |}
+        |
+        |""".stripMargin
+    val checkpoint = Checkpoint.as(json)
+    println(checkpoint)
+  }
+
+  @Test def testIngress(): Unit = {
+    val json =
+      """
+        |[
+        |    {
+        |        "addresses":[
+        |            "192.168.0.1",
+        |            "192.168.0.2",
+        |            "192.168.0.3"
+        |        ],
+        |        "port":80,
+        |        "protocol":"HTTP",
+        |        "serviceName":"native-flink:statebackend12788-rest",
+        |        "ingressName":"native-flink:statebackend12788",
+        |        "hostname":"streamx.com",
+        |        "path":"/native-flink/statebackend12788/",
+        |        "allNodes":false
+        |    },
+        |    {
+        |        "addresses":[
+        |        ],
+        |        "port":80,
+        |        "protocol":"HTTP",
+        |        "serviceName":"native-flink:statebackend12788-rest",
+        |        "ingressName":"native-flink:statebackend12788",
+        |        "hostname":"streamx.com",
+        |        "path":"/native-flink/statebackend12788(/|$)(.*)",
+        |        "allNodes":false
+        |    }
+        |]
+        |""".stripMargin
+
+    val ingressMeta = IngressMeta.as(json)
+    println(ingressMeta.get)
   }
 
 }

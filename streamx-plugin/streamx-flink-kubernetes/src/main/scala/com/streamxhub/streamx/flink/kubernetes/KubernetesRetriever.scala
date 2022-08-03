@@ -23,7 +23,6 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.tryWithResource
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
-import com.streamxhub.streamx.flink.kubernetes.network.FlinkJobIngress
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
 import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.{ClusterClientFactory, DefaultClusterClientServiceLoader}
@@ -65,7 +64,6 @@ object KubernetesRetriever extends Logger {
     Try(newK8sClient().getVersion != null).getOrElse(false)
   }
 
-
   private val clusterClientServiceLoader = new DefaultClusterClientServiceLoader()
 
   /**
@@ -89,8 +87,8 @@ object KubernetesRetriever extends Logger {
     }
     // retrieve flink cluster client
     val clientFactory: ClusterClientFactory[String] = clusterClientServiceLoader.getClusterClientFactory(flinkConfig)
-    val clusterProvider: KubernetesClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
-      .asInstanceOf[KubernetesClusterDescriptor]
+
+    val clusterProvider: KubernetesClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[KubernetesClusterDescriptor]
 
     Try {
       clusterProvider
@@ -99,11 +97,10 @@ object KubernetesRetriever extends Logger {
     } match {
       case Success(v) => v
       case Failure(e) =>
-        logError(s"Get flinkClient error, the error is:$e")
+        logError(s"Get flinkClient error, the error is: $e")
         throw e
     }
   }
-
 
   /**
    * check whether deployment exists on kubernetes cluster
@@ -132,9 +129,9 @@ object KubernetesRetriever extends Logger {
       Try(KubernetesRetriever.newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode))
         .getOrElse(return None)) {
       client =>
-        val url = FlinkJobIngress.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
+        val url = IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
         Some(url)
     }
-
   }
+
 }

@@ -56,6 +56,7 @@ import java.util.List;
 public class Project implements Serializable {
     @TableId(value = "ID", type = IdType.AUTO)
     private Long id;
+    private Long teamId;
 
     private String name;
 
@@ -105,8 +106,12 @@ public class Project implements Serializable {
      */
     private transient String appSource;
 
+    private transient List<Long> teamIdList;
+
     @JsonIgnore
     private transient SettingService settingService;
+
+    private transient String teamName;
 
     /**
      * 获取项目源码路径

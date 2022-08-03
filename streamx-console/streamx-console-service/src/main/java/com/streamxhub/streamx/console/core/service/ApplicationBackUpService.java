@@ -20,7 +20,7 @@
 package com.streamxhub.streamx.console.core.service;
 
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
@@ -33,7 +33,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
 
-    Boolean delete(Long id) throws ServiceException;
+    Boolean delete(Long id) throws InternalException;
 
     void backup(Application application, FlinkSql flinkSql);
 
