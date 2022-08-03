@@ -7,6 +7,7 @@
  * 所有图标均从这里加载，方便管理
  */
 import alarm from '@/assets/icons/alarm.svg?inline'
+import testalarm from '@/assets/icons/testalarm.svg?inline'
 import analyse from '@/assets/icons/analyse.svg' // path to your '*.svg?inline' file.
 import flink from '@/assets/icons/flink.svg?inline'
 import spark from '@/assets/icons/spark.svg?inline'
@@ -60,6 +61,7 @@ import password from '@/assets/icons/password.svg?inline'
 
 export {
   alarm,
+  testalarm,
   analyse,
   flink,
   flinksql,
