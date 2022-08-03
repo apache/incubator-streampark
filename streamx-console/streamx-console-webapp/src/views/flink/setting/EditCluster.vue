@@ -67,28 +67,23 @@
         </a-form-item>
       </template>
 
-      <template v-if="executionMode === 1">
-        <a-form-item
-          label="Address"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+      <a-form-item
+        label="Address"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <template v-if="executionMode === 1">
           <a-input
-            type="text"
+            name="address"
             placeholder="Please enter cluster address, multiple addresses use ',' split e.g: http://host:port,http://host1:port2"
             v-decorator="['address',{ rules: [{ required: true } ]}]"/>
-        </a-form-item>
-      </template>
-      <template v-if="executionMode === 0 || executionMode > 1">
-        <a-form-item
-          label="Address"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        </template>
+        <template v-if="executionMode === 3 || executionMode === 5">
           <a-input
-            type="text"
+            name="address"
             placeholder="Please enter cluster address,  e.g: http://host:port"
             v-decorator="['address',{ rules: [{ required: false } ]}]"/>
-        </a-form-item>
-      </template>
+        </template>
+      </a-form-item>
 
       <template v-if="executionMode === 3">
         <a-form-item
