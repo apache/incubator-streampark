@@ -122,8 +122,7 @@ Make stream processing easier
 
 诸多公司和组织将 StreamX 用于研究、生产和商业产品中, 如果您也在使用 ? 可以在[这里添加](https://github.com/streamxhub/streamx/issues/163)
 
-![image](https://user-images.githubusercontent.com/13284744/160220085-11f1e011-e7a0-421f-9294-c14213c0bc22.png)
-
+![image](https://user-images.githubusercontent.com/13284744/182794423-b77a09dd-ed45-4e87-a1bb-2a4646951f22.png)
 
 
 ## 🏆 我们的荣誉
