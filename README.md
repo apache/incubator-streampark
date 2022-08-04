@@ -122,7 +122,7 @@ Our ultimate goal is to build a one-stop big data solution integrating stream pr
 Thanks to the above excellent open source projects and many outstanding open source projects that are not mentioned, for giving the greatest
 respect,Thanks to [Apache Flink](http://flink.apache.org) for creating a great project!  Thanks to the [Apache Zeppelin](http://zeppelin.apache.org) project for the early inspiration.
 
-### 🚀 Quick Start
+## 🚀 Quick Start
 
 click [Document](https://www.streamxhub.com/docs/intro) for more information
 
@@ -132,8 +132,7 @@ click [Document](https://www.streamxhub.com/docs/intro) for more information
 
 Various companies and organizations use StreamX for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/streamxhub/streamx/issues/163)
 
-![image](https://user-images.githubusercontent.com/13284744/160220085-11f1e011-e7a0-421f-9294-c14213c0bc22.png)
-
+![image](https://user-images.githubusercontent.com/13284744/182794423-b77a09dd-ed45-4e87-a1bb-2a4646951f22.png)
 
 
 ## 🏆 Our honor
