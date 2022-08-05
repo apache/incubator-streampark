@@ -53,7 +53,7 @@ public class LoggerServiceImpl {
      * @param limit       limit
      * @return log string data
      */
-    public CompletionStage<String> queryLog(String namespac,String jobName, int skipLineNum, int limit) {
+    public CompletionStage<String> queryLog(String namespac, String jobName, int skipLineNum, int limit) {
         return CompletableFuture.supplyAsync(() ->
             FlinkJobWatch.jobDeploymentsWatch(namespac, jobName)
         ).thenApply(path -> logClient.rollViewLog(String.valueOf(path), skipLineNum, limit));
