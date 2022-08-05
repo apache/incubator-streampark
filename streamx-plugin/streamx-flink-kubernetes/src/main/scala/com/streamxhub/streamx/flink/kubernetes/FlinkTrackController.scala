@@ -65,13 +65,13 @@ class FlinkTrackController extends Logger with AutoCloseable {
    * determines whether the specified TrackId is in the trace
    */
   def isInTracking(trackId: TrackId): Boolean = {
-    if (Try(trackId.nonLegal).getOrElse(true)) false; else {
+    if (!trackId.isLegal) false; else {
       trackIds.get(trackId) != null
     }
   }
 
   def unTracking(trackId: TrackId): Unit = {
-    if (!Try(trackId.nonLegal).getOrElse(true)) {
+    if (trackId.isLegal) {
       trackIds.invalidate(trackId)
       canceling.invalidate(trackId)
       jobStatuses.invalidate(trackId)
@@ -83,7 +83,7 @@ class FlinkTrackController extends Logger with AutoCloseable {
   /**
    * collect all legal tracking ids, and covert to ClusterKey
    */
-  private[kubernetes] def collectTracks(): Set[TrackId] = collectAllTrackIds().filter(_.isLegal)
+  private[kubernetes] def collectTracks(): Set[TrackId] = collectAllTrackIds().filter(_.isActive)
 
   /**
    * collect the aggregation of flink metrics that in tracking
@@ -93,7 +93,7 @@ class FlinkTrackController extends Logger with AutoCloseable {
     collectTracks() match {
       case k if k.isEmpty => FlinkMetricCV.empty
       case k =>
-        flinkMetrics.getAll(k) match {
+        flinkMetrics.getAll(for (elem <- k) yield {ClusterKey.of(elem)}) match {
           case m if m.isEmpty => FlinkMetricCV.empty
           case m =>
             // aggregate metrics
@@ -225,7 +225,7 @@ class MetricCache {
 
   def asMap(): Map[ClusterKey, FlinkMetricCV] = cache.asMap().toMap
 
-  def getAll(k: Set[TrackId]): Map[ClusterKey, FlinkMetricCV] = cache.getAllPresent(k).toMap
+  def getAll(k: Set[ClusterKey]): Map[ClusterKey, FlinkMetricCV] = cache.getAllPresent(k).toMap
 
   def get(key: ClusterKey): FlinkMetricCV = cache.getIfPresent(key)
 

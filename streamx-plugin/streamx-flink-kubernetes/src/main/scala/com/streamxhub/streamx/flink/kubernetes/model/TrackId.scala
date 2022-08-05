@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.flink.kubernetes.model
 
+import com.streamxhub.streamx.common.util.Utils
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 
 import scala.util.Try
@@ -33,19 +34,17 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
                    appId: Long,
                    jobId: String) {
 
-  /**
-   * check whether fields of trackId are legal
-   */
   def isLegal: Boolean = {
-    Try(namespace.nonEmpty).getOrElse(false) &&
-      Try(clusterId.nonEmpty).getOrElse(false) &&
-      Try(jobId.nonEmpty).getOrElse(false)
+    executeMode match {
+      case FlinkK8sExecuteMode.APPLICATION =>
+        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false)
+      case FlinkK8sExecuteMode.SESSION =>
+        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false) && Try(jobId.nonEmpty).getOrElse(false)
+      case _ => false
+    }
   }
 
-  /**
-   * check whether fields of trackId are no legal
-   */
-  def nonLegal: Boolean = !isLegal
+  def isActive: Boolean = isLegal && Try(jobId.nonEmpty).getOrElse(false)
 
   /**
    * covert to ClusterKey
@@ -57,6 +56,21 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
    */
   def belongTo(clusterKey: ClusterKey): Boolean =
     executeMode == clusterKey.executeMode && namespace == clusterKey.namespace && clusterId == clusterKey.clusterId
+
+  override def hashCode(): Int = {
+    Utils.hashCode(executeMode, clusterId, namespace, appId)
+  }
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case that: TrackId =>
+        this.executeMode == that.executeMode &&
+          this.clusterId == that.clusterId &&
+          this.namespace == that.namespace &&
+          this.appId == that.appId
+      case _ => false
+    }
+  }
 
 }
 

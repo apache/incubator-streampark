@@ -2,6 +2,7 @@ security:
   kerberos:
     login:
       enable: false
+      debug: false
       principal:
       krb5:
       keytab:
