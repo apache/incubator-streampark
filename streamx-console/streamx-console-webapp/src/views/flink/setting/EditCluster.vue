@@ -77,7 +77,7 @@
             placeholder="Please enter cluster address, multiple addresses use ',' split e.g: http://host:port,http://host1:port2"
             v-decorator="['address',{ rules: [{ required: true } ]}]"/>
         </template>
-        <template v-else>
+        <template v-if="executionMode === 3 || executionMode === 5">
           <a-input
             name="address"
             placeholder="Please enter cluster address,  e.g: http://host:port"
