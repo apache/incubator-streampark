@@ -52,7 +52,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
@@ -333,17 +332,5 @@ public class ApplicationController {
                                @ApiParam("Number of log lines skipped loading") @RequestParam(value = "skipLineNum", required = false) Integer skipLineNum,
                                @ApiParam("Number of log lines loaded at once") @RequestParam(value = "limit", required = false) Integer limit) {
         return RestResponse.success(MoreFutures.derefUsingDefaultTimeout(loggerService.queryLog(namespac, jobName, skipLineNum, limit)));
-    }
-
-    /**
-     * download log file
-     *
-     * @return log file content
-     */
-    @PostMapping(value = "/download")
-    @ResponseBody
-    public RestResponse downloadTaskLog(Application app) {
-        byte[] logBytes = loggerService.getLogBytes(app);
-        return RestResponse.success(logBytes);
     }
 }
