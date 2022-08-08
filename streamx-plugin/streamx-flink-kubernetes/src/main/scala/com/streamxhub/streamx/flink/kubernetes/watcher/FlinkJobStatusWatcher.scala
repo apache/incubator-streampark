@@ -24,7 +24,7 @@ import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model._
-import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackController, JobStatusWatcherConfig, KubernetesRetriever}
+import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackController, JobStatusWatcherConfig, K8sDeploymentRelated, KubernetesRetriever}
 import io.fabric8.kubernetes.client.Watcher.Action
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
@@ -256,7 +256,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       if (trackController.canceling.has(trackId)) FlinkJobState.CANCELED else {
         // whether deployment exists on kubernetes cluster
         val isDeployExists = KubernetesRetriever.isDeploymentExists(trackId.clusterId, trackId.namespace)
-        if (isDeployExists) {
+        val DeployStateOfTheError = K8sDeploymentRelated.getDeploymentStatusChanges(trackId.namespace, trackId.clusterId)
+        if (isDeployExists && !DeployStateOfTheError) {
           FlinkJobState.K8S_INITIALIZING
         } else {
           val deployEvent = trackController.k8sDeploymentEvents.get(K8sEventKey(trackId.namespace, trackId.clusterId))
