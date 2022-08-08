@@ -58,19 +58,22 @@ services:
     environment:
       - |
         FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager        
+        jobmanager.rpc.address: jobmanager
+    restart: unless-stopped
 
   taskmanager:
     image: flink:1.14.5-scala_2.12
     depends_on:
       - jobmanager
     command: taskmanager
-    scale: 1
+    deploy:
+      replicas: 1
     environment:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2
+        taskmanager.numberOfTaskSlots: 10
+    restart: unless-stopped
 
 volumes:
   mysql-data:
