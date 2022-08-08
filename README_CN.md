@@ -113,7 +113,7 @@ Make stream processing easier
 
 感谢以上优秀的开源项目和很多未提到的优秀开源项目，致以最崇高的敬意，感谢 [Apache Flink](http://flink.apache.org) 创造了一个了不起的项目! 感谢 [Apache Zeppelin](http://zeppelin.apache.org) 早期给予的灵感，感谢我老婆在项目开发时给予的支持，悉心照顾我的生活和日常，给予我足够的时间开发这个项目!
 
-### 🚀 快速上手
+## 🚀 快速上手
 
 请查看[官网文档](https://www.streamxhub.com/docs/intro)了解更多信息
 
@@ -122,8 +122,7 @@ Make stream processing easier
 
 诸多公司和组织将 StreamX 用于研究、生产和商业产品中, 如果您也在使用 ? 可以在[这里添加](https://github.com/streamxhub/streamx/issues/163)
 
-![image](https://user-images.githubusercontent.com/13284744/160220085-11f1e011-e7a0-421f-9294-c14213c0bc22.png)
-
+![image](https://user-images.githubusercontent.com/13284744/182794423-b77a09dd-ed45-4e87-a1bb-2a4646951f22.png)
 
 
 ## 🏆 我们的荣誉

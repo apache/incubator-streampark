@@ -15,9 +15,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
-
 version: '3.8'
-
 services:
   streamx-server:
     build:
@@ -52,6 +50,30 @@ services:
       retries: 10
     restart: unless-stopped
 
+  jobmanager:
+    image: flink:1.14.5-scala_2.12
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+    restart: unless-stopped
+
+  taskmanager:
+    image: flink:1.14.5-scala_2.12
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    deploy:
+      replicas: 1
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 10
+    restart: unless-stopped
 
 volumes:
   mysql-data:

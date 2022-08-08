@@ -93,7 +93,7 @@ class FlinkTrackController extends Logger with AutoCloseable {
     collectTracks() match {
       case k if k.isEmpty => FlinkMetricCV.empty
       case k =>
-        flinkMetrics.getAll(k) match {
+        flinkMetrics.getAll(for (elem <- k) yield {ClusterKey.of(elem)}) match {
           case m if m.isEmpty => FlinkMetricCV.empty
           case m =>
             // aggregate metrics
@@ -225,7 +225,7 @@ class MetricCache {
 
   def asMap(): Map[ClusterKey, FlinkMetricCV] = cache.asMap().toMap
 
-  def getAll(k: Set[TrackId]): Map[ClusterKey, FlinkMetricCV] = cache.getAllPresent(k).toMap
+  def getAll(k: Set[ClusterKey]): Map[ClusterKey, FlinkMetricCV] = cache.getAllPresent(k).toMap
 
   def get(key: ClusterKey): FlinkMetricCV = cache.getIfPresent(key)
 
