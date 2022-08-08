@@ -19,37 +19,34 @@
 
 package com.streamxhub.streamx.spark.core
 
-import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.util.{PropertiesUtils, SystemPropertyUtils}
-import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.streaming.{Seconds, StreamingContext}
+import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.annotation.meta.getter
-import scala.collection.mutable.ArrayBuffer
 
 /**
  * <b><code>SparkBatch</code></b>
  * <p/>
- * Spark 流处理 入口封装
+ * Spark 批处理 入口封装
  * <p/>
  * <b>Creation Time:</b> 2022/8/8 20:44.
  *
  * @author gn
  * @since streamx ${PROJECT_VERSION}
  */
-trait SparkStreaming extends Spark {
+trait SparkBatch extends Spark {
 
 
   @(transient@getter)
-  var context: StreamingContext = _
+  var context: SparkContext
 
   /**
-   * StreamingContext 运行之前执行
+   * SparkContext 运行之前执行
    *
    * @param ssc
    */
   def beforeStarted(): Unit = {}
+
 
   /**
    * StreamingContext 运行之后执行
@@ -64,7 +61,7 @@ trait SparkStreaming extends Spark {
   /**
    * 处理函数
    *
-   * @param ssc
+   * @param sc
    */
   def handle(): Unit
 
@@ -74,33 +71,13 @@ trait SparkStreaming extends Spark {
     this._args = args
 
     initArgs(args)
-    initialize(sparkConf)
 
-    // 时间间隔
-    val duration = sparkConf.get(KEY_SPARK_BATCH_DURATION).toInt
-
-
-    def initContext() = {
-      // 时间间隔
-      val duration = sparkConf.get(KEY_SPARK_BATCH_DURATION).toInt
-      this.context = new StreamingContext(sparkSession.sparkContext, Seconds(duration))
-      handle()
-      this.context
-    }
-
-    checkpoint match {
-      case "" => initContext()
-      case ck =>
-        this.context = StreamingContext.getOrCreate(ck, initContext, createOnError = createOnError)
-        this.context.checkpoint(ck)
-    }
-
-    beforeStarted()
-    this.context.start()
+    this.context = sparkSession.sparkContext
+    handle()
     afterStarted()
-    this.context.awaitTermination()
+    this.context.stop()
     beforeStop()
   }
 
-}
 
+}
