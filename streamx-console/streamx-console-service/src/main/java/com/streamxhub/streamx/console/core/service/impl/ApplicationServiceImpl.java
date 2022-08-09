@@ -1181,6 +1181,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         Map<String, String> dynamicOption = FlinkSubmitter.extractDynamicOptionAsJava(application.getDynamicOptions());
+        //设置yarn.application.queue，如果yarn queue和dynamic option都设置了，那么yarn queue优先级较高
+        if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
+            if (!application.getHotParamsMap().isEmpty()) {
+                if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
+                    dynamicOption.put(ConfigConst.KEY_YARN_APP_QUEUE(),application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE()).toString());
+                }
+            }
+        }
 
         Map<String, Object> extraParameter = new HashMap<>(0);
         extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());
