@@ -1185,7 +1185,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
             if (!application.getHotParamsMap().isEmpty()) {
                 if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
-                    dynamicOption.put(ConfigConst.KEY_YARN_APP_QUEUE(),application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE()).toString());
+                    dynamicOption.put(ConfigConst.KEY_YARN_APP_QUEUE(), application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE()).toString());
                 }
             }
         }
