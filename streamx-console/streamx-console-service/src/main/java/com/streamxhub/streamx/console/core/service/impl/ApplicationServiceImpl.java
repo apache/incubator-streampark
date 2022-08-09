@@ -968,8 +968,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
             String yarnQueue = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
-            optionMap.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
-
+            if (yarnQueue != null) {
+                optionMap.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
+            }
             if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
                 String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
                 assert yarnSessionClusterId != null;
@@ -1181,14 +1182,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         Map<String, String> dynamicOption = FlinkSubmitter.extractDynamicOptionAsJava(application.getDynamicOptions());
-        //设置yarn.application.queue，如果yarn queue和dynamic option都设置了，那么yarn queue优先级较高
-        if (ExecutionMode.YARN_APPLICATION.equals(application.getExecutionModeEnum())) {
-            if (!application.getHotParamsMap().isEmpty()) {
-                if (application.getHotParamsMap().containsKey(ConfigConst.KEY_YARN_APP_QUEUE())) {
-                    dynamicOption.put(ConfigConst.KEY_YARN_APP_QUEUE(), application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE()).toString());
-                }
-            }
-        }
 
         Map<String, Object> extraParameter = new HashMap<>(0);
         extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());
@@ -1205,10 +1198,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             extraParameter.put(RestOptions.PORT.key(), activeAddress.getPort());
         }
 
-        if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
-            String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
-            assert yarnSessionClusterId != null;
-            extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
+        if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
+            String yarnQueue = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
+            if (yarnQueue != null) {
+                dynamicOption.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
+            }
+            if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+                String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
+                assert yarnSessionClusterId != null;
+                extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
+            }
         }
 
         if (application.isFlinkSqlJob()) {
