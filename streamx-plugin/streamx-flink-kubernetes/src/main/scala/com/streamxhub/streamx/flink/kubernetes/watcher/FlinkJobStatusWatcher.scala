@@ -260,20 +260,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         if (isDeployExists && !DeployStateOfTheError) {
           FlinkJobState.K8S_INITIALIZING
         } else {
-          val deployEvent = trackController.k8sDeploymentEvents.get(K8sEventKey(trackId.namespace, trackId.clusterId))
-          if (deployEvent != null) {
-            // no exists k8s deployment, infer from last deployment event
-            val isDelete = deployEvent.action == Action.DELETED
-            val isDeployAvailable = deployEvent.event.getStatus.getConditions.exists(_.getReason == "MinimumReplicasAvailable")
-            (isDelete, isDeployAvailable) match {
-              case (true, true) => FlinkJobState.POS_TERMINATED // maybe FINISHED or CANCEL
-              case (true, false) => FlinkJobState.FAILED
-              case _ => FlinkJobState.K8S_INITIALIZING
-            }
-          } else {
-            // determine if the state should be SILENT or LOST
-            inferSilentOrLostFromPreCache(latest)
-          }
+          K8sDeploymentRelated.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
+          FlinkJobState.FAILED
         }
       }
     }

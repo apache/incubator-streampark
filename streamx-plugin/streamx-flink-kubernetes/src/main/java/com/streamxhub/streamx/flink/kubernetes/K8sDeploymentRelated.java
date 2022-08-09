@@ -42,4 +42,10 @@ public class K8sDeploymentRelated {
             return items.get(0).getStatus().getContainerStatuses().get(0).getLastState().getTerminated() != null;
         }
     }
+
+    public static void deleteTaskDeployment(String nameSpce, String deploymentName){
+        try (KubernetesClient client = new DefaultKubernetesClient()){
+            client.apps().deployments().inNamespace(nameSpce).withName(deploymentName).delete();
+        }
+    }
 }
