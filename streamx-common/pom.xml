@@ -15,6 +15,12 @@
 
     <dependencies>
 
+        <!-- s3 -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+        </dependency>
+
         <!-- junit -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
