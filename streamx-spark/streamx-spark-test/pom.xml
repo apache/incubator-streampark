@@ -46,7 +46,7 @@
         <dependency>
             <groupId>org.scalikejdbc</groupId>
             <artifactId>scalikejdbc_${scala.binary.version}</artifactId>
-            <version>4.0.0</version>
+            <version>${scalikejdbc.version}</version>
         </dependency>
 
         <dependency>
