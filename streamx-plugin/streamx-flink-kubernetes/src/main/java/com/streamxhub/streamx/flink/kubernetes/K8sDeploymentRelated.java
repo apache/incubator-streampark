@@ -48,4 +48,19 @@ public class K8sDeploymentRelated {
             client.apps().deployments().inNamespace(nameSpce).withName(deploymentName).delete();
         }
     }
+
+    public static Integer getTheNumberOfTaskDeploymentRetries(String nameSpce, String deploymentName){
+        try (KubernetesClient client = new DefaultKubernetesClient()){
+            Map<String, String> matchLabels = client.apps()
+                .deployments()
+                .inNamespace(nameSpce)
+                .withName(deploymentName)
+                .get()
+                .getSpec()
+                .getSelector()
+                .getMatchLabels();
+            List<Pod> items = client.pods().inNamespace(nameSpce).withLabels(matchLabels).list().getItems();
+            return items.get(0).getStatus().getContainerStatuses().get(0).getRestartCount();
+        }
+    }
 }

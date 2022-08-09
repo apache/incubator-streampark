@@ -256,12 +256,17 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       if (trackController.canceling.has(trackId)) FlinkJobState.CANCELED else {
         // whether deployment exists on kubernetes cluster
         val isDeployExists = KubernetesRetriever.isDeploymentExists(trackId.clusterId, trackId.namespace)
-        val DeployStateOfTheError = K8sDeploymentRelated.getDeploymentStatusChanges(trackId.namespace, trackId.clusterId)
-        if (isDeployExists && !DeployStateOfTheError) {
+        val deployStateOfTheError = K8sDeploymentRelated.getDeploymentStatusChanges(trackId.namespace, trackId.clusterId)
+        val numRetries = K8sDeploymentRelated.getTheNumberOfTaskDeploymentRetries(trackId.namespace, trackId.clusterId)
+        if (isDeployExists && !deployStateOfTheError) {
           FlinkJobState.K8S_INITIALIZING
-        } else {
+        }
+        else if (deployStateOfTheError && numRetries > 3) {
           K8sDeploymentRelated.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
           FlinkJobState.FAILED
+        } else {
+          // determine if the state should be SILENT or LOST
+          inferSilentOrLostFromPreCache(latest)
         }
       }
     }
