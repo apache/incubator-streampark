@@ -108,6 +108,7 @@ trait SparkStreaming {
           argv = tail
         case Nil =>
         case tail =>
+          // scalastyle:off println
           System.err.println(s"Unrecognized options: ${tail.mkString(" ")}")
           printUsageAndExit()
       }
@@ -116,8 +117,8 @@ trait SparkStreaming {
     sparkConf.set(KEY_SPARK_USER_ARGS, args.mkString("|"))
     //通过vm -Dspark.debug.conf传入配置文件的默认当作本地调试模式
     val (isDebug, confPath) = SystemPropertyUtils.get(KEY_SPARK_CONF, "") match {
-      case "" => (false, sparkConf.get(KEY_SPARK_DEBUG_CONF))
-      case path => (true, path)
+      case "" => (true, sparkConf.get(KEY_SPARK_DEBUG_CONF))
+      case path => (false, path)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
     }
 
@@ -138,6 +139,7 @@ trait SparkStreaming {
     }
 
     if (appMain == null) {
+      // scalastyle:off println
       System.err.println(s"[StreamX] $KEY_SPARK_MAIN_CLASS must not be empty!")
       System.exit(1)
     }
@@ -163,6 +165,7 @@ trait SparkStreaming {
   }
 
   private[this] def printUsageAndExit(): Unit = {
+    // scalastyle:off println
     System.err.println(
       """
         |"Usage: Streaming [options]
