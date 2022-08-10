@@ -483,7 +483,7 @@
                 <plugin>
                     <groupId>net.alchim31.maven</groupId>
                     <artifactId>scala-maven-plugin</artifactId>
-                    <version>4.7.1</version>
+                    <version>4.3.0</version>
                     <configuration>
                         <addScalacArgs>-target:jvm-${project.build.jdk}</addScalacArgs>
                         <target>${project.build.jdk}</target>
