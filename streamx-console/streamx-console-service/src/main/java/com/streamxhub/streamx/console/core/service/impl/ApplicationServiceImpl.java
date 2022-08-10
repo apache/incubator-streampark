@@ -968,8 +968,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
             String yarnQueue = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
-            optionMap.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
-
+            if (yarnQueue != null) {
+                optionMap.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
+            }
             if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
                 String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
                 assert yarnSessionClusterId != null;
@@ -1197,10 +1198,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             extraParameter.put(RestOptions.PORT.key(), activeAddress.getPort());
         }
 
-        if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
-            String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
-            assert yarnSessionClusterId != null;
-            extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
+        if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
+            String yarnQueue = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
+            if (yarnQueue != null) {
+                dynamicOption.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
+            }
+            if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+                String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
+                assert yarnSessionClusterId != null;
+                extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
+            }
         }
 
         if (application.isFlinkSqlJob()) {
