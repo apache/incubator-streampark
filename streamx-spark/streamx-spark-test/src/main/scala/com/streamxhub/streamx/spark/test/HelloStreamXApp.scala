@@ -25,10 +25,8 @@ import scalikejdbc.{ConnectionPool, DB, SQL}
 
 object HelloStreamXApp extends SparkStreaming {
 
-
   override def handle(): Unit = {
 
-    val sparkConf = context.sparkContext.getConf
     val jdbcURL = sparkConf.get("spark.sink.mysql.jdbc.url")
     val user = sparkConf.get("spark.sink.mysql.user")
     val password = sparkConf.get("spark.sink.mysql.password")
@@ -69,5 +67,4 @@ object HelloStreamXApp extends SparkStreaming {
         source.updateOffset(time)
       })
   }
-
 }

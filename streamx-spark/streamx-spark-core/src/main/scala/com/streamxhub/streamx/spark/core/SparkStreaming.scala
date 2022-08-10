@@ -40,67 +40,57 @@ import scala.collection.mutable.ArrayBuffer
  */
 trait SparkStreaming extends Spark {
 
-
   @(transient@getter)
-  var context: StreamingContext = _
+  protected lazy val context: StreamingContext = {
 
-  /**
-   * StreamingContext 运行之前执行
-   *
-   * @param ssc
-   */
-  def beforeStarted(): Unit = {}
-
-  /**
-   * StreamingContext 运行之后执行
-   */
-  def afterStarted(): Unit = {}
-
-  /**
-   * StreamingContext 停止后 程序停止前 执行
-   */
-  def beforeStop(): Unit = {}
-
-  /**
-   * 处理函数
-   *
-   * @param ssc
-   */
-  def handle(): Unit
-
-
-  def main(args: Array[String]): Unit = {
-
-    this._args = args
-
-    initArgs(args)
-    initialize(sparkConf)
-
-    // 时间间隔
-    val duration = sparkConf.get(KEY_SPARK_BATCH_DURATION).toInt
-
-
-    def initContext() = {
+    /**
+     * 构建 StreamingContext
+     *
+     * @return
+     */
+    def _context(): StreamingContext = {
       // 时间间隔
       val duration = sparkConf.get(KEY_SPARK_BATCH_DURATION).toInt
-      this.context = new StreamingContext(sparkSession.sparkContext, Seconds(duration))
-      handle()
-      this.context
+      new StreamingContext(sparkSession.sparkContext, Seconds(duration))
     }
 
     checkpoint match {
-      case "" => initContext()
-      case ck =>
-        this.context = StreamingContext.getOrCreate(ck, initContext, createOnError = createOnError)
-        this.context.checkpoint(ck)
+      case "" => _context()
+      case checkpointPath =>
+        val tmpContext = StreamingContext.getOrCreate(checkpointPath, _context, createOnError = createOnError)
+        tmpContext.checkpoint(checkpointPath)
+        tmpContext
     }
-
-    beforeStarted()
-    this.context.start()
-    afterStarted()
-    this.context.awaitTermination()
-    beforeStop()
   }
+
+  /**
+   * 启动
+   */
+  final override def start(): Unit = {
+    context.start()
+    context.awaitTermination()
+  }
+
+  /**
+   * config 阶段的目的是让开发者可以通过钩子的方式设置更多的参数(约定的配置文件以外的其他参数)
+   * 用户设置sparkConf参数,如,spark序列化:
+   * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+   * // 注册要序列化的自定义类型。
+   * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
+   *
+   * @param sparkConf
+   */
+  override def config(sparkConf: SparkConf): Unit = {}
+
+  /**
+   * 阶段是在参数都设置完毕了 给开发者提供的一个用于做其他动作的入口, 该阶段是在初始化完成之后在程序启动之前进行
+   */
+  override def ready(): Unit = {}
+
+  /**
+   * destroy 阶段,是程序运行完毕了,在jvm退出之前的最后一个阶段,一般用于收尾的工作
+   */
+  override def destroy(): Unit = {}
 
 }
 

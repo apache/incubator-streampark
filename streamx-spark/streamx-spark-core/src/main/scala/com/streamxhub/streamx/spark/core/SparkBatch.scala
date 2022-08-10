@@ -31,53 +31,15 @@ import scala.annotation.meta.getter
  * <p/>
  * <b>Creation Time:</b> 2022/8/8 20:44.
  *
- * @author gn
- * @since streamx ${PROJECT_VERSION}
+ * @author guoning
+ * @since streamx
  */
 trait SparkBatch extends Spark {
 
-
   @(transient@getter)
-  var context: SparkContext
+  protected lazy val context: SparkContext = sparkSession.sparkContext
 
-  /**
-   * SparkContext 运行之前执行
-   *
-   * @param ssc
-   */
-  def beforeStarted(): Unit = {}
-
-
-  /**
-   * StreamingContext 运行之后执行
-   */
-  def afterStarted(): Unit = {}
-
-  /**
-   * StreamingContext 停止后 程序停止前 执行
-   */
-  def beforeStop(): Unit = {}
-
-  /**
-   * 处理函数
-   *
-   * @param sc
-   */
-  def handle(): Unit
-
-
-  def main(args: Array[String]): Unit = {
-
-    this._args = args
-
-    initArgs(args)
-
-    this.context = sparkSession.sparkContext
-    handle()
-    afterStarted()
-    this.context.stop()
-    beforeStop()
+  override def destroy(): Unit = {
+    context.stop()
   }
-
-
 }

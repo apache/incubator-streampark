@@ -28,44 +28,54 @@ import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
 
 /**
+ * <b><code>Spark</code></b>
+ * <p/>
+ * Spark基础特质
+ * <p/>
+ * <b>Creation Time:</b> 2022/8/8 20:44.
  *
+ * @author guoning
+ * @since streamx
  */
 trait Spark {
 
-  protected final def args: Array[String] = _args
-
-  protected final var _args: Array[String] = _
-
-  protected val sparkListeners = new ArrayBuffer[String]()
+  @(transient@getter)
+  protected final lazy val sparkConf: SparkConf = new SparkConf()
+  @(transient@getter)
+  protected final val sparkListeners = new ArrayBuffer[String]()
 
   @(transient@getter)
-  protected var sparkSession: SparkSession = _
-
-  protected final var sparkConf: SparkConf = _
+  protected final var sparkSession: SparkSession = _
 
   // checkpoint目录
-  protected var checkpoint: String = ""
+  protected final var checkpoint: String = ""
 
   // 从checkpoint 中恢复失败，则重新创建
-  protected var createOnError: Boolean = true
+  protected final var createOnError: Boolean = true
+
 
   /**
-   * 用户设置sparkConf参数,如,spark序列化:
-   * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-   * // 注册要序列化的自定义类型。
-   * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
+   * 入口函数
    *
-   * @param conf
+   * @param args
    */
-  def initialize(sparkConf: SparkConf): Unit = {}
+  def main(args: Array[String]): Unit = {
+    init(args)
+    config(sparkConf)
+    sparkSession = SparkSession.builder().enableHiveSupport().config(sparkConf).getOrCreate()
+    ready()
+    handle()
+    start()
+    destroy()
+  }
 
   /**
-   * 初始化参数
+   * 根据用户传参，初始化 sparkConf
    *
    * @return
    */
 
-  def initArgs(args: Array[String]): Unit = {
+  final def init(args: Array[String]): Unit = {
 
     var argv = args.toList
 
@@ -85,7 +95,6 @@ trait Spark {
       }
     }
 
-    sparkConf = new SparkConf()
     sparkConf.set(KEY_SPARK_USER_ARGS, args.mkString("|"))
 
     //通过vm -Dspark.debug.conf传入配置文件的默认当作本地调试模式
@@ -125,14 +134,40 @@ trait Spark {
     //优雅停止...
     sparkConf.set("spark.streaming.stopGracefullyOnShutdown", "true")
 
-    initialize(sparkConf)
-
     val extraListeners = sparkListeners.mkString(",") + "," + sparkConf.get("spark.extraListeners", "")
     if (extraListeners != "") sparkConf.set("spark.extraListeners", extraListeners)
-
-    sparkSession = SparkSession.builder().enableHiveSupport().config(sparkConf).getOrCreate()
-
   }
+
+  /**
+   * config 阶段的目的是让开发者可以通过钩子的方式设置更多的参数(约定的配置文件以外的其他参数)
+   * 用户设置sparkConf参数,如,spark序列化:
+   * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+   * // 注册要序列化的自定义类型。
+   * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
+   *
+   * @param sparkConf
+   */
+  def config(sparkConf: SparkConf): Unit
+
+  /**
+   * 阶段是在参数都设置完毕了,给开发者提供的一个用于做其他动作的入口, 该阶段是在初始化完成之后在程序启动之前进行
+   */
+  def ready(): Unit
+
+  /**
+   * handle 阶段是接入开发者编写的代码的阶段,是开发者编写代码的入口,也是最重要的一个阶段, 这个handle 方法会强制让开发者去实现
+   */
+  def handle(): Unit
+
+  /**
+   * start 阶段,顾名思义,这个阶段会启动任务,由框架自动执行
+   */
+  def start(): Unit
+
+  /**
+   * destroy 阶段,是程序运行完毕了,在jvm退出之前的最后一个阶段,一般用于收尾的工作
+   */
+  def destroy(): Unit
 
   /**
    * printUsageAndExit
