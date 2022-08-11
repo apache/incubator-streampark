@@ -379,15 +379,26 @@ start() {
   -Xloggc:${APP_HOME}/logs/gc.log
   """
 
-  eval $NOHUP "\"$RUNJAVA\"" $JAVA_OPTS \
-    -classpath "\"$APP_CLASSPATH\"" \
-    -Dapp.home="\"${APP_HOME}\"" \
-    -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
-    -Dspring.config.location="\"${PROPER}\"" \
-    -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
-    -Dpid="\"${APP_PID}\"" \
-    com.streamxhub.streamx.console.StreamXConsole \
-    >> "$APP_OUT" 2>&1 "&"
+  if [[ "$IS_DOCKER" == "true" ]]; then
+    eval "\"$RUNJAVA\"" $JAVA_OPTS \
+      -classpath "\"$APP_CLASSPATH\"" \
+      -Dapp.home="\"${APP_HOME}\"" \
+      -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
+      -Dspring.config.location="\"${PROPER}\"" \
+      -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
+      -Dpid="\"${APP_PID}\"" \
+      com.streamxhub.streamx.console.StreamXConsole
+  else
+    eval $NOHUP "\"$RUNJAVA\"" $JAVA_OPTS \
+      -classpath "\"$APP_CLASSPATH\"" \
+      -Dapp.home="\"${APP_HOME}\"" \
+      -Dlogging.config="\"${APP_CONF}\"/logback-spring.xml" \
+      -Dspring.config.location="\"${PROPER}\"" \
+      -Djava.io.tmpdir="\"$APP_TMPDIR\"" \
+      -Dpid="\"${APP_PID}\"" \
+      com.streamxhub.streamx.console.StreamXConsole
+      >> "$APP_OUT" 2>&1 "&"
+  fi
 
    if [ $? -eq "0" ]; then
       local SLEEP_INTERVAL=5

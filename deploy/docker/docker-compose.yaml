@@ -18,21 +18,19 @@
 version: '3.8'
 services:
   streamx-server:
-    build:
-      context: ../..
-      dockerfile: deploy/docker/compose/Dockerfile
-      args:
-        DB: database
+    image: qlucky/streamx:v1.2.3-mixed
     ports:
       - 10000:10000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      MYSQL_HOST: database
     depends_on:
       - database
     restart: unless-stopped
 
   database:
-    build:
-      context: ../..
-      dockerfile: deploy/docker/mysql/Dockerfile
+    image: qlucky/streamx-mysql:v1.2.3
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
       - 3306:3306

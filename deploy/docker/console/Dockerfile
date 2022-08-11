@@ -15,45 +15,34 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ###############################################################################
-FROM alpine:3.16 as deps-stage
-COPY . /
-WORKDIR /
-RUN tar zxvf streamx-console/streamx-console-service/target/streamx-console-service-*.tar.gz \
-&& mv streamx-console-service-* streamx
+FROM maven:3.8.5-jdk-8-slim as build
+ARG SCALA_VERSION=2.12.7
+ARG SCALA_BINARY_VERSION=2.12
+ARG WEB_BUILD
 
+COPY . /app
+WORKDIR /app
 
-FROM docker:dind
+RUN mvn clean install -DskipTests -Dscala.version=$SCALA_VERSION -Dscala.binary.version=$SCALA_BINARY_VERSION $WEB_BUILD \
+  && tar zxvf streamx-console/streamx-console-service/target/streamx-console-service-*.tar.gz \
+  && mv streamx-console-service-* streamx
+
+FROM maven:3.8.5-jdk-8-slim
+ARG FLINK_VERSION=1.14.5
+ARG SCALA_VERSION=scala_2.12
+ARG DOCKER_VERSION=20.10.11
+
+ENV IS_DOCKER=true
 WORKDIR /streamx
-COPY --from=deps-stage /streamx /streamx
 
-ARG DB=localhost
-ENV NODE_VERSION=16.1.0
-ENV NPM_VERSION=7.11.2
+RUN apt-get update \
+    && apt-get -y install iputils-ping vim net-tools bash wget \
+    && wget "https://dlcdn.apache.org/flink/flink-$FLINK_VERSION/flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" \
+    && mkdir ./flink \
+    && tar zxvf "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" -C ./flink --strip-components=1 \
+    && rm "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz"
 
-RUN sed -i -e 's/eval $NOHUP/eval/' bin/streamx.sh \
-    && sed -i -e 's/StreamXConsole \\/StreamXConsole/' bin/streamx.sh \
-    && sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' bin/streamx.sh \
-    && sed -i -e 's/localhost/'$DB'/' conf/application.yml
-
-RUN apk add openjdk8 \
-    && apk add maven \
-    && apk add wget \
-    && apk add vim \
-    && apk add bash
-
-ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
-ENV MAVEN_HOME=/usr/share/java/maven-3
-ENV PATH $JAVA_HOME/bin:$PATH
-ENV PATH $MAVEN_HOME/bin:$PATH
-
-
-
-RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
-    && tar zxvf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
-    && rm "node-v$NODE_VERSION-linux-x64.tar.gz" \
-    && ln -s /usr/local/bin/node /usr/local/bin/nodejs
-
-RUN mkdir -p ~/.kube \
-    && cat plugins/config >> ~/.kube/config
-
+COPY --from=build /app/streamx/ /streamx
 EXPOSE 10000
+
+ENTRYPOINT [ "/bin/sh", "bin/startup.sh" ]
