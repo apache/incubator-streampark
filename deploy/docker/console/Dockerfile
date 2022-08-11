@@ -39,16 +39,20 @@ RUN apt-get update \
     && apt-get -y install iputils-ping vim net-tools bash wget \
     && wget "https://dlcdn.apache.org/flink/flink-$FLINK_VERSION/flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" \
     && mkdir ./flink \
-    && tar zxvf "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" -C ./flink --strip-components=1 \
-    && rm "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" \
-    && set -eux; \
+    && tar zxf "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" -C ./flink --strip-components=1 \
+    && rm "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz"
+
+# download docker cli file
+RUN set -eux; \
     if [ $(uname -m) = "x86_64" ]; then \
         wget -O docker.tgz "https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER_VERSION.tgz"; \
     else \
         wget -O docker.tgz "https://download.docker.com/linux/static/stable/aarch64/docker-$DOCKER_VERSION.tgz"; \
     fi \
-    && tar zxf docker.tgz --strip-components 1 --directory /usr/local/bin/ \
-    && rm docker.tgz
+    && mkdir ./docker \
+    && tar zxf docker.tgz -C ./docker --strip-components 1 \
+    && mv docker/docker /usr/bin/ \
+    && rm -r docker && rm docker.tgz
     
 COPY --from=build /app/streamx/ /streamx
 EXPOSE 10000
