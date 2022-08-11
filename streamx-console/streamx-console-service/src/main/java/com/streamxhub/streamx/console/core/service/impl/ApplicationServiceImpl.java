@@ -605,6 +605,83 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    @SneakyThrows
+    @Transactional(rollbackFor = {Exception.class})
+    public Long copy(Application appParam) {
+        Application oldApp = getById(appParam.getId());
+
+        Application newApp = new Application();
+        String jobName = appParam.getJobName();
+        String args = appParam.getArgs();
+        String copy = "copy-";
+        jobName = jobName != null && !"".equals(jobName) ? jobName : copy + oldApp.getJobName();
+        newApp.setJobName(jobName);
+        newApp.setClusterId(jobName);
+        args = args != null && !"".equals(args) ? args : oldApp.getArgs();
+        newApp.setArgs(args);
+        newApp.setVersionId(100000L);
+
+        newApp.setFlinkClusterId(oldApp.getFlinkClusterId());
+        newApp.setRestartSize(oldApp.getRestartSize());
+        newApp.setJobType(oldApp.getJobType());
+        newApp.setTeamId(oldApp.getTeamId());
+        newApp.setOptions(oldApp.getOptions());
+        newApp.setDynamicOptions(oldApp.getDynamicOptions());
+        newApp.setResolveOrder(oldApp.getResolveOrder());
+        newApp.setExecutionMode(oldApp.getExecutionMode());
+        newApp.setFlinkImage(oldApp.getFlinkImage());
+        newApp.setK8sNamespace(oldApp.getK8sNamespace());
+        newApp.setK8sRestExposedType(oldApp.getK8sRestExposedType());
+        newApp.setK8sPodTemplate(oldApp.getK8sPodTemplate());
+        newApp.setK8sJmPodTemplate(oldApp.getK8sJmPodTemplate());
+        newApp.setK8sTmPodTemplate(oldApp.getK8sTmPodTemplate());
+        newApp.setK8sHadoopIntegration(oldApp.getK8sHadoopIntegration());
+        newApp.setDescription(oldApp.getDescription());
+        newApp.setAlertId(oldApp.getAlertId());
+        newApp.setCpFailureAction(oldApp.getCpFailureAction());
+        newApp.setCpFailureRateInterval(oldApp.getCpFailureRateInterval());
+        newApp.setCpMaxFailureInterval(oldApp.getCpMaxFailureInterval());
+        newApp.setMainClass(oldApp.getMainClass());
+        newApp.setAppType(oldApp.getAppType());
+        newApp.setResourceFrom(oldApp.getResourceFrom());
+
+        newApp.setUserId(commonService.getCurrentUser().getUserId());
+        newApp.setState(FlinkAppState.ADDED.getValue());
+        newApp.setLaunch(LaunchState.NEED_LAUNCH.get());
+        newApp.setOptionState(OptionState.NONE.getValue());
+        newApp.setCreateTime(new Date());
+        newApp.doSetHotParams();
+
+        newApp.setJar(oldApp.getJar());
+        newApp.setJarCheckSum(oldApp.getJarCheckSum());
+
+        boolean saved = save(newApp);
+        if (saved) {
+            if (newApp.isFlinkSqlJob()) {
+                FlinkSql copyFlinkSql = flinkSqlService.getEffective(appParam.getId(), true);
+                newApp.setFlinkSql(copyFlinkSql.getSql());
+                newApp.setDependency(copyFlinkSql.getDependency());
+                FlinkSql flinkSql = new FlinkSql(newApp);
+                flinkSqlService.create(flinkSql);
+            }
+            if (newApp.getConfig() != null) {
+                ApplicationConfig copyConfig = configService.getEffective(appParam.getId());
+                ApplicationConfig config = new ApplicationConfig();
+                config.setAppId(newApp.getId());
+                config.setFormat(copyConfig.getFormat());
+                config.setContent(copyConfig.getContent());
+                config.setCreateTime(new Date());
+                config.setVersion(1);
+                configService.save(config);
+                configService.setLatestOrEffective(true, config.getId(), newApp.getId());
+            }
+            assert newApp.getId() != null;
+            return newApp.getId();
+        }
+        return 0L;
+    }
+
+    @Override
     @Transactional(rollbackFor = {Exception.class})
     @RefreshCache
     public boolean update(Application appParam) {
