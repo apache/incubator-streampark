@@ -24,6 +24,7 @@ mvn clean install -Dscala.version=2.12.5 -Dscala.binary.version=2.12 -DskipTests
 
 2.Execution Docker compose build command
 ```
+cd deploy/docker
 docker-compose up -d
 ```
 
