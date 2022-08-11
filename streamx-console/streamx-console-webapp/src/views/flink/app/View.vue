@@ -422,6 +422,17 @@
             </a-button>
           </a-tooltip>
 
+          <a-tooltip title="Copy Application">
+            <a-button
+              v-permit="'app:copy'"
+              @click.native="handleCopy(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="copy"/>
+            </a-button>
+          </a-tooltip>
+
           <a-tooltip title="View FlameGraph">
             <a-button
               v-if="record.flameGraph"
@@ -990,6 +1001,7 @@ import {
   clean,
   checkSavepointPath,
   dashboard,
+  copy,
   downLog,
   forcedStop,
   list,
@@ -1678,6 +1690,27 @@ export default {
     handleDetail(app) {
       this.SetAppId(app.id)
       this.$router.push({'path': '/flink/app/detail'})
+    },
+
+    handleCopy(app) {
+      copy({
+        id: app.id
+      }).then((resp) => {
+        const status = resp.status || 'error'
+        if (status === 'success') {
+          this.$swal.fire({
+            icon: 'success',
+            title: 'copy successful',
+            timer: 2000
+          })
+        }else{
+          this.$swal.fire({
+            icon: 'error',
+            title: 'copy exception',
+            timer: 2000
+          })
+        }
+      })
     },
 
     handleCheckFlameGraph() {

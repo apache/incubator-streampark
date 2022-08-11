@@ -41,6 +41,10 @@ export function update (params) {
   return http.post(api.Application.UPDATE, params)
 }
 
+export function copy (params) {
+  return http.post(api.Application.COPY, params)
+}
+
 export function upload (params) {
   return http.upload(api.Application.UPLOAD, params)
 }

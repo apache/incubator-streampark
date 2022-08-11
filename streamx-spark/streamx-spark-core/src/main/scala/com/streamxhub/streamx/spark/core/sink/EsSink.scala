@@ -16,38 +16,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.streamxhub.streamx.spark.core.sink
-
-import org.apache.spark.SparkContext
-import org.apache.spark.rdd.RDD
-import org.apache.spark.streaming.Time
-import org.elasticsearch.spark.rdd.EsSpark
-
-import scala.collection.Map
-import scala.language.postfixOps
-
-/**
-  *
-  *
-  * 输出ES
-  */
-class EsSink[T](@transient override val sc: SparkContext, initParams: Map[String, String] = Map.empty[String, String])
-  extends Sink[T] {
-
-  override val prefix: String = "spark.sink.es."
-
-
-  lazy val esParam: Map[String, String] = (param++initParams).filter(_._1.startsWith(prefix))
-
-  /**
-    * 输出
-    *
-    */
-  def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
-    rdd match {
-      case rdd: RDD[String] => EsSpark.saveJsonToEs(rdd, esParam)
-      case _ => EsSpark.saveToEs(rdd, esParam)
-    }
-  }
-}
+//
+//package com.streamxhub.streamx.spark.core.sink
+//
+//import org.apache.spark.SparkContext
+//import org.apache.spark.rdd.RDD
+//import org.apache.spark.streaming.Time
+//import org.elasticsearch.spark.rdd.EsSpark
+//
+//import scala.collection.Map
+//import scala.language.postfixOps
+//
+///**
+//  *
+//  *
+//  * 输出ES
+//  */
+//class EsSink[T](@transient override val sc: SparkContext, initParams: Map[String, String] = Map.empty[String, String])
+//  extends Sink[T] {
+//
+//  override val prefix: String = "spark.sink.es."
+//
+//
+//  lazy val esParam: Map[String, String] = (param++initParams).filter(_._1.startsWith(prefix))
+//
+//  /**
+//    * 输出
+//    *
+//    */
+//  def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
+//    rdd match {
+//      case rdd: RDD[String] => EsSpark.saveJsonToEs(rdd, esParam)
+//      case _ => EsSpark.saveToEs(rdd, esParam)
+//    }
+//  }
+//}
