@@ -26,7 +26,7 @@ mvn clean install -Dscala.version=2.12.5 -Dscala.binary.version=2.12 -DskipTests
 ```
 cd deploy/docker
 docker-compose up -d
-```
+```tttt
 
 3.Set up flink home on the streamx web ui
 ```
