@@ -62,7 +62,7 @@ public class UserController {
     }
 
     @PostMapping("list")
-    @RequiresPermissions("user:view")
+    @RequiresPermissions(value = {"user:view","app:view"},logical = Logical.OR)
     public RestResponse userList(RestRequest restRequest, User user) {
         IPage<User> userList = userService.findUserDetail(user, restRequest);
         return RestResponse.success(userList);
