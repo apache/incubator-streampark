@@ -21,8 +21,8 @@ package com.streamxhub.streamx.spark.core
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{PropertiesUtils, SystemPropertyUtils}
+import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
