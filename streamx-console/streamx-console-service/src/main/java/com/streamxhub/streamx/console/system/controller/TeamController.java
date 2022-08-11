@@ -51,7 +51,7 @@ public class TeamController {
     private TeamService teamService;
 
     @PostMapping("list")
-    @RequiresPermissions(value = {"team:view","app:view"},logical = Logical.OR)
+    @RequiresPermissions(value = {"team:view", "app:view"}, logical = Logical.OR)
     public RestResponse teamList(RestRequest restRequest, Team team) {
         IPage<Team> groupList = teamService.findTeams(team, restRequest);
         return RestResponse.success(groupList);
