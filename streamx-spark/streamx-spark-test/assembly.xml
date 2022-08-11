@@ -8,29 +8,7 @@
             <useProjectArtifact>true</useProjectArtifact>
             <outputDirectory>lib</outputDirectory>
             <useProjectAttachments>true</useProjectAttachments>
-            <includes>
-                <include>com.streamxhub.streamx:streamx-spark-core</include>
-                <include>org.apache.curator:curator-framework</include>
-                <include>org.apache.curator:curator-recipes</include>
-                <include>org.apache.curator:curator-client</include>
-                <include>org.apache.zookeeper:zookeeper</include>
-                <include>org.yaml:snakeyaml</include>
-                <include>org.apache.spark:spark-streaming-kafka-0-10_2.11</include>
-                <include>org.scalaj:scalaj-http_${scala.binary.version}</include>
-                <include>redis.clients:jedis</include>
-                <include>org.apache.commons:commons-pool2</include>
-                <include>com.solarmosaic.client:mail-client_2.11</include>
-                <include>mysql:mysql-connector-java</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <!--
-               不使用项目的artifact，第三方jar不要解压
-            -->
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>lib</outputDirectory>
-            <useProjectAttachments>true</useProjectAttachments>
-            <scope>provided</scope>
+            <scope>runtime</scope>
         </dependencySet>
     </dependencySets>
     <fileSets>
