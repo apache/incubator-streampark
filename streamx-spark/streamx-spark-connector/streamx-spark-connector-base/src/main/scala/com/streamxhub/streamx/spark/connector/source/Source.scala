@@ -33,7 +33,6 @@ import scala.util.Try
  * 源
  */
 trait Source extends Logger with Serializable {
-  //  lazy val logger: Logger = LoggerFactory.getLogger(getClass)
 
   @(transient@getter)
   val ssc: StreamingContext

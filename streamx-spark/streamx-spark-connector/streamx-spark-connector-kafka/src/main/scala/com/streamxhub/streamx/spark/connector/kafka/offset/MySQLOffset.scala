@@ -97,7 +97,7 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
     DB.localTx { implicit session =>
       offsetInfos.foreach { case (tp, offset) =>
         val sql = s"insert into $table(`topic`,`groupId`,`partition`,`offset`) values(?,?,?,?) on duplicate key update `offset`= values(`offset`) "
-        val updated = SQL(sql).bind(tp.topic(), groupId, tp.partition(), offset).update().apply()
+        val updated = SQL(sql).bind(tp.topic(), groupId, tp.partition(), offset).update()
         if (updated == 0) {
           throw new Exception(s"Commit kafka topic :${tp.topic()} failed!")
         }
@@ -116,7 +116,7 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
     DB.autoCommit { implicit session =>
       topics.foreach(topic => {
         val sql = "delete from $table where topic=? and groupId=?"
-        SQL(sql).bind(topic, groupId).update().apply()
+        SQL(sql).bind(topic, groupId).update()
       })
     }
     logInfo(s"storeType:MySQL,deleteOffsets [ $groupId,${topics.mkString(",")} ]")
