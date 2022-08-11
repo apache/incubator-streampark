@@ -28,7 +28,7 @@ services:
     depends_on:
       - database
     volumes:
-      - flink:/streamx/flink/flink1.14.5
+      - flink1.14.5:/streamx/flink/flink1.14.5
     restart: unless-stopped
 
   database:
@@ -58,7 +58,7 @@ services:
       - "8081:8081"
     command: jobmanager
     volumes:
-      - flink:/opt/flink
+      - flink1.14.5:/opt/flink
     environment:
       - |
         FLINK_PROPERTIES=
@@ -81,4 +81,4 @@ services:
 
 volumes:
   mysql-data:
-  flink:
+  flink1.14.5:
