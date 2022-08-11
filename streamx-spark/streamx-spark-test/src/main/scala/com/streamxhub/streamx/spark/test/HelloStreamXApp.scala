@@ -21,31 +21,17 @@ package com.streamxhub.streamx.spark.test
 
 import com.streamxhub.streamx.spark.connector.kafka.source.KafkaSource
 import com.streamxhub.streamx.spark.core.SparkStreaming
-import org.apache.spark.SparkConf
-import org.apache.spark.streaming.StreamingContext
 import scalikejdbc.{ConnectionPool, DB, SQL}
 
 object HelloStreamXApp extends SparkStreaming {
 
-  /**
-   * 用户设置sparkConf参数,如,spark序列化:
-   * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-   * // 注册要序列化的自定义类型。
-   * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
-   *
-   * @param conf
-   */
-  override def configure(conf: SparkConf): Unit = {}
+  override def handle(): Unit = {
 
-
-  override def handle(ssc: StreamingContext): Unit = {
-
-    val sparkConf = ssc.sparkContext.getConf
     val jdbcURL = sparkConf.get("spark.sink.mysql.jdbc.url")
     val user = sparkConf.get("spark.sink.mysql.user")
     val password = sparkConf.get("spark.sink.mysql.password")
 
-    val source = new KafkaSource[String, String](ssc)
+    val source = new KafkaSource[String, String](context)
 
     val line = source.getDStream[String](x => (x.value))
 
@@ -58,17 +44,17 @@ object HelloStreamXApp extends SparkStreaming {
           //sink 数据落盘到MySQL
           ConnectionPool.singleton(jdbcURL, user, password)
 
-          //        DB.autoCommit { implicit session =>
-          //          val sql =
-          //            s"""
-          //               |create table if not exists word_count (
-          //               |`word` varchar(255),
-          //               |`count` int(255),
-          //               |UNIQUE INDEX `INX`(`word`)
-          //               |)
-          //          """.stripMargin
-          //          SQL(sql).execute.apply()
-          //        }
+          DB.autoCommit { implicit session =>
+            val sql =
+              s"""
+                 |create table if not exists word_count (
+                 |`word` varchar(255),
+                 |`count` int(255),
+                 |UNIQUE INDEX `INX`(`word`)
+                 |)
+                    """.stripMargin
+            SQL(sql).execute.apply()
+          }
 
           DB.localTx(implicit session => {
             iter.foreach(x => {
@@ -81,5 +67,4 @@ object HelloStreamXApp extends SparkStreaming {
         source.updateOffset(time)
       })
   }
-
 }
