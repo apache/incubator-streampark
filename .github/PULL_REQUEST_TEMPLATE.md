@@ -25,7 +25,6 @@ Feel free to ping committers for the review!
 
   - Minor fixes should be named following this pattern: `[hotfix] [docs] Fix typo in README.md doc`.
 
--->
 
 ## Purpose of this pull request
 

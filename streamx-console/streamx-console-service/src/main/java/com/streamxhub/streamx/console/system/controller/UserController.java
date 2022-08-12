@@ -29,6 +29,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -62,7 +63,7 @@ public class UserController {
     }
 
     @PostMapping("list")
-    @RequiresPermissions("user:view")
+    @RequiresPermissions(value = {"user:view", "app:view"}, logical = Logical.OR)
     public RestResponse userList(RestRequest restRequest, User user) {
         IPage<User> userList = userService.findUserDetail(user, restRequest);
         return RestResponse.success(userList);
