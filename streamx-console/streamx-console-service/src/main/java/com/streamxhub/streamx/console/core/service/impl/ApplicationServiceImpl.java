@@ -407,7 +407,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -768,7 +768,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             baseMapper.updateById(application);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return false;
         }
     }

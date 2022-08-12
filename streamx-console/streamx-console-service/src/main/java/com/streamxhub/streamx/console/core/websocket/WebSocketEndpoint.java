@@ -69,7 +69,7 @@ public class WebSocketEndpoint {
 
     @OnError
     public void onError(Session session, Throwable e) {
-        e.printStackTrace();
+        log.error(e.getMessage(), e);
     }
 
     public static void writeMessage(String socketId, String message) {
@@ -79,7 +79,7 @@ public class WebSocketEndpoint {
                 session.getBasicRemote().sendText(message);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -90,7 +90,7 @@ public class WebSocketEndpoint {
                 session.getBasicRemote().sendObject(message);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 

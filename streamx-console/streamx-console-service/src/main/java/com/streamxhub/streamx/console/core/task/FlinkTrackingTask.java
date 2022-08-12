@@ -248,7 +248,7 @@ public class FlinkTrackingTask {
                                         try {
                                             applicationService.start(application, true);
                                         } catch (Exception e) {
-                                            e.printStackTrace();
+                                            log.error(e.getMessage(), e);
                                         }
                                     }
                                 }

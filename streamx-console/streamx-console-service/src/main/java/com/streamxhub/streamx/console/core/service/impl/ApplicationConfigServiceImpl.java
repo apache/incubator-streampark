@@ -249,7 +249,7 @@ public class ApplicationConfigServiceImpl
                 this.flinkConfTemplate = Base64.getEncoder().encodeToString(template.getBytes());
             } catch (Exception e) {
                 log.error("Read conf/flink-application.conf failed, please check your deployment");
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
         }
         return this.flinkConfTemplate;
