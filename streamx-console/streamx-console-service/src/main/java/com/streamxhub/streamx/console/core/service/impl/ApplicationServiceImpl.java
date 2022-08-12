@@ -1312,7 +1312,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
             buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
         } else {
-            if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
+            if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
+                assert buildResult != null;
                 DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
                 String ingressTemplates = application.getIngressTemplate();
                 String domainName = application.getDefaultModeIngress();

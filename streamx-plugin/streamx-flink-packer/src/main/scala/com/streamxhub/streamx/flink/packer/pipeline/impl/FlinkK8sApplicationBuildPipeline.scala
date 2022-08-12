@@ -136,7 +136,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
           val pullImageCmd = {
             // when the register address prefix is explicitly identified on base image tag,
             // the user's pre-saved docker register auth info would be used.
-            if (!baseImageTag.startsWith(dockerConf.registerAddress)) {
+            if (dockerConf.registerAddress != null && !baseImageTag.startsWith(dockerConf.registerAddress)) {
               dockerClient.pullImageCmd(baseImageTag)
             } else {
               dockerClient.pullImageCmd(baseImageTag).withAuthConfig(dockerConf.toAuthConf)
@@ -170,7 +170,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
             })
           val imageId = buildCmdCallback.awaitImageId
           logInfo(s"built docker image, imageId=$imageId, imageTag=$pushImageTag")
-      }(err => throw new Exception(s"build docker image failed. tag=${pushImageTag}", err))
+      }(err => throw new Exception(s"build docker image failed. tag=$pushImageTag", err))
     }.getOrElse(throw getError.exception)
 
     // Step-7: push flink image
@@ -189,7 +189,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
             })
           pushCmdCallback.awaitCompletion
           logInfo(s"already pushed docker image, imageTag=$pushImageTag")
-      }(err => throw new Exception(s"push docker image failed. tag=${pushImageTag}", err))
+      }(err => throw new Exception(s"push docker image failed. tag=$pushImageTag", err))
     }.getOrElse(throw getError.exception)
 
     // Step-8:  init build workspace of ingress
@@ -200,7 +200,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
       case _ =>
         execStep(8) {
           val ingressOutputPath = IngressController.prepareIngressTemplateFiles(buildWorkspace, request.ingressTemplate)
-          logInfo(s"export flink ingress: ${ingressOutputPath}")
+          logInfo(s"export flink ingress: $ingressOutputPath")
           ingressOutputPath
         }.getOrElse(throw getError.exception)
     }
@@ -214,7 +214,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
    */
   private[this] def compileTag(tag: String, registerAddress: String, imageNamespace: String): String = {
     var tagName = if (tag.contains("/")) tag else s"$imageNamespace/$tag"
-    if (registerAddress.nonEmpty && !tagName.startsWith(registerAddress)) {
+    if (registerAddress != null && registerAddress.nonEmpty && !tagName.startsWith(registerAddress)) {
       tagName = s"$registerAddress/$tagName"
     }
     tagName.toLowerCase
