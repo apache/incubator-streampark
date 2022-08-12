@@ -57,12 +57,6 @@
             <version>${hbase.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase-hadoop2-compat</artifactId>
-            <version>${hbase.version}</version>
-            <scope>provided</scope>
-        </dependency>
 
     </dependencies>
 

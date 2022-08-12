@@ -20,14 +20,11 @@
 package com.streamxhub.streamx.spark.connector.kafka.offset
 
 import com.streamxhub.streamx.common.util.Logger
-import kafka.api._
-import kafka.common.TopicAndPartition
-import kafka.consumer.SimpleConsumer
 import org.apache.kafka.common.TopicPartition
-import org.apache.spark.{SparkConf, SparkException}
+import org.apache.spark.SparkConf
 
 import java.util.Properties
-import scala.collection.mutable
+import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 import scala.util.Try
 
@@ -91,13 +88,16 @@ trait Offset extends Logger with Serializable {
   def key(groupId: String, topic: String): String = s"$groupId#$topic"
 
 
+  private final val LatestTime = -1L
+  private final val EarliestTime = -2L
+
   /**
    * 获取最旧的Offsets
    *
    * @param topics
    * @return
    */
-  def getEarliestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, OffsetRequest.EarliestTime)
+  def getEarliestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, EarliestTime)
 
   /**
    * 获取最新的Offset
@@ -105,33 +105,8 @@ trait Offset extends Logger with Serializable {
    * @param topics
    * @return
    */
-  def getLatestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, OffsetRequest.LatestTime)
+  def getLatestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, LatestTime)
 
-
-  private def getLeaders(topics: Seq[String]): Map[(String, Int), Seq[TopicPartition]] = {
-    val consumer = new SimpleConsumer(host, port, 100000, 64 * 1024, s"leaderLookup-${System.currentTimeMillis()}")
-    val req = new TopicMetadataRequest(topics, 0)
-    val resp = consumer.send(req)
-
-    val leaderAndTopicPartition = new mutable.HashMap[(String, Int), Seq[TopicPartition]]()
-
-    resp.topicsMetadata.foreach((metadata: TopicMetadata) => {
-      val topic = metadata.topic
-      metadata.partitionsMetadata.foreach((partition: PartitionMetadata) => {
-        partition.leader match {
-          case Some(endPoint) =>
-            val hp = endPoint.host -> endPoint.port
-            leaderAndTopicPartition.get(hp) match {
-              case Some(taps) => leaderAndTopicPartition.put(hp, taps :+ new TopicPartition(topic, partition.partitionId))
-              case None => leaderAndTopicPartition.put(hp, Seq(new TopicPartition(topic, partition.partitionId)))
-            }
-          case None => throw new SparkException(s"get topic[$topic] partition[${partition.partitionId}] leader failed")
-        }
-      })
-    })
-    Try(consumer.close())
-    leaderAndTopicPartition.toMap
-  }
 
   /**
    * 获取指定时间的Offset
@@ -142,31 +117,28 @@ trait Offset extends Logger with Serializable {
    * @return
    */
   private def getOffsets(topics: Seq[String], time: Long): Map[TopicPartition, Long] = {
-    val leaders = getLeaders(topics)
-    val offsetMap = new mutable.HashMap[TopicPartition, Long]()
 
-    leaders.foreach {
-      case ((leaderHost, _port), taps) =>
-        val consumer = new SimpleConsumer(leaderHost, _port, 100000, 64 * 1024, s"offsetLookup-${System.currentTimeMillis()}")
+    import org.apache.kafka.clients.consumer.KafkaConsumer
+    val props = new Properties()
+    props.setProperty("bootstrap.servers", s"${host}:${port}")
+    props.setProperty("group.id", s"offsetLookup-${System.currentTimeMillis()}")
+    props.setProperty("enable.auto.commit", "false")
+    props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
+    props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
+    val consumer = new KafkaConsumer[String, String](props)
 
-        val requestInfo = taps.map(x => TopicAndPartition(x.topic(), x.partition()) -> PartitionOffsetRequestInfo(time, 1)).toMap
+    val partitions = topics.flatMap(topic => {
+      consumer.partitionsFor(topic).asScala.map(x => new TopicPartition(x.topic(), x.partition()))
+    })
 
-        val offsetRequest = new OffsetRequest(requestInfo)
-
-        val offsetResponse = consumer.getOffsetsBefore(offsetRequest)
-
-        if (offsetResponse.hasError) {
-          logError(s"get topic offset failed offsetResponse $offsetResponse")
-          throw new SparkException(s"get topic offset failed $leaderHost $taps")
-        }
-        offsetResponse.offsetsGroupedByTopic.values.foreach(partitionToResponse => {
-          partitionToResponse.foreach {
-            case (tap, por) => offsetMap.put(new TopicPartition(tap.topic, tap.partition), por.offsets.head)
-          }
-        })
-        Try(consumer.close())
+    val offsetInfos = time match {
+      case EarliestTime => consumer.beginningOffsets(partitions.asJavaCollection)
+      case LatestTime => consumer.endOffsets(partitions.asJavaCollection)
     }
-    offsetMap.toMap
+
+    Try(consumer.close())
+
+    offsetInfos.asInstanceOf[Map[TopicPartition, Long]]
   }
 
 }
