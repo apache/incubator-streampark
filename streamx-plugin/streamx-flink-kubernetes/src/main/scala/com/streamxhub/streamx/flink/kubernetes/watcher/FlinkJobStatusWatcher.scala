@@ -25,7 +25,6 @@ import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLIC
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model._
 import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackController, JobStatusWatcherConfig, K8sDeploymentRelated, KubernetesRetriever}
-import io.fabric8.kubernetes.client.Watcher.Action
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
 import org.json4s.{DefaultFormats, JNothing, JNull}
@@ -36,7 +35,6 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 import javax.annotation.Nonnull
 import javax.annotation.concurrent.ThreadSafe
-import scala.collection.JavaConversions._
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.language.{implicitConversions, postfixOps}
@@ -257,7 +255,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         // whether deployment exists on kubernetes cluster
         val isDeployExists = KubernetesRetriever.isDeploymentExists(trackId.clusterId, trackId.namespace)
         val deployStateOfTheError = K8sDeploymentRelated.getDeploymentStatusChanges(trackId.namespace, trackId.clusterId)
-        val numRetries = K8sDeploymentRelated.getTheNumberOfTaskDeploymentRetries(trackId.namespace, trackId.clusterId)
         val isConnection = K8sDeploymentRelated.isTheK8sConnectionNormal()
         if (isDeployExists && !deployStateOfTheError) {
           FlinkJobState.K8S_INITIALIZING
