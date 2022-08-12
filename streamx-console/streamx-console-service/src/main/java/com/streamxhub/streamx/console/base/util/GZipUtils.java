@@ -19,6 +19,7 @@
 
 package com.streamxhub.streamx.console.base.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -33,6 +34,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * @author benjobs
  */
+@Slf4j
 public final class GZipUtils {
 
     private GZipUtils() {
@@ -84,7 +86,7 @@ public final class GZipUtils {
                 entry = (TarArchiveEntry) archiveInput.getNextEntry();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
 
         return unFile;
