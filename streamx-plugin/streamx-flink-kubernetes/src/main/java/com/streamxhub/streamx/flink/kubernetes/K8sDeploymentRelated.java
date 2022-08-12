@@ -63,4 +63,10 @@ public class K8sDeploymentRelated {
             return items.get(0).getStatus().getContainerStatuses().get(0).getRestartCount();
         }
     }
+
+    public static Boolean isTheK8sConnectionNormal(){
+        try (KubernetesClient client = new DefaultKubernetesClient()){
+            return client != null;
+        }
+    }
 }

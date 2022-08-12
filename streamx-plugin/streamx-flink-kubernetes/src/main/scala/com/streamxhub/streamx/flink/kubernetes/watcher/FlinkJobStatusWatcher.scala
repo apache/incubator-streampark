@@ -258,10 +258,11 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         val isDeployExists = KubernetesRetriever.isDeploymentExists(trackId.clusterId, trackId.namespace)
         val deployStateOfTheError = K8sDeploymentRelated.getDeploymentStatusChanges(trackId.namespace, trackId.clusterId)
         val numRetries = K8sDeploymentRelated.getTheNumberOfTaskDeploymentRetries(trackId.namespace, trackId.clusterId)
+        val isConnection = K8sDeploymentRelated.isTheK8sConnectionNormal()
         if (isDeployExists && !deployStateOfTheError) {
           FlinkJobState.K8S_INITIALIZING
         }
-        else if (deployStateOfTheError && numRetries > 3) {
+        else if (deployStateOfTheError && isConnection) {
           K8sDeploymentRelated.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
           FlinkJobState.FAILED
         } else {
