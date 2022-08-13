@@ -53,7 +53,7 @@ On the other hand, It can be challenge for enterprises to use Flink & Spark if t
 * Support multiple versions of Flink & Spark
 * Scala 2.11 / 2.12 support
 * One-stop stream processing operation platform
-* Support catalog、olap、process-warehouse etc.
+* Support catalog、olap、streaming-warehouse etc.
 * ...
 
 ![](https://user-images.githubusercontent.com/13284744/142746863-856ef1cd-fa0e-4010-b359-c16ca2ad2fb7.png)
