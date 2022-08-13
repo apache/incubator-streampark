@@ -39,42 +39,27 @@ Make stream processing easier
 
 ## 🚀 Introduction
 
-The original intention of `StreamX` is to make stream processing easier. `StreamX` focuses on the management of development phases
-and tasks. Our ultimate goal is to build a one-stop big data solution integrating stream processing, batch processing, data warehouse and
-data laker.
+Apache Flink and Apache Spark are widely used as the next generation of big data streaming computing engines.  Based on a bench of excellent experiences combined with best practices, we extracted the task deployment and runtime parameters into the configuration files. In this way,  an easy-to-use RuntimeContext with out-of-the-box connectors would bring easier and more efficient task development experience. It reduces the learning cost and development barriers, hence developers can focus on the business logic.
+On the other hand, It can be challenge for enterprises to use Flink & Spark if there is no professional management platform for Flink & Spark tasks during the deployment phase. StreamX provides such a professional task management platform, including task development, scheduling, interactive query, deployment, operation, maintenance, etc.
 
 [![StreamX video](https://user-images.githubusercontent.com/13284744/166101616-50a44d38-3ffb-4296-8a77-92f76a4c21b5.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
 
 ## 🎉 Features
 
-* Scaffolding
+* Apache Flink & Spark application development scaffolding
 * Out-of-the-box connectors
 * Support maven compilation
-* Configuration
-* Multi version flink support(1.12.x,1.13.x,1.14.x, 1.15.x)
+* Support multiple versions of Flink & Spark
 * Scala 2.11 / 2.12 support
-* restapi support.
-* All Flink deployment mode support(`Remote`/`K8s-Native-Application`/`K8s-Native-Session`/`YARN-Application`/`YARN-Per-Job`/`YARN-Session`)
-* `start`, `stop`, `savepoint`, resume from `savepoint`
-* Various companies and organizations use `StreamX` for production and commercial products.
-* Flame graph
-* Notebook
-* Project configuration and dependency version management
-* Task backup and rollback
-* Manage dependencies
-* UDF
-* Flink SQL Connector
-* Flink SQL WebIDE
-* Catalog、Hive
-* Full support from task `development` to `deployment`
+* One-stop stream processing operation platform
+* Support catalog、olap、process-warehouse etc.
 * ...
 
 ![](https://user-images.githubusercontent.com/13284744/142746863-856ef1cd-fa0e-4010-b359-c16ca2ad2fb7.png)
 
 
 ![](https://user-images.githubusercontent.com/13284744/142746864-d807d728-423f-41c3-b90d-45ce2c21936b.png)
-
 
 
 ## 🏳‍🌈 Components
@@ -86,25 +71,25 @@ data laker.
 ### 1️⃣ streamx-core
 
 `streamx-core` is a framework that focuses on coding, standardizes configuration, and develops in a way that is better than configuration by
-convention. Also it provides a development-time `RunTime Content` and a series of `Connector` out of the box. At the same time, it
-extends `DataStream` some methods, and integrates `DataStream` and `Flink sql` api to simplify tedious operations, focus on the business
-itself, and improve development efficiency and development experience.
+convention. Also it provides a development-time `RunTime Content` and a series of `Connector` out of the box. make application development easier
+developer focus on the business itself, and improve development efficiency and development experience.
 
 ### 2️⃣ streamx-pump
 
-`streamx-pump` is a planned data extraction component, similar to `flinkx`. Based on the various `connector` provided in `streamx-core`, the
+`streamx-pump` is a planned data extraction component. Based on the various `connector` provided in `streamx-core`, the
 purpose is to create a convenient, fast, out-of-the-box real-time data extraction and migration component for big data, and it will be
 integrated into the `streamx-console`.
 
 ### 3️⃣ streamx-console
 
-`streamx-console` is a stream processing and `Low Code` platform, capable of managing `Flink` tasks, integrating project compilation,
-deploy, configuration, startup, `savepoint`, `flame graph`, `Flink SQL`, monitoring and many other features. Simplify the daily operation
-and maintenance of the `Flink` task.
+`streamx-console` is a stream processing and `Low Code` platform, capable of managing `Flink` & `Spark` tasks, integrating project compilation,
+deploy, configuration, startup, `savepoint`, `flame graph`, monitoring and many other features. Simplify the daily operation
+and maintenance of the `Flink` & `Spark` task.
 
-Our ultimate goal is to build a one-stop big data solution integrating stream processing, batch processing, data warehouse and data laker.
+Our ultimate goal is to build a one-stop big data solution integrating stream processing, batch processing, data warehouse.
 
 * [Apache Flink](http://flink.apache.org)
+* [Apache Spark](http://spark.apache.org)
 * [Apache YARN](http://hadoop.apache.org)
 * [Spring Boot](https://spring.io/projects/spring-boot/)
 * [Mybatis](http://www.mybatis.org)
@@ -119,16 +104,14 @@ Our ultimate goal is to build a one-stop big data solution integrating stream pr
 * [Monaco Editor](https://microsoft.github.io/monaco-editor/)
 * ...
 
-Thanks to the above excellent open source projects and many outstanding open source projects that are not mentioned, for giving the greatest
-respect,Thanks to [Apache Flink](http://flink.apache.org) for creating a great project!  Thanks to the [Apache Zeppelin](http://zeppelin.apache.org) project for the early inspiration.
+Thanks for the respect given by the above excellent open source projects and many unmentioned excellent open source projects
+
 
 ## 🚀 Quick Start
 
 click [Document](https://www.streamxhub.com/docs/intro) for more information
 
-
 ## 💋 our users
-
 
 Various companies and organizations use StreamX for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/streamxhub/streamx/issues/163)
 
@@ -164,56 +147,6 @@ Thank you to all the people who already contributed to StreamX!
 
 [![Contributor Over Time](https://contributor-overtime-api.git-contributor.com/contributors-svg?chart=contributorOverTime&repo=streamxhub/streamx)](https://git-contributor.com?chart=contributorOverTime&repo=streamxhub/streamx)
 
-
-## 💰 Donation
-
-Are you **enjoying this project** ? 👋
-
-If you like this framework, and appreciate the work done for it to exist, you can still support the developers by donating ☀️ 👊
-
-| WeChat Pay | Alipay |
-|:----------|:----------|
-| <img src="https://user-images.githubusercontent.com/13284744/142746857-35e7f823-7160-4505-be3f-e748a2d0a233.png" alt="Buy Me A Coffee" width="150"> | <img src="https://user-images.githubusercontent.com/13284744/142746860-e14a8183-d973-44ca-83bf-e5f9d4da1510.png" alt="Buy Me A Coffee" width="150"> |
-
-## 🏆 Our sponsors (Coffee Suppliers)
-
-### 💜 Monthly Supplier
-
-Welcome individuals and enterprises to sponsor, your support will help us better develop the project
-
-### 🥇 Gold Supplier
-
-<p>
-  <a href="https://github.com/wolfboys" alt="benjobs"><img src="https://avatars.githubusercontent.com/u/13284744?v=4" height="50" width="50"></a>
-  <a href="https://github.com/Kitming25" alt="Kitming25"><img src="https://avatars.githubusercontent.com/u/11773106?v=4" height="50" width="50"></a>
-  <a href="https://github.com/Narcasserun" alt="Narcasserun"><img src="https://avatars.githubusercontent.com/u/39329477?v=4" height="50" width="50"></a>
-</p>
-
-### 🥈 Platinum Supplier
-
-<p>
-    <a href="https://github.com/lianxiaobao" alt="lianxiaobao"><img src="https://avatars.githubusercontent.com/u/36557317?v=4" height="50" width="50"></a>
-    <a href="https://github.com/su94998" alt="su94998"><img src="https://avatars.githubusercontent.com/u/33316193?v=4" height="50" width="50"></a>
-</p>
-
-### 🥈 Silver Supplier
-
-<p>
-    <a href="https://github.com/CrazyJugger" alt="leohantaoluo"><img src="https://avatars.githubusercontent.com/u/30514978?v=4" height="50" width="50"></a>
-    <a href="https://github.com/zhaizhirui" alt="zhaizhirui"><img src="https://avatars.githubusercontent.com/u/39609947?v=4" height="50" width="50"></a>
-</p>
-
-
-Thanks to [JetBrains](https://www.jetbrains.com/?from=streamx) for supporting us free open source licenses.
-
-[![JetBrains](https://img.alicdn.com/tfs/TB1sSomo.z1gK0jSZLeXXb9kVXa-120-130.svg)](https://www.jetbrains.com/?from=streamx)
-
-
-### 🏅 Backers
-
-Thank you to all our backers!
-
----
 
 ## 💬 Join us
 
