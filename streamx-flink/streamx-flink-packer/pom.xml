@@ -4,7 +4,7 @@
 
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
-        <artifactId>streamx-plugin</artifactId>
+        <artifactId>streamx-flink</artifactId>
         <version>1.2.4</version>
     </parent>
 
