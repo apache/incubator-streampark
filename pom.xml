@@ -15,7 +15,7 @@
         <module>streamx-spark</module>
         <module>streamx-plugin</module>
         <module>streamx-console</module>
-        <module>streamx-storage-service</module>
+        <module>streamx-storage</module>
     </modules>
     <url>https://github.com/streamxhub/streamx</url>
 

@@ -16,46 +16,8 @@
     </properties>
 
     <modules>
-        <module>streamx-flink-sqlclient</module>
-        <module>streamx-flink-udf</module>
-        <module>streamx-flink-submit</module>
-        <module>streamx-flink-proxy</module>
-        <module>streamx-flink-packer</module>
-        <module>streamx-flink-kubernetes</module>
         <module>streamx-jvm-profiler</module>
     </modules>
-
-    <dependencies>
-
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${scala.binary.version}</artifactId>
-            <version>${scalatest.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
 
     <build>
         <plugins>
