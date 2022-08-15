@@ -24,8 +24,7 @@ import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model._
-import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackController, JobStatusWatcherConfig, KubernetesRetriever}
-import io.fabric8.kubernetes.client.Watcher.Action
+import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackController, JobStatusWatcherConfig, K8sDeploymentRelated, KubernetesRetriever}
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
 import org.json4s.{DefaultFormats, JNothing, JNull}
@@ -36,7 +35,6 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 import javax.annotation.Nonnull
 import javax.annotation.concurrent.ThreadSafe
-import scala.collection.JavaConversions._
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.language.{implicitConversions, postfixOps}
@@ -256,23 +254,17 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       if (trackController.canceling.has(trackId)) FlinkJobState.CANCELED else {
         // whether deployment exists on kubernetes cluster
         val isDeployExists = KubernetesRetriever.isDeploymentExists(trackId.clusterId, trackId.namespace)
-        if (isDeployExists) {
+        val deployStateOfTheError = K8sDeploymentRelated.getDeploymentStatusChanges(trackId.namespace, trackId.clusterId)
+        val isConnection = K8sDeploymentRelated.isTheK8sConnectionNormal()
+        if (isDeployExists && !deployStateOfTheError) {
           FlinkJobState.K8S_INITIALIZING
+        }
+        else if (deployStateOfTheError && isConnection) {
+          K8sDeploymentRelated.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
+          FlinkJobState.FAILED
         } else {
-          val deployEvent = trackController.k8sDeploymentEvents.get(K8sEventKey(trackId.namespace, trackId.clusterId))
-          if (deployEvent != null) {
-            // no exists k8s deployment, infer from last deployment event
-            val isDelete = deployEvent.action == Action.DELETED
-            val isDeployAvailable = deployEvent.event.getStatus.getConditions.exists(_.getReason == "MinimumReplicasAvailable")
-            (isDelete, isDeployAvailable) match {
-              case (true, true) => FlinkJobState.POS_TERMINATED // maybe FINISHED or CANCEL
-              case (true, false) => FlinkJobState.FAILED
-              case _ => FlinkJobState.K8S_INITIALIZING
-            }
-          } else {
-            // determine if the state should be SILENT or LOST
-            inferSilentOrLostFromPreCache(latest)
-          }
+          // determine if the state should be SILENT or LOST
+          inferSilentOrLostFromPreCache(latest)
         }
       }
     }
