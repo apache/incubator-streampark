@@ -28,12 +28,12 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import java.util.Map;
 import java.util.Objects;
 
-public class PodKubernetesResourceCollection {
+public class PodK8sResourceCollection {
     private final KubernetesClient client;
     private final String namespace;
     private final String labelSelector;
 
-    public PodKubernetesResourceCollection(Config config, String namespace, Map<String, String> labels) {
+    public PodK8sResourceCollection(Config config, String namespace, Map<String, String> labels) {
         this.client = new DefaultKubernetesClient(config);
         this.namespace = Objects.requireNonNull(namespace, "namespace");
         this.labelSelector = K8sDeploymentRelated.toLabelSelector(Objects.requireNonNull(labels, "labels"));

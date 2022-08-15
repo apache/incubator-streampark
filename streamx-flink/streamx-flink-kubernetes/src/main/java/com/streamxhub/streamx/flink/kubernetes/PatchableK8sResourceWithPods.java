@@ -19,6 +19,8 @@
 
 package com.streamxhub.streamx.flink.kubernetes;
 
-public interface KubernetesResourceCollection<T> {
-    Iterable<T> listResources();
+import io.fabric8.kubernetes.api.model.Patch;
+
+public interface PatchableK8sResourceWithPods<T> extends K8sResource<T> {
+    T patchResource(Patch patch);
 }

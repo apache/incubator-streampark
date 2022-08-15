@@ -38,7 +38,7 @@ public class JobK8sResource implements K8sResourceWithPods<Job> {
     private final KubernetesClient client;
     private final String namespace;
     private final Job resource;
-    private final PodKubernetesResourceCollection pods;
+    private final PodK8sResourceCollection pods;
     @VisibleForTesting
     public final DeletionPropagationPolicy deletionPolicy;
 
@@ -46,7 +46,7 @@ public class JobK8sResource implements K8sResourceWithPods<Job> {
         this.client = new DefaultKubernetesClient(config);
         this.namespace = Objects.requireNonNull(namespace, "namespace");
         this.resource = Objects.requireNonNull(resource, "resource");
-        this.pods = new PodKubernetesResourceCollection(config, namespace, Optional.ofNullable(resource.getSpec()).map((spec) -> {
+        this.pods = new PodK8sResourceCollection(config, namespace, Optional.ofNullable(resource.getSpec()).map((spec) -> {
             return spec.getTemplate().getMetadata();
         }).map(ObjectMeta::getLabels).orElseThrow(() -> {
             return new IllegalArgumentException("Must provide Pod template labels");

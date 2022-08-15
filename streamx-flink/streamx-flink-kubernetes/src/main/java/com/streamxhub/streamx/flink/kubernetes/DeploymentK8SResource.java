@@ -33,19 +33,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 
-public class DeploymentK8sResource implements PatchableK8SResourceWithPods<Deployment> {
+public class DeploymentK8SResource implements PatchableK8sResourceWithPods<Deployment> {
     private final KubernetesClient client;
     private final String namespace;
     private final Deployment resource;
-    private final PodKubernetesResourceCollection pods;
+    private final PodK8sResourceCollection pods;
     @VisibleForTesting
     public final DeletionPropagationPolicy deletionPolicy;
 
-    public DeploymentK8sResource(Config config, String namespace, Deployment resource, DeletionPropagationPolicy deletionPolicy) {
+    public DeploymentK8SResource(Config config, String namespace, Deployment resource, DeletionPropagationPolicy deletionPolicy) {
         this.client = new DefaultKubernetesClient(config);
         this.namespace = Objects.requireNonNull(namespace, "namespace");
         this.resource = Objects.requireNonNull(resource, "resource");
-        this.pods = new PodKubernetesResourceCollection(config, namespace, Optional.ofNullable(resource.getSpec()).map((spec) -> {
+        this.pods = new PodK8sResourceCollection(config, namespace, Optional.ofNullable(resource.getSpec()).map((spec) -> {
             return spec.getTemplate().getMetadata();
         }).map(ObjectMeta::getLabels).orElseThrow(() -> {
             return new IllegalArgumentException("Must provide Pod template labels");
