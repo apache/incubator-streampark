@@ -25,35 +25,4 @@
         <module>streamx-spark-connector-base</module>
         <module>streamx-spark-connector-kafka</module>
     </modules>
-
-    <profiles>
-        <profile>
-            <id>connector_2.12</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.12</value>
-                </property>
-            </activation>
-            <modules>
-
-            </modules>
-        </profile>
-
-        <profile>
-            <id>connector_2.11</id>
-            <activation>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.11</value>
-                </property>
-            </activation>
-            <modules>
-                <!-- redis only support scala 2.11 -->
-<!--                <module>streamx-spark-connector-redis</module>-->
-            </modules>
-        </profile>
-    </profiles>
-
 </project>
