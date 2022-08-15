@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -98,6 +99,21 @@ public class ApplicationController {
         }
         boolean saved = applicationService.create(app);
         return RestResponse.success(saved);
+    }
+
+    @ApiAccess
+    @ApiOperation(value = "App Copy", notes = "App Copy", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "id", value = "copy target app id", required = true, paramType = "form", dataType = "Long"),
+        @ApiImplicitParam(name = "jobName", value = "name of the copied application", required = false, paramType = "form", dataType = "String", defaultValue = ""),
+        @ApiImplicitParam(name = "args", value = "commit parameters after copying", required = false, paramType = "form", dataType = "String", defaultValue = "")})
+    @PostMapping("copy")
+    @RequiresPermissions("app:copy")
+    public RestResponse copy(@ApiIgnore Application app) throws IOException {
+        Long id = applicationService.copy(app);
+        Map<String, String> data = new HashMap<>();
+        data.put("id", Long.toString(id));
+        return id.equals(0) ? RestResponse.success(false).data(data) : RestResponse.success(true).data(data);
     }
 
     @PostMapping("update")

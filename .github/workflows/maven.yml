@@ -2,9 +2,19 @@ name: Maven Package Test
 
 on:
   push:
-    branches: [ dev ]
+    branches:
+      - dev
+    paths-ignore:
+      - '**.md'
+      - 'deploy/**'
+      - 'script/**'
+      - 'streamx-console/streamx-console-webapp/**'
   pull_request:
-    branches: [ dev ]
+    paths-ignore:
+      - '**.md'
+      - 'deploy/**'
+      - 'script/**'
+      - 'streamx-console/streamx-console-webapp/**'
 
 jobs:
   build:

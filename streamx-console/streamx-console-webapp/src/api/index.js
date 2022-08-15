@@ -31,6 +31,7 @@ export default {
     CREATE: '/flink/project/create',
     GET: '/flink/project/get',
     UPDATE: '/flink/project/update',
+    COPY: '/flink/project/copy',
     BUILD: '/flink/project/build',
     BUILD_LOG: '/flink/project/buildlog',
     CLOSE_BUILD: '/flink/project/closebuild',
@@ -61,6 +62,7 @@ export default {
   Application: {
     READ_CONF: '/flink/app/readConf',
     UPDATE: '/flink/app/update',
+    COPY: '/flink/app/copy',
     UPLOAD: '/flink/app/upload',
     DEPLOY: '/flink/app/deploy',
     MAPPING: '/flink/app/mapping',

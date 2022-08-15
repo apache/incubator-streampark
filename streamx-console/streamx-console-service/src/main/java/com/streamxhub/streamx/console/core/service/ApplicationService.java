@@ -42,6 +42,8 @@ public interface ApplicationService extends IService<Application> {
 
     boolean create(Application app) throws IOException;
 
+    Long copy(Application app) throws IOException;
+
     boolean update(Application app);
 
     void starting(Application app);

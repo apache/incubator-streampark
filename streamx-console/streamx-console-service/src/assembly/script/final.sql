@@ -373,6 +373,7 @@ INSERT INTO `t_menu` VALUES (100043, 100000, 'Team Management', '/system/team', 
 INSERT INTO `t_menu` VALUES (100044, 100043, 'add', NULL, NULL, 'team:add', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100045, 100043, 'update', NULL, NULL, 'team:update', NULL, '1', '1', NULL, NOW(), NULL);
 INSERT INTO `t_menu` VALUES (100046, 100043, 'delete', NULL, NULL, 'team:delete', NULL, '1', '1', NULL, NOW(), NULL);
+INSERT INTO `t_menu` VALUES (100047, 100015, 'copy', null, null, 'app:copy', null, '1', '1', null, NOW(), null);
 
 
 
@@ -505,6 +506,7 @@ INSERT INTO `t_role_menu` VALUES (100062, 100000, 100043);
 INSERT INTO `t_role_menu` VALUES (100063, 100000, 100044);
 INSERT INTO `t_role_menu` VALUES (100064, 100000, 100045);
 INSERT INTO `t_role_menu` VALUES (100065, 100000, 100046);
+INSERT INTO `t_role_menu` VALUES (100066, 100000, 100047);
 
 
 

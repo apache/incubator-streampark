@@ -26,6 +26,7 @@ import com.streamxhub.streamx.console.system.service.TeamService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -50,7 +51,7 @@ public class TeamController {
     private TeamService teamService;
 
     @PostMapping("list")
-    @RequiresPermissions("team:view")
+    @RequiresPermissions(value = {"team:view", "app:view"}, logical = Logical.OR)
     public RestResponse teamList(RestRequest restRequest, Team team) {
         IPage<Team> groupList = teamService.findTeams(team, restRequest);
         return RestResponse.success(groupList);
