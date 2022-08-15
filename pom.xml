@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.streamxhub.streamx</groupId>
@@ -12,7 +13,6 @@
     <modules>
         <module>streamx-common</module>
         <module>streamx-flink</module>
-        <module>streamx-spark</module>
         <module>streamx-plugin</module>
         <module>streamx-console</module>
         <module>streamx-storage</module>
@@ -696,6 +696,32 @@
                 <flink.table.uber.artifact.id>flink-table-api-java-uber</flink.table.uber.artifact.id>
             </properties>
         </profile>
+
+        <profile>
+            <id>spark_2.11</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>scala.binary.version</name>
+                    <value>2.11</value>
+                </property>
+            </activation>
+        </profile>
+
+        <profile>
+            <id>spark_2.12</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>scala.binary.version</name>
+                    <value>2.12</value>
+                </property>
+            </activation>
+            <modules>
+                <module>streamx-spark</module>
+            </modules>
+        </profile>
+
     </profiles>
 
 </project>
