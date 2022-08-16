@@ -89,6 +89,8 @@ public interface ApplicationService extends IService<Application> {
 
     boolean checkEnv(Application app) throws ApplicationException;
 
+    Boolean checkAlter(Application application);
+
     void updateLaunch(Application application);
 
     List<Application> getByProjectId(Long id);
