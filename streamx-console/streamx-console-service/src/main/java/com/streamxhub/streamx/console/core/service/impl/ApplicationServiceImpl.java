@@ -604,17 +604,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return false;
     }
 
+    @SuppressWarnings("checkstyle:WhitespaceAround")
     @Override
     @SneakyThrows
     @Transactional(rollbackFor = {Exception.class})
     public Long copy(Application appParam) {
+        int count = this.baseMapper.selectCount(
+                new QueryWrapper<Application>().lambda()
+                        .eq(Application::getJobName, appParam.getJobName()));
+        if (count > 0) {
+            throw new IllegalArgumentException("[StreamX] Application names cannot be repeated");
+        }
         Application oldApp = getById(appParam.getId());
 
         Application newApp = new Application();
         String jobName = appParam.getJobName();
         String args = appParam.getArgs();
-        String copy = "copy-";
-        jobName = jobName != null && !"".equals(jobName) ? jobName : copy + oldApp.getJobName();
+
         newApp.setJobName(jobName);
         newApp.setClusterId(jobName);
         args = args != null && !"".equals(args) ? args : oldApp.getArgs();
@@ -658,7 +664,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         boolean saved = save(newApp);
         if (saved) {
             if (newApp.isFlinkSqlJob()) {
-                FlinkSql copyFlinkSql = flinkSqlService.getEffective(appParam.getId(), true);
+                FlinkSql copyFlinkSql = flinkSqlService.getLastVersionFlinkSql(appParam.getId(), true);
                 newApp.setFlinkSql(copyFlinkSql.getSql());
                 newApp.setDependency(copyFlinkSql.getDependency());
                 FlinkSql flinkSql = new FlinkSql(newApp);

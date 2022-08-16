@@ -906,6 +906,58 @@
         </template>
       </a-modal>
 
+
+
+      <a-modal
+        v-model="copyVisible"
+        on-ok="handleCopyOk">
+        <template
+          slot="title">
+          <svg-icon
+            slot="icon"
+            name="copy"
+            style="color: red"/>
+          Copy Application
+        </template>
+
+        <a-form
+          @submit="handleCopyOk"
+          :form="formCopy">
+
+          <a-form-item
+            class="def-margin-bottom"
+            label="Application Name"
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
+            :validate-status="validateStatus"
+            :help="help"
+            >
+            <a-input
+              type="text"
+              placeholder="New Application Name"
+              v-model="copyAppName"
+              v-decorator="['copyAppName',{rules: [{ required: true }]}]"/>
+          </a-form-item>
+        </a-form>
+
+        <template
+          slot="footer">
+          <a-button
+            key="back"
+            @click="handleCopyCancel">
+            Cancel
+          </a-button>
+          <a-button
+            key="submit"
+            type="primary"
+            :loading="loading"
+            @click="handleCopyOk">
+            Apply
+          </a-button>
+        </template>
+      </a-modal>
+
+
       <a-modal
         v-model="mappingVisible"
         on-ok="handleMappingOk">
@@ -1056,6 +1108,11 @@ export default {
       queryInterval: 2000,
       yarn: null,
       stopVisible: false,
+      copyVisible: false,
+      validateStatus: '',
+      help: '',
+      formCopy: null,
+      copyAppName:null,
       startVisible: false,
       mappingVisible: false,
       formDeploy: null,
@@ -1203,6 +1260,7 @@ export default {
   beforeMount() {
     this.formDeploy = this.$form.createForm(this)
     this.formStopSavePoint = this.$form.createForm(this)
+    this.formCopy = this.$form.createForm(this)
     this.formStartCheckPoint = this.$form.createForm(this)
     this.formMapping = this.$form.createForm(this)
     this.dashBigScreen = (document.documentElement.offsetWidth || document.body.offsetWidth) >= 1500
@@ -1693,21 +1751,37 @@ export default {
     },
 
     handleCopy(app) {
+        this.copyVisible = true
+        this.application = app
+        this.validateStatus = ''
+        this.help = ''
+        this.formCopy.resetFields()
+    },
+    handleCopyCancel() {
+      this.validateStatus = ''
+      this.help = ''
+      this.copyVisible = false
+      this.formCopy.resetFields()
+    },
+    handleCopyOk() {
+      const copyAppName = this.copyAppName
+      const id = this.application.id
+      if (!copyAppName){
+        this.validateStatus = 'error'
+        this.help = 'Sorry, Application Name cannot be empty'
+        return
+      }
       copy({
-        id: app.id
+        id : id,
+        jobName : copyAppName
       }).then((resp) => {
         const status = resp.status || 'error'
         if (status === 'success') {
+          this.copyVisible = false
           this.$swal.fire({
             icon: 'success',
             title: 'copy successful',
-            timer: 2000
-          })
-        }else{
-          this.$swal.fire({
-            icon: 'error',
-            title: 'copy exception',
-            timer: 2000
+            timer: 1500
           })
         }
       })
