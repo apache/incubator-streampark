@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test
 
 /**
  * test single tracking task
+ * 
  */
 // scalastyle:off println
 class SingleTrackingTaskTest {
