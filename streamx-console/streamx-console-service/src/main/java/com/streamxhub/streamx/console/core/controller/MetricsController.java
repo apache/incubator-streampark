@@ -88,7 +88,7 @@ public class MetricsController {
                 flameGraphService.save(flameGraph);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
         return RestResponse.success();
     }

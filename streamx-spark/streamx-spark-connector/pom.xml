@@ -18,42 +18,11 @@
         <clickhouse.version>0.3.2</clickhouse.version>
         <async.client.version>2.12.3</async.client.version>
         <influxdb.version>2.17</influxdb.version>
-        <kafka.version>0.10.2.2</kafka.version>
+        <kafka.version>3.2.1</kafka.version>
     </properties>
 
     <modules>
         <module>streamx-spark-connector-base</module>
         <module>streamx-spark-connector-kafka</module>
     </modules>
-
-    <profiles>
-        <profile>
-            <id>connector_2.12</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.12</value>
-                </property>
-            </activation>
-            <modules>
-
-            </modules>
-        </profile>
-
-        <profile>
-            <id>connector_2.11</id>
-            <activation>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.11</value>
-                </property>
-            </activation>
-            <modules>
-                <!-- redis only support scala 2.11 -->
-<!--                <module>streamx-spark-connector-redis</module>-->
-            </modules>
-        </profile>
-    </profiles>
-
 </project>

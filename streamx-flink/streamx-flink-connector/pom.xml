@@ -221,7 +221,7 @@
 
     <profiles>
         <profile>
-            <id>connector_2.12</id>
+            <id>scala-2.12</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
                 <property>
@@ -233,7 +233,7 @@
         </profile>
 
         <profile>
-            <id>connector_2.11</id>
+            <id>scala-2.11</id>
             <activation>
                 <property>
                     <name>scala.binary.version</name>

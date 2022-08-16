@@ -153,7 +153,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             baseMapper.updateById(project);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return false;
         }
     }

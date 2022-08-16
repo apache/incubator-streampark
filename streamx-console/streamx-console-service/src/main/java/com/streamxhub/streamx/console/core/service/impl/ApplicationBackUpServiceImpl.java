@@ -173,7 +173,7 @@ public class ApplicationBackUpServiceImpl
                     return null;
                 });
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
         });
     }
@@ -207,7 +207,7 @@ public class ApplicationBackUpServiceImpl
                 return null;
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 

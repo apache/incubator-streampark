@@ -537,7 +537,7 @@ public final class CommonUtils implements Serializable {
         try {
             return Double.parseDouble(df.format(number));
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return 0.0;
         }
     }

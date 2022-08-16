@@ -73,34 +73,5 @@
             <version>${hbase.version}</version>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>spark_2.12</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.12</value>
-                </property>
-            </activation>
-        </profile>
-
-        <profile>
-            <id>spark_2.11</id>
-            <activation>
-                <property>
-                    <name>scala.binary.version</name>
-                    <value>2.11</value>
-                </property>
-            </activation>
-            <properties>
-                <spark.version>2.4.8</spark.version>
-                <scalikejdbc.version>3.4.2</scalikejdbc.version>
-            </properties>
-        </profile>
-    </profiles>
-
 </project>

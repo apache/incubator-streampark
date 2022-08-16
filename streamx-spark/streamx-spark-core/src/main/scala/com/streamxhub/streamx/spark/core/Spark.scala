@@ -62,7 +62,10 @@ trait Spark {
   def main(args: Array[String]): Unit = {
     init(args)
     config(sparkConf)
-    sparkSession = SparkSession.builder().enableHiveSupport().config(sparkConf).getOrCreate()
+    sparkSession = sparkConf.get("spark.enable.hive.support", "false").toLowerCase match {
+      case "true" => SparkSession.builder().enableHiveSupport().config(sparkConf).getOrCreate()
+      case "false" => SparkSession.builder().config(sparkConf).getOrCreate()
+    }
     ready()
     handle()
     start()

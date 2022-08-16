@@ -31,6 +31,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
@@ -51,6 +52,7 @@ import java.util.List;
 /**
  * @author benjobs
  */
+@Slf4j
 @Data
 @TableName("t_flink_project")
 public class Project implements Serializable {
@@ -179,7 +181,7 @@ public class Project implements Serializable {
             }
             return branchList;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
         return Collections.emptyList();
     }

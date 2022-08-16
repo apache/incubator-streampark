@@ -43,11 +43,6 @@ RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.t
     && rm "node-v$NODE_VERSION-linux-x64.tar.gz" \
     && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
-RUN wget "https://mirrors.cloud.tencent.com/apache/flink/flink-$FLINK_VERSION/flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" \
-    && mkdir ./flink \
-    && tar zxvf "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz" -C ./flink --strip-components=1 \
-    && rm "flink-$FLINK_VERSION-bin-$SCALA_VERSION.tgz"
-
 RUN echo Y|apt-get update \
     && echo Y|apt-get install iputils-ping \
     && echo Y|apt-get install vim \

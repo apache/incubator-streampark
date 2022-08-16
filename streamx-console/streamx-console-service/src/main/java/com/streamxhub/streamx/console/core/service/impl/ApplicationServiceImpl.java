@@ -407,7 +407,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -768,7 +768,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             baseMapper.updateById(application);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return false;
         }
     }
@@ -1320,7 +1320,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
             buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
         } else {
-            if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
+            if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
+                assert buildResult != null;
                 DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
                 String ingressTemplates = application.getIngressTemplate();
                 String domainName = application.getDefaultModeIngress();
