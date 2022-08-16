@@ -80,6 +80,20 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         return flinkSql;
     }
 
+    /**
+     * @param appId
+     * @param decode
+     * @return
+     */
+    @Override
+    public FlinkSql getLastVersionFlinkSql(Long appId, boolean decode) {
+        FlinkSql flinkSql = baseMapper.getLastVersionFlinkSql(appId);
+        if (flinkSql != null && decode) {
+            flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
+        }
+        return flinkSql;
+    }
+
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public void create(FlinkSql flinkSql) {

@@ -19,16 +19,19 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.log.LogClientService;
-import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.LogClientService;
 import com.streamxhub.streamx.console.core.service.LoggerService;
-import com.streamxhub.streamx.flink.kubernetes.FlinkJobWatch;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -38,14 +41,9 @@ import java.util.concurrent.CompletionStage;
 @Service
 @Slf4j
 public class LoggerServiceImpl implements LoggerService {
+
     @Autowired
-    private ApplicationService applicationService;
-
-    private final LogClientService logClient;
-
-    public LoggerServiceImpl(){
-        logClient = new LogClientService();
-    }
+    private LogClientService logClient;
 
     /**
      * view log
@@ -54,13 +52,26 @@ public class LoggerServiceImpl implements LoggerService {
      * @param limit       limit
      * @return log string data
      */
-    public CompletionStage<String> queryLog(String namespac, String jobName, int skipLineNum, int limit) {
-        return CompletableFuture.supplyAsync(() ->
-            FlinkJobWatch.jobDeploymentsWatch(namespac, jobName)
+    public CompletionStage<String> queryLog(String nameSpace, String jobName, int skipLineNum, int limit) {
+        return CompletableFuture.supplyAsync(() -> jobDeploymentsWatch(nameSpace, jobName)
         ).thenApply(path -> logClient.rollViewLog(String.valueOf(path), skipLineNum, limit));
     }
 
-    public byte[] getLogBytes(Application app) {
-        return null;
+    private String jobDeploymentsWatch(String nameSpace, String jobName) {
+        try (KubernetesClient client = new DefaultKubernetesClient()) {
+            String log = client.apps().deployments()
+                .inNamespace(nameSpace)
+                .withName(jobName).getLog();
+
+            File dir = new File("");
+            String projectPath = dir.getCanonicalPath();
+            String path = String.format("%s/%s_%s.log", projectPath, nameSpace, jobName);
+            File file = new File(path);
+            Files.asCharSink(file, Charsets.UTF_8).write(log);
+            return path;
+        } catch (IOException e) {
+            return null;
+        }
     }
+
 }

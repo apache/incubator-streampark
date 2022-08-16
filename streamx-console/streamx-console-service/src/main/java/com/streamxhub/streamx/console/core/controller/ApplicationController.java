@@ -112,7 +112,7 @@ public class ApplicationController {
     @ApiOperation(value = "App Copy", notes = "App Copy", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "id", value = "copy target app id", required = true, paramType = "form", dataType = "Long"),
-        @ApiImplicitParam(name = "jobName", value = "name of the copied application", required = false, paramType = "form", dataType = "String", defaultValue = ""),
+        @ApiImplicitParam(name = "jobName", value = "name of the copied application", required = true, paramType = "form", dataType = "String", defaultValue = ""),
         @ApiImplicitParam(name = "args", value = "commit parameters after copying", required = false, paramType = "form", dataType = "String", defaultValue = "")})
     @PostMapping("copy")
     @RequiresPermissions("app:copy")
