@@ -930,8 +930,7 @@
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
             :validate-status="validateStatus"
-            :help="help"
-            >
+            :help="help">
             <a-input
               type="text"
               placeholder="New Application Name"
