@@ -190,9 +190,13 @@ public class ApplicationBackUpServiceImpl
     @Override
     public void removeApp(Application application) {
         baseMapper.removeApp(application.getId());
-        application.getFsOperator().delete(
-            application.getWorkspace().APP_BACKUPS().concat("/").concat(application.getId().toString())
-        );
+        try {
+            application.getFsOperator().delete(
+                application.getWorkspace().APP_BACKUPS().concat("/").concat(application.getId().toString())
+            );
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
