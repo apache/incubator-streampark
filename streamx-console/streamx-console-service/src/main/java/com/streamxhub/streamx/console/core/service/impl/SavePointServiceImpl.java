@@ -129,6 +129,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     public void removeApp(Application application) {
         Long appId = application.getId();
         baseMapper.removeApp(application.getId());
-        application.getFsOperator().delete(application.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
+        try {
+            application.getFsOperator().delete(application.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }
