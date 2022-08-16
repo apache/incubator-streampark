@@ -90,6 +90,8 @@
         <jackson.version>2.13.2</jackson.version>
         <guava.version>30.0-jre</guava.version>
         <caffeine.version>2.8.6</caffeine.version>
+        <selenium.version>3.141.59</selenium.version>
+        <testcontainers.version>1.17.3</testcontainers.version>
 
         <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
         <checkstyle.fails.on.error>true</checkstyle.fails.on.error>
