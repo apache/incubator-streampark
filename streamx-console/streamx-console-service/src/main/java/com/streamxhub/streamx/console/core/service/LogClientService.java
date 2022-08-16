@@ -17,9 +17,10 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.log;
+package com.streamxhub.streamx.console.core.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,10 +31,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** log client */
+/**
+ * log client
+ */
 @Slf4j
+@Component
 public class LogClientService {
-    public String rollViewLog(String path, int skipLineNum, int limit){
+    public String rollViewLog(String path, int skipLineNum, int limit) {
         String result = "";
         try {
             List<String> lines = readPartFileContent(path, skipLineNum, limit);
@@ -51,12 +55,12 @@ public class LogClientService {
      *
      * @param filePath file path
      * @param skipLine skip line
-     * @param limit read lines limit
+     * @param limit    read lines limit
      * @return part file content
      */
     private List<String> readPartFileContent(String filePath,
                                              int skipLine,
-                                             int limit){
+                                             int limit) {
         File file = new File(filePath);
         if (file.exists() && file.isFile()) {
             try (Stream<String> stream = Files.lines(Paths.get(filePath))) {

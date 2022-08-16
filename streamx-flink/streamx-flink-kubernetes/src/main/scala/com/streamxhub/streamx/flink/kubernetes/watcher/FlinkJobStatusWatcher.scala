@@ -24,7 +24,8 @@ import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model._
-import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackController, JobStatusWatcherConfig, K8sDeploymentRelated, KubernetesRetriever}
+import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackController, JobStatusWatcherConfig, KubernetesRetriever}
+import com.streamxhub.streamx.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
 import org.json4s.{DefaultFormats, JNothing, JNull}
@@ -254,13 +255,13 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       if (trackController.canceling.has(trackId)) FlinkJobState.CANCELED else {
         // whether deployment exists on kubernetes cluster
         val isDeployExists = KubernetesRetriever.isDeploymentExists(trackId.clusterId, trackId.namespace)
-        val deployStateOfTheError = K8sDeploymentRelated.getDeploymentStatusChanges(trackId.namespace, trackId.clusterId)
-        val isConnection = K8sDeploymentRelated.isTheK8sConnectionNormal()
+        val deployStateOfTheError = KubernetesDeploymentHelper.getDeploymentStatusChanges(trackId.namespace, trackId.clusterId)
+        val isConnection = KubernetesDeploymentHelper.isTheK8sConnectionNormal()
+
         if (isDeployExists && !deployStateOfTheError) {
           FlinkJobState.K8S_INITIALIZING
-        }
-        else if (deployStateOfTheError && isConnection) {
-          K8sDeploymentRelated.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
+        } else if (deployStateOfTheError && isConnection) {
+          KubernetesDeploymentHelper.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
           FlinkJobState.FAILED
         } else {
           // determine if the state should be SILENT or LOST
