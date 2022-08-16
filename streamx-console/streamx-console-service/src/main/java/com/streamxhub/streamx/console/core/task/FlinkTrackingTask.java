@@ -433,7 +433,7 @@ public class FlinkTrackingTask {
                 if (StopFrom.NONE.equals(stopFrom) || applicationService.checkAlter(application)) {
                     log.info("flinkTrackingTask getFromFlinkRestApi, job cancel is not form streamX,savePoint obsoleted!");
                     savePointService.obsolete(application.getId());
-					stopCanlledJob(application.getId());
+                    stopCanlledJob(application.getId());
                     alertService.alert(application, FlinkAppState.CANCELED);
                 }
                 //清理stopFrom
@@ -521,7 +521,7 @@ public class FlinkTrackingTask {
                         || (flinkAppState.equals(FlinkAppState.CANCELED) && StopFrom.NONE.equals(stopFrom))
                         || applicationService.checkAlter(application)) {
                         alertService.alert(application, flinkAppState);
-						stopCanlledJob(application.getId());
+                        stopCanlledJob(application.getId());
                         if (flinkAppState.equals(FlinkAppState.FAILED)) {
                             applicationService.start(application, true);
                         }
