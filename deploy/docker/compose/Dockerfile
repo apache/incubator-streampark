@@ -32,8 +32,14 @@ ARG DB=localhost
 ENV FLINK_VERSION 1.14.5
 ENV SCALA_VERSION scala_2.12
 
+RUN echo Y|apt-get update \
+    && echo Y|apt-get install iputils-ping \
+    && echo Y|apt-get install vim \
+    && echo Y|apt-get install net-tools \
+    && echo Y|apt-get install dos2unix
 
-RUN sed -i -e 's/eval $NOHUP/eval/' bin/streamx.sh \
+RUN dos2unix bin/*.sh \
+    && sed -i -e 's/eval $NOHUP/eval/' bin/streamx.sh \
     && sed -i -e 's/StreamXConsole \\/StreamXConsole/' bin/streamx.sh \
     && sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' bin/streamx.sh \
     && sed -i -e 's/localhost/'$DB'/' conf/application.yml
@@ -42,11 +48,6 @@ RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.t
     && tar zxvf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
     && rm "node-v$NODE_VERSION-linux-x64.tar.gz" \
     && ln -s /usr/local/bin/node /usr/local/bin/nodejs
-
-RUN echo Y|apt-get update \
-    && echo Y|apt-get install iputils-ping \
-    && echo Y|apt-get install vim \
-    && echo Y|apt-get install net-tools
 
 EXPOSE 10000
 ENTRYPOINT bash bin/startup.sh
