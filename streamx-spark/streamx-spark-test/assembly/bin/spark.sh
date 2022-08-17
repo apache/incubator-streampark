@@ -210,7 +210,7 @@ doStart() {
 
     local exit_code=0
 
-    sudo -u hdfs yarn application --list | grep -i "spark" | grep "${app_name}" >/dev/null
+    yarn application --list | grep -i "spark" | grep "${app_name}" >/dev/null
 
     if [[ $? -eq 0 ]]; then
         echo_r "${app_name} already exists!!!"
@@ -220,12 +220,13 @@ doStart() {
         local app_log_date=`date "+%Y%m%d_%H%M%S"`
         local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
 
-        sudo -u hdfs spark2-submit \
+        spark-submit \
+            --master yarn \
+            --deploy-mode cluster \
             --files ${app_proper} \
             --conf "spark.conf=${app_proper}" \
 	          --conf "spark.startup=$0 $RUN_ARGS" \
             --name ${app_name} \
-            --queue spark \
             --jars ${jars} ${app_params}  \
             --class ${main}  ${main_jar} ${main_params} \
             >> ${app_out} 2>&1 &
@@ -234,7 +235,15 @@ doStart() {
 
         if [[ ${exit_code} -eq 0 ]] ; then
              #get application_id
-             local pid="application_`grep "tracking URL:" ${app_out}|awk -F'/application_' '{print $2}'|awk -F'/' '{print $1}'`"
+             local pid="application_"
+
+             while [ "${pid}" = "application_" ]
+             do {
+                sleep 1
+                pid="application_$(grep "tracking URL:" ${app_out} | awk -F '/application_' '{print $2}' | awk -F '/' '{print $1}')"
+                echo_g "Waiting for the program to submit to run pid = [${pid}] "
+             }
+             done
              #write application_id to ${app_pid}
              echo ${pid} > ${app_pid}
              echo_g "${app_name} start successful,application_id:${pid}"
@@ -292,7 +301,7 @@ doShutdown() {
            fi
         fi
 
-        sudo -u hdfs yarn application -kill ${pid}  >/dev/null
+        yarn application -kill ${pid}  >/dev/null
 
         if [[ $? -eq 0 ]] ; then
            echo_g "stop successful,application_id:${pid}"
@@ -327,3 +336,5 @@ case "$1" in
       exit 1
     ;;
 esac
+
+#spark-submit                           --master yarn                           --deploy-mode cluster                           --files /opt/share/streamx-spark-test-1.2.4/conf/prod/test.properties                           --conf spark.conf=/opt/share/streamx-spark-test-1.2.4/conf/prod/test.properties                           --name HelloStreamXApp --jars /opt/share/streamx-spark-test-1.2.4/lib/streamx-spark-core_2.12-1.2.4.jar,/opt/share/streamx-spark-test-1.2.4/lib/streamx-spark-connector-kafka_2.12-1.2.4.jar,/opt/share/streamx-spark-test-1.2.4/lib/streamx-spark-connector-base_2.12-1.2.4.jar,/opt/share/streamx-spark-test-1.2.4/lib/streamx-common_2.12-1.2.4.jar,/opt/share/streamx-spark-test-1.2.4/lib/spark-streaming-kafka-0-10_2.12-2.4.0.jar,/opt/share/streamx-spark-test-1.2.4/lib/snakeyaml-1.29.jar,/opt/share/streamx-spark-test-1.2.4/lib/scala-xml_2.12-1.0.6.jar,/opt/share/streamx-spark-test-1.2.4/lib/scala-reflect-2.12.8.jar,/opt/share/streamx-spark-test-1.2.4/lib/scala-library-2.12.8.jar,/opt/share/streamx-spark-test-1.2.4/lib/scala-compiler-2.12.8.jar,/opt/share/streamx-spark-test-1.2.4/lib/mysql-connector-java-8.0.16.jar,/opt/share/streamx-spark-test-1.2.4/lib/kafka-clients-2.0.0.jar,/opt/share/streamx-spark-test-1.2.4/lib/commons-pool2-2.6.2.jar,/opt/share/streamx-spark-test-1.2.4/lib/commons-dbcp2-2.9.0.jar,                             --class com.streamxhub.streamx.spark.test.HelloStreamXApp  /opt/share/streamx-spark-test-1.2.4/lib/streamx-spark-test-1.2.4.jar
