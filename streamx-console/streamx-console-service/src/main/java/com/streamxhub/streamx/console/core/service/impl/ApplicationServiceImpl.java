@@ -442,6 +442,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public boolean checkAlter(Application application) {
+        Long appId = application.getId();
+        FlinkAppState state = FlinkAppState.of(application.getState());
+        if (!FlinkAppState.CANCELED.equals(state)) {
+            return false;
+        }
+        Long useId = FlinkTrackingTask.getCanlledJobUserId(appId);
+        if (useId == null || application.getUserId().longValue() != FlinkTrackingTask.getCanlledJobUserId(appId).longValue()) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public Long getCountByTeam(Long teamId) {
         return baseMapper.getCountByTeam(teamId);
     }
@@ -1059,6 +1073,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 assert yarnSessionClusterId != null;
                 extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
             }
+        }
+
+        //设置作业取消跟踪列表
+        Long userId = commonService.getCurrentUser().getUserId();
+        if (application.getUserId() != userId) {
+            FlinkTrackingTask.addCanlledApp(application.getId(), userId);
         }
 
         CancelRequest cancelRequest = new CancelRequest(
