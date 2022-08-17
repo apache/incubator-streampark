@@ -19,8 +19,10 @@
 
 package com.streamxhub.streamx.storage;
 
+import java.util.Optional;
+
 public interface StorageService {
-    byte[] getData(String objectPath);
+    Optional<byte[]> getData(String objectPath);
 
     Boolean putData(String objectPath, byte[] data);
 }
