@@ -26,6 +26,7 @@ import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ApplicationException;
 import com.streamxhub.streamx.console.base.exception.InternalException;
+import com.streamxhub.streamx.console.base.util.MoreFutures;
 import com.streamxhub.streamx.console.core.annotation.ApiAccess;
 import com.streamxhub.streamx.console.core.entity.AppControl;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -36,18 +37,21 @@ import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationLogService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.LoggerService;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
@@ -82,6 +86,9 @@ public class ApplicationController {
     @Autowired
     private AppBuildPipeService appBuildPipeService;
 
+    @Autowired
+    private LoggerService logService;
+
     @ApiAccess
     @PostMapping("get")
     @RequiresPermissions("app:detail")
@@ -105,7 +112,7 @@ public class ApplicationController {
     @ApiOperation(value = "App Copy", notes = "App Copy", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "id", value = "copy target app id", required = true, paramType = "form", dataType = "Long"),
-        @ApiImplicitParam(name = "jobName", value = "name of the copied application", required = false, paramType = "form", dataType = "String", defaultValue = ""),
+        @ApiImplicitParam(name = "jobName", value = "name of the copied application", required = true, paramType = "form", dataType = "String", defaultValue = ""),
         @ApiImplicitParam(name = "args", value = "commit parameters after copying", required = false, paramType = "form", dataType = "String", defaultValue = "")})
     @PostMapping("copy")
     @RequiresPermissions("app:copy")
@@ -333,6 +340,15 @@ public class ApplicationController {
         } else {
             return RestResponse.success(false).message(error);
         }
+    }
+
+    @ApiOperation(value = "APP detail")
+    @PostMapping(value = "/detail")
+    public RestResponse detail(@ApiParam("K8s name spaces") @RequestParam(value = "namespac", required = false) String namespac,
+                               @ApiParam("Job name") @RequestParam(value = "jobName", required = false) String jobName,
+                               @ApiParam("Number of log lines skipped loading") @RequestParam(value = "skipLineNum", required = false) Integer skipLineNum,
+                               @ApiParam("Number of log lines loaded at once") @RequestParam(value = "limit", required = false) Integer limit) {
+        return RestResponse.success(MoreFutures.derefUsingDefaultTimeout(logService.queryLog(namespac, jobName, skipLineNum, limit)));
     }
 
 }

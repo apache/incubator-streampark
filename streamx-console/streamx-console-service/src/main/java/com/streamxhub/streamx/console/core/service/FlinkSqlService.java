@@ -52,6 +52,13 @@ public interface FlinkSqlService extends IService<FlinkSql> {
     FlinkSql getEffective(Long appId, boolean decode);
 
     /**
+     * @param appId
+     * @param decode
+     * @return
+     */
+    FlinkSql getLastVersionFlinkSql(Long appId, boolean decode);
+
+    /**
      * @param application
      * @return
      */

@@ -407,7 +407,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -454,7 +454,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //曾经设置过yarn-application类型,尝试删除,不留后患.
             HdfsOperator.delete(Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString()));
         } catch (Exception e) {
-            //skip
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -604,17 +604,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return false;
     }
 
+    @SuppressWarnings("checkstyle:WhitespaceAround")
     @Override
     @SneakyThrows
     @Transactional(rollbackFor = {Exception.class})
     public Long copy(Application appParam) {
+        int count = this.baseMapper.selectCount(
+                new QueryWrapper<Application>().lambda()
+                        .eq(Application::getJobName, appParam.getJobName()));
+        if (count > 0) {
+            throw new IllegalArgumentException("[StreamX] Application names cannot be repeated");
+        }
         Application oldApp = getById(appParam.getId());
 
         Application newApp = new Application();
         String jobName = appParam.getJobName();
         String args = appParam.getArgs();
-        String copy = "copy-";
-        jobName = jobName != null && !"".equals(jobName) ? jobName : copy + oldApp.getJobName();
+
         newApp.setJobName(jobName);
         newApp.setClusterId(jobName);
         args = args != null && !"".equals(args) ? args : oldApp.getArgs();
@@ -658,7 +664,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         boolean saved = save(newApp);
         if (saved) {
             if (newApp.isFlinkSqlJob()) {
-                FlinkSql copyFlinkSql = flinkSqlService.getEffective(appParam.getId(), true);
+                FlinkSql copyFlinkSql = flinkSqlService.getLastVersionFlinkSql(appParam.getId(), true);
                 newApp.setFlinkSql(copyFlinkSql.getSql());
                 newApp.setDependency(copyFlinkSql.getDependency());
                 FlinkSql flinkSql = new FlinkSql(newApp);
@@ -768,7 +774,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             baseMapper.updateById(application);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return false;
         }
     }
@@ -1312,7 +1318,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
             buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
         } else {
-            if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
+            if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
+                assert buildResult != null;
                 DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
                 String ingressTemplates = application.getIngressTemplate();
                 String domainName = application.getDefaultModeIngress();

@@ -203,7 +203,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             }
             return result;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             updateWrapper.eq(FlinkCluster::getId, flinkCluster.getId());
             updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STOPED.getValue());
             updateWrapper.set(FlinkCluster::getException, e.toString());
@@ -279,7 +279,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             result.setMsg("clusterId is not exists!");
             return result;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             updateWrapper.set(FlinkCluster::getException, e.toString());
             update(flinkCluster, updateWrapper);
             result.setStatus(0);

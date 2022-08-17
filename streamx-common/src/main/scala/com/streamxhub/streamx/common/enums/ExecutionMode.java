@@ -118,6 +118,10 @@ public enum ExecutionMode implements Serializable {
         return isKubernetesMode(of(value));
     }
 
+    public static boolean isKubernetesApplicationMode(Integer value) {
+        return KUBERNETES_NATIVE_APPLICATION.equals(of(value));
+    }
+
     public static List<Integer> getKubernetesMode() {
         return Lists.newArrayList(KUBERNETES_NATIVE_SESSION.getMode(), KUBERNETES_NATIVE_APPLICATION.getMode());
     }
