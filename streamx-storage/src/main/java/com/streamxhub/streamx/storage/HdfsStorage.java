@@ -1,0 +1,108 @@
+/*
+ * Copyright (c) 2019 The StreamX Project
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.streamxhub.streamx.storage;
+
+import static org.apache.hadoop.io.IOUtils.copyBytes;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.InvalidPathException;
+import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
+public class HdfsStorage implements StorageService{
+    private static final Logger LOG = LoggerFactory.getLogger(HdfsStorage.class);
+    private static final Set<Character> AVOID_CHARS_IN_FILENAME = new LinkedHashSet(Arrays.asList('#', '%', '&', '{', '}', '\\', '<', '>', '*', '?', ' ', '\t', '$', '!', '\'', '"', ':', '@'));
+    private final String fullPathPrefix;
+    private final FileSystem client;
+
+    public HdfsStorage(URI baseUri, String storageGroup) {
+        Objects.requireNonNull(baseUri);
+        if (!baseUri.getScheme().equals("hdfs")) {
+            throw new IllegalArgumentException("Expected scheme hdfs://, but was: " + baseUri);
+        } else {
+            this.fullPathPrefix = String.format("%s/%s", StringUtils.removeEnd(baseUri.toString(), "/"), storageGroup);
+            Configuration conf = new Configuration();
+            try {
+                this.client = FileSystem.get(conf);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    @Override
+    public Optional<byte[]> getData(String objectPath) {
+        Objects.requireNonNull(objectPath);
+        Path path = new Path(this.fullPathPrefix);
+        try (FSDataInputStream inputStream = this.client.open(path)){
+            Optional<byte[]> data;
+            data = Optional.of(IOUtils.toByteArray(inputStream));
+            return data;
+        } catch (FileNotFoundException e) {
+            LOG.debug("No file at path: {}", path);
+            return Optional.empty();
+        } catch (IOException e) {
+            LOG.error("Failed to get data from path: {}", path, e);
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Boolean putData(String objectPath, byte[] data) {
+        validateName(objectPath);
+        Objects.requireNonNull(data);
+        Path path = new Path(this.fullPathPrefix);
+        try (FSDataOutputStream fsDataOutputStream = this.client.create(path)){
+            copyBytes(new ByteArrayInputStream(data), fsDataOutputStream, this.client.getConf());
+        } catch (IOException e) {
+            LOG.error("Failed to put data to path: {}", path, e);
+            return false;
+        }
+        return true;
+    }
+
+    static void validateName(String filename) throws InvalidPathException {
+        if (StringUtils.isBlank(filename)) {
+            throw new InvalidPathException(filename, "filename cannot be blank");
+        } else {
+            boolean containsInvalidChar = filename.chars().anyMatch(AVOID_CHARS_IN_FILENAME::contains);
+            if (containsInvalidChar) {
+                throw new InvalidPathException(filename, String.format("filename cannot include the following characters: %s", AVOID_CHARS_IN_FILENAME));
+            }
+        }
+    }
+
+}
