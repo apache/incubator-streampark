@@ -188,7 +188,7 @@ mixedPackage() {
     binaryVer="2.12"
   fi
   echo_g "build info: package mode @ mixed, scala version @ $binaryVer, now build starting..."
-  "$PRG_DIR/mvnw" clean package -DskipTests -Dscala.version=$scalaVer -Dscala.binary.version=$binaryVer -Pwebapp
+  "$PRG_DIR/mvnw" clean package -T 4 -DskipTests -Dscala.version=$scalaVer -Dscala.binary.version=$binaryVer -Pwebapp
 
   if [ $? -eq 0 ]; then
      printf '\n'
@@ -206,7 +206,7 @@ detachedPackage () {
 
   echo_g "build info: package mode @ detached, scala version @ $binaryVer, now build starting..."
 
-  "$PRG_DIR"/mvnw clean package -DskipTests -Dscala.version=$scalaVer -Dscala.binary.version=$binaryVer
+  "$PRG_DIR"/mvnw clean package -T 4 -DskipTests -Dscala.version=$scalaVer -Dscala.binary.version=$binaryVer
 
   if [ $? -eq 0 ]; then
     printf '\n'
