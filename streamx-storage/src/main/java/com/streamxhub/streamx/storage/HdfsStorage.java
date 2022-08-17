@@ -21,9 +21,10 @@ package com.streamxhub.streamx.storage;
 
 import static org.apache.hadoop.io.IOUtils.copyBytes;
 
+import com.streamxhub.streamx.common.util.HadoopUtils;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -54,12 +55,8 @@ public class HdfsStorage implements StorageService{
             throw new IllegalArgumentException("Expected scheme hdfs://, but was: " + baseUri);
         } else {
             this.fullPathPrefix = String.format("%s/%s", StringUtils.removeEnd(baseUri.toString(), "/"), storageGroup);
-            Configuration conf = new Configuration();
-            try {
-                this.client = FileSystem.get(conf);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            this.client = HadoopUtils.hdfs();
+
         }
     }
 
