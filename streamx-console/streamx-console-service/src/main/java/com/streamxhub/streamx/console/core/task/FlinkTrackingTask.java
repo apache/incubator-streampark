@@ -117,6 +117,13 @@ public class FlinkTrackingTask {
      */
     private static final Cache<Long, Byte> CANCELING_CACHE = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
 
+    /**
+     * 任务取消跟踪列表,跟踪任务是由谁取消
+     * key:applicationId
+     * value:userId
+     */
+    private static final Map<Long, Long> CANCELLED_JOB_MAP = new ConcurrentHashMap<>(0);
+
     @Autowired
     private SavePointService savePointService;
 
@@ -423,9 +430,10 @@ public class FlinkTrackingTask {
                 log.info("flinkTrackingTask getFromFlinkRestApi, job state {}, stop tracking and delete stopFrom!", currentState.name());
                 cleanSavepoint(application);
                 application.setState(currentState.getValue());
-                if (StopFrom.NONE.equals(stopFrom)) {
+                if (StopFrom.NONE.equals(stopFrom) || applicationService.checkAlter(application)) {
                     log.info("flinkTrackingTask getFromFlinkRestApi, job cancel is not form streamX,savePoint obsoleted!");
                     savePointService.obsolete(application.getId());
+                    stopCanlledJob(application.getId());
                     alertService.alert(application, FlinkAppState.CANCELED);
                 }
                 //清理stopFrom
@@ -510,8 +518,11 @@ public class FlinkTrackingTask {
                     cleanOptioning(optionState, application.getId());
                     this.persistentAndClean(application);
 
-                    if (flinkAppState.equals(FlinkAppState.FAILED) || flinkAppState.equals(FlinkAppState.LOST)) {
+                    if (flinkAppState.equals(FlinkAppState.FAILED) || flinkAppState.equals(FlinkAppState.LOST)
+                        || (flinkAppState.equals(FlinkAppState.CANCELED) && StopFrom.NONE.equals(stopFrom))
+                        || applicationService.checkAlter(application)) {
                         alertService.alert(application, flinkAppState);
+                        stopCanlledJob(application.getId());
                         if (flinkAppState.equals(FlinkAppState.FAILED)) {
                             applicationService.start(application, true);
                         }
@@ -647,6 +658,23 @@ public class FlinkTrackingTask {
         }
         log.info("flinkTrackingTask stop app,appId:{}", appId);
         TRACKING_MAP.remove(appId);
+    }
+
+    public static void stopCanlledJob(Long appId) {
+        if (!CANCELLED_JOB_MAP.containsKey(appId)) {
+            return;
+        }
+        log.info("flink job canlled app appId:{} by useId:{}", appId, CANCELLED_JOB_MAP.get(appId));
+        CANCELLED_JOB_MAP.remove(appId);
+    }
+
+    public static void addCanlledApp(Long appId, Long userId) {
+        log.info("flink job addCanlledApp app appId:{}, useId:{}", appId, userId);
+        CANCELLED_JOB_MAP.put(appId, userId);
+    }
+
+    public static Long getCanlledJobUserId(Long appId) {
+        return CANCELLED_JOB_MAP.get(appId);
     }
 
     public static Map<Long, Application> getAllTrackingApp() {
