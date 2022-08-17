@@ -1456,11 +1456,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setOptionTime(new Date());
         updateById(application);
         savePointService.obsolete(application.getId());
-        //设置作业取消跟踪列表
-        Long userId = commonService.getCurrentUser().getUserId();
-        if (application.getUserId() != userId) {
-            FlinkTrackingTask.addCanlledApp(application.getId(), userId);
-        }
         // retracking flink job on kubernetes and logging exception
         if (isKubernetesApp(application)) {
             TrackId id = toTrackId(application);
