@@ -12,7 +12,6 @@
     <modules>
         <module>streamx-common</module>
         <module>streamx-flink</module>
-        <module>streamx-spark</module>
         <module>streamx-plugin</module>
         <module>streamx-console</module>
         <module>streamx-storage</module>
