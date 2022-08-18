@@ -12,7 +12,6 @@
     <modules>
         <module>streamx-common</module>
         <module>streamx-flink</module>
-        <module>streamx-spark</module>
         <module>streamx-plugin</module>
         <module>streamx-console</module>
         <module>streamx-storage</module>
@@ -454,7 +453,7 @@
                         <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
                         <testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
                         <!--suppress UnresolvedMavenProperty -->
-                        <configLocation>${maven.multiModuleProjectDirectory}/scalastyle-config.xml</configLocation>
+                        <configLocation>${maven.multiModuleProjectDirectory}/tools/checkstyle/scalastyle-config.xml</configLocation>
                         <outputFile>${project.build.directory}/target/scalastyle-output.xml</outputFile>
                         <inputEncoding>UTF-8</inputEncoding>
                         <outputEncoding>UTF-8</outputEncoding>
