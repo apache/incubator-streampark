@@ -17,12 +17,14 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.storage;
+package com.streamxhub.streamx.flink.kubernetes;
 
 import java.util.Optional;
 
-public interface StorageService {
-    Optional<byte[]> getData(String objectPath);
+public interface ReadOnlyK8sResource<T> {
+    Optional<T> getResource();
 
-    Boolean putData(String objectPath, byte[] data);
+    default boolean resourceExists() {
+        return this.getResource().isPresent();
+    }
 }

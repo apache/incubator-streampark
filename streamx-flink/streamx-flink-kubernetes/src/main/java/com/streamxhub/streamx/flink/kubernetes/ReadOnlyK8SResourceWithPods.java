@@ -17,12 +17,11 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.storage;
+package com.streamxhub.streamx.flink.kubernetes;
 
-import java.util.Optional;
+import io.fabric8.kubernetes.api.model.Pod;
 
-public interface StorageService {
-    Optional<byte[]> getData(String objectPath);
+public interface ReadOnlyK8SResourceWithPods<T> extends ReadOnlyK8sResource<T> {
 
-    Boolean putData(String objectPath, byte[] data);
+    Iterable<Pod> listPods();
 }

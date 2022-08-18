@@ -25,6 +25,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class K8sDeploymentRelated {
 
@@ -68,5 +69,13 @@ public class K8sDeploymentRelated {
         try (KubernetesClient client = new DefaultKubernetesClient()){
             return client != null;
         }
+    }
+
+    public static String toLabelSelector(Map<String, String> labels) {
+        StringJoiner joiner = new StringJoiner(",");
+        for (Map.Entry<String, String> stringStringEntry : labels.entrySet()) {
+            joiner.add(String.format("%s=%s", stringStringEntry.getKey(), stringStringEntry.getValue()));
+        }
+        return joiner.toString();
     }
 }
