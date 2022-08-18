@@ -1,0 +1,82 @@
+version: '3.9'
+networks:
+  default:
+    name: zookeeper_network
+    external: true
+
+services:
+  spark-master:
+    image: "spark_hadoop_yarn:3.2.0"
+    build:
+      context: .
+      labels:
+        - "spark_hadoop_yarn"
+    container_name: master
+    hostname: master
+#    command: /bin/bash -c "sh start-hadoop.sh"
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    volumes:
+      - ./share:/opt/share
+    ports:
+      - '8080:8080'
+      - '4040:4040'
+      - '8088:8088'
+      - '8042:8042'
+      - '9870:9870'
+      - '19889:19888'
+  spark-worker-1:
+    image: "spark_hadoop_yarn:3.2.0"
+    build:
+      context: .
+      labels:
+        - "spark_hadoop_yarn"
+    container_name: worker1
+    hostname: worker1
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://master:7077
+      - SPARK_WORKER_MEMORY=256M
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    volumes:
+      - ./share:/opt/share
+
+    expose:
+      - '8081'
+      - '9864'
+      - '8042'
+    links:
+      - spark-master
+  spark-worker-2:
+    image: "spark_hadoop_yarn:3.2.0"
+    build:
+      context: .
+      labels:
+        - "spark_hadoop_yarn"
+    container_name: worker2
+    hostname: worker2
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://master:7077
+      - SPARK_WORKER_MEMORY=256M
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    volumes:
+      - ./share:/opt/share
+    expose:
+      - '8081'
+      - '9864'
+      - '8042'
+    links:
+      - spark-master
