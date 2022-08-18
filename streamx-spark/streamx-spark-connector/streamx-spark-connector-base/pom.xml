@@ -5,12 +5,12 @@
 
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
-        <artifactId>streamx-spark-connector_${scala.binary.version}</artifactId>
+        <artifactId>streamx-spark-connector_2.12</artifactId>
         <version>1.2.4</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>streamx-spark-connector-base_${scala.binary.version}</artifactId>
+    <artifactId>streamx-spark-connector-base_2.12</artifactId>
 
     <name>StreamX : Spark Connector Base</name>
 
@@ -19,7 +19,7 @@
         <!--streamxhub   核心jar包  -->
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-spark-core_${scala.binary.version}</artifactId>
+            <artifactId>streamx-spark-core_2.12</artifactId>
             <version>${project.version}</version>
         </dependency>
 

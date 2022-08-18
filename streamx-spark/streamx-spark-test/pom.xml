@@ -14,19 +14,19 @@
     <dependencies>
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-spark-core_${scala.binary.version}</artifactId>
+            <artifactId>streamx-spark-core_2.12</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-spark-connector-kafka_${scala.binary.version}</artifactId>
+            <artifactId>streamx-spark-connector-kafka_2.12</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.json4s</groupId>
-            <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
+            <artifactId>json4s-jackson_2.12</artifactId>
         </dependency>
 
         <dependency>
@@ -41,12 +41,12 @@
 
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
+            <artifactId>jackson-module-scala_2.12</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.scalikejdbc</groupId>
-            <artifactId>scalikejdbc_${scala.binary.version}</artifactId>
+            <artifactId>scalikejdbc_2.12</artifactId>
             <version>${scalikejdbc.version}</version>
         </dependency>
 

@@ -22,35 +22,35 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-common_${scala.binary.version}</artifactId>
+            <artifactId>streamx-common_2.12</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <!--Spark 核心jar包-->
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_${scala.binary.version}</artifactId>
+            <artifactId>spark-core_2.12</artifactId>
             <version>${spark.version}</version>
             <scope>provided</scope>
         </dependency>
         <!--Spark Streaming 核心jar-->
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-streaming_${scala.binary.version}</artifactId>
+            <artifactId>spark-streaming_2.12</artifactId>
             <version>${spark.version}</version>
             <scope>provided</scope>
         </dependency>
         <!--Spark Sql 核心jar-->
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_${scala.binary.version}</artifactId>
+            <artifactId>spark-sql_2.12</artifactId>
             <version>${spark.version}</version>
             <scope>provided</scope>
         </dependency>
         <!--Spark kafka 核心jar-->
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-streaming-kafka-0-10_${scala.binary.version}</artifactId>
+            <artifactId>spark-streaming-kafka-0-10_2.12</artifactId>
             <version>${spark.version}</version>
         </dependency>
 
