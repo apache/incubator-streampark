@@ -20,6 +20,9 @@
 package com.streamxhub.streamx.common.fs
 
 import com.streamxhub.streamx.common.enums.StorageType
+import com.streamxhub.streamx.common.util.Utils.tryWithResource
+
+import java.io.{InputStream, OutputStream}
 
 object FsOperator {
 
@@ -35,6 +38,29 @@ object FsOperator {
     }
   }
 
+}
+
+abstract class ObjectOperator extends FsOperator {
+  override def mkCleanDirs(path: String): Unit = {}
+
+  override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {}
+
+  override def move(srcPath: String, dstPath: String): Unit = {}
+
+  def download(srcPath: String, dstPath: String): Unit
+
+  def download(inputStream: InputStream, outputStream: OutputStream): Unit = {
+    tryWithResource(inputStream)(in => {
+      tryWithResource(outputStream)(out => {
+        val buf = new Array[Byte](1024)
+        var len = in.read(buf)
+        while (len >= 0) {
+          out.write(buf, 0, len)
+          len = in.read(buf)
+        }
+      })
+    })
+  }
 }
 
 abstract class FsOperator {
