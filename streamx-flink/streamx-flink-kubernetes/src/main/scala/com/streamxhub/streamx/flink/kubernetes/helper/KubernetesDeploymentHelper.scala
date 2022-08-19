@@ -17,10 +17,13 @@
 package com.streamxhub.streamx.flink.kubernetes.helper
 
 
+import com.google.common.base.Charsets
+import com.google.common.io.Files
 import com.streamxhub.streamx.common.util.Utils
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 
+import java.io.File
 import scala.collection.JavaConversions._
 import scala.util.Try
 
@@ -68,4 +71,16 @@ object KubernetesDeploymentHelper {
     }
   }
 
+  def watchDeploymentLog(nameSpace: String, jobName: String): String = try {
+    Utils.tryWithResource(new DefaultKubernetesClient) { client =>
+      val log = client.apps.deployments.inNamespace(nameSpace).withName(jobName).getLog
+
+      val dir = new File("")
+      val projectPath = dir.getCanonicalPath
+      val path = String.format("%s/%s_%s.log", projectPath, nameSpace, jobName)
+      val file = new File(path)
+      Files.asCharSink(file, Charsets.UTF_8).write(log)
+      return path
+    }
+  }
 }

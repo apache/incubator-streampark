@@ -18,17 +18,12 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.streamxhub.streamx.console.core.service.LogClientService;
 import com.streamxhub.streamx.console.core.service.LoggerService;
+import com.streamxhub.streamx.flink.kubernetes.helper.KubernetesDeploymentHelper;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -55,20 +50,8 @@ public class LoggerServiceImpl implements LoggerService {
     }
 
     private String jobDeploymentsWatch(String nameSpace, String jobName) {
-        try (KubernetesClient client = new DefaultKubernetesClient()) {
-            String log = client.apps().deployments()
-                .inNamespace(nameSpace)
-                .withName(jobName).getLog();
-
-            File dir = new File("");
-            String projectPath = dir.getCanonicalPath();
-            String path = String.format("%s/%s_%s.log", projectPath, nameSpace, jobName);
-            File file = new File(path);
-            Files.asCharSink(file, Charsets.UTF_8).write(log);
-            return path;
-        } catch (IOException e) {
-            return null;
-        }
+        return KubernetesDeploymentHelper.watchDeploymentLog(nameSpace, jobName);
     }
-
 }
+
+
