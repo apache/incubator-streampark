@@ -22,7 +22,7 @@ package com.streamxhub.streamx.storage;
 import java.util.Optional;
 
 public interface StorageService {
-    Optional<byte[]> getData(String objectPath);
+    Optional<byte[]> getData(String fileName);
 
-    Boolean putData(String objectPath, byte[] data);
+    Boolean putData(String fileName, byte[] data);
 }

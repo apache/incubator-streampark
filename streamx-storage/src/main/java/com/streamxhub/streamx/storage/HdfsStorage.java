@@ -28,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.InvalidPathException;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,16 +36,12 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 public class HdfsStorage implements StorageService{
     private static final Logger LOG = LoggerFactory.getLogger(HdfsStorage.class);
-    private static final Set<Character> AVOID_CHARS_IN_FILENAME = new LinkedHashSet(Arrays.asList('#', '%', '&', '{', '}', '\\', '<', '>', '*', '?', ' ', '\t', '$', '!', '\'', '"', ':', '@'));
-    private final String fullPathPrefix;
+    private final String bucketPath;
     private final FileSystem client;
 
     public HdfsStorage(URI baseUri, String storageGroup) {
@@ -54,16 +49,16 @@ public class HdfsStorage implements StorageService{
         if (!baseUri.getScheme().equals("hdfs")) {
             throw new IllegalArgumentException("Expected scheme hdfs://, but was: " + baseUri);
         } else {
-            this.fullPathPrefix = String.format("%s/%s", StringUtils.removeEnd(baseUri.toString(), "/"), storageGroup);
+            this.bucketPath = String.format("%s/%s", StringUtils.removeEnd(baseUri.toString(), "/"), storageGroup);
             this.client = HadoopUtils.hdfs();
 
         }
     }
 
     @Override
-    public Optional<byte[]> getData(String objectPath) {
-        Objects.requireNonNull(objectPath);
-        Path path = new Path(this.fullPathPrefix);
+    public Optional<byte[]> getData(String fileName) {
+        Objects.requireNonNull(fileName);
+        Path path = new Path(StorageUtils.getFullBucketPath(bucketPath, fileName));
         try (FSDataInputStream inputStream = this.client.open(path)){
             Optional<byte[]> data;
             data = Optional.of(IOUtils.toByteArray(inputStream));
@@ -78,10 +73,11 @@ public class HdfsStorage implements StorageService{
     }
 
     @Override
-    public Boolean putData(String objectPath, byte[] data) {
-        validateName(objectPath);
+    public Boolean putData(String fileName, byte[] data) {
         Objects.requireNonNull(data);
-        Path path = new Path(this.fullPathPrefix);
+        Objects.requireNonNull(fileName);
+        StorageUtils.validateName(fileName);
+        Path path = new Path(StorageUtils.getFullBucketPath(bucketPath, fileName));
         try (FSDataOutputStream fsDataOutputStream = this.client.create(path)){
             copyBytes(new ByteArrayInputStream(data), fsDataOutputStream, this.client.getConf());
         } catch (IOException e) {
@@ -90,16 +86,4 @@ public class HdfsStorage implements StorageService{
         }
         return true;
     }
-
-    static void validateName(String filename) throws InvalidPathException {
-        if (StringUtils.isBlank(filename)) {
-            throw new InvalidPathException(filename, "filename cannot be blank");
-        } else {
-            boolean containsInvalidChar = filename.chars().anyMatch(AVOID_CHARS_IN_FILENAME::contains);
-            if (containsInvalidChar) {
-                throw new InvalidPathException(filename, String.format("filename cannot include the following characters: %s", AVOID_CHARS_IN_FILENAME));
-            }
-        }
-    }
-
 }
