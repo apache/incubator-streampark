@@ -58,6 +58,6 @@ public class StorageUtils {
     public static String getFullBucketPath(String bucketPathPrefix, String filename){
         Objects.requireNonNull(bucketPathPrefix);
         Objects.requireNonNull(filename);
-        return String.format("%s/%s/%s", bucketPathPrefix, filename);
+        return String.format("%s/%s", bucketPathPrefix, filename);
     }
 }
