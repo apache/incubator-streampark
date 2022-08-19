@@ -77,7 +77,7 @@ object KubernetesDeploymentHelper {
 
       val dir = new File("")
       val projectPath = dir.getCanonicalPath
-      val path = String.format("%s/%s_%s.log", projectPath, nameSpace, jobName)
+      val path = s"$projectPath/$nameSpace_$jobName.log"
       val file = new File(path)
       Files.asCharSink(file, Charsets.UTF_8).write(log)
       return path
