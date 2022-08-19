@@ -736,7 +736,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     !ObjectUtils.safeTrimEquals(application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate()) ||
                     !ObjectUtils.safeTrimEquals(application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate()) ||
                     !ObjectUtils.safeTrimEquals(application.getK8sPodTemplates(), appParam.getK8sPodTemplates()) ||
-                    !ObjectUtils.safeTrimEquals(application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())) {
+                    !ObjectUtils.safeTrimEquals(application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration()) ||
+                    !ObjectUtils.safeTrimEquals(application.getFlinkImage(), appParam.getFlinkImage())
+                ) {
                     application.setBuild(true);
                 }
             }
