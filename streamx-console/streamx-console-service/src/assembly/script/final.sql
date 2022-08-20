@@ -557,7 +557,6 @@ CREATE TABLE `t_user` (
 `SALT` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '密码加盐',
 `PASSWORD` varchar(128) COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码',
 `EMAIL` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '邮箱',
-`MOBILE` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '联系电话',
 `STATUS` char(1) COLLATE utf8mb4_general_ci NOT NULL COMMENT '状态 0锁定 1有效',
 `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
 `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
@@ -572,7 +571,7 @@ UNIQUE KEY `UN_USERNAME` (`NICK_NAME`) USING BTREE
 -- Records of t_user
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_user` VALUES (100000, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', 'benjobs@qq.com', '13800000000', '1', NOW(), NULL,NULL,NULL,NULL,NULL );
+INSERT INTO `t_user` VALUES (100000, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', NULL, '1', NOW(), NULL,NULL,0,NULL,NULL );
 COMMIT;
 
 -- ----------------------------

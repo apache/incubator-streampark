@@ -9,7 +9,7 @@
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <template slot="title">
       <a-icon type="user" />
-      添加用户
+      Add User
     </template>
     <a-form
       :form="form">
@@ -43,20 +43,12 @@
           ]}]" />
       </a-form-item>
       <a-form-item
-        label="Mail"
+        label="E-Mail"
         v-bind="formItemLayout">
         <a-input
           v-decorator="['email',{rules: [
-            { type: 'email', message: '请输入正确的邮箱' },
-            { max: 50, message: '长度不能超过50个字符'}
-          ]}]" />
-      </a-form-item>
-      <a-form-item
-        label="Mobile"
-        v-bind="formItemLayout">
-        <a-input
-          v-decorator="['mobile', {rules: [
-            { pattern: '^0?(13[0-9]|15[012356789]|17[013678]|18[0-9]|14[57])[0-9]{8}$', message: '请输入正确的手机号'}
+            { type: 'email', message: 'please enter a valid email address' },
+            { max: 50, message: 'exceeds maximum length limit of 50 characters'}
           ]}]" />
       </a-form-item>
       <a-form-item
@@ -64,7 +56,7 @@
         v-bind="formItemLayout">
         <a-input
           v-decorator="['description',{rules: [
-            { max: 100, message: '长度不能超过100个字符'}
+            { max: 100, message: 'exceeds maximum length limit of 100 characters'}
           ]}]" />
       </a-form-item>
       <a-form-item

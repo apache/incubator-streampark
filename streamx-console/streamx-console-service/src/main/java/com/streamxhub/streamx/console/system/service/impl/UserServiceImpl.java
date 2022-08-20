@@ -258,7 +258,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 u.setPassword(null);
                 u.setSalt(null);
                 u.setRoleId(null);
-                u.setMobile(null);
             });
         }
         return users;
