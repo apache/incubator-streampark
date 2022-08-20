@@ -23,6 +23,7 @@ import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model._
 import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrackController, JobStatusWatcherConfig, KubernetesRetriever}
 import com.streamxhub.streamx.flink.kubernetes.helper.KubernetesDeploymentHelper
+import com.streamxhub.streamx.flink.kubernetes.helper.KubernetesDeploymentHelper.getTheNumberOfTaskDeploymentRetries
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
 import org.json4s.{DefaultFormats, JNothing, JNull}
@@ -258,6 +259,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         if (isDeployExists && !deployStateOfTheError) {
           FlinkJobState.K8S_INITIALIZING
         } else if (deployStateOfTheError && isConnection) {
+          KubernetesDeploymentHelper.watchDeploymentLog(trackId.namespace, trackId.clusterId)
           KubernetesDeploymentHelper.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
           FlinkJobState.FAILED
         } else {
