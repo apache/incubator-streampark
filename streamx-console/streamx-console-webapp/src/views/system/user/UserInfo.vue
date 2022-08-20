@@ -4,34 +4,30 @@
     :centered="true"
     :keyboard="false"
     :footer="null"
-    :width="400"
+    :width="450"
     @cancel="handleCancleClick">
     <template slot="title">
       <a-icon type="user" />
-      用户信息
+      User Info
     </template>
     <a-layout class="user-info">
       <a-layout-content class="user-content">
         <p>
           <a-icon
-            type="user" />账户：{{ data.username }}
+            type="user" />User Name：{{ data.username }}
         </p>
         <p
           :title="data.roleName">
           <a-icon
-            type="star" />角色：{{ data.roleName? data.roleName: '暂无角色' }}
+            type="star" />Role：{{ data.roleName? data.roleName: '' }}
         </p>
         <p>
           <a-icon
-            type="skin" />性别：{{ sex }}
+            type="skin" />Gender：{{ sex }}
         </p>
         <p>
           <a-icon
-            type="phone" />电话：{{ data.mobile ? data.mobile : '暂未绑定电话' }}
-        </p>
-        <p>
-          <a-icon
-            type="mail" />邮箱：{{ data.email ? data.email : '暂未绑定邮箱' }}
+            type="mail" />E-Mail：{{ data.email ? data.email : '' }}
         </p>
       </a-layout-content>
       <a-layout-content
@@ -42,19 +38,19 @@
             v-if="data.status === '1'" />
           <a-icon
             type="frown"
-            v-else />状态：
+            v-else />Status：
           <template
             v-if="data.status === '0'">
             <a-tag
               color="red">
-              锁定
+              locked
             </a-tag>
           </template>
           <template
             v-else-if="data.status === '1'">
             <a-tag
               color="cyan">
-              有效
+              effective
             </a-tag>
           </template>
           <template
@@ -64,16 +60,16 @@
         </p>
         <p>
           <a-icon
-            type="clock-circle" />创建时间：{{ data.createTime }}
+            type="clock-circle" />Creation Time：{{ data.createTime }}
         </p>
         <p>
           <a-icon
-            type="login" />最近登录：{{ data.lastLoginTime }}
+            type="login" />Recent Login：{{ data.lastLoginTime }}
         </p>
         <p
           :title="data.description">
           <a-icon
-            type="message" />描述：{{ data.description }}
+            type="message" />Description：{{ data.description }}
         </p>
       </a-layout-content>
     </a-layout>
@@ -105,11 +101,11 @@ export default {
     sex () {
       switch (this.data.sex) {
         case '0':
-          return '男'
+          return 'male'
         case '1':
-          return '女'
+          return 'female'
         case '2':
-          return '保密'
+          return 'secret'
         default:
           return this.data.sex
       }
@@ -133,7 +129,7 @@ export default {
   }
   p {
     margin-bottom: 1rem;
-    max-width: 15.5rem;
+    max-width: 16rem;
   }
   i {
     margin-right: .8rem;

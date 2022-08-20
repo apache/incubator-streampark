@@ -23,7 +23,6 @@ import lombok.Data;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import java.io.Serializable;
@@ -67,9 +66,6 @@ public class User implements Serializable {
     @Size(max = 50, message = "{noMoreThan}")
     @Email(message = "{email}")
     private String email;
-
-    @Pattern(regexp = "[1]\\d{10}", message = "{mobile}")
-    private String mobile;
 
     @NotBlank(message = "{required}")
     private String status;

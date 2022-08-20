@@ -9,46 +9,38 @@
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <template slot="title">
       <a-icon type="user" />
-      修改用户
+      Modify User
     </template>
     <a-form
       :form="form">
       <a-form-item
-        label="用户名"
+        label="User Name"
         v-bind="formItemLayout">
         <a-input
           read-only
           v-decorator="['username']" />
       </a-form-item>
       <a-form-item
-        label="昵称"
+        label="Nick Name"
         v-bind="formItemLayout">
         <a-input
           read-only
           v-decorator="['nickName']" />
       </a-form-item>
       <a-form-item
-        label="邮箱"
+        label="E-Mail"
         v-bind="formItemLayout">
         <a-input
           v-decorator="[
             'email',
             {rules: [
-              { type: 'email', message: '请输入正确的邮箱' },
-              { max: 50, message: '长度不能超过50个字符'}
+              { type: 'email', message: 'please enter a valid email address' },
+              { max: 50, message: 'exceeds maximum length limit of 50 characters'}
             ]}
           ]" />
       </a-form-item>
       <a-form-item
-        label="手机"
-        v-bind="formItemLayout">
-        <a-input
-          v-decorator="['mobile', {rules: [
-            { pattern: '^0?(13[0-9]|15[012356789]|17[013678]|18[0-9]|14[57])[0-9]{8}$', message: '请输入正确的手机号'}
-          ]}]" />
-      </a-form-item>
-      <a-form-item
-        label="角色"
+        label="Role"
         v-bind="formItemLayout">
         <a-select
           @change="handleRoleEdit"
@@ -57,7 +49,7 @@
           style="width: 100%"
           v-decorator="[
             'roleId',
-            {rules: [{ required: true, message: '请选择角色' }]}
+            {rules: [{ required: true, message: 'please select role' }]}
           ]">
           <a-select-option
             v-for="r in roleData"
@@ -68,7 +60,7 @@
       </a-form-item>
       <a-form-item
         v-if="!roles.includes('100000')"
-        label="团队"
+        label="Team"
         v-bind="formItemLayout">
         <a-select
           mode="multiple"
@@ -76,7 +68,7 @@
           style="width: 100%"
           v-decorator="[
             'teamId',
-            {rules: [{ required: true, message: '请选择团队' }]}
+            {rules: [{ required: true, message: 'please select team' }]}
           ]">
           <a-select-option
             v-for="t in teamData"
@@ -87,12 +79,12 @@
       </a-form-item>
 
       <a-form-item
-        label="状态"
+        label="Status"
         v-bind="formItemLayout">
         <a-radio-group
           v-decorator="[
             'status',
-            {rules: [{ required: true, message: '请选择状态' }]}
+            {rules: [{ required: true, message: 'please select status' }]}
           ]">
           <a-radio
             value="0">
@@ -105,12 +97,12 @@
         </a-radio-group>
       </a-form-item>
       <a-form-item
-        label="性别"
+        label="Gender"
         v-bind="formItemLayout">
         <a-radio-group
           v-decorator="[
             'sex',
-            {rules: [{ required: true, message: '请选择性别' }]}
+            {rules: [{ required: true, message: 'please select gender' }]}
           ]">
           <a-radio
             value="0">
@@ -194,7 +186,7 @@ export default {
     setFormValues ({ ...user }) {
       this.userId = user.userId
       this.userType = user.userType
-      const fields = ['username', 'nickName', 'email', 'status', 'sex', 'mobile']
+      const fields = ['username', 'nickName', 'email', 'status', 'sex']
       Object.keys(user).forEach((key) => {
         if (fields.indexOf(key) !== -1) {
           this.form.getFieldDecorator(key)

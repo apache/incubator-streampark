@@ -105,12 +105,12 @@
           name="edit"
           border
           @click.native="handleEdit(record)"
-          title="修改用户" />
+          title="modify" />
         <svg-icon
           name="see"
           border
           @click.native="handleView(record)"
-          title="查看" />
+          title="view" />
         <svg-icon
           v-permit="'user:reset'"
           v-if="(record.username !== 'admin' || userName === 'admin')"
@@ -267,7 +267,7 @@ export default {
     },
     handleUserAddSuccess () {
       this.userAdd.visible = false
-      this.$message.success('新增用户成功')
+      this.$message.success('add user successfully')
       this.search()
     },
     handleEdit (record) {
@@ -279,7 +279,7 @@ export default {
     },
     handleUserEditSuccess () {
       this.userEdit.visible = false
-      this.$message.success('修改用户成功')
+      this.$message.success('modify user successfully')
       this.search()
     },
     handleUserInfoClose () {
