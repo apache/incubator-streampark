@@ -1176,7 +1176,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             return error;
         } else {
-            return "When custom savepoint is not set, state.savepoints.dir needs to be set in Dynamic Option or flick-conf.yaml of application";
+            return "When custom savepoint is not set, state.savepoints.dir needs to be set in Dynamic Option or flink-conf.yaml of application";
         }
     }
 
