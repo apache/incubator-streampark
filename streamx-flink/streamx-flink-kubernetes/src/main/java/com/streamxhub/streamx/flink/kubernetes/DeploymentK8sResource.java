@@ -67,7 +67,7 @@ public class DeploymentK8sResource implements PatchableK8SResourceWithPods<Deplo
     public Optional<Deployment> getResource() {
         try {
             return Optional.ofNullable(this.client.apps().deployments().inNamespace(this.namespace).withName(this.resource.getMetadata().getName()).get());
-        } catch (KubernetesClientException e){
+        } catch (KubernetesClientException e) {
             return Optional.empty();
         }
     }

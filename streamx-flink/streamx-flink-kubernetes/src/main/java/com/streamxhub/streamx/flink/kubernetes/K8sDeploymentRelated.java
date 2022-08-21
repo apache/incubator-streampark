@@ -29,7 +29,7 @@ import java.util.StringJoiner;
 
 public class K8sDeploymentRelated {
 
-    public static Boolean getDeploymentStatusChanges(String nameSpce, String deploymentName){
+    public static Boolean getDeploymentStatusChanges(String nameSpce, String deploymentName) {
         try (KubernetesClient client = new DefaultKubernetesClient()){
             Map<String, String> matchLabels = client.apps()
                 .deployments()
@@ -44,13 +44,13 @@ public class K8sDeploymentRelated {
         }
     }
 
-    public static void deleteTaskDeployment(String nameSpce, String deploymentName){
+    public static void deleteTaskDeployment(String nameSpce, String deploymentName) {
         try (KubernetesClient client = new DefaultKubernetesClient()){
             client.apps().deployments().inNamespace(nameSpce).withName(deploymentName).delete();
         }
     }
 
-    public static Integer getTheNumberOfTaskDeploymentRetries(String nameSpce, String deploymentName){
+    public static Integer getTheNumberOfTaskDeploymentRetries(String nameSpce, String deploymentName) {
         try (KubernetesClient client = new DefaultKubernetesClient()){
             Map<String, String> matchLabels = client.apps()
                 .deployments()
@@ -65,8 +65,8 @@ public class K8sDeploymentRelated {
         }
     }
 
-    public static Boolean isTheK8sConnectionNormal(){
-        try (KubernetesClient client = new DefaultKubernetesClient()){
+    public static Boolean isTheK8sConnectionNormal() {
+        try (KubernetesClient client = new DefaultKubernetesClient()) {
             return client != null;
         }
     }

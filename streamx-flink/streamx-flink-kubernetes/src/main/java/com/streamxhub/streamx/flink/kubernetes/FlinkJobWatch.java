@@ -29,8 +29,8 @@ import java.io.IOException;
 
 public class FlinkJobWatch {
 
-    public static String jobDeploymentsWatch(String nameSpace, String jobName){
-        try (KubernetesClient client = new DefaultKubernetesClient()){
+    public static String jobDeploymentsWatch(String nameSpace, String jobName) {
+        try (KubernetesClient client = new DefaultKubernetesClient()) {
             String log = client.apps().deployments()
                 .inNamespace(nameSpace)
                 .withName(jobName).getLog();
