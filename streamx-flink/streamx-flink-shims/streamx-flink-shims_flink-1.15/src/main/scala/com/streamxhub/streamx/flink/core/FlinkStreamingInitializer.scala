@@ -124,8 +124,8 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         val configFile = new File(config)
         require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
         extension match {
-          case "properties" => PropertiesUtils.fromPropertiesText(configFile.getAbsolutePath)
-          case "yml" | "yaml" => PropertiesUtils.fromYamlText(configFile.getAbsolutePath)
+          case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
+          case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
           case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,must be properties or yml")
         }
     }
