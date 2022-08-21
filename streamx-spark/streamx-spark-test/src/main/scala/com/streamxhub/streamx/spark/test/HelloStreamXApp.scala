@@ -35,10 +35,10 @@ object HelloStreamXApp extends SparkStreaming {
     line.flatMap(_.split(" ")).map(_ -> 1).reduceByKey(_ + _)
       .foreachRDD((rdd, time) => {
 
-        //transform 业务处理
+        // handle transform
         rdd.foreachPartition(iter => {
 
-          //sink 数据落盘到MySQL
+          // sink data to MySQL
           ConnectionPool.singleton(jdbcURL, user, password)
 
           DB.autoCommit { implicit session =>
@@ -60,7 +60,7 @@ object HelloStreamXApp extends SparkStreaming {
             })
           })
         })
-        //提交offset
+        // commit offset
         source.updateOffset(time)
       })
   }

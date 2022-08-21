@@ -44,17 +44,15 @@ trait Spark {
   @(transient@getter)
   protected final var sparkSession: SparkSession = _
 
-  // checkpoint目录
+  // Directory of checkpoint
   protected final var checkpoint: String = ""
 
-  // 从checkpoint 中恢复失败，则重新创建
+  // If recovery from checkpoint fails, recreate
   protected final var createOnError: Boolean = true
 
 
   /**
-   * 入口函数
-   *
-   * @param args
+   * Entrance
    */
   def main(args: Array[String]): Unit = {
     init(args)
@@ -70,9 +68,7 @@ trait Spark {
   }
 
   /**
-   * 根据用户传参，初始化 sparkConf
-   *
-   * @return
+   * Initialize sparkConf according to user parameters
    */
 
   final def init(args: Array[String]): Unit = {
@@ -97,7 +93,7 @@ trait Spark {
 
     sparkConf.set(KEY_SPARK_USER_ARGS, args.mkString("|"))
 
-    //通过vm -Dspark.debug.conf传入配置文件的默认当作本地调试模式
+    // The default configuration file passed in through vm -Dspark.debug.conf is used as local debugging mode
     val (isDebug, confPath) = SystemPropertyUtils.get(KEY_SPARK_CONF, "") match {
       case "" => (true, sparkConf.get(KEY_SPARK_DEBUG_CONF))
       case path => (false, path)
@@ -126,12 +122,12 @@ trait Spark {
       System.exit(1)
     }
 
-    //debug mode
+    // debug mode
     if (isDebug) {
       sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
-    //优雅停止...
+    // stop...
     sparkConf.set("spark.streaming.stopGracefullyOnShutdown", "true")
 
     val extraListeners = sparkListeners.mkString(",") + "," + sparkConf.get("spark.extraListeners", "")
