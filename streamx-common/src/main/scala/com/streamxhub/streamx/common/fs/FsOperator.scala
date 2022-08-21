@@ -49,6 +49,10 @@ abstract class ObjectOperator extends FsOperator {
 
   def download(srcPath: String, dstPath: String): Unit
 
+  def putObject(objectPath: String, obj: Array[Byte]): Unit
+
+  def getObject(objectPath: String): InputStream
+
   def download(inputStream: InputStream, outputStream: OutputStream): Unit = {
     tryWithResource(inputStream)(in => {
       tryWithResource(outputStream)(out => {

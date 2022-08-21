@@ -29,7 +29,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 
-public class LocalFsStorage implements StorageService{
+public class LocalFsStorage implements StorageService {
     private static final Logger LOG = LoggerFactory.getLogger(LocalFsStorage.class);
     private final URI baseUri;
     private final Path basePath;

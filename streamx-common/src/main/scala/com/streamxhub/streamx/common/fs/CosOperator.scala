@@ -27,7 +27,7 @@ import com.streamxhub.streamx.common.conf.ConfigOption
 import com.streamxhub.streamx.common.util.Logger
 import org.apache.commons.codec.digest.DigestUtils
 
-import java.io.{ByteArrayInputStream, Closeable, File, FileOutputStream}
+import java.io.{ByteArrayInputStream, Closeable, File, FileOutputStream, InputStream}
 import java.util.Properties
 import scala.util.{Failure, Success, Try}
 
@@ -122,4 +122,19 @@ class CosOperator(properties: Properties) extends ObjectOperator with Closeable 
     val cosObject = cosClient.getObject(bucket, srcPath)
     download(cosObject.getObjectContent, new FileOutputStream(dstPath))
   }
+
+  override def putObject(objectPath: String, obj: Array[Byte]): Unit = {
+    val metadata = new ObjectMetadata()
+    metadata.setContentLength(obj.length)
+    cosClient.putObject(bucket, objectPath, new ByteArrayInputStream(obj), metadata)
+  }
+
+  override def getObject(objectPath: String): InputStream = {
+    val cosObject = cosClient.getObject(bucket, objectPath)
+    cosObject.getObjectContent
+  }
+}
+
+object CosOperator {
+  def apply(properties: Properties): CosOperator = new CosOperator(properties)
 }

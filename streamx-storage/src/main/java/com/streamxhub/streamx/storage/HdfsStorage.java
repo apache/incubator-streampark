@@ -39,7 +39,7 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
 
-public class HdfsStorage implements StorageService{
+public class HdfsStorage implements StorageService {
     private static final Logger LOG = LoggerFactory.getLogger(HdfsStorage.class);
     private final String bucketPath;
     private final FileSystem client;

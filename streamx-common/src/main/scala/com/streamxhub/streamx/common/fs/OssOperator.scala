@@ -19,12 +19,13 @@
 
 package com.streamxhub.streamx.common.fs
 
+import com.aliyun.oss.model.ObjectMetadata
 import com.aliyun.oss.{OSS, OSSClientBuilder}
 import com.streamxhub.streamx.common.conf.ConfigOption
 import com.streamxhub.streamx.common.util.Logger
 import org.apache.commons.codec.digest.DigestUtils
 
-import java.io.{ByteArrayInputStream, Closeable, File, FileOutputStream}
+import java.io.{ByteArrayInputStream, Closeable, File, FileOutputStream, InputStream}
 import java.util.Properties
 import scala.util.{Failure, Success, Try}
 
@@ -114,4 +115,19 @@ class OssOperator(properties: Properties) extends ObjectOperator with Closeable 
     val ossObject = ossClient.getObject(bucket, srcPath)
     download(ossObject.getObjectContent, new FileOutputStream(dstPath))
   }
+
+  override def putObject(objectPath: String, obj: Array[Byte]): Unit = {
+    val metadata = new ObjectMetadata()
+    metadata.setContentLength(obj.length)
+    ossClient.putObject(bucket, objectPath, new ByteArrayInputStream(obj), metadata)
+  }
+
+  override def getObject(objectPath: String): InputStream = {
+    val ossObject = ossClient.getObject(bucket, objectPath)
+    ossObject.getObjectContent
+  }
+}
+
+object OssOperator {
+  def apply(properties: Properties): OssOperator = new OssOperator(properties)
 }
