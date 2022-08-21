@@ -30,7 +30,7 @@ import java.util.StringJoiner;
 public class K8sDeploymentRelated {
 
     public static Boolean getDeploymentStatusChanges(String nameSpce, String deploymentName) {
-        try (KubernetesClient client = new DefaultKubernetesClient()){
+        try (KubernetesClient client = new DefaultKubernetesClient()) {
             Map<String, String> matchLabels = client.apps()
                 .deployments()
                 .inNamespace(nameSpce)
@@ -45,13 +45,13 @@ public class K8sDeploymentRelated {
     }
 
     public static void deleteTaskDeployment(String nameSpce, String deploymentName) {
-        try (KubernetesClient client = new DefaultKubernetesClient()){
+        try (KubernetesClient client = new DefaultKubernetesClient()) {
             client.apps().deployments().inNamespace(nameSpce).withName(deploymentName).delete();
         }
     }
 
     public static Integer getTheNumberOfTaskDeploymentRetries(String nameSpce, String deploymentName) {
-        try (KubernetesClient client = new DefaultKubernetesClient()){
+        try (KubernetesClient client = new DefaultKubernetesClient()) {
             Map<String, String> matchLabels = client.apps()
                 .deployments()
                 .inNamespace(nameSpce)
