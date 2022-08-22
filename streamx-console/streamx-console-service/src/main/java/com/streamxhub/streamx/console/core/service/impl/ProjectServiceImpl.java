@@ -512,7 +512,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public List<Project> listByTeam(Long teamId){
+    public List<Project> listByTeam(Long teamId) {
         QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("team_id", teamId);
         return list(queryWrapper);
