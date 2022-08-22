@@ -82,7 +82,7 @@ public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole>
     }
 
     @Override
-    public Boolean isManageTeam(){
+    public Boolean isManageTeam() {
         return isManageTeam(commonService.getCurrentUser().getUsername());
     }
 
