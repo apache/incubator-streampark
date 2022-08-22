@@ -59,7 +59,7 @@ public class HdfsStorage implements StorageService {
     public Optional<byte[]> getData(String fileName) {
         Objects.requireNonNull(fileName);
         Path path = new Path(StorageUtils.getFullBucketPath(bucketPath, fileName));
-        try (FSDataInputStream inputStream = this.client.open(path)){
+        try (FSDataInputStream inputStream = this.client.open(path)) {
             Optional<byte[]> data;
             data = Optional.of(IOUtils.toByteArray(inputStream));
             return data;
@@ -78,7 +78,7 @@ public class HdfsStorage implements StorageService {
         Objects.requireNonNull(fileName);
         StorageUtils.validateName(fileName);
         Path path = new Path(StorageUtils.getFullBucketPath(bucketPath, fileName));
-        try (FSDataOutputStream fsDataOutputStream = this.client.create(path)){
+        try (FSDataOutputStream fsDataOutputStream = this.client.create(path)) {
             copyBytes(new ByteArrayInputStream(data), fsDataOutputStream, this.client.getConf());
         } catch (IOException e) {
             LOG.error("Failed to put data to path: {}", path, e);

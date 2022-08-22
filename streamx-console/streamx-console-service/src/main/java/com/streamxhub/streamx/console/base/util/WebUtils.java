@@ -119,7 +119,7 @@ public final class WebUtils {
         return getAppDir("client");
     }
 
-    public static File getAppConfDir(){
+    public static File getAppConfDir() {
         return getAppDir("conf");
     }
 }

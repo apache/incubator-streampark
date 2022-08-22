@@ -43,7 +43,7 @@ public class LoggerServiceImpl implements LoggerService {
 
     private final LogClientService logClient;
 
-    public LoggerServiceImpl(){
+    public LoggerServiceImpl() {
         logClient = new LogClientService();
     }
 

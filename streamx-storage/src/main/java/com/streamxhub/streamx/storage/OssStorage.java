@@ -60,7 +60,7 @@ public class OssStorage implements StorageService {
         try {
             operator.putObject(objectPath, data);
         } catch (SdkClientException e) {
-            LOG.error("Failed to put data to path: {}" , objectPath, e);
+            LOG.error("Failed to put data to path: {}", objectPath, e);
             return false;
         } finally {
             if (operator != null) {

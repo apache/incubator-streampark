@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 /** log client */
 @Slf4j
 public class LogClientService {
-    public String rollViewLog(String path, int skipLineNum, int limit){
+    public String rollViewLog(String path, int skipLineNum, int limit) {
         String result = "";
         try {
             List<String> lines = readPartFileContent(path, skipLineNum, limit);
@@ -56,7 +56,7 @@ public class LogClientService {
      */
     private List<String> readPartFileContent(String filePath,
                                              int skipLine,
-                                             int limit){
+                                             int limit) {
         File file = new File(filePath);
         if (file.exists() && file.isFile()) {
             try (Stream<String> stream = Files.lines(Paths.get(filePath))) {

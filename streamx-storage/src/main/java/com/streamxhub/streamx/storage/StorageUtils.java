@@ -55,7 +55,7 @@ public class StorageUtils {
         return basePath.resolve(filename);
     }
 
-    public static String getFullBucketPath(String bucketPathPrefix, String filename){
+    public static String getFullBucketPath(String bucketPathPrefix, String filename) {
         Objects.requireNonNull(bucketPathPrefix);
         Objects.requireNonNull(filename);
         return String.format("%s/%s", bucketPathPrefix, filename);

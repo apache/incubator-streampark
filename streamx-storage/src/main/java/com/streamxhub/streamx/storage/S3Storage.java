@@ -19,9 +19,10 @@
 
 package com.streamxhub.streamx.storage;
 
+import com.streamxhub.streamx.common.fs.S3Operator;
+
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.streamxhub.streamx.common.fs.S3Operator;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +60,7 @@ public class S3Storage implements StorageService {
         try {
             operator.putObject(objectPath, data);
         } catch (SdkClientException e) {
-            LOG.error("Failed to put data to path: {}" , objectPath, e);
+            LOG.error("Failed to put data to path: {}", objectPath, e);
             return false;
         } finally {
             if (operator != null) {
