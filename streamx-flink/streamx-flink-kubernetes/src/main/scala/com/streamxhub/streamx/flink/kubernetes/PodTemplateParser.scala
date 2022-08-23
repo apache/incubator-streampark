@@ -57,15 +57,17 @@ object PodTemplateParser {
     }
     val yaml = new Yaml
     val root = yaml.load(podTemplateContent).asInstanceOf[JMap[String, Any]]
-    val res = new util.LinkedHashMap[String, Any]
 
-    res.put("apiVersion", root.getOrDefault("apiVersion", "v1"))
-    res.put("kind", root.getOrDefault("kind", "Pod"))
-    res.put("metadata", root.getOrDefault("metadata", {
-      val m = new util.LinkedHashMap[String, Any]()
-      m.put("name", "pod-template")
-      m
-    }))
+    val res = new util.LinkedHashMap[String, Any] {
+      put("apiVersion", root.getOrDefault("apiVersion", "v1"))
+      put("kind", root.getOrDefault("kind", "Pod"))
+      put("metadata", root.getOrDefault("metadata", {
+        new util.LinkedHashMap[String, Any] {
+          put("name", "pod-template")
+        }
+      }))
+    }
+
     if (root.containsKey("spec")
       && Try(!root.get("spec").asInstanceOf[JMap[String, Any]].isEmpty).getOrElse(false)) {
       res.put("spec", root.get("spec"))

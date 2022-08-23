@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.google.common.collect.ImmutableMap
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -42,6 +41,7 @@ class PodTemplateParserTest {
           |metadata:
           |  name: pod-template
           |""".stripMargin,
+
       """apiVersion: v1
         |kind: Pod
         |metadata:
@@ -117,20 +117,21 @@ class PodTemplateParserTest {
           |""".stripMargin)
     for (expect <- podTemplateExpect) {
       val res = PodTemplateParser.completeInitPodTemplate(expect._1)
-      assertEquals(expect._2, res)
+      assertEquals(expect._2.trim, res.trim)
     }
   }
 
 
   @Test
   def testHostAliasSpecToPodTemplate(): Unit = {
-    val hostMap = ImmutableMap.of(
-      "hdp01.assad.site", "192.168.3.114",
-      "hdp02.assad.site", "192.168.3.115",
-      "hdp03.assad.site", "192.168.3.116",
-      "hdp01", "192.168.3.114",
-      "hdp02", "192.168.3.115"
-    )
+    val hostMap = Map(
+      "hdp01" -> "192.168.3.114",
+      "hdp02" -> "192.168.3.115",
+      "hdp01.assad.site" -> "192.168.3.114",
+      "hdp02.assad.site" -> "192.168.3.115",
+      "hdp03.assad.site" -> "192.168.3.116",
+    ).asJava
+
     val expected = Map(
       "" ->
         """apiVersion: v1
@@ -141,15 +142,15 @@ class PodTemplateParserTest {
           |  hostAliases:
           |  - ip: 192.168.3.114
           |    hostnames:
-          |    - hdp01.assad.site
           |    - hdp01
+          |    - hdp01.assad.site
           |  - ip: 192.168.3.116
           |    hostnames:
           |    - hdp03.assad.site
           |  - ip: 192.168.3.115
           |    hostnames:
-          |    - hdp02.assad.site
           |    - hdp02
+          |    - hdp02.assad.site
           |""".stripMargin,
 
       """apiVersion: v1
@@ -166,15 +167,15 @@ class PodTemplateParserTest {
           |  hostAliases:
           |  - ip: 192.168.3.114
           |    hostnames:
-          |    - hdp01.assad.site
           |    - hdp01
+          |    - hdp01.assad.site
           |  - ip: 192.168.3.116
           |    hostnames:
           |    - hdp03.assad.site
           |  - ip: 192.168.3.115
           |    hostnames:
-          |    - hdp02.assad.site
           |    - hdp02
+          |    - hdp02.assad.site
           |""".stripMargin,
       """apiVersion: v1
         |kind: Pod
@@ -184,8 +185,8 @@ class PodTemplateParserTest {
         |  hostAliases:
         |  - ip: 192.168.3.114
         |    hostnames:
-        |    - hdp01.assad.site
         |    - hdp01
+        |    - hdp01.assad.site
         |""".stripMargin ->
         """apiVersion: v1
           |kind: Pod
@@ -195,15 +196,15 @@ class PodTemplateParserTest {
           |  hostAliases:
           |  - ip: 192.168.3.114
           |    hostnames:
-          |    - hdp01.assad.site
           |    - hdp01
+          |    - hdp01.assad.site
           |  - ip: 192.168.3.116
           |    hostnames:
           |    - hdp03.assad.site
           |  - ip: 192.168.3.115
           |    hostnames:
-          |    - hdp02.assad.site
           |    - hdp02
+          |    - hdp02.assad.site
           |""".stripMargin,
       """apiVersion: v1
         |kind: Pod
@@ -247,20 +248,20 @@ class PodTemplateParserTest {
           |  hostAliases:
           |  - ip: 192.168.3.114
           |    hostnames:
-          |    - hdp01.assad.site
           |    - hdp01
+          |    - hdp01.assad.site
           |  - ip: 192.168.3.116
           |    hostnames:
           |    - hdp03.assad.site
           |  - ip: 192.168.3.115
           |    hostnames:
-          |    - hdp02.assad.site
           |    - hdp02
+          |    - hdp02.assad.site
           |""".stripMargin
     )
     for (expect <- expected) {
       val result = PodTemplateParser.completeHostAliasSpec(hostMap, expect._1)
-      assertEquals(result.trim, expect._2.trim)
+      assertEquals(result, expect._2)
     }
   }
 
