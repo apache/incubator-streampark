@@ -311,7 +311,8 @@
               :data-source="savePoints"
               :pagination="pagination.savePoints"
               :loading="pager.savePoints.loading"
-              class="detail-table">
+              class="detail-table"
+              @change="handleTableChange">
               <template
                 slot="triggerTime"
                 slot-scope="text, record">
