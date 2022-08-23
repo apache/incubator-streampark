@@ -73,14 +73,12 @@ object KubernetesDeploymentHelper {
 
   def watchDeploymentLog(nameSpace: String, jobName: String): String = try {
     Utils.tryWithResource(new DefaultKubernetesClient) { client =>
-      val log = client.apps.deployments.inNamespace(nameSpace).withName(jobName).getLog
-
-      val dir = new File("")
-      val projectPath = dir.getCanonicalPath
-      val path = s"${projectPath}/${nameSpace}_${jobName}.log"
+      val projectPath = new File("").getCanonicalPath
+      val path = s"$projectPath/${nameSpace}_$jobName.log"
       val file = new File(path)
+      val log = client.apps.deployments.inNamespace(nameSpace).withName(jobName).getLog
       Files.asCharSink(file, Charsets.UTF_8).write(log)
-      return path
+      path
     }
   }
 }
