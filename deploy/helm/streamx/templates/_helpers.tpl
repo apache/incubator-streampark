@@ -63,6 +63,6 @@ Create the name of the operator service account to use
 {{- if .Values.streamxServiceAccount.create }}
 {{- default (include "streamx.fullname" .) .Values.streamxServiceAccount.name }}
 {{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- default "default" .Values.streamxServiceAccount.name }}
 {{- end }}
 {{- end }}
