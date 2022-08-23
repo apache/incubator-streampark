@@ -24,7 +24,7 @@ import scala.annotation.meta.getter
 /**
  * <b><code>SparkBatch</code></b>
  * <p/>
- * Spark 批处理 入口封装
+ * Spark batch processing entry
  * <p/>
  * <b>Creation Time:</b> 2022/8/8 20:44.
  *

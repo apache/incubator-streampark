@@ -57,7 +57,7 @@ public class Arguments {
 
     private static final AgentLogger LOGGER = AgentLogger.getLogger(Arguments.class.getName());
 
-    private Map<String, List<String>> rawArgValues = new HashMap<>();
+    private final Map<String, List<String>> rawArgValues = new HashMap<>();
 
     private boolean noop = false;
 
@@ -103,11 +103,7 @@ public class Arguments {
                 throw new IllegalArgumentException("Argument key should not be empty");
             }
 
-            List<String> list = map.get(key);
-            if (list == null) {
-                list = new ArrayList<>();
-                map.put(key, list);
-            }
+            List<String> list = map.computeIfAbsent(key, k -> new ArrayList<>());
             list.add(strs[1].trim());
         }
 
