@@ -64,6 +64,7 @@ export default {
     UPDATE: '/flink/app/update',
     COPY: '/flink/app/copy',
     UPLOAD: '/flink/app/upload',
+    START_LOG: '/flink/app/detail',
     DEPLOY: '/flink/app/deploy',
     MAPPING: '/flink/app/mapping',
     YARN: '/flink/app/yarn',

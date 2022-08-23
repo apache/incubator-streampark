@@ -341,11 +341,11 @@ public class ApplicationController {
 
     @ApiOperation(value = "APP detail")
     @PostMapping(value = "/detail")
-    public RestResponse detail(@ApiParam("K8s name spaces") @RequestParam(value = "namespac", required = false) String namespac,
+    public RestResponse detail(@ApiParam("K8s name spaces") @RequestParam(value = "namespace", required = false) String namespace,
                                @ApiParam("Job name") @RequestParam(value = "jobName", required = false) String jobName,
                                @ApiParam("Number of log lines skipped loading") @RequestParam(value = "skipLineNum", required = false) Integer skipLineNum,
                                @ApiParam("Number of log lines loaded at once") @RequestParam(value = "limit", required = false) Integer limit) {
-        return RestResponse.success(MoreFutures.derefUsingDefaultTimeout(logService.queryLog(namespac, jobName, skipLineNum, limit)));
+        return RestResponse.success(MoreFutures.derefUsingDefaultTimeout(logService.queryLog(namespace, jobName, skipLineNum, limit)));
     }
 
 }
