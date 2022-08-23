@@ -104,14 +104,14 @@
 import UserAdd from './TeamAdd'
 import RangeDate from '@/components/DateTime/RangeDate'
 import SvgIcon from '@/components/SvgIcon'
-
+import UserEdit from '../user/UserEdit'
 import { list, remove} from '@/api/team'
 import storage from '@/utils/storage'
 import {USER_NAME} from '@/store/mutation-types'
 
 export default {
   name: 'Team',
-  components: { UserAdd, RangeDate, SvgIcon },
+  components: { UserAdd, RangeDate, SvgIcon, UserEdit },
   data () {
     return {
       userAdd: {
