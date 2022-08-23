@@ -45,6 +45,10 @@ export function copy (params) {
   return http.post(api.Application.COPY, params)
 }
 
+export function startLog (params) {
+  return http.post(api.Application.START_LOG, params)
+}
+
 export function upload (params) {
   return http.upload(api.Application.UPLOAD, params)
 }

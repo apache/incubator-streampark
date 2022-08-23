@@ -433,6 +433,19 @@
             </a-button>
           </a-tooltip>
 
+          <a-tooltip title="See Flink Start log">
+            <a-button
+              v-permit="'app:detail'"
+              shape="circle"
+              size="small"
+              @click.native="handleSeeLog(record)"
+              class="control-button ctl-btn-color">
+              <a-icon
+                type="history"
+                style="color:#4a9ff5"/>
+            </a-button>
+          </a-tooltip>
+
           <a-tooltip title="View FlameGraph">
             <a-button
               v-if="record.flameGraph"
@@ -1021,17 +1034,22 @@
         width="65%"
         :body-style="controller.modalStyle"
         :destroy-on-close="controller.modalDestroyOnClose"
-        :footer="null"
         @ok="handleCloseWS">
         <template slot="title">
           <a-icon type="code"/>&nbsp; {{ controller.consoleName }}
         </template>
         <template slot="footer">
           <a-button
-            key="submit"
+            key="refresh"
+            type="primary"
+            @click="refreshLog">
+            refresh
+          </a-button>
+          <a-button
+            key="close"
             type="primary"
             @click="handleCloseWS">
-            Close
+            close
           </a-button>
         </template>
         <div
@@ -1061,7 +1079,8 @@ import {
   revoke,
   start,
   yarn,
-  verifySchema
+  verifySchema,
+  startLog
 } from '@api/application'
 import {history, latest} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
@@ -1138,6 +1157,7 @@ export default {
       paginationInfo: null,
       stompClient: null,
       terminal: null,
+      currentApp : null,
       controller: {
         ellipsis: 100,
         modalStyle: {
@@ -2065,7 +2085,8 @@ export default {
     },
 
     handleSeeLog(app) {
-      this.controller.consoleName = app.jobName + ' Deploying log'
+      this.currentApp = app
+      this.controller.consoleName = 'Start Log : Application Name ['+ app.jobName + ']'
       this.controller.visible = true
       this.$nextTick(function () {
         this.handleOpenWS(app)
@@ -2073,8 +2094,8 @@ export default {
     },
 
     handleOpenWS(app) {
-      const rows = parseInt(this.controller.modalStyle.height.replace('px', '')) / 16
-      const cols = (document.querySelector('.terminal').offsetWidth - 10) / 8
+      const rows = (parseInt(this.controller.modalStyle.height.replace('px', '')) - 48) / 16
+      const cols = (document.querySelector('.terminal').offsetWidth - 36) / 8
       this.terminal = new Terminal({
         cursorBlink: true,
         rendererType: 'canvas',
@@ -2097,49 +2118,29 @@ export default {
       })
       const container = document.getElementById('terminal')
       this.terminal.open(container, true)
-
-      const url = baseUrl().concat('/websocket/' + this.handleGetSocketId())
-      const socket = this.getSocket(url)
-
-      socket.onopen = () => {
-        downLog({id: app.id})
-      }
-
-      socket.onmessage = (event) => {
-        if (event.data.startsWith('[Exception]')) {
-          this.$swal.fire({
-            title: 'Failed',
-            icon: 'error',
-            width: this.exceptionPropWidth(),
-            html: '<pre class="propException">' + event.data + '</pre>',
-            focusConfirm: false,
-          })
-        } else {
-          this.terminal.writeln(event.data)
-        }
-      }
-
-      socket.onclose = () => {
-        this.socketId = null
-        storage.rm(this.storageKey)
-      }
-
+      this.refreshLog(app)
     },
-
+    refreshLog(app){
+      const tmpApp = app || this.currentApp
+      startLog({
+        namespace : tmpApp.k8sNamespace,
+        jobName : tmpApp.jobName
+      }).then((resp) => {
+        const status = resp.status || 'error'
+        if (status === 'success') {
+          this.terminal.clear()
+          this.terminal.writeln(resp.data)
+        }
+      })
+    },
     handleCloseWS() {
-      this.stompClient.disconnect()
+
       this.controller.visible = false
       this.terminal.clear()
       this.terminal.clearSelection()
       this.terminal = null
-    },
-
-    handleGetSocketId() {
-      if (this.socketId == null) {
-        return storage.get(this.storageKey) || null
-      }
-      return this.socketId
-    },
+      this.currentApp = null
+    }
 
   }
 }
