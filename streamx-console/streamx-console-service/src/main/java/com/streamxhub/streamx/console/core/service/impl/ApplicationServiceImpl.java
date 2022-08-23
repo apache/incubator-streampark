@@ -1498,8 +1498,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (!config.isEmpty()) {
                     savepointPath = config.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
                 }
-            } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-                // 3.2) 如是 on yarn模式. 则读取绑定的flink里的flink-conf.yml中的savepoint
+            } else if (ExecutionMode.isYarnMode(application.getExecutionMode()) || ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
+                // 3.2) 如是 on yarn 或者 kubernetes模式. 则读取绑定的flink里的flink-conf.yml中的savepoint
                 FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
                 savepointPath = flinkEnv.convertFlinkYamlAsMap().get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
             }
