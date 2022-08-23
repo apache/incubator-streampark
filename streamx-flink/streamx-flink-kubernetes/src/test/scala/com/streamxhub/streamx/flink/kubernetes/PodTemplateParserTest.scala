@@ -129,7 +129,7 @@ class PodTemplateParserTest {
       "hdp02" -> "192.168.3.115",
       "hdp01.assad.site" -> "192.168.3.114",
       "hdp02.assad.site" -> "192.168.3.115",
-      "hdp03.assad.site" -> "192.168.3.116",
+      "hdp03.assad.site" -> "192.168.3.116"
     ).asJava
 
     val expected = Map(
