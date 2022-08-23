@@ -24,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -46,7 +48,14 @@ public class LoggerServiceImpl implements LoggerService {
      */
     public CompletionStage<String> queryLog(String nameSpace, String jobName, int skipLineNum, int limit) {
         return CompletableFuture.supplyAsync(() -> jobDeploymentsWatch(nameSpace, jobName)
-        ).thenApply(path -> logClient.rollViewLog(String.valueOf(path), skipLineNum, limit));
+        ).exceptionally(e -> {
+            try {
+                return new File("").getCanonicalPath() + "/" + nameSpace + "_" + jobName + "_err.log";
+            } catch (IOException ex) {
+                log.error("Generate log path exception:{}", ex.getMessage());
+                return null;
+            }
+        }).thenApply(path -> logClient.rollViewLog(String.valueOf(path), skipLineNum, limit));
     }
 
     private String jobDeploymentsWatch(String nameSpace, String jobName) {
