@@ -347,8 +347,14 @@ start() {
   # shellcheck disable=SC2091
   MYSQL_EXISTS=$(ls "$APP_LIB"/*.jar | grep "mysql-connector-java" | wc -l)
   if [[ MYSQL_EXISTS -eq 0 ]]; then
-    echo_r "please download mysql-connector-java lib to $APP_LIB"
-    exit 1
+    echo_w "Downloading mysql-connector.jar ..."
+    (cd $APP_LIB && curl -o mysql-connector.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.18/mysql-connector-java-8.0.18.jar)
+    if [ $? -eq "1" ]; then
+        # shellcheck disable=SC2006
+        rm -rf "$APP_LIB"/mysql-connector-*.jar >/dev/null 2>&1
+        echo_r "download mysql-connector-java failed, you need download it to $APP_LIB by yourself"
+        exit 1
+    fi
   fi
   APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
   # shellcheck disable=SC2206

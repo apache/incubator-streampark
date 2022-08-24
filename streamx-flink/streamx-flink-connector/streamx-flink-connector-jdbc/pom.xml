@@ -18,16 +18,6 @@
             <artifactId>streamx-flink-connector-base_${scala.binary.version}</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-jdbc-client</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-        </dependency>
-
     </dependencies>
 
 
