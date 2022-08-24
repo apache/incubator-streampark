@@ -435,14 +435,14 @@
 
           <a-tooltip title="See Flink Start log">
             <a-button
-              v-permit="'app:detail'"
+              v-if="record.executionMode === 5 || record.executionMode === 6"
               shape="circle"
               size="small"
               @click.native="handleSeeLog(record)"
               class="control-button ctl-btn-color">
               <a-icon
-                type="history"
-                style="color:#4a9ff5"/>
+                type="sync"
+                />
             </a-button>
           </a-tooltip>
 
@@ -2124,7 +2124,9 @@ export default {
       const tmpApp = app || this.currentApp
       startLog({
         namespace : tmpApp.k8sNamespace,
-        jobName : tmpApp.jobName
+        jobName : tmpApp.jobName,
+        limit : 100000000,
+        skipLineNum : 0
       }).then((resp) => {
         const status = resp.status || 'error'
         if (status === 'success') {
