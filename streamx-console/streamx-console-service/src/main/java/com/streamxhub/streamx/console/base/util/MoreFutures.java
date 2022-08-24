@@ -59,9 +59,7 @@ public final class MoreFutures {
     }
 
     public static <T> CompletionStage<T> exceptionallyCompose(CompletionStage<T> stage, Function<Throwable, ? extends CompletionStage<T>> fn) {
-        return stage.thenApply((res) -> {
-            return CompletableFuture.completedFuture(res);
-        }).exceptionally((Function<Throwable, ? extends CompletableFuture<T>>) fn).thenCompose(Function.identity());
+        return stage.thenApply((res) -> CompletableFuture.completedFuture(res)).exceptionally((Function<Throwable, ? extends CompletableFuture<T>>) fn).thenCompose(Function.identity());
     }
 
     public static <T> CompletableFuture<T> completeImmediately(Supplier<T> supplier) {

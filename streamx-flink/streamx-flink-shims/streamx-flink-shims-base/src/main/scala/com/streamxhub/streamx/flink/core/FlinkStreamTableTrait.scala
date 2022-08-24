@@ -304,7 +304,6 @@ abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
   override def getConfig: TableConfig = tableEnv.getConfig
 
   /**
-   * deprecated!!! what are you fucking for??? don't call this method
    *
    * @param name
    * @param dataStream

@@ -87,13 +87,11 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   private[this] var localStreamEnv: StreamExecutionEnvironment = _
 
-//  private[this] var localBatchEnv: ExecutionEnvironment = _
-
   private[this] lazy val defaultFlinkConf: Map[String, String] = {
     parameter.get(KEY_FLINK_CONF(), null) match {
       case null =>
         val flinkHome = System.getenv("FLINK_HOME")
-        require(flinkHome != null)
+        require(flinkHome != null, "FLINK_HOME not found.")
         logInfo(s"flinkHome: $flinkHome")
         val yaml = new File(s"$flinkHome/conf/flink-conf.yaml")
         PropertiesUtils.loadFlinkConfYaml(yaml)

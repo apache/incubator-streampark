@@ -24,17 +24,17 @@ import java.io.Serializable;
 public enum AppExistsState implements Serializable {
 
     /**
-     * 不存在
+     * no exists
      */
     NO(0),
 
     /**
-     * 表里存在
+     * exists in database
      */
     IN_DB(1),
 
     /**
-     * 正在运行的yarn里存在
+     * exists in yarn
      */
     IN_YARN(2),
 

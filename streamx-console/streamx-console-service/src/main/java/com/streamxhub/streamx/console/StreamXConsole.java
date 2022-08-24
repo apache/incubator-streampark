@@ -61,16 +61,12 @@ public class StreamXConsole {
         String pid = SystemPropertyUtils.get("pid");
         if (pid != null) {
             application.addListeners(new ApplicationPidFileWriter(pid));
-        }
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            log.info("application shutdown now, pid: " + getPid());
-            if (pid != null) {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                log.info("application shutdown now, pid: " + getPid());
                 File pidFile = new File(pid);
                 pidFile.delete();
-            }
-        }));
-
+            }));
+        }
         application.run();
     }
 
