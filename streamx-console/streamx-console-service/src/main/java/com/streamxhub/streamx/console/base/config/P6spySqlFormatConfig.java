@@ -48,7 +48,7 @@ public class P6spySqlFormatConfig implements MessageFormattingStrategy {
                 "%s  | 耗时 %d ms | SQL 语句：\n %s;",
                 DateUtils.formatFullTime(LocalDateTime.now()),
                 elapsed,
-                sql.replaceAll("[\\s]+", StringUtils.SPACE)
+                sql.replaceAll("\\s+", StringUtils.SPACE)
             );
     }
 }

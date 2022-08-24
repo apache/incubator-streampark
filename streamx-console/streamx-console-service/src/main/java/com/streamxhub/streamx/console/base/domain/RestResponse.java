@@ -23,7 +23,6 @@ import java.util.HashMap;
  */
 public class RestResponse extends HashMap<String, Object> {
 
-
     public static final String STATUS_SUCCESS = "success";
     public static final String STATUS_FAIL = "error";
 

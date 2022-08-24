@@ -25,6 +25,6 @@ package com.streamxhub.streamx.console.base.domain;
  */
 public class ApiDocConstant {
 
-    public static final String FLINK_APP_OP_TAG = "[flink application]相关操作";
+    public static final String FLINK_APP_OP_TAG = "[Flink application] operations";
 
 }
