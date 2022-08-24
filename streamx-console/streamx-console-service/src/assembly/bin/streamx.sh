@@ -340,10 +340,16 @@ start() {
 
   #
   # classpath options:
-  # 1): java env (lib and jre/lib)
-  # 2): StreamX
-  # 3): hadoop conf
-
+  # 1): check mysql connector
+  # 2): java env (lib and jre/lib)
+  # 3): StreamX
+  # 4): hadoop conf
+  # shellcheck disable=SC2091
+  MYSQL_EXISTS=$(ls "$APP_LIB"/*.jar | grep "mysql-connector-java" | wc -l)
+  if [[ MYSQL_EXISTS -gt 0 ]]; then
+    echo_r "please download mysql-connector-java lib to $APP_LIB"
+    exit 1
+  fi
   APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
   # shellcheck disable=SC2206
   # shellcheck disable=SC2010
