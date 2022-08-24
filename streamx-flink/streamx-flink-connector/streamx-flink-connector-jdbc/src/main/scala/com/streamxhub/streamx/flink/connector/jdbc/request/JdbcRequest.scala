@@ -17,7 +17,7 @@
 package com.streamxhub.streamx.flink.connector.jdbc.request
 
 import com.streamxhub.streamx.common.util.Utils
-import com.streamxhub.streamx.flink.connector.jdbc.internal.JdbcASyncClientFunction
+import com.streamxhub.streamx.flink.connector.jdbc.internal.JdbcASyncFunction
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.scala.{AsyncDataStream, DataStream}
 
@@ -42,13 +42,13 @@ class JdbcRequest[T: TypeInformation](@(transient@param) private val stream: Dat
    */
   def requestOrdered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: (T, Map[String, _]) => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
     Utils.copyProperties(property, jdbc)
-    val async = new JdbcASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
+    val async = new JdbcASyncFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
   def requestUnordered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: (T, Map[String, _]) => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
     Utils.copyProperties(property, jdbc)
-    val async = new JdbcASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
+    val async = new JdbcASyncFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
