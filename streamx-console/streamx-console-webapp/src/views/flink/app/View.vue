@@ -1563,10 +1563,10 @@ export default {
     },
 
     handleCanRemapping(record) {
-      return record.state === 7 &&
-        record.state === 0 &&
-        record.state === 10 &&
-        record.state === 11 &&
+      return record.state === 7 ||
+        record.state === 0 ||
+        record.state === 10 ||
+        record.state === 11 ||
         record.state === 13
     },
 
