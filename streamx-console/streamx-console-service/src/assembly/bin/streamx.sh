@@ -346,7 +346,7 @@ start() {
   # 4): hadoop conf
   # shellcheck disable=SC2091
   MYSQL_EXISTS=$(ls "$APP_LIB"/*.jar | grep "mysql-connector-java" | wc -l)
-  if [[ MYSQL_EXISTS -gt 0 ]]; then
+  if [[ MYSQL_EXISTS -eq 0 ]]; then
     echo_r "please download mysql-connector-java lib to $APP_LIB"
     exit 1
   fi
