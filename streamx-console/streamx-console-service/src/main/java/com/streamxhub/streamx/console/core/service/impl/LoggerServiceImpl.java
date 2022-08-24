@@ -50,7 +50,7 @@ public class LoggerServiceImpl implements LoggerService {
         return CompletableFuture.supplyAsync(() -> jobDeploymentsWatch(nameSpace, jobName)
         ).exceptionally(e -> {
             try {
-                return String.format("%s/%s_%s_err.log",new File("").getCanonicalPath(), nameSpace, jobName);
+                return String.format("%s/%s_%s_err.log", new File("").getCanonicalPath(), nameSpace, jobName);
             } catch (IOException ex) {
                 log.error("Generate log path exception:{}", ex.getMessage());
                 return null;
