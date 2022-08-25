@@ -57,33 +57,33 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @PostConstruct
     public void initSetting() {
         List<Setting> settingList = super.list();
-        settingList.forEach(x -> settings.put(x.getKey(), x));
+        settingList.forEach(x -> settings.put(x.getSettingKey(), x));
     }
 
     @Override
     public boolean update(Setting setting) {
         try {
-            String value = setting.getValue();
+            String value = setting.getSettingValue();
             if (value != null) {
                 if (StringUtils.isEmpty(value.trim())) {
                     value = null;
                 } else {
-                    value = setting.getValue().trim();
+                    value = setting.getSettingValue().trim();
                 }
             }
-            setting.setValue(value);
+            setting.setSettingValue(value);
             this.baseMapper.updateByKey(setting);
 
-            if (setting.getKey().equals(CommonConfig.MAVEN_REMOTE_URL().key())) {
+            if (setting.getSettingKey().equals(CommonConfig.MAVEN_REMOTE_URL().key())) {
                 InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), value);
             }
-            if (setting.getKey().equals(CommonConfig.MAVEN_AUTH_USER().key())) {
+            if (setting.getSettingKey().equals(CommonConfig.MAVEN_AUTH_USER().key())) {
                 InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), value);
             }
-            if (setting.getKey().equals(CommonConfig.MAVEN_AUTH_PASSWORD().key())) {
+            if (setting.getSettingKey().equals(CommonConfig.MAVEN_AUTH_PASSWORD().key())) {
                 InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), value);
             }
-            settings.get(setting.getKey()).setValue(value);
+            settings.get(setting.getSettingKey()).setSettingValue(value);
             return true;
         } catch (Exception e) {
             return false;
@@ -93,12 +93,12 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public SenderEmail getSenderEmail() {
         try {
-            String host = settings.get(SettingService.KEY_ALERT_EMAIL_HOST).getValue();
-            String port = settings.get(SettingService.KEY_ALERT_EMAIL_PORT).getValue();
-            String from = settings.get(SettingService.KEY_ALERT_EMAIL_FROM).getValue();
-            String userName = settings.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getValue();
-            String password = settings.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getValue();
-            String ssl = settings.get(SettingService.KEY_ALERT_EMAIL_SSL).getValue();
+            String host = settings.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue();
+            String port = settings.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue();
+            String from = settings.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue();
+            String userName = settings.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue();
+            String password = settings.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue();
+            String ssl = settings.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue();
 
             SenderEmail senderEmail = new SenderEmail();
             senderEmail.setSmtpHost(host);
@@ -116,42 +116,42 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public String getDockerRegisterAddress() {
-        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_ADDRESS, defaultSetting).getValue();
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_ADDRESS, defaultSetting).getSettingValue();
     }
 
     @Override
     public String getDockerRegisterUser() {
-        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_USER, defaultSetting).getValue();
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_USER, defaultSetting).getSettingValue();
     }
 
     @Override
     public String getDockerRegisterPassword() {
-        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_PASSWORD, defaultSetting).getValue();
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_PASSWORD, defaultSetting).getSettingValue();
     }
 
     @Override
     public String getDockerRegisterNamespace() {
-        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_NAMESPACE, defaultSetting).getValue();
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_NAMESPACE, defaultSetting).getSettingValue();
     }
 
     @Override
     public String getStreamXAddress() {
-        return settings.getOrDefault(SettingService.KEY_STREAMX_ADDRESS, defaultSetting).getValue();
+        return settings.getOrDefault(SettingService.KEY_STREAMX_ADDRESS, defaultSetting).getSettingValue();
     }
 
     @Override
     public String getMavenRepository() {
-        return settings.getOrDefault(SettingService.KEY_MAVEN_REPOSITORY, defaultSetting).getValue();
+        return settings.getOrDefault(SettingService.KEY_MAVEN_REPOSITORY, defaultSetting).getSettingValue();
     }
 
     @Override
     public String getMavenAuthUser() {
-        return settings.getOrDefault(SettingService.KEY_MAVEN_AUTH_USER, defaultSetting).getValue();
+        return settings.getOrDefault(SettingService.KEY_MAVEN_AUTH_USER, defaultSetting).getSettingValue();
     }
 
     @Override
     public String getMavenAuthPassword() {
-        return settings.getOrDefault(SettingService.KEY_MAVEN_AUTH_PASSWORD, defaultSetting).getValue();
+        return settings.getOrDefault(SettingService.KEY_MAVEN_AUTH_PASSWORD, defaultSetting).getSettingValue();
     }
 
 }

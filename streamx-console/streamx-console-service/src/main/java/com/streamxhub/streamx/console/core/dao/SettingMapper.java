@@ -28,9 +28,9 @@ import org.apache.ibatis.annotations.Update;
  */
 public interface SettingMapper extends BaseMapper<Setting> {
 
-    @Select("select * from t_setting where `key`=#{key}")
+    @Select("select * from t_setting where setting_key=#{key}")
     Setting get(@Param("key") String key);
 
-    @Update("update t_setting set `value` = #{setting.value} where `key` = #{setting.key}")
+    @Update("update t_setting set setting_value = #{setting.value} where setting_key = #{setting.key}")
     void updateByKey(@Param("setting") Setting setting);
 }

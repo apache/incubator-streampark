@@ -16,7 +16,6 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -31,17 +30,13 @@ import java.io.Serializable;
 @Slf4j
 public class Setting implements Serializable {
 
-    @TableField("`NUM`")
-    private Integer num;
+    private Integer orderNum;
 
-    @TableField("`TITLE`")
-    private String title;
+    private String settingName;
 
-    @TableField("`key`")
-    private String key;
+    private String settingKey;
 
-    @TableField("`value`")
-    private String value;
+    private String settingValue;
 
     private Integer type;
 
