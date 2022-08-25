@@ -17,72 +17,6 @@ on:
       - 'streamx-console/streamx-console-webapp/**'
 
 jobs:
-  dependency-license:
-    name: Dependency licenses
-    needs: [ changes ]
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '8'
-          cache: 'maven'
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: '1.16'
-      - name: Check Dependencies Licenses
-        run: |
-          go install github.com/apache/skywalking-eyes/cmd/license-eye@47febf5
-          license-eye dependency resolve --summary ./dist-material/release-docs/LICENSE.tpl || exit 1
-          if [ ! -z "$(git diff -U0 ./dist-material/release-docs/LICENSE)" ]; then
-            echo "LICENSE file is not updated correctly"
-            git diff -U0 ./dist-material/release-docs/LICENSE
-            exit 1
-  changes:
-    # Check if anything related to Actual code / CI(functional testing) is changed
-    # set outputs for other jobs to access for if conditions
-    runs-on: ubuntu-latest
-    # To prevent error when there's no base branch
-    if: github.event_name != 'schedule'
-    timeout-minutes: 10
-    outputs:
-      oap: ${{ steps.filter.outputs.oap }}
-      pom: ${{ steps.filter.outputs.pom }}
-    steps:
-      - uses: actions/checkout@v3  # required for push event
-      - name: Check for file changes
-        uses: getsentry/paths-filter@v2
-        id: filter
-        with:
-          token: ${{ github.token }}
-          # The following is a single composite pattern that allows next CI steps,
-          # the pattern is in form of [not (foo or bar)] to be safe.
-          # When new files come in, the CI will NOT ignore them unless listed,
-          # so remember to extend here if they do not serve functional purposes.
-          # NOTE: careful with using ** in expression, keep !**/{old, new things}.
-          filters: |
-            oap:
-              - "!**/{\
-              *.md,*.txt,\
-              skywalking-ui,\
-              .asf.yaml,.dlc.json,.gitignore,.licenserc.yaml,\
-              codeStyle.xml,\
-              HEADER,LICENSE,NOTICE,\
-              docs/**,\
-              .github/workflows/codeql.yaml,\
-              .github/(ISSUE_TEMPLATE/**|PULL_REQUEST_TEMPLATE),\
-              dist-material/release-docs/**,\
-              component-libraries.yml\
-              }"
-            pom:
-              - "**/pom.xml"
-          list-files: json  # logs matched files
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -93,12 +27,14 @@ jobs:
           log: debug
           config: .licenserc.yaml
           mode: check
-      - name: in1
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.16'
+      - name: Check Dependencies Licenses
         run: |
-          git clone https://github.com/apache/skywalking-eyes
-          cd skywalking-eyes
-          make build
-          license-eye -c .licenserc.yaml header check
+          go install github.com/apache/skywalking-eyes/cmd/license-eye@47febf5
+          license-eye dependency resolve --summary ./dist-material/release-docs/LICENSE.tpl
       - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
