@@ -91,7 +91,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case null =>
         //通过脚本启动..
         val flinkHome = System.getenv("FLINK_HOME")
-        require(flinkHome != null)
+        require(flinkHome != null, "FLINK_HOME not found.")
         logInfo(s"flinkHome: $flinkHome")
         val yaml = new File(s"$flinkHome/conf/flink-conf.yaml")
         PropertiesUtils.loadFlinkConfYaml(yaml)

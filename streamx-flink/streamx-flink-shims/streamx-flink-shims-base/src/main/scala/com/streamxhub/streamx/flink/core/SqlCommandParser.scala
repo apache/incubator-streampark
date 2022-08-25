@@ -793,7 +793,7 @@ object SqlSplitter {
    * @param text
    * @return
    */
-  private[this] def extractLineBreaks(text: String) = {
+  private[this] def extractLineBreaks(text: String): String = {
     val builder = new StringBuilder
     for (i <- 0 until text.length) {
       if (text.charAt(i) == '\n') {

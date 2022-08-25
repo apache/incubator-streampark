@@ -14,7 +14,6 @@
     <packaging>pom</packaging>
 
     <properties>
-        <vertx.version>4.2.3</vertx.version>
         <clickhouse.version>0.3.2</clickhouse.version>
         <async.client.version>2.12.3</async.client.version>
         <influxdb.version>2.17</influxdb.version>
@@ -149,20 +148,6 @@
                 <artifactId>mongo-java-driver</artifactId>
                 <version>3.12.2</version>
             </dependency>
-
-            <!--mysql async start-->
-            <dependency>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-jdbc-client</artifactId>
-                <version>${vertx.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-core</artifactId>
-                <version>${vertx.version}</version>
-            </dependency>
-            <!--mysql async end-->
 
         </dependencies>
 

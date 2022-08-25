@@ -50,14 +50,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(Exception e) {
-        log.info("internal server error：", e);
+        log.info("Internal server error：", e);
         return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
     }
 
     @ExceptionHandler(value = InternalException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleParamsInvalidException(InternalException e) {
-        log.info("internal server error：{}", e.getMessage());
+        log.info("Internal server error：{}", e.getMessage());
         return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
     }
 
@@ -116,6 +116,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = UnauthorizedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public void handleUnauthorizedException(Exception e) {
-        log.info("权限不足，{}", e.getMessage());
+        log.info("Permission denied，{}", e.getMessage());
     }
 }

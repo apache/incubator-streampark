@@ -56,10 +56,4 @@ public final class ShaHashUtils {
         return builder.toString();
     }
 
-    public static void main(String[] args) {
-        String salt = getRandomSalt(26);
-        System.out.println(salt);
-        String encrypt = encrypt(salt, "123456");
-        System.out.println(encrypt);
-    }
 }
