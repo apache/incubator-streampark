@@ -11,3 +11,7 @@ header:
     - 'NOTICE'
 
   comment: on-failure
+  
+dependency:
+  files:
+    - pom.xml
