@@ -11,9 +11,3 @@ header:
     - 'NOTICE'
 
   comment: on-failure
-
-# If you want to check dependencies' license compatibility, uncomment the following section
-dependency:
-   files:
-     - pom.xml           # If this is a maven project.
-     - package.json      # If this is a npm project.
