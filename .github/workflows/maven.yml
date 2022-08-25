@@ -33,3 +33,5 @@ jobs:
         run: mvn -B clean package -T 4 -DskipTests
       - name: Test with Maven
         run: mvn -B test -pl '!streamx-plugin/streamx-jvm-profiler,!streamx-console/streamx-console-service' -am
+      - name: Check Dependencies' License
+        uses: apache/skywalking-eyes/dependency@main
