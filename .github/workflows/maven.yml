@@ -42,6 +42,6 @@ jobs:
           distribution: 'adopt'
           cache: maven
       - name: Build with Maven
-        run: mvn -B clean package -T 4 -DskipTests
+        run: mvn -B clean package -T 4 -DskipTests -Dscala.version=2.12.8 -Dscala.binary.version=2.12
       - name: Test with Maven
         run: mvn -B test -pl '!streamx-plugin/streamx-jvm-profiler,!streamx-console/streamx-console-service' -am
