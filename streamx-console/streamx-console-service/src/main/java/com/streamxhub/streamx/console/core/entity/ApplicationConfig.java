@@ -53,7 +53,7 @@ public class ApplicationConfig {
      */
     private Integer version = 1;
 
-    @TableField(strategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String content;
 
     private Date createTime;

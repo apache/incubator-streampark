@@ -11,9 +11,9 @@
         t1.create_time,
         t1.modify_time,
         t1.description ,
-        t1.`STATUS` as `status`,
-        t2.`STATUS` as `userStatus`,
-        if(t1.`STATUS`=1 and t2.`STATUS`=1,1,0) as `finalStatus`
+        t1.status as status,
+        t2.status as userStatus,
+        case t1.status=1 and t2.status=1 when 1 else 0 as finalStatus
         FROM t_access_token t1 join t_user t2 on t1.user_id = t2.user_id
         <where>
             <if test="accessToken.userId != null and accessToken.userId != ''">
@@ -31,9 +31,9 @@
                t1.create_time,
                t1.modify_time,
                t1.description,
-               t1.`STATUS` as `status`,
-               t2.`STATUS` as `userStatus`,
-               if(t1.`STATUS`=1 and t2.`STATUS`=1,1,0) as `finalStatus`
+               t1.status as status,
+               t2.status as userStatus,
+               case t1.status=1 and t2.status=1 when 1 else 0 as finalStatus
         FROM t_user t2
                  join t_access_token t1 on t1.user_id = t2.user_id
         where t1.user_id = #{userId}
@@ -48,9 +48,9 @@
                t1.create_time,
                t1.modify_time,
                t1.description,
-               t1.`STATUS` as `status`,
-               t2.`STATUS` as `userStatus`,
-               if(t1.`STATUS`=1 and t2.`STATUS`=1,1,0) as `finalStatus`
+               t1.status as status,
+               t2.status as userStatus,
+               case t1.status=1 and t2.status=1 when 1 else 0 as finalStatus
         FROM t_user t2
             join t_access_token t1 on t1.user_id = t2.user_id
         where t1.user_id = #{userId}
@@ -66,9 +66,9 @@
                t1.create_time,
                t1.modify_time,
                t1.description,
-               t1.`STATUS` as `status`,
-               t2.`STATUS` as `userStatus`,
-               if(t1.`STATUS`=1 and t2.`STATUS`=1,1,0) as `finalStatus`
+               t1.status as status,
+               t2.status as userStatus,
+               case t1.status=1 and t2.status=1 when 1 else 0 as finalStatus
         FROM t_access_token t1 join t_user t2 on t1.user_id = t2.user_id
         where t1.id= #{id}
     </select>

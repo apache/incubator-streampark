@@ -61,7 +61,7 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
             .lambda()
             .eq(Effective::getAppId, appId)
             .eq(Effective::getTargetType, type.getType());
-        int count = count(queryWrapper);
+        long count = count(queryWrapper);
         if (count == 0) {
             Effective effective = new Effective();
             effective.setAppId(appId);

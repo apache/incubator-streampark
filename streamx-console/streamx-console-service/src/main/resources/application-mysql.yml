@@ -1,21 +1,6 @@
 spring:
   datasource:
-    dynamic:
-      # 是否开启 SQL日志输出，生产环境建议关闭，有性能损耗
-      p6spy: false
-      hikari:
-        connection-timeout: 30000
-        max-lifetime: 1800000
-        max-pool-size: 15
-        min-idle: 5
-        connection-test-query: select 1
-        pool-name: HikariCP-DS-POOL
-      # 配置默认数据源
-      primary: primary
-      datasource:
-        # 数据源-1，名称为 primary
-        primary:
-          username: root
-          password: streamx
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/streamx?useSSL=false&useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+    username: root
+    password: streamx
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/streamx?useSSL=false&useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8

@@ -620,7 +620,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @SneakyThrows
     @Transactional(rollbackFor = {Exception.class})
     public Long copy(Application appParam) {
-        int count = this.baseMapper.selectCount(
+        long count = this.baseMapper.selectCount(
                 new QueryWrapper<Application>().lambda()
                         .eq(Application::getJobName, appParam.getJobName()));
         if (count > 0) {

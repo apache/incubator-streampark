@@ -107,7 +107,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(Project::getName, project.getName());
         queryWrapper.eq(true, "team_id", project.getTeamId());
-        int count = count(queryWrapper);
+        long count = count(queryWrapper);
         if (count == 0) {
             project.setDate(new Date());
             boolean status = save(project);
@@ -162,7 +162,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         assert project != null;
         LambdaQueryWrapper<Application> queryWrapper = new QueryWrapper<Application>().lambda();
         queryWrapper.eq(Application::getProjectId, id);
-        int count = applicationService.count(queryWrapper);
+        long count = applicationService.count(queryWrapper);
         if (count > 0) {
             return false;
         }

@@ -93,10 +93,10 @@ public class Application implements Serializable {
      */
     private String jobName;
 
-    @TableField(strategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String appId;
 
-    @TableField(strategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String jobId;
 
     /**
@@ -180,7 +180,7 @@ public class Application implements Serializable {
     private Date startTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @TableField(strategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private Date endTime;
 
     private Long duration;

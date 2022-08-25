@@ -14,7 +14,7 @@ logging:
 spring:
   application.name: streamx
   profiles:
-    active: pgsql
+    active: h2
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -56,7 +56,7 @@ mybatis-plus:
 
 streamx:
   database:
-    dialect: postgresql # mysql
+    dialect: h2 #[h2,postgresql,mysql]
   proxy:
     # knox 代理地址 https://cdpsit02.example.cn:8443/gateway/cdp-proxy/yarn
     yarn-url:
