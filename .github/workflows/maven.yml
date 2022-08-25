@@ -17,10 +17,38 @@ on:
       - 'streamx-console/streamx-console-webapp/**'
 
 jobs:
-  build:
-
+  dependency-license:
+    if: |
+      always() &&
+      ((github.event_name == 'schedule' && github.repository == 'apache/skywalking') || needs.changes.outputs.pom == 'true')
+    name: Dependency licenses
+    needs: [ changes ]
     runs-on: ubuntu-latest
-
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+          cache: 'maven'
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.16'
+      - name: Check Dependencies Licenses
+        run: |
+          go install github.com/apache/skywalking-eyes/cmd/license-eye@47febf5
+          license-eye dependency resolve --summary ./dist-material/release-docs/LICENSE.tpl || exit 1
+          if [ ! -z "$(git diff -U0 ./dist-material/release-docs/LICENSE)" ]; then
+            echo "LICENSE file is not updated correctly"
+            git diff -U0 ./dist-material/release-docs/LICENSE
+            exit 1
+          fi
+  build:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Check Dependencies' License
