@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The StreamX Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 CREATE database IF NOT EXISTS streamx;
 use streamx;
 
@@ -155,7 +171,7 @@ CREATE TABLE `t_flink_effective` (
 `TARGET_ID` bigint NOT NULL COMMENT 'configId or sqlId',
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
-UNIQUE KEY `UN_INX` (`APP_ID`,`TARGET_TYPE`) USING BTREE
+UNIQUE KEY `UN_EFFECTIVE_INX` (`APP_ID`,`TARGET_TYPE`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -180,7 +196,7 @@ CREATE TABLE `t_flink_env` (
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述信息',
 `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
 PRIMARY KEY (`ID`) USING BTREE,
-UNIQUE KEY `UN_NAME` (`FLINK_NAME`) USING BTREE
+UNIQUE KEY `UN_ENV_NAME` (`FLINK_NAME`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -393,7 +409,7 @@ CREATE TABLE `t_message` (
 `READED` tinyint DEFAULT '0',
 `CREATE_TIME` datetime DEFAULT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
-KEY `INX_USER_ID` (`USER_ID`) USING BTREE
+KEY `INX_MES_USER` (`USER_ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -433,7 +449,7 @@ CREATE TABLE `t_role_menu` (
 `ROLE_ID` bigint NOT NULL,
 `MENU_ID` bigint NOT NULL,
 PRIMARY KEY (`ID`) USING BTREE,
-UNIQUE KEY `UN_INX` (`ROLE_ID`,`MENU_ID`) USING BTREE
+UNIQUE KEY `UN_ROLE_MENU_INX` (`ROLE_ID`,`MENU_ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -517,10 +533,10 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_setting`;
 CREATE TABLE `t_setting` (
-`NUM` int DEFAULT NULL,
-`KEY` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-`VALUE` text COLLATE utf8mb4_general_ci DEFAULT NULL,
-`TITLE` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`ORDER_NUM` int DEFAULT NULL,
+`SETTING_KEY` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+`SETTING_VALUE` text COLLATE utf8mb4_general_ci DEFAULT NULL,
+`SETTING_NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `TYPE` tinyint NOT NULL COMMENT '1: input 2: boolean 3: number',
 PRIMARY KEY (`KEY`) USING BTREE
@@ -583,7 +599,7 @@ CREATE TABLE `t_user_role` (
 `USER_ID` bigint DEFAULT NULL COMMENT '用户ID',
 `ROLE_ID` bigint DEFAULT NULL COMMENT '角色ID',
 PRIMARY KEY (`ID`) USING BTREE,
-UNIQUE KEY `UN_INX` (`USER_ID`,`ROLE_ID`) USING BTREE
+UNIQUE KEY `UN_USER_ROLE_INX` (`USER_ID`,`ROLE_ID`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -679,7 +695,7 @@ CREATE TABLE `t_alert_config` (
   `LARK_PARAMS`          text COLLATE utf8mb4_general_ci COMMENT '飞书报警配置信息',
   `CREATE_TIME`          datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `MODIFY_TIME`          datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-  INDEX `INX_USER_ID` (`USER_ID`) USING BTREE
+  INDEX `INX_ALERT_USER` (`USER_ID`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci;

@@ -211,11 +211,11 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
-        <!-- mysql -->
+        <!-- postgresql -->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <optional>true</optional>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.4.2</version>
         </dependency>
 
         <dependency>
