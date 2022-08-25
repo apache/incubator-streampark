@@ -33,12 +33,11 @@ import java.util.List;
 @Slf4j
 public class Team {
 
-    @TableId(value = "TEAM_ID", type = IdType.AUTO)
+    @TableId(type = IdType.AUTO)
     private Long teamId;
 
     private String teamCode;
 
-    @TableId(value = "TEAM_NAME")
     private String teamName;
 
     private Date createTime;

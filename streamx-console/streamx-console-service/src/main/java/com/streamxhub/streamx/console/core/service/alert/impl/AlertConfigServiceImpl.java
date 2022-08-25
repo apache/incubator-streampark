@@ -79,7 +79,7 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
 
     @Override
     public boolean deleteById(Long id) throws AlertException {
-        int count = applicationService.count(new LambdaQueryWrapper<Application>().eq(id != null, Application::getAlertId, id));
+        long count = applicationService.count(new LambdaQueryWrapper<Application>().eq(id != null, Application::getAlertId, id));
         if (count > 0) {
             throw new AlertException(String.format("AlertId:%d, this is bound by application. Please clear the configuration first", id));
         }

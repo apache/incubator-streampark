@@ -56,24 +56,6 @@ public final class SortUtils {
             sortField = WebUtils.camelToUnderscore(sortField);
             defaultSort = WebUtils.camelToUnderscore(defaultSort);
         }
-        if (StringUtils.isNotBlank(request.getSortField())
-            && StringUtils.isNotBlank(request.getSortOrder())
-            && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
-            && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
-            if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
-                page.setDesc(sortField);
-            } else {
-                page.setAsc(sortField);
-            }
-        } else {
-            if (StringUtils.isNotBlank(defaultSort)) {
-                if (StringUtils.equals(defaultOrder, Constant.ORDER_DESC)) {
-                    page.setDesc(defaultSort);
-                } else {
-                    page.setAsc(defaultSort);
-                }
-            }
-        }
     }
 
     /**

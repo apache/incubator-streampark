@@ -41,7 +41,7 @@ public class AccessToken implements Serializable {
     public static final Integer STATUS_ENABLE = 1;
     public static final Integer STATUS_DISABLE = 0;
 
-    @TableId(value = "ID", type = IdType.AUTO)
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     @NotBlank(message = "{required}")

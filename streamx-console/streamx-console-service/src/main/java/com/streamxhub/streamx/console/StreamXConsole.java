@@ -19,6 +19,7 @@ package com.streamxhub.streamx.console;
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
@@ -54,6 +55,7 @@ import java.lang.management.RuntimeMXBean;
 @Slf4j
 @SpringBootApplication
 @EnableScheduling
+@MapperScan(value = {"com.streamxhub.streamx.console.*.dao"})
 public class StreamXConsole {
 
     public static void main(String[] args) {
