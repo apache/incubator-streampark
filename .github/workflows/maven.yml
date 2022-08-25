@@ -93,6 +93,12 @@ jobs:
           log: debug
           config: .licenserc.yaml
           mode: check
+      - name: in1
+        run: |
+          git clone https://github.com/apache/skywalking-eyes
+          cd skywalking-eyes
+          make build
+          license-eye -c .licenserc.yaml header check
       - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
