@@ -25,6 +25,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Set up JDK 8
         uses: actions/setup-java@v2
+      - name: Check Dependencies' License
+      uses: apache/skywalking-eyes/dependency@main
         with:
           java-version: '8'
           distribution: 'adopt'
@@ -33,5 +35,3 @@ jobs:
         run: mvn -B clean package -T 4 -DskipTests
       - name: Test with Maven
         run: mvn -B test -pl '!streamx-plugin/streamx-jvm-profiler,!streamx-console/streamx-console-service' -am
-      - name: Check Dependencies' License
-        uses: apache/skywalking-eyes/dependency@main
