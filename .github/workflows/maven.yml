@@ -47,6 +47,46 @@ jobs:
             git diff -U0 ./dist-material/release-docs/LICENSE
             exit 1
           fi
+  changes:
+    # Check if anything related to Actual code / CI(functional testing) is changed
+    # set outputs for other jobs to access for if conditions
+    runs-on: ubuntu-latest
+    # To prevent error when there's no base branch
+    if: github.event_name != 'schedule'
+    timeout-minutes: 10
+    outputs:
+      oap: ${{ steps.filter.outputs.oap }}
+      pom: ${{ steps.filter.outputs.pom }}
+    steps:
+      - uses: actions/checkout@v3  # required for push event
+      - name: Check for file changes
+        uses: getsentry/paths-filter@v2
+        id: filter
+        with:
+          token: ${{ github.token }}
+          # The following is a single composite pattern that allows next CI steps,
+          # the pattern is in form of [not (foo or bar)] to be safe.
+          # When new files come in, the CI will NOT ignore them unless listed,
+          # so remember to extend here if they do not serve functional purposes.
+          # NOTE: careful with using ** in expression, keep !**/{old, new things}.
+          filters: |
+            oap:
+              - "!**/{\
+              *.md,*.txt,\
+              skywalking-ui,\
+              .asf.yaml,.dlc.json,.gitignore,.licenserc.yaml,\
+              codeStyle.xml,\
+              HEADER,LICENSE,NOTICE,\
+              docs/**,\
+              .github/workflows/codeql.yaml,\
+              .github/(ISSUE_TEMPLATE/**|PULL_REQUEST_TEMPLATE),\
+              dist-material/release-docs/**,\
+              component-libraries.yml\
+              }"
+            pom:
+              - "**/pom.xml"
+          list-files: json  # logs matched files
+
   build:
     runs-on: ubuntu-latest
     steps:
