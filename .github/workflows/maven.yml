@@ -34,7 +34,7 @@ jobs:
       - name: Check Dependencies Licenses
         run: |
           go install github.com/apache/skywalking-eyes/cmd/license-eye@47febf5
-          license-eye dep resolve -o ./dist-material/release-docs/ -s LICENSE.tpl
+          license-eye dep resolve -o ./dist-material/release-docs/ -s ./dist-material/release-docs/LICENSE.tpl
       - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
