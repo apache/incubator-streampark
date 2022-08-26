@@ -21,20 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Check Dependencies' License
-        uses: apache/skywalking-eyes/dependency@main
-        with:
-          log: debug
-          config: .licenserc.yaml
-          mode: check
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: '1.16'
-      - name: Check Dependencies Licenses
-        run: |
-          go install github.com/apache/skywalking-eyes/cmd/license-eye@47febf5
-          license-eye dep resolve -o ./dist-material/release-docs/ -s ./dist-material/release-docs/LICENSE.tpl
       - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
@@ -45,3 +31,16 @@ jobs:
         run: mvn -B clean package -T 4 -DskipTests
       - name: Test with Maven
         run: mvn -B test -pl '!streamx-plugin/streamx-jvm-profiler,!streamx-console/streamx-console-service' -am
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.16'
+      - name: Check Dependencies Licenses
+        run: |
+          go install github.com/apache/skywalking-eyes/cmd/license-eye@47febf5
+          license-eye dependency resolve --summary ./dist-material/release-docs/LICENSE.tpl || exit 1
+          if [ ! -z "$(git diff -U0 ./dist-material/release-docs/LICENSE)" ]; then
+            echo "LICENSE file is not updated correctly"
+            git diff -U0 ./dist-material/release-docs/LICENSE
+            exit 1
+          fi
