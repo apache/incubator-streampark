@@ -2118,10 +2118,10 @@ export default {
       })
       const container = document.getElementById('terminal')
       this.terminal.open(container, true)
-      this.refreshLog(app)
+      this.refreshLog()
     },
-    refreshLog(app){
-      const tmpApp = app || this.currentApp
+    refreshLog(){
+      const tmpApp = this.currentApp
       startLog({
         namespace : tmpApp.k8sNamespace,
         jobName : tmpApp.jobName,
