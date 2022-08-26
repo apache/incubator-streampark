@@ -1,0 +1,2 @@
+License: {Name: LGPL, version 2.1, URL: http://www.gnu.org/licenses/licenses.html, Distribution: repo, Comments: , }
+License: {Name: Apache License v2.0, URL: http://www.apache.org/licenses/LICENSE-2.0.txt, Distribution: repo, Comments: , }
