@@ -539,7 +539,7 @@ CREATE TABLE `t_setting` (
 `SETTING_NAME` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `DESCRIPTION` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
 `TYPE` tinyint NOT NULL COMMENT '1: input 2: boolean 3: number',
-PRIMARY KEY (`KEY`) USING BTREE
+PRIMARY KEY (`SETTING_KEY`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
