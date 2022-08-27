@@ -158,7 +158,7 @@ create table "public"."t_flink_app" (
   "job_type" int2,
   "execution_mode" int2,
   "resource_from" int2,
-  "project_id" varchar(64) collate "pg_catalog"."default",
+  "project_id" bigint,
   "job_name" varchar(255) collate "pg_catalog"."default",
   "module" varchar(255) collate "pg_catalog"."default",
   "jar" varchar(255) collate "pg_catalog"."default",
@@ -450,7 +450,7 @@ alter table "public"."t_flink_sql" owner to "postgres";
 -- records of t_flink_sql
 -- ----------------------------
 begin;
-insert into "public"."t_flink_sql" values (100000, 100000, 'enqluutphdaqvu+vmfs1ayiht5s94aavqgxsspzikgxry2mxrdgfb4gs3c0+lnjo6mz36syapkmzqpk8vkbqmmt2kofmae5rk4nf3yhrhcwva1/ttdaqo61uxmoosprlt1pdgkgkekpmwviojwvdp3w2zpg+jfqfhjfu46xxrvvyzuwztye1khjrqzsbfrcfjuwsyqiqt1xjjvypcbwjp9wpcxvuouen0zavufcs0niujyn2l4s++yiy75eblr+2dnl3gyktwryfqkyrrr2xzxxmnvu9yh9ghamuo/sxymrkgnly4c714rz7zawtlhsx+n9njvvrwxm99jmyvehpouhujmiyfi5zkcoyzyij11a7qh7tyz+ne8bw', null, 1, 1, '2022-08-25 15:16:48');
+insert into "public"."t_flink_sql" values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94AaVqGxSSPZIKgxrY2mxrdGfb4GS3c0+LnJo6Mz36syapkmZQpk8vKbQMMt2KOFmAe5rK4Nf3yhrhCwvA1/TTDaqO61UxmooSprlT1PDGkgKEKpmwvIOjWVdP3W2zpG+JfQFHjfU46xxrVvYZuWztye1khJrqzSBFRCfjUwSYQiqt1xJJvyPcbWJp9WPCXvUoUEn0ZAVufcs0nIUjYn2L4s++YiY75eBLr+2Dnl3GYKTWRyfQKYRRR2XZxXmNvu9yh9GHAmUO/sxyMRkGNly4c714RZ7zaWtLHsX+N9NjvVrWxm99jmyvEhpOUhujmIYFI5zkCOYzYIj11a7QH7Tyz+nE8bw', null, 1, 1, '2022-08-25 15:16:48');
 commit;
 
 -- ----------------------------
@@ -503,7 +503,7 @@ create table "public"."t_menu" (
   "component" varchar(255) collate "pg_catalog"."default",
   "perms" varchar(50) collate "pg_catalog"."default",
   "icon" varchar(50) collate "pg_catalog"."default",
-  "type" char(2) collate "pg_catalog"."default",
+  "type" int2,
   "display" char(2) collate "pg_catalog"."default" not null,
   "order_num" float8,
   "create_time" timestamp(6) not null,
@@ -807,7 +807,7 @@ create table "public"."t_user" (
   "salt" varchar(255) collate "pg_catalog"."default",
   "password" varchar(128) collate "pg_catalog"."default" not null,
   "email" varchar(128) collate "pg_catalog"."default",
-  "status" char(1) collate "pg_catalog"."default" not null,
+  "status" int2,
   "create_time" timestamp(6) not null,
   "modify_time" timestamp(6),
   "last_login_time" timestamp(6),

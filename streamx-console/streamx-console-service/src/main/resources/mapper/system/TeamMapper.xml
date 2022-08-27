@@ -5,7 +5,7 @@
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.system.entity.Team">
         <id column="team_id" property="teamId"/>
         <result column="team_name" property="teamName"/>
-        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
     </resultMap>
 
     <select id="findTeamList" resultType="com.streamxhub.streamx.console.system.entity.Team">
