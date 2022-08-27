@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.core.mapper;
 
-import com.streamxhub.streamx.console.core.entity.Effective;
+import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 /**
- * @author benjobs
+ * @author Al-assad
  */
-public interface EffectiveMapper extends BaseMapper<Effective> {
+public interface ApplicationBuildPipelineMapper extends BaseMapper<AppBuildPipeline> {
 
-    @Select("select * from t_flink_effective where app_id=#{appId} and target_type=#{type}")
-    Effective get(@Param("appId") Long appId, @Param("type") int type);
-
-    @Delete("delete from t_flink_effective where app_id=#{appId}")
-    void removeApp(@Param("appId") Long appId);
 }

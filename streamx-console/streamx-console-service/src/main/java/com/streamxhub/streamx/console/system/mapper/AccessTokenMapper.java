@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.dao;
+package com.streamxhub.streamx.console.system.mapper;
 
-import com.streamxhub.streamx.console.system.entity.Role;
+import com.streamxhub.streamx.console.system.entity.AccessToken;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+public interface AccessTokenMapper extends BaseMapper<AccessToken> {
 
-public interface RoleMapper extends BaseMapper<Role> {
+    IPage<AccessToken> page(Page<AccessToken> page, @Param("accessToken") AccessToken accessToken);
 
-    List<Role> findUserRole(String userName);
+    AccessToken getByUserToken(@Param("userId") Long userId, @Param("accessToken") String accessToken);
 
-    IPage<Role> findRole(Page<Role> page, @Param("role") Role role);
+    AccessToken getById(@Param("id") Long id);
+
+    AccessToken getByUserId(@Param("userId") Long userId);
 }

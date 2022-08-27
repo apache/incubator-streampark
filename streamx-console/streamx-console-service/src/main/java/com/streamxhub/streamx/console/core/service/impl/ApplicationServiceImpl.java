@@ -34,15 +34,13 @@ import com.streamxhub.streamx.common.util.ExceptionUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.common.util.YarnUtils;
-import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ApplicationException;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
-import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.annotation.RefreshCache;
-import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
@@ -59,6 +57,7 @@ import com.streamxhub.streamx.console.core.enums.CheckPointType;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.OptionState;
+import com.streamxhub.streamx.console.core.mapper.ApplicationMapper;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.runner.EnvInitializer;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
@@ -471,10 +470,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
-        Page<Application> page = new Page<>();
         List<Long> teamList = teamUserService.getTeamIdList();
         appParam.setTeamIdList(teamList);
-        SortUtils.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
+        Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
         if (CommonUtils.notEmpty(appParam.getStateArray())) {
             if (Arrays.stream(appParam.getStateArray()).anyMatch(x -> x == FlinkAppState.FINISHED.getValue())) {
                 Integer[] newArray = CommonUtils.arrayInsertIndex(
@@ -621,8 +619,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     public Long copy(Application appParam) {
         long count = this.baseMapper.selectCount(
-                new QueryWrapper<Application>().lambda()
-                        .eq(Application::getJobName, appParam.getJobName()));
+            new QueryWrapper<Application>().lambda()
+                .eq(Application::getJobName, appParam.getJobName()));
         if (count > 0) {
             throw new IllegalArgumentException("[StreamX] Application names cannot be repeated");
         }
@@ -675,7 +673,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         boolean saved = save(newApp);
         if (saved) {
             if (newApp.isFlinkSqlJob()) {
-                FlinkSql copyFlinkSql = flinkSqlService.getLastVersionFlinkSql(appParam.getId(), true);
+                FlinkSql copyFlinkSql = flinkSqlService.getLatestFlinkSql(appParam.getId(), true);
                 newApp.setFlinkSql(copyFlinkSql.getSql());
                 newApp.setDependency(copyFlinkSql.getDependency());
                 FlinkSql flinkSql = new FlinkSql(newApp);

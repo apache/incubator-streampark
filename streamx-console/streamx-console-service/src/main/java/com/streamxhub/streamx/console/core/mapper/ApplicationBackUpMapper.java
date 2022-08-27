@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.core.mapper;
 
-import com.streamxhub.streamx.console.core.entity.Setting;
+import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 
 /**
  * @author benjobs
  */
-public interface SettingMapper extends BaseMapper<Setting> {
+public interface ApplicationBackUpMapper extends BaseMapper<ApplicationBackUp> {
 
-    @Select("select * from t_setting where setting_key=#{key}")
-    Setting get(@Param("key") String key);
-
-    @Update("update t_setting set setting_value = #{setting.value} where setting_key = #{setting.key}")
-    void updateByKey(@Param("setting") Setting setting);
 }

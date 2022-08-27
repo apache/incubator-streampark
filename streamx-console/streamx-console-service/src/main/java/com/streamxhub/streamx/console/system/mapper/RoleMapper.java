@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.system.mapper;
 
-import com.streamxhub.streamx.console.core.entity.Message;
+import com.streamxhub.streamx.console.system.entity.Role;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Param;
 
-public interface MessageMapper extends BaseMapper<Message> {
+import java.util.List;
+
+public interface RoleMapper extends BaseMapper<Role> {
+
+    List<Role> findUserRole(String userName);
+
+    IPage<Role> findRole(Page<Role> page, @Param("role") Role role);
 }

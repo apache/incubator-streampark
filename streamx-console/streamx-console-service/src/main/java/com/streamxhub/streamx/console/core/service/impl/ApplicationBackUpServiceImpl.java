@@ -18,17 +18,16 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.util.ThreadUtils;
-import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.InternalException;
-import com.streamxhub.streamx.console.base.util.SortUtils;
-import com.streamxhub.streamx.console.core.dao.ApplicationBackUpMapper;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
 import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
+import com.streamxhub.streamx.console.core.mapper.ApplicationBackUpMapper;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
@@ -87,9 +86,10 @@ public class ApplicationBackUpServiceImpl
 
     @Override
     public IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request) {
-        Page<ApplicationBackUp> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
-        return this.baseMapper.page(page, backUp.getAppId());
+        Page<ApplicationBackUp> page = new MybatisPager<ApplicationBackUp>().getDefaultPage(request);
+        LambdaQueryWrapper queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+            .eq(ApplicationBackUp::getAppId, backUp.getAppId());
+        return this.baseMapper.selectPage(page, queryWrapper);
     }
 
     @Override
@@ -177,17 +177,27 @@ public class ApplicationBackUpServiceImpl
 
     @Override
     public void revoke(Application application) {
-        ApplicationBackUp backup = baseMapper.getLastBackup(application.getId());
-        assert backup != null;
-        String path = backup.getPath();
-        application.getFsOperator().move(path, application.getWorkspace().APP_WORKSPACE());
-        removeById(backup.getId());
+        Page<ApplicationBackUp> page = new Page<>();
+        page.setCurrent(0).setSize(1).setSearchCount(false);
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+            .eq(ApplicationBackUp::getAppId, application.getId())
+            .orderByDesc(ApplicationBackUp::getCreateTime);
+
+        Page<ApplicationBackUp> backUpPages = baseMapper.selectPage(page, queryWrapper);
+        if (!backUpPages.getRecords().isEmpty()) {
+            ApplicationBackUp backup = backUpPages.getRecords().get(0);
+            String path = backup.getPath();
+            application.getFsOperator().move(path, application.getWorkspace().APP_WORKSPACE());
+            removeById(backup.getId());
+        }
     }
 
     @Override
     public void removeApp(Application application) {
-        baseMapper.removeApp(application.getId());
         try {
+            baseMapper.delete(
+                new LambdaQueryWrapper<ApplicationBackUp>().eq(ApplicationBackUp::getAppId, application.getId())
+            );
             application.getFsOperator().delete(
                 application.getWorkspace().APP_BACKUPS().concat("/").concat(application.getId().toString())
             );
@@ -221,7 +231,10 @@ public class ApplicationBackUpServiceImpl
     }
 
     private ApplicationBackUp getFlinkSqlBackup(Long appId, Long sqlId) {
-        return baseMapper.getFlinkSqlBackup(appId, sqlId);
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+            .eq(ApplicationBackUp::getAppId, appId)
+            .eq(ApplicationBackUp::getSqlId, sqlId);
+        return baseMapper.selectOne(queryWrapper);
     }
 
     @Override

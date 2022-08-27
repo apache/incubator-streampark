@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.streamxhub.streamx.console.core.dao.ApplicationMapper">
+<mapper namespace="com.streamxhub.streamx.console.core.mapper.ApplicationMapper">
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.core.entity.Application">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="project_id" jdbcType="BIGINT" property="projectId"/>
@@ -59,7 +59,16 @@
     </resultMap>
 
     <select id="page" resultType="application" parameterType="application">
-        SELECT t.*,p.name as projectName,u.username,case when trim(u.nick_name) = '' then u.username else u.nick_name end as nickname,v.version as flinkVersion,f.team_name as teamName FROM t_flink_app t
+        select t.*,
+               p.name as projectName,
+               u.username,
+               case when trim(u.nick_name) = ''
+                   then u.username
+                   else u.nick_name
+                   end as nickname,
+               v.version as flinkVersion,
+               f.team_name as teamName
+        from t_flink_app t
         inner join t_user u
         on t.user_id = u.user_id
         left join t_flink_env v
@@ -70,46 +79,46 @@
         on t.team_id = f.team_id
         <where>
             <if test="application.jobType != null and application.jobType != ''">
-                AND t.job_type = #{application.jobType}
+                and t.job_type = #{application.jobType}
             </if>
             <if test="application.jobTypeArray != null and application.jobTypeArray.length>0">
-                AND t.job_type IN
+                and t.job_type in
                 <foreach item="item" index="index" collection="application.jobTypeArray" open="("  close=")" separator=",">
                     #{item}
                 </foreach>
             </if>
             <if test="application.executionMode != null and application.executionMode != ''">
-                AND t.execution_mode = #{application.executionMode}
+                and t.execution_mode = #{application.executionMode}
             </if>
             <if test="application.jobName != null and application.jobName != ''">
-                AND t.job_name like '%${application.jobName}%'
+                and t.job_name like '%${application.jobName}%'
             </if>
             <if test="application.projectName != null and application.projectName != ''">
-                AND p.name like '%${application.projectName}%'
+                and p.name like '%${application.projectName}%'
             </if>
             <if test="application.appId != null and application.appId != ''">
-                AND t.app_id = #{application.appId}
+                and t.app_id = #{application.appId}
             </if>
             <if test="application.state != null and application.state != ''">
-                AND t.state = #{application.state}
+                and t.state = #{application.state}
             </if>
 
             <if test="application.userId != null and application.userId != ''">
-                AND t.user_id = #{application.userId}
+                and t.user_id = #{application.userId}
             </if>
 
             <if test="application.teamId != null and application.teamId != ''">
-                AND t.team_id = #{application.teamId}
+                and t.team_id = #{application.teamId}
             </if>
             <if test="application.stateArray != null and application.stateArray.length>0">
-                AND t.state IN
+                and t.state in
                 <foreach item="item" index="index" collection="application.stateArray" open="("  close=")" separator=",">
                     #{item}
                 </foreach>
             </if>
 
             <if test="application.teamIdList != null and application.teamIdList.size>0">
-                AND t.team_id IN
+                and t.team_id in
                 <foreach item="item" index="index" collection="application.teamIdList" open="("  close=")" separator=",">
                     #{item}
                 </foreach>
@@ -118,8 +127,8 @@
     </select>
 
     <select id="getApp" resultType="application" parameterType="application">
-        SELECT t.*, p.name as projectName
-        FROM t_flink_app t left join t_flink_project p
+        select t.*, p.name as projectName
+        from t_flink_app t left join t_flink_project p
         on t.project_id = p.id
         where t.id = #{application.id}
     </select>

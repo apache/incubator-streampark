@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.streamxhub.streamx.console.system.dao.RoleMapper">
+<mapper namespace="com.streamxhub.streamx.console.system.mapper.RoleMapper">
     <resultMap id="roleMap" type="com.streamxhub.streamx.console.system.entity.Role">
         <result column="role_id" jdbcType="BIGINT" property="roleId"/>
         <result column="role_name" jdbcType="VARCHAR" property="roleName"/>
@@ -13,28 +13,28 @@
     <select id="findUserRole" resultMap="roleMap">
         select r.*
         from t_role r
-         left join t_user_role ur on r.role_id = ur.role_id
-         left join t_user u on u.user_id = ur.user_id
+        left join t_user_role ur on r.role_id = ur.role_id
+        left join t_user u on u.user_id = ur.user_id
         where u.username = #{userName}
     </select>
 
     <select id="findRole" resultType="role" parameterType="role">
-        SELECT t.*
-        FROM
+        select t.*
+        from
         t_role t
         <where>
             <if test="role.roleName != null and role.roleName != ''">
-                AND t.role_name like '%${role.roleName}%'
+                and t.role_name like '%${role.roleName}%'
             </if>
             <if test="role.createTimeFrom != null and role.createTimeFrom !=''">
-                And t.create_time &gt; #{role.createTimeFrom}
+                and  t.create_time &gt; #{role.createTimeFrom}
             </if>
             <if test="role.createTimeTo!= null and role.createTimeTo !=''">
-                And t.create_time &lt; #{role.createTimeTo}
+                and  t.create_time &lt; #{role.createTimeTo}
             </if>
 
             <if test="role.roleIdList != null and role.roleIdList.size > 0">
-                AND role_id IN
+                and role_id in
                 <foreach item="item" index="index" collection="role.roleIdList" open="("  close=")" separator=",">
                     #{item}
                 </foreach>

@@ -19,9 +19,9 @@ package com.streamxhub.streamx.console.core.service.impl;
 import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
-import com.streamxhub.streamx.console.core.dao.FlameGraphMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlameGraph;
+import com.streamxhub.streamx.console.core.mapper.FlameGraphMapper;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.FlameGraphService;
 

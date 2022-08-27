@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.dao;
+package com.streamxhub.streamx.console.system.mapper;
 
+import com.streamxhub.streamx.console.system.entity.Team;
 import com.streamxhub.streamx.console.system.entity.User;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
-import java.util.List;
+/**
+ * @author daixinyu
+ */
+public interface TeamMapper extends BaseMapper<Team> {
 
-public interface UserMapper extends BaseMapper<User> {
-
-    IPage<User> findUserDetail(Page page, @Param("user") User user);
-
-    @Select("SELECT u.* FROM t_user u LEFT JOIN t_access_token t ON u.USER_ID = t.USER_ID WHERE t.USER_ID IS NULL")
-    List<User> getNoTokenUser();
+    IPage<Team> findTeamList(Page<User> page, @Param("team") Team team);
 
 }
