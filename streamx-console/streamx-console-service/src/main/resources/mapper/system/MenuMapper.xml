@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.streamxhub.streamx.console.system.dao.MenuMapper">
+<mapper namespace="com.streamxhub.streamx.console.system.mapper.MenuMapper">
     <resultMap id="menu" type="com.streamxhub.streamx.console.system.entity.Menu">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <id column="menu_id" jdbcType="BIGINT" property="menuId"/>
@@ -20,13 +20,13 @@
     <select id="findUserPermissions" resultMap="menu">
         select distinct m.perms
         from t_role r
-                 left join t_user_role ur on (r.role_id = ur.role_id)
-                 left join t_user u on (u.user_id = ur.user_id)
-                 left join t_role_menu rm on (rm.role_id = r.role_id)
-                 left join t_menu m on (m.menu_id = rm.menu_id)
+        left join t_user_role ur on (r.role_id = ur.role_id)
+        left join t_user u on (u.user_id = ur.user_id)
+        left join t_role_menu rm on (rm.role_id = r.role_id)
+        left join t_menu m on (m.menu_id = rm.menu_id)
         where u.username = #{userName}
-          and m.perms is not null
-          and m.perms &lt;&gt; ''
+        and m.perms is not null
+        and m.perms &lt;&gt; ''
     </select>
 
     <select id="findUserMenus" resultMap="menu">
@@ -44,18 +44,19 @@
     </select>
 
     <select id="findUserIdsByMenuId" parameterType="string" resultType="string">
-        SELECT user_id
-        FROM t_user_role
-        WHERE role_id IN (SELECT rm.role_id FROM t_role_menu rm WHERE rm.menu_id = #{menuId})
+        select user_id
+        from t_user_role
+        where role_id in
+              (select rm.role_id from t_role_menu rm where rm.menu_id = #{menuId})
     </select>
 
     <!-- 递归删除菜单，findMenuChildren为自定义的 MySQL函数，作用为根据当前 menuId递归查找出其所有下级菜单或按钮-->
     <delete id="deleteMenus" parameterType="string">
         DELETE
-        FROM t_menu
-        WHERE menu_id IN (SELECT m.menu_id
-                          FROM (SELECT menu_id
-                                FROM t_menu
-                                WHERE FIND_IN_SET(menu_id, findMenuChildren(#{menuId})) > 0) m)
+        from t_menu
+        where menu_id in (select m.menu_id
+                          from (select menu_id
+                                from t_menu
+                                where FIND_IN_SET(menu_id, findMenuChildren(#{menuId})) > 0) m)
     </delete>
 </mapper>

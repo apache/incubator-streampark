@@ -14,36 +14,34 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.dao;
+package com.streamxhub.streamx.console.core.mapper;
 
-import com.streamxhub.streamx.console.system.entity.UserRole;
+import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
-import java.util.List;
-
-public interface UserRoleMapper extends BaseMapper<UserRole> {
-
-    /**
-     * 根据用户Id删除该用户的角色关系
-     *
-     * @param userId 用户ID
-     * @return boolean
-     * @author lzx
-     * @date 2019年03月04日17:46:49
-     */
-    Boolean deleteByUserId(@Param("userId") Long userId);
+/**
+ * @author benjobs
+ */
+public interface FlinkEnvMapper extends BaseMapper<FlinkEnv> {
 
     /**
-     * 根据角色Id删除该角色的用户关系
+     * 设置为默认
      *
-     * @param roleId 角色ID
-     * @return boolean
-     * @author lzx
-     * @date 2019年03月04日17:47:16
+     * @param id
      */
-    Boolean deleteByRoleId(@Param("roleId") Long roleId);
+    @Update("update t_flink_env set is_default = case id when #{id} then 1 else 0 end")
+    void setDefault(@Param("id") Long id);
 
-    List<Long> selectRoleIdList(@Param("userId") Long userId);
+    /**
+     * 根据appId获取对象的flinkVersion
+     *
+     * @param appId
+     * @return
+     */
+    @Select("select v.* from t_flink_env v inner join (select version_id from t_flink_app where id=#{appId}) as t on v.id = t.version_id")
+    FlinkEnv getByAppId(@Param("appId") Long appId);
 }

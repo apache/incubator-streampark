@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.core.mapper;
 
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 
@@ -45,7 +45,7 @@ public interface SavePointMapper extends BaseMapper<SavePoint> {
     @Delete("delete from t_flink_savepoint where app_id=#{appId}")
     void removeApp(@Param("appId") Long appId);
 
-    @Delete("delete from t_flink_savepoint where app_id=#{appId} and trigger_time < #{trigger} and type = 1")
+    @Delete("delete from t_flink_savepoint where app_id=#{appId} and type = 1 and trigger_time < #{trigger}")
     void expire(@Param("appId") Long appId, @Param("trigger") Date triggerTime);
 
     @Delete("delete from t_flink_savepoint where app_id=#{appId} and type = 1")

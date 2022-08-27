@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.streamxhub.streamx.console.system.dao.UserMapper">
+<mapper namespace="com.streamxhub.streamx.console.system.mapper.UserMapper">
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.system.entity.User">
         <id column="user_id" jdbcType="BIGINT" property="userId"/>
         <result column="username" jdbcType="VARCHAR" property="username"/>
@@ -18,35 +18,35 @@
     </resultMap>
 
     <select id="findUserDetail" resultType="user" parameterType="user">
-        SELECT a.*
-        FROM
+        select a.*
+        from
         t_user a
         <if test="user.teamIdList != null and user.teamIdList.size>0">
-             join t_team_user b on a.user_id=b.user_id
+             join t_team_user b on a.user_id = b.user_id
         </if>
         <where>
             <if test="user.username != null and user.username != ''">
-                AND username like '%${user.username}%'
+                and username like '%${user.username}%'
             </if>
             <if test="user.createTimeFrom != null and user.createTimeFrom !=''">
-                And create_time &gt; #{user.createTimeFrom}
+                and create_time &gt; #{user.createTimeFrom}
             </if>
             <if test="user.createTimeTo!= null and user.createTimeTo !=''">
-                And create_time &lt; #{user.createTimeTo}
+                and create_time &lt; #{user.createTimeTo}
             </if>
             <if test="user.sex != null and user.sex != ''">
-                AND sex = #{user.sex}
+                and sex = #{user.sex}
             </if>
             <if test="user.status != null and user.status != ''">
-                AND status = #{user.status}
+                and status = #{user.status}
             </if>
 
             <if test="user.teamIdList != null and user.teamIdList.size>0">
-                AND b.team_id IN
+                and b.team_id in
                 <foreach item="item" index="index" collection="user.teamIdList" open="("  close=")" separator=",">
                     #{item}
                 </foreach>
-                GROUP BY a.user_id
+                group by a.user_id
             </if>
         </where>
         <if test="user.sortField != null and user.sortField != ''">

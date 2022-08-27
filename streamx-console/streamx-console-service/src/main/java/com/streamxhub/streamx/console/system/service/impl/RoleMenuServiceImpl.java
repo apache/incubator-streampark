@@ -16,8 +16,8 @@
 
 package com.streamxhub.streamx.console.system.service.impl;
 
-import com.streamxhub.streamx.console.system.dao.RoleMenuMapper;
 import com.streamxhub.streamx.console.system.entity.RoleMenu;
+import com.streamxhub.streamx.console.system.mapper.RoleMenuMapper;
 import com.streamxhub.streamx.console.system.service.RoleMenuServie;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;

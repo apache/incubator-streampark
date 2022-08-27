@@ -25,9 +25,9 @@ import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.system.authentication.JWTToken;
 import com.streamxhub.streamx.console.system.authentication.JWTUtil;
-import com.streamxhub.streamx.console.system.dao.AccessTokenMapper;
 import com.streamxhub.streamx.console.system.entity.AccessToken;
 import com.streamxhub.streamx.console.system.entity.User;
+import com.streamxhub.streamx.console.system.mapper.AccessTokenMapper;
 import com.streamxhub.streamx.console.system.service.AccessTokenService;
 import com.streamxhub.streamx.console.system.service.UserService;
 

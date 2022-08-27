@@ -21,9 +21,9 @@ import com.streamxhub.streamx.console.base.domain.router.RouterMeta;
 import com.streamxhub.streamx.console.base.domain.router.RouterTree;
 import com.streamxhub.streamx.console.base.domain.router.VueRouter;
 import com.streamxhub.streamx.console.base.util.TreeUtils;
-import com.streamxhub.streamx.console.system.dao.MenuMapper;
 import com.streamxhub.streamx.console.system.entity.Menu;
 import com.streamxhub.streamx.console.system.entity.User;
+import com.streamxhub.streamx.console.system.mapper.MenuMapper;
 import com.streamxhub.streamx.console.system.service.MenuService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;

@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.system.mapper;
 
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
+import com.streamxhub.streamx.console.system.entity.TeamUser;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
- * @author weijinglun
- * @date 2022.01.14
+ * @author daixinyu
  */
-public interface AlertConfigMapper extends BaseMapper<AlertConfig> {
-    AlertConfig getAlertConfByName(@Param("alertConfig") AlertConfig alertConfig);
+public interface TeamUserMapper extends BaseMapper<TeamUser> {
+
+    void deleteByUserId(Long valueOf);
+
+    List<Long> selectTeamIdList(Long userId);
+
+    Long getCountByTeam(@Param("teamId") Long teamId);
 }

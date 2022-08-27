@@ -17,8 +17,8 @@
 package com.streamxhub.streamx.console.system.service.impl;
 
 import com.streamxhub.streamx.console.core.service.CommonService;
-import com.streamxhub.streamx.console.system.dao.TeamUserMapper;
 import com.streamxhub.streamx.console.system.entity.TeamUser;
+import com.streamxhub.streamx.console.system.mapper.TeamUserMapper;
 import com.streamxhub.streamx.console.system.service.TeamUserService;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

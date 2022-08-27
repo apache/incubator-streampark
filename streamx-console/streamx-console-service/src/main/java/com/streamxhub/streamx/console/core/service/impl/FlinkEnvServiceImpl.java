@@ -16,8 +16,8 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.streamxhub.streamx.console.core.dao.FlinkEnvMapper;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
+import com.streamxhub.streamx.console.core.mapper.FlinkEnvMapper;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 

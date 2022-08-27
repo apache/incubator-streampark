@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.streamxhub.streamx.console.core.dao.ApplicationConfigMapper">
+<mapper namespace="com.streamxhub.streamx.console.core.mapper.ApplicationConfigMapper">
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.core.entity.ApplicationConfig">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="app_id" jdbcType="BIGINT" property="appId"/>

@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.core.mapper;
 
-import com.streamxhub.streamx.console.core.entity.FlinkCluster;
+import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
-public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
-
-    /**
-     * @param clusterName
-     * @return
-     */
-    @Select("SELECT * from t_flink_cluster where cluster_name=#{clusterName}")
-    FlinkCluster getByName(@Param("clusterName") String clusterName);
-
-    @Select("SELECT * from t_flink_cluster where cluster_id=#{clusterId}")
-    FlinkCluster getByClusterId(@Param("clusterId") String clusterId);
+/**
+ * @author weijinglun
+ * @date 2022.01.14
+ */
+public interface AlertConfigMapper extends BaseMapper<AlertConfig> {
+    AlertConfig getAlertConfByName(@Param("alertConfig") AlertConfig alertConfig);
 }

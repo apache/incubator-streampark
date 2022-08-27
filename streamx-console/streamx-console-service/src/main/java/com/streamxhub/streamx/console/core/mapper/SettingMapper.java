@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.dao;
+package com.streamxhub.streamx.console.core.mapper;
 
-import com.streamxhub.streamx.console.system.entity.Team;
-import com.streamxhub.streamx.console.system.entity.User;
+import com.streamxhub.streamx.console.core.entity.Setting;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
- * @author daixinyu
+ * @author benjobs
  */
-public interface TeamMapper extends BaseMapper<Team> {
+public interface SettingMapper extends BaseMapper<Setting> {
 
-    IPage<Team> findTeamList(Page<User> page, @Param("team") Team team);
+    @Select("select * from t_setting where setting_key=#{key}")
+    Setting get(@Param("key") String key);
 
+    @Update("update t_setting set setting_value = #{setting.value} where setting_key = #{setting.key}")
+    void updateByKey(@Param("setting") Setting setting);
 }

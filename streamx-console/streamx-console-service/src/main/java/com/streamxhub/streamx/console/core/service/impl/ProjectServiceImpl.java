@@ -22,14 +22,14 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.GZipUtils;
-import com.streamxhub.streamx.console.base.util.SortUtils;
-import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.BuildState;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
+import com.streamxhub.streamx.console.core.mapper.ProjectMapper;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
@@ -179,8 +179,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public IPage<Project> page(Project project, RestRequest request) {
         List<Long> groupIdList = groupUserService.getTeamIdList();
         project.setTeamIdList(groupIdList);
-        Page<Project> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "date", Constant.ORDER_DESC, false);
+        Page<Project> page = new MybatisPager<Project>().getPage(request, "date", Constant.ORDER_DESC);
         return this.baseMapper.findProject(page, project);
     }
 

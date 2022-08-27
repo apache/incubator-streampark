@@ -14,23 +14,11 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.dao;
+package com.streamxhub.streamx.console.system.mapper;
 
-import com.streamxhub.streamx.console.system.entity.TeamUser;
+import com.streamxhub.streamx.console.system.entity.RoleMenu;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
-
-/**
- * @author daixinyu
- */
-public interface TeamUserMapper extends BaseMapper<TeamUser> {
-
-    void deleteByUserId(Long valueOf);
-
-    List<Long> selectTeamIdList(Long userId);
-
-    Long getCountByTeam(@Param("teamId") Long teamId);
+public interface RoleMenuMapper extends BaseMapper<RoleMenu> {
 }

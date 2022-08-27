@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.system.mapper;
 
-import com.streamxhub.streamx.console.core.entity.Tutorial;
+import com.streamxhub.streamx.console.system.entity.User;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-/**
- * @author benjobs
- */
-public interface TutorialMapper extends BaseMapper<Tutorial> {
+import java.util.List;
 
-    @Select("select * from t_flink_tutorial where name=#{name}")
-    Tutorial getByName(@Param("name") String name);
+public interface UserMapper extends BaseMapper<User> {
+
+    IPage<User> findUserDetail(Page page, @Param("user") User user);
+
+    @Select("SELECT u.* FROM t_user u LEFT JOIN t_access_token t ON u.USER_ID = t.USER_ID WHERE t.USER_ID IS NULL")
+    List<User> getNoTokenUser();
+
 }
