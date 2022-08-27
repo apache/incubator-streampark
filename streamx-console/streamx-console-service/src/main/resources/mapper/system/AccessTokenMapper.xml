@@ -33,7 +33,7 @@
                t1.description,
                t1.status as status,
                t2.status as userStatus,
-               case when t1.status = 1 and t2.status = 1 then 1 else 0 end as finalStatus
+               case t1.status=1 and t2.status=1 when 1 else 0 as finalStatus
         FROM t_user t2
                  join t_access_token t1 on t1.user_id = t2.user_id
         where t1.user_id = #{userId}
@@ -52,7 +52,7 @@
                t2.status as userStatus,
                case when t1.status = 1 and t2.status = 1 then 1 else 0 end as finalStatus
         FROM t_user t2
-            join t_access_token t1 on t1.user_id = t2.user_id
+                 join t_access_token t1 on t1.user_id = t2.user_id
         where t1.user_id = #{userId}
           and t1.token = #{accessToken,jdbcType=VARCHAR}
     </select>

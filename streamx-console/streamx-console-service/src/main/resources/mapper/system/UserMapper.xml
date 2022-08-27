@@ -2,19 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.streamxhub.streamx.console.system.dao.UserMapper">
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.system.entity.User">
-        <id column="USER_ID" jdbcType="BIGINT" property="userId"/>
-        <result column="USERNAME" jdbcType="VARCHAR" property="username"/>
-        <result column="NICK_NAME" jdbcType="VARCHAR" property="nickName"/>
-        <result column="PASSWORD" jdbcType="VARCHAR" property="password"/>
-        <result column="EMAIL" jdbcType="VARCHAR" property="email"/>
-        <result column="MOBILE" jdbcType="VARCHAR" property="mobile"/>
-        <result column="STATUS" jdbcType="CHAR" property="status"/>
-        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
-        <result column="LAST_LOGIN_TIME" jdbcType="TIMESTAMP" property="lastLoginTime"/>
-        <result column="SEX" jdbcType="CHAR" property="sex"/>
-        <result column="AVATAR" jdbcType="VARCHAR" property="avatar"/>
-        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <id column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="nick_name" jdbcType="VARCHAR" property="nickName"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="mobile" jdbcType="VARCHAR" property="mobile"/>
+        <result column="status" jdbcType="CHAR" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime"/>
+        <result column="sex" jdbcType="CHAR" property="sex"/>
+        <result column="avatar" jdbcType="VARCHAR" property="avatar"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
     </resultMap>
 
     <select id="findUserDetail" resultType="user" parameterType="user">

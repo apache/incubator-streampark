@@ -1,0 +1,1 @@
+License: {Name: Unicode/ICU License, URL: https://raw.githubusercontent.com/unicode-org/icu/master/icu4c/LICENSE, Distribution: repo, Comments: , }
