@@ -440,9 +440,7 @@
               size="small"
               @click.native="handleSeeLog(record)"
               class="control-button ctl-btn-color">
-              <a-icon
-                type="sync"
-                />
+              <a-icon type="sync"/>
             </a-button>
           </a-tooltip>
 
