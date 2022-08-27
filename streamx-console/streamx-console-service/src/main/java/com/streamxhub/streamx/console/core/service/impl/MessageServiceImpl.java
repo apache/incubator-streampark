@@ -54,7 +54,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
     public IPage<Message> getUnRead(NoticeType noticeType, RestRequest request) {
         Page<Message> page = new Page<>();
         LambdaQueryWrapper<Message> query = new QueryWrapper<Message>().lambda();
-        query.eq(Message::getReaded, false).orderByDesc(Message::getCreateTime);
+        query.eq(Message::getReaded, 0).orderByDesc(Message::getCreateTime);
         query.eq(Message::getType, noticeType.get());
         SortUtils.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
         return this.baseMapper.selectPage(page, query);

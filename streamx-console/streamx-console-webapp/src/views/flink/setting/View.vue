@@ -418,7 +418,7 @@
               <div slot="actions">
                 <a-tooltip title="Edit Cluster">
                   <a-button
-                    v-if="handleIsStart(item) && (item.executionMode === 3  || item.executionMode === 3)"
+                    v-if="handleIsStart(item) && (item.executionMode === 3 || item.executionMode === 3)"
                     v-permit="'app:update'"
                     :disabled="true"
                     @click.native="handleEditCluster(item)"
