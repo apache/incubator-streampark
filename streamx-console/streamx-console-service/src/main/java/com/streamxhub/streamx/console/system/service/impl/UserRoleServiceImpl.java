@@ -17,8 +17,8 @@
 package com.streamxhub.streamx.console.system.service.impl;
 
 import com.streamxhub.streamx.console.core.service.CommonService;
-import com.streamxhub.streamx.console.system.dao.UserRoleMapper;
 import com.streamxhub.streamx.console.system.entity.UserRole;
+import com.streamxhub.streamx.console.system.mapper.UserRoleMapper;
 import com.streamxhub.streamx.console.system.service.UserRoleService;
 import com.streamxhub.streamx.console.system.service.UserService;
 

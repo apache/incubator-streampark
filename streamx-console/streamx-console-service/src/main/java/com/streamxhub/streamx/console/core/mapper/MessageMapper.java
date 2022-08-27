@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.system.dao;
+package com.streamxhub.streamx.console.core.mapper;
 
-import com.streamxhub.streamx.console.system.entity.AccessToken;
+import com.streamxhub.streamx.console.core.entity.Message;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Param;
 
-public interface AccessTokenMapper extends BaseMapper<AccessToken> {
-
-    IPage<AccessToken> page(Page<AccessToken> page, @Param("accessToken") AccessToken accessToken);
-
-    AccessToken getByUserToken(@Param("userId") Long userId, @Param("accessToken") String accessToken);
-
-    AccessToken getById(@Param("id") Long id);
-
-    AccessToken getByUserId(@Param("userId") Long userId);
+public interface MessageMapper extends BaseMapper<Message> {
 }

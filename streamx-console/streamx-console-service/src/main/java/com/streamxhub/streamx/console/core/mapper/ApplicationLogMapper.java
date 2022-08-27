@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.core.mapper;
 
-import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
+import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.entity.ApplicationLog;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -28,18 +29,11 @@ import org.apache.ibatis.annotations.Select;
 /**
  * @author benjobs
  */
-public interface ApplicationBackUpMapper extends BaseMapper<ApplicationBackUp> {
+public interface ApplicationLogMapper extends BaseMapper<ApplicationLog> {
 
-    @Select("SELECT * from t_app_backup where app_id=#{appId}")
-    IPage<ApplicationBackUp> page(Page<ApplicationBackUp> page, @Param("appId") Long appId);
+    @Select("SELECT * from t_flink_log where app_id=#{appId}")
+    IPage<ApplicationLog> page(Page<Application> page, @Param("appId") Long appId);
 
-    @Select("SELECT * from t_app_backup where app_id=#{appId} order by create_time desc limit 1")
-    ApplicationBackUp getLastBackup(@Param("appId") Long appId);
-
-    @Delete("delete from t_app_backup where app_id=#{appId}")
+    @Delete("delete from t_flink_log where app_id=#{appId}")
     void removeApp(@Param("appId") Long appId);
-
-    @Select("SELECT * from t_app_backup where app_id=#{appId} and sql_id=#{sqlId}")
-    ApplicationBackUp getFlinkSqlBackup(@Param("appId") Long appId, @Param("sqlId") Long sqlId);
-
 }

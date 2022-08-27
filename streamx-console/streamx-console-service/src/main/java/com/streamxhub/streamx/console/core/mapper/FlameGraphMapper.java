@@ -14,34 +14,32 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.core.mapper;
 
-import com.streamxhub.streamx.console.core.entity.FlinkEnv;
+import com.streamxhub.streamx.console.core.entity.FlameGraph;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author benjobs
  */
-public interface FlinkEnvMapper extends BaseMapper<FlinkEnv> {
+public interface FlameGraphMapper extends BaseMapper<FlameGraph> {
 
     /**
-     * 设置为默认
-     *
-     * @param id
-     */
-    @Update("update t_flink_env set is_default = case id when #{id} then 1 else 0 end")
-    void setDefault(@Param("id") Long id);
-
-    /**
-     * 根据appId获取对象的flinkVersion
-     *
      * @param appId
+     * @param start
+     * @param end
      * @return
      */
-    @Select("select v.* from t_flink_env v inner join (select version_id from t_flink_app where id=#{appId}) as t on v.id = t.version_id")
-    FlinkEnv getByAppId(@Param("appId") Long appId);
+    @Select("select * from t_flame_graph where app_id=#{appId} and timeline between #{start} and #{end} order by timeline asc")
+    List<FlameGraph> getFlameGraph(@Param("appId") Long appId, @Param("start") Date start, @Param("end") Date end);
+
+    @Delete("delete from t_flame_graph where timeline < #{end}")
+    void clean(Date end);
 }

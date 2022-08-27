@@ -14,26 +14,31 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.core.mapper;
 
-import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.entity.ApplicationLog;
+import com.streamxhub.streamx.console.core.entity.Project;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * @author benjobs
  */
-public interface ApplicationLogMapper extends BaseMapper<ApplicationLog> {
+public interface ProjectMapper extends BaseMapper<Project> {
 
-    @Select("SELECT * from t_flink_log where app_id=#{appId}")
-    IPage<ApplicationLog> page(Page<Application> page, @Param("appId") Long appId);
+    IPage<Project> findProject(Page<Project> page, @Param("project") Project project);
 
-    @Delete("delete from t_flink_log where app_id=#{appId}")
-    void removeApp(@Param("appId") Long appId);
+    @Update("update t_flink_project set BUILD_STATE=2 where id=#{project.id}")
+    void failureBuild(@Param("project") Project project);
+
+    @Update("update t_flink_project set LAST_BUILD = now(),BUILD_STATE=1 where id=#{project.id}")
+    void successBuild(@Param("project") Project project);
+
+    @Update("update t_flink_project set BUILD_STATE=0 where id=#{project.id}")
+    void startBuild(@Param("project") Project project);
+
+    Long getCountByTeam(@Param("teamId") Long teamId);
 }

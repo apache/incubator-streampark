@@ -16,8 +16,8 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.streamxhub.streamx.console.core.dao.TutorialMapper;
 import com.streamxhub.streamx.console.core.entity.Tutorial;
+import com.streamxhub.streamx.console.core.mapper.TutorialMapper;
 import com.streamxhub.streamx.console.core.service.TutorialService;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

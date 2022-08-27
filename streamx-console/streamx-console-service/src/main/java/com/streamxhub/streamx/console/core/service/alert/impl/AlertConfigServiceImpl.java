@@ -16,14 +16,13 @@
 
 package com.streamxhub.streamx.console.core.service.alert.impl;
 
-import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.AlertException;
-import com.streamxhub.streamx.console.base.util.SortUtils;
-import com.streamxhub.streamx.console.core.dao.AlertConfigMapper;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
 import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.mapper.AlertConfigMapper;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.alert.AlertConfigService;
 
@@ -55,12 +54,11 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
 
     @Override
     public IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request) {
-        Page<AlertConfig> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
         // build query conditions
         QueryWrapper<AlertConfig> wrapper = new QueryWrapper<>();
         wrapper.lambda().eq(params.getUserId() != null, AlertConfig::getUserId, params.getUserId());
 
+        Page<AlertConfig> page = new MybatisPager<AlertConfig>().getDefaultPage(request);
         IPage<AlertConfig> resultPage = getBaseMapper().selectPage(page, wrapper);
 
         Page<AlertConfigWithParams> result = new Page<>();

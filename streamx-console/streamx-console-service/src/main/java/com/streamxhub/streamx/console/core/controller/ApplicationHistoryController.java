@@ -19,7 +19,7 @@ package com.streamxhub.streamx.console.core.controller;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
+import com.streamxhub.streamx.console.core.mapper.ApplicationMapper;
 import com.streamxhub.streamx.console.core.service.ApplicationHistoryService;
 
 import io.swagger.annotations.Api;

@@ -20,11 +20,11 @@ import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.util.SortUtils;
-import com.streamxhub.streamx.console.core.dao.ApplicationConfigMapper;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
+import com.streamxhub.streamx.console.core.mapper.ApplicationConfigMapper;
 import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 
@@ -33,7 +33,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,7 +176,10 @@ public class ApplicationConfigServiceImpl
 
     @Override
     public void toEffective(Long appId, Long configId) {
-        this.baseMapper.clearLatest(appId);
+        LambdaUpdateWrapper updateWrapper = new LambdaUpdateWrapper<ApplicationConfig>()
+            .eq(ApplicationConfig::getAppId, appId)
+            .set(ApplicationConfig::getLatest, 0);
+        this.baseMapper.update(null, updateWrapper);
         effectiveService.saveOrUpdate(appId, EffectiveType.CONFIG, configId);
     }
 
@@ -205,9 +207,10 @@ public class ApplicationConfigServiceImpl
 
     @Override
     public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
-        Page<ApplicationConfig> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "version", Constant.ORDER_DESC, false);
-        return this.baseMapper.page(page, config.getAppId());
+        return this.baseMapper.page(
+            new MybatisPager<ApplicationConfig>().getPage(request, "version", Constant.ORDER_DESC),
+            config.getAppId()
+        );
     }
 
     @Override
@@ -254,6 +257,8 @@ public class ApplicationConfigServiceImpl
 
     @Override
     public void removeApp(Long appId) {
-        baseMapper.removeApp(appId);
+        baseMapper.delete(
+            new LambdaQueryWrapper<ApplicationConfig>().eq(ApplicationConfig::getAppId, appId)
+        );
     }
 }

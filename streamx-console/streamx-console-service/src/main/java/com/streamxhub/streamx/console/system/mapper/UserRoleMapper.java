@@ -14,32 +14,36 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.system.mapper;
 
-import com.streamxhub.streamx.console.core.entity.FlameGraph;
+import com.streamxhub.streamx.console.system.entity.UserRole;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
-import java.util.Date;
 import java.util.List;
 
-/**
- * @author benjobs
- */
-public interface FlameGraphMapper extends BaseMapper<FlameGraph> {
+public interface UserRoleMapper extends BaseMapper<UserRole> {
 
     /**
-     * @param appId
-     * @param start
-     * @param end
-     * @return
+     * 根据用户Id删除该用户的角色关系
+     *
+     * @param userId 用户ID
+     * @return boolean
+     * @author lzx
+     * @date 2019年03月04日17:46:49
      */
-    @Select("select * from t_flame_graph where app_id=#{appId} and timeline between #{start} and #{end} order by timeline asc")
-    List<FlameGraph> getFlameGraph(@Param("appId") Long appId, @Param("start") Date start, @Param("end") Date end);
+    Boolean deleteByUserId(@Param("userId") Long userId);
 
-    @Delete("delete from t_flame_graph where timeline < #{end}")
-    void clean(Date end);
+    /**
+     * 根据角色Id删除该角色的用户关系
+     *
+     * @param roleId 角色ID
+     * @return boolean
+     * @author lzx
+     * @date 2019年03月04日17:47:16
+     */
+    Boolean deleteByRoleId(@Param("roleId") Long roleId);
+
+    List<Long> selectRoleIdList(@Param("userId") Long userId);
 }

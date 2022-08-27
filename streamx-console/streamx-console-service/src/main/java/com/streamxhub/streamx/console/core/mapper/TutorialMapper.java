@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.dao;
+package com.streamxhub.streamx.console.core.mapper;
 
-import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
+import com.streamxhub.streamx.console.core.entity.Tutorial;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 /**
- * @author Al-assad
+ * @author benjobs
  */
-public interface ApplicationBuildPipelineMapper extends BaseMapper<AppBuildPipeline> {
+public interface TutorialMapper extends BaseMapper<Tutorial> {
 
+    @Select("select * from t_flink_tutorial where name=#{name}")
+    Tutorial getByName(@Param("name") String name);
 }

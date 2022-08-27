@@ -55,7 +55,7 @@ import java.lang.management.RuntimeMXBean;
 @Slf4j
 @SpringBootApplication
 @EnableScheduling
-@MapperScan(value = {"com.streamxhub.streamx.console.*.dao"})
+@MapperScan(value = {"com.streamxhub.streamx.console.*.mapper"})
 public class StreamXConsole {
 
     public static void main(String[] args) {

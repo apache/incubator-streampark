@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.streamxhub.streamx.console.core.dao.FlinkClusterMapper">
+<mapper namespace="com.streamxhub.streamx.console.core.mapper.FlinkClusterMapper">
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.core.entity.FlinkCluster">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="address" jdbcType="VARCHAR" property="address"/>

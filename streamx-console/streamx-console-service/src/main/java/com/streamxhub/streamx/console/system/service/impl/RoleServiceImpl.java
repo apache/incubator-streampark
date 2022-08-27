@@ -18,10 +18,10 @@ package com.streamxhub.streamx.console.system.service.impl;
 
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.system.dao.RoleMapper;
-import com.streamxhub.streamx.console.system.dao.RoleMenuMapper;
 import com.streamxhub.streamx.console.system.entity.Role;
 import com.streamxhub.streamx.console.system.entity.RoleMenu;
+import com.streamxhub.streamx.console.system.mapper.RoleMapper;
+import com.streamxhub.streamx.console.system.mapper.RoleMenuMapper;
 import com.streamxhub.streamx.console.system.service.RoleMenuServie;
 import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserRoleService;
