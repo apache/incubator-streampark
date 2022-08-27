@@ -13,7 +13,7 @@
         t1.description ,
         t1.status as status,
         t2.status as userStatus,
-        case when t1.status=1 and t2.status=1 then 1 else 0 end as finalStatus
+        case when t1.status = 1 and t2.status = 1 then 1 else 0 end as finalStatus
         FROM t_access_token t1 join t_user t2 on t1.user_id = t2.user_id
         <where>
             <if test="accessToken.userId != null and accessToken.userId != ''">
@@ -33,7 +33,7 @@
                t1.description,
                t1.status as status,
                t2.status as userStatus,
-               case when t1.status=1 and t2.status=1 then 1 else 0 end as finalStatus
+               case when t1.status = 1 and t2.status = 1 then 1 else 0 end as finalStatus
         FROM t_user t2
                  join t_access_token t1 on t1.user_id = t2.user_id
         where t1.user_id = #{userId}
@@ -50,7 +50,7 @@
                t1.description,
                t1.status as status,
                t2.status as userStatus,
-               case when t1.status=1 and t2.status=1 then 1 else 0 end as finalStatus
+               case when t1.status = 1 and t2.status = 1 then 1 else 0 end as finalStatus
         FROM t_user t2
                  join t_access_token t1 on t1.user_id = t2.user_id
         where t1.user_id = #{userId}
@@ -68,7 +68,7 @@
                t1.description,
                t1.status as status,
                t2.status as userStatus,
-               case when t1.status=1 and t2.status=1 then 1 else 0 end as finalStatus
+               case when t1.status = 1 and t2.status = 1 then 1 else 0 end as finalStatus
         FROM t_access_token t1 join t_user t2 on t1.user_id = t2.user_id
         where t1.id= #{id}
     </select>

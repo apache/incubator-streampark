@@ -42,7 +42,7 @@ management:
       exposure:
         include: [ 'httptrace', 'metrics' ]
 
-#mybatis plus 设置
+# mybatis plus setting
 mybatis-plus:
   type-aliases-package: com.streamxhub.streamx.console.*.entity
   mapper-locations: classpath:mapper/*/*.xml
@@ -51,14 +51,14 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
-    # 关闭 mybatis-plus的 banner
+    # close mybatis-plus banner
     banner: false
 
 streamx:
   database:
     dialect: h2 #[h2,postgresql,mysql]
   proxy:
-    # knox 代理地址 https://cdpsit02.example.cn:8443/gateway/cdp-proxy/yarn
+    # knox process address https://cdpsit02.example.cn:8443/gateway/cdp-proxy/yarn
     yarn-url:
   yarn:
       # default sample, or kerberos
@@ -66,7 +66,7 @@ streamx:
 
   # HADOOP_USER_NAME
   hadoop-user-name: hdfs
-  # 本地的工作空间,用于存放项目源码,构建的目录等.
+  # local workspace, used to store source code and build dir etc.
   workspace:
     local: /opt/streamx_workspace
     remote: hdfs://hdfscluster/streamx   # support hdfs:///streamx/ 、 /streamx 、hdfs://host:ip/streamx/
@@ -98,9 +98,9 @@ streamx:
     exec-cron: 0 0 0/6 * * ?
 
   shiro:
-    # token有效期，单位秒
+    # token timeout, unit second
     jwtTimeOut: 86400
-    # 后端免认证接口 url
+    # backend authentication-free resources url
     anonUrl: >
       /passport/**,
       /systemName,
@@ -120,7 +120,7 @@ streamx:
       /*.less,
       /
 
-## Select the login mode: 1. PASSWORD 2.LDAP
+## select the login mode: 1. PASSWORD 2.LDAP
 security:
   authentication:
     type: PASSWORD
