@@ -16,9 +16,8 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.util.SortUtils;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.core.dao.MessageMapper;
 import com.streamxhub.streamx.console.core.entity.Message;
 import com.streamxhub.streamx.console.core.enums.NoticeType;
@@ -28,7 +27,6 @@ import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,11 +50,9 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 
     @Override
     public IPage<Message> getUnRead(NoticeType noticeType, RestRequest request) {
-        Page<Message> page = new Page<>();
         LambdaQueryWrapper<Message> query = new QueryWrapper<Message>().lambda();
         query.eq(Message::getReaded, false).orderByDesc(Message::getCreateTime);
         query.eq(Message::getType, noticeType.get());
-        SortUtils.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
-        return this.baseMapper.selectPage(page, query);
+        return this.baseMapper.selectPage(new MybatisPager<Message>().getDefaultPage(request), query);
     }
 }

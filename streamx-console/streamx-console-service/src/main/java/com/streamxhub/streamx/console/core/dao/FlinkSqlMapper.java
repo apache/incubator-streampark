@@ -19,34 +19,17 @@ package com.streamxhub.streamx.console.core.dao;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 
 /**
  * @author benjobs
  */
 public interface FlinkSqlMapper extends BaseMapper<FlinkSql> {
-    @Select("select s.* from t_flink_sql s inner join t_flink_effective e on s.id = e.target_id where e.app_id=#{appId} and e.target_type=2")
+    @Select("select s.* from t_flink_sql s inner join t_flink_effective e on s.id = e.target_id where e.target_type=2 and e.app_id=#{appId}")
     FlinkSql getEffective(@Param("appId") Long appId);
 
     @Select("select max(`version`) as maxVersion from t_flink_sql where app_id=#{appId}")
-    Integer getLastVersion(@Param("appId") Long appId);
-
-    @Select("select * from t_flink_sql where app_id=#{appId} order by `version` desc limit 1")
-    FlinkSql getLastVersionFlinkSql(@Param("appId") Long appId);
-
-    @Select("select * from t_flink_sql where app_id=#{appId} and candidate>0 ")
-    FlinkSql getCandidate(@Param("appId") Long appId);
-
-    @Select("select * from t_flink_sql where app_id=#{appId} and candidate=#{candidate}")
-    FlinkSql getCandidateByType(@Param("appId") Long appId, @Param("candidate") Integer candidate);
-
-    @Update("update t_flink_sql set candidate=0 where id=#{id}")
-    void cleanCandidate(@Param("id") Long id);
-
-    @Delete("delete from t_flink_sql where app_id=#{appId}")
-    void removeApp(@Param("appId") Long appId);
+    Integer getLatestVersion(@Param("appId") Long appId);
 
 }

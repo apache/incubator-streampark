@@ -22,9 +22,9 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.GZipUtils;
-import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
@@ -179,8 +179,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public IPage<Project> page(Project project, RestRequest request) {
         List<Long> groupIdList = groupUserService.getTeamIdList();
         project.setTeamIdList(groupIdList);
-        Page<Project> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "date", Constant.ORDER_DESC, false);
+        Page<Project> page = new MybatisPager<Project>().getPage(request, "date", Constant.ORDER_DESC);
         return this.baseMapper.findProject(page, project);
     }
 

@@ -19,8 +19,8 @@ package com.streamxhub.streamx.console.core.service.impl;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.InternalException;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
-import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
@@ -117,8 +117,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     @Override
     public IPage<SavePoint> page(SavePoint savePoint, RestRequest request) {
-        Page<SavePoint> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "trigger_time", Constant.ORDER_DESC, false);
+        Page<SavePoint> page = new MybatisPager<SavePoint>().getPage(request, "trigger_time", Constant.ORDER_DESC);
         return this.baseMapper.page(page, savePoint.getAppId());
     }
 

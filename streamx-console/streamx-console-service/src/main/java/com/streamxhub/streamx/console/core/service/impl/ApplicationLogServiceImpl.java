@@ -18,7 +18,7 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.util.SortUtils;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.core.dao.ApplicationLogMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationLog;
@@ -43,8 +43,7 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
 
     @Override
     public IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request) {
-        Page<Application> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "option_time", Constant.ORDER_DESC, false);
+        Page<Application> page = new MybatisPager<Application>().getPage(request, "option_time", Constant.ORDER_DESC);
         return this.baseMapper.page(page, applicationLog.getAppId());
     }
 

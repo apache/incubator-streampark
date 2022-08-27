@@ -4,7 +4,3 @@ spring:
     url: jdbc:h2:tcp://localhost/~/test
     username: sa
     password: sa
-  sql:
-    init:
-      schema-locations: classpath:db/schema-h2.sql
-      data-locations: classpath:db/data-h2.sql

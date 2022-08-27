@@ -34,7 +34,7 @@ import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,18 +83,28 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
      * @return
      */
     @Override
-    public FlinkSql getLastVersionFlinkSql(Long appId, boolean decode) {
-        FlinkSql flinkSql = baseMapper.getLastVersionFlinkSql(appId);
-        if (flinkSql != null && decode) {
-            flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
+    public FlinkSql getLatestFlinkSql(Long appId, boolean decode) {
+        Page<FlinkSql> page = new Page<>();
+        page.setCurrent(0).setSize(1).setSearchCount(false);
+        LambdaQueryWrapper<FlinkSql> queryWrapper =
+            new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId)
+                .orderByDesc(FlinkSql::getVersion);
+
+        Page<FlinkSql> flinkSqlPage = baseMapper.selectPage(page, queryWrapper);
+        if (!flinkSqlPage.getRecords().isEmpty()) {
+            FlinkSql flinkSql = flinkSqlPage.getRecords().get(0);
+            if (decode) {
+                flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
+            }
+            return flinkSql;
         }
-        return flinkSql;
+        return null;
     }
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public void create(FlinkSql flinkSql) {
-        Integer version = this.baseMapper.getLastVersion(flinkSql.getAppId());
+        Integer version = this.baseMapper.getLatestVersion(flinkSql.getAppId());
         flinkSql.setVersion(version == null ? 1 : version + 1);
         String sql = DeflaterUtils.zipString(flinkSql.getSql());
         flinkSql.setSql(sql);
@@ -104,15 +114,17 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public void setCandidate(CandidateType candidateType, Long appId, Long sqlId) {
-        LambdaUpdateWrapper<FlinkSql> updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
-        updateWrapper.set(FlinkSql::getCandidate, 0)
-                .eq(FlinkSql::getAppId, appId);
-        this.update(updateWrapper);
+        this.update(
+            new LambdaUpdateWrapper<FlinkSql>()
+                .eq(FlinkSql::getAppId, appId)
+                .set(FlinkSql::getCandidate, 0)
+        );
 
-        updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
-        updateWrapper.set(FlinkSql::getCandidate, candidateType.get())
-                .eq(FlinkSql::getId, sqlId);
-        this.update(updateWrapper);
+        this.update(
+            new LambdaUpdateWrapper<FlinkSql>()
+                .eq(FlinkSql::getId, sqlId)
+                .set(FlinkSql::getCandidate, candidateType.get())
+        );
     }
 
     @Override
@@ -136,11 +148,14 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public FlinkSql getCandidate(Long appId, CandidateType candidateType) {
+        LambdaQueryWrapper<FlinkSql> queryWrapper = new LambdaQueryWrapper<FlinkSql>()
+            .eq(FlinkSql::getAppId, appId);
         if (candidateType == null) {
-            return baseMapper.getCandidate(appId);
+            queryWrapper.gt(FlinkSql::getCandidate, CandidateType.NONE.get());
         } else {
-            return baseMapper.getCandidateByType(appId, candidateType.get());
+            queryWrapper.eq(FlinkSql::getCandidate, candidateType.get());
         }
+        return baseMapper.selectOne(queryWrapper);
     }
 
     @Override
@@ -150,12 +165,17 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public void cleanCandidate(Long id) {
-        this.baseMapper.cleanCandidate(id);
+        this.baseMapper.update(
+            null,
+            new LambdaUpdateWrapper<FlinkSql>()
+                .eq(FlinkSql::getId, id)
+                .set(FlinkSql::getCandidate, CandidateType.NONE.get())
+        );
     }
 
     @Override
     public void removeApp(Long appId) {
-        baseMapper.removeApp(appId);
+        baseMapper.delete(new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId));
     }
 
     @Override
