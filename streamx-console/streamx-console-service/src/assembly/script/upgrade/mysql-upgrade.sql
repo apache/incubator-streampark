@@ -27,7 +27,7 @@ BEGIN;
 
 -- ALTER TABLE `t_flink_app` ADD COLUMN `HOT_PARAMS` text NULL AFTER `OPTIONS`;
 
-update `t_flink_app` set `RESOURCE_FROM` = 1 where `JOB_TYPE` = 1;
+update `t_flink_app` set `resource_from` = 1 where `job_type` = 1;
 
 -- ALTER TABLE `t_user_role` ADD COLUMN `ID` bigint NOT NULL primary key AUTO_INCREMENT FIRST;
 -- ----------------------------
@@ -35,17 +35,17 @@ update `t_flink_app` set `RESOURCE_FROM` = 1 where `JOB_TYPE` = 1;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_app_build_pipe`;
 CREATE TABLE `t_app_build_pipe`(
-`APP_ID`          BIGINT AUTO_INCREMENT,
-`PIPE_TYPE`       TINYINT,
-`PIPE_STATUS`     TINYINT,
-`CUR_STEP`        SMALLINT,
-`TOTAL_STEP`      SMALLINT,
-`STEPS_STATUS`    TEXT,
-`STEPS_STATUS_TS` TEXT,
-`ERROR`           TEXT,
-`BUILD_RESULT`    TEXT,
-`UPDATE_TIME`     DATETIME,
-PRIMARY KEY (`APP_ID`) USING BTREE
+`app_id`          BIGINT AUTO_INCREMENT,
+`pipe_type`       TINYINT,
+`pipe_status`     TINYINT,
+`cur_step`        SMALLINT,
+`total_step`      SMALLINT,
+`steps_status`    TEXT,
+`steps_status_ts` TEXT,
+`error`           TEXT,
+`build_result`    TEXT,
+`update_time`     DATETIME,
+PRIMARY KEY (`app_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 -- ----------------------------
@@ -53,11 +53,11 @@ PRIMARY KEY (`APP_ID`) USING BTREE
 -- ----------------------------
 DROP TABLE IF EXISTS `t_role_menu`;
 CREATE TABLE `t_role_menu` (
-`ID` bigint NOT NULL AUTO_INCREMENT,
-`ROLE_ID` bigint NOT NULL,
-`MENU_ID` bigint NOT NULL,
-PRIMARY KEY (`ID`) USING BTREE,
-UNIQUE KEY `UN_INX` (`ROLE_ID`,`MENU_ID`) USING BTREE
+`id` bigint NOT NULL AUTO_INCREMENT,
+`role_id` bigint NOT NULL,
+`menu_id` bigint NOT NULL,
+PRIMARY KEY (`id`) USING BTREE,
+UNIQUE KEY `UN_INX` (`role_id`,`menu_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -131,31 +131,31 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 BEGIN;
 -- menu
-update `t_menu` set MENU_NAME='launch',PERMS='app:launch' where MENU_NAME='deploy';
+update `t_menu` set menu_name='launch',perms='app:launch' where menu_name='deploy';
 -- change default value
-UPDATE `t_setting` SET `KEY`='streamx.maven.central.repository' WHERE `KEY` = 'maven.central.repository';
+UPDATE `t_setting` SET `key`='streamx.maven.central.repository' WHERE `key` = 'maven.central.repository';
 COMMIT;
 
 -- rename column
 ALTER TABLE `t_flink_project`
-    CHANGE COLUMN `USERNAME` `USER_NAME` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL AFTER `BRANCHES`,
-    CHANGE COLUMN `LASTBUILD` `LAST_BUILD` datetime(0) NULL DEFAULT NULL AFTER `DATE`,
-    CHANGE COLUMN `BUILDSTATE` `BUILD_STATE` tinyint(4) NULL DEFAULT -1 AFTER `DESCRIPTION`,
-    ADD COLUMN `BUILD_ARGS` varchar(255) NULL AFTER `POM`;
+    CHANGE COLUMN `username` `user_name` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL AFTER `branches`,
+    CHANGE COLUMN `lastbuild` `last_build` datetime NULL DEFAULT NULL AFTER `date`,
+    CHANGE COLUMN `buildstate` `build_state` tinyint NULL DEFAULT -1 AFTER `description`,
+    ADD COLUMN `build_args` varchar(255) NULL AFTER `POM`;
 
 -- rename column name DEPLOY to LAUNCH
 ALTER TABLE `t_flink_app`
-    CHANGE COLUMN `DEPLOY` `LAUNCH` tinyint NULL DEFAULT 2 AFTER `CREATE_TIME`,
-    ADD COLUMN `BUILD` tinyint DEFAULT '1' AFTER `LAUNCH`,
-    ADD COLUMN `FLINK_CLUSTER_ID` bigint DEFAULT NULL AFTER `K8S_HADOOP_INTEGRATION`;
+    CHANGE COLUMN `deploy` `launch` tinyint NULL DEFAULT 2 AFTER `create_time`,
+    ADD COLUMN `build` tinyint DEFAULT '1' AFTER `launch`,
+    ADD COLUMN `flink_cluster_id` bigint DEFAULT NULL AFTER `k8s_hadoop_integration`;
 
 -- change column id to AUTO_INCREMENT
 ALTER TABLE `t_flink_sql`
     CHANGE COLUMN `id` `id` bigint NOT NULL AUTO_INCREMENT,
-    MODIFY COLUMN `CANDIDATE` tinyint(4) NOT NULL DEFAULT 1;
+    MODIFY COLUMN `candidate` tinyint NOT NULL DEFAULT 1;
 
 ALTER TABLE `t_flink_log`
-    CHANGE COLUMN `START_TIME` `OPTION_TIME` datetime(0) NULL DEFAULT NULL AFTER `EXCEPTION`;
+    CHANGE COLUMN `start_time` `option_time` datetime NULL DEFAULT NULL AFTER `exception`;
 
 -- change launch value
 BEGIN;
@@ -164,16 +164,16 @@ COMMIT;
 
 -- change state value
 BEGIN;
-update `t_flink_app` set STATE = 0 where STATE in (1,2);
+update `t_flink_app` set state = 0 where state in (1,2);
 COMMIT;
 
 BEGIN;
-update `t_flink_app` set STATE = STATE - 2 where STATE > 1;
+update `t_flink_app` set state = state - 2 where state > 1;
 COMMIT;
 
 -- t_setting
 BEGIN;
-update `t_setting` set `NUM` = `NUM` + 2 where `NUM` > 1;
+update `t_setting` set `num` = `num` + 2 where `num` > 1;
 COMMIT;
 
 BEGIN;
@@ -204,13 +204,13 @@ ALTER TABLE t_app_build_pipe AUTO_INCREMENT = 100000 ;
 COMMIT;
 -- update table id
 BEGIN;
-UPDATE t_menu set PARENT_ID=PARENT_ID+99999 where PARENT_ID != '0';
-UPDATE t_menu set MENU_ID=MENU_ID+99999;
-UPDATE t_role set ROLE_ID=ROLE_ID+99999;
-UPDATE t_role_menu set ID=ID+99999,ROLE_ID=ROLE_ID+99999,MENU_ID=MENU_ID+99999;
-UPDATE t_user set USER_ID=USER_ID+99999;
-UPDATE t_user_role set ID=ID+99999,ROLE_ID=ROLE_ID+99999,USER_ID=USER_ID+99999;
-UPDATE t_flink_app set USER_ID = USER_ID+99999;
+UPDATE t_menu set parent_id=parent_id+99999 where parent_id != '0';
+UPDATE t_menu set menu_id=menu_id+99999;
+UPDATE t_role set role_id=role_id+99999;
+UPDATE t_role_menu set id=id+99999,role_id=role_id+99999,menu_id=menu_id+99999;
+UPDATE t_user set user_id=user_id+99999;
+UPDATE t_user_role set id=id+99999,role_id=role_id+99999,user_id=user_id+99999;
+UPDATE t_flink_app set user_id = user_id+99999;
 COMMIT;
 
 -- ----------------------------
@@ -218,12 +218,12 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_flink_cluster`;
 CREATE TABLE `t_flink_cluster`(
-`ID`              bigint NOT NULL AUTO_INCREMENT,
-`CLUSTER_NAME`    varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群名称',
-`ADDRESS`         text COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群地址,http://$host:$port多个地址用,分割',
-`DESCRIPTION`     varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-`CREATE_TIME`     datetime DEFAULT NULL,
-PRIMARY KEY (`ID`) USING BTREE
+`id`              bigint NOT NULL AUTO_INCREMENT,
+`cluster_name`    varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群名称',
+`address`         text COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群地址,http://$host:$port多个地址用,分割',
+`description`     varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+`create_time`     datetime DEFAULT NULL,
+PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
@@ -246,41 +246,41 @@ BEGIN;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_access_token`;
 CREATE TABLE `t_access_token` (
-`ID` int NOT NULL AUTO_INCREMENT COMMENT 'key',
-`USER_ID`     bigint,
-`TOKEN` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'TOKEN',
-`EXPIRE_TIME` datetime DEFAULT NULL COMMENT '过期时间',
-`DESCRIPTION` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '使用场景描述',
-`STATUS` tinyint DEFAULT NULL COMMENT '1:enable,0:disable',
-`CREATE_TIME` datetime DEFAULT NULL COMMENT 'create time',
-`MODIFY_TIME` datetime DEFAULT NULL COMMENT 'modify time',
-PRIMARY KEY (`ID`)
+`id` int NOT NULL AUTO_INCREMENT COMMENT 'key',
+`user_id`     bigint,
+`token` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'TOKEN',
+`expire_time` datetime DEFAULT NULL COMMENT '过期时间',
+`description` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '使用场景描述',
+`status` tinyint DEFAULT NULL COMMENT '1:enable,0:disable',
+`create_time` datetime DEFAULT NULL COMMENT 'create time',
+`modify_time` datetime DEFAULT NULL COMMENT 'modify time',
+PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Table of t_flink_cluster
 -- ----------------------------
 ALTER TABLE `t_flink_cluster`
-CHANGE COLUMN `ADDRESS` `ADDRESS` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
-ADD COLUMN  `CLUSTER_ID` varchar(255) DEFAULT NULL COMMENT 'session模式的clusterId(yarn-session:application-id,k8s-session:cluster-id)',
-ADD COLUMN  `OPTIONS` text COMMENT '参数集合json形式',
-ADD COLUMN  `YARN_QUEUE` varchar(100) DEFAULT NULL COMMENT '任务所在yarn队列',
-ADD COLUMN  `EXECUTION_MODE` tinyint(4) NOT NULL DEFAULT '1' COMMENT 'session类型(1:remote,3:yarn-session,5:kubernetes-session)',
-ADD COLUMN  `VERSION_ID` bigint(20) NOT NULL COMMENT 'flink对应id',
-ADD COLUMN  `K8S_NAMESPACE` varchar(255) DEFAULT 'default' COMMENT 'k8s namespace',
-ADD COLUMN  `SERVICE_ACCOUNT` varchar(50) DEFAULT NULL COMMENT 'k8s service account',
-ADD COLUMN  `USER_ID` bigint(20) DEFAULT NULL,
-ADD COLUMN  `FLINK_IMAGE` varchar(255) DEFAULT NULL COMMENT 'flink使用镜像',
-ADD COLUMN  `DYNAMIC_OPTIONS` text COMMENT '动态参数',
-ADD COLUMN  `K8S_REST_EXPOSED_TYPE` tinyint(4) DEFAULT '2' COMMENT 'k8s 暴露类型(0:LoadBalancer,1:ClusterIP,2:NodePort)',
-ADD COLUMN  `K8S_HADOOP_INTEGRATION` tinyint(4) DEFAULT '0',
-ADD COLUMN  `FLAME_GRAPH` tinyint(4) DEFAULT '0' COMMENT '是否开启火焰图，默认不开启',
-ADD COLUMN  `K8S_CONF` varchar(255) DEFAULT NULL COMMENT 'k8s配置文件所在路径',
-ADD COLUMN  `RESOLVE_ORDER` int(11) DEFAULT NULL,
-ADD COLUMN  `EXCEPTION` text COMMENT '异常信息',
-ADD COLUMN  `CLUSTER_STATE` tinyint(4) DEFAULT '0' COMMENT '集群状态(0:创建未启动,1:已启动,2:停止)',
-ADD UNIQUE INDEX `INX_NAME`(`CLUSTER_NAME`),
-ADD UNIQUE INDEX `INX_CLUSTER`(`CLUSTER_ID`, `ADDRESS`, `EXECUTION_MODE`);
+CHANGE COLUMN `address` `ADDRESS` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
+ADD COLUMN  `cluster_id` varchar(255) DEFAULT NULL COMMENT 'session模式的clusterId(yarn-session:application-id,k8s-session:cluster-id)',
+ADD COLUMN  `options` text COMMENT '参数集合json形式',
+ADD COLUMN  `yarn_queue` varchar(100) DEFAULT NULL COMMENT '任务所在yarn队列',
+ADD COLUMN  `execution_mode` tinyint NOT NULL DEFAULT '1' COMMENT 'session类型(1:remote,3:yarn-session,5:kubernetes-session)',
+ADD COLUMN  `version_id` bigint NOT NULL COMMENT 'flink对应id',
+ADD COLUMN  `k8s_namespace` varchar(255) DEFAULT 'default' COMMENT 'k8s namespace',
+ADD COLUMN  `service_account` varchar(50) DEFAULT NULL COMMENT 'k8s service account',
+ADD COLUMN  `user_id` bigint DEFAULT NULL,
+ADD COLUMN  `flink_image` varchar(255) DEFAULT NULL COMMENT 'flink使用镜像',
+ADD COLUMN  `dynamic_options` text COMMENT '动态参数',
+ADD COLUMN  `k8s_rest_exposed_type` tinyint DEFAULT '2' COMMENT 'k8s 暴露类型(0:LoadBalancer,1:ClusterIP,2:NodePort)',
+ADD COLUMN  `k8s_hadoop_integration` tinyint DEFAULT '0',
+ADD COLUMN  `flame_graph` tinyint DEFAULT '0' COMMENT '是否开启火焰图，默认不开启',
+ADD COLUMN  `k8s_conf` varchar(255) DEFAULT NULL COMMENT 'k8s配置文件所在路径',
+ADD COLUMN  `resolve_order` int(11) DEFAULT NULL,
+ADD COLUMN  `exception` text COMMENT '异常信息',
+ADD COLUMN  `cluster_state` tinyint DEFAULT '0' COMMENT '集群状态(0:创建未启动,1:已启动,2:停止)',
+ADD UNIQUE INDEX `INX_NAME`(`cluster_name`),
+ADD UNIQUE INDEX `INX_CLUSTER`(`cluster_id`, `address`, `execution_mode`);
 
 INSERT INTO `t_menu` VALUES (100038, 100000, 'Token Management', '/system/token', 'system/token/Token', 'token:view', 'lock', '0', '1', 1.0, NOW(), NOW());
 INSERT INTO `t_menu` VALUES (100039, 100038, 'add', NULL, NULL, 'token:add', NULL, '1', '1', NULL, NOW(), NULL);
@@ -304,66 +304,66 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS `t_alert_config`;
 CREATE TABLE `t_alert_config` (
-  `ID`                   bigint   NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `USER_ID`              bigint   DEFAULT NULL,
-  `ALERT_NAME`           varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '报警组名称',
-  `ALERT_TYPE`           int DEFAULT 0 COMMENT '报警类型',
-  `EMAIL_PARAMS`         varchar(255) COLLATE utf8mb4_general_ci COMMENT '邮件报警配置信息',
-  `SMS_PARAMS`           text COLLATE utf8mb4_general_ci COMMENT '短信报警配置信息',
-  `DING_TALK_PARAMS`     text COLLATE utf8mb4_general_ci COMMENT '钉钉报警配置信息',
-  `WE_COM_PARAMS`        varchar(255) COLLATE utf8mb4_general_ci COMMENT '企微报警配置信息',
-  `HTTP_CALLBACK_PARAMS` text COLLATE utf8mb4_general_ci COMMENT '报警http回调配置信息',
-  `LARK_PARAMS`          text COLLATE utf8mb4_general_ci COMMENT '飞书报警配置信息',
-  `CREATE_TIME`          datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `MODIFY_TIME`          datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-  INDEX `INX_USER_ID` (`USER_ID`) USING BTREE
+  `id`                   bigint   NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `user_id`              bigint   DEFAULT NULL,
+  `alert_name`           varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '报警组名称',
+  `alert_type`           int DEFAULT 0 COMMENT '报警类型',
+  `email_params`         varchar(255) COLLATE utf8mb4_general_ci COMMENT '邮件报警配置信息',
+  `sms_params`           text COLLATE utf8mb4_general_ci COMMENT '短信报警配置信息',
+  `ding_talk_params`     text COLLATE utf8mb4_general_ci COMMENT '钉钉报警配置信息',
+  `we_com_params`        varchar(255) COLLATE utf8mb4_general_ci COMMENT '企微报警配置信息',
+  `http_callback_params` text COLLATE utf8mb4_general_ci COMMENT '报警http回调配置信息',
+  `lark_params`          text COLLATE utf8mb4_general_ci COMMENT '飞书报警配置信息',
+  `create_time`          datetime NOT NULL DEFAULT current_timestamp COMMENT '创建时间',
+  `modify_time`          datetime NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp COMMENT '修改时间',
+  INDEX `INX_USER_ID` (`user_id`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci;
 
 BEGIN;
 -- 增加 ALERT_ID 字段
-ALTER TABLE t_flink_app ADD COLUMN ALERT_ID bigint AFTER END_TIME;
+ALTER TABLE t_flink_app ADD COLUMN alert_id bigint AFTER end_time;
 
 -- 转存历史邮件报警配置
-INSERT INTO t_alert_config(USER_ID, ALERT_NAME, ALERT_TYPE, EMAIL_PARAMS)
-SELECT a.USER_ID, concat('emailAlertConf-', (@rownum := @rownum + 1)) AS ALERT_NAME, 1 as ALERT_TYPE, a.ALERT_EMAIL
-from (select USER_ID, ALERT_EMAIL from t_flink_app where ALERT_EMAIL is not null group by USER_ID, ALERT_EMAIL) a,
+INSERT INTO t_alert_config(user_id, alert_name, alert_type, email_params)
+SELECT a.user_id, concat('emailAlertConf-', (@rownum := @rownum + 1)) AS alert_name, 1 as alert_type, a.alert_email
+from (select user_id, alert_email from t_flink_app where alert_email is not null group by user_id, alert_email) a,
      (select @rownum := 0) t;
 
 -- 更新原表邮件配置 id
-UPDATE t_flink_app a INNER JOIN t_alert_config b ON a.ALERT_EMAIL = b.EMAIL_PARAMS
+UPDATE t_flink_app a INNER JOIN t_alert_config b ON a.alert_email = b.email_params
     SET a.ALERT_ID = b.ID
-WHERE a.ALERT_EMAIL = b.EMAIL_PARAMS;
+WHERE a.alert_email = b.email_params;
 
 -- 调整报警配置表 params 内容
 UPDATE t_alert_config
-SET EMAIL_PARAMS     = concat('{"contacts":"', EMAIL_PARAMS, '"}'),
-    DING_TALK_PARAMS = '{}',
-    WE_COM_PARAMS='{}',
-    LARK_PARAMS='{}'
-WHERE ALERT_TYPE = 1;
+SET email_params     = concat('{"contacts":"', email_params, '"}'),
+    ding_talk_params = '{}',
+    we_com_params='{}',
+    lark_params='{}'
+WHERE alert_type = 1;
 -- 删除原 ALERT_EMAIL 字段
 ALTER TABLE t_flink_app DROP COLUMN ALERT_EMAIL;
 
-ALTER TABLE `t_flink_app` ADD COLUMN `OPTION_TIME` datetime DEFAULT NULL AFTER `CREATE_TIME`;
-ALTER TABLE t_setting modify COLUMN `VALUE` text ;
+ALTER TABLE `t_flink_app` ADD COLUMN `option_time` datetime DEFAULT NULL AFTER `CREATE_TIME`;
+ALTER TABLE t_setting modify COLUMN `value` text ;
 INSERT INTO `t_setting` VALUES (14, 'docker.register.namespace', NULL, 'Docker Register Image namespace', 'Docker命名空间', 1);
-ALTER TABLE `t_flink_app` ADD COLUMN `INGRESS_TEMPLATE` text COLLATE utf8mb4_general_ci COMMENT 'ingress模版文件';
-ALTER TABLE `t_flink_app` ADD COLUMN `DEFAULT_MODE_INGRESS` text COLLATE utf8mb4_general_ci COMMENT '配置ingress的域名';
-ALTER TABLE `t_flink_app` ADD COLUMN `MODIFY_TIME` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER CREATE_TIME;
+ALTER TABLE `t_flink_app` ADD COLUMN `ingress_template` text COLLATE utf8mb4_general_ci COMMENT 'ingress模版文件';
+ALTER TABLE `t_flink_app` ADD COLUMN `default_mode_ingress` text COLLATE utf8mb4_general_ci COMMENT '配置ingress的域名';
+ALTER TABLE `t_flink_app` ADD COLUMN `modify_time` datetime NOT NULL DEFAULT current_timestamp ON UPDATE CURRENT_TIMESTAMP AFTER create_time;
 
 
 -- 项目组
 DROP TABLE IF EXISTS `t_team`;
 CREATE TABLE `t_team`
 (
-    `TEAM_ID`     bigint       NOT NULL AUTO_INCREMENT COMMENT 'ID',
-    `TEAM_CODE`   varchar(255) NOT NULL COMMENT '团队标识 后续可以用于队列 资源隔离相关',
-    `TEAM_NAME`   varchar(255) NOT NULL COMMENT '团队名',
-    `CREATE_TIME` datetime     NOT NULL COMMENT '创建时间',
-    PRIMARY KEY (`TEAM_ID`) USING BTREE,
-    UNIQUE KEY `TEAM_CODE` (TEAM_CODE) USING BTREE
+    `team_id`     bigint       NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `team_code`   varchar(255) NOT NULL COMMENT '团队标识 后续可以用于队列 资源隔离相关',
+    `team_name`   varchar(255) NOT NULL COMMENT '团队名',
+    `create_time` datetime     NOT NULL COMMENT '创建时间',
+    PRIMARY KEY (`team_id`) USING BTREE,
+    UNIQUE KEY `TEAM_CODE` (team_code) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 insert into t_team values (1,'bigdata','BIGDATA','2022-02-21 18:00:00');
@@ -372,16 +372,16 @@ insert into t_team values (1,'bigdata','BIGDATA','2022-02-21 18:00:00');
 DROP TABLE IF EXISTS `t_team_user`;
 CREATE TABLE `t_team_user`
 (
-    `TEAM_ID`    bigint   NOT NULL COMMENT 'teamId',
-    `USER_ID`     bigint   NOT NULL COMMENT 'userId',
-    `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
-    UNIQUE KEY `GROUP_USER` (`TEAM_ID`,`USER_ID`) USING BTREE
+    `team_id`    bigint   NOT NULL COMMENT 'teamId',
+    `user_id`     bigint   NOT NULL COMMENT 'userId',
+    `create_time` datetime NOT NULL COMMENT '创建时间',
+    UNIQUE KEY `GROUP_USER` (`team_id`,`user_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- 给 app 和 project 加字段
-ALTER TABLE `t_flink_app` ADD COLUMN `TEAM_ID` bigint not null default 1 comment '任务所属组';
-ALTER TABLE `t_flink_project` ADD COLUMN `TEAM_ID` bigint not null default 1 comment '项目所属组';
+ALTER TABLE `t_flink_app` ADD COLUMN `team_id` bigint not null default 1 comment '任务所属组';
+ALTER TABLE `t_flink_project` ADD COLUMN `team_id` bigint not null default 1 comment '项目所属组';
 
 
 
@@ -401,7 +401,7 @@ INSERT INTO `t_role_menu` VALUES (100065, 100000, 100046);
 INSERT INTO `t_role_menu` VALUES (100066, 100000, 100047);
 
 -- 移除用户表联系电话字段
-ALTER TABLE `t_user` DROP COLUMN `MOBILE`;
+ALTER TABLE `t_user` DROP COLUMN `mobile`;
 
 
 COMMIT;
