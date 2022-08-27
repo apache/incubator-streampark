@@ -46,7 +46,7 @@
                 <foreach item="item" index="index" collection="user.teamIdList" open="("  close=")" separator=",">
                     #{item}
                 </foreach>
-                GROUP BY a.USER_ID
+                GROUP BY a.user_id
             </if>
         </where>
         <if test="user.sortField != null and user.sortField != ''">
