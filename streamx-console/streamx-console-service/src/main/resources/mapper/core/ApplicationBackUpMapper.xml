@@ -3,13 +3,13 @@
 
 <mapper namespace="com.streamxhub.streamx.console.core.dao.ApplicationBackUpMapper">
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.core.entity.ApplicationBackUp">
-        <id column="ID" jdbcType="BIGINT" property="id"/>
-        <result column="APP_ID" jdbcType="BIGINT" property="appId"/>
-        <result column="SQL_ID" jdbcType="BIGINT" property="sqlId"/>
-        <result column="CONFIG_ID" jdbcType="BIGINT" property="configId"/>
-        <result column="PATH" jdbcType="VARCHAR" property="path"/>
-        <result column="VERSION" jdbcType="INTEGER" property="version"/>
-        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
-        <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="app_id" jdbcType="BIGINT" property="appId"/>
+        <result column="sql_id" jdbcType="BIGINT" property="sqlId"/>
+        <result column="config_id" jdbcType="BIGINT" property="configId"/>
+        <result column="path" jdbcType="VARCHAR" property="path"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="create_time" jdbcType="DATE" property="createTime"/>
     </resultMap>
 </mapper>

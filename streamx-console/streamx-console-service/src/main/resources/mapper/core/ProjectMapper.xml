@@ -2,21 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.streamxhub.streamx.console.core.dao.ProjectMapper">
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.core.entity.Project">
-        <id column="ID" jdbcType="INTEGER" property="id"/>
-        <result column="TEAM_ID" jdbcType="BIGINT" property="teamId"/>
-        <result column="NAME" jdbcType="VARCHAR" property="name"/>
-        <result column="URL" jdbcType="VARCHAR" property="url"/>
-        <result column="REPOSITORY" jdbcType="INTEGER" property="repository"/>
-        <result column="BRANCHES" jdbcType="VARCHAR" property="branches"/>
-        <result column="USER_NAME" jdbcType="VARCHAR" property="userName"/>
-        <result column="PASSWORD" jdbcType="VARCHAR" property="password"/>
-        <result column="POM" jdbcType="VARCHAR" property="pom"/>
-        <result column="BUILD_ARGS" jdbcType="VARCHAR" property="buildArgs"/>
-        <result column="TYPE" jdbcType="INTEGER" property="type"/>
-        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
-        <result column="LAST_BUILD" jdbcType="TIMESTAMP" property="lastBuild"/>
-        <result column="BUILD_STATE" jdbcType="INTEGER" property="buildState"/>
-        <result column="DATE" jdbcType="TIMESTAMP" property="date"/>
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="team_id" jdbcType="BIGINT" property="teamId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="url" jdbcType="VARCHAR" property="url"/>
+        <result column="repository" jdbcType="INTEGER" property="repository"/>
+        <result column="branches" jdbcType="VARCHAR" property="branches"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="pom" jdbcType="VARCHAR" property="pom"/>
+        <result column="build_args" jdbcType="VARCHAR" property="buildArgs"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="last_build" jdbcType="TIMESTAMP" property="lastBuild"/>
+        <result column="build_state" jdbcType="INTEGER" property="buildState"/>
+        <result column="date" jdbcType="TIMESTAMP" property="date"/>
     </resultMap>
 
     <select id="findProject" resultType="project" parameterType="project">
