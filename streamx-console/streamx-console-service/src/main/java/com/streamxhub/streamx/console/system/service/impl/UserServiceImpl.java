@@ -132,6 +132,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
             });
             resPage.setRecords(users);
+            //TODO://
+            if (resPage.getTotal() == 0) {
+                resPage.setTotal(users.size());
+            }
         }
         assert resPage != null;
         if (resPage.getTotal() == 0) {
