@@ -18,10 +18,10 @@ package com.streamxhub.streamx.console.core.service.alert.impl;
 
 import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
-import com.streamxhub.streamx.console.core.entity.alert.RobotResponse;
-import com.streamxhub.streamx.console.core.entity.alert.WeComParams;
+import com.streamxhub.streamx.console.core.bean.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.bean.AlertTemplate;
+import com.streamxhub.streamx.console.core.bean.AlertWeComParams;
+import com.streamxhub.streamx.console.core.bean.RobotResponse;
 import com.streamxhub.streamx.console.core.service.alert.AlertNotifyService;
 
 import freemarker.template.Template;
@@ -62,7 +62,7 @@ public class WeComAlertNotifyServiceImpl implements AlertNotifyService {
 
     @Override
     public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate) throws AlertException {
-        WeComParams weComParams = alertConfig.getWeComParams();
+        AlertWeComParams weComParams = alertConfig.getWeComParams();
         try {
             // format markdown
             String markdown = FreemarkerUtils.format(template, alertTemplate);
@@ -83,7 +83,7 @@ public class WeComAlertNotifyServiceImpl implements AlertNotifyService {
         }
     }
 
-    private void sendMessage(WeComParams params, Map<String, Object> body) throws AlertException {
+    private void sendMessage(AlertWeComParams params, Map<String, Object> body) throws AlertException {
         // get webhook url
         String url = getWebhook(params);
         HttpHeaders headers = new HttpHeaders();
@@ -112,10 +112,10 @@ public class WeComAlertNotifyServiceImpl implements AlertNotifyService {
      * <p>Reference documentation</p>
      * <a href="https://developer.work.weixin.qq.com/document/path/91770">Swarm Robot Configuration Instructions</a>
      *
-     * @param params {@link  WeComParams}
+     * @param params {@link  AlertWeComParams}
      * @return the webhook
      */
-    private String getWebhook(WeComParams params) {
+    private String getWebhook(AlertWeComParams params) {
         String url;
         url = String.format("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=%s", params.getToken());
         if (log.isDebugEnabled()) {

@@ -18,6 +18,8 @@ package com.streamxhub.streamx.console.core.entity;
 
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
@@ -35,6 +37,7 @@ import java.util.TimeZone;
 @Slf4j
 public class FlameGraph {
 
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long appId;

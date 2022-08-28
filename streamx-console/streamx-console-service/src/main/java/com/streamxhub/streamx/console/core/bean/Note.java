@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity;
+package com.streamxhub.streamx.console.core.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

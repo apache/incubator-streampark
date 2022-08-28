@@ -18,9 +18,9 @@ package com.streamxhub.streamx.console.core.service.alert.impl;
 
 import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
-import com.streamxhub.streamx.console.core.entity.alert.HttpCallbackParams;
+import com.streamxhub.streamx.console.core.bean.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.bean.AlertHttpCallbackParams;
+import com.streamxhub.streamx.console.core.bean.AlertTemplate;
 import com.streamxhub.streamx.console.core.service.alert.AlertNotifyService;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -58,9 +58,9 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
 
     @Override
     public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate) throws AlertException {
-        HttpCallbackParams httpCallbackParams = alertConfig.getHttpCallbackParams();
+        AlertHttpCallbackParams alertHttpCallbackParams = alertConfig.getHttpCallbackParams();
 
-        String requestTemplate = httpCallbackParams.getRequestTemplate();
+        String requestTemplate = alertHttpCallbackParams.getRequestTemplate();
         if (!StringUtils.hasLength(requestTemplate)) {
             return false;
         }
@@ -69,7 +69,7 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
             String format = FreemarkerUtils.format(template, alertTemplate);
             Map<String, Object> body = mapper.readValue(format, new TypeReference<Map<String, Object>>() {
             });
-            sendMessage(httpCallbackParams, body);
+            sendMessage(alertHttpCallbackParams, body);
             return true;
         } catch (AlertException alertException) {
             throw alertException;
@@ -78,7 +78,7 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
         }
     }
 
-    private Object sendMessage(HttpCallbackParams params, Map<String, Object> body) throws AlertException {
+    private Object sendMessage(AlertHttpCallbackParams params, Map<String, Object> body) throws AlertException {
         String url = params.getUrl();
         HttpHeaders headers = new HttpHeaders();
         String contentType = params.getContentType();

@@ -18,10 +18,10 @@ package com.streamxhub.streamx.console.core.service.alert.impl;
 
 import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
-import com.streamxhub.streamx.console.core.entity.alert.DingTalkParams;
-import com.streamxhub.streamx.console.core.entity.alert.RobotResponse;
+import com.streamxhub.streamx.console.core.bean.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.bean.AlertDingTalkParams;
+import com.streamxhub.streamx.console.core.bean.AlertTemplate;
+import com.streamxhub.streamx.console.core.bean.RobotResponse;
 import com.streamxhub.streamx.console.core.service.alert.AlertNotifyService;
 
 import freemarker.template.Template;
@@ -73,7 +73,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
 
     @Override
     public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate) throws AlertException {
-        DingTalkParams dingTalkParams = alertConfig.getDingTalkParams();
+        AlertDingTalkParams dingTalkParams = alertConfig.getDingTalkParams();
         try {
             // handling contacts
             List<String> contactList = new ArrayList<>();
@@ -112,7 +112,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
         }
     }
 
-    private void sendMessage(DingTalkParams params, Map<String, Object> body) throws AlertException {
+    private void sendMessage(AlertDingTalkParams params, Map<String, Object> body) throws AlertException {
         // get webhook url
         String url = getWebhook(params);
         HttpHeaders headers = new HttpHeaders();
@@ -138,10 +138,10 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
     /**
      * Gets webhook.
      *
-     * @param params {@link  DingTalkParams}
+     * @param params {@link  AlertDingTalkParams}
      * @return the webhook
      */
-    private String getWebhook(DingTalkParams params) {
+    private String getWebhook(AlertDingTalkParams params) {
         String urlPef = "https://oapi.dingtalk.com/robot/send";
         if (StringUtils.hasLength(params.getAlertDingURL())) {
             urlPef = params.getAlertDingURL();

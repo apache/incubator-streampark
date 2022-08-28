@@ -19,7 +19,7 @@ package com.streamxhub.streamx.console.core.controller;
 import com.streamxhub.streamx.console.base.domain.ApiDocConstant;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.annotation.ApiAccess;
-import com.streamxhub.streamx.console.core.entity.AppBuildDockerResolvedDetail;
+import com.streamxhub.streamx.console.core.bean.AppBuildDockerResolvedDetail;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;

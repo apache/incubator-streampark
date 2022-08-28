@@ -17,9 +17,9 @@
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.YarnUtils;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
+import com.streamxhub.streamx.console.core.bean.AlertTemplate;
+import com.streamxhub.streamx.console.core.bean.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.entity.SenderEmail;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 
 import freemarker.template.Template;

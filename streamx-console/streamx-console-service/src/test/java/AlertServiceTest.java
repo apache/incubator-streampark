@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 import com.streamxhub.streamx.common.util.DateUtils;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
-import com.streamxhub.streamx.console.core.entity.alert.DingTalkParams;
-import com.streamxhub.streamx.console.core.entity.alert.LarkParams;
-import com.streamxhub.streamx.console.core.entity.alert.WeComParams;
+import com.streamxhub.streamx.console.core.bean.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.bean.AlertDingTalkParams;
+import com.streamxhub.streamx.console.core.bean.AlertLarkParams;
+import com.streamxhub.streamx.console.core.bean.AlertTemplate;
+import com.streamxhub.streamx.console.core.bean.AlertWeComParams;
 import com.streamxhub.streamx.console.core.service.alert.impl.DingTalkAlertNotifyServiceImpl;
 import com.streamxhub.streamx.console.core.service.alert.impl.LarkAlertNotifyServiceImpl;
 import com.streamxhub.streamx.console.core.service.alert.impl.WeComAlertNotifyServiceImpl;
@@ -80,7 +80,7 @@ public class AlertServiceTest {
         DingTalkAlertNotifyServiceImpl notifyService = new DingTalkAlertNotifyServiceImpl(restTemplate);
 
         notifyService.loadTemplateFile();
-        DingTalkParams dingTalkParams = new DingTalkParams();
+        AlertDingTalkParams dingTalkParams = new AlertDingTalkParams();
         dingTalkParams.setToken("your_token");
         dingTalkParams.setContacts("175xxxx1234");
         dingTalkParams.setIsAtAll(true);
@@ -96,7 +96,7 @@ public class AlertServiceTest {
         WeComAlertNotifyServiceImpl notifyService = new WeComAlertNotifyServiceImpl(restTemplate);
         notifyService.loadTemplateFile();
 
-        WeComParams weComParams = new WeComParams();
+        AlertWeComParams weComParams = new AlertWeComParams();
         weComParams.setToken("your_token");
 
         params.setAlertType(4);
@@ -110,11 +110,11 @@ public class AlertServiceTest {
         LarkAlertNotifyServiceImpl notifyService = new LarkAlertNotifyServiceImpl(restTemplate, mapper);
         notifyService.loadTemplateFile();
 
-        LarkParams larkParams = new LarkParams();
-        larkParams.setToken("your_token");
+        AlertLarkParams alertLarkParams = new AlertLarkParams();
+        alertLarkParams.setToken("your_token");
 
         params.setAlertType(16);
-        params.setLarkParams(larkParams);
+        params.setLarkParams(alertLarkParams);
 
         notifyService.doAlert(params, alertTemplate);
     }

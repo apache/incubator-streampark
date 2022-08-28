@@ -37,24 +37,6 @@
              {rules: [{ required: true }]}]" />
       </a-form-item>
 
-
-      <!--
-      <a-form-item
-        label="manager"
-        v-bind="formItemLayout">
-        <a-input v-decorator="['manager',{rules: [{ required: false }]}]" />
-      </a-form-item>
-
-      <a-form-item
-        label="mobile"
-        v-bind="formItemLayout">
-        <a-input
-          v-decorator="['mobile', {rules: [
-            { pattern: '^0?(13[0-9]|15[012356789]|17[013678]|18[0-9]|14[57])[0-9]{8}$', message: '请输入正确的手机号'}
-          ]}]" />
-      </a-form-item>
-      -->
-
     </a-form>
     <div
       class="drawer-bootom-button">

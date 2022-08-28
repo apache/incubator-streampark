@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity;
+package com.streamxhub.streamx.console.core.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import lombok.experimental.Accessors;
+
+import javax.validation.constraints.NotBlank;
+
+import java.io.Serializable;
 
 /**
- * @author Al-assad
+ * @author weijinglun
+ * @date 2022.01.14
  */
 @Data
-@Accessors(chain = true)
-public class AppControl {
-
-    /**
-     * allow to start the application
-     */
-    private boolean allowStart;
-
-    /**
-     * allow to stop the application
-     */
-    private boolean allowStop;
-
-    /**
-     * allow to build the application
-     */
-    private boolean allowBuild;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class AlertWeComParams implements Serializable {
+    @NotBlank(message = "The access token of WeCom must not be empty")
+    private String token;
 }

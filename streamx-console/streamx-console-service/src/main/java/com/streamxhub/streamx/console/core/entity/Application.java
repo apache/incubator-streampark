@@ -32,6 +32,7 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.base.util.ObjectUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
+import com.streamxhub.streamx.console.core.bean.AppControl;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.ResourceFrom;
@@ -41,7 +42,9 @@ import com.streamxhub.streamx.flink.packer.maven.Artifact;
 import com.streamxhub.streamx.flink.packer.maven.DependencyInfo;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -72,6 +75,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class Application implements Serializable {
 
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**

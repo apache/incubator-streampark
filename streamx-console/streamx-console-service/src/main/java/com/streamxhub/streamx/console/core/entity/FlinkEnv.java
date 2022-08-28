@@ -21,6 +21,8 @@ import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
 import com.streamxhub.streamx.console.base.exception.ApiException;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
@@ -38,6 +40,7 @@ import java.util.Map;
 @TableName("t_flink_env")
 public class FlinkEnv implements Serializable {
 
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private String flinkName;

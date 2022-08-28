@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity.alert;
+package com.streamxhub.streamx.console.core.bean;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * The robot alarm response of DingTalk And WeCom
+ * The robot alarm response of Lark
  *
  * @author weijinglun
- * @date 2022.01.17
+ * @date 2022.06.24
  */
+@NoArgsConstructor
 @Data
-public class RobotResponse {
-
-    private Integer errcode;
-
-    private String errmsg;
-
+public class AlertLarkRobotResponse {
+    @JsonProperty("Extra")
+    private Object extra;
+    @JsonProperty("StatusCode")
+    private Integer statusCode;
+    @JsonProperty("StatusMessage")
+    private String statusMessage;
+    private Integer code;
+    private String msg;
+    private Object data;
 }

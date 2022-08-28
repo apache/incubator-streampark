@@ -14,18 +14,31 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity;
+package com.streamxhub.streamx.console.core.bean;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
- * @author 02211659
- * @version 1.0
- * @date 2022/04/22 15:14:54
+ * @author Al-assad
  */
 @Data
-public class ResponseResult<T> {
-    private int status;
-    private String msg;
-    private T result;
+@Accessors(chain = true)
+public class AppControl {
+
+    /**
+     * allow to start the application
+     */
+    private boolean allowStart;
+
+    /**
+     * allow to stop the application
+     */
+    private boolean allowStop;
+
+    /**
+     * allow to build the application
+     */
+    private boolean allowBuild;
+
 }

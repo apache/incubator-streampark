@@ -16,8 +16,8 @@
 
 package com.streamxhub.streamx.console.core.service;
 
+import com.streamxhub.streamx.console.core.bean.ResponseResult;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
-import com.streamxhub.streamx.console.core.entity.ResponseResult;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 

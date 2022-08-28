@@ -18,7 +18,7 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.streamxhub.streamx.common.conf.CommonConfig;
 import com.streamxhub.streamx.common.conf.InternalConfigHolder;
-import com.streamxhub.streamx.console.core.entity.SenderEmail;
+import com.streamxhub.streamx.console.core.bean.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.mapper.SettingMapper;
 import com.streamxhub.streamx.console.core.service.SettingService;

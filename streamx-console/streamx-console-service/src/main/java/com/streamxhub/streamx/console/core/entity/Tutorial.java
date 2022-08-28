@@ -16,6 +16,8 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -27,6 +29,7 @@ import java.util.Date;
 @Data
 @TableName("t_flink_tutorial")
 public class Tutorial {
+    @TableId(type = IdType.AUTO)
     private Long id;
     private String name;
     private Integer type;

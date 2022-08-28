@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity.alert;
+package com.streamxhub.streamx.console.core.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -29,21 +29,22 @@ import java.io.Serializable;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class HttpCallbackParams implements Serializable {
-    @NotBlank(message = "The url of alert must not be empty")
-    private String url;
-    /**
-     * http request method, default is  POST
-     */
-    private String method = "POST";
+public class AlertLarkParams implements Serializable {
+    @NotBlank(message = "The access token of Lark must not be empty")
+    private String token;
 
     /**
-     * http request contentType, default is application/json
+     * 是否@所有人
      */
-    private String contentType;
+    private Boolean isAtAll = false;
 
     /**
-     * use freemarker replace the params
+     * 飞书机器人是否启用加签，默认 false，启用加签需设置 secret_token
      */
-    private String requestTemplate;
+    private Boolean secretEnable = false;
+
+    /**
+     * 飞书机器人 WebHook 地址的 secret_token,群机器人加签用
+     */
+    private String secretToken;
 }

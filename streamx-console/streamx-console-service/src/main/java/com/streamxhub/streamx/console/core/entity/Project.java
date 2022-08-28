@@ -53,7 +53,7 @@ import java.util.List;
 @Data
 @TableName("t_flink_project")
 public class Project implements Serializable {
-    @TableId(value = "ID", type = IdType.AUTO)
+    @TableId(type = IdType.AUTO)
     private Long id;
     private Long teamId;
 

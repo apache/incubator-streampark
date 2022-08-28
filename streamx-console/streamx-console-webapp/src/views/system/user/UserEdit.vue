@@ -141,7 +141,7 @@ import { listByUser as getUserTeam } from '@/api/team'
 import { update, get } from '@/api/user'
 
 const formItemLayout = {
-  labelCol: { span: 3 },
+  labelCol: { span: 4 },
   wrapperCol: { span: 18 }
 }
 export default {

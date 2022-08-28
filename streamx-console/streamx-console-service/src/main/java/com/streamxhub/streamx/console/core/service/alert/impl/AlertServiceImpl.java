@@ -18,10 +18,10 @@ package com.streamxhub.streamx.console.core.service.alert.impl;
 
 import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.SpringContextUtils;
+import com.streamxhub.streamx.console.core.bean.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.bean.AlertTemplate;
+import com.streamxhub.streamx.console.core.entity.AlertConfig;
 import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
 import com.streamxhub.streamx.console.core.enums.AlertType;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;

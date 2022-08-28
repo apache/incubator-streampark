@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity;
+package com.streamxhub.streamx.console.core.bean;
 
 import lombok.Data;
 
+/**
+ * @author 02211659
+ * @version 1.0
+ * @date 2022/04/22 15:14:54
+ */
 @Data
-public class SenderEmail {
-
-    private String smtpHost;
-    private Integer smtpPort;
-    private String from;
-    private String userName;
-    private String password;
-    private boolean ssl;
-
+public class ResponseResult<T> {
+    private int status;
+    private String msg;
+    private T result;
 }

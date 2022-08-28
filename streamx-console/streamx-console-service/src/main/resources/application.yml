@@ -12,15 +12,10 @@ logging:
     root: info
 
 spring:
+  profiles.active: h2
   application.name: streamx
-  profiles:
-    active: h2
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
-  devtools:
-    restart:
-      enabled: false
+  devtools.restart.enabled: false
+  mvc.pathmatch.matching-strategy: ant_path_matcher
   servlet:
     multipart:
       enabled: true
@@ -55,8 +50,6 @@ mybatis-plus:
     banner: false
 
 streamx:
-  database:
-    dialect: h2 #[h2,postgresql,mysql]
   proxy:
     # knox process address https://cdpsit02.example.cn:8443/gateway/cdp-proxy/yarn
     yarn-url:

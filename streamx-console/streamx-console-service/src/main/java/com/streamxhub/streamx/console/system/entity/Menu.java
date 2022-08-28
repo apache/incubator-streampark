@@ -41,7 +41,7 @@ public class Menu implements Serializable {
 
     public static final String DISPLAY_NONE = "0";
 
-    @TableId(value = "MENU_ID", type = IdType.AUTO)
+    @TableId(type = IdType.AUTO)
     private Long menuId;
 
     private Long parentId;

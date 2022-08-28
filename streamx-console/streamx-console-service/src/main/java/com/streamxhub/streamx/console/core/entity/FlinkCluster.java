@@ -23,6 +23,8 @@ import com.streamxhub.streamx.common.enums.FlinkK8sRestExposedType;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.console.base.util.JacksonUtils;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -47,6 +49,7 @@ import java.util.Map;
 @TableName("t_flink_cluster")
 public class FlinkCluster implements Serializable {
 
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private String address;

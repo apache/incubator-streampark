@@ -16,7 +16,7 @@
 
 package com.streamxhub.streamx.console.core.mapper;
 
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
+import com.streamxhub.streamx.console.core.entity.AlertConfig;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
