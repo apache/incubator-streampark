@@ -217,6 +217,7 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
