@@ -67,13 +67,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * <pre><b>
- *  十步杀一人
- *  千里不留行
- *  事了拂衣去
- *  深藏身与名
- * </b></pre>
- * <p>
  * This implementation is currently only used for tracing flink job on yarn
  *
  * @author benjobs
@@ -81,6 +74,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class FlinkTrackingTask {
+
+    // track interval  every 5 seconds
+    private static final long TRACK_INTERVAL = 1000L * 5;
+    //option interval within 10 seconds
+    private static final long OPTION_INTERVAL = 1000L * 10;
 
     /**
      * <pre>
@@ -154,12 +152,12 @@ public class FlinkTrackingTask {
     private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
 
     private static final ExecutorService EXECUTOR = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 2,
-            200,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("flink-tracking-executor"));
+        Runtime.getRuntime().availableProcessors() * 2,
+        200,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("flink-tracking-executor"));
 
     @Autowired
     public void setApplicationService(ApplicationService appService) {
@@ -184,18 +182,14 @@ public class FlinkTrackingTask {
      */
     @Scheduled(fixedDelay = 1000)
     public void execute() {
-        // 正常5秒钟获取一次信息
-        long trackInterval = 1000L * 5;
-        //10秒之内
-        long optionInterval = 1000L * 10;
 
         //1) 项目刚启动第一次执行,或者前端正在操作...(启动,停止)需要立即返回状态信息.
         if (lastTrackTime == null || !OPTIONING.isEmpty()) {
             tracking();
-        } else if (System.currentTimeMillis() - lastOptionTime <= optionInterval) {
+        } else if (System.currentTimeMillis() - lastOptionTime <= OPTION_INTERVAL) {
             //2) 如果在管理端正在操作时间的10秒中之内(每秒执行一次)
             tracking();
-        } else if (System.currentTimeMillis() - lastTrackTime >= trackInterval) {
+        } else if (System.currentTimeMillis() - lastTrackTime >= TRACK_INTERVAL) {
             //3) 正常信息获取,判断本次时间和上次时间是否间隔5秒(正常监控信息获取,每5秒一次)
             tracking();
         }
@@ -219,10 +213,10 @@ public class FlinkTrackingTask {
                         try {
                             getFromYarnRestApi(application, stopFrom);
                         } catch (Exception yarnException) {
-                            /**
-                             * 3) 从flink的restAPI和yarn的restAPI都查询失败</br>
-                             * 此时需要根据管理端正在操作的状态来决定是否返回最终状态,需满足:</br>
-                             * 1: 操作状态为为取消和正常的状态跟踪(操作状态不为STARTING)</br>
+                            /*
+                              3) 从flink的restAPI和yarn的restAPI都查询失败</br>
+                              此时需要根据管理端正在操作的状态来决定是否返回最终状态,需满足:</br>
+                              1: 操作状态为为取消和正常的状态跟踪(操作状态不为STARTING)</br>
                              */
                             if (optionState == null || !optionState.equals(OptionState.STARTING)) {
                                 //非正在手动映射appId
@@ -236,9 +230,9 @@ public class FlinkTrackingTask {
                                         application.setState(FlinkAppState.CANCELED.getValue());
                                     }
                                 }
-                                /**
-                                 * 进入到这一步说明前两种方式获取信息都失败,此步是最后一步,直接会判别任务取消或失联</br>
-                                 * 需清空savepoint.
+                                /*
+                                  进入到这一步说明前两种方式获取信息都失败,此步是最后一步,直接会判别任务取消或失联</br>
+                                  需清空savepoint.
                                  */
                                 cleanSavepoint(application);
                                 cleanOptioning(optionState, key);
@@ -252,7 +246,7 @@ public class FlinkTrackingTask {
                                         try {
                                             applicationService.start(application, true);
                                         } catch (Exception e) {
-                                            log.error(e.getMessage(), e);
+                                            logError(e.getMessage(), e);
                                         }
                                     }
                                 }
@@ -290,13 +284,13 @@ public class FlinkTrackingTask {
                     // 1) set info from JobOverview
                     handleJobOverview(application, jobOverview);
                 } catch (Exception e) {
-                    log.error("get flink jobOverview error: {}", e);
+                    logError("get flink jobOverview error: {}", e);
                 }
                 try {
                     //2) CheckPoints
                     handleCheckPoints(application);
                 } catch (Exception e) {
-                    log.error("get flink checkPoints error: {}", e);
+                    logError("get flink checkPoints error: {}", e);
                 }
                 //3) savePoint obsolete check and NEED_START check
                 OptionState optionState = OPTIONING.get(application.getId());
@@ -310,6 +304,10 @@ public class FlinkTrackingTask {
         }
     }
 
+    private void logError(String s, Exception e) {
+        log.error(s, e);
+    }
+
     /**
      * 基本信息回写等处理
      *
@@ -321,9 +319,7 @@ public class FlinkTrackingTask {
         // 1) duration
         long startTime = jobOverview.getStartTime();
         long endTime = jobOverview.getEndTime();
-        if (application.getStartTime() == null) {
-            application.setStartTime(new Date(startTime));
-        } else if (startTime != application.getStartTime().getTime()) {
+        if (application.getStartTime() == null || startTime != application.getStartTime().getTime()) {
             application.setStartTime(new Date(startTime));
         }
         if (endTime != -1) {
@@ -372,13 +368,13 @@ public class FlinkTrackingTask {
      * @param currentState
      */
     private void handleRunningState(Application application, OptionState optionState, FlinkAppState currentState) {
-        /**
-         * 上次记录的状态的 "STARTING" 本次获取到最新的状态为"RUNNING",说明是重启后的第一次跟踪
-         * 则:job以下状态需要更新为重启状态:
-         * NEED_RESTART_AFTER_CONF_UPDATE(配置文件修改后需要重新启动)
-         * NEED_RESTART_AFTER_SQL_UPDATE(flink sql修改后需要重启)
-         * NEED_RESTART_AFTER_ROLLBACK(任务回滚后需要重启)
-         * NEED_RESTART_AFTER_DEPLOY(任务重新发布后需要回滚)
+        /*
+          上次记录的状态的 "STARTING" 本次获取到最新的状态为"RUNNING",说明是重启后的第一次跟踪
+          则:job以下状态需要更新为重启状态:
+          NEED_RESTART_AFTER_CONF_UPDATE(配置文件修改后需要重新启动)
+          NEED_RESTART_AFTER_SQL_UPDATE(flink sql修改后需要重启)
+          NEED_RESTART_AFTER_ROLLBACK(任务回滚后需要重启)
+          NEED_RESTART_AFTER_DEPLOY(任务重新发布后需要回滚)
          */
         if (OptionState.STARTING.equals(optionState)) {
             LaunchState launchState = LaunchState.of(application.getLaunch());
@@ -469,9 +465,9 @@ public class FlinkTrackingTask {
         log.debug("flinkTrackingTask getFromYarnRestApi starting...");
         OptionState optionState = OPTIONING.get(application.getId());
 
-        /**
-         * 上一次的状态为canceling(在获取信息时flink restServer还未关闭为canceling)
-         * 且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
+        /*
+          上一次的状态为canceling(在获取信息时flink restServer还未关闭为canceling)
+          且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
          */
         Byte flag = CANCELING_CACHE.getIfPresent(application.getId());
         if (flag != null) {
