@@ -18,7 +18,7 @@
 -- Table structure for t_app_backup
 -- ----------------------------
 create table if not exists `t_app_backup` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `app_id` bigint default null,
   `sql_id` bigint default null,
   `config_id` bigint default null,
@@ -32,7 +32,7 @@ create table if not exists `t_app_backup` (
 -- Table structure for t_flame_graph
 -- ----------------------------
 create table if not exists `t_flame_graph` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `app_id` bigint default null,
   `profiler` varchar(255) default null,
   `timeline` datetime default null,
@@ -43,7 +43,7 @@ create table if not exists `t_flame_graph` (
 -- Table structure for t_flink_app
 -- ----------------------------
 create table if not exists `t_flink_app` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `job_type` tinyint default null,
   `execution_mode` tinyint default null,
   `resource_from` tinyint default null,
@@ -107,7 +107,7 @@ create table if not exists `t_flink_app` (
 -- Table structure for t_flink_config
 -- ----------------------------
 create table if not exists `t_flink_config` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `app_id` bigint not null,
   `format` tinyint not null default 0,
   `version` int not null,
@@ -120,7 +120,7 @@ create table if not exists `t_flink_config` (
 -- Table structure for t_flink_effective
 -- ----------------------------
 create table if not exists `t_flink_effective` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `app_id` bigint not null,
   `target_type` tinyint not null comment '1) config 2) flink sql',
   `target_id` bigint not null comment 'configId or sqlId',
@@ -132,7 +132,7 @@ create table if not exists `t_flink_effective` (
 -- table structure for t_flink_env
 -- ----------------------------
 create table if not exists `t_flink_env` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `flink_name` varchar(128)  not null comment 'flink实例名称',
   `flink_home` varchar(255)  not null comment 'flink home路径',
   `version` varchar(50)  not null comment 'flink对应的版本号',
@@ -148,7 +148,7 @@ create table if not exists `t_flink_env` (
 -- table structure for t_flink_log
 -- ----------------------------
 create table if not exists `t_flink_log` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `app_id` bigint default null,
   `yarn_app_id` varchar(50)  default null,
   `success` tinyint default null,
@@ -161,7 +161,7 @@ create table if not exists `t_flink_log` (
 -- table structure for t_flink_project
 -- ----------------------------
 create table if not exists `t_flink_project` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `name` varchar(255)  default null,
   `url` varchar(1000)  default null,
   `branches` varchar(1000)  default null,
@@ -183,7 +183,7 @@ create table if not exists `t_flink_project` (
 -- Table structure for t_flink_savepoint
 -- ----------------------------
 create table if not exists `t_flink_savepoint` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `app_id` bigint not null,
   `type` tinyint default null,
   `path` varchar(255)  default null,
@@ -197,7 +197,7 @@ create table if not exists `t_flink_savepoint` (
 -- table structure for t_flink_sql
 -- ----------------------------
 create table if not exists `t_flink_sql` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `app_id` bigint default null,
   `sql` text ,
   `dependency` text ,
@@ -211,7 +211,7 @@ create table if not exists `t_flink_sql` (
 -- Table structure for t_flink_tutorial
 -- ----------------------------
 create table if not exists `t_flink_tutorial` (
-  `id` int primary key not null auto_increment,
+  `id` int primary key not null,
   `type` tinyint default null,
   `name` varchar(255)  default null,
   `content` text ,
@@ -222,7 +222,7 @@ create table if not exists `t_flink_tutorial` (
 -- Table structure for t_menu
 -- ----------------------------
 create table if not exists `t_menu` (
-  `menu_id` bigint primary key not null auto_increment comment '菜单/按钮id',
+  `menu_id` bigint primary key not null comment '菜单/按钮id',
   `parent_id` bigint not null comment '上级菜单id',
   `menu_name` varchar(50)  not null comment '菜单/按钮名称',
   `path` varchar(255)  default null comment '对应路由path',
@@ -240,7 +240,7 @@ create table if not exists `t_menu` (
 -- Table structure for t_message
 -- ----------------------------
 create table if not exists `t_message` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `app_id` bigint default null,
   `user_id` bigint default null,
   `type` tinyint default null,
@@ -254,7 +254,7 @@ create table if not exists `t_message` (
 -- Table structure for t_role
 -- ----------------------------
 create table if not exists `t_role` (
-  `role_id` bigint primary key not null auto_increment comment '角色id',
+  `role_id` bigint primary key not null comment '角色id',
   `role_name` varchar(50)  not null comment '角色名称',
   `remark` varchar(100)  default null comment '角色描述',
   `create_time` datetime not null comment '创建时间',
@@ -266,7 +266,7 @@ create table if not exists `t_role` (
 -- Table structure for t_role_menu
 -- ----------------------------
 create table if not exists `t_role_menu` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `role_id` bigint not null,
   `menu_id` bigint not null,
   unique (`role_id`,`menu_id`)
@@ -288,7 +288,7 @@ create table if not exists `t_setting` (
 -- Table structure for t_user
 -- ----------------------------
 create table if not exists `t_user` (
-  `user_id` bigint primary key not null auto_increment comment '用户id',
+  `user_id` bigint primary key not null comment '用户id',
   `username` varchar(255)  default null comment '登录用户名',
   `nick_name` varchar(50)  not null comment '昵称',
   `salt` varchar(255)  default null comment '密码加盐',
@@ -308,7 +308,7 @@ create table if not exists `t_user` (
 -- Table structure for t_user_role
 -- ----------------------------
 create table if not exists `t_user_role` (
-  `id` bigint primary key not null auto_increment,
+  `id` bigint primary key not null,
   `user_id` bigint default null comment '用户id',
   `role_id` bigint default null comment '角色id',
   unique (`user_id`,`role_id`)
@@ -334,7 +334,7 @@ create table if not exists `t_app_build_pipe` (
 -- Table of t_flink_cluster
 -- ----------------------------
 create table if not exists `t_flink_cluster` (
-  `id` bigint not null auto_increment,
+  `id` bigint not null,
   `address` varchar(255) default null comment 'jobManager的url地址',
   `cluster_id` varchar(255) default null comment 'session模式的clusterId(yarn-session:application-id,k8s-session:cluster-id)',
   `cluster_name` varchar(255) not null comment '集群名称',
@@ -365,7 +365,7 @@ create table if not exists `t_flink_cluster` (
 -- Table of t_access_token definition
 -- ----------------------------
 create table if not exists `t_alert_config` (
-  `id` bigint not null auto_increment primary key,
+  `id` bigint not null primary key,
   `user_id` bigint default null,
   `alert_name` varchar(128)  default null comment '报警组名称',
   `alert_type` int default 0 comment '报警类型',
@@ -384,7 +384,7 @@ create table if not exists `t_alert_config` (
 -- Table of t_alert_config
 -- ----------------------------
 create table if not exists `t_team` (
-  `team_id` bigint primary key not null auto_increment,
+  `team_id` bigint primary key not null,
   `team_code` varchar(255) not null comment '团队标识 后续可以用于队列 资源隔离相关',
   `team_name` varchar(255) not null comment '团队名',
   `create_time` datetime not null comment '创建时间'
@@ -394,7 +394,7 @@ create table if not exists `t_team` (
 -- Table of t_team
 -- ----------------------------
 create table if not exists `t_access_token` (
-  `id` int primary key not null auto_increment comment 'key',
+  `id` int primary key not null comment 'key',
   `user_id` bigint,
   `token` varchar(1024) default null comment 'token',
   `expire_time` datetime default null comment '过期时间',
