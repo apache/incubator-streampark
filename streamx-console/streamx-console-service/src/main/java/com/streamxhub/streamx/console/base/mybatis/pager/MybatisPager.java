@@ -37,7 +37,7 @@ import java.util.List;
 public final class MybatisPager<T> {
 
     public Page<T> getDefaultPage(RestRequest request) {
-        return getPage(request, "create_time", Constant.ORDER_DESC);
+        return getPage(request, Constant.DEFAULT_SORT_FIELD, Constant.ORDER_DESC);
     }
 
     public Page<T> getPage(RestRequest request, String defaultSort, String defaultOrder) {

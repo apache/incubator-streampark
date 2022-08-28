@@ -80,7 +80,6 @@ public class Project implements Serializable {
 
     private String buildArgs;
 
-    private Date date;
 
     private String description;
     /**
@@ -93,6 +92,10 @@ public class Project implements Serializable {
      * 2) spark
      */
     private Integer type;
+
+    private Date createTime;
+
+    private Date modifyTime;
 
     private transient String module;
 

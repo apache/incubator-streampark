@@ -202,11 +202,12 @@ create table `t_flink_project` (
   `build_args` varchar(255) default null,
   `type` tinyint default null,
   `repository` tinyint default null,
-  `date` datetime default null,
   `last_build` datetime default null,
   `description` varchar(255) collate utf8mb4_general_ci default null,
   `build_state` tinyint default -1,
   `team_id` bigint not null default 1,
+  `create_time` datetime default null,
+  `modify_time` datetime default null,
   primary key (`id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
@@ -389,7 +390,7 @@ create table `t_app_build_pipe`(
   `steps_status_ts` text,
   `error` text,
   `build_result` text,
-  `update_time` datetime,
+  `modify_time` datetime,
   primary key (`app_id`) using btree
 ) engine = innodb auto_increment=100000 default charset = utf8mb4 collate = utf8mb4_general_ci;
 

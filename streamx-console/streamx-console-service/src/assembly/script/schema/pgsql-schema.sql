@@ -107,7 +107,7 @@ create table "public"."t_app_build_pipe" (
   "steps_status_ts" text collate "pg_catalog"."default",
   "error" text collate "pg_catalog"."default",
   "build_result" text collate "pg_catalog"."default",
-  "update_time" timestamp(6)
+  "modify_time" timestamp(6)
 )
 ;
 alter table "public"."t_app_build_pipe" add constraint "t_app_build_pipe_pkey" primary key ("app_id");
@@ -365,11 +365,12 @@ create table "public"."t_flink_project" (
   "build_args" varchar(255) collate "pg_catalog"."default",
   "type" int2,
   "repository" int2,
-  "date" timestamp(6),
   "last_build" timestamp(6),
   "description" varchar(255) collate "pg_catalog"."default",
   "build_state" int2,
-  "team_id" int8 not null
+  "team_id" int8 not null,
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6) null
 )
 ;
 comment on column "public"."t_flink_project"."team_id" is '项目所属组';
