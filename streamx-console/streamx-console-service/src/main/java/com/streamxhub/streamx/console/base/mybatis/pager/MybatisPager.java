@@ -48,9 +48,7 @@ public final class MybatisPager<T> {
 
         List<OrderItem> orderItems = new ArrayList<>(0);
         if (StringUtils.isNotBlank(request.getSortField())
-            && StringUtils.isNotBlank(request.getSortOrder())
-            && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
-            && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
+            && StringUtils.isNotBlank(request.getSortOrder())) {
             if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
                 orderItems.add(OrderItem.desc(sortField));
             } else {
@@ -78,9 +76,7 @@ public final class MybatisPager<T> {
         String defaultOrder) {
         String sortField = request.getSortField();
         if (StringUtils.isNotBlank(request.getSortField())
-            && StringUtils.isNotBlank(request.getSortOrder())
-            && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
-            && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
+            && StringUtils.isNotBlank(request.getSortOrder())) {
             if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
                 wrapper.orderByDesc(sortField);
             } else {
