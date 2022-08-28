@@ -16,7 +16,6 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
