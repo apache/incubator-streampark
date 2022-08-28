@@ -430,7 +430,7 @@ create table `t_flink_cluster` (
 -- ----------------------------
 -- Table of t_access_token definition
 -- ----------------------------
-drop table if exists `cluster status (0: create not started, 1: started, 2: stopped)`;
+drop table if exists `t_access_token`;
 create table `t_access_token` (
   `id` int not null auto_increment comment 'key',
   `user_id` bigint,
