@@ -12,7 +12,7 @@ logging:
     root: info
 
 spring:
-  profiles.active: h2
+  profiles.active: h2 #[h2,pgsql,mysql]
   application.name: streamx
   devtools.restart.enabled: false
   mvc.pathmatch.matching-strategy: ant_path_matcher
