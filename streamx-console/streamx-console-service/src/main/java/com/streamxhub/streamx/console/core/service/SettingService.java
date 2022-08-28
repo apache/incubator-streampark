@@ -16,7 +16,7 @@
 
 package com.streamxhub.streamx.console.core.service;
 
-import com.streamxhub.streamx.console.core.entity.SenderEmail;
+import com.streamxhub.streamx.console.core.bean.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
 
 import com.baomidou.mybatisplus.extension.service.IService;

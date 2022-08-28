@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity.alert;
+package com.streamxhub.streamx.console.core.bean;
 
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.DateUtils;

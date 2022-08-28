@@ -16,6 +16,8 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,7 @@ import java.util.Date;
 @Slf4j
 public class SavePoint {
 
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long appId;

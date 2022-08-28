@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity.alert;
+package com.streamxhub.streamx.console.core.entity;
 
 import com.streamxhub.streamx.console.base.util.JacksonUtils;
+import com.streamxhub.streamx.console.core.bean.AlertConfigWithParams;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

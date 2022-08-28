@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity.alert;
+package com.streamxhub.streamx.console.core.bean;
 
 import com.streamxhub.streamx.console.base.util.JacksonUtils;
+import com.streamxhub.streamx.console.core.entity.AlertConfig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Data;
@@ -47,27 +48,27 @@ public class AlertConfigWithParams implements Serializable {
     /**
      * 邮件报警配置信息
      */
-    private EmailParams emailParams;
+    private AlertEmailParams emailParams;
 
     /**
      * 钉钉报警配置信息
      */
-    private DingTalkParams dingTalkParams;
+    private AlertDingTalkParams dingTalkParams;
 
     /**
      * 企微报警配置信息
      */
-    private WeComParams weComParams;
+    private AlertWeComParams weComParams;
 
     /**
      * 报警http回调配置信息
      */
-    private HttpCallbackParams httpCallbackParams;
+    private AlertHttpCallbackParams httpCallbackParams;
 
     /**
      * 飞书报警配置信息
      */
-    private LarkParams larkParams;
+    private AlertLarkParams larkParams;
 
     public static AlertConfigWithParams of(AlertConfig config) {
         if (config == null) {
@@ -77,19 +78,19 @@ public class AlertConfigWithParams implements Serializable {
         BeanUtils.copyProperties(config, params, "emailParams", "dingTalkParams", "weComParams", "httpCallbackParams", "larkParams");
         try {
             if (StringUtils.isNotBlank(config.getEmailParams())) {
-                params.setEmailParams(JacksonUtils.read(config.getEmailParams(), EmailParams.class));
+                params.setEmailParams(JacksonUtils.read(config.getEmailParams(), AlertEmailParams.class));
             }
             if (StringUtils.isNotBlank(config.getDingTalkParams())) {
-                params.setDingTalkParams(JacksonUtils.read(config.getDingTalkParams(), DingTalkParams.class));
+                params.setDingTalkParams(JacksonUtils.read(config.getDingTalkParams(), AlertDingTalkParams.class));
             }
             if (StringUtils.isNotBlank(config.getWeComParams())) {
-                params.setWeComParams(JacksonUtils.read(config.getWeComParams(), WeComParams.class));
+                params.setWeComParams(JacksonUtils.read(config.getWeComParams(), AlertWeComParams.class));
             }
             if (StringUtils.isNotBlank(config.getHttpCallbackParams())) {
-                params.setHttpCallbackParams(JacksonUtils.read(config.getHttpCallbackParams(), HttpCallbackParams.class));
+                params.setHttpCallbackParams(JacksonUtils.read(config.getHttpCallbackParams(), AlertHttpCallbackParams.class));
             }
             if (StringUtils.isNotBlank(config.getLarkParams())) {
-                params.setLarkParams(JacksonUtils.read(config.getLarkParams(), LarkParams.class));
+                params.setLarkParams(JacksonUtils.read(config.getLarkParams(), AlertLarkParams.class));
             }
         } catch (JsonProcessingException e) {
             log.error("Json read failed", e);

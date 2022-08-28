@@ -35,8 +35,8 @@ public class MapperConfig {
      * @return {@linkplain PostgreSQLQueryInterceptor}
      */
     @Bean
-    @ConditionalOnProperty(name = "streamx.database.dialect", havingValue = "postgresql")
-    public PostgreSQLQueryInterceptor postgreSqlQueryInterceptor() {
+    @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "pgsql")
+    public PostgreSQLQueryInterceptor postgreSQLQueryInterceptor() {
         return new PostgreSQLQueryInterceptor();
     }
 
@@ -46,8 +46,8 @@ public class MapperConfig {
      * @return {@linkplain PostgreSQLPrepareInterceptor}
      */
     @Bean
-    @ConditionalOnProperty(name = "streamx.database.dialect", havingValue = "postgresql")
-    public PostgreSQLPrepareInterceptor postgreSqlPrepareInterceptor() {
+    @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "pgsql")
+    public PostgreSQLPrepareInterceptor postgreSQLPrepareInterceptor() {
         return new PostgreSQLPrepareInterceptor();
     }
 

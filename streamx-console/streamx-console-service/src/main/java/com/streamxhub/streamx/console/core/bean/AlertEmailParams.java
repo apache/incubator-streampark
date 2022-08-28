@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity.alert;
+package com.streamxhub.streamx.console.core.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -29,32 +29,8 @@ import java.io.Serializable;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DingTalkParams implements Serializable {
-    @NotBlank(message = "The access token of DingTalk must not be empty")
-    private String token;
+public class AlertEmailParams implements Serializable {
 
-    /**
-     * 报警人手机号, 多个用','分割
-     */
+    @NotBlank(message = "The address of email must not be empty")
     private String contacts;
-
-    /**
-     * 钉钉告警url
-     */
-    private String alertDingURL;
-
-    /**
-     * 是否@所有人
-     */
-    private Boolean isAtAll = false;
-
-    /**
-     * 钉钉机器人是否启用加签，默认 false，启用加签需设置 secret_token
-     */
-    private Boolean secretEnable = false;
-
-    /**
-     * 钉钉机器人 WebHook 地址的 secret_token,群机器人加签用
-     */
-    private String secretToken;
 }

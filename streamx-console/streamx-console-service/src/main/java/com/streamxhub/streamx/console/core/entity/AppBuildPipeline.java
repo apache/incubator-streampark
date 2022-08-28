@@ -65,7 +65,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AppBuildPipeline {
 
-    @TableId(value = "app_id", type = IdType.INPUT)
+    @TableId(type = IdType.INPUT)
     private Long appId;
 
     @TableField(value = "pipe_type")

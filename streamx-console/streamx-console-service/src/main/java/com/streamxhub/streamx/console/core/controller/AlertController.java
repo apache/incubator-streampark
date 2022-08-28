@@ -20,9 +20,9 @@ import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.AlertException;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfig;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
+import com.streamxhub.streamx.console.core.bean.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.bean.AlertTemplate;
+import com.streamxhub.streamx.console.core.entity.AlertConfig;
 import com.streamxhub.streamx.console.core.service.alert.AlertConfigService;
 import com.streamxhub.streamx.console.core.service.alert.AlertService;
 

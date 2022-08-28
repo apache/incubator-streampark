@@ -18,10 +18,10 @@ package com.streamxhub.streamx.console.core.service.alert.impl;
 
 import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
-import com.streamxhub.streamx.console.core.entity.alert.LarkParams;
-import com.streamxhub.streamx.console.core.entity.alert.LarkRobotResponse;
+import com.streamxhub.streamx.console.core.bean.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.bean.AlertLarkParams;
+import com.streamxhub.streamx.console.core.bean.AlertLarkRobotResponse;
+import com.streamxhub.streamx.console.core.bean.AlertTemplate;
 import com.streamxhub.streamx.console.core.service.alert.AlertNotifyService;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -69,8 +69,8 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
 
     @Override
     public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate alertTemplate) throws AlertException {
-        LarkParams larkParams = alertConfig.getLarkParams();
-        if (larkParams.getIsAtAll()) {
+        AlertLarkParams alertLarkParams = alertConfig.getLarkParams();
+        if (alertLarkParams.getIsAtAll()) {
             alertTemplate.setAtAll(true);
         }
         try {
@@ -81,15 +81,15 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
 
             Map<String, Object> body = new HashMap<>();
             // get sign
-            if (larkParams.getSecretEnable()) {
+            if (alertLarkParams.getSecretEnable()) {
                 long timestamp = System.currentTimeMillis() / 1000;
-                String sign = getSign(larkParams.getSecretToken(), timestamp);
+                String sign = getSign(alertLarkParams.getSecretToken(), timestamp);
                 body.put("timestamp", timestamp);
                 body.put("sign", sign);
             }
             body.put("msg_type", "interactive");
             body.put("card", cardMap);
-            sendMessage(larkParams, body);
+            sendMessage(alertLarkParams, body);
             return true;
         } catch (AlertException alertException) {
             throw alertException;
@@ -98,16 +98,16 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
         }
     }
 
-    private void sendMessage(LarkParams params, Map<String, Object> body) throws AlertException {
+    private void sendMessage(AlertLarkParams params, Map<String, Object> body) throws AlertException {
         // get webhook url
         String url = getWebhook(params);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        LarkRobotResponse robotResponse;
+        AlertLarkRobotResponse robotResponse;
         try {
-            robotResponse = alertRestTemplate.postForObject(url, entity, LarkRobotResponse.class);
+            robotResponse = alertRestTemplate.postForObject(url, entity, AlertLarkRobotResponse.class);
         } catch (Exception e) {
             log.error("Failed to request Lark robot alarm,\nurl:{}", url, e);
             throw new AlertException(String.format("Failed to request Lark robot alert,\nurl:%s", url), e);
@@ -125,10 +125,10 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
     /**
      * Gets webhook.
      *
-     * @param params {@link  LarkParams}
+     * @param params {@link  AlertLarkParams}
      * @return the webhook
      */
-    private String getWebhook(LarkParams params) {
+    private String getWebhook(AlertLarkParams params) {
         String url = String.format("https://open.feishu.cn/open-apis/bot/v2/hook/%s", params.getToken());
         if (log.isDebugEnabled()) {
             log.debug("The alarm robot url of Lark is {}", url);

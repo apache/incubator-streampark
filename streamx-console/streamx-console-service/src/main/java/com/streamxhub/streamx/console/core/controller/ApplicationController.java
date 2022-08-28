@@ -25,7 +25,7 @@ import com.streamxhub.streamx.console.base.exception.ApplicationException;
 import com.streamxhub.streamx.console.base.exception.InternalException;
 import com.streamxhub.streamx.console.base.util.MoreFutures;
 import com.streamxhub.streamx.console.core.annotation.ApiAccess;
-import com.streamxhub.streamx.console.core.entity.AppControl;
+import com.streamxhub.streamx.console.core.bean.AppControl;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
 import com.streamxhub.streamx.console.core.entity.ApplicationLog;

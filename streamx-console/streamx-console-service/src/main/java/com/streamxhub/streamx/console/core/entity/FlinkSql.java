@@ -19,7 +19,9 @@ package com.streamxhub.streamx.console.core.entity;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.console.core.enums.ChangedType;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -32,6 +34,8 @@ import java.util.Date;
 @Data
 @TableName("t_flink_sql")
 public class FlinkSql {
+
+    @TableId(type = IdType.AUTO)
     private Long id;
     private Long appId;
     @TableField("`sql`")

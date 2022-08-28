@@ -17,8 +17,8 @@
 package com.streamxhub.streamx.console.core.service.alert;
 
 import com.streamxhub.streamx.console.base.exception.AlertException;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
+import com.streamxhub.streamx.console.core.bean.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.bean.AlertTemplate;
 
 /**
  * @author weijinglun

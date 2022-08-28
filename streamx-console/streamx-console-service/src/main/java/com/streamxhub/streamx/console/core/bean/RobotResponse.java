@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity.alert;
+package com.streamxhub.streamx.console.core.bean;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-
-import java.io.Serializable;
-
 /**
+ * The robot alarm response of DingTalk And WeCom
+ *
  * @author weijinglun
- * @date 2022.01.14
+ * @date 2022.01.17
  */
 @Data
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class EmailParams implements Serializable {
+public class RobotResponse {
 
-    @NotBlank(message = "The address of email must not be empty")
-    private String contacts;
+    private Integer errcode;
+
+    private String errmsg;
+
 }

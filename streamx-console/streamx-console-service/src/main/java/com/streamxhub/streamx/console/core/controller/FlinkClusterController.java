@@ -18,8 +18,8 @@ package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.InternalException;
+import com.streamxhub.streamx.console.core.bean.ResponseResult;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
-import com.streamxhub.streamx.console.core.entity.ResponseResult;
 import com.streamxhub.streamx.console.core.service.FlinkClusterService;
 
 import lombok.extern.slf4j.Slf4j;

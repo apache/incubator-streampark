@@ -16,6 +16,8 @@
 
 package com.streamxhub.streamx.console.core.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ public class Setting implements Serializable {
 
     private String settingName;
 
+    @TableId(type = IdType.INPUT)
     private String settingKey;
 
     private String settingValue;

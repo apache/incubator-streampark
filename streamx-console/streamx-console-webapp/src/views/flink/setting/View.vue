@@ -1237,12 +1237,12 @@ export default {
     handleSubmit(setting) {
       setting.submitting = false
       setting.editable = false
-      const className = setting.key.replace(/\./g, '_')
+      const className = setting.settingKey.replace(/\./g, '_')
       const elem = document.querySelector('.' + className)
       const value = elem.value
       update({
-        key: setting.key,
-        value: value
+        settingKey: setting.settingKey,
+        settingValue: value
       }).then((resp) => {
         this.handleSettingAll()
       })
@@ -1717,8 +1717,8 @@ export default {
 
     handleSwitch(setting) {
       update({
-        key: setting.key,
-        value: setting.value !== 'true'
+        settingKey: setting.settingKey,
+        settingValue: setting.settingValue !== 'true'
       }).then((resp) => {
         this.handleSettingAll()
       })

@@ -55,7 +55,7 @@ public class User implements Serializable {
     // 默认密码
     public static final String DEFAULT_PASSWORD = "streamx666";
 
-    @TableId(value = "USER_ID", type = IdType.AUTO)
+    @TableId(type = IdType.AUTO)
     private Long userId;
 
     @Size(min = 4, max = 20, message = "{range}")

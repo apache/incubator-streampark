@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity.alert;
+package com.streamxhub.streamx.console.core.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -29,7 +29,21 @@ import java.io.Serializable;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WeComParams implements Serializable {
-    @NotBlank(message = "The access token of WeCom must not be empty")
-    private String token;
+public class AlertHttpCallbackParams implements Serializable {
+    @NotBlank(message = "The url of alert must not be empty")
+    private String url;
+    /**
+     * http request method, default is  POST
+     */
+    private String method = "POST";
+
+    /**
+     * http request contentType, default is application/json
+     */
+    private String contentType;
+
+    /**
+     * use freemarker replace the params
+     */
+    private String requestTemplate;
 }

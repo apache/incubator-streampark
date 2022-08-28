@@ -18,9 +18,9 @@ package com.streamxhub.streamx.console.core.service.alert.impl;
 
 import com.streamxhub.streamx.console.base.exception.AlertException;
 import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
-import com.streamxhub.streamx.console.core.entity.SenderEmail;
-import com.streamxhub.streamx.console.core.entity.alert.AlertConfigWithParams;
-import com.streamxhub.streamx.console.core.entity.alert.AlertTemplate;
+import com.streamxhub.streamx.console.core.bean.AlertConfigWithParams;
+import com.streamxhub.streamx.console.core.bean.AlertTemplate;
+import com.streamxhub.streamx.console.core.bean.SenderEmail;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.console.core.service.alert.AlertNotifyService;
 

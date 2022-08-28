@@ -14,28 +14,18 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.console.core.entity.alert;
+package com.streamxhub.streamx.console.core.bean;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-/**
- * The robot alarm response of Lark
- *
- * @author weijinglun
- * @date 2022.06.24
- */
-@NoArgsConstructor
 @Data
-public class LarkRobotResponse {
-    @JsonProperty("Extra")
-    private Object extra;
-    @JsonProperty("StatusCode")
-    private Integer statusCode;
-    @JsonProperty("StatusMessage")
-    private String statusMessage;
-    private Integer code;
-    private String msg;
-    private Object data;
+public class SenderEmail {
+
+    private String smtpHost;
+    private Integer smtpPort;
+    private String from;
+    private String userName;
+    private String password;
+    private boolean ssl;
+
 }
