@@ -19,7 +19,6 @@ package com.streamxhub.streamx.console.core.service.impl;
 import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
-import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
@@ -109,7 +108,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         queryWrapper.eq(true, "team_id", project.getTeamId());
         long count = count(queryWrapper);
         if (count == 0) {
-            project.setDate(new Date());
+            project.setCreateTime(new Date());
             boolean status = save(project);
             if (status) {
                 return response.message("添加项目成功").data(true);
@@ -128,6 +127,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             Project project = getById(projectParam.getId());
             assert project != null;
             project.setName(projectParam.getName());
+            project.setModifyTime(new Date());
             project.setUrl(projectParam.getUrl());
             project.setBranches(projectParam.getBranches());
             project.setUserName(projectParam.getUserName());
@@ -179,8 +179,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public IPage<Project> page(Project project, RestRequest request) {
         List<Long> groupIdList = groupUserService.getTeamIdList();
         project.setTeamIdList(groupIdList);
-        Page<Project> page = new MybatisPager<Project>().getPage(request, "date", Constant.ORDER_DESC);
-        return this.baseMapper.findProject(page, project);
+        Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
+        return this.baseMapper.page(page, project);
     }
 
     @Override
@@ -355,7 +355,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public Long getCountByTeam(Long teamId) {
-        return baseMapper.getCountByTeam(teamId);
+        return baseMapper.selectCount(new LambdaQueryWrapper<Project>().eq(Project::getTeamId, teamId));
     }
 
     @Override

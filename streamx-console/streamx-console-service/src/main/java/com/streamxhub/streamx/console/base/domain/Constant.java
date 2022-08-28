@@ -29,6 +29,8 @@ public class Constant {
     // 排序规则： ascend 升序
     public static final String ORDER_ASC = "asc";
 
+    public static final String DEFAULT_SORT_FIELD = "create_time";
+
     // 按钮
     public static final String TYPE_BUTTON = "1";
     // 菜单

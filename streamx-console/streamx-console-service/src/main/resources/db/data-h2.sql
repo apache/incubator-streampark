@@ -27,7 +27,7 @@ insert into `t_flink_effective` values (100000, 100000, 2, 100000, now());
 -- ----------------------------
 -- Records of t_flink_project
 -- ----------------------------
-insert into `t_flink_project` values (100000, 'streamx-quickstart', 'https://github.com/streamxhub/streamx-quickstart.git', 'main', null, null, null, null, 1, 1, now(), null, 'streamx-quickstart', 1,1);
+insert into `t_flink_project` values (100000, 'streamx-quickstart', 'https://github.com/streamxhub/streamx-quickstart.git', 'main', null, null, null, null, 1, 1, null, 'streamx-quickstart', 1, 1, now(), null);
 
 -- ----------------------------
 -- Records of t_flink_sql

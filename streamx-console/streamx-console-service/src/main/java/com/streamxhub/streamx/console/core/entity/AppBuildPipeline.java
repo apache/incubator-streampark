@@ -74,10 +74,8 @@ public class AppBuildPipeline {
     @TableField(value = "pipe_status")
     private Integer pipeStatusCode;
 
-    @TableField(value = "cur_step")
     private Integer curStep;
 
-    @TableField(value = "total_step")
     private Integer totalStep;
 
     // step status map: (stepSeq -> stepStatus)
@@ -94,8 +92,7 @@ public class AppBuildPipeline {
     @TableField(value = "build_result")
     private String buildResultJson;
 
-    @TableField(value = "update_time")
-    private Date updateTime;
+    private Date modifyTime;
 
     @Nonnull
     @JsonIgnore
@@ -257,7 +254,7 @@ public class AppBuildPipeline {
                 .setStepStatus(snapshot.pureStepStatusAsJava())
                 .setStepStatusTimestamp(snapshot.stepStatusTimestampAsJava())
                 .setError(snapshot.error())
-                .setUpdateTime(new Date(snapshot.emitTime()));
+                .setModifyTime(new Date(snapshot.emitTime()));
     }
 
     /**
@@ -321,7 +318,7 @@ public class AppBuildPipeline {
                     .setHasError(pipe.getError().nonEmpty())
                     .setErrorSummary(pipe.getError().summary())
                     .setErrorStack(pipe.getError().exceptionStack())
-                    .setUpdateTime(pipe.getUpdateTime());
+                    .setUpdateTime(pipe.getModifyTime());
         }
     }
 
