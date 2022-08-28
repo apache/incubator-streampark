@@ -19,6 +19,9 @@ package com.streamxhub.streamx.console.base.config;
 import com.streamxhub.streamx.console.base.mybatis.interceptor.PostgreSQLPrepareInterceptor;
 import com.streamxhub.streamx.console.base.mybatis.interceptor.PostgreSQLQueryInterceptor;
 
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +30,14 @@ import org.springframework.context.annotation.Configuration;
  * for MyBatis Configure management.
  */
 @Configuration
-public class MapperConfig {
+public class MybatisConfig {
+
+    @Bean
+    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
+        return interceptor;
+    }
 
     /**
      * Add the plugin to the MyBatis plugin interceptor chain.
