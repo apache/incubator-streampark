@@ -100,9 +100,7 @@ public final class SortUtils {
             defaultSort = WebUtils.camelToUnderscore(defaultSort);
         }
         if (StringUtils.isNotBlank(request.getSortField())
-            && StringUtils.isNotBlank(request.getSortOrder())
-            && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
-            && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
+            && StringUtils.isNotBlank(request.getSortOrder())) {
             if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
                 wrapper.orderByDesc(sortField);
             } else {
