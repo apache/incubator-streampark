@@ -60,6 +60,8 @@ http.interceptors.request.use(config => {
       }
     }
     if (config.method === 'get') {
+      // filter undefined params
+      data = Object.fromEntries(Object.entries(data).filter(([_,value]) => value !== undefined))
       data = {params: data}
     } else if (config.headers['Content-Type'] !== 'multipart/form-data') {
       if (!data.isJsonType){
