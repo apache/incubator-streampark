@@ -28,12 +28,11 @@ create table "public"."t_access_token" (
   "status" int2,
   "create_time" timestamp(6),
   "modify_time" timestamp(6)
-)
-;
+);
 comment on column "public"."t_access_token"."id" is 'key';
 comment on column "public"."t_access_token"."token" is 'token';
-comment on column "public"."t_access_token"."expire_time" is '过期时间';
-comment on column "public"."t_access_token"."description" is '使用场景描述';
+comment on column "public"."t_access_token"."expire_time" is 'expiration time';
+comment on column "public"."t_access_token"."description" is 'description';
 comment on column "public"."t_access_token"."status" is '1:enable,0:disable';
 comment on column "public"."t_access_token"."create_time" is 'create time';
 comment on column "public"."t_access_token"."modify_time" is 'modify time';
@@ -59,16 +58,16 @@ create table "public"."t_alert_config" (
   "modify_time" timestamp(6) not null
 )
 ;
-comment on column "public"."t_alert_config"."alert_name" is '报警组名称';
-comment on column "public"."t_alert_config"."alert_type" is '报警类型';
-comment on column "public"."t_alert_config"."email_params" is '邮件报警配置信息';
-comment on column "public"."t_alert_config"."sms_params" is '短信报警配置信息';
-comment on column "public"."t_alert_config"."ding_talk_params" is '钉钉报警配置信息';
-comment on column "public"."t_alert_config"."we_com_params" is '企微报警配置信息';
-comment on column "public"."t_alert_config"."http_callback_params" is '报警http回调配置信息';
-comment on column "public"."t_alert_config"."lark_params" is '飞书报警配置信息';
-comment on column "public"."t_alert_config"."create_time" is '创建时间';
-comment on column "public"."t_alert_config"."modify_time" is '修改时间';
+comment on column "public"."t_alert_config"."alert_name" is 'alert name';
+comment on column "public"."t_alert_config"."alert_type" is 'alert type';
+comment on column "public"."t_alert_config"."email_params" is 'email params';
+comment on column "public"."t_alert_config"."sms_params" is 'sms params';
+comment on column "public"."t_alert_config"."ding_talk_params" is 'ding talk params';
+comment on column "public"."t_alert_config"."we_com_params" is 'we com params';
+comment on column "public"."t_alert_config"."http_callback_params" is 'http callback params';
+comment on column "public"."t_alert_config"."lark_params" is 'lark params';
+comment on column "public"."t_alert_config"."create_time" is 'create time';
+comment on column "public"."t_alert_config"."modify_time" is 'modify time';
 alter table "public"."t_alert_config" add constraint "t_alert_config_pkey" primary key ("id");
 create index "inx_alert_user" on "public"."t_alert_config" using btree (
   "user_id" "pg_catalog"."int8_ops" asc nulls last
@@ -199,7 +198,7 @@ create table "public"."t_flink_app" (
   "team_id" int8 not null
 )
 ;
-comment on column "public"."t_flink_app"."team_id" is '任务所属组';
+comment on column "public"."t_flink_app"."team_id" is 'task group';
 alter table "public"."t_flink_app" add constraint "t_flink_app_pkey" primary key ("id");
 create index "inx_job_type" on "public"."t_flink_app" using btree (
   "job_type" "pg_catalog"."int2_ops" asc nulls last
@@ -241,22 +240,22 @@ create table "public"."t_flink_cluster" (
   "create_time" timestamp(6)
 )
 ;
-comment on column "public"."t_flink_cluster"."address" is 'jobmanager的url地址';
-comment on column "public"."t_flink_cluster"."cluster_id" is 'session模式的clusterid(yarn-session:application-id,k8s-session:cluster-id)';
-comment on column "public"."t_flink_cluster"."cluster_name" is '集群名称';
-comment on column "public"."t_flink_cluster"."options" is '参数集合json形式';
-comment on column "public"."t_flink_cluster"."yarn_queue" is '任务所在yarn队列';
-comment on column "public"."t_flink_cluster"."execution_mode" is 'session类型(1:remote,3:yarn-session,5:kubernetes-session)';
-comment on column "public"."t_flink_cluster"."version_id" is 'flink对应id';
+comment on column "public"."t_flink_cluster"."address" is 'url address of jobmanager';
+comment on column "public"."t_flink_cluster"."cluster_id" is 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)';
+comment on column "public"."t_flink_cluster"."cluster_name" is 'cluster name';
+comment on column "public"."t_flink_cluster"."options" is 'parameter collection json form';
+comment on column "public"."t_flink_cluster"."yarn_queue" is 'the yarn queue where the task is located';
+comment on column "public"."t_flink_cluster"."execution_mode" is 'k8s execution session mode(1:remote,3:yarn-session,5:kubernetes-session)';
+comment on column "public"."t_flink_cluster"."version_id" is 'flink version id';
 comment on column "public"."t_flink_cluster"."k8s_namespace" is 'k8s namespace';
 comment on column "public"."t_flink_cluster"."service_account" is 'k8s service account';
-comment on column "public"."t_flink_cluster"."flink_image" is 'flink使用镜像';
-comment on column "public"."t_flink_cluster"."dynamic_options" is '动态参数';
-comment on column "public"."t_flink_cluster"."k8s_rest_exposed_type" is 'k8s 暴露类型(0:loadbalancer,1:clusterip,2:nodeport)';
-comment on column "public"."t_flink_cluster"."flame_graph" is '是否开启火焰图，默认不开启';
-comment on column "public"."t_flink_cluster"."k8s_conf" is 'k8s配置文件所在路径';
-comment on column "public"."t_flink_cluster"."exception" is '异常信息';
-comment on column "public"."t_flink_cluster"."cluster_state" is '集群状态(0:创建未启动,1:已启动,2:停止)';
+comment on column "public"."t_flink_cluster"."flink_image" is 'flink image';
+comment on column "public"."t_flink_cluster"."dynamic_options" is 'dynamic parameters';
+comment on column "public"."t_flink_cluster"."k8s_rest_exposed_type" is 'k8s export(0:loadbalancer,1:clusterip,2:nodeport)';
+comment on column "public"."t_flink_cluster"."flame_graph" is 'enable the flame graph';
+comment on column "public"."t_flink_cluster"."k8s_conf" is 'the path where the k 8 s configuration file is located';
+comment on column "public"."t_flink_cluster"."exception" is 'exception information';
+comment on column "public"."t_flink_cluster"."cluster_state" is 'cluster status (0: create not started, 1: started, 2: stopped)';
 alter table "public"."t_flink_cluster" add constraint "t_flink_cluster_pkey" primary key ("id", "cluster_name");
 create index "id" on "public"."t_flink_cluster" using btree (
   "cluster_id" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last,
@@ -320,14 +319,14 @@ create table "public"."t_flink_env" (
 )
 ;
 comment on column "public"."t_flink_env"."id" is 'id';
-comment on column "public"."t_flink_env"."flink_name" is 'flink实例名称';
-comment on column "public"."t_flink_env"."flink_home" is 'flink home路径';
-comment on column "public"."t_flink_env"."version" is 'flink对应的版本号';
-comment on column "public"."t_flink_env"."scala_version" is 'flink对应的scala版本号';
-comment on column "public"."t_flink_env"."flink_conf" is 'flink-conf配置内容';
-comment on column "public"."t_flink_env"."is_default" is '是否为默认版本';
-comment on column "public"."t_flink_env"."description" is '描述信息';
-comment on column "public"."t_flink_env"."create_time" is '创建时间';
+comment on column "public"."t_flink_env"."flink_name" is 'flink instance name';
+comment on column "public"."t_flink_env"."flink_home" is 'flink home path';
+comment on column "public"."t_flink_env"."version" is 'the version number corresponding to flink';
+comment on column "public"."t_flink_env"."scala_version" is 'the scala version number corresponding to flink';
+comment on column "public"."t_flink_env"."flink_conf" is 'flink conf configuration content';
+comment on column "public"."t_flink_env"."is_default" is 'is it the default version';
+comment on column "public"."t_flink_env"."description" is 'description';
+comment on column "public"."t_flink_env"."create_time" is 'create time';
 alter table "public"."t_flink_env" add constraint "t_flink_env_pkey" primary key ("id");
 create index "un_env_name" on "public"."t_flink_env" using btree (
   "flink_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
@@ -373,7 +372,7 @@ create table "public"."t_flink_project" (
   "modify_time" timestamp(6) null
 )
 ;
-comment on column "public"."t_flink_project"."team_id" is '项目所属组';
+comment on column "public"."t_flink_project"."team_id" is 'project group';
 alter table "public"."t_flink_project" add constraint "t_flink_project_pkey" primary key ("id");
 
 
@@ -445,18 +444,18 @@ create table "public"."t_menu" (
   "modify_time" timestamp(6)
 )
 ;
-comment on column "public"."t_menu"."menu_id" is '菜单/按钮id';
-comment on column "public"."t_menu"."parent_id" is '上级菜单id';
-comment on column "public"."t_menu"."menu_name" is '菜单/按钮名称';
-comment on column "public"."t_menu"."path" is '对应路由path';
-comment on column "public"."t_menu"."component" is '对应路由组件component';
-comment on column "public"."t_menu"."perms" is '权限标识';
-comment on column "public"."t_menu"."icon" is '图标';
-comment on column "public"."t_menu"."type" is '类型 0菜单 1按钮';
-comment on column "public"."t_menu"."display" is '菜单是否显示';
-comment on column "public"."t_menu"."order_num" is '排序';
-comment on column "public"."t_menu"."create_time" is '创建时间';
-comment on column "public"."t_menu"."modify_time" is '修改时间';
+comment on column "public"."t_menu"."menu_id" is 'menu button id';
+comment on column "public"."t_menu"."parent_id" is 'parent menu id';
+comment on column "public"."t_menu"."menu_name" is 'menu button name';
+comment on column "public"."t_menu"."path" is 'routing path';
+comment on column "public"."t_menu"."component" is 'corresponding routing component component';
+comment on column "public"."t_menu"."perms" is 'authority id';
+comment on column "public"."t_menu"."icon" is 'icon';
+comment on column "public"."t_menu"."type" is 'type 0:menu 1:button';
+comment on column "public"."t_menu"."display" is 'menu is displayed';
+comment on column "public"."t_menu"."order_num" is 'sort';
+comment on column "public"."t_menu"."create_time" is 'creation time';
+comment on column "public"."t_menu"."modify_time" is 'modify time';
 alter table "public"."t_menu" add constraint "t_menu_pkey" primary key ("menu_id");
 
 
@@ -493,12 +492,12 @@ create table "public"."t_role" (
   "role_code" varchar(255) collate "pg_catalog"."default"
 )
 ;
-comment on column "public"."t_role"."role_id" is '角色id';
-comment on column "public"."t_role"."role_name" is '角色名称';
-comment on column "public"."t_role"."remark" is '角色描述';
-comment on column "public"."t_role"."create_time" is '创建时间';
-comment on column "public"."t_role"."modify_time" is '修改时间';
-comment on column "public"."t_role"."role_code" is '角色标识';
+comment on column "public"."t_role"."role_id" is 'role id';
+comment on column "public"."t_role"."role_name" is 'role name';
+comment on column "public"."t_role"."remark" is 'role description';
+comment on column "public"."t_role"."create_time" is 'creation time';
+comment on column "public"."t_role"."modify_time" is 'modify time';
+comment on column "public"."t_role"."role_code" is 'role code';
 alter table "public"."t_role" add constraint "t_role_pkey" primary key ("role_id");
 
 
@@ -548,9 +547,9 @@ create table "public"."t_team" (
 )
 ;
 comment on column "public"."t_team"."team_id" is 'id';
-comment on column "public"."t_team"."team_code" is '团队标识 后续可以用于队列 资源隔离相关';
-comment on column "public"."t_team"."team_name" is '团队名';
-comment on column "public"."t_team"."create_time" is '创建时间';
+comment on column "public"."t_team"."team_code" is 'team ID can be used for queues later Resource isolation related';
+comment on column "public"."t_team"."team_name" is 'team name';
+comment on column "public"."t_team"."create_time" is 'creation time';
 alter table "public"."t_team" add constraint "t_team_pkey" primary key ("team_id");
 create index "team_code" on "public"."t_team" using btree (
   "team_code" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
@@ -569,7 +568,7 @@ create table "public"."t_team_user" (
 ;
 comment on column "public"."t_team_user"."team_id" is 'teamid';
 comment on column "public"."t_team_user"."user_id" is 'userid';
-comment on column "public"."t_team_user"."create_time" is '创建时间';
+comment on column "public"."t_team_user"."create_time" is 'creation time';
 create index "group_user" on "public"."t_team_user" using btree (
   "team_id" "pg_catalog"."int8_ops" asc nulls last,
   "user_id" "pg_catalog"."int8_ops" asc nulls last
@@ -595,19 +594,19 @@ create table "public"."t_user" (
   "description" varchar(100) collate "pg_catalog"."default"
 )
 ;
-comment on column "public"."t_user"."user_id" is '用户id';
-comment on column "public"."t_user"."username" is '登录用户名';
-comment on column "public"."t_user"."nick_name" is '昵称';
-comment on column "public"."t_user"."salt" is '密码加盐';
-comment on column "public"."t_user"."password" is '密码';
-comment on column "public"."t_user"."email" is '邮箱';
-comment on column "public"."t_user"."status" is '状态 0锁定 1有效';
-comment on column "public"."t_user"."create_time" is '创建时间';
-comment on column "public"."t_user"."modify_time" is '修改时间';
-comment on column "public"."t_user"."last_login_time" is '最近访问时间';
-comment on column "public"."t_user"."sex" is '性别 0男 1女 2保密';
-comment on column "public"."t_user"."avatar" is '用户头像';
-comment on column "public"."t_user"."description" is '描述';
+comment on column "public"."t_user"."user_id" is 'user id';
+comment on column "public"."t_user"."username" is 'user name';
+comment on column "public"."t_user"."nick_name" is 'nick name';
+comment on column "public"."t_user"."salt" is 'salt';
+comment on column "public"."t_user"."password" is 'password';
+comment on column "public"."t_user"."email" is 'email';
+comment on column "public"."t_user"."status" is 'status 0:locked 1:active';
+comment on column "public"."t_user"."create_time" is 'creation time';
+comment on column "public"."t_user"."modify_time" is 'change time';
+comment on column "public"."t_user"."last_login_time" is 'last login time';
+comment on column "public"."t_user"."sex" is 'gender 0:male 1:female 2:confidential';
+comment on column "public"."t_user"."avatar" is 'avatar';
+comment on column "public"."t_user"."description" is 'description';
 alter table "public"."t_user" add constraint "t_user_pkey" primary key ("user_id");
 create index "un_username" on "public"."t_user" using btree (
   "nick_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
@@ -624,8 +623,8 @@ create table "public"."t_user_role" (
   "role_id" int8
 )
 ;
-comment on column "public"."t_user_role"."user_id" is '用户id';
-comment on column "public"."t_user_role"."role_id" is '角色id';
+comment on column "public"."t_user_role"."user_id" is 'user id';
+comment on column "public"."t_user_role"."role_id" is 'role id';
 alter table "public"."t_user_role" add constraint "t_user_role_pkey" primary key ("id");
 create index "un_user_role_inx" on "public"."t_user_role" using btree (
   "user_id" "pg_catalog"."int8_ops" asc nulls last,

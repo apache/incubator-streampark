@@ -159,14 +159,14 @@ create table `t_flink_effective` (
 drop table if exists `t_flink_env`;
 create table `t_flink_env` (
   `id` bigint not null auto_increment comment 'id',
-  `flink_name` varchar(128) collate utf8mb4_general_ci not null comment 'flink实例名称',
-  `flink_home` varchar(255) collate utf8mb4_general_ci not null comment 'flink home路径',
-  `version` varchar(50) collate utf8mb4_general_ci not null comment 'flink对应的版本号',
-  `scala_version` varchar(50) collate utf8mb4_general_ci not null comment 'flink对应的scala版本号',
-  `flink_conf` text collate utf8mb4_general_ci not null comment 'flink-conf配置内容',
-  `is_default` tinyint not null default 0 comment '是否为默认版本',
-  `description` varchar(255) collate utf8mb4_general_ci default null comment '描述信息',
-  `create_time` datetime not null comment '创建时间',
+  `flink_name` varchar(128) collate utf8mb4_general_ci not null comment 'flink instance name',
+  `flink_home` varchar(255) collate utf8mb4_general_ci not null comment 'flink home path',
+  `version` varchar(50) collate utf8mb4_general_ci not null comment 'the version number corresponding to flink',
+  `scala_version` varchar(50) collate utf8mb4_general_ci not null comment 'the scala version number corresponding to flink',
+  `flink_conf` text collate utf8mb4_general_ci not null comment 'flink conf configuration content',
+  `is_default` tinyint not null default 0 comment 'default value',
+  `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
+  `create_time` datetime not null comment 'create time',
   primary key (`id`) using btree,
   unique key `un_env_name` (`flink_name`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -263,18 +263,18 @@ create table `t_flink_tutorial` (
 -- ----------------------------
 drop table if exists `t_menu`;
 create table `t_menu` (
-  `menu_id` bigint not null auto_increment comment '菜单/按钮id',
-  `parent_id` bigint not null comment '上级菜单id',
-  `menu_name` varchar(50) collate utf8mb4_general_ci not null comment '菜单/按钮名称',
-  `path` varchar(255) collate utf8mb4_general_ci default null comment '对应路由path',
-  `component` varchar(255) collate utf8mb4_general_ci default null comment '对应路由组件component',
-  `perms` varchar(50) collate utf8mb4_general_ci default null comment '权限标识',
-  `icon` varchar(50) collate utf8mb4_general_ci default null comment '图标',
-  `type` char(2) collate utf8mb4_general_ci default null comment '类型 0菜单 1按钮',
-  `display` char(2) collate utf8mb4_general_ci not null default 1 comment '菜单是否显示',
-  `order_num` double(20,0) default null comment '排序',
-  `create_time` datetime not null comment '创建时间',
-  `modify_time` datetime default null comment '修改时间',
+  `menu_id` bigint not null auto_increment comment 'menu/button id',
+  `parent_id` bigint not null comment 'parent menu id',
+  `menu_name` varchar(50) collate utf8mb4_general_ci not null comment 'menu button name',
+  `path` varchar(255) collate utf8mb4_general_ci default null comment 'routing path',
+  `component` varchar(255) collate utf8mb4_general_ci default null comment 'routing component component',
+  `perms` varchar(50) collate utf8mb4_general_ci default null comment 'authority id',
+  `icon` varchar(50) collate utf8mb4_general_ci default null comment 'icon',
+  `type` char(2) collate utf8mb4_general_ci default null comment 'type 0:menu 1:button',
+  `display` char(2) collate utf8mb4_general_ci not null default 1 comment 'whether the menu is displayed',
+  `order_num` double(20,0) default null comment 'sort',
+  `create_time` datetime not null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key (`menu_id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
@@ -302,12 +302,12 @@ create table `t_message` (
 -- ----------------------------
 drop table if exists `t_role`;
 create table `t_role` (
-  `role_id` bigint not null auto_increment comment '角色id',
-  `role_name` varchar(50) collate utf8mb4_general_ci not null comment '角色名称',
-  `remark` varchar(100) collate utf8mb4_general_ci default null comment '角色描述',
-  `create_time` datetime not null comment '创建时间',
-  `modify_time` datetime default null comment '修改时间',
-  `role_code` varchar(255) collate utf8mb4_general_ci default null comment '角色标识',
+  `role_id` bigint not null auto_increment comment 'user id',
+  `role_name` varchar(50) collate utf8mb4_general_ci not null comment 'user name',
+  `remark` varchar(100) collate utf8mb4_general_ci default null comment 'remark',
+  `create_time` datetime not null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
+  `role_code` varchar(255) collate utf8mb4_general_ci default null comment 'role code',
   primary key (`role_id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
@@ -345,19 +345,19 @@ create table `t_setting` (
 -- ----------------------------
 drop table if exists `t_user`;
 create table `t_user` (
-  `user_id` bigint not null auto_increment comment '用户id',
-  `username` varchar(255) collate utf8mb4_general_ci default null comment '登录用户名',
-  `nick_name` varchar(50) collate utf8mb4_general_ci not null comment '昵称',
-  `salt` varchar(255) collate utf8mb4_general_ci default null comment '密码加盐',
-  `password` varchar(128) collate utf8mb4_general_ci not null comment '密码',
-  `email` varchar(128) collate utf8mb4_general_ci default null comment '邮箱',
-  `status` char(1) collate utf8mb4_general_ci not null comment '状态 0锁定 1有效',
-  `create_time` datetime not null comment '创建时间',
-  `modify_time` datetime default null comment '修改时间',
-  `last_login_time` datetime default null comment '最近访问时间',
-  `sex` char(1) collate utf8mb4_general_ci default null comment '性别 0男 1女 2保密',
-  `avatar` varchar(100) collate utf8mb4_general_ci default null comment '用户头像',
-  `description` varchar(100) collate utf8mb4_general_ci default null comment '描述',
+  `user_id` bigint not null auto_increment comment 'user id',
+  `username` varchar(255) collate utf8mb4_general_ci default null comment 'user name',
+  `nick_name` varchar(50) collate utf8mb4_general_ci not null comment 'nick name',
+  `salt` varchar(255) collate utf8mb4_general_ci default null comment 'salt',
+  `password` varchar(128) collate utf8mb4_general_ci not null comment 'password',
+  `email` varchar(128) collate utf8mb4_general_ci default null comment 'email',
+  `status` char(1) collate utf8mb4_general_ci not null comment 'status 0:locked 1:active',
+  `create_time` datetime not null comment 'creation time',
+  `modify_time` datetime default null comment 'change time',
+  `last_login_time` datetime default null comment 'last login time',
+  `sex` char(1) collate utf8mb4_general_ci default null comment 'gender 0:male 1:female 2:confidential',
+  `avatar` varchar(100) collate utf8mb4_general_ci default null comment 'avatar',
+  `description` varchar(100) collate utf8mb4_general_ci default null comment 'description',
   primary key (`user_id`) using btree,
   unique key `un_username` (`nick_name`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -369,8 +369,8 @@ create table `t_user` (
 drop table if exists `t_user_role`;
 create table `t_user_role` (
   `id` bigint not null auto_increment,
-  `user_id` bigint default null comment '用户id',
-  `role_id` bigint default null comment '角色id',
+  `user_id` bigint default null comment 'user id',
+  `role_id` bigint default null comment 'role id',
   primary key (`id`) using btree,
   unique key `un_user_role_inx` (`user_id`,`role_id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -401,27 +401,27 @@ create table `t_app_build_pipe`(
 drop table if exists `t_flink_cluster`;
 create table `t_flink_cluster` (
   `id` bigint not null auto_increment,
-  `address` varchar(255) default null comment 'jobManager的url地址',
-  `cluster_id` varchar(255) default null comment 'session模式的clusterId(yarn-session:application-id,k8s-session:cluster-id)',
-  `cluster_name` varchar(255) not null comment '集群名称',
-  `options` text comment '参数集合json形式',
-  `yarn_queue` varchar(100) default null comment '任务所在yarn队列',
-  `execution_mode` tinyint not null default 1 comment 'session类型(1:remote,3:yarn-session,5:kubernetes-session)',
-  `version_id` bigint not null comment 'flink对应id',
+  `address` varchar(255) default null comment 'url address of jobmanager',
+  `cluster_id` varchar(255) default null comment 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)',
+  `cluster_name` varchar(255) not null comment 'cluster name',
+  `options` text comment 'parameter collection json form',
+  `yarn_queue` varchar(100) default null comment 'the yarn queue where the task is located',
+  `execution_mode` tinyint not null default 1 comment 'k8s execution session mode(1:remote,3:yarn-session,5:kubernetes-session)',
+  `version_id` bigint not null comment 'flink version id',
   `k8s_namespace` varchar(255) default 'default' comment 'k8s namespace',
   `service_account` varchar(50) default null comment 'k8s service account',
   `description` varchar(255) default null,
   `user_id` bigint default null,
-  `flink_image` varchar(255) default null comment 'flink使用镜像',
-  `dynamic_options` text comment '动态参数',
-  `k8s_rest_exposed_type` tinyint default 2 comment 'k8s 暴露类型(0:loadbalancer,1:clusterIp,2:nodePort)',
+  `flink_image` varchar(255) default null comment 'flink image',
+  `dynamic_options` text comment 'dynamic parameters',
+  `k8s_rest_exposed_type` tinyint default 2 comment 'k8s export(0:loadbalancer,1:clusterip,2:nodeport)',
   `k8s_hadoop_integration` tinyint default 0,
   `flame_graph` tinyint default 0 comment 'flameGraph enable，default disable',
-  `k8s_conf` varchar(255) default null comment 'k8s配置文件所在路径',
+  `k8s_conf` varchar(255) default null comment 'the path where the k 8 s configuration file is located',
   `resolve_order` int default null,
-  `exception` text comment '异常信息',
-  `cluster_state` tinyint default 0 comment '集群状态(0:创建未启动,1:已启动,2:停止)',
-  `create_time` datetime default null,
+  `exception` text comment 'exception information',
+  `cluster_state` tinyint default 0 comment 'cluster status (0: create not started, 1: started, 2: stopped)',
+  `create_time` datetime default null comment 'creattion time',
   primary key (`id`,`cluster_name`),
   unique key `id` (`cluster_id`,`address`,`execution_mode`)
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -430,13 +430,13 @@ create table `t_flink_cluster` (
 -- ----------------------------
 -- Table of t_access_token definition
 -- ----------------------------
-drop table if exists `t_access_token`;
+drop table if exists `cluster status (0: create not started, 1: started, 2: stopped)`;
 create table `t_access_token` (
   `id` int not null auto_increment comment 'key',
   `user_id` bigint,
   `token` varchar(1024) character set utf8mb4 collate utf8mb4_general_ci default null comment 'token',
-  `expire_time` datetime default null comment '过期时间',
-  `description` varchar(512) character set utf8mb4 collate utf8mb4_general_ci default null comment '使用场景描述',
+  `expire_time` datetime default null comment 'expiration',
+  `description` varchar(512) character set utf8mb4 collate utf8mb4_general_ci default null comment 'description',
   `status` tinyint default null comment '1:enable,0:disable',
   `create_time` datetime default null comment 'create time',
   `modify_time` datetime default null comment 'modify time',
@@ -451,16 +451,16 @@ drop table if exists `t_alert_config`;
 create table `t_alert_config` (
   `id` bigint not null auto_increment primary key,
   `user_id` bigint default null,
-  `alert_name` varchar(128) collate utf8mb4_general_ci default null comment '报警组名称',
-  `alert_type` int default 0 comment '报警类型',
-  `email_params` varchar(255) collate utf8mb4_general_ci comment '邮件报警配置信息',
-  `sms_params` text collate utf8mb4_general_ci comment '短信报警配置信息',
-  `ding_talk_params` text collate utf8mb4_general_ci comment '钉钉报警配置信息',
-  `we_com_params` varchar(255) collate utf8mb4_general_ci comment '企微报警配置信息',
-  `http_callback_params` text collate utf8mb4_general_ci comment '报警http回调配置信息',
-  `lark_params` text collate utf8mb4_general_ci comment '飞书报警配置信息',
-  `create_time` datetime not null default current_timestamp comment '创建时间',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment '修改时间',
+  `alert_name` varchar(128) collate utf8mb4_general_ci default null comment 'alert group name',
+  `alert_type` int default 0 comment 'alert type',
+  `email_params` varchar(255) collate utf8mb4_general_ci comment 'email params',
+  `sms_params` text collate utf8mb4_general_ci comment 'sms params',
+  `ding_talk_params` text collate utf8mb4_general_ci comment 'ding talk params',
+  `we_com_params` varchar(255) collate utf8mb4_general_ci comment 'wechat params',
+  `http_callback_params` text collate utf8mb4_general_ci comment 'http callback params',
+  `lark_params` text collate utf8mb4_general_ci comment 'lark params',
+  `create_time` datetime not null default current_timestamp comment 'creation time',
+  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'change time',
   index `inx_alert_user` (`user_id`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
@@ -471,9 +471,9 @@ create table `t_alert_config` (
 drop table if exists `t_team`;
 create table `t_team`(
   `team_id` bigint not null auto_increment comment 'id',
-  `team_code` varchar(255) not null comment '团队标识 后续可以用于队列 资源隔离相关',
-  `team_name` varchar(255) not null comment '团队名',
-  `create_time` datetime not null comment '创建时间',
+  `team_code` varchar(255) not null comment 'team ID can be used for queues later Resource isolation related',
+  `team_name` varchar(255) not null comment 'team name',
+  `create_time` datetime not null comment 'creation time',
   primary key (`team_id`) using btree,
   unique key `team_code` (team_code) using btree
 ) engine=innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
