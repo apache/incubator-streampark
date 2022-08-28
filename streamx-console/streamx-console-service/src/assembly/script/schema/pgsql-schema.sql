@@ -14,6 +14,7 @@
  * limitations under the license.
  */
 
+
 -- ----------------------------
 -- table structure for t_access_token
 -- ----------------------------
@@ -29,7 +30,6 @@ create table "public"."t_access_token" (
   "modify_time" timestamp(6)
 )
 ;
-alter table "public"."t_access_token" owner to "postgres";
 comment on column "public"."t_access_token"."id" is 'key';
 comment on column "public"."t_access_token"."token" is 'token';
 comment on column "public"."t_access_token"."expire_time" is '过期时间';
@@ -59,7 +59,6 @@ create table "public"."t_alert_config" (
   "modify_time" timestamp(6) not null
 )
 ;
-alter table "public"."t_alert_config" owner to "postgres";
 comment on column "public"."t_alert_config"."alert_name" is '报警组名称';
 comment on column "public"."t_alert_config"."alert_type" is '报警类型';
 comment on column "public"."t_alert_config"."email_params" is '邮件报警配置信息';
@@ -91,7 +90,6 @@ create table "public"."t_app_backup" (
   "create_time" timestamp(6)
 )
 ;
-alter table "public"."t_app_backup" owner to "postgres";
 alter table "public"."t_app_backup" add constraint "t_app_backup_pkey" primary key ("id");
 
 
@@ -112,7 +110,6 @@ create table "public"."t_app_build_pipe" (
   "update_time" timestamp(6)
 )
 ;
-alter table "public"."t_app_build_pipe" owner to "postgres";
 alter table "public"."t_app_build_pipe" add constraint "t_app_build_pipe_pkey" primary key ("app_id");
 
 
@@ -128,7 +125,6 @@ create table "public"."t_flame_graph" (
   "content" text collate "pg_catalog"."default"
 )
 ;
-alter table "public"."t_flame_graph" owner to "postgres";
 alter table "public"."t_flame_graph" add constraint "t_flame_graph_pkey" primary key ("id");
 create index "inx_appid" on "public"."t_flame_graph" using btree (
   "app_id" "pg_catalog"."int8_ops" asc nulls last
@@ -203,7 +199,6 @@ create table "public"."t_flink_app" (
   "team_id" int8 not null
 )
 ;
-alter table "public"."t_flink_app" owner to "postgres";
 comment on column "public"."t_flink_app"."team_id" is '任务所属组';
 alter table "public"."t_flink_app" add constraint "t_flink_app_pkey" primary key ("id");
 create index "inx_job_type" on "public"."t_flink_app" using btree (
@@ -246,7 +241,6 @@ create table "public"."t_flink_cluster" (
   "create_time" timestamp(6)
 )
 ;
-alter table "public"."t_flink_cluster" owner to "postgres";
 comment on column "public"."t_flink_cluster"."address" is 'jobmanager的url地址';
 comment on column "public"."t_flink_cluster"."cluster_id" is 'session模式的clusterid(yarn-session:application-id,k8s-session:cluster-id)';
 comment on column "public"."t_flink_cluster"."cluster_name" is '集群名称';
@@ -285,7 +279,6 @@ create table "public"."t_flink_config" (
   "create_time" timestamp(6)
 )
 ;
-alter table "public"."t_flink_config" owner to "postgres";
 alter table "public"."t_flink_config" add constraint "t_flink_config_pkey" primary key ("id");
 
 
@@ -301,7 +294,6 @@ create table "public"."t_flink_effective" (
   "create_time" timestamp(6)
 )
 ;
-alter table "public"."t_flink_effective" owner to "postgres";
 comment on column "public"."t_flink_effective"."target_type" is '1) config 2) flink sql';
 comment on column "public"."t_flink_effective"."target_id" is 'configid or sqlid';
 alter table "public"."t_flink_effective" add constraint "t_flink_effective_pkey" primary key ("id");
@@ -327,7 +319,6 @@ create table "public"."t_flink_env" (
   "create_time" timestamp(6) not null
 )
 ;
-alter table "public"."t_flink_env" owner to "postgres";
 comment on column "public"."t_flink_env"."id" is 'id';
 comment on column "public"."t_flink_env"."flink_name" is 'flink实例名称';
 comment on column "public"."t_flink_env"."flink_home" is 'flink home路径';
@@ -356,7 +347,6 @@ create table "public"."t_flink_log" (
   "option_time" timestamp(6)
 )
 ;
-alter table "public"."t_flink_log" owner to "postgres";
 alter table "public"."t_flink_log" add constraint "t_flink_log_pkey" primary key ("id");
 
 
@@ -382,7 +372,6 @@ create table "public"."t_flink_project" (
   "team_id" int8 not null
 )
 ;
-alter table "public"."t_flink_project" owner to "postgres";
 comment on column "public"."t_flink_project"."team_id" is '项目所属组';
 alter table "public"."t_flink_project" add constraint "t_flink_project_pkey" primary key ("id");
 
@@ -401,7 +390,6 @@ create table "public"."t_flink_savepoint" (
   "create_time" timestamp(6)
 )
 ;
-alter table "public"."t_flink_savepoint" owner to "postgres";
 alter table "public"."t_flink_savepoint" add constraint "t_flink_savepoint_pkey" primary key ("id");
 
 
@@ -419,7 +407,6 @@ create table "public"."t_flink_sql" (
   "create_time" timestamp(6)
 )
 ;
-alter table "public"."t_flink_sql" owner to "postgres";
 alter table "public"."t_flink_sql" add constraint "t_flink_sql_pkey" primary key ("id");
 
 
@@ -435,7 +422,6 @@ create table "public"."t_flink_tutorial" (
   "create_time" timestamp(6)
 )
 ;
-alter table "public"."t_flink_tutorial" owner to "postgres";
 alter table "public"."t_flink_tutorial" add constraint "t_flink_tutorial_pkey" primary key ("id");
 
 
@@ -458,7 +444,6 @@ create table "public"."t_menu" (
   "modify_time" timestamp(6)
 )
 ;
-alter table "public"."t_menu" owner to "postgres";
 comment on column "public"."t_menu"."menu_id" is '菜单/按钮id';
 comment on column "public"."t_menu"."parent_id" is '上级菜单id';
 comment on column "public"."t_menu"."menu_name" is '菜单/按钮名称';
@@ -489,7 +474,6 @@ create table "public"."t_message" (
   "create_time" timestamp(6)
 )
 ;
-alter table "public"."t_message" owner to "postgres";
 alter table "public"."t_message" add constraint "t_message_pkey" primary key ("id");
 create index "inx_mes_user" on "public"."t_message" using btree (
   "user_id" "pg_catalog"."int8_ops" asc nulls last
@@ -508,7 +492,6 @@ create table "public"."t_role" (
   "role_code" varchar(255) collate "pg_catalog"."default"
 )
 ;
-alter table "public"."t_role" owner to "postgres";
 comment on column "public"."t_role"."role_id" is '角色id';
 comment on column "public"."t_role"."role_name" is '角色名称';
 comment on column "public"."t_role"."remark" is '角色描述';
@@ -528,7 +511,6 @@ create table "public"."t_role_menu" (
   "menu_id" int8 not null
 )
 ;
-alter table "public"."t_role_menu" owner to "postgres";
 alter table "public"."t_role_menu" add constraint "t_role_menu_pkey" primary key ("id");
 create index "un_role_menu_inx" on "public"."t_role_menu" using btree (
   "role_id" "pg_catalog"."int8_ops" asc nulls last,
@@ -549,7 +531,6 @@ create table "public"."t_setting" (
   "type" int2 not null
 )
 ;
-alter table "public"."t_setting" owner to "postgres";
 comment on column "public"."t_setting"."type" is '1: input 2: boolean 3: number';
 alter table "public"."t_setting" add constraint "t_setting_pkey" primary key ("setting_key");
 
@@ -565,7 +546,6 @@ create table "public"."t_team" (
   "create_time" timestamp(6) not null
 )
 ;
-alter table "public"."t_team" owner to "postgres";
 comment on column "public"."t_team"."team_id" is 'id';
 comment on column "public"."t_team"."team_code" is '团队标识 后续可以用于队列 资源隔离相关';
 comment on column "public"."t_team"."team_name" is '团队名';
@@ -586,7 +566,6 @@ create table "public"."t_team_user" (
   "create_time" timestamp(6) not null
 )
 ;
-alter table "public"."t_team_user" owner to "postgres";
 comment on column "public"."t_team_user"."team_id" is 'teamid';
 comment on column "public"."t_team_user"."user_id" is 'userid';
 comment on column "public"."t_team_user"."create_time" is '创建时间';
@@ -615,7 +594,6 @@ create table "public"."t_user" (
   "description" varchar(100) collate "pg_catalog"."default"
 )
 ;
-alter table "public"."t_user" owner to "postgres";
 comment on column "public"."t_user"."user_id" is '用户id';
 comment on column "public"."t_user"."username" is '登录用户名';
 comment on column "public"."t_user"."nick_name" is '昵称';
@@ -645,7 +623,6 @@ create table "public"."t_user_role" (
   "role_id" int8
 )
 ;
-alter table "public"."t_user_role" owner to "postgres";
 comment on column "public"."t_user_role"."user_id" is '用户id';
 comment on column "public"."t_user_role"."role_id" is '角色id';
 alter table "public"."t_user_role" add constraint "t_user_role_pkey" primary key ("id");

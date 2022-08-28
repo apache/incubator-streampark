@@ -196,4 +196,4 @@ insert into `t_user_role` values (100000, 100000, 100000);
 
 -- Records of t_team
 -- ----------------------------
-insert into `t_team` values (1,'bigdata','BIGDATA','2022-02-21 18:00:00');
+insert into `t_team` values (1,'bigdata','BIGDATA', now());
