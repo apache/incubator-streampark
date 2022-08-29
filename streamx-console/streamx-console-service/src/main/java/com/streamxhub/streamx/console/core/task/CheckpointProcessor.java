@@ -67,6 +67,7 @@ public class CheckpointProcessor {
                     if (latestId == null || latestId < checkPoint.getId()) {
                         SavePoint savePoint = new SavePoint();
                         savePoint.setAppId(application.getId());
+                        savePoint.setChkId(checkPoint.getId());
                         savePoint.setLatest(true);
                         savePoint.setType(checkPoint.getCheckPointType().get());
                         savePoint.setPath(checkPoint.getExternalPath());
