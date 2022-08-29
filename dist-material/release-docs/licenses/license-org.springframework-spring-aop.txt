@@ -202,9 +202,9 @@
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.18 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.22 SUBCOMPONENTS:
 
-Spring Framework 5.3.18 includes a number of subcomponents
+Spring Framework 5.3.22 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
