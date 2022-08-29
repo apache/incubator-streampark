@@ -40,8 +40,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 /**
  * @author benjobs
  */
@@ -84,12 +82,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             queryWrapper.select(SavePoint::getTriggerTime)
                 .eq(SavePoint::getAppId, entity.getAppId())
                 .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
-                .orderByDesc(SavePoint::getTriggerTime)
-                .last("limit 0," + cpThreshold + 1);
+                .orderByDesc(SavePoint::getTriggerTime);
 
-            List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
-            if (!savePointList.isEmpty() && savePointList.size() > cpThreshold) {
-                SavePoint savePoint = savePointList.get(cpThreshold - 1);
+            Page<SavePoint> savePointPage = this.baseMapper.selectPage(new Page<>(1, cpThreshold + 1), queryWrapper);
+            if (!savePointPage.getRecords().isEmpty() && savePointPage.getRecords().size() > cpThreshold) {
+                SavePoint savePoint = savePointPage.getRecords().get(cpThreshold - 1);
                 this.baseMapper.expire(entity.getAppId(), savePoint.getTriggerTime());
             }
         }
