@@ -22,7 +22,7 @@
     </resultMap>
 
     <select id="page" resultType="project" parameterType="project">
-        select *,
+        select t.*,
                b.team_name as teamName
         from t_flink_project t
         left join t_team b on t.team_id = b.team_id
