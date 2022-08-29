@@ -26,6 +26,7 @@ import com.streamxhub.streamx.console.core.service.alert.AlertService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import scala.Tuple2;
 
 import java.util.Date;
 import java.util.Map;
@@ -34,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class CheckpointProcessor {
 
-    private final Map<Long, Long> checkPointCache = new ConcurrentHashMap<>(0);
+    private final Map<Tuple2<Long, String>, Long> checkPointCache = new ConcurrentHashMap<>(0);
 
     private final Map<Long, Counter> checkPointFailedCache = new ConcurrentHashMap<>(0);
 
@@ -51,15 +52,16 @@ public class CheckpointProcessor {
         CheckPoints.Latest latest = checkPoints.getLatest();
         if (latest != null) {
             Application application = applicationService.getById(appId);
+            String jobId = application.getJobId();
             CheckPoints.CheckPoint checkPoint = latest.getCompleted();
             if (checkPoint != null) {
                 CheckPointStatus status = checkPoint.getCheckPointStatus();
                 if (CheckPointStatus.COMPLETED.equals(status)) {
-                    Long latestId = checkPointCache.get(appId);
+                    Long latestId = checkPointCache.get(new Tuple2<>(appId,jobId));
                     if (latestId == null) {
                         SavePoint savePoint = savePointService.getLatest(appId);
                         if (savePoint != null) {
-                            latestId = savePoint.getId();
+                            latestId = savePoint.getChkId();
                         }
                     }
                     if (latestId == null || latestId < checkPoint.getId()) {
@@ -71,7 +73,7 @@ public class CheckpointProcessor {
                         savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
                         savePoint.setCreateTime(new Date());
                         savePointService.save(savePoint);
-                        checkPointCache.put(application.getId(), checkPoint.getId());
+                        checkPointCache.put(new Tuple2<>(appId,jobId), checkPoint.getId());
                     }
                 } else if (CheckPointStatus.FAILED.equals(status) && application.cpFailedTrigger()) {
                     Counter counter = checkPointFailedCache.get(appId);

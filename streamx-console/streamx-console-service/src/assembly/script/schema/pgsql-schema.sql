@@ -383,6 +383,7 @@ drop table if exists "public"."t_flink_savepoint";
 create table "public"."t_flink_savepoint" (
   "id" int8 not null,
   "app_id" int8 not null,
+  "chk_id" int8 ,
   "type" int2,
   "path" varchar(255) collate "pg_catalog"."default",
   "latest" int2 not null,

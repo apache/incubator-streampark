@@ -162,6 +162,9 @@ add column `modify_time` datetime null after `create_time`;
 -- change `update_time` to `modify_time`
 alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime null default null;
 
+-- add chk_id field
+alter table t_flink_savepoint add column `chk_id` bigint after `app_id`;
+
 -- add permissions for user group management
 insert into `t_menu` values (100043, 100000, 'Team Management', '/system/team', 'system/team/Team', 'team:view', 'team', '0', '1', 1, now(), null);
 insert into `t_menu` values (100044, 100043, 'add', null, null, 'team:add', null, '1', '1', null, now(), null);
