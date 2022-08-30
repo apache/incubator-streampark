@@ -217,14 +217,14 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   private def listJobsDetails(clusterKey: ClusterKey): Option[JobDetails] = {
     // get flink rest api
     var clusterRestUrl = trackController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
-    // list flink jobs from rest api
-    Try(callJobsOverviewsApi(clusterRestUrl)).recover { case _ =>
-      clusterRestUrl = trackController.refreshClusterRestUrl(clusterKey).getOrElse(return None)
-      Try(callJobsOverviewsApi(clusterRestUrl)).recover { case ex =>
-        logInfo(s"failed to list remote flink jobs on kubernetes-native-mode cluster, errorStack=${ex.getMessage}")
+    Try{
+      callJobsOverviewsApi(clusterRestUrl)
+    }match {
+      case Success(jobDetails) =>jobDetails
+      case Failure(e) =>
+        logInfo(s"failed to list remote flink jobs on kubernetes-native-mode cluster, errorStack=${e.getMessage}")
         None
-      }.get
-    }.get
+    }
   }
 
   /**
@@ -257,12 +257,19 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         val isConnection = KubernetesDeploymentHelper.isTheK8sConnectionNormal()
 
         if (isDeployExists && !deployStateOfTheError) {
+          logger.info("task Enter the initialization process")
           FlinkJobState.K8S_INITIALIZING
-        } else if (deployStateOfTheError && isConnection) {
+        } else if (isDeployExists && deployStateOfTheError && isConnection) {
           KubernetesDeploymentHelper.watchPodTerminatedLog(trackId.namespace, trackId.clusterId)
           KubernetesDeploymentHelper.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
+          logger.info("Enter the task failure deletion process")
           FlinkJobState.FAILED
-        } else {
+        } else if (!isDeployExists && isConnection){
+          logger.info("The deployment is deleted and enters the task failure process")
+          FlinkJobState.FAILED
+        }
+        else {
+          logger.info("Enter the disconnected state process")
           // determine if the state should be SILENT or LOST
           inferSilentOrLostFromPreCache(latest)
         }

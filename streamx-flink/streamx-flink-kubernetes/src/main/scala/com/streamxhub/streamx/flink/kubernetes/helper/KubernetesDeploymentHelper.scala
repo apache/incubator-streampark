@@ -47,8 +47,11 @@ object KubernetesDeploymentHelper {
   }
 
   def getDeploymentStatusChanges(nameSpace: String, deploymentName: String): Boolean = {
-    val pods = getPods(nameSpace, deploymentName)
-    pods.head.getStatus.getContainerStatuses.head.getLastState.getTerminated != null
+    Try{
+      val pods = getPods(nameSpace, deploymentName)
+      pods.head.getStatus.getContainerStatuses.head.getLastState.getTerminated != null
+    }.getOrElse(true)
+
   }
 
   def getTheNumberOfTaskDeploymentRetries(nameSpace: String, deploymentName: String): Integer = {
