@@ -31,12 +31,11 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import scala.Tuple2;
 
 @Component
 public class CheckpointProcessor {
 
-    private final Map<Tuple2<Long, String>, Long> checkPointCache = new ConcurrentHashMap<>(0);
+    private final Map<String, Long> checkPointCache = new ConcurrentHashMap<>(0);
 
     private final Map<Long, Counter> checkPointFailedCache = new ConcurrentHashMap<>(0);
 
@@ -54,11 +53,12 @@ public class CheckpointProcessor {
         if (latest != null) {
             Application application = applicationService.getById(appId);
             String jobId = application.getJobId();
+            String cacheId = appId + "_" + jobId;
             CheckPoints.CheckPoint checkPoint = latest.getCompleted();
             if (checkPoint != null) {
                 CheckPointStatus status = checkPoint.getCheckPointStatus();
                 if (CheckPointStatus.COMPLETED.equals(status)) {
-                    Long latestId = checkPointCache.get(new Tuple2<>(appId, jobId));
+                    Long latestId = checkPointCache.get(cacheId);
                     if (latestId == null) {
                         SavePoint savePoint = savePointService.getLatest(appId);
                         if (savePoint != null) {
@@ -75,7 +75,7 @@ public class CheckpointProcessor {
                         savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
                         savePoint.setCreateTime(new Date());
                         savePointService.save(savePoint);
-                        checkPointCache.put(new Tuple2<>(appId, jobId), checkPoint.getId());
+                        checkPointCache.put(cacheId, checkPoint.getId());
                     }
                 } else if (CheckPointStatus.FAILED.equals(status) && application.cpFailedTrigger()) {
                     Counter counter = checkPointFailedCache.get(appId);
