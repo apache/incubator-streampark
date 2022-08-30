@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class CheckpointProcessor {
 
-    private final Map<Long, Long> checkPointCache = new ConcurrentHashMap<>(0);
+    private final Map<String, Long> checkPointCache = new ConcurrentHashMap<>(0);
 
     private final Map<Long, Counter> checkPointFailedCache = new ConcurrentHashMap<>(0);
 
@@ -51,27 +51,30 @@ public class CheckpointProcessor {
         CheckPoints.Latest latest = checkPoints.getLatest();
         if (latest != null) {
             Application application = applicationService.getById(appId);
+            String jobId = application.getJobId();
+            String cacheId = appId + "_" + jobId;
             CheckPoints.CheckPoint checkPoint = latest.getCompleted();
             if (checkPoint != null) {
                 CheckPointStatus status = checkPoint.getCheckPointStatus();
                 if (CheckPointStatus.COMPLETED.equals(status)) {
-                    Long latestId = checkPointCache.get(appId);
+                    Long latestId = checkPointCache.get(cacheId);
                     if (latestId == null) {
                         SavePoint savePoint = savePointService.getLatest(appId);
                         if (savePoint != null) {
-                            latestId = savePoint.getId();
+                            latestId = savePoint.getChkId();
                         }
                     }
                     if (latestId == null || latestId < checkPoint.getId()) {
                         SavePoint savePoint = new SavePoint();
                         savePoint.setAppId(application.getId());
+                        savePoint.setChkId(checkPoint.getId());
                         savePoint.setLatest(true);
                         savePoint.setType(checkPoint.getCheckPointType().get());
                         savePoint.setPath(checkPoint.getExternalPath());
                         savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
                         savePoint.setCreateTime(new Date());
                         savePointService.save(savePoint);
-                        checkPointCache.put(application.getId(), checkPoint.getId());
+                        checkPointCache.put(cacheId, checkPoint.getId());
                     }
                 } else if (CheckPointStatus.FAILED.equals(status) && application.cpFailedTrigger()) {
                     Counter counter = checkPointFailedCache.get(appId);
