@@ -259,7 +259,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         if (isDeployExists && !deployStateOfTheError) {
           FlinkJobState.K8S_INITIALIZING
         } else if (deployStateOfTheError && isConnection) {
-          KubernetesDeploymentHelper.watchDeploymentLog(trackId.namespace, trackId.clusterId)
+          KubernetesDeploymentHelper.watchPodTerminatedLog(trackId.namespace, trackId.clusterId)
           KubernetesDeploymentHelper.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
           FlinkJobState.FAILED
         } else {
