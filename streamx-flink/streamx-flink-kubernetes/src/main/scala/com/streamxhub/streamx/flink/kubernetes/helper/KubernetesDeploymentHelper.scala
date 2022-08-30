@@ -81,4 +81,16 @@ object KubernetesDeploymentHelper {
       path
     }
   }
+
+  def watchPodTerminatedLog(nameSpace: String, jobName: String): String = try {
+    Utils.tryWithResource(new DefaultKubernetesClient) { client =>
+      val podName = getPods(nameSpace, jobName).head.getMetadata.getName
+      val projectPath = new File("").getCanonicalPath
+      val path = s"$projectPath/${nameSpace}_${jobName}_err.log"
+      val file = new File(path)
+      val log = client.pods.inNamespace(nameSpace).withName(podName).terminated().withPrettyOutput.getLog
+      Files.asCharSink(file, Charsets.UTF_8).write(log)
+      path
+    }
+  }
 }
