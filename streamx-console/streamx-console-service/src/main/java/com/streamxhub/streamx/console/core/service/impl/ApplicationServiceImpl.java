@@ -345,12 +345,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(Application::getId, application.getId());
         if (application.isFlinkSqlJob()) {
-            updateWrapper.set(Application::getLaunch, LaunchState.FAILED.get());
+            application.setLaunch(LaunchState.FAILED.get());
         } else {
-            updateWrapper.set(Application::getLaunch, LaunchState.NEED_LAUNCH.get());
+            application.setLaunch(LaunchState.NEED_LAUNCH.get());
         }
         if (!application.isRunning()) {
-            updateWrapper.set(Application::getState, FlinkAppState.REVOKED.getValue());
+            application.setState(FlinkAppState.REVOKED.getValue());
         }
         try {
             FlinkTrackingTask.refreshTracking(application.getId(), () -> {
@@ -863,11 +863,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public void updateLaunch(Application application) {
         LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(Application::getId, application.getId());
-        updateWrapper.set(Application::getLaunch, application.getLaunch());
-        updateWrapper.set(Application::getBuild, application.getBuild());
-        if (application.getOptionState() != null) {
-            updateWrapper.set(Application::getOptionState, application.getOptionState());
-        }
         baseMapper.update(application, updateWrapper);
     }
 
@@ -884,10 +879,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
             updateWrapper.eq(Application::getId, application.getId());
             if (application.isRunning()) {
-                updateWrapper.set(Application::getLaunch, LaunchState.NEED_RESTART.get());
+                application.setLaunch(LaunchState.NEED_RESTART.get());
             } else {
-                updateWrapper.set(Application::getLaunch, LaunchState.DONE.get());
-                updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
+                application.setLaunch(LaunchState.DONE.get());
+                application.setOptionState(OptionState.NONE.getValue());
             }
             baseMapper.update(application, updateWrapper);
 

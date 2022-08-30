@@ -724,7 +724,6 @@
         <profile>
             <id>scala-2.11</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
                 <property>
                     <name>scala.binary.version</name>
                     <value>2.11</value>
