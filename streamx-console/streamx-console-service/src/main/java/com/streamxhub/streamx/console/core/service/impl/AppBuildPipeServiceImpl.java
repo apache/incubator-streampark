@@ -98,7 +98,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
-public class ApplBuildPipeServiceImpl
+public class AppBuildPipeServiceImpl
     extends ServiceImpl<ApplicationBuildPipelineMapper, AppBuildPipeline> implements AppBuildPipeService {
 
     @Autowired
