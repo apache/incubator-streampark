@@ -217,7 +217,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   private def listJobsDetails(clusterKey: ClusterKey): Option[JobDetails] = {
     // get flink rest api
     Try {
-      val clusterRestUrl = trackController.refreshClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
+      val clusterRestUrl = trackController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
       callJobsOverviewsApi(clusterRestUrl)
     } match {
       case Success(v) => v
