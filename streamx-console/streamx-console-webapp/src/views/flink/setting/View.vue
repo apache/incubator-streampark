@@ -386,13 +386,13 @@
           </div>
           <a-list>
             <a-list-item v-for="(item,index) in clusters" :key="index">
-              <a-list-item-meta style="width: 60%">
+              <a-list-item-meta style="width: 50% ;white-space: normal; word-wrap: break-word;">
                 <svg-icon class="avatar" name="flink" size="large" slot="avatar"></svg-icon>
                 <span slot="title">{{ item.clusterName }}</span>
                 <span slot="description">{{ item.description }}</span>
               </a-list-item-meta>
-              <div class="list-content" style="width: 10%">
-                <div class="list-content-item" style="width: 60%">
+              <div class="list-content" style="width: 15%">
+                <div class="list-content-item" style="width: 80%;white-space: normal; word-wrap: break-word;">
                   <span>ExecutionMode</span>
                   <p style="margin-top: 10px">
                     {{ item.executionModeEnum.toLowerCase() }}
@@ -400,17 +400,17 @@
                 </div>
               </div>
               <div class="list-content" style="width: 15%">
-                <div class="list-content-item" style="width: 80%">
+                <div class="list-content-item" style="width: 80%; text-align: center; display: block;">
                   <span>ClusterId</span>
-                  <p style="margin-top: 10px">
+                  <p style="margin-top: 10px;white-space: normal; word-wrap: break-word;">
                     {{ item.clusterId }}
                   </p>
                 </div>
               </div>
               <div class="list-content" style="width: 20%">
-                <div class="list-content-item" style="width: 60%">
+                <div class="list-content-item" style="width: 80%; text-align: center; display: block;">
                   <span>Address</span>
-                  <p style="margin-top: 10px">
+                  <p style="margin-top: 10px;white-space: normal; word-wrap: break-word;">
                     {{ item.address }}
                   </p>
                 </div>
