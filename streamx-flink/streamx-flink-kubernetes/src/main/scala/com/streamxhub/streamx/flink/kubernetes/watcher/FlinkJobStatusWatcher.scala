@@ -216,11 +216,11 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    */
   private def listJobsDetails(clusterKey: ClusterKey): Option[JobDetails] = {
     // get flink rest api
-    var clusterRestUrl = trackController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
-    Try{
+    Try {
+      val clusterRestUrl = trackController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
       callJobsOverviewsApi(clusterRestUrl)
-    }match {
-      case Success(jobDetails) =>jobDetails
+    } match {
+      case Success(v) => v
       case Failure(e) =>
         logInfo(s"failed to list remote flink jobs on kubernetes-native-mode cluster, errorStack=${e.getMessage}")
         None
@@ -264,7 +264,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
           KubernetesDeploymentHelper.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
           logger.info("Enter the task failure deletion process")
           FlinkJobState.FAILED
-        } else if (!isDeployExists && isConnection){
+        } else if (!isDeployExists && isConnection) {
           logger.info("The deployment is deleted and enters the task failure process")
           FlinkJobState.FAILED
         }
