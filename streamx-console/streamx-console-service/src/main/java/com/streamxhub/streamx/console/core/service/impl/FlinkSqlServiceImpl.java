@@ -165,8 +165,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public void cleanCandidate(Long id) {
-        this.baseMapper.update(
-            null,
+        this.update(
             new LambdaUpdateWrapper<FlinkSql>()
                 .eq(FlinkSql::getId, id)
                 .set(FlinkSql::getCandidate, CandidateType.NONE.get())
