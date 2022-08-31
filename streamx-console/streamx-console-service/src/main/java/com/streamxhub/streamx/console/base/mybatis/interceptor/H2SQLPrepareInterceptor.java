@@ -31,7 +31,11 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.plugin.*;
+import org.apache.ibatis.plugin.Interceptor;
+import org.apache.ibatis.plugin.Intercepts;
+import org.apache.ibatis.plugin.Invocation;
+import org.apache.ibatis.plugin.Plugin;
+import org.apache.ibatis.plugin.Signature;
 
 import java.sql.Connection;
 import java.util.Iterator;
@@ -97,7 +101,7 @@ public class H2SQLPrepareInterceptor extends JsqlParserSupport implements Interc
                     columnNameCountMap.forEach((column, times) -> {
                         for (long i = 1L; i < times; ) {
                             Iterator<UpdateSet> updateSetIterator = update.getUpdateSets().iterator();
-                            while (updateSetIterator.hasNext()) {
+                            while (((Iterator<?>) updateSetIterator).hasNext()) {
                                 UpdateSet updateSet = updateSetIterator.next();
                                 if (updateSet.getColumns().stream().anyMatch(c -> c.getColumnName().equals(column))) {
                                     updateSetIterator.remove();

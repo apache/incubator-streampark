@@ -17,6 +17,7 @@
 import com.streamxhub.streamx.console.StreamXConsole;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;

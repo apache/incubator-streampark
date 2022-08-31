@@ -19,6 +19,7 @@ package com.streamxhub.streamx.console.base.config;
 import com.streamxhub.streamx.console.base.mybatis.interceptor.H2SQLPrepareInterceptor;
 import com.streamxhub.streamx.console.base.mybatis.interceptor.PostgreSQLPrepareInterceptor;
 import com.streamxhub.streamx.console.base.mybatis.interceptor.PostgreSQLQueryInterceptor;
+
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
