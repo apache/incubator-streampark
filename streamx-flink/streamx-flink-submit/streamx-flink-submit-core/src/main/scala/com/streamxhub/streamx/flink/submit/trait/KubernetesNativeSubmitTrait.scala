@@ -147,7 +147,8 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   }
 
   def getDefaultKubernetesConf(k8sConf: String): String = {
-    if (k8sConf != null) File.separator.concat(k8sConf.replace("~", "root"))
-    else "/root/.kube/conf"
+    val homePath: String = System.getProperty("user.home")
+    if (k8sConf != null) k8sConf.replace("~", homePath)
+    else homePath.concat("/.kube/config")
   }
 }
