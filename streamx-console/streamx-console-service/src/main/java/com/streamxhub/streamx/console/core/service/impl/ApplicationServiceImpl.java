@@ -354,7 +354,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
         try {
             FlinkTrackingTask.refreshTracking(application.getId(), () -> {
-                baseMapper.update(application, updateWrapper);
+                baseMapper.update(null, updateWrapper);
                 return null;
             });
         } catch (Exception e) {
@@ -868,7 +868,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (application.getOptionState() != null) {
             updateWrapper.set(Application::getOptionState, application.getOptionState());
         }
-        baseMapper.update(application, updateWrapper);
+        this.update(updateWrapper);
     }
 
     @Override
@@ -889,7 +889,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 updateWrapper.set(Application::getLaunch, LaunchState.DONE.get());
                 updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
             }
-            baseMapper.update(application, updateWrapper);
+            this.update(updateWrapper);
 
             // backup.
             if (application.isFlinkSqlJob()) {

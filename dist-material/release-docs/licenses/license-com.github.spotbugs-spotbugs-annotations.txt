@@ -1,1 +1,0 @@
-License: {Name: GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1, URL: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html, Distribution: , Comments: , }
