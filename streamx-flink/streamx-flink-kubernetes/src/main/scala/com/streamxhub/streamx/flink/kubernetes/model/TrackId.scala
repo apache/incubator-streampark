@@ -55,7 +55,7 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
     executeMode == clusterKey.executeMode && namespace == clusterKey.namespace && clusterId == clusterKey.clusterId
 
   override def hashCode(): Int = {
-    Utils.hashCode(executeMode, clusterId, namespace, appId)
+    Utils.hashCode(executeMode, clusterId, namespace, appId, jobId)
   }
 
   override def equals(obj: Any): Boolean = {
@@ -64,7 +64,8 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
         this.executeMode == that.executeMode &&
           this.clusterId == that.clusterId &&
           this.namespace == that.namespace &&
-          this.appId == that.appId
+          this.appId == that.appId &&
+          this.jobId == that.jobId
       case _ => false
     }
   }
