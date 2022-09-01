@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-create database if not exists  `streamx`  default character set utf8mb4 collate utf8mb4_unicode_ci ;
-use `streamx`;
 set names utf8mb4;
 set foreign_key_checks = 0;
 

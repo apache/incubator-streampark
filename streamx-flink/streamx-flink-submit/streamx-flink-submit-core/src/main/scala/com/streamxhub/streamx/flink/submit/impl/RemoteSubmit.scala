@@ -27,7 +27,7 @@ import org.apache.flink.configuration._
 
 import java.io.File
 import java.lang.{Integer => JavaInt}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 
 /**
@@ -105,10 +105,12 @@ object RemoteSubmit extends FlinkSubmitTrait {
       val jobId = FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
       logInfo(s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
       SubmitResponse(null, flinkConfig.toMap, jobId)
-    }.recover { case e =>
+    } match {
+      case Success(s) => s
+      case Failure(e) =>
         logError(s"${submitRequest.executionMode} mode submit by restApi fail.")
         throw e
-    }.get
+    }
   }
 
   /**

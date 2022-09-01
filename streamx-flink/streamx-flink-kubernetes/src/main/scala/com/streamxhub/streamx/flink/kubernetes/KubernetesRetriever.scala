@@ -133,7 +133,7 @@ object KubernetesRetriever extends Logger {
       Option(url)
     } { error =>
       logger.info(s"Failed to get url path of jobManager for task,errorStack=${error.getMessage}")
-      None
+      throw error
     }
   }
 }

@@ -71,13 +71,13 @@ object KubernetesDeploymentHelper extends Logger {
     }
   }
 
-  def isTheK8sConnectionNormal(): Boolean = try {
+  def isTheK8sConnectionNormal(): Boolean = {
     Utils.tryWithResource(new DefaultKubernetesClient) { client =>
       client != null
-    }
+    }(_ => false)
   }
 
-  def watchDeploymentLog(nameSpace: String, jobName: String): String = try {
+  def watchDeploymentLog(nameSpace: String, jobName: String): String = {
     Utils.tryWithResource(new DefaultKubernetesClient) { client =>
       val projectPath = new File("").getCanonicalPath
       val path = s"$projectPath/${nameSpace}_$jobName.log"
@@ -85,10 +85,10 @@ object KubernetesDeploymentHelper extends Logger {
       val log = client.apps.deployments.inNamespace(nameSpace).withName(jobName).getLog
       Files.asCharSink(file, Charsets.UTF_8).write(log)
       path
-    }
+    }(error => throw error)
   }
 
-  def watchPodTerminatedLog(nameSpace: String, jobName: String): String = try {
+  def watchPodTerminatedLog(nameSpace: String, jobName: String): String = {
     Utils.tryWithResource(new DefaultKubernetesClient) { client =>
       val podName = getPods(nameSpace, jobName).head.getMetadata.getName
       val projectPath = new File("").getCanonicalPath
@@ -97,6 +97,6 @@ object KubernetesDeploymentHelper extends Logger {
       val log = client.pods.inNamespace(nameSpace).withName(podName).terminated().withPrettyOutput.getLog
       Files.asCharSink(file, Charsets.UTF_8).write(log)
       path
-    }
+    }(error => throw error)
   }
 }
