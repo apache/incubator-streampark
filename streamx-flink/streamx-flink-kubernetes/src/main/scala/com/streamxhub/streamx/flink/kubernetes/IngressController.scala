@@ -103,7 +103,7 @@ object IngressController extends Logger {
   }
 
   private[this] def determineThePodSurvivalStatus(name: String, nameSpace: String): Boolean = {
-    tryWithResource(Try(new DefaultKubernetesClient).getOrElse(return false)) { client =>
+    tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
       Try {
         client.apps()
           .deployments()
@@ -127,18 +127,18 @@ object IngressController extends Logger {
         case Some(metas) =>
           val ingressMeta = metas.head
           val hostname = ingressMeta.hostname
-          val path = ingressMeta.path
+          val path = ingressMeta.path.trim.replaceAll("/$","")
           logger.info(s"Retrieve flink cluster $clusterId successfully, JobManager Web Interface: https://$hostname$path")
           s"https://$hostname$path"
         case None => throw new RuntimeException("[StreamX] get ingressUrlAddress error.")
       }
     } else {
-      clusterClient.getWebInterfaceURL
+      clusterClient.getWebInterfaceURL.trim.replaceAll("/$","")
     }
   }
 
   def determineIfIngressExists(nameSpace: String, clusterId: String): Boolean = {
-    tryWithResource(Try(new DefaultKubernetesClient).getOrElse(return false)) { client =>
+    tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
       Try {
         client.extensions.ingresses
           .inNamespace(nameSpace)
