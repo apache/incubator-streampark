@@ -22,7 +22,6 @@ import com.streamxhub.streamx.flink.kubernetes.model._
 
 import java.util.concurrent.TimeUnit
 import scala.collection.JavaConversions._
-import scala.util.Try
 
 /**
  * Tracking info cache pool on flink kubernetes mode.
@@ -127,8 +126,9 @@ class TrackIdCache {
   private[this] lazy val cache: Cache[CacheKey, TrackId] = Caffeine.newBuilder.build()
 
   def update(k: TrackId): Unit = {
-    cache.invalidate(k)
-    cache.put(CacheKey(k.appId), k)
+    val key = CacheKey(k.appId)
+    cache.invalidate(key)
+    cache.put(key, k)
   }
 
   def set(k: TrackId): Unit = cache.put(CacheKey(k.appId), k)
