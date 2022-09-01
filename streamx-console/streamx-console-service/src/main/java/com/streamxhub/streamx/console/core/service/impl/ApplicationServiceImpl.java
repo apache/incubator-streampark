@@ -661,6 +661,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setResourceFrom(oldApp.getResourceFrom());
         newApp.setProjectId(oldApp.getProjectId());
         newApp.setModule(oldApp.getModule());
+        newApp.setDefaultModeIngress(oldApp.getDefaultModeIngress())
 
         newApp.setUserId(commonService.getCurrentUser().getUserId());
         newApp.setState(FlinkAppState.ADDED.getValue());
