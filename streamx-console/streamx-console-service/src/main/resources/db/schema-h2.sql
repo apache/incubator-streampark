@@ -241,7 +241,7 @@ create table if not exists `t_menu` (
   `perms` varchar(50)  default null comment 'authority id',
   `icon` varchar(50)  default null comment 'icon',
   `type` char(2)  default null comment 'type 0:menu 1:button',
-  `display` boolean  not null 1 comment 'whether the menu is displayed',
+  `display` boolean not null default 1 comment 'whether the menu is displayed',
   `order_num` int default null comment 'sort',
   `create_time` datetime not null comment 'create time',
   `modify_time` datetime default null comment 'modify time',
