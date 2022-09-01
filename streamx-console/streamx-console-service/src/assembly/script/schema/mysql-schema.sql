@@ -159,10 +159,10 @@ create table `t_flink_env` (
   `id` bigint not null auto_increment comment 'id',
   `flink_name` varchar(128) collate utf8mb4_general_ci not null comment 'flink instance name',
   `flink_home` varchar(255) collate utf8mb4_general_ci not null comment 'flink home path',
-  `version` varchar(50) collate utf8mb4_general_ci not null comment 'the version number corresponding to flink',
-  `scala_version` varchar(50) collate utf8mb4_general_ci not null comment 'the scala version number corresponding to flink',
-  `flink_conf` text collate utf8mb4_general_ci not null comment 'flink conf configuration content',
-  `is_default` tinyint not null default 0 comment 'default value',
+  `version` varchar(50) collate utf8mb4_general_ci not null comment 'flink version',
+  `scala_version` varchar(50) collate utf8mb4_general_ci not null comment 'scala version of flink',
+  `flink_conf` text collate utf8mb4_general_ci not null comment 'flink-conf',
+  `is_default` tinyint not null default 0 comment 'whether default version or not',
   `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
   `create_time` datetime not null comment 'create time',
   primary key (`id`) using btree,
@@ -351,7 +351,7 @@ create table `t_user` (
   `password` varchar(128) collate utf8mb4_general_ci not null comment 'password',
   `email` varchar(128) collate utf8mb4_general_ci default null comment 'email',
   `status` char(1) collate utf8mb4_general_ci not null comment 'status 0:locked 1:active',
-  `create_time` datetime not null comment 'creation time',
+  `create_time` datetime not null comment 'create time',
   `modify_time` datetime default null comment 'change time',
   `last_login_time` datetime default null comment 'last login time',
   `sex` char(1) collate utf8mb4_general_ci default null comment 'gender 0:male 1:female 2:confidential',
@@ -403,7 +403,7 @@ create table `t_flink_cluster` (
   `address` varchar(255) default null comment 'url address of jobmanager',
   `cluster_id` varchar(255) default null comment 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)',
   `cluster_name` varchar(255) not null comment 'cluster name',
-  `options` text comment 'parameter collection json form',
+  `options` text comment 'json form of parameter collection ',
   `yarn_queue` varchar(100) default null comment 'the yarn queue where the task is located',
   `execution_mode` tinyint not null default 1 comment 'k8s execution session mode(1:remote,3:yarn-session,5:kubernetes-session)',
   `version_id` bigint not null comment 'flink version id',
@@ -419,7 +419,7 @@ create table `t_flink_cluster` (
   `k8s_conf` varchar(255) default null comment 'the path where the k 8 s configuration file is located',
   `resolve_order` int default null,
   `exception` text comment 'exception information',
-  `cluster_state` tinyint default 0 comment 'cluster status (0: create not started, 1: started, 2: stopped)',
+  `cluster_state` tinyint default 0 comment 'cluster status (0: created but not started, 1: started, 2: stopped)',
   `create_time` datetime default null comment 'creattion time',
   primary key (`id`,`cluster_name`),
   unique key `id` (`cluster_id`,`address`,`execution_mode`)
@@ -429,7 +429,7 @@ create table `t_flink_cluster` (
 -- ----------------------------
 -- Table of t_access_token definition
 -- ----------------------------
-drop table if exists `cluster status (0: create not started, 1: started, 2: stopped)`;
+drop table if exists `t_access_token`;
 create table `t_access_token` (
   `id` int not null auto_increment comment 'key',
   `user_id` bigint,
@@ -458,7 +458,7 @@ create table `t_alert_config` (
   `we_com_params` varchar(255) collate utf8mb4_general_ci comment 'wechat params',
   `http_callback_params` text collate utf8mb4_general_ci comment 'http callback params',
   `lark_params` text collate utf8mb4_general_ci comment 'lark params',
-  `create_time` datetime not null default current_timestamp comment 'creation time',
+  `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'change time',
   index `inx_alert_user` (`user_id`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
@@ -470,9 +470,9 @@ create table `t_alert_config` (
 drop table if exists `t_team`;
 create table `t_team`(
   `team_id` bigint not null auto_increment comment 'id',
-  `team_code` varchar(255) not null comment 'team ID can be used for queues later Resource isolation related',
+  `team_code` varchar(255) not null comment 'team ID, which could be used for queue and resource isolation',
   `team_name` varchar(255) not null comment 'team name',
-  `create_time` datetime not null comment 'creation time',
+  `create_time` datetime not null comment 'create time',
   primary key (`team_id`) using btree,
   unique key `team_code` (team_code) using btree
 ) engine=innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
