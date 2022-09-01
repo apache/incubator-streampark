@@ -17,7 +17,6 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import java.io.File
-
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
@@ -33,11 +32,11 @@ import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType
 import org.apache.flink.kubernetes.configuration.{KubernetesConfigOptions, KubernetesDeploymentTarget}
-import org.apache.flink.kubernetes.kubeclient.{Endpoint, FlinkKubeClient, FlinkKubeClientFactory}
+import org.apache.flink.kubernetes.kubeclient.{FlinkKubeClient, FlinkKubeClientFactory}
 
 import scala.collection.JavaConversions._
 import scala.language.postfixOps
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
  * kubernetes native session mode submit
@@ -70,10 +69,12 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       // submit job via rest api
       val jobId = FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig)
       SubmitResponse(clusterKey.clusterId, flinkConfig.toMap, jobId)
-    }.recover { case e =>
-      logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
-      throw e
-    }.get
+    } match {
+      case Success(s) => s
+      case Failure(e) =>
+        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
+        throw e
+    }
   }
 
   /**

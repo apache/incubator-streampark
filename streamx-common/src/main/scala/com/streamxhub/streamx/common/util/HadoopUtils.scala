@@ -219,8 +219,10 @@ object HadoopUtils extends Logger {
       UserGroupInformation.setLoginUser(ugi)
       logInfo("kerberos authentication successful")
       ugi
-    }.recover { case e => throw e }
-      .get
+    } match {
+      case Success(ugi) => ugi
+      case Failure(e) => throw e
+    }
   }
 
   def hdfs: FileSystem = {

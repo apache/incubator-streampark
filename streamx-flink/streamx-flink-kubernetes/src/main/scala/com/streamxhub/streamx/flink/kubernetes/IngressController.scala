@@ -37,46 +37,48 @@ import scala.language.postfixOps
 object IngressController extends Logger {
 
   def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
-    tryWithResource(new DefaultKubernetesClient) { client =>
-      val annotMap = Map[String, String](
-        "nginx.ingress.kubernetes.io/rewrite-target" -> "/$2",
-        "nginx.ingress.kubernetes.io/proxy-body-size" -> "1024m",
-        "nginx.ingress.kubernetes.io/configuration-snippet" -> ("rewrite ^(/" + clusterId + ")$ $1/ permanent;")
-      )
-      val labelsMap = Map[String, String](
-        "app" -> clusterId,
-        "type" -> "flink-native-kubernetes",
-        "component" -> "ingress"
-      )
-      val ingress = new IngressBuilder()
-        .withNewMetadata()
-        .withName(clusterId)
-        .addToAnnotations(annotMap.asJava)
-        .addToLabels(labelsMap.asJava)
-        .endMetadata()
-        .withNewSpec()
-        .addNewRule()
-        .withHost(domainName)
-        .withNewHttp()
-        .addNewPath()
-        .withPath(s"/$nameSpace/$clusterId/")
-        .withNewBackend()
-        .withServiceName(s"$clusterId-rest")
-        .withServicePort(new IntOrString("rest"))
-        .endBackend()
-        .endPath()
-        .addNewPath()
-        .withPath(s"/$nameSpace/$clusterId" + "(/|$)(.*)")
-        .withNewBackend()
-        .withServiceName(s"$clusterId-rest")
-        .withServicePort(new IntOrString("rest"))
-        .endBackend()
-        .endPath()
-        .endHttp()
-        .endRule()
-        .endSpec()
-        .build();
-      client.network.ingress.inNamespace(nameSpace).create(ingress)
+    Try(new DefaultKubernetesClient) match {
+      case Success(client) =>
+        val annotMap = Map[String, String](
+          "nginx.ingress.kubernetes.io/rewrite-target" -> "/$2",
+          "nginx.ingress.kubernetes.io/proxy-body-size" -> "1024m",
+          "nginx.ingress.kubernetes.io/configuration-snippet" -> ("rewrite ^(/" + clusterId + ")$ $1/ permanent;")
+        )
+        val labelsMap = Map[String, String](
+          "app" -> clusterId,
+          "type" -> "flink-native-kubernetes",
+          "component" -> "ingress"
+        )
+        val ingress = new IngressBuilder()
+          .withNewMetadata()
+          .withName(clusterId)
+          .addToAnnotations(annotMap.asJava)
+          .addToLabels(labelsMap.asJava)
+          .endMetadata()
+          .withNewSpec()
+          .addNewRule()
+          .withHost(domainName)
+          .withNewHttp()
+          .addNewPath()
+          .withPath(s"/$nameSpace/$clusterId/")
+          .withNewBackend()
+          .withServiceName(s"$clusterId-rest")
+          .withServicePort(new IntOrString("rest"))
+          .endBackend()
+          .endPath()
+          .addNewPath()
+          .withPath(s"/$nameSpace/$clusterId" + "(/|$)(.*)")
+          .withNewBackend()
+          .withServiceName(s"$clusterId-rest")
+          .withServicePort(new IntOrString("rest"))
+          .endBackend()
+          .endPath()
+          .endHttp()
+          .endRule()
+          .endSpec()
+          .build();
+        client.network.ingress.inNamespace(nameSpace).create(ingress)
+      case _ =>
     }
   }
 
@@ -100,8 +102,8 @@ object IngressController extends Logger {
     }
   }
 
-  private[this] def determineThePodSurvivalStatus(name: String, nameSpace: String): Boolean = { // getpod by deploymentName
-    tryWithResource(new DefaultKubernetesClient()) { client =>
+  private[this] def determineThePodSurvivalStatus(name: String, nameSpace: String): Boolean = {
+    tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
       Try {
         client.apps()
           .deployments()
@@ -136,7 +138,7 @@ object IngressController extends Logger {
   }
 
   def determineIfIngressExists(nameSpace: String, clusterId: String): Boolean = {
-    tryWithResource(new DefaultKubernetesClient) { client =>
+    tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
       Try {
         client.extensions.ingresses
           .inNamespace(nameSpace)

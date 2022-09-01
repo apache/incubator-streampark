@@ -19,7 +19,8 @@ package com.streamxhub.streamx.flink.packer
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.listener.{BuildImageCallbackListener, PullImageCallbackListener, PushImageCallbackListener}
 import com.github.dockerjava.api.model.{PullResponseItem, PushResponseItem}
-import com.streamxhub.streamx.common.util.Utils.tryWithResource
+
+import scala.util.{Failure, Success, Try}
 
 /**
  * @author Al-assad
@@ -41,7 +42,14 @@ package object docker {
       override def watchPushProcess(processDetail: PushResponseItem): Unit = func(processDetail)
     }
 
-  def usingDockerClient[R](process: DockerClient => R)(handleException: Throwable => R): R =
-    tryWithResource(DockerRetriever.newDockerClient())(process)(handleException)
+  def usingDockerClient[R](process: DockerClient => R)(handleException: Throwable => R): R = {
+    Try(DockerRetriever.newDockerClient()) match {
+      case Success(client) =>
+        val r = process(client)
+        client.close()
+        r
+      case Failure(e) => handleException(e)
+    }
+  }
 
 }

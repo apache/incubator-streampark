@@ -89,6 +89,9 @@ public class H2SQLPrepareInterceptor extends JsqlParserSupport implements Interc
             Object parameterObject = boundSql.getParameterObject();
             if (parameterObject instanceof MapperMethod.ParamMap<?>) {
                 MapperMethod.ParamMap<?> paramMap = (MapperMethod.ParamMap<?>) parameterObject;
+                if (!paramMap.containsKey(Constants.ENTITY)) {
+                    return;
+                }
                 Object entity = paramMap.get(Constants.ENTITY);
                 if (Objects.nonNull(entity) && paramMap.containsKey(Constants.WRAPPER)) {
                     TableInfo tableInfo = TableInfoHelper.getTableInfo(entity.getClass());
@@ -124,5 +127,4 @@ public class H2SQLPrepareInterceptor extends JsqlParserSupport implements Interc
             }
         }
     }
-
 }

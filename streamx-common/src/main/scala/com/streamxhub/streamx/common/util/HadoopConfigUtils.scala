@@ -24,7 +24,7 @@ import java.util.{Map => JavaMap, Optional => JOption}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 
 /**
@@ -42,9 +42,12 @@ object HadoopConfigUtils {
    * Get Hadoop configuration directory path from system.
    */
   def getSystemHadoopConfDir: Option[String] = {
-    Try(FileUtils.getPathFromEnv("HADOOP_CONF_DIR"))
-      .recover { case _ => FileUtils.resolvePath(FileUtils.getPathFromEnv("HADOOP_HOME"), "/etc/hadoop") }
-      .toOption
+    Try(FileUtils.getPathFromEnv("HADOOP_CONF_DIR")) match {
+      case Success(p) => Some(p)
+      case Failure(_) =>
+        val p = FileUtils.resolvePath(FileUtils.getPathFromEnv("HADOOP_HOME"), "/etc/hadoop")
+        Some(p)
+    }
   }
 
   def getSystemHadoopConfDirAsJava: JOption[String] = JOption.ofNullable(getSystemHadoopConfDir.orNull)
