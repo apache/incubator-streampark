@@ -37,6 +37,8 @@ public class SavePoint {
 
     private Long appId;
 
+    private Long chkId;
+
     private Boolean latest;
 
     /**

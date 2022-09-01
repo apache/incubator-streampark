@@ -27,7 +27,7 @@ create table `t_app_backup` (
   `id` bigint not null auto_increment,
   `app_id` bigint default null,
   `sql_id` bigint default null,
-  `confing_id` bigint default null,
+  `config_id` bigint default null,
   `version` int default null,
   `path` varchar(255) collate utf8mb4_general_ci default null,
   `description` varchar(255) collate utf8mb4_general_ci default null,
@@ -219,6 +219,7 @@ drop table if exists `t_flink_savepoint`;
 create table `t_flink_savepoint` (
   `id` bigint not null auto_increment,
   `app_id` bigint not null,
+  `chk_id` bigint default null,
   `type` tinyint default null,
   `path` varchar(255) collate utf8mb4_general_ci default null,
   `latest` tinyint not null,

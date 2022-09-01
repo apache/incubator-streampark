@@ -144,6 +144,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     public ResponseResult start(FlinkCluster flinkCluster) {
         ResponseResult result = new ResponseResult();
         LambdaUpdateWrapper<FlinkCluster> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(FlinkCluster::getId, flinkCluster.getId());
         try {
             ExecutionMode executionModeEnum = flinkCluster.getExecutionModeEnum();
             KubernetesDeployParam kubernetesDeployParam = null;
@@ -183,12 +184,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             DeployResponse deployResponse = future.get(60, TimeUnit.SECONDS);
             if (null != deployResponse) {
                 if (deployResponse.message() == null) {
-                    updateWrapper.eq(FlinkCluster::getId, flinkCluster.getId());
                     updateWrapper.set(FlinkCluster::getClusterId, deployResponse.clusterId());
                     updateWrapper.set(FlinkCluster::getAddress, deployResponse.address());
                     updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STARTED.getValue());
                     updateWrapper.set(FlinkCluster::getException, null);
-                    update(flinkCluster, updateWrapper);
+                    update(updateWrapper);
                     result.setStatus(1);
                 } else {
                     result.setStatus(0);
@@ -201,10 +201,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             return result;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            updateWrapper.eq(FlinkCluster::getId, flinkCluster.getId());
             updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STOPED.getValue());
             updateWrapper.set(FlinkCluster::getException, e.toString());
-            update(flinkCluster, updateWrapper);
+            update(updateWrapper);
             result.setStatus(0);
             result.setMsg("deploy cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
             return result;
@@ -268,7 +267,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
             if (null != shutDownResponse) {
                 updateWrapper.set(FlinkCluster::getClusterState, ClusterState.STOPED.getValue());
-                update(flinkCluster, updateWrapper);
+                update(updateWrapper);
                 result.setStatus(1);
                 return result;
             }
@@ -278,7 +277,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             updateWrapper.set(FlinkCluster::getException, e.toString());
-            update(flinkCluster, updateWrapper);
+            update(updateWrapper);
             result.setStatus(0);
             result.setMsg("shutdown cluster failed, Caused By: " + ExceptionUtils.getStackTrace(e));
             return result;

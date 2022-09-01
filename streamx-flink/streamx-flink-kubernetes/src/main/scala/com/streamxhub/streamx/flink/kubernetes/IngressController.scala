@@ -16,6 +16,7 @@
 
 package com.streamxhub.streamx.flink.kubernetes
 
+import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils._
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder
@@ -33,7 +34,7 @@ import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConverters._
 import scala.language.postfixOps
 
-object IngressController {
+object IngressController extends Logger {
 
   def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
     tryWithResource(new DefaultKubernetesClient) { client =>
@@ -125,6 +126,7 @@ object IngressController {
           val ingressMeta = metas.head
           val hostname = ingressMeta.hostname
           val path = ingressMeta.path
+          logger.info(s"Retrieve flink cluster $clusterId successfully, JobManager Web Interface: https://$hostname$path")
           s"https://$hostname$path"
         case None => throw new RuntimeException("[StreamX] get ingressUrlAddress error.")
       }

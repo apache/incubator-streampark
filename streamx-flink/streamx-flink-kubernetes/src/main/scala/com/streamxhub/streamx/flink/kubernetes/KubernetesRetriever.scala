@@ -119,16 +119,21 @@ object KubernetesRetriever extends Logger {
 
 
   /**
-   * retrieve flink jobmanger rest url
+   * retrieve flink jobManager rest url
    */
   def retrieveFlinkRestUrl(clusterKey: ClusterKey): Option[String] = {
     tryWithResource(
-      Try(KubernetesRetriever.newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode))
-        .getOrElse(return None)) {
-      client =>
-        val url = IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
-        Some(url)
+      KubernetesRetriever.newFinkClusterClient(
+        clusterKey.clusterId,
+        clusterKey.namespace,
+        clusterKey.executeMode
+      )
+    ) { client =>
+      val url = IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
+      Option(url)
+    } { error =>
+      logger.info(s"Failed to get url path of jobManager for task,errorStack=${error.getMessage}")
+      None
     }
   }
-
 }

@@ -19,7 +19,8 @@ package com.streamxhub.streamx.flink.kubernetes.helper
 
 import com.google.common.base.Charsets
 import com.google.common.io.Files
-import com.streamxhub.streamx.common.util.Utils
+import com.streamxhub.streamx.common.util.{Logger, Utils}
+import com.streamxhub.streamx.common.util.Utils.tryWithResource
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 
@@ -27,7 +28,7 @@ import java.io.File
 import scala.collection.JavaConversions._
 import scala.util.Try
 
-object KubernetesDeploymentHelper {
+object KubernetesDeploymentHelper extends Logger {
 
   private[this] def getPods(nameSpace: String, deploymentName: String): List[Pod] = {
     Try {
@@ -47,8 +48,10 @@ object KubernetesDeploymentHelper {
   }
 
   def getDeploymentStatusChanges(nameSpace: String, deploymentName: String): Boolean = {
-    val pods = getPods(nameSpace, deploymentName)
-    pods.head.getStatus.getContainerStatuses.head.getLastState.getTerminated != null
+    Try {
+      val pods = getPods(nameSpace, deploymentName)
+      pods.head.getStatus.getContainerStatuses.head.getLastState.getTerminated != null
+    }.getOrElse(true)
   }
 
   def getTheNumberOfTaskDeploymentRetries(nameSpace: String, deploymentName: String): Integer = {
@@ -56,12 +59,15 @@ object KubernetesDeploymentHelper {
     pods.head.getStatus.getContainerStatuses.head.getRestartCount
   }
 
-  def deleteTaskDeployment(nameSpace: String, deploymentName: String): Unit = {
-    Utils.tryWithResource(new DefaultKubernetesClient) { client =>
+  def deleteTaskDeployment(nameSpace: String, deploymentName: String): Boolean = {
+    tryWithResource(new DefaultKubernetesClient) { client =>
       client.apps.deployments
         .inNamespace(nameSpace)
         .withName(deploymentName)
         .delete
+    } { error =>
+      logger.info(s"Failed to delete Deployment,errorStack=$error")
+      false
     }
   }
 
@@ -77,6 +83,18 @@ object KubernetesDeploymentHelper {
       val path = s"$projectPath/${nameSpace}_$jobName.log"
       val file = new File(path)
       val log = client.apps.deployments.inNamespace(nameSpace).withName(jobName).getLog
+      Files.asCharSink(file, Charsets.UTF_8).write(log)
+      path
+    }
+  }
+
+  def watchPodTerminatedLog(nameSpace: String, jobName: String): String = try {
+    Utils.tryWithResource(new DefaultKubernetesClient) { client =>
+      val podName = getPods(nameSpace, jobName).head.getMetadata.getName
+      val projectPath = new File("").getCanonicalPath
+      val path = s"$projectPath/${nameSpace}_${jobName}_err.log"
+      val file = new File(path)
+      val log = client.pods.inNamespace(nameSpace).withName(podName).terminated().withPrettyOutput.getLog
       Files.asCharSink(file, Charsets.UTF_8).write(log)
       path
     }

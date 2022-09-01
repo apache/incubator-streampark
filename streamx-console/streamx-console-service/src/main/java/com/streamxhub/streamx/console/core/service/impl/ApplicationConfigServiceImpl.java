@@ -31,8 +31,8 @@ import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,14 +84,13 @@ public class ApplicationConfigServiceImpl
 
     @Transactional(rollbackFor = {Exception.class})
     public void setLatest(Long appId, Long configId) {
-        LambdaUpdateWrapper<ApplicationConfig> updateWrapper = new UpdateWrapper<ApplicationConfig>().lambda();
+        LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.set(ApplicationConfig::getLatest, 0)
             .eq(ApplicationConfig::getAppId, appId);
         this.update(updateWrapper);
 
-        updateWrapper = new UpdateWrapper<ApplicationConfig>().lambda();
-        updateWrapper.set(ApplicationConfig::getLatest, 1)
-            .eq(ApplicationConfig::getId, configId);
+        updateWrapper.clear();
+        updateWrapper.set(ApplicationConfig::getLatest, 1).eq(ApplicationConfig::getId, configId);
         this.update(updateWrapper);
     }
 
@@ -176,10 +175,10 @@ public class ApplicationConfigServiceImpl
 
     @Override
     public void toEffective(Long appId, Long configId) {
-        LambdaUpdateWrapper updateWrapper = new LambdaUpdateWrapper<ApplicationConfig>()
-            .eq(ApplicationConfig::getAppId, appId)
+        LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(ApplicationConfig::getAppId, appId)
             .set(ApplicationConfig::getLatest, 0);
-        this.baseMapper.update(null, updateWrapper);
+        this.update(updateWrapper);
         effectiveService.saveOrUpdate(appId, EffectiveType.CONFIG, configId);
     }
 

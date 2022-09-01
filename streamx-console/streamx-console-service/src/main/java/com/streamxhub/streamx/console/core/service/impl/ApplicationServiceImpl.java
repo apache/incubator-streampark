@@ -354,7 +354,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
         try {
             FlinkTrackingTask.refreshTracking(application.getId(), () -> {
-                baseMapper.update(application, updateWrapper);
+                baseMapper.update(null, updateWrapper);
                 return null;
             });
         } catch (Exception e) {
@@ -631,7 +631,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String args = appParam.getArgs();
 
         newApp.setJobName(jobName);
-        newApp.setClusterId(jobName);
+        newApp.setClusterId(oldApp.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_SESSION ? oldApp.getClusterId() : jobName);
         args = args != null && !"".equals(args) ? args : oldApp.getArgs();
         newApp.setArgs(args);
         newApp.setVersionId(100000L);
@@ -868,7 +868,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (application.getOptionState() != null) {
             updateWrapper.set(Application::getOptionState, application.getOptionState());
         }
-        baseMapper.update(application, updateWrapper);
+        this.update(updateWrapper);
     }
 
     @Override
@@ -889,7 +889,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 updateWrapper.set(Application::getLaunch, LaunchState.DONE.get());
                 updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
             }
-            baseMapper.update(application, updateWrapper);
+            this.update(updateWrapper);
 
             // backup.
             if (application.isFlinkSqlJob()) {
