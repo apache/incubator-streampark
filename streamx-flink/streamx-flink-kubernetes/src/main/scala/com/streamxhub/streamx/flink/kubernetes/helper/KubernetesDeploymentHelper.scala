@@ -19,20 +19,20 @@ package com.streamxhub.streamx.flink.kubernetes.helper
 
 import com.google.common.base.Charsets
 import com.google.common.io.Files
-import com.streamxhub.streamx.common.util.{Logger, Utils}
+import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.tryWithResource
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 
 import java.io.File
 import scala.collection.JavaConversions._
-import scala.util.Try
+import scala.util.{Success, Try}
 
 object KubernetesDeploymentHelper extends Logger {
 
   private[this] def getPods(nameSpace: String, deploymentName: String): List[Pod] = {
-    Try {
-      Utils.tryWithResource(new DefaultKubernetesClient) { client =>
+    tryWithResource(Try(new DefaultKubernetesClient).getOrElse(return List.empty[Pod])) { client =>
+      Try {
         client.pods.inNamespace(nameSpace)
           .withLabels {
             client.apps.deployments
@@ -43,8 +43,8 @@ object KubernetesDeploymentHelper extends Logger {
               .getSelector
               .getMatchLabels
           }.list.getItems.toList
-      }
-    }.getOrElse(List.empty[Pod])
+      }.getOrElse(List.empty[Pod])
+    }
   }
 
   def getDeploymentStatusChanges(nameSpace: String, deploymentName: String): Boolean = {
@@ -60,43 +60,50 @@ object KubernetesDeploymentHelper extends Logger {
   }
 
   def deleteTaskDeployment(nameSpace: String, deploymentName: String): Boolean = {
-    tryWithResource(new DefaultKubernetesClient) { client =>
-      client.apps.deployments
-        .inNamespace(nameSpace)
-        .withName(deploymentName)
-        .delete
-    } { error =>
-      logger.info(s"Failed to delete Deployment,errorStack=$error")
-      false
+    tryWithResource(Try(new DefaultKubernetesClient).getOrElse(return false)) { client =>
+      Try {
+        val r = client.apps.deployments
+          .inNamespace(nameSpace)
+          .withName(deploymentName)
+          .delete
+        Boolean.unbox(r)
+      }.getOrElse(false)
     }
   }
 
   def isTheK8sConnectionNormal(): Boolean = {
-    Utils.tryWithResource(new DefaultKubernetesClient) { client =>
-      client != null
-    }(_ => false)
+    Try(new DefaultKubernetesClient) match {
+      case Success(client) =>
+        client.close()
+        true
+      case _ => false
+    }
   }
 
   def watchDeploymentLog(nameSpace: String, jobName: String): String = {
-    Utils.tryWithResource(new DefaultKubernetesClient) { client =>
-      val projectPath = new File("").getCanonicalPath
-      val path = s"$projectPath/${nameSpace}_$jobName.log"
-      val file = new File(path)
-      val log = client.apps.deployments.inNamespace(nameSpace).withName(jobName).getLog
-      Files.asCharSink(file, Charsets.UTF_8).write(log)
-      path
+    tryWithResource(Try(new DefaultKubernetesClient).getOrElse(return null)) { client =>
+      Try {
+        val projectPath = new File("").getCanonicalPath
+        val path = s"$projectPath/${nameSpace}_$jobName.log"
+        val file = new File(path)
+        val log = client.apps.deployments.inNamespace(nameSpace).withName(jobName).getLog
+        Files.asCharSink(file, Charsets.UTF_8).write(log)
+        path
+      }.getOrElse(null)
     }(error => throw error)
   }
 
   def watchPodTerminatedLog(nameSpace: String, jobName: String): String = {
-    Utils.tryWithResource(new DefaultKubernetesClient) { client =>
-      val podName = getPods(nameSpace, jobName).head.getMetadata.getName
-      val projectPath = new File("").getCanonicalPath
-      val path = s"$projectPath/${nameSpace}_${jobName}_err.log"
-      val file = new File(path)
-      val log = client.pods.inNamespace(nameSpace).withName(podName).terminated().withPrettyOutput.getLog
-      Files.asCharSink(file, Charsets.UTF_8).write(log)
-      path
+    tryWithResource(Try(new DefaultKubernetesClient).getOrElse(return null)) { client =>
+      Try {
+        val podName = getPods(nameSpace, jobName).head.getMetadata.getName
+        val projectPath = new File("").getCanonicalPath
+        val path = s"$projectPath/${nameSpace}_${jobName}_err.log"
+        val file = new File(path)
+        val log = client.pods.inNamespace(nameSpace).withName(podName).terminated().withPrettyOutput.getLog
+        Files.asCharSink(file, Charsets.UTF_8).write(log)
+        path
+      }.getOrElse(null)
     }(error => throw error)
   }
 }

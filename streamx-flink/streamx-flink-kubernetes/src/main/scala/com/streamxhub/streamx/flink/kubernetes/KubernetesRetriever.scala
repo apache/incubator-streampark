@@ -17,7 +17,7 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.common.util.Utils.tryWithResource
+import com.streamxhub.streamx.common.util.Utils.{close, tryWithResource}
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
@@ -105,7 +105,7 @@ object KubernetesRetriever extends Logger {
    * @param name      deployment name
    * @param namespace deployment namespace
    */
-  def isDeploymentExists(name: String, namespace: String): Boolean =
+  def isDeploymentExists(name: String, namespace: String): Boolean = {
     tryWithResource(Try(KubernetesRetriever.newK8sClient()).getOrElse(return false)) {
       client =>
         client.apps()
@@ -116,24 +116,25 @@ object KubernetesRetriever extends Logger {
           .getItems.asScala
           .exists(e => e.getMetadata.getName == name)
     } { _ => false }
+  }
 
 
   /**
    * retrieve flink jobManager rest url
    */
   def retrieveFlinkRestUrl(clusterKey: ClusterKey): Option[String] = {
-    tryWithResource(
-      KubernetesRetriever.newFinkClusterClient(
-        clusterKey.clusterId,
-        clusterKey.namespace,
-        clusterKey.executeMode
-      )
-    ) { client =>
-      val url = IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
-      Option(url)
-    } { error =>
-      logger.info(s"Failed to get url path of jobManager for task,errorStack=${error.getMessage}")
-      throw error
+    Try(KubernetesRetriever.newFinkClusterClient(
+      clusterKey.clusterId,
+      clusterKey.namespace,
+      clusterKey.executeMode
+    )) match {
+      case Success(client) =>
+        val url = IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
+        client.close()
+        Option(url)
+      case Failure(e) =>
+        logger.info(s"Failed to get url path of jobManager for task,errorStack=${e.getMessage}")
+        throw e
     }
   }
 }

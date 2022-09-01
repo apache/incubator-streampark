@@ -16,7 +16,6 @@
 
 package com.streamxhub.streamx.console.base.config;
 
-import com.streamxhub.streamx.console.base.mybatis.interceptor.H2SQLPrepareInterceptor;
 import com.streamxhub.streamx.console.base.mybatis.interceptor.PostgreSQLPrepareInterceptor;
 import com.streamxhub.streamx.console.base.mybatis.interceptor.PostgreSQLQueryInterceptor;
 
@@ -59,17 +58,6 @@ public class MybatisConfig {
     @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "pgsql")
     public PostgreSQLPrepareInterceptor postgreSQLPrepareInterceptor() {
         return new PostgreSQLPrepareInterceptor();
-    }
-
-    /**
-     * Add the plugin to the MyBatis plugin interceptor chain.
-     *
-     * @return {@linkplain PostgreSQLPrepareInterceptor}
-     */
-    @Bean
-    @ConditionalOnProperty(name = "spring.profiles.active", havingValue = "h2")
-    public H2SQLPrepareInterceptor h2SQLPrepareInterceptor() {
-        return new H2SQLPrepareInterceptor();
     }
 
 }
