@@ -16,14 +16,19 @@
 
 package com.streamxhub.streamx.console.system.controller;
 
+import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.properties.ShiroProperties;
+import com.streamxhub.streamx.console.base.util.ShaHashUtils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.system.authentication.JWTToken;
+import com.streamxhub.streamx.console.system.authentication.JWTUtil;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.security.Authenticator;
 import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserService;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotBlank;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -67,8 +73,27 @@ public class PassportController {
             return RestResponse.success().put("code", 0);
         }
 
-        // verify username and password
-        Map<String, Object> userInfo = authenticator.authenticate(username, password);
+        User user = authenticator.authenticate(username, password);
+
+        if (user == null) {
+            return RestResponse.success().put("code", 0);
+        }
+
+        if (User.STATUS_LOCK.equals(user.getStatus())) {
+            return RestResponse.success().put("code", 1);
+        }
+
+        password = ShaHashUtils.encrypt(user.getSalt(), password);
+
+        // 更新用户登录时间
+        this.userService.updateLoginTime(username);
+        String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
+        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
+        String expireTimeStr = DateUtils.formatFullTime(expireTime);
+        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
+        String userId = RandomStringUtils.randomAlphanumeric(20);
+        user.setId(userId);
+        Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
         return new RestResponse().data(userInfo);
     }
 
@@ -101,4 +126,5 @@ public class PassportController {
         userInfo.put("user", user);
         return userInfo;
     }
+
 }

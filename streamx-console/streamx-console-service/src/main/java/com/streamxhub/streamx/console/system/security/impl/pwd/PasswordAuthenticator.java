@@ -16,11 +16,13 @@
 
 package com.streamxhub.streamx.console.system.security.impl.pwd;
 
+import com.streamxhub.streamx.console.base.util.ShaHashUtils;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.security.Authenticator;
 import com.streamxhub.streamx.console.system.security.impl.AbstractAuthenticator;
 import com.streamxhub.streamx.console.system.service.UserService;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class PasswordAuthenticator extends AbstractAuthenticator implements Authenticator {
@@ -29,6 +31,12 @@ public class PasswordAuthenticator extends AbstractAuthenticator implements Auth
 
     @Override
     public User login(String userId, String password) {
-        return usersService.findByName(userId);
+        User user = usersService.findByName(userId);
+        String salt = user.getSalt();
+        password = ShaHashUtils.encrypt(salt, password);
+        if (!StringUtils.equals(user.getPassword(), password)) {
+            return null;
+        }
+        return user;
     }
 }

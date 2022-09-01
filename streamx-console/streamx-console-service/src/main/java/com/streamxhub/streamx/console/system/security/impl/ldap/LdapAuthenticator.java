@@ -16,43 +16,57 @@
 
 package com.streamxhub.streamx.console.system.security.impl.ldap;
 
+import com.streamxhub.streamx.console.base.util.ShaHashUtils;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.security.impl.AbstractAuthenticator;
+import com.streamxhub.streamx.console.system.security.impl.pwd.PasswordAuthenticator;
 import com.streamxhub.streamx.console.system.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 
 public class LdapAuthenticator extends AbstractAuthenticator {
     @Autowired
     private UserService usersService;
     @Autowired
-    LdapService ldapService;
+    private LdapService ldapService;
+
+    @Autowired
+    private PasswordAuthenticator passwordAuthenticator;
 
     @Override
     public User login(String userId, String password) throws Exception {
-        User user = null;
-        String ldapEmail = ldapService.ldapLogin(userId, password);
-
-        if (userId.equals("admin")) {
-            user = usersService.findByName(userId);
-            return user;
+        // admin login by username and password
+        if ("admin".equals(userId)) {
+            return passwordAuthenticator.login(userId, password);
         }
-
-        if (ldapEmail != null) {
+        String ldapUser = ldapService.ldapLogin(userId, password);
+        // ldapUser is null, login by default
+        if (ldapUser == null) {
+            return passwordAuthenticator.login(userId, password);
+        } else {
             //check if user exist
-            user = usersService.findByName(userId);
-            if (user == null) {
+            User user = usersService.findByName(userId);
+            if (user != null) {
+                return passwordAuthenticator.login(userId, password);
+            } else {
+                // create ....
                 User newUser = new User();
+                newUser.setCreateTime(new Date());
                 newUser.setUsername(userId);
                 newUser.setRoleId("100001");
                 newUser.setNickName(userId);
-                newUser.setPassword(password);
                 newUser.setStatus("1");
                 newUser.setSex("1");
+
+                String salt = ShaHashUtils.getRandomSalt(26);
+                String saltPass = ShaHashUtils.encrypt(salt, user.getPassword());
+                newUser.setSalt(salt);
+                newUser.setPassword(saltPass);
                 usersService.createUser(newUser);
                 return newUser;
             }
         }
-        return user;
     }
 }
