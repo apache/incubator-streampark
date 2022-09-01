@@ -493,7 +493,7 @@ create table "public"."t_menu" (
   "perms" varchar(50) collate "pg_catalog"."default",
   "icon" varchar(50) collate "pg_catalog"."default",
   "type" int2,
-  "display" boolean,
+  "display" boolean default false,
   "order_num" float8,
   "create_time" timestamp(6) not null,
   "modify_time" timestamp(6)
