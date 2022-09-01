@@ -21,6 +21,7 @@ import com.google.common.base.Charsets
 import com.google.common.io.Files
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.tryWithResource
+import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 
@@ -31,7 +32,7 @@ import scala.util.{Success, Try}
 object KubernetesDeploymentHelper extends Logger {
 
   private[this] def getPods(nameSpace: String, deploymentName: String): List[Pod] = {
-    tryWithResource(Try(new DefaultKubernetesClient).getOrElse(return List.empty[Pod])) { client =>
+    tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
       Try {
         client.pods.inNamespace(nameSpace)
           .withLabels {
@@ -60,7 +61,7 @@ object KubernetesDeploymentHelper extends Logger {
   }
 
   def deleteTaskDeployment(nameSpace: String, deploymentName: String): Boolean = {
-    tryWithResource(Try(new DefaultKubernetesClient).getOrElse(return false)) { client =>
+    tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
       Try {
         val r = client.apps.deployments
           .inNamespace(nameSpace)
@@ -81,7 +82,7 @@ object KubernetesDeploymentHelper extends Logger {
   }
 
   def watchDeploymentLog(nameSpace: String, jobName: String): String = {
-    tryWithResource(Try(new DefaultKubernetesClient).getOrElse(return null)) { client =>
+    tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
       Try {
         val projectPath = new File("").getCanonicalPath
         val path = s"$projectPath/${nameSpace}_$jobName.log"
@@ -94,7 +95,7 @@ object KubernetesDeploymentHelper extends Logger {
   }
 
   def watchPodTerminatedLog(nameSpace: String, jobName: String): String = {
-    tryWithResource(Try(new DefaultKubernetesClient).getOrElse(return null)) { client =>
+    tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
       Try {
         val podName = getPods(nameSpace, jobName).head.getMetadata.getName
         val projectPath = new File("").getCanonicalPath
