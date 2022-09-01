@@ -184,14 +184,14 @@ create table "public"."t_flink_app" (
   "modify_time" timestamp(6) not null,
   "option_time" timestamp(6),
   "launch" int2,
-  "build" int2,
+  "build" boolean,
   "start_time" timestamp(6),
   "end_time" timestamp(6),
   "alert_id" int8,
   "k8s_pod_template" text collate "pg_catalog"."default",
   "k8s_jm_pod_template" text collate "pg_catalog"."default",
   "k8s_tm_pod_template" text collate "pg_catalog"."default",
-  "k8s_hadoop_integration" int2,
+  "k8s_hadoop_integration" boolean,
   "flink_cluster_id" int8,
   "ingress_template" text collate "pg_catalog"."default",
   "default_mode_ingress" text collate "pg_catalog"."default",
@@ -231,8 +231,8 @@ create table "public"."t_flink_cluster" (
   "flink_image" varchar(255) collate "pg_catalog"."default",
   "dynamic_options" text collate "pg_catalog"."default",
   "k8s_rest_exposed_type" int2,
-  "k8s_hadoop_integration" int2,
-  "flame_graph" int2,
+  "k8s_hadoop_integration" boolean,
+  "flame_graph" boolean,
   "k8s_conf" varchar(255) collate "pg_catalog"."default",
   "resolve_order" int4,
   "exception" text collate "pg_catalog"."default",
@@ -273,7 +273,7 @@ create table "public"."t_flink_config" (
   "app_id" int8 not null,
   "format" int2 not null,
   "version" int4 not null,
-  "latest" int2 not null,
+  "latest" boolean not null,
   "content" text collate "pg_catalog"."default" not null,
   "create_time" timestamp(6)
 )
@@ -313,7 +313,7 @@ create table "public"."t_flink_env" (
   "version" varchar(50) collate "pg_catalog"."default" not null,
   "scala_version" varchar(50) collate "pg_catalog"."default" not null,
   "flink_conf" text collate "pg_catalog"."default" not null,
-  "is_default" int2 not null,
+  "is_default" boolean not null,
   "description" varchar(255) collate "pg_catalog"."default",
   "create_time" timestamp(6) not null
 )
@@ -386,7 +386,7 @@ create table "public"."t_flink_savepoint" (
   "chk_id" int8,
   "type" int2,
   "path" varchar(255) collate "pg_catalog"."default",
-  "latest" int2 not null,
+  "latest" boolean not null,
   "trigger_time" timestamp(6),
   "create_time" timestamp(6)
 )
@@ -439,7 +439,7 @@ create table "public"."t_menu" (
   "perms" varchar(50) collate "pg_catalog"."default",
   "icon" varchar(50) collate "pg_catalog"."default",
   "type" int2,
-  "display" char(2) collate "pg_catalog"."default" not null,
+  "display" boolean,
   "order_num" float8,
   "create_time" timestamp(6) not null,
   "modify_time" timestamp(6)
@@ -471,7 +471,7 @@ create table "public"."t_message" (
   "type" int2,
   "title" varchar(255) collate "pg_catalog"."default",
   "context" text collate "pg_catalog"."default",
-  "readed" int2,
+  "readed" boolean,
   "create_time" timestamp(6)
 )
 ;
