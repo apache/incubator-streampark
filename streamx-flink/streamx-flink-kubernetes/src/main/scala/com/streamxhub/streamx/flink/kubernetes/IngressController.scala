@@ -127,13 +127,13 @@ object IngressController extends Logger {
         case Some(metas) =>
           val ingressMeta = metas.head
           val hostname = ingressMeta.hostname
-          val path = ingressMeta.path.trim.replaceAll("/$","")
+          val path = ingressMeta.path
           logger.info(s"Retrieve flink cluster $clusterId successfully, JobManager Web Interface: https://$hostname$path")
           s"https://$hostname$path"
         case None => throw new RuntimeException("[StreamX] get ingressUrlAddress error.")
       }
     } else {
-      clusterClient.getWebInterfaceURL.trim.replaceAll("/$","")
+      clusterClient.getWebInterfaceURL
     }
   }
 
