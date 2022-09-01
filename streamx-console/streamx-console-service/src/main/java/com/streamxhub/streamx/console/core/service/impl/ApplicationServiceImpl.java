@@ -461,11 +461,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         removeById(appId);
         application.getFsOperator().delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
         try {
-            if (application.getWorkspace().storageType().equals(StorageType.HDFS)) {
-                HdfsOperator.delete(Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString()));
+            //曾经设置过yarn-application类型,尝试删除,不留后患.
+            String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
+            if (HdfsOperator.exists(path)) {
+                HdfsOperator.delete(path);
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            //skip
         }
     }
 
