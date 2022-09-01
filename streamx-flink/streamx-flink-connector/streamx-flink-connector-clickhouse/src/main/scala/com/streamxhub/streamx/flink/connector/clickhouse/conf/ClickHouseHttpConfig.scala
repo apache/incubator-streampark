@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,8 +43,6 @@ class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHo
 
   val hosts: List[String] = sinkOption.hosts.get()
 
-  val table: String = sinkOption.targetTable.get()
-
   var currentHostId: Int = 0
 
   val credentials: String = (user, password) match {
@@ -71,7 +66,7 @@ class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHo
 
   override def toString: String = {
     s"""
-       |{ user: $user, password: ******, hosts: ${hosts.mkString(",")},  table: $table }
+       |{ user: $user, password: ******, hosts: ${hosts.mkString(",")} }
        |""".stripMargin
   }
 }

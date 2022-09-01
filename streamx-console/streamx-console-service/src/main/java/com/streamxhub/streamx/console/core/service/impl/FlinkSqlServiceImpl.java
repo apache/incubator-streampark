@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,23 +18,23 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.ExceptionUtils;
-import com.streamxhub.streamx.console.core.dao.FlinkSqlMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
+import com.streamxhub.streamx.console.core.mapper.FlinkSqlMapper;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
-import com.streamxhub.streamx.flink.core.SqlError;
+import com.streamxhub.streamx.flink.core.FlinkSqlValidationResult;
 import com.streamxhub.streamx.flink.proxy.FlinkShimsProxy;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,10 +77,34 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         return flinkSql;
     }
 
+    /**
+     * @param appId
+     * @param decode
+     * @return
+     */
+    @Override
+    public FlinkSql getLatestFlinkSql(Long appId, boolean decode) {
+        Page<FlinkSql> page = new Page<>();
+        page.setCurrent(0).setSize(1).setSearchCount(false);
+        LambdaQueryWrapper<FlinkSql> queryWrapper =
+            new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId)
+                .orderByDesc(FlinkSql::getVersion);
+
+        Page<FlinkSql> flinkSqlPage = baseMapper.selectPage(page, queryWrapper);
+        if (!flinkSqlPage.getRecords().isEmpty()) {
+            FlinkSql flinkSql = flinkSqlPage.getRecords().get(0);
+            if (decode) {
+                flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
+            }
+            return flinkSql;
+        }
+        return null;
+    }
+
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public void create(FlinkSql flinkSql) {
-        Integer version = this.baseMapper.getLastVersion(flinkSql.getAppId());
+        Integer version = this.baseMapper.getLatestVersion(flinkSql.getAppId());
         flinkSql.setVersion(version == null ? 1 : version + 1);
         String sql = DeflaterUtils.zipString(flinkSql.getSql());
         flinkSql.setSql(sql);
@@ -93,15 +114,17 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public void setCandidate(CandidateType candidateType, Long appId, Long sqlId) {
-        LambdaUpdateWrapper<FlinkSql> updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
-        updateWrapper.set(FlinkSql::getCandidate, 0)
-                .eq(FlinkSql::getAppId, appId);
-        this.update(updateWrapper);
+        this.update(
+            new LambdaUpdateWrapper<FlinkSql>()
+                .eq(FlinkSql::getAppId, appId)
+                .set(FlinkSql::getCandidate, 0)
+        );
 
-        updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
-        updateWrapper.set(FlinkSql::getCandidate, candidateType.get())
-                .eq(FlinkSql::getId, sqlId);
-        this.update(updateWrapper);
+        this.update(
+            new LambdaUpdateWrapper<FlinkSql>()
+                .eq(FlinkSql::getId, sqlId)
+                .set(FlinkSql::getCandidate, candidateType.get())
+        );
     }
 
     @Override
@@ -125,11 +148,14 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public FlinkSql getCandidate(Long appId, CandidateType candidateType) {
+        LambdaQueryWrapper<FlinkSql> queryWrapper = new LambdaQueryWrapper<FlinkSql>()
+            .eq(FlinkSql::getAppId, appId);
         if (candidateType == null) {
-            return baseMapper.getCandidate(appId);
+            queryWrapper.gt(FlinkSql::getCandidate, CandidateType.NONE.get());
         } else {
-            return baseMapper.getCandidateByType(appId, candidateType.get());
+            queryWrapper.eq(FlinkSql::getCandidate, candidateType.get());
         }
+        return baseMapper.selectOne(queryWrapper);
     }
 
     @Override
@@ -139,12 +165,16 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public void cleanCandidate(Long id) {
-        this.baseMapper.cleanCandidate(id);
+        this.update(
+            new LambdaUpdateWrapper<FlinkSql>()
+                .eq(FlinkSql::getId, id)
+                .set(FlinkSql::getCandidate, CandidateType.NONE.get())
+        );
     }
 
     @Override
     public void removeApp(Long appId) {
-        baseMapper.removeApp(appId);
+        baseMapper.delete(new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId));
     }
 
     @Override
@@ -165,18 +195,18 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     }
 
     @Override
-    public SqlError verifySql(String sql, Long versionId) {
+    public FlinkSqlValidationResult verifySql(String sql, Long versionId) {
         FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
-        return FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), (Function<ClassLoader, SqlError>) classLoader -> {
+        return FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), (Function<ClassLoader, FlinkSqlValidationResult>) classLoader -> {
             try {
                 Class<?> clazz = classLoader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
                 Method method = clazz.getDeclaredMethod("verifySql", String.class);
                 method.setAccessible(true);
-                Object sqlError = method.invoke(null, sql);
-                if (sqlError == null) {
+                Object result = method.invoke(null, sql);
+                if (result == null) {
                     return null;
                 }
-                return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), sqlError);
+                return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), result);
             } catch (Throwable e) {
                 log.error("verifySql invocationTargetException: {}", ExceptionUtils.stringifyException(e));
             }

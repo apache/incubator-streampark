@@ -27,7 +27,6 @@
             :sm="24">
             <span
               class="table-page-search-bar">
-
               <a-button
                 type="primary"
                 shape="circle"
@@ -35,9 +34,10 @@
                 @click.native="search"/>
               <a-button
                 type="primary"
+                shape="circle"
+                icon="plus"
                 v-permit="'token:add'"
-                v-text="'创建token'"
-                @click="handleAdd"/>
+                @click="handleAdd" />
             </span>
           </a-col>
         </a-row>
@@ -54,45 +54,66 @@
       :scroll="{ x: 900 }"
       @change="handleTableChange">
       <template
-        slot="email"
-        slot-scope="text">
-        <a-popover
-          placement="topLeft">
-          <template
-            slot="content">
-            <div>
-              {{ text }}
-            </div>
-          </template>
-          <p
-            style="width: 150px;margin-bottom: 0">
-            {{ text }}
-          </p>
-        </a-popover>
+        slot="token-text"
+        slot-scope="text,record">
+        <ellipsis
+          :length="24"
+          tooltip
+          placement="rightBottom">
+          {{ record.token }}
+        </ellipsis>
       </template>
+
+      <template
+        slot="token-status"
+        slot-scope="text,record">
+        <a-switch
+          checked-children="on"
+          un-checked-children="off"
+          :checked="Boolean(record.finalStatus)"
+          @change="handleToggle(record)"/>
+      </template>
+
       <template
         slot="operation"
         slot-scope="text, record">
 
-        <svg-icon
-          v-permit="'token:view'"
-          name="copy"
-          border
-          @click.native="copyToken(record)"
-          title="copy token"/>
-        <a-popconfirm
-          v-permit="'token:delete'"
-          title="Are you sure delete this token ?"
-          cancel-text="No"
-          ok-text="Yes"
-          @confirm="handleDelete(record)">
-          <svg-icon name="remove" border/>
-        </a-popconfirm>
+        <a-tooltip title="Copy Token">
+          <a-button
+            v-permit="'token:view'"
+            name="copy"
+            @click.native="copyToken(record)"
+            shape="circle"
+            size="small"
+            style="margin-left: 8px"
+            class="control-button ctl-btn-color">
+            <a-icon type="copy"/>
+          </a-button>
+        </a-tooltip>
+
+        <a-tooltip title="Delete Token">
+          <a-popconfirm
+            v-permit="'token:delete'"
+            title="Are you sure delete this token ?"
+            cancel-text="No"
+            ok-text="Yes"
+            @confirm="handleDelete(record)">
+            <a-button
+              type="danger"
+              shape="circle"
+              size="small"
+              style="margin-left: 8px"
+              class="control-button">
+              <a-icon type="delete"/>
+            </a-button>
+          </a-popconfirm>
+        </a-tooltip>
       </template>
     </a-table>
 
 
     <token-add
+      ref="tokenAdd"
       @close="handleTokenAddClose"
       @success="handleTokenAddSuccess"
       :visible="tokenAdd.visible"/>
@@ -105,13 +126,14 @@ import TokenAdd from './TokenAdd'
 import RangeDate from '@/components/DateTime/RangeDate'
 import SvgIcon from '@/components/SvgIcon'
 
-import {deleteToken, list} from '@/api/token'
+import {deleteToken, list, toggle} from '@/api/token'
 import storage from '@/utils/storage'
 import {USER_NAME} from '@/store/mutation-types'
+import Ellipsis from '@/components/Ellipsis'
 
 export default {
   name: 'Token',
-  components: {RangeDate, SvgIcon, TokenAdd},
+  components: {RangeDate, SvgIcon, TokenAdd, Ellipsis},
   data() {
     return {
       tokenAdd: {
@@ -134,6 +156,7 @@ export default {
     }
   },
   computed: {
+
     columns() {
       let {sortedInfo, filteredInfo} = this
       sortedInfo = sortedInfo || {}
@@ -141,46 +164,30 @@ export default {
       return [{
         title: 'User Name',
         dataIndex: 'username',
-        sorter: true,
         width: 150,
+        sorter: true,
         sortOrder: sortedInfo.columnKey === 'username' && sortedInfo.order
       }, {
-        title: 'Status',
-        dataIndex: 'status',
-        width: 150,
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '0':
-              return <a-tag color="red"> Locked </a-tag>
-            case '1':
-              return <a-tag color="cyan"> Effective </a-tag>
-            default:
-              return text
-          }
-        },
-        filters: [
-          {text: 'Effective', value: '1'},
-          {text: 'Locked', value: '0'}
-        ],
-        filterMultiple: false,
-        filteredValue: filteredInfo.status || null,
-        onFilter: (value, record) => value
-      }, {
         title: 'Token',
-        dataIndex: 'token'
+        width: 250,
+        dataIndex: 'token',
+        scopedSlots: {customRender: 'token-text'}
       }, {
         title: 'Description',
         dataIndex: 'description'
       }, {
         title: 'Create Time',
-        dataIndex: 'createTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'createTime' && sortedInfo.order
+        dataIndex: 'createTime'
       }, {
         title: 'Expire Time',
         dataIndex: 'expireTime',
         sorter: true,
-        sortOrder: sortedInfo.columnKey === 'createTime' && sortedInfo.order
+        sortOrder: sortedInfo.columnKey === 'expireTime' && sortedInfo.order
+      }, {
+        title: 'Status',
+        dataIndex: 'status',
+        width: 100,
+        scopedSlots: {customRender: 'token-status'}
       },
         {
           title: 'Operation',
@@ -199,6 +206,22 @@ export default {
   },
 
   methods: {
+    handleToggle(record) {
+      toggle({
+        tokenId: record.id
+      }).then((resp) => {
+        if (resp.code !== undefined && resp.code.toString() === '2000') {
+          this.$message.success('update status successful')
+          this.search()
+        } else if (resp.code !== undefined && resp.code.toString() === '3001') {
+          this.$message.error(resp.message)
+          this.search()
+        } else if (resp.status === 'error') {
+          this.$message.error('update failed')
+          this.search()
+        }
+      })
+    },
     search() {
       const {sortedInfo, filteredInfo} = this
       let sortField, sortOrder
@@ -226,6 +249,7 @@ export default {
         } else {
           this.$message.error('delete failed')
         }
+        this.$refs.tokenAdd.fetch()
       })
     },
     handleAdd() {
@@ -236,7 +260,7 @@ export default {
     },
     handleTokenAddSuccess() {
       this.tokenAdd.visible = false
-      this.$message.success('新增令牌成功')
+      this.$message.success('create Account Token Successful!')
       this.search()
     },
 
@@ -247,7 +271,7 @@ export default {
       // 选择对象
       oInput.select()
       document.execCommand('Copy')
-      this.$message.success('复制成功')
+      this.$message.success('copy successful')
       oInput.remove()
     },
     handleDateChange(value) {
@@ -277,7 +301,6 @@ export default {
       this.paginationInfo = pagination
       this.filteredInfo = filters
       this.sortedInfo = sorter
-      this.userInfo.visible = false
       this.fetch({
         sortField: sorter.field,
         sortOrder: sorter.order,
@@ -321,3 +344,4 @@ export default {
   }
 }
 </script>
+

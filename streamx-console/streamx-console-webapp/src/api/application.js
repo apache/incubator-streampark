@@ -22,7 +22,7 @@ import api from './index'
 import http from '@/utils/request'
 
 export function readConf (params) {
-  return http.post(api.Application.READCONF, params)
+  return http.post(api.Application.READ_CONF, params)
 }
 
 export function get (params) {
@@ -39,6 +39,14 @@ export function main (params) {
 
 export function update (params) {
   return http.post(api.Application.UPDATE, params)
+}
+
+export function copy (params) {
+  return http.post(api.Application.COPY, params)
+}
+
+export function startLog (params) {
+  return http.post(api.Application.START_LOG, params)
 }
 
 export function upload (params) {
@@ -66,11 +74,15 @@ export function name (params) {
 }
 
 export function checkName (params) {
-  return http.post(api.Application.CHECKNAME, params)
+  return http.post(api.Application.CHECK_NAME, params)
 }
 
 export function cancel (params) {
   return http.post(api.Application.CANCEL, params)
+}
+
+export function forcedStop (params) {
+  return http.post(api.Application.FORCED_STOP, params)
 }
 
 export function create (params) {
@@ -82,7 +94,7 @@ export function remove (params) {
 }
 
 export function removeBak (params) {
-  return http.post(api.Application.DELETEBAK, params)
+  return http.post(api.Application.DELETE_BAK, params)
 }
 
 export function start (params) {
@@ -106,17 +118,21 @@ export function revoke (params) {
 }
 
 export function optionLog (params) {
-  return http.post(api.Application.OPTIONLOG, params)
+  return http.post(api.Application.OPTION_LOG, params)
 }
 
 export function downLog (params) {
-  return http.post(api.Application.DOWNLOG, params)
+  return http.post(api.Application.DOWN_LOG, params)
 }
 
 export function checkJar(params) {
-  return http.post(api.Application.CHECKJAR, params)
+  return http.post(api.Application.CHECK_JAR, params)
 }
 
 export function verifySchema(params) {
-  return http.post(api.Application.VERIFYSCHEMA, params)
+  return http.post(api.Application.VERIFY_SCHEMA, params)
+}
+
+export function checkSavepointPath (params) {
+  return http.post(api.Application.CHECK_SAVEPOINT_PATH, params)
 }

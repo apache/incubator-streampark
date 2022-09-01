@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,21 +57,21 @@ public class MenuController {
     @PostMapping("router")
     public RestResponse getUserRouters() {
         ArrayList<VueRouter<Menu>> routers = this.menuService.getUserRouters(commonService.getCurrentUser());
-        return RestResponse.create().data(routers);
+        return RestResponse.success(routers);
     }
 
     @PostMapping("list")
     @RequiresPermissions("menu:view")
     public RestResponse menuList(Menu menu) {
         Map<String, Object> maps = this.menuService.findMenus(menu);
-        return RestResponse.create().data(maps);
+        return RestResponse.success(maps);
     }
 
     @PostMapping("post")
     @RequiresPermissions("menu:add")
     public RestResponse addMenu(@Valid Menu menu) {
         this.menuService.createMenu(menu);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @DeleteMapping("delete")
@@ -83,14 +80,14 @@ public class MenuController {
         throws Exception {
         String[] ids = menuIds.split(StringPool.COMMA);
         this.menuService.deleteMenus(ids);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("menu:update")
     public RestResponse updateMenu(@Valid Menu menu) throws Exception {
         this.menuService.updateMenu(menu);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
 }

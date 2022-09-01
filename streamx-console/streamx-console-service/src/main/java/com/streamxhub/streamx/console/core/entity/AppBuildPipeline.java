@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -68,7 +65,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AppBuildPipeline {
 
-    @TableId(value = "app_id", type = IdType.INPUT)
+    @TableId(type = IdType.INPUT)
     private Long appId;
 
     @TableField(value = "pipe_type")
@@ -77,10 +74,8 @@ public class AppBuildPipeline {
     @TableField(value = "pipe_status")
     private Integer pipeStatusCode;
 
-    @TableField(value = "cur_step")
     private Integer curStep;
 
-    @TableField(value = "total_step")
     private Integer totalStep;
 
     // step status map: (stepSeq -> stepStatus)
@@ -97,8 +92,7 @@ public class AppBuildPipeline {
     @TableField(value = "build_result")
     private String buildResultJson;
 
-    @TableField(value = "update_time")
-    private Date updateTime;
+    private Date modifyTime;
 
     @Nonnull
     @JsonIgnore
@@ -260,7 +254,7 @@ public class AppBuildPipeline {
                 .setStepStatus(snapshot.pureStepStatusAsJava())
                 .setStepStatusTimestamp(snapshot.stepStatusTimestampAsJava())
                 .setError(snapshot.error())
-                .setUpdateTime(new Date(snapshot.emitTime()));
+                .setModifyTime(new Date(snapshot.emitTime()));
     }
 
     /**
@@ -324,7 +318,7 @@ public class AppBuildPipeline {
                     .setHasError(pipe.getError().nonEmpty())
                     .setErrorSummary(pipe.getError().summary())
                     .setErrorStack(pipe.getError().exceptionStack())
-                    .setUpdateTime(pipe.getUpdateTime());
+                    .setUpdateTime(pipe.getModifyTime());
         }
     }
 

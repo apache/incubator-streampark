@@ -21,7 +21,6 @@
 import api from './index'
 import http from '@/utils/request'
 
-
 export function list (queryParam) {
   return http.post(api.Token.LIST, queryParam)
 }
@@ -30,10 +29,18 @@ export function create (queryParam) {
   return http.post(api.Token.CREATE, queryParam)
 }
 
+export function check(queryParam) {
+  return http.post(api.Token.CHECK, queryParam)
+}
+
 export function deleteToken (queryParam) {
   return http.delete(api.Token.DELETE, queryParam)
 }
 
 export function copyCurl (queryParam) {
   return http.post(api.Token.CURL, queryParam)
+}
+
+export function toggle (queryParam) {
+  return http.post(api.Token.TOGGLE, queryParam)
 }

@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,13 +16,22 @@
 
 package com.streamxhub.streamx.common.domain;
 
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.BYTES;
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.GIGA_BYTES;
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.KILO_BYTES;
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.MEGA_BYTES;
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.TERA_BYTES;
+import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.hasUnit;
+
 import com.streamxhub.streamx.common.util.AssertUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.IntStream;
-
-import static com.streamxhub.streamx.common.domain.FlinkMemorySize.MemoryUnit.*;
 
 /**
  * MemorySize is a representation of a number of bytes, viewable in different units.
@@ -79,35 +85,39 @@ public class FlinkMemorySize implements java.io.Serializable, Comparable<FlinkMe
     // ------------------------------------------------------------------------
 
     /**
-     * Gets the memory size in bytes.
+     *
+     * @return Gets the memory size in bytes.
      */
     public long getBytes() {
         return bytes;
     }
 
     /**
-     * Gets the memory size in Kibibytes (= 1024 bytes).
+     *
+     * @return Gets the memory size in Kibibytes (= 1024 bytes).
      */
     public long getKibiBytes() {
         return bytes >> 10;
     }
 
     /**
-     * Gets the memory size in Mebibytes (= 1024 Kibibytes).
+     *
+     * @return Gets the memory size in Mebibytes (= 1024 Kibibytes).
      */
     public int getMebiBytes() {
         return (int) (bytes >> 20);
     }
 
     /**
-     * Gets the memory size in Gibibytes (= 1024 Mebibytes).
+     *
+     * @return Gets the memory size in Gibibytes (= 1024 Mebibytes).
      */
     public long getGibiBytes() {
         return bytes >> 30;
     }
 
     /**
-     * Gets the memory size in Tebibytes (= 1024 Gibibytes).
+     * @return Gets the memory size in Tebibytes (= 1024 Gibibytes).
      */
     public long getTebiBytes() {
         return bytes >> 40;

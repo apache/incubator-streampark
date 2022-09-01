@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,37 +48,37 @@ public class SettingController {
     @PostMapping("all")
     @RequiresPermissions("setting:view")
     public RestResponse all() {
-        LambdaQueryWrapper<Setting> query = new QueryWrapper<Setting>().lambda().orderByAsc(Setting::getNum);
+        LambdaQueryWrapper<Setting> query = new QueryWrapper<Setting>().lambda().orderByAsc(Setting::getOrderNum);
         List<Setting> setting = settingService.list(query);
-        return RestResponse.create().data(setting);
+        return RestResponse.success(setting);
     }
 
     @PostMapping("get")
     public RestResponse get(String key) {
         Setting setting = settingService.get(key);
-        return RestResponse.create().data(setting);
+        return RestResponse.success(setting);
     }
 
     @PostMapping("weburl")
     public RestResponse weburl() {
         String url = settingService.getStreamXAddress();
-        return RestResponse.create().data(url == null ? null : url.trim());
+        return RestResponse.success(url == null ? null : url.trim());
     }
 
     @PostMapping("update")
     @RequiresPermissions("setting:update")
     public RestResponse update(Setting setting) {
         boolean updated = settingService.update(setting);
-        return RestResponse.create().data(updated);
+        return RestResponse.success(updated);
     }
 
     @PostMapping("checkHadoop")
     public RestResponse checkHadoop() {
         try {
             HadoopUtils.hdfs().getStatus();
-            return RestResponse.create().data(true);
+            return RestResponse.success(true);
         } catch (Exception e) {
-            return RestResponse.create().data(false).message(e.getMessage());
+            return RestResponse.success(false).message(e.getMessage());
         }
     }
 

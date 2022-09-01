@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +20,9 @@ import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
@@ -33,8 +32,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 
-import scala.collection.JavaConversions;
-
 /**
  * @author benjobs
  */
@@ -43,6 +40,7 @@ import scala.collection.JavaConversions;
 @Slf4j
 public class ApplicationConfig {
 
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long appId;
@@ -58,7 +56,7 @@ public class ApplicationConfig {
      */
     private Integer version = 1;
 
-    @TableField(strategy = FieldStrategy.IGNORED)
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String content;
 
     private Date createTime;
@@ -82,9 +80,9 @@ public class ApplicationConfig {
     public Map<String, String> readConfig() {
         switch (this.getFormat()) {
             case 1:
-                return JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(this.content)));
+                return PropertiesUtils.fromYamlTextAsJava(DeflaterUtils.unzipString(this.content));
             case 2:
-                return JavaConversions.mapAsJavaMap(PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(this.content)));
+                return PropertiesUtils.fromPropertiesTextAsJava(DeflaterUtils.unzipString(this.content));
             default:
                 break;
         }

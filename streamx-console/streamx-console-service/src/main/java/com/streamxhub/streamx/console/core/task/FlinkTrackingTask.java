@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,12 +19,13 @@ package com.streamxhub.streamx.console.core.task;
 import static com.streamxhub.streamx.common.enums.ExecutionMode.isKubernetesMode;
 
 import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
+import com.streamxhub.streamx.common.util.YarnUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
-import com.streamxhub.streamx.console.core.entity.SavePoint;
-import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
 import com.streamxhub.streamx.console.core.enums.OptionState;
@@ -36,18 +34,18 @@ import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
-import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.FlinkClusterService;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
+import com.streamxhub.streamx.console.core.service.alert.AlertService;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.config.RequestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -66,15 +64,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
- * <pre><b>
- *  十步杀一人
- *  千里不留行
- *  事了拂衣去
- *  深藏身与名
- * </b></pre>
- * <p>
  * This implementation is currently only used for tracing flink job on yarn
  *
  * @author benjobs
@@ -82,6 +74,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class FlinkTrackingTask {
+
+    // track interval  every 5 seconds
+    private static final long TRACK_INTERVAL = 1000L * 5;
+    //option interval within 10 seconds
+    private static final long OPTION_INTERVAL = 1000L * 10;
 
     /**
      * <pre>
@@ -94,7 +91,7 @@ public class FlinkTrackingTask {
     /**
      * 记录第一次跟踪任务的状态,因为在任务启动后会在第一次跟踪时会获取任务的overview
      */
-    private static final Cache<Long, Byte> STARTING_CACHE = Caffeine.newBuilder().expireAfterWrite(3, TimeUnit.MINUTES).build();
+    private static final Cache<Long, Byte> STARTING_CACHE = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 
     /**
      * 跟踪任务列表
@@ -115,6 +112,13 @@ public class FlinkTrackingTask {
      */
     private static final Cache<Long, Byte> CANCELING_CACHE = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
 
+    /**
+     * 任务取消跟踪列表,跟踪任务是由谁取消
+     * key:applicationId
+     * value:userId
+     */
+    private static final Map<Long, Long> CANCELLED_JOB_MAP = new ConcurrentHashMap<>(0);
+
     @Autowired
     private SavePointService savePointService;
 
@@ -127,6 +131,9 @@ public class FlinkTrackingTask {
     @Autowired
     private FlinkClusterService flinkClusterService;
 
+    @Autowired
+    private CheckpointProcessor checkpointProcessor;
+
     /**
      * 常用版本更新
      */
@@ -136,11 +143,7 @@ public class FlinkTrackingTask {
 
     private static ApplicationService applicationService;
 
-    private static final Map<String, Long> CHECK_POINT_MAP = new ConcurrentHashMap<>();
-
-    private static final Map<String, Counter> CHECK_POINT_FAILED_MAP = new ConcurrentHashMap<>();
-
-    private static final Map<Long, OptionState> OPTIONING = new ConcurrentHashMap<>();
+    private static final Map<Long, OptionState> OPTIONING = new ConcurrentHashMap<>(0);
 
     private Long lastTrackTime = 0L;
 
@@ -149,12 +152,12 @@ public class FlinkTrackingTask {
     private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
 
     private static final ExecutorService EXECUTOR = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 2,
-            200,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("flink-tracking-executor"));
+        Runtime.getRuntime().availableProcessors() * 2,
+        200,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("flink-tracking-executor"));
 
     @Autowired
     public void setApplicationService(ApplicationService appService) {
@@ -179,18 +182,14 @@ public class FlinkTrackingTask {
      */
     @Scheduled(fixedDelay = 1000)
     public void execute() {
-        // 正常5秒钟获取一次信息
-        long trackInterval = 1000L * 5;
-        //10秒之内
-        long optionInterval = 1000L * 10;
 
         //1) 项目刚启动第一次执行,或者前端正在操作...(启动,停止)需要立即返回状态信息.
         if (lastTrackTime == null || !OPTIONING.isEmpty()) {
             tracking();
-        } else if (System.currentTimeMillis() - lastOptionTime <= optionInterval) {
+        } else if (System.currentTimeMillis() - lastOptionTime <= OPTION_INTERVAL) {
             //2) 如果在管理端正在操作时间的10秒中之内(每秒执行一次)
             tracking();
-        } else if (System.currentTimeMillis() - lastTrackTime >= trackInterval) {
+        } else if (System.currentTimeMillis() - lastTrackTime >= TRACK_INTERVAL) {
             //3) 正常信息获取,判断本次时间和上次时间是否间隔5秒(正常监控信息获取,每5秒一次)
             tracking();
         }
@@ -198,11 +197,11 @@ public class FlinkTrackingTask {
 
     private void tracking() {
         lastTrackTime = System.currentTimeMillis();
-        TRACKING_MAP.entrySet().stream()
-                .filter(trkElement -> !isKubernetesMode(trkElement.getValue().getExecutionMode()))
-                .forEach(trkElement -> EXECUTOR.execute(() -> {
-                    long key = trkElement.getKey();
-                    Application application = trkElement.getValue();
+        for (Map.Entry<Long, Application> entry : TRACKING_MAP.entrySet()) {
+            if (!isKubernetesMode(entry.getValue().getExecutionMode())) {
+                EXECUTOR.execute(() -> {
+                    long key = entry.getKey();
+                    Application application = entry.getValue();
                     final StopFrom stopFrom = STOP_FROM_MAP.getOrDefault(key, null) == null ? StopFrom.NONE : STOP_FROM_MAP.get(key);
                     final OptionState optionState = OPTIONING.get(key);
                     try {
@@ -214,10 +213,10 @@ public class FlinkTrackingTask {
                         try {
                             getFromYarnRestApi(application, stopFrom);
                         } catch (Exception yarnException) {
-                            /**
-                             * 3) 从flink的restAPI和yarn的restAPI都查询失败</br>
-                             * 此时需要根据管理端正在操作的状态来决定是否返回最终状态,需满足:</br>
-                             * 1: 操作状态为为取消和正常的状态跟踪(操作状态不为STARTING)</br>
+                            /*
+                              3) 从flink的restAPI和yarn的restAPI都查询失败</br>
+                              此时需要根据管理端正在操作的状态来决定是否返回最终状态,需满足:</br>
+                              1: 操作状态为为取消和正常的状态跟踪(操作状态不为STARTING)</br>
                              */
                             if (optionState == null || !optionState.equals(OptionState.STARTING)) {
                                 //非正在手动映射appId
@@ -231,9 +230,9 @@ public class FlinkTrackingTask {
                                         application.setState(FlinkAppState.CANCELED.getValue());
                                     }
                                 }
-                                /**
-                                 * 进入到这一步说明前两种方式获取信息都失败,此步是最后一步,直接会判别任务取消或失联</br>
-                                 * 需清空savepoint.
+                                /*
+                                  进入到这一步说明前两种方式获取信息都失败,此步是最后一步,直接会判别任务取消或失联</br>
+                                  需清空savepoint.
                                  */
                                 cleanSavepoint(application);
                                 cleanOptioning(optionState, key);
@@ -247,14 +246,16 @@ public class FlinkTrackingTask {
                                         try {
                                             applicationService.start(application, true);
                                         } catch (Exception e) {
-                                            e.printStackTrace();
+                                            logError(e.getMessage(), e);
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                }));
+                });
+            }
+        }
     }
 
     /**
@@ -265,9 +266,8 @@ public class FlinkTrackingTask {
      * @throws Exception
      */
     private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
-        FlinkEnv flinkEnv = getFlinkEnvCache(application);
-        FlinkCluster flinkCluster = getFlinkClusterCache(application);
-        JobsOverview jobsOverview = application.httpJobsOverview(flinkEnv, flinkCluster);
+        FlinkCluster flinkCluster = getFlinkCluster(application);
+        JobsOverview jobsOverview = httpJobsOverview(application, flinkCluster);
         Optional<JobsOverview.Job> optional;
         if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
             optional = jobsOverview.getJobs().size() > 1 ? jobsOverview.getJobs().stream().filter(a -> StringUtils.equals(application.getJobId(), a.getId())).findFirst() : jobsOverview.getJobs().stream().findFirst();
@@ -280,12 +280,18 @@ public class FlinkTrackingTask {
             FlinkAppState currentState = FlinkAppState.of(jobOverview.getState());
 
             if (!FlinkAppState.OTHER.equals(currentState)) {
-                // 1) set info from JobOverview
-                handleJobOverview(application, jobOverview);
-
-                //2) CheckPoints
-                handleCheckPoints(application);
-
+                try {
+                    // 1) set info from JobOverview
+                    handleJobOverview(application, jobOverview);
+                } catch (Exception e) {
+                    logError("get flink jobOverview error: {}", e);
+                }
+                try {
+                    //2) CheckPoints
+                    handleCheckPoints(application);
+                } catch (Exception e) {
+                    logError("get flink checkPoints error: {}", e);
+                }
                 //3) savePoint obsolete check and NEED_START check
                 OptionState optionState = OPTIONING.get(application.getId());
                 // cpu分支预测,将Running的状态单独拿出来
@@ -298,6 +304,10 @@ public class FlinkTrackingTask {
         }
     }
 
+    private void logError(String s, Exception e) {
+        log.error(s, e);
+    }
+
     /**
      * 基本信息回写等处理
      *
@@ -306,17 +316,10 @@ public class FlinkTrackingTask {
      * @throws IOException
      */
     private void handleJobOverview(Application application, JobsOverview.Job jobOverview) throws IOException {
-        // 1) jobId以restapi返回的状态为准
-        application.setJobId(jobOverview.getId());
-        application.setTotalTask(jobOverview.getTasks().getTotal());
-        application.setOverview(jobOverview.getTasks());
-
-        // 2) duration
+        // 1) duration
         long startTime = jobOverview.getStartTime();
         long endTime = jobOverview.getEndTime();
-        if (application.getStartTime() == null) {
-            application.setStartTime(new Date(startTime));
-        } else if (startTime != application.getStartTime().getTime()) {
+        if (application.getStartTime() == null || startTime != application.getStartTime().getTime()) {
             application.setStartTime(new Date(startTime));
         }
         if (endTime != -1) {
@@ -326,17 +329,20 @@ public class FlinkTrackingTask {
         }
         application.setDuration(jobOverview.getDuration());
 
-        // 3) overview,刚启动第一次获取Overview信息.
+        // 2) overview,刚启动第一次获取Overview信息.
         if (STARTING_CACHE.getIfPresent(application.getId()) != null) {
-            FlinkEnv flinkEnv = getFlinkEnvCache(application);
-            FlinkCluster flinkCluster = getFlinkClusterCache(application);
-            Overview override = application.httpOverview(flinkEnv, flinkCluster);
+            application.setJobId(jobOverview.getId());
+            application.setTotalTask(jobOverview.getTasks().getTotal());
+            application.setOverview(jobOverview.getTasks());
+
+            FlinkCluster flinkCluster = getFlinkCluster(application);
+            Overview override = httpOverview(application, flinkCluster);
             if (override != null && override.getSlotsTotal() > 0) {
-                STARTING_CACHE.invalidate(application.getId());
                 application.setTotalTM(override.getTaskmanagers());
                 application.setTotalSlot(override.getSlotsTotal());
                 application.setAvailableSlot(override.getSlotsAvailable());
             }
+            STARTING_CACHE.invalidate(application.getId());
         }
     }
 
@@ -347,50 +353,10 @@ public class FlinkTrackingTask {
      * @throws IOException
      */
     private void handleCheckPoints(Application application) throws Exception {
-        FlinkEnv flinkEnv = getFlinkEnvCache(application);
-        FlinkCluster flinkCluster = getFlinkClusterCache(application);
-        CheckPoints checkPoints = application.httpCheckpoints(flinkEnv, flinkCluster);
+        FlinkCluster flinkCluster = getFlinkCluster(application);
+        CheckPoints checkPoints = httpCheckpoints(application, flinkCluster);
         if (checkPoints != null) {
-            CheckPoints.Latest latest = checkPoints.getLatest();
-            if (latest != null) {
-                CheckPoints.CheckPoint checkPoint = latest.getCompleted();
-                if (checkPoint != null) {
-                    CheckPointStatus status = checkPoint.getCheckPointStatus();
-                    if (CheckPointStatus.COMPLETED.equals(status)) {
-                        Long latestId = CHECK_POINT_MAP.get(application.getJobId());
-                        if (latestId == null || latestId < checkPoint.getId()) {
-                            SavePoint savePoint = new SavePoint();
-                            savePoint.setAppId(application.getId());
-                            savePoint.setLatest(true);
-                            savePoint.setType(checkPoint.getCheckPointType().get());
-                            savePoint.setPath(checkPoint.getExternalPath());
-                            savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
-                            savePoint.setCreateTime(new Date());
-                            savePointService.save(savePoint);
-                            CHECK_POINT_MAP.put(application.getJobId(), checkPoint.getId());
-                        }
-                    } else if (CheckPointStatus.FAILED.equals(status) && application.cpFailedTrigger()) {
-                        Counter counter = CHECK_POINT_FAILED_MAP.get(application.getJobId());
-                        if (counter == null) {
-                            CHECK_POINT_FAILED_MAP.put(application.getJobId(), new Counter(checkPoint.getTriggerTimestamp()));
-                        } else {
-                            //x分钟之内超过Y次CheckPoint失败触发动作
-                            long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
-                            if (minute <= application.getCpFailureRateInterval()
-                                    && counter.getCount() >= application.getCpMaxFailureInterval()) {
-                                CHECK_POINT_FAILED_MAP.remove(application.getJobId());
-                                if (application.getCpFailureAction() == 1) {
-                                    alertService.alert(application, CheckPointStatus.FAILED);
-                                } else {
-                                    applicationService.restart(application);
-                                }
-                            } else {
-                                counter.add();
-                            }
-                        }
-                    }
-                }
-            }
+            checkpointProcessor.process(application.getId(), checkPoints);
         }
     }
 
@@ -402,13 +368,13 @@ public class FlinkTrackingTask {
      * @param currentState
      */
     private void handleRunningState(Application application, OptionState optionState, FlinkAppState currentState) {
-        /**
-         * 上次记录的状态的 "STARTING" 本次获取到最新的状态为"RUNNING",说明是重启后的第一次跟踪
-         * 则:job以下状态需要更新为重启状态:
-         * NEED_RESTART_AFTER_CONF_UPDATE(配置文件修改后需要重新启动)
-         * NEED_RESTART_AFTER_SQL_UPDATE(flink sql修改后需要重启)
-         * NEED_RESTART_AFTER_ROLLBACK(任务回滚后需要重启)
-         * NEED_RESTART_AFTER_DEPLOY(任务重新发布后需要回滚)
+        /*
+          上次记录的状态的 "STARTING" 本次获取到最新的状态为"RUNNING",说明是重启后的第一次跟踪
+          则:job以下状态需要更新为重启状态:
+          NEED_RESTART_AFTER_CONF_UPDATE(配置文件修改后需要重新启动)
+          NEED_RESTART_AFTER_SQL_UPDATE(flink sql修改后需要重启)
+          NEED_RESTART_AFTER_ROLLBACK(任务回滚后需要重启)
+          NEED_RESTART_AFTER_DEPLOY(任务重新发布后需要回滚)
          */
         if (OptionState.STARTING.equals(optionState)) {
             LaunchState launchState = LaunchState.of(application.getLaunch());
@@ -457,9 +423,10 @@ public class FlinkTrackingTask {
                 log.info("flinkTrackingTask getFromFlinkRestApi, job state {}, stop tracking and delete stopFrom!", currentState.name());
                 cleanSavepoint(application);
                 application.setState(currentState.getValue());
-                if (StopFrom.NONE.equals(stopFrom)) {
+                if (StopFrom.NONE.equals(stopFrom) || applicationService.checkAlter(application)) {
                     log.info("flinkTrackingTask getFromFlinkRestApi, job cancel is not form streamX,savePoint obsoleted!");
                     savePointService.obsolete(application.getId());
+                    stopCanlledJob(application.getId());
                     alertService.alert(application, FlinkAppState.CANCELED);
                 }
                 //清理stopFrom
@@ -498,9 +465,9 @@ public class FlinkTrackingTask {
         log.debug("flinkTrackingTask getFromYarnRestApi starting...");
         OptionState optionState = OPTIONING.get(application.getId());
 
-        /**
-         * 上一次的状态为canceling(在获取信息时flink restServer还未关闭为canceling)
-         * 且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
+        /*
+          上一次的状态为canceling(在获取信息时flink restServer还未关闭为canceling)
+          且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
          */
         Byte flag = CANCELING_CACHE.getIfPresent(application.getId());
         if (flag != null) {
@@ -515,7 +482,7 @@ public class FlinkTrackingTask {
             this.persistentAndClean(application);
         } else {
             // 2)到yarn的restApi中查询状态
-            AppInfo appInfo = application.httpYarnAppInfo();
+            AppInfo appInfo = httpYarnAppInfo(application);
             if (appInfo == null) {
                 if (!ExecutionMode.REMOTE.equals(application.getExecutionModeEnum())) {
                     throw new RuntimeException("flinkTrackingTask getFromYarnRestApi failed ");
@@ -544,8 +511,11 @@ public class FlinkTrackingTask {
                     cleanOptioning(optionState, application.getId());
                     this.persistentAndClean(application);
 
-                    if (flinkAppState.equals(FlinkAppState.FAILED) || flinkAppState.equals(FlinkAppState.LOST)) {
+                    if (flinkAppState.equals(FlinkAppState.FAILED) || flinkAppState.equals(FlinkAppState.LOST)
+                        || (flinkAppState.equals(FlinkAppState.CANCELED) && StopFrom.NONE.equals(stopFrom))
+                        || applicationService.checkAlter(application)) {
                         alertService.alert(application, flinkAppState);
+                        stopCanlledJob(application.getId());
                         if (flinkAppState.equals(FlinkAppState.FAILED)) {
                             applicationService.start(application, true);
                         }
@@ -575,7 +545,7 @@ public class FlinkTrackingTask {
     private static List<Application> getAllApplications() {
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1)
-                .notIn("execution_mode", ExecutionMode.getKubernetesMode());
+            .notIn("execution_mode", ExecutionMode.getKubernetesMode());
         return applicationService.list(queryWrapper);
     }
 
@@ -610,7 +580,6 @@ public class FlinkTrackingTask {
             return;
         }
         log.info("flinkTrackingTask setOptioning");
-        Long optioningTime = System.currentTimeMillis();
         OPTIONING.put(appId, state);
         //从streamx停止
         if (state.equals(OptionState.CANCELLING)) {
@@ -684,6 +653,23 @@ public class FlinkTrackingTask {
         TRACKING_MAP.remove(appId);
     }
 
+    public static void stopCanlledJob(Long appId) {
+        if (!CANCELLED_JOB_MAP.containsKey(appId)) {
+            return;
+        }
+        log.info("flink job canlled app appId:{} by useId:{}", appId, CANCELLED_JOB_MAP.get(appId));
+        CANCELLED_JOB_MAP.remove(appId);
+    }
+
+    public static void addCanlledApp(Long appId, Long userId) {
+        log.info("flink job addCanlledApp app appId:{}, useId:{}", appId, userId);
+        CANCELLED_JOB_MAP.put(appId, userId);
+    }
+
+    public static Long getCanlledJobUserId(Long appId) {
+        return CANCELLED_JOB_MAP.get(appId);
+    }
+
     public static Map<Long, Application> getAllTrackingApp() {
         return TRACKING_MAP;
     }
@@ -692,35 +678,16 @@ public class FlinkTrackingTask {
         return TRACKING_MAP.get(appId);
     }
 
-    @Data
-    public static class Counter {
-        private Long timestamp;
-        private Integer count;
-
-        public Counter(Long timestamp) {
-            this.timestamp = timestamp;
-            this.count = 1;
-        }
-
-        public void add() {
-            this.count += 1;
-        }
-
-        public long getDuration(Long currentTimestamp) {
-            return (currentTimestamp - this.getTimestamp()) / 1000 / 60;
-        }
-    }
-
     private static boolean isKubernetesApp(Application application) {
-        return K8sFlinkTrkMonitorWrapper.isKubernetesApp(application);
+        return K8sFlinkTrackMonitorWrapper.isKubernetesApp(application);
     }
 
     private static boolean isKubernetesApp(Long appId) {
         Application app = TRACKING_MAP.get(appId);
-        return K8sFlinkTrkMonitorWrapper.isKubernetesApp(app);
+        return K8sFlinkTrackMonitorWrapper.isKubernetesApp(app);
     }
 
-    private FlinkEnv getFlinkEnvCache(Application application) {
+    private FlinkEnv getFlinkEnv(Application application) {
         FlinkEnv flinkEnv = FLINK_ENV_MAP.get(application.getVersionId());
         if (flinkEnv == null) {
             flinkEnv = flinkEnvService.getByAppId(application.getId());
@@ -729,8 +696,8 @@ public class FlinkTrackingTask {
         return flinkEnv;
     }
 
-    private FlinkCluster getFlinkClusterCache(Application application) {
-        if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
+    private FlinkCluster getFlinkCluster(Application application) {
+        if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum()) || ExecutionMode.isSessionMode(application.getExecutionModeEnum())) {
             FlinkCluster flinkCluster = FLINK_CLUSTER_MAP.get(application.getFlinkClusterId());
             if (flinkCluster == null) {
                 flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
@@ -743,6 +710,85 @@ public class FlinkTrackingTask {
 
     public static Map<Long, FlinkEnv> getFlinkEnvMap() {
         return FLINK_ENV_MAP;
+    }
+
+    private AppInfo httpYarnAppInfo(Application application) throws Exception {
+        String reqURL = "ws/v1/cluster/apps/".concat(application.getAppId());
+        return yarnRestRequest(reqURL, AppInfo.class);
+    }
+
+    private Overview httpOverview(Application application, FlinkCluster flinkCluster) throws IOException {
+        String appId = application.getAppId();
+        if (appId != null) {
+            if (application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
+                application.getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
+                String format = "proxy/%s/overview";
+                String reqURL = String.format(format, appId);
+                return yarnRestRequest(reqURL, Overview.class);
+                // TODO: yarn-session
+                //String remoteUrl = getFlinkClusterRestUrl(flinkCluster, flinkUrl);
+                //return httpGetDoResult(remoteUrl, Overview.class);
+            }
+        }
+        return null;
+    }
+
+    private JobsOverview httpJobsOverview(Application application, FlinkCluster flinkCluster) throws Exception {
+        final String flinkUrl = "jobs/overview";
+        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            String format = "proxy/%s/" + flinkUrl;
+            String reqURL = String.format(format, application.getAppId());
+            JobsOverview jobsOverview = yarnRestRequest(reqURL, JobsOverview.class);
+            if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
+                //过滤出当前job
+                List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).collect(Collectors.toList());
+                jobsOverview.setJobs(jobs);
+            }
+            return jobsOverview;
+        } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+            if (application.getJobId() != null) {
+                String remoteUrl = flinkCluster.getActiveAddress().toURL() + "/" + flinkUrl;
+                JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
+                if (jobsOverview != null) {
+                    //过滤出当前job
+                    List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).collect(Collectors.toList());
+                    jobsOverview.setJobs(jobs);
+                }
+                return jobsOverview;
+            }
+        }
+        return null;
+    }
+
+    private CheckPoints httpCheckpoints(Application application, FlinkCluster flinkCluster) throws IOException {
+        final String flinkUrl = "jobs/%s/checkpoints";
+        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+            String format = "proxy/%s/" + flinkUrl;
+            String reqURL = String.format(format, application.getAppId(), application.getJobId());
+            return yarnRestRequest(reqURL, CheckPoints.class);
+        } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+            if (application.getJobId() != null) {
+                String remoteUrl = flinkCluster.getActiveAddress().toURL() + "/" + String.format(flinkUrl, application.getJobId());
+                return httpRestRequest(remoteUrl, CheckPoints.class);
+            }
+        }
+        return null;
+    }
+
+    private <T> T yarnRestRequest(String url, Class<T> clazz) throws IOException {
+        String result = YarnUtils.restRequest(url);
+        if (null == result) {
+            return null;
+        }
+        return JacksonUtils.read(result, clazz);
+    }
+
+    private <T> T httpRestRequest(String url, Class<T> clazz) throws IOException {
+        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
+        if (null == result) {
+            return null;
+        }
+        return JacksonUtils.read(result, clazz);
     }
 
 }

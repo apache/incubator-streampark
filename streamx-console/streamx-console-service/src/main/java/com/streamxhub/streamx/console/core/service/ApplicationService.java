@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +17,7 @@
 package com.streamxhub.streamx.console.core.service;
 
 import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.exception.ApplicationException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.AppExistsState;
 
@@ -41,11 +39,13 @@ public interface ApplicationService extends IService<Application> {
 
     boolean create(Application app) throws IOException;
 
+    Long copy(Application app) throws IOException;
+
     boolean update(Application app);
 
     void starting(Application app);
 
-    boolean start(Application app, boolean auto) throws Exception;
+    void start(Application app, boolean auto) throws Exception;
 
     void restart(Application application) throws Exception;
 
@@ -53,7 +53,9 @@ public interface ApplicationService extends IService<Application> {
 
     AppExistsState checkExists(Application app);
 
-    void cancel(Application app);
+    String checkSavepointPath(Application app) throws Exception;
+
+    void cancel(Application app) throws Exception;
 
     void updateTracking(Application application);
 
@@ -71,22 +73,28 @@ public interface ApplicationService extends IService<Application> {
 
     void tailMvnDownloading(Long id);
 
-    String upload(MultipartFile file) throws Exception;
+    String upload(MultipartFile file) throws ApplicationException;
 
     /**
      * 将 latest的设置为Effective的,(此时才真正变成当前生效的)
      */
     void toEffective(Application application);
 
-    void revoke(Application app) throws Exception;
+    void revoke(Application app) throws ApplicationException;
 
     Boolean delete(Application app);
 
-    boolean checkEnv(Application app) throws Exception;
+    boolean checkEnv(Application app) throws ApplicationException;
+
+    boolean checkAlter(Application application);
 
     void updateLaunch(Application application);
 
     List<Application> getByProjectId(Long id);
 
     boolean checkBuildAndUpdate(Application app);
+
+    void forcedStop(Application app);
+
+    Long getCountByTeam(Long teamId);
 }

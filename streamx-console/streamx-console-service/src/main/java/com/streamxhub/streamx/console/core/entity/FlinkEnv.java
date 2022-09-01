@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,14 +19,16 @@ package com.streamxhub.streamx.console.core.entity;
 import com.streamxhub.streamx.common.domain.FlinkVersion;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
+import com.streamxhub.streamx.console.base.exception.ApiException;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -41,6 +40,7 @@ import java.util.Map;
 @TableName("t_flink_env")
 public class FlinkEnv implements Serializable {
 
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private String flinkName;
@@ -64,18 +64,30 @@ public class FlinkEnv implements Serializable {
 
     private transient FlinkVersion flinkVersion;
 
-    public void doSetFlinkConf() throws IOException {
-        assert this.flinkHome != null;
-        File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
-        assert yaml.exists();
-        String flinkConf = FileUtils.readFileToString(yaml);
-        this.flinkConf = DeflaterUtils.zipString(flinkConf);
+    private transient String streamxScalaVersion = scala.util.Properties.versionNumberString();
+
+    public void doSetFlinkConf() throws ApiException {
+        try {
+            File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
+            String flinkConf = FileUtils.readFileToString(yaml);
+            this.flinkConf = DeflaterUtils.zipString(flinkConf);
+        } catch (Exception e) {
+            throw new ApiException(e);
+        }
     }
 
     public void doSetVersion() {
-        assert this.flinkHome != null;
         this.setVersion(this.getFlinkVersion().version());
         this.setScalaVersion(this.getFlinkVersion().scalaVersion());
+        if (!streamxScalaVersion.startsWith(this.getFlinkVersion().scalaVersion())) {
+            throw new UnsupportedOperationException(
+                String.format(
+                    "The current Scala version of StreamX is %s, but the scala version of Flink to be added is %s, which does not match, Please check",
+                    streamxScalaVersion,
+                    this.getFlinkVersion().scalaVersion()
+                )
+            );
+        }
     }
 
     @JsonIgnore

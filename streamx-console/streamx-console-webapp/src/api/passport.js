@@ -22,9 +22,9 @@ import api from './index'
 import http from '@/utils/request'
 
 export function signin (parameter) {
-  return http.post(api.Passport.SIGNIN, parameter)
+  return http.post(api.Passport.SIGN_IN, parameter)
 }
 
 export function signout () {
-  return http.post(api.Passport.SIGNOUT)
+  return http.post(api.Passport.SIGN_OUT)
 }

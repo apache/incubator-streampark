@@ -5,16 +5,15 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-flink</artifactId>
-        <version>1.2.3</version>
+        <version>1.2.4</version>
     </parent>
 
-    <artifactId>streamx-flink-connector</artifactId>
+    <artifactId>streamx-flink-connector_${scala.binary.version}</artifactId>
 
     <name>StreamX : Flink Connector</name>
     <packaging>pom</packaging>
 
     <properties>
-        <vertx.version>4.2.3</vertx.version>
         <clickhouse.version>0.3.2</clickhouse.version>
         <async.client.version>2.12.3</async.client.version>
         <influxdb.version>2.17</influxdb.version>
@@ -31,7 +30,6 @@
         <module>streamx-flink-connector-jdbc</module>
         <module>streamx-flink-connector-kafka</module>
         <module>streamx-flink-connector-mongo</module>
-        <module>streamx-flink-connector-redis</module>
     </modules>
 
     <dependencyManagement>
@@ -52,13 +50,14 @@
 
             <dependency>
                 <groupId>com.streamxhub.streamx</groupId>
-                <artifactId>streamx-flink-shims-base_${scala.binary.version}</artifactId>
+                <artifactId>streamx-flink-shims_flink-${streamx.flink.shims.version}_${scala.binary.version}</artifactId>
                 <version>${project.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>com.streamxhub.streamx</groupId>
-                <artifactId>streamx-flink-shims_flink-${streamx.flink.shims.version}_${scala.binary.version}</artifactId>
+                <artifactId>streamx-flink-shims-base_${scala.binary.version}</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -88,29 +87,54 @@
                 <version>4.1.2</version>
             </dependency>
 
+            <!-- kafka connector -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-connector-kafka${scala.binary.flink.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-core</artifactId>
+                <version>${flink.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-scala_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <!-- table -->
             <dependency>
                 <groupId>org.apache.flink</groupId>
-                <artifactId>flink-table-api-scala-bridge_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
                 <artifactId>flink-table-planner_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-table-common</artifactId>
                 <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
@@ -124,20 +148,6 @@
                 <artifactId>mongo-java-driver</artifactId>
                 <version>3.12.2</version>
             </dependency>
-
-            <!--mysql async start-->
-            <dependency>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-jdbc-client</artifactId>
-                <version>${vertx.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-core</artifactId>
-                <version>${vertx.version}</version>
-            </dependency>
-            <!--mysql async end-->
 
         </dependencies>
 
@@ -184,11 +194,6 @@
         <!-- table -->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-api-scala-bridge_${scala.binary.version}</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner_${scala.binary.version}</artifactId>
         </dependency>
 
@@ -201,7 +206,19 @@
 
     <profiles>
         <profile>
-            <id>streamx-flink-connector-2.11</id>
+            <id>scala-2.12</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>scala.binary.version</name>
+                    <value>2.12</value>
+                </property>
+            </activation>
+            <modules></modules>
+        </profile>
+
+        <profile>
+            <id>scala-2.11</id>
             <activation>
                 <property>
                     <name>scala.binary.version</name>
@@ -209,7 +226,7 @@
                 </property>
             </activation>
             <modules>
-                <!-- redis connector only support scale 2.11 -->
+                <!-- redis only support scala 2.11 -->
                 <module>streamx-flink-connector-redis</module>
             </modules>
         </profile>

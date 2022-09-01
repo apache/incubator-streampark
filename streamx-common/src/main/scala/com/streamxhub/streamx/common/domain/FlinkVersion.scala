@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,8 +38,12 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
 
   lazy val scalaVersion: String = {
     val matcher = FLINK_SCALA_VERSION_PATTERN.matcher(flinkDistJar.getName)
-    matcher.matches()
-    matcher.group(1)
+    if (matcher.matches()) {
+      matcher.group(1);
+    } else {
+      // flink 1.15 + on support scala 2.12
+       "2.12"
+    }
   }
 
   lazy val fullVersion: String = s"${version}_$scalaVersion"
@@ -92,7 +93,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
   }
 
   lazy val flinkDistJar: File = {
-    val distJar = flinkLib.listFiles().filter(_.getName.matches("flink-dist_.*\\.jar"))
+    val distJar = flinkLib.listFiles().filter(_.getName.matches("flink-dist.*\\.jar"))
     distJar match {
       case x if x.isEmpty =>
         throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLib")

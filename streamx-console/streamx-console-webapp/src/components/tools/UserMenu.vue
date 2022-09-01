@@ -12,6 +12,8 @@
     </div>
 
     <div class="content-box header-icon">
+      <a> Version: 1.2.4 </a>
+      <a-divider type="vertical" />
       <a title="theme">
         <svg-icon name="theme" size="small" class="icon" @click.native="handleChangeTheme(false)"></svg-icon>
       </a>

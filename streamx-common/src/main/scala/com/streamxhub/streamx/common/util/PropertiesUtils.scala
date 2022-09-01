@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +21,7 @@ import java.io._
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.{Properties, Scanner, HashMap => JavaMap, LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable.{Map => MutableMap}
 
 /**
@@ -154,6 +152,21 @@ object PropertiesUtils extends Logger {
     }
   }
 
+  def fromYamlTextAsJava(text: String): JavaMap[String, String] = new JavaMap[String, String](fromYamlText(text).asJava)
+
+  def fromPropertiesTextAsJava(conf: String): JavaMap[String, String] = new JavaMap[String, String](fromPropertiesText(conf).asJava)
+
+  /** Load Yaml present in the given file. */
+  def fromYamlFileAsJava(filename: String): JavaMap[String, String] = new JavaMap[String, String](fromYamlFile(filename).asJava)
+
+  /** Load properties present in the given file. */
+  def fromPropertiesFileAsJava(filename: String): JavaMap[String, String] = new JavaMap[String, String](fromPropertiesFile(filename).asJava)
+
+  /** Load Yaml present in the given file. */
+  def fromYamlFileAsJava(inputStream: InputStream): JavaMap[String, String] = new JavaMap[String, String](fromYamlFile(inputStream).asJava)
+
+  /** Load properties present in the given file. */
+  def fromPropertiesFileAsJava(inputStream: InputStream): JavaMap[String, String] = new JavaMap[String, String](fromPropertiesFile(inputStream).asJava)
 
   /**
    *
@@ -174,19 +187,24 @@ object PropertiesUtils extends Logger {
       val line = scanner.nextLine()
       lineNo.incrementAndGet()
       // 1. check for comments
-      val comments = line.split("#", 2)
+      // [FLINK-27299] flink parsing parameter bug fixed.
+      val comments = line.split("^#|\\s+#", 2)
       val conf = comments(0).trim
       // 2. get key and value
       if (conf.nonEmpty) {
         val kv = conf.split(": ", 2)
         // skip line with no valid key-value pair
-        val key = kv(0).trim
-        val value = kv(1).trim
-        // sanity check
-        if (key.nonEmpty && value.nonEmpty) {
-          flinkConf += key -> value
+        if (kv.length == 2) {
+          val key = kv(0).trim
+          val value = kv(1).trim
+          // sanity check
+          if (key.nonEmpty && value.nonEmpty) {
+            flinkConf += key -> value
+          } else {
+            logWarn(s"Error after splitting key and value in configuration ${lineNo.get()}: $line")
+          }
         } else {
-          logWarn(s"Error after splitting key and value in configuration ${lineNo.get()}: $line")
+          logWarn(s"Error while trying to split key and value in configuration. $lineNo : $line")
         }
       }
     }

@@ -1,0 +1,89 @@
+/*
+ * Copyright 2019 The StreamX Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.streamxhub.streamx.flink.kubernetes.watcher
+
+import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey}
+import com.streamxhub.streamx.flink.kubernetes.{FlinkTrackController, KubernetesRetriever}
+import io.fabric8.kubernetes.api.model.apps.Deployment
+import io.fabric8.kubernetes.client.{KubernetesClient, Watcher}
+import org.apache.flink.kubernetes.kubeclient.resources.{CompKubernetesDeployment, CompatibleKubernetesWatcher}
+
+import javax.annotation.concurrent.ThreadSafe
+import scala.util.Try
+
+/**
+ * K8s Event Watcher for Flink Native-K8s Mode.
+ * Currently only flink-native-application mode events would be tracked.
+ * The results of traced events would written into cachePool.
+ *
+ * author:Al-assad
+ */
+@ThreadSafe
+class FlinkK8sEventWatcher(implicit trackController: FlinkTrackController) extends Logger with FlinkWatcher {
+
+  private var k8sClient: KubernetesClient = _
+
+  /**
+   * start watcher process
+   */
+  override def doStart(): Unit = {
+    k8sClient = Try(KubernetesRetriever.newK8sClient()).getOrElse {
+      logError("[flink-k8s] FlinkK8sEventWatcher fails to start.")
+      return
+    }
+    doWatch()
+    logInfo("[flink-k8s] FlinkK8sEventWatcher started.")
+  }
+
+  /**
+   * stop watcher process
+   */
+  override def doStop(): Unit = {
+    k8sClient.close()
+    k8sClient = null
+    logInfo("[flink-k8s] FlinkK8sEventWatcher stopped.")
+  }
+
+  override def doClose(): Unit = {
+    logInfo("[flink-k8s] FlinkK8sEventWatcher closed.")
+  }
+
+  override def doWatch(): Unit = {
+    // watch k8s deployment events
+    k8sClient.apps().deployments()
+      .withLabel("type", "flink-native-kubernetes")
+      .watch(new CompatibleKubernetesWatcher[Deployment, CompKubernetesDeployment] {
+        override def eventReceived(action: Watcher.Action, event: Deployment): Unit = {
+          handleDeploymentEvent(action, event)
+        }
+      })
+  }
+
+  private def handleDeploymentEvent(action: Watcher.Action, event: Deployment): Unit = {
+    val clusterId = event.getMetadata.getName
+    val namespace = event.getMetadata.getNamespace
+    // if (!cachePool.isInTracking(TrackId.onApplication(namespace, clusterId)))
+    //  return
+    // just tracking every flink-k8s-native event :)
+    trackController.k8sDeploymentEvents.put(
+      K8sEventKey(namespace, clusterId),
+      K8sDeploymentEventCV(action, event, System.currentTimeMillis())
+    )
+  }
+
+}

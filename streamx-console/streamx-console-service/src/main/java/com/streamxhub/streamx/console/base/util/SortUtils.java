@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,24 +56,6 @@ public final class SortUtils {
             sortField = WebUtils.camelToUnderscore(sortField);
             defaultSort = WebUtils.camelToUnderscore(defaultSort);
         }
-        if (StringUtils.isNotBlank(request.getSortField())
-            && StringUtils.isNotBlank(request.getSortOrder())
-            && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
-            && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
-            if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
-                page.setDesc(sortField);
-            } else {
-                page.setAsc(sortField);
-            }
-        } else {
-            if (StringUtils.isNotBlank(defaultSort)) {
-                if (StringUtils.equals(defaultOrder, Constant.ORDER_DESC)) {
-                    page.setDesc(defaultSort);
-                } else {
-                    page.setAsc(defaultSort);
-                }
-            }
-        }
     }
 
     /**
@@ -121,9 +100,7 @@ public final class SortUtils {
             defaultSort = WebUtils.camelToUnderscore(defaultSort);
         }
         if (StringUtils.isNotBlank(request.getSortField())
-            && StringUtils.isNotBlank(request.getSortOrder())
-            && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
-            && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
+            && StringUtils.isNotBlank(request.getSortOrder())) {
             if (StringUtils.equals(request.getSortOrder(), Constant.ORDER_DESC)) {
                 wrapper.orderByDesc(sortField);
             } else {

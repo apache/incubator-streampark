@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,19 +16,21 @@
 package com.streamxhub.streamx.common.util
 
 import org.apache.http.NameValuePair
-import org.apache.http.client.config.RequestConfig
+import org.apache.http.auth.{AuthSchemeProvider, AuthScope, Credentials}
+import org.apache.http.client.config.{AuthSchemes, RequestConfig}
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods._
 import org.apache.http.client.utils.URIBuilder
+import org.apache.http.config.RegistryBuilder
 import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.HttpClients
+import org.apache.http.impl.auth.SPNegoSchemeFactory
+import org.apache.http.impl.client.{BasicCredentialsProvider, CloseableHttpClient, HttpClientBuilder, HttpClients}
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
 
-import java.io.UnsupportedEncodingException
-import java.net.URISyntaxException
 import java.nio.charset.{Charset, StandardCharsets}
+import java.security.Principal
 import java.util
 import scala.collection.JavaConversions._
 
@@ -57,8 +56,13 @@ object HttpClientUtils {
     val httpGet = params match {
       case null => new HttpGet(url)
       case _ =>
-        val ub = uriBuilder(url, params)
-        new HttpGet(ub.build)
+        val uriBuilder = {
+          val uriBuilder = new URIBuilder
+          uriBuilder.setPath(url)
+          uriBuilder.setParameters(paramsToNameValuePairs(params))
+          uriBuilder
+        }
+        new HttpGet(uriBuilder.build)
     }
     if (config != null) {
       httpGet.setConfig(config)
@@ -71,89 +75,106 @@ object HttpClientUtils {
    * @return
    */
   def httpGetRequest(url: String, config: RequestConfig): String = {
-    getResult(getHttpGet(url, null, config))
+    getHttpResult(getHttpGet(url, null, config))
   }
 
-  @throws[URISyntaxException] def httpGetRequest(url: String, config: RequestConfig, params: util.Map[String, AnyRef]): String = {
-    getResult(getHttpGet(url, params, config))
+  def httpGetRequest(url: String, config: RequestConfig, params: util.Map[String, AnyRef]): String = {
+    getHttpResult(getHttpGet(url, params, config))
   }
 
-  @throws[URISyntaxException] def httpGetRequest(url: String, config: RequestConfig, headers: util.Map[String, AnyRef], params: util.Map[String, AnyRef]): String = {
+  def httpGetRequest(url: String, config: RequestConfig, headers: util.Map[String, AnyRef], params: util.Map[String, AnyRef]): String = {
     val httpGet = getHttpGet(url, params, config)
-    for (param <- headers.entrySet) {
-      httpGet.addHeader(param.getKey, String.valueOf(param.getValue))
-    }
-    getResult(httpGet)
-  }
-
-  private[this] def uriBuilder(url: String, params: util.Map[String, AnyRef]): URIBuilder = {
-    val uriBuilder = new URIBuilder
-    uriBuilder.setPath(url)
-    uriBuilder.setParameters(params2NVPS(params))
-    uriBuilder
+    headers.entrySet.foreach(p => httpGet.addHeader(p.getKey, String.valueOf(p.getValue)))
+    getHttpResult(httpGet)
   }
 
   def httpPostRequest(url: String): String = {
     val httpPost = new HttpPost(url)
-    getResult(httpPost)
+    getHttpResult(httpPost)
   }
 
   def httpPatchRequest(url: String): String = {
     val httpPatch = new HttpPatch(url)
-    getResult(httpPatch)
+    getHttpResult(httpPatch)
   }
 
-  @throws[UnsupportedEncodingException] def httpPostRequest(url: String, params: util.Map[String, AnyRef]): String = {
+  def httpPostRequest(url: String, params: util.Map[String, AnyRef]): String = {
     val httpPost = new HttpPost(url)
-    httpPost.setEntity(new UrlEncodedFormEntity(params2NVPS(params), defaultChart))
-    getResult(httpPost)
+    httpPost.setEntity(new UrlEncodedFormEntity(paramsToNameValuePairs(params), defaultChart))
+    getHttpResult(httpPost)
   }
 
-  @throws[UnsupportedEncodingException] def httpPatchRequest(url: String, params: util.Map[String, AnyRef]): String = {
+  def httpPatchRequest(url: String, params: util.Map[String, AnyRef]): String = {
     val httpPatch = new HttpPatch(url)
-    httpPatch.setEntity(new UrlEncodedFormEntity(params2NVPS(params), defaultChart))
-    getResult(httpPatch)
+    httpPatch.setEntity(new UrlEncodedFormEntity(paramsToNameValuePairs(params), defaultChart))
+    getHttpResult(httpPatch)
   }
 
-  @throws[UnsupportedEncodingException] def httpPostRequest(url: String, params: String): String = httpRequest(new HttpPost(url), params)
+  def httpPostRequest(url: String, params: String): String = httpRequest(new HttpPost(url), params)
 
-  @throws[UnsupportedEncodingException] def httpPatchRequest(url: String, params: String): String = httpRequest(new HttpPatch(url), params)
+  def httpPatchRequest(url: String, params: String): String = httpRequest(new HttpPatch(url), params)
 
 
-  @throws[UnsupportedEncodingException] def httpPostRequest(url: String,
-                                                            params: util.Map[String, AnyRef],
-                                                            headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
+  def httpPostRequest(url: String,
+                      params: util.Map[String, AnyRef],
+                      headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
     httpRequest(new HttpPost(url), headers, params)
   }
 
-  @throws[UnsupportedEncodingException] def httpPatchRequest(url: String,
-                                                             params: util.Map[String, AnyRef],
-                                                             headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
+  def httpPatchRequest(url: String,
+                       params: util.Map[String, AnyRef],
+                       headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
     httpRequest(new HttpPatch(url), headers, params)
   }
 
   private[this] def httpRequest(httpEntity: HttpEntityEnclosingRequestBase, params: String): String = {
-    val entity = new StringEntity(params, defaultChart) //解决中文乱码问题
+    val entity = new StringEntity(params, defaultChart)
     entity.setContentEncoding("UTF-8")
     entity.setContentType("application/json")
     httpEntity.setEntity(entity)
-    getResult(httpEntity)
+    getHttpResult(httpEntity)
   }
 
   private[this] def httpRequest(httpPatch: HttpEntityEnclosingRequestBase, headers: util.Map[String, AnyRef], params: util.Map[String, AnyRef]) = {
-    for (param <- headers.entrySet) {
-      httpPatch.addHeader(param.getKey, String.valueOf(param.getValue))
-    }
-    httpPatch.setEntity(new UrlEncodedFormEntity(params2NVPS(params), defaultChart))
-    getResult(httpPatch)
+    headers.entrySet.foreach(p => httpPatch.addHeader(p.getKey, String.valueOf(p.getValue)))
+    httpPatch.setEntity(new UrlEncodedFormEntity(paramsToNameValuePairs(params), defaultChart))
+    getHttpResult(httpPatch)
   }
 
-  private[this] def params2NVPS(params: util.Map[String, AnyRef]): util.List[NameValuePair] = {
+  private[this] def paramsToNameValuePairs(params: util.Map[String, AnyRef]): util.List[NameValuePair] = {
     val pairs = new util.ArrayList[NameValuePair]
-    for (param <- params.entrySet) {
-      pairs.add(new BasicNameValuePair(param.getKey, String.valueOf(param.getValue)))
-    }
+    params.entrySet.foreach(p => pairs.add(new BasicNameValuePair(p.getKey, String.valueOf(p.getValue))))
     pairs
+  }
+
+  /**
+   * @param url
+   * @return
+   */
+  def httpAuthGetRequest(url: String, config: RequestConfig): String = {
+    def getHttpAuthClient: CloseableHttpClient = {
+      val credentialsProvider = new BasicCredentialsProvider
+      credentialsProvider.setCredentials(
+        new AuthScope(null, -1, null),
+        new Credentials {
+          override def getUserPrincipal: Principal = null
+
+          override def getPassword: String = null
+        })
+
+      val authSchemeRegistry = RegistryBuilder.create[AuthSchemeProvider]
+        .register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory(true)).build
+
+      HttpClientBuilder.create()
+        .setDefaultAuthSchemeRegistry(authSchemeRegistry)
+        .setDefaultCredentialsProvider(credentialsProvider)
+        .setConnectionManager(connectionManager).build()
+    }
+
+    getHttpResult(
+      getHttpGet(url, null, config),
+      getHttpAuthClient
+    )
   }
 
   /**
@@ -162,8 +183,7 @@ object HttpClientUtils {
    * @param request
    * @return
    */
-  private[this] def getResult(request: HttpRequestBase): String = {
-    val httpClient = getHttpClient
+  private[this] def getHttpResult(request: HttpRequestBase, httpClient: CloseableHttpClient = getHttpClient): String = {
     try {
       val response = httpClient.execute(request)
       val entity = response.getEntity
@@ -176,5 +196,6 @@ object HttpClientUtils {
       case e: Exception => throw e
     }
   }
+
 
 }

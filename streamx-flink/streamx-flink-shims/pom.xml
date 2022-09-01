@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-flink</artifactId>
-        <version>1.2.3</version>
+        <version>1.2.4</version>
     </parent>
 
     <artifactId>streamx-flink-shims</artifactId>
@@ -14,9 +14,36 @@
 
     <modules>
         <module>streamx-flink-shims-base</module>
+        <module>streamx-flink-shims-test</module>
         <module>streamx-flink-shims_flink-1.12</module>
         <module>streamx-flink-shims_flink-1.13</module>
         <module>streamx-flink-shims_flink-1.14</module>
     </modules>
+
+    <profiles>
+
+        <profile>
+            <id>scala-2.12</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <!-- flink 1.15+ only support scala 2.12 -->
+                <module>streamx-flink-shims_flink-1.15</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>scala-2.11</id>
+            <activation>
+                <property>
+                    <name>scala.binary.version</name>
+                    <value>2.11</value>
+                </property>
+            </activation>
+            <modules></modules>
+        </profile>
+
+    </profiles>
 
 </project>

@@ -1,30 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.streamxhub.streamx.console.system.dao.AccessTokenMapper">
+<mapper namespace="com.streamxhub.streamx.console.system.mapper.AccessTokenMapper">
+
+    <sql id="Base_Column_List">
+        t1.id,
+        t1.user_id,
+        t2.username,
+        t1.token,
+        t1.expire_time,
+        t1.create_time,
+        t1.modify_time,
+        t1.description,
+        t1.status as status,
+        t2.status as userStatus,
+        case
+            when t1.status = 1 and t2.status = 1
+                then 1
+            else 0
+        end
+        as finalStatus
+    </sql>
+
     <select id="page" resultType="com.streamxhub.streamx.console.system.entity.AccessToken"
             parameterType="com.streamxhub.streamx.console.system.entity.AccessToken">
-        SELECT t1.id, t1.username, t1.token, t1.expire_time, t1.create_time, t1.modify_time, t1.description , t2.`STATUS` as `status`
-        FROM t_access_token t1,t_user t2
+        select
+        <include refid="Base_Column_List"/>
+        from t_access_token t1 join t_user t2 on t1.user_id = t2.user_id
         <where>
-            t1.username = t2.username
-            <if test="accessToken.username != null and accessToken.username != ''">
-                AND t1.USERNAME like concat('%',#{accessToken.username},'%')
+            <if test="accessToken.userId != null and accessToken.userId != ''">
+                and t1.user_id = accessToken.userId
             </if>
         </where>
     </select>
 
-    <select id="getTokenInfo" resultType="com.streamxhub.streamx.console.system.entity.AccessToken">
-        SELECT t1.id,
-               t1.username,
-               t1.token,
-               t1.expire_time,
-               t1.create_time,
-               t1.modify_time,
-               t1.description,
-               t2.`STATUS` as `status`
-        FROM t_user t2
-                 join t_access_token t1
-                      on t1.username = t2.username
-                          and t1.username = #{username,jdbcType=VARCHAR} and t1.token = #{accessToken,jdbcType=VARCHAR}
+    <select id="getByUserId" resultType="com.streamxhub.streamx.console.system.entity.AccessToken">
+        select
+        <include refid="Base_Column_List"/>
+        from t_user t2
+        join t_access_token t1
+        on t1.user_id = t2.user_id
+        where t1.user_id = #{userId}
+    </select>
+
+    <select id="getByUserToken" resultType="com.streamxhub.streamx.console.system.entity.AccessToken">
+        select
+        <include refid="Base_Column_List"/>
+        from t_user t2
+        join t_access_token t1 on t1.user_id = t2.user_id
+        where t1.user_id = #{userId}
+        and t1.token = #{accessToken,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getById" resultType="com.streamxhub.streamx.console.system.entity.AccessToken">
+        select
+        <include refid="Base_Column_List"/>
+        from t_access_token t1
+        join t_user t2 on t1.user_id = t2.user_id
+        where t1.id= #{id}
     </select>
 </mapper>

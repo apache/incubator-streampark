@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,17 +16,17 @@
 package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.conf.ConfigConst.KEY_FLINK_SQL
-import com.streamxhub.streamx.common.enums.SqlErrorType
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.{ConfigOption, Configuration}
+import org.apache.flink.table.api.TableEnvironment
 import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
-import org.apache.flink.table.api.{SqlDialect, TableEnvironment}
 
 import java.util
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.{HashMap => JavaHashMap, Map => JavaMap}
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
@@ -70,8 +67,7 @@ object FlinkSqlExecutor extends Logger {
 
   private[streamx] def executeSql(sql: String, parameter: ParameterTool, context: TableEnvironment)(implicit callbackFunc: String => Unit = null): Unit = {
     val flinkSql: String = if (sql == null || sql.isEmpty) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
-    val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
-    require(flinkSql != null && flinkSql.trim.nonEmpty, sqlEmptyError)
+    require(flinkSql != null && flinkSql.trim.nonEmpty, "verify failed: flink sql cannot be empty")
 
     def callback(r: String): Unit = {
       callbackFunc match {
@@ -80,18 +76,12 @@ object FlinkSqlExecutor extends Logger {
       }
     }
 
-    //TODO registerHiveCatalog
     val insertArray = new ArrayBuffer[String]()
     SqlCommandParser.parseSQL(flinkSql).foreach(x => {
       val args = if (x.operands.isEmpty) null else x.operands.head
       val command = x.command.name
       x.command match {
-        case USE =>
-          context.useDatabase(args)
-          logInfo(s"$command: $args")
-        case USE_CATALOG =>
-          context.useCatalog(args)
-          logInfo(s"$command: $args")
+        // For display sql statement result information
         case SHOW_CATALOGS =>
           val catalogs = context.listCatalogs
           callback(s"$command: ${catalogs.mkString("\n")}")
@@ -113,36 +103,9 @@ object FlinkSqlExecutor extends Logger {
         case SHOW_MODULES =>
           val modules = context.listModules()
           callback(s"$command: ${modules.mkString("\n")}")
-        case SET =>
-          if (!tableConfigOptions.containsKey(args)) {
-            throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/table/config")
-          }
-          val operand = x.operands(1)
-          if (TableConfigOptions.TABLE_SQL_DIALECT.key().equalsIgnoreCase(args)) {
-            Try(SqlDialect.valueOf(operand.toUpperCase()))
-              .map(context.getConfig.setSqlDialect(_))
-              .getOrElse(throw new IllegalArgumentException(s"$operand is not a valid dialect"))
-          } else {
-            context.getConfig.getConfiguration.setString(args, operand)
-          }
-          logInfo(s"$command: $args --> $operand")
-        case RESET =>
-          val confDataField = classOf[Configuration].getDeclaredField("confData")
-          confDataField.setAccessible(true)
-          val confData = confDataField.get(context.getConfig.getConfiguration).asInstanceOf[util.HashMap[String, AnyRef]]
-          if (args.toUpperCase == "ALL") {
-            confData.synchronized {
-              confData.clear()
-            }
-          } else {
-            confData.synchronized {
-              confData.remove(args)
-            }
-          }
-          logInfo(s"$command: $args")
         case DESC | DESCRIBE =>
           val schema = context.scan(args).getSchema
-          val builder = new StringBuilder()
+          val builder = new mutable.StringBuilder()
           builder.append("Column\tType\n")
           for (i <- 0 to schema.getFieldCount) {
             builder.append(schema.getFieldName(i).get() + "\t" + schema.getFieldDataType(i).get() + "\n")
@@ -152,27 +115,42 @@ object FlinkSqlExecutor extends Logger {
           val tableResult = context.executeSql(x.originSql)
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
-        case INSERT_INTO | INSERT_OVERWRITE => insertArray += x.originSql
-        case SELECT =>
-          throw new Exception(s"[StreamX] Unsupported SELECT in current version.")
-        case BEGIN_STATEMENT_SET | END_STATEMENT_SET =>
-          logWarn(s"SQL Client Syntax: ${x.command.name} ")
-        case INSERT_INTO | INSERT_OVERWRITE |
-             CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
-             CREATE_CATALOG | DROP_CATALOG |
-             CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
-             CREATE_VIEW | DROP_VIEW |
-             CREATE_DATABASE | DROP_DATABASE | ALTER_DATABASE =>
-          try {
-            lock.lock()
-            val result = context.executeSql(x.originSql)
-            logInfo(s"$command:$args")
-          } finally {
-            if (lock.isHeldByCurrentThread) {
-              lock.unlock()
+
+        //For specific statement, such as: SET、RESET、INSERT、SELECT
+        case SET =>
+          if (!tableConfigOptions.containsKey(args)) {
+            throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/table/config")
+          }
+          val operand = x.operands(1)
+          context.getConfig.getConfiguration.setString(args, operand)
+          logInfo(s"$command: $args --> $operand")
+        case RESET | RESET_ALL =>
+          val confDataField = classOf[Configuration].getDeclaredField("confData")
+          confDataField.setAccessible(true)
+          val confData = confDataField.get(context.getConfig.getConfiguration).asInstanceOf[util.HashMap[String, AnyRef]]
+          confData.synchronized {
+            if (x.command == RESET) {
+              confData.remove(args)
+            } else {
+              confData.clear()
             }
           }
-        case _ => throw new Exception(s"[StreamX] Unsupported command: ${x.command}")
+          logInfo(s"$command: $args")
+        case BEGIN_STATEMENT_SET | END_STATEMENT_SET =>
+          logWarn(s"SQL Client Syntax: ${x.command.name} ")
+        case INSERT => insertArray += x.originSql
+        case SELECT =>
+          logError("StreamX dose not support 'SELECT' statement now!")
+          throw new RuntimeException("StreamX dose not support 'select' statement now!")
+        case _ => try {
+          lock.lock()
+          val result = context.executeSql(x.originSql)
+          logInfo(s"$command:$args")
+        } finally {
+          if (lock.isHeldByCurrentThread) {
+            lock.unlock()
+          }
+        }
       }
     })
 
@@ -187,8 +165,13 @@ object FlinkSqlExecutor extends Logger {
           }
         case _ =>
       }
+    } else {
+      logError("No 'INSERT' statement to trigger the execution of the Flink job.")
+      throw new RuntimeException("No 'INSERT' statement to trigger the execution of the Flink job.")
     }
 
     logInfo(s"\n\n\n==============flinkSql==============\n\n $flinkSql\n\n============================\n\n\n")
   }
+
+
 }

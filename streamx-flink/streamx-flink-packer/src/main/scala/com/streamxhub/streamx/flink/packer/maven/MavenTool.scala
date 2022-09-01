@@ -1,0 +1,214 @@
+/*
+ * Copyright 2019 The StreamX Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.streamxhub.streamx.flink.packer.maven
+
+import com.google.common.collect.Lists
+import com.streamxhub.streamx.common.conf.CommonConfig.{MAVEN_AUTH_PASSWORD, MAVEN_AUTH_USER, MAVEN_REMOTE_URL}
+import com.streamxhub.streamx.common.conf.{InternalConfigHolder, Workspace}
+import com.streamxhub.streamx.common.util.{Logger, Utils}
+import org.apache.maven.plugins.shade.resource.{ManifestResourceTransformer, ResourceTransformer, ServicesResourceTransformer}
+import org.apache.maven.plugins.shade.{DefaultShader, ShadeRequest}
+import org.apache.maven.repository.internal.MavenRepositorySystemUtils
+import org.codehaus.plexus.logging.console.ConsoleLogger
+import org.codehaus.plexus.logging.{Logger => PlexusLog}
+import org.eclipse.aether.{RepositorySystem, RepositorySystemSession}
+import org.eclipse.aether.artifact.DefaultArtifact
+import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory
+import org.eclipse.aether.repository.{LocalRepository, RemoteRepository}
+import org.eclipse.aether.resolution.{ArtifactDescriptorRequest, ArtifactRequest}
+import org.eclipse.aether.spi.connector.RepositoryConnectorFactory
+import org.eclipse.aether.spi.connector.transport.TransporterFactory
+import org.eclipse.aether.transport.file.FileTransporterFactory
+import org.eclipse.aether.transport.http.HttpTransporterFactory
+import org.eclipse.aether.util.repository.AuthenticationBuilder
+
+import java.io.File
+import java.util
+import javax.annotation.{Nonnull, Nullable}
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
+import scala.util.Try
+
+/**
+ * @author Al-assad
+ */
+object MavenTool extends Logger {
+
+  private[this] lazy val plexusLog = new ConsoleLogger(PlexusLog.LEVEL_INFO, "streamx-maven")
+
+  private[this] val excludeArtifact = List(
+    Artifact.of("org.apache.flink:force-shading:*"),
+    Artifact.of("com.google.code.findbugs:jsr305:*"),
+    Artifact.of("org.apache.logging.log4j:*:*")
+  )
+
+  private[this] lazy val remoteRepos: List[RemoteRepository] = {
+    val builder = new RemoteRepository.Builder("central", "default", InternalConfigHolder.get(MAVEN_REMOTE_URL))
+    val remoteRepository = if (InternalConfigHolder.get(MAVEN_AUTH_USER) == null || InternalConfigHolder.get(MAVEN_AUTH_PASSWORD) == null) {
+      builder.build()
+    } else {
+      val authentication = new AuthenticationBuilder()
+        .addUsername(InternalConfigHolder.get[String](MAVEN_AUTH_USER))
+        .addPassword(InternalConfigHolder.get[String](MAVEN_AUTH_PASSWORD))
+        .build()
+      builder.setAuthentication(authentication).build()
+    }
+    List(remoteRepository)
+  }
+
+  private val isJarFile = (file: File) => file.isFile && Try(Utils.checkJarFile(file.toURI.toURL)).isSuccess
+
+  /**
+   * Build a fat-jar with custom jar libraries.
+   *
+   * @param jarLibs       list of jar lib paths for building fat-jar
+   * @param outFatJarPath output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
+   * @return File Object of output fat-jar
+   */
+  @throws[Exception] def buildFatJar(@Nullable mainClass: String, @Nonnull jarLibs: Set[String], @Nonnull outFatJarPath: String): File = {
+    // check userJarPath
+    val uberJar = new File(outFatJarPath)
+    require(outFatJarPath.endsWith(".jar") && !uberJar.isDirectory, s"[StreamX] streamx-packer: outFatJarPath($outFatJarPath) should be a JAR file.")
+    uberJar.delete()
+    // resolve all jarLibs
+    val jarSet = new util.HashSet[File]
+    jarLibs.map(lib => new File(lib))
+      .filter(_.exists)
+      .foreach {
+        case libFile if isJarFile(libFile) => jarSet.add(libFile)
+        case libFile if libFile.isDirectory => libFile.listFiles.filter(isJarFile).foreach(jarSet.add)
+        case _ =>
+      }
+    logInfo(s"start shaded fat-jar: ${jarLibs.mkString(",")}")
+    // shade jars
+    val shadeRequest = {
+      val req = new ShadeRequest
+      req.setJars(jarSet)
+      req.setUberJar(uberJar)
+      req.setFilters(Lists.newArrayList())
+
+      val transformer = ArrayBuffer[ResourceTransformer]()
+      // ref https://ci.apache.org/projects/flink/flink-docs-master/docs/connectors/table/overview/#transform-table-connectorformat-resources
+      transformer += new ServicesResourceTransformer()
+      if (mainClass != null) {
+        val manifest = new ManifestResourceTransformer()
+        manifest.setMainClass(mainClass)
+        transformer += manifest
+      }
+      req.setResourceTransformers(transformer.toList)
+      req.setRelocators(Lists.newArrayList())
+      req
+    }
+    val shader = new DefaultShader()
+    shader.enableLogging(plexusLog)
+    shader.shade(shadeRequest)
+    logInfo(s"finish build fat-jar: ${uberJar.getAbsolutePath}")
+    uberJar
+  }
+
+  /**
+   * Build a fat-jar with custom jar librarties and maven artifacts.
+   *
+   * @param dependencyInfo maven artifacts and jar libraries for building a fat-jar
+   * @param outFatJarPath  output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
+   */
+  @throws[Exception] def buildFatJar(@Nullable mainClass: String,
+                                     @Nonnull dependencyInfo: DependencyInfo,
+                                     @Nonnull outFatJarPath: String): File = {
+    val jarLibs = dependencyInfo.extJarLibs
+    val arts = dependencyInfo.mavenArts
+    if (jarLibs.isEmpty && arts.isEmpty) {
+      throw new Exception(s"[StreamX] streamx-packer: empty artifacts.")
+    }
+    val artFilePaths = resolveArtifacts(arts).map(_.getAbsolutePath)
+    buildFatJar(mainClass, jarLibs ++ artFilePaths, outFatJarPath)
+  }
+
+
+  /**
+   * Resolve the collectoin of artifacts, Artifacts will be download to
+   * ConfigConst.MAVEN_LOCAL_DIR if necessary. notes: Only compile scope
+   * dependencies will be resolved.
+   *
+   * @param mavenArtifacts collection of maven artifacts
+   * @return jar File Object of resolved artifacts
+   */
+  @throws[Exception] def resolveArtifacts(mavenArtifacts: Set[Artifact]): Set[File] = {
+    if (mavenArtifacts == null) Set.empty[File]; else {
+      val (repoSystem, session) = getMavenEndpoint()
+      val artifacts = mavenArtifacts.map(e => new DefaultArtifact(e.groupId, e.artifactId, "jar", e.version))
+      logInfo(s"start resolving dependencies: ${artifacts.mkString}")
+
+      // read relevant artifact descriptor info
+      // plz don't simplify the following lambda syntax to maintain the readability of the code.
+      val resolvedArtifacts = artifacts
+        .map(artifact => new ArtifactDescriptorRequest(artifact, remoteRepos, null))
+        .map(artDescReq => repoSystem.readArtifactDescriptor(session, artDescReq))
+        .flatMap(_.getDependencies)
+        .filter(_.getScope == "compile")
+        .filter(x => !excludeArtifact.exists(_.eq(x.getArtifact))
+        ).map(_.getArtifact)
+
+      val mergedArtifacts = artifacts ++ resolvedArtifacts
+      logInfo(s"resolved dependencies: ${mergedArtifacts.mkString}")
+
+      // download artifacts
+      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, remoteRepos, null))
+      repoSystem.resolveArtifacts(session, artReqs)
+        .map(_.getArtifact.getFile).toSet
+    }
+  }
+
+
+  /**
+   * create composite maven endpoint
+   */
+  private[this] def getMavenEndpoint(): (RepositorySystem, RepositorySystemSession) = {
+    /**
+     * create maven repository endpoint
+     */
+
+    lazy val locator = MavenRepositorySystemUtils.newServiceLocator
+
+    /**
+     * default maven local repository
+     */
+    lazy val localRepo = new LocalRepository(Workspace.local.MAVEN_LOCAL_DIR)
+
+
+    def newRepoSystem(): RepositorySystem = {
+      locator.addService(classOf[RepositoryConnectorFactory], classOf[BasicRepositoryConnectorFactory])
+      locator.addService(classOf[TransporterFactory], classOf[FileTransporterFactory])
+      locator.addService(classOf[TransporterFactory], classOf[HttpTransporterFactory])
+      locator.getService(classOf[RepositorySystem])
+    }
+
+    /**
+     * create maven repository session endpoint
+     */
+    def newSession(system: RepositorySystem): RepositorySystemSession = {
+      val session = MavenRepositorySystemUtils.newSession
+      session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo))
+      session
+    }
+
+    val repoSystem = newRepoSystem()
+    val session = newSession(repoSystem)
+    (repoSystem, session)
+  }
+
+}

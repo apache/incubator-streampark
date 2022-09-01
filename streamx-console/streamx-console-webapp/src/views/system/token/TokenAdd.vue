@@ -9,33 +9,34 @@
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <template slot="title">
       <a-icon type="user"/>
-      创建令牌
+      Add Account Token
     </template>
     <a-form
       :form="form">
       <a-form-item
-        label="User Name"
+        label="User"
         v-bind="formItemLayout"
         :validate-status="validateStatus"
         :help="help">
-
         <a-select
           showSearch
           placeholder="Select a user"
           optionFilterProp="children"
-          v-decorator="['username',{rules: [{ required: true }]}]">
-
-          <a-select-option v-for="i in dataSource" :key="i.userId" :value="i.username">{{ i.username }}</a-select-option>
+          v-decorator="['userId',{rules: [{ required: true }]}]">
+          <a-select-option v-for="i in dataSource" :key="i.userId" :value="i.userId">{{ i.username }}</a-select-option>
         </a-select>
       </a-form-item>
       <a-form-item
         label="Description"
         v-bind="formItemLayout"
         :validate-status="validateStatus">
-        <a-input
-          v-decorator="['description',{rules: [
-            { max: 100, message: '长度不能超过100个字符'}
-          ]}]"/>
+        <a-textarea
+          :rows="4"
+          v-decorator="[
+            'description',
+            {rules: [
+              { max: 50, message: 'max 50 characters'}
+            ]}]" />
       </a-form-item>
       <a-form-item
         label="ExpireTime"
@@ -49,8 +50,6 @@
             v-decorator="['expireTime',{initialValue: this.dateExpire}]"
             disabled/>
         </div>
-
-
       </a-form-item>
     </a-form>
     <div
@@ -70,10 +69,10 @@
 </template>
 <script>
 import {create} from '@/api/token'
-import {list} from '@/api/user'
-import moment from 'moment'
-import {message} from 'ant-design-vue'
+import {getNoTokenUser} from '@/api/user'
 
+import moment from 'moment'
+import message from 'ant-design-vue'
 
 const formItemLayout = {
   labelCol: {span: 4},
@@ -98,9 +97,11 @@ export default {
       help: ''
     }
   },
+
   mounted() {
     this.fetch()
   },
+
   methods: {
 
     //expireTime不可选择的日期
@@ -120,11 +121,9 @@ export default {
     },
 
     handleSubmit() {
-
-
       this.form.validateFields((err, tokenInfo) => {
-        if (tokenInfo.username == '' || tokenInfo.username == null) {
-          message.error('user name is empty !')
+        if (tokenInfo.userId == '' || tokenInfo.userId == null) {
+          message.error('user is empty !')
           return
         }
 
@@ -132,12 +131,15 @@ export default {
           message.error('expireTime is null !')
           return
         }
+
         tokenInfo.expireTime = tokenInfo.expireTime.format('YYYY-MM-DD HH:mm:ss')
+
         create({
           ...tokenInfo
         }).then((r) => {
           if (r.status === 'success') {
             this.reset()
+            this.fetch()
             this.$emit('success')
           }
         }).catch(() => {
@@ -145,10 +147,10 @@ export default {
         })
       })
     },
+
     fetch(params = {}) {
       // 显示loading
       this.loading = true
-
       params.pageSize = 99999
       params.pageNum = 1
       if (params.status != null && params.status.length > 0) {
@@ -160,12 +162,13 @@ export default {
         params.sortField = 'create_time'
       }
 
-      list({...params}).then((resp) => {
-        this.dataSource = resp.data.records
+      getNoTokenUser().then((resp) => {
+        this.dataSource = resp.data
         // 数据加载完毕，关闭loading
         this.loading = false
       })
     }
+
   }
 }
 </script>

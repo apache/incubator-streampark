@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,21 +19,21 @@ package com.streamxhub.streamx.console.core.service.impl;
 import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.common.util.Utils;
-import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.GZipUtils;
-import com.streamxhub.streamx.console.base.util.SortUtils;
-import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.BuildState;
 import com.streamxhub.streamx.console.core.enums.LaunchState;
+import com.streamxhub.streamx.console.core.mapper.ProjectMapper;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
+import com.streamxhub.streamx.console.system.service.TeamUserService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -87,6 +84,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Autowired
     private ApplicationService applicationService;
 
+    @Autowired
+    private TeamUserService groupUserService;
+
     private final ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
         200,
@@ -99,12 +99,16 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public RestResponse create(Project project) {
+        RestResponse response = RestResponse.success();
+        if (project.getTeamId() == null) {
+            return response.message("请选择团队").data(false);
+        }
         QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(Project::getName, project.getName());
-        int count = count(queryWrapper);
-        RestResponse response = RestResponse.create();
+        queryWrapper.eq(true, "team_id", project.getTeamId());
+        long count = count(queryWrapper);
         if (count == 0) {
-            project.setDate(new Date());
+            project.setCreateTime(new Date());
             boolean status = save(project);
             if (status) {
                 return response.message("添加项目成功").data(true);
@@ -123,6 +127,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             Project project = getById(projectParam.getId());
             assert project != null;
             project.setName(projectParam.getName());
+            project.setModifyTime(new Date());
             project.setUrl(projectParam.getUrl());
             project.setBranches(projectParam.getBranches());
             project.setUserName(projectParam.getUserName());
@@ -145,7 +150,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             baseMapper.updateById(project);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return false;
         }
     }
@@ -157,7 +162,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         assert project != null;
         LambdaQueryWrapper<Application> queryWrapper = new QueryWrapper<Application>().lambda();
         queryWrapper.eq(Application::getProjectId, id);
-        int count = applicationService.count(queryWrapper);
+        long count = applicationService.count(queryWrapper);
         if (count > 0) {
             return false;
         }
@@ -172,9 +177,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public IPage<Project> page(Project project, RestRequest request) {
-        Page<Project> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "date", Constant.ORDER_DESC, false);
-        return this.baseMapper.findProject(page, project);
+        List<Long> groupIdList = groupUserService.getTeamIdList();
+        project.setTeamIdList(groupIdList);
+        Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
+        return this.baseMapper.page(page, project);
     }
 
     @Override
@@ -221,6 +227,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         List<File> apps = new ArrayList<>();
         // 在项目路径下寻找编译完成的tar.gz(StreamX项目)文件或jar(普通,官方标准的flink工程)...
         findTarOrJar(apps, path);
+        if (apps.isEmpty()) {
+            throw new RuntimeException("[StreamX] can't find tar.gz or jar in " + path.getAbsolutePath());
+        }
         for (File app : apps) {
             String appPath = app.getAbsolutePath();
             // 1). tar.gz文件....
@@ -282,9 +291,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 }
                 File target = tar == null ? jar : tar;
                 if (target == null) {
-                    throw new RuntimeException("[StreamX] can't find tar.gz or jar in " + file.getAbsolutePath());
+                    log.warn("[StreamX] can't find tar.gz or jar in {}", file.getAbsolutePath());
+                } else {
+                    list.add(target);
                 }
-                list.add(target);
             }
 
             if (file.isDirectory()) {
@@ -338,8 +348,14 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             }
         }
         LambdaQueryWrapper<Project> wrapper = new QueryWrapper<Project>().lambda()
-            .eq(Project::getName, project.getName());
+            .eq(Project::getName, project.getName())
+            .eq(Project::getTeamId, project.getTeamId());
         return this.baseMapper.selectCount(wrapper) > 0;
+    }
+
+    @Override
+    public Long getCountByTeam(Long teamId) {
+        return baseMapper.selectCount(new LambdaQueryWrapper<Project>().eq(Project::getTeamId, teamId));
     }
 
     @Override
@@ -494,4 +510,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         tailBeginning.remove(id);
     }
 
+    @Override
+    public List<Project> listByTeam(Long teamId) {
+        QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("team_id", teamId);
+        return list(queryWrapper);
+    }
 }

@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +28,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
@@ -51,11 +49,13 @@ import java.util.List;
 /**
  * @author benjobs
  */
+@Slf4j
 @Data
 @TableName("t_flink_project")
 public class Project implements Serializable {
-    @TableId(value = "ID", type = IdType.AUTO)
+    @TableId(type = IdType.AUTO)
     private Long id;
+    private Long teamId;
 
     private String name;
 
@@ -80,7 +80,6 @@ public class Project implements Serializable {
 
     private String buildArgs;
 
-    private Date date;
 
     private String description;
     /**
@@ -94,6 +93,10 @@ public class Project implements Serializable {
      */
     private Integer type;
 
+    private Date createTime;
+
+    private Date modifyTime;
+
     private transient String module;
 
     private transient String dateFrom;
@@ -105,8 +108,12 @@ public class Project implements Serializable {
      */
     private transient String appSource;
 
+    private transient List<Long> teamIdList;
+
     @JsonIgnore
     private transient SettingService settingService;
+
+    private transient String teamName;
 
     /**
      * 获取项目源码路径
@@ -174,7 +181,7 @@ public class Project implements Serializable {
             }
             return branchList;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
         return Collections.emptyList();
     }

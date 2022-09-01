@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,7 +51,7 @@ public class WebSocketEndpoint {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("id") String id) {
-        log.info("websocket onOpen....");
+        log.debug("websocket onOpen....");
         this.id = id;
         this.session = session;
         SOCKET_SESSIONS.put(id, session);
@@ -62,14 +59,14 @@ public class WebSocketEndpoint {
 
     @OnClose
     public void onClose() throws IOException {
-        log.info("websocket onClose....");
+        log.debug("websocket onClose....");
         this.session.close();
         SOCKET_SESSIONS.remove(this.id);
     }
 
     @OnError
     public void onError(Session session, Throwable e) {
-        e.printStackTrace();
+        log.error(e.getMessage(), e);
     }
 
     public static void writeMessage(String socketId, String message) {
@@ -79,7 +76,7 @@ public class WebSocketEndpoint {
                 session.getBasicRemote().sendText(message);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -90,7 +87,7 @@ public class WebSocketEndpoint {
                 session.getBasicRemote().sendObject(message);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 

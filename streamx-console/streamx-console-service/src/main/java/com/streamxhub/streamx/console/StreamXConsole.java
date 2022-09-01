@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +19,7 @@ package com.streamxhub.streamx.console;
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
@@ -57,6 +55,7 @@ import java.lang.management.RuntimeMXBean;
 @Slf4j
 @SpringBootApplication
 @EnableScheduling
+@MapperScan(value = {"com.streamxhub.streamx.console.*.mapper"})
 public class StreamXConsole {
 
     public static void main(String[] args) {
@@ -64,16 +63,12 @@ public class StreamXConsole {
         String pid = SystemPropertyUtils.get("pid");
         if (pid != null) {
             application.addListeners(new ApplicationPidFileWriter(pid));
-        }
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            log.info("application shutdown now, pid: " + getPid());
-            if (pid != null) {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                log.info("application shutdown now, pid: " + getPid());
                 File pidFile = new File(pid);
                 pidFile.delete();
-            }
-        }));
-
+            }));
+        }
         application.run();
     }
 
@@ -83,7 +78,7 @@ public class StreamXConsole {
         try {
             return Integer.parseInt(name.substring(0, name.indexOf('@')));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
         return -1;
     }

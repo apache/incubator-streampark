@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,12 +47,12 @@ public class FlinkPodTemplateController {
         // hostname -> ipv4
         Map<String, String> hostMap = HostsUtils.getSystemHostsAsJava(true);
         List<String> friendlyHosts = hostMap.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).collect(Collectors.toList());
-        return RestResponse.create().data(friendlyHosts);
+        return RestResponse.success(friendlyHosts);
     }
 
     @PostMapping("init")
     public RestResponse getInitContent() {
-        return RestResponse.create().data(PodTemplateParser.getInitPodTemplateContent());
+        return RestResponse.success(PodTemplateParser.getInitPodTemplateContent());
     }
 
     /**
@@ -65,7 +62,7 @@ public class FlinkPodTemplateController {
     public RestResponse completeHostAlias(String hosts, String podTemplate) {
         Map<String, String> hostMap = covertHostsParamToMap(hosts);
         String completedPodTemplate = PodTemplateParser.completeHostAliasSpec(hostMap, podTemplate);
-        return RestResponse.create().data(completedPodTemplate);
+        return RestResponse.success(completedPodTemplate);
     }
 
     private Map<String, String> covertHostsParamToMap(String hosts) {
@@ -85,7 +82,7 @@ public class FlinkPodTemplateController {
     public RestResponse extractHostAlias(String podTemplate) {
         Map<String, String> hosts = PodTemplateParser.extractHostAliasMap(podTemplate);
         List<String> friendlyHosts = hosts.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).collect(Collectors.toList());
-        return RestResponse.create().data(friendlyHosts);
+        return RestResponse.success(friendlyHosts);
     }
 
     /**
@@ -95,7 +92,7 @@ public class FlinkPodTemplateController {
     public RestResponse previewHostAlias(String hosts) {
         Map<String, String> hostMap = covertHostsParamToMap(hosts);
         String podTemplate = PodTemplateParser.previewHostAliasSpec(hostMap);
-        return RestResponse.create().data(podTemplate);
+        return RestResponse.success(podTemplate);
     }
 
 }

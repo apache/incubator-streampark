@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -70,9 +67,6 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
   override def open(parameters: Configuration): Unit = {
     val user: String = clickHouseConf.user
     val driver: String = clickHouseConf.driverClassName
-    val targetTable = clickHouseConf.table
-    require(targetTable != null && targetTable.nonEmpty, () => s"ClickHouseSinkFunction insert targetTable must not null")
-    insertSqlPrefixes = s"insert into  $targetTable  values "
     val properties = new ClickHouseProperties()
     (user, driver) match {
       case (u, d) if u != null && d != null =>
@@ -104,39 +98,34 @@ class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Proper
 
   override def invoke(value: T, context: SinkFunction.Context): Unit = {
     require(connection != null)
-
-    val values = (scalaSqlFunc, javaSqlFunc) match {
-      case (null, null) => convert(value)
+    val sql = (javaSqlFunc, scalaSqlFunc) match {
+      case (null, null) => convert[T](value)
       case _ => apiType match {
         case ApiType.java => javaSqlFunc.transform(value)
         case ApiType.scala => scalaSqlFunc(value)
       }
     }
+
     batchSize match {
       case 1 =>
-        try {
-          val sql = s"$insertSqlPrefixes $values"
-          connection.prepareStatement(sql).executeUpdate
-        } catch {
-          case e: Exception =>
-            logError(s"""ClickHouseSink invoke error:$values""")
+        Try(connection.prepareStatement(sql).executeUpdate)
+          .recover{ case e =>
+            logError(s"ClickHouseSink invoke error: $e")
             throw e
-          case _: Throwable =>
-        }
+          }.get
       case batch =>
-        try {
-          sqlValues.add(values)
+        Try {
+          sqlValues.add(sql)
           (offset.incrementAndGet() % batch, System.currentTimeMillis()) match {
             case (0, _) => execBatch()
             case (_, current) if current - timestamp > flushInterval => execBatch()
             case _ =>
           }
-        } catch {
-          case e: Exception =>
+        }.recover {
+          case e =>
             logError(s"""ClickHouseSink batch invoke error:$sqlValues""")
             throw e
-          case _: Throwable =>
-        }
+        }.get
     }
   }
 

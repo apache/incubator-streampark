@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +18,6 @@ package com.streamxhub.streamx.console.system.controller;
 
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.util.ShaHashUtils;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.service.UserService;
@@ -30,6 +26,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -42,6 +39,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+
+import java.util.List;
 
 /**
  * @author benjobs
@@ -61,37 +60,37 @@ public class UserController {
     }
 
     @PostMapping("list")
-    @RequiresPermissions("user:view")
+    @RequiresPermissions(value = {"user:view", "app:view"}, logical = Logical.OR)
     public RestResponse userList(RestRequest restRequest, User user) {
         IPage<User> userList = userService.findUserDetail(user, restRequest);
-        return RestResponse.create().data(userList);
+        return RestResponse.success(userList);
     }
 
     @PostMapping("post")
     @RequiresPermissions("user:add")
     public RestResponse addUser(@Valid User user) throws Exception {
         this.userService.createUser(user);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("user:update")
     public RestResponse updateUser(@Valid User user) throws Exception {
         this.userService.updateUser(user);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("user:delete")
-    public RestResponse deleteUsers(Long userId) throws ServiceException {
+    public RestResponse deleteUsers(Long userId) {
         this.userService.removeById(userId);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PutMapping("profile")
     public RestResponse updateProfile(@Valid User user) throws Exception {
         this.userService.updateProfile(user);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PutMapping("avatar")
@@ -100,13 +99,19 @@ public class UserController {
         @NotBlank(message = "{required}") String avatar)
         throws Exception {
         this.userService.updateAvatar(username, avatar);
-        return RestResponse.create();
+        return RestResponse.success();
+    }
+
+    @PostMapping("getNoTokenUser")
+    public RestResponse getNoTokenUser() {
+        List<User> userList = this.userService.getNoTokenUser();
+        return RestResponse.success(userList);
     }
 
     @PostMapping("check/name")
     public RestResponse checkUserName(@NotBlank(message = "{required}") String username) {
         boolean result = this.userService.findByName(username) == null;
-        return RestResponse.create().data(result);
+        return RestResponse.success(result);
     }
 
     @PostMapping("check/password")
@@ -118,7 +123,7 @@ public class UserController {
         String salt = user.getSalt();
         String encryptPassword = ShaHashUtils.encrypt(salt, password);
         boolean result = StringUtils.equals(user.getPassword(), encryptPassword);
-        return RestResponse.create().data(result);
+        return RestResponse.success(result);
     }
 
     @PutMapping("password")
@@ -127,7 +132,7 @@ public class UserController {
         @NotBlank(message = "{required}") String password)
         throws Exception {
         userService.updatePassword(username, password);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
     @PutMapping("password/reset")
@@ -136,7 +141,7 @@ public class UserController {
         throws Exception {
         String[] usernameArr = usernames.split(StringPool.COMMA);
         this.userService.resetPassword(usernameArr);
-        return RestResponse.create();
+        return RestResponse.success();
     }
 
 }

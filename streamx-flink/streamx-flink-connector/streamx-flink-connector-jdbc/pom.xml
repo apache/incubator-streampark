@@ -3,8 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
-        <artifactId>streamx-flink-connector</artifactId>
-        <version>1.2.3</version>
+        <artifactId>streamx-flink-connector_${scala.binary.version}</artifactId>
+        <version>1.2.4</version>
     </parent>
 
     <artifactId>streamx-flink-connector-jdbc_${scala.binary.version}</artifactId>
@@ -16,16 +16,6 @@
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-connector-base_${scala.binary.version}</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-jdbc-client</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
         </dependency>
 
     </dependencies>

@@ -69,7 +69,7 @@ export function initFlinkSqlEditor(vue) {
     controller.flinkSql.value = arguments[1] || controller.flinkSql.defaultValue
     const option = Object.assign({}, globalOption(vue))
     option.value = controller.flinkSql.value
-    option.minimap = {enabled: false}
+    option.minimap = {enabled: true}
     controller.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), option)
     //输入事件触发...
     controller.editor.flinkSql.onDidChangeModelContent(() => {
@@ -149,10 +149,8 @@ export function verifySQL(vue) {
                 syntaxError(vue)
             } else {
                 controller.flinkSql.success = false
-                controller.flinkSql.errorLine = resp.line
-                controller.flinkSql.errorColumn = resp.column
-                controller.flinkSql.errorStart = resp.start
-                controller.flinkSql.errorEnd = resp.end
+                controller.flinkSql.errorStart = parseInt(resp.start)
+                controller.flinkSql.errorEnd = parseInt(resp.end)
                 switch (resp.type) {
                     case 4:
                         controller.flinkSql.errorMsg = 'Unsupported sql'
@@ -183,25 +181,13 @@ export function syntaxError(vue) {
     monaco.editor.setModelMarkers(model, 'sql', [])
     if (!controller.flinkSql.success) {
         try {
-            const startFind = model.findMatches(controller.flinkSql.errorStart)
-            const endFind = model.findMatches(controller.flinkSql.errorEnd)
-            const startLineNumber = startFind[0].range.startLineNumber
-            let endLineNumber = startLineNumber
-            for (let i = 0; i < endFind.length; i++) {
-                const find = endFind[i]
-                if (find.range.endLineNumber >= startLineNumber) {
-                    endLineNumber = find.range.endLineNumber
-                    break
-                }
-            }
-            //清空
-            monaco.editor.setModelMarkers(model, 'sql', [{
-                    startLineNumber: startLineNumber,
-                    endLineNumber: endLineNumber + 1,
-                    severity: monaco.MarkerSeverity.Error,
-                    message: controller.flinkSql.errorMsg
-                }]
-            )
+          monaco.editor.setModelMarkers(model, 'sql', [{
+              startLineNumber: controller.flinkSql.errorStart,
+              endLineNumber: controller.flinkSql.errorEnd,
+              severity: monaco.MarkerSeverity.Error,
+              message: controller.flinkSql.errorMsg
+            }]
+          )
         } catch (e) {
         }
     }
@@ -241,7 +227,8 @@ export function formatSql(vue) {
 }
 
 export function sqlNotEmpty(vue) {
-    return vue.controller.flinkSql.value != null && vue.controller.flinkSql.value.trim() !== ''
+  const flinkSql = vue.controller.flinkSql.value
+  return flinkSql != undefined && flinkSql != null && flinkSql.trim().length > 0
 }
 
 export function bigScreenOk(vue, callback) {

@@ -29,6 +29,10 @@ export function list (queryParam) {
   return http.post(api.Role.LIST, queryParam)
 }
 
+export function listByUser (queryParam) {
+  return http.post(api.Role.LIST_BY_USER, queryParam)
+}
+
 export function remove (queryParam) {
   return http.delete(api.Role.DELETE, queryParam)
 }

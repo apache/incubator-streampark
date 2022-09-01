@@ -26,6 +26,15 @@
       </template>
 
       <a-descriptions-item
+        label="ID">
+        <span
+          class="link pointer"
+          v-clipboard:copy="app.id"
+          v-clipboard:success="handleCopySuccess">
+          {{ app.id }}
+        </span>
+      </a-descriptions-item>
+      <a-descriptions-item
         label="Application Name">
         {{ app.jobName }}
       </a-descriptions-item>
@@ -114,7 +123,7 @@
           type="primary"
           shape="round"
           icon="copy"
-          size="middle"
+          size="default"
           style="margin:0 3px;padding: 0 5px"
           @click.native="handleCopyCurl(api.Application.START.toString())">Copy Start cURL
         </a-button>
@@ -122,7 +131,7 @@
           type="primary"
           shape="round"
           icon="copy"
-          size="middle"
+          size="default"
           style="margin:0 3px;padding: 0 5px"
           @click.native="handleCopyCurl(api.Application.CANCEL.toString())">Copy Cancel cURL
         </a-button>
@@ -130,7 +139,7 @@
           type="link"
           shape="round"
           icon="link"
-          size="middle"
+          size="default"
           @click.native="handleDocPage()"
           style="margin:0 3px;padding: 0 5px">Api Doc Center
         </a-button>
@@ -142,7 +151,7 @@
       style="margin-top: 20px;margin-bottom: -17px"/>
     <a-tabs
       v-if="app"
-      defaultActiveKey="1"
+      :defaultActiveKey="1"
       style="margin-top: 15px"
       :animated="animated"
       :tab-bar-gutter="tabBarGutter"
@@ -302,7 +311,8 @@
               :data-source="savePoints"
               :pagination="pagination.savePoints"
               :loading="pager.savePoints.loading"
-              class="detail-table">
+              class="detail-table"
+              @change="handleTableChange">
               <template
                 slot="triggerTime"
                 slot-scope="text, record">
@@ -687,7 +697,6 @@ import {get as getVer, list as listVer, remove as removeConf} from '@api/config'
 import {history, remove as removeSp} from '@api/savepoint'
 import Mergely from './Mergely'
 import Different from './Different'
-import notification from 'ant-design-vue/lib/notification'
 import * as monaco from 'monaco-editor'
 import SvgIcon from '@/components/SvgIcon'
 import storage from '@/utils/storage'
@@ -695,7 +704,7 @@ import {DEFAULT_THEME} from '@/store/mutation-types'
 import {activeURL} from '@/api/flinkCluster'
 import {baseUrl} from '@/api/baseUrl'
 import api from '@/api/index'
-import {copyCurl} from '@/api/token'
+import {copyCurl, check as checkToken} from '@/api/token'
 
 const Base64 = require('js-base64').Base64
 configOptions.push(
@@ -715,10 +724,7 @@ export default {
   data() {
     return {
       api,
-      baseUrl: baseUrl(),
       app: null,
-      curlTemplate: `curl -X POST '{requestUrl}' \\\n-H 'Content-Type: application/x-www-form-urlencoded' \\\n-H 'Authorization: {替换成accessToken}' \\\n{form-data} -i
-      `,
       options: {},
       defaultConfigId: null,
       allConfigVersions: null,
@@ -1008,22 +1014,40 @@ export default {
     },
 
     handleCopyCurl(urlPath) {
-      const params = {
-        appId: this.app.id,
-        baseUrl: baseUrl(),
-        path: urlPath
-      }
-      copyCurl({...params}).then((resp) => {
-        const oTextarea = document.createElement('textarea')
-        oTextarea.value = resp.data
-        document.body.appendChild(oTextarea)
-        // 选择对象
-        oTextarea.select()
-        document.execCommand('Copy')
-        this.$message.success('copy successful')
-        oTextarea.remove()
+      checkToken({}).then((resp) => {
+        const result = parseInt(resp.data)
+        if (result === 0) {
+          this.$swal.fire({
+            icon: 'error',
+            title: 'access token is null,please contact the administrator to add.',
+            showConfirmButton: true,
+            timer: 3500
+          })
+        } else if (result === 1) {
+          this.$swal.fire({
+            icon: 'error',
+            title: 'access token is invalid,please contact the administrator.',
+            showConfirmButton: true,
+            timer: 3500
+          })
+        } else {
+          const params = {
+            appId: this.app.id,
+            baseUrl: baseUrl(),
+            path: urlPath
+          }
+          copyCurl({...params}).then((resp) => {
+            const oTextarea = document.createElement('textarea')
+            oTextarea.value = resp.data
+            document.body.appendChild(oTextarea)
+            // 选择对象
+            oTextarea.select()
+            document.execCommand('Copy')
+            this.$message.success('copy successful')
+            oTextarea.remove()
+          })
+        }
       })
-
     },
 
     handleGet(appId) {
@@ -1234,15 +1258,11 @@ export default {
     },
 
     handleCopySuccess() {
-      notification.success({
-        message: 'The savepoint path copied to clipboard Successfully'
-      })
+      this.$message.success('copied to clipboard successfully')
     },
 
     handleCopyError() {
-      notification.error({
-        message: 'The savepoint path copied to clipboard failed'
-      })
+      this.$message.error('copied to clipboard failed')
     },
 
     handleCompare(record) {

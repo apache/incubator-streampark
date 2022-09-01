@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,14 +18,14 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.base.exception.InternalException;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
-import com.streamxhub.streamx.console.base.util.SortUtils;
-import com.streamxhub.streamx.console.core.dao.SavePointMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
+import com.streamxhub.streamx.console.core.mapper.SavePointMapper;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 
@@ -42,8 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * @author benjobs
@@ -73,7 +68,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         assert flinkEnv != null;
         int cpThreshold = Integer.parseInt(
             flinkEnv.convertFlinkYamlAsMap()
-                .getOrDefault("state.checkpoints.num-retained", "1")
+                .getOrDefault("state.checkpoints.num-retained", "5")
         );
 
         if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
@@ -87,12 +82,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             queryWrapper.select(SavePoint::getTriggerTime)
                 .eq(SavePoint::getAppId, entity.getAppId())
                 .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
-                .orderByDesc(SavePoint::getTriggerTime)
-                .last("limit 0," + cpThreshold + 1);
+                .orderByDesc(SavePoint::getTriggerTime);
 
-            List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
-            if (!savePointList.isEmpty() && savePointList.size() > cpThreshold) {
-                SavePoint savePoint = savePointList.get(cpThreshold - 1);
+            Page<SavePoint> savePointPage = this.baseMapper.selectPage(new Page<>(1, cpThreshold + 1), queryWrapper);
+            if (!savePointPage.getRecords().isEmpty() && savePointPage.getRecords().size() > cpThreshold) {
+                SavePoint savePoint = savePointPage.getRecords().get(cpThreshold - 1);
                 this.baseMapper.expire(entity.getAppId(), savePoint.getTriggerTime());
             }
         }
@@ -105,7 +99,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean delete(Long id, Application application) throws ServiceException {
+    public Boolean delete(Long id, Application application) throws InternalException {
         SavePoint savePoint = getById(id);
         try {
             if (CommonUtils.notEmpty(savePoint.getPath())) {
@@ -114,14 +108,13 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             removeById(id);
             return true;
         } catch (Exception e) {
-            throw new ServiceException(e.getMessage());
+            throw new InternalException(e.getMessage());
         }
     }
 
     @Override
     public IPage<SavePoint> page(SavePoint savePoint, RestRequest request) {
-        Page<SavePoint> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "trigger_time", Constant.ORDER_DESC, false);
+        Page<SavePoint> page = new MybatisPager<SavePoint>().getPage(request, "trigger_time", Constant.ORDER_DESC);
         return this.baseMapper.page(page, savePoint.getAppId());
     }
 
@@ -129,6 +122,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     public void removeApp(Application application) {
         Long appId = application.getId();
         baseMapper.removeApp(application.getId());
-        application.getFsOperator().delete(application.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
+        try {
+            application.getFsOperator().delete(application.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

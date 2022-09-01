@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +18,13 @@ package com.streamxhub.streamx.common.conf
 
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
 
+import java.lang.{
+  Boolean => JavaBool,
+  Double => JavaDouble,
+  Float => JavaFloat,
+  Integer => JavaInt,
+  Long => JavaLong
+}
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.{Nonnull, Nullable}
@@ -71,9 +75,9 @@ object InternalConfigHolder extends Logger {
    * When using this api, the type must be explicitly declared and the relevant type will be
    * automatically converted to some extent.
    * 1) in scala:
-   * val result: Long = ConfigHub.get(K8sFlinkConfig.sglMetricTrkTaskTimeoutSec)
+   * val result: Long = ConfigHub.get(K8sFlinkConfig.sglMetricTrackTaskTimeoutSec)
    * 2) in java:
-   * Long result = ConfigHub.get(K8sFlinkConfig.sglMetricTrkTaskTimeoutSec());
+   * Long result = ConfigHub.get(K8sFlinkConfig.sglMetricTrackTaskTimeoutSec());
    *
    * @return return the defaultValue of ConfigOption when the value has not been overwritten.
    */
@@ -176,7 +180,6 @@ object InternalConfigHolder extends Logger {
   }
 
 
-
 }
 
 
@@ -190,12 +193,12 @@ object Converter {
       case c if c == classOf[Boolean] => v.toBoolean.asInstanceOf[T]
       case c if c == classOf[Float] => v.toFloat.asInstanceOf[T]
       case c if c == classOf[Double] => v.toDouble.asInstanceOf[T]
-      case c if c == classOf[java.lang.String] => v.asInstanceOf[T]
-      case c if c == classOf[java.lang.Integer] => java.lang.Integer.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[java.lang.Long] => java.lang.Long.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[java.lang.Boolean] => java.lang.Boolean.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[java.lang.Float] => java.lang.Float.valueOf(v).asInstanceOf[T]
-      case c if c == classOf[java.lang.Double] => java.lang.Double.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[String] => v.asInstanceOf[T]
+      case c if c == classOf[JavaInt] => JavaInt.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[JavaLong] => JavaLong.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[JavaBool] => JavaBool.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[JavaFloat] => JavaFloat.valueOf(v).asInstanceOf[T]
+      case c if c == classOf[JavaDouble] => JavaDouble.valueOf(v).asInstanceOf[T]
       case _ =>
         throw new IllegalArgumentException(s"Unsupported type: $classType")
     }

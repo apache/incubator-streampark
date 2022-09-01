@@ -121,7 +121,7 @@ export default {
   mounted() {
     const index = this.randomNum(1, 4)
     $('.main').css({
-      'background': index > 2 ? 'rgba(100, 150, 255, .3)' : 'rgba(0, 0, 0, .4)'
+      'background': index > 2 ? 'rgba(122, 200, 255, .2)' : 'rgba(0, 0, 0, .2)'
     })
     const bgUrl = require('@assets/bg/' + index + '.png')
     $('#particles-js').css('background-image', 'url(' + bgUrl + ')')

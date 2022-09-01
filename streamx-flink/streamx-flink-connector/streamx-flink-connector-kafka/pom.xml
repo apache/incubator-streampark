@@ -3,8 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
-        <artifactId>streamx-flink-connector</artifactId>
-        <version>1.2.3</version>
+        <artifactId>streamx-flink-connector_${scala.binary.version}</artifactId>
+        <version>1.2.4</version>
     </parent>
 
     <artifactId>streamx-flink-connector-kafka_${scala.binary.version}</artifactId>
@@ -20,7 +20,7 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
+            <artifactId>flink-connector-kafka${scala.binary.flink.version}</artifactId>
         </dependency>
 
     </dependencies>

@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,20 +20,19 @@ import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.util.SortUtils;
-import com.streamxhub.streamx.console.core.dao.ApplicationConfigMapper;
+import com.streamxhub.streamx.console.base.mybatis.pager.MybatisPager;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
+import com.streamxhub.streamx.console.core.mapper.ApplicationConfigMapper;
 import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,14 +84,13 @@ public class ApplicationConfigServiceImpl
 
     @Transactional(rollbackFor = {Exception.class})
     public void setLatest(Long appId, Long configId) {
-        LambdaUpdateWrapper<ApplicationConfig> updateWrapper = new UpdateWrapper<ApplicationConfig>().lambda();
+        LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.set(ApplicationConfig::getLatest, 0)
             .eq(ApplicationConfig::getAppId, appId);
         this.update(updateWrapper);
 
-        updateWrapper = new UpdateWrapper<ApplicationConfig>().lambda();
-        updateWrapper.set(ApplicationConfig::getLatest, 1)
-            .eq(ApplicationConfig::getId, configId);
+        updateWrapper.clear();
+        updateWrapper.set(ApplicationConfig::getLatest, 1).eq(ApplicationConfig::getId, configId);
         this.update(updateWrapper);
     }
 
@@ -180,7 +175,10 @@ public class ApplicationConfigServiceImpl
 
     @Override
     public void toEffective(Long appId, Long configId) {
-        this.baseMapper.clearLatest(appId);
+        LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.eq(ApplicationConfig::getAppId, appId)
+            .set(ApplicationConfig::getLatest, 0);
+        this.update(updateWrapper);
         effectiveService.saveOrUpdate(appId, EffectiveType.CONFIG, configId);
     }
 
@@ -208,9 +206,10 @@ public class ApplicationConfigServiceImpl
 
     @Override
     public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
-        Page<ApplicationConfig> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "version", Constant.ORDER_DESC, false);
-        return this.baseMapper.page(page, config.getAppId());
+        return this.baseMapper.page(
+            new MybatisPager<ApplicationConfig>().getPage(request, "version", Constant.ORDER_DESC),
+            config.getAppId()
+        );
     }
 
     @Override
@@ -237,7 +236,7 @@ public class ApplicationConfigServiceImpl
     public synchronized String readTemplate() {
         if (flinkConfTemplate == null) {
             try {
-                Resource resource = resourceLoader.getResource("classpath:flink-application.template");
+                Resource resource = resourceLoader.getResource("classpath:flink-application.conf");
                 Scanner scanner = new Scanner(resource.getInputStream());
                 StringBuilder stringBuffer = new StringBuilder();
                 while (scanner.hasNextLine()) {
@@ -248,8 +247,8 @@ public class ApplicationConfigServiceImpl
                 String template = stringBuffer.toString();
                 this.flinkConfTemplate = Base64.getEncoder().encodeToString(template.getBytes());
             } catch (Exception e) {
-                log.error("Read conf/flink-application.template failed, please check your deployment");
-                e.printStackTrace();
+                log.error("Read conf/flink-application.conf failed, please check your deployment");
+                log.error(e.getMessage(), e);
             }
         }
         return this.flinkConfTemplate;
@@ -257,6 +256,8 @@ public class ApplicationConfigServiceImpl
 
     @Override
     public void removeApp(Long appId) {
-        baseMapper.removeApp(appId);
+        baseMapper.delete(
+            new LambdaQueryWrapper<ApplicationConfig>().eq(ApplicationConfig::getAppId, appId)
+        );
     }
 }

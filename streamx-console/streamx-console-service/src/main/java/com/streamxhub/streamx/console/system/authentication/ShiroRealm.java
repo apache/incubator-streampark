@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -96,21 +93,21 @@ public class ShiroRealm extends AuthorizingRealm {
         String token = (String) authenticationToken.getCredentials();
         String username = JWTUtil.getUsername(token);
         if (StringUtils.isBlank(username)) {
-            throw new AuthenticationException("token校验不通过");
+            throw new AuthenticationException("Token verification failed");
         }
         // 通过用户名查询用户信息
         User user = userService.findByName(username);
 
         if (user == null) {
-            throw new AuthenticationException("用户名或密码错误");
+            throw new AuthenticationException("ERROR Incorrect username or password!");
         }
 
         if (!JWTUtil.verify(token, username, user.getPassword())) {
             //校验是否属于api的token，权限是否有效
             String tokenDb = WebUtils.encryptToken(token);
-            boolean effective = accessTokenService.checkTokenEffective(username, tokenDb);
+            boolean effective = accessTokenService.checkTokenEffective(user.getUserId(), tokenDb);
             if (!effective) {
-                throw new AuthenticationException("token校验不通过,请检查user状态或token状态");
+                throw new AuthenticationException("Token checked failed: 1-[Browser Request] please check the username or password; 2-[Api Request] please check the user status or accessToken status");
             }
             SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
         }

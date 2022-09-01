@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-flink</artifactId>
-        <version>1.2.3</version>
+        <version>1.2.4</version>
     </parent>
 
     <artifactId>streamx-flink-core_${scala.binary.version}</artifactId>
@@ -56,14 +56,14 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
+            <artifactId>flink-statebackend-rocksdb${scala.binary.flink.version}</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-jdbc_${scala.binary.version}</artifactId>
+            <artifactId>flink-connector-jdbc${scala.binary.flink.version}</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
         </dependency>

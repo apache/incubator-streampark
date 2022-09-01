@@ -1,0 +1,3 @@
+License: {Name: The Apache Software License, Version 2.0, URL: http://www.apache.org/licenses/LICENSE-2.0.txt, Distribution: repo, Comments: , }
+License: {Name: The SAX License, URL: http://www.saxproject.org/copying.html, Distribution: repo, Comments: , }
+License: {Name: The W3C License, URL: http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/java-binding.zip, Distribution: repo, Comments: , }

@@ -105,7 +105,7 @@
           @click.native="handleBranches"
           v-decorator="['branches',{ rules: [{ required: true } ]}]">
           <a-select-option
-            v-for="(k ,i) in brancheList"
+            v-for="(k ,i) in branchList"
             :key="i"
             :value="k">
             {{ k }}
@@ -172,8 +172,8 @@ export default {
   name: 'BaseForm',
   data () {
     return {
-      brancheList: [],
-      searchBranche: false,
+      branchList: [],
+      searchBranch: false,
       options: {
         repository: [
           { id: 1, name: 'GitHub/GitLab', default: true },
@@ -210,6 +210,8 @@ export default {
       get({ id: projectId }).then((resp) => {
         this.project = resp.data
         this.handleReset()
+      }).then(() => {
+        this.handleBranches()
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -288,10 +290,10 @@ export default {
             password: values.password || null,
           }).then((resp) => {
             if ( resp.data === 0 ) {
-              if (this.brancheList.length === 0) {
+              if (this.branchList.length === 0) {
                 this.handleBranches()
               }
-              if (this.brancheList.indexOf(values.branches) === -1) {
+              if (this.branchList.indexOf(values.branches) === -1) {
                 this.$swal.fire(
                   'Failed',
                   'branch [' + values.branches + '] does not exist<br>or authentication error,please check',
@@ -343,7 +345,7 @@ export default {
     },
 
     handleBranches() {
-      this.searchBranche = true
+      this.searchBranch = true
       const form = this.form
       const url = form.getFieldValue('url')
       if (url) {
@@ -357,10 +359,10 @@ export default {
             userName: userName ,
             password: password
           }).then((resp) => {
-            this.brancheList = resp.data
-            this.searchBranche = false
+            this.branchList = resp.data
+            this.searchBranch = false
           }).catch((error) => {
-            this.searchBranche = false
+            this.searchBranch = false
             this.$message.error(error.message)
           })
         }

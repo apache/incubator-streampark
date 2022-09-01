@@ -84,7 +84,7 @@
 <script>
 import { update, list } from '@/api/menu'
 const formItemLayout = {
-  labelCol: { span: 3 },
+  labelCol: { span: 4 },
   wrapperCol: { span: 18 }
 }
 export default {

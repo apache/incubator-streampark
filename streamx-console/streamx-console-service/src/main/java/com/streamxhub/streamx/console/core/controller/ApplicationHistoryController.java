@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +19,7 @@ package com.streamxhub.streamx.console.core.controller;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
+import com.streamxhub.streamx.console.core.mapper.ApplicationMapper;
 import com.streamxhub.streamx.console.core.service.ApplicationHistoryService;
 
 import io.swagger.annotations.Api;
@@ -62,14 +59,14 @@ public class ApplicationHistoryController {
     @RequiresPermissions("app:create")
     public RestResponse listUploadJars() {
         List<String> jars = applicationHistoryService.listUploadJars(StorageType.LFS, DEFAULT_HISTORY_RECORD_LIMIT);
-        return RestResponse.create().data(jars);
+        return RestResponse.success(jars);
     }
 
     @PostMapping("k8sNamespaces")
     @RequiresPermissions("app:create")
     public RestResponse listK8sNamespace() {
         List<String> namespaces = applicationMapper.getRecentK8sNamespace(DEFAULT_HISTORY_RECORD_LIMIT);
-        return RestResponse.create().data(namespaces);
+        return RestResponse.success(namespaces);
     }
 
     @PostMapping("sessionClusterIds")
@@ -86,35 +83,35 @@ public class ApplicationHistoryController {
                 clusterIds = new ArrayList<>(0);
                 break;
         }
-        return RestResponse.create().data(clusterIds);
+        return RestResponse.success(clusterIds);
     }
 
     @PostMapping("flinkBaseImages")
     @RequiresPermissions("app:create")
     public RestResponse listFlinkBaseImage() {
         List<String> images = applicationMapper.getRecentFlinkBaseImage(DEFAULT_HISTORY_RECORD_LIMIT);
-        return RestResponse.create().data(images);
+        return RestResponse.success(images);
     }
 
     @PostMapping("flinkPodTemplates")
     @RequiresPermissions("app:create")
     public RestResponse listPodTemplate() {
         List<String> templates = applicationMapper.getRecentK8sPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
-        return RestResponse.create().data(templates);
+        return RestResponse.success(templates);
     }
 
     @PostMapping("flinkJmPodTemplates")
     @RequiresPermissions("app:create")
     public RestResponse listJmPodTemplate() {
         List<String> templates = applicationMapper.getRecentK8sJmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
-        return RestResponse.create().data(templates);
+        return RestResponse.success(templates);
     }
 
     @PostMapping("flinkTmPodTemplates")
     @RequiresPermissions("app:create")
     public RestResponse listTmPodTemplate() {
         List<String> templates = applicationMapper.getRecentK8sTmPodTemplate(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
-        return RestResponse.create().data(templates);
+        return RestResponse.success(templates);
     }
 
 }

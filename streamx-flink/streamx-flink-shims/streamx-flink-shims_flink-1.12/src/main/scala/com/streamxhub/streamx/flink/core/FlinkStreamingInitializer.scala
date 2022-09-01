@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -94,7 +91,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case null =>
         //通过脚本启动..
         val flinkHome = System.getenv("FLINK_HOME")
-        require(flinkHome != null)
+        require(flinkHome != null, "FLINK_HOME not found.")
         logInfo(s"flinkHome: $flinkHome")
         val yaml = new File(s"$flinkHome/conf/flink-conf.yaml")
         PropertiesUtils.loadFlinkConfYaml(yaml)
@@ -320,10 +317,10 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
             //从flink-conf.yaml中读取,key: state.checkpoints.dir
             val dir = defaultFlinkConf("state.checkpoints.dir")
             require(dir != null, s"[StreamX] can't found state.checkpoints.dir from default FlinkConf ")
-            logInfo(s"stat.backend: state.checkpoints.dir found in flink-conf.yaml,$dir")
+            logInfo(s"state.backend: state.checkpoints.dir found in flink-conf.yaml,$dir")
             dir
           case dir =>
-            logInfo(s"stat.backend: flink.checkpoints.dir found in properties,$dir")
+            logInfo(s"state.backend: flink.checkpoints.dir found in properties,$dir")
             dir
         }
       }
@@ -335,19 +332,19 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
          * The aggregate state must fit into the JobManager memory.
          */
         case XStateBackend.jobmanager =>
-          logInfo(s"stat.backend Type: jobmanager...")
+          logInfo(s"state.backend Type: jobmanager...")
           //default 5 MB,cannot be larger than the akka frame size
           val maxMemorySize = Try(parameter.get(KEY_FLINK_STATE_BACKEND_MEMORY).toInt).getOrElse(MemoryStateBackend.DEFAULT_MAX_STATE_SIZE)
           val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
           val ms = new MemoryStateBackend(maxMemorySize, async)
           streamEnvironment.setStateBackend(ms)
         case XStateBackend.filesystem =>
-          logInfo(s"stat.backend Type: filesystem...")
+          logInfo(s"state.backend Type: filesystem...")
           val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
           val fs = new FsStateBackend(cpDir, async)
           streamEnvironment.setStateBackend(fs)
         case XStateBackend.rocksdb =>
-          logInfo("stat.backend Type: rocksdb...")
+          logInfo("state.backend Type: rocksdb...")
           // 默认开启增量.
           val incremental = Try(parameter.get(KEY_FLINK_STATE_BACKEND_INCREMENTAL).toBoolean).getOrElse(true)
           val rs = new RocksDBStateBackend(cpDir, incremental)
@@ -368,7 +365,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           }
           streamEnvironment.setStateBackend(rs)
         case _ =>
-          logError("usage error!!! stat.backend must be (jobmanager|filesystem|rocksdb)")
+          logError("usage error!!! state.backend must be (jobmanager|filesystem|rocksdb)")
       }
     }
   }

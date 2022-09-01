@@ -6,13 +6,14 @@ import storage from '@/utils/storage'
 import store from '@/store'
 import moment from 'moment'
 import {message, Modal} from 'ant-design-vue'
+import Swal from 'sweetalert2/dist/sweetalert2.js'
 
 import {baseUrl} from '@/api/baseUrl'
 
 const http = axios.create({
   baseURL: baseUrl(),
   withCredentials: false,
-  timeout: 1000 * 5, // 请求超时时间
+  timeout: 1000 * 10, // 请求超时时间
   responseType: 'json',
   validateStatus(status) {
     // 200 外的状态码都认定为失败
@@ -59,9 +60,15 @@ http.interceptors.request.use(config => {
       }
     }
     if (config.method === 'get') {
+      // filter undefined params
+      data = Object.fromEntries(Object.entries(data).filter(([_,value]) => value !== undefined))
       data = {params: data}
     } else if (config.headers['Content-Type'] !== 'multipart/form-data') {
-      data = $qs.stringify(data)
+      if (!data.isJsonType){
+        data = $qs.stringify(data)
+      } else { // Content-Type : json
+        data = JSON.stringify(data)
+      }
     }
     return data
   }]
@@ -75,35 +82,50 @@ http.interceptors.response.use((response) => {
   return response.data
 }, error => {
   if (error.response) {
-    const errorMessage = error.response.data === null ? 'System error，Please contact the administrator' : error.response.data.message
-    switch (error.response.status) {
-      case 404:
-        notification.error({
-          message: 'Sorry, resource not found',
-          duration: 4
-        })
-        break
-      case 403:
-      case 401:
-        //避免在某些页面有密集的ajax请求数据时反复的弹窗
-        if (!storage.get(INVALID, false)) {
-          storage.set(INVALID, true)
-          notification.warn({
-            message: 'Sorry, you can\'t access. May be because you don\'t have permissions or the Sign In is invalid',
+    if (error.response.data.code == 501) {
+      let width = document.documentElement.clientWidth || document.body.clientWidth
+      if (width > 1200) {
+        width = 1080
+      }
+      width *= 0.96
+      Swal.fire({
+        title: 'Operation Failed',
+        icon: 'error',
+        width: width,
+        html: '<pre class="propException">' + error.response.data.message + '</pre>',
+        focusConfirm: false
+      })
+    } else {
+      const errorMessage = error.response.data === null ? 'System error，Please contact the administrator' : error.response.data.message
+      switch (error.response.status) {
+        case 404:
+          notification.error({
+            message: 'Sorry, resource not found',
             duration: 4
           })
-          store.dispatch('SignOut', {}).then((resp) => {
-            storage.clear()
-            location.reload()
+          break
+        case 403:
+        case 401:
+          //避免在某些页面有密集的ajax请求数据时反复的弹窗
+          if (!storage.get(INVALID, false)) {
+            storage.set(INVALID, true)
+            notification.warn({
+              message: 'Sorry, you can\'t access. May be because you don\'t have permissions or the Sign In is invalid',
+              duration: 4
+            })
+            store.dispatch('SignOut', {}).then((resp) => {
+              storage.clear()
+              location.reload()
+            })
+          }
+          break
+        default:
+          notification.error({
+            message: errorMessage,
+            duration: 4
           })
-        }
-        break
-      default:
-        notification.error({
-          message: errorMessage,
-          duration: 4
-        })
-        break
+          break
+      }
     }
   }
   return Promise.reject(error)
@@ -128,6 +150,15 @@ const respBlob = (content, fileName) => {
 
 const blobTimeout = 1000 * 60 * 10
 export default {
+  postJson(url, data) {
+    data.isJsonType = true
+    console.log('最终提交参数： ' + JSON.stringify(data))
+    return http.post(url, data , {
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8'
+      }
+    })
+  },
   get(url, data = {}) {
     return http.get(url, data)
   },

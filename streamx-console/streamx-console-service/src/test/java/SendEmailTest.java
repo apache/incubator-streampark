@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,25 +15,21 @@
  */
 
 import com.streamxhub.streamx.common.util.DateUtils;
-import com.streamxhub.streamx.common.util.HadoopUtils;
-import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.common.util.YarnUtils;
+import com.streamxhub.streamx.console.base.util.FreemarkerUtils;
+import com.streamxhub.streamx.console.core.bean.AlertTemplate;
+import com.streamxhub.streamx.console.core.bean.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
-import com.streamxhub.streamx.console.core.metrics.flink.MailTemplate;
 
-import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.StringWriter;
-import java.net.URL;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -49,29 +42,7 @@ public class SendEmailTest {
 
     @Before
     public void initConfig() throws Exception {
-        Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
-        String template = "email.html";
-        Enumeration<URL> urls = ClassLoader.getSystemResources(template);
-        if (urls != null) {
-            if (!urls.hasMoreElements()) {
-                urls = Thread.currentThread().getContextClassLoader().getResources(template);
-            }
-        }
-        if (urls != null) {
-            if (urls.hasMoreElements()) {
-                URL url = urls.nextElement();
-                if (url.getPath().contains(".jar")) {
-                    configuration.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
-                } else {
-                    File file = new File(url.getPath());
-                    configuration.setDirectoryForTemplateLoading(file.getParentFile());
-                }
-                configuration.setDefaultEncoding("UTF-8");
-                this.template = configuration.getTemplate(template);
-            }
-        } else {
-            throw new ExceptionInInitializerError("email.html not found!");
-        }
+        this.template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
         senderEmail = new SenderEmail();
         senderEmail.setFrom("****@domain.com");
         senderEmail.setUserName("******");
@@ -87,7 +58,7 @@ public class SendEmailTest {
         application.setStartTime(new Date());
         application.setJobName("Test My Job");
         application.setAppId("1234567890");
-        application.setAlertEmail("******");
+        application.setAlertId(1);
 
         application.setRestartCount(5);
         application.setRestartSize(100);
@@ -98,31 +69,29 @@ public class SendEmailTest {
 
         FlinkAppState appState = FlinkAppState.FAILED;
 
-        if (Utils.notEmpty(application.getAlertEmail())) {
-            try {
-                MailTemplate mail = getAlertBaseInfo(application);
-                mail.setType(1);
-                mail.setTitle("Notify: " + application.getJobName().concat(" " + appState.name()));
-                mail.setStatus(appState.name());
+        try {
+            AlertTemplate mail = getAlertBaseInfo(application);
+            mail.setType(1);
+            mail.setTitle("Notify: " + application.getJobName().concat(" " + appState.name()));
+            mail.setStatus(appState.name());
 
-                StringWriter writer = new StringWriter();
-                Map<String, MailTemplate> out = new HashMap<String, MailTemplate>();
-                out.put("mail", mail);
+            StringWriter writer = new StringWriter();
+            Map<String, AlertTemplate> out = new HashMap<String, AlertTemplate>();
+            out.put("mail", mail);
 
-                template.process(out, writer);
-                String html = writer.toString();
-                System.out.println(html);
-                writer.close();
+            template.process(out, writer);
+            String html = writer.toString();
+            System.out.println(html);
+            writer.close();
 
-                String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
-                sendEmail(subject, html, application.getAlertEmail().split(","));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
+            sendEmail(subject, html, "****@domain.com");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private MailTemplate getAlertBaseInfo(Application application) {
+    private AlertTemplate getAlertBaseInfo(Application application) {
         long duration;
         if (application.getEndTime() == null) {
             duration = System.currentTimeMillis() - application.getStartTime().getTime();
@@ -131,9 +100,9 @@ public class SendEmailTest {
         }
         duration = duration / 1000 / 60;
         String format = "%s/proxy/%s/";
-        String url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
+        String url = String.format(format, YarnUtils.getRMWebAppURL(), application.getAppId());
 
-        MailTemplate template = new MailTemplate();
+        AlertTemplate template = new AlertTemplate();
         template.setJobName(application.getJobName());
         template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
         template.setDuration(DateUtils.toRichTimeDuration(duration));

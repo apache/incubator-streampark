@@ -51,7 +51,3 @@ Vue.prototype.clientHeight = function () {
 Vue.prototype.ideTheme = function () {
   return storage.get(DEFAULT_THEME) === 'dark' ? 'vs-dark' : 'vs'
 }
-
-String.prototype.trim = function () {
-  return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '')
-}

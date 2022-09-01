@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -71,6 +68,8 @@ object ConfigConst {
 
   val KEY_SECURITY_KERBEROS_ENABLE = "security.kerberos.login.enable"
 
+  val KEY_SECURITY_KERBEROS_DEBUG = "security.kerberos.login.debug"
+
   val KEY_SECURITY_KERBEROS_KEYTAB = "security.kerberos.login.keytab"
 
   val KEY_SECURITY_KERBEROS_PRINCIPAL = "security.kerberos.login.principal"
@@ -112,9 +111,9 @@ object ConfigConst {
 
   val KEY_YARN_APP_ID = "yarn.application.id"
 
-  val KEY_YARN_APP_QUEUE = "yarn.application.queue"
+  val KEY_YARN_APP_NAME = "yarn.application.name"
 
-  val KEY_FLINK_SAVEPOINT_PATH = "execution.savepoint.path"
+  val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
   // --checkpoints--
   val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"
@@ -134,6 +133,8 @@ object ConfigConst {
   val KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN = "flink.checkpoints.minPauseBetween"
 
   //---state---
+
+  val KEY_FLINK_STATE_SAVEPOINTS_DIR = "flink.state.savepoints.dir"
 
   val KEY_FLINK_STATE_CHECKPOINTS_DIR = "flink.state.checkpoints.dir"
 
@@ -252,23 +253,6 @@ object ConfigConst {
   val KEY_INFLUX_FLUSH_DURATION = "flush.duration"
 
   /**
-   * about config doris
-   */
-  val DORIS_SINK_PREFIX = "doris.sink"
-  val DORIS_FENODES = "fenodes"
-  val DORIS_DATABASE = "database"
-  val DORIS_TABLE = "table"
-  val DORIS_USER = "user"
-  val DORIS_PASSWORD = "password"
-  val DORIS_BATCHSIZE = "batchSize"
-  val DORIS_DEFAULT_BATCHSIZE = "100"
-  val DORIS_INTERVALMS = "intervalMs"
-  val DORIS_DEFAULT_INTERVALMS = "3000"
-  val DORIS_MAXRETRIES = "maxRetries"
-  val DORIS_DEFAULT_MAXRETRIES = "1"
-  val DORIS_STREAM_LOAD_PROP_PREFIX = "streamLoad."
-
-  /**
    * flink config key
    */
   val KEY_FLINK_APPLICATION_ARGS = "$internal.application.program-args"
@@ -288,6 +272,7 @@ object ConfigConst {
   val STREAMX_FLINKSQL_CLIENT_CLASS = "com.streamxhub.streamx.flink.cli.SqlClient"
 
   def printLogo(info: String): Unit = {
+    // scalastyle:off println
     println("\n\n                 .+.                                ")
     println("           _____/ /_________  ____ _____ ___  _  __     ")
     println("          / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\| |/_/   ")
@@ -298,9 +283,10 @@ object ConfigConst {
     println("\n       WebSite:  http://www.streamxhub.com            ")
     println("       GitHub :  https://github.com/streamxhub/streamx  ")
     println("       Gitee  :  https://gitee.com/streamxhub/streamx   ")
-    println("       Ver    :  1.2.3                                  ")
+    println("       Ver    :  1.2.4                                  ")
     println(s"       Info   :  $info                                 ")
     println(s"       Time   :  ${LocalDateTime.now}              \n\n")
+    // scalastyle:on println
   }
 
 }

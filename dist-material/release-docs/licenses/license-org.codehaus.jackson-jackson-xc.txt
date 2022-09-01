@@ -1,0 +1,2 @@
+License: {Name: The Apache Software License, Version 2.0, URL: http://www.apache.org/licenses/LICENSE-2.0.txt, Distribution: repo, Comments: , }
+License: {Name: GNU Lesser General Public License (LGPL), Version 2.1, URL: http://www.fsf.org/licensing/licenses/lgpl.txt, Distribution: repo, Comments: , }

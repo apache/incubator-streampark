@@ -15,6 +15,7 @@
     "core-js": "^3.20.0",
     "cross-env": "^7.0.3",
     "dedent": "^0.7.0",
+    "deepmerge": "^4.2.2",
     "enquire.js": "^2.1.6",
     "github-markdown-css": "^5.1.0",
     "highlight.js": "^11.3.1",

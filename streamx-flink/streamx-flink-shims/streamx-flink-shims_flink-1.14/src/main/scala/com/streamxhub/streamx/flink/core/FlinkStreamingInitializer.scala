@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -94,7 +91,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case null =>
         //通过脚本启动..
         val flinkHome = System.getenv("FLINK_HOME")
-        require(flinkHome != null)
+        require(flinkHome != null, "FLINK_HOME not found.")
         logInfo(s"flinkHome: $flinkHome")
         val yaml = new File(s"$flinkHome/conf/flink-conf.yaml")
         PropertiesUtils.loadFlinkConfYaml(yaml)
@@ -335,16 +332,16 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           //从flink-conf.yaml中读取,key: state.checkpoints.dir
           val dir = defaultFlinkConf("state.checkpoints.dir")
           require(dir != null, s"[StreamX] can't found state.checkpoints.dir from Default FlinkConf ")
-          logInfo(s"stat.backend: state.checkpoints.dir found in flink-conf.yaml,$dir")
+          logInfo(s"state.backend: state.checkpoints.dir found in flink-conf.yaml,$dir")
           dir
         case dir =>
-          logInfo(s"stat.backend: flink.checkpoints.dir found in properties,$dir")
+          logInfo(s"state.backend: flink.checkpoints.dir found in properties,$dir")
           dir
       }
 
       stateBackend match {
         case XStateBackend.hashmap =>
-          logInfo("stat.backend: hashmap...")
+          logInfo("state.backend: hashmap...")
           streamEnvironment.setStateBackend(new HashMapStateBackend())
           storage match {
             case CheckpointStorage.jobmanager =>
@@ -357,7 +354,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
               cpConfig.setCheckpointStorage(new FileSystemCheckpointStorage(cpDir))
           }
         case XStateBackend.rocksdb =>
-          logInfo("stat.backend: rocksdb...")
+          logInfo("state.backend: rocksdb...")
           val rock = new EmbeddedRocksDBStateBackend()
           val map = new JavaHashMap[String, Object]()
           val skipKey = List(KEY_FLINK_STATE_BACKEND_ASYNC, KEY_FLINK_STATE_BACKEND_INCREMENTAL, KEY_FLINK_STATE_BACKEND_MEMORY, KEY_FLINK_STATE_ROCKSDB)

@@ -30,24 +30,6 @@
       </a-form-item>
 
       <a-form-item
-        label="Execution Mode"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-select
-          placeholder="Execution Mode"
-          v-decorator="[ 'executionMode' ]"
-          @change="handleChangeMode">
-          <a-select-option
-            v-for="(o,index) in executionModes"
-            :key="`execution_mode_${index}`"
-            :disabled="o.disabled"
-            :value="o.value">
-            {{ o.mode }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-
-      <a-form-item
         label="Application Type"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -75,6 +57,24 @@
       </a-form-item>
 
       <a-form-item
+        label="Execution Mode"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          placeholder="Execution Mode"
+          v-decorator="[ 'executionMode' ]"
+          @change="handleChangeMode">
+          <a-select-option
+            v-for="(o,index) in executionModes"
+            :key="`execution_mode_${index}`"
+            :disabled="o.disabled"
+            :value="o.value">
+            {{ o.mode }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
         label="Flink Version"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -98,9 +98,10 @@
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
             placeholder="Flink Cluster"
+            allowClear
             v-decorator="[ 'flinkClusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
             <a-select-option
-              v-for="(v,index) in flinkClusters"
+              v-for="(v,index) in getExecutionCluster(executionMode)"
               :key="`cluster_${index}`"
               :value="v.id">
               {{ v.clusterName }}
@@ -114,16 +115,21 @@
           label="Yarn Session ClusterId"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-          <a-input
-            type="text"
+          <a-select
             allowClear
             placeholder="Please enter Yarn Session clusterId"
-            v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, validator: handleCheckYarnSessionClusterId }] }]">
-          </a-input>
+            v-decorator="[ 'yarnSessionClusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
+            <a-select-option
+              v-for="(v,index) in getExecutionCluster(executionMode)"
+              :key="`cluster_${index}`"
+              :value="v.clusterId">
+              {{ v.clusterName }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
       </template>
 
-      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode === 5 || executionMode === 6)">
+      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode !== null && (executionMode === 5 || executionMode === 6))">
         <a-form-item
           label="Kubernetes Namespace"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -133,10 +139,19 @@
             placeholder="default"
             allowClear
             v-decorator="[ 'k8sNamespace']">
+            <a-dropdown slot="addonAfter" placement="bottomRight">
+              <a-menu slot="overlay" trigger="['click', 'hover']">
+                <a-menu-item v-for="item in historyRecord.k8sNamespace" :key="item" @click="handleSelectHistoryK8sNamespace(item)" style="padding-right: 60px">
+                  <a-icon type="plus-circle"/>{{ item }}
+                </a-menu-item>
+              </a-menu>
+              <a-icon type="history"/>
+            </a-dropdown>
           </a-input>
         </a-form-item>
 
         <a-form-item
+          v-if="app.executionMode === 6 || executionMode === 6"
           label="Kubernetes ClusterId"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -144,8 +159,37 @@
             type="text"
             placeholder="Please enter Kubernetes clusterId"
             allowClear
+            @change="handleClusterId"
             v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
+            <template v-if="(executionMode == null && app.executionMode === 5) || (executionMode !== null && executionMode === 5)">
+              <a-dropdown slot="addonAfter" placement="bottomRight">
+                <a-menu slot="overlay" trigger="['click', 'hover']">
+                  <a-menu-item v-for="item in historyRecord.k8sSessionClusterId" :key="item" @click="handleSelectHistoryK8sSessionClusterId(item)" style="padding-right: 60px">
+                    <a-icon type="plus-circle"/>{{ item }}
+                  </a-menu-item>
+                </a-menu>
+                <a-icon type="history"/>
+              </a-dropdown>
+            </template>
           </a-input>
+        </a-form-item>
+
+        <a-form-item
+          v-if="app.executionMode === 5 || executionMode === 5"
+          label="Kubernetes ClusterId"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            allowClear
+            placeholder="Please enter Kubernetes clusterId"
+            v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Flink Cluster is required' }] }]">>
+            <a-select-option
+              v-for="(v,index) in getExecutionCluster(executionMode)"
+              :key="`cluster_${index}`"
+              :value="v.clusterId">
+              {{ v.clusterName }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
       </template>
 
@@ -353,7 +397,7 @@
             :step="1"
             placeholder="checkpoint failure rate interval"
             allow-clear
-            v-decorator="['cpMaxFailureInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            v-decorator="['cpMaxFailureInterval',{ rules: [ { validator: handleCheckCheckPoint , trigger:'change'} ]}]"
             style="width: calc(33% - 70px)"/>
           <a-button style="width: 70px">
             minute
@@ -362,7 +406,7 @@
             :min="1"
             :step="1"
             placeholder="max failures per interval"
-            v-decorator="['cpFailureRateInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            v-decorator="['cpFailureRateInterval',{ rules: [ { validator: handleCheckCheckPoint, trigger:'change'} ]}]"
             style="width: calc(33% - 70px); margin-left: 1%"/>
           <a-button style="width: 70px">
             count
@@ -370,7 +414,7 @@
           <a-select
             placeholder="trigger action"
             allowClear
-            v-decorator="['cpFailureAction',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            v-decorator="['cpFailureAction',{ rules: [ { validator: handleCheckCheckPoint, trigger:'change'} ]}]"
             allow-clear
             style="width: 32%;margin-left: 1%">
             <a-select-option
@@ -391,7 +435,7 @@
         </p>
       </a-form-item>
 
-      <a-form-item
+      <!-- <a-form-item
         label="Alert Email List"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -402,7 +446,112 @@
           v-decorator="[ 'alertEmail',{ rules: [ { validator: handleCheckAlertEmail} ]} ]">
           <svg-icon name="mail" slot="prefix"/>
         </a-input>
+      </a-form-item> -->
+
+      <!--告警方式-->
+      <a-form-item
+        label="Fault Alert Template"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          placeholder="Alert Template"
+          allowClear
+          v-decorator="['alertId', {rules: [{ required: false}] }]">
+          <a-select-option
+            v-for="(o, index) in alerts"
+            :key="`alertType_${index}`"
+            :value="o.id">
+            {{ o.alertName }}
+          </a-select-option>
+        </a-select>
       </a-form-item>
+
+      <!-- <template>
+        <a-form-item
+          label="Fault Alert Type"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            placeholder="Alert Type"
+            mode="multiple"
+            @change="handleChangeAlertType"
+            v-decorator="[ 'alertType', {rules: [{ required: true, message: 'Alert Type is required' }] }]">
+            <a-select-option
+              v-for="(o,index) in alertTypes"
+              :key="`alertType_${index}`"
+              :disabled="o.disabled"
+              :value="o.value">
+              <svg-icon role="img" v-if="o.value === 1" name="mail"/>
+              <svg-icon role="img" v-if="o.value === 2" name="dingding"/>
+              <svg-icon role="img" v-if="o.value === 4" name="wechat"/>
+              <svg-icon role="img" v-if="o.value === 8" name="sms"/>
+              {{ o.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(1)>-1"
+          label="Alert Email"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter email,separate multiple emails with comma(,)"
+            allowClear
+            v-decorator="[ 'alertEmail' ]">
+            <svg-icon name="mail" slot="prefix"/>
+          </a-input>
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(8)>-1"
+          label="SMS"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter mobile number"
+            allowClear
+            v-decorator="[ 'alertSms', {rules: [{ required: true, message: 'mobile number is required' }]} ]"/>
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(8)>-1"
+          label="SMS Template"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-textarea
+            rows="4"
+            placeholder="Please enter sms template"
+            v-decorator="['alertSmsTemplate', {rules: [{ required: true, message: 'SMS Template is required' }]} ]"/>
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(2)>-1"
+          label="DingTask Url"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter DingTask Url"
+            allowClear
+            v-decorator="[ 'alertDingURL', {rules: [{ required: true, message: 'DingTask Url is required' }]} ]"/>
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(2)>-1"
+          label="DingTask User"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter DingTask receive user"
+            allowClear
+            v-decorator="[ 'alertDingUser', {rules: [{ required: true, message: 'DingTask receive user is required' }]} ]"/>
+        </a-form-item>
+
+      </template> -->
 
       <a-form-item
         class="conf-item"
@@ -605,11 +754,38 @@
       </template>
 
       <a-form-item
+        label="Kubernetes Pod Template"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-tabs type="card" v-model="controller.podTemplateTab">
+          <a-tab-pane
+            key="pod-template"
+            tab="Pod Template"
+            forceRender>
+            <div class="pod-template-box syntax-true"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="jm-pod-template"
+            tab="JM Pod Template"
+            forceRender>
+            <div class="jm-pod-template-box syntax-true"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="tm-pod-template"
+            tab="TM Pod Template"
+            forceRender>
+            <div class="tm-pod-template-box syntax-true"></div>
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-item>
+
+      <a-form-item
         label="Dynamic Option"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
-          rows="4"
+          rows="8"
           name="dynamicOptions"
           placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
           v-decorator="['dynamicOptions']" />
@@ -627,37 +803,10 @@
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
-          rows="4"
+          rows="8"
           name="args"
           placeholder="<arguments>"
           v-decorator="['args']" />
-      </a-form-item>
-
-      <a-form-item
-        label="Kubernetes Pod Template"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
-        <a-tabs type="card" v-model="controller.podTemplateTab">
-          <a-tab-pane
-            key="pod-template"
-            tab="Pod Template"
-            forceRender>
-            <div class="pod-template-box syntax-true" style="height: 300px"></div>
-          </a-tab-pane>
-          <a-tab-pane
-            key="jm-pod-template"
-            tab="JM Pod Template"
-            forceRender>
-            <div class="jm-pod-template-box syntax-true" style="height: 300px"></div>
-          </a-tab-pane>
-          <a-tab-pane
-            key="tm-pod-template"
-            tab="TM Pod Template"
-            forceRender>
-            <div class="tm-pod-template-box syntax-true" style="height: 300px"></div>
-          </a-tab-pane>
-        </a-tabs>
       </a-form-item>
 
       <a-form-item
@@ -700,6 +849,11 @@ import {list as listFlinkEnv} from '@/api/flinkEnv'
 import {list as listFlinkCluster} from '@/api/flinkCluster'
 import {initPodTemplateEditor} from './AddEdit'
 import SvgIcon from '@/components/SvgIcon'
+import {
+  get as getAlert,
+  listWithOutPage as listWithOutPageAlert,
+  send as sendAlert
+} from '@/api/alert'
 
 export default {
   name: 'EditFlink',
@@ -720,6 +874,17 @@ export default {
       executionMode: null,
       configSource: [],
       jars: [],
+      alert: true,
+      alertTypes: [
+        {name: 'E-mail', value: 1, disabled: false},
+        {name: 'Ding Ding Task', value: 2, disabled: false},
+        {name: 'Wechat', value: 4, disabled: true},
+        {name: 'SMS', value: 8, disabled: false}
+      ],
+      alertType: [],
+      alerts: [],
+      alertId: {},
+      selectAlert: {},
       flinkEnvs: [],
       flinkClusters: [],
       validateAgain: false,
@@ -744,6 +909,15 @@ export default {
         { name: 'alert', value: 1 },
         { name: 'restart', value: 2 }
       ],
+      historyRecord: {
+        uploadJars: [],
+        k8sNamespace: [],
+        k8sSessionClusterId: [],
+        flinkImage: [],
+        podTemplate:[],
+        jmPodTemplate:[],
+        tmPodTemplate:[]
+      },
       podTemplate: null,
       jmPodTemplate: null,
       tmPodTemplate: null,
@@ -809,6 +983,9 @@ export default {
     listFlinkCluster().then((resp)=>{
       this.flinkClusters = resp.data
     })
+    listWithOutPageAlert().then((resp) => {
+      this.alerts = resp.data
+    })
   },
 
   filters: {
@@ -831,6 +1008,10 @@ export default {
         this.executionMode = this.app.executionMode
         this.defaultOptions = JSON.parse(this.app.options || '{}')
         this.resourceFrom = this.app.resourceFrom
+        if(this.app.alertId){
+          this.selectAlert = this.alerts.filter(t => t.id == this.app.alertId)[0]
+        }
+
         if (this.resourceFrom === 1) {
           jars({
             id: this.app.projectId,
@@ -872,6 +1053,22 @@ export default {
 
     handleFlinkVersion(id) {
       this.versionId = id
+    },
+
+    handleClusterId(e) {
+      this.form.setFieldsValue({jobName: e.target.value})
+    },
+
+    getExecutionCluster(executionMode){
+      return this.flinkClusters.filter(o => o.executionMode === executionMode && o.clusterState === 1)
+    },
+
+    handleSelectHistoryK8sNamespace(value) {
+      this.form.setFieldsValue({'k8sNamespace': value})
+    },
+
+    handleSelectHistoryK8sSessionClusterId(value) {
+      this.form.setFieldsValue({'clusterId': value})
     },
 
     handleCheckYarnSessionClusterId(rule, value, callback) {
@@ -971,6 +1168,10 @@ export default {
       return true
     },
 
+    handleChangeAlertType(value) {
+      this.alertType = value
+    },
+
     handleUploadJob(info) {
       const status = info.file.status
       if (status === 'done') {
@@ -985,30 +1186,17 @@ export default {
       const formData = new FormData()
       formData.append('file', data.file)
       upload(formData).then((resp) => {
-        if (resp.status == 'error') {
-          this.$swal.fire({
-            title: 'Failed',
-            icon: 'error',
-            width: this.exceptionPropWidth(),
-            html: '<pre class="propException">' + resp['exception'] + '</pre>',
-            focusConfirm: false
-          })
-        } else {
-          this.loading = false
-          const path = resp.data
-          this.uploadJar = data.file.name
-          this.form.setFieldsValue({ 'jar': this.uploadJar })
-          main({
-            jar: path
-          }).then((resp) => {
-            this.form.setFieldsValue({'mainClass': resp.data})
-          }).catch((error) => {
-            this.$message.error(error.message)
-          })
-        }
-      }).catch((error) => {
-        this.$message.error(error.message)
         this.loading = false
+        const path = resp.data
+        this.uploadJar = data.file.name
+        this.form.setFieldsValue({ 'jar': this.uploadJar })
+        main({
+          jar: path
+        }).then((resp) => {
+          this.form.setFieldsValue({'mainClass': resp.data})
+        }).catch((error) => {
+          this.$message.error(error.message)
+        })
       })
     },
 
@@ -1065,7 +1253,8 @@ export default {
               cpFailureAction: values.cpFailureAction || null,
               dynamicOptions: values.dynamicOptions,
               restartSize: values.restartSize,
-              alertEmail: values.alertEmail || null,
+              // alertEmail: values.alertEmail || null,
+              alertId: values.alertId,
               description: values.description,
               k8sRestExposedType: values.k8sRestExposedType,
               k8sNamespace: values.k8sNamespace || null,
@@ -1155,7 +1344,6 @@ export default {
           'executionMode': this.executionMode || this.app.executionMode,
           'yarnQueue': this.app.yarnQueue,
           'restartSize': this.app.restartSize,
-          'alertEmail': this.app.alertEmail,
           'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
           'cpFailureRateInterval': this.app.cpFailureRateInterval,
           'cpFailureAction': this.app.cpFailureAction,
@@ -1165,6 +1353,7 @@ export default {
           'flinkClusterId': this.app.flinkClusterId,
           'flinkImage': this.app.flinkImage,
           'k8sNamespace': this.app.k8sNamespace,
+          'alertId': this.selectAlert.id,
           'yarnSessionClusterId': this.app.yarnSessionClusterId
         })
         if (this.app.executionMode === 6) {

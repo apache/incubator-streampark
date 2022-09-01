@@ -9,7 +9,7 @@
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <template slot="title">
       <a-icon type="user" />
-      添加用户
+      Add User
     </template>
     <a-form
       :form="form">
@@ -43,20 +43,12 @@
           ]}]" />
       </a-form-item>
       <a-form-item
-        label="Mail"
+        label="E-Mail"
         v-bind="formItemLayout">
         <a-input
           v-decorator="['email',{rules: [
-            { type: 'email', message: '请输入正确的邮箱' },
-            { max: 50, message: '长度不能超过50个字符'}
-          ]}]" />
-      </a-form-item>
-      <a-form-item
-        label="Mobile"
-        v-bind="formItemLayout">
-        <a-input
-          v-decorator="['mobile', {rules: [
-            { pattern: '^0?(13[0-9]|15[012356789]|17[013678]|18[0-9]|14[57])[0-9]{8}$', message: '请输入正确的手机号'}
+            { type: 'email', message: 'please enter a valid email address' },
+            { max: 50, message: 'exceeds maximum length limit of 50 characters'}
           ]}]" />
       </a-form-item>
       <a-form-item
@@ -64,13 +56,14 @@
         v-bind="formItemLayout">
         <a-input
           v-decorator="['description',{rules: [
-            { max: 100, message: '长度不能超过100个字符'}
+            { max: 100, message: 'exceeds maximum length limit of 100 characters'}
           ]}]" />
       </a-form-item>
       <a-form-item
         label="Role"
         v-bind="formItemLayout">
         <a-select
+          @change="handleRoleChange"
           mode="multiple"
           :allow-clear="true"
           style="width: 100%"
@@ -79,6 +72,22 @@
             v-for="r in roleData"
             :key="r.roleId">
             {{ r.roleName }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item
+        v-if="!roles.includes('100000')"
+        label="Team"
+        v-bind="formItemLayout">
+        <a-select
+          mode="multiple"
+          :allow-clear="true"
+          style="width: 100%"
+          v-decorator="['teamId',{rules: [{ required: true, message: 'please select team' }]}]">
+          <a-select-option
+            v-for="t in teamData"
+            :key="t.teamId">
+            {{ t.teamName }}
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -133,7 +142,8 @@
   </a-drawer>
 </template>
 <script>
-import { list as getRole } from '@/api/role'
+import { listByUser as getRole } from '@/api/role'
+import { listByUser as getUserTeam } from '@/api/team'
 import { checkUserName, post } from '@/api/user'
 
 const formItemLayout = {
@@ -152,10 +162,12 @@ export default {
     return {
       loading: false,
       roleData: [],
+      teamData: [],
       formItemLayout,
       form: this.$form.createForm(this),
       validateStatus: '',
-      help: ''
+      help: '',
+      roles: []
     }
   },
   methods: {
@@ -169,13 +181,20 @@ export default {
       this.reset()
       this.$emit('close')
     },
-    handleSubmit () {
+    handleRoleChange(role) {
+      this.roles = role
+      debugger
+    },
+    handleSubmit() {
       if (this.validateStatus !== 'success') {
         this.handleUserNameBlur()
       }
       this.form.validateFields((err, user) => {
         if (!err && this.validateStatus === 'success') {
           user.roleId = user.roleId.join(',')
+          if (user != undefined && user.teamId != undefined) {
+            user.teamId = user.teamId.join(',')
+          }
           post({
             ...user
           }).then((r) => {
@@ -225,6 +244,11 @@ export default {
           { 'pageSize': '9999' }
         ).then((resp) => {
           this.roleData = resp.data.records
+        })
+        getUserTeam(
+          {'pageSize': '9999'}
+        ).then((resp) => {
+          this.teamData = resp.data.records
         })
       }
     }

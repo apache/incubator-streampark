@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -282,6 +279,18 @@ public final class ObjectUtils {
             }
         }
         return false;
+    }
+
+    public static boolean safeTrimEquals(Object o1, Object o2) {
+        boolean equals = safeEquals(o1, o2);
+        if (!equals) {
+            if (o1 != null && o2 != null) {
+                if (o1 instanceof String && o2 instanceof String) {
+                    return o1.toString().trim().equals(o2.toString().trim());
+                }
+            }
+        }
+        return equals;
     }
 
     /**

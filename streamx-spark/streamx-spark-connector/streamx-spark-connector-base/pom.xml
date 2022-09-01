@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.streamxhub.streamx</groupId>
+        <artifactId>streamx-spark-connector_2.12</artifactId>
+        <version>1.2.4</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>streamx-spark-connector-base_2.12</artifactId>
+
+    <name>StreamX : Spark Connector Base</name>
+
+    <dependencies>
+
+        <!--streamxhub   核心jar包  -->
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-spark-core_2.12</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

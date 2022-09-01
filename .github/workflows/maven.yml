@@ -2,15 +2,23 @@ name: Maven Package Test
 
 on:
   push:
-    branches: [ dev ]
+    branches:
+      - dev
+    paths-ignore:
+      - '**.md'
+      - 'deploy/**'
+      - 'script/**'
+      - 'streamx-console/streamx-console-webapp/**'
   pull_request:
-    branches: [ dev ]
+    paths-ignore:
+      - '**.md'
+      - 'deploy/**'
+      - 'script/**'
+      - 'streamx-console/streamx-console-webapp/**'
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 8
@@ -20,5 +28,15 @@ jobs:
           distribution: 'adopt'
           cache: maven
       - name: Build with Maven
-        run: mvn -B package -DskipTests --file pom.xml
-
+        run: mvn -B clean package -T 4 -DskipTests
+      - name: Test with Maven
+        run: mvn -B test -pl '!streamx-plugin/streamx-jvm-profiler,!streamx-console/streamx-console-service' -am
+#      - name: Setup Go
+#        uses: actions/setup-go@v3
+#        with:
+#          go-version: '1.16'
+#      - name: Check Dependencies Licenses
+#        run: |
+#          go install github.com/apache/skywalking-eyes/cmd/license-eye@47febf5
+#          license-eye dependency resolve --summary ./dist-material/release-docs/LICENSE.tpl
+          

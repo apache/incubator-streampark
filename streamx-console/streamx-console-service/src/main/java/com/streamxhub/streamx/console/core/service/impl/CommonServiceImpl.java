@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +16,7 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.streamxhub.streamx.console.base.exception.ApiException;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.service.CommonService;
@@ -59,15 +57,17 @@ public class CommonServiceImpl implements CommonService {
     public String getSqlClientJar(FlinkEnv flinkEnv) {
         if (sqlClientJar == null) {
             File localClient = WebUtils.getAppClientDir();
-            assert localClient.exists();
+            if (!localClient.exists()) {
+                throw new ApiException("[StreamX] " + localClient + " no exists. please check.");
+            }
             List<String> jars =
                 Arrays.stream(Objects.requireNonNull(localClient.list())).filter(x -> x.matches("streamx-flink-sqlclient_" + flinkEnv.getScalaVersion() + "-.*\\.jar"))
                     .collect(Collectors.toList());
             if (jars.isEmpty()) {
-                throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localClient);
+                throw new ApiException("[StreamX] can no found streamx-flink-sqlclient jar in " + localClient);
             }
             if (jars.size() > 1) {
-                throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localClient);
+                throw new ApiException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localClient);
             }
             sqlClientJar = jars.get(0);
         }

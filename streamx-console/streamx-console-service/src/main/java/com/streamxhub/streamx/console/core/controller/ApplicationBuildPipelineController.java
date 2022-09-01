@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright 2019 The StreamX Project
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +19,7 @@ package com.streamxhub.streamx.console.core.controller;
 import com.streamxhub.streamx.console.base.domain.ApiDocConstant;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.annotation.ApiAccess;
-import com.streamxhub.streamx.console.core.entity.AppBuildDockerResolvedDetail;
+import com.streamxhub.streamx.console.core.bean.AppBuildDockerResolvedDetail;
 import com.streamxhub.streamx.console.core.entity.AppBuildPipeline;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
@@ -83,13 +80,13 @@ public class ApplicationBuildPipelineController {
     public RestResponse buildApplication(Long appId, boolean forceBuild) {
         try {
             if (!forceBuild && !appBuildPipeService.allowToBuildNow(appId)) {
-                return RestResponse.create().data(false);
+                return RestResponse.success(false);
             }
             Application app = applicationService.getById(appId);
             // 检查是否需要走build这一步流程(jar和pom发生变化了则需要走build流程, 其他普通参数修改了,不需要走build流程)
             boolean needBuild = applicationService.checkBuildAndUpdate(app);
             if (!needBuild) {
-                return RestResponse.create().data(true);
+                return RestResponse.success(true);
             }
 
             //回滚任务.
@@ -98,9 +95,9 @@ public class ApplicationBuildPipelineController {
             }
 
             boolean actionResult = appBuildPipeService.buildApplication(app);
-            return RestResponse.create().data(actionResult);
+            return RestResponse.success(actionResult);
         } catch (Exception e) {
-            return RestResponse.create().data(false).message(e.getMessage());
+            return RestResponse.success(false).message(e.getMessage());
         }
     }
 
@@ -122,7 +119,7 @@ public class ApplicationBuildPipelineController {
             DockerResolvedSnapshot dockerProgress = appBuildPipeService.getDockerProgressDetailSnapshot(appId);
             details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));
         }
-        return RestResponse.create().data(details);
+        return RestResponse.success(details);
     }
 
 }

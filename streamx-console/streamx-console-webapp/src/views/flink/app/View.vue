@@ -10,7 +10,7 @@
                 :value="metrics.availableSlot"
                 :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}"/>
             </a-card>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Task Slots
@@ -32,7 +32,7 @@
                 :value="metrics['runningJob']"
                 :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}"/>
             </a-card>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Total Task
@@ -56,7 +56,7 @@
                 suffix="MB"
                 :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}"/>
             </a-card>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Total JobManager Mem
@@ -80,7 +80,7 @@
                 suffix="MB"
                 :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}"/>
             </a-card>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Total TaskManager Mem
@@ -130,7 +130,7 @@
                 </a-card>
               </a-col>
             </a-row>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Total Task
@@ -196,7 +196,7 @@
                 </a-card>
               </a-col>
             </a-row>
-            <a-divider style="margin-bottom: 10px"/>
+            <a-divider class="def-margin-bottom"/>
             <div>
               <span>
                 Total JobManager Mem
@@ -212,14 +212,45 @@
         </a-col>
       </template>
     </a-row>
+
     <a-card
       :bordered="false"
       style="margin-top: 20px">
+
+      <div slot="extra">
+        <a-input-group compact>
+          <a-select placeholder="Team" allowClear @change="handleChangeTeam" style="width: 140px">
+            <a-select-option v-for="t in teamData" :key="t.teamId"> {{ t.teamName }} </a-select-option>
+          </a-select>
+          <a-select placeholder="User" allowClear @change="handleChangeUser" style="margin-left: 16px;width: 120px">
+            <a-select-option v-for="u in users" :key="u.userId">
+              <span v-if="u.nickName"> {{ u.nickName }} </span>
+              <span v-else> {{ u.username }} </span>
+            </a-select-option>
+          </a-select>
+          <a-select placeholder="Type" allowClear @change="handleChangeJobType" style="margin-left: 16px;width: 80px">
+            <a-select-option value="1">JAR</a-select-option>
+            <a-select-option value="2">SQL</a-select-option>
+          </a-select>
+          <a-input-search
+            placeholder="Search..."
+            v-model="searchText"
+            @change="handleSearch"
+            style="width: 250px;"/>
+          <a-button
+            type="primary"
+            icon="plus"
+            style="margin-left: 20px"
+            @click="handleAdd">
+            Add New
+          </a-button>
+        </a-input-group>
+      </div>
+
       <!-- 表格区域 -->
       <a-table
         ref="TableInfo"
         :columns="columns"
-        :expand-icon="handleExpandIcon"
         size="middle"
         row-key="id"
         class="app_list"
@@ -230,41 +261,11 @@
         :scroll="{ x: 700 }"
         @change="handleTableChange">
         <a-table
-          slot="expandedRowRender"
           class="expanded-table"
           slot-scope="record"
           v-if="record.state === 5"
           row-key="id"
-          :columns="innerColumns"
-          :data-source="record.expanded"
           :pagination="false"/>
-        <div
-          slot="filterDropdown"
-          slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
-          style="padding: 8px">
-          <a-input
-            v-ant-ref="c => (searchInput = c)"
-            :placeholder="`Search ${column.title}`"
-            :value="selectedKeys[0]"
-            style="width: 220px; margin-bottom: 8px; display: block;"
-            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
-            @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"/>
-          <a-button
-            type="primary"
-            icon="search"
-            size="small"
-            style="width: 90px; margin-right: 8px"
-            @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)">
-            Search
-          </a-button>
-          <a-button
-            size="small"
-            icon="rest"
-            style="width: 90px"
-            @click="() => handleReset(clearFilters)">
-            Reset
-          </a-button>
-        </div>
 
         <a-icon
           slot="filterIcon"
@@ -273,8 +274,8 @@
           :style="{ color: filtered ? '#108ee9' : undefined }"/>
 
         <template
-          slot="customRender"
-          slot-scope="text, record, index, column">
+          slot="jobName"
+          slot-scope="text, record">
           <span
             class="app_type app_jar"
             v-if="record['jobType'] === 1">
@@ -286,76 +287,11 @@
             SQL
           </span>
 
-          <!--有条件搜索-->
-          <template v-if="searchText && searchedColumn === column.dataIndex">
-            <span
-              :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
-              @click="handleView(record)">
-              <template
-                v-if="record.launch === 0"
-                v-for="(fragment, i) in text
-                  .toString()
-                  .substr(0,(text.length > 30 ? 30: text.length ))
-                  .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                <mark
-                  v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                  :key="i"
-                  class="highlight">
-                  {{ fragment }}
-                </mark>
-                <template v-else>
-                  {{ fragment }}
-                </template>
-              </template>
-              <template v-else>
-                <a-tooltip placement="top">
-                  <template slot="title">
-                    {{ text }}
-                  </template>
-                  <template
-                    v-for="(fragment, i) in
-                      text
-                        .toString()
-                        .substr(0,(text.length > 30 ? 30: text.length ))
-                        .toString()
-                        .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                    <mark
-                      v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                      :key="i"
-                      class="highlight">
-                      {{ fragment }}
-                    </mark>
-                    <template v-else>
-                      {{ fragment }}
-                    </template>
-                  </template>
-                </a-tooltip>
-              </template>
-              <span v-if="text.length>30">
-                ...
-              </span>
-            </span>
-          </template>
-          <!--无条件搜索-->
-          <template v-else>
-            <span
-              v-if="column.dataIndex === 'jobName'"
-              :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
-              @click="handleView(record)">
-              <ellipsis
-                :length="30"
-                tooltip>
-                {{ text }}
-              </ellipsis>
-            </span>
-            <span v-else>
-              <ellipsis
-                :length="30"
-                tooltip>
-                {{ text }}
-              </ellipsis>
-            </span>
-          </template>
+          <span
+            class="link"
+            :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
+            @click="handleView(record)">{{ record.jobName }}
+          </span>
 
           <template v-if="record['jobType'] === 1">
             <a-badge
@@ -369,6 +305,7 @@
               count="NEW"
               title="the application has changed."/>
           </template>
+
         </template>
 
         <template
@@ -396,28 +333,20 @@
         <template
           slot="launchState"
           slot-scope="text, record">
-          <a-space size="small">
-            <State
-              option="launch"
-              :title="handleLaunchTitle(record.launch)"
-              :data="record"/>
-            <State
-              option="build"
-              click="openBuildProgressDetailDrawer(record)"
-              :data="record"/>
-          </a-space>
+          <State
+            option="launch"
+            :title="handleLaunchTitle(record.launch)"
+            :data="record"/>
+          <a-divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus != null"/>
+          <State
+            option="build"
+            click="openBuildProgressDetailDrawer(record)"
+            :data="record"/>
         </template>
 
         <template
           slot="customOperation">
           Operation
-          <a-button
-            v-permit="'app:create'"
-            type="primary"
-            shape="circle"
-            icon="plus"
-            style="margin-left: 20px; width: 25px;height: 25px;min-width: 25px"
-            @click="handleAdd"/>
         </template>
 
         <template
@@ -470,7 +399,7 @@
             </a-button>
           </a-tooltip>
 
-          <a-tooltip title="Stop Application">
+          <a-tooltip title="Cancel Application">
             <a-button
               v-show="record.state === 5 && record['optionState'] === 0"
               v-permit="'app:cancel'"
@@ -490,6 +419,28 @@
               size="small"
               class="control-button ctl-btn-color">
               <a-icon type="eye"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="Copy Application">
+            <a-button
+              v-permit="'app:copy'"
+              @click.native="handleCopy(record)"
+              shape="circle"
+              size="small"
+              class="control-button ctl-btn-color">
+              <a-icon type="copy"/>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="See Flink Start log">
+            <a-button
+              v-if="record.executionMode === 5 || record.executionMode === 6"
+              shape="circle"
+              size="small"
+              @click.native="handleSeeLog(record)"
+              class="control-button ctl-btn-color">
+              <a-icon type="sync"/>
             </a-button>
           </a-tooltip>
 
@@ -533,6 +484,19 @@
               </a-button>
             </a-popconfirm>
           </template>
+
+          <a-tooltip title="Forced Stop Application">
+            <a-button
+              type="danger"
+              shape="circle"
+              size="small"
+              v-show="handleCanStop(record)"
+              v-permit="'app:cancel'"
+              @click.native="handleForcedStop(record)"
+              class="control-button">
+              <a-icon type="pause-circle"/>
+            </a-button>
+          </a-tooltip>
 
         </template>
 
@@ -619,21 +583,20 @@
                 <template v-if="appBuildDetail.pipeline.pipeType === 2 && appBuildDetail.docker !== null">
                   <template
                     v-if="item.seq === 5 && appBuildDetail.docker.pull !== null && appBuildDetail.docker.pull.layers !== null">
-                    <template v-for="layer in appBuildDetail.docker.pull.layers">
+                    <template v-for="(layer,index) in appBuildDetail.docker.pull.layers">
                       <a-row :key="layer.layerId" style="margin-bottom: 5px;">
                         <a-space size="small">
                           <a-icon type="arrow-right"/>
                           <a-tag color="blue"> {{ layer.layerId }}</a-tag>
                           <a-tag>{{ layer.status }}</a-tag>
                           <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{
-                              layer.totalMb
-                            }} MB</span>
+                            <span style="font-size: 12px; text-align: right">
+                              {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
                           </template>
                         </a-space>
                       </a-row>
                       <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                        <a-row :key="layer.layerId" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
+                        <a-row :key="index" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
                           <a-progress
                             :percent="layer.percent"
                             status="active"/>
@@ -659,21 +622,20 @@
 
                   <template
                     v-else-if="item.seq === 7 && appBuildDetail.docker.push !== null && appBuildDetail.docker.push.layers !== null">
-                    <template v-for="layer in appBuildDetail.docker.push.layers">
+                    <template v-for="(layer,index) in appBuildDetail.docker.push.layers">
                       <a-row :key="layer.layerId" style="margin-bottom: 5px;">
                         <a-space size="small">
                           <a-icon type="arrow-right"/>
                           <a-tag color="blue"> {{ layer.layerId }}</a-tag>
                           <a-tag>{{ layer.status }}</a-tag>
                           <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                            <span style="font-size: 12px; text-align: right"> {{ layer.currentMb }} / {{
-                              layer.totalMb
-                            }} MB</span>
+                            <span style="font-size: 12px; text-align: right">
+                              {{ layer.currentMb }} / {{ layer.totalMb }} MB</span>
                           </template>
                         </a-space>
                       </a-row>
                       <template v-if="layer.totalMb != null && layer.totalMb !== 0">
-                        <a-row :key="layer.layerId" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
+                        <a-row :key="index" style="margin-left: 20px; margin-right: 50px; margin-bottom: 15px;">
                           <a-progress
                             :percent="layer.percent"
                             status="active"/>
@@ -805,24 +767,24 @@
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
-              v-model="savePoint"
-              v-decorator="['savePoint']"/>
+              v-model="startSavePointed"
+              v-decorator="['startSavePointed']"/>
             <span
               class="conf-switch"
               style="color:darkgrey"> restore the application from savepoint or latest checkpoint</span>
           </a-form-item>
 
           <a-form-item
-            v-if="savePoint && !latestSavePoint "
+            class="def-margin-bottom"
+            v-if="startSavePointed && !latestSavePoint "
             label="savepoint"
-            style="margin-bottom: 10px"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
             <a-select
               v-if="historySavePoint && historySavePoint.length>0"
               mode="combobox"
               allow-clear
-              v-decorator="['savepoint',{ rules: [{ required: true } ]}]">
+              v-decorator="['startSavePoint',{ rules: [{ required: true } ]}]">
               <a-select-option
                 v-for="(k ,i) in historySavePoint"
                 :key="i"
@@ -843,14 +805,14 @@
               v-if="!historySavePoint || (historySavePoint && historySavePoint.length === 0)"
               type="text"
               placeholder="Please enter savepoint manually"
-              v-decorator="['savepoint',{ rules: [{ required: true } ]}]"/>
+              v-decorator="['startSavePoint',{ rules: [{ required: true } ]}]"/>
             <span
               class="conf-switch"
               style="color:darkgrey"> restore the application from savepoint or latest checkpoint</span>
           </a-form-item>
 
           <a-form-item
-            v-if="savePoint"
+            v-if="startSavePointed"
             label="ignore restored"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
@@ -903,18 +865,18 @@
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
-              v-model="savePoint"
-              v-decorator="['savePoint']"/>
+              v-model="stopSavePointed"
+              v-decorator="['stopSavePointed']"/>
             <span
               class="conf-switch"
-              style="color:darkgrey"> trigger savePoint before taking stoping </span>
+              style="color:darkgrey"> trigger savePoint before taking cancel </span>
           </a-form-item>
           <a-form-item
+            class="def-margin-bottom"
             label="Custom SavePoint"
-            style="margin-bottom: 10px"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
-            v-show="savePoint">
+            v-show="stopSavePointed">
             <a-input
               type="text"
               placeholder="Entry the custom savepoint path"
@@ -929,12 +891,12 @@
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
-              placeholder="Send max watermark before taking stoping"
+              placeholder="Send max watermark before job stopped"
               v-model="drain"
               v-decorator="['drain']"/>
             <span
               class="conf-switch"
-              style="color:darkgrey"> Send max watermark before stoping</span>
+              style="color:darkgrey"> Send max watermark before stopped</span>
           </a-form-item>
         </a-form>
 
@@ -954,6 +916,57 @@
           </a-button>
         </template>
       </a-modal>
+
+
+
+      <a-modal
+        v-model="copyVisible"
+        on-ok="handleCopyOk">
+        <template
+          slot="title">
+          <svg-icon
+            slot="icon"
+            name="copy"
+            style="color: red"/>
+          Copy Application
+        </template>
+
+        <a-form
+          @submit="handleCopyOk"
+          :form="formCopy">
+
+          <a-form-item
+            class="def-margin-bottom"
+            label="Application Name"
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
+            :validate-status="validateStatus"
+            :help="help">
+            <a-input
+              type="text"
+              placeholder="New Application Name"
+              v-model="copyAppName"
+              v-decorator="['copyAppName',{rules: [{ required: true }]}]"/>
+          </a-form-item>
+        </a-form>
+
+        <template
+          slot="footer">
+          <a-button
+            key="back"
+            @click="handleCopyCancel">
+            Cancel
+          </a-button>
+          <a-button
+            key="submit"
+            type="primary"
+            :loading="loading"
+            @click="handleCopyOk">
+            Apply
+          </a-button>
+        </template>
+      </a-modal>
+
 
       <a-modal
         v-model="mappingVisible"
@@ -1019,17 +1032,22 @@
         width="65%"
         :body-style="controller.modalStyle"
         :destroy-on-close="controller.modalDestroyOnClose"
-        :footer="null"
         @ok="handleCloseWS">
         <template slot="title">
           <a-icon type="code"/>&nbsp; {{ controller.consoleName }}
         </template>
         <template slot="footer">
           <a-button
-            key="submit"
+            key="refresh"
+            type="primary"
+            @click="refreshLog">
+            refresh
+          </a-button>
+          <a-button
+            key="close"
             type="primary"
             @click="handleCloseWS">
-            Close
+            close
           </a-button>
         </template>
         <div
@@ -1048,15 +1066,19 @@ import {mapActions} from 'vuex'
 import {
   cancel,
   clean,
+  checkSavepointPath,
   dashboard,
+  copy,
   downLog,
+  forcedStop,
   list,
   mapping,
   remove,
   revoke,
   start,
   yarn,
-  verifySchema
+  verifySchema,
+  startLog
 } from '@api/application'
 import {history, latest} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
@@ -1068,6 +1090,8 @@ import 'xterm/css/xterm.css'
 import {baseUrl} from '@/api/baseUrl'
 import SvgIcon from '@/components/SvgIcon'
 import storage from '@/utils/storage'
+import {listByUser as getUserTeam} from '@/api/team'
+import {list as listUser} from '@/api/user'
 
 export default {
   components: {Ellipsis, State, SvgIcon},
@@ -1088,13 +1112,23 @@ export default {
           running: 0
         }
       },
+      teamData: [],
+      users: [],
       expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
+      jobType: null,
+      teamId: null,
+      userId: null,
       sortedInfo: null,
       filteredInfo: null,
       queryInterval: 2000,
       yarn: null,
       stopVisible: false,
+      copyVisible: false,
+      validateStatus: '',
+      help: '',
+      formCopy: null,
+      copyAppName:null,
       startVisible: false,
       mappingVisible: false,
       formDeploy: null,
@@ -1102,7 +1136,8 @@ export default {
       formStartCheckPoint: null,
       formMapping: null,
       drain: false,
-      savePoint: true,
+      startSavePointed: true,
+      stopSavePointed: true,
       customSavepoint: null,
       flameGraph: false,
       restart: false,
@@ -1112,16 +1147,15 @@ export default {
       historySavePoint: null,
       allowNonRestoredState: false,
       searchText: '',
-      searchInput: null,
       optionApps: {
         'starting': new Map(),
-        'stoping': new Map(),
+        'stopping': new Map(),
         'launch': new Map()
       },
-      searchedColumn: null,
       paginationInfo: null,
       stompClient: null,
       terminal: null,
+      currentApp : null,
       controller: {
         ellipsis: 100,
         modalStyle: {
@@ -1155,51 +1189,44 @@ export default {
   },
 
   computed: {
-    innerColumns() {
-      return [
-        {title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 280},
-        {title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory'},
-        {title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory'},
-        {title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM'},
-        {title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot'},
-        {title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot'}
-      ]
-    },
     columns() {
       let {sortedInfo, filteredInfo} = this
       sortedInfo = sortedInfo || {}
       filteredInfo = filteredInfo || {}
-      return [{
+      return [ {
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 280,
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'customRender'
-        },
-        onFilter: (value, record) =>
-            record.jobName
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus()
-            }, 0)
-          }
-        },
-      }, {
+        width: 320,
+        scopedSlots: {customRender: 'jobName'},
+      },  {
         title: 'Flink Version',
         dataIndex: 'flinkVersion',
-        width: 120
+        width: 130
       }, {
-        title: 'Start Time',
-        dataIndex: 'startTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
-        width: 180
+        title: 'Owner',
+        dataIndex: 'nickName',
+        width: 130
+      }, {
+        title: 'Run Status',
+        dataIndex: 'state',
+        width: 120,
+        scopedSlots: {customRender: 'state'},
+        filters: [
+          {text: 'ADDED', value: 0},
+          {text: 'STARTING', value: 3},
+          {text: 'RUNNING', value: 5},
+          {text: 'FAILED', value: 6},
+          {text: 'CANCELED', value: 9},
+          {text: 'FINISHED', value: 10},
+          {text: 'LOST', value: 13},
+          {text: 'SILENT', value: 17},
+          {text: 'TERMINATED', value: 18}
+        ]
+      }, {
+        title: 'Launch | Build',
+        dataIndex: 'launch',
+        width: 220,
+        scopedSlots: {customRender: 'launchState'}
       }, {
         title: 'Duration',
         dataIndex: 'duration',
@@ -1208,48 +1235,33 @@ export default {
         scopedSlots: {customRender: 'duration'},
         width: 150
       }, {
-        title: 'Task',
-        dataIndex: 'task',
-        width: 100,
-      }, {
-        title: 'Run Status',
-        dataIndex: 'state',
-        width: 120,
-        scopedSlots: {customRender: 'state'},
-        filters: [
-          {text: 'ADDED', value: 0},
-          {text: 'DEPLOYING', value: 1},
-          {text: 'DEPLOYED', value: 2},
-          {text: 'CREATED', value: 4},
-          {text: 'STARTING', value: 5},
-          {text: 'RUNNING', value: 7},
-          {text: 'FAILED', value: 9},
-          {text: 'CANCELED', value: 11},
-          {text: 'FINISHED', value: 12},
-          {text: 'SUSPENDED', value: 13},
-          {text: 'LOST', value: 15},
-          {text: 'SILENT', value: 19},
-          {text: 'TERMINATED', value: 20},
-          {text: 'FINISHED', value: 21},
-        ]
-      }, {
-        title: 'Launch | Build',
-        dataIndex: 'launch',
-        width: 250,
-        scopedSlots: {customRender: 'launchState'}
+        title: 'Modified Time',
+        dataIndex: 'modifyTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'modifyTime' && sortedInfo.order,
+        width: 170
       }, {
         dataIndex: 'operation',
         key: 'operation',
         fixed: 'right',
         scopedSlots: {customRender: 'operation'},
         slots: {title: 'customOperation'},
-        width: 220
+        width: 200
       }]
     }
   },
 
   mounted() {
     this.handleDashboard()
+    listUser({'pageSize': '9999'}).then((resp) => {
+      this.users = resp.data.records
+    })
+
+    getUserTeam(
+      {'pageSize': '9999'}
+    ).then((resp) => {
+      this.teamData = resp.data.records
+    })
     this.handleFetch(true)
     const timer = window.setInterval(() => {
       this.handleDashboard()
@@ -1265,6 +1277,7 @@ export default {
   beforeMount() {
     this.formDeploy = this.$form.createForm(this)
     this.formStopSavePoint = this.$form.createForm(this)
+    this.formCopy = this.$form.createForm(this)
     this.formStartCheckPoint = this.$form.createForm(this)
     this.formMapping = this.$form.createForm(this)
     this.dashBigScreen = (document.documentElement.offsetWidth || document.body.offsetWidth) >= 1500
@@ -1285,7 +1298,7 @@ export default {
         case -1:
           return 'launch failed'
         case 1:
-          return 'need relaunch'
+          return 'current job need relaunch'
         case 2:
           return 'launching'
         case 3:
@@ -1295,6 +1308,18 @@ export default {
       }
     },
 
+    handleChangeJobType(jobType) {
+      this.jobType = jobType
+      this.handleSearch()
+    },
+    handleChangeTeam(team) {
+      this.teamId = team
+      this.handleSearch()
+    },
+    handleChangeUser(user) {
+      this.userId = user
+      this.handleSearch()
+    },
 
     handleMapping(app) {
       this.mappingVisible = true
@@ -1360,18 +1385,18 @@ export default {
         showConfirmButton: false,
         timer: 2000
       }).then((e) =>
-          build({
-            appId: app.id,
-            forceBuild: force
-          }).then((resp) => {
-            if (!resp.data) {
-              this.$swal.fire(
-                  'Failed',
-                  'lanuch application failed, ' + resp.message.replaceAll(/\[StreamX]/g, ''),
-                  'error'
-              )
-            }
-          })
+        build({
+          appId: app.id,
+          forceBuild: force
+        }).then((resp) => {
+          if (!resp.data) {
+            this.$swal.fire(
+              'Failed',
+              'lanuch application failed, ' + resp.message.replaceAll(/\[StreamX]/g, ''),
+              'error'
+            )
+          }
+        })
       )
     },
 
@@ -1497,16 +1522,16 @@ export default {
        * @type {boolean}
        */
       const status = app.state === 0 ||
-          app.state === 7 ||
-          app.state === 9 ||
-          app.state === 10 ||
-          app.state === 11 ||
-          app.state === 13 ||
-          app.state === 16 ||
-          app.state === 18 ||
-          app.state === 19 ||
-          app.state === 20 ||
-          app.state === -9 || false
+        app.state === 7 ||
+        app.state === 9 ||
+        app.state === 10 ||
+        app.state === 11 ||
+        app.state === 13 ||
+        app.state === 16 ||
+        app.state === 18 ||
+        app.state === 19 ||
+        app.state === 20 ||
+        app.state === -9 || false
 
       /**
        *
@@ -1536,11 +1561,11 @@ export default {
     },
 
     handleCanRemapping(record) {
-      return record.state !== 5 &&
-      !this.optionApps.launch.get(record.id) &&
-      !this.optionApps.stoping.get(record.id) &&
-      !this.optionApps.starting.get(record.id) &&
-      record['optionState'] === 0
+      return record.state === 7 ||
+        record.state === 0 ||
+        record.state === 10 ||
+        record.state === 11 ||
+        record.state === 13
     },
 
     showForceStartAppModal() {
@@ -1566,12 +1591,12 @@ export default {
       this.closeForceStartAppModal()
       if (app.flinkVersion == null) {
         this.$swal.fire(
-            'Failed',
-            'please set flink version first.',
-            'error'
+          'Failed',
+          'please set flink version first.',
+          'error'
         )
       } else {
-        if ( !this.optionApps.starting.get(app.id) || app['optionState'] === 0) {
+        if (!this.optionApps.starting.get(app.id) || app['optionState'] === 0) {
           this.application = app
           latest({
             appId: this.application.id
@@ -1604,7 +1629,7 @@ export default {
         this.allowNonRestoredState = false
         this.formStartCheckPoint.resetFields()
         this.application = null
-        this.savePoint = true
+        this.startSavePointed = true
         this.flameGraph = false
       }, 1000)
     },
@@ -1613,9 +1638,9 @@ export default {
       this.formStartCheckPoint.validateFields((err, values) => {
         if (!err) {
           const id = this.application.id
-          const savePointed = this.savePoint
+          const savePointed = this.startSavePointed
           const flameGraph = this.flameGraph
-          const savePoint = savePointed ? (values['savepoint'] || this.latestSavePoint.savePoint) : null
+          const savePointPath = savePointed ? (values['startSavePoint'] || this.latestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
           this.optionApps.starting.set(id, new Date().getTime())
           this.handleMapUpdate('starting')
@@ -1630,7 +1655,7 @@ export default {
             start({
               id: id,
               savePointed: savePointed,
-              savePoint: savePoint,
+              savePoint: savePointPath,
               flameGraph: flameGraph,
               allowNonRestored: allowNonRestoredState
             }).then((resp) => {
@@ -1644,7 +1669,7 @@ export default {
                   confirmButtonColor: '#55BDDDFF',
                   confirmButtonText: 'Detail',
                   cancelButtonText: 'Close'
-                }).then((isConfirm) =>{
+                }).then((isConfirm) => {
                   if (isConfirm.value) {
                     this.SetAppId(id)
                     this.$router.push({'path': '/flink/app/detail'})
@@ -1658,7 +1683,7 @@ export default {
     },
 
     handleCancel(app) {
-      if (!this.optionApps.stoping.get(app.id) || app['optionState'] === 0) {
+      if (!this.optionApps.stopping.get(app.id) || app['optionState'] === 0) {
         this.stopVisible = true
         this.application = app
       }
@@ -1669,7 +1694,7 @@ export default {
       setTimeout(() => {
         this.formStopSavePoint.resetFields()
         this.drain = false
-        this.savePoint = true
+        this.stopSavePointed = true
         this.application = null
       }, 1000)
     },
@@ -1677,10 +1702,10 @@ export default {
     handleStopOk() {
       const customSavePoint = this.customSavepoint
       const id = this.application.id
-      const savePointed = this.savePoint
+      const savePointed = this.stopSavePointed
       const drain = this.drain
-      this.optionApps.stoping.set(id, new Date().getTime())
-      this.handleMapUpdate('stoping')
+      this.optionApps.stopping.set(id, new Date().getTime())
+      this.handleMapUpdate('stopping')
       this.handleStopCancel()
 
       const stopReq = {
@@ -1690,24 +1715,39 @@ export default {
         savePoint: customSavePoint
       }
 
-      if ( customSavePoint != null ) {
-        verifySchema({
-          'path': customSavePoint
-        }).then(resp => {
-          if (resp.data === false) {
-            this.$swal.fire(
+      if (savePointed) {
+        if (customSavePoint != null) {
+          verifySchema({
+            path: customSavePoint
+          }).then(resp => {
+            if (resp.data === false) {
+              this.$swal.fire(
                 'Failed',
                 'custom savePoint path is invalid, ' + resp.message,
                 'error'
-            )
-          } else {
-            this.handleStopAction(stopReq)
-          }
-        })
+              )
+            } else {
+              this.handleStopAction(stopReq)
+            }
+          })
+        } else {
+          checkSavepointPath({
+            id: id
+          }).then((resp) => {
+            if (resp.data === true) {
+              this.handleStopAction(stopReq)
+            } else {
+              this.$swal.fire(
+                'Failed',
+                resp.message,
+                'error'
+              )
+            }
+          })
+        }
       } else {
         this.handleStopAction(stopReq)
       }
-
     },
 
     handleStopAction(stopReq) {
@@ -1718,13 +1758,6 @@ export default {
         timer: 2000
       }).then((result) => {
         cancel(stopReq).then((resp) => {
-          if (resp.status === 'error') {
-            this.$swal.fire(
-                'Failed',
-                resp.exception,
-                'error'
-            )
-          }
         })
       })
     },
@@ -1734,14 +1767,51 @@ export default {
       this.$router.push({'path': '/flink/app/detail'})
     },
 
+    handleCopy(app) {
+        this.copyVisible = true
+        this.application = app
+        this.validateStatus = ''
+        this.help = ''
+        this.formCopy.resetFields()
+    },
+    handleCopyCancel() {
+      this.validateStatus = ''
+      this.help = ''
+      this.copyVisible = false
+      this.formCopy.resetFields()
+    },
+    handleCopyOk() {
+      const copyAppName = this.copyAppName
+      const id = this.application.id
+      if (!copyAppName){
+        this.validateStatus = 'error'
+        this.help = 'Sorry, Application Name cannot be empty'
+        return
+      }
+      copy({
+        id : id,
+        jobName : copyAppName
+      }).then((resp) => {
+        const status = resp.status || 'error'
+        if (status === 'success') {
+          this.copyVisible = false
+          this.$swal.fire({
+            icon: 'success',
+            title: 'copy successful',
+            timer: 1500
+          })
+        }
+      })
+    },
+
     handleCheckFlameGraph() {
       if (this.flameGraph) {
         weburl({}).then((resp) => {
           if (resp.data == null || resp.data === '') {
             this.$swal.fire(
-                'Failed',
-                ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
-                'error'
+              'Failed',
+              ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
+              'error'
             )
             this.flameGraph = false
           }
@@ -1751,28 +1821,93 @@ export default {
 
     handleFlameGraph(app) {
       flamegraph({
-            appId: app.id,
-            width: document.documentElement.offsetWidth || document.body.offsetWidth
-          },
-          (resp) => {
-            if (resp != null) {
-              const blob = new Blob([resp], {type: 'image/svg+xml'})
-              const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
-              window.open(imageUrl)
-            }
-          },
-          {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
+          appId: app.id,
+          width: document.documentElement.offsetWidth || document.body.offsetWidth
+        },
+        (resp) => {
+          if (resp != null) {
+            const blob = new Blob([resp], {type: 'image/svg+xml'})
+            const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
+            window.open(imageUrl)
+          }
+        },
+        {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
       )
+    },
+
+    handleCanStop(app) {
+      const optionTime = new Date(app['optionTime']).getTime()
+      const nowTime = new Date().getTime()
+      if (nowTime - optionTime >= 60 * 1000) {
+        const state = app['optionState']
+        if (state === 0) {
+          return app.state === 3 || app.state === 4 || app.state === 8 || false
+        }
+        return true
+      }
+      return false
+    },
+
+    handleForcedStop(app) {
+      let option = 'starting'
+      const optionState = app['optionState']
+      if (optionState === 0) {
+        switch (app.state) {
+          case 3:
+            option = 'starting'
+            break
+          case 4:
+            option = 'restarting'
+            break
+          case 8:
+            option = 'cancelling'
+            break
+        }
+      } else {
+        switch (optionState) {
+          case 1:
+            option = 'launching'
+            break
+          case 2:
+            option = 'cancelling'
+            break
+          case 3:
+            option = 'starting'
+            break
+          case 4:
+            option = 'savePointing'
+            break
+        }
+      }
+
+      this.$swal.fire({
+        title: 'Are you sure?',
+        text: `current job is ${option}, are you sure forced stop?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, forced stop!',
+        denyButtonText: `No, cancel`,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.$swal.fire('forced stopping', '', 'success')
+          forcedStop({
+            id: app.id
+          }).then((resp) => {
+          })
+        }
+      })
     },
 
     handleCanDelete(app) {
       return app.state === 0 ||
-          app.state === 7 ||
-          app.state === 9 ||
-          app.state === 10 ||
-          app.state === 13 ||
-          app.state === 18 ||
-          app.state === 19 || false
+        app.state === 7 ||
+        app.state === 9 ||
+        app.state === 10 ||
+        app.state === 13 ||
+        app.state === 18 ||
+        app.state === 19 || false
     },
 
     handleDelete(app) {
@@ -1790,35 +1925,23 @@ export default {
       })
     },
 
-    handleSearch(selectedKeys, confirm, dataIndex) {
-      confirm()
-      this.searchText = selectedKeys[0]
-      this.searchedColumn = dataIndex
-      this.queryParams[this.searchedColumn] = this.searchText
+    handleSearch() {
       const {sortedInfo} = this
       // 获取当前列的排序和列的过滤规则
       if (sortedInfo) {
         this.queryParams['sortField'] = sortedInfo.field
         this.queryParams['sortOrder'] = sortedInfo.order
       }
-    },
-
-    handleReset(clearFilters) {
-      clearFilters()
-      this.searchText = null
-      this.searchedColumn = null
-      // 重置列排序规则
-      this.sortedInfo = null
-      // 重置查询参数
-      this.queryParams = {}
+      this.queryParams['jobName'] = this.searchText
+      this.queryParams['jobType'] = this.jobType
+      this.queryParams['teamId'] = this.teamId
+      this.queryParams['userId'] = this.userId
+      this.handleFetch(false)
     },
 
     handleTableChange(pagination, filters, sorter) {
       this.sortedInfo = sorter
       this.paginationInfo = pagination
-      if (filters['jobType']) {
-        this.queryParams['jobTypeArray'] = filters['jobType']
-      }
       if (filters['state']) {
         this.queryParams['stateArray'] = filters['state']
       }
@@ -1867,10 +1990,10 @@ export default {
                 this.handleMapUpdate('starting')
               }
             }
-            if (this.optionApps.stoping.get(x.id)) {
-              if (timestamp - this.optionApps.stoping.get(x.id) > this.queryInterval) {
-                this.optionApps.stoping.delete(x.id)
-                this.handleMapUpdate('stoping')
+            if (this.optionApps.stopping.get(x.id)) {
+              if (timestamp - this.optionApps.stopping.get(x.id) > this.queryInterval) {
+                this.optionApps.stopping.delete(x.id)
+                this.handleMapUpdate('stopping')
               }
             }
             if (this.optionApps.launch.get(x.id)) {
@@ -1896,46 +2019,30 @@ export default {
       })
     },
 
-    handleExpandIcon(props) {
-      if (props.record.state === 5) {
-        if (props.expanded) {
-          return <a class="expand-icon-open" onClick={(e) => {
-            props.onExpand(props.record, e)
-          }}>
-            <a-icon type="down"/>
-          </a>
-        } else {
-          return <a class="expand-icon-close" onClick={(e) => {
-            props.onExpand(props.record, e)
-          }}>
-            <a-icon type="right"/>
-          </a>
-        }
-      } else {
-        return ''
-      }
-    },
-
-    handleView(params) {
+    handleView(app) {
       // 任务正在运行中, 重启中, 正在 savePoint 中
-      if (params.state === 4 || params.state === 5 || params['optionState'] === 4) {
+      if (app.state === 4 || app.state === 5 || app['optionState'] === 4) {
         // yarn-per-job|yarn-session|yarn-application
-        const executionMode = params['executionMode']
+        const executionMode = app['executionMode']
         if (executionMode === 1) {
-          activeURL({id: params.flinkClusterId}).then((resp) => {
-            const url = resp.data + '/#/job/' + params.jobId + '/overview'
+          activeURL({id: app.flinkClusterId}).then((resp) => {
+            const url = resp.data + '/#/job/' + app.jobId + '/overview'
             window.open(url)
           })
         } else if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
           if (this.yarn == null) {
             yarn({}).then((resp) => {
               this.yarn = resp.data
-              const url = this.yarn + '/proxy/' + params['appId'] + '/'
+              const url = this.yarn + '/proxy/' + app['appId'] + '/'
               window.open(url)
             })
           } else {
-            const url = this.yarn + '/proxy/' + params['appId'] + '/'
+            const url = this.yarn + '/proxy/' + app['appId'] + '/'
             window.open(url)
+          }
+        } else {
+          if (app.flinkRestUrl != null) {
+            window.open(app.flinkRestUrl)
           }
         }
       }
@@ -1976,7 +2083,8 @@ export default {
     },
 
     handleSeeLog(app) {
-      this.controller.consoleName = app.jobName + ' Deploying log'
+      this.currentApp = app
+      this.controller.consoleName = 'Start Log : Application Name ['+ app.jobName + ']'
       this.controller.visible = true
       this.$nextTick(function () {
         this.handleOpenWS(app)
@@ -1984,8 +2092,8 @@ export default {
     },
 
     handleOpenWS(app) {
-      const rows = parseInt(this.controller.modalStyle.height.replace('px', '')) / 16
-      const cols = (document.querySelector('.terminal').offsetWidth - 10) / 8
+      const rows = (parseInt(this.controller.modalStyle.height.replace('px', '')) - 48) / 16
+      const cols = (document.querySelector('.terminal').offsetWidth - 36) / 8
       this.terminal = new Terminal({
         cursorBlink: true,
         rendererType: 'canvas',
@@ -2008,49 +2116,31 @@ export default {
       })
       const container = document.getElementById('terminal')
       this.terminal.open(container, true)
-
-      const url = baseUrl().concat('/websocket/' + this.handleGetSocketId())
-      const socket = this.getSocket(url)
-
-      socket.onopen = () => {
-        downLog({id: app.id})
-      }
-
-      socket.onmessage = (event) => {
-        if (event.data.startsWith('[Exception]')) {
-          this.$swal.fire({
-            title: 'Failed',
-            icon: 'error',
-            width: this.exceptionPropWidth(),
-            html: '<pre class="propException">' + event.data + '</pre>',
-            focusConfirm: false,
-          })
-        } else {
-          this.terminal.writeln(event.data)
-        }
-      }
-
-      socket.onclose = () => {
-        this.socketId = null
-        storage.rm(this.storageKey)
-      }
-
+      this.refreshLog()
     },
-
+    refreshLog(){
+      const tmpApp = this.currentApp
+      startLog({
+        namespace : tmpApp.k8sNamespace,
+        jobName : tmpApp.jobName,
+        limit : 100000000,
+        skipLineNum : 0
+      }).then((resp) => {
+        const status = resp.status || 'error'
+        if (status === 'success') {
+          this.terminal.clear()
+          this.terminal.writeln(resp.data)
+        }
+      })
+    },
     handleCloseWS() {
-      this.stompClient.disconnect()
+
       this.controller.visible = false
       this.terminal.clear()
       this.terminal.clearSelection()
       this.terminal = null
-    },
-
-    handleGetSocketId() {
-      if (this.socketId == null) {
-        return storage.get(this.storageKey) || null
-      }
-      return this.socketId
-    },
+      this.currentApp = null
+    }
 
   }
 }

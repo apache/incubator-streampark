@@ -4,33 +4,29 @@
         <format>tar.gz</format>
     </formats>
     <dependencySets>
+        <!-- 需要打进去的jar包都写在这里，是的我没有找到好的方法😅       -->
         <dependencySet>
             <useProjectArtifact>true</useProjectArtifact>
             <outputDirectory>lib</outputDirectory>
             <useProjectAttachments>true</useProjectAttachments>
             <includes>
-                <include>com.streamxhub.streamx:streamx-spark-core</include>
-                <include>org.apache.curator:curator-framework</include>
-                <include>org.apache.curator:curator-recipes</include>
-                <include>org.apache.curator:curator-client</include>
-                <include>org.apache.zookeeper:zookeeper</include>
-                <include>org.yaml:snakeyaml</include>
-                <include>org.apache.spark:spark-streaming-kafka-0-10_2.11</include>
-                <include>org.scalaj:scalaj-http_${scala.binary.version}</include>
-                <include>redis.clients:jedis</include>
                 <include>org.apache.commons:commons-pool2</include>
-                <include>com.solarmosaic.client:mail-client_2.11</include>
+                <include>org.apache.commons:commons-dbcp2</include>
+                <include>com.streamxhub.streamx:streamx-common_2.12</include>
+                <include>com.streamxhub.streamx:streamx-spark-core_2.12</include>
+                <include>com.streamxhub.streamx:streamx-spark-connector-base_2.12</include>
+                <include>com.streamxhub.streamx:streamx-spark-connector-kafka_2.12</include>
+                <include>org.apache.kafka:kafka-clients</include>
+                <include>org.apache.spark:spark-token-provider-kafka-0-10_2.12</include>
+                <include>org.apache.spark:spark-streaming-kafka-0-10_2.12</include>
+                <include>org.scalikejdbc:scalikejdbc-core_2.12</include>
+                <include>org.scalikejdbc:scalikejdbc-interpolation-macro_2.12</include>
+                <include>org.scalikejdbc:scalikejdbc-interpolation_2.12</include>
+                <include>org.scalikejdbc:scalikejdbc_2.12</include>
+                <include>redis.clients:jedis</include>
                 <include>mysql:mysql-connector-java</include>
+                <include>org.scala-lang.modules:scala-collection-compat_2.12</include>
             </includes>
-        </dependencySet>
-        <dependencySet>
-            <!--
-               不使用项目的artifact，第三方jar不要解压
-            -->
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>lib</outputDirectory>
-            <useProjectAttachments>true</useProjectAttachments>
-            <scope>provided</scope>
         </dependencySet>
     </dependencySets>
     <fileSets>

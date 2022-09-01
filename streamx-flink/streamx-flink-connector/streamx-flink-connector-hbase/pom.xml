@@ -3,8 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
-        <artifactId>streamx-flink-connector</artifactId>
-        <version>1.2.3</version>
+        <artifactId>streamx-flink-connector_${scala.binary.version}</artifactId>
+        <version>1.2.4</version>
     </parent>
 
     <artifactId>streamx-flink-connector-hbase_${scala.binary.version}</artifactId>
@@ -22,21 +22,23 @@
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-jdbc-client</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
     </dependencies>
