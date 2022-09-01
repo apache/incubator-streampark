@@ -118,23 +118,21 @@ object ClassLoaderUtils extends Logger {
     }
   }
 
-  private[this] def addURL(file: File): Unit = {
-    Try {
-      val classLoader = ClassLoader.getSystemClassLoader
-      classLoader match {
-        case c if c.isInstanceOf[URLClassLoader] =>
-          val addURL = classOf[URLClassLoader].getDeclaredMethod("addURL", Array(classOf[URL]): _*)
-          addURL.setAccessible(true)
-          addURL.invoke(c, file.toURI.toURL)
-        case _ =>
-          val field = classLoader.getClass.getDeclaredField("ucp")
-          field.setAccessible(true)
-          val ucp = field.get(classLoader)
-          val addURL = ucp.getClass.getDeclaredMethod("addURL", Array(classOf[URL]): _*)
-          addURL.setAccessible(true)
-          addURL.invoke(ucp, file.toURI.toURL)
-      }
-    }.recover { case e => throw e }.get
+  @throws[Exception] private[this] def addURL(file: File): Unit = {
+    val classLoader = ClassLoader.getSystemClassLoader
+    classLoader match {
+      case c if c.isInstanceOf[URLClassLoader] =>
+        val addURL = classOf[URLClassLoader].getDeclaredMethod("addURL", Array(classOf[URL]): _*)
+        addURL.setAccessible(true)
+        addURL.invoke(c, file.toURI.toURL)
+      case _ =>
+        val field = classLoader.getClass.getDeclaredField("ucp")
+        field.setAccessible(true)
+        val ucp = field.get(classLoader)
+        val addURL = ucp.getClass.getDeclaredMethod("addURL", Array(classOf[URL]): _*)
+        addURL.setAccessible(true)
+        addURL.invoke(ucp, file.toURI.toURL)
+    }
   }
 
 

@@ -16,7 +16,7 @@
 
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.common.util.Utils.tryWithResource
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey
@@ -66,10 +66,9 @@ object KubernetesRetriever extends Logger {
   /**
    * get new flink cluster client of kubernetes mode
    */
-  @throws(classOf[Exception])
   def newFinkClusterClient(clusterId: String,
                            @Nullable namespace: String,
-                           executeMode: FlinkK8sExecuteMode.Value): ClusterClient[String] = {
+                           executeMode: FlinkK8sExecuteMode.Value): Option[ClusterClient[String]] = {
     // build flink config
     val flinkConfig = new Configuration()
     flinkConfig.setString(DeploymentOptions.TARGET, executeMode.toString)
@@ -92,10 +91,10 @@ object KubernetesRetriever extends Logger {
         .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
         .getClusterClient
     } match {
-      case Success(v) => v
+      case Success(v) => Some(v)
       case Failure(e) =>
         logError(s"Get flinkClient error, the error is: $e")
-        throw e
+        None
     }
   }
 
@@ -105,8 +104,8 @@ object KubernetesRetriever extends Logger {
    * @param name      deployment name
    * @param namespace deployment namespace
    */
-  def isDeploymentExists(name: String, namespace: String): Boolean =
-    tryWithResource(Try(KubernetesRetriever.newK8sClient()).getOrElse(return false)) {
+  def isDeploymentExists(name: String, namespace: String): Boolean = {
+    tryWithResource(KubernetesRetriever.newK8sClient()) {
       client =>
         client.apps()
           .deployments()
@@ -116,24 +115,23 @@ object KubernetesRetriever extends Logger {
           .getItems.asScala
           .exists(e => e.getMetadata.getName == name)
     } { _ => false }
+  }
 
 
   /**
    * retrieve flink jobManager rest url
    */
   def retrieveFlinkRestUrl(clusterKey: ClusterKey): Option[String] = {
-    tryWithResource(
+    Utils.tryWithResource(
       KubernetesRetriever.newFinkClusterClient(
         clusterKey.clusterId,
         clusterKey.namespace,
         clusterKey.executeMode
-      )
+      ).getOrElse(return None)
     ) { client =>
       val url = IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
-      Option(url)
-    } { error =>
-      logger.info(s"Failed to get url path of jobManager for task,errorStack=${error.getMessage}")
-      None
+      client.close()
+      Some(url)
     }
   }
 }
