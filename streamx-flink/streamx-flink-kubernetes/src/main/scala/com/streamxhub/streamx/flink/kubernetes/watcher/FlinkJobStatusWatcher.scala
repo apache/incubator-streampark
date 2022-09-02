@@ -219,28 +219,21 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       val clusterRestUrl = trackController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
       // list flink jobs from rest api
       callJobsOverviewsApi(clusterRestUrl)
-    } match {
-      case Success(s) =>
-        logger.info("Get Job details successfully")
-        s
-      case Failure(_) =>
-        logger.info("Get task details by flink rest api failure,try to get it again")
-        val clusterRestUrl = trackController.refreshClusterRestUrl(clusterKey).getOrElse(return None)
-        Try(callJobsOverviewsApi(clusterRestUrl)) match {
-          case Success(s) =>
-            logger.info("Retrying to get Job details succeed")
-            s
-          case Failure(e) =>
-            logInfo(s"failed to visit remote flink jobs on kubernetes-native-mode cluster, errorStack=${e.getMessage}")
-            None
-        }
+    }.getOrElse {
+      val clusterRestUrl = trackController.refreshClusterRestUrl(clusterKey).getOrElse(return None)
+      Try(callJobsOverviewsApi(clusterRestUrl)) match {
+        case Success(s) => s
+        case Failure(e) =>
+          logError(s"failed to visit remote flink jobs on kubernetes-native-mode cluster, errorStack=${e.getMessage}")
+          None
+      }
     }
   }
 
   /**
    * list flink jobs details from rest api
    */
-  @throws[Exception] private def callJobsOverviewsApi(restUrl: String): Option[JobDetails] = {
+  private def callJobsOverviewsApi(restUrl: String): Option[JobDetails] = {
     logger.info(s"Get task details by flink rest api:$restUrl")
     JobDetails.as(
       Request.get(s"$restUrl/jobs/overview")
