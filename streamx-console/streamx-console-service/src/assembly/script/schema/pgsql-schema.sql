@@ -265,7 +265,7 @@ create table "public"."t_flink_cluster" (
 comment on column "public"."t_flink_cluster"."address" is 'url address of jobmanager';
 comment on column "public"."t_flink_cluster"."cluster_id" is 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)';
 comment on column "public"."t_flink_cluster"."cluster_name" is 'cluster name';
-comment on column "public"."t_flink_cluster"."options" is 'parameter collection json form';
+comment on column "public"."t_flink_cluster"."options" is 'json form of parameter collection ';
 comment on column "public"."t_flink_cluster"."yarn_queue" is 'the yarn queue where the task is located';
 comment on column "public"."t_flink_cluster"."execution_mode" is 'k8s execution session mode(1:remote,3:yarn-session,5:kubernetes-session)';
 comment on column "public"."t_flink_cluster"."version_id" is 'flink version id';
@@ -274,10 +274,10 @@ comment on column "public"."t_flink_cluster"."service_account" is 'k8s service a
 comment on column "public"."t_flink_cluster"."flink_image" is 'flink image';
 comment on column "public"."t_flink_cluster"."dynamic_options" is 'dynamic parameters';
 comment on column "public"."t_flink_cluster"."k8s_rest_exposed_type" is 'k8s export(0:loadbalancer,1:clusterip,2:nodeport)';
-comment on column "public"."t_flink_cluster"."flame_graph" is 'enable the flame graph';
+comment on column "public"."t_flink_cluster"."flame_graph" is 'whether to enable the flame graph, default is false';
 comment on column "public"."t_flink_cluster"."k8s_conf" is 'the path where the k 8 s configuration file is located';
 comment on column "public"."t_flink_cluster"."exception" is 'exception information';
-comment on column "public"."t_flink_cluster"."cluster_state" is 'cluster status (0: create not started, 1: started, 2: stopped)';
+comment on column "public"."t_flink_cluster"."cluster_state" is 'cluster status (0: created but not started, 1: started, 2: stopped)';
 alter table "public"."t_flink_cluster" add constraint "t_flink_cluster_pkey" primary key ("id", "cluster_name");
 create index "id" on "public"."t_flink_cluster" using btree (
   "cluster_id" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last,
@@ -355,10 +355,10 @@ create table "public"."t_flink_env" (
 comment on column "public"."t_flink_env"."id" is 'id';
 comment on column "public"."t_flink_env"."flink_name" is 'flink instance name';
 comment on column "public"."t_flink_env"."flink_home" is 'flink home path';
-comment on column "public"."t_flink_env"."version" is 'the version number corresponding to flink';
-comment on column "public"."t_flink_env"."scala_version" is 'the scala version number corresponding to flink';
-comment on column "public"."t_flink_env"."flink_conf" is 'flink conf configuration content';
-comment on column "public"."t_flink_env"."is_default" is 'is it the default version';
+comment on column "public"."t_flink_env"."version" is 'flink version';
+comment on column "public"."t_flink_env"."scala_version" is 'scala version of flink';
+comment on column "public"."t_flink_env"."flink_conf" is 'flink-conf';
+comment on column "public"."t_flink_env"."is_default" is 'whether default version or not';
 comment on column "public"."t_flink_env"."description" is 'description';
 comment on column "public"."t_flink_env"."create_time" is 'create time';
 alter table "public"."t_flink_env" add constraint "t_flink_env_pkey" primary key ("id");
@@ -509,7 +509,7 @@ comment on column "public"."t_menu"."icon" is 'icon';
 comment on column "public"."t_menu"."type" is 'type 0:menu 1:button';
 comment on column "public"."t_menu"."display" is 'menu is displayed';
 comment on column "public"."t_menu"."order_num" is 'sort';
-comment on column "public"."t_menu"."create_time" is 'creation time';
+comment on column "public"."t_menu"."create_time" is 'create time';
 comment on column "public"."t_menu"."modify_time" is 'modify time';
 alter table "public"."t_menu" add constraint "t_menu_pkey" primary key ("menu_id");
 
@@ -558,7 +558,7 @@ create table "public"."t_role" (
 comment on column "public"."t_role"."role_id" is 'role id';
 comment on column "public"."t_role"."role_name" is 'role name';
 comment on column "public"."t_role"."remark" is 'role description';
-comment on column "public"."t_role"."create_time" is 'creation time';
+comment on column "public"."t_role"."create_time" is 'create time';
 comment on column "public"."t_role"."modify_time" is 'modify time';
 comment on column "public"."t_role"."role_code" is 'role code';
 alter table "public"."t_role" add constraint "t_role_pkey" primary key ("role_id");
@@ -614,9 +614,9 @@ create table "public"."t_team" (
 )
 ;
 comment on column "public"."t_team"."team_id" is 'id';
-comment on column "public"."t_team"."team_code" is 'team ID can be used for queues later Resource isolation related';
+comment on column "public"."t_team"."team_code" is 'team ID, which could be used for queue and resource isolation';
 comment on column "public"."t_team"."team_name" is 'team name';
-comment on column "public"."t_team"."create_time" is 'creation time';
+comment on column "public"."t_team"."create_time" is 'create time';
 alter table "public"."t_team" add constraint "t_team_pkey" primary key ("team_id");
 create index "team_code" on "public"."t_team" using btree (
   "team_code" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
@@ -635,7 +635,7 @@ create table "public"."t_team_user" (
 ;
 comment on column "public"."t_team_user"."team_id" is 'teamid';
 comment on column "public"."t_team_user"."user_id" is 'userid';
-comment on column "public"."t_team_user"."create_time" is 'creation time';
+comment on column "public"."t_team_user"."create_time" is 'create time';
 create index "group_user" on "public"."t_team_user" using btree (
   "team_id" "pg_catalog"."int8_ops" asc nulls last,
   "user_id" "pg_catalog"."int8_ops" asc nulls last
@@ -672,7 +672,7 @@ comment on column "public"."t_user"."salt" is 'salt';
 comment on column "public"."t_user"."password" is 'password';
 comment on column "public"."t_user"."email" is 'email';
 comment on column "public"."t_user"."status" is 'status 0:locked 1:active';
-comment on column "public"."t_user"."create_time" is 'creation time';
+comment on column "public"."t_user"."create_time" is 'create time';
 comment on column "public"."t_user"."modify_time" is 'change time';
 comment on column "public"."t_user"."last_login_time" is 'last login time';
 comment on column "public"."t_user"."sex" is 'gender 0:male 1:female 2:confidential';
