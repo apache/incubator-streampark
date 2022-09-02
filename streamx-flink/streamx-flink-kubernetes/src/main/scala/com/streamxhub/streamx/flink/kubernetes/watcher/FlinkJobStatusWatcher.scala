@@ -226,7 +226,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         Try(callJobsOverviewsApi(clusterRestUrl)) match {
           case Success(s) => s
           case Failure(e) =>
-            logInfo(s"failed to visit remote flink jobs on kubernetes-native-mode cluster, errorStack=${e.getMessage}")
+            logError(s"failed to visit remote flink jobs on kubernetes-native-mode cluster, errorStack=${e.getMessage}")
             None
         }
     }
