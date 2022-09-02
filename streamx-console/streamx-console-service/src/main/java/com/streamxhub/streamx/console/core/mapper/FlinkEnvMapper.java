@@ -21,20 +21,11 @@ import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 
 /**
  * @author benjobs
  */
 public interface FlinkEnvMapper extends BaseMapper<FlinkEnv> {
-
-    /**
-     * 设置为默认
-     *
-     * @param id
-     */
-    @Update("update t_flink_env set is_default = case id when #{id} then 1 else 0 end")
-    void setDefault(@Param("id") Long id);
 
     /**
      * 根据appId获取对象的flinkVersion

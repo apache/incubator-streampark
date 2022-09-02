@@ -155,12 +155,17 @@ alter table `t_flink_app` add column `team_id` bigint not null default 1 comment
 alter table `t_flink_project` add column `team_id` bigint not null default 1 comment 'team id';
 
 alter table `t_flink_project`
-change column `date` `create_time` datetime null default null after `team_id`,
+change column `date` `create_time` datetime default null after `team_id`,
 add column `modify_time` datetime null after `create_time`;
 
 
 -- change `update_time` to `modify_time`
-alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime null default null;
+alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime default null;
+
+
+-- change `readed` to `read`
+alter table `t_message` change column `readed` `read` tinyint default 0;
+
 
 -- add chk_id field
 alter table t_flink_savepoint add column `chk_id` bigint after `app_id`;

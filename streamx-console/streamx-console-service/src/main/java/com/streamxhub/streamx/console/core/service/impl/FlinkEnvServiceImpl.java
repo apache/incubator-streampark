@@ -16,6 +16,8 @@
 
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.streamxhub.streamx.console.core.entity.FlinkEnv;
 import com.streamxhub.streamx.console.core.mapper.FlinkEnvMapper;
 import com.streamxhub.streamx.console.core.service.FlinkEnvService;
@@ -61,10 +63,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
     @Override
     public boolean create(FlinkEnv version) throws Exception {
         long count = this.baseMapper.selectCount(null);
-        if (count == 0) {
-            version.setIsDefault(true);
-        }
-        version.setId(null);
+        version.setIsDefault(count == 0);
         version.setCreateTime(new Date());
         version.doSetFlinkConf();
         version.doSetVersion();
@@ -90,7 +89,13 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
 
     @Override
     public void setDefault(Long id) {
-        this.baseMapper.setDefault(id);
+        LambdaUpdateWrapper<FlinkEnv> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.ne(FlinkEnv::getId, id).set(FlinkEnv::getIsDefault, false);
+        this.update(updateWrapper);
+
+        updateWrapper.clear();
+        updateWrapper.eq(FlinkEnv::getId, id).set(FlinkEnv::getIsDefault, true);
+        this.update(updateWrapper);
     }
 
     @Override
