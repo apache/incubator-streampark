@@ -51,7 +51,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
     @Override
     public IPage<Message> getUnRead(NoticeType noticeType, RestRequest request) {
         LambdaQueryWrapper<Message> query = new QueryWrapper<Message>().lambda();
-        query.eq(Message::getReaded, 0).orderByDesc(Message::getCreateTime);
+        query.eq(Message::getRead, false).orderByDesc(Message::getCreateTime);
         query.eq(Message::getType, noticeType.get());
         return this.baseMapper.selectPage(new MybatisPager<Message>().getDefaultPage(request), query);
     }

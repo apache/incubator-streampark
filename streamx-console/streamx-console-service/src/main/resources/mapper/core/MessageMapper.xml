@@ -9,7 +9,7 @@
         <result column="title" jdbcType="VARCHAR" property="title"/>
         <result column="type" jdbcType="INTEGER" property="type"/>
         <result column="context" jdbcType="VARCHAR" property="context"/>
-        <result column="readed" jdbcType="BOOLEAN" property="readed"/>
+        <result column="read" jdbcType="BOOLEAN" property="read"/>
         <result column="create_time" jdbcType="DATE" property="createTime"/>
     </resultMap>
 </mapper>

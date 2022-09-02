@@ -15,14 +15,63 @@
  */
 
 -- ----------------------------
--- table structure for t_access_token
+-- drop table if exists
 -- ----------------------------
 
+drop table if exists "public"."t_user";
+drop table if exists "public"."t_user_role";
+drop table if exists "public"."t_team";
+drop table if exists "public"."t_team_user";
+drop table if exists "public"."t_setting";
+drop table if exists "public"."t_role";
+drop table if exists "public"."t_role_menu";
+drop table if exists "public"."t_menu";
+drop table if exists "public"."t_message";
+drop table if exists "public"."t_flink_tutorial";
+drop table if exists "public"."t_flink_sql";
+drop table if exists "public"."t_flink_savepoint";
+drop table if exists "public"."t_flink_project";
+drop table if exists "public"."t_flink_env";
+drop table if exists "public"."t_flink_effective";
+drop table if exists "public"."t_flink_config";
+drop table if exists "public"."t_flink_cluster";
+drop table if exists "public"."t_flink_app";
+drop table if exists "public"."t_flame_graph";
+drop table if exists "public"."t_app_build_pipe";
+drop table if exists "public"."t_app_backup";
+drop table if exists "public"."t_alert_config";
+drop table if exists "public"."t_access_token";
+drop table if exists "public"."t_flink_log";
+
+-- ----------------------------
+-- drop sequence if exists
+-- ----------------------------
+drop sequence if exists "public"."streamx_t_user_id_seq";
+drop sequence if exists "public"."streamx_t_user_role_id_seq";
+drop sequence if exists "public"."streamx_t_role_id_seq";
+drop sequence if exists "public"."streamx_t_role_menu_id_seq";
+drop sequence if exists "public"."streamx_t_menu_id_seq";
+drop sequence if exists "public"."streamx_t_message_id_seq";
+drop sequence if exists "public"."streamx_t_flink_sql_id_seq";
+drop sequence if exists "public"."streamx_t_flink_savepoint_id_seq";
+drop sequence if exists "public"."streamx_t_flink_project_id_seq";
+drop sequence if exists "public"."streamx_t_flink_env_id_seq";
+drop sequence if exists "public"."streamx_t_flink_effective_id_seq";
+drop sequence if exists "public"."streamx_t_flink_config_id_seq";
+drop sequence if exists "public"."streamx_t_flink_cluster_id_seq";
+drop sequence if exists "public"."streamx_t_flink_app_id_seq";
+drop sequence if exists "public"."streamx_t_flame_graph_id_seq";
+drop sequence if exists "public"."streamx_t_app_backup_id_seq";
+drop sequence if exists "public"."streamx_t_alert_config_id_seq";
 drop sequence if exists "public"."streamx_t_access_token_id_seq";
+drop sequence if exists "public"."streamx_t_flink_log_id_seq";
+
+-- ----------------------------
+-- table structure for t_access_token
+-- ----------------------------
 create sequence if not exists "public"."streamx_t_access_token_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_access_token";
 create table "public"."t_access_token" (
   "id" int4 not null default nextval('streamx_t_access_token_id_seq'::regclass),
   "user_id" int8,
@@ -46,11 +95,9 @@ alter table "public"."t_access_token" add constraint "t_access_token_pkey" prima
 -- ----------------------------
 -- table structure for t_alert_config
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_alert_config_id_seq";
 create sequence "public"."streamx_t_alert_config_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_alert_config";
 create table "public"."t_alert_config" (
   "id" int8 not null default nextval('streamx_t_alert_config_id_seq'::regclass),
   "user_id" int8,
@@ -85,11 +132,9 @@ create index "inx_alert_user" on "public"."t_alert_config" using btree (
 -- ----------------------------
 -- table structure for t_app_backup
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_app_backup_id_seq";
 create sequence "public"."streamx_t_app_backup_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_app_backup";
 create table "public"."t_app_backup" (
   "id" int8 not null default nextval('streamx_t_app_backup_id_seq'::regclass),
   "app_id" int8,
@@ -107,7 +152,6 @@ alter table "public"."t_app_backup" add constraint "t_app_backup_pkey" primary k
 -- ----------------------------
 -- table structure for t_app_build_pipe
 -- ----------------------------
-drop table if exists "public"."t_app_build_pipe";
 create table "public"."t_app_build_pipe" (
   "app_id" int8 not null,
   "pipe_type" int2,
@@ -127,11 +171,9 @@ alter table "public"."t_app_build_pipe" add constraint "t_app_build_pipe_pkey" p
 -- ----------------------------
 -- table structure for t_flame_graph
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_flame_graph_id_seq";
 create sequence "public"."streamx_t_flame_graph_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_flame_graph";
 create table "public"."t_flame_graph" (
   "id" int8 not null default nextval('streamx_t_flame_graph_id_seq'::regclass),
   "app_id" int8,
@@ -151,11 +193,9 @@ create index "inx_time" on "public"."t_flame_graph" using btree (
 -- ----------------------------
 -- table structure for t_flink_app
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_flink_app_id_seq";
 create sequence "public"."streamx_t_flink_app_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_flink_app";
 create table "public"."t_flink_app" (
   "id" int8 not null default nextval('streamx_t_flink_app_id_seq'::regclass),
   "job_type" int2,
@@ -232,11 +272,9 @@ create index "inx_track" on "public"."t_flink_app" using btree (
 -- ----------------------------
 -- table structure for t_flink_cluster
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_flink_cluster_id_seq";
 create sequence "public"."streamx_t_flink_cluster_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_flink_cluster";
 create table "public"."t_flink_cluster" (
   "id" int8 not null default nextval('streamx_t_flink_cluster_id_seq'::regclass),
   "address" varchar(255) collate "pg_catalog"."default",
@@ -265,7 +303,7 @@ create table "public"."t_flink_cluster" (
 comment on column "public"."t_flink_cluster"."address" is 'url address of jobmanager';
 comment on column "public"."t_flink_cluster"."cluster_id" is 'clusterid of session mode(yarn-session:application-id,k8s-session:cluster-id)';
 comment on column "public"."t_flink_cluster"."cluster_name" is 'cluster name';
-comment on column "public"."t_flink_cluster"."options" is 'json form of parameter collection ';
+comment on column "public"."t_flink_cluster"."options" is 'parameter collection json form';
 comment on column "public"."t_flink_cluster"."yarn_queue" is 'the yarn queue where the task is located';
 comment on column "public"."t_flink_cluster"."execution_mode" is 'k8s execution session mode(1:remote,3:yarn-session,5:kubernetes-session)';
 comment on column "public"."t_flink_cluster"."version_id" is 'flink version id';
@@ -274,10 +312,10 @@ comment on column "public"."t_flink_cluster"."service_account" is 'k8s service a
 comment on column "public"."t_flink_cluster"."flink_image" is 'flink image';
 comment on column "public"."t_flink_cluster"."dynamic_options" is 'dynamic parameters';
 comment on column "public"."t_flink_cluster"."k8s_rest_exposed_type" is 'k8s export(0:loadbalancer,1:clusterip,2:nodeport)';
-comment on column "public"."t_flink_cluster"."flame_graph" is 'whether to enable the flame graph, default is false';
+comment on column "public"."t_flink_cluster"."flame_graph" is 'enable the flame graph';
 comment on column "public"."t_flink_cluster"."k8s_conf" is 'the path where the k 8 s configuration file is located';
 comment on column "public"."t_flink_cluster"."exception" is 'exception information';
-comment on column "public"."t_flink_cluster"."cluster_state" is 'cluster status (0: created but not started, 1: started, 2: stopped)';
+comment on column "public"."t_flink_cluster"."cluster_state" is 'cluster status (0: create not started, 1: started, 2: stopped)';
 alter table "public"."t_flink_cluster" add constraint "t_flink_cluster_pkey" primary key ("id", "cluster_name");
 create index "id" on "public"."t_flink_cluster" using btree (
   "cluster_id" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last,
@@ -289,11 +327,9 @@ create index "id" on "public"."t_flink_cluster" using btree (
 -- ----------------------------
 -- table structure for t_flink_config
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_flink_config_id_seq";
 create sequence "public"."streamx_t_flink_config_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_flink_config";
 create table "public"."t_flink_config" (
   "id" int8 not null default nextval('streamx_t_flink_config_id_seq'::regclass),
   "app_id" int8 not null,
@@ -310,11 +346,9 @@ alter table "public"."t_flink_config" add constraint "t_flink_config_pkey" prima
 -- ----------------------------
 -- table structure for t_flink_effective
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_flink_effective_id_seq";
 create sequence "public"."streamx_t_flink_effective_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_flink_effective";
 create table "public"."t_flink_effective" (
   "id" int8 not null default nextval('streamx_t_flink_effective_id_seq'::regclass),
   "app_id" int8 not null,
@@ -335,11 +369,9 @@ create index "un_effective_inx" on "public"."t_flink_effective" using btree (
 -- ----------------------------
 -- table structure for t_flink_env
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_flink_env_id_seq";
 create sequence "public"."streamx_t_flink_env_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_flink_env";
 create table "public"."t_flink_env" (
   "id" int8 not null default nextval('streamx_t_flink_env_id_seq'::regclass),
   "flink_name" varchar(128) collate "pg_catalog"."default" not null,
@@ -355,10 +387,10 @@ create table "public"."t_flink_env" (
 comment on column "public"."t_flink_env"."id" is 'id';
 comment on column "public"."t_flink_env"."flink_name" is 'flink instance name';
 comment on column "public"."t_flink_env"."flink_home" is 'flink home path';
-comment on column "public"."t_flink_env"."version" is 'flink version';
-comment on column "public"."t_flink_env"."scala_version" is 'scala version of flink';
-comment on column "public"."t_flink_env"."flink_conf" is 'flink-conf';
-comment on column "public"."t_flink_env"."is_default" is 'whether default version or not';
+comment on column "public"."t_flink_env"."version" is 'the version number corresponding to flink';
+comment on column "public"."t_flink_env"."scala_version" is 'the scala version number corresponding to flink';
+comment on column "public"."t_flink_env"."flink_conf" is 'flink conf configuration content';
+comment on column "public"."t_flink_env"."is_default" is 'is it the default version';
 comment on column "public"."t_flink_env"."description" is 'description';
 comment on column "public"."t_flink_env"."create_time" is 'create time';
 alter table "public"."t_flink_env" add constraint "t_flink_env_pkey" primary key ("id");
@@ -370,11 +402,9 @@ create index "un_env_name" on "public"."t_flink_env" using btree (
 -- ----------------------------
 -- table structure for t_flink_log
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_flink_log_id_seq";
 create sequence "public"."streamx_t_flink_log_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_flink_log";
 create table "public"."t_flink_log" (
   "id" int8 not null default nextval('streamx_t_flink_log_id_seq'::regclass),
   "app_id" int8,
@@ -390,11 +420,9 @@ alter table "public"."t_flink_log" add constraint "t_flink_log_pkey" primary key
 -- ----------------------------
 -- table structure for t_flink_project
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_flink_project_id_seq";
 create sequence "public"."streamx_t_flink_project_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_flink_project";
 create table "public"."t_flink_project" (
   "id" int8 not null default nextval('streamx_t_flink_project_id_seq'::regclass),
   "name" varchar(255) collate "pg_catalog"."default",
@@ -421,11 +449,9 @@ alter table "public"."t_flink_project" add constraint "t_flink_project_pkey" pri
 -- ----------------------------
 -- table structure for t_flink_savepoint
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_flink_savepoint_id_seq";
 create sequence "public"."streamx_t_flink_savepoint_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_flink_savepoint";
 create table "public"."t_flink_savepoint" (
   "id" int8 not null default nextval('streamx_t_flink_savepoint_id_seq'::regclass),
   "app_id" int8 not null,
@@ -443,11 +469,9 @@ alter table "public"."t_flink_savepoint" add constraint "t_flink_savepoint_pkey"
 -- ----------------------------
 -- table structure for t_flink_sql
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_flink_sql_id_seq";
 create sequence "public"."streamx_t_flink_sql_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_flink_sql";
 create table "public"."t_flink_sql" (
   "id" int8 not null default nextval('streamx_t_flink_sql_id_seq'::regclass),
   "app_id" int8,
@@ -464,7 +488,7 @@ alter table "public"."t_flink_sql" add constraint "t_flink_sql_pkey" primary key
 -- ----------------------------
 -- table structure for t_flink_tutorial
 -- ----------------------------
-drop table if exists "public"."t_flink_tutorial";
+
 create table "public"."t_flink_tutorial" (
   "id" int4 not null,
   "type" int2,
@@ -479,11 +503,9 @@ alter table "public"."t_flink_tutorial" add constraint "t_flink_tutorial_pkey" p
 -- ----------------------------
 -- table structure for t_menu
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_menu_id_seq";
 create sequence "public"."streamx_t_menu_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_menu";
 create table "public"."t_menu" (
   "menu_id" int8 not null default nextval('streamx_t_menu_id_seq'::regclass),
   "parent_id" int8 not null,
@@ -493,7 +515,7 @@ create table "public"."t_menu" (
   "perms" varchar(50) collate "pg_catalog"."default",
   "icon" varchar(50) collate "pg_catalog"."default",
   "type" int2,
-  "display" boolean default true,
+  "display" boolean,
   "order_num" float8,
   "create_time" timestamp(6) not null,
   "modify_time" timestamp(6)
@@ -509,7 +531,7 @@ comment on column "public"."t_menu"."icon" is 'icon';
 comment on column "public"."t_menu"."type" is 'type 0:menu 1:button';
 comment on column "public"."t_menu"."display" is 'menu is displayed';
 comment on column "public"."t_menu"."order_num" is 'sort';
-comment on column "public"."t_menu"."create_time" is 'create time';
+comment on column "public"."t_menu"."create_time" is 'creation time';
 comment on column "public"."t_menu"."modify_time" is 'modify time';
 alter table "public"."t_menu" add constraint "t_menu_pkey" primary key ("menu_id");
 
@@ -517,11 +539,9 @@ alter table "public"."t_menu" add constraint "t_menu_pkey" primary key ("menu_id
 -- ----------------------------
 -- table structure for t_message
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_message_id_seq";
 create sequence "public"."streamx_t_message_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_message";
 create table "public"."t_message" (
   "id" int8 not null default nextval('streamx_t_message_id_seq'::regclass),
   "app_id" int8,
@@ -529,7 +549,7 @@ create table "public"."t_message" (
   "type" int2,
   "title" varchar(255) collate "pg_catalog"."default",
   "context" text collate "pg_catalog"."default",
-  "readed" boolean,
+  "read" boolean,
   "create_time" timestamp(6)
 )
 ;
@@ -541,11 +561,9 @@ create index "inx_mes_user" on "public"."t_message" using btree (
 -- ----------------------------
 -- table structure for t_role
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_role_id_seq";
 create sequence "public"."streamx_t_role_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_role";
 create table "public"."t_role" (
   "role_id" int8 not null default nextval('streamx_t_role_id_seq'::regclass),
   "role_name" varchar(50) collate "pg_catalog"."default" not null,
@@ -558,7 +576,7 @@ create table "public"."t_role" (
 comment on column "public"."t_role"."role_id" is 'role id';
 comment on column "public"."t_role"."role_name" is 'role name';
 comment on column "public"."t_role"."remark" is 'role description';
-comment on column "public"."t_role"."create_time" is 'create time';
+comment on column "public"."t_role"."create_time" is 'creation time';
 comment on column "public"."t_role"."modify_time" is 'modify time';
 comment on column "public"."t_role"."role_code" is 'role code';
 alter table "public"."t_role" add constraint "t_role_pkey" primary key ("role_id");
@@ -567,13 +585,11 @@ alter table "public"."t_role" add constraint "t_role_pkey" primary key ("role_id
 -- ----------------------------
 -- table structure for t_role_menu
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_role_menu_seq";
-create sequence "public"."streamx_t_role_menu_seq"
+create sequence "public"."streamx_t_role_menu_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_role_menu";
 create table "public"."t_role_menu" (
-  "id" int8 not null default nextval('streamx_t_role_menu_seq'::regclass),
+  "id" int8 not null default nextval('streamx_t_role_menu_id_seq'::regclass),
   "role_id" int8 not null,
   "menu_id" int8 not null
 )
@@ -588,7 +604,6 @@ create index "un_role_menu_inx" on "public"."t_role_menu" using btree (
 -- ----------------------------
 -- table structure for t_setting
 -- ----------------------------
-drop table if exists "public"."t_setting";
 create table "public"."t_setting" (
   "order_num" int4,
   "setting_key" varchar(50) collate "pg_catalog"."default" not null,
@@ -605,7 +620,6 @@ alter table "public"."t_setting" add constraint "t_setting_pkey" primary key ("s
 -- ----------------------------
 -- table structure for t_team
 -- ----------------------------
-drop table if exists "public"."t_team";
 create table "public"."t_team" (
   "team_id" int8 not null,
   "team_code" varchar(255) collate "pg_catalog"."default" not null,
@@ -614,9 +628,9 @@ create table "public"."t_team" (
 )
 ;
 comment on column "public"."t_team"."team_id" is 'id';
-comment on column "public"."t_team"."team_code" is 'team ID, which could be used for queue and resource isolation';
+comment on column "public"."t_team"."team_code" is 'team ID can be used for queues later Resource isolation related';
 comment on column "public"."t_team"."team_name" is 'team name';
-comment on column "public"."t_team"."create_time" is 'create time';
+comment on column "public"."t_team"."create_time" is 'creation time';
 alter table "public"."t_team" add constraint "t_team_pkey" primary key ("team_id");
 create index "team_code" on "public"."t_team" using btree (
   "team_code" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
@@ -626,7 +640,6 @@ create index "team_code" on "public"."t_team" using btree (
 -- ----------------------------
 -- table structure for t_team_user
 -- ----------------------------
-drop table if exists "public"."t_team_user";
 create table "public"."t_team_user" (
   "team_id" int8 not null,
   "user_id" int8 not null,
@@ -635,7 +648,7 @@ create table "public"."t_team_user" (
 ;
 comment on column "public"."t_team_user"."team_id" is 'teamid';
 comment on column "public"."t_team_user"."user_id" is 'userid';
-comment on column "public"."t_team_user"."create_time" is 'create time';
+comment on column "public"."t_team_user"."create_time" is 'creation time';
 create index "group_user" on "public"."t_team_user" using btree (
   "team_id" "pg_catalog"."int8_ops" asc nulls last,
   "user_id" "pg_catalog"."int8_ops" asc nulls last
@@ -644,13 +657,11 @@ create index "group_user" on "public"."t_team_user" using btree (
 -- ----------------------------
 -- table structure for t_user
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_user_seq";
-create sequence "public"."streamx_t_user_seq"
+create sequence "public"."streamx_t_user_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_user";
 create table "public"."t_user" (
-  "user_id" int8 not null default nextval('streamx_t_user_seq'::regclass),
+  "user_id" int8 not null default nextval('streamx_t_user_id_seq'::regclass),
   "username" varchar(255) collate "pg_catalog"."default",
   "nick_name" varchar(50) collate "pg_catalog"."default" not null,
   "salt" varchar(255) collate "pg_catalog"."default",
@@ -672,7 +683,7 @@ comment on column "public"."t_user"."salt" is 'salt';
 comment on column "public"."t_user"."password" is 'password';
 comment on column "public"."t_user"."email" is 'email';
 comment on column "public"."t_user"."status" is 'status 0:locked 1:active';
-comment on column "public"."t_user"."create_time" is 'create time';
+comment on column "public"."t_user"."create_time" is 'creation time';
 comment on column "public"."t_user"."modify_time" is 'change time';
 comment on column "public"."t_user"."last_login_time" is 'last login time';
 comment on column "public"."t_user"."sex" is 'gender 0:male 1:female 2:confidential';
@@ -687,13 +698,11 @@ create index "un_username" on "public"."t_user" using btree (
 -- ----------------------------
 -- table structure for t_user_role
 -- ----------------------------
-drop sequence if exists "public"."streamx_t_user_role_seq";
-create sequence "public"."streamx_t_user_role_seq"
+create sequence "public"."streamx_t_user_role_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-drop table if exists "public"."t_user_role";
 create table "public"."t_user_role" (
-  "id" int8 not null default nextval('streamx_t_user_role_seq'::regclass),
+  "id" int8 not null default nextval('streamx_t_user_role_id_seq'::regclass),
   "user_id" int8,
   "role_id" int8
 )

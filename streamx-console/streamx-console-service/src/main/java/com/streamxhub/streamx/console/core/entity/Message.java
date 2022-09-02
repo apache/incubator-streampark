@@ -46,7 +46,7 @@ public class Message {
 
     private String context;
 
-    private Integer readed;
+    private Boolean read;
 
     private Date createTime;
 
@@ -60,7 +60,7 @@ public class Message {
         this.context = context;
         this.type = noticeType.get();
         this.createTime = new Date();
-        this.readed = 0;
+        this.read = false;
     }
 
 }
