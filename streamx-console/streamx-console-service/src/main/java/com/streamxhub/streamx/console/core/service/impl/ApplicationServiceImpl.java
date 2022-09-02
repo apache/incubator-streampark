@@ -96,6 +96,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -1351,11 +1352,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     IngressController.configureIngress(ingressOutput);
                 }
                 if (StringUtils.isNotBlank(domainName)) {
-                    IngressController.configureIngress(domainName, application.getClusterId(), application.getK8sNamespace());
+                    try {
+                        IngressController.configureIngress(domainName, application.getClusterId(), application.getK8sNamespace());
+                    } catch (KubernetesClientException e) {
+                        log.info("Failed to create ingress, stack info:{}", e.getMessage());
+                        applicationLog.setException(e.getMessage());
+                        applicationLog.setSuccess(false);
+                        applicationLogService.save(applicationLog);
+                        application.setState(FlinkAppState.FAILED.getValue());
+                        application.setOptionState(OptionState.NONE.getValue());
+                        updateById(application);
+                        return;
+                    }
                 }
             }
         }
-
         SubmitRequest submitRequest = new SubmitRequest(
             flinkEnv.getFlinkVersion(),
             flinkEnv.getFlinkConf(),
