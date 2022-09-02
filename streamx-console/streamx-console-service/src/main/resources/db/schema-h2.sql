@@ -258,7 +258,7 @@ create table if not exists `t_message` (
   `type` tinyint default null,
   `title` varchar(255)  default null,
   `context` text ,
-  `read` tinyint default 0,
+  `is_read` tinyint default 0,
   `create_time` datetime default null,
   primary key(`id`)
 );

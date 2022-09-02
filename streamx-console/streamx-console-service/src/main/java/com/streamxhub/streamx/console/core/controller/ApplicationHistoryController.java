@@ -51,7 +51,6 @@ public class ApplicationHistoryController {
     @Autowired
     private ApplicationHistoryService applicationHistoryService;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private ApplicationMapper applicationMapper;
 

@@ -289,7 +289,7 @@ create table `t_message` (
   `type` tinyint default null,
   `title` varchar(255) collate utf8mb4_general_ci default null,
   `context` text collate utf8mb4_general_ci,
-  `read` tinyint default 0,
+  `is_read` tinyint default 0,
   `create_time` datetime default null,
   primary key (`id`) using btree,
   key `inx_mes_user` (`user_id`) using btree

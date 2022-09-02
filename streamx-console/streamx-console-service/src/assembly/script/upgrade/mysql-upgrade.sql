@@ -163,8 +163,8 @@ add column `modify_time` datetime null after `create_time`;
 alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime default null;
 
 
--- change `readed` to `read`
-alter table `t_message` change column `readed` `read` tinyint default 0;
+-- change `readed` to `is_read`
+alter table `t_message` change column `readed` `is_read` tinyint default 0;
 
 
 -- add chk_id field
