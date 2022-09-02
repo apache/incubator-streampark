@@ -549,7 +549,7 @@ create table "public"."t_message" (
   "type" int2,
   "title" varchar(255) collate "pg_catalog"."default",
   "context" text collate "pg_catalog"."default",
-  "read" boolean,
+  "is_read" boolean,
   "create_time" timestamp(6)
 )
 ;
