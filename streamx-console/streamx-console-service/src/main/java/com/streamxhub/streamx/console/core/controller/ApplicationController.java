@@ -98,9 +98,6 @@ public class ApplicationController {
     @PostMapping("create")
     @RequiresPermissions("app:create")
     public RestResponse create(Application app) throws IOException {
-        if (app.getTeamId() == null || app.getTeamId() <= 0L) {
-            return RestResponse.success(false).message("请选择团队");
-        }
         boolean saved = applicationService.create(app);
         return RestResponse.success(saved);
     }

@@ -43,7 +43,6 @@
         label="Role"
         v-bind="formItemLayout">
         <a-select
-          @change="handleRoleEdit"
           mode="multiple"
           :allow-clear="true"
           style="width: 100%"
@@ -55,25 +54,6 @@
             v-for="r in roleData"
             :key="r.roleId.toString()">
             {{ r.roleName }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-      <a-form-item
-        v-if="!roles.includes('100000')"
-        label="Team"
-        v-bind="formItemLayout">
-        <a-select
-          mode="multiple"
-          :allow-clear="true"
-          style="width: 100%"
-          v-decorator="[
-            'teamId',
-            {rules: [{ required: true, message: 'please select team' }]}
-          ]">
-          <a-select-option
-            v-for="t in teamData"
-            :key="t.teamId.toString()">
-            {{ t.teamName }}
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -136,8 +116,7 @@
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex'
-import { listByUser as getRole } from '@/api/role'
-import { listByUser as getUserTeam } from '@/api/team'
+import { list as getRole } from '@/api/role'
 import { update, get } from '@/api/user'
 
 const formItemLayout = {
@@ -161,10 +140,8 @@ export default {
         { 'value': 2, 'name': '外部用户' }
       ],
       roleData: [],
-      teamData: [],
       userId: '',
-      loading: false,
-      roles:[]
+      loading: false
     }
   },
 
@@ -178,11 +155,13 @@ export default {
     ...mapMutations({
       setUser: 'account/setUser'
     }),
+
     onClose () {
       this.loading = false
       this.form.resetFields()
       this.$emit('close')
     },
+
     setFormValues ({ ...user }) {
       this.userId = user.userId
       this.userType = user.userType
@@ -195,30 +174,20 @@ export default {
           this.form.setFieldsValue(obj)
         }
       })
+
       if (user.roleId) {
         this.form.getFieldDecorator('roleId')
-        const roleArr = user.roleId.split(',')
-        this.roles = roleArr
-        this.form.setFieldsValue({ 'roleId': roleArr })
-      }
-      if (user.teamId) {
-        this.form.getFieldDecorator('teamId')
-        const teamArr = user.teamId.split(',')
-        this.form.setFieldsValue({ 'teamId': teamArr })
+        const roles = user.roleId.split(',')
+        this.form.setFieldsValue({ 'roleId': roles })
       }
     },
-    handleRoleEdit(v) {
-      this.roles=v
-    },
+
     handleSubmit () {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true
           const user = this.form.getFieldsValue()
           user.roleId = user.roleId.join(',')
-          if (user != undefined && user.teamId != undefined) {
-            user.teamId = user.teamId.join(',')
-          }
           user.userId = this.userId
           update(user).then((r) => {
             if (r.status === 'success') {
@@ -248,11 +217,6 @@ export default {
         getRole({ 'pageSize': '9999' }).then((resp) => {
           this.roleData = resp.data.records
         })
-
-        getUserTeam({ 'pageSize': '9999' }).then((resp) => {
-          this.teamData = resp.data.records
-        })
-
       }
     }
   }

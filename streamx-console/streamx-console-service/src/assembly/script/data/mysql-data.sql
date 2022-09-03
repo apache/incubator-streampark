@@ -21,7 +21,7 @@ set foreign_key_checks = 0;
 -- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
-insert into `t_flink_app` values (100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, 0, 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, 0, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, 0, null, null, null,1);
+insert into `t_flink_app` values (100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, 0, 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, 0, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, 0, null, null, null);
 
 -- ----------------------------
 -- Records of t_flink_effective
@@ -31,7 +31,7 @@ insert into `t_flink_effective` values (100000, 100000, 2, 100000, now());
 -- ----------------------------
 -- Records of t_flink_project
 -- ----------------------------
-insert into `t_flink_project` values (100000, 'streamx-quickstart', 'https://github.com/streamxhub/streamx-quickstart.git', 'main', null, null, null, null, 1, 1, null, 'streamx-quickstart', 1, 1, now(), null);
+insert into `t_flink_project` values (100000, 'streamx-quickstart', 'https://github.com/streamxhub/streamx-quickstart.git', 'main', null, null, null, null, 1, 1, null, 'streamx-quickstart', 1, now(), null);
 
 -- ----------------------------
 -- Records of t_flink_sql
@@ -89,11 +89,7 @@ insert into `t_menu` values (100039, 100038, 'add', null, null, 'token:add', nul
 insert into `t_menu` values (100040, 100038, 'delete', null, null, 'token:delete', null, 1, 1, null, now(), null);
 insert into `t_menu` values (100041, 100013, 'Add Cluster', '/flink/setting/add_cluster', 'flink/setting/AddCluster', 'cluster:create', '', 0, 0, null, now(), now());
 insert into `t_menu` values (100042, 100013, 'Edit Cluster', '/flink/setting/edit_cluster', 'flink/setting/EditCluster', 'cluster:update', '', 0, 0, null, now(), now());
-insert into `t_menu` values (100043, 100000, 'Team Management', '/system/team', 'system/team/Team', 'team:view', 'team', 0, 1, 1, now(), null);
-insert into `t_menu` values (100044, 100043, 'add', null, null, 'team:add', null, 1, 1, null, now(), null);
-insert into `t_menu` values (100045, 100043, 'update', null, null, 'team:update', null, 1, 1, null, now(), null);
-insert into `t_menu` values (100046, 100043, 'delete', null, null, 'team:delete', null, 1, 1, null, now(), null);
-insert into `t_menu` values (100047, 100015, 'copy', null, null, 'app:copy', null, 1, 1, null, now(), null);
+insert into `t_menu` values (100043, 100015, 'copy', null, null, 'app:copy', null, 1, 1, null, now(), null);
 
 -- ----------------------------
 -- Records of t_role
@@ -167,10 +163,6 @@ insert into `t_role_menu` values (100059, 100001, 100015);
 insert into `t_role_menu` values (100060, 100000, 100041);
 insert into `t_role_menu` values (100061, 100000, 100042);
 insert into `t_role_menu` values (100062, 100000, 100043);
-insert into `t_role_menu` values (100063, 100000, 100044);
-insert into `t_role_menu` values (100064, 100000, 100045);
-insert into `t_role_menu` values (100065, 100000, 100046);
-insert into `t_role_menu` values (100066, 100000, 100047);
 
 -- ----------------------------
 -- Records of t_setting
@@ -199,9 +191,5 @@ insert into `t_user` values (100000, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', 
 -- Records of t_user_role
 -- ----------------------------
 insert into `t_user_role` values (100000, 100000, 100000);
-
--- Records of t_team
--- ----------------------------
-insert into t_team values (1,'bigdata','BIGDATA',now());
 
 set foreign_key_checks = 1;

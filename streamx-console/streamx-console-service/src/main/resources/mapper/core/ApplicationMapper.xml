@@ -24,7 +24,6 @@
         <result column="main_class" jdbcType="VARCHAR" property="mainClass"/>
         <result column="job_id" jdbcType="VARCHAR" property="jobId"/>
         <result column="user_id" jdbcType="BIGINT" property="userId"/>
-        <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="start_time" jdbcType="DATE" property="startTime"/>
         <result column="end_time" jdbcType="DATE" property="endTime"/>
         <result column="duration" jdbcType="BIGINT" property="duration"/>
@@ -66,8 +65,7 @@
                    then u.username
                    else u.nick_name
                    end as nickname,
-               v.version as flinkVersion,
-               f.team_name as teamName
+               v.version as flinkVersion
         from t_flink_app t
         inner join t_user u
         on t.user_id = u.user_id
@@ -75,8 +73,6 @@
         on t.version_id = v.id
         left join t_flink_project p
         on t.project_id = p.id
-        left join t_team f
-        on t.team_id = f.team_id
         <where>
             <if test="application.jobType != null and application.jobType != ''">
                 and t.job_type = #{application.jobType}
@@ -106,20 +102,9 @@
             <if test="application.userId != null and application.userId != ''">
                 and t.user_id = #{application.userId}
             </if>
-
-            <if test="application.teamId != null and application.teamId != ''">
-                and t.team_id = #{application.teamId}
-            </if>
             <if test="application.stateArray != null and application.stateArray.length>0">
                 and t.state in
                 <foreach item="item" index="index" collection="application.stateArray" open="("  close=")" separator=",">
-                    #{item}
-                </foreach>
-            </if>
-
-            <if test="application.teamIdList != null and application.teamIdList.size>0">
-                and t.team_id in
-                <foreach item="item" index="index" collection="application.teamIdList" open="("  close=")" separator=",">
                     #{item}
                 </foreach>
             </if>
@@ -131,10 +116,6 @@
         from t_flink_app t left join t_flink_project p
         on t.project_id = p.id
         where t.id = #{application.id}
-    </select>
-    <select id="getCountByTeam" resultType="java.lang.Long">
-        select count(1) as count
-        from t_flink_app where team_id=#{teamId}
     </select>
 
     <update id="updateTracking" parameterType="application">
@@ -180,7 +161,7 @@
                 jm_memory=#{application.jmMemory},
             </if>
             <if test="application.tmMemory != null">
-                tm_memory=#{application.tmMemory},
+                tm_memory=#{application.tmMemory}
             </if>
         </set>
         where id=#{application.id}

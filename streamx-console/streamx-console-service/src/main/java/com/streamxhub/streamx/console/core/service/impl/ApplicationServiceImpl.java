@@ -74,7 +74,6 @@ import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
-import com.streamxhub.streamx.console.system.service.TeamUserService;
 import com.streamxhub.streamx.flink.core.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.IngressController;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrackMonitor;
@@ -201,9 +200,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private FlinkClusterService flinkClusterService;
-
-    @Autowired
-    private TeamUserService teamUserService;
 
     @PostConstruct
     public void resetOptionState() {
@@ -452,11 +448,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return false;
     }
 
-    @Override
-    public Long getCountByTeam(Long teamId) {
-        return baseMapper.getCountByTeam(teamId);
-    }
-
     private void removeApp(Application application) {
         Long appId = application.getId();
         removeById(appId);
@@ -474,8 +465,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
-        List<Long> teamList = teamUserService.getTeamIdList();
-        appParam.setTeamIdList(teamList);
         Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
         if (CommonUtils.notEmpty(appParam.getStateArray())) {
             if (Arrays.stream(appParam.getStateArray()).anyMatch(x -> x == FlinkAppState.FINISHED.getValue())) {
@@ -488,7 +477,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
         this.baseMapper.page(page, appParam);
-        //瞒天过海,暗度陈仓,偷天换日,鱼目混珠.
         List<Application> records = page.getRecords();
         long now = System.currentTimeMillis();
         List<Application> newRecords = records.stream().map(record -> {
@@ -508,7 +496,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             app.setFlinkVersion(record.getFlinkVersion());
             app.setProjectName(record.getProjectName());
-            app.setTeamName(record.getTeamName());
             return app;
         }).collect(Collectors.toList());
         page.setRecords(newRecords);
@@ -643,7 +630,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setFlinkClusterId(oldApp.getFlinkClusterId());
         newApp.setRestartSize(oldApp.getRestartSize());
         newApp.setJobType(oldApp.getJobType());
-        newApp.setTeamId(oldApp.getTeamId());
         newApp.setOptions(oldApp.getOptions());
         newApp.setDynamicOptions(oldApp.getDynamicOptions());
         newApp.setResolveOrder(oldApp.getResolveOrder());

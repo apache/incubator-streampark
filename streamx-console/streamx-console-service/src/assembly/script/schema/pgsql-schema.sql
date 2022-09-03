@@ -20,8 +20,6 @@
 
 drop table if exists "public"."t_user";
 drop table if exists "public"."t_user_role";
-drop table if exists "public"."t_team";
-drop table if exists "public"."t_team_user";
 drop table if exists "public"."t_setting";
 drop table if exists "public"."t_role";
 drop table if exists "public"."t_role_menu";
@@ -253,11 +251,9 @@ create table "public"."t_flink_app" (
   "k8s_hadoop_integration" boolean,
   "flink_cluster_id" int8,
   "ingress_template" text collate "pg_catalog"."default",
-  "default_mode_ingress" text collate "pg_catalog"."default",
-  "team_id" int8 not null
+  "default_mode_ingress" text collate "pg_catalog"."default"
 )
 ;
-comment on column "public"."t_flink_app"."team_id" is 'task group';
 alter table "public"."t_flink_app" add constraint "t_flink_app_pkey" primary key ("id");
 create index "inx_job_type" on "public"."t_flink_app" using btree (
   "job_type" "pg_catalog"."int2_ops" asc nulls last
@@ -437,12 +433,10 @@ create table "public"."t_flink_project" (
   "last_build" timestamp(6),
   "description" varchar(255) collate "pg_catalog"."default",
   "build_state" int2,
-  "team_id" int8 not null,
   "create_time" timestamp(6),
   "modify_time" timestamp(6) null
 )
 ;
-comment on column "public"."t_flink_project"."team_id" is 'project group';
 alter table "public"."t_flink_project" add constraint "t_flink_project_pkey" primary key ("id");
 
 
@@ -615,44 +609,6 @@ create table "public"."t_setting" (
 ;
 comment on column "public"."t_setting"."type" is '1: input 2: boolean 3: number';
 alter table "public"."t_setting" add constraint "t_setting_pkey" primary key ("setting_key");
-
-
--- ----------------------------
--- table structure for t_team
--- ----------------------------
-create table "public"."t_team" (
-  "team_id" int8 not null,
-  "team_code" varchar(255) collate "pg_catalog"."default" not null,
-  "team_name" varchar(255) collate "pg_catalog"."default" not null,
-  "create_time" timestamp(6) not null
-)
-;
-comment on column "public"."t_team"."team_id" is 'id';
-comment on column "public"."t_team"."team_code" is 'team ID can be used for queues later Resource isolation related';
-comment on column "public"."t_team"."team_name" is 'team name';
-comment on column "public"."t_team"."create_time" is 'creation time';
-alter table "public"."t_team" add constraint "t_team_pkey" primary key ("team_id");
-create index "team_code" on "public"."t_team" using btree (
-  "team_code" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
-);
-
-
--- ----------------------------
--- table structure for t_team_user
--- ----------------------------
-create table "public"."t_team_user" (
-  "team_id" int8 not null,
-  "user_id" int8 not null,
-  "create_time" timestamp(6) not null
-)
-;
-comment on column "public"."t_team_user"."team_id" is 'teamid';
-comment on column "public"."t_team_user"."user_id" is 'userid';
-comment on column "public"."t_team_user"."create_time" is 'creation time';
-create index "group_user" on "public"."t_team_user" using btree (
-  "team_id" "pg_catalog"."int8_ops" asc nulls last,
-  "user_id" "pg_catalog"."int8_ops" asc nulls last
-);
 
 -- ----------------------------
 -- table structure for t_user

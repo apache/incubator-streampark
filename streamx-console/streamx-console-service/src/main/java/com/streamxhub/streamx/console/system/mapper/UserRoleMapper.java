@@ -21,8 +21,6 @@ import com.streamxhub.streamx.console.system.entity.UserRole;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
-
 public interface UserRoleMapper extends BaseMapper<UserRole> {
 
     /**
@@ -45,5 +43,4 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
      */
     Boolean deleteByRoleId(@Param("roleId") Long roleId);
 
-    List<Long> selectRoleIdList(@Param("userId") Long userId);
 }

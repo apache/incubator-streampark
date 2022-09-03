@@ -22,8 +22,6 @@ import com.streamxhub.streamx.console.core.service.FlinkEnvService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -89,13 +87,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> i
 
     @Override
     public void setDefault(Long id) {
-        LambdaUpdateWrapper<FlinkEnv> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.ne(FlinkEnv::getId, id).set(FlinkEnv::getIsDefault, false);
-        this.update(updateWrapper);
-
-        updateWrapper.clear();
-        updateWrapper.eq(FlinkEnv::getId, id).set(FlinkEnv::getIsDefault, true);
-        this.update(updateWrapper);
+        this.baseMapper.setDefault(id);
     }
 
     @Override

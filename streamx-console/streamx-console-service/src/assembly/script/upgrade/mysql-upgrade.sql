@@ -126,36 +126,8 @@ alter table `t_flink_app` add column `ingress_template` text collate utf8mb4_gen
 alter table `t_flink_app` add column `default_mode_ingress` text collate utf8mb4_general_ci comment '配置ingress的域名';
 alter table `t_flink_app` add column `modify_time` datetime not null default current_timestamp on update current_timestamp after create_time;
 
-
--- team
-drop table if exists `t_team`;
-create table `t_team` (
-    `team_id` bigint       not null auto_increment comment 'id',
-    `team_code` varchar(255) not null comment 'team ID, which could be used for queue and resource isolation',
-    `team_name` varchar(255) not null comment 'team name',
-    `create_time` datetime     not null comment 'create time',
-    primary key (`team_id`) using btree,
-    unique key `team_code` (team_code) using btree
-) engine=innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
-
-insert into t_team values (1,'bigdata','BIGDATA', now());
-
--- correspondence between groups and users
-drop table if exists `t_team_user`;
-create table `t_team_user` (
-    `team_id` bigint not null,
-    `user_id` bigint not null,
-    `create_time` datetime not null,
-    unique key `group_user` (`team_id`,`user_id`) using btree
-) engine=innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
-
-
--- add fields to app and project
-alter table `t_flink_app` add column `team_id` bigint not null default 1 comment 'team id';
-alter table `t_flink_project` add column `team_id` bigint not null default 1 comment 'team id';
-
 alter table `t_flink_project`
-change column `date` `create_time` datetime default null after `team_id`,
+change column `date` `create_time` datetime default null,
 add column `modify_time` datetime null after `create_time`;
 
 
@@ -171,10 +143,6 @@ alter table `t_message` change column `readed` `is_read` tinyint default 0;
 alter table t_flink_savepoint add column `chk_id` bigint after `app_id`;
 
 -- add permissions for user group management
-insert into `t_menu` values (100043, 100000, 'Team Management', '/system/team', 'system/team/Team', 'team:view', 'team', '0', '1', 1, now(), null);
-insert into `t_menu` values (100044, 100043, 'add', null, null, 'team:add', null, '1', '1', null, now(), null);
-insert into `t_menu` values (100045, 100043, 'update', null, null, 'team:update', null, '1', '1', null, now(), null);
-insert into `t_menu` values (100046, 100043, 'delete', null, null, 'team:delete', null, '1', '1', null, now(), null);
 insert into `t_menu` values (100047, 100015, 'copy', null, null, 'app:copy', null, '1', '1', null, now(), null);
 
 

@@ -61,12 +61,6 @@ public class RoleController {
         return RestResponse.success(roleList);
     }
 
-    @PostMapping("listByUser")
-    public RestResponse listByUser() {
-        IPage<Role> roleList = roleService.findRolesByUser();
-        return RestResponse.success(roleList);
-    }
-
     @PostMapping("check/name")
     public RestResponse checkRoleName(@NotBlank(message = "{required}") String roleName) {
         Role result = this.roleService.findByName(roleName);

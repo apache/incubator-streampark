@@ -24,7 +24,6 @@ import com.streamxhub.streamx.flink.kubernetes.model._
 import com.streamxhub.streamx.flink.kubernetes.watcher.{FlinkCheckpointWatcher, FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
 import javax.annotation.Nullable
-import scala.util.Try
 
 /**
  * Default K8sFlinkTrackMonitor implementation.
