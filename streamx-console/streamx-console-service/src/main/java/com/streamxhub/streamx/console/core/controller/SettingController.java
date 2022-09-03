@@ -60,7 +60,7 @@ public class SettingController {
     }
 
     @PostMapping("weburl")
-    public RestResponse weburl() {
+    public RestResponse webUrl() {
         String url = settingService.getStreamXAddress();
         return RestResponse.success(url == null ? null : url.trim());
     }

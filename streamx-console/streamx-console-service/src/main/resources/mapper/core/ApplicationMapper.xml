@@ -65,7 +65,7 @@
                    then u.username
                    else u.nick_name
                    end as nickname,
-               v.version as flinkVersion,
+               v.version as flinkVersion
         from t_flink_app t
         inner join t_user u
         on t.user_id = u.user_id
@@ -161,7 +161,7 @@
                 jm_memory=#{application.jmMemory},
             </if>
             <if test="application.tmMemory != null">
-                tm_memory=#{application.tmMemory},
+                tm_memory=#{application.tmMemory}
             </if>
         </set>
         where id=#{application.id}

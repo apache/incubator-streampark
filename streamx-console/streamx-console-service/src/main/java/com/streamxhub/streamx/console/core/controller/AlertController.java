@@ -57,9 +57,10 @@ public class AlertController {
 
     @Autowired
     private AlertService alertService;
+
     @PostMapping(value = "add")
-    public RestResponse addAlertConf(@RequestBody AlertConfigWithParams params) throws Exception {
-        log.info("接收到告警配置：{}", params);
+    public RestResponse addAlertConf(@RequestBody AlertConfigWithParams params) {
+        log.info("received alert config：{}", params);
         AlertConfig alertConfig = AlertConfig.of(params);
         boolean save = alertConfigService.save(alertConfig);
         return RestResponse.success(save);
