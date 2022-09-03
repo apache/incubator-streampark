@@ -287,7 +287,14 @@
           <span
             class="link"
             :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
-            @click="handleView(record)">{{ record.jobName }}
+            @click="handleView(record)">
+            <a-tooltip>
+              {{ record.jobName }}
+              <template
+                slot="title">
+                {{ record.description }}
+              </template>
+            </a-tooltip>
           </span>
 
           <template v-if="record['jobType'] === 1">
@@ -1066,7 +1073,6 @@ import {
   checkSavepointPath,
   dashboard,
   copy,
-  downLog,
   forcedStop,
   list,
   mapping,
