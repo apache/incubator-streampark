@@ -163,7 +163,7 @@ public class ApplicationController {
 
     @PostMapping("revoke")
     @RequiresPermissions("app:launch")
-    public RestResponse revoke(Application app) throws Exception {
+    public RestResponse revoke(Application app) {
         applicationService.revoke(app);
         return RestResponse.success();
     }

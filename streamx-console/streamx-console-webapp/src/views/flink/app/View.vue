@@ -422,17 +422,6 @@
             </a-button>
           </a-tooltip>
 
-          <a-tooltip title="Copy Application">
-            <a-button
-              v-permit="'app:copy'"
-              @click.native="handleCopy(record)"
-              shape="circle"
-              size="small"
-              class="control-button ctl-btn-color">
-              <a-icon type="copy"/>
-            </a-button>
-          </a-tooltip>
-
           <a-tooltip title="See Flink Start log">
             <a-button
               v-if="record.executionMode === 5 || record.executionMode === 6"
@@ -443,47 +432,6 @@
               <a-icon type="sync"/>
             </a-button>
           </a-tooltip>
-
-          <a-tooltip title="View FlameGraph">
-            <a-button
-              v-if="record.flameGraph"
-              v-permit="'app:flameGraph'"
-              @click.native="handleFlameGraph(record)"
-              shape="circle"
-              size="small"
-              class="control-button ctl-btn-color">
-              <a-icon type="fire"/>
-            </a-button>
-          </a-tooltip>
-
-          <a-tooltip title="Remapping Application">
-            <a-button
-              v-if="handleCanRemapping(record)"
-              v-permit="'app:mapping'"
-              @click.native="handleMapping(record)"
-              shape="circle"
-              size="small"
-              class="control-button ctl-btn-color">
-              <a-icon type="deployment-unit"/>
-            </a-button>
-          </a-tooltip>
-
-          <template v-if="handleCanDelete(record)">
-            <a-popconfirm
-              title="Are you sure delete this job ?"
-              cancel-text="No"
-              ok-text="Yes"
-              v-permit="'app:delete'"
-              @confirm="handleDelete(record)">
-              <a-button
-                type="danger"
-                shape="circle"
-                size="small"
-                class="control-button">
-                <a-icon type="delete"/>
-              </a-button>
-            </a-popconfirm>
-          </template>
 
           <a-tooltip title="Forced Stop Application">
             <a-button
@@ -498,8 +446,73 @@
             </a-button>
           </a-tooltip>
 
+          <a-popover trigger="click" placement="bottomRight">
+            <template #content>
+              <p>
+                <a-tooltip title="Copy Application">
+                  <a-button
+                    v-permit="'app:copy'"
+                    @click.native="handleCopy(record)"
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="copy"/>
+                  </a-button>
+                </a-tooltip>
+              </p>
+              <p>
+                <a-tooltip title="Remapping Application">
+                  <a-button
+                    v-if="handleCanRemapping(record)"
+                    v-permit="'app:mapping'"
+                    @click.native="handleMapping(record)"
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="deployment-unit"/>
+                  </a-button>
+                </a-tooltip>
+              </p>
+              <p>
+                <a-tooltip title="View FlameGraph">
+                  <a-button
+                    v-if="record.flameGraph"
+                    v-permit="'app:flameGraph'"
+                    @click.native="handleFlameGraph(record)"
+                    shape="circle"
+                    size="small"
+                    class="control-button ctl-btn-color">
+                    <a-icon type="fire"/>
+                  </a-button>
+                </a-tooltip>
+              </p>
+              <p>
+                <template v-if="handleCanDelete(record)">
+                  <a-popconfirm
+                    title="Are you sure delete this job ?"
+                    cancel-text="No"
+                    ok-text="Yes"
+                    v-permit="'app:delete'"
+                    @confirm="handleDelete(record)">
+                    <a-button
+                      type="danger"
+                      shape="circle"
+                      size="small"
+                      class="control-button">
+                      <a-icon type="delete"/>
+                    </a-button>
+                  </a-popconfirm>
+                </template>
+              </p>
+            </template>
+            <a-button
+              shape="circle"
+              size="small"
+              class="control-button">
+              <a-icon type="ellipsis"/>
+            </a-button>
+          </a-popover>
         </template>
-
       </a-table>
 
       <!-- app building progress detail-->
@@ -1246,7 +1259,7 @@ export default {
         fixed: 'right',
         scopedSlots: {customRender: 'operation'},
         slots: {title: 'customOperation'},
-        width: 200
+        width: 190
       }]
     }
   },

@@ -50,7 +50,6 @@ import java.util.Optional;
 @Validated
 @RestController
 @RequestMapping("flink/pipe")
-@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class ApplicationBuildPipelineController {
 
     @Autowired
