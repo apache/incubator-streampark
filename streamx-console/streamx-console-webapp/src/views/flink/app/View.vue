@@ -219,9 +219,6 @@
 
       <div slot="extra">
         <a-input-group compact>
-          <a-select placeholder="Team" allowClear @change="handleChangeTeam" style="width: 140px">
-            <a-select-option v-for="t in teamData" :key="t.teamId"> {{ t.teamName }} </a-select-option>
-          </a-select>
           <a-select placeholder="User" allowClear @change="handleChangeUser" style="margin-left: 16px;width: 120px">
             <a-select-option v-for="u in users" :key="u.userId">
               <span v-if="u.nickName"> {{ u.nickName }} </span>
@@ -1087,10 +1084,7 @@ import {build, detail as buildDetail} from '@/api/appBuild'
 import {activeURL} from '@/api/flinkCluster'
 import {Terminal} from 'xterm'
 import 'xterm/css/xterm.css'
-import {baseUrl} from '@/api/baseUrl'
 import SvgIcon from '@/components/SvgIcon'
-import storage from '@/utils/storage'
-import {listByUser as getUserTeam} from '@/api/team'
 import {list as listUser} from '@/api/user'
 
 export default {
@@ -1112,13 +1106,11 @@ export default {
           running: 0
         }
       },
-      teamData: [],
-      users: [],
       expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
       jobType: null,
-      teamId: null,
       userId: null,
+      users: [],
       sortedInfo: null,
       filteredInfo: null,
       queryInterval: 2000,
@@ -1256,12 +1248,6 @@ export default {
     listUser({'pageSize': '9999'}).then((resp) => {
       this.users = resp.data.records
     })
-
-    getUserTeam(
-      {'pageSize': '9999'}
-    ).then((resp) => {
-      this.teamData = resp.data.records
-    })
     this.handleFetch(true)
     const timer = window.setInterval(() => {
       this.handleDashboard()
@@ -1312,10 +1298,7 @@ export default {
       this.jobType = jobType
       this.handleSearch()
     },
-    handleChangeTeam(team) {
-      this.teamId = team
-      this.handleSearch()
-    },
+
     handleChangeUser(user) {
       this.userId = user
       this.handleSearch()
@@ -1934,7 +1917,6 @@ export default {
       }
       this.queryParams['jobName'] = this.searchText
       this.queryParams['jobType'] = this.jobType
-      this.queryParams['teamId'] = this.teamId
       this.queryParams['userId'] = this.userId
       this.handleFetch(false)
     },

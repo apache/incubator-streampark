@@ -26,7 +26,6 @@ import javax.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 @Data
 @TableName("t_role")
@@ -59,6 +58,4 @@ public class Role implements Serializable {
     private transient String createTimeFrom;
     private transient String createTimeTo;
     private transient String menuId;
-
-    private transient List<Long> roleIdList;
 }

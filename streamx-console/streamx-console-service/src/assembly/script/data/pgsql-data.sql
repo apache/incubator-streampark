@@ -17,7 +17,7 @@
 -- ----------------------------
 -- records of t_flink_app
 -- ----------------------------
-insert into "public"."t_flink_app" values (100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, 0, 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, false, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, false, null, null, null,1);
+insert into "public"."t_flink_app" values (100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, 0, 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, false, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, false, null, null, null);
 
 -- ----------------------------
 -- records of t_flink_effective
@@ -27,7 +27,7 @@ insert into "public"."t_flink_effective" values (100000, 100000, 2, 100000, now(
 -- ----------------------------
 -- records of t_flink_project
 -- ----------------------------
-insert into "public"."t_flink_project" values (100000, 'streamx-quickstart', 'https://github.com/streamxhub/streamx-quickstart.git', 'main', null, null, null, null, 1, 1, null, 'streamx-quickstart', 1, 1, now(), null);
+insert into "public"."t_flink_project" values (100000, 'streamx-quickstart', 'https://github.com/streamxhub/streamx-quickstart.git', 'main', null, null, null, null, 1, 1, null, 'streamx-quickstart', 1, now(), null);
 
 
 -- ----------------------------
@@ -81,11 +81,7 @@ insert into "public"."t_menu" values (100039, 100038, 'add', null, null, 'token:
 insert into "public"."t_menu" values (100040, 100038, 'delete', null, null, 'token:delete', null, 1, true, null, now(), null);
 insert into "public"."t_menu" values (100041, 100013, 'Add Cluster', '/flink/setting/add_cluster', 'flink/setting/AddCluster', 'cluster:create', '', 0, false, null, now(), now());
 insert into "public"."t_menu" values (100042, 100013, 'Edit Cluster', '/flink/setting/edit_cluster', 'flink/setting/EditCluster', 'cluster:update', '', 0, false, null, now(), now());
-insert into "public"."t_menu" values (100043, 100000, 'Team Management', '/system/team', 'system/team/Team', 'team:view', 'team', 0, true, 1, now(), null);
-insert into "public"."t_menu" values (100044, 100043, 'add', null, null, 'team:add', null, 1, true, null, now(), null);
-insert into "public"."t_menu" values (100045, 100043, 'update', null, null, 'team:update', null, 1, true, null, now(), null);
-insert into "public"."t_menu" values (100046, 100043, 'delete', null, null, 'team:delete', null, 1, true, null, now(), null);
-insert into "public"."t_menu" values (100047, 100015, 'copy', null, null, 'app:copy', null, 1, true, null, now(), null);
+insert into "public"."t_menu" values (100043, 100015, 'copy', null, null, 'app:copy', null, 1, true, null, now(), null);
 
 
 -- ----------------------------
@@ -138,16 +134,7 @@ insert into "public"."t_role_menu" values (100037, 100000, 100037);
 insert into "public"."t_role_menu" values (100038, 100000, 100038);
 insert into "public"."t_role_menu" values (100039, 100000, 100039);
 insert into "public"."t_role_menu" values (100040, 100000, 100040);
-insert into "public"."t_role_menu" values (100060, 100000, 100041);
-insert into "public"."t_role_menu" values (100061, 100000, 100042);
-insert into "public"."t_role_menu" values (100062, 100000, 100043);
-insert into "public"."t_role_menu" values (100063, 100000, 100044);
-insert into "public"."t_role_menu" values (100064, 100000, 100045);
-insert into "public"."t_role_menu" values (100065, 100000, 100046);
-insert into "public"."t_role_menu" values (100066, 100000, 100047);
-insert into "public"."t_role_menu" values (100058, 100001, 100013);
 insert into "public"."t_role_menu" values (100041, 100001, 100014);
-insert into "public"."t_role_menu" values (100059, 100001, 100015);
 insert into "public"."t_role_menu" values (100042, 100001, 100016);
 insert into "public"."t_role_menu" values (100043, 100001, 100017);
 insert into "public"."t_role_menu" values (100044, 100001, 100018);
@@ -164,6 +151,11 @@ insert into "public"."t_role_menu" values (100054, 100001, 100030);
 insert into "public"."t_role_menu" values (100055, 100001, 100031);
 insert into "public"."t_role_menu" values (100056, 100001, 100032);
 insert into "public"."t_role_menu" values (100057, 100001, 100033);
+insert into "public"."t_role_menu" values (100058, 100001, 100013);
+insert into "public"."t_role_menu" values (100059, 100001, 100015);
+insert into "public"."t_role_menu" values (100060, 100000, 100041);
+insert into "public"."t_role_menu" values (100061, 100000, 100042);
+insert into "public"."t_role_menu" values (100062, 100000, 100043);
 
 -- ----------------------------
 -- Records of t_setting
@@ -183,11 +175,6 @@ insert into "public"."t_setting" values (12, 'docker.register.user', null, 'Dock
 insert into "public"."t_setting" values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker容器服务认证密码', 1);
 insert into "public"."t_setting" values (14, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker命名空间', 1);
 
-
--- ----------------------------
--- records of t_team
--- ----------------------------
-insert into "public"."t_team" values (1, 'bigdata', 'BIGDATA', now());
 
 -- ----------------------------
 -- records of t_user

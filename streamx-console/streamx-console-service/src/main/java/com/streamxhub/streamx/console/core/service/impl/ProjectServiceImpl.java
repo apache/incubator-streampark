@@ -33,7 +33,6 @@ import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.console.core.websocket.WebSocketEndpoint;
-import com.streamxhub.streamx.console.system.service.TeamUserService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -84,9 +83,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Autowired
     private ApplicationService applicationService;
 
-    @Autowired
-    private TeamUserService groupUserService;
-
     private final ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
         200,
@@ -99,14 +95,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public RestResponse create(Project project) {
-        RestResponse response = RestResponse.success();
-        if (project.getTeamId() == null) {
-            return response.message("请选择团队").data(false);
-        }
         QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(Project::getName, project.getName());
-        queryWrapper.eq(true, "team_id", project.getTeamId());
         long count = count(queryWrapper);
+        RestResponse response = RestResponse.success();
         if (count == 0) {
             project.setCreateTime(new Date());
             boolean status = save(project);
@@ -127,7 +119,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             Project project = getById(projectParam.getId());
             assert project != null;
             project.setName(projectParam.getName());
-            project.setModifyTime(new Date());
             project.setUrl(projectParam.getUrl());
             project.setBranches(projectParam.getBranches());
             project.setUserName(projectParam.getUserName());
@@ -177,8 +168,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public IPage<Project> page(Project project, RestRequest request) {
-        List<Long> groupIdList = groupUserService.getTeamIdList();
-        project.setTeamIdList(groupIdList);
         Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
         return this.baseMapper.page(page, project);
     }
@@ -348,14 +337,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             }
         }
         LambdaQueryWrapper<Project> wrapper = new QueryWrapper<Project>().lambda()
-            .eq(Project::getName, project.getName())
-            .eq(Project::getTeamId, project.getTeamId());
+            .eq(Project::getName, project.getName());
         return this.baseMapper.selectCount(wrapper) > 0;
-    }
-
-    @Override
-    public Long getCountByTeam(Long teamId) {
-        return baseMapper.selectCount(new LambdaQueryWrapper<Project>().eq(Project::getTeamId, teamId));
     }
 
     @Override
@@ -510,10 +493,4 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         tailBeginning.remove(id);
     }
 
-    @Override
-    public List<Project> listByTeam(Long teamId) {
-        QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("team_id", teamId);
-        return list(queryWrapper);
-    }
 }

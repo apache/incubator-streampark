@@ -96,5 +96,4 @@ public interface ApplicationService extends IService<Application> {
 
     void forcedStop(Application app);
 
-    Long getCountByTeam(Long teamId);
 }

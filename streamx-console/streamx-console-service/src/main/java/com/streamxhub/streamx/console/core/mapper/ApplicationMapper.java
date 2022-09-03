@@ -85,5 +85,4 @@ public interface ApplicationMapper extends BaseMapper<Application> {
             "limit #{limitSize}")
     List<String> getRecentK8sTmPodTemplate(@Param("limitSize") int limit);
 
-    Long getCountByTeam(@Param("teamId") Long teamId);
 }

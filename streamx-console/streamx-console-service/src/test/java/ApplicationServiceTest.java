@@ -44,7 +44,6 @@ public class ApplicationServiceTest {
         app.setId(100001L);
         app.setJobType(1);
         app.setUserId(100000L);
-        app.setTeamId(1L);
         app.setJobName("socket-test");
         app.setVersionId(1L);
         app.setK8sNamespace("default");

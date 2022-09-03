@@ -112,7 +112,6 @@ create table `t_flink_app` (
   `flink_cluster_id` bigint default null,
   `ingress_template` text collate utf8mb4_general_ci,
   `default_mode_ingress` text collate utf8mb4_general_ci,
-  `team_id` bigint not null default 1,
   primary key (`id`) using btree,
   key `inx_state` (`state`) using btree,
   key `inx_job_type` (`job_type`) using btree,
@@ -203,7 +202,6 @@ create table `t_flink_project` (
   `last_build` datetime default null,
   `description` varchar(255) collate utf8mb4_general_ci default null,
   `build_state` tinyint default -1,
-  `team_id` bigint not null default 1,
   `create_time` datetime default null,
   `modify_time` datetime default null,
   primary key (`id`) using btree
@@ -462,32 +460,6 @@ create table `t_alert_config` (
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'change time',
   index `inx_alert_user` (`user_id`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
-
-
--- ----------------------------
--- Table of t_team
--- ----------------------------
-drop table if exists `t_team`;
-create table `t_team`(
-  `team_id` bigint not null auto_increment comment 'id',
-  `team_code` varchar(255) not null comment 'team ID, which could be used for queue and resource isolation',
-  `team_name` varchar(255) not null comment 'team name',
-  `create_time` datetime not null comment 'create time',
-  primary key (`team_id`) using btree,
-  unique key `team_code` (team_code) using btree
-) engine=innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
-
-
--- ----------------------------
--- Table of t_team_user
--- ----------------------------
-drop table if exists `t_team_user`;
-create table `t_team_user`(
-  `team_id` bigint not null,
-  `user_id` bigint not null,
-  `create_time` datetime not null,
-  unique key `group_user` (`team_id`,`user_id`) using btree
-) engine=innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 set foreign_key_checks = 1;
 

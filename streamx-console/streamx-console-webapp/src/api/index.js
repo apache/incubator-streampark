@@ -190,16 +190,6 @@ export default {
     DELETE: '/role/delete',
     MENU: '/role/menu'
   },
-  Team: {
-    POST: '/team/post',
-    UPDATE: '/team/update',
-    LIST: '/team/list',
-    LIST_BY_USER:'/team/listByUser',
-    CHECK_NAME: '/team/check/name',
-    CHECK_CODE: '/team/check/code',
-    DELETE: '/team/delete',
-    MENU: '/team/menu'
-  },
   Menu: {
     LIST: '/menu/list',
     DELETE: '/menu/delete',

@@ -22,6 +22,7 @@ import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * @author benjobs
@@ -49,9 +49,6 @@ public class ProjectController {
     @PostMapping("create")
     @RequiresPermissions("project:create")
     public RestResponse create(Project project) {
-        if (project.getTeamId() == null || project.getTeamId() <= 0L) {
-            return RestResponse.success().message("请选择项目团队").data(false);
-        }
         return projectService.create(project);
     }
 
@@ -59,12 +56,12 @@ public class ProjectController {
     @RequiresPermissions("project:update")
     public RestResponse update(Project project) {
         boolean update = projectService.update(project);
-        return RestResponse.success(update);
+        return RestResponse.success().data(update);
     }
 
     @PostMapping("get")
     public RestResponse get(Long id) {
-        return RestResponse.success(projectService.getById(id));
+        return RestResponse.success().data(projectService.getById(id));
     }
 
     @PostMapping("build")
@@ -91,54 +88,55 @@ public class ProjectController {
     @PostMapping("list")
     @RequiresPermissions("project:view")
     public RestResponse list(Project project, RestRequest restRequest) {
-        return RestResponse.success(projectService.page(project, restRequest));
+        IPage<Project> page = projectService.page(project, restRequest);
+        return RestResponse.success().data(page);
     }
 
     @PostMapping("branches")
     public RestResponse branches(Project project) {
         List<String> branches = project.getAllBranches();
-        return RestResponse.success(branches);
+        return RestResponse.success().data(branches);
     }
 
     @PostMapping("delete")
     @RequiresPermissions("project:delete")
     public RestResponse delete(Long id) {
         Boolean deleted = projectService.delete(id);
-        return RestResponse.success(deleted);
+        return RestResponse.success().data(deleted);
     }
 
     @PostMapping("gitcheck")
     public RestResponse gitCheck(Project project) {
         GitAuthorizedError error = project.gitCheck();
-        return RestResponse.success(error.getType());
+        return RestResponse.success().data(error.getType());
     }
 
     @PostMapping("exists")
     public RestResponse exists(Project project) {
         boolean exists = projectService.checkExists(project);
-        return RestResponse.success(exists);
+        return RestResponse.success().data(exists);
     }
 
     @PostMapping("modules")
     public RestResponse modules(Long id) {
         List<String> result = projectService.modules(id);
-        return RestResponse.success(result);
+        return RestResponse.success().data(result);
     }
 
     @PostMapping("jars")
     public RestResponse jars(Project project) {
         List<String> result = projectService.jars(project);
-        return RestResponse.success(result);
+        return RestResponse.success().data(result);
     }
 
     @PostMapping("listconf")
     public RestResponse listConf(Project project) {
         List<Map<String, Object>> list = projectService.listConf(project);
-        return RestResponse.success(list);
+        return RestResponse.success().data(list);
     }
 
     @PostMapping("select")
-    public RestResponse select(Long teamId) {
-        return RestResponse.success(projectService.listByTeam(teamId));
+    public RestResponse select() {
+        return RestResponse.success().data(projectService.list());
     }
 }
