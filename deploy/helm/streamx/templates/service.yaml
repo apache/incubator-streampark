@@ -22,7 +22,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   selector:
-    {{ include "streamx.selectorLabels" . | indent 4}}
+    {{ include "streampark.selectorLabels" . | indent 4}}
   ports:
     - name: {{ .Values.spec.name }}
       port: {{ .Values.spec.containerPort }}

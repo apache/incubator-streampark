@@ -14,48 +14,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-{{- if .Values.streamxDefaultConfiguration.create }}
+{{- if .Values.streamParkDefaultConfiguration.create }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: streamx-console-config
+  name: streampark-console-config
   namespace: {{ .Release.Namespace }}
   labels:
-  {{- include "streamx.labels" . | nindent 4 }}
+  {{- include "streampark.labels" . | nindent 4 }}
 data:
   application.yml: |+
-{{- if .Values.streamxDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streamx-console-config/application.yml"  | nindent 4 -}}
+{{- if .Values.streamParkDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streampark-console-config/application.yml"  | nindent 4 -}}
 {{- end }}
-{{- if index (.Values.streamxDefaultConfiguration) "application.yml" }}
-    {{- index (.Values.streamxDefaultConfiguration) "application.yml" | nindent 4 -}}
+{{- if index (.Values.streamParkDefaultConfiguration) "application.yml" }}
+    {{- index (.Values.streamParkDefaultConfiguration) "application.yml" | nindent 4 -}}
 {{- end }}
   logback-spring.xml: |+
-{{- if .Values.streamxDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streamx-console-config/logback-spring.xml"  | nindent 4 -}}
+{{- if .Values.streamParkDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streampark-console-config/logback-spring.xml"  | nindent 4 -}}
 {{- end }}
-{{- if index (.Values.streamxDefaultConfiguration) "logback-spring.xml" }}
-    {{- index (.Values.streamxDefaultConfiguration) "logback-spring.xml" | nindent 4 -}}
+{{- if index (.Values.streamParkDefaultConfiguration) "logback-spring.xml" }}
+    {{- index (.Values.streamParkDefaultConfiguration) "logback-spring.xml" | nindent 4 -}}
 {{- end }}
   kerberos.yml: |+
-{{- if .Values.streamxDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streamx-console-config/kerberos.yml"  | nindent 4 -}}
+{{- if .Values.streamParkDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streampark-console-config/kerberos.yml"  | nindent 4 -}}
 {{- end }}
-{{- if index (.Values.streamxDefaultConfiguration) "kerberos.yml" }}
-    {{- index (.Values.streamxDefaultConfiguration) "kerberos.yml" | nindent 4 -}}
+{{- if index (.Values.streamParkDefaultConfiguration) "kerberos.yml" }}
+    {{- index (.Values.streamParkDefaultConfiguration) "kerberos.yml" | nindent 4 -}}
 {{- end }}
   spy.properties: |+
-{{- if .Values.streamxDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streamx-console-config/spy.properties"  | nindent 4 -}}
+{{- if .Values.streamParkDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streampark-console-config/spy.properties"  | nindent 4 -}}
 {{- end }}
-{{- if index (.Values.streamxDefaultConfiguration) "spy.properties" }}
-    {{- index (.Values.streamxDefaultConfiguration) "spy.properties" | nindent 4 -}}
+{{- if index (.Values.streamParkDefaultConfiguration) "spy.properties" }}
+    {{- index (.Values.streamParkDefaultConfiguration) "spy.properties" | nindent 4 -}}
 {{- end }}
   ValidationMessages.properties: |+
-{{- if .Values.streamxDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streamx-console-config/ValidationMessages.properties"  | nindent 4 -}}
+{{- if .Values.streamParkDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/streampark-console-config/ValidationMessages.properties"  | nindent 4 -}}
 {{- end }}
-{{- if index (.Values.streamxDefaultConfiguration) "ValidationMessages.properties" }}
-    {{- index (.Values.streamxDefaultConfiguration) "ValidationMessages.properties" | nindent 4 -}}
+{{- if index (.Values.streamParkDefaultConfiguration) "ValidationMessages.properties" }}
+    {{- index (.Values.streamParkDefaultConfiguration) "ValidationMessages.properties" | nindent 4 -}}
 {{- end }}
 {{- end }}

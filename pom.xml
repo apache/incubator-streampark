@@ -1,64 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.streamxhub.streamx</groupId>
-    <artifactId>streamx</artifactId>
-    <version>1.2.4</version>
+    <parent>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>25</version>
+    </parent>
+
+    <groupId>org.apache.streampark</groupId>
+    <artifactId>streampark</artifactId>
     <packaging>pom</packaging>
-    <name>StreamX Parent</name>
-    <description>A magical framework that make stream processing easier</description>
+    <version>${reversion}</version>
 
-    <modules>
-        <module>streamx-common</module>
-        <module>streamx-flink</module>
-        <module>streamx-plugin</module>
-        <module>streamx-console</module>
-        <module>streamx-storage</module>
-    </modules>
-    <url>https://github.com/streamxhub/streamx</url>
+    <name>StreamPark</name>
 
-    <scm>
-        <url>https://github.com/streamxhub/streamx</url>
-        <connection>git@github.com:streamxhub/streamx.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:streamxhub/streamx.git</developerConnection>
-    </scm>
+    <description>
+        A magical framework that make stream processing easier
+    </description>
 
-    <developers>
-        <developer>
-            <name>StreamX</name>
-            <id>StreamX</id>
-            <email>benjobs@apache.org</email>
-            <roles>
-                <role>Developer</role>
-            </roles>
-            <timezone>+8</timezone>
-        </developer>
-    </developers>
+    <url>https://github.com/apache/incubator-streampark</url>
 
     <licenses>
         <license>
-            <name>The Apache Software License, Version 2.0</name>
+            <name>The Apache License, Version 2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
         </license>
     </licenses>
 
-    <distributionManagement>
+    <scm>
+        <connection>scm:git:https://github.com/apache/incubator-streampark.git</connection>
+        <developerConnection>scm:git:https://github.com/apache/incubator-streampark.git</developerConnection>
+        <url>https://github.com/apache/incubator-streampark</url>
+        <tag>HEAD</tag>
+    </scm>
 
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/apache/incubator-streampark/issues</url>
+    </issueManagement>
 
-        <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
+    <mailingLists>
+        <mailingList>
+            <name>StreamPark Developer List</name>
+            <post>dev@streampark.apache.org</post>
+            <subscribe>dev-subscribe@streampark.apache.org</subscribe>
+            <unsubscribe>dev-unsubscribe@streampark.apache.org</unsubscribe>
+        </mailingList>
+        <mailingList>
+            <name>StreamPark Commits List</name>
+            <post>commits@streampark.apache.org</post>
+            <subscribe>commits-subscribe@streampark.apache.org</subscribe>
+            <unsubscribe>commits-unsubscribe@streampark.apache.org</unsubscribe>
+        </mailingList>
+    </mailingLists>
 
-    </distributionManagement>
+    <modules>
+        <module>streampark-common</module>
+        <module>streampark-flink</module>
+        <module>streampark-plugin</module>
+        <module>streampark-console</module>
+        <module>streampark-storage</module>
+    </modules>
 
     <properties>
+        <reversion>1.2.4</reversion>
         <project.build.jdk>1.8</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -70,7 +75,7 @@
         <scala.binary.flink.version>_${scala.binary.version}</scala.binary.flink.version>
 
         <flink.version>1.14.0</flink.version>
-        <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
+        <streampark.flink.shims.version>1.14</streampark.flink.shims.version>
         <spark.version>3.2.0</spark.version>
         <scalikejdbc.version>4.0.0</scalikejdbc.version>
         <hive.version>2.3.4</hive.version>
@@ -102,7 +107,7 @@
         <checkstyle.fails.on.error>true</checkstyle.fails.on.error>
         <scalastyle.fails.on.error>true</scalastyle.fails.on.error>
         <scalastyle-maven-plugin.version>1.0.0</scalastyle-maven-plugin.version>
-        <streamx.shaded.package>com.streamxhub.streamx.shaded</streamx.shaded.package>
+        <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
         <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
         <httpclient.version>4.5.13</httpclient.version>
 
@@ -830,7 +835,7 @@
         <profile>
             <id>flink-1.15</id>
             <properties>
-                <streamx.flink.shims.version>1.15</streamx.flink.shims.version>
+                <streampark.flink.shims.version>1.15</streampark.flink.shims.version>
                 <flink.version>1.15.0</flink.version>
                 <scala.binary.flink.version/>
                 <flink.table.uber.artifact.id>flink-table-api-java-uber</flink.table.uber.artifact.id>
@@ -858,7 +863,7 @@
                 </property>
             </activation>
             <modules>
-                <module>streamx-spark</module>
+                <module>streampark-spark</module>
             </modules>
         </profile>
 
