@@ -125,7 +125,7 @@
   </a-drawer>
 </template>
 <script>
-import { listByUser as getRole } from '@/api/role'
+import { list as getRole } from '@/api/role'
 import { checkUserName, post } from '@/api/user'
 
 const formItemLayout = {
@@ -157,7 +157,7 @@ export default {
       this.loading = false
       this.form.resetFields()
     },
-    
+
     onClose () {
       this.reset()
       this.$emit('close')
