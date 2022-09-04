@@ -1,12 +1,9 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-# update streamx project version, requires python-3.8+
+# update StreamPark project version, requires python-3.8+
 # use case: python3 update_ver.py <expect_ver> <project_path>
 # example: python3 update_ver.py 1.2.1
-
-# @author : Al-assad
-# @date   : 2021/11/17
 
 import sys
 import os
@@ -39,7 +36,7 @@ for pom in poms:
     tree = ET.parse(pom, parser=ET.XMLParser(target=ET.TreeBuilder(insert_comments=True)))
     root = tree.getroot()
     group_id = root.find(ns + 'groupId')
-    if group_id is not None and group_id.text != 'com.streamxhub.streamx':
+    if group_id is not None and group_id.text != 'org.apache.streampark':
         continue
     version_id = root.find(ns + 'version')
     if version_id is not None:
@@ -47,7 +44,7 @@ for pom in poms:
         version_id.text = expect_ver
     parent = root.find(ns + 'parent')
     if parent is not None:
-        if parent.find(ns + 'groupId').text == 'com.streamxhub.streamx':
+        if parent.find(ns + 'groupId').text == 'org.apache.streampark':
             parent_version = parent.find(ns + 'version')
             if parent_version is not None:
                 parent_version.text = expect_ver
@@ -61,7 +58,7 @@ for pom in poms:
     print('update version in {} to {}'.format(pom, expect_ver))
 
 # update version in print log content
-config_const_file = os_path(project_path, 'streamx-common/src/main/scala/com/streamxhub/streamx/common/conf/ConfigConst.scala')
+config_const_file = os_path(project_path, 'streampark-common/src/main/scala/org/apache/streampark/common/conf/ConfigConst.scala')
 f_content = []
 with open(config_const_file, 'r') as f:
     f_content = f.readlines()

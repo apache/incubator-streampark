@@ -15,20 +15,20 @@
 # limitations under the License.
 #
 
-** Please be patient while the chart Streamx {{ .Chart.AppVersion }} is being deployed **
+** Please be patient while the chart StreamPark {{ .Chart.AppVersion }} is being deployed **
 
-Access streamx UI URL by:
+Access StreamPark UI URL by:
 
 ChartVersion:{{ .Chart.Version}}[refers to the release version]
 appVersion:{{ .Chart.Version }}[refers to the code version]
 
 {{- if .Values.ingress.enabled }}
 
-  streamx UI URL: https://{{ .Values.ingress.host }}/streamx
+  StreamPark UI URL: https://{{ .Values.ingress.host }}/streampark
 
 {{- else if eq .Values.service.type "NodePort" }}
 
-You can try the following command to get the ip, port of streamx:
+You can try the following command to get the ip, port of StreamPark:
 kubectl get no -n {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}"
 kubectl get svc {{ .Values.service.name }} -n {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}"
 

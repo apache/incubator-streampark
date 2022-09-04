@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.streampark</groupId>
+        <artifactId>streampark-spark</artifactId>
+        <version>${reversion}</version>
+    </parent>
+
+    <artifactId>streampark-spark-connector_2.12</artifactId>
+
+    <name>StreamPark : Spark Connector</name>
+    <packaging>pom</packaging>
+
+    <properties>
+        <clickhouse.version>0.3.2</clickhouse.version>
+        <async.client.version>2.12.3</async.client.version>
+        <influxdb.version>2.17</influxdb.version>
+        <kafka.version>3.2.1</kafka.version>
+    </properties>
+
+    <modules>
+        <module>streampark-spark-connector-base</module>
+        <module>streampark-spark-connector-kafka</module>
+    </modules>
+</project>

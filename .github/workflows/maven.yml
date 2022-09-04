@@ -8,13 +8,13 @@ on:
       - '**.md'
       - 'deploy/**'
       - 'script/**'
-      - 'streamx-console/streamx-console-webapp/**'
+      - 'streampark-console/streampark-console-webapp/**'
   pull_request:
     paths-ignore:
       - '**.md'
       - 'deploy/**'
       - 'script/**'
-      - 'streamx-console/streamx-console-webapp/**'
+      - 'streampark-console/streampark-console-webapp/**'
 
 jobs:
   build:
@@ -30,7 +30,7 @@ jobs:
       - name: Build with Maven
         run: mvn -B clean package -T 4 -DskipTests
       - name: Test with Maven
-        run: mvn -B test -pl '!streamx-plugin/streamx-jvm-profiler,!streamx-console/streamx-console-service' -am
+        run: mvn -B test -pl '!streampark-plugin/streampark-jvm-profiler,!streampark-console/streampark-console-service' -am
 #      - name: Setup Go
 #        uses: actions/setup-go@v3
 #        with:
@@ -39,4 +39,3 @@ jobs:
 #        run: |
 #          go install github.com/apache/skywalking-eyes/cmd/license-eye@47febf5
 #          license-eye dependency resolve --summary ./dist-material/release-docs/LICENSE.tpl
-          

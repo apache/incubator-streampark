@@ -1,5 +1,4 @@
 ###############################################################################
-#  Copyright (c) 2019 The StreamX Project
 #  Licensed to the Apache Software Foundation (ASF) under one or more
 #  contributor license agreements.  See the NOTICE file distributed with
 #  this work for additional information regarding copyright ownership.
@@ -7,7 +6,7 @@
 #  (the "License"); you may not use this file except in compliance with
 #  the License.  You may obtain a copy of the License at
 #
-#  https://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +16,7 @@
 ###############################################################################
 version: '3.8'
 services:
-  streamx-server:
+  streampark-server:
     build:
       context: ../..
       dockerfile: deploy/docker/compose/Dockerfile
@@ -28,7 +27,7 @@ services:
     depends_on:
       - database
     volumes:
-      - flink1.14.5:/streamx/flink/flink1.14.5
+      - flink1.14.5:/  streampark/flink/flink1.14.5
     restart: unless-stopped
 
   database:
@@ -43,8 +42,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: streamx
-      MYSQL_USER: streamx
+      MYSQL_DATABASE: streampark
+      MYSQL_USER: streampark
       MYSQL_PASSWORD: 123456
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"-uroot","-p123456","ping", "-h", "localhost" ]
