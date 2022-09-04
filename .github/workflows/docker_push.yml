@@ -1,5 +1,4 @@
 ###############################################################################
-#  Copyright (c) 2019 The StreamX Project
 #  Licensed to the Apache Software Foundation (ASF) under one or more
 #  contributor license agreements.  See the NOTICE file distributed with
 #  this work for additional information regarding copyright ownership.
@@ -7,7 +6,7 @@
 #  (the "License"); you may not use this file except in compliance with
 #  the License.  You may obtain a copy of the License at
 #
-#  https://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,9 +45,9 @@ jobs:
 
       - name: init
         run: |
-          sed -i -e 's/eval $NOHUP/eval/' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
-          sed -i -e 's/StreamXConsole \\/StreamXConsole/' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
-          sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' streamx-console/streamx-console-service/src/assembly/bin/streamx.sh
+          sed -i -e 's/eval $NOHUP/eval/' streampark-console/streampark-console-service/src/assembly/bin/streampark.sh
+          sed -i -e 's/StreamParkConsoleBootstrap \\/StreamParkConsoleBootstrap/' streampark-console/streampark-console-service/src/assembly/bin/streampark.sh
+          sed -i -e 's/>> "$APP_OUT" 2>&1 "&"//' streampark-console/streampark-console-service/src/assembly/bin/streampark.sh
 
       - name: Mixed front-end and back-end packaging
         run: |
@@ -64,7 +63,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: streamxhub/streamx-console
+          images: streamxhub/streampark-console
 
       - name: Build and push streamx
         uses: docker/build-push-action@v3

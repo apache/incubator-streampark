@@ -18,9 +18,9 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: {{ include "streamx.name" . }}
+  name: {{ include "streampark.name" . }}
   labels:
-  {{- include "streamx.labels" . | nindent 4 }}
+  {{- include "streampark.labels" . | nindent 4 }}
   annotations:
     nginx.ingress.kubernetes.io/configuration-snippet: {{ .Values.nginx.ingress.kubernetes.configurationSnippet }}
     nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.nginx.ingress.kubernetes.proxyBbodySize }}

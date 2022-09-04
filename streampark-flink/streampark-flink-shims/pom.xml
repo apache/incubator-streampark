@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.apache.streampark</groupId>
+        <artifactId>streampark-flink</artifactId>
+        <version>${reversion}</version>
+    </parent>
+
+    <artifactId>streampark-flink-shims</artifactId>
+    <name>StreamPark : Flink Shims Parent</name>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>streampark-flink-shims-base</module>
+        <module>streampark-flink-shims-test</module>
+        <module>streampark-flink-shims_flink-1.12</module>
+        <module>streampark-flink-shims_flink-1.13</module>
+        <module>streampark-flink-shims_flink-1.14</module>
+    </modules>
+
+    <profiles>
+
+        <profile>
+            <id>scala-2.12</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <!-- flink 1.15+ only support scala 2.12 -->
+                <module>streampark-flink-shims_flink-1.15</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>scala-2.11</id>
+            <activation>
+                <property>
+                    <name>scala.binary.version</name>
+                    <value>2.11</value>
+                </property>
+            </activation>
+            <modules></modules>
+        </profile>
+
+    </profiles>
+
+</project>

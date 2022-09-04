@@ -17,7 +17,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "streamx.name" -}}
+{{- define "streampark.name" -}}
 {{- default .Chart.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -26,43 +26,43 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "streamx.fullname" -}}
+{{- define "streampark.fullname" -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "streamx.chart" -}}
+{{- define "streampark.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "streamx.labels" -}}
-{{ include "streamx.selectorLabels" . }}
+{{- define "streampark.labels" -}}
+{{ include "streampark.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-helm.sh/chart: {{ include "streamx.chart" . }}
+helm.sh/chart: {{ include "streampark.chart" . }}
 {{- end }}
 
 {{/*
 Selector labels
 */}}
-{{- define "streamx.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "streamx.name" . }}
+{{- define "streampark.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "streampark.name" . }}
 {{- end }}
 
 {{/*
 Create the name of the operator service account to use
 */}}
-{{- define "streamx.serviceAccountName" -}}
-{{- if .Values.streamxServiceAccount.create }}
-{{- default (include "streamx.fullname" .) .Values.streamxServiceAccount.name }}
+{{- define "streampark.serviceAccountName" -}}
+{{- if .Values.streamParkServiceAccount.create }}
+{{- default (include "streampark.fullname" .) .Values.streamParkServiceAccount.name }}
 {{- else }}
-{{- default "default" .Values.streamxServiceAccount.name }}
+{{- default "default" .Values.streamParkServiceAccount.name }}
 {{- end }}
 {{- end }}

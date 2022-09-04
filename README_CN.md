@@ -63,7 +63,7 @@ Make stream processing easier
 
 ## 🏳‍🌈 组成部分
 
-`Streamx` 由三部分组成，分别是 `streamx-core`，`streamx-pump` 和 `streamx-console`
+`StreamPark` 由三部分组成，分别是 `streamx-core`，`streamx-pump` 和 `streampark-console`
 
 ![](https://user-images.githubusercontent.com/13284744/142746859-f6a4dedc-ec42-4ed5-933b-c27d559b9988.png)
 
@@ -75,11 +75,11 @@ Make stream processing easier
 ### 2️⃣ streamx-pump
 
 `pump` 是抽水机，水泵的意思，`streamx-pump` 的定位是一个数据抽取的组件，基于`streamx-core` 中提供的各种 `connector`
-开发，目的是打造一个方便快捷，开箱即用的大数据实时数据抽取和迁移组件，并且集成到 `streamx-console` 中，解决实时数据源获取问题，目前在规划中
+开发，目的是打造一个方便快捷，开箱即用的大数据实时数据抽取和迁移组件，并且集成到 `streampark-console` 中，解决实时数据源获取问题，目前在规划中
 
-### 3️⃣ streamx-console
+### 3️⃣ streampark-console
 
-`streamx-console` 是一个综合实时数据平台，低代码(`Low Code`)平台，可以较好的管理`Flink` & `Spark` 任务，集成了项目编译、发布、参数配置、启动、`savepoint`，火焰图(`flame graph`)
+`streampark-console` 是一个综合实时数据平台，低代码(`Low Code`)平台，可以较好的管理`Flink` & `Spark` 任务，集成了项目编译、发布、参数配置、启动、`savepoint`，火焰图(`flame graph`)
 ， 监控等诸多功能于一体，大大简化了 `Flink` & `Spark` 任务的日常操作和维护，融合了诸多最佳实践。旧时王谢堂前燕，飞入寻常百姓家，让大公司有能力研发使用的项目，现在人人可以使用，
 其最终目标是打造成一个实时数仓，流批一体的一站式大数据解决方案，该平台使用但不仅限以下技术:
 
