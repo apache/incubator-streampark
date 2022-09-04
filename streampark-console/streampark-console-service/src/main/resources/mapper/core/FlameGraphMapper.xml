@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.apache.streampark.console.core.mapper.FlameGraphMapper">
+    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.FlameGraph">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="app_id" jdbcType="BIGINT" property="appId"/>
+        <result column="timeline" jdbcType="DATE" property="timeline"/>
+        <result column="profiler" jdbcType="VARCHAR" property="profiler"/>
+        <result column="content" jdbcType="LONGVARCHAR" property="content"/>
+    </resultMap>
+</mapper>

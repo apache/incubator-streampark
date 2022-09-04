@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:streampark;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'
+    username: sa
+    password: sa
+  sql:
+    init:
+      data-locations: classpath:db/data-h2.sql
+      continue-on-error: true
+      username: sa
+      password: sa
+      mode: always
