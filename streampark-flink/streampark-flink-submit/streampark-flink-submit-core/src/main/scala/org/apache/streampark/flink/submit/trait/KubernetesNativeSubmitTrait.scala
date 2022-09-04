@@ -37,7 +37,6 @@ import scala.language.postfixOps
 /**
   * kubernetes native mode submit
   */
-//noinspection DuplicatedCode
 trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
