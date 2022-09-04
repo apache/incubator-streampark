@@ -35,7 +35,6 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
  */
 object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
 
-  // noinspection DuplicatedCode
   @throws[Exception]
   override def doSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
 

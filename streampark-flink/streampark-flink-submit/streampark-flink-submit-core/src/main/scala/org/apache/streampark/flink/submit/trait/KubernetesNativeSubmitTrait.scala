@@ -28,6 +28,7 @@ import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType
 import org.apache.flink.kubernetes.{KubernetesClusterClientFactory, KubernetesClusterDescriptor}
+import org.apache.streampark.flink.kubernetes.IngressController
 
 import java.io.File
 import javax.annotation.Nonnull
