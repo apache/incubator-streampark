@@ -18,7 +18,6 @@
 package org.apache.streampark.flink.submit.tool
 
 import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration.{Configuration, CoreOptions}
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions

@@ -18,7 +18,6 @@
 package org.apache.streampark.flink.submit.`trait`
 
 import org.apache.streampark.common.enums.{ExecutionMode, FlinkK8sRestExposedType}
-import org.apache.streampark.flink.kubernetes.IngressController
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
 import org.apache.streampark.flink.submit.bean._
 import org.apache.commons.lang3.StringUtils
