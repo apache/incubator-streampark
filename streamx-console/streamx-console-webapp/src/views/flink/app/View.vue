@@ -1257,7 +1257,7 @@ export default {
         fixed: 'right',
         scopedSlots: {customRender: 'operation'},
         slots: {title: 'customOperation'},
-        width: 190
+        width: 150
       }]
     }
   },
