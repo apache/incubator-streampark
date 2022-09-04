@@ -1,6 +1,6 @@
 <!--
 
-Thank you for contributing to StreamX! Please make sure that your code changes
+Thank you for contributing to StreamPark! Please make sure that your code changes
 are covered with tests. And in case of new features or big changes
 remember to adjust the documentation.
 
@@ -19,7 +19,7 @@ Feel free to ping committers for the review!
 
 ## Contribution Checklist
 
-  - Make sure that the pull request corresponds to a [GITHUB issue](https://github.com/streamxhub/streamx/issues).
+  - Make sure that the pull request corresponds to a [GITHUB issue](https://github.com/apache/streampark/issues).
 
   - Name the pull request in the form "[Feature] [component] Title of the pull request", where *Feature* can be replaced by `Hotfix`, `Bug`, etc.
 
