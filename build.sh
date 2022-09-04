@@ -1,24 +1,22 @@
 #!/bin/bash
-#
-# Copyright (c) 2019 The StreamX Project
-#
+# ----------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements. See the NOTICE file
+# or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
-# regarding copyright ownership. The ASF licenses this file
+# regarding copyright ownership.  The ASF licenses this file
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
-# with the License. You may obtain a copy of the License at
+# with the License.  You may obtain a copy of the License at
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
+#    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the License for the
+# KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
+# ----------------------------------------------------------------------------
 
 # Bugzilla 37848: When no TTY is available, don't output to console
 have_tty=0
@@ -66,28 +64,28 @@ echo_r () {
     # Color red: Error, Failed
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[%sStreamX%s] %s$1%s\n"  $BLUE $RESET $RED $RESET
+    printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $RED $RESET
 }
 
 echo_g () {
     # Color green: Success
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[%sStreamX%s] %s$1%s\n"  $BLUE $RESET $GREEN $RESET
+    printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $GREEN $RESET
 }
 
 echo_y () {
     # Color yellow: Warning
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[%sStreamX%s] %s$1%s\n"  $BLUE $RESET $YELLOW $RESET
+    printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $YELLOW $RESET
 }
 
 echo_w () {
     # Color yellow: White
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[%sStreamX%s] %s$1%s\n"  $BLUE $RESET $WHITE $RESET
+    printf "[%sStreamPark%s] %s$1%s\n"  $BLUE $RESET $WHITE $RESET
 }
 
 # OS specific support.  $var _must_ be set to either true or false.
@@ -128,9 +126,8 @@ print_logo() {
   printf '%s  /____/%s\__%s/_/   %s\___/%s\__,_%s/_/ /_/ /_/%s_/|_|                    %s\n' $RAINBOW $RESET
   printf '%s       %s    %s     %s      %s     %s           %s  |/                     %s\n' $RAINBOW $RESET
   printf '%s      %s    %s    %s      %s     %s             %s  .                      %s\n' $RAINBOW $RESET
-  printf '  • WebSite: %s http://www.streamxhub.com%s\n'                              $BLUE   $RESET
-  printf '  • GitHub : %s http://github.com/streamxhub/streamx%s\n'                   $BLUE   $RESET
-  printf '  • Gitee  : %s http://gitee.com/streamxhub/streamx%s\n'                    $BLUE   $RESET
+  printf '  • WebSite: %s http://streampark.apache.org%s\n'                              $BLUE   $RESET
+  printf '  • GitHub : %s http://github.com/apache/streampark%s\n'                   $BLUE   $RESET
   printf '          %s ────────  Make stream processing easier ô~ô!%s\n\n'            $GREEN  $RESET
 }
 
@@ -143,7 +140,7 @@ checkPerm() {
 }
 
 selectScala() {
-  echo_w 'StreamX supports Scala 2.11 and 2.12. Which version do you need ?'
+  echo_w 'StreamPark supports Scala 2.11 and 2.12. Which version do you need ?'
   select scala in "2.11" "2.12"
   do
     case $scala in
@@ -162,7 +159,7 @@ selectScala() {
 }
 
 selectMode() {
-  echo_w 'StreamX supports front-end and server-side mixed / detached packaging mode, Which mode do you need ?'
+  echo_w 'StreamPark supports front-end and server-side mixed / detached packaging mode, Which mode do you need ?'
   select scala in "mixed mode" "detached mode"
   do
     case $scala in
@@ -192,7 +189,7 @@ mixedPackage() {
 
   if [ $? -eq 0 ]; then
      printf '\n'
-     echo_g "streamx project build successful! build info: package mode @ mixed, scala version @ $binaryVer\n"
+     echo_g "StreamPark project build successful! build info: package mode @ mixed, scala version @ $binaryVer\n"
   fi
 }
 
@@ -210,14 +207,14 @@ detachedPackage () {
 
   if [ $? -eq 0 ]; then
     printf '\n'
-    echo_g """streamx project build successful! build info: package mode @ detached, scala version @ $binaryVer
+    echo_g """StreamPark project build successful! build info: package mode @ detached, scala version @ $binaryVer
     Next, you need to build front-end by yourself. build cmd:
 
-     1) cd $PRG_DIR/streamx-console/streamx-console-webapp
+     1) cd $PRG_DIR/streampark-console/streampark-console-webapp
      2) npm install # or yarn install
      3) npm build   # or yarn build
 
-    please visit: http://www.streamxhub.com/docs/user-guide/deployment for more detail. \n"""
+    please visit: http://streampark.apache.org/docs/user-guide/deployment for more detail. \n"""
   fi
 }
 

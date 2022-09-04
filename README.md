@@ -2,7 +2,7 @@
     <br/>
     <h1>
         <a href="http://www.streamxhub.com" target="_blank" rel="noopener noreferrer">
-        <img width="600" src="https://user-images.githubusercontent.com/13284744/166133644-ed3cc4f5-aae5-45bc-bfbe-29c540612446.png" alt="StreamX logo">
+        <img width="600" src="https://user-images.githubusercontent.com/13284744/166133644-ed3cc4f5-aae5-45bc-bfbe-29c540612446.png" alt="StreamPark logo">
         </a>
     </h1>
     <strong style="font-size: 1.5rem">Make stream processing easier!!!</strong>
@@ -31,7 +31,7 @@
 
 #### English | [中文](README_CN.md)
 
-# StreamX
+# Apache StreamPark (Incubating)
 
 Make stream processing easier
 
@@ -40,9 +40,9 @@ Make stream processing easier
 ## 🚀 Introduction
 
 Apache Flink and Apache Spark are widely used as the next generation of big data streaming computing engines.  Based on a bench of excellent experiences combined with best practices, we extracted the task deployment and runtime parameters into the configuration files. In this way,  an easy-to-use RuntimeContext with out-of-the-box connectors would bring easier and more efficient task development experience. It reduces the learning cost and development barriers, hence developers can focus on the business logic.
-On the other hand, It can be challenge for enterprises to use Flink & Spark if there is no professional management platform for Flink & Spark tasks during the deployment phase. StreamX provides such a professional task management platform, including task development, scheduling, interactive query, deployment, operation, maintenance, etc.
+On the other hand, It can be challenge for enterprises to use Flink & Spark if there is no professional management platform for Flink & Spark tasks during the deployment phase. StreamPark provides such a professional task management platform, including task development, scheduling, interactive query, deployment, operation, maintenance, etc.
 
-[![StreamX video](https://user-images.githubusercontent.com/13284744/166101616-50a44d38-3ffb-4296-8a77-92f76a4c21b5.png)](http://assets.streamxhub.com/streamx-video.mp4)
+[![StreamPark video](https://user-images.githubusercontent.com/13284744/166101616-50a44d38-3ffb-4296-8a77-92f76a4c21b5.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
 
 ## 🎉 Features
@@ -64,25 +64,25 @@ On the other hand, It can be challenge for enterprises to use Flink & Spark if t
 
 ## 🏳‍🌈 Components
 
-`Streamx` consists of three parts,`streamx-core`,`streamx-pump` and `streamx-console`
+`StreamPark` consists of three parts,`streampark-core`,`streampark-pump` and `streampark-console`
 
 ![](https://user-images.githubusercontent.com/13284744/142746859-f6a4dedc-ec42-4ed5-933b-c27d559b9988.png)
 
-### 1️⃣ streamx-core
+### 1️⃣ streampark-core
 
-`streamx-core` is a framework that focuses on coding, standardizes configuration, and develops in a way that is better than configuration by
+`streampark-core` is a framework that focuses on coding, standardizes configuration, and develops in a way that is better than configuration by
 convention. Also it provides a development-time `RunTime Content` and a series of `Connector` out of the box. make application development easier
 developer focus on the business itself, and improve development efficiency and development experience.
 
-### 2️⃣ streamx-pump
+### 2️⃣ streampark-pump
 
-`streamx-pump` is a planned data extraction component. Based on the various `connector` provided in `streamx-core`, the
+`streampark-pump` is a planned data extraction component. Based on the various `connector` provided in `streampark-core`, the
 purpose is to create a convenient, fast, out-of-the-box real-time data extraction and migration component for big data, and it will be
-integrated into the `streamx-console`.
+integrated into the `streampark-console`.
 
-### 3️⃣ streamx-console
+### 3️⃣ streampark-console
 
-`streamx-console` is a stream processing and `Low Code` platform, capable of managing `Flink` & `Spark` tasks, integrating project compilation,
+`streampark-console` is a stream processing and `Low Code` platform, capable of managing `Flink` & `Spark` tasks, integrating project compilation,
 deploy, configuration, startup, `savepoint`, `flame graph`, monitoring and many other features. Simplify the daily operation
 and maintenance of the `Flink` & `Spark` task.
 
@@ -113,14 +113,14 @@ click [Document](https://www.streamxhub.com/docs/intro) for more information
 
 ## 💋 our users
 
-Various companies and organizations use StreamX for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/streamxhub/streamx/issues/163)
+Various companies and organizations use StreamPark for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/streamxhub/streamx/issues/163)
 
 ![image](https://user-images.githubusercontent.com/13284744/182794423-b77a09dd-ed45-4e87-a1bb-2a4646951f22.png)
 
 
 ## 🏆 Our honor
 
-We have received some precious honors, which belong to everyone who contributes to StreamX, Thank you !
+We have received some precious honors, which belong to everyone who contributes to StreamPark, Thank you !
 
 
 ![](https://user-images.githubusercontent.com/13284744/142746797-85ebf7b4-4105-4b5b-a023-0689c7fd1d2d.png)
@@ -136,7 +136,7 @@ You can submit any ideas as [pull requests](https://github.com/streamxhub/stream
 
 > If you're new to posting issues, we ask that you read [*How To Ask Questions The Smart Way*](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
 
-Thank you to all the people who already contributed to StreamX!
+Thank you to all the people who already contributed to StreamPark!
 
 <a href="https://github.com/streamxhub/streamx/graphs/contributors">
     <img src="https://contrib.rocks/image?repo=streamxhub/streamx" />
@@ -150,7 +150,7 @@ Thank you to all the people who already contributed to StreamX!
 
 ## 💬 Join us
 
-[StreamX]((http://www.streamxhub.com/#/)) enters the high-speed development stage, we need your contribution.
+[StreamPark]((http://www.streamxhub.com/#/)) enters the high-speed development stage, we need your contribution.
 
 
 <div align="center">
