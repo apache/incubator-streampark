@@ -1,0 +1,11 @@
+security:
+  kerberos:
+    login:
+      enable: false
+      principal:
+      krb5:
+      keytab:
+java:
+  security:
+    krb5:
+      conf:
