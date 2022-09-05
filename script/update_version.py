@@ -5,8 +5,6 @@
 # use case: python3 update_ver.py <expect_ver> <project_path>
 # example: python3 update_ver.py 1.2.1
 
-# @date   : 2021/11/17
-
 import sys
 import os
 import xml.etree.ElementTree as ET
