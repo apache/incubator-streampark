@@ -34,9 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.MalformedURLException;
 import java.util.List;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Validated
 @RestController

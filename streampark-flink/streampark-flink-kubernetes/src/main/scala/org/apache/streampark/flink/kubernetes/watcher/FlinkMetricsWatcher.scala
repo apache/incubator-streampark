@@ -35,9 +35,6 @@ import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorServic
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-/**
- * author:Al-assad
- */
 @ThreadSafe
 class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.defaultConf)
                         (implicit val trackController: FlinkTrackController,

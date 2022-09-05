@@ -31,9 +31,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 public interface ApplicationService extends IService<Application> {
 
     IPage<Application> page(Application app, RestRequest request);

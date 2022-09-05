@@ -48,7 +48,6 @@ import java.io.File;
  *
  * </pre>
  *
- * @author benjobs
  */
 @Slf4j
 @SpringBootApplication

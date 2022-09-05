@@ -25,10 +25,6 @@ import org.apache.streampark.console.core.entity.AlertConfig;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/**
- * @author weijinglun
- * @date 2022.01.14
- */
 public interface AlertConfigService extends IService<AlertConfig> {
     IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request);
 

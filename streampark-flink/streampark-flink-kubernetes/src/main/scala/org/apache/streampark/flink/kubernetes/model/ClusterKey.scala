@@ -21,7 +21,6 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 
 /**
  * flink cluster identifier on kubernetes
- * author:Al-assad
  */
 case class ClusterKey(executeMode: FlinkK8sExecuteMode.Value,
                       namespace: String = "default",

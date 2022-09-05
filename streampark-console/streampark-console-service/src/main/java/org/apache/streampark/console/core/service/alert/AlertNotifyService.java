@@ -21,10 +21,6 @@ import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.core.bean.AlertConfigWithParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 
-/**
- * @author weijinglun
- * @date 2022.01.14
- */
 public interface AlertNotifyService {
     /**
      * alert

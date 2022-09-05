@@ -22,9 +22,7 @@ import com.google.common.collect.Lists;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * @author benjobs
- */
+
 
 public enum ExecutionMode implements Serializable {
 

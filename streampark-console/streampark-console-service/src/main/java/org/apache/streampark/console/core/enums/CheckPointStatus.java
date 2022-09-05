@@ -20,10 +20,6 @@ package org.apache.streampark.console.core.enums;
 import java.io.Serializable;
 import java.util.Arrays;
 
-/**
- * @author benjobs
- */
-
 public enum CheckPointStatus implements Serializable {
     /**
      * IN_PROGRESS

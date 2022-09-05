@@ -31,9 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 public class Arguments {
     public static final String DEFAULT_APP_ID_REGEX = "application_[\\w_]+";
     public static final long DEFAULT_METRIC_INTERVAL = 60000;

@@ -22,9 +22,6 @@ import org.apache.streampark.console.core.enums.EffectiveType;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/**
- * @author benjobs
- */
 public interface EffectiveService extends IService<Effective> {
     /**
      * @param appId

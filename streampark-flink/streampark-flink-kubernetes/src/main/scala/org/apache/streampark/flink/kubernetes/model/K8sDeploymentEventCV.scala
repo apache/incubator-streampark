@@ -21,7 +21,6 @@ import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.Watcher.Action
 
 /**
- * author:Al-assad
  *
  * @param action      event action
  * @param event       event content

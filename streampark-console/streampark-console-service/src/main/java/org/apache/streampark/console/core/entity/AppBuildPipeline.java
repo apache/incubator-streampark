@@ -56,7 +56,6 @@ import java.util.stream.Collectors;
  * Building pipeline state for Application.
  * Each Application instance will have only one corresponding ApplicationBuildPipeline record.
  *
- * @author Al-assad
  */
 @TableName("t_app_build_pipe")
 @Data

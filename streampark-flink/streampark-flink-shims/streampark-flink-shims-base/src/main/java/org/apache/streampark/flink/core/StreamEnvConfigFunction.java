@@ -20,9 +20,6 @@ package org.apache.streampark.flink.core;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
-/**
- * @author benjobs
- */
 @FunctionalInterface
 public interface StreamEnvConfigFunction {
     /**

@@ -20,9 +20,6 @@ package org.apache.streampark.plugin.profiling.transformer;
 import org.apache.streampark.plugin.profiling.profiler.MethodArgumentCollector;
 import org.apache.streampark.plugin.profiling.profiler.MethodDurationCollector;
 
-/**
- * @author benjobs
- */
 public class MethodProfilerStaticProxy {
     private static MethodDurationCollector collectorSingleton;
     private static MethodArgumentCollector argumentCollectorSingleton;

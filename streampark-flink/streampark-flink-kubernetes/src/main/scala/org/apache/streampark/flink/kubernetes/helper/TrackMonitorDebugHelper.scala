@@ -24,7 +24,6 @@ import scala.language.implicitConversions
 
 /**
  * Debug helper for FlinkTrackMonitor, only for streampark development, debugging scenarios.
- * @author Al-assad
  */
 object TrackMonitorDebugHelper {
 

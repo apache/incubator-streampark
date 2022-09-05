@@ -27,9 +27,6 @@ import java.io.{File, FileInputStream}
 import java.nio.file.{Files, Paths}
 import scala.language.implicitConversions
 
-/**
- * @author Al-assad
- */
 object LfsOperatorTest {
 
   def withTempDir(block: String => Unit): Unit = {

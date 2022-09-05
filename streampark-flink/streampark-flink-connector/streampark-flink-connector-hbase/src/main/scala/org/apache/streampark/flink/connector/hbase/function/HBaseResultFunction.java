@@ -21,9 +21,6 @@ import org.apache.hadoop.hbase.client.Result;
 
 import java.io.Serializable;
 
-/**
- * @author benjobs
- */
 @FunctionalInterface
 public interface HBaseResultFunction<T> extends Serializable {
     /**

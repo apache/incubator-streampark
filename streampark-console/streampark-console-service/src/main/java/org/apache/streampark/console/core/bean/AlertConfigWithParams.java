@@ -28,10 +28,6 @@ import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 
-/**
- * @author weijinglun
- * @date 2022.01.14
- */
 @Data
 @Slf4j
 public class AlertConfigWithParams implements Serializable {

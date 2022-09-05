@@ -20,7 +20,6 @@ package org.apache.streampark.flink.packer.docker
 /**
  * Base flink docker file image template.
  *
- * @author Al-assad
  * @param workspacePath      Path of dockerfile workspace, it should be a directory.
  * @param flinkBaseImage     Flink base docker image name, see https://hub.docker.com/_/flink.
  * @param flinkMainJarPath   Path of flink job main jar which would copy to $FLINK_HOME/usrlib/

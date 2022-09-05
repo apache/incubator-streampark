@@ -30,9 +30,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-/**
- * @author benjobs
- */
 @Data
 @TableName("t_flame_graph")
 @Slf4j

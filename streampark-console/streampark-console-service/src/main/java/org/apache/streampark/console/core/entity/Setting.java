@@ -25,9 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 
-/**
- * @author benjobs
- */
 @Data
 @TableName("t_setting")
 @Slf4j

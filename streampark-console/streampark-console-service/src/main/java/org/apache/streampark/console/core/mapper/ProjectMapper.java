@@ -25,9 +25,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 
-/**
- * @author benjobs
- */
 public interface ProjectMapper extends BaseMapper<Project> {
 
     IPage<Project> page(Page<Project> page, @Param("project") Project project);

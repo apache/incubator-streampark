@@ -18,11 +18,6 @@ package org.apache.streampark.common.conf
 
 import java.lang.{Integer => JavaInt, Long => JavaLong}
 
-/**
- * Common Configuration
- *
- * @author Al-assad
- */
 object CommonConfig {
 
   val STREAMPARK_WORKSPACE_LOCAL: InternalOption = InternalOption(

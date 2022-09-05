@@ -26,7 +26,6 @@ import scala.collection.JavaConversions._
 
 /**
  * Tracking info cache pool on flink kubernetes mode.
- * author:Al-assad
  */
 class FlinkTrackController extends Logger with AutoCloseable {
 

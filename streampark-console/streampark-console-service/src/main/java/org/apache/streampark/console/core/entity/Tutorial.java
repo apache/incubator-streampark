@@ -24,9 +24,6 @@ import lombok.Data;
 
 import java.util.Date;
 
-/**
- * @author benjobs
- */
 @Data
 @TableName("t_flink_tutorial")
 public class Tutorial {

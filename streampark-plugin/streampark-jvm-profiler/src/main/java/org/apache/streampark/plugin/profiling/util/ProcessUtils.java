@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @author benjobs
- */
 public class ProcessUtils {
     private static final String SPARK_PROCESS_KEYWORD = "spark.yarn.app.container.log.dir";
     private static final String SPARK_CMDLINE_KEYWORD = "spark.";

@@ -28,9 +28,6 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink;
 
 import java.util.Properties;
 
-/**
- * @author benjobs
- */
 public class JdbcJavaSink<T> {
 
     private final StreamingContext context;

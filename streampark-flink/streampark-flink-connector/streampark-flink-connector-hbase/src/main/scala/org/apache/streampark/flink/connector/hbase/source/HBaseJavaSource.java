@@ -28,9 +28,6 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
 import java.util.Properties;
 
-/**
- * @author benjobs
- */
 public class HBaseJavaSource<T> {
     private final StreamingContext context;
     private final Properties property;

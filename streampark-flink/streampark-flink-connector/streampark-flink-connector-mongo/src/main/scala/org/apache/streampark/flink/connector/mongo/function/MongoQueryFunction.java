@@ -21,9 +21,6 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
-/**
- * @author benjobs
- */
 @FunctionalInterface
 public interface MongoQueryFunction<T> {
 

@@ -17,10 +17,6 @@
 
 package org.apache.streampark.console.base.domain;
 
-/**
- * @author xianwei.yang
- * 业务响应code
- */
 public interface ResponseCode {
 
     /**

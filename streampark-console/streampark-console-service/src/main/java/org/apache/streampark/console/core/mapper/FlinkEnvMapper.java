@@ -24,9 +24,6 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
-/**
- * @author benjobs
- */
 public interface FlinkEnvMapper extends BaseMapper<FlinkEnv> {
 
     /**

@@ -34,9 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 public class YamlConfigProvider implements ConfigProvider {
     private static final AgentLogger LOGGER =
         AgentLogger.getLogger(YamlConfigProvider.class.getName());

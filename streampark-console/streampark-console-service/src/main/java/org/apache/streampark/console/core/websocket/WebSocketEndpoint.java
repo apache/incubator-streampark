@@ -34,9 +34,6 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Component
 @ServerEndpoint(value = "/websocket/{id}")

@@ -24,7 +24,6 @@ import com.github.dockerjava.api.model.AuthConfig;
 /**
  * Listenable PullImageCmdImpl
  *
- * @author Al-assad
  */
 public class HackPullImageCmd extends PullImageCmdImpl {
 

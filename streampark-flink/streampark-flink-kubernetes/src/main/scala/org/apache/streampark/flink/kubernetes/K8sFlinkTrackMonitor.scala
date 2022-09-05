@@ -31,7 +31,6 @@ import javax.annotation.Nullable
  * This is the entry point for external calls to the
  * streampark.flink.kubernetes package.
  *
- * author:Al-assad
  */
 @Public
 trait K8sFlinkTrackMonitor extends Logger with AutoCloseable {

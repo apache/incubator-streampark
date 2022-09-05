@@ -22,9 +22,7 @@ import java.util.regex.Pattern
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 
-/**
- * @author benjobs
- */
+
 object SqlConvertUtils extends Logger {
 
   private[this] val FIELD_REGEXP = Pattern.compile(

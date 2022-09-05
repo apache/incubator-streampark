@@ -25,7 +25,6 @@
 #
 #    perl stackcollapse-vtune result_vtune_tachyon.csv | perl flamegraph.pl > result_vtune_tachyon.svg
 #
-# AUTHOR: Rohith Bakkannagari
 
 use strict;
 

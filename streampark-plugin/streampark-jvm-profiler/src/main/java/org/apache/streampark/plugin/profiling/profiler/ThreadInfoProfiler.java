@@ -29,7 +29,6 @@ import java.util.Map;
 /**
  * ThreadInfoProfiler is used to Collects the Thread Related Metrics.
  *
- * @author benjobs
  */
 public class ThreadInfoProfiler extends ProfilerBase implements Profiler {
     public static final String PROFILER_NAME = "ThreadInfo";

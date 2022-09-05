@@ -31,7 +31,6 @@ import scala.util.{Failure, Success, Try}
 /**
  * Hadoop client configuration tools mainly for flink use.
  *
- * @author Al-assad
  */
 object HadoopConfigUtils {
 

@@ -32,9 +32,6 @@ import org.apache.shiro.authc.AuthenticationException;
 
 import java.util.Date;
 
-/**
- * @author benjobs
- */
 @Slf4j
 public class JWTUtil {
 

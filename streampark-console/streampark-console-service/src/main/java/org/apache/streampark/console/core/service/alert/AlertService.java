@@ -24,9 +24,6 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.CheckPointStatus;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 
-/**
- * @author benjobs
- */
 public interface AlertService {
 
     /**

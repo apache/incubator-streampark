@@ -19,9 +19,6 @@ package org.apache.streampark.plugin.profiling.profiler;
 
 import org.apache.streampark.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 
-/**
- * @author benjobs
- */
 public class MethodArgumentCollector {
     private ClassMethodArgumentMetricBuffer buffer;
 

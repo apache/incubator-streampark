@@ -29,7 +29,6 @@ import scala.util.{Failure, Success, Try}
 /**
  * Behavior that BuildPipeline subclasses must inherit to implement.
  *
- * @author Al-assad
  */
 trait BuildPipelineProcess {
 
@@ -55,7 +54,6 @@ trait BuildPipelineProcess {
 /**
  * Callable methods exposed by BuildPipeline to the outside.
  *
- * @author Al-assad
  */
 trait BuildPipelineExpose {
 
@@ -97,7 +95,6 @@ trait BuildPipelineExpose {
 /**
  * Building pipeline trait.
  *
- * @author Al-assad
  */
 trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with Logger {
 

@@ -21,9 +21,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/**
- * @author benjobs
- */
 @Data
 public class RestRequest implements Serializable {
 

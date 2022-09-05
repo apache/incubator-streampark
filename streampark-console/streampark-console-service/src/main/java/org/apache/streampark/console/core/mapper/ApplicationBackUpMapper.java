@@ -21,9 +21,6 @@ import org.apache.streampark.console.core.entity.ApplicationBackUp;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-/**
- * @author benjobs
- */
 public interface ApplicationBackUpMapper extends BaseMapper<ApplicationBackUp> {
 
 }

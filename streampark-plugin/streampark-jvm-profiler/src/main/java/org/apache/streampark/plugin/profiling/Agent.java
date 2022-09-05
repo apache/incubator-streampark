@@ -21,9 +21,6 @@ import org.apache.streampark.plugin.profiling.util.AgentLogger;
 
 import java.lang.instrument.Instrumentation;
 
-/**
- * @author benjobs
- */
 public final class Agent {
 
     private static final AgentLogger LOGGER = AgentLogger.getLogger(Agent.class.getName());

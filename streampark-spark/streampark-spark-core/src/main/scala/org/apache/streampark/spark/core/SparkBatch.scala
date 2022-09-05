@@ -29,8 +29,6 @@ import scala.annotation.meta.getter
  * <p/>
  * <b>Creation Time:</b> 2022/8/8 20:44.
  *
- * @author guoning
- * @since streampark
  */
 trait SparkBatch extends Spark {
 

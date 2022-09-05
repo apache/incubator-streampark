@@ -29,7 +29,6 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * Params of a BuildPipeline instance.
  *
- * @author Al-assad
  */
 sealed trait BuildParam {
   def appName: String

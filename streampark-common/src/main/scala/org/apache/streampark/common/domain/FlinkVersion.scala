@@ -27,7 +27,6 @@ import scala.collection.JavaConversions._
 
 /**
  * @param flinkHome actual flink home that must be a readable local path
- * @author benjobs
  */
 class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logger {
 

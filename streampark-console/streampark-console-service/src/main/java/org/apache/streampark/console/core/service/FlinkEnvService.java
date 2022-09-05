@@ -23,9 +23,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.io.IOException;
 
-/**
- * @author benjobs
- */
 public interface FlinkEnvService extends IService<FlinkEnv> {
 
     /**

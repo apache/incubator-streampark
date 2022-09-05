@@ -20,9 +20,6 @@ package org.apache.streampark.plugin.profiling;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author benjobs
- */
 public class ProfilerGroup {
     private List<Profiler> oneTimeProfilers;
     private List<Profiler> periodicProfilers;

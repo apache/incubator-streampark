@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @author benjobs
- */
 public class StringUtils {
     private static final int KB_SIZE = 1024;
     private static final int MB_SIZE = 1024 * 1024;

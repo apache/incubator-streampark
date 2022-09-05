@@ -30,9 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * @author benjobs
- */
 public class HttpReporter implements Reporter {
 
     private static final AgentLogger LOGGER = AgentLogger.getLogger(HttpReporter.class.getName());

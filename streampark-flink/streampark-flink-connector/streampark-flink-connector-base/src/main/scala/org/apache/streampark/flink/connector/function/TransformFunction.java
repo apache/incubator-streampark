@@ -19,9 +19,6 @@ package org.apache.streampark.flink.connector.function;
 
 import java.io.Serializable;
 
-/**
- * @author benjobs
- */
 @FunctionalInterface
 public interface TransformFunction<T, R> extends Serializable {
     /**

@@ -29,9 +29,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.zip.GZIPInputStream;
 
-/**
- * @author benjobs
- */
 @Slf4j
 public final class GZipUtils {
 

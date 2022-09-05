@@ -24,7 +24,6 @@ import com.github.dockerjava.api.model.AuthConfig;
 /**
  * Listenable PushImageCmdImpl
  *
- * @author Al-assad
  */
 public class HackPushImageCmd extends PushImageCmdImpl {
 

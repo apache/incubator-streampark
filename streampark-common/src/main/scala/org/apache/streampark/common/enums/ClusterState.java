@@ -20,7 +20,6 @@ package org.apache.streampark.common.enums;
 import java.io.Serializable;
 
 /**
- * @author: xxyykkxx
  * @since: 1.2.3
  */
 public enum ClusterState implements Serializable {

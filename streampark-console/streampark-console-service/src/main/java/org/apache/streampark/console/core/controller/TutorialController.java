@@ -30,9 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Validated
 @RestController

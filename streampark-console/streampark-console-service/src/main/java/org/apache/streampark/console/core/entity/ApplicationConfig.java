@@ -33,9 +33,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 @Data
 @TableName("t_flink_config")
 @Slf4j

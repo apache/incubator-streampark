@@ -26,7 +26,6 @@ import javax.annotation.Nullable
  *
  * @param summary   summary of error
  * @param exception exception stack
- * @author Al-assad
  */
 @JsonIgnoreProperties(ignoreUnknown = true, value = Array("exception"))
 case class PipeError(summary: String,

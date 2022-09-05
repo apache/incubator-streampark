@@ -30,9 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * @author Al-assad
- */
 public interface AppBuildPipeService extends IService<AppBuildPipeline> {
 
     /**

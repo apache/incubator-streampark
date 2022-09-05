@@ -26,7 +26,6 @@ import java.io.InputStream;
 /**
  * Listenable BuildImageCmdImpl
  *
- * @author Al-assad
  */
 public class HackBuildImageCmd extends BuildImageCmdImpl {
 

@@ -21,12 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * The robot alarm response of Lark
- *
- * @author weijinglun
- * @date 2022.06.24
- */
 @NoArgsConstructor
 @Data
 public class AlertLarkRobotResponse {

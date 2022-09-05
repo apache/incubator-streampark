@@ -35,9 +35,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-/**
- * @author benjobs
- */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 

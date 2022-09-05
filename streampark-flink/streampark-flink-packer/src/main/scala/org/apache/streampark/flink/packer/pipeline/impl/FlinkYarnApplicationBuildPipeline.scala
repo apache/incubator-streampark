@@ -30,7 +30,6 @@ import java.io.{File, FileInputStream, IOException}
 /**
  * Building pipeline for flink yarn application mode
  *
- * @author benjobs
  */
 class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildRequest) extends BuildPipeline {
 

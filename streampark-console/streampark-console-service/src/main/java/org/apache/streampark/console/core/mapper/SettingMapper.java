@@ -24,9 +24,6 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
-/**
- * @author benjobs
- */
 public interface SettingMapper extends BaseMapper<Setting> {
 
     @Select("select * from t_setting where setting_key=#{key}")

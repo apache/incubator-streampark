@@ -34,7 +34,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * └──────────────────────────────────┘
  * </pre>
  *
- * @author Al-assad
  */
 @SuppressWarnings("AlibabaEnumConstantsMustHaveComment")
 public enum PipelineStepStatus {

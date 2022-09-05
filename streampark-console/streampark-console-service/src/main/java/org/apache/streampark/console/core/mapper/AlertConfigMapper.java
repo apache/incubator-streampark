@@ -22,10 +22,6 @@ import org.apache.streampark.console.core.entity.AlertConfig;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
-/**
- * @author weijinglun
- * @date 2022.01.14
- */
 public interface AlertConfigMapper extends BaseMapper<AlertConfig> {
     AlertConfig getAlertConfByName(@Param("alertConfig") AlertConfig alertConfig);
 }

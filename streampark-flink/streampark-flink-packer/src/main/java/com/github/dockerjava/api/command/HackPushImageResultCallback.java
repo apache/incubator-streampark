@@ -21,10 +21,6 @@ import com.github.dockerjava.api.listener.PushImageCallbackListener;
 import com.github.dockerjava.api.model.PushResponseItem;
 import com.github.dockerjava.core.command.PushImageResultCallback;
 
-/**
- * @author Al-assad
- */
-@SuppressWarnings("deprecation")
 public class HackPushImageResultCallback extends PushImageResultCallback {
 
     private final PushImageCallbackListener listener;

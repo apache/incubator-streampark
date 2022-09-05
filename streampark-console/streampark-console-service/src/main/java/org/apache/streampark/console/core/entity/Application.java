@@ -68,9 +68,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @author benjobs
- */
 @Data
 @TableName("t_flink_app")
 @Slf4j

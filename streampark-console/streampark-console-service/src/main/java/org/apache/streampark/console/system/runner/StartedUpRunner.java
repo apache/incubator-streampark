@@ -27,9 +27,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-/**
- * @author benjobs
- */
 @Order
 @Slf4j
 @Component

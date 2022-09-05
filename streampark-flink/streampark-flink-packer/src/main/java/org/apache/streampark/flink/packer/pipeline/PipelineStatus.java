@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * │                      └─► failure  │
  * └───────────────────────────────────┘
  * </pre>
- * @author Al-assad
+ *
  */
 @SuppressWarnings("AlibabaEnumConstantsMustHaveComment")
 public enum PipelineStatus {

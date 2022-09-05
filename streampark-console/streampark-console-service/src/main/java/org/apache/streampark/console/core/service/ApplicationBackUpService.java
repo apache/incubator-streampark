@@ -26,9 +26,6 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/**
- * @author benjobs
- */
 public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
 
     Boolean delete(Long id) throws InternalException;

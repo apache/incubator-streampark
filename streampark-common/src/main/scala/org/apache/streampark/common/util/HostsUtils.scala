@@ -24,9 +24,7 @@ import java.util.{Map => JavaMap}
 import scala.collection.JavaConversions._
 import scala.collection.immutable.ListMap
 
-/**
- * @author Al-assad
- */
+
 object HostsUtils {
 
   /**

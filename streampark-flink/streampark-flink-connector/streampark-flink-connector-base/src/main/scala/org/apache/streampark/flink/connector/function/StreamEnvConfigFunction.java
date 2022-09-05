@@ -22,9 +22,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.io.Serializable;
 
-/**
- * @author benjobs
- */
 @FunctionalInterface
 public interface StreamEnvConfigFunction extends Serializable {
     /**

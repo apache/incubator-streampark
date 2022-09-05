@@ -22,8 +22,6 @@ import lombok.Data;
 /**
  * The robot alarm response of DingTalk And WeCom
  *
- * @author weijinglun
- * @date 2022.01.17
  */
 @Data
 public class RobotResponse {

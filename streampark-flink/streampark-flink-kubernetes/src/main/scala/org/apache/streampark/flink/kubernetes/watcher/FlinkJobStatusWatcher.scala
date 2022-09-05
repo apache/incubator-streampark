@@ -44,7 +44,6 @@ import scala.util.{Failure, Success, Try}
  * the traced flink identifiers from FlinkTrackCachePool.trackIds, the traced
  * result of flink jobs status would written to FlinkTrackCachePool.jobStatuses.
  *
- * author:Al-assad
  */
 @ThreadSafe
 class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfig.defaultConf)

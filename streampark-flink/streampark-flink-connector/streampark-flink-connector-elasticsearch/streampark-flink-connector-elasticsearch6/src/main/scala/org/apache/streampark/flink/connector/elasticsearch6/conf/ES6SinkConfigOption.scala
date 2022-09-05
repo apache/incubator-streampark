@@ -25,9 +25,6 @@ import java.net.InetSocketAddress
 import java.util.{Properties, Map => JavaMap}
 import scala.collection.JavaConverters._
 
-/**
- * @author benjobs
- */
 object ESSinkConfigOption {
 
   val ES_SINK_PREFIX = "es.sink"

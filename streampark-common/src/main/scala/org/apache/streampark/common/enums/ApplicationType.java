@@ -19,9 +19,7 @@ package org.apache.streampark.common.enums;
 
 import java.io.Serializable;
 
-/**
- * @author benjobs
- */
+
 public enum ApplicationType implements Serializable {
     /**
      * StreamPark Flink

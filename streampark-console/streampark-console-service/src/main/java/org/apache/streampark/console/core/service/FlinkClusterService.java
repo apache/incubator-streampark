@@ -22,9 +22,6 @@ import org.apache.streampark.console.core.entity.FlinkCluster;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/**
- * @author benjobs
- */
 public interface FlinkClusterService extends IService<FlinkCluster> {
 
     /**

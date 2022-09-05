@@ -26,7 +26,6 @@ import java.nio.file.{Path, Paths}
 /**
  * Flink image dockerfile template.
  *
- * @author Al-assad
  */
 trait FlinkDockerfileTemplateTrait {
 

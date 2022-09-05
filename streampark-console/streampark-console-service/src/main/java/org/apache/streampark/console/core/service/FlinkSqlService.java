@@ -26,9 +26,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
-/**
- * @author benjobs
- */
 public interface FlinkSqlService extends IService<FlinkSql> {
 
     /**

@@ -29,9 +29,6 @@ import org.apache.flink.streaming.api.datastream.{DataStream => JavaDataStream}
 import java.util.Properties
 import scala.annotation.meta.param
 
-/**
- * @author benjobs
- */
 object ClickHouseSink {
 
   /**

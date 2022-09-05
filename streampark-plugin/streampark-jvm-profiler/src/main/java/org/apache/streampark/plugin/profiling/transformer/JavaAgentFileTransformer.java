@@ -34,9 +34,6 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.List;
 
-/**
- * @author benjobs
- */
 public class JavaAgentFileTransformer implements ClassFileTransformer {
     private static final AgentLogger LOGGER =
         AgentLogger.getLogger(JavaAgentFileTransformer.class.getName());

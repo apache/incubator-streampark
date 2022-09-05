@@ -19,11 +19,6 @@ package org.apache.streampark.console.core.bean;
 
 import lombok.Data;
 
-/**
- * @author 02211659
- * @version 1.0
- * @date 2022/04/22 15:14:54
- */
 @Data
 public class ResponseResult<T> {
     private int status;

@@ -19,9 +19,6 @@ package org.apache.streampark.plugin.profiling.util;
 
 import java.util.List;
 
-/**
- * @author benjobs
- */
 public class ClassAndMethodFilter {
     private static final String METHOD_NAME_WILDCARD = "*";
 

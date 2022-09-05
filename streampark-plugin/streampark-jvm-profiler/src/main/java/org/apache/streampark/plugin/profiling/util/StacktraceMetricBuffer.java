@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * StacktraceMetricBuffer is a buffer to store metrics. It is thread safe for appendValue. The reset
  * method will create a new empty internal buffer and return the old one.
  *
- * @author benjobs
  */
 public class StacktraceMetricBuffer {
     private AtomicLong lastResetMillis = new AtomicLong(System.currentTimeMillis());

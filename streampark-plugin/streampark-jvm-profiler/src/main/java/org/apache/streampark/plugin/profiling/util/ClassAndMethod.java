@@ -17,9 +17,6 @@
 
 package org.apache.streampark.plugin.profiling.util;
 
-/**
- * @author benjobs
- */
 public class ClassAndMethod {
     private final String className;
     private final String methodName;

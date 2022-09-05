@@ -27,9 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
 
-/**
- * @author benjobs
- */
 @Data
 @TableName("t_app_backup")
 @Slf4j

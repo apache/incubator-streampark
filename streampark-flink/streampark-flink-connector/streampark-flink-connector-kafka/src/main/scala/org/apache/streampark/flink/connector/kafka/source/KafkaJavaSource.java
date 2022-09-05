@@ -27,9 +27,6 @@ import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 
 import java.util.Properties;
 
-/**
- * @author benjobs
- */
 public class KafkaJavaSource<T> {
 
     private StreamingContext context;

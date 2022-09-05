@@ -20,9 +20,6 @@ package org.apache.streampark.plugin.profiling.util;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author benjobs
- */
 public class ClassMethodArgumentFilter {
     private static final String METHOD_NAME_WILDCARD = "*";
 

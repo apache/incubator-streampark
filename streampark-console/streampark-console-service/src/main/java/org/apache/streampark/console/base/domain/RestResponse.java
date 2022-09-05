@@ -19,9 +19,6 @@ package org.apache.streampark.console.base.domain;
 
 import java.util.HashMap;
 
-/**
- * @author benjobs
- */
 public class RestResponse extends HashMap<String, Object> {
 
     public static final String STATUS_SUCCESS = "success";

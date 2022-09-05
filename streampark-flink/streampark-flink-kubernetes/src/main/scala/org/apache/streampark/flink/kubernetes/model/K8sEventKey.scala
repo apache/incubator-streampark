@@ -17,7 +17,4 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
-/**
- * author:Al-assad
- */
 case class K8sEventKey(namespace: String, clusterId: String)

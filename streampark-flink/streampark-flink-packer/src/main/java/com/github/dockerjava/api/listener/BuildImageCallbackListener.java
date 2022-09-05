@@ -17,9 +17,6 @@
 
 package com.github.dockerjava.api.listener;
 
-/**
- * @author Al-assad
- */
 public interface BuildImageCallbackListener {
 
     /**

@@ -29,7 +29,6 @@ import javax.annotation.Nullable
 /**
  * Default K8sFlinkTrackMonitor implementation.
  *
- * author:Al-assad
  */
 class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defaultConf) extends K8sFlinkTrackMonitor {
 

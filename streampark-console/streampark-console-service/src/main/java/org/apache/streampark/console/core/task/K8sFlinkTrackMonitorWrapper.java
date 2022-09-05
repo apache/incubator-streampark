@@ -57,7 +57,6 @@ import scala.Enumeration;
  * for this unified implementation.
  * <p>
  *
- * @author Al-assad
  */
 @Configuration
 public class K8sFlinkTrackMonitorWrapper {

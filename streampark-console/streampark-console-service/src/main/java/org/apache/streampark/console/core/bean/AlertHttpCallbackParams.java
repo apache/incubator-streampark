@@ -24,10 +24,6 @@ import javax.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 
-/**
- * @author weijinglun
- * @date 2022.01.14
- */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertHttpCallbackParams implements Serializable {

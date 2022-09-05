@@ -28,9 +28,6 @@ import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
-/**
- * @author benjobs
- */
 public interface ApplicationMapper extends BaseMapper<Application> {
     IPage<Application> page(Page<Application> page, @Param("application") Application application);
 

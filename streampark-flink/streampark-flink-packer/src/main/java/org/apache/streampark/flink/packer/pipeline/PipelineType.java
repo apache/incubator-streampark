@@ -26,7 +26,6 @@ import java.util.Map;
 /**
  * Building pipeline type.
  *
- * @author Al-assad
  */
 public enum PipelineType {
 

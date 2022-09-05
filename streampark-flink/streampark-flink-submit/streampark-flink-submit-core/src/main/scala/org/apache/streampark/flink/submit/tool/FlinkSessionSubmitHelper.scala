@@ -35,9 +35,7 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import scala.util.{Failure, Success, Try}
 
-/**
- * @author Al-assad
- */
+
 object FlinkSessionSubmitHelper extends Logger {
 
   @transient

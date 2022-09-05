@@ -19,9 +19,6 @@ package org.apache.streampark.console.core.enums;
 
 import java.io.Serializable;
 
-/**
- * @author benjobs
- */
 public enum GitAuthorizedError implements Serializable {
 
     /**

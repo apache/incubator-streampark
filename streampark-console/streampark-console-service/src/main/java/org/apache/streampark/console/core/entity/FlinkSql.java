@@ -29,9 +29,6 @@ import lombok.Data;
 import java.util.Base64;
 import java.util.Date;
 
-/**
- * @author benjobs
- */
 @Data
 @TableName("t_flink_sql")
 public class FlinkSql {

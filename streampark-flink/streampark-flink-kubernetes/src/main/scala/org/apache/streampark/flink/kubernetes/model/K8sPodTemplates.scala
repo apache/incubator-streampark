@@ -24,7 +24,6 @@ import scala.util.Try
 /**
  * Pod template for flink k8s cluster
  *
- * @author Al-assad
  */
 case class K8sPodTemplates(podTemplate: String = "", jmPodTemplate: String = "", tmPodTemplate: String = "") {
 

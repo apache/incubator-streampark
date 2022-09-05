@@ -24,9 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Properties;
 import java.util.Scanner;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Data
 public class Note {

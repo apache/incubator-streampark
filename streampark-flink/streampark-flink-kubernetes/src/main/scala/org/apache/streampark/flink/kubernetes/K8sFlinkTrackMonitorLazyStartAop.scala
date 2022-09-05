@@ -25,7 +25,6 @@ import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, 
  * What more, this AOP has the ability to automatically recover
  * the FlinkTrackMonitor's internal FlinkWatcher.
  *
- * author:Al-assad
  */
 trait K8sFlinkTrackMonitorLazyStartAop extends K8sFlinkTrackMonitor {
 

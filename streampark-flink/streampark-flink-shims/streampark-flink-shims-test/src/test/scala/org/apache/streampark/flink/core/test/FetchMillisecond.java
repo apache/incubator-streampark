@@ -19,10 +19,6 @@ package org.apache.streampark.flink.core.test;
 
 import org.apache.flink.table.functions.ScalarFunction;
 
-/**
- * @author ziqiang.wang
- * @date 2021/12/27 18:34
- */
 public class FetchMillisecond extends ScalarFunction {
 
     /**

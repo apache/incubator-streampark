@@ -24,9 +24,6 @@ import org.apache.flink.configuration.Configuration
 import java.io.File
 import scala.collection.mutable
 
-/**
- * @author Al-assad
- */
 object PodTemplateTool {
 
   val KUBERNETES_POD_TEMPLATE: PodTemplateType = PodTemplateType("kubernetes.pod-template-file", "pod-template.yaml")

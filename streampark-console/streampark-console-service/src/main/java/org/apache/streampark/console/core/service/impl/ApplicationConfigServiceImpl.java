@@ -48,9 +48,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)

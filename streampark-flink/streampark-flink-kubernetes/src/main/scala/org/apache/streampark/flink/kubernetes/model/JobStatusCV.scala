@@ -20,7 +20,6 @@ package org.apache.streampark.flink.kubernetes.model
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 
 /**
- * author:Al-assad
  *
  * @param jobState     state of flink job
  * @param jobId        flink jobId hex string

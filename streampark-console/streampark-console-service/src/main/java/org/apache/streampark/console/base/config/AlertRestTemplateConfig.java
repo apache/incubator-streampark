@@ -21,10 +21,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * @author weijinglun
- * @date 2022.01.17
- */
 @Configuration
 public class AlertRestTemplateConfig {
     /**

@@ -17,9 +17,6 @@
 
 package org.apache.streampark.plugin.profiling.util;
 
-/**
- * @author benjobs
- */
 public interface ErrorLogReporter {
     void report(String message, Throwable exception);
 

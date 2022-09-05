@@ -22,9 +22,6 @@ import org.apache.streampark.console.core.entity.Setting;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/**
- * @author benjobs
- */
 public interface SettingService extends IService<Setting> {
 
     String KEY_MAVEN_REPOSITORY = "streampark.maven.central.repository";

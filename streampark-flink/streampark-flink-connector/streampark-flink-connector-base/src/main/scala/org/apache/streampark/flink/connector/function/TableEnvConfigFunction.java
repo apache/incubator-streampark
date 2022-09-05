@@ -22,9 +22,6 @@ import org.apache.flink.table.api.TableConfig;
 
 import java.io.Serializable;
 
-/**
- * @author benjobs
- */
 @FunctionalInterface
 public interface TableEnvConfigFunction extends Serializable {
     /**

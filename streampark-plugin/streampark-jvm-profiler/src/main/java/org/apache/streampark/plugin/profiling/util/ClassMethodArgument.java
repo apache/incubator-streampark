@@ -17,9 +17,6 @@
 
 package org.apache.streampark.plugin.profiling.util;
 
-/**
- * @author benjobs
- */
 public class ClassMethodArgument {
     private final String className;
     private final String methodName;

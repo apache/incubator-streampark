@@ -20,9 +20,6 @@ package org.apache.streampark.plugin.profiling;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-/**
- * @author benjobs
- */
 public class AgentThreadFactory implements ThreadFactory {
     public static final String NAME_PREFIX = "uber_java_agent";
 

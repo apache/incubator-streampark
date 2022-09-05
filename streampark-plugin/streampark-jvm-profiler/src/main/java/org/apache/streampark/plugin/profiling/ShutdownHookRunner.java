@@ -24,9 +24,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @author benjobs
- */
 public class ShutdownHookRunner implements Runnable {
     private static final AgentLogger LOGGER = AgentLogger.getLogger(ShutdownHookRunner.class.getName());
 

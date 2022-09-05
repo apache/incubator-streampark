@@ -24,9 +24,6 @@ import org.asynchttpclient.config.AsyncHttpClientConfigDefaults
 import java.util.Properties
 import scala.collection.JavaConverters._
 
-/**
- * @author benjobs
- */
 object ClickHouseSinkConfigOption {
 
   val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"

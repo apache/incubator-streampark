@@ -25,9 +25,7 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{Map => MutableMap}
 
-/**
- * @author benjobs
- */
+
 object PropertiesUtils extends Logger {
 
 

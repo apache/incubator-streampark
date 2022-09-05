@@ -20,9 +20,6 @@ package org.apache.streampark.console.core.metrics.yarn;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
-/**
- * @author benjobs
- */
 @Data
 public class AppInfo {
 

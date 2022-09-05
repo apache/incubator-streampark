@@ -40,10 +40,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-/**
- * @author john
- * @time 2021.12.20
- */
 @Slf4j
 @Service
 public class SqlCompleteServiceImpl implements SqlCompleteService {

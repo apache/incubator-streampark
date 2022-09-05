@@ -39,9 +39,7 @@ import javax.security.auth.kerberos.KerberosTicket
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
-/**
- * @author benjobs
- */
+
 object HadoopUtils extends Logger {
 
   private[this] lazy val HADOOP_HOME: String = "HADOOP_HOME"

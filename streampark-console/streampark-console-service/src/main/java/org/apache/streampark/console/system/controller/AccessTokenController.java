@@ -38,10 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-
-/**
- * @author xianwei.yang
- */
 @RestController
 @RequestMapping("token")
 public class AccessTokenController {

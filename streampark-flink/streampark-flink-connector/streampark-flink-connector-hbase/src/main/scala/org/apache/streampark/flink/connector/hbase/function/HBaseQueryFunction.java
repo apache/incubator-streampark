@@ -21,9 +21,6 @@ import org.apache.streampark.flink.connector.hbase.bean.HBaseQuery;
 
 import java.io.Serializable;
 
-/**
- * @author benjobs
- */
 @FunctionalInterface
 public interface HBaseQueryFunction<T> extends Serializable {
     /**

@@ -28,9 +28,6 @@ import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartiti
 
 import java.util.Properties;
 
-/**
- * @author benjobs
- */
 public class KafkaJavaSink<T> {
 
     private final StreamingContext context;

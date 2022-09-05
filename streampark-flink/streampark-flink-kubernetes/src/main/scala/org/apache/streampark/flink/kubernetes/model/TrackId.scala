@@ -24,7 +24,7 @@ import scala.util.Try
 
 /**
  * tracking identifier for flink on kubernetes
- * author:Al-assad
+ *
  */
 case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
                    namespace: String = "default",

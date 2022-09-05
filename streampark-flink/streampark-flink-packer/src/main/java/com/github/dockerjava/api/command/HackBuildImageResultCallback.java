@@ -20,9 +20,6 @@ package com.github.dockerjava.api.command;
 import com.github.dockerjava.api.listener.BuildImageCallbackListener;
 import com.github.dockerjava.api.model.BuildResponseItem;
 
-/**
- * @author Al-assad
- */
 public class HackBuildImageResultCallback extends BuildImageResultCallback {
 
     private final BuildImageCallbackListener listener;

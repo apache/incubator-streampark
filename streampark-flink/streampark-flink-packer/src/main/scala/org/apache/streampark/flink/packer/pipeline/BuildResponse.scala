@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 /**
  * Result of a BuildPipeline instance.
  *
- * @author Al-assad
  */
 sealed trait BuildResult {
 

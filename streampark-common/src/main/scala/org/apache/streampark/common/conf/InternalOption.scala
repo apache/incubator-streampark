@@ -26,7 +26,6 @@ package org.apache.streampark.common.conf
  * @param defaultValue default value of configuration that <b>should not be null</b>.
  * @param classType    the class type of value. <b>please use java class type</b>.
  * @param description  description of configuration.
- * @author Al-assad
  */
 case class InternalOption(key: String,
                           defaultValue: Any,

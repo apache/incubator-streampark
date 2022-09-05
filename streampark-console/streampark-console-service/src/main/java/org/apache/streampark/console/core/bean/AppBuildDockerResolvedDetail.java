@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 /**
  * View for DockerResolveProgress
  *
- * @author Al-assad
  */
 @Data
 @Accessors(chain = true)

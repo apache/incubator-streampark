@@ -26,7 +26,6 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * cache storage for docker resolved progress
  *
- * @author Al-assad
  */
 class DockerResolveProgress(val pull: DockerPullProgress, val build: DockerBuildProgress, val push: DockerPushProgress)
 

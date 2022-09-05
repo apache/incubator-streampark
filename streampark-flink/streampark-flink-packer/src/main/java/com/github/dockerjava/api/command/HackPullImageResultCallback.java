@@ -20,9 +20,6 @@ package com.github.dockerjava.api.command;
 import com.github.dockerjava.api.listener.PullImageCallbackListener;
 import com.github.dockerjava.api.model.PullResponseItem;
 
-/**
- * @author Al-assad
- */
 public class HackPullImageResultCallback extends PullImageResultCallback {
 
     private final PullImageCallbackListener listener;

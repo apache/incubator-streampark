@@ -30,9 +30,6 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.zip.Deflater;
 
-/**
- * @author benjobs
- */
 public class Utils {
 
     protected static ObjectMapper mapper = new ObjectMapper();

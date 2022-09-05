@@ -26,7 +26,6 @@ import java.util.Properties;
  * This is abstract class for anything that is api incompatible between different flink versions. It will
  * load the correct version of FlinkShims based on the version of flink.
  *
- * @author benjobs
  */
 public class FlinkShims {
 

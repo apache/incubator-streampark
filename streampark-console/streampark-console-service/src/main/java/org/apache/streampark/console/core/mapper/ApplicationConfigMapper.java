@@ -25,9 +25,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-/**
- * @author benjobs
- */
 public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
 
     @Select("select max(`version`) as lastVersion from t_flink_config where app_id=#{appId}")

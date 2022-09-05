@@ -23,9 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 public class DummyConfigProvider implements ConfigProvider {
     @Override
     public Map<String, Map<String, List<String>>> getConfig() {

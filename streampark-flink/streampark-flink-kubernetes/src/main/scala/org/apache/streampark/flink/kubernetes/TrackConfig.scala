@@ -20,7 +20,6 @@ package org.apache.streampark.flink.kubernetes
 import org.apache.streampark.common.conf.{InternalConfigHolder, K8sFlinkConfig}
 
 /**
- * @author Al-assad
  * @param jobStatusWatcherConf configuration for flink job status tracking process
  * @param metricWatcherConf    configuration for flink metric tracking process
  */

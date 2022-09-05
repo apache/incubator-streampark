@@ -29,9 +29,6 @@ import org.apache.ibatis.annotations.Update;
 
 import java.util.Date;
 
-/**
- * @author benjobs
- */
 public interface SavePointMapper extends BaseMapper<SavePoint> {
 
     @Update("update t_flink_savepoint set latest=0 where app_id=#{appId}")

@@ -21,9 +21,6 @@ import org.apache.streampark.plugin.profiling.profiler.Constants;
 
 import java.util.List;
 
-/**
- * @author benjobs
- */
 public class SparkUtils {
     // Try to get application ID by match regex in class path or system property
     public static String probeAppId(String appIdRegex) {

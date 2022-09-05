@@ -19,10 +19,6 @@ package org.apache.streampark.console.core.service;
 
 import java.util.List;
 
-/**
- * @author Whojohn
- * @time 2021.12.20
- */
 public interface SqlCompleteService {
 
     /**

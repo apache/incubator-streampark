@@ -38,10 +38,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
-/**
- * @author weijinglun
- * @date 2022.01.14
- */
 @Slf4j
 @Service
 public class AlertServiceImpl implements AlertService {

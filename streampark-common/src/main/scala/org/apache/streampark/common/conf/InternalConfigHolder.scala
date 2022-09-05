@@ -37,7 +37,6 @@ import scala.language.postfixOps
  * All configurations will be automatically initialized from the spring
  * configuration items of the same name.
  *
- * @author Al-assad
  */
 object InternalConfigHolder extends Logger {
 

@@ -44,9 +44,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * @author Al-assad
- */
 @Slf4j
 @Validated
 @RestController

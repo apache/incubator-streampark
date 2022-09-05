@@ -25,7 +25,6 @@ import com.github.dockerjava.transport.DockerHttpClient;
 /**
  * Enhancement of DockerClient to provide custom api with a hacked way.
  *
- * @author Al-assad
  */
 public class HackDockerClient extends DockerClientImpl {
 

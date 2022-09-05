@@ -27,9 +27,6 @@ import org.apache.streampark.plugin.profiling.util.Histogram;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 public class MethodDurationProfiler extends ProfilerBase implements Profiler {
     public static final String PROFILER_NAME = "MethodDuration";
 

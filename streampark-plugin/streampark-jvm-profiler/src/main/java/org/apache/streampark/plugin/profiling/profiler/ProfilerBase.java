@@ -24,9 +24,6 @@ import org.apache.streampark.plugin.profiling.util.Utils;
 
 import java.util.UUID;
 
-/**
- * @author benjobs
- */
 public class ProfilerBase {
     private String tag = null;
     private String cluster = null;

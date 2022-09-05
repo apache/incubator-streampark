@@ -19,9 +19,6 @@ package com.github.dockerjava.api.listener;
 
 import com.github.dockerjava.api.model.PullResponseItem;
 
-/**
- * @author Al-assad
- */
 public interface PullImageCallbackListener {
 
     /**

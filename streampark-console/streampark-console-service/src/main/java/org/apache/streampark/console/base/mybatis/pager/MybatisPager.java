@@ -29,11 +29,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 处理排序工具类
- *
- * @author benjobs
- */
 @SuppressWarnings("unchecked")
 public final class MybatisPager<T> {
 

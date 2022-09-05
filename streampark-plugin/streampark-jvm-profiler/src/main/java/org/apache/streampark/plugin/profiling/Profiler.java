@@ -17,9 +17,6 @@
 
 package org.apache.streampark.plugin.profiling;
 
-/**
- * @author benjobs
- */
 public interface Profiler {
     /**
      * @return

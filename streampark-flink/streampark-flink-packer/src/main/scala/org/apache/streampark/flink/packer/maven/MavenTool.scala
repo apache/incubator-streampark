@@ -44,9 +44,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 
-/**
- * @author Al-assad
- */
+
 object MavenTool extends Logger {
 
   private[this] lazy val plexusLog = new ConsoleLogger(PlexusLog.LEVEL_INFO, "streampark-maven")

@@ -20,9 +20,6 @@ package org.apache.streampark.flink.connector.mongo.function;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 
-/**
- * @author benjobs
- */
 @FunctionalInterface
 public interface MongoResultFunction<T> {
 

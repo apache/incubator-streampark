@@ -21,10 +21,6 @@ import com.google.common.eventbus.{AsyncEventBus, EventBus}
 
 import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 
-/**
- * @author Al-assad
- */
-// noinspection UnstableApiUsage
 class ChangeEventBus {
 
   private val execPool = new ThreadPoolExecutor(6, 12,

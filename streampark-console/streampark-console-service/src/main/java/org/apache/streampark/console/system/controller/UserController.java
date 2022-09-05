@@ -43,9 +43,6 @@ import javax.validation.constraints.NotBlank;
 
 import java.util.List;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Validated
 @RestController

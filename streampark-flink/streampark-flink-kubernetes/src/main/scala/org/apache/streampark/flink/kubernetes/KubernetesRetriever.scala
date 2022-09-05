@@ -34,9 +34,6 @@ import javax.annotation.Nullable
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
-/**
- * author:Al-assad
- */
 object KubernetesRetriever extends Logger {
 
   // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}

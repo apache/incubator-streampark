@@ -47,9 +47,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Data
 @TableName("t_flink_project")

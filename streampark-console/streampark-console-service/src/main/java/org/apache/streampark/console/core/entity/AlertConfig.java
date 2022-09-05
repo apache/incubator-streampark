@@ -31,12 +31,6 @@ import org.springframework.beans.BeanUtils;
 import java.io.Serializable;
 import java.util.Date;
 
-/**
- * t_alert_config
- *
- * @author weijinglun
- * @date 2022.01.14
- */
 @Data
 @TableName("t_alert_config")
 @Slf4j

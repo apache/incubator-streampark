@@ -37,9 +37,6 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
-/**
- * @author benjobs
- */
 @Api(tags = "[flink sql]相关操作", consumes = "Content-Type=application/x-www-form-urlencoded")
 @Slf4j
 @Validated

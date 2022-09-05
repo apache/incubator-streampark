@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * This class is a buffer to store argument counters. It is thread safe for appendValue. The reset
  * method will create a new empty internal buffer and return the old one.
  *
- * @author benjobs
  */
 public class ClassMethodArgumentMetricBuffer {
     private volatile ConcurrentHashMap<ClassAndMethodMetricKey, AtomicLong> metrics =

@@ -24,9 +24,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.io.IOException;
 import java.util.Date;
 
-/**
- * @author benjobs
- */
 public interface FlameGraphService extends IService<FlameGraph> {
     /**
      * @param flameGraph

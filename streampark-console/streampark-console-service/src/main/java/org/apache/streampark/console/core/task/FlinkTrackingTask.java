@@ -70,7 +70,6 @@ import java.util.stream.Collectors;
 /**
  * This implementation is currently only used for tracing flink job on yarn
  *
- * @author benjobs
  */
 @Slf4j
 @Component

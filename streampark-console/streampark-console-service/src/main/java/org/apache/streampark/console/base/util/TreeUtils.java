@@ -23,9 +23,6 @@ import org.apache.streampark.console.base.domain.router.VueRouter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author benjobs
- */
 public final class TreeUtils {
 
     private TreeUtils() {

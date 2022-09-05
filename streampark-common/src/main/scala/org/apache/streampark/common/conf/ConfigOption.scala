@@ -28,7 +28,6 @@ import scala.util.{Failure, Success, Try}
  * @param required     is required <b>
  * @param description  description of configuration.
  * @param handle       Processing function of special parameters
- * @author benjobs
  */
 case class ConfigOption[T](key: String,
                            defaultValue: T = null,

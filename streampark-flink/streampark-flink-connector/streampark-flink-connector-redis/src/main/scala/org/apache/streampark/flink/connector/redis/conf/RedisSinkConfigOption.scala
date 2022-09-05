@@ -24,9 +24,6 @@ import org.apache.streampark.common.util.ConfigUtils
 import java.util.Properties
 import scala.collection.JavaConverters._
 
-/**
- * @author benjobs
- */
 object RedisSinkConfigOption {
   val REDIS_SINK_PREFIX = "redis.sink"
 

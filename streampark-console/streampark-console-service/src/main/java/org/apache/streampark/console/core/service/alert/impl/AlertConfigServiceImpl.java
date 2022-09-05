@@ -41,10 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Collectors;
 
-/**
- * @author weijinglun
- * @date 2022.01.14
- */
 @Service
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)

@@ -23,9 +23,6 @@ import java.io.File
 import scala.language.implicitConversions
 import scala.util.Random
 
-/**
- * @author Al-assad
- */
 package object fs {
 
   implicit def funcToExecutable[R](func: => R): Executable = new Executable() {

@@ -19,7 +19,6 @@ package org.apache.streampark.flink.kubernetes.enums
 
 /**
  * flink job status on kubernetes
- * author:Al-assad
  */
 object FlinkJobState extends Enumeration {
 

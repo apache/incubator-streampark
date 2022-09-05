@@ -20,9 +20,6 @@ package org.apache.streampark.plugin.profiling.example;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * @author benjobs
- */
 public class HelloWorldApplication {
 
     /**

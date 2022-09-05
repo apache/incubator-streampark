@@ -26,7 +26,6 @@ import scala.collection.JavaConverters._
 /**
  * Snapshot for docker resolved progress
  *
- * @author Al-assad
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 case class DockerResolvedSnapshot(pull: DockerPullSnapshot, build: DockerBuildSnapshot, push: DockerPushSnapshot)

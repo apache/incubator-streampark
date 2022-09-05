@@ -21,9 +21,6 @@ import org.apache.streampark.console.core.entity.Tutorial;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/**
- * @author benjobs
- */
 public interface TutorialService extends IService<Tutorial> {
     Tutorial getByName(String name);
 }

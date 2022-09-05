@@ -23,9 +23,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * @author benjobs
- */
 @Data
 public class JobsOverview implements Serializable {
 

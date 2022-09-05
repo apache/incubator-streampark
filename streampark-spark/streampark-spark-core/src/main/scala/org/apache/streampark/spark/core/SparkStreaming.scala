@@ -30,7 +30,6 @@ import scala.annotation.meta.getter
  * <p/>
  * <b>Creation Time:</b> 2022/8/8 20:44.
  *
- * @author gn
  * @since streampark ${PROJECT_VERSION}
  */
 trait SparkStreaming extends Spark {

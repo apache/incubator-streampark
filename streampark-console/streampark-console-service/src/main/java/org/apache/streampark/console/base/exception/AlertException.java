@@ -17,12 +17,6 @@
 
 package org.apache.streampark.console.base.exception;
 
-/**
- * 报警异常
- *
- * @author weijinglun
- * @date 2022.07.21
- */
 public class AlertException extends ApiException {
     public AlertException(String message) {
         super(message);

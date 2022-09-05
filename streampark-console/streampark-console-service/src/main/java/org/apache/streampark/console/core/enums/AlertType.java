@@ -25,10 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author weijinglun
- * @date 2022.01.14
- */
 public enum AlertType {
     email(1),
     dingTalk(2),

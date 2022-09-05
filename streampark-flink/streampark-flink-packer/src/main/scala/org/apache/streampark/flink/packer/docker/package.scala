@@ -23,9 +23,7 @@ import com.github.dockerjava.api.model.{PullResponseItem, PushResponseItem}
 
 import scala.util.{Failure, Success, Try}
 
-/**
- * @author Al-assad
- */
+
 package object docker {
 
   def watchDockerBuildStep(func: String => Unit): BuildImageCallbackListener =

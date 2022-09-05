@@ -20,9 +20,6 @@ package org.apache.streampark.console.core.bean;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-/**
- * @author Al-assad
- */
 @Data
 @Accessors(chain = true)
 public class AppControl {

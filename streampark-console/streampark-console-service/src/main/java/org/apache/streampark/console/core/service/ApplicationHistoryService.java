@@ -21,9 +21,6 @@ import org.apache.streampark.common.enums.StorageType;
 
 import java.util.List;
 
-/**
- * @author Al-assad
- */
 public interface ApplicationHistoryService {
 
     List<String> listUploadJars(StorageType storageType, int limit);

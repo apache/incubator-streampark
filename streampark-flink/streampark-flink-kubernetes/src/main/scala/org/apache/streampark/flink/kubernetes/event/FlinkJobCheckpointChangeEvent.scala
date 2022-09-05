@@ -22,6 +22,5 @@ import org.apache.streampark.flink.kubernetes.model.{CheckpointCV, TrackId}
 /**
  * held internally by K8sFlinkMonitor.
  *
- * @author benjobs
  */
 case class FlinkJobCheckpointChangeEvent(trackId: TrackId, checkpoint: CheckpointCV) extends BuildInEvent

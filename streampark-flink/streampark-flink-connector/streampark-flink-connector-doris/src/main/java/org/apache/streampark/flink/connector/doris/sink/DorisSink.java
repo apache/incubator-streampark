@@ -23,10 +23,6 @@ import org.apache.streampark.flink.core.scala.StreamingContext;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 
-/**
- * @param <T>
- * @author wudi
- */
 public class DorisSink<T> {
 
     private final StreamingContext context;

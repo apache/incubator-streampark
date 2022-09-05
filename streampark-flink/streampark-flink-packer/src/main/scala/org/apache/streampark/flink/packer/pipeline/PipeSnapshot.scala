@@ -29,8 +29,9 @@ import scala.collection.JavaConverters._
  *
  * @param emitTime   snapshot interception time
  * @param stepStatus StepSeq -> (PipeStepStatus -> status update timestamp)
- * @author Al-assad
+ *
  */
+
 case class PipeSnapshot(appName: String,
                         pipeType: PipelineType,
                         pipeStatus: PipelineStatus,

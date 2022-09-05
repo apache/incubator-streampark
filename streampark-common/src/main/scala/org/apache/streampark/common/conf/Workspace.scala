@@ -21,10 +21,6 @@ import org.apache.streampark.common.util.{HdfsUtils, SystemPropertyUtils}
 
 import java.net.URI
 
-/**
- * @author benjobs
- * @param storageType
- */
 
 object Workspace {
 

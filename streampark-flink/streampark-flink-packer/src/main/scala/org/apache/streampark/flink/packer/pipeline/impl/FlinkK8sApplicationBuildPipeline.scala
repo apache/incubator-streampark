@@ -38,7 +38,6 @@ import scala.language.postfixOps
 /**
  * Building pipeline for flink kubernetes-native application mode
  *
- * @author Al-assad
  */
 class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest) extends BuildPipeline {
 

@@ -20,9 +20,6 @@ package org.apache.streampark.plugin.profiling.util;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
-/**
- * @author benjobs
- */
 public class ExponentialBackoffRetryPolicy<T> {
     private static final AgentLogger LOGGER =
         AgentLogger.getLogger(ExponentialBackoffRetryPolicy.class.getName());

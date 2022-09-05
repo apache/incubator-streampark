@@ -25,9 +25,6 @@ import java.io.Serializable;
 
 import scala.Enumeration;
 
-/**
- * @author benjobs
- */
 @Getter
 public enum FlinkAppState implements Serializable {
 

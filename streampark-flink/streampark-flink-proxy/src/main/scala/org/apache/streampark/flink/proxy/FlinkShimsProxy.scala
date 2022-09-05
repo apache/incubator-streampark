@@ -26,12 +26,6 @@ import java.util.function.{Supplier, Function => JavaFunc}
 import java.util.regex.Pattern
 import scala.collection.mutable.{ListBuffer, Map => MutableMap}
 
-/**
- *
- * @author benjobs
- * @author zzz
- */
-
 object FlinkShimsProxy extends Logger {
 
   private[this] val INCLUDE_PATTERN: Pattern = Pattern.compile(

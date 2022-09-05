@@ -19,7 +19,6 @@ package org.apache.streampark.console.base.domain;
 
 /**
  * @ClassName : ApiDocConstant
- * @AUTHOR :  Yang XianWei
  * @DATE :    2022/4/14 11:29 PM
  * @DESCRIPTION : api swagger文档常量
  * @since JDK 1.8

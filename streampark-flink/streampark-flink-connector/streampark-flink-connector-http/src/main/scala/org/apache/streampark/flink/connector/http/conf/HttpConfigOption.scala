@@ -20,9 +20,6 @@ package org.apache.streampark.flink.connector.http.conf
 
 import java.util.Properties
 
-/**
- * @author benjobs
- */
 object HttpConfigOption {
 
   val HTTP_SINK_PREFIX: String = "http.sink"

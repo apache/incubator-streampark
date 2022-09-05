@@ -23,9 +23,6 @@ import org.apache.streampark.console.core.entity.ApplicationLog;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/**
- * @author benjobs
- */
 public interface ApplicationLogService extends IService<ApplicationLog> {
 
     IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request);

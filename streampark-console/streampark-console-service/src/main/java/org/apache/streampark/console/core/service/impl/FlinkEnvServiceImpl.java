@@ -32,9 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.Date;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)

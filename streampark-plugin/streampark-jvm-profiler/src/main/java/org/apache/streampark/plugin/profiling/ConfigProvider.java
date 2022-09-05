@@ -20,9 +20,6 @@ package org.apache.streampark.plugin.profiling;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 public interface ConfigProvider {
     /**
      * * Returns a map containing multiple child maps. Each child map contains a group of key/value

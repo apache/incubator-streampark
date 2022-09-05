@@ -18,11 +18,10 @@
 package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.DateUtils;
-import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.util.SortUtils;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
@@ -90,8 +89,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
 
     @Override
     public IPage<AccessToken> findAccessTokens(AccessToken tokenParam, RestRequest request) {
-        Page<AccessToken> page = new Page<>();
-        SortUtils.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
+        Page<AccessToken> page = new MybatisPager<AccessToken>().getDefaultPage(request);
         this.baseMapper.page(page, tokenParam);
         List<AccessToken> records = page.getRecords();
         page.setRecords(records);

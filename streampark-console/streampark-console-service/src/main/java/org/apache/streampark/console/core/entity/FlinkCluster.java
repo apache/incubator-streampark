@@ -43,9 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 @Data
 @TableName("t_flink_cluster")
 public class FlinkCluster implements Serializable {

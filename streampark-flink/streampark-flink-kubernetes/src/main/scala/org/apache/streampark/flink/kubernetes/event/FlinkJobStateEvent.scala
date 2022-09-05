@@ -24,6 +24,5 @@ import org.apache.streampark.flink.kubernetes.model.TrackId
  * Notification of expecting changes to flink job state cache
  * held internally by K8sFlinkMonitor.
  *
- * @author Al-assad
  */
 case class FlinkJobStateEvent(trackId: TrackId, jobState: FlinkJobState.Value, pollTime: Long) extends BuildInEvent

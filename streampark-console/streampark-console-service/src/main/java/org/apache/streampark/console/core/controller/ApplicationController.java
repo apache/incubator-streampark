@@ -63,9 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Validated
 @RestController

@@ -28,9 +28,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 public interface ProjectService extends IService<Project> {
 
     RestResponse create(Project project);

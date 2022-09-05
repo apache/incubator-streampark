@@ -35,9 +35,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * @author benjobs
- */
 @Slf4j
 public class JWTFilter extends BasicHttpAuthenticationFilter {
 

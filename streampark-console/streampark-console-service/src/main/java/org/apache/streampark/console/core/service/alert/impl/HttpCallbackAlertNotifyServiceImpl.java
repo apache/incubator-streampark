@@ -43,10 +43,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
-/**
- * @author weijinglun
- * @date 2022.01.14
- */
 @Slf4j
 @Service
 @Lazy

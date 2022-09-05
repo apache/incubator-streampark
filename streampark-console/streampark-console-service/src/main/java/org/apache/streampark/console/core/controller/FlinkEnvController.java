@@ -30,9 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Validated
 @RestController

@@ -20,9 +20,6 @@ package org.apache.streampark.console.core.metrics.flink;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-/**
- * @author benjobs
- */
 @Data
 public class Overview {
 

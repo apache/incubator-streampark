@@ -20,9 +20,6 @@ package org.apache.streampark.flink.connector.function;
 import java.io.Serializable;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 @FunctionalInterface
 public interface SQLResultFunction<T> extends Serializable {
     /**

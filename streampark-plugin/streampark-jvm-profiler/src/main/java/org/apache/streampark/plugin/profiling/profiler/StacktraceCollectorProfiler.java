@@ -33,7 +33,6 @@ import java.util.List;
  * This class collects stacktraces by getting thread dump via JMX, and stores the stacktraces into
  * the given buffer.
  *
- * @author benjobs
  */
 public class StacktraceCollectorProfiler implements Profiler {
     private long interval;

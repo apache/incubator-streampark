@@ -24,9 +24,6 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-/**
- * @author benjobs
- */
 public interface EffectiveMapper extends BaseMapper<Effective> {
 
     @Select("select * from t_flink_effective where app_id=#{appId} and target_type=#{type}")

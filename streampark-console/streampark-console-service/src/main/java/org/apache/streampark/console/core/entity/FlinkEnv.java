@@ -34,9 +34,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 @Data
 @TableName("t_flink_env")
 public class FlinkEnv implements Serializable {

@@ -31,8 +31,6 @@ import scala.util.Try
  * <p>{@link # getResourceAsStream ( String )} uses {@link # getResource ( String )} internally so we don't
  * override that.
  *
- * @author benjobs
- * @author zzz
  */
 
 class ChildFirstClassLoader(urls: Array[URL],

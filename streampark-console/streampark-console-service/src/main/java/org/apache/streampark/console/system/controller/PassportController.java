@@ -45,9 +45,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author benjobs
- */
 @Validated
 @RestController
 @RequestMapping("passport")

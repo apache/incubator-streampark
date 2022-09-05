@@ -20,9 +20,6 @@ package org.apache.streampark.flink.connector.influx.function;
 import java.io.Serializable;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 public interface InfluxTagFunction<T> extends Serializable {
     Map<String, String> transform(T value);
 }

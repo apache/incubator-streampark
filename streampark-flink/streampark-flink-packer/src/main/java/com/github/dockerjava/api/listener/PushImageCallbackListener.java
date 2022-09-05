@@ -19,9 +19,6 @@ package com.github.dockerjava.api.listener;
 
 import com.github.dockerjava.api.model.PushResponseItem;
 
-/**
- * @author Al-assad
- */
 public interface PushImageCallbackListener {
 
     /**

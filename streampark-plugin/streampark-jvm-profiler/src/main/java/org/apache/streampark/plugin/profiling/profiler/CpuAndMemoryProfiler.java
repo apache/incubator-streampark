@@ -38,9 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 public class CpuAndMemoryProfiler extends ProfilerBase implements Profiler {
     public static final String PROFILER_NAME = "CpuAndMemory";
 

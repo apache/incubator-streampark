@@ -29,7 +29,6 @@ import org.apache.flink.streaming.api.scala._
 import scala.language.implicitConversions
 
 /**
- * @author benjobs
  * @param parameter
  * @param environment
  */

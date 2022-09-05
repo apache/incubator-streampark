@@ -20,7 +20,6 @@ package org.apache.streampark.flink.kubernetes.enums
 import org.apache.streampark.common.enums.ExecutionMode
 
 /**
- * author:Al-assad
  * execution mode of flink on kubernetes
  */
 object FlinkK8sExecuteMode extends Enumeration {

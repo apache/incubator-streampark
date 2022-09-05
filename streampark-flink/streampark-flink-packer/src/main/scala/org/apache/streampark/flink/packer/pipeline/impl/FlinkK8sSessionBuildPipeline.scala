@@ -26,7 +26,6 @@ import org.apache.streampark.flink.packer.pipeline._
 /**
  * Building pipeline for flink kubernetes-native session mode
  *
- * @author Al-assad
  */
 class FlinkK8sSessionBuildPipeline(request: FlinkK8sSessionBuildRequest) extends BuildPipeline {
 

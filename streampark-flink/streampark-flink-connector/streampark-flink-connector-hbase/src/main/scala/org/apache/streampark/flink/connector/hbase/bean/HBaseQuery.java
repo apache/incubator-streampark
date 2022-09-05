@@ -30,7 +30,6 @@ import java.util.Properties;
 /**
  * 封装一个HBase查询的条件对象,包装了scan和get两种查询方式.
  *
- * @author benjobs
  */
 public class HBaseQuery extends Scan implements Serializable {
 

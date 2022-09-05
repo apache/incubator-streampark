@@ -19,9 +19,6 @@ package org.apache.streampark.plugin.profiling.util;
 
 import java.util.Arrays;
 
-/**
- * @author benjobs
- */
 public class SparkAppCmdInfo {
     private String appClass;
     private String appJar;

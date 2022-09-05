@@ -20,7 +20,6 @@ package org.apache.streampark.flink.packer.pipeline
 /**
  * Trait for watching a BuildPipeline instance
  *
- * @author Al-assad
  */
 trait PipeWatcher {
 

@@ -27,9 +27,6 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-/**
- * @author benjobs
- */
 public interface ApplicationLogMapper extends BaseMapper<ApplicationLog> {
 
     @Select("SELECT * from t_flink_log where app_id=#{appId}")

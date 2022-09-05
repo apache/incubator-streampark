@@ -28,10 +28,6 @@ import org.springframework.ui.freemarker.SpringTemplateLoader;
 import java.io.IOException;
 import java.io.StringWriter;
 
-/**
- * @author WeiJinglun
- * @date 2022.01.17
- */
 @Slf4j
 public class FreemarkerUtils  {
     private static final Configuration CONFIGURATION;

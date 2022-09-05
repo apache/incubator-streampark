@@ -44,9 +44,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.Date;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Validated
 @RestController

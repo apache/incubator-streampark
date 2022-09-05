@@ -21,9 +21,6 @@ import org.apache.streampark.plugin.profiling.util.AgentLogger;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * @author benjobs
- */
 public class ProfilerRunner implements Runnable {
     private static final AgentLogger LOGGER = AgentLogger.getLogger(ProfilerRunner.class.getName());
 

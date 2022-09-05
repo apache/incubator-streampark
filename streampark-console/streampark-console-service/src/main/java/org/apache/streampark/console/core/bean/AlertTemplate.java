@@ -30,10 +30,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.TimeZone;
 
-/**
- * @author weijinglun
- * @date 2022.01.14
- */
 @Data
 public class AlertTemplate implements Serializable {
     private String title;

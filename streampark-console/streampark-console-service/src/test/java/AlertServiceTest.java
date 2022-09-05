@@ -32,10 +32,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Date;
 import java.util.TimeZone;
 
-/**
- * @author weijinglun
- * @date 2022.01.19
- */
 public class AlertServiceTest {
     AlertTemplate alertTemplate;
     AlertConfigWithParams params = new AlertConfigWithParams();

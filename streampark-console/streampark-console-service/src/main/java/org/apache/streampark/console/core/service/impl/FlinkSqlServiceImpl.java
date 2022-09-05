@@ -47,9 +47,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Function;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)

@@ -20,7 +20,6 @@ package org.apache.streampark.common.conf
 /**
  * Flink kubernetes Configuration
  *
- * @author Al-assad
  */
 object K8sFlinkConfig {
 

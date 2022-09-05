@@ -28,9 +28,6 @@ import scala.language.postfixOps
 import scala.util.Try
 import scala.util.control.Breaks.{break, breakable}
 
-/**
- * @author Al-assad
- */
 object PodTemplateParser {
 
   val POD_TEMPLATE_INIT_CONTENT: String =

@@ -24,9 +24,7 @@ import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
 
 import java.time.Duration
 
-/**
- * @author Al-assad
- */
+
 object DockerRetriever {
 
   /**

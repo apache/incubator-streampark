@@ -26,9 +26,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
-/**
- * @author benjobs
- */
 public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
     void create(Application application, Boolean latest);

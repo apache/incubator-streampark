@@ -17,9 +17,6 @@
 
 package org.apache.streampark.plugin.profiling.profiler;
 
-/**
- * @author benjobs
- */
 public class Constants {
     public static final long DEFAULT_METRIC_INTERVAL = 60000;
 

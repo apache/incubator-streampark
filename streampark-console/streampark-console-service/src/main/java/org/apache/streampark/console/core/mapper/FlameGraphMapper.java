@@ -27,9 +27,6 @@ import org.apache.ibatis.annotations.Select;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @author benjobs
- */
 public interface FlameGraphMapper extends BaseMapper<FlameGraph> {
 
     /**

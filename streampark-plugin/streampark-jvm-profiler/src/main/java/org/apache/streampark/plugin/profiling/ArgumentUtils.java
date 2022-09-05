@@ -21,9 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
 public class ArgumentUtils {
 
     public static boolean needToUpdateArg(String argValue) {

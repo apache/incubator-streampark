@@ -30,9 +30,6 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 
-/**
- * @author benjobs
- */
 @Slf4j
 @Component
 @Aspect

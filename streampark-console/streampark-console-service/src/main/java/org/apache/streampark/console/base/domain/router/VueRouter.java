@@ -28,7 +28,6 @@ import java.util.List;
 /**
  * 构建 Vue路由
  *
- * @author benjobs
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)

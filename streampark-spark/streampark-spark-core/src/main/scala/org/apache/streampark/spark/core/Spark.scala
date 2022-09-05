@@ -32,7 +32,6 @@ import scala.collection.mutable.ArrayBuffer
  * <p/>
  * <b>Creation Time:</b> 2022/8/8 20:44.
  *
- * @author guoning
  * @since streampark
  */
 trait Spark {

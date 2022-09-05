@@ -35,10 +35,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @author benjobs
- */
-
 @Service
 public class CommonServiceImpl implements CommonService {
 

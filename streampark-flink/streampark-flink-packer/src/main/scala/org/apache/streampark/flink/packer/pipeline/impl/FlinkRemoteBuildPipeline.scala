@@ -24,7 +24,6 @@ import org.apache.streampark.flink.packer.pipeline._
 /**
  * Building pipeline for flink standalone session mode
  *
- * @author czy006
  */
 class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends BuildPipeline {
 
