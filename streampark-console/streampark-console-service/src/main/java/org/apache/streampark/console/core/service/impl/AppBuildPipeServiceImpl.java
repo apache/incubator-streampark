@@ -95,7 +95,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
-@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class AppBuildPipeServiceImpl
     extends ServiceImpl<ApplicationBuildPipelineMapper, AppBuildPipeline> implements AppBuildPipeService {
 
@@ -444,7 +443,7 @@ public class AppBuildPipeServiceImpl
             return Maps.newHashMap();
         }
         LambdaQueryWrapper<AppBuildPipeline> query = new LambdaQueryWrapper();
-        query.select(AppBuildPipeline::getAppId, AppBuildPipeline::getPipeStatus)
+        query.select(AppBuildPipeline::getAppId, AppBuildPipeline::getPipeStatusCode)
             .in(AppBuildPipeline::getAppId, appIds);
         List<Map<String, Object>> rMaps = baseMapper.selectMaps(query);
         if (CollectionUtils.isEmpty(rMaps)) {

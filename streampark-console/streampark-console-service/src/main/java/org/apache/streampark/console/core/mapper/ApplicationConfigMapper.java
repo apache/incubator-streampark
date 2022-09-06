@@ -36,7 +36,7 @@ public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
     @Select("select s.* from t_flink_config s inner join t_flink_effective e on s.id = e.target_id where e.app_id=#{appId} and e.target_type=1")
     ApplicationConfig getEffective(@Param("appId") Long appId);
 
-    @Select("select * from t_flink_config where app_id=#{appId} and latest=1")
+    @Select("select * from t_flink_config where app_id=#{appId} and latest=true")
     ApplicationConfig getLatest(@Param("appId") Long appId);
 
 }
