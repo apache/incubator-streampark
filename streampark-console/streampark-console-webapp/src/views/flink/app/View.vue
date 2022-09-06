@@ -219,6 +219,11 @@
 
       <div slot="extra">
         <a-input-group compact>
+          <a-select placeholder="Tags" show-search allowClear @change="handleChangeTags" style="margin-left: 16px;width: 150px">
+            <a-select-option v-for="tag in tagsOptions" :key="tag">
+              <span> {{ tag }} </span>
+            </a-select-option>
+          </a-select>
           <a-select placeholder="User" allowClear @change="handleChangeUser" style="margin-left: 16px;width: 120px">
             <a-select-option v-for="u in users" :key="u.userId">
               <span v-if="u.nickName"> {{ u.nickName }} </span>
@@ -313,6 +318,20 @@
         </template>
 
         <template
+          slot="tags"
+          slot-scope="text, record">
+          <span>
+            <a-tooltip>
+              {{ record.tags }}
+              <template
+                slot="title">
+                {{ record.tags }}
+              </template>
+            </a-tooltip>
+          </span>
+        </template>
+
+        <template
           slot="duration"
           slot-scope="text, record">
           {{ record.duration | duration }}
@@ -352,6 +371,8 @@
           slot="customOperation">
           Operation
         </template>
+
+        
 
         <template
           slot="operation"
@@ -1130,6 +1151,8 @@ export default {
       jobType: null,
       userId: null,
       users: [],
+      tags: null,
+      tagsOptions: [],
       sortedInfo: null,
       filteredInfo: null,
       queryInterval: 2000,
@@ -1246,6 +1269,12 @@ export default {
         scopedSlots: {customRender: 'duration'},
         width: 150
       }, {
+        title: 'Tags',
+        dataIndex: 'tags',
+        width: 200,
+        ellipsis: true,
+        scopedSlots: {customRender: 'tags'},
+      }, {
         title: 'Modified Time',
         dataIndex: 'modifyTime',
         sorter: true,
@@ -1257,7 +1286,7 @@ export default {
         fixed: 'right',
         scopedSlots: {customRender: 'operation'},
         slots: {title: 'customOperation'},
-        width: 150
+        width: 160
       }]
     }
   },
@@ -1267,6 +1296,7 @@ export default {
     listUser({'pageSize': '9999'}).then((resp) => {
       this.users = resp.data.records
     })
+    this.handleInitTagsOptions()
     this.handleFetch(true)
     const timer = window.setInterval(() => {
       this.handleDashboard()
@@ -1937,6 +1967,7 @@ export default {
       this.queryParams['jobName'] = this.searchText
       this.queryParams['jobType'] = this.jobType
       this.queryParams['userId'] = this.userId
+      this.queryParams['tags'] = this.tags
       this.handleFetch(false)
     },
 
@@ -1953,6 +1984,31 @@ export default {
         this.queryParams['sortOrder'] = sorter.order
       }
       this.handleFetch(true)
+    },
+
+    //Tags
+    handleInitTagsOptions() {
+      const params = Object.assign(this.queryParams, {})
+      params.pageSize = 999999999
+      params.pageNum = 1
+      list({...params}).then((resp) => {
+          const dataSource = resp.data.records
+          dataSource.forEach(record => {
+            if (record.tags !== null && record.tags !== undefined && record.tags !== '') {
+              const tagsArray =record.tags.split(',')
+              tagsArray.forEach(x => {
+                if(x.length > 0 && this.tagsOptions.indexOf(x) == -1) {
+                  this.tagsOptions.push(x)
+                }
+              })
+            }
+          })
+      })
+    },
+
+    handleChangeTags(tags) {
+      this.tags = tags
+      this.handleSearch()
     },
 
     handleFetch(loading) {

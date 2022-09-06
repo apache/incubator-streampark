@@ -55,6 +55,7 @@
         <result column="k8s_hadoop_integration" jdbcType="TINYINT" property="k8sHadoopIntegration"/>
         <result column="rest_url" jdbcType="VARCHAR" property="restUrl"/>
         <result column="rest_port" jdbcType="INTEGER" property="restPort"/>
+        <result column="tags" jdbcType="VARCHAR" property="tags"/>
     </resultMap>
 
     <select id="page" resultType="application" parameterType="application">
@@ -107,6 +108,9 @@
                 <foreach item="item" index="index" collection="application.stateArray" open="("  close=")" separator=",">
                     #{item}
                 </foreach>
+            </if>
+            <if test="application.tags != null and application.tags != ''">
+                and t.tags like '%${application.tags}%'
             </if>
         </where>
     </select>

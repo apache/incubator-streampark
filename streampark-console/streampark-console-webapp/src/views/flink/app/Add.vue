@@ -658,6 +658,17 @@
       </a-form-item>
 
       <a-form-item
+        label="Tags"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input
+          type="text"
+          placeholder="Please enter tags,if more than one, separate them with commas(,)"
+          allowClear
+          v-decorator="['tags']"/>
+      </a-form-item>
+
+      <a-form-item
         label="Resolve Order"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -2281,6 +2292,7 @@
           projectId: values.project || null,
           module: values.module || null,
           jobName: values.jobName,
+          tags: values.tags,
           args: values.args,
           options: JSON.stringify(options),
           yarnQueue: this.handleYarnQueue(values),
@@ -2380,6 +2392,7 @@
           config: config,
           format: this.isSetConfig ? 1 : null,
           jobName: values.jobName,
+          tags: values.tags,
           args: values.args || null,
           dependency: dependency.pom === undefined && dependency.jar === undefined ? null : JSON.stringify(dependency),
           options: JSON.stringify(options),

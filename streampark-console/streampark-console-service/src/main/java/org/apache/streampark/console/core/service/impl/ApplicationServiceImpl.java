@@ -761,6 +761,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setCpFailureRateInterval(appParam.getCpFailureRateInterval());
             application.setCpMaxFailureInterval(appParam.getCpMaxFailureInterval());
             application.setFlinkClusterId(appParam.getFlinkClusterId());
+            application.setTags(appParam.getTags());
 
             // Flink Sql job...
             if (application.isFlinkSqlJob()) {

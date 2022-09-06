@@ -255,6 +255,8 @@ public class Application implements Serializable {
      */
     private Boolean k8sHadoopIntegration;
 
+    private String tags;
+
     /**
      * running job
      */
