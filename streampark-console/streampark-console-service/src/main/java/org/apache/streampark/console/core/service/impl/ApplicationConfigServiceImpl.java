@@ -82,12 +82,13 @@ public class ApplicationConfigServiceImpl
     @Transactional(rollbackFor = {Exception.class})
     public void setLatest(Long appId, Long configId) {
         LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.set(ApplicationConfig::getLatest, 0)
+        updateWrapper.set(ApplicationConfig::getLatest, false)
             .eq(ApplicationConfig::getAppId, appId);
         this.update(updateWrapper);
 
         updateWrapper.clear();
-        updateWrapper.set(ApplicationConfig::getLatest, 1).eq(ApplicationConfig::getId, configId);
+        updateWrapper.set(ApplicationConfig::getLatest, true)
+            .eq(ApplicationConfig::getId, configId);
         this.update(updateWrapper);
     }
 
@@ -174,7 +175,7 @@ public class ApplicationConfigServiceImpl
     public void toEffective(Long appId, Long configId) {
         LambdaUpdateWrapper<ApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(ApplicationConfig::getAppId, appId)
-            .set(ApplicationConfig::getLatest, 0);
+            .set(ApplicationConfig::getLatest, false);
         this.update(updateWrapper);
         effectiveService.saveOrUpdate(appId, EffectiveType.CONFIG, configId);
     }
