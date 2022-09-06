@@ -502,7 +502,7 @@ public class Application implements Serializable {
         return isCustomCodeJob() && ResourceFrom.CICD.getValue().equals(this.getResourceFrom());
     }
 
-    public boolean isStreamXJob() {
+    public boolean isStreamParkJob() {
         return this.getAppType() == ApplicationType.STREAMPARK_FLINK.getType();
     }
 
