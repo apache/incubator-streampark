@@ -40,6 +40,9 @@ import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 
 import com.google.common.eventbus.Subscribe;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
@@ -53,30 +56,30 @@ import scala.Enumeration;
  * Event Listener for K8sFlinkTrackMonitor
  *
  */
+@Component
 public class K8sFlinkChangeEventListener {
 
-    private final ApplicationService applicationService;
-    private final AlertService alertService;
+    @Lazy
+    @Autowired
+    private ApplicationService applicationService;
 
-    private final CheckpointProcessor checkpointProcessor;
+    @Lazy
+    @Autowired
+    private AlertService alertService;
+
+    @Lazy
+    @Autowired
+    private CheckpointProcessor checkpointProcessor;
 
     private final ExecutorService executor = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors(),
-        100,
+        Runtime.getRuntime().availableProcessors() * 5,
+        Runtime.getRuntime().availableProcessors() * 10,
         20L,
         TimeUnit.SECONDS,
         new LinkedBlockingQueue<>(1024),
         ThreadUtils.threadFactory("streampark-notify-executor"),
         new ThreadPoolExecutor.AbortPolicy()
     );
-
-    public K8sFlinkChangeEventListener(ApplicationService applicationService,
-                                       AlertService alertService,
-                                       CheckpointProcessor checkpointProcessor) {
-        this.applicationService = applicationService;
-        this.alertService = alertService;
-        this.checkpointProcessor = checkpointProcessor;
-    }
 
     /**
      * Catch FlinkJobStatusChangeEvent then storage it persistently to db.

@@ -30,7 +30,6 @@ import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.EffectiveService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -212,7 +211,7 @@ public class ApplicationConfigServiceImpl
 
     @Override
     public List<ApplicationConfig> history(Application application) {
-        LambdaQueryWrapper<ApplicationConfig> wrapper = new QueryWrapper<ApplicationConfig>().lambda();
+        LambdaQueryWrapper<ApplicationConfig> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ApplicationConfig::getAppId, application.getId())
             .orderByDesc(ApplicationConfig::getVersion);
 

@@ -68,7 +68,7 @@ import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipe
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -124,11 +124,11 @@ public class AppBuildPipeServiceImpl
     private ApplicationConfigService applicationConfigService;
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() * 2,
-        300,
+        Runtime.getRuntime().availableProcessors() * 5,
+        Runtime.getRuntime().availableProcessors() * 10,
         60L,
         TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(2048),
+        new LinkedBlockingQueue<>(1024),
         ThreadUtils.threadFactory("streampark-build-pipeline-executor"),
         new ThreadPoolExecutor.AbortPolicy()
     );
@@ -443,8 +443,9 @@ public class AppBuildPipeServiceImpl
         if (CollectionUtils.isEmpty(appIds)) {
             return Maps.newHashMap();
         }
-        QueryWrapper<AppBuildPipeline> query = new QueryWrapper<>();
-        query.select("app_id", "pipe_status").in("app_id", appIds);
+        LambdaQueryWrapper<AppBuildPipeline> query = new LambdaQueryWrapper();
+        query.select(AppBuildPipeline::getAppId, AppBuildPipeline::getPipeStatus)
+            .in(AppBuildPipeline::getAppId, appIds);
         List<Map<String, Object>> rMaps = baseMapper.selectMaps(query);
         if (CollectionUtils.isEmpty(rMaps)) {
             return Maps.newHashMap();
@@ -456,7 +457,7 @@ public class AppBuildPipeServiceImpl
 
     @Override
     public void removeApp(Long appId) {
-        baseMapper.delete(new QueryWrapper<AppBuildPipeline>().lambda().eq(AppBuildPipeline::getAppId, appId));
+        baseMapper.delete(new LambdaQueryWrapper<AppBuildPipeline>().eq(AppBuildPipeline::getAppId, appId));
     }
 
     public boolean saveEntity(AppBuildPipeline pipe) {

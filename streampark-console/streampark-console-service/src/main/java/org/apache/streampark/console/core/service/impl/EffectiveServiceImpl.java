@@ -22,9 +22,8 @@ import org.apache.streampark.console.core.enums.EffectiveType;
 import org.apache.streampark.console.core.mapper.EffectiveMapper;
 import org.apache.streampark.console.core.service.EffectiveService;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,9 +40,8 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
 
     @Override
     public void delete(Long appId, EffectiveType effectiveType) {
-        Wrapper<Effective> queryWrapper = new QueryWrapper<Effective>()
-            .lambda()
-            .eq(Effective::getAppId, appId)
+        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(Effective::getAppId, appId)
             .eq(Effective::getTargetType, effectiveType.getType());
         baseMapper.delete(queryWrapper);
     }
@@ -55,8 +53,7 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
 
     @Override
     public void saveOrUpdate(Long appId, EffectiveType type, Long id) {
-        Wrapper<Effective> queryWrapper = new QueryWrapper<Effective>()
-            .lambda()
+        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
             .eq(Effective::getAppId, appId)
             .eq(Effective::getTargetType, type.getType());
         long count = count(queryWrapper);
@@ -68,8 +65,7 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
             effective.setCreateTime(new Date());
             save(effective);
         } else {
-            update(new UpdateWrapper<Effective>()
-                .lambda()
+            update(new LambdaUpdateWrapper<Effective>()
                 .eq(Effective::getAppId, appId)
                 .eq(Effective::getTargetType, type.getType())
                 .set(Effective::getTargetId, id)

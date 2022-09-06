@@ -40,7 +40,7 @@ trait K8sFlinkTrackMonitor extends Logger with AutoCloseable {
    *
    * At present, the implementation of listener is in the
    * same form as Guava EvenBus Listener. The events that
-   * can be subcribed are included in
+   * can be subscribed are included in
    * org.apache.streampark.flink.kubernetes.event
    */
   def registerListener(listener: AnyRef): Unit
@@ -140,7 +140,7 @@ trait K8sFlinkTrackMonitor extends Logger with AutoCloseable {
   /**
    * Create FlinkTrackMonitor instance.
    *
-   * @param conf      onfiguration
+   * @param conf      configuration
    * @param lazyStart Whether monitor will performs delayed auto-start when necessary.
    *                  In this case, there is no need to display the call to FlinkTrackMonitor.start(),
    *                  useless the monitor is expected to start immediately.

@@ -90,7 +90,7 @@ import org.apache.streampark.flink.submit.bean.KubernetesSubmitParam;
 import org.apache.streampark.flink.submit.bean.SubmitRequest;
 import org.apache.streampark.flink.submit.bean.SubmitResponse;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -144,8 +144,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private final Map<Long, Boolean> tailBeginning = new ConcurrentHashMap<>();
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() * 2,
-        200,
+        Runtime.getRuntime().availableProcessors() * 5,
+        Runtime.getRuntime().availableProcessors() * 10,
         60L,
         TimeUnit.SECONDS,
         new LinkedBlockingQueue<>(1024),
@@ -521,7 +521,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             return AppExistsState.INVALID;
         }
         boolean inDB = this.baseMapper.selectCount(
-            new QueryWrapper<Application>().lambda()
+            new LambdaQueryWrapper<Application>()
                 .eq(Application::getJobName, appParam.getJobName())) > 0;
 
         if (appParam.getId() != null) {
@@ -608,7 +608,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     public Long copy(Application appParam) {
         long count = this.baseMapper.selectCount(
-            new QueryWrapper<Application>().lambda()
+            new LambdaQueryWrapper<Application>()
                 .eq(Application::getJobName, appParam.getJobName()));
         if (count > 0) {
             throw new IllegalArgumentException("[StreamPark] Application names cannot be repeated");
