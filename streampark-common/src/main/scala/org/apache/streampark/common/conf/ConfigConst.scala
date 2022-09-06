@@ -272,18 +272,20 @@ object ConfigConst {
 
   def printLogo(info: String): Unit = {
     // scalastyle:off println
-    println("\n\n                 .+.                                ")
-    println("           _____/ /_________  ____ _____ ___  _  __     ")
-    println("          / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\| |/_/   ")
-    println("         (__  ) /_/ /  /  __/ /_/ / / / / / />  <       ")
-    println("        /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/_/|_|    ")
-    println("                                              |/        ")
-    println("                                              .         ")
-    println("\n       WebSite:  http://streampark.apache.org         ")
-    println("       GitHub :  https://github.com/apache/streampark   ")
-    println("       Ver    :  1.2.4                                  ")
-    println(s"       Info   :  $info                                 ")
-    println(s"       Time   :  ${LocalDateTime.now}              \n\n")
+    println("\n")
+    println("        ___                     __                  .+.                         ______             __       ")
+    println("       /   |  ____  ____ ______/ /_  ___      _____/ /_________  ____ _____ ___  , __ \\____ ______/ /__    ")
+    println("      / /| | / __ \\/ __ `/ ___/ __ \\/ _ \\    / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\  /_/ / __ `/ ___/ //_/")
+    println("     / ___ |/ /_/ / /_/ / /__/ / / /  __/   (__  ) /_/ /  /  __/ /_/ / / / / / / ____/ /_/ / /  / ,<        ")
+    println("    /_/  |_/ /___/\\__,_/\\___/_/ /_/\\___/   /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/_/    \\__,_/_/  /_/|_|")
+    println("           \\/                                                                                              ")
+    println("                                                                                                            ")
+    println("")
+    println("    WebSite:  http://streampark.apache.org                                                                  ")
+    println("    GitHub :  https://github.com/apache/streampark                                                          ")
+    println("    Ver    :  1.2.4                                  ")
+    println(s"    Info   :  $info                                 ")
+    println(s"    Time   :  ${LocalDateTime.now}              \n\n")
     // scalastyle:on println
   }
 
