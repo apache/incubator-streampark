@@ -236,7 +236,7 @@ public class AppBuildPipeServiceImpl
                         if (app.isFlinkSqlJob()) {
                             applicationService.toEffective(app);
                         } else {
-                            if (app.isStreamXJob()) {
+                            if (app.isStreamParkJob()) {
                                 ApplicationConfig config = applicationConfigService.getLatest(app.getId());
                                 if (config != null) {
                                     config.setToApplication(app);

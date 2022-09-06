@@ -36,14 +36,14 @@
         href="https://github.com/apache/streampark"
         title="GitHub"
         target="_blank">
-        <img src="https://img.shields.io/github/stars/streamxhub/streamx.svg?sanitize=true" class="shields">
+        <img src="https://img.shields.io/github/stars/streamxhub/streampark.svg?sanitize=true" class="shields">
       </a>
 
       <a
         href="https://github.com/apache/streampark"
         title="GitHub"
         target="_blank">
-        <img src="https://img.shields.io/github/forks/streamxhub/streamx.svg?sanitize=true" class="shields">
+        <img src="https://img.shields.io/github/forks/streamxhub/streampark.svg?sanitize=true" class="shields">
       </a>
 
       <notice class="action"/>

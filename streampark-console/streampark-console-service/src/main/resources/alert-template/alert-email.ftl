@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>StreamX Email</title>
+    <title>StreamPark Email</title>
     <link rel="shortcut icon"
           href="favicon.ico">
     <style type="text/css">
@@ -762,7 +762,7 @@
                                                                                         style="padding: 5px 20px; font-family: Arial, Helvetica, sans-serif; font-size: 1em; font-weight: 400; color: rgb(222,222,222); text-align: left;"
                                                                                         class="tblCell">
                                                                                         <div style="line-height: 150%; text-align: center;">
-                                                                                            <span style="font-size: 1rem; font-family: Tahoma, Arial, Helvetica, sans-serif; color: #f0f0f0; line-height: 150%;">StreamX , Make stream processing easier!</span>
+                                                                                            <span style="font-size: 1rem; font-family: Tahoma, Arial, Helvetica, sans-serif; color: #f0f0f0; line-height: 150%;">StreamPark , Make stream processing easier!</span>
                                                                                         </div>
                                                                                         <br>
                                                                                         <div style="line-height: 150%; text-align: center;">
@@ -839,7 +839,7 @@
                                                                 <tr>
                                                                     <td colspan="2">
                                                                         <br>
-                                                                        <p style="margin: 0 0 1em;">Dear StreamX
+                                                                        <p style="margin: 0 0 1em;">Dear StreamPark
                                                                             user:</p>
                                                                         <p style="margin: 0 1em 1em;">I'm sorry to
                                                                             inform you that something wrong with your
@@ -971,7 +971,7 @@
                                                                         <div style="margin: 1.5em 0;">Best Wishes!
                                                                         </div>
                                                                         <div style="margin: 1.5em 0;font-weight: bold;">
-                                                                            StreamX Team
+                                                                            StreamPark Team
                                                                         </div>
                                                                         <br>
                                                                     </td>
@@ -1012,7 +1012,7 @@
                                                                                 <td style="border: 3px solid rgb(0, 174, 84); text-align: center; font-family: Arial, Helvetica, sans-serif; font-size: 1em; padding: 15px 30px; font-weight: bold; border-collapse: separate; background-color: rgb(0, 174, 84);"
                                                                                     class="bmeButtonText">
                                                                                             <span style="font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 1em; color: rgb(255, 255, 255);">
-                                                                                                <a href="https://github.com/streamxhub/streamx"
+                                                                                                <a href="https://github.com/streamxhub/streampark"
                                                                                                    style="color:#FFFFFF;text-decoration:none;">GitHub</a>
                                                                                             </span>
                                                                                 </td>
