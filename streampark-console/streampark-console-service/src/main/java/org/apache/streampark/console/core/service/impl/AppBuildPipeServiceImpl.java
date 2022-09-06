@@ -69,6 +69,7 @@ import org.apache.streampark.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -442,9 +443,8 @@ public class AppBuildPipeServiceImpl
         if (CollectionUtils.isEmpty(appIds)) {
             return Maps.newHashMap();
         }
-        LambdaQueryWrapper<AppBuildPipeline> query = new LambdaQueryWrapper();
-        query.select(AppBuildPipeline::getAppId, AppBuildPipeline::getPipeStatusCode)
-            .in(AppBuildPipeline::getAppId, appIds);
+        QueryWrapper<AppBuildPipeline> query = new QueryWrapper<>();
+        query.select("app_id", "pipe_status").in("app_id", appIds);
         List<Map<String, Object>> rMaps = baseMapper.selectMaps(query);
         if (CollectionUtils.isEmpty(rMaps)) {
             return Maps.newHashMap();
