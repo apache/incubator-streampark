@@ -766,7 +766,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (application.isFlinkSqlJob()) {
                 updateFlinkSqlJob(application, appParam);
             } else {
-                if (application.isStreamXJob()) {
+                if (application.isStreamParkJob()) {
                     configService.update(appParam, application.isRunning());
                 } else {
                     application.setJar(appParam.getJar());
@@ -1475,7 +1475,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         // 2) Application conf配置优先级第二,如果是 streampark|flinksql 类型的任务,则看任务定义时是否配置了Application conf,
         // 如配置了并开启了checkpoints则读取state.savepoints.dir
         if (StringUtils.isBlank(savepointPath)) {
-            if (application.isStreamXJob() || application.isFlinkSqlJob()) {
+            if (application.isStreamParkJob() || application.isFlinkSqlJob()) {
                 ApplicationConfig applicationConfig = configService.getEffective(application.getId());
                 if (applicationConfig != null) {
                     Map<String, String> map = applicationConfig.readConfig();
