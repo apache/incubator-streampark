@@ -21,7 +21,6 @@ import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.console.base.util.CommonUtils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
@@ -50,7 +49,6 @@ import java.io.File;
 @Slf4j
 @SpringBootApplication
 @EnableScheduling
-@MapperScan(value = {"org.apache.streampark.console.*.mapper"})
 public class StreamParkConsoleBootstrap {
 
     public static void main(String[] args) {

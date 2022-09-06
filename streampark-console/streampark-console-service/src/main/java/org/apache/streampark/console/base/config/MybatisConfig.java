@@ -22,6 +22,7 @@ import org.apache.streampark.console.base.mybatis.interceptor.PostgreSQLQueryInt
 
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
  * for MyBatis Configure management.
  */
 @Configuration
+@MapperScan(value = {"org.apache.streampark.console.*.mapper"})
 public class MybatisConfig {
 
     @Bean
