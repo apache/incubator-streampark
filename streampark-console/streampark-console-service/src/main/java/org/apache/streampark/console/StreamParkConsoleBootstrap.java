@@ -32,19 +32,17 @@ import java.io.File;
 /**
  * <pre>
  *
- *               .+.
- *         _____/ /_________  ____ _____ ___  _  __
- *        / ___/ __/ ___/ _ \/ __ `/ __ `__ \| |/_/
- *       (__  ) /_/ /  /  __/ /_/ / / / / / />   <
- *      /____/\__/_/   \___/\__,_/_/ /_/ /_/_/|_|
- *                                            |/
- *                                            .
+ *       ___                     __                  .+.                         ______             __
+ *      /   |  ____  ____ ______/ /_  ___      _____/ /_________  ____ _____ ___  , __ \____ ______/ /__
+ *     / /| | / __ \/ __ `/ ___/ __ \/ _ \    / ___/ __/ ___/ _ \/ __ `/ __ `__ \  /_/ / __ `/ ___/ //_/
+ *    / ___ |/ /_/ / /_/ / /__/ / / /  __/   (__  ) /_/ /  /  __/ /_/ / / / / / / ____/ /_/ / /  / ,<
+ *   /_/  |_/ /___/\__,_/\___/_/ /_/\___/   /____/\__/_/   \___/\__,_/_/ /_/ /_/_/    \__,_/_/  /_/|_|
+ *          \/
  *
- *      WebSite:  http://streampark.apache.org
- *      GitHub :  https://github.com/apache/streampark
+ *   WebSite:  http://streampark.apache.org
+ *   GitHub :  https://github.com/apache/streampark
  *
- *      [StreamPark] Make stream processing easier ô~ô!
- *
+ *   [StreamPark] Make stream processing easier ô~ô!
  *
  * </pre>
  *

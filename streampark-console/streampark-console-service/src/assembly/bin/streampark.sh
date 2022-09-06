@@ -54,11 +54,14 @@ if [[ ${have_tty} -eq 1 ]]; then
   RAINBOW="
     $(printf '\033[38;5;196m')
     $(printf '\033[38;5;202m')
-    $(printf '\033[38;5;226m')
     $(printf '\033[38;5;082m')
-    $(printf '\033[38;5;021m')
-    $(printf '\033[38;5;093m')
     $(printf '\033[38;5;163m')
+    $(printf '\033[38;5;093m')
+    $(printf '\033[38;5;100m')
+    $(printf '\033[38;5;255m')
+    $(printf '\033[38;5;110m')
+    $(printf '\033[38;5;085m')
+    $(printf '\033[38;5;226m')
   "
   RED=$(printf '\033[31m')
   GREEN=$(printf '\033[32m')
@@ -66,6 +69,7 @@ if [[ ${have_tty} -eq 1 ]]; then
   BLUE=$(printf '\033[34m')
   BOLD=$(printf '\033[1m')
   RESET=$(printf '\033[0m')
+
 
 else
   RAINBOW=""
@@ -262,16 +266,15 @@ fi
 
 print_logo() {
   printf '\n'
-  printf '%s           %s.+. %s   %s     %s     %s          %s                         %s\n' $RAINBOW $RESET
-  printf '%s     _____%s/ /_%s_____%s___  %s____ %s_____ ___ %s _  __                  %s\n' $RAINBOW $RESET
-  printf '%s    / ___/%s __%s/ ___%s/ _ \%s/ __ `%s/ __ `__ \%s| |/_/                  %s\n' $RAINBOW $RESET
-  printf '%s   (__  )%s /_%s/ /  %s/  __/%s /_/ %s/ / / / / /%s>   <                   %s\n' $RAINBOW $RESET
-  printf '%s  /____/%s\__%s/_/   %s\___/%s\__,_%s/_/ /_/ /_/%s_/|_|                    %s\n' $RAINBOW $RESET
-  printf '%s       %s    %s     %s      %s     %s           %s  |/                     %s\n' $RAINBOW $RESET
-  printf '%s      %s    %s    %s      %s     %s             %s  .                      %s\n' $RAINBOW $RESET
-  printf '  • WebSite: %s http://streampark.apache.org%s\n'                              $BLUE   $RESET
-  printf '  • GitHub : %s http://github.com/apache/streampark%s\n'                   $BLUE   $RESET
-  printf '          %s ────────  Make stream processing easier ô~ô!%s\n\n'            $GREEN  $RESET
+  printf '        ___                     __           %s        %s.+. %s   %s     %s     %s          %s ______ %s     %s      %s __    %s\n' $RAINBOW $RESET
+  printf '       /   |  ____  ____ ______/ /_  ___    %s   _____%s/ /_%s_____%s___  %s____ %s_____ ___ %s , __ \%s____%s ______%s/ /__  %s\n' $RAINBOW $RESET
+  printf '      / /| | / __ \/ __ `/ ___/ __ \/ _ \  %s  / ___/%s __%s/ ___%s/ _ \%s/ __ `%s/ __ `__ \%s  /_/ / %s__ `%s/ ___/ %s//_/   %s\n' $RAINBOW $RESET
+  printf '     / ___ |/ /_/ / /_/ / /__/ / / /  __/ %s  (__  )%s /_%s/ /  %s/  __/%s /_/ %s/ / / / / /%s ____/ %s/_/ %s/ /  / %s,<      %s\n' $RAINBOW $RESET
+  printf '    /_/  |_/ /___/\__,_/\___/_/ /_/\___/  %s /____/%s\__%s/_/   %s\___/%s\__,_%s/_/ /_/ /_/%s_/    %s\__,_%s/_/  /_%s/|_|     %s\n' $RAINBOW $RESET
+  printf '           \/                                                                                                                        %s\n\n' $RESET
+  printf '    WebSite: %s http://streampark.apache.org%s\n'                              $BLUE   $RESET
+  printf '    GitHub : %s http://github.com/apache/streampark%s\n'                       $BLUE   $RESET
+  printf '   %s ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'    $GREEN  $RESET
 }
 
 # shellcheck disable=SC2120
