@@ -372,8 +372,6 @@
           Operation
         </template>
 
-        
-
         <template
           slot="operation"
           slot-scope="text, record">
