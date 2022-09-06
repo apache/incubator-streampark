@@ -128,7 +128,7 @@ public class AppBuildPipeServiceImpl
         Runtime.getRuntime().availableProcessors() * 10,
         60L,
         TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(2048),
+        new LinkedBlockingQueue<>(1024),
         ThreadUtils.threadFactory("streampark-build-pipeline-executor"),
         new ThreadPoolExecutor.AbortPolicy()
     );
