@@ -41,7 +41,7 @@ import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
@@ -152,8 +152,8 @@ public class FlinkTrackingTask {
     private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
 
     private static final ExecutorService EXECUTOR = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() * 2,
-        200,
+        Runtime.getRuntime().availableProcessors() * 5,
+        Runtime.getRuntime().availableProcessors() * 10,
         60L,
         TimeUnit.SECONDS,
         new LinkedBlockingQueue<>(1024),
@@ -543,9 +543,9 @@ public class FlinkTrackingTask {
     }
 
     private static List<Application> getAllApplications() {
-        QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("tracking", 1)
-            .notIn("execution_mode", ExecutionMode.getKubernetesMode());
+        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(Application::getTracking, 1)
+            .notIn(Application::getExecutionMode, ExecutionMode.getKubernetesMode());
         return applicationService.list(queryWrapper);
     }
 

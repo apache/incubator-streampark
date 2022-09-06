@@ -65,14 +65,15 @@ import java.util.concurrent.TimeUnit;
 public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, FlinkCluster> implements FlinkClusterService {
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() * 2,
-        200,
+        Runtime.getRuntime().availableProcessors() * 5,
+        Runtime.getRuntime().availableProcessors() * 10,
         60L,
         TimeUnit.SECONDS,
         new LinkedBlockingQueue<>(1024),
         ThreadUtils.threadFactory("streampark-cluster-executor"),
         new ThreadPoolExecutor.AbortPolicy()
     );
+
     @Autowired
     private FlinkEnvService flinkEnvService;
 

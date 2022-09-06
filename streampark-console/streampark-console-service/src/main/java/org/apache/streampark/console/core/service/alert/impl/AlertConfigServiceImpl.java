@@ -28,7 +28,6 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -52,8 +51,8 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
     @Override
     public IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request) {
         // build query conditions
-        QueryWrapper<AlertConfig> wrapper = new QueryWrapper<>();
-        wrapper.lambda().eq(params.getUserId() != null, AlertConfig::getUserId, params.getUserId());
+        LambdaQueryWrapper<AlertConfig> wrapper = new LambdaQueryWrapper();
+        wrapper.eq(params.getUserId() != null, AlertConfig::getUserId, params.getUserId());
 
         Page<AlertConfig> page = new MybatisPager<AlertConfig>().getDefaultPage(request);
         IPage<AlertConfig> resultPage = getBaseMapper().selectPage(page, wrapper);

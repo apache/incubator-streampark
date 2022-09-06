@@ -64,12 +64,12 @@ trait K8sFlinkTrackMonitorLazyStartAop extends K8sFlinkTrackMonitor {
   }
 
   abstract override def getAccClusterMetrics: FlinkMetricCV = {
-    // hehavior of getting cluster metrics will not trgger a delayed start
+    // behavior of getting cluster metrics will not trgger a delayed start
     super.getAccClusterMetrics
   }
 
   abstract override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = {
-    // hehavior of getting cluster metrics will not trgger a delayed start
+    // behavior of getting cluster metrics will not trgger a delayed start
     super.getClusterMetrics(clusterKey)
   }
 

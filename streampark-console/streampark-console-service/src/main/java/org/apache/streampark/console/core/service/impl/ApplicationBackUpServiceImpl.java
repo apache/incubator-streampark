@@ -37,7 +37,6 @@ import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.task.FlinkTrackingTask;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -73,8 +72,8 @@ public class ApplicationBackUpServiceImpl
     private FlinkSqlService flinkSqlService;
 
     private ExecutorService executorService = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() * 2,
-        200,
+        Runtime.getRuntime().availableProcessors() * 5,
+        Runtime.getRuntime().availableProcessors() * 10,
         60L,
         TimeUnit.SECONDS,
         new LinkedBlockingQueue<>(1024),
@@ -222,7 +221,7 @@ public class ApplicationBackUpServiceImpl
 
     @Override
     public boolean isFlinkSqlBacked(Long appId, Long sqlId) {
-        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new QueryWrapper<ApplicationBackUp>().lambda();
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper();
         queryWrapper.eq(ApplicationBackUp::getAppId, appId)
             .eq(ApplicationBackUp::getSqlId, sqlId);
         return baseMapper.selectCount(queryWrapper) > 0;

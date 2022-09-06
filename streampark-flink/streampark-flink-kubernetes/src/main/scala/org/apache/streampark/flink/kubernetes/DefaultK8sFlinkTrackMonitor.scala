@@ -36,7 +36,11 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
   implicit val trackController: FlinkTrackController = new FlinkTrackController()
 
   // eventBus for change event
-  implicit val eventBus: ChangeEventBus = new ChangeEventBus()
+  implicit lazy val eventBus: ChangeEventBus = {
+    val eventBus = new ChangeEventBus()
+    eventBus.registerListener(new BuildInEventListener)
+    eventBus
+  }
 
   // remote server tracking watcher
   val k8sEventWatcher = new FlinkK8sEventWatcher()
@@ -45,11 +49,6 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
   val checkpointWatcher = new FlinkCheckpointWatcher(conf.metricWatcherConf)
 
   private[this] val allWatchers = Array[FlinkWatcher](k8sEventWatcher, jobStatusWatcher, metricsWatcher, checkpointWatcher)
-
-  {
-    // register build-in event listener
-    eventBus.registerListener(new BuildInEventListener)
-  }
 
   override def registerListener(listener: AnyRef): Unit = eventBus.registerListener(listener)
 

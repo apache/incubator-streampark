@@ -23,8 +23,11 @@ import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 
 class ChangeEventBus {
 
-  private val execPool = new ThreadPoolExecutor(6, 12,
-    0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue[Runnable](10000))
+  private val execPool = new ThreadPoolExecutor(
+    Runtime.getRuntime.availableProcessors * 10,
+    Runtime.getRuntime.availableProcessors * 20,
+    60L, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable](2048)
+  )
 
   private[kubernetes] val asyncEventBus = new AsyncEventBus("[StreamPark][flink-k8s]AsyncEventBus", execPool)
 
