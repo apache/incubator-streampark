@@ -31,7 +31,7 @@ import java.util.Date;
 
 public interface SavePointMapper extends BaseMapper<SavePoint> {
 
-    @Update("update t_flink_savepoint set latest=0 where app_id=#{appId}")
+    @Update("update t_flink_savepoint set latest=false where app_id=#{appId}")
     void obsolete(@Param("appId") Long appId);
 
     @Select("select * from t_flink_savepoint where app_id=#{appId} and latest=true")
