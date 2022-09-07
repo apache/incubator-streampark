@@ -474,7 +474,7 @@ create table "public"."t_flink_sql" (
   "sql" text collate "pg_catalog"."default",
   "dependency" text collate "pg_catalog"."default",
   "version" int4,
-  "candidate" int2 not null,
+  "candidate" int2 default 1 not null,
   "create_time" timestamp(6)
 )
 ;
