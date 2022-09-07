@@ -145,7 +145,7 @@ Thank you to all the people who already contributed to StreamPark!
 
 ## ⏰ Contributor Over Time
 
-[![Contributor Over Time](https://contributor-overtime-api.git-contributor.com/contributors-svg?chart=contributorOverTime&repo=streamxhub/streamx)](https://git-contributor.com?chart=contributorOverTime&repo=streamxhub/streamx)
+[![Contributor Over Time](https://contributor-overtime-api.git-contributor.com/contributors-svg?chart=contributorOverTime&repo=streamxhub/streampark)](https://git-contributor.com?chart=contributorOverTime&repo=streamxhub/streampark)
 
 
 ## 💬 Join us
