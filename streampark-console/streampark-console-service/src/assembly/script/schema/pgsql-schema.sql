@@ -239,7 +239,7 @@ create table "public"."t_flink_app" (
   "option_state" int2,
   "tracking" int2,
   "create_time" timestamp(6),
-  "modify_time" timestamp(6) not null default current_timestamp,
+  "modify_time" timestamp(6),
   "option_time" timestamp(6),
   "launch" int2 default 1,
   "build" boolean default true,
