@@ -106,7 +106,7 @@ object HadoopUtils extends Logger {
         val end = value.getEndTime.getTime
         ((end - start) * 0.90f).toLong
       case _ =>
-        logWarn("get tgtRefreshTime failed, try get kerberos.ttl. ")
+        logWarn("get kerberos tgtRefreshTime failed, try get kerberos.ttl. ")
         val timeUnit = DateUtils.getTimeUnit(InternalConfigHolder.get(CommonConfig.KERBEROS_TTL))
         timeUnit._2 match {
           case TimeUnit.SECONDS => timeUnit._1 * 1000
