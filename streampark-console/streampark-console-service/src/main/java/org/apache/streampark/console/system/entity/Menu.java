@@ -38,10 +38,6 @@ public class Menu implements Serializable {
 
     public static final String TYPE_BUTTON = "1";
 
-    public static final String DISPLAY_SHOW = "1";
-
-    public static final String DISPLAY_NONE = "0";
-
     @TableId(type = IdType.AUTO)
     private Long menuId;
 
@@ -71,7 +67,7 @@ public class Menu implements Serializable {
 
     private Date modifyTime;
 
-    private String display;
+    private boolean display;
 
     private transient String createTimeFrom;
     private transient String createTimeTo;

@@ -197,7 +197,7 @@ export default {
       this.menu.icon = ''
     },
     setFormValues ({ ...menu }) {
-      this.display = menu.display === '1'
+      this.display = menu.display
       const fields = ['path', 'component', 'icon']
       Object.keys(menu).forEach((key) => {
         if (fields.indexOf(key) !== -1) {
@@ -245,7 +245,7 @@ export default {
           }
           // 0 表示菜单 1 表示按钮
           menu.type = '0'
-          menu.display = this.display ? '1' : '0'
+          menu.display = this.display
           update({
             ...menu
           }).then((resp) => {
