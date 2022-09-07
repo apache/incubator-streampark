@@ -127,7 +127,7 @@ alter table `t_flink_app` add column `ingress_template` text collate utf8mb4_gen
 alter table `t_flink_app` add column `default_mode_ingress` text collate utf8mb4_general_ci comment '配置ingress的域名';
 alter table `t_flink_app` add column `modify_time` datetime not null default current_timestamp on update current_timestamp after create_time;
 -- add tags field
-alter table t_flink_app add column `tags` varchar(500) default null ;
+alter table `t_flink_app` add column `tags` varchar(500) default null;
 
 alter table `t_flink_project`
 change column `date` `create_time` datetime default null,
