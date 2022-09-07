@@ -9,6 +9,13 @@ header:
     - '**/*.md'
     - 'LICENSE'
     - 'NOTICE'
+    - '**/*.json'
+    - '**/*.iml'
+    - '**/*.ini'
+    - '**/*.svg'
+    - '.gitattributes'
+    - '**/.gitignore'
+    - '**/.gitkeep'
 
   comment: on-failure
 
