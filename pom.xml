@@ -15,7 +15,7 @@
     <name>StreamPark</name>
 
     <description>
-        A magical framework that make stream processing easier
+        StreamPark, Make stream processing easier! easy-to-use streaming application development framework and operation platform
     </description>
 
     <url>https://github.com/apache/incubator-streampark</url>
