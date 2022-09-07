@@ -1,191 +1,193 @@
 <template>
-  <span v-if="option === 'state'">
-    <div
-      v-if="data['optionState'] === 0"
-      class="app_state">
+  <span class="state_tag">
+    <span v-if="option === 'state'">
+      <div
+        v-if="data['optionState'] === 0"
+        class="app_state">
+        <a-tag
+          color="#2f54eb"
+          v-if="data['state'] === 0">ADDED</a-tag>
+        <a-tag
+          color="#738df8"
+          v-if="data['state'] === 1"
+          class="status-processing-initializing">INITIALIZING</a-tag>
+        <a-tag
+          color="#2f54eb"
+          v-if="data['state'] === 2">CREATED</a-tag>
+        <a-tag
+          color="#1AB58E"
+          v-if="data['state'] === 3"
+          class="status-processing-starting">STARTING</a-tag>
+        <a-tag
+          color="#13c2c2"
+          v-if="data['state'] === 4"
+          class="status-processing-restarting">RESTARTING</a-tag>
+        <a-tag
+          color="#52c41a"
+          v-if="data['state'] === 5"
+          class="status-processing-running">RUNNING</a-tag>
+        <a-tag
+          color="#fa541c"
+          v-if="data['state'] === 6"
+          class="status-processing-failing">FAILING</a-tag>
+        <a-tag
+          color="#f5222d"
+          v-if="data['state'] === 7">FAILED</a-tag>
+        <a-tag
+          color="#faad14"
+          v-if="data['state'] === 8"
+          class="status-processing-cancelling">CANCELLING</a-tag>
+        <a-tag
+          color="#fa8c16"
+          v-if="data['state'] === 9">CANCELED</a-tag>
+        <a-tag
+          color="#1890ff"
+          v-if="data['state'] === 10 || data['state'] === 19">FINISHED</a-tag>
+        <a-tag
+          color="#722ed1"
+          v-if="data['state'] === 11">SUSPENDED</a-tag>
+        <a-tag
+          color="#eb2f96"
+          v-if="data['state'] === 12"
+          class="status-processing-reconciling">RECONCILING</a-tag>
+        <a-tag
+          color="#000000"
+          v-if="data['state'] === 13">LOST</a-tag>
+        <a-tag
+          color="#13c2c2"
+          v-if="data['state'] === 14"
+          class="status-processing-restarting">MAPPING</a-tag>
+        <a-tag
+          color="#738df8"
+          v-if="data['state'] === 17"
+          class="status-processing-initializing">SILENT</a-tag>
+        <a-tag
+          color="#8E50FF"
+          v-if="data['state'] === 18">TERMINATED</a-tag>
+      </div>
+      <div v-else class="app_state">
+        <a-tag
+          v-if="data['optionState'] === 1"
+          color="#1ABBDC"
+          class="status-processing-deploying">LAUNCHING</a-tag>
+        <a-tag
+          v-if="data['optionState'] === 2"
+          color="#faad14"
+          class="status-processing-cancelling">CANCELLING</a-tag>
+        <a-tag
+          v-if="data['optionState'] === 3 "
+          color="#1AB58E"
+          class="status-processing-starting">STARTING</a-tag>
+        <a-tag
+          v-if="data['optionState'] === 4"
+          color="#faad14"
+          class="status-processing-cancelling">SAVEPOINT</a-tag>
+      </div>
+    </span>
+    <span v-else-if="option === 'launch'" class="app_state">
       <a-tag
-        color="#2f54eb"
-        v-if="data['state'] === 0">ADDED</a-tag>
+        v-if="data.launch === -1"
+        color="#f5222d">FAILED</a-tag>
       <a-tag
-        color="#738df8"
-        v-if="data['state'] === 1"
-        class="status-processing-initializing">INITIALIZING</a-tag>
+        v-if="data.launch === 0"
+        color="#52c41a">DONE</a-tag>
       <a-tag
-        color="#2f54eb"
-        v-if="data['state'] === 2">CREATED</a-tag>
+        v-if="data.launch === 1 || data.launch === 4"
+        color="#fa8c16">WAITING</a-tag>
       <a-tag
-        color="#1AB58E"
-        v-if="data['state'] === 3"
-        class="status-processing-starting">STARTING</a-tag>
+        v-if="data.launch === 2"
+        class="status-processing-deploying"
+        color="#52c41a">LAUNCHING</a-tag>
       <a-tag
-        color="#13c2c2"
-        v-if="data['state'] === 4"
-        class="status-processing-restarting">RESTARTING</a-tag>
+        v-if="data.launch === 3"
+        color="#fa8c16">PENDING</a-tag>
+    </span>
+    <span v-else-if="option === 'build'" class="app_state">
       <a-tag
-        color="#52c41a"
-        v-if="data['state'] === 5"
-        class="status-processing-running">RUNNING</a-tag>
+        v-if="data['buildStatus'] === 0"
+        color="#99A3A4">UNKNOWN</a-tag>
       <a-tag
-        color="#fa541c"
-        v-if="data['state'] === 6"
-        class="status-processing-failing">FAILING</a-tag>
+        v-if="data['buildStatus'] === 1"
+        color="#F5B041">PENDING</a-tag>
       <a-tag
-        color="#f5222d"
-        v-if="data['state'] === 7">FAILED</a-tag>
+        v-if="data['buildStatus'] === 2"
+        color="#3498DB"
+        class="status-processing-deploying">BUILDING</a-tag>
       <a-tag
-        color="#faad14"
-        v-if="data['state'] === 8"
-        class="status-processing-cancelling">CANCELLING</a-tag>
+        v-if="data['buildStatus'] === 3"
+        color="#2ECC71">SUCCESS</a-tag>
       <a-tag
-        color="#fa8c16"
-        v-if="data['state'] === 9">CANCELED</a-tag>
-      <a-tag
-        color="#1890ff"
-        v-if="data['state'] === 10 || data['state'] === 19">FINISHED</a-tag>
-      <a-tag
-        color="#722ed1"
-        v-if="data['state'] === 11">SUSPENDED</a-tag>
-      <a-tag
-        color="#eb2f96"
-        v-if="data['state'] === 12"
-        class="status-processing-reconciling">RECONCILING</a-tag>
-      <a-tag
-        color="#000000"
-        v-if="data['state'] === 13">LOST</a-tag>
-      <a-tag
-        color="#13c2c2"
-        v-if="data['state'] === 14"
-        class="status-processing-restarting">MAPPING</a-tag>
-      <a-tag
-        color="#738df8"
-        v-if="data['state'] === 17"
-        class="status-processing-initializing">SILENT</a-tag>
-      <a-tag
-        color="#8E50FF"
-        v-if="data['state'] === 18">TERMINATED</a-tag>
-    </div>
-    <div v-else class="app_state">
-      <a-tag
-        v-if="data['optionState'] === 1"
-        color="#1ABBDC"
-        class="status-processing-deploying">LAUNCHING</a-tag>
-      <a-tag
-        v-if="data['optionState'] === 2"
-        color="#faad14"
-        class="status-processing-cancelling">CANCELLING</a-tag>
-      <a-tag
-        v-if="data['optionState'] === 3 "
-        color="#1AB58E"
-        class="status-processing-starting">STARTING</a-tag>
-      <a-tag
-        v-if="data['optionState'] === 4"
-        color="#faad14"
-        class="status-processing-cancelling">SAVEPOINT</a-tag>
-    </div>
-  </span>
-  <span v-else-if="option === 'launch'" class="app_state">
-    <a-tag
-      v-if="data.launch === -1"
-      color="#f5222d">FAILED</a-tag>
-    <a-tag
-      v-if="data.launch === 0"
-      color="#52c41a">DONE</a-tag>
-    <a-tag
-      v-if="data.launch === 1 || data.launch === 4"
-      color="#fa8c16">WAITING</a-tag>
-    <a-tag
-      v-if="data.launch === 2"
-      class="status-processing-deploying"
-      color="#52c41a">LAUNCHING</a-tag>
-    <a-tag
-      v-if="data.launch === 3"
-      color="#fa8c16">PENDING</a-tag>
-  </span>
-  <span v-else-if="option === 'build'" class="app_state">
-    <a-tag
-      v-if="data['buildStatus'] === 0"
-      color="#99A3A4">UNKNOWN</a-tag>
-    <a-tag
-      v-if="data['buildStatus'] === 1"
-      color="#F5B041">PENDING</a-tag>
-    <a-tag
-      v-if="data['buildStatus'] === 2"
-      color="#3498DB"
-      class="status-processing-deploying">BUILDING</a-tag>
-    <a-tag
-      v-if="data['buildStatus'] === 3"
-      color="#2ECC71">SUCCESS</a-tag>
-    <a-tag
-      v-if="data['buildStatus'] === 4"
-      color="#E74C3C">FAILURE</a-tag>
-  </span>
-  <span v-else>
-    <div
-      class="task-tag"
-      v-if="data['state'] === 4 || data['state'] === 5 || data['state'] === 7 || data['optionState'] === 4">
-      <a-tooltip
-        v-if="data['totalTask']">
-        <template slot="title">
-          TOTAL
-        </template>
-        <a-tag color="#102541">{{ data['totalTask'] }}</a-tag>
-      </a-tooltip>
-      <a-tooltip v-if="data.overview && data.overview['running']">
-        <template slot="title">
-          RUNNING
-        </template>
-        <a-tag color="#52c41a">{{ data.overview['running'] }}</a-tag>
-      </a-tooltip>
-      <a-tooltip v-if="data.overview && data.overview['canceled']">
-        <template slot="title">
-          CANCELED
-        </template>
-        <a-tag color="#fa8c16">{{ data.overview['canceled'] }}</a-tag>
-      </a-tooltip>
-      <a-tooltip v-if="data.overview && data.overview['canceling']">
-        <template slot="title">
-          CANCELING
-        </template>
-        <a-tag color="#faad14">{{ data.overview['canceling'] }}</a-tag>
-      </a-tooltip>
-      <a-tooltip v-if="data.overview && data.overview['created']">
-        <template slot="title">
-          CREATED
-        </template>
-        <a-tag color="#2f54eb">{{ data.overview['created'] }}</a-tag>
-      </a-tooltip>
-      <a-tooltip v-if="data.overview && data.overview['deploying']">
-        <template slot="title">
-          LAUNCHING
-        </template>
-        <a-tag color="#13c2c2">{{ data.overview['deploying'] }}</a-tag>
-      </a-tooltip>
-      <a-tooltip v-if="data.overview && data.overview['failed']">
-        <template slot="title">
-          FAILED
-        </template>
-        <a-tag color="#f5222d">{{ data.overview['failed'] }}</a-tag>
-      </a-tooltip>
-      <a-tooltip v-if="data.overview && data.overview['finished']">
-        <template slot="title">
-          FINISHED
-        </template>
-        <a-tag color="#1890ff">{{ data.overview['finished'] }}</a-tag>
-      </a-tooltip>
-      <a-tooltip v-if="data.overview && data.overview['reconciling']">
-        <template slot="title">
-          RECONCILING
-        </template>
-        <a-tag color="#eb2f96">{{ data.overview['reconciling'] }}</a-tag>
-      </a-tooltip>
-      <a-tooltip v-if="data.overview && data.overview['scheduled']">
-        <template slot="title">
-          SCHEDULED
-        </template>
-        <a-tag color="#722ed1">{{ data.overview['scheduled'] }}</a-tag>
-      </a-tooltip>
-    </div>
-    <div v-else>-</div>
+        v-if="data['buildStatus'] === 4"
+        color="#E74C3C">FAILURE</a-tag>
+    </span>
+    <span v-else>
+      <div
+        class="task-tag"
+        v-if="data['state'] === 4 || data['state'] === 5 || data['state'] === 7 || data['optionState'] === 4">
+        <a-tooltip
+          v-if="data['totalTask']">
+          <template slot="title">
+            TOTAL
+          </template>
+          <a-tag color="#102541">{{ data['totalTask'] }}</a-tag>
+        </a-tooltip>
+        <a-tooltip v-if="data.overview && data.overview['running']">
+          <template slot="title">
+            RUNNING
+          </template>
+          <a-tag color="#52c41a">{{ data.overview['running'] }}</a-tag>
+        </a-tooltip>
+        <a-tooltip v-if="data.overview && data.overview['canceled']">
+          <template slot="title">
+            CANCELED
+          </template>
+          <a-tag color="#fa8c16">{{ data.overview['canceled'] }}</a-tag>
+        </a-tooltip>
+        <a-tooltip v-if="data.overview && data.overview['canceling']">
+          <template slot="title">
+            CANCELING
+          </template>
+          <a-tag color="#faad14">{{ data.overview['canceling'] }}</a-tag>
+        </a-tooltip>
+        <a-tooltip v-if="data.overview && data.overview['created']">
+          <template slot="title">
+            CREATED
+          </template>
+          <a-tag color="#2f54eb">{{ data.overview['created'] }}</a-tag>
+        </a-tooltip>
+        <a-tooltip v-if="data.overview && data.overview['deploying']">
+          <template slot="title">
+            LAUNCHING
+          </template>
+          <a-tag color="#13c2c2">{{ data.overview['deploying'] }}</a-tag>
+        </a-tooltip>
+        <a-tooltip v-if="data.overview && data.overview['failed']">
+          <template slot="title">
+            FAILED
+          </template>
+          <a-tag color="#f5222d">{{ data.overview['failed'] }}</a-tag>
+        </a-tooltip>
+        <a-tooltip v-if="data.overview && data.overview['finished']">
+          <template slot="title">
+            FINISHED
+          </template>
+          <a-tag color="#1890ff">{{ data.overview['finished'] }}</a-tag>
+        </a-tooltip>
+        <a-tooltip v-if="data.overview && data.overview['reconciling']">
+          <template slot="title">
+            RECONCILING
+          </template>
+          <a-tag color="#eb2f96">{{ data.overview['reconciling'] }}</a-tag>
+        </a-tooltip>
+        <a-tooltip v-if="data.overview && data.overview['scheduled']">
+          <template slot="title">
+            SCHEDULED
+          </template>
+          <a-tag color="#722ed1">{{ data.overview['scheduled'] }}</a-tag>
+        </a-tooltip>
+      </div>
+      <div v-else>-</div>
+    </span>
   </span>
 </template>
 <script>
