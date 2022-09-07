@@ -224,7 +224,7 @@
               <span> {{ tag }} </span>
             </a-select-option>
           </a-select>
-          <a-select placeholder="User" allowClear @change="handleChangeUser" style="margin-left: 16px;width: 120px">
+          <a-select placeholder="Owner" allowClear @change="handleChangeUser" style="margin-left: 16px;width: 120px">
             <a-select-option v-for="u in users" :key="u.userId">
               <span v-if="u.nickName"> {{ u.nickName }} </span>
               <span v-else> {{ u.username }} </span>
@@ -320,15 +320,15 @@
         <template
           slot="tags"
           slot-scope="text, record">
-          <span>
-            <a-tooltip>
+          <a-tooltip>
+            <span v-for="(tag,index) in record.tags.split(',')" :key="'tag-'.concat(index)">
+              <a-tag color="blue" class="app-tag">{{ tag }}</a-tag>
+            </span>
+            <template
+              slot="title">
               {{ record.tags }}
-              <template
-                slot="title">
-                {{ record.tags }}
-              </template>
-            </a-tooltip>
-          </span>
+            </template>
+          </a-tooltip>
         </template>
 
         <template
@@ -1228,16 +1228,35 @@ export default {
       return [ {
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 320,
+        width: 300,
         scopedSlots: {customRender: 'jobName'},
-      },  {
+      }, {
+        title: 'Tags',
+        dataIndex: 'tags',
+        width: 150,
+        ellipsis: true,
+        scopedSlots: {customRender: 'tags'},
+      }, {
+        title: 'Owner',
+        dataIndex: 'nickName',
+        width: 100
+      }, {
         title: 'Flink Version',
         dataIndex: 'flinkVersion',
         width: 130
       }, {
-        title: 'Owner',
-        dataIndex: 'nickName',
-        width: 130
+        title: 'Duration',
+        dataIndex: 'duration',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
+        scopedSlots: {customRender: 'duration'},
+        width: 150
+      }, {
+        title: 'Modified Time',
+        dataIndex: 'modifyTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'modifyTime' && sortedInfo.order,
+        width: 170
       }, {
         title: 'Run Status',
         dataIndex: 'state',
@@ -1259,25 +1278,6 @@ export default {
         dataIndex: 'launch',
         width: 220,
         scopedSlots: {customRender: 'launchState'}
-      }, {
-        title: 'Duration',
-        dataIndex: 'duration',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
-        scopedSlots: {customRender: 'duration'},
-        width: 150
-      }, {
-        title: 'Tags',
-        dataIndex: 'tags',
-        width: 200,
-        ellipsis: true,
-        scopedSlots: {customRender: 'tags'},
-      }, {
-        title: 'Modified Time',
-        dataIndex: 'modifyTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'modifyTime' && sortedInfo.order,
-        width: 170
       }, {
         dataIndex: 'operation',
         key: 'operation',
