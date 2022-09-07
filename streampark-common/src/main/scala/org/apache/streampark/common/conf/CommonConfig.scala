@@ -83,4 +83,10 @@ object CommonConfig {
     classType = classOf[String],
     description = "maven repository used for built-in compilation")
 
+  val KERBEROS_TTL: InternalOption = InternalOption(
+    key = "security.kerberos.ttl",
+    defaultValue = "2h",
+    classType = classOf[String],
+    description = "kerberos default ttl")
+
 }

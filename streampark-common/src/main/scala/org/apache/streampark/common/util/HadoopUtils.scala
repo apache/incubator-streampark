@@ -105,7 +105,16 @@ object HadoopUtils extends Logger {
         val start = value.getStartTime.getTime
         val end = value.getEndTime.getTime
         ((end - start) * 0.90f).toLong
-      case _ => 0
+      case _ =>
+        logWarn("get kerberos tgtRefreshTime failed, try get kerberos.ttl. ")
+        val timeUnit = DateUtils.getTimeUnit(InternalConfigHolder.get(CommonConfig.KERBEROS_TTL))
+        timeUnit._2 match {
+          case TimeUnit.SECONDS => timeUnit._1 * 1000
+          case TimeUnit.MINUTES => timeUnit._1 * 60 * 1000
+          case TimeUnit.HOURS => timeUnit._1 * 60 * 60 * 1000
+          case TimeUnit.DAYS => timeUnit._1 * 60 * 60 * 24 * 1000
+          case _ => throw new IllegalArgumentException(s"[StreamPark] parameter:${CommonConfig.KERBEROS_TTL.key} invalided, unit options are [s|m|h|d]")
+        }
     }
   }
 

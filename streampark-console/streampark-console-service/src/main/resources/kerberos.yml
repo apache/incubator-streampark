@@ -1,5 +1,6 @@
 security:
   kerberos:
+    ttl: 2h # unit [s|m|h|d]
     login:
       enable: false
       debug: false
