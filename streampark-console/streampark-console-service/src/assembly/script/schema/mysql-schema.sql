@@ -113,6 +113,7 @@ create table `t_flink_app` (
   `flink_cluster_id` bigint default null,
   `ingress_template` text collate utf8mb4_general_ci,
   `default_mode_ingress` text collate utf8mb4_general_ci,
+  `tags` varchar(500) default null,
   primary key (`id`) using btree,
   key `inx_state` (`state`) using btree,
   key `inx_job_type` (`job_type`) using btree,

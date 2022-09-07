@@ -103,6 +103,7 @@ create table if not exists `t_flink_app` (
   `flink_cluster_id` bigint default null,
   `ingress_template` text ,
   `default_mode_ingress` text ,
+  `tags` varchar(500) default null,
   primary key(`id`)
 );
 

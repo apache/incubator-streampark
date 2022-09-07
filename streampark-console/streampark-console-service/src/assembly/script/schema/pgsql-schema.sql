@@ -239,10 +239,10 @@ create table "public"."t_flink_app" (
   "option_state" int2,
   "tracking" int2,
   "create_time" timestamp(6),
-  "modify_time" timestamp(6) not null,
+  "modify_time" timestamp(6),
   "option_time" timestamp(6),
-  "launch" int2,
-  "build" int2,
+  "launch" int2 default 1,
+  "build" boolean default true,
   "start_time" timestamp(6),
   "end_time" timestamp(6),
   "alert_id" int8,
@@ -252,7 +252,8 @@ create table "public"."t_flink_app" (
   "k8s_hadoop_integration" boolean,
   "flink_cluster_id" int8,
   "ingress_template" text collate "pg_catalog"."default",
-  "default_mode_ingress" text collate "pg_catalog"."default"
+  "default_mode_ingress" text collate "pg_catalog"."default",
+  "tags" varchar(500) collate "pg_catalog"."default"
 )
 ;
 alter table "public"."t_flink_app" add constraint "t_flink_app_pkey" primary key ("id");

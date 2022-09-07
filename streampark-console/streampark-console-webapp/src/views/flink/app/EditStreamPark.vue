@@ -660,6 +660,17 @@
       </a-form-item>
 
       <a-form-item
+        label="Tags"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input
+          type="text"
+          placeholder="Please enter tags,if more than one, separate them with commas(,)"
+          allowClear
+          v-decorator="['tags']"/>
+      </a-form-item>
+
+      <a-form-item
         label="Resolve Order"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -2393,6 +2404,7 @@ export default {
       const params = {
         id: this.app.id,
         jobName: values.jobName,
+        tags: values.tags,
         format: format,
         configId: configId,
         versionId: values.versionId,
@@ -2454,6 +2466,7 @@ export default {
         format: this.isSetConfig ? 1 : null,
         versionId: values.versionId,
         jobName: values.jobName,
+        tags: values.tags,
         args: values.args || null,
         dependency: dependency.pom === undefined && dependency.jar === undefined ? null : JSON.stringify(dependency),
         options: JSON.stringify(options),
@@ -2823,6 +2836,7 @@ export default {
       this.$nextTick(() => {
         this.form.setFieldsValue({
           'jobName': this.app.jobName,
+          'tags': this.app.tags,
           'args': this.app.args,
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
