@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.01
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -474,7 +474,7 @@ create table "public"."t_flink_sql" (
   "sql" text collate "pg_catalog"."default",
   "dependency" text collate "pg_catalog"."default",
   "version" int4,
-  "candidate" int2 not null,
+  "candidate" int2 default 1 not null,
   "create_time" timestamp(6)
 )
 ;
