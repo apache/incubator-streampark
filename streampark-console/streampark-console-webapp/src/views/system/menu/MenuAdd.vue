@@ -207,7 +207,7 @@ export default {
           // 0 表示菜单 1 表示按钮
           menu.type = '0'
           menu.icon = this.icon
-          menu.display = this.display ? '1' : '0'
+          menu.display = this.display
           post({
             ...menu
           }).then((resp) => {

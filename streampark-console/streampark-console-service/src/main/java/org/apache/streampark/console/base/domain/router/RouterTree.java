@@ -44,7 +44,7 @@ public class RouterTree<T> {
 
     private String type;
 
-    private String display;
+    private boolean display;
 
     private Double order;
 

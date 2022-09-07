@@ -11,7 +11,7 @@
         <result column="perms" jdbcType="VARCHAR" property="perms"/>
         <result column="icon" jdbcType="VARCHAR" property="icon"/>
         <result column="type" jdbcType="CHAR" property="type"/>
-        <result column="display" jdbcType="CHAR" property="display"/>
+        <result column="display" jdbcType="BOOLEAN" property="display"/>
         <result column="order_num" jdbcType="DOUBLE" property="orderNum"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>

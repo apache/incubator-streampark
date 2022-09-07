@@ -131,8 +131,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             route.setPath(menu.getPath());
             route.setComponent(menu.getComponent());
             route.setName(menu.getMenuName());
-            boolean hidden = menu.getDisplay().equals(Menu.DISPLAY_NONE);
-            route.setMeta(new RouterMeta(true, hidden, true, menu.getIcon()));
+            route.setMeta(new RouterMeta(true, !menu.isDisplay(), true, menu.getIcon()));
             routes.add(route);
         });
         return TreeUtils.buildVueRouter(routes);
@@ -155,7 +154,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             tree.setOrder(menu.getOrderNum());
             tree.setPermission(menu.getPerms());
             tree.setType(menu.getType());
-            tree.setDisplay(menu.getDisplay());
+            tree.setDisplay(menu.isDisplay());
             trees.add(tree);
         });
     }
