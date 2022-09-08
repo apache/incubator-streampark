@@ -320,7 +320,7 @@
         <template
           slot="tags"
           slot-scope="text, record">
-          <a-tooltip>
+          <a-tooltip v-if="record.tags">
             <span v-for="(tag,index) in record.tags.split(',')" :key="'tag-'.concat(index)">
               <a-tag color="blue" class="app-tag">{{ tag }}</a-tag>
             </span>
