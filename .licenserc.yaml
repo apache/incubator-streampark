@@ -33,12 +33,29 @@ header:
     - '.gitattributes'
     - '**/.gitignore'
     - '**/.gitkeep'
-    - 'dist-material'
+    - 'dist-material/release-docs'
     - 'mvnw.cmd'
     - '.mvn'
     - '**/known-dependencies.txt'
     - '**/LICENSE'
     - '**/NOTICE'
+    - "DISCLAIMER"
+    - '**/*.MD'
+    - '**/*.ftl'
+    - '**/*.tpl'
+    - '**/*.pl'
+    - '**/*.dict'
+    - "**/*.lock"
+    - "**/*.svg"
+    - '.prettierrc'
+    - '.browserslistrc'
+    - '.editorconfig'
+    - '**/target/**'
+    - '**/*.ini'
+    - '**/*.crt'
+    - '**/*.pem'
+    - 'ssh_config'
+    - 'workers'
 
   comment: on-failure
 
