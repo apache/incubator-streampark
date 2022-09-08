@@ -39,7 +39,7 @@ github:
 
 notifications:
   commits:      commits@streampark.apache.org
-  issues:       commits@streampark.apache.org
-  pullrequests: commits@streampark.apache.org
-  pullrequests_status:  commits@streampark.apache.org
-  pullrequests_comment: commits@streampark.apache.org
+  issues:       issues@streampark.apache.org
+  pullrequests: issues@streampark.apache.org
+  jobs:         builds@streampark.apache.org
+  discussions:  dev@streampark.apache.org
