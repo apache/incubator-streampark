@@ -45,11 +45,14 @@ header:
     - '**/*.tpl'
     - '**/*.pl'
     - '**/*.dict'
+    - '**/*.awk'
+    - '**/*.php'
     - "**/*.lock"
     - "**/*.svg"
     - '.prettierrc'
     - '.browserslistrc'
     - '.editorconfig'
+    - '.helmignore'
     - '**/target/**'
     - '**/*.ini'
     - '**/*.crt'

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!--
 
     Licensed to the Apache Software Foundation (ASF) under one or more
@@ -18,6 +17,7 @@
     limitations under the License.
 
 -->
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
 <!-- Put site-specific property overrides in this file. -->
 

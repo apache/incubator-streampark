@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!--
 
     Licensed to the Apache Software Foundation (ASF) under one or more
@@ -18,6 +17,7 @@
     limitations under the License.
 
 -->
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
 <!-- 1/1 local-dirs usable space is below configured utilization percentage/no more usable space [ /tmp/hadoop-root/nm-local-dir : used space above threshold of 90.0% ] ; 1/1 log-dirs usable space is below configured utilization percentage/no more usable space [ /opt/hadoop/logs/userlogs : used space above threshold of 90.0% -->
 
