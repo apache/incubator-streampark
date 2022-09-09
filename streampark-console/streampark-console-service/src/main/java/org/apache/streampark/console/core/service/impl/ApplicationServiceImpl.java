@@ -623,7 +623,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setClusterId(oldApp.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_SESSION ? oldApp.getClusterId() : jobName);
         args = args != null && !"".equals(args) ? args : oldApp.getArgs();
         newApp.setArgs(args);
-        newApp.setVersionId(100000L);
+        newApp.setVersionId(oldApp.getVersionId());
 
         newApp.setFlinkClusterId(oldApp.getFlinkClusterId());
         newApp.setRestartSize(oldApp.getRestartSize());
@@ -660,6 +660,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         newApp.setJar(oldApp.getJar());
         newApp.setJarCheckSum(oldApp.getJarCheckSum());
+        newApp.setTags(oldApp.getTags());
 
         boolean saved = save(newApp);
         if (saved) {
