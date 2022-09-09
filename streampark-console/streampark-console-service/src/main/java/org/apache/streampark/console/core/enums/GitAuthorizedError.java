@@ -22,17 +22,17 @@ import java.io.Serializable;
 public enum GitAuthorizedError implements Serializable {
 
     /**
-     * 没有错误
+     * success
      */
     SUCCESS(0),
 
     /**
-     * 需要验证,但是用户密码为null
+     * need required, user password is null
      */
     REQUIRED(1),
 
     /**
-     * 用户名密码错误
+     * user password error
      */
     ERROR(2),
 

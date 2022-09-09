@@ -39,12 +39,6 @@ public class JdbcJavaSource<T> {
         this.context = context;
     }
 
-    /**
-     * 允许手动指定一个jdbc的连接信息
-     *
-     * @param jdbc: jdbc connection info
-     * @return JdbcJavaSource: JdbcJavaSource
-     */
     public JdbcJavaSource<T> jdbc(Properties jdbc) {
         this.jdbc = jdbc;
         return this;

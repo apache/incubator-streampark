@@ -31,27 +31,27 @@ public class AlertDingTalkParams implements Serializable {
     private String token;
 
     /**
-     * 报警人手机号, 多个用','分割
+     * alert phone, separated by ','
      */
     private String contacts;
 
     /**
-     * 钉钉告警url
+     * ding alert url
      */
     private String alertDingURL;
 
     /**
-     * 是否@所有人
+     * at all
      */
     private Boolean isAtAll = false;
 
     /**
-     * 钉钉机器人是否启用加签，默认 false，启用加签需设置 secret_token
+     * ding robot secret enabled, default false, if enable, need set secret token
      */
     private Boolean secretEnable = false;
 
     /**
-     * 钉钉机器人 WebHook 地址的 secret_token,群机器人加签用
+     * ding robot webhook secret_token
      */
     private String secretToken;
 }

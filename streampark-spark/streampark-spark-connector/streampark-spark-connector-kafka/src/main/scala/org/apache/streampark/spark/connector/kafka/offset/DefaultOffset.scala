@@ -21,39 +21,37 @@ import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
 
 /**
-  *
-  *
-  * 默认Offset管理，不做任何操作
-  */
+ * Default offset manager
+ */
 private[kafka] class DefaultOffset(val sparkConf: SparkConf) extends Offset {
 
   /**
-    * 获取存储的Offset
-    *
-    * @param groupId
-    * @param topics
-    * @return
-    */
+   * get stored offset
+   *
+   * @param groupId
+   * @param topics
+   * @return
+   */
   override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     Map.empty[TopicPartition, Long]
   }
 
   /**
-    * 更新 Offsets
-    *
-    * @param groupId
-    * @param offsetInfos
-    */
+   * update offset
+   *
+   * @param groupId
+   * @param offsetInfos
+   */
   override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
 
   }
 
   /**
-    * 删除 Offsets
-    *
-    * @param groupId
-    * @param topics
-    */
+   * delete offset
+   *
+   * @param groupId
+   * @param topics
+   */
   override def delete(groupId: String, topics: Set[String]): Unit = {
 
   }

@@ -59,7 +59,7 @@ public class FlinkCluster implements Serializable {
     private Integer executionMode;
 
     /**
-     * 对应的flink的版本.
+     * flink version
      */
     private Long versionId;
 
@@ -143,7 +143,6 @@ public class FlinkCluster implements Serializable {
         String[] array = address.split(",");
         for (String url : array) {
             try {
-                // 检查是否有效
                 new URI(url);
             } catch (Exception ignored) {
                 return false;

@@ -78,6 +78,7 @@ public class GlobalExceptionHandler {
 
     /**
      * 统一处理请求参数校验(实体对象传参)
+     * Unified processing of request parameter verification
      *
      * @param e BindException
      * @return RestResponse

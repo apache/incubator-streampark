@@ -23,26 +23,26 @@ import java.util.Arrays;
 public enum BuildState implements Serializable {
 
     /**
-     * 发生变更,需重新build
+     * has changed, need rebuild
      */
     NEED_REBUILD(-2),
     /**
-     * 发布的任务已经撤销
+     * has cancelled, not build
      */
     NOT_BUILD(-1),
 
     /**
-     * 正在构建
+     * building
      */
     BUILDING(0),
 
     /**
-     * 构建成功
+     * build successful
      */
     SUCCESSFUL(1),
 
     /**
-     * 构建失败
+     * build failed
      */
     FAILED(2);
 

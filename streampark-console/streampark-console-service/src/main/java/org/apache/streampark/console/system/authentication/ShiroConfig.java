@@ -29,8 +29,7 @@ import javax.servlet.Filter;
 import java.util.LinkedHashMap;
 
 /**
- * Shiro 配置类
- *
+ * Shiro Config
  */
 @Configuration
 public class ShiroConfig {
@@ -38,16 +37,13 @@ public class ShiroConfig {
     @Bean
     public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager) {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
-        // 设置 securityManager
         shiroFilterFactoryBean.setSecurityManager(securityManager);
 
-        // 在 Shiro过滤器链上加入 JWTFilter
         LinkedHashMap<String, Filter> filters = new LinkedHashMap<>();
         filters.put("jwt", new JWTFilter());
         shiroFilterFactoryBean.setFilters(filters);
 
         LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
-        // 所有请求都要经过 jwt过滤器
         filterChainDefinitionMap.put("/doc.html", "anon");
         filterChainDefinitionMap.put("/swagger-ui.html", "anon");
         filterChainDefinitionMap.put("/swagger-resources", "anon");
@@ -66,14 +62,12 @@ public class ShiroConfig {
     @Bean
     public SecurityManager securityManager() {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-        // 配置 SecurityManager，并注入 shiroRealm
         securityManager.setRealm(shiroRealm());
         return securityManager;
     }
 
     @Bean
     public ShiroRealm shiroRealm() {
-        // 配置 Realm
         return new ShiroRealm();
     }
 

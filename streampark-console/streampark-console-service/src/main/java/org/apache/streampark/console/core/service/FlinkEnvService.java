@@ -50,7 +50,7 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
     void update(FlinkEnv version) throws IOException;
 
     /**
-     * 根据appId获取flinkVersion
+     * get flink version by appid
      *
      * @param appId
      * @return
@@ -58,28 +58,28 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
     FlinkEnv getByAppId(Long appId);
 
     /**
-     * 设置某个flink版本为默认版本
+     * set a flink version as the default
      *
      * @param id
      */
     void setDefault(Long id);
 
     /**
-     * 获取默认的flink版本
+     * get default version
      *
      * @return
      */
     FlinkEnv getDefault();
 
     /**
-     * 根据id获取 如果获取不到则使用默认的flink版本
+     * get flink version, if null, get default version
      *
      * @return
      */
     FlinkEnv getByIdOrDefault(Long id);
 
     /**
-     * 同步配置文件
+     * sycn conf file
      *
      * @param id
      */

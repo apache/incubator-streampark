@@ -74,7 +74,7 @@ public interface ApplicationService extends IService<Application> {
     String upload(MultipartFile file) throws ApplicationException;
 
     /**
-     * 将 latest的设置为Effective的,(此时才真正变成当前生效的)
+     * set the latest to Effective, it will really become the current effective
      */
     void toEffective(Application application);
 

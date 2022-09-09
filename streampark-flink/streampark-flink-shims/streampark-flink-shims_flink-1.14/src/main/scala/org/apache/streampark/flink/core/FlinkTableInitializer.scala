@@ -121,11 +121,8 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
     localTableEnv
   }
 
-
   /**
-   * table SQL 下  --conf 非必须传入,取决于开发者.
-   *
-   * @return
+   * In case of table SQL, the parameter conf is not required, it depends on the developer.
    */
   override def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
@@ -135,7 +132,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         ParameterTool.fromSystemProperties().mergeWith(argsMap)
       case file =>
         val configArgs = super.readFlinkConf(file)
-        //显示指定的优先级 > 项目配置文件 > 系统配置文件...
+        // config priority: explicitly specified priority > project profiles > system profiles
         ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(configArgs)).mergeWith(argsMap)
     }
     parameter.get(KEY_FLINK_SQL()) match {

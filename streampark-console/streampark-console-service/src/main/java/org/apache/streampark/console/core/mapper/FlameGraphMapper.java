@@ -29,12 +29,6 @@ import java.util.List;
 
 public interface FlameGraphMapper extends BaseMapper<FlameGraph> {
 
-    /**
-     * @param appId
-     * @param start
-     * @param end
-     * @return
-     */
     @Select("select * from t_flame_graph where app_id=#{appId} and timeline between #{start} and #{end} order by timeline asc")
     List<FlameGraph> getFlameGraph(@Param("appId") Long appId, @Param("start") Date start, @Param("end") Date end);
 

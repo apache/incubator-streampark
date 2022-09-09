@@ -31,7 +31,6 @@ import java.lang.{Iterable => JIter}
 import java.util.Properties
 import scala.annotation.meta.param
 
-
 object HBaseSink {
 
   def apply(@(transient@param)
@@ -53,14 +52,6 @@ class HBaseSink(@(transient@param) ctx: StreamingContext,
     this(ctx, new Properties, 0, null, null)
   }
 
-
-  /**
-   * @param stream
-   * @param tableName
-   * @param fun
-   * @tparam T
-   * @return
-   */
   def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => JIter[Mutation]): DataStreamSink[T] = {
     val prop: Properties = checkProp(stream, tableName, fun)
     val sinkFun = new HBaseSinkFunction[T](tableName, prop, fun)
@@ -68,13 +59,6 @@ class HBaseSink(@(transient@param) ctx: StreamingContext,
     afterSink(sink, parallelism, name, uid)
   }
 
-  /**
-   * @param stream
-   * @param tableName
-   * @param fun
-   * @tparam T
-   * @return
-   */
   def sink[T](stream: JavaDataStream[T], tableName: String, fun: TransformFunction[T, JIter[Mutation]]): DataStreamSink[T] = {
     val prop: Properties = checkProp(stream, tableName, fun)
     val sinkFun = new HBaseSinkFunction[T](tableName, prop, fun)

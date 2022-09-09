@@ -50,7 +50,7 @@ public class ApplicationConfig {
     private Integer format;
 
     /**
-     * 默认版本号:1
+     * default version: 1
      */
     private Integer version = 1;
 
@@ -60,7 +60,7 @@ public class ApplicationConfig {
     private Date createTime;
 
     /**
-     * 记录要设置的目标要生效的配置
+     * record the configuration to take effect for the target
      */
     private Boolean latest;
 

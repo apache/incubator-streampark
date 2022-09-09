@@ -101,12 +101,11 @@ object KafkaSource {
     }
 
     (timestamp, startFrom) match {
-      //全局设定Timestamp,对所有的topic生效.
+      // Globally set Timestamp, effective for all topics.
       case (Some(t), _) => consumer.setStartFromTimestamp(t)
-      //精确为每个topic,partition指定offset
+      // Specify the offset for each topic and partition
       case _ =>
         val startFroms = (topicOpt, regexOpt) match {
-          //topic方式...
           case (Some(top), _) =>
             topic match {
               case null => startFrom.toList
@@ -143,10 +142,6 @@ object KafkaSource {
 
 }
 
-/*
- * @param ctx
- * @param property
- */
 class KafkaSource(@(transient@param) private[this] val ctx: StreamingContext, property: Properties = new Properties()) {
   /**
     *

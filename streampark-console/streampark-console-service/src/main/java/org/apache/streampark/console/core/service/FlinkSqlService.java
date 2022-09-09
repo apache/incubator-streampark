@@ -28,46 +28,18 @@ import java.util.List;
 
 public interface FlinkSqlService extends IService<FlinkSql> {
 
-    /**
-     * @param flinkSql
-     */
     void create(FlinkSql flinkSql);
 
-    /**
-     * @param sqlId
-     * @param appId
-     */
     void setCandidate(CandidateType candidateType, Long appId, Long sqlId);
 
-    /**
-     * @param appId
-     * @param decode
-     * @return
-     */
     FlinkSql getEffective(Long appId, boolean decode);
 
-    /**
-     * @param appId
-     * @param decode
-     * @return
-     */
     FlinkSql getLatestFlinkSql(Long appId, boolean decode);
 
-    /**
-     * @param application
-     * @return
-     */
     List<FlinkSql> history(Application application);
 
-    /**
-     * @param appId
-     * @return
-     */
     FlinkSql getCandidate(Long appId, CandidateType type);
 
-    /**
-     * @param appId
-     */
     void toEffective(Long appId, Long sqlId);
 
     void cleanCandidate(Long id);

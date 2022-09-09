@@ -47,9 +47,7 @@ object HttpClientUtils {
   }
 
   /**
-   * 通过连接池获取HttpClient
-   *
-   * @return
+   * Get HttpClient with connection manager
    */
   private[this] def getHttpClient = HttpClients.custom.setConnectionManager(connectionManager).build
 
@@ -71,10 +69,6 @@ object HttpClientUtils {
     httpGet
   }
 
-  /**
-   * @param url
-   * @return
-   */
   def httpGetRequest(url: String, config: RequestConfig): String = {
     getHttpResult(getHttpGet(url, null, config))
   }
@@ -148,10 +142,6 @@ object HttpClientUtils {
     pairs
   }
 
-  /**
-   * @param url
-   * @return
-   */
   def httpAuthGetRequest(url: String, config: RequestConfig): String = {
     def getHttpAuthClient: CloseableHttpClient = {
       val credentialsProvider = new BasicCredentialsProvider
@@ -179,16 +169,13 @@ object HttpClientUtils {
   }
 
   /**
-   * 处理Http请求
-   *
-   * @param request
-   * @return
+   * process http request
    */
   private[this] def getHttpResult(request: HttpRequestBase, httpClient: CloseableHttpClient = getHttpClient): String = {
     try {
       val response = httpClient.execute(request)
       val entity = response.getEntity
-      if (entity != null) { // long len = entity.getContentLength();// -1 表示长度未知
+      if (entity != null) {
         val result = EntityUtils.toString(entity)
         response.close()
         result

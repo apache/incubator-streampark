@@ -41,17 +41,17 @@ public class ApplicationLog {
      */
     private String yarnAppId;
     /**
-     * 启动状态
+     * start status
      */
     private Boolean success;
 
     /**
-     * 操作时间
+     * option time
      */
     private Date optionTime;
 
     /**
-     * 启动失败的异常
+     * exception at the start
      */
     private String exception;
 }

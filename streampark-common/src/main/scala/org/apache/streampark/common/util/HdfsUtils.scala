@@ -65,7 +65,7 @@ object HdfsUtils extends Logger {
   }
 
   /**
-   * 在hdfs 上创建一个新的文件，将某些数据写入到hdfs中
+   * create a new file on hdfs, write some data to it
    *
    * @param fileName
    * @param content

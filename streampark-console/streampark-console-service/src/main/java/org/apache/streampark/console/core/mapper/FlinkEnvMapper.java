@@ -26,12 +26,6 @@ import org.apache.ibatis.annotations.Update;
 
 public interface FlinkEnvMapper extends BaseMapper<FlinkEnv> {
 
-    /**
-     * 根据appId获取对象的flinkVersion
-     *
-     * @param appId
-     * @return
-     */
     @Select("select v.* from t_flink_env v inner join (select version_id from t_flink_app where id=#{appId}) as t on v.id = t.version_id")
     FlinkEnv getByAppId(@Param("appId") Long appId);
 

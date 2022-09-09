@@ -38,12 +38,9 @@ import java.util.Date;
 public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv> implements FlinkEnvService {
 
     /**
-     * 需要校验两个地方:
-     * 1) name 不能重复
-     * 2) flink版本不能重新(flink版本需要解析得出)
-     *
-     * @param version
-     * @return
+     * two places will be checked:
+     * 1) name cannot be repeated
+     * 2) flink version need to be parsed
      */
     @Override
     public boolean exists(FlinkEnv version) {

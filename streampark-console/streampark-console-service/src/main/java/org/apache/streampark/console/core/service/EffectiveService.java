@@ -23,10 +23,7 @@ import org.apache.streampark.console.core.enums.EffectiveType;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface EffectiveService extends IService<Effective> {
-    /**
-     * @param appId
-     * @param config
-     */
+
     void delete(Long appId, EffectiveType config);
 
     Effective get(Long appId, EffectiveType config);

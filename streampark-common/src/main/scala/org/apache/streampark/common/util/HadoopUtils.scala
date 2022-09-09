@@ -156,10 +156,10 @@ object HadoopUtils extends Logger {
 
   /**
    * <pre>
-   * 注意:加载hadoop配置文件,有两种方式:<br>
-   * 1) 将hadoop的core-site.xml,hdfs-site.xml,yarn-site.xml copy到 resources下<br>
-   * 2) 程序自动去$HADOOP_HOME/etc/hadoop下加载配置<br>
-   * 推荐第二种方法,不用copy配置文件.<br>
+   * Note: There are two ways to load a hadoop configuration file:<br>
+   * 1) Copy core-site.xml,hdfs-site.xml,yarn-site.xml of hadoop conf to the resource dir.<br>
+   * 2) Automatically goes to $HADOOP_HOME/etc/hadoop to load the configuration.<br>
+   * We recommend the second method, without copying the configuration files.<br>
    * </pre>
    */
   def hadoopConf: Configuration = Option(reusableConf).getOrElse {

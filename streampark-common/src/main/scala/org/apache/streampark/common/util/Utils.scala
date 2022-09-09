@@ -76,7 +76,9 @@ object Utils {
 
   def copyProperties(original: Properties, target: Properties): Unit = original.foreach(x => target.put(x._1, x._2))
 
-  //获取系统名字
+  /**
+   * get os name
+   */
   def getOsName: String = OS
 
   def isLinux: Boolean = OS.indexOf("linux") >= 0

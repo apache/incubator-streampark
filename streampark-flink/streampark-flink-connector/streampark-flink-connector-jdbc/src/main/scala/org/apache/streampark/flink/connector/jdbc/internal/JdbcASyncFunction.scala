@@ -27,7 +27,7 @@ import java.util.concurrent.{CompletableFuture, ExecutorService, Executors}
 import java.util.function.{Consumer, Supplier}
 
 /**
- * 基于线程池实现
+ * Based on thread pool
  *
  * @param sqlFun
  * @param resultFun
@@ -35,7 +35,6 @@ import java.util.function.{Consumer, Supplier}
  * @tparam T
  * @tparam R
  */
-
 class JdbcASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: (T, Map[String, _]) => R, jdbc: Properties, capacity: Int = 10) extends RichAsyncFunction[T, R] with Logger {
 
   @transient private[this] var executorService: ExecutorService = _

@@ -36,7 +36,7 @@ object SerializationExtensions {
   private val logger = Logger.getLogger(getClass)
 
   /**
-    * 构建一个 Avro Job
+    * Build a AvroJob
     *
     * @param job
     * @tparam T
@@ -44,35 +44,21 @@ object SerializationExtensions {
     */
   def avroJob[T <: GenericRecord : ClassTag](job: Job = Job.getInstance(new Configuration())): Job = {
     val schema: Schema = SpecificData.get.getSchema(classTag[T].runtimeClass)
-    //    val schema: Schema = User.getClassSchema
     AvroJob.setInputKeySchema(job, schema)
     AvroJob.setOutputKeySchema(job, schema)
     job
   }
 
-  /**
-    * 判断字段是否定义
-    *
-    * @param record
-    * @param field
-    * @return
-    */
-  def definedOrLog(record: GenericRecord, field: String): Boolean = {
+  def isDefined(record: GenericRecord, field: String): Boolean = {
     if (record.get(field) != null) return true
     logger.warn(s"Expected field '$field' to be defined, but it was not on record of type '${record.getClass}'")
     false
   }
 
-
-  /**
-    * 隐士转换 AvroRDDSparkContext
-    *
-    * @param sparkContext
-    */
   implicit class AvroRDDSparkContext(val sparkContext: SparkContext) extends AnyVal {
 
     /**
-      * 读取指定路径下的 Avro 文件
+      * Read the Avro file in the specified path
       *
       * @param path
       * @tparam T
@@ -88,27 +74,13 @@ object SerializationExtensions {
     }
   }
 
-  /**
-    * 隐士构建 AvroRDD
-    *
-    * @param avroRDD
-    * @tparam T
-    */
   implicit class AvroRDD[T <: GenericRecord : ClassTag](val avroRDD: RDD[T]) {
-    /**
-      * 过滤指定字段未定义的数据
-      *
-      * @param fields
-      * @return
-      */
     def filterIfUnexpectedNull(fields: String*): RDD[T] = {
-      avroRDD.filter(r => fields.forall(definedOrLog(r, _)))
+      avroRDD.filter(r => fields.forall(isDefined(r, _)))
     }
 
     /**
-      * 保存为 Avro 文件
-      *
-      * @param outputPath 输出路径
+      * Save as avro file
       */
     def saveAsAvroFile(outputPath: String): Unit = {
       avroRDD.map(r => (new AvroKey[T](r), NullWritable.get))
@@ -120,10 +92,10 @@ object SerializationExtensions {
     }
 
     /**
-      * 根据 Key 值保存指定文件名
+      * Save the specified avro files according to the Key value
       *
-      * @param outputKeyFun
-      * @param outputPath
+      * @param outputKeyFun outputKeyFunction
+      * @param outputPath outputPath
       */
     def saveAsMultipleAvroFiles(outputKeyFun: (T) => String, outputPath: String): Unit = {
       avroRDD.map(r => ((outputKeyFun(r), new AvroKey(r)), NullWritable.get))

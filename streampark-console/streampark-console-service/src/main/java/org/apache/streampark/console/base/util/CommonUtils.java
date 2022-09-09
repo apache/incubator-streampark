@@ -53,11 +53,12 @@ public final class CommonUtils implements Serializable {
     private static String os = System.getProperty("os.name").toLowerCase();
 
     /**
-     * 非空判断
+     * is empty
      *
-     * @param objs 要判断,处理的对象
+     * @param objs handle obj
      * @return Boolean
-     * @see <b>对象为Null返回true,集合的大小为0也返回true,迭代器没有下一个也返回true..</b>
+     * @see <b>Returns true if the object is Null, returns true if the size of the collection is 0,
+     *         and returns true if the iterator has no next</b>
      * @since 1.0
      */
     public static Boolean isEmpty(Object... objs) {
@@ -75,17 +76,17 @@ public final class CommonUtils implements Serializable {
                 return true;
             }
 
-            // 字符序列集
+            // char sequence
             if ((obj instanceof CharSequence) && "".equals(obj.toString().trim())) {
                 return true;
             }
-            // 单列集合
+            // collection
             if (obj instanceof Collection) {
                 if (((Collection<?>) obj).isEmpty()) {
                     return true;
                 }
             }
-            // 双列集合
+            // map
             if (obj instanceof Map) {
                 if (((Map<?, ?>) obj).isEmpty()) {
                     return true;
@@ -98,14 +99,14 @@ public final class CommonUtils implements Serializable {
                 }
             }
 
-            // 迭代器
+            // iterator
             if (obj instanceof Iterator) {
                 if (!((Iterator<?>) obj).hasNext()) {
                     return true;
                 }
             }
 
-            // 文件类型
+            // file
             if (obj instanceof File) {
                 if (!((File) obj).exists()) {
                     return true;
@@ -121,11 +122,10 @@ public final class CommonUtils implements Serializable {
     }
 
     /**
-     * 空判断
+     * non-empty
      *
-     * @param obj 要判断,处理的对象
+     * @param obj handle obj
      * @return Boolean
-     * @see <b>与非空相反</b>
      * @since 1.0
      */
     public static Boolean notEmpty(Object... obj) {
@@ -304,7 +304,6 @@ public final class CommonUtils implements Serializable {
         return new EnumerationIterator<E>(enumeration);
     }
 
-    // 获取系统名字
     public static String getOsName() {
         return os;
     }
@@ -506,10 +505,10 @@ public final class CommonUtils implements Serializable {
     }
 
     /**
-     * 生成指定长度的uuid
+     * generate specific length uuid
      *
-     * @param len
-     * @return
+     * @param len len
+     * @return uuid
      */
     public static String uuid(int len) {
         StringBuffer sb = new StringBuffer();
@@ -553,10 +552,10 @@ public final class CommonUtils implements Serializable {
     }
 
     /**
-     * 将对象装换为map
+     * convert bean to map
      *
-     * @param bean
-     * @return
+     * @param bean bean
+     * @return map
      */
     public static <T> Map<String, Object> beanToMap(T bean) {
         Map<String, Object> map = new HashMap<>();
@@ -570,11 +569,11 @@ public final class CommonUtils implements Serializable {
     }
 
     /**
-     * 将map装换为javabean对象
+     * convert map to bean
      *
-     * @param map
-     * @param bean
-     * @return
+     * @param map map
+     * @param bean bean class
+     * @return bean
      */
     public static <T> T mapToBean(Map<String, Object> map, T bean) {
         BeanMap beanMap = BeanMap.create(bean);
@@ -583,7 +582,7 @@ public final class CommonUtils implements Serializable {
     }
 
     /**
-     * 将List<T>转换为List<Map<String, Object>>
+     * convert List<T> to List<Map<String, Object>>
      *
      * @param objList
      * @return
@@ -604,10 +603,10 @@ public final class CommonUtils implements Serializable {
     }
 
     /**
-     * 将List<Map<String,Object>>转换为List<T>
+     * convert List<Map<String,Object>> to List<T>
      *
-     * @param maps
-     * @param clazz
+     * @param maps maps
+     * @param clazz element class
      * @return
      * @throws InstantiationException
      * @throws IllegalAccessException

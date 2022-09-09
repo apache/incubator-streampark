@@ -24,7 +24,7 @@ import java.io.Serializable;
 @FunctionalInterface
 public interface HBaseResultFunction<T> extends Serializable {
     /**
-     * 返回结合处理
+     * get hbase result
      *
      * @param result Result
      * @return T t

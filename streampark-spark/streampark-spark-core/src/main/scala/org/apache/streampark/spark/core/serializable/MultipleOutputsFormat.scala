@@ -28,9 +28,6 @@ import org.apache.hadoop.util.Progress
 
 import java.io.IOException
 
-/**
- *
- */
 object MultipleOutputsFormat {
   // Type inference fails with this inlined in constructor parameters
   private def defaultMultipleOutputsMaker[K, V](io: TaskInputOutputContext[_, _, K, V])
@@ -38,20 +35,14 @@ object MultipleOutputsFormat {
 }
 
 /**
- * 将此子类创建为创建OutputFormat的多输出 。 这个子类必须有一个nullary构造函数
- * hadoop可以用 `.newInstance` 来构造它 ， 呃...
+ * Use this abstract class to create multiple outputs of OutputFormat.
+ * The output format requires a two-part key (outputPath and actualKey), and the outputPath will be used to
+ * output into different directories ('/' separated by filenames).
  *
- * 输出格式需要一个两部分的键 （ outputPath ， actualKey ）,该字符串outputPath将被用于
- * 将输出分成不同的目录 （ '/' 分隔的文件名 ） 。
- *
- * 由于某些原因 ， MultipleOutputs与Avro不兼容 ， 但AvroMultipleOutputs几乎相同
- * 这些明显相关的类没有共同的祖先 ， 因此它们在MultipleOutputer类型类下组合
- * 至少允许将来扩展 。
- *
- * @param outputFormat         负责写入的底层 OutputFormat
- * @param multipleOutputsMaker 工厂方法,用于构建实现 MultiplerOutputer trait的对象
- * @tparam K 基础 OutputFormat 的K键类型
- * @tparam V 基础 OutputFormat 的V值类型
+ * @param outputFormat         OutputFormat
+ * @param multipleOutputsMaker Methods that implement the MultipleOutputer trait
+ * @tparam K Basic OutputFormat's key type
+ * @tparam V Basic OutputFormat's value type
  */
 abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
                                            multipleOutputsMaker: TaskInputOutputContext[_, _, K, V] => MultipleOutputer[K, V] =
@@ -93,9 +84,7 @@ abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
     new RecordWriter[(String, K), V] {
 
       val job: Job = Job.getInstance(context.getConfiguration)
-      // 使用懒惰设置底层输出格式输出
       LazyOutputFormat.setOutputFormatClass(job, outputFormat.getClass)
-      // 我们通过ReduceContext大多数字段dummied-out因为他们不会使用的上下文
       // of Spark's saveAs*Hadoop* methods
       val ioContext = new ReduceContextImpl(job.getConfiguration, context.getTaskAttemptID,
         new DummyIterator, new GenericCounter, new GenericCounter,

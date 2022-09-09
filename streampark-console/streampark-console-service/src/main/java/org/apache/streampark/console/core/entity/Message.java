@@ -40,8 +40,8 @@ public class Message {
     private String title;
 
     /**
-     * 1) 构建失败报
-     * 2) 任务监控到异常
+     * 1) build failure report
+     * 2) task monitoring exception
      */
     private Integer type;
 

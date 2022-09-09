@@ -96,17 +96,16 @@ public class ApplicationBackUpServiceImpl
         Application application = applicationService.getById(backParam.getAppId());
 
         FsOperator fsOperator = application.getFsOperator();
-        /**
-         * 备份文件不存在
-         */
+        // backup files not exist
         if (!fsOperator.exists(backParam.getPath())) {
             return;
         }
         executorService.execute(() -> {
             try {
                 FlinkTrackingTask.refreshTracking(backParam.getAppId(), () -> {
-                    // 备份文件存在则执行回滚
-                    // 1) 在回滚时判断当前生效的项目是否需要备份.如需要则先执行备份...
+                    // if backup files exists, will be rollback
+                    // When rollback, determine the currently effective project is necessary to be backed up.
+                    // If necessary, perform the backup first
                     if (backParam.isBackup()) {
                         application.setBackUpDescription(backParam.getDescription());
                         if (application.isFlinkSqlJob()) {
@@ -117,41 +116,31 @@ public class ApplicationBackUpServiceImpl
                         }
                     }
 
-                    //2) 恢复 配置和SQL
+                    // restore config and sql
 
-                    //如果正在运作,则设置Latest
+                    // if running, set Latest
                     if (application.isRunning()) {
-                        //  回滚到备份的配置....
+                        // rollback to buckup config
                         configService.setLatestOrEffective(true, backParam.getId(), backParam.getAppId());
-                        // 如FlinkSQL任务则回滚sql语句和依赖
-                        if (application.isFlinkSqlJob()) {
-                            //TODO rollback
-                            //flinkSqlService.setCandidateOrEffective(true,backParam.getAppId(), backParam.getSqlId());
-                        }
-                        //
                     } else {
-                        // 回滚到备份的配置....
                         effectiveService.saveOrUpdate(backParam.getAppId(), EffectiveType.CONFIG, backParam.getId());
-                        // 如FlinkSQL任务则回滚sql语句和依赖
+                        // if flink sql task, will be rollback sql and dependencies
                         if (application.isFlinkSqlJob()) {
                             effectiveService.saveOrUpdate(backParam.getAppId(), EffectiveType.FLINKSQL, backParam.getSqlId());
                         }
                     }
 
-                    // 4) 删除当前的有效项目工程文件(注意:该操作如果整个回滚失败,则要恢复...)
+                    // delete the current valid project files (Note: If the rollback failed, need to restore)
                     fsOperator.delete(application.getAppHome());
 
                     try {
-                        // 5)将备份的文件copy到有效项目目录下.
+                        // copy backup files to a valid dir
                         fsOperator.copyDir(backParam.getPath(), application.getAppHome());
                     } catch (Exception e) {
-                        //1. TODO: 如果失败了,则要恢复第4部操作.
-
-                        //2. throw e
                         throw e;
                     }
 
-                    // 6) 更新重启状态
+                    // update restart status
                     try {
                         applicationService.update(new UpdateWrapper<Application>()
                             .lambda()
@@ -159,9 +148,6 @@ public class ApplicationBackUpServiceImpl
                             .set(Application::getLaunch, LaunchState.NEED_RESTART.get())
                         );
                     } catch (Exception e) {
-                        //1. TODO: 如果失败,则要恢复第4第5步操作.
-
-                        //2. throw e
                         throw e;
                     }
                     return null;
@@ -209,7 +195,7 @@ public class ApplicationBackUpServiceImpl
         assert backUp != null;
         try {
             FlinkTrackingTask.refreshTracking(backUp.getAppId(), () -> {
-                // 回滚 config 和 sql
+                // rollback config and sql
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
                 return null;
@@ -250,16 +236,16 @@ public class ApplicationBackUpServiceImpl
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public void backup(Application application, FlinkSql flinkSql) {
-        //1) 基础的配置文件备份
+        // basic configuration file backup
         String appHome = (application.isCustomCodeJob() && application.isCICDJob()) ? application.getDistHome() : application.getAppHome();
         FsOperator fsOperator = application.getFsOperator();
         if (fsOperator.exists(appHome)) {
-            // 3) 需要备份的做备份,移动文件到备份目录...
+            // move files to back up directory
             ApplicationConfig config = configService.getEffective(application.getId());
             if (config != null) {
                 application.setConfigId(config.getId());
             }
-            //2) FlinkSQL任务需要备份sql和依赖.
+            // flink sql tasks need to back up sql and dependencies
             int version = 1;
             if (flinkSql != null) {
                 application.setSqlId(flinkSql.getId());

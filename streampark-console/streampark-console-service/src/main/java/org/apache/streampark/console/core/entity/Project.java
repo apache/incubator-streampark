@@ -59,7 +59,7 @@ public class Project implements Serializable {
     private String url;
 
     /**
-     * 分支
+     * git branch
      */
     private String branches;
 
@@ -80,7 +80,7 @@ public class Project implements Serializable {
 
     private String description;
     /**
-     * 构建状态: -2:发生变更,需重新build -1:未构建 0:正在构建 1:构建成功 2:构建失败
+     * Build status: -2: Changed, need to rebuild -1: Not built 0: Building 1: Build successful 2: Build failed
      */
     private Integer buildState;
 
@@ -101,7 +101,7 @@ public class Project implements Serializable {
     private transient String dateTo;
 
     /**
-     * 项目源码路径
+     * project source
      */
     private transient String appSource;
 
@@ -109,9 +109,7 @@ public class Project implements Serializable {
     private transient SettingService settingService;
 
     /**
-     * 获取项目源码路径
-     *
-     * @return
+     * get project source
      */
     @JsonIgnore
     public File getAppSource() {
@@ -207,9 +205,9 @@ public class Project implements Serializable {
     }
 
     /**
-     * 如果检查到项目已经存在被clone过,则先删除,
-     * 主要是解决: 如果最新拉取的代码里有文件删除等,本地不会自动删除
-     * 可能会引发不可预知的错误
+     * If you check that the project already exists and has been cloned, delete it first,
+     * Mainly to solve: if the latest pulling code in the file deletion, etc., the local will not automatically delete,
+     * may cause unpredictable errors.
      */
     public void cleanCloned() throws IOException {
         if (isCloned()) {

@@ -26,9 +26,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface SavePointService extends IService<SavePoint> {
-    /**
-     * @param appId
-     */
+
     void obsolete(Long appId);
 
     SavePoint getLatest(Long id);

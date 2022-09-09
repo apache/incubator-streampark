@@ -58,10 +58,6 @@ trait FlinkStreamTable extends Logger {
 
   def configTable(tableConfig: TableConfig, parameter: ParameterTool): Unit = {}
 
-  /**
-   * 用户可覆盖次方法...
-   *
-   */
   def ready(): Unit = {}
 
   def handle(): Unit

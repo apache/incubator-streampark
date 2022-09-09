@@ -76,7 +76,6 @@ private[kafka] object KafkaWriter {
 }
 
 /**
- *
  * This class can be used to write data to Kafka from Spark Streaming. To write data to Kafka
  * simply `import org.cloudera.spark.streaming.kafka.KafkaWriter._` in your application and call
  * `dstream.writeToKafka(producerConf, func)`
@@ -91,11 +90,11 @@ private[kafka] object KafkaWriter {
  *
  *   val props = new Properties()
  *   props.put("bootstrap.servers", "localhost:9092")
- *   props.put("acks", "all")// ack方式，all，会等所有的commit最慢的方式
- *   props.put("retries", 0)// 失败是否重试，设置会有可能产生重复数据
- *   props.put("batch.size", 16384)//对于每个partition的batch buffer大小
- *   props.put("linger.ms", 1)//等多久，如果buffer没满，比如设为1，即消息发送会多1ms的延迟，如果buffer没满
- *   props.put("buffer.memory", 33554432)//整个producer可以用于buffer的内存大小
+ *   props.put("acks", "all")
+ *   props.put("retries", 0)
+ *   props.put("batch.size", 16384)
+ *   props.put("linger.ms", 1)
+ *   props.put("buffer.memory", 33554432)
  *   props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
  *   props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
  *

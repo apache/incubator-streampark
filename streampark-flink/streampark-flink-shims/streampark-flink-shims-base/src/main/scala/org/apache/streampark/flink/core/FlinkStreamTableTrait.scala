@@ -48,26 +48,24 @@ import org.apache.flink.util.SplittableIterator
 import java.util.{Optional, List => JavaList}
 
 /**
- * 融合了流(stream)和table的api
+ * Integration api of stream and table
  *
- * @param parameter
- * @param streamEnv
- * @param tableEnv
+ * @param parameter parameter
+ * @param streamEnv streamEnv
+ * @param tableEnv tableEnv
  */
-
 abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
                                      private val streamEnv: StreamExecutionEnvironment,
                                      private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
 
   /**
-   * 一旦 Table 被转化为 DataStream，必须使用 StreamExecutionEnvironment 的 execute 方法执行该 DataStream 作业。
+   * Once a Table has been converted to a DataStream, the DataStream job must be executed
+   * using the execute method of the StreamExecutionEnvironment.
    */
   var isConvertedToDataStream: Boolean = false
 
   /**
-   * 推荐使用该Api启动任务...
-   *
-   * @return
+   * Recommended to use this Api to start tasks
    */
   def start(name: String = null): JobExecutionResult = {
     val appName = name match {

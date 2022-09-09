@@ -82,7 +82,6 @@ public class CheckpointProcessor {
                     if (counter == null) {
                         checkPointFailedCache.put(appId, new Counter(checkPoint.getTriggerTimestamp()));
                     } else {
-                        //x分钟之内超过Y次CheckPoint失败触发动作
                         long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
                         if (minute <= application.getCpFailureRateInterval()
                             && counter.count >= application.getCpMaxFailureInterval()) {

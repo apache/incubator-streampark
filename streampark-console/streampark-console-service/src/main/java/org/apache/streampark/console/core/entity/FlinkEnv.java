@@ -54,7 +54,7 @@ public class FlinkEnv implements Serializable {
     private String version;
 
     /**
-     * 是否为默认版本.
+     * is default
      */
     private Boolean isDefault;
 

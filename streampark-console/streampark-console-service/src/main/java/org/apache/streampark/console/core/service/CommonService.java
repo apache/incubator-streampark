@@ -22,15 +22,7 @@ import org.apache.streampark.console.system.entity.User;
 
 public interface CommonService {
 
-    /**
-     * get login user
-     * @return
-     */
     User getCurrentUser();
 
-    /**
-     * get sqlclient
-     * @return
-     */
     String getSqlClientJar(FlinkEnv flinkEnv);
 }

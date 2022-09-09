@@ -595,6 +595,17 @@
                         <excludes>
                         </excludes>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <!--
+                              If you are changing the dependency setting for checkstyle plugin,
+                              please check project/plugins.sbt too.
+                            -->
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>9.3</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
                             <id>validate</id>
@@ -622,8 +633,21 @@
                         <inputEncoding>UTF-8</inputEncoding>
                         <outputEncoding>UTF-8</outputEncoding>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <!--
+                              If you are changing the dependency setting for checkstyle plugin,
+                              please check project/plugins.sbt too.
+                            -->
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>9.3</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
+                            <id>validate</id>
+                            <phase>process-sources</phase>
                             <goals>
                                 <goal>check</goal>
                             </goals>

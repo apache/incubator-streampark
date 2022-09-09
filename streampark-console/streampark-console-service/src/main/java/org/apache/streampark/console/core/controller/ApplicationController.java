@@ -190,7 +190,7 @@ public class ApplicationController {
         @ApiImplicitParam(name = "id", value = "app Id", required = true, paramType = "form", dataType = "Long"),
         @ApiImplicitParam(name = "savePointed", value = "trigger savePoint before taking stoping", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
         @ApiImplicitParam(name = "savePoint", value = "savepoint path", paramType = "form", dataType = "String", defaultValue = "hdfs:///tm/xxx"),
-        @ApiImplicitParam(name = "drain", value = "取消前发送最大 watermark", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false")})
+        @ApiImplicitParam(name = "drain", value = "send max watermark before canceling", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false")})
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
     public RestResponse cancel(@ApiIgnore Application app) throws Exception {
@@ -207,9 +207,7 @@ public class ApplicationController {
     }
 
     /**
-     * 强制停止.(正常启动或者停止一直在进行中)
-     * @param app
-     * @return
+     * force stop(stop normal start or in progress)
      */
     @PostMapping("forcedStop")
     @RequiresPermissions("app:cancel")

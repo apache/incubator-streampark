@@ -24,8 +24,6 @@ import scala.annotation.meta.param
 import scala.reflect.ClassTag
 
 /**
-  *
-  *
   * A simple Kafka producers
   */
 class IterKafkaWriter[T: ClassTag](@(transient@param) msg: Iterator[T]) extends KafkaWriter[T] {

@@ -22,17 +22,17 @@ import java.io.Serializable;
 public enum AccessTokenState implements Serializable {
 
     /**
-     * 用户未添加token
+     * not added token
      */
     NULL(0),
 
     /**
-     * 用户的token被锁定或者无效
+     * invalid token
      */
     INVALID(1),
 
     /**
-     * 有效
+     * effect token
      */
     OK(2);
 

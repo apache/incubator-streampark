@@ -31,17 +31,17 @@ public class AlertLarkParams implements Serializable {
     private String token;
 
     /**
-     * 是否@所有人
+     * at all
      */
     private Boolean isAtAll = false;
 
     /**
-     * 飞书机器人是否启用加签，默认 false，启用加签需设置 secret_token
+     * lark robot secret enabled, default false, if enable, need set secret token
      */
     private Boolean secretEnable = false;
 
     /**
-     * 飞书机器人 WebHook 地址的 secret_token,群机器人加签用
+     * lark robot webhook secret_token
      */
     private String secretToken;
 }

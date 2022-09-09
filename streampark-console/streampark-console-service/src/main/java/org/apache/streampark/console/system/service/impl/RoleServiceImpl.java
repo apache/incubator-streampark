@@ -102,7 +102,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Override
     public void updateRole(Role role) throws Exception {
-        // 查找这些角色关联了那些用户
         String[] roleId = {String.valueOf(role.getRoleId())};
         role.setModifyTime(new Date());
         baseMapper.updateById(role);

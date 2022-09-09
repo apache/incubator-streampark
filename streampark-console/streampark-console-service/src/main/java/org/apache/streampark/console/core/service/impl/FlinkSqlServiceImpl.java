@@ -60,11 +60,6 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     @Autowired
     private FlinkEnvService flinkEnvService;
 
-    /**
-     * @param appId
-     * @param decode
-     * @return
-     */
     @Override
     public FlinkSql getEffective(Long appId, boolean decode) {
         FlinkSql flinkSql = baseMapper.getEffective(appId);
@@ -74,11 +69,6 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         return flinkSql;
     }
 
-    /**
-     * @param appId
-     * @param decode
-     * @return
-     */
     @Override
     public FlinkSql getLatestFlinkSql(Long appId, boolean decode) {
         Page<FlinkSql> page = new Page<>();
@@ -180,10 +170,10 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         FlinkSql sql = getCandidate(application.getId(), CandidateType.HISTORY);
         assert sql != null;
         try {
-            //检查并备份当前的任务.
+            // check and backup current job
             FlinkSql effectiveSql = getEffective(application.getId(), false);
             assert effectiveSql != null;
-            //回滚历史版本的任务
+            // rollback history sql
             backUpService.rollbackFlinkSql(application, sql);
         } catch (Exception e) {
             log.error("Backup and Roll back FlinkSql before start failed.");

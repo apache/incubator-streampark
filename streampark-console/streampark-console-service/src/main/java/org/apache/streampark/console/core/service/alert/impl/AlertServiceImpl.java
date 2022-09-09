@@ -75,10 +75,9 @@ public class AlertServiceImpl implements AlertService {
         if (CollectionUtils.isEmpty(alertTypes)) {
             return true;
         }
-        // 没有使用线程池,保证报警能够成功发送
+        // No use thread pool, ensure that the alarm can be sent successfully
         Tuple2<Boolean, AlertException> reduce = alertTypes.stream().map(alertType -> {
             try {
-                // 处理每种报警类型的异常,并收集异常
                 boolean alertRes = SpringContextUtils
                     .getBean(alertType.getServiceType(), AlertNotifyService.class)
                     .doAlert(params, alertTemplate);
@@ -92,7 +91,7 @@ public class AlertServiceImpl implements AlertService {
                 return new Tuple2<>(tp1.f0 & tp2.f0, null);
             }
             if (tp1.f1 != null && tp2.f1 != null) {
-                // 合并多个异常的 message 信息,只保留第一个异常的详细内容
+                // merge multiple exception, and keep the details of the first exception
                 AlertException alertException = new AlertException(tp1.f1.getMessage() + "\n" + tp2.f1.getMessage(), tp1.f1);
                 return new Tuple2<>(alertResult, alertException);
             }

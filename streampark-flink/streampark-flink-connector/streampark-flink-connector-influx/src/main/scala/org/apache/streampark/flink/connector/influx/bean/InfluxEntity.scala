@@ -23,11 +23,11 @@ import org.apache.streampark.flink.connector.influx.function.{InfluxFieldFunctio
 
 /**
  *
- * @param database        指定database
- * @param measurement     指定measurement
- * @param retentionPolicy 失效策略
- * @param tagFun          tags 函数
- * @param fieldFun        field 函数
+ * @param database        database
+ * @param measurement     measurement
+ * @param retentionPolicy retentionPolicy
+ * @param tagFun          tag function
+ * @param fieldFun        field function
  * @tparam T
  */
 case class InfluxEntity[T](apiType: ApiType = ApiType.scala,
@@ -41,7 +41,7 @@ case class InfluxEntity[T](apiType: ApiType = ApiType.scala,
   var javaTagFun: InfluxTagFunction[T] = _
   var javaFieldFun: InfluxFieldFunction[T] = _
 
-  //for java
+  // for java
   def this(database: String,
            measurement: String,
            retentionPolicy: String,
@@ -52,7 +52,7 @@ case class InfluxEntity[T](apiType: ApiType = ApiType.scala,
     this.javaFieldFun = javaFieldFun
   }
 
-  //for scala
+  // for scala
   def this(database: String,
            measurement: String,
            retentionPolicy: String,

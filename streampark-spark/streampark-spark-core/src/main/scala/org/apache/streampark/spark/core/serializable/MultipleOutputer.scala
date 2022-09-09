@@ -21,13 +21,10 @@ import org.apache.avro.mapreduce.AvroMultipleOutputs
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs
 
 /**
+  * Multiple dir output
   *
-  */
-/**
-  * 多目录输出
-  *
-  * @tparam K
-  * @tparam V
+  * @tparam K key
+  * @tparam V value
   */
 trait MultipleOutputer[K, V] {
   def write(key: K, value: V, path: String): Unit
@@ -38,7 +35,7 @@ trait MultipleOutputer[K, V] {
 object MultipleOutputer {
 
   /**
-    * Avro 多文件输出
+    * Avro multi files output
     *
     * @param mo
     * @tparam K
@@ -51,7 +48,7 @@ object MultipleOutputer {
   }
 
   /**
-    * 无格式多路径输出
+    * Unformatted multipath output
     *
     * @param mo
     * @tparam K

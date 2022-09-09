@@ -26,11 +26,6 @@ import org.apache.streampark.console.core.enums.FlinkAppState;
 
 public interface AlertService {
 
-    /**
-     * alert
-     *
-     * @param application
-     */
     void alert(Application application, CheckPointStatus checkPointStatus);
 
     void alert(Application application, FlinkAppState appState);

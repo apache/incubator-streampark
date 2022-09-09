@@ -31,7 +31,7 @@ public final class TreeUtils {
     private static final String TOP_NODE_ID = "0";
 
     /**
-     * 用于构建菜单或部门树
+     * build menu or department tree
      *
      * @param nodes nodes
      * @param <T>   <T>
@@ -77,7 +77,7 @@ public final class TreeUtils {
     }
 
     /**
-     * 构造前端路由
+     * build vue router
      *
      * @param routes routes
      * @param <T>    T

@@ -35,7 +35,7 @@ public class User implements Serializable {
 
     private static final long serialVersionUID = -4852732617765810959L;
     /**
-     * 账户状态
+     * user status
      */
     public static final String STATUS_VALID = "1";
 
@@ -43,16 +43,12 @@ public class User implements Serializable {
 
     public static final String DEFAULT_AVATAR = "default.jpg";
 
-    /**
-     * 性别
-     */
     public static final String SEX_MALE = "0";
 
     public static final String SEX_FEMALE = "1";
 
     public static final String SEX_UNKNOW = "2";
 
-    // 默认密码
     public static final String DEFAULT_PASSWORD = "streampark666";
 
     @TableId(type = IdType.AUTO)
@@ -89,10 +85,8 @@ public class User implements Serializable {
 
     private transient String roleName;
 
-    // 排序字段
     private transient String sortField;
 
-    // 排序规则 ascend 升序 descend 降序
     private transient String sortOrder;
 
     private transient String createTimeFrom;
@@ -100,15 +94,13 @@ public class User implements Serializable {
 
     private transient String id;
 
-    // 盐值
     private String salt;
 
-    // 昵称
     private String nickName;
 
     /**
-     * shiro-redis v3.1.0 必须要有 getAuthCacheKey()或者 getId()方法 # Principal id field name. The field
-     * which you can get unique id to identify this principal. # For example, if you use UserInfo as
+     * shiro-redis v3.1.0 must have getAuthCacheKey() or getId() function # Principal id field name.
+     * The field which you can get unique id to identify this principal. # For example, if you use UserInfo as
      * Principal class, the id field maybe userId, userName, email, etc. # Remember to add getter to
      * this id field. For example, getUserId(), getUserName(), getEmail(), etc. # Default value is
      * authCacheKey or id, that means your principal object has a method called "getAuthCacheKey()" or

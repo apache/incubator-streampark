@@ -31,18 +31,11 @@ import java.time.Duration
 object DataStreamExt {
 
   /**
-   *
-   * @param dataStream DataStream 扩展方法.
+   * @param dataStream DataStream extension function
    * @tparam T
    */
-
   class DataStream[T: TypeInformation](dataStream: DStream[T]) {
 
-    /**
-     *
-     * @param fun
-     * @return
-     */
     def sideOut(fun: (T, ProcFunc[T, T]#Context) => Unit): DStream[T] = dataStream.process(new ProcFunc[T, T] {
       override def processElement(value: T, ctx: ProcFunc[T, T]#Context, out: Collector[T]): Unit = {
         fun(value, ctx)
@@ -52,25 +45,12 @@ object DataStreamExt {
 
     def sideGet[R: TypeInformation](sideTag: String): DStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
-    /**
-     * 基于最大延迟时间的Watermark生成
-     *
-     * @return
-     * */
-
     def boundedOutOfOrdernessWatermark(func: T => Long, duration: Duration): DStream[T] = {
       dataStream.assignTimestampsAndWatermarks(WatermarkStrategy.forBoundedOutOfOrderness[T](duration).withTimestampAssigner(new SerializableTimestampAssigner[T]() {
         override def extractTimestamp(element: T, recordTimestamp: Long): Long = func(element)
       }))
     }
 
-    /**
-     * 基于最大延迟时间的Watermark生成,直接用系统时间戳做比较
-     *
-     * @param fun
-     * @param maxTimeLag
-     * @return
-     */
     def timeLagWatermark(fun: T => Long, maxTimeLag: Time): DStream[T] = {
       val assigner = new AssignerWithPeriodicWatermarks[T] {
         override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
@@ -92,7 +72,7 @@ object DataStreamExt {
     }
 
     /**
-     * 扩展process方法,使其调用更加简单.
+     * extension process function, make be called easy
      *
      * @param processFunction
      * @param onTimerFunction
@@ -117,9 +97,8 @@ object DataStreamExt {
 
   }
 
-
   /**
-   * 扩展 ProcessFunction方法
+   * extension ProcessFunction
    *
    * @param ctx
    * @tparam IN
@@ -131,6 +110,5 @@ object DataStreamExt {
       ctx.output[R](tag, value)
     }
   }
-
 
 }

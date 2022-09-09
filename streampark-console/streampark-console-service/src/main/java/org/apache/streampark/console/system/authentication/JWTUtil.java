@@ -39,11 +39,11 @@ public class JWTUtil {
     private static final long JWT_TIME_OUT = SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
 
     /**
-     * 校验 token是否正确
+     * verify token
      *
-     * @param token  密钥
-     * @param secret 用户的密码
-     * @return 是否正确
+     * @param token  token
+     * @param secret secret
+     * @return is valid token
      */
     public static boolean verify(String token, String username, String secret) {
         try {
@@ -60,9 +60,7 @@ public class JWTUtil {
     }
 
     /**
-     * 从 token中获取用户名
-     *
-     * @return token中包含的用户名
+     * get username from token
      */
     public static String getUsername(String token) {
         try {
@@ -75,10 +73,10 @@ public class JWTUtil {
     }
 
     /**
-     * 生成 token
+     * generate token
      *
-     * @param username 用户名
-     * @param secret   用户的密码
+     * @param username username
+     * @param secret   secret
      * @return token
      */
     public static String sign(String username, String secret) {
@@ -86,11 +84,11 @@ public class JWTUtil {
     }
 
     /**
-     * 生成 token
+     * generate token
      *
-     * @param username     用户名
-     * @param secret       用户的密码
-     * @param expireTime   token过期时间
+     * @param username     username
+     * @param secret       secret
+     * @param expireTime   token expire time
      * @return token
      */
     public static String sign(String username, String secret, Long expireTime) {
@@ -106,7 +104,7 @@ public class JWTUtil {
     }
 
     /**
-     * 获取用户登录token 失效时间
+     * get token expire timestamp
      */
     private static Long getExpireTime() {
         return System.currentTimeMillis() + JWT_TIME_OUT;

@@ -29,7 +29,8 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 
 /**
- *  基于hikari连接池实现.呃,当然支持多数据源,需注意所有的修改和添加操作都是自动提交事物的...
+ *  Based on the hikari connection pool implementation. Support multiple data sources,
+ *  note that all modifications and additions are automatically committed transactions.
  */
 object JdbcUtils {
 
@@ -39,11 +40,7 @@ object JdbcUtils {
   private[this] val dataSourceHolder = new ConcurrentHashMap[String, HikariDataSource]
 
   /**
-   * 将查询的一行数据的所有字段封装到Map里,返回List。。。
-   *
-   * @param sql
-   * @param jdbcConfig
-   * @return
+   * Wrap all the fields of a query row of data into a List[Map]
    */
   def select(sql: String, func: ResultSet => Unit = null)(implicit jdbcConfig: Properties): List[Map[String, _]] = {
     if (Try(sql.isEmpty).getOrElse(false)) List.empty else {
@@ -116,14 +113,10 @@ object JdbcUtils {
   def update(sql: String)(implicit jdbcConfig: Properties): Int = update(getConnection(jdbcConfig), sql)
 
   /**
-   *
-   * 用于执行 INSERT、UPDATE 或 DELETE 语句以及 SQL DDL（数据定义语言）语句，例如 CREATE TABLE 和 DROP TABLE。
-   * INSERT、UPDATE 或 DELETE 语句的效果是修改表中零行或多行中的一列或多列。
-   * executeUpdate 的返回值是一个整数（int），指示受影响的行数（即更新计数）。
-   * 对于 CREATE TABLE 或 DROP TABLE 等不操作行的语句，executeUpdate 的返回值总为零
-   *
-   * @param sql
-   * @return
+   * Used to execute INSERT, UPDATE, or DELETE statements and SQL DDL statements, such as CREATE TABLE and DROP TABLE.
+   * The effect of an INSERT, UPDATE, or DELETE statement is to modify one or more columns in zero or more rows of a table.
+   * The return value of executeUpdate is an integer (int) indicating the number of rows affected (i.e., the update count).
+   * For statements such as CREATE TABLE or DROP TABLE that do not operate on rows, the return value of executeUpdate is always zero
    */
   def update(conn: Connection, sql: String): Int = {
     var statement: Statement = null
@@ -141,10 +134,7 @@ object JdbcUtils {
   def unique(sql: String)(implicit jdbcConfig: Properties): Map[String, _] = unique(getConnection(jdbcConfig), sql)
 
   /**
-   * 查询返回一行记录...
-   *
-   * @param sql
-   * @return
+   * The query returns one row of records
    */
   def unique(conn: Connection, sql: String): Map[String, _] = {
     var stmt: Statement = null
@@ -171,17 +161,14 @@ object JdbcUtils {
   }
 
   /**
-   *
-   * 方法execute：
-   * 可用于执行任何SQL语句，返回一个boolean值，表明执行该SQL语句是否返回了ResultSet。
-   * 如果执行后第一个结果是ResultSet，则返回true，否则返回false。
-   * 但它执行SQL语句时比较麻烦，通常我们没有必要使用execute方法来执行SQL语句，而是使用executeQuery或executeUpdate更适合。
-   * 但如果在不清楚SQL语句的类型时则只能使用execute方法来执行该SQL语句了
-   *
-   * @param sql
-   * @return
+   * Note about execute:
+   * It can be used to execute any SQL statement, returns a boolean value indicating whether the execution
+   * of the SQL statement returned a ResultSet. Returns true if the first result after execution is a
+   * ResultSet, otherwise it returns false. However, it is cumbersome to execute SQL statements. Usually
+   * we don't need to use the execute method to execute SQL statements,but it is more appropriate to use
+   * executeQuery or executeUpdate. But if you don't know the type of the SQL statement,you can only use
+   * the execute method to execute the SQL statement.
    */
-
   def execute(sql: String)(implicit jdbcConfig: Properties): Boolean = execute(getConnection(jdbcConfig), sql)
 
   def execute(conn: Connection, sql: String): Boolean = {
@@ -198,10 +185,7 @@ object JdbcUtils {
   }
 
   /**
-   * 以及Hikari连接池
-   *
-   * @param prop
-   * @return
+   * Get connection with HikariDataSource
    */
   def getConnection(prop: Properties): Connection = {
     val alias = prop(KEY_ALIAS)
@@ -210,7 +194,6 @@ object JdbcUtils {
       lock.lock()
       val ds: HikariDataSource = Try(Option(dataSourceHolder(alias))).getOrElse(None) match {
         case None =>
-          // 创建一个数据源对象
           val jdbcConfig = new HikariConfig()
           prop.filter(x => x._1 != KEY_ALIAS && x._1 != KEY_SEMANTIC).foreach(x => {
             Try(Option(jdbcConfig.getClass.getDeclaredField(x._1))).getOrElse(None) match {
@@ -246,7 +229,6 @@ object JdbcUtils {
           ds
         case Some(x) => x
       }
-      // 返回连接...
       ds.getConnection()
     } finally {
       lock.unlock()

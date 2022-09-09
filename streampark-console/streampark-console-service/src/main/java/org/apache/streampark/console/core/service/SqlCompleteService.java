@@ -21,10 +21,5 @@ import java.util.List;
 
 public interface SqlCompleteService {
 
-    /**
-     *
-     * @param sql
-     * @return
-     */
     public List<String> getComplete(String sql);
 }

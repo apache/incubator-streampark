@@ -22,7 +22,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
 
 /**
- * 直接打印
+ * print sink
  *
  * @param sc
  * @param initParams
@@ -37,10 +37,6 @@ class ShowSink[T](@transient override val sc: SparkContext,
 
   private val num = prop.getProperty("num", "10").toInt
 
-  /**
-   * 输出
-   *
-   */
   override def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
     val firstNum = rdd.take(num + 1)
     // scalastyle:off println

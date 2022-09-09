@@ -282,7 +282,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public void tailMvnDownloading(Long id) {
         this.tailOutMap.put(id, id);
-        // 首次会从buffer里从头读取数据.有且仅有一次.
+        // the first time, will be read from the beginning of the buffer. Only once
         this.tailBeginning.put(id, true);
     }
 
@@ -305,7 +305,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public void toEffective(Application application) {
-        //将Latest的设置为Effective
+        // set latest to Effective
         ApplicationConfig config = configService.getLatest(application.getId());
         if (config != null) {
             this.configService.toEffective(application.getId(), config.getId());
@@ -314,29 +314,24 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), null);
             if (flinkSql != null) {
                 flinkSqlService.toEffective(application.getId(), flinkSql.getId());
-                //清除备选标记.
+                // clean candidate
                 flinkSqlService.cleanCandidate(flinkSql.getId());
             }
         }
     }
 
-    /**
-     * 撤销发布.
-     *
-     * @param appParma
-     */
     @Override
     public void revoke(Application appParma) throws ApplicationException {
         Application application = getById(appParma.getId());
         assert application != null;
 
-        //1) 将已经发布到workspace的文件删除
+        //1) delete files that have been published to workspace
         application.getFsOperator().delete(application.getAppHome());
 
-        //2) 将backup里的文件回滚到workspace
+        //2) rollback the files to the workspace
         backUpService.revoke(application);
 
-        //3) 相关状态恢复
+        //3) restore related status
         LambdaUpdateWrapper<Application> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(Application::getId, application.getId());
         if (application.isFlinkSqlJob()) {
@@ -365,30 +360,29 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Application application = getById(paramApp.getId());
 
         try {
-            //1) 删除flink sql
+            // 1) remove flink sql
             flinkSqlService.removeApp(application.getId());
 
-            //2) 删除 log
+            // 2) remove log
             applicationLogService.removeApp(application.getId());
 
-            //3) 删除 config
+            // 3) remove config
             configService.removeApp(application.getId());
 
-            //4) 删除 effective
+            // 4) remove effective
             effectiveService.removeApp(application.getId());
 
-            //以下涉及到hdfs文件的删除
-
-            //5) 删除 backup
+            // remove related hdfs
+            // 5) remove backup
             backUpService.removeApp(application);
 
-            //6) 删除savepoint
+            // 6) remove savepoint
             savePointService.removeApp(application);
 
-            //7) 删除 BuildPipeline
+            // 7) remove BuildPipeline
             appBuildPipeService.removeApp(application.getId());
 
-            //8) 删除 app
+            // 8) remove app
             removeApp(application);
 
             if (isKubernetesApp(paramApp)) {
@@ -417,7 +411,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (application.getVersionId() != null) {
                 flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
             } else {
-                //任务未指定flink version.则检查是否配置的默认的flink version
                 flinkEnv = flinkEnvService.getDefault();
             }
             if (flinkEnv == null) {
@@ -451,7 +444,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         removeById(appId);
         application.getFsOperator().delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
         try {
-            //曾经设置过yarn-application类型,尝试删除,不留后患.
+            // try to delete yarn-application, and leave no trouble.
             String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
             if (HdfsOperator.exists(path)) {
                 HdfsOperator.delete(path);
@@ -509,10 +502,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     /**
-     * 检查当前的 jobName 以及其他关键标识别在 db 和 yarn/k8s 中是否已经存在
-     *
-     * @param appParam
-     * @return
+     * Check if the current jobName and other key identifiers already exist in db and yarn/k8s
      */
     @Override
     public AppExistsState checkExists(Application appParam) {
@@ -535,7 +525,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
 
             FlinkAppState state = FlinkAppState.of(app.getState());
-            //当前任务已停止的状态
+            // has stopped status
             if (state.equals(FlinkAppState.ADDED) ||
                 state.equals(FlinkAppState.CREATED) ||
                 state.equals(FlinkAppState.FAILED) ||
@@ -711,7 +701,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
 
             if (!application.getBuild()) {
-                //部署模式发生了变化.
                 if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
                     if (appParam.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
                         application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)) {
@@ -732,9 +721,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             }
 
-            //从db中补全jobType到appParam
             appParam.setJobType(application.getJobType());
-            //以下参数发生变化,需要重新任务才能生效
+            // changes to the following parameters need to be re-launched to take effect
             application.setJobName(appParam.getJobName());
             application.setVersionId(appParam.getVersionId());
             application.setArgs(appParam.getArgs());
@@ -752,7 +740,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setK8sTmPodTemplate(appParam.getK8sTmPodTemplate());
             application.setK8sHadoopIntegration(appParam.getK8sHadoopIntegration());
 
-            //以下参数发生改变不影响正在运行的任务
+            // changes to the following parameters do not affect running tasks
             application.setModifyTime(new Date());
             application.setDescription(appParam.getDescription());
             application.setAlertId(appParam.getAlertId());
@@ -783,10 +771,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     /**
-     * 更新 FlinkSql 类型的作业.要考虑3个方面<br/>
-     * 1. flink Sql是否发生更新 <br/>
-     * 2. 依赖是否发生更新<br/>
-     * 3. 配置参数是否发生更新<br/>
+     * update FlinkSql type jobs, there are 3 aspects to consider<br/>
+     * 1. flink sql has changed <br/>
+     * 2. dependency has changed<br/>
+     * 3. parameter has changed<br/>
      *
      * @param application
      * @param appParam
@@ -800,30 +788,32 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             flinkSqlService.create(sql);
             application.setBuild(true);
         } else {
-            //1) 获取copy的源FlinkSql
+            // get previous flink sql and decode
             FlinkSql copySourceFlinkSql = flinkSqlService.getById(appParam.getSqlId());
             assert copySourceFlinkSql != null;
             copySourceFlinkSql.decode();
 
-            //当前提交的FlinkSql记录
+            // get submit flink sql
             FlinkSql targetFlinkSql = new FlinkSql(appParam);
 
-            //2) 判断sql和依赖是否发生变化
+            // judge sql and dependency has changed
             ChangedType changedType = copySourceFlinkSql.checkChange(targetFlinkSql);
 
             log.info("updateFlinkSqlJob changedType: {}", changedType);
 
-            //依赖或sql发生了变更
+            // if has been changed
             if (changedType.hasChanged()) {
-                // 3) 检查是否存在新增记录的候选版本
+                // check if there is a candidate version for the newly added record
                 FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
-                //存在新增记录的候选版本则直接删除,只会保留一个候选版本,新增候选版本在没有生效的情况下,如果再次编辑,下个记录进来,则删除上个候选版本
+                // If the candidate version of the new record exists, it will be deleted directly,
+                // and only one candidate version will be retained. If the new candidate version is not effective,
+                // if it is edited again and the next record comes in, the previous candidate version will be deleted.
                 if (newFlinkSql != null) {
-                    //删除候选版本的所有记录
+                    // delete all records about candidates
                     flinkSqlService.removeById(newFlinkSql.getId());
                 }
                 FlinkSql historyFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.HISTORY);
-                //将已经存在的但是被设置成候选版本的移除候选标记
+                // remove candidate flags that already exist but are set as candidates
                 if (historyFlinkSql != null) {
                     flinkSqlService.cleanCandidate(historyFlinkSql.getId());
                 }
@@ -833,20 +823,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     application.setBuild(true);
                 }
             } else {
-                // 2) 判断版本是否发生变化
-                //获取正式版本的flinkSql
+                // judge version has changed
                 boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
                 if (versionChanged) {
-                    //sql和依赖未发生变更,但是版本号发生了变化,说明是回滚到某个版本了
+                    // sql and dependency not changed, but version changed, means that rollback to the version
                     CandidateType type = CandidateType.HISTORY;
                     flinkSqlService.setCandidate(type, appParam.getId(), appParam.getSqlId());
-                    //直接回滚到某个历史版本(rollback)
                     application.setLaunch(LaunchState.NEED_ROLLBACK.get());
                     application.setBuild(true);
                 }
             }
         }
-        // 7) 配置文件修改
         this.configService.update(appParam, application.isRunning());
     }
 
@@ -883,7 +870,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             this.update(updateWrapper);
 
-            // backup.
+            // backup
             if (application.isFlinkSqlJob()) {
                 FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
                 if (!application.isNeedRollback() && newFlinkSql != null) {
@@ -891,7 +878,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             }
 
-            //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
+            // If the current task is not running, or the task has just been added,
+            // directly set the candidate version to the official version
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
             if (!application.isRunning() || flinkSql == null) {
                 this.toEffective(application);
@@ -1018,7 +1006,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         application.setState(FlinkAppState.CANCELLING.getValue());
         if (appParam.getSavePointed()) {
-            // 正在执行savepoint...
             FlinkTrackingTask.addSavepoint(application.getId());
             application.setOptionState(OptionState.SAVEPOINTING.getValue());
         } else {
@@ -1027,7 +1014,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         application.setOptionTime(new Date());
         this.baseMapper.updateById(application);
-        //此步骤可能会比较耗时,重新开启一个线程去执行
 
         FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
 
@@ -1064,9 +1050,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        //设置作业取消跟踪列表
         Long userId = commonService.getCurrentUser().getUserId();
-        if (application.getUserId() != userId) {
+        if (!application.getUserId().equals(userId)) {
             FlinkTrackingTask.addCanlledApp(application.getId(), userId);
         }
 
@@ -1118,12 +1103,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     application.setState(FlinkAppState.FAILED.getValue());
                     updateById(application);
 
-                    // 保持savepoint失败.则将之前的统统设置为过期
                     if (appParam.getSavePointed()) {
                         savePointService.obsolete(application.getId());
                     }
 
-                    // retracking flink job on kubernetes and logging exception
+                    // re-tracking flink job on kubernetes and logging exception
                     if (isKubernetesApp(application)) {
                         TrackId id = toTrackId(application);
                         k8SFlinkTrackMonitor.unTrackingJob(id);
@@ -1176,7 +1160,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     /**
-     * 设置任务正在启动中.(for webUI "state" display)
+     * Setup task is starting (for webUI "state" display)
      *
      * @param appParam
      */
@@ -1199,7 +1183,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         assert application != null;
 
-        //手动启动的,将reStart清空
+        // if manually started, clear the restart flag
         if (!auto) {
             application.setRestartCount(0);
         } else {
@@ -1210,17 +1194,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setSavePointed(true);
         }
 
-        //1) 真正执行启动相关的操作..
         String appConf;
         String flinkUserJar = null;
         ApplicationLog applicationLog = new ApplicationLog();
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());
 
-        //2) 将latest的设置为Effective的,(此时才真正变成当前生效的)
+        // set the latest to Effective, (it will only become the current effective at this time)
         this.toEffective(application);
 
-        //获取一个最新的Effective的配置
         ApplicationConfig applicationConfig = configService.getEffective(application.getId());
         ExecutionMode executionMode = ExecutionMode.of(application.getExecutionMode());
         assert executionMode != null;
@@ -1259,12 +1241,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         } else if (application.isFlinkSqlJob()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
             assert flinkSql != null;
-            //1) dist_userJar
+            // 1) dist_userJar
             FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
             String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
-            //2) appConfig
+            // 2) appConfig
             appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
-            //3) client
+            // 3) client
             if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
                 String clientPath = Workspace.remote().APP_CLIENT();
                 flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
@@ -1403,7 +1385,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
                 updateById(application);
 
-                //2) 启动完成将任务加入到监控中...
+                // if start completed, will be added task to tracking queue
                 if (isKubernetesApp(application)) {
                     k8SFlinkTrackMonitor.trackingJob(toTrackId(application));
                 } else {
@@ -1413,7 +1395,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
                 applicationLog.setSuccess(true);
                 applicationLogService.save(applicationLog);
-                //将savepoint设置为过期
+                // set savepoint to expire
                 savePointService.obsolete(application.getId());
             }, e -> {
                 if (e.getCause() instanceof CancellationException) {
@@ -1448,7 +1430,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setOptionTime(new Date());
         updateById(application);
         savePointService.obsolete(application.getId());
-        // retracking flink job on kubernetes and logging exception
+        // re-tracking flink job on kubernetes and logging exception
         if (isKubernetesApp(application)) {
             TrackId id = toTrackId(application);
             k8SFlinkTrackMonitor.unTrackingJob(id);
@@ -1468,13 +1450,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private String getSavePointPath(Application appParam) throws Exception {
         Application application = getById(appParam.getId());
 
-        //1) 动态参数优先级最高,读取动态参数中是否设置: -Dstate.savepoints.dir
+        // 1) dynamic parameters have the highest priority, read the dynamic parameters are set: -Dstate.savepoints.dir
         String savepointPath = FlinkSubmitter
             .extractDynamicOptionAsJava(application.getDynamicOptions())
             .get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
 
-        // 2) Application conf配置优先级第二,如果是 streampark|flinksql 类型的任务,则看任务定义时是否配置了Application conf,
-        // 如配置了并开启了checkpoints则读取state.savepoints.dir
+        // Application conf configuration has the second priority. If it is a streampark|flinksql type task,
+        // see if Application conf is configured when the task is defined, if checkpoints are configured and enabled,
+        // read `state.savepoints.dir`
         if (StringUtils.isBlank(savepointPath)) {
             if (application.isStreamParkJob() || application.isFlinkSqlJob()) {
                 ApplicationConfig applicationConfig = configService.getEffective(application.getId());
@@ -1488,9 +1471,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        // 3) 以上都未获取到savepoint, 则按照部署类型来尝试获取savepoint路径(remote|on yarn)
+        // 3) If the savepoint is not obtained above, try to obtain the savepoint path according to the deployment type (remote|on yarn)
         if (StringUtils.isBlank(savepointPath)) {
-            // 3.1) 如果是remote模式,则通过restapi请求flink webui接口,获取savepoint路径
+            // 3.1) At the remote mode, request the flink webui interface to get the savepoint path
             if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
                 FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
                 assert cluster != null;
@@ -1499,7 +1482,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     savepointPath = config.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
                 }
             } else {
-                // 3.2) 如是 on yarn 或者 kubernetes模式. 则读取绑定的flink里的flink-conf.yml中的savepoint
+                // 3.2) At the yarn or k8s mode, then read the savepoint in flink-conf.yml in the bound flink
                 FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
                 savepointPath = flinkEnv.convertFlinkYamlAsMap().get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
             }

@@ -23,11 +23,8 @@ import java.security.Key;
 
 public class EncryptUtils {
 
-    // 设置默认密匙
     private static String strDefaultKey = "defaultKey";
-    // 加密
     private Cipher encryptCipher = null;
-    // 解密
     private Cipher decryptCipher = null;
 
     private static String byteArr2HexStr(byte[] arrB) {

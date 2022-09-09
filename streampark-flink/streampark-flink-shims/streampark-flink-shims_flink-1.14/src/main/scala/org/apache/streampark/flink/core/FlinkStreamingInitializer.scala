@@ -90,14 +90,14 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   private[this] lazy val defaultFlinkConf: Map[String, String] = {
     parameter.get(KEY_FLINK_CONF(), null) match {
       case null =>
-        //通过脚本启动..
+        // start with script
         val flinkHome = System.getenv("FLINK_HOME")
         require(flinkHome != null, "FLINK_HOME not found.")
         logInfo(s"flinkHome: $flinkHome")
         val yaml = new File(s"$flinkHome/conf/flink-conf.yaml")
         PropertiesUtils.loadFlinkConfYaml(yaml)
       case flinkConf =>
-        //从 StreamParkConsole 后端传递过来的.
+        // passed in from the streampark console backend
         PropertiesUtils.loadFlinkConfYaml(DeflaterUtils.unzipString(flinkConf))
     }
   }
@@ -111,9 +111,8 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case x if x.startsWith("prop://") =>
         PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(x.drop(7)))
       case x if x.startsWith("hdfs://") =>
-
         /**
-         * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
+         * If the configuration file with the hdfs, user will need to copy the hdfs-related configuration files under the resources dir
          */
         val text = HdfsUtils.read(x)
         extension match {
@@ -145,7 +144,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case file => file
     }
     val configArgs = readFlinkConf(config)
-    //显示指定的优先级 > 项目配置文件 > 系统配置文件...
+    // config priority: explicitly specified priority > project profiles > system profiles
     ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(configArgs)).mergeWith(argsMap)
   }
 
@@ -162,7 +161,6 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   def initStreamEnv(): Unit = {
     localStreamEnv = StreamExecutionEnvironment.getExecutionEnvironment
-    //init env...
     Try(parameter.get(KEY_FLINK_PARALLELISM()).toInt).getOrElse {
       Try(parameter.get(CoreOptions.DEFAULT_PARALLELISM.key()).toInt).getOrElse(CoreOptions.DEFAULT_PARALLELISM.defaultValue().toInt)
     } match {
@@ -177,10 +175,8 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     val executionMode = Try(RuntimeExecutionMode.valueOf(parameter.get(KEY_EXECUTION_RUNTIME_MODE))).getOrElse(RuntimeExecutionMode.STREAMING)
     localStreamEnv.setRuntimeMode(executionMode)
 
-    //重启策略.
     restartStrategy()
 
-    //checkpoint
     checkpoint()
 
     apiType match {
@@ -193,7 +189,8 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   private[this] def restartStrategy(): Unit = {
     /**
-     * 优先到当前项目的配置下找配置,找不到,则取$FLINK_HOME/conf/flink-conf.yml里的配置
+     * Priority to the current project configuration to find the configuration, if can not find,
+     * then take $FLINK_HOME/conf/flink-conf.yml as the configuration
      */
     val prefixLen = "flink.".length
     val strategy = Try(RestartStrategy.byName(parameter.get(KEY_FLINK_RESTART_STRATEGY)))
@@ -203,18 +200,19 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
     strategy match {
       case RestartStrategy.`failure-rate` =>
-
         /**
-         * restart-strategy.failure-rate.max-failures-per-interval: 在一个Job认定为失败之前,最大的重启次数
-         * restart-strategy.failure-rate.failure-rate-interval: 计算失败率的时间间隔
-         * restart-strategy.failure-rate.delay: 两次连续重启尝试之间的时间间隔
+         * restart-strategy.failure-rate.max-failures-per-interval: maximum number of restarts before a Job is deemed to have failed
+         * restart-strategy.failure-rate.failure-rate-interval: time interval for calculating the failure rate
+         * restart-strategy.failure-rate.delay: time interval between two consecutive reboot attempts
          * e.g:
          * >>>
          * max-failures-per-interval: 10
          * failure-rate-interval: 5 min
          * delay: 2 s
          * <<<
-         * 即:每次异常重启的时间间隔是"2秒",如果在"5分钟"内,失败总次数到达"10次" 则任务失败.
+         * That is:
+         * the time interval of each abnormal restart is "2 seconds",
+         * if the total number of failures reaches "10" within "5 minutes", the task will fail.
          */
         val interval = Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_PER_INTERVAL).toInt)
           .getOrElse(
@@ -237,15 +235,14 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           Time.of(delay._1, delay._2)
         ))
       case RestartStrategy.`fixed-delay` =>
-
         /**
-         *
-         * restart-strategy.fixed-delay.attempts: 在Job最终宣告失败之前，Flink尝试执行的次数
-         * restart-strategy.fixed-delay.delay: 一个任务失败之后不会立即重启,这里指定间隔多长时间重启
+         * restart-strategy.fixed-delay.attempts: the number of times Flink tries to execute a Job before it finally failure
+         * restart-strategy.fixed-delay.delay: specific how long the restart interval
          * e.g:
          * attempts: 5,delay: 3 s
-         * 即:
-         * 任务最大的失败重试次数是5次,每次任务重启的时间间隔是3秒,如果失败次数到达5次,则任务失败退出
+         * That is:
+         * The maximum number of failed retries for a task is 5, and the time interval for each task restart is 3 seconds,
+         * if the number of failed attempts reaches 5, the task will fail and exit
          */
         val attempts = Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS).toInt)
           .getOrElse(
@@ -258,7 +255,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           ))
 
         /**
-         * 任务执行失败后总共重启 restartAttempts 次,每次重启间隔 delayBetweenAttempts
+         * Total `restartAttempts` after task execution failure, each restart interval `delayBetweenAttempts`
          */
         streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(attempts, Time.of(delay._1, delay._2)))
 
@@ -269,7 +266,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   }
 
   private[this] def checkpoint(): Unit = {
-    //checkPoint,从配置文件读取是否开启checkpoint,默认不启用.
+    // read from the configuration file whether to enable checkpoint, default is disabled.
     val enableCheckpoint = Try(parameter.get(KEY_FLINK_CHECKPOINTS_ENABLE).toBoolean).getOrElse(false)
     if (!enableCheckpoint) return
 
@@ -281,26 +278,24 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     val cpMinPauseBetween = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN).toLong).getOrElse(CheckpointConfig.DEFAULT_MIN_PAUSE_BETWEEN_CHECKPOINTS)
     val unaligned = Try(parameter.get(KEY_FLINK_CHECKPOINTS_UNALIGNED).toBoolean).getOrElse(false)
 
-    //默认:开启检查点,1s进行启动一个检查点
+    // default: enable checkpoint, interval 1s to start a checkpoint
     streamEnvironment.enableCheckpointing(cpInterval)
 
     val cpConfig = streamEnvironment.getCheckpointConfig
 
     cpConfig.setCheckpointingMode(cpMode)
-    //默认: 检查点之间的时间间隔【checkpoint最小间隔】
+    // default, min pause interval between checkpoints
     cpConfig.setMinPauseBetweenCheckpoints(cpMinPauseBetween)
-    //默认:检查点必须在 $cpTimeout 分钟之内完成，或者被丢弃【checkpoint超时时间】
+    // default: checkpoints must complete within $cpTimeout minutes or be discarded
     cpConfig.setCheckpointTimeout(cpTimeout)
-    //默认:同一时间允许进行?次检查点[默认一次]
+    // default: allow ? times checkpoint at the same time, default one.
     cpConfig.setMaxConcurrentCheckpoints(cpMaxConcurrent)
-    //默认:被cancel会保留Checkpoint数据
+    // default: checkpoint data is retained when cancelled
     cpConfig.enableExternalizedCheckpoints(cpCleanUp)
-    //非对齐checkpoint (flink 1.11.1 =+)
+    // unaligned checkpoint (flink 1.11.1 +=)
     cpConfig.enableUnalignedCheckpoints(unaligned)
 
     val stateBackend = XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND, null))
-
-    //stateBackend
     if (stateBackend != null) {
       require(
         stateBackend == XStateBackend.hashmap || stateBackend == XStateBackend.rocksdb,
@@ -308,7 +303,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       )
       val storage = {
         val storage = parameter.get(KEY_FLINK_STATE_CHECKPOINT_STORAGE, null) match {
-          //从flink-conf.yaml中读取.
+          // read from flink-conf.yaml
           case null =>
             logWarn("can't found flink.state.checkpoint-storage from properties,now try found from flink-conf.yaml")
             val storage = defaultFlinkConf("state.checkpoint-storage")
@@ -327,10 +322,10 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       }
 
       lazy val cpDir = parameter.get(KEY_FLINK_STATE_CHECKPOINTS_DIR, null) match {
-        //从flink-conf.yaml中读取.
+        // read from flink-conf.yaml
         case null =>
           logWarn("can't found flink.state.checkpoints.dir from properties,now try found from flink-conf.yaml")
-          //从flink-conf.yaml中读取,key: state.checkpoints.dir
+          // read `state.checkpoints.dir` key from flink-conf.yaml
           val dir = defaultFlinkConf("state.checkpoints.dir")
           require(dir != null, s"[StreamPark] can't found state.checkpoints.dir from Default FlinkConf ")
           logInfo(s"state.backend: state.checkpoints.dir found in flink-conf.yaml,$dir")
@@ -381,6 +376,5 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     }
 
   }
-
 
 }

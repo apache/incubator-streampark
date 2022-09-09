@@ -18,7 +18,7 @@
 package org.apache.streampark.console.base.exception;
 
 /**
- * api业务异常，区别于内部错误，需要返回友好的message
+ * api business exceptions, as different from internal errors, need to return a friendly message
  */
 public class ApiException extends RuntimeException {
 

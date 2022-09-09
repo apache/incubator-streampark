@@ -102,7 +102,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void createUser(User user) throws Exception {
-        // 创建用户
         user.setCreateTime(new Date());
         user.setAvatar(User.DEFAULT_AVATAR);
         String salt = ShaHashUtils.getRandomSalt(26);
@@ -110,7 +109,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setSalt(salt);
         user.setPassword(password);
         save(user);
-        // 保存用户角色
         String[] roles = user.getRoleId().split(StringPool.COMMA);
         setUserRoles(user, roles);
     }
@@ -118,7 +116,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateUser(User user) throws Exception {
-        // 更新用户
         user.setPassword(null);
         user.setModifyTime(new Date());
         updateById(user);
@@ -132,7 +129,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void deleteUsers(String[] userIds) throws Exception {
         List<String> list = Arrays.asList(userIds);
         removeByIds(list);
-        // 删除用户角色
         this.userRoleService.deleteUserRolesByUserId(userIds);
     }
 
@@ -175,10 +171,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 通过用户名获取用户权限集合
+     * get user permissions by name
      *
-     * @param username 用户名
-     * @return 权限集合
+     * @param username name
+     * @return permissions
      */
     @Override
     public Set<String> getPermissions(String username) {

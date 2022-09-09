@@ -26,9 +26,7 @@ import scala.reflect.ClassTag
 import scala.util.Try
 
 /**
- *
- *
- * 源
+ * Base source trait
  */
 trait Source extends Logger with Serializable {
 
@@ -49,9 +47,7 @@ trait Source extends Logger with Serializable {
   type SourceType
 
   /**
-   * 获取DStream 流
-   *
-   * @return
+   * get DStream
    */
   def getDStream[R: ClassTag](f: SourceType => R): DStream[R]
 }

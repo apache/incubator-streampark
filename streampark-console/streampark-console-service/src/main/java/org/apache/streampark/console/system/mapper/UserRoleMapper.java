@@ -25,20 +25,18 @@ import org.apache.ibatis.annotations.Param;
 public interface UserRoleMapper extends BaseMapper<UserRole> {
 
     /**
-     * 根据用户Id删除该用户的角色关系
+     * delete role by user id
      *
-     * @param userId 用户ID
+     * @param userId user id
      * @return boolean
-     * @date 2019年03月04日17:46:49
      */
     Boolean deleteByUserId(@Param("userId") Long userId);
 
     /**
-     * 根据角色Id删除该角色的用户关系
+     * delete user by role id
      *
-     * @param roleId 角色ID
+     * @param roleId role id
      * @return boolean
-     * @date 2019年03月04日17:47:16
      */
     Boolean deleteByRoleId(@Param("roleId") Long roleId);
 

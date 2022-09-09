@@ -29,11 +29,11 @@ import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.types.Row
 
 /**
- * 融合了流(stream)和table的api
+ * Integration api of stream and table
  *
- * @param parameter
- * @param streamEnv
- * @param tableEnv
+ * @param parameter parameter
+ * @param streamEnv streamEnv
+ * @param tableEnv tableEnv
  */
 class StreamTableContext(override val parameter: ParameterTool,
                          private val streamEnv: StreamExecutionEnvironment,
@@ -41,15 +41,11 @@ class StreamTableContext(override val parameter: ParameterTool,
 
   /**
    * for scala
-   *
-   * @param args
    */
   def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) = this(args._1, args._2, args._3)
 
   /**
    * for Java
-   *
-   * @param args
    */
   def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initJavaStreamTable(args))
 

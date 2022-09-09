@@ -41,7 +41,7 @@ object ParameterCli {
   def read(args: Array[String]): String = {
     args(0) match {
       case "--vmopt" =>
-        //解决jdk1.8+ 动态加载资源到classpath下问题
+        // solved jdk1.8+ dynamic loading of resources to the classpath problem
         ClassLoader.getSystemClassLoader match {
           case c if c.isInstanceOf[URLClassLoader] => ""
           case _ => "--add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED"
@@ -89,7 +89,7 @@ object ParameterCli {
               case appName if appName.nonEmpty => appName
               case _ => ""
             }
-          //是否detached模式...
+          // is detached mode
           case "--detached" =>
             val option = getOption(map, programArgs)
             val line = parser.parse(FlinkRunOption.allOptions, option, false)
@@ -105,7 +105,7 @@ object ParameterCli {
     val optionMap = new mutable.HashMap[String, Any]()
     map.filter(_._1.startsWith(optionPrefix)).filter(_._2.nonEmpty).filter(x => {
       val key = x._1.drop(optionPrefix.length)
-      //验证参数是否合法...
+      // verify parameters is valid
       flinkOptions.hasOption(key)
     }).foreach(x => {
       Try(x._2.toBoolean).getOrElse(x._2) match {
@@ -113,7 +113,8 @@ object ParameterCli {
         case v => optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> v
       }
     })
-    //来自从命令行输入的参数,优先级比配置文件高,若存在则覆盖...
+    // parameters from the command line, which have a higher priority than the configuration file,
+    // if they exist, will be overwritten
     args match {
       case Array() =>
       case array =>

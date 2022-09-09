@@ -89,8 +89,6 @@ public class AccessTokenController {
 
     /**
      * update token status
-     *
-     * @return
      */
     @PostMapping("toggle")
     @RequiresPermissions("token:add")
@@ -109,8 +107,8 @@ public class AccessTokenController {
     }
 
     /**
-     * copy cURL
-     * 暂且硬编码吧，这里没有配置的必要，因为是固定的几个接口
+     * copy cURL, hardcode now, there is no need for configuration here,
+     * because there are several fixed interfaces
      */
     @PostMapping(value = "curl")
     public RestResponse copyRestApiCurl(@NotBlank(message = "{required}") String appId,

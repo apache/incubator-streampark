@@ -36,7 +36,7 @@ object SqlConvertUtils extends Logger {
   )
 
   /**
-   * 转成Flink里的数据类型
+   * convert to flink types
    *
    * @param dataType
    * @param length
@@ -52,7 +52,7 @@ object SqlConvertUtils extends Logger {
   }
 
   /**
-   * 其他数据库类型转换为clickHouse类型,
+   * convert to clickhouse types
    *
    * @param dataType
    * @param length
@@ -93,9 +93,9 @@ object SqlConvertUtils extends Logger {
 
 
   /**
-   * 一段神奇的代码.目前只支持ddl,create table等语法.
+   * An magic code for format sql. only support ddl, create table syntax, etc.
    *
-   * @param sql '
+   * @param sql
    * @return
    */
   private[this] def formatSql(sql: String): String = {
@@ -174,10 +174,10 @@ object SqlConvertUtils extends Logger {
 
   /**
    *
-   * @param sql      : 原始要转化的sql ddl语句
-   * @param typeFunc : 类型转换方法
-   * @param keyFunc  : 遇到primary key的处理函数
-   * @param postfix  : 后缀内容
+   * @param sql      : original sql statement to be converted
+   * @param typeFunc : type conversion function
+   * @param keyFunc  : handle primary key function
+   * @param postfix  : suffix content
    * @return
    */
   private[this] def convertSql(sql: String,

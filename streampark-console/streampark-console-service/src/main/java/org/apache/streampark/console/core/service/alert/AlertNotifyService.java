@@ -22,11 +22,7 @@ import org.apache.streampark.console.core.bean.AlertConfigWithParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 
 public interface AlertNotifyService {
-    /**
-     * alert
-     *
-     * @param template
-     */
+
     boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template) throws AlertException;
 
 }

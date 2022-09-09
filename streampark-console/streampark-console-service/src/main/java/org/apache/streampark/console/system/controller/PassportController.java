@@ -83,7 +83,6 @@ public class PassportController {
 
         password = ShaHashUtils.encrypt(user.getSalt(), password);
 
-        // 更新用户登录时间
         this.userService.updateLoginTime(username);
         String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
@@ -102,10 +101,10 @@ public class PassportController {
     }
 
     /**
-     * 生成前端需要的用户信息，包括： 1. token 2. Vue Router 3. 用户角色 4. 用户权限 5. 前端系统个性化配置信息
+     * generate user info, contains: 1.token, 2.vue router, 3.role, 4.permission, 5.personalized config info of frontend
      *
      * @param token token
-     * @param user  用户信息
+     * @param user  user
      * @return UserInfo
      */
     private Map<String, Object> generateUserInfo(JWTToken token, User user) {
