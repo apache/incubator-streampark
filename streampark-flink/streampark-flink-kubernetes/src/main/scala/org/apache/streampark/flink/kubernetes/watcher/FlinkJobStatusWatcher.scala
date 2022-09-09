@@ -199,6 +199,8 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     logger.info("Enter the touchApplicationJob logic")
     val jobDetails = listJobsDetails(ClusterKey(APPLICATION, namespace, clusterId))
     lazy val k8sInferResult = inferApplicationFlinkJobStateFromK8sEvent(trackId)
+    logger.info(s"The job Details are: ${jobDetails.get.toString}")
+    logger.info(s"The k8s Infer Result are：${k8sInferResult.toString}")
     jobDetails match {
       case Some(details) =>
         if (details.jobs.isEmpty) k8sInferResult; else {
@@ -219,27 +221,28 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       val clusterRestUrl = trackController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
       // list flink jobs from rest api
       callJobsOverviewsApi(clusterRestUrl)
-    }.getOrElse {
-      val clusterRestUrl = trackController.refreshClusterRestUrl(clusterKey).getOrElse(return None)
-      Try(callJobsOverviewsApi(clusterRestUrl)) match {
+    } match {
         case Success(s) => s
         case Failure(e) =>
+          trackController.refreshClusterRestUrl(clusterKey)
           logError(s"failed to visit remote flink jobs on kubernetes-native-mode cluster, errorStack=${e.getMessage}")
           None
       }
-    }
   }
 
   /**
    * list flink jobs details from rest api
    */
   private def callJobsOverviewsApi(restUrl: String): Option[JobDetails] = {
-    JobDetails.as(
+    logger.info(s"Try to access flink's service via http：$restUrl/jobs/overview")
+    val jobDetails = JobDetails.as(
       Request.get(s"$restUrl/jobs/overview")
         .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
         .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
         .execute.returnContent().asString(StandardCharsets.UTF_8)
     )
+    logger.info("Access flink's service by http,success")
+    jobDetails
   }
 
   /**
@@ -252,6 +255,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
     // infer from k8s deployment and event
     val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
+    logger.info(s"Query the local cache: ${trackController.canceling.has(trackId).toString},trackId:${trackId.toString}")
     val jobState = {
       if (trackController.canceling.has(trackId)) FlinkJobState.CANCELED else {
         // whether deployment exists on kubernetes cluster

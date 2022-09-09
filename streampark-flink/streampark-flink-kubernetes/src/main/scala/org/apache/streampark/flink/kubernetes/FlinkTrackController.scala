@@ -109,11 +109,17 @@ class FlinkTrackController extends Logger with AutoCloseable {
    * refresh flink job-manager rest url from remote flink cluster, and cache it.
    */
   def refreshClusterRestUrl(clusterKey: ClusterKey): Option[String] = {
-    val restUrl = KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
-    if (restUrl.nonEmpty) {
-      endpoints.put(clusterKey, restUrl.get)
+    KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
+    match {
+      case restUrl if restUrl.isEmpty => {
+        endpoints.invalidate(clusterKey)
+        None
+      }
+      case restUrl => {
+        endpoints.put(clusterKey, restUrl.get)
+        restUrl
+      }
     }
-    restUrl
   }
 
 }
