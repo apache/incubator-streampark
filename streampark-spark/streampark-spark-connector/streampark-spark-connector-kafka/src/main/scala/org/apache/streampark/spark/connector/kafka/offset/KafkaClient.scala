@@ -17,12 +17,6 @@
 
 package org.apache.streampark.spark.connector.kafka.offset
 
-/**
-  *
-  *
-  * 封装 Kafka
-  */
-
 import org.apache.streampark.common.util.Logger
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition
@@ -36,10 +30,8 @@ import java.lang.reflect.Constructor
 import java.{util => ju}
 import scala.reflect.ClassTag
 
-
 class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
-  // 自定义
   private lazy val offsetManager = {
     sparkConf.get("spark.source.kafka.offset.store.class", "none").trim match {
       case "none" =>
@@ -69,15 +61,6 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
   private var canCommitOffsets: CanCommitOffsets = _
 
-  /**
-    *
-    * @param ssc
-    * @param kafkaParams
-    * @param topics
-    * @tparam K
-    * @tparam V
-    * @return
-    */
   def createDirectStream[K: ClassTag, V: ClassTag](ssc: StreamingContext,
                                                    kafkaParams: Map[String, Object],
                                                    topics: Set[String]
@@ -113,16 +96,6 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
   }
 
-  /**
-    *
-    * @param sc
-    * @param kafkaParams
-    * @param offsetRanges
-    * @param locationStrategy
-    * @tparam K
-    * @tparam V
-    * @return
-    */
   def createRDD[K: ClassTag, V: ClassTag](sc: SparkContext,
                                           kafkaParams: ju.Map[String, Object],
                                           offsetRanges: Array[OffsetRange],
@@ -130,13 +103,6 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
     KafkaUtils.createRDD(sc, kafkaParams, offsetRanges, locationStrategy)
   }
 
-
-  /**
-    * 更新 Offsets
-    *
-    * @param groupId
-    * @param offsetRanges
-    */
   def updateOffset(groupId: String, offsetRanges: Array[OffsetRange]): Unit = {
     offsetStoreType match {
       case "kafka" => canCommitOffsets.commitAsync(offsetRanges)

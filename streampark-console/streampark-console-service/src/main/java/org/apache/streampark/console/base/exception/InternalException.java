@@ -18,7 +18,7 @@
 package org.apache.streampark.console.base.exception;
 
 /**
- * 系统内部异常
+ * System Internal Exception
  */
 public class InternalException extends Exception {
 

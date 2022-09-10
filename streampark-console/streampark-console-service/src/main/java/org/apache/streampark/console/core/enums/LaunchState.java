@@ -23,39 +23,41 @@ import java.util.Arrays;
 public enum LaunchState implements Serializable {
 
     /**
-     * 部署失败
+     * launch failed
      */
     FAILED(-1),
     /**
-     * 完结
+     * launch done
      */
     DONE(0),
 
     /**
-     * 任务修改完毕需要重新发布
+     * need relaunch after modify task
      */
     NEED_LAUNCH(1),
 
     /**
-     * 上线中
+     * launching
      */
     LAUNCHING(2),
 
     /**
-     * 上线完毕,需要重启
+     * launch complete, need restart
      */
     NEED_RESTART(3),
 
-    //需要回滚
+    /**
+     * need rollback
+     */
     NEED_ROLLBACK(4),
 
     /**
-     * 项目发生变化,任务需检查(是否需要重新选择jar)
+     * project has changed, need to check the jar whether to be re-selected
      */
     NEED_CHECK(5),
 
     /**
-     * 发布的任务已经撤销
+     * revoked
      */
     REVOKED(10);
 

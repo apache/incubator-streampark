@@ -38,12 +38,6 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
     ApplicationConfig getLatest(Long appId);
 
-    /**
-     * 获取application的生效的活跃的Config
-     *
-     * @param application
-     * @return
-     */
     ApplicationConfig getEffective(Long appId);
 
     ApplicationConfig get(Long id);

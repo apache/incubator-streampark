@@ -40,7 +40,7 @@ public class ApplicationBackUp {
     private String path;
     private String description;
     /**
-     * 备份时的版本号.
+     * version number at the backup
      */
     private Integer version;
     private Date createTime;

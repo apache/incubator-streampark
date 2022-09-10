@@ -256,7 +256,7 @@ trait FlinkSubmitTrait extends Logger {
         }
       })
 
-      //fromSavePoint
+      // fromSavePoint
       if (submitRequest.savePoint != null) {
         optionMap += s"-${FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt}" -> submitRequest.savePoint
       }
@@ -283,12 +283,12 @@ trait FlinkSubmitTrait extends Logger {
         array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/$jvmProfilerJar=$param"
       }
 
-      //页面定义的参数优先级大于app配置文件,属性参数...
+      // The priority of the parameters defined on the page is greater than the app conf file, property parameters etc.
       if (MapUtils.isNotEmpty(submitRequest.option)) {
         submitRequest.option.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
       }
 
-      //-D 其他动态参数配置....
+      //-D other dynamic parameter
       if (submitRequest.dynamicOption != null && submitRequest.dynamicOption.nonEmpty) {
         submitRequest.dynamicOption
           .filter(_._1 != "classloader.resolve-order")
@@ -333,7 +333,7 @@ trait FlinkSubmitTrait extends Logger {
       //read and verify user config...
       val cliArgs = {
         val array = new ArrayBuffer[String]()
-        //页面定义的参数优先级大于app配置文件,属性参数...
+        // The priority of the parameters defined on the page is greater than the app conf file, property parameters etc.
         if (MapUtils.isNotEmpty(extraParameter)) {
           extraParameter.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
         }
@@ -390,7 +390,6 @@ trait FlinkSubmitTrait extends Logger {
     val executorConfig = activeCustomCommandLine.toConfiguration(commandLine)
     val customConfiguration = new Configuration(executorConfig)
     val configuration = new Configuration()
-    //flink-conf.yaml配置
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(flinkHome)
     flinkDefaultConfiguration.keySet.foreach(x => {
       flinkDefaultConfiguration.getString(x, null) match {

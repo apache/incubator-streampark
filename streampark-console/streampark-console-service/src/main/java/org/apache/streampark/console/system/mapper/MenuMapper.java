@@ -32,15 +32,15 @@ public interface MenuMapper extends BaseMapper<Menu> {
     List<Menu> findUserMenus(String userName);
 
     /**
-     * 查找当前菜单/按钮关联的用户 ID
+     * Find the user ID associated with the current menu or button
      *
      * @param menuId menuId
-     * @return 用户 ID集合
+     * @return user id list
      */
     List<String> findUserIdsByMenuId(String menuId);
 
     /**
-     * 递归删除菜单/按钮
+     * Recursively delete menu and buttons
      *
      * @param menuId menuId
      */

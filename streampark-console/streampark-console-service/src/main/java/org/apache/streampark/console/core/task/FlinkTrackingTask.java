@@ -82,19 +82,21 @@ public class FlinkTrackingTask {
 
     /**
      * <pre>
-     * 记录任务是否需要savePoint
-     * 只有在RUNNING状态下才会真正使用,如检查到任务正在运行,且需要savePoint,则设置该任务的状态为"savepoint"
+     * record task requires save points
+     * It will only be used in the RUNNING state. If it is checked that the task is running and the save point is required,
+     * set the state of the task to savepoint
      * </pre>
      */
     private static final Cache<Long, Byte> SAVEPOINT_CACHE = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 
     /**
-     * 记录第一次跟踪任务的状态,因为在任务启动后会在第一次跟踪时会获取任务的overview
+     * Record the status of the first tracking task, because after the task is started, the overview of the task will be obtained
+     * during the first tracking
      */
     private static final Cache<Long, Byte> STARTING_CACHE = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 
     /**
-     * 跟踪任务列表
+     * tracking task list
      */
     private static final Map<Long, Application> TRACKING_MAP = new ConcurrentHashMap<>(0);
 

@@ -22,22 +22,22 @@ import java.util.Arrays;
 
 public enum ChangedType implements Serializable {
     /**
-     * 未发生变化
+     * none changed
      */
     NONE(0),
 
     /**
-     * 依赖发生变化
+     * dependency has changed
      */
     DEPENDENCY(1),
 
     /**
-     * flink Sql发生变化
+     * sql has changed
      */
     SQL(2),
 
     /**
-     * 依赖和sql都发生变化,BOTH
+     * both
      */
     ALL(3);
 

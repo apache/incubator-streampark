@@ -52,10 +52,10 @@ object FlinkShimsProxy extends Logger {
   )
 
   /**
-   * 获取 shimsClassLoader 执行代码...
+   * Get shimsClassLoader to execute for scala API
    *
-   * @param flinkVersion
-   * @param func
+   * @param flinkVersion flinkVersion
+   * @param func execute function
    * @tparam T
    * @return
    */
@@ -65,11 +65,10 @@ object FlinkShimsProxy extends Logger {
   }
 
   /**
-   * 获取 shimsClassLoader 执行代码...
-   * for java
+   * Get shimsClassLoader to execute for java API
    *
-   * @param flinkVersion
-   * @param func
+   * @param flinkVersion flinkVersion
+   * @param func execute function
    * @tparam T
    * @return
    */
@@ -86,11 +85,11 @@ object FlinkShimsProxy extends Logger {
     logInfo(flinkVersion.toString)
 
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(s"${flinkVersion.fullVersion}", {
-      //1) flink/lib
+      // 1) flink/lib
       val libURL = getFlinkHomeLib(flinkVersion.flinkHome)
       val shimsUrls = ListBuffer[URL](libURL: _*)
 
-      //2) shims jar
+      // 2) shims jar
       val appHome = System.getProperty("app.home")
       require(appHome != null, "app.home is not found on System env.")
 

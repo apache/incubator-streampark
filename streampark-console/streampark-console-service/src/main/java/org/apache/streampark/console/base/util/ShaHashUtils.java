@@ -29,7 +29,7 @@ public final class ShaHashUtils {
     }
 
     /**
-     * 用户密码加密
+     * encrypt user password
      *
      * @param salt
      * @param password
@@ -41,7 +41,7 @@ public final class ShaHashUtils {
     }
 
     /**
-     * 获取随机盐值
+     * get random salt
      *
      * @param length
      * @return

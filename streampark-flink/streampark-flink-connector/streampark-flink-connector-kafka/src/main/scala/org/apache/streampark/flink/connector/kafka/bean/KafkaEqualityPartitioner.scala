@@ -25,7 +25,7 @@ import javax.annotation.Nullable
 
 /**
  *
- * <b>KafkaEqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去
+ * <b>KafkaEqualityPartitioner</b>Equality Partitioner, the partitioner can evenly write data to each partition
  *
  * @param parallelism
  * @tparam T
@@ -45,7 +45,7 @@ class KafkaEqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitione
   override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]): Int = {
     require(partitions != null && partitions.length > 0, "[StreamPark] KafkaEqualityPartitioner:Partitions of the target topic is empty.")
     (parallelism, partitions.length) match {
-      //kafka have 1 partition
+      // kafka have 1 partition
       case (_, 1) => 0
       case (x, y) if x % y == 0 => partitions(parallelInstanceId % partitions.length)
       case (_, y) =>

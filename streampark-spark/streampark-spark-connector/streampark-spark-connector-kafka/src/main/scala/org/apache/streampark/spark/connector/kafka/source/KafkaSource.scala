@@ -30,11 +30,10 @@ import scala.reflect.ClassTag
 import scala.util.Try
 
 /**
+ * Wrapped Kafka Direct Api
  *
- * 封装 Kafka Direct Api
- *
- * @param ssc
- * @param overrideParams 指定 Kafka 配置,可以覆盖配置文件
+ * @param ssc StreamingContext
+ * @param overrideParams specific kafka params
  */
 class KafkaSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingContext,
                                             overrideParams: Map[String, String] = Map.empty[String, String]
@@ -42,14 +41,14 @@ class KafkaSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingContext
 
   override val prefix: String = "spark.source.kafka.consume."
 
-  // 分区数
+  // partition nums
   lazy val repartition: Int = sparkConf.get("spark.source.kafka.consume.repartition", "0").toInt
 
-  // kafka 消费 topic
+  // kafka consume topic
   private lazy val topicSet: Set[String] = overrideParams.getOrElse("consume.topics",
     sparkConf.get("spark.source.kafka.consume.topics")).split(",").map(_.trim).toSet
 
-  // 组装 Kafka 参数
+  // assemble kafka params
   private lazy val kafkaParams: Map[String, String] = {
     sparkConf.getAll.flatMap {
       case (k, v) if k.startsWith(prefix) && Try(v.nonEmpty).getOrElse(false) => Some(k.substring(prefix.length) -> v)
@@ -63,13 +62,10 @@ class KafkaSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingContext
 
   val kafkaClient = new KafkaClient(ssc.sparkContext.getConf)
 
-  // 保存 offset
   private lazy val offsetRanges: java.util.Map[Long, Array[OffsetRange]] = new ConcurrentHashMap[Long, Array[OffsetRange]]
 
   /**
-   * 获取DStream 流
-   *
-   * @return
+   * Get DStream
    */
   override def getDStream[R: ClassTag](recordHandler: ConsumerRecord[K, V] => R): DStream[R] = {
     val stream = kafkaClient.createDirectStream[K, V](ssc, kafkaParams, topicSet)
@@ -80,11 +76,12 @@ class KafkaSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingContext
   }
 
   /**
-   * 更新Offset 操作 一定要放在所有逻辑代码的最后
-   * 这样才能保证,只有action执行成功后才更新offset
+   * Update offset
+   * Note that:
+   * Must be placed at the end of all logical code, it ensures that the offset is updated only
+   * after the action is executed successfully.
    */
   def updateOffset(time: Time): Unit = {
-    // 更新 offset
     val milliseconds = time.milliseconds
     if (groupId.isDefined) {
       logInfo(s"updateOffset with ${kafkaClient.offsetStoreType} for time $milliseconds offsetRanges: $offsetRanges")
@@ -93,4 +90,5 @@ class KafkaSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingContext
     }
     offsetRanges.remove(milliseconds)
   }
+
 }

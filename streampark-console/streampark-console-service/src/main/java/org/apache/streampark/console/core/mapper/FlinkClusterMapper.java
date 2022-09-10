@@ -25,10 +25,6 @@ import org.apache.ibatis.annotations.Select;
 
 public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
 
-    /**
-     * @param clusterName
-     * @return
-     */
     @Select("SELECT * from t_flink_cluster where cluster_name=#{clusterName}")
     FlinkCluster getByName(@Param("clusterName") String clusterName);
 

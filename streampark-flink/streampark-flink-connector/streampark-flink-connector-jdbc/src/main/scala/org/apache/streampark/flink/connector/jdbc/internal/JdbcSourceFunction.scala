@@ -35,10 +35,6 @@ import scala.util.{Success, Try}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
-/**
- *
- * @tparam R
- */
 class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSourceFunction[R]
   with CheckpointedFunction
   with CheckpointListener
@@ -56,7 +52,7 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
   private val OFFSETS_STATE_NAME: String = "jdbc-source-query-states"
   private[this] var last: R = _
 
-  //for Scala
+  // for Scala
   def this(jdbc: Properties,
            sqlFunc: R => String,
            resultFunc: Iterable[Map[String, _]] => Iterable[R],
@@ -68,7 +64,7 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
     this.scalaRunningFunc = if (runningFunc == null) _ => true else runningFunc
   }
 
-  //for JAVA
+  // for JAVA
   def this(jdbc: Properties,
            javaSqlFunc: SQLQueryFunction[R],
            javaResultFunc: SQLResultFunction[R],
@@ -126,7 +122,6 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
   }
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
-    //从checkpoint中恢复...
     logInfo("JdbcSource snapshotState initialize")
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {

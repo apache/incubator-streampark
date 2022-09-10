@@ -24,7 +24,7 @@ import org.bson.Document;
 public interface MongoResultFunction<T> {
 
     /**
-     * 处理查询结果
+     * process query result
      *
      * @param cursor: MongoCursor
      * @return Iterable: Iterable

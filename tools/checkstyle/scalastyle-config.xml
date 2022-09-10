@@ -123,6 +123,8 @@ This file is divided into 3 sections:
 
     <check level="error" class="org.scalastyle.scalariform.NoWhitespaceAfterLeftBracketChecker" enabled="true"/>
 
+    <check level="error" class="org.scalastyle.scalariform.NonASCIICharacterChecker" enabled="true"/>
+
     <!-- Doesn't seem super big deal here ... -->
     <check level="error" class="org.scalastyle.scalariform.NoCloneChecker" enabled="true"/>
 

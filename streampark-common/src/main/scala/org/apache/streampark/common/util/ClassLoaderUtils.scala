@@ -26,7 +26,7 @@ object ClassLoaderUtils extends Logger {
   private[this] val originalClassLoader: ClassLoader = Thread.currentThread().getContextClassLoader
 
   /**
-   * 指定 classLoader执行代码...
+   * Execute with the specified classloader for scala API
    *
    * @param targetClassLoader
    * @param func
@@ -45,8 +45,7 @@ object ClassLoaderUtils extends Logger {
   }
 
   /**
-   * 指定 classLoader执行代码...
-   * for java
+   * Execute with the specified classloader for JavaAPI
    *
    * @param targetClassLoader
    * @param supplier
@@ -81,7 +80,6 @@ object ClassLoaderUtils extends Logger {
     }
   }
 
-
   def loadResource(filepath: String): Unit = {
     val file = new File(filepath)
     addURL(file)
@@ -97,14 +95,12 @@ object ClassLoaderUtils extends Logger {
     loopFiles(file, ext)
   }
 
-
-  private[this] def loopDirs(file: File): Unit = { // 资源文件只加载路径
+  private[this] def loopDirs(file: File): Unit = {
     if (file.isDirectory) {
       addURL(file)
       file.listFiles.foreach(loopDirs)
     }
   }
-
 
   private[this] def loopFiles(file: File, ext: List[String] = List()): Unit = {
     if (file.isDirectory) {
@@ -135,6 +131,4 @@ object ClassLoaderUtils extends Logger {
         addURL.invoke(ucp, file.toURI.toURL)
     }
   }
-
-
 }

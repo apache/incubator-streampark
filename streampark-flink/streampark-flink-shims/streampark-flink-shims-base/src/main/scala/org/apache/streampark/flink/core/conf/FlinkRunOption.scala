@@ -23,9 +23,7 @@ import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 /**
- *
- * copy from flink(1.12.0) sourceCode
- * 适用于flink run下的所有可选参数...
+ * Applies to all optional parameters under flink run
  */
 object FlinkRunOption {
 

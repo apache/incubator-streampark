@@ -37,38 +37,31 @@ public final class GZipUtils {
     }
 
     /**
-     * @param tarZipSource 源文件
-     * @param targetDir    目标目录
+     * @param tarZipSource source dir
+     * @param targetDir    target dir
      */
     public static File decompress(String tarZipSource, String targetDir) {
         File unFile = null;
-        // tar压缩格式（tar类型）
+        // tar compress format
         ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
-        try (// 文件流
+        try (
             FileInputStream inputStream = new FileInputStream(tarZipSource);
-            // 缓冲流
             BufferedInputStream bufInput = new BufferedInputStream(inputStream);
-            // GZIP压缩流
             GZIPInputStream gzipInput = new GZIPInputStream(bufInput);
             ArchiveInputStream archiveInput = archiveStreamFactory.createArchiveInputStream("tar", gzipInput);) {
 
-            // tar压缩文件条目
             TarArchiveEntry entry = (TarArchiveEntry) archiveInput.getNextEntry();
 
             while (entry != null) {
-                // 条目名称
                 String entryName = entry.getName();
 
                 if (entry.isDirectory()) {
-                    // 如果当前条目是目录
                     createDir(targetDir, entryName, 1);
                     if (unFile == null) {
                         unFile = new File(targetDir + entryName.replaceAll("/.*$", ""));
                     }
                 } else if (entry.isFile()) {
-                    // 如果当前条目是文件
                     String fullFileName = createDir(targetDir, entryName, 2);
-                    // 输出文件
                     try (FileOutputStream outputStream = new FileOutputStream(fullFileName);
                         BufferedOutputStream bufOutput = new BufferedOutputStream(outputStream);) {
                         int b = -1;
@@ -77,7 +70,6 @@ public final class GZipUtils {
                         }
                     }
                 }
-                // 下一个条目
                 entry = (TarArchiveEntry) archiveInput.getNextEntry();
             }
         } catch (Exception e) {
@@ -88,13 +80,12 @@ public final class GZipUtils {
     }
 
     /**
-     * @param baseDir 根目录
-     * @param entry   压缩包条目
-     * @param type    类型：1、目录；2、文件
+     * @param baseDir baseDir
+     * @param entry   archive entry
+     * @param type    type: 1, dir; 2, file
      * @return
      */
     private static String createDir(String baseDir, String entry, int type) {
-        // 拆分名称
         String[] items = entry.split("/");
         String fullFilePath = baseDir;
         for (int i = 0; i < items.length; i++) {
@@ -102,21 +93,18 @@ public final class GZipUtils {
             fullFilePath = fullFilePath + File.separator + item;
             if (type == 2) {
                 if (i != items.length - 1) {
-                    // 如果目录不存在，就创建
                     File tmpFile = new File(fullFilePath);
                     if (!tmpFile.exists()) {
                         tmpFile.mkdir();
                     }
                 }
             } else {
-                // 如果目录不存在，就创建
                 File tmpFile = new File(fullFilePath);
                 if (!tmpFile.exists()) {
                     tmpFile.mkdir();
                 }
             }
         }
-        // 返回目录全路径
         File fullFile = new File(fullFilePath);
         return fullFile.getAbsolutePath();
     }

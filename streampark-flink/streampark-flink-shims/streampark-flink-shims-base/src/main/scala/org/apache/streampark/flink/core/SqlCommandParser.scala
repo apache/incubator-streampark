@@ -351,9 +351,9 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   //---- EXPLAIN Statement--------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * For flink-1.13.x：EXPLAIN PLAN FOR `<query_statement_or_insert_statement>` <br>
-   * For flink-1.14.x：EXPLAIN ESTIMATED_COST, CHANGELOG_MODE, JSON_EXECUTION_PLAN `<query_statement_or_insert_statement>`<br>
-   * For flink-1.15.x：<br>
+   * For flink-1.13.x: EXPLAIN PLAN FOR `<query_statement_or_insert_statement>` <br>
+   * For flink-1.14.x: EXPLAIN ESTIMATED_COST, CHANGELOG_MODE, JSON_EXECUTION_PLAN `<query_statement_or_insert_statement>`<br>
+   * For flink-1.15.x: <br>
    * <pre>
    * EXPLAIN [([ExplainDetail[, ExplainDetail]*]) | PLAN FOR] <query_statement_or_insert_statement_or_statement_set>
    *
@@ -435,7 +435,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   /**
    * SHOW TABLES,support from flink-1.13.x<br>
-   * SHOW TABLES [ ( FROM | IN ) [catalog_name.]database_name ] [ [NOT] LIKE `<sql_like_pattern`> ],support from flink-1.15.x
+   * SHOW TABLES [ ( FROM | IN ) [catalog_name.]database_name ] [ [NOT] LIKE `<sql_like_pattern`> ], support from flink-1.15.x
    */
   case object SHOW_TABLES extends SqlCommand(
     "show tables",
@@ -443,7 +443,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   )
 
   /**
-   * SHOW CREATE TABLE，flink-1.14.x support.
+   * SHOW CREATE TABLE, flink-1.14.x support.
    */
   case object SHOW_CREATE_TABLE extends SqlCommand(
     "show create table",
@@ -451,7 +451,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   )
 
   /**
-   * SHOW COLUMNS ( FROM | IN ) [`[`catalog_name.]database.]`<table_name>` [ [NOT] LIKE `<sql_like_pattern>`]，flink-1.15.x support.
+   * SHOW COLUMNS ( FROM | IN ) [`[`catalog_name.]database.]`<table_name>` [ [NOT] LIKE `<sql_like_pattern>`],flink-1.15.x support.
    */
   case object SHOW_COLUMNS extends SqlCommand(
     "show columns",
@@ -559,9 +559,8 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    * improve the efficiency of executing multiple queries.
    * </pre>
    */
-
   /**
-   * This is SQL Client's syntax，don't use in our platform.
+   * This is SQL Client's syntax, don't use in our platform.
    */
   @deprecated
   case object BEGIN_STATEMENT_SET extends SqlCommand(
@@ -571,7 +570,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   )
 
   /**
-   * This is SQL Client's syntax，don't use in our platform.
+   * This is SQL Client's syntax, don't use in our platform.
    */
   @deprecated
   case object END_STATEMENT_SET extends SqlCommand(

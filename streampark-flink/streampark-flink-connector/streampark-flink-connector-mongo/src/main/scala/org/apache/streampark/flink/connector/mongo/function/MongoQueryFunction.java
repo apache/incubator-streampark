@@ -25,7 +25,7 @@ import org.bson.Document;
 public interface MongoQueryFunction<T> {
 
     /**
-     * 返回一个查询条件
+     * return query condition
      *
      * @param last:      last one
      * @param collection MongoCollection

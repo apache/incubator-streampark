@@ -26,11 +26,8 @@ import scala.annotation.meta.getter
 /**
  * <b><code>SparkBatch</code></b>
  * <p/>
- * Spark 流处理 入口封装
+ * Spark streaming handle entrance
  * <p/>
- * <b>Creation Time:</b> 2022/8/8 20:44.
- *
- * @since streampark ${PROJECT_VERSION}
  */
 trait SparkStreaming extends Spark {
 
@@ -38,12 +35,9 @@ trait SparkStreaming extends Spark {
   protected lazy val context: StreamingContext = {
 
     /**
-     * 构建 StreamingContext
-     *
-     * @return
+     * Construct StreamingContext
      */
     def _context(): StreamingContext = {
-      // 时间间隔
       val duration = sparkConf.get(KEY_SPARK_BATCH_DURATION).toInt
       new StreamingContext(sparkSession.sparkContext, Seconds(duration))
     }
@@ -57,32 +51,29 @@ trait SparkStreaming extends Spark {
     }
   }
 
-  /**
-   * 启动
-   */
   final override def start(): Unit = {
     context.start()
     context.awaitTermination()
   }
 
   /**
-   * config 阶段的目的是让开发者可以通过钩子的方式设置更多的参数(约定的配置文件以外的其他参数)
-   * 用户设置sparkConf参数,如,spark序列化:
+   * The purpose of the config phase is to allow the developer to set more parameters (other than the agreed
+   * configuration file) by means of hooks.
+   * Such as,
    * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-   * // 注册要序列化的自定义类型。
    * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
-   *
-   * @param sparkConf
    */
   override def config(sparkConf: SparkConf): Unit = {}
 
   /**
-   * 阶段是在参数都设置完毕了 给开发者提供的一个用于做其他动作的入口, 该阶段是在初始化完成之后在程序启动之前进行
+   * The ready phase is an entry point for the developer to do other actions after the parameters have been set,
+   * and is done after initialization and before the program starts.
    */
   override def ready(): Unit = {}
 
   /**
-   * destroy 阶段,是程序运行完毕了,在jvm退出之前的最后一个阶段,一般用于收尾的工作
+   * The destroy phase, is the last phase before jvm exits after the program has finished running,
+   * and is generally used to wrap up the work.
    */
   override def destroy(): Unit = {}
 

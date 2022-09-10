@@ -24,7 +24,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * Vue路由 Meta
+ * Vue Router Meta
  *
  */
 @Data
@@ -39,10 +39,6 @@ public class RouterMeta implements Serializable {
     private Boolean hidden;
 
     private Boolean keepAlive;
-
-    // private Boolean hideHeader;
-
-    // private Boolean hiddenHeaderContent;
 
     private String icon;
 }

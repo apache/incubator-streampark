@@ -21,8 +21,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
 /**
-  *
-  * SQLContext 单例
+  * SQLContext singleton
   */
 object SQLContextUtil {
 
@@ -37,10 +36,7 @@ object SQLContextUtil {
   }
 
   /**
-    * 获取 HiveContext
-    *
-    * @param sparkContext
-    * @return
+    * Get HiveContext
     */
   def getHiveContext(@transient sparkContext: SparkContext): SQLContext = {
     if (hiveContext == null) {

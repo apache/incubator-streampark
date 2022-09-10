@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.connector.kafka.sink
 
 import org.apache.streampark.common.conf.ConfigConst
-import org.apache.streampark.common.util.{ConfigUtils, Logger, Utils}
+import org.apache.streampark.common.util.{ConfigUtils, Utils}
 import org.apache.streampark.flink.connector.kafka.bean.KafkaEqualityPartitioner
 import org.apache.streampark.flink.connector.sink.Sink
 import org.apache.streampark.flink.core.scala.StreamingContext
@@ -30,9 +30,7 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.{DEFAULT_K
 import org.apache.flink.streaming.connectors.kafka.internals.KeyedSerializationSchemaWrapper
 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
 
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.{Optional, Properties}
-import javax.annotation.Nullable
 import scala.annotation.meta.param
 import scala.util.Try
 
@@ -56,10 +54,12 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
    * @param stream
    * @param alias
    * @param topic
-   * @param serializer  序列化Scheam,不指定默认使用SimpleStringSchema
-   * @param partitioner 指定kafka分区器(默认使用<b>KafkaEqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去,
-   *                    注意:Flink中默认使用的是<span style="color:RED">FlinkFixedPartitioner</span>分区器,该分区器需要特别注意sink的并行度和kafka的分区数,不然会出现往一个分区写...
-   *                    )
+   * @param serializer  serializer, if not specified, used <b>SimpleStringSchema<b>
+   * @param partitioner kafka partitioner, used <b>KafkaEqualityPartitioner</b> as default partitioner,
+   *                    the partitioner can evenly write data to each partition.
+   *                    Note: The default used in Flink is <span style="color:RED">FlinkFixedPartitioner</span>,
+   *                    which is need to pay attention to the parallelism of sink and the number of kafka partitions,
+   *                    otherwise it will appear to write to a partition.)
    * @tparam T
    * @return
    */
@@ -74,10 +74,10 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
       Utils.copyProperties(property, prop)
       val topicId = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
       /**
-       * EXACTLY_ONCE语义下会使用到 kafkaProducersPoolSize
+       * kafkaProducersPoolSize will be used under EXACTLY_ONCE semantics
        */
       val semantic = Try(Some(prop.remove(ConfigConst.KEY_KAFKA_SEMANTIC).toString.toUpperCase)).getOrElse(None) match {
-        case None => Semantic.AT_LEAST_ONCE //默认采用AT_LEAST_ONCE
+        case None => Semantic.AT_LEAST_ONCE
         case Some("AT_LEAST_ONCE") => Semantic.AT_LEAST_ONCE
         case Some("EXACTLY_ONCE") => Semantic.EXACTLY_ONCE
         case Some("NONE") => Semantic.NONE

@@ -78,7 +78,7 @@ case class Workspace(storageType: StorageType) {
   lazy val APP_CLIENT = s"$WORKSPACE/client"
 
   /**
-   * 存放不同版本flink相关的jar
+   * store flink multi version jars
    */
   lazy val APP_SHIMS = s"$WORKSPACE/shims"
 
@@ -91,14 +91,14 @@ case class Workspace(storageType: StorageType) {
   lazy val APP_BACKUPS = s"$WORKSPACE/backups"
 
   /**
-   * 本地构建项目存放路径
+   * local build path
    */
   lazy val APP_LOCAL_DIST = s"$WORKSPACE/dist"
 
   lazy val APP_SAVEPOINTS = s"$WORKSPACE/savepoints"
 
   /**
-   * 存放全局公共的jar
+   * store global public jars
    */
   lazy val APP_JARS = s"$WORKSPACE/jars"
 

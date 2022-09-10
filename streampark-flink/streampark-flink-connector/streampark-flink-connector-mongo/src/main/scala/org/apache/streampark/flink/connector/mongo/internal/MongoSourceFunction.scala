@@ -142,7 +142,7 @@ class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties
   }
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
-    //从checkpoint中恢复...
+    // restore from checkpoint
     logInfo("MongoSource snapshotState initialize")
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {

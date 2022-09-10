@@ -68,7 +68,6 @@
               (select rm.role_id from t_role_menu rm where rm.menu_id = #{menuId})
     </select>
 
-    <!-- 递归删除菜单，findMenuChildren为自定义的 MySQL函数，作用为根据当前 menuId递归查找出其所有下级菜单或按钮-->
     <delete id="deleteMenus" parameterType="string">
         DELETE
         from t_menu

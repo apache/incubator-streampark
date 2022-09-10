@@ -47,10 +47,6 @@ trait FlinkTable extends Logger {
     context = new TableContext(FlinkTableInitializer.initTable(args, config))
   }
 
-  /**
-   * 用户可覆盖次方法...
-   *
-   */
   def ready(): Unit = {}
 
   def config(tableConfig: TableConfig, parameter: ParameterTool): Unit = {}

@@ -25,15 +25,8 @@ import java.io.IOException;
 import java.util.Date;
 
 public interface FlameGraphService extends IService<FlameGraph> {
-    /**
-     * @param flameGraph
-     * @return
-     * @throws IOException
-     */
+
     String generateFlameGraph(FlameGraph flameGraph) throws IOException;
 
-    /**
-     * @param end
-     */
     void clean(Date end);
 }

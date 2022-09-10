@@ -40,32 +40,12 @@ object HBaseRequest {
 
 class HBaseRequest[T: TypeInformation](@(transient@param) private val stream: DataStream[T], property: Properties = new Properties()) {
 
-  /**
-   *
-   * @param queryFunc
-   * @param resultFunc
-   * @param timeout
-   * @param capacity
-   * @param prop
-   * @tparam R
-   * @return
-   */
   def requestOrdered[R: TypeInformation](queryFunc: T => HBaseQuery, resultFunc: (T, Result) => R, timeout: Long = 1000, capacity: Int = 10)(implicit prop: Properties): DataStream[R] = {
     Utils.copyProperties(property, prop)
     val async = new HBaseAsyncFunction[T, R](prop, queryFunc, resultFunc, capacity)
     AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
-  /**
-   *
-   * @param queryFunc
-   * @param resultFunc
-   * @param timeout
-   * @param capacity
-   * @param prop
-   * @tparam R
-   * @return
-   */
   def requestUnordered[R: TypeInformation](queryFunc: T => HBaseQuery, resultFunc: (T, Result) => R, timeout: Long = 1000, capacity: Int = 10)(implicit prop: Properties): DataStream[R] = {
     Utils.copyProperties(property, prop)
     val async = new HBaseAsyncFunction[T, R](prop, queryFunc, resultFunc, capacity)

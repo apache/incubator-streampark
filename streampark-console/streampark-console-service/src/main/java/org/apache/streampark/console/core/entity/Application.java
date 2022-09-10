@@ -84,12 +84,12 @@ public class Application implements Serializable {
 
     private Long projectId;
     /**
-     * 创建人
+     * creator
      */
     private Long userId;
 
     /**
-     * 前端和程序在yarn中显示的名称
+     * The name of the frontend and program displayed in yarn
      */
     private String jobName;
 
@@ -100,12 +100,12 @@ public class Application implements Serializable {
     private String jobId;
 
     /**
-     * 对应的flink的版本.
+     * flink version
      */
     private Long versionId;
 
     /**
-     * k8s部署下clusterId
+     * k8s cluster id
      */
     private String clusterId;
 
@@ -115,42 +115,42 @@ public class Application implements Serializable {
     private String flinkImage;
 
     /**
-     * k8s部署下的namespace
+     * k8s namespace
      */
     private String k8sNamespace = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE();
 
 
     private Integer state;
     /**
-     * 任务的上线发布状态
+     * task launch status
      */
     private Integer launch;
 
     /**
-     * 任务实现需要构建
+     * determine if a task needs to be built
      */
     private Boolean build;
 
     /**
-     * 任务失败后的最大重启次数.
+     * max restart retries after job failed
      */
     private Integer restartSize;
 
     /**
-     * 已经重启的次数
+     * has restart count
      */
     private Integer restartCount;
 
     private Integer optionState;
 
     /**
-     * 失败告警配置id
+     * alert id
      */
     private Integer alertId;
 
     private String args;
     /**
-     * 应用程序模块
+     * application module
      */
     private String module;
 
@@ -163,14 +163,15 @@ public class Application implements Serializable {
     private Boolean flameGraph;
 
     /**
-     * 是否需要跟踪监控状态
+     * determine if tracking status
      */
     private Integer tracking;
 
     private String jar;
 
     /**
-     * 针对upload 类型任务,需要记录checkSum,用于判断更新修改之后是否需要重新发布.
+     * for upload type tasks, checkSum needs to be recorded whether it needs to be republished
+     * after the update and modify.
      */
     private Long jarCheckSum;
 
@@ -186,19 +187,19 @@ public class Application implements Serializable {
     private Long duration;
 
     /**
-     * checkpoint最大的失败次数
+     * checkpoint max failure interval
      */
     private Integer cpMaxFailureInterval;
 
     /**
-     * checkpoint在时间范围内失败(分钟)
+     * checkpoint failure rate interval
      */
     private Integer cpFailureRateInterval;
 
     /**
-     * 在X分钟之后失败Y次,之后触发的操作:
-     * 1: 发送告警
-     * 2: 重启
+     * Actions triggered after X minutes failed Y times:
+     * 1: send alert
+     * 2: restart
      */
     private Integer cpFailureAction;
 
@@ -215,7 +216,7 @@ public class Application implements Serializable {
     private Integer totalTask;
 
     /**
-     * remote 模式下与任务绑定的cluster
+     * the cluster id bound to the task in remote mode
      */
     private Long flinkClusterId;
 
@@ -407,9 +408,7 @@ public class Application implements Serializable {
     }
 
     /**
-     * 本地的编译打包工作目录
-     *
-     * @return
+     * Local compilation and packaging working directory
      */
     @JsonIgnore
     public String getDistHome() {
@@ -444,9 +443,7 @@ public class Application implements Serializable {
     }
 
     /**
-     * 根据 app ExecutionModeEnum 自动识别remoteAppHome 或 localAppHome
-     *
-     * @return
+     * Automatically identify remoteAppHome or localAppHome based on app ExecutionModeEnum
      */
     @JsonIgnore
     public String getAppHome() {
@@ -538,22 +535,19 @@ public class Application implements Serializable {
     }
 
     /**
-     * 参数对比,主要是对比Flink运行时相关的参数是否发生了变化
-     *
-     * @param other
-     * @return
+     * Parameter comparison, mainly to compare whether the parameters related to Flink runtime have changed
      */
     @JsonIgnore
     public boolean eqJobParam(Application other) {
-        //1) Resolve Order 是否发生变化
-        //2) flink Version是否发生变化
-        //3) Execution Mode 是否发生变化
-        //4) Parallelism 是否发生变化
-        //5) Task Slots 是否发生变化
-        //6) Options 是否发生变化
-        //7) Dynamic Option 是否发生变化
-        //8) Program Args 是否发生变化
-        //9) Flink Version  是否发生变化
+        // 1) Resolve Order has it changed
+        // 2) flink Version has it changed
+        // 3) Execution Mode has it changed
+        // 4) Parallelism has it changed
+        // 5) Task Slots has it changed
+        // 6) Options has it changed
+        // 7) Dynamic Option has it changed
+        // 8) Program Args has it changed
+        // 9) Flink Version  has it changed
 
         if (!ObjectUtils.safeEquals(this.getVersionId(), other.getVersionId())) {
             return false;

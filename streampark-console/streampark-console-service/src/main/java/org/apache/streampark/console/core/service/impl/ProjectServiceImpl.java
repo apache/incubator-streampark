@@ -211,20 +211,20 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     private void deploy(Project project) throws Exception {
         File path = project.getAppSource();
         List<File> apps = new ArrayList<>();
-        // 在项目路径下寻找编译完成的tar.gz(StreamPark项目)文件或jar(普通,官方标准的flink工程)...
+        // find the compiled tar.gz (Stream Park project) file or jar (normal or official standard flink project) under the project path
         findTarOrJar(apps, path);
         if (apps.isEmpty()) {
             throw new RuntimeException("[StreamPark] can't find tar.gz or jar in " + path.getAbsolutePath());
         }
         for (File app : apps) {
             String appPath = app.getAbsolutePath();
-            // 1). tar.gz文件....
+            // 1). tar.gz file
             if (appPath.endsWith("tar.gz")) {
                 File deployPath = project.getDistHome();
                 if (!deployPath.exists()) {
                     deployPath.mkdirs();
                 }
-                // 将项目解包到app下.
+                // xzvf jar
                 if (app.exists()) {
                     String cmd = String.format(
                         "tar -xzvf %s -C %s",
@@ -234,7 +234,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     CommandUtils.execute(cmd);
                 }
             } else {
-                // 2) .jar文件(普通,官方标准的flink工程)
+                // 2) .jar file(normal or official standard flink project)
                 Utils.checkJarFile(app.toURI().toURL());
                 String moduleName = app.getName().replace(".jar", "");
                 File distHome = project.getDistHome();
@@ -250,25 +250,26 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     private void findTarOrJar(List<File> list, File path) {
         for (File file : Objects.requireNonNull(path.listFiles())) {
-            // 定位到target目录下:
+            // navigate to the target directory:
             if (file.isDirectory() && "target".equals(file.getName())) {
-                // 在target路径下找tar.gz的文件或者jar文件,注意:两者只选其一,不能同时满足,
+                // find the tar.gz file or the jar file in the target path.
+                // note: only one of the two can be selected, which cannot be satisfied at the same time.
                 File tar = null;
                 File jar = null;
                 for (File targetFile : Objects.requireNonNull(file.listFiles())) {
-                    // 1) 一旦找到tar.gz文件则退出.
+                    // 1) exit once the tar.gz file is found.
                     if (targetFile.getName().endsWith("tar.gz")) {
                         tar = targetFile;
                         break;
                     }
-                    // 2) 尝试寻找jar文件...可能存在发现多个jar.
+                    // 2) try look for jar files, there may be multiple jars found.
                     if (!targetFile.getName().startsWith("original-")
                         && !targetFile.getName().endsWith("-sources.jar")
                         && targetFile.getName().endsWith(".jar")) {
                         if (jar == null) {
                             jar = targetFile;
                         } else {
-                            // 可能存在会找到多个jar,这种情况下,选择体积最大的那个jar返回...(不要问我为什么.)
+                            // there may be multiple jars found, in this case, select the jar with the largest and return
                             if (targetFile.length() > jar.length()) {
                                 jar = targetFile;
                             }
@@ -347,7 +348,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 GZipUtils.decompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());
             }
             List<Map<String, Object>> list = new ArrayList<>();
-            // 只过滤conf这个目录
             File[] files = unzipFile.listFiles(x -> "conf".equals(x.getName()));
             assert files != null;
             for (File item : files) {
@@ -455,10 +455,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         }
     }
 
-    /**
-     * @param project
-     * @return
-     */
     private boolean projectBuild(Project project, String socketId) {
         StringBuilder builder = tailBuffer.get(project.getId());
         int code = CommandUtils.execute(project.getMavenWorkHome(), project.getMavenArgs(), (line) -> {

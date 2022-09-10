@@ -28,30 +28,20 @@ import org.apache.flink.streaming.api.scala._
 
 import scala.language.implicitConversions
 
-/**
- * @param parameter
- * @param environment
- */
 class StreamingContext(val parameter: ParameterTool, private val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
   /**
    * for scala
-   *
-   * @param args
    */
   def this(args: (ParameterTool, StreamExecutionEnvironment)) = this(args._1, args._2)
 
   /**
    * for Java
-   *
-   * @param args
    */
   def this(args: StreamEnvConfig) = this(FlinkStreamingInitializer.initJavaStream(args))
 
   /**
-   * 推荐使用该Api启动任务...
-   *
-   * @return
+   * Recommend use this Api to start task
    */
   def start(): JobExecutionResult = execute()
 
@@ -96,10 +86,6 @@ trait FlinkStreaming extends Serializable with Logger {
     context = new StreamingContext(FlinkStreamingInitializer.initStream(args, config))
   }
 
-  /**
-   * 用户可覆盖次方法...
-   *
-   */
   def ready(): Unit = {}
 
   def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}

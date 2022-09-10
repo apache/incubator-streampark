@@ -17,24 +17,18 @@
 
 package org.apache.streampark.console.base.domain;
 
-/**
- * 常量
- */
 public class Constant {
 
-    // token缓存前缀
+    // token cache prefix
     public static final String TOKEN_CACHE_PREFIX = "streampark.cache.token.";
-
-    // 排序规则： descend 降序
+    // order rules: descend
     public static final String ORDER_DESC = "desc";
-    // 排序规则： ascend 升序
+    // order rules: ascend
     public static final String ORDER_ASC = "asc";
-
     public static final String DEFAULT_SORT_FIELD = "create_time";
-
-    // 按钮
+    // button
     public static final String TYPE_BUTTON = "1";
-    // 菜单
+    // menu
     public static final String TYPE_MENU = "0";
     public static final String APP_MENU_ID = "100015";
     public static final String APP_DETAIL_MENU_ID = "100018";

@@ -35,7 +35,7 @@ object HBaseSource {
 }
 
 /**
- * 支持端到端的精准一次,可回放...
+ * Support end-to-end exactly once and replay
  *
  * @param ctx
  * @param property

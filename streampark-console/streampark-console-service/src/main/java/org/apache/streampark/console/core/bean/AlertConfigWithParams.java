@@ -37,34 +37,16 @@ public class AlertConfigWithParams implements Serializable {
 
     private String alertName;
 
-    /**
-     * 报警类型
-     */
     private Integer alertType;
 
-    /**
-     * 邮件报警配置信息
-     */
     private AlertEmailParams emailParams;
 
-    /**
-     * 钉钉报警配置信息
-     */
     private AlertDingTalkParams dingTalkParams;
 
-    /**
-     * 企微报警配置信息
-     */
     private AlertWeComParams weComParams;
 
-    /**
-     * 报警http回调配置信息
-     */
     private AlertHttpCallbackParams httpCallbackParams;
 
-    /**
-     * 飞书报警配置信息
-     */
     private AlertLarkParams larkParams;
 
     public static AlertConfigWithParams of(AlertConfig config) {

@@ -26,9 +26,6 @@ import java.time.LocalDateTime;
 
 public class P6spySqlFormatConfig implements MessageFormattingStrategy {
 
-    /**
-     * 过滤掉定时任务的 SQL
-     */
     @Override
     public String formatMessage(
         int connectionId,
@@ -41,7 +38,7 @@ public class P6spySqlFormatConfig implements MessageFormattingStrategy {
 
         return StringUtils.isBlank(sql) ? "" :
             String.format(
-                "%s  | 耗时 %d ms | SQL 语句：\n %s;",
+                "%s  | consume %d ms | SQL statement：\n %s;",
                 DateUtils.formatFullTime(LocalDateTime.now()),
                 elapsed,
                 sql.replaceAll("\\s+", StringUtils.SPACE)

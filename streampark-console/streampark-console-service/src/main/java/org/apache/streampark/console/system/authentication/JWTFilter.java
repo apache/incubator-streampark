@@ -87,7 +87,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     }
 
     /**
-     * 对跨域提供支持
+     * cross-domain support
      */
     @Override
     protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
@@ -99,14 +99,13 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
         httpServletResponse.setHeader(
             "Access-Control-Allow-Headers",
             httpServletRequest.getHeader("Access-Control-Request-Headers"));
-        // 跨域时会首先发送一个 option请求，这里我们给 option请求直接返回正常状态
         if (httpServletRequest.getMethod().equals(RequestMethod.OPTIONS.name())) {
             httpServletResponse.setStatus(HttpStatus.OK.value());
             return false;
         }
         boolean preHandleResult = super.preHandle(request, response);
         int httpStatus = httpServletResponse.getStatus();
-        //避免http_status=401时，浏览器自动弹出认证框
+        // avoid the browser to automatically pop up the authentication box when http status=401
         if (!preHandleResult && httpStatus == 401) {
             httpServletResponse.setHeader("WWW-Authenticate", null);
         }

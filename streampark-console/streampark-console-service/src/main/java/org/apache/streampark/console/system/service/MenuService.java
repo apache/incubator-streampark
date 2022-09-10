@@ -42,14 +42,11 @@ public interface MenuService extends IService<Menu> {
     void updateMenu(Menu menu) throws Exception;
 
     /**
-     * 递归删除菜单/按钮
+     * Recursively delete menu buttons
      *
      * @param menuIds menuIds
      */
     void deleteMenus(String[] menuIds) throws Exception;
 
-    /**
-     * @return
-     */
     ArrayList<VueRouter<Menu>> getUserRouters(User user);
 }

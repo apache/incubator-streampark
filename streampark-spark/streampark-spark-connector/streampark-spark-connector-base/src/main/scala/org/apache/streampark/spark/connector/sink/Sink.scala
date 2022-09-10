@@ -28,10 +28,9 @@ import scala.collection.Map
 import scala.util.Try
 
 /**
- *
+ * Base output trait
  */
 trait Sink[T] extends Serializable with Logger {
-
 
   @(transient@getter)
   val sc: SparkContext
@@ -55,18 +54,19 @@ trait Sink[T] extends Serializable with Logger {
   }
 
   /**
-   * 输出
+   * sink
    *
+   * @param dStream dStream
    */
   def sink(dStream: DStream[T]): Unit = {
     dStream.foreachRDD((rdd, time) => sink(rdd, time))
   }
 
   /**
-   * 输出
+   * sink
    *
    * @param rdd  spark.RDD
    * @param time spark.streaming.Time
    */
-  def sink(rdd: RDD[T], time: Time)
+  def sink(rdd: RDD[T], time: Time): Unit
 }

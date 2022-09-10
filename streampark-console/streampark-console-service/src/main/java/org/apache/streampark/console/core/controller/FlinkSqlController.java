@@ -37,7 +37,7 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
-@Api(tags = "[flink sql]相关操作", consumes = "Content-Type=application/x-www-form-urlencoded")
+@Api(tags = "[flink sql] related operations", consumes = "Content-Type=application/x-www-form-urlencoded")
 @Slf4j
 @Validated
 @RestController
@@ -54,7 +54,7 @@ public class FlinkSqlController {
     public RestResponse verify(String sql, Long versionId) {
         FlinkSqlValidationResult flinkSqlValidationResult = flinkSqlService.verifySql(sql, versionId);
         if (!flinkSqlValidationResult.success()) {
-            //记录错误类型,出错的sql,原因,错误的开始行和结束行内容(用于前端查找mod节点)
+            // record error type, such as error sql, reason and error start/end line
             String exception = flinkSqlValidationResult.exception();
             RestResponse response = RestResponse.success()
                 .data(false)

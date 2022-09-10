@@ -30,10 +30,20 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 /**
-  *
-  *
-  * Hbase 存储Offset
-  */
+ * HBase Offset Manager
+ *
+ * The table model for storing offsets is as follow, please optimize and extend it by yourself,
+ * please set the version of the record corresponding to each rowkey to 1(default value),
+ * because it is necessary to overwrite the original saved offsets, instead of generating multiple versions.
+ *
+ * |---------------------------------------------------------------------------------------------------|
+ * |rowKey                   |  column family                                                          |
+ * |---------------------------------------------------------------------------------------------------|
+ * |                         |  column:topic(string)  |  column:partition(int)  | column:offset(long)  |
+ * |---------------------------------------------------------------------------------------------------|
+ * |topic#groupId#partition  |   topic                |   partition             |    offset            |
+ * |---------------------------------------------------------------------------------------------------|
+ */
 private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
 
   private lazy val tableName = storeParams("hbase.table")
@@ -54,27 +64,13 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
     conn.getTable(TableName.valueOf(tableName))
   }
 
-
   /**
-    *
-    * 存放offset的表模型如下，请自行优化和扩展，请把每个rowkey对应的record的version设置为1（默认值），因为要覆盖原来保存的offset，而不是产生多个版本
-    * |---------------------------------------------------------------------------------------------------|
-    * |rowKey                   |  column family                                                          |
-    * |--------------------------------------------------------------------------—————————————————————————|
-    * |                         |  column:topic(string)  |  column:partition(int)  | column:offset(long)  |
-    * |----------------------------------------------------------------------------------------------—————|
-    * |topic#groupId#partition  |   topic                |   partition             |    offset            |
-    * |---------------------------------------------------------------------------------------------------|
-    *
-    */
-
-  /**
-    * 获取存储的Offset
-    *
-    * @param groupId
-    * @param topics
-    * @return
-    */
+   * get stored offset
+   *
+   * @param groupId
+   * @param topics
+   * @return
+   */
   override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     val storedOffsetMap = new mutable.HashMap[TopicPartition, Long]()
     val earliestOffsets = getEarliestOffsets(topics.toSeq)
@@ -96,7 +92,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
             case _ =>
           }
         }
-        // 如果Offset失效了，则用 earliestOffsets 替代
+        // if offset invalid, please use earliest offset to instead of
         val topicPartition = new TopicPartition(topic, partition)
         val finalOffset = earliestOffsets.get(topicPartition) match {
           case Some(left) if left > offset =>
@@ -120,7 +116,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
   }
 
   /**
-    * 更新 Offsets
+    * update offset
     *
     * @param groupId
     * @param offsetInfos
@@ -139,7 +135,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
   }
 
   /**
-    * 删除Offset
+    * delete offset
     *
     * @param groupId
     * @param topics

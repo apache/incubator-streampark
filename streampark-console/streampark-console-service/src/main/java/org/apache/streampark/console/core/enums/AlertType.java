@@ -39,12 +39,12 @@ public enum AlertType {
         this.code = code;
     }
 
-    /*
-     * 报警方式，二进制位表示
-     * 其中第 1 位表示:邮件报警，第 2 位表示: 钉钉报警，第 3 位表示: 企微报警，第 4 位表示: callback，第 5 位表示: 飞书。
-     * 示例：
-     * level= 3，其二进制位为：0000 0011， 则对应的报警方式位：钉钉，邮件
-     * level= 10，其二进制位为：0000 1010， 则对应的报警方式位：钉钉，callback
+    /**
+     * Alarm way, binary bits indicate
+     * Where bit 1 means: email alarm, bit 2 means: ding alarm, bit 3 means: weCom alarm, bit 4 means: http callback, and bit 5 means: lark.
+     * Example:
+     * level= 3, its binary bit is: 0000 0011, then the corresponding alarm mode bit: ding, email
+     * level= 10, its binary bit is: 0000 1010, then the corresponding alarm mode bit: ding, callback
      */
     public static List<AlertType> decode(Integer level) {
         if (level == null) {
@@ -52,10 +52,8 @@ public enum AlertType {
         }
         List<AlertType> result = Lists.newArrayList();
         while (level != 0) {
-            // 获取最低位的 1
             int code = level & -level;
             result.add(getByCode(code));
-            // 将最低位置 0
             level ^= code;
         }
         return result;

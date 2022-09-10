@@ -29,7 +29,7 @@ import java.util.Set;
 public interface UserService extends IService<User> {
 
     /**
-     * 通过用户名查找用户
+     * find user by name
      *
      * @param username username
      * @return user
@@ -37,7 +37,7 @@ public interface UserService extends IService<User> {
     User findByName(String username);
 
     /**
-     * 查询用户详情，包括基本信息，用户角色，用户部门
+     * find uer detail, contains basic info, role, department
      *
      * @param user        user
      * @param restRequest queryRequest
@@ -46,67 +46,63 @@ public interface UserService extends IService<User> {
     IPage<User> findUserDetail(User user, RestRequest restRequest);
 
     /**
-     * 更新用户登录时间
+     * update login time
      *
      * @param username username
      */
     void updateLoginTime(String username) throws Exception;
 
     /**
-     * 新增用户
+     * create user
      *
      * @param user user
      */
     void createUser(User user) throws Exception;
 
     /**
-     * 修改用户
+     * update user
      *
      * @param user user
      */
     void updateUser(User user) throws Exception;
 
     /**
-     * 删除用户
+     * delete user list
      *
-     * @param userIds 用户 id数组
+     * @param userIds user id list
      */
     void deleteUsers(String[] userIds) throws Exception;
 
     /**
-     * 更新个人信息
+     * update user
      *
-     * @param user 个人信息
+     * @param user user
      */
     void updateProfile(User user) throws Exception;
 
     /**
-     * 更新用户头像
+     * update user avatar
      *
-     * @param username 用户名
-     * @param avatar   用户头像
+     * @param username name
+     * @param avatar   avatar
      */
     void updateAvatar(String username, String avatar) throws Exception;
 
     /**
-     * 更新用户密码
+     * update password
      *
-     * @param username 用户名
-     * @param password 新密码
+     * @param username user
+     * @param password password
      */
     void updatePassword(String username, String password) throws Exception;
 
     /**
-     * 重置密码
+     * reset password
      *
-     * @param usernames 用户集合
+     * @param usernames user list
      */
     void resetPassword(String[] usernames) throws Exception;
 
-    /**
-     * @param username
-     * @return
-     */
     Set<String> getPermissions(String username);
 
     List<User> getNoTokenUser();

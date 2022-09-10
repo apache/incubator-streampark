@@ -115,7 +115,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     The default kubernetes cluster communication information will be obtained from ./kube/conf file.
 
     If you need to customize the kubernetes cluster context, such as multiple target kubernetes clusters
-    or multiple kubernetes api-server accounts, there are two ways to achieve this：
+    or multiple kubernetes api-server accounts, there are two ways to achieve this:
      1. Get the KubernetesClusterDescriptor by manually, building the FlinkKubeClient and specify
          the kubernetes context contents in the FlinkKubeClient.
      2. Specify an explicit key kubernetes.config.file in flinkConfig instead of the default value.

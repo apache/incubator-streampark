@@ -22,7 +22,7 @@ import org.apache.streampark.console.system.entity.User;
 public interface Authenticator {
     /**
      * Verifying legality via username and password
-     * @param username user name
+     * @param username username
      * @param password user password
      * @return result object
      */

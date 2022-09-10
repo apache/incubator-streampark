@@ -26,9 +26,7 @@ import scala.collection.JavaConversions._
 import scala.util.Try
 
 /**
- *
- *
- * Offset 存储到Redis
+ * Redis Offset Manager
  */
 private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
 
@@ -47,7 +45,7 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
       topics.flatMap(topic => {
         redis.hgetAll(key(groupId, topic)).map {
           case (partition, offset) =>
-            // 如果Offset失效了，则用 earliestOffsets 替代
+            // if offset invalid, please use earliest offset to instead of
             val tp = new TopicPartition(topic, partition.toInt)
             val finalOffset = earliestOffsets.get(tp) match {
               case Some(left) if left > offset.toLong =>

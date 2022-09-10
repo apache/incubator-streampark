@@ -46,7 +46,7 @@ object YarnUtils extends Logger {
 
   /**
    * hadoop.http.authentication.type<br>
-   * 获取 yarn http 认证方式.<br> ex: sample, kerberos
+   * get yarn http authentication mode.<br> ex: sample, kerberos
    *
    * @return
    */
@@ -72,7 +72,7 @@ object YarnUtils extends Logger {
   }
 
   /**
-   * 查询 state
+   * get yarn application state
    *
    * @param appId
    * @return
@@ -90,7 +90,7 @@ object YarnUtils extends Logger {
   }
 
   /**
-   * 判断任务名为appName的任务，是否在yarn中运行，状态为RUNNING
+   * Determine if the task named appName is running in yarn
    *
    * @return boolean
    * @param appName
@@ -137,7 +137,7 @@ object YarnUtils extends Logger {
                     logInfo("findActiveRMHAId successful")
                     x
                   case None =>
-                    //If you don't know why, don't modify it
+                    // if you don't know why, don't modify it
                     logWarn(s"findActiveRMHAId is null,config yarn.acl.enable:${yarnConf.get("yarn.acl.enable")},now http try it.")
                     // url ==> rmId
                     val idUrlMap = new JavaHashMap[String, String]
@@ -157,7 +157,7 @@ object YarnUtils extends Logger {
                       CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT
                     )
                     breakable(idUrlMap.foreach(x => {
-                      //test yarn url
+                      // test yarn url
                       val activeUrl = httpTestYarnRMUrl(x._1, rpcTimeoutForChecks)
                       if (activeUrl != null) {
                         rmId = idUrlMap(activeUrl)
@@ -257,7 +257,6 @@ object YarnUtils extends Logger {
     if (url.startsWith("http://") || url.startsWith("https://")) request(url) else {
       request(s"${getRMWebAppURL()}/$url")
     }
-
   }
 
 }

@@ -37,7 +37,7 @@ object RedisClient extends Logger {
   private lazy val clusters: ConcurrentHashMap[RedisEndpoint, JedisCluster] = new ConcurrentHashMap[RedisEndpoint, JedisCluster]()
 
   /**
-   * 随机选择一个 RedisEndpoint 创建 或者获取一个Redis 连接池
+   * Select a random RedisEndpoint to create or get a Redis connection pool
    *
    * @param res
    * @return
@@ -55,7 +55,7 @@ object RedisClient extends Logger {
   }
 
   /**
-   * 创建或者获取一个Redis 连接池
+   * Create or get a Redis connection pool
    *
    * @param re
    * @return
@@ -80,7 +80,7 @@ object RedisClient extends Logger {
   }
 
   /**
-   * 创建一个连接池
+   * Create a connection pool
    *
    * @param endpoint
    * @return
@@ -93,18 +93,18 @@ object RedisClient extends Logger {
 
   private lazy val poolConfig = {
     val poolConfig: JedisPoolConfig = new JedisPoolConfig()
-    /*最大连接数*/
+    // maximum number of connections
     poolConfig.setMaxTotal(1000)
-    /*最大空闲连接数*/
+    // maximum number of connections
     poolConfig.setMaxIdle(64)
-    /*在获取连接的时候检查有效性, 默认false*/
+    // check validity when getting connection, default false
     poolConfig.setTestOnBorrow(true)
     poolConfig.setTestOnReturn(false)
-    /*在空闲时检查有效性, 默认false*/
+    // check validity at idle, default false
     poolConfig.setTestWhileIdle(false)
-    /*逐出连接的最小空闲时间 默认1800000毫秒(30分钟)*/
+    // minimum idle time for eviction connections, default 1800000 milliseconds (30 minutes)
     poolConfig.setMinEvictableIdleTimeMillis(1800000)
-    /*逐出扫描的时间间隔(毫秒) 如果为负数,则不运行逐出线程, 默认-1*/
+    // evicting scan interval (ms), default -1, if negative, do not run the eviction thread
     poolConfig.setTimeBetweenEvictionRunsMillis(30000)
     poolConfig.setNumTestsPerEvictionRun(-1)
     poolConfig
@@ -121,6 +121,4 @@ object RedisClient extends Logger {
   }
 
   def close(): Unit = pools.foreach { case (_, v) => v.close() }
-
-
 }

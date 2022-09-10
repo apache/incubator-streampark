@@ -36,7 +36,8 @@ object FlinkSqlExecutor extends Logger {
   private[this] val lock = new ReentrantReadWriteLock().writeLock
 
   /**
-   * all the available sql config options. see: https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/table/config
+   * all the available sql config options.
+   * see: https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/table/config
    */
   lazy val tableConfigOptions: JavaMap[String, ConfigOption[_]] = {
     def extractConfig(clazz: Class[_]): JavaMap[String, ConfigOption[_]] = {
@@ -117,7 +118,7 @@ object FlinkSqlExecutor extends Logger {
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
 
-        //For specific statement, such as: SET、RESET、INSERT、SELECT
+        // For specific statement, such as: SET/RESET/INSERT/SELECT
         case SET =>
           if (!tableConfigOptions.containsKey(args)) {
             throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/table/config")

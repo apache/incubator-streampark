@@ -595,6 +595,13 @@
                         <excludes>
                         </excludes>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>9.3</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
                             <id>validate</id>
@@ -622,8 +629,17 @@
                         <inputEncoding>UTF-8</inputEncoding>
                         <outputEncoding>UTF-8</outputEncoding>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>9.3</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
+                            <id>validate</id>
+                            <phase>process-sources</phase>
                             <goals>
                                 <goal>check</goal>
                             </goals>

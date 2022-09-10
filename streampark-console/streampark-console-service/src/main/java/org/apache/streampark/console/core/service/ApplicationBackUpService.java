@@ -34,10 +34,6 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
 
     IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request);
 
-    /**
-     * @param backUp
-     * @return
-     */
     void rollback(ApplicationBackUp backUp);
 
     void revoke(Application application);

@@ -28,8 +28,7 @@ import java.io.Serializable;
 import java.util.Properties;
 
 /**
- * 封装一个HBase查询的条件对象,包装了scan和get两种查询方式.
- *
+ * Wrapping a HBase query condition object, wrapping the scan and get two query methods.
  */
 public class HBaseQuery extends Scan implements Serializable {
 
@@ -38,20 +37,12 @@ public class HBaseQuery extends Scan implements Serializable {
     private transient Scan scan;
     private transient Get get;
 
-    /**
-     * @param table 要查询的Hbase table表名
-     * @param scan  根据scan为查询条件进行查询
-     */
     public HBaseQuery(String table, Scan scan) throws IOException {
         super(scan);
         this.table = table;
         this.scan = scan;
     }
 
-    /**
-     * @param table 要查询的Hbase table表名
-     * @param get   根据get为查询条件进行查询
-     */
     public HBaseQuery(String table, Get get) {
         super(get);
         this.table = table;

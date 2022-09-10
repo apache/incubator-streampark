@@ -469,7 +469,6 @@ public class AppBuildPipeServiceImpl
     }
 
     private void checkOrElseUploadJar(FsOperator fsOperator, File localJar, String targetJar, String targetDir) {
-        //1)文件不存直接上传
         if (!fsOperator.exists(targetJar)) {
             fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
         } else {

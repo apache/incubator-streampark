@@ -106,7 +106,9 @@ public enum FlinkAppState implements Serializable {
      */
     OTHER(15),
 
-    //已回滚
+    /**
+     * has rollback
+     */
     REVOKED(16),
 
     /**
@@ -130,7 +132,7 @@ public enum FlinkAppState implements Serializable {
      */
     SUCCEEDED(20),
     /**
-     * yarn 中检查到被killed
+     * has killed in Yarn
      */
     KILLED(-9);
 

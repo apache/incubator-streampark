@@ -19,9 +19,6 @@ package org.apache.streampark.console.base.domain;
 
 public interface ResponseCode {
 
-    /**
-     * default
-     */
     Long CODE_SUCCESS = 200L;
 
     Long CODE_FAIL = 500L;

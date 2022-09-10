@@ -42,21 +42,21 @@ public class FlinkSql {
     private Integer version = 1;
 
     /**
-     * 候选版本:
-     * 0: 非候选 <br>
-     * 1: 新增的记录成为候选版本 <br>
-     * 2: 指定历史记录的版本成为候选版本 <br>
+     * candidate number:
+     * 0: none candidate <br>
+     * 1: newly added record becomes a candidate <br>
+     * 2: specific history becomes a candidate <br>
      */
     private Integer candidate;
 
     private Date createTime;
     private transient boolean effective = false;
     /**
-     * sql 有差异
+     * sql diff
      */
     private transient boolean sqlDifference = false;
     /**
-     * 依赖 有差异
+     * dependency diff
      */
     private transient boolean dependencyDifference = false;
 
@@ -82,9 +82,9 @@ public class FlinkSql {
     }
 
     public ChangedType checkChange(FlinkSql target) {
-        // 1) 判断sql语句是否发生变化
+        // 1) determine if sql statement has changed
         boolean sqlDifference = !this.getSql().trim().equals(target.getSql().trim());
-        // 2) 判断 依赖是否发生变化
+        // 2) determine if dependency has changed
         Application.Dependency thisDependency = Application.Dependency.toDependency(this.getDependency());
         Application.Dependency targetDependency = Application.Dependency.toDependency(target.getDependency());
 

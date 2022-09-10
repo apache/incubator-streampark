@@ -23,10 +23,6 @@ import org.apache.avro.mapreduce.{AvroKeyOutputFormat, AvroMultipleOutputs}
 import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapreduce.TaskInputOutputContext
 
-/**
-  *
-  *
-  */
 object MultipleAvroOutputsFormat {
   // This seems to be an unfortunate limitation of type inference of lambda defaults within constructor params.
   // If it would work I would just inline this function

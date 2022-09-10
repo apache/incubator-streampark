@@ -43,16 +43,8 @@ public interface SettingService extends IService<Setting> {
 
     String KEY_DOCKER_REGISTER_NAMESPACE = "docker.register.namespace";
 
-    /**
-     * @param key
-     * @return
-     */
     Setting get(String key);
 
-    /**
-     * @param setting
-     * @return
-     */
     boolean update(Setting setting);
 
     String getStreamParkAddress();

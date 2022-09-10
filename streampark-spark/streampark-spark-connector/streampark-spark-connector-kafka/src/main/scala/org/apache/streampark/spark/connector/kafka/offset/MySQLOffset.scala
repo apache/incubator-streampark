@@ -22,10 +22,18 @@ import org.apache.spark.SparkConf
 import scalikejdbc.{ConnectionPool, DB, _}
 
 /**
-  *
-  *
-  * MySQL 存储Offset
-  */
+ * MySQL Offset Manager
+ *
+ * The table model for storing offsets is as follow, (topic+groupId+partition as union unique primary key)
+ *
+ * |----------------------------------------------------------------------------------|
+ * | topic         |     groupId        |     partition      |         offset         |
+ * |----------------------------------------------------------------------------------|
+ * | topic_001    |     groupId_001     |     0             | 197                     |
+ * |----------------------------------------------------------------------------------|
+ * | topic_001    |     groupId_001     |     1             | 200                     |
+ * |----------------------------------------------------------------------------------|
+ */
 private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
 
   private lazy val jdbcURL = storeParams("mysql.jdbc.url")
@@ -35,16 +43,7 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
 
 
   /**
-    *
-    * 存放offset的表模型如下,(topic+groupId+partition 为联合唯一主键)
-    * |----------------------------------------------------------------------------------|
-    * | topic         |     groupId        |     partition      |         offset         |
-    * |--------------------------------------------------------------------------———————-|
-    * | topic_001    |     groupId_001     |     0             | 197                     |
-    * |----------------------------------------------------------------------------------|
-    * | topic_001    |     groupId_001     |     1             | 200                     |
-    * |----------------------------------------------------------------------------------|
-    * ......
+    * get stored offset
     *
     * @param groupId
     * @param topics
@@ -52,7 +51,6 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
     */
   override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     require(topics.nonEmpty)
-    //在Driver端创建数据库连接池
     ConnectionPool.singleton(jdbcURL, user, password)
     DB.getTable(table) match {
       case None =>
@@ -86,7 +84,7 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
   }
 
   /**
-    * 更新 Offsets
+    * update offset
     *
     * @param groupId
     * @param offsetInfos
@@ -105,7 +103,7 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
   }
 
   /**
-    * 删除 Offsets
+    * delete offset
     *
     * @param groupId
     * @param topics

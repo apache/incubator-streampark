@@ -111,7 +111,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             return result;
         }
         String clusterId = flinkCluster.getClusterId();
-        //clusterId不能重复
         if (StringUtils.isNoneBlank(clusterId)) {
             FlinkCluster inDB = this.baseMapper.getByClusterId(clusterId);
             if (inDB != null) {
@@ -122,7 +121,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         }
         flinkCluster.setUserId(commonService.getCurrentUser().getUserId());
         flinkCluster.setCreateTime(new Date());
-        //REMOTE模式直接设置为已启动
+        // remote mode directly set STARTED
         if (ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
             flinkCluster.setClusterState(ClusterState.STARTED.getValue());
         } else {
@@ -286,9 +285,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     @Override
     public ResponseResult delete(FlinkCluster flinkCluster) {
         ResponseResult result = new ResponseResult();
-        //clusterId非空 集群为已启动状态 非REMOTE模式
-        if (StringUtils.isNoneBlank(flinkCluster.getClusterId()) && ClusterState.STARTED.equals(flinkCluster.getClusterStateEnum()) && !ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
-            //集群未正常停止，无法删除
+        if (StringUtils.isNoneBlank(flinkCluster.getClusterId())
+            && ClusterState.STARTED.equals(flinkCluster.getClusterStateEnum())
+            && !ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {
             result = shutdown(flinkCluster);
             if (0 == result.getStatus()) {
                 return result;

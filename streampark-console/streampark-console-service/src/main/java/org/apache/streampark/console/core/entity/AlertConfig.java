@@ -42,47 +42,47 @@ public class AlertConfig implements Serializable {
     private Long userId;
 
     /**
-     * 报警组名称
+     * alert name
      */
     private String alertName;
 
     /**
-     * 报警类型
+     * alert type
      */
     private Integer alertType;
 
     /**
-     * 邮件报警配置信息
+     * email alert parameters
      */
     private String emailParams;
 
     /**
-     * 钉钉报警配置信息
+     * ding alert parameters
      */
     private String dingTalkParams;
 
     /**
-     * 企微报警配置信息
+     * wecom alert parameters
      */
     private String weComParams;
 
     /**
-     * 报警http回调配置信息
+     * alert http callback parameters
      */
     private String httpCallbackParams;
 
     /**
-     * 飞书报警配置信息
+     * lark alert parameters
      */
     private String larkParams;
 
     /**
-     * 创建时间
+     * create time
      */
     private Date createTime;
 
     /**
-     * 修改时间
+     * modify time
      */
     private Date modifyTime;
 

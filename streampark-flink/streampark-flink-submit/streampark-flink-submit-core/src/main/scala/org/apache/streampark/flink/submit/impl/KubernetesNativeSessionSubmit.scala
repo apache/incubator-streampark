@@ -121,7 +121,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   def deploy(deployRequest: DeployRequest): DeployResponse = {
     logInfo(
       s"""
-         |--------------------------------------- kubernetes sesion start ---------------------------------------
+         |--------------------------------------- kubernetes session start ---------------------------------------
          |    userFlinkHome    : ${deployRequest.flinkVersion.flinkHome}
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
          |    execMode         : ${deployRequest.executionMode.name()}

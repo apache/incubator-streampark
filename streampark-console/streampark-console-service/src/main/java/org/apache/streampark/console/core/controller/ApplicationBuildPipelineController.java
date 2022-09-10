@@ -80,13 +80,15 @@ public class ApplicationBuildPipelineController {
                 return RestResponse.success(false);
             }
             Application app = applicationService.getById(appId);
-            // 检查是否需要走build这一步流程(jar和pom发生变化了则需要走build流程, 其他普通参数修改了,不需要走build流程)
+            // check if you need to go through the build process (if the jar and pom have changed,
+            // you need to go through the build process, if other common parameters are modified,
+            // you don't need to go through the build process)
             boolean needBuild = applicationService.checkBuildAndUpdate(app);
             if (!needBuild) {
                 return RestResponse.success(true);
             }
 
-            //回滚任务.
+            // rollback
             if (app.isNeedRollback() && app.isFlinkSqlJob()) {
                 flinkSqlService.rollback(app);
             }

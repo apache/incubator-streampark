@@ -27,7 +27,7 @@ import scala.language.implicitConversions
 import scala.util.Try
 
 /**
- * Offset 管理
+ * Offset Manager
  */
 trait Offset extends Logger with Serializable {
 
@@ -52,7 +52,7 @@ trait Offset extends Logger with Serializable {
   }
 
   /**
-   * 获取存储的Offset
+   * get stored offset
    *
    * @param groupId
    * @param topics
@@ -61,7 +61,7 @@ trait Offset extends Logger with Serializable {
   def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long]
 
   /**
-   * 更新 Offsets
+   * update offset
    *
    * @param groupId
    * @param offsetInfos
@@ -69,7 +69,7 @@ trait Offset extends Logger with Serializable {
   def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit
 
   /**
-   * 删除 Offsets
+   * delete offset
    *
    * @param groupId
    * @param topics
@@ -77,7 +77,7 @@ trait Offset extends Logger with Serializable {
   def delete(groupId: String, topics: Set[String]): Unit
 
   /**
-   * 生成Key
+   * generate key
    *
    * @param groupId
    * @param topic
@@ -90,7 +90,7 @@ trait Offset extends Logger with Serializable {
   private final val EarliestTime = -2L
 
   /**
-   * 获取最旧的Offsets
+   * get earliest offset
    *
    * @param topics
    * @return
@@ -98,7 +98,7 @@ trait Offset extends Logger with Serializable {
   def getEarliestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, EarliestTime)
 
   /**
-   * 获取最新的Offset
+   * get latest offset
    *
    * @param topics
    * @return
@@ -107,8 +107,7 @@ trait Offset extends Logger with Serializable {
 
 
   /**
-   * 获取指定时间的Offset
-   * 想
+   * get specific timestamp offset
    *
    * @param topics
    * @param time

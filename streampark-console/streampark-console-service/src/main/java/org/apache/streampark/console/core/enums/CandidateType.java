@@ -23,17 +23,17 @@ import java.util.Arrays;
 public enum CandidateType implements Serializable {
 
     /**
-     * 非候选版本
+     * non candidate
      */
     NONE(0),
 
     /**
-     * 新增的记录成为候选版本
+     * newly added record becomes a candidate
      */
     NEW(1),
 
     /**
-     * 历史记录成为候选版本
+     * specific history becomes a candidate
      */
     HISTORY(2);
 

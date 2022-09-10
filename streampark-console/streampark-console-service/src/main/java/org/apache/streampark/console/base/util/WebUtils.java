@@ -27,7 +27,7 @@ import java.io.File;
 import java.util.stream.IntStream;
 
 /**
- * 工具类
+ * Web Utils
  */
 @Slf4j
 public final class WebUtils {
@@ -37,42 +37,42 @@ public final class WebUtils {
     }
 
     /**
-     * token 加密
+     * token encrypt
      *
      * @param token token
-     * @return 加密后的 token
+     * @return encrypt token
      */
     public static String encryptToken(String token) {
         try {
             EncryptUtils encryptUtils = new EncryptUtils(Constant.TOKEN_CACHE_PREFIX);
             return encryptUtils.encrypt(token);
         } catch (Exception e) {
-            log.info("token加密失败：", e);
+            log.info("token encrypt failed: ", e);
             return null;
         }
     }
 
     /**
-     * token 解密
+     * token decrypt
      *
-     * @param encryptToken 加密后的 token
-     * @return 解密后的 token
+     * @param encryptToken encryptToken
+     * @return decrypt token
      */
     public static String decryptToken(String encryptToken) {
         try {
             EncryptUtils encryptUtils = new EncryptUtils(Constant.TOKEN_CACHE_PREFIX);
             return encryptUtils.decrypt(encryptToken);
         } catch (Exception e) {
-            log.info("token解密失败：", e);
+            log.info("token decrypt failed: ", e);
             return null;
         }
     }
 
     /**
-     * 驼峰转下划线
+     * camel to underscore
      *
-     * @param value 待转换值
-     * @return 结果
+     * @param value value
+     * @return underscore
      */
     public static String camelToUnderscore(String value) {
         if (StringUtils.isBlank(value)) {

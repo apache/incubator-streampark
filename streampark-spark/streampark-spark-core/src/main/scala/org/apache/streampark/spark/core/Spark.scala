@@ -28,11 +28,8 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * <b><code>Spark</code></b>
  * <p/>
- * Spark基础特质
+ * Spark Basic Traits
  * <p/>
- * <b>Creation Time:</b> 2022/8/8 20:44.
- *
- * @since streampark
  */
 trait Spark {
 
@@ -70,7 +67,6 @@ trait Spark {
   /**
    * Initialize sparkConf according to user parameters
    */
-
   final def init(args: Array[String]): Unit = {
 
     var argv = args.toList
@@ -135,33 +131,33 @@ trait Spark {
   }
 
   /**
-   * config 阶段的目的是让开发者可以通过钩子的方式设置更多的参数(约定的配置文件以外的其他参数)
-   * 用户设置sparkConf参数,如,spark序列化:
-   * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-   * // 注册要序列化的自定义类型。
-   * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
-   *
-   * @param sparkConf
+   * The purpose of the config phase is to allow the developer to set more parameters (other than the agreed
+   * configuration file) by means of hooks.
+   * Such as,
+   *  conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+   *  conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
    */
   def config(sparkConf: SparkConf): Unit
 
   /**
-   * 阶段是在参数都设置完毕了,给开发者提供的一个用于做其他动作的入口, 该阶段是在初始化完成之后在程序启动之前进行
+   * The ready phase is an entry point for the developer to do other actions after the parameters have been set,
+   * and is done after initialization and before the program starts.
    */
   def ready(): Unit
 
   /**
-   * handle 阶段是接入开发者编写的代码的阶段,是开发者编写代码的入口,也是最重要的一个阶段, 这个handle 方法会强制让开发者去实现
+   * The handle phase is the entry point to the code written by the developer and is the most important phase.
    */
   def handle(): Unit
 
   /**
-   * start 阶段,顾名思义,这个阶段会启动任务,由框架自动执行
+   * The start phase starts the task, which is executed automatically by the framework.
    */
   def start(): Unit
 
   /**
-   * destroy 阶段,是程序运行完毕了,在jvm退出之前的最后一个阶段,一般用于收尾的工作
+   * The destroy phase, is the last phase before jvm exits after the program has finished running,
+   * and is generally used to wrap up the work.
    */
   def destroy(): Unit
 
@@ -175,11 +171,10 @@ trait Spark {
         |"Usage: Streaming [options]
         |
         | Options are:
-        |   --checkpoint <checkpoint 目录设置>
-        |   --createOnError <从 checkpoint 恢复失败,是否重新创建 true|false>
+        |   --checkpoint <checkpoint dir>
+        |   --createOnError <Failed to recover from checkpoint, whether to recreated, true or false>
         |""".stripMargin)
     System.exit(1)
   }
-
 
 }

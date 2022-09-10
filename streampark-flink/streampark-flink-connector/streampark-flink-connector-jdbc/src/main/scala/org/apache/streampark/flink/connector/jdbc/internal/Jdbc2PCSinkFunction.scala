@@ -31,7 +31,7 @@ import java.sql.{Connection, SQLException, Statement}
 import java.util.{Optional, Properties}
 
 /**
- * (flink checkpoint + db transactionId) 模拟了提交读.充分利用flink的checkpoint机制,经过flink checkpoint确认过的数据才提交
+ * (flink checkpoint + db transactionId) Simulates commit read. Use of flink's checkpoint mechanism, and only submit data that has been confirmed
  *
  * @param apiType
  * @param jdbc
@@ -72,19 +72,17 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
     if (!sql.toUpperCase.trim.startsWith("INSERT")) {
       transaction.insertMode = false
     }
-    //调用invoke插入过数据....
     transaction.invoked = true
     transaction + sql
   }
 
   /**
-   * call on snapshotState
-   * 将要操作的sql语句保存到状态里.如果这一步失败,会回滚
+   * Save the sql statement to be operated in the state. If this step fails, it will be rolled back
    *
    * @param transaction
    */
   override def preCommit(transaction: Transaction): Unit = {
-    //防止未调用invoke方法直接调用preCommit
+    // Prevent called preCommit directly without called the invoke method
     if (transaction.invoked) {
       logInfo(s"Jdbc2PCSink preCommit.TransactionId:${transaction.transactionId}")
       buffer += transaction.transactionId -> transaction
@@ -93,36 +91,31 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
 
 
   /**
-   * 在数据checkpoint完成或者恢复完成的时候会调用该方法,这里直接利用db的事务特性
-   * 当前操作处于第二阶段:
-   * 如果当前一批数据保存成功则整个过程成功
-   * 如果失败,会抛出异常,导致本次完成的checkpoint也会回滚
-   * 进而下次启动的时候还是从上次消费的位置开始.做到端到端精准一次.
-   *
-   * @param transaction
+   * When the data checkpoint is completed or the recovery is finished, this method will be called,
+   * here use the transaction feature of db. The current operation is at the second stage:
+   * If the current batch of data is saved successfully, the whole process is successful;
+   * If it fails, will be thrown an exception, resulting in the checkpoint will also be rolled back,
+   * at the same time, the next time to started, it will start from the last consumption location,
+   * ensuring that end-to-end exactly once.
    */
   override def commit(transaction: Transaction): Unit = {
-    //防止未调用invoke方法直接调用preCommit和commit...
     if (transaction.invoked && transaction.sql.nonEmpty) {
       logInfo(s"Jdbc2PCSink commit,TransactionId:${transaction.transactionId}")
       var connection: Connection = null
       var statement: Statement = null
       try {
-        //获取jdbc连接....
         connection = JdbcUtils.getConnection(jdbc)
         connection.setAutoCommit(false)
         statement = connection.createStatement()
-        //全部是插入则走批量插入
         if (transaction.insertMode) {
           transaction.sql.foreach(statement.addBatch)
           statement.executeBatch
           statement.clearBatch()
         } else {
-          //单条记录插入...
           transaction.sql.foreach(statement.executeUpdate)
         }
         connection.commit()
-        //成功,清除state...
+        // successful, clean state
         buffer -= transaction.transactionId
       } catch {
         case t: Throwable =>

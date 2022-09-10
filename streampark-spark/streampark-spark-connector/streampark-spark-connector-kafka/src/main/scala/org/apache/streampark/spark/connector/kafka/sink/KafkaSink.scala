@@ -27,11 +27,6 @@ import org.apache.spark.streaming.Time
 import java.util.UUID
 import scala.reflect.ClassTag
 
-/**
- *
- *
- * 输出到kafka
- */
 class KafkaSink[T: ClassTag](@transient override val sc: SparkContext,
                              initParams: Map[String, String] = Map.empty[String, String])
   extends Sink[T] {
@@ -43,8 +38,7 @@ class KafkaSink[T: ClassTag](@transient override val sc: SparkContext,
   private val outputTopic = prop.getProperty("topic")
 
   /**
-   * 以字符串的形式输出到kafka
-   *
+   * Sink to kafka as a string
    */
   override def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
     rdd.writeToKafka(prop, x => new ProducerRecord[String, String](outputTopic, UUID.randomUUID().toString, x.toString))

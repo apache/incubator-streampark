@@ -24,7 +24,7 @@ import java.io.Serializable;
 @FunctionalInterface
 public interface HBaseQueryFunction<T> extends Serializable {
     /**
-     * 获取一个查询对象.
+     * get hbase query obj
      *
      * @param last: last one
      * @return HBaseQuery: HBaseQuery

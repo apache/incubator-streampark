@@ -24,12 +24,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface FlinkClusterService extends IService<FlinkCluster> {
 
-    /**
-     * check
-     *
-     * @param flinkCluster
-     * @return
-     */
     String check(FlinkCluster flinkCluster);
 
     ResponseResult create(FlinkCluster flinkCluster);

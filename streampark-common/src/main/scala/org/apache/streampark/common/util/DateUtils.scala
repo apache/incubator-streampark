@@ -85,8 +85,9 @@ object DateUtils {
       .filter(_ > 0).getOrElse(System.currentTimeMillis())
   }
 
-
-  //日期加减...
+  /**
+   * Date plus and minus
+   */
   def addAndSubtract(i: Int, date: Date = new Date, timeZone: TimeZone = TimeZone.getDefault): Date = {
     val cal = Calendar.getInstance
     cal.setTimeZone(timeZone)
@@ -102,18 +103,16 @@ object DateUtils {
 
   def localToUTC(localTime: Date): Date = {
     val localTimeInMillis = localTime.getTime
-    /** long时间转换成Calendar */
+    // convert long time to calendar
     val calendar = Calendar.getInstance
     calendar.setTimeInMillis(localTimeInMillis)
-    /** 取得时间偏移量 */
+    // get the zone offset
     val zoneOffset = calendar.get(java.util.Calendar.ZONE_OFFSET)
-    /** 取得夏令时差 */
+    // get the daylight saving time offset
     val dstOffset = calendar.get(java.util.Calendar.DST_OFFSET)
-
-    /** 从本地时间里扣除这些差量，即可以取得UTC时间 */
+    // subtract these offset from local time to get UTC time
     calendar.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset))
-
-    /** 取得的时间就是UTC标准时间 */
+    // get the UTC Standard Time
     new Date(calendar.getTimeInMillis)
   }
 
@@ -126,7 +125,7 @@ object DateUtils {
   }
 
   /**
-   * <p>Description:UTC时间转化为本地时间 </p>
+   * <p>Description: convert UTC time to local time</p>
    */
   def utcToLocal(utcTime: String, format: String = fullFormat): Date = {
     val sdf = new SimpleDateFormat(format)
@@ -174,10 +173,7 @@ object DateUtils {
     }
     timeUnit match {
       case null => default
-
-      /**
-       * 未带单位,值必须为毫秒,这里转成对应的秒...
-       */
+      // without unit, the value must be milliseconds, convert to seconds.
       case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS)
       case other => other
     }

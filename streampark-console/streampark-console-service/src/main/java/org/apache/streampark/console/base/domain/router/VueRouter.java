@@ -26,8 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 构建 Vue路由
- *
+ * Build Vue Router
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)

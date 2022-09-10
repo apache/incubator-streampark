@@ -36,9 +36,6 @@ public class AccessToken implements Serializable {
     public static final String DEFAULT_EXPIRE_TIME = "9999-01-01 00:00:00";
     public static final String IS_API_TOKEN = "is_api_token";
 
-    /**
-     * token状态
-     */
     public static final Integer STATUS_ENABLE = 1;
     public static final Integer STATUS_DISABLE = 0;
 
@@ -68,7 +65,7 @@ public class AccessToken implements Serializable {
     private transient String userStatus;
 
     /**
-     * token最终可用状态  token&user 同时可用 1:可用，0：不可用
+     * token final status, 1: available, 0: unavailable
      */
     private transient Integer finalStatus;
 

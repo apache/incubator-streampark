@@ -41,7 +41,7 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
   }
 
   override def preCommit(transaction: RedisTransaction[T]): Unit = {
-    //防止未调用invoke方法直接调用preCommit
+    // Prevent called preCommit directly without called the invoke method
     if (transaction.invoked) {
       logInfo(s"Redis2PCSink preCommit.TransactionId:${transaction.transactionId}")
     }
@@ -61,7 +61,6 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
         transaction.close()
         redisContainer.close()
         redisTransaction.mapper.clear()
-        //成功,清除state...
       } catch {
         case t: Exception =>
           logError(s"Redis2PCSink commit Throwable:${t.getMessage}")
