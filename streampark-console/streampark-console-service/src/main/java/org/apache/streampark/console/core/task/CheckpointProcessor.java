@@ -25,17 +25,22 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class CheckpointProcessor {
 
-    private final Map<String, Long> checkPointCache = new ConcurrentHashMap<>(0);
+    private final Cache<String, Long> checkPointCache =
+        Caffeine.newBuilder().expireAfterAccess(1, TimeUnit.DAYS).build();
 
     private final Map<Long, Counter> checkPointFailedCache = new ConcurrentHashMap<>(0);
 
@@ -50,62 +55,63 @@ public class CheckpointProcessor {
 
     public void process(Long appId, CheckPoints checkPoints) {
         CheckPoints.Latest latest = checkPoints.getLatest();
-        if (latest != null) {
-            Application application = applicationService.getById(appId);
-            String jobId = application.getJobId();
-            String cacheId = appId + "_" + jobId;
-            CheckPoints.CheckPoint checkPoint = latest.getCompleted();
-            if (checkPoint != null) {
-                CheckPointStatus status = checkPoint.getCheckPointStatus();
-                if (CheckPointStatus.COMPLETED.equals(status)) {
-                    Long latestId = checkPointCache.get(cacheId);
-                    if (latestId == null) {
-                        SavePoint savePoint = savePointService.getLatest(appId);
-                        if (savePoint != null) {
-                            latestId = savePoint.getChkId();
-                        }
-                    }
-                    if (latestId == null || latestId < checkPoint.getId()) {
-                        SavePoint savePoint = new SavePoint();
-                        savePoint.setAppId(application.getId());
-                        savePoint.setChkId(checkPoint.getId());
-                        savePoint.setLatest(true);
-                        savePoint.setType(checkPoint.getCheckPointType().get());
-                        savePoint.setPath(checkPoint.getExternalPath());
-                        savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
-                        savePoint.setCreateTime(new Date());
-                        savePointService.save(savePoint);
-                        checkPointCache.put(cacheId, checkPoint.getId());
-                    }
-                } else if (CheckPointStatus.FAILED.equals(status) && application.cpFailedTrigger()) {
-                    Counter counter = checkPointFailedCache.get(appId);
-                    if (counter == null) {
-                        checkPointFailedCache.put(appId, new Counter(checkPoint.getTriggerTimestamp()));
+        if (latest == null || latest.getCompleted() == null) {
+            return;
+        }
+        CheckPoints.CheckPoint checkPoint = latest.getCompleted();
+        Application application = applicationService.getById(appId);
+        CheckPointStatus status = checkPoint.getCheckPointStatus();
+
+        if (CheckPointStatus.COMPLETED.equals(status)) {
+            String cacheId = appId + "_" + application.getJobId();
+            Long latestId = checkPointCache.get(cacheId, key -> {
+                SavePoint savePoint = savePointService.getLatest(appId);
+                return Optional.ofNullable(savePoint).map(SavePoint::getChkId).orElse(null);
+            });
+
+            if (latestId == null || latestId < checkPoint.getId()) {
+                saveSavepoint(checkPoint, application);
+                checkPointCache.put(cacheId, checkPoint.getId());
+            }
+        } else if (CheckPointStatus.FAILED.equals(status) && application.cpFailedTrigger()) {
+            Counter counter = checkPointFailedCache.get(appId);
+            if (counter == null) {
+                checkPointFailedCache.put(appId, new Counter(checkPoint.getTriggerTimestamp()));
+            } else {
+                long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
+                if (minute <= application.getCpFailureRateInterval()
+                    && counter.count >= application.getCpMaxFailureInterval()) {
+                    checkPointFailedCache.remove(appId);
+                    if (application.getCpFailureAction() == 1) {
+                        alertService.alert(application, CheckPointStatus.FAILED);
                     } else {
-                        long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
-                        if (minute <= application.getCpFailureRateInterval()
-                            && counter.count >= application.getCpMaxFailureInterval()) {
-                            checkPointFailedCache.remove(appId);
-                            if (application.getCpFailureAction() == 1) {
-                                alertService.alert(application, CheckPointStatus.FAILED);
-                            } else {
-                                try {
-                                    applicationService.restart(application);
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                        } else {
-                            counter.add();
+                        try {
+                            applicationService.restart(application);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
                         }
                     }
+                } else {
+                    counter.add();
                 }
             }
         }
     }
 
+    private void saveSavepoint(CheckPoints.CheckPoint checkPoint, Application application) {
+        SavePoint savePoint = new SavePoint();
+        savePoint.setAppId(application.getId());
+        savePoint.setChkId(checkPoint.getId());
+        savePoint.setLatest(true);
+        savePoint.setType(checkPoint.getCheckPointType().get());
+        savePoint.setPath(checkPoint.getExternalPath());
+        savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
+        savePoint.setCreateTime(new Date());
+        savePointService.save(savePoint);
+    }
+
     public static class Counter {
-        private Long timestamp;
+        private final Long timestamp;
         private Integer count;
 
         public Counter(Long timestamp) {
