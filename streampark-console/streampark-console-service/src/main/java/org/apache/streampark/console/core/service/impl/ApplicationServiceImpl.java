@@ -485,6 +485,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (app == null) {
                 return record;
             }
+            app.setNickName(record.getNickName());
+            app.setUserName(record.getUserName());
             app.setFlinkVersion(record.getFlinkVersion());
             app.setProjectName(record.getProjectName());
             return app;
