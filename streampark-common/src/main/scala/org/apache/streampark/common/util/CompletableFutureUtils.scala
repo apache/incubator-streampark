@@ -55,6 +55,16 @@ object CompletableFutureUtils {
     future.applyToEither(setTimeout(timeout, unit), handle).exceptionally(exceptionally)
   }
 
+  /**
+   * Callback handler when the future is done before timeout. Callback exceptionally when the future completed exceptionally or future isn't
+   * done after timeout.
+   *
+   * @param future        The future that needs to be watched.
+   * @param timeout       timeout
+   * @param unit          timeout unit
+   * @param handle        The handler will be called when future complete normally before timeout.
+   * @param exceptionally The exceptionally will be called when future completed exceptionally or future isn't done after timeout.
+   */
   def runTimeout[T](future: CompletableFuture[T],
                     timeout: Long,
                     unit: TimeUnit,

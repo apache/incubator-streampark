@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.streampark.common.util.CompletableFutureUtils;
 
 import org.junit.Test;
@@ -22,61 +25,125 @@ import org.junit.Test;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CompletableFutureTest {
 
     @Test
-    public void test() throws Exception {
+    public void testStartJobNormally() throws Exception {
+        // It takes 5 seconds to start job.
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> runStart(5));
 
-        //启动任务需要10秒...
-        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> runStart(10));
+        // Stop job after 8 seconds.
+        CompletableFuture.runAsync(() -> runStop(future, 8));
 
-        // 5秒之后停止任务.
-        CompletableFuture.runAsync(() -> runStop(future, 5));
+        AtomicBoolean isStartNormal = new AtomicBoolean(false);
+        AtomicBoolean isStartException = new AtomicBoolean(false);
 
-        //设置启动超时时间为20秒
+        // Set the timeout is 10 seconds for start job.
         CompletableFutureUtils.runTimeout(
             future,
-            20L,
+            10L,
             TimeUnit.SECONDS,
-            r -> System.out.println(r),
-            e -> {
-                if (e.getCause() instanceof CancellationException) {
-                    System.out.println("任务被终止....");
-                } else {
-                    e.printStackTrace();
-                    future.cancel(true);
-                    System.out.println("start timeout");
-                }
-            }
+            r -> isStartNormal.set(true),
+            e -> isStartException.set(true)
         ).get();
-        if (future.isCancelled()) {
-            System.out.println("cancelled...");
-        }
+
+        assertTrue(future.isDone());
+        assertTrue(isStartNormal.get());
+        assertFalse(isStartException.get());
     }
 
+    @Test
+    public void testStopJobEarly() throws Exception {
+        // It takes 10 seconds to start job.
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> runStart(10));
+
+        // Stop job after 5 seconds.
+        CompletableFuture.runAsync(() -> runStop(future, 5));
+
+        AtomicBoolean isStartNormal = new AtomicBoolean(false);
+        AtomicBoolean isStartException = new AtomicBoolean(false);
+
+        // Set the timeout is 15 seconds for start job.
+        CompletableFutureUtils.runTimeout(
+            future,
+            15L,
+            TimeUnit.SECONDS,
+            r -> {
+                isStartNormal.set(true);
+                throw new IllegalStateException("It shouldn't be called due to the job is stopped before the timeout.");
+            },
+            e -> {
+                isStartException.set(true);
+                assertTrue(future.isCancelled());
+                assertTrue(e.getCause() instanceof CancellationException);
+                System.out.println("The future is cancelled.");
+            }
+        ).get();
+        assertTrue(future.isCancelled());
+        assertFalse(isStartNormal.get());
+        assertTrue(isStartException.get());
+    }
+
+    @Test
+    public void testStartJobTimeout() throws Exception {
+
+        // It takes 10 seconds to start job.
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> runStart(10));
+
+        // Stop job after 15 seconds.
+        CompletableFuture.runAsync(() -> runStop(future, 15));
+
+        AtomicBoolean isStartNormal = new AtomicBoolean(false);
+        AtomicBoolean isStartException = new AtomicBoolean(false);
+
+        // Set the timeout is 5 seconds for start job.
+        CompletableFutureUtils.runTimeout(
+            future,
+            5L,
+            TimeUnit.SECONDS,
+            r -> {
+                isStartNormal.set(true);
+                throw new IllegalStateException("It shouldn't be called due to the job is timed out.");
+            },
+            e -> {
+                isStartException.set(true);
+                assertFalse(future.isDone());
+                assertTrue(e.getCause() instanceof TimeoutException);
+                future.cancel(true);
+                System.out.println("Future is timed out.");
+            }
+        ).get();
+        assertTrue(future.isCancelled());
+        assertFalse(isStartNormal.get());
+        assertTrue(isStartException.get());
+    }
+
+    /**
+     * Cancel the future after sec seconds.
+     */
     private void runStop(CompletableFuture<String> future, int sec) {
         try {
-            Thread.sleep(sec * 1000);
+            Thread.sleep(sec * 1000L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        if (!future.isCancelled()) {
-            System.out.println("强行停止任务");
-            future.cancel(true);
+        if (future.isDone()) {
+            System.out.println("The future is done.");
         } else {
-            System.out.println("任务正常停止...");
+            System.out.println("Force cancel future.");
+            future.cancel(true);
         }
     }
 
     /**
-     * 模拟启动需要30秒钟.
-     *
-     * @return
+     * Start job, it will take sec seconds.
      */
     private String runStart(int sec) {
         try {
-            Thread.sleep(sec * 1000);
+            Thread.sleep(sec * 1000L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
