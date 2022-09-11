@@ -25,17 +25,22 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class CheckpointProcessor {
 
-    private final Map<String, Long> checkPointCache = new ConcurrentHashMap<>(0);
+    private final Cache<String, Long> checkPointCache =
+        Caffeine.newBuilder().expireAfterAccess(1, TimeUnit.DAYS).build();
 
     private final Map<Long, Counter> checkPointFailedCache = new ConcurrentHashMap<>(0);
 
@@ -59,13 +64,10 @@ public class CheckpointProcessor {
 
         if (CheckPointStatus.COMPLETED.equals(status)) {
             String cacheId = appId + "_" + application.getJobId();
-            Long latestId = checkPointCache.get(cacheId);
-            if (latestId == null) {
+            Long latestId = checkPointCache.get(cacheId, key -> {
                 SavePoint savePoint = savePointService.getLatest(appId);
-                if (savePoint != null) {
-                    latestId = savePoint.getChkId();
-                }
-            }
+                return Optional.ofNullable(savePoint).map(SavePoint::getChkId).orElse(null);
+            });
 
             if (latestId == null || latestId < checkPoint.getId()) {
                 saveSavepoint(checkPoint, application);
