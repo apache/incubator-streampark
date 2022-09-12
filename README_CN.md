@@ -99,7 +99,7 @@ Make stream processing easier
 
 ![Stargazers over time](https://starchart.cc/apache/streampark.svg)
 
-## 💬 Join us (微信公众号)
+## 💬 Join Us (微信公众号)
 
 <div align="center">
     <img src="https://streampark.apache.org/image/wx_qr.png" alt="Join the Group" height="400px"><br>
