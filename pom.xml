@@ -129,7 +129,6 @@
         <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
         <httpclient.version>4.5.13</httpclient.version>
         <lombok.version>1.18.24</lombok.version>
-        <aliyun.oss.version>3.15.0</aliyun.oss.version>
         <junit.version>4.13.2</junit.version>
 
         <PermGen>64m</PermGen>
