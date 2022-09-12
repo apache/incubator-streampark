@@ -64,7 +64,7 @@ Make stream processing easier
 
 ## 💋 谁在使用
 
-诸多公司和组织将 StreamPark 用于研究、生产和商业产品中，如果您也在使用 ? 可以在[这里添加](https://github.com/streamxhub/streamx/issues/163)
+诸多公司和组织将 StreamPark 用于研究、生产和商业产品中，如果您也在使用 ? 可以在[这里添加](https://github.com/apache/streampark/issues/163)
 
 ![image](https://user-images.githubusercontent.com/13284744/182794423-b77a09dd-ed45-4e87-a1bb-2a4646951f22.png)
 
