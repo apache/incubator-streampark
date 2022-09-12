@@ -37,7 +37,7 @@ Vue.filter('moment', function (dataStr, pattern = 'YYYY-MM-DD HH:mm:ss') {
 })
 
 Vue.filter('duration', function duration (ms) {
-  if (ms === 0 || ms === undefined || ms === null) {
+  if (ms === '0' || ms === undefined || ms === null) {
     return ''
   }
   const ss = 1000
@@ -45,10 +45,10 @@ Vue.filter('duration', function duration (ms) {
   const hh = mi * 60
   const dd = hh * 24
 
-  const day = parseInt(ms / dd)
-  const hour = parseInt((ms - day * dd) / hh)
-  const minute = parseInt((ms - day * dd - hour * hh) / mi)
-  const seconds = parseInt((ms - day * dd - hour * hh - minute * mi) / ss)
+  const day = parseFloat(ms / dd).toFixed(0)
+  const hour = parseFloat((ms - day * dd) / hh).toFixed(0)
+  const minute = parseFloat((ms - day * dd - hour * hh) / mi).toFixed(0)
+  const seconds = parseFloat((ms - day * dd - hour * hh - minute * mi) / ss).toFixed(0)
   if (day > 0) {
     return day + 'd ' + hour + 'h ' + minute + 'm ' + seconds + 's'
   } else if (hour > 0) {
