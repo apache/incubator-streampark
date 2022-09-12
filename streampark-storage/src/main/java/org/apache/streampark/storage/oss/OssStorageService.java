@@ -52,14 +52,9 @@ public class OssStorageService implements StorageService {
 
         try {
             ossClient.getObject(new GetObjectRequest(bucket, objectPath), new File(localFilePath));
-        } catch (OSSException oe) {
-            String errMsg = String.format("Caught an OSSException. Error Message: %s." +
-                "Error Code: %s. Request ID: %s", oe.getErrorMessage(), oe.getErrorCode(),
-                oe.getRequestId());
-            throw new RuntimeException(errMsg, oe);
-        } catch (ClientException ce) {
-            String errMsg = String.format("Caught an ClientException. Error Message: %s.", ce.getMessage());
-            throw new RuntimeException(errMsg, ce);
+        } catch (Exception e) {
+            log.error("GetData failed. ObjectPath: %s, local path: %s.", objectPath, localFilePath, e);
+            throw handleOssException(e);
         }
     }
 
@@ -69,6 +64,7 @@ public class OssStorageService implements StorageService {
             PutObjectRequest putObjectRequest = new PutObjectRequest(ossConfig.getBucket(), objectPath, new File(localFilePath));
             ossClient.putObject(putObjectRequest);
         } catch (Exception e) {
+            log.error("PutData failed. ObjectPath: %s, local path: %s.", objectPath, localFilePath, e);
             throw handleOssException(e);
         }
     }
