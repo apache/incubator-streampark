@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -48,8 +49,6 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
     @Autowired
     private SettingService settingService;
 
-    private SenderEmail senderEmail;
-
     @PostConstruct
     public void loadTemplateFile() throws Exception {
         String template = "alert-email.ftl";
@@ -58,21 +57,17 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
     @Override
     public boolean doAlert(AlertConfigWithParams alertConfig, AlertTemplate template) throws AlertException {
-        if (this.senderEmail == null) {
-            this.senderEmail = settingService.getSenderEmail();
-        }
-        if (this.senderEmail == null) {
-            throw new AlertException("Please configure first mail sender");
-        }
+        SenderEmail senderEmail = Optional.ofNullable(settingService.getSenderEmail())
+            .orElseThrow(() -> new AlertException("Please configure first mail sender"));
         String contacts = alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
         if (!StringUtils.hasLength(contacts)) {
             throw new AlertException("Please configure a valid contacts");
         }
         String[] emails = contacts.split(",");
-        return sendEmail(template, emails);
+        return sendEmail(senderEmail, template, emails);
     }
 
-    private boolean sendEmail(AlertTemplate mail, String... mails) throws AlertException {
+    private boolean sendEmail(SenderEmail senderEmail, AlertTemplate mail, String... mails) throws AlertException {
         log.info(mail.getSubject());
         try {
             Map<String, AlertTemplate> out = new HashMap<>(16);
@@ -81,14 +76,14 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
             HtmlEmail htmlEmail = new HtmlEmail();
             htmlEmail.setCharset("UTF-8");
-            htmlEmail.setHostName(this.senderEmail.getSmtpHost());
-            htmlEmail.setAuthentication(this.senderEmail.getUserName(), this.senderEmail.getPassword());
-            htmlEmail.setFrom(this.senderEmail.getFrom());
-            if (this.senderEmail.isSsl()) {
+            htmlEmail.setHostName(senderEmail.getSmtpHost());
+            htmlEmail.setAuthentication(senderEmail.getUserName(), senderEmail.getPassword());
+            htmlEmail.setFrom(senderEmail.getFrom());
+            if (senderEmail.isSsl()) {
                 htmlEmail.setSSLOnConnect(true);
-                htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
+                htmlEmail.setSslSmtpPort(senderEmail.getSmtpPort().toString());
             } else {
-                htmlEmail.setSmtpPort(this.senderEmail.getSmtpPort());
+                htmlEmail.setSmtpPort(senderEmail.getSmtpPort());
             }
             htmlEmail.setSubject(mail.getSubject());
             htmlEmail.setHtmlMsg(html);
