@@ -15,13 +15,17 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.storage;
+package org.apache.streampark.storage.oss;
 
-/**
- * StorageService will be used as artifacts fetcher in pod template, so it should rely on other modules.
- */
-public interface StorageService {
-    void getData(String objectPath, String localFilePath) throws Exception;
+import org.apache.streampark.storage.StorageServiceConfig;
 
-    void putData(String objectPath, String localFilePath) throws Exception;
+import lombok.Data;
+
+@Data
+public class OssConfig extends StorageServiceConfig {
+    private String accessKeyId;
+    private String accessKeySecret;
+    private String endpoint;
+    private String bucket;
+    private String baseUri;
 }
