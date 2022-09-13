@@ -101,14 +101,14 @@ create table "public"."t_alert_config" (
   "id" int8 not null default nextval('streampark_t_alert_config_id_seq'::regclass),
   "user_id" int8,
   "alert_name" varchar(128) collate "pg_catalog"."default",
-  "alert_type" int4,
+  "alert_type" int4 default 0,
   "email_params" varchar(255) collate "pg_catalog"."default",
   "sms_params" text collate "pg_catalog"."default",
   "ding_talk_params" text collate "pg_catalog"."default",
   "we_com_params" varchar(255) collate "pg_catalog"."default",
   "http_callback_params" text collate "pg_catalog"."default",
   "lark_params" text collate "pg_catalog"."default",
-  "create_time" timestamp(6) not null,
+  "create_time" timestamp(6) not null default current_timestamp,
   "modify_time" timestamp(6) not null
 )
 ;
@@ -229,7 +229,7 @@ create table "public"."t_flink_app" (
   "description" varchar(255) collate "pg_catalog"."default",
   "resolve_order" int2,
   "k8s_rest_exposed_type" int2,
-  "flame_graph" boolean,
+  "flame_graph" boolean default false,
   "jm_memory" int4,
   "tm_memory" int4,
   "total_task" int4,
@@ -249,7 +249,7 @@ create table "public"."t_flink_app" (
   "k8s_pod_template" text collate "pg_catalog"."default",
   "k8s_jm_pod_template" text collate "pg_catalog"."default",
   "k8s_tm_pod_template" text collate "pg_catalog"."default",
-  "k8s_hadoop_integration" boolean,
+  "k8s_hadoop_integration" boolean default false,
   "flink_cluster_id" int8,
   "ingress_template" text collate "pg_catalog"."default",
   "default_mode_ingress" text collate "pg_catalog"."default",
@@ -280,7 +280,7 @@ create table "public"."t_flink_cluster" (
   "cluster_name" varchar(255) collate "pg_catalog"."default" not null,
   "options" text collate "pg_catalog"."default",
   "yarn_queue" varchar(100) collate "pg_catalog"."default",
-  "execution_mode" int2 not null,
+  "execution_mode" int2 not null default 1,
   "version_id" int8 not null,
   "k8s_namespace" varchar(255) collate "pg_catalog"."default",
   "service_account" varchar(50) collate "pg_catalog"."default",
@@ -288,13 +288,13 @@ create table "public"."t_flink_cluster" (
   "user_id" int8,
   "flink_image" varchar(255) collate "pg_catalog"."default",
   "dynamic_options" text collate "pg_catalog"."default",
-  "k8s_rest_exposed_type" int2,
-  "k8s_hadoop_integration" boolean,
-  "flame_graph" boolean,
+  "k8s_rest_exposed_type" int2 default 2,
+  "k8s_hadoop_integration" boolean default false,
+  "flame_graph" boolean default false,
   "k8s_conf" varchar(255) collate "pg_catalog"."default",
   "resolve_order" int4,
   "exception" text collate "pg_catalog"."default",
-  "cluster_state" int2,
+  "cluster_state" int2 default 0,
   "create_time" timestamp(6)
 )
 ;
@@ -331,9 +331,9 @@ create sequence "public"."streampark_t_flink_config_id_seq"
 create table "public"."t_flink_config" (
   "id" int8 not null default nextval('streampark_t_flink_config_id_seq'::regclass),
   "app_id" int8 not null,
-  "format" int2 not null,
+  "format" int2 not null default 0,
   "version" int4 not null,
-  "latest" boolean not null,
+  "latest" boolean not null default false,
   "content" text collate "pg_catalog"."default" not null,
   "create_time" timestamp(6)
 )
@@ -377,7 +377,7 @@ create table "public"."t_flink_env" (
   "version" varchar(50) collate "pg_catalog"."default" not null,
   "scala_version" varchar(50) collate "pg_catalog"."default" not null,
   "flink_conf" text collate "pg_catalog"."default" not null,
-  "is_default" boolean not null,
+  "is_default" boolean not null default false,
   "description" varchar(255) collate "pg_catalog"."default",
   "create_time" timestamp(6) not null
 )
@@ -434,7 +434,7 @@ create table "public"."t_flink_project" (
   "repository" int2,
   "last_build" timestamp(6),
   "description" varchar(255) collate "pg_catalog"."default",
-  "build_state" int2,
+  "build_state" int2 default -1,
   "create_time" timestamp(6),
   "modify_time" timestamp(6) null
 )
@@ -454,7 +454,7 @@ create table "public"."t_flink_savepoint" (
   "chk_id" int8,
   "type" int2,
   "path" varchar(255) collate "pg_catalog"."default",
-  "latest" boolean not null,
+  "latest" boolean not null default true,
   "trigger_time" timestamp(6),
   "create_time" timestamp(6)
 )
@@ -511,7 +511,7 @@ create table "public"."t_menu" (
   "perms" varchar(50) collate "pg_catalog"."default",
   "icon" varchar(50) collate "pg_catalog"."default",
   "type" int2,
-  "display" boolean,
+  "display" boolean not null default true,
   "order_num" float8,
   "create_time" timestamp(6) not null,
   "modify_time" timestamp(6)
@@ -545,7 +545,7 @@ create table "public"."t_message" (
   "type" int2,
   "title" varchar(255) collate "pg_catalog"."default",
   "context" text collate "pg_catalog"."default",
-  "is_read" boolean,
+  "is_read" boolean default false,
   "create_time" timestamp(6)
 )
 ;
