@@ -676,7 +676,7 @@
             type="text"
             allowClear
             placeholder="Please enter alert name"
-            v-decorator="['alertName',{ rules: [{validator: handleCheckAlertName,required: true , message: 'Alert Name is required'}]} ]"/>
+            v-decorator="['alertName',{ rules: [{ validator: handleCheckAlertName,trigger:'submit',required: true}] }]"/>
           <span
             class="conf-switch"
             style="color:darkgrey">the alert name, e.g: StreamPark team alert </span>
