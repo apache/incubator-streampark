@@ -45,10 +45,10 @@ Vue.filter('duration', function duration (ms) {
   const hh = mi * 60
   const dd = hh * 24
 
-  const day = parseFloat(ms / dd).toFixed(0)
-  const hour = parseFloat((ms - day * dd) / hh).toFixed(0)
-  const minute = parseFloat((ms - day * dd - hour * hh) / mi).toFixed(0)
-  const seconds = parseFloat((ms - day * dd - hour * hh - minute * mi) / ss).toFixed(0)
+  const day = Math.floor(ms / dd)
+  const hour = Math.floor((ms - day * dd) / hh)
+  const minute = Math.floor((ms - day * dd - hour * hh) / mi)
+  const seconds = Math.floor((ms - day * dd - hour * hh - minute * mi) / ss)
   if (day > 0) {
     return day + 'd ' + hour + 'h ' + minute + 'm ' + seconds + 's'
   } else if (hour > 0) {
