@@ -132,7 +132,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
                |__________________________________________________________________
                |""".stripMargin)
 
-          SubmitResponse(applicationId.toString, flinkConfig.toMap, "", jobManagerUrl);
+          SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl);
         } finally {
           Utils.close(clusterDescriptor, clusterClient)
         }
