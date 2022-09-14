@@ -257,7 +257,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     logger.debug("Inaccessible to flink the logic to judge the state.")
     // infer from k8s deployment and event
     val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
-    logger.debug(s"Query the local cache ${trackController.canceling.has(trackId).toString} trackId ${trackId.toString}.")
+    logger.debug(s"Query the local cache result:${trackController.canceling.has(trackId).toString},trackId ${trackId.toString}.")
     val jobState = {
       if (trackController.canceling.has(trackId)) FlinkJobState.CANCELED else {
         // whether deployment exists on kubernetes cluster
