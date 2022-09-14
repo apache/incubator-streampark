@@ -432,8 +432,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!FlinkAppState.CANCELED.equals(state)) {
             return false;
         }
-        Long useId = FlinkTrackingTask.getCanlledJobUserId(appId);
-        if (useId == null || application.getUserId().longValue() != FlinkTrackingTask.getCanlledJobUserId(appId).longValue()) {
+        Long useId = FlinkTrackingTask.getCanceledJobUserId(appId);
+        if (useId == null || application.getUserId().longValue() != FlinkTrackingTask.getCanceledJobUserId(appId).longValue()) {
             return true;
         }
         return false;
@@ -1055,7 +1055,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         Long userId = commonService.getCurrentUser().getUserId();
         if (!application.getUserId().equals(userId)) {
-            FlinkTrackingTask.addCanlledApp(application.getId(), userId);
+            FlinkTrackingTask.addCanceledApp(application.getId(), userId);
         }
 
         CancelRequest cancelRequest = new CancelRequest(
