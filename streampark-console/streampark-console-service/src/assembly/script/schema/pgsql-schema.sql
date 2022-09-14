@@ -109,7 +109,7 @@ create table "public"."t_alert_config" (
   "http_callback_params" text collate "pg_catalog"."default",
   "lark_params" text collate "pg_catalog"."default",
   "create_time" timestamp(6) not null default current_timestamp,
-  "modify_time" timestamp(6) not null
+  "modify_time" timestamp(6) not null default current_timestamp
 )
 ;
 comment on column "public"."t_alert_config"."alert_name" is 'alert name';
