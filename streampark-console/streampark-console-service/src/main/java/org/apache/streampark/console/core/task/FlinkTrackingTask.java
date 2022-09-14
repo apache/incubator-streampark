@@ -509,7 +509,7 @@ public class FlinkTrackingTask {
                         flinkAppState = FlinkAppState.FINISHED;
                     }
                     application.setState(flinkAppState.getValue());
-                    //能运行到这一步,说明到YARN REST api中成功查询到信息
+                    // 能运行到这一步,说明到YARN REST api中成功查询到信息
                     cleanOptioning(optionState, application.getId());
                     this.persistentAndClean(application);
 
@@ -562,9 +562,13 @@ public class FlinkTrackingTask {
 
 
     /**
-     * <p><strong>1分钟往数据库同步一次状态</strong></p></br>
-     * <p><strong>NOTE:该操作可能会导致当程序挂了,所监控的状态没及时往数据库同步的情况,造成被监控的实际的application和数控库状态不一致的情况
+     * <p><strong>synchronize status to database once a minute</strong></p></br>
+     * <p><strong>NOTE: 该操作可能会导致当程序挂了,所监控的状态没及时往数据库同步的情况,造成被监控的实际的application和数控库状态不一致的情况
      * 但是这种操作也仅在每次程序挂和升级手动停止的情况,但是带的是减少了对数据库读写的次数,减小了数据的压力.
+     *
+     * This operation may lead to the situation that when the application hangs, the monitored state is not synchronized to the database
+     * in time, resulting in inconsistency between the actual application being monitored and the database state. But
+     *
      * </strong></p>
      */
     @Scheduled(fixedDelay = 1000 * 60)
@@ -572,10 +576,8 @@ public class FlinkTrackingTask {
         TRACKING_MAP.forEach((k, v) -> persistent(v));
     }
 
-    // ===============================  static public method...  =========================================
-
     /**
-     * 设置正在操作中...
+     * set current option state
      */
     public static void setOptionState(Long appId, OptionState state) {
         if (isKubernetesApp(appId)) {
@@ -583,7 +585,6 @@ public class FlinkTrackingTask {
         }
         log.info("flinkTrackingTask setOptioning");
         OPTIONING.put(appId, state);
-        //从 streampark 停止
         if (state.equals(OptionState.CANCELLING)) {
             STOP_FROM_MAP.put(appId, StopFrom.STREAMPARK);
         }
@@ -607,10 +608,10 @@ public class FlinkTrackingTask {
     }
 
     /**
-     * 重新加载最新的application到数据库,防止如修改等操作,导致cache和实际数据库中信息不一致的问题.
+     * Reload the latest application to the database to avoid the problem of inconsistency between the data of cache and database.
      *
-     * @param appId
-     * @param callable
+     * @param appId appId
+     * @param callable callable function
      */
     public static Object refreshTracking(Long appId, Callable callable) throws Exception {
         if (isKubernetesApp(appId)) {
@@ -742,7 +743,6 @@ public class FlinkTrackingTask {
             String reqURL = String.format(format, application.getAppId());
             JobsOverview jobsOverview = yarnRestRequest(reqURL, JobsOverview.class);
             if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
-                //过滤出当前job
                 List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).collect(Collectors.toList());
                 jobsOverview.setJobs(jobs);
             }
@@ -752,7 +752,6 @@ public class FlinkTrackingTask {
                 String remoteUrl = flinkCluster.getActiveAddress().toURL() + "/" + flinkUrl;
                 JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
                 if (jobsOverview != null) {
-                    //过滤出当前job
                     List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).collect(Collectors.toList());
                     jobsOverview.setJobs(jobs);
                 }
