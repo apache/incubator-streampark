@@ -14,6 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.streampark.console.core.service.alert;
+
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.core.bean.AlertConfigWithParams;
 import org.apache.streampark.console.core.bean.AlertDingTalkParams;
@@ -58,7 +61,7 @@ public class AlertServiceTest {
 
     public void before2() {
         alertTemplate = new AlertTemplate();
-        alertTemplate.setTitle("告警: StreamPark alert job for test");
+        alertTemplate.setTitle("Alert: StreamPark alert job for test");
         alertTemplate.setSubject("StreamPark Alert: test-job OTHER");
         alertTemplate.setJobName("StreamPark alert job for test");
         alertTemplate.setLink("http://127.0.0.1:8080");
@@ -103,7 +106,7 @@ public class AlertServiceTest {
     }
 
     @Test
-    public void larkAlertTest() throws Exception {
+    public void larkAlertTest() {
         LarkAlertNotifyServiceImpl notifyService = new LarkAlertNotifyServiceImpl(restTemplate, mapper);
         notifyService.loadTemplateFile();
 
