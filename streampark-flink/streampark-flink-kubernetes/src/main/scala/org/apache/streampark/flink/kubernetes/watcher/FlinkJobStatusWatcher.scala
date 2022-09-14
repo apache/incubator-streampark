@@ -218,14 +218,14 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       logger.info(s"The first visit was successful.")
       v
     }.getOrElse {
-      logger.info("The first access fails, and the retry access logic is performed.")
+      logger.info("Failed to visit remote flink jobs on kubernetes-native-mode cluster, and the retry access logic is performed.")
       val clusterRestUrl = trackController.refreshClusterRestUrl(clusterKey).getOrElse(return None)
       Try(callJobsOverviewsApi(clusterRestUrl)) match {
         case Success(s) =>
           logger.info("The retry is successful.")
           s
         case Failure(e) =>
-          logger.info(s"The retry fetch failed, final status failed.")
+          logger.info(s"The retry fetch failed, final status failed, errorStack=${e.getMessage}.")
           None
       }
     }
