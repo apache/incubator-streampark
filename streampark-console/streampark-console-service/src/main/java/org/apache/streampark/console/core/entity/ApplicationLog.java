@@ -17,9 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,6 +38,10 @@ public class ApplicationLog {
      * applicationId
      */
     private String yarnAppId;
+    /**
+     * The address of the jobmanager, that is, the direct access address of the Flink web UI
+     */
+    private String jobManagerUrl;
     /**
      * start status
      */

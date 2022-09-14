@@ -232,6 +232,7 @@ object YarnUtils extends Logger {
     if (url == null) return null
 
     def request(url: String): String = {
+      logDebug("request url is " + url);
       val config = RequestConfig.custom.setConnectTimeout(5000).build
       if (hasYarnHttpKerberosAuth) {
         HadoopUtils.getUgi().doAs(new PrivilegedExceptionAction[String] {

@@ -1379,6 +1379,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (StringUtils.isNoneEmpty(submitResponse.jobId())) {
                     application.setJobId(submitResponse.jobId());
                 }
+                if (StringUtils.isNoneEmpty(submitResponse.jobManagerUrl())) {
+                    application.setJobManagerUrl(submitResponse.jobManagerUrl());
+                    applicationLog.setJobManagerUrl(submitResponse.jobManagerUrl());
+                }
                 application.setFlameGraph(appParam.getFlameGraph());
                 applicationLog.setYarnAppId(submitResponse.clusterId());
                 application.setStartTime(new Date());

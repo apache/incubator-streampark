@@ -214,6 +214,7 @@ create table "public"."t_flink_app" (
   "app_type" int2,
   "duration" int8,
   "job_id" varchar(64) collate "pg_catalog"."default",
+  "job_manager_url" varchar(255) collate "pg_catalog"."default",
   "version_id" int8,
   "cluster_id" varchar(255) collate "pg_catalog"."default",
   "k8s_namespace" varchar(255) collate "pg_catalog"."default",
@@ -407,6 +408,7 @@ create table "public"."t_flink_log" (
   "id" int8 not null default nextval('streampark_t_flink_log_id_seq'::regclass),
   "app_id" int8,
   "yarn_app_id" varchar(50) collate "pg_catalog"."default",
+  "job_manager_url" varchar(255) collate "pg_catalog"."default",
   "success" int2,
   "exception" text collate "pg_catalog"."default",
   "option_time" timestamp(6)
