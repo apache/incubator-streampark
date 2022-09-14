@@ -486,6 +486,11 @@
                 <span class="pointer" @click="handleView(record.yarnAppId)">{{ record.yarnAppId }}</span>
               </template>
               <template
+                slot="jobManagerUrl"
+                slot-scope="text, record">
+                <span class="pointer" @click="handleJobManagerUrlView(record.jobManagerUrl)">{{ record.jobManagerUrl }}</span>
+              </template>
+              <template
                 slot="optionTime"
                 slot-scope="text, record">
                 <a-icon
@@ -967,8 +972,14 @@ export default {
           {
             title: 'Application Id',
             dataIndex: 'yarnAppId',
-            width: '40%',
+            width: '20%',
             scopedSlots: {customRender: 'yarnAppId'}
+          },
+          {
+            title: 'JobManager URL',
+            dataIndex: 'jobManagerUrl',
+            width: '25%',
+            scopedSlots: {customRender: 'jobManagerUrl'}
           },
           {
             title: 'Start Status',
@@ -1157,6 +1168,10 @@ export default {
       } else {
         window.open(this.app.flinkRestUrl)
       }
+    },
+
+    handleJobManagerUrlView() {
+      window.open(this.app.jobManagerUrl)
     },
 
     handleSavePoint() {

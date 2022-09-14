@@ -41,6 +41,7 @@
         <result column="jar_check_sum" jdbcType="VARCHAR" property="jarCheckSum"/>
         <result column="main_class" jdbcType="VARCHAR" property="mainClass"/>
         <result column="job_id" jdbcType="VARCHAR" property="jobId"/>
+        <result column="job_manager_url" jdbcType="VARCHAR" property="jobManagerUrl"/>
         <result column="user_id" jdbcType="BIGINT" property="userId"/>
         <result column="start_time" jdbcType="DATE" property="startTime"/>
         <result column="end_time" jdbcType="DATE" property="endTime"/>
