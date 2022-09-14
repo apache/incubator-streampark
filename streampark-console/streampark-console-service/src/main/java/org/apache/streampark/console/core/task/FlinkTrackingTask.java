@@ -271,7 +271,8 @@ public class FlinkTrackingTask {
         FlinkCluster flinkCluster = getFlinkCluster(application);
         JobsOverview jobsOverview = httpJobsOverview(application, flinkCluster);
         Optional<JobsOverview.Job> optional;
-        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+        ExecutionMode execMode = application.getExecutionModeEnum();
+        if (ExecutionMode.YARN_APPLICATION.equals(execMode) || ExecutionMode.YARN_PER_JOB.equals(execMode)) {
             optional = jobsOverview.getJobs().size() > 1 ? jobsOverview.getJobs().stream().filter(a -> StringUtils.equals(application.getJobId(), a.getId())).findFirst() : jobsOverview.getJobs().stream().findFirst();
         } else {
             optional = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).findFirst();
@@ -605,6 +606,13 @@ public class FlinkTrackingTask {
         SAVEPOINT_CACHE.put(appId, DEFAULT_FLAG_BYTE);
     }
 
+    public static void removeFlinkCluster(FlinkCluster flinkCluster) {
+        if (FLINK_CLUSTER_MAP.containsKey(flinkCluster.getId())) {
+            log.info("remove flink cluster:{}", flinkCluster.getId());
+            FLINK_CLUSTER_MAP.remove(flinkCluster.getId());
+        }
+    }
+
     /**
      * 重新加载最新的application到数据库,防止如修改等操作,导致cache和实际数据库中信息不一致的问题.
      *
@@ -742,7 +750,8 @@ public class FlinkTrackingTask {
 
     private JobsOverview httpJobsOverview(Application application, FlinkCluster flinkCluster) throws Exception {
         final String flinkUrl = "jobs/overview";
-        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+        ExecutionMode execMode = application.getExecutionModeEnum();
+        if (ExecutionMode.YARN_PER_JOB.equals(execMode) || ExecutionMode.YARN_APPLICATION.equals(execMode)) {
             String reqURL;
             if (StringUtils.isEmpty(application.getJobManagerUrl())) {
                 String format = "proxy/%s/" + flinkUrl;
@@ -758,7 +767,7 @@ public class FlinkTrackingTask {
                 jobsOverview.setJobs(jobs);
             }
             return jobsOverview;
-        } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+        } else if (ExecutionMode.REMOTE.equals(execMode) ||ExecutionMode.YARN_SESSION.equals(execMode)) {
             if (application.getJobId() != null) {
                 String remoteUrl = flinkCluster.getActiveAddress().toURL() + "/" + flinkUrl;
                 JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
@@ -775,7 +784,8 @@ public class FlinkTrackingTask {
 
     private CheckPoints httpCheckpoints(Application application, FlinkCluster flinkCluster) throws IOException {
         final String flinkUrl = "jobs/%s/checkpoints";
-        if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+        ExecutionMode execMode = application.getExecutionModeEnum();
+        if (ExecutionMode.YARN_PER_JOB.equals(execMode) || ExecutionMode.YARN_APPLICATION.equals(execMode)) {
             String reqURL;
             if (StringUtils.isEmpty(application.getJobManagerUrl())) {
                 String format = "proxy/%s/" + flinkUrl;
@@ -785,7 +795,7 @@ public class FlinkTrackingTask {
                 reqURL = String.format(format, application.getJobManagerUrl(), application.getJobId());
             }
             return yarnRestRequest(reqURL, CheckPoints.class);
-        } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
+        } else if (ExecutionMode.REMOTE.equals(execMode) ||ExecutionMode.YARN_SESSION.equals(execMode)) {
             if (application.getJobId() != null) {
                 String remoteUrl = flinkCluster.getActiveAddress().toURL() + "/" + String.format(flinkUrl, application.getJobId());
                 return httpRestRequest(remoteUrl, CheckPoints.class);

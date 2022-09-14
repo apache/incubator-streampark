@@ -31,6 +31,7 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SettingService;
+import org.apache.streampark.console.core.task.FlinkTrackingTask;
 import org.apache.streampark.flink.submit.FlinkSubmitter;
 import org.apache.streampark.flink.submit.bean.DeployRequest;
 import org.apache.streampark.flink.submit.bean.DeployResponse;
@@ -188,6 +189,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                     updateWrapper.set(FlinkCluster::getException, null);
                     update(updateWrapper);
                     result.setStatus(1);
+                    FlinkTrackingTask.removeFlinkCluster(flinkCluster);
                 } else {
                     result.setStatus(0);
                     result.setMsg("deploy cluster failed," + deployResponse.message());
