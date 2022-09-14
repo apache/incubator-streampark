@@ -67,12 +67,12 @@ public class ApplicationBuildPipelineController {
      * @return Whether the pipeline was successfully started
      */
     @ApiAccess
-    @ApiOperation(value = "Launch application", notes = "Launch application", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
+    @ApiOperation(value = "Launch application", notes = "Launch application", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "appId", value = "APP_ID", required = true, paramType = "form", dataType = "Long"),
         @ApiImplicitParam(name = "forceBuild", value = "FORCE_BUILD", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
     })
-    @PostMapping("/build")
+    @PostMapping(value = "build", consumes = "application/x-www-form-urlencoded")
     @RequiresPermissions("app:create")
     public RestResponse buildApplication(Long appId, boolean forceBuild) {
         try {

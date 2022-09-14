@@ -196,17 +196,13 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     implicit val pollEmitTime: Long = System.currentTimeMillis
     val clusterId = trackId.clusterId
     val namespace = trackId.namespace
-    logger.info("Enter the touchApplicationJob logic")
+    logger.debug("Enter the touchApplicationJob logic.")
     val jobDetails = listJobsDetails(ClusterKey(APPLICATION, namespace, clusterId))
-    lazy val k8sInferResult = inferApplicationFlinkJobStateFromK8sEvent(trackId)
-    jobDetails match {
-      case Some(details) =>
-        if (details.jobs.isEmpty) k8sInferResult; else {
-          // just receive the first result
-          val jobDetail = details.jobs.head.toJobStatusCV(pollEmitTime, System.currentTimeMillis)
-          Some(jobDetail)
-        }
-      case _ => k8sInferResult
+    if (jobDetails.isEmpty || jobDetails.get.jobs.isEmpty) {
+      logger.debug("The normal acquisition fails and the speculative logic is used.")
+      inferApplicationFlinkJobStateFromK8sEvent(trackId)
+    } else {
+      Some(jobDetails.get.jobs.head.toJobStatusCV(pollEmitTime, System.currentTimeMillis))
     }
   }
 
@@ -218,13 +214,18 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     Try {
       val clusterRestUrl = trackController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
       // list flink jobs from rest api
-      callJobsOverviewsApi(clusterRestUrl)
+      val v = callJobsOverviewsApi(clusterRestUrl)
+      logger.debug(s"The first visit was successful.")
+      v
     }.getOrElse {
+      logger.debug("Failed to visit remote flink jobs on kubernetes-native-mode cluster, and the retry access logic is performed.")
       val clusterRestUrl = trackController.refreshClusterRestUrl(clusterKey).getOrElse(return None)
       Try(callJobsOverviewsApi(clusterRestUrl)) match {
-        case Success(s) => s
+        case Success(s) =>
+          logger.debug("The retry is successful.")
+          s
         case Failure(e) =>
-          logError(s"failed to visit remote flink jobs on kubernetes-native-mode cluster, errorStack=${e.getMessage}")
+          logger.debug(s"The retry fetch failed, final status failed, errorStack=${e.getMessage}.")
           None
       }
     }
@@ -234,12 +235,15 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    * list flink jobs details from rest api
    */
   private def callJobsOverviewsApi(restUrl: String): Option[JobDetails] = {
-    JobDetails.as(
+    logger.debug(s"Try to access flink's service via http:${restUrl}/jobs/overview.")
+    val jobDetails = JobDetails.as(
       Request.get(s"$restUrl/jobs/overview")
         .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
         .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
         .execute.returnContent().asString(StandardCharsets.UTF_8)
     )
+    logger.debug(s"Access flink's service through http success jobDetail:${jobDetails.toString}.")
+    jobDetails
   }
 
   /**
@@ -250,8 +254,10 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
   private def inferApplicationFlinkJobStateFromK8sEvent(@Nonnull trackId: TrackId)
                                                        (implicit pollEmitTime: Long): Option[JobStatusCV] = {
 
+    logger.debug("Inaccessible to flink the logic to judge the state.")
     // infer from k8s deployment and event
     val latest: JobStatusCV = trackController.jobStatuses.get(trackId)
+    logger.debug(s"Query the local cache result:${trackController.canceling.has(trackId).toString},trackId ${trackId.toString}.")
     val jobState = {
       if (trackController.canceling.has(trackId)) FlinkJobState.CANCELED else {
         // whether deployment exists on kubernetes cluster
@@ -260,20 +266,20 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         val isConnection = KubernetesDeploymentHelper.isTheK8sConnectionNormal()
 
         if (isDeployExists && !deployStateOfTheError) {
-          logger.info("task Enter the initialization process")
+          logger.debug("Task Enter the initialization process.")
           FlinkJobState.K8S_INITIALIZING
         } else if (isDeployExists && deployStateOfTheError && isConnection) {
           KubernetesDeploymentHelper.watchPodTerminatedLog(trackId.namespace, trackId.clusterId)
           KubernetesDeploymentHelper.deleteTaskDeployment(trackId.namespace, trackId.clusterId)
           IngressController.deleteIngress(trackId.namespace, trackId.clusterId)
-          logger.info("Enter the task failure deletion process")
+          logger.debug("Enter the task failure deletion process.")
           FlinkJobState.FAILED
         } else if (!isDeployExists && isConnection) {
-          logger.info("The deployment is deleted and enters the task failure process")
+          logger.debug("The deployment is deleted and enters the task failure process.")
           FlinkJobState.FAILED
         }
         else {
-          logger.info("Enter the disconnected state process")
+          logger.debug("Enter the disconnected state process.")
           // determine if the state should be SILENT or LOST
           inferSilentOrLostFromPreCache(latest)
         }

@@ -101,6 +101,7 @@ object YarnPerJobSubmit extends YarnSubmitTrait {
 
       }
       val applicationId = clusterClient.getClusterId
+      val jobManagerUrl = clusterClient.getWebInterfaceURL
       logInfo(
         s"""
            |-------------------------<<applicationId>>------------------------
@@ -108,7 +109,7 @@ object YarnPerJobSubmit extends YarnSubmitTrait {
            |__________________________________________________________________
            |""".stripMargin)
 
-      SubmitResponse(applicationId.toString, flinkConfig.toMap)
+      SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl)
     } finally {
       if (submitRequest.safePackageProgram) {
         Utils.close(packagedProgram)

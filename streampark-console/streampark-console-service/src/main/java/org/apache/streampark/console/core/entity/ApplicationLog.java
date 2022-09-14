@@ -41,6 +41,10 @@ public class ApplicationLog {
      */
     private String yarnAppId;
     /**
+     * The address of the jobmanager, that is, the direct access address of the Flink web UI
+     */
+    private String jobManagerUrl;
+    /**
      * start status
      */
     private Boolean success;

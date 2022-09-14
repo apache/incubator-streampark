@@ -326,7 +326,6 @@ public class FlinkTrackingTask {
 
         // get overview info at the first start time
         if (STARTING_CACHE.getIfPresent(application.getId()) != null) {
-            application.setJobId(jobOverview.getId());
             application.setTotalTask(jobOverview.getTasks().getTotal());
             application.setOverview(jobOverview.getTasks());
 
@@ -709,8 +708,14 @@ public class FlinkTrackingTask {
         if (appId != null) {
             if (application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION) ||
                 application.getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
-                String format = "proxy/%s/overview";
-                String reqURL = String.format(format, appId);
+                String reqURL;
+                if (StringUtils.isEmpty(application.getJobManagerUrl())) {
+                    String format = "proxy/%s/overview";
+                    reqURL = String.format(format, appId);
+                } else {
+                    String format = "%s/overview";
+                    reqURL = String.format(format, application.getJobManagerUrl());
+                }
                 return yarnRestRequest(reqURL, Overview.class);
             }
         }
@@ -720,8 +725,14 @@ public class FlinkTrackingTask {
     private JobsOverview httpJobsOverview(Application application, FlinkCluster flinkCluster) throws Exception {
         final String flinkUrl = "jobs/overview";
         if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-            String format = "proxy/%s/" + flinkUrl;
-            String reqURL = String.format(format, application.getAppId());
+            String reqURL;
+            if (StringUtils.isEmpty(application.getJobManagerUrl())) {
+                String format = "proxy/%s/" + flinkUrl;
+                reqURL = String.format(format, application.getAppId());
+            } else {
+                String format = "%s/" + flinkUrl;
+                reqURL = String.format(format, application.getJobManagerUrl());
+            }
             JobsOverview jobsOverview = yarnRestRequest(reqURL, JobsOverview.class);
             if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
                 List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).collect(Collectors.toList());
@@ -745,8 +756,14 @@ public class FlinkTrackingTask {
     private CheckPoints httpCheckpoints(Application application, FlinkCluster flinkCluster) throws IOException {
         final String flinkUrl = "jobs/%s/checkpoints";
         if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-            String format = "proxy/%s/" + flinkUrl;
-            String reqURL = String.format(format, application.getAppId(), application.getJobId());
+            String reqURL;
+            if (StringUtils.isEmpty(application.getJobManagerUrl())) {
+                String format = "proxy/%s/" + flinkUrl;
+                reqURL = String.format(format, application.getAppId(), application.getJobId());
+            } else {
+                String format = "%s/" + flinkUrl;
+                reqURL = String.format(format, application.getJobManagerUrl(), application.getJobId());
+            }
             return yarnRestRequest(reqURL, CheckPoints.class);
         } else if (ExecutionMode.isRemoteMode(application.getExecutionMode())) {
             if (application.getJobId() != null) {
@@ -772,5 +789,4 @@ public class FlinkTrackingTask {
         }
         return JacksonUtils.read(result, clazz);
     }
-
 }

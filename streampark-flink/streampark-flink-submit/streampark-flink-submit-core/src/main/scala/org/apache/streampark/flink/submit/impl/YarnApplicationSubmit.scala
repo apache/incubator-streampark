@@ -121,8 +121,10 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
 
           val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
           var applicationId: ApplicationId = null
+          var jobManagerUrl: String = null
           clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
           applicationId = clusterClient.getClusterId
+          jobManagerUrl = clusterClient.getWebInterfaceURL;
           logInfo(
             s"""
                |-------------------------<<applicationId>>------------------------
@@ -130,7 +132,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
                |__________________________________________________________________
                |""".stripMargin)
 
-          SubmitResponse(applicationId.toString, flinkConfig.toMap)
+          SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl);
         } finally {
           Utils.close(clusterDescriptor, clusterClient)
         }
