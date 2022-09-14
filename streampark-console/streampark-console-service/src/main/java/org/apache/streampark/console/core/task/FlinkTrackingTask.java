@@ -761,11 +761,6 @@ public class FlinkTrackingTask {
                 reqURL = String.format(format, application.getJobManagerUrl());
             }
             JobsOverview jobsOverview = yarnRestRequest(reqURL, JobsOverview.class);
-            if (jobsOverview != null && ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
-                //过滤出当前job
-                List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream().filter(x -> x.getId().equals(application.getJobId())).collect(Collectors.toList());
-                jobsOverview.setJobs(jobs);
-            }
             return jobsOverview;
         } else if (ExecutionMode.REMOTE.equals(execMode) ||ExecutionMode.YARN_SESSION.equals(execMode)) {
             if (application.getJobId() != null) {
