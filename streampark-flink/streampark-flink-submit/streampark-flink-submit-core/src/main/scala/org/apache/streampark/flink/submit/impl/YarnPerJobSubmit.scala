@@ -109,7 +109,7 @@ object YarnPerJobSubmit extends YarnSubmitTrait {
            |__________________________________________________________________
            |""".stripMargin)
 
-      SubmitResponse(applicationId.toString, flinkConfig.toMap, "", jobManagerUrl)
+      SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl)
     } finally {
       if (submitRequest.safePackageProgram) {
         Utils.close(packagedProgram)
