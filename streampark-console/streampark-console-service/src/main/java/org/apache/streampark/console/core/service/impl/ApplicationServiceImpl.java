@@ -574,7 +574,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setLaunch(LaunchState.NEED_LAUNCH.get());
         appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
-        appParam.setJobId(new JobID().toHexString());
         appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
             String jarPath = WebUtils.getAppTempDir().getAbsolutePath().concat("/").concat(appParam.getJar());
@@ -1188,6 +1187,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         assert application != null;
 
+        application.setJobId(new JobID().toHexString());
         // if manually started, clear the restart flag
         if (!auto) {
             application.setRestartCount(0);
