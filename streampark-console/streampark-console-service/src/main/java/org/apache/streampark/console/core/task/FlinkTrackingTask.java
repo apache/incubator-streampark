@@ -333,7 +333,6 @@ public class FlinkTrackingTask {
 
         // 2) overview,刚启动第一次获取Overview信息.
         if (STARTING_CACHE.getIfPresent(application.getId()) != null) {
-            application.setJobId(jobOverview.getId());
             application.setTotalTask(jobOverview.getTasks().getTotal());
             application.setOverview(jobOverview.getTasks());
 

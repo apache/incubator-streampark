@@ -162,7 +162,6 @@ public class K8sFlinkChangeEventListener {
         app.setState(fromK8sFlinkJobState(state).getValue());
 
         // update relevant fields of Application from JobStatusCV
-        app.setJobId(jobStatus.jobId());
         app.setTotalTask(jobStatus.taskTotal());
         if (FlinkJobState.isEndState(state)) {
             app.setOptionState(OptionState.NONE.getValue());
