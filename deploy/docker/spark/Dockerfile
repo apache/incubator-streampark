@@ -16,7 +16,6 @@
 #
 
 FROM docker.io/bitnami/spark:3.2.0
-LABEL maintainer="ning.guo <ning.guo@gmail.com>"
 LABEL description="Docker image with Spark (3.2.0) and Hadoop (3.3.2) and Hive (3.1.3), based on bitnami/spark:3.2.0. \
 For more information, please visit https://github.com/s1mplecc/spark-hadoop-docker."
 
