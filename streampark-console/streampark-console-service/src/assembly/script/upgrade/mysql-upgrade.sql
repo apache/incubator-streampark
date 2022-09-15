@@ -92,7 +92,7 @@ create table `t_alert_config` (
   `http_callback_params` text collate utf8mb4_general_ci comment 'http callback params',
   `lark_params` text collate utf8mb4_general_ci comment 'lark params',
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'change time',
+  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
   index `inx_user_id` (`user_id`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
@@ -125,7 +125,7 @@ alter table t_setting modify column `value` text ;
 insert into `t_setting` values (14, 'docker.register.namespace', null, 'Docker Register Image namespace', 'Docker命名空间', 1);
 alter table `t_flink_app` add column `ingress_template` text collate utf8mb4_general_ci comment 'ingress模版文件';
 alter table `t_flink_app` add column `default_mode_ingress` text collate utf8mb4_general_ci comment '配置ingress的域名';
-alter table `t_flink_app` add column `modify_time` datetime not null default current_timestamp on update current_timestamp after create_time;
+alter table `t_flink_app` add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`;
 -- add tags field
 alter table `t_flink_app` add column `tags` varchar(500) default null;
 -- add job_manager_url field
@@ -134,12 +134,12 @@ alter table `t_flink_app` add column `job_manager_url` varchar(255) default null
 alter table `t_flink_log` add column `job_manager_url` varchar(255) default null after `yarn_app_id`;
 
 alter table `t_flink_project`
-change column `date` `create_time` datetime default null,
-add column `modify_time` datetime null after `create_time`;
+change column `date` `create_time` datetime default current_timestamp not null,
+add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`;
 
 
 -- change `update_time` to `modify_time`
-alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime default null;
+alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime not null default current_timestamp on update current_timestamp;
 
 
 -- change `readed` to `is_read`
@@ -147,10 +147,35 @@ alter table `t_message` change column `readed` `is_read` tinyint default 0;
 
 
 -- add chk_id field
-alter table t_flink_savepoint add column `chk_id` bigint after `app_id`;
+alter table `t_flink_savepoint` add column `chk_id` bigint after `app_id`;
+
+-- change create_time field and modify_time field
+update `t_access_token` set `modify_time` = current_timestamp where `modify_time` is null;
+update `t_menu` set `modify_time` = current_timestamp where `modify_time` is null;
+update `t_role` set `modify_time` = current_timestamp where `modify_time` is null;
+update `t_user` set `modify_time` = current_timestamp where `modify_time` is null;
+
+alter table `t_app_backup` modify `create_time` datetime not null default current_timestamp;
+alter table `t_flink_app` modify `create_time` datetime not null default current_timestamp;
+alter table `t_flink_config` modify `create_time` datetime not null default current_timestamp;
+alter table `t_flink_effective` modify `create_time` datetime not null default current_timestamp;
+alter table `t_flink_env` modify `create_time` datetime not null default current_timestamp;
+alter table `t_flink_savepoint` modify `create_time` datetime not null default current_timestamp;
+alter table `t_flink_sql` modify `create_time` datetime not null default current_timestamp;
+alter table `t_flink_tutorial` modify `create_time` datetime not null default current_timestamp;
+alter table `t_message` modify `create_time` datetime not null default current_timestamp;
+alter table `t_role` modify `create_time` datetime not null default current_timestamp;
+alter table `t_user` modify `create_time` datetime not null default current_timestamp;
+alter table `t_flink_cluster` modify `create_time` datetime not null default current_timestamp;
+alter table `t_access_token` modify `create_time` datetime not null default current_timestamp;
+
+alter table `t_access_token` modify `modify_time` datetime not null default current_timestamp on update current_timestamp;
+alter table `t_menu` modify `modify_time` datetime not null default current_timestamp on update current_timestamp;
+alter table `t_role` modify `modify_time` datetime not null default current_timestamp on update current_timestamp;
+alter table `t_user` modify `modify_time` datetime not null default current_timestamp on update current_timestamp;
 
 -- add permissions for user group management
-insert into `t_menu` values (100047, 100015, 'copy', null, null, 'app:copy', null, '1', '1', null, now(), null);
+insert into `t_menu` values (100047, 100015, 'copy', null, null, 'app:copy', null, '1', '1', null, now(), now());
 
 
 -- add permissions to admin

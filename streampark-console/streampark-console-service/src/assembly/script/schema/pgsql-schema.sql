@@ -66,6 +66,18 @@ drop sequence if exists "public"."streampark_t_access_token_id_seq";
 drop sequence if exists "public"."streampark_t_flink_log_id_seq";
 
 -- ----------------------------
+-- drop trigger if exists
+-- ----------------------------
+drop trigger if exists "streampark_t_access_token_modify_time_tri" on "public"."t_access_token";
+drop trigger if exists "streampark_t_app_build_pipe_modify_time_tri" on "public"."t_app_build_pipe";
+drop trigger if exists "streampark_t_flink_app_modify_time_tri" on "public"."t_flink_app";
+drop trigger if exists "streampark_t_flink_project_modify_time_tri" on "public"."t_flink_project";
+drop trigger if exists "streampark_t_menu_modify_time_tri" on "public"."t_menu";
+drop trigger if exists "streampark_t_role_modify_time_tri" on "public"."t_role";
+drop trigger if exists "streampark_t_user_modify_time_tri" on "public"."t_user";
+drop trigger if exists "streampark_t_alert_config_modify_time_tri" on "public"."t_alert_config";
+
+-- ----------------------------
 -- table structure for t_access_token
 -- ----------------------------
 create sequence if not exists "public"."streampark_t_access_token_id_seq"
@@ -78,8 +90,8 @@ create table "public"."t_access_token" (
   "expire_time" timestamp(6),
   "description" varchar(512) collate "pg_catalog"."default",
   "status" int2,
-  "create_time" timestamp(6),
-  "modify_time" timestamp(6)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 );
 comment on column "public"."t_access_token"."id" is 'key';
 comment on column "public"."t_access_token"."token" is 'token';
@@ -108,8 +120,8 @@ create table "public"."t_alert_config" (
   "we_com_params" varchar(255) collate "pg_catalog"."default",
   "http_callback_params" text collate "pg_catalog"."default",
   "lark_params" text collate "pg_catalog"."default",
-  "create_time" timestamp(6) not null default current_timestamp,
-  "modify_time" timestamp(6) not null default current_timestamp
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 comment on column "public"."t_alert_config"."alert_name" is 'alert name';
@@ -142,7 +154,7 @@ create table "public"."t_app_backup" (
   "version" int4,
   "path" varchar(255) collate "pg_catalog"."default",
   "description" varchar(255) collate "pg_catalog"."default",
-  "create_time" timestamp(6)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 alter table "public"."t_app_backup" add constraint "t_app_backup_pkey" primary key ("id");
@@ -161,7 +173,7 @@ create table "public"."t_app_build_pipe" (
   "steps_status_ts" text collate "pg_catalog"."default",
   "error" text collate "pg_catalog"."default",
   "build_result" text collate "pg_catalog"."default",
-  "modify_time" timestamp(6)
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 alter table "public"."t_app_build_pipe" add constraint "t_app_build_pipe_pkey" primary key ("app_id");
@@ -239,8 +251,8 @@ create table "public"."t_flink_app" (
   "available_slot" int4,
   "option_state" int2,
   "tracking" int2,
-  "create_time" timestamp(6),
-  "modify_time" timestamp(6),
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "option_time" timestamp(6),
   "launch" int2 default 1,
   "build" boolean default true,
@@ -296,7 +308,7 @@ create table "public"."t_flink_cluster" (
   "resolve_order" int4,
   "exception" text collate "pg_catalog"."default",
   "cluster_state" int2 default 0,
-  "create_time" timestamp(6)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 comment on column "public"."t_flink_cluster"."address" is 'url address of jobmanager';
@@ -336,7 +348,7 @@ create table "public"."t_flink_config" (
   "version" int4 not null,
   "latest" boolean not null default false,
   "content" text collate "pg_catalog"."default" not null,
-  "create_time" timestamp(6)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 alter table "public"."t_flink_config" add constraint "t_flink_config_pkey" primary key ("id");
@@ -353,7 +365,7 @@ create table "public"."t_flink_effective" (
   "app_id" int8 not null,
   "target_type" int2 not null,
   "target_id" int8 not null,
-  "create_time" timestamp(6)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 comment on column "public"."t_flink_effective"."target_type" is '1) config 2) flink sql';
@@ -380,7 +392,7 @@ create table "public"."t_flink_env" (
   "flink_conf" text collate "pg_catalog"."default" not null,
   "is_default" boolean not null default false,
   "description" varchar(255) collate "pg_catalog"."default",
-  "create_time" timestamp(6) not null
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 comment on column "public"."t_flink_env"."id" is 'id';
@@ -437,8 +449,8 @@ create table "public"."t_flink_project" (
   "last_build" timestamp(6),
   "description" varchar(255) collate "pg_catalog"."default",
   "build_state" int2 default -1,
-  "create_time" timestamp(6),
-  "modify_time" timestamp(6) null
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 alter table "public"."t_flink_project" add constraint "t_flink_project_pkey" primary key ("id");
@@ -458,7 +470,7 @@ create table "public"."t_flink_savepoint" (
   "path" varchar(255) collate "pg_catalog"."default",
   "latest" boolean not null default true,
   "trigger_time" timestamp(6),
-  "create_time" timestamp(6)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 alter table "public"."t_flink_savepoint" add constraint "t_flink_savepoint_pkey" primary key ("id");
@@ -477,7 +489,7 @@ create table "public"."t_flink_sql" (
   "dependency" text collate "pg_catalog"."default",
   "version" int4,
   "candidate" int2 default 1 not null,
-  "create_time" timestamp(6)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 alter table "public"."t_flink_sql" add constraint "t_flink_sql_pkey" primary key ("id");
@@ -492,7 +504,7 @@ create table "public"."t_flink_tutorial" (
   "type" int2,
   "name" varchar(255) collate "pg_catalog"."default",
   "content" text collate "pg_catalog"."default",
-  "create_time" timestamp(6)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 alter table "public"."t_flink_tutorial" add constraint "t_flink_tutorial_pkey" primary key ("id");
@@ -515,8 +527,8 @@ create table "public"."t_menu" (
   "type" int2,
   "display" boolean not null default true,
   "order_num" float8,
-  "create_time" timestamp(6) not null,
-  "modify_time" timestamp(6)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 comment on column "public"."t_menu"."menu_id" is 'menu button id';
@@ -548,7 +560,7 @@ create table "public"."t_message" (
   "title" varchar(255) collate "pg_catalog"."default",
   "context" text collate "pg_catalog"."default",
   "is_read" boolean default false,
-  "create_time" timestamp(6)
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
 alter table "public"."t_message" add constraint "t_message_pkey" primary key ("id");
@@ -566,8 +578,8 @@ create table "public"."t_role" (
   "role_id" int8 not null default nextval('streampark_t_role_id_seq'::regclass),
   "role_name" varchar(50) collate "pg_catalog"."default" not null,
   "remark" varchar(100) collate "pg_catalog"."default",
-  "create_time" timestamp(6) not null,
-  "modify_time" timestamp(6),
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "role_code" varchar(255) collate "pg_catalog"."default"
 )
 ;
@@ -628,8 +640,8 @@ create table "public"."t_user" (
   "password" varchar(128) collate "pg_catalog"."default" not null,
   "email" varchar(128) collate "pg_catalog"."default",
   "status" int2,
-  "create_time" timestamp(6) not null,
-  "modify_time" timestamp(6),
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "last_login_time" timestamp(6),
   "sex" char(1) collate "pg_catalog"."default",
   "avatar" varchar(100) collate "pg_catalog"."default",
@@ -674,3 +686,24 @@ create index "un_user_role_inx" on "public"."t_user_role" using btree (
   "user_id" "pg_catalog"."int8_ops" asc nulls last,
   "role_id" "pg_catalog"."int8_ops" asc nulls last
 );
+
+-- -----------------------------------------
+-- trigger for table with modify_time field
+-- -----------------------------------------
+create or replace function "public"."update_modify_time"() returns trigger as
+$$
+begin
+    new.modify_time= timezone('UTC-8'::text, (now())::timestamp(0) without time zone);
+    return new;
+end
+$$
+language plpgsql;
+
+create trigger "streampark_t_alert_config_modify_time_tri" before update on "public"."t_alert_config" for each row execute procedure "public"."update_modify_time"();
+create trigger "streampark_t_app_build_pipe_modify_time_tri" before update on "public"."t_app_build_pipe" for each row execute procedure "public"."update_modify_time"();
+create trigger "streampark_t_access_token_modify_time_tri" before update on "public"."t_access_token" for each row execute procedure "public"."update_modify_time"();
+create trigger "streampark_t_flink_app_modify_time_tri" before update on "public"."t_flink_app" for each row execute procedure "public"."update_modify_time"();
+create trigger "streampark_t_flink_project_modify_time_tri" before update on "public"."t_flink_project" for each row execute procedure "public"."update_modify_time"();
+create trigger "streampark_t_menu_modify_time_tri" before update on "public"."t_menu" for each row execute procedure "public"."update_modify_time"();
+create trigger "streampark_t_role_modify_time_tri" before update on "public"."t_role" for each row execute procedure "public"."update_modify_time"();
+create trigger "streampark_t_user_modify_time_tri" before update on "public"."t_user" for each row execute procedure "public"."update_modify_time"();
