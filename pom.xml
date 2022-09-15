@@ -726,6 +726,12 @@
                         <source>${project.build.jdk}</source>
                         <target>${project.build.jdk}</target>
                         <encoding>UTF-8</encoding>
+                        <!-- The semantics of this option are reversed, see MCOMPILER-209. -->
+                        <useIncrementalCompilation>false</useIncrementalCompilation>
+                        <compilerArgs>
+                            <!-- Prevents recompilation due to missing package-info.class, see MCOMPILER-205 -->
+                            <arg>-Xpkginfo:always</arg>
+                        </compilerArgs>
                     </configuration>
                 </plugin>
 
@@ -752,7 +758,6 @@
                             <id>test-compile-scala</id>
                             <phase>test-compile</phase>
                             <goals>
-                                <goal>add-source</goal>
                                 <goal>testCompile</goal>
                             </goals>
                         </execution>
@@ -893,12 +898,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
 
-            <!--scala-->
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -949,7 +948,7 @@
         <profile>
             <id>scala-2.11</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
                 <property>
                     <name>scala.binary.version</name>
                     <value>2.11</value>
