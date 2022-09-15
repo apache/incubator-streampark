@@ -1379,9 +1379,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     }
                 }
                 application.setAppId(submitResponse.clusterId());
-                if (StringUtils.isNoneEmpty(submitResponse.jobId())) {
-                    application.setJobId(submitResponse.jobId());
-                }
+                
                 if (StringUtils.isNoneEmpty(submitResponse.jobManagerUrl())) {
                     application.setJobManagerUrl(submitResponse.jobManagerUrl());
                     applicationLog.setJobManagerUrl(submitResponse.jobManagerUrl());
