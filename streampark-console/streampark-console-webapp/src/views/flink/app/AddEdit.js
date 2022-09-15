@@ -186,6 +186,7 @@ export function syntaxError(vue) {
             }]
           )
         } catch (e) {
+          console.log(e)
         }
     }
 }

@@ -1500,9 +1500,7 @@
   } from './AddEdit'
 
   import {
-    get as getAlert,
     listWithOutPage as listWithOutPageAlert,
-    send as sendAlert
   } from '@/api/alert'
 
   import {toPomString} from './Pom'

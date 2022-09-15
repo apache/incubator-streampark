@@ -930,11 +930,11 @@ import {
   setDefault,
   sync
 } from '@/api/flinkEnv'
+import {checkHadoop} from '@api/setting'
 
 import {
   list as listCluster,
   create as createCluster,
-  get as getCluster,
   update as updateCluster,
   check as checkCluster,
   start as startCluster,
@@ -946,7 +946,6 @@ import {
   add as addAlert,
   exists as existsAlert,
   update as updateAlert,
-  get as getAlert,
   listWithOutPage as listWithOutPageAlert,
   remove as removeAlert,
   send as sendAlert
@@ -957,8 +956,6 @@ import monaco from '@/views/flink/app/Monaco.yaml'
 import addCluster from './AddCluster'
 import { mapActions } from 'vuex'
 import storage from '@/utils/storage'
-import cluster from '@/store/modules/cluster'
-import { Item } from 'ant-design-vue/es/vc-menu'
 
 export default {
   name: 'Setting',
@@ -1510,7 +1507,7 @@ export default {
 
         }
       }).catch((err) => {
-        callback(new Error('提交表单异常' + err))
+        // callback(new Error('提交表单异常' + err))
       })
       this.alertId = null
     },

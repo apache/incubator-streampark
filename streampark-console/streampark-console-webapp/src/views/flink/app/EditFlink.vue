@@ -880,9 +880,7 @@ import {list as listFlinkCluster} from '@/api/flinkCluster'
 import {initPodTemplateEditor} from './AddEdit'
 import SvgIcon from '@/components/SvgIcon'
 import {
-  get as getAlert,
   listWithOutPage as listWithOutPageAlert,
-  send as sendAlert
 } from '@/api/alert'
 
 export default {

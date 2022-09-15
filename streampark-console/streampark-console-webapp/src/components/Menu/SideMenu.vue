@@ -79,9 +79,6 @@ export default {
     onSelect (obj) {
       this.$emit('menuSelect', obj)
     },
-    logoCollapsed () {
-      this.$emit('menuSelect', obj)
-    },
     // 处理菜单隐藏的。。。
     handleHideMenu (array, source) {
       source.filter((x) => { return !x.meta.hidden }).forEach((x) => {

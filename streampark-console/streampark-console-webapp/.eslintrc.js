@@ -18,10 +18,15 @@
 module.exports = {
   'root': true,
   'env': {
+    'browser': true,
     'node': true
   },
+  globals: {
+    $: true,
+  },
   'extends': [
-    'plugin:vue/strongly-recommended'
+    'plugin:vue/strongly-recommended',
+    'eslint:recommended'
   ],
   'parserOptions': {
     'parser': 'babel-eslint'
@@ -75,6 +80,10 @@ module.exports = {
       {
         'ignoreReadBeforeAssign': false
       }
-    ]
+    ],
+    'no-unused-vars': [2, {
+      'vars': 'all',
+      'args': 'none'
+    }],
   }
 }
