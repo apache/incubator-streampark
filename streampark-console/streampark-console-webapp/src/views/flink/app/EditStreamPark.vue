@@ -1683,9 +1683,7 @@ import {
 } from '@/api/flinkPodtmpl'
 
 import {
-  get as getAlert,
   listWithOutPage as listWithOutPageAlert,
-  send as sendAlert
 } from '@/api/alert'
 
 

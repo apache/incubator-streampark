@@ -1241,9 +1241,8 @@ export default {
 
   computed: {
     columns() {
-      let {sortedInfo, filteredInfo} = this
+      let {sortedInfo} = this
       sortedInfo = sortedInfo || {}
-      filteredInfo = filteredInfo || {}
       return [ {
         title: 'Application Name',
         dataIndex: 'jobName',

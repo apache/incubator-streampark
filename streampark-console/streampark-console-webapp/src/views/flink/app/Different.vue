@@ -142,7 +142,9 @@ export default {
         if (this.diffEditor != null) {
           try {
             this.diffEditor.dispose()
-          }catch (e) {}
+          } catch (e) {
+            console.log(e)
+          }
         }
         this.diffEditor = monaco.editor.createDiffEditor(elem, this.getOption())
         this.diffEditor.setModel({
@@ -163,7 +165,9 @@ export default {
       if (this.diffEditor != null) {
         try {
           this.diffEditor.dispose()
-        }catch (e) {}
+        }catch (e) {
+          console.log(e)
+        }
       }
     },
 

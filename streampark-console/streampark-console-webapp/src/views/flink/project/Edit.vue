@@ -184,7 +184,7 @@
 
 <script>
 
-import {get, update, branches, gitcheck, exists, jars} from '@api/project'
+import {get, update, branches, gitcheck, exists} from '@api/project'
 import { mapActions, mapGetters } from 'vuex'
 
 export default {

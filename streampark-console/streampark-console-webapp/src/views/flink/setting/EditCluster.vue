@@ -517,7 +517,6 @@ import {
   flinkBaseImages as histFlinkBaseImages
 } from '@/api/flinkHistory'
 
-const Base64 = require('js-base64').Base64
 
 export default {
   name: 'EditCluster',

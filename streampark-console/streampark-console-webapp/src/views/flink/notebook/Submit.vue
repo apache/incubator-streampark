@@ -96,7 +96,6 @@
 import * as monaco from 'monaco-editor'
 import {submit} from '@api/notebook'
 import {get} from '@api/tutorial'
-import storage from '@/utils/storage'
 
 export default {
   name: 'Submit',
