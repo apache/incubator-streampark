@@ -745,6 +745,23 @@
                         <target>${project.build.jdk}</target>
                         <source>${project.build.jdk}</source>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <id>install-scala</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>test-compile-scala</id>
+                            <phase>test-compile</phase>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
 
                 <!--(start) shade-->
