@@ -2298,13 +2298,13 @@
 
       handleSubmitCustomJob(values) {
         const options = this.handleFormValue(values)
-        if(values.flinkClusterId) {
+        if (values.flinkClusterId) {
           const cluster = this.flinkClusters.filter(c => c.id === values.flinkClusterId && c.clusterState === 1)[0] || null
           values.clusterId = cluster.id
           values.flinkClusterId = cluster.id
           values.yarnSessionClusterId = cluster.clusterId
         }
-        if(values.yarnSessionClusterId) {
+        if (values.yarnSessionClusterId) {
           const cluster = this.flinkClusters.filter(c => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1)[0] || null
           values.clusterId = cluster.id
           values.flinkClusterId = cluster.id
@@ -2401,13 +2401,13 @@
         } else {
           config = null
         }
-        if(values.flinkClusterId) {
+        if (values.flinkClusterId) {
           const cluster = this.flinkClusters.filter(c => c.id === values.flinkClusterId && c.clusterState === 1)[0] || null
           values.clusterId = cluster.id
           values.flinkClusterId = cluster.id
           values.yarnSessionClusterId = cluster.clusterId
         }
-        if(values.yarnSessionClusterId) {
+        if (values.yarnSessionClusterId) {
           const cluster = this.flinkClusters.filter(c => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1)[0] || null
           values.clusterId = cluster.id
           values.flinkClusterId = cluster.id
