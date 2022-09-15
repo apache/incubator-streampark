@@ -146,7 +146,7 @@ create table if not exists `t_flink_env` (
   `version` varchar(50)  not null comment 'flink version',
   `scala_version` varchar(50)  not null comment 'scala version of flink',
   `flink_conf` text  not null comment 'flink-conf',
-  `is_default` tinyint not null default '0' comment 'whether default version or not',
+  `is_default` tinyint not null default 0 comment 'whether default version or not',
   `description` varchar(255)  default null comment 'description',
   `create_time` datetime not null default current_timestamp comment 'create time',
   primary key(`id`),
@@ -375,7 +375,7 @@ create table if not exists `t_flink_cluster` (
   `k8s_conf` varchar(255) default null comment 'the path where the k 8 s configuration file is located',
   `resolve_order` tinyint default null,
   `exception` text comment 'exception information',
-  `cluster_state` tinyint default '0' comment 'cluster status (0: created but not started, 1: started, 2: stopped)',
+  `cluster_state` tinyint default 0 comment 'cluster status (0: created but not started, 1: started, 2: stopped)',
   `create_time` datetime not null default current_timestamp comment 'create time',
   primary key(`id`,`cluster_name`),
   unique (`cluster_id`,`address`,`execution_mode`)
