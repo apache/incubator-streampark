@@ -178,7 +178,7 @@ insert into `t_setting` values (14, 'docker.register.namespace', null, 'Namespac
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-insert into `t_user` values (100000, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', null, '1', now(), now(),null,0,null,null );
+insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, '1', now(), now(),null,0,null,null );
 
 -- ----------------------------
 -- Records of t_user_role
