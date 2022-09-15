@@ -101,12 +101,12 @@ public class ApplicationController {
     }
 
     @ApiAccess
-    @ApiOperation(value = "App Copy", notes = "App Copy", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
+    @ApiOperation(value = "App Copy", notes = "App Copy", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "id", value = "copy target app id", required = true, paramType = "form", dataType = "Long"),
         @ApiImplicitParam(name = "jobName", value = "name of the copied application", required = true, paramType = "form", dataType = "String", defaultValue = ""),
         @ApiImplicitParam(name = "args", value = "commit parameters after copying", required = false, paramType = "form", dataType = "String", defaultValue = "")})
-    @PostMapping("copy")
+    @PostMapping(value = "copy", consumes = "application/x-www-form-urlencoded")
     @RequiresPermissions("app:copy")
     public RestResponse copy(@ApiIgnore Application app) throws IOException {
         Long id = applicationService.copy(app);
@@ -164,14 +164,14 @@ public class ApplicationController {
     }
 
     @ApiAccess
-    @ApiOperation(value = "App Start", notes = "App Start", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
+    @ApiOperation(value = "App Start", notes = "App Start", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "id", value = "app Id", required = true, paramType = "form", dataType = "Long"),
         @ApiImplicitParam(name = "savePointed", value = "从savepoint或最新checkpoint恢复app", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
         @ApiImplicitParam(name = "savePoint", value = "手动填写savepoint或最新checkpoint", required = true, paramType = "form", dataType = "String", defaultValue = ""),
         @ApiImplicitParam(name = "flameGraph", value = "flame Graph support", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
         @ApiImplicitParam(name = "allowNonRestored", value = "ignore savepoint then cannot be restored", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false")})
-    @PostMapping("start")
+    @PostMapping(value = "start", consumes = "application/x-www-form-urlencoded")
     @RequiresPermissions("app:start")
     public RestResponse start(@ApiIgnore Application app) {
         try {
@@ -185,13 +185,13 @@ public class ApplicationController {
     }
 
     @ApiAccess
-    @ApiOperation(value = "App Cancel", notes = "App Cancel", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "x-www-form-urlencoded")
+    @ApiOperation(value = "App Cancel", notes = "App Cancel", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "id", value = "app Id", required = true, paramType = "form", dataType = "Long"),
         @ApiImplicitParam(name = "savePointed", value = "trigger savePoint before taking stoping", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false"),
         @ApiImplicitParam(name = "savePoint", value = "savepoint path", paramType = "form", dataType = "String", defaultValue = "hdfs:///tm/xxx"),
         @ApiImplicitParam(name = "drain", value = "send max watermark before canceling", required = true, paramType = "form", dataType = "Boolean", defaultValue = "false")})
-    @PostMapping("cancel")
+    @PostMapping(value = "cancel", consumes = "application/x-www-form-urlencoded")
     @RequiresPermissions("app:cancel")
     public RestResponse cancel(@ApiIgnore Application app) throws Exception {
         applicationService.cancel(app);

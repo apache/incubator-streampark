@@ -96,8 +96,13 @@ public class Application implements Serializable {
     @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String appId;
 
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String jobId;
+
+    /**
+     * The address of the jobmanager, that is, the direct access address of the Flink web UI
+     */
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String jobManagerUrl;
 
     /**
      * flink version

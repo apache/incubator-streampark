@@ -101,6 +101,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -573,6 +574,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setLaunch(LaunchState.NEED_LAUNCH.get());
         appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
+        appParam.setJobId(new JobID().toHexString());
         appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
             String jarPath = WebUtils.getAppTempDir().getAbsolutePath().concat("/").concat(appParam.getJar());
@@ -1262,6 +1264,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         Map<String, Object> extraParameter = new HashMap<>(0);
         extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());
+        extraParameter.put(ConfigConst.KEY_FLINK_JOB_ID(), application.getJobId());
 
         if (appParam.getAllowNonRestored()) {
             extraParameter.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
@@ -1378,6 +1381,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.setAppId(submitResponse.clusterId());
                 if (StringUtils.isNoneEmpty(submitResponse.jobId())) {
                     application.setJobId(submitResponse.jobId());
+                }
+                if (StringUtils.isNoneEmpty(submitResponse.jobManagerUrl())) {
+                    application.setJobManagerUrl(submitResponse.jobManagerUrl());
+                    applicationLog.setJobManagerUrl(submitResponse.jobManagerUrl());
                 }
                 application.setFlameGraph(appParam.getFlameGraph());
                 applicationLog.setYarnAppId(submitResponse.clusterId());
