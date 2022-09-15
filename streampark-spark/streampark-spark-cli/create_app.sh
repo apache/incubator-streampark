@@ -340,7 +340,6 @@ cat > $name/pom.xml <<EOF
                         <id>test-compile-scala</id>
                         <phase>test-compile</phase>
                         <goals>
-                            <goal>add-source</goal>
                             <goal>testCompile</goal>
                         </goals>
                     </execution>
