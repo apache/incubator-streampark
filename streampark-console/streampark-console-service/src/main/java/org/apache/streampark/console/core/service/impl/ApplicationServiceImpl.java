@@ -1049,9 +1049,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 optionMap.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
             }
             if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
-                String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
-                assert yarnSessionClusterId != null;
-                extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
+                FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+                assert cluster != null;
+                extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), cluster.getClusterId());
             }
         }
 
@@ -1284,9 +1284,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 dynamicOption.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
             }
             if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
-                String yarnSessionClusterId = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_ID());
-                assert yarnSessionClusterId != null;
-                extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), yarnSessionClusterId);
+                FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+                assert cluster != null;
+                extraParameter.put(ConfigConst.KEY_YARN_APP_ID(), cluster.getClusterId());
             }
         }
 
