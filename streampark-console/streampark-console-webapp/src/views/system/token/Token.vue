@@ -159,7 +159,7 @@ export default {
         visible: false
       },
       queryParams: {},
-      filteredInfo: null,
+      filteredInfo: {},
       sortedInfo: null,
       paginationInfo: null,
       dataSource: [],
@@ -177,9 +177,8 @@ export default {
   computed: {
 
     columns() {
-      let {sortedInfo, filteredInfo} = this
+      let {sortedInfo} = this
       sortedInfo = sortedInfo || {}
-      filteredInfo = filteredInfo || {}
       return [{
         title: 'User Name',
         dataIndex: 'username',
@@ -307,7 +306,7 @@ export default {
         this.paginationInfo.pageSize = this.pagination.defaultPageSize
       }
       // 重置列过滤器规则
-      this.filteredInfo = null
+      this.filteredInfo = {}
       // 重置列排序规则
       this.sortedInfo = null
       // 重置查询参数
@@ -318,7 +317,7 @@ export default {
     handleTableChange(pagination, filters, sorter) {
       // 将这三个参数赋值给Vue data，用于后续使用
       this.paginationInfo = pagination
-      this.filteredInfo = filters
+      this.filteredInfo = filters || {}
       this.sortedInfo = sorter
       this.fetch({
         sortField: sorter.field,

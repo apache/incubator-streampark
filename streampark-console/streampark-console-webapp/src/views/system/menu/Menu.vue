@@ -167,7 +167,7 @@ export default {
       advanced: false,
       key: +new Date(),
       queryParams: {},
-      filteredInfo: null,
+      filteredInfo: {},
       dataSource: [],
       pagination: {
         defaultPageSize: 10000000,
@@ -183,8 +183,6 @@ export default {
   },
   computed: {
     columns () {
-      let { filteredInfo } = this
-      filteredInfo = filteredInfo || {}
       return [{
         title: 'Name',
         dataIndex: 'text',
@@ -197,7 +195,7 @@ export default {
       }, {
         title: 'Type',
         dataIndex: 'type',
-        customRender: (text, row, index) => {
+        customRender: (text) => {
           switch (text) {
             case '0': return <a-tag color = "cyan" >菜单</a-tag>
             case '1': return <a-tag color = "pink"> 按钮 </a-tag>
@@ -300,7 +298,7 @@ export default {
     },
     reset () {
       // 重置列过滤器规则
-      this.filteredInfo = null
+      this.filteredInfo = {}
       // 重置查询参数
       this.queryParams = {}
       // 清空时间选择
@@ -309,7 +307,7 @@ export default {
     },
     handleTableChange (pagination, filters, sorter) {
       // 将这两个个参数赋值给Vue data，用于后续使用
-      this.filteredInfo = filters
+      this.filteredInfo = filters || {}
       this.fetch({
         sortField: sorter.field,
         sortOrder: sorter.order,

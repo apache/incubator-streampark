@@ -7,7 +7,8 @@
     "build:mix": "cross-env VUE_APP_ENV=mixin vue-cli-service build",
     "build": "vue-cli-service build --mode production",
     "lint": "vue-cli-service lint",
-    "lint:nofix": "vue-cli-service lint --no-fix"
+    "lint:nofix": "vue-cli-service lint --no-fix",
+    "prepare": "cd ../../ && husky install"
   },
   "dependencies": {
     "ant-design-vue": "^1.7.8",
