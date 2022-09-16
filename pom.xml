@@ -805,28 +805,6 @@
                 </plugin>
                 <!--(end) shade -->
 
-                <!--assembly-->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.1.1</version>
-                    <executions>
-                        <execution>
-                            <id>distro-assembly</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <appendAssemblyId>false</appendAssemblyId>
-                        <descriptors>
-                            <descriptor>assembly.xml</descriptor>
-                        </descriptors>
-                    </configuration>
-                </plugin>
-
                 <!--source and doc-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
