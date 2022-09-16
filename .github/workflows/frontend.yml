@@ -54,4 +54,6 @@ jobs:
           node-version: 16
       - name: Compile and Build
         run: |
-          npm i && npm run prepare
+          npm i
+          npm run prepare
+          npm run build
