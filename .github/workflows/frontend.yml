@@ -30,7 +30,7 @@ on:
 
 defaults:
   run:
-    working-directory: streampark-console-webapp
+    working-directory: streampark-console/streampark-console-webapp
 
 concurrency:
   group: frontend-${{ github.event.pull_request.number || github.ref }}
