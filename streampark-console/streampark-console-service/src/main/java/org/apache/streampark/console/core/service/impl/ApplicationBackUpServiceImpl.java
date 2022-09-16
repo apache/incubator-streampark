@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -192,7 +193,7 @@ public class ApplicationBackUpServiceImpl
     @Override
     public void rollbackFlinkSql(Application application, FlinkSql sql) {
         ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
-        assert backUp != null;
+        AssertUtils.state(backUp != null);
         try {
             FlinkTrackingTask.refreshTracking(backUp.getAppId(), () -> {
                 // rollback config and sql

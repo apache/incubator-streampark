@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -62,7 +63,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     private void expire(SavePoint entity) {
         FlinkEnv flinkEnv = flinkEnvService.getByAppId(entity.getAppId());
-        assert flinkEnv != null;
+        AssertUtils.state(flinkEnv != null);
         int cpThreshold = Integer.parseInt(
             flinkEnv.convertFlinkYamlAsMap()
                 .getOrDefault("state.checkpoints.num-retained", "5")
