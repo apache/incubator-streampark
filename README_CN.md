@@ -51,7 +51,7 @@ Make stream processing easier
 * 多版本 Flink & Spark 支持
 * Scala 2.11 / 2.12 支持
 * 一站式的流任务管理平台
-* 支持不限于 Catalog、OLAP、process-warehouse
+* 支持不限于 Catalog、OLAP、streaming-warehouse
 * ...
 
 ![](https://streampark.apache.org/image/dashboard.png)
