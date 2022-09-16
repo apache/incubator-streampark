@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import org.apache.streampark.console.core.entity.Project;
+package org.apache.streampark.console.core.entity;
+
 import org.apache.streampark.console.core.enums.GitAuthorizedError;
 
 import org.junit.Before;

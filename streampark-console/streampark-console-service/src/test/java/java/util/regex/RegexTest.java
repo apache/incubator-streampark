@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+package java.util.regex;
+
 import org.apache.streampark.common.util.CommandUtils;
 
 import org.junit.Test;
@@ -26,8 +28,6 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RegexTest {

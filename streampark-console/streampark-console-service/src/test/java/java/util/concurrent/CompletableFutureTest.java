@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+package java.util.concurrent;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -22,10 +24,6 @@ import org.apache.streampark.common.util.CompletableFutureUtils;
 
 import org.junit.Test;
 
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CompletableFutureTest {

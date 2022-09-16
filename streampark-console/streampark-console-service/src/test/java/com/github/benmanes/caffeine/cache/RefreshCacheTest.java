@@ -15,23 +15,34 @@
  * limitations under the License.
  */
 
-import org.apache.streampark.console.core.enums.AlertType;
+package com.github.benmanes.caffeine.cache;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
-public class AlertTypeTest {
+public class RefreshCacheTest {
+
+    Cache<String, String> caffeine = null;
+
     @Test
-    void decodeTest() {
-        List<AlertType> notifyTypes = AlertType.decode(5);
-        System.out.println(notifyTypes);
+    public void cache() throws Exception {
+        if (caffeine == null) {
+            caffeine = Caffeine.newBuilder()
+                .refreshAfterWrite(50, TimeUnit.MILLISECONDS)
+                .build(this::refresh);
+        }
+        caffeine.put("config", "hadoop");
+        int count = 4;
+        while (count > 0) {
+            System.out.println(caffeine.getIfPresent("config"));
+            Thread.sleep(100L);
+            --count;
+        }
     }
 
-    @Test
-    void encodeTest() {
-        int level = AlertType.encode(Arrays.asList(AlertType.dingTalk, AlertType.email));
-        System.out.println(level);
+    public String refresh(String value) {
+        return UUID.randomUUID() + "@" + value;
     }
 }

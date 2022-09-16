@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+package org.apache.commons.mail;
+
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
@@ -24,8 +26,6 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 
 import freemarker.template.Template;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
 import org.junit.Before;
 import org.junit.Test;
 

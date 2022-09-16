@@ -14,8 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.streampark.console.system.authentication;
+
 import org.apache.streampark.common.util.DateUtils;
-import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.AccessToken;
 
 import com.auth0.jwt.JWT;

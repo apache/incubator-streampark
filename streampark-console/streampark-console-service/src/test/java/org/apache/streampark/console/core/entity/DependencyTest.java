@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
+package org.apache.streampark.console.core.entity;
+
 import org.apache.streampark.common.util.DependencyUtils;
-import org.apache.streampark.console.core.entity.Application;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -33,7 +34,7 @@ import scala.collection.JavaConversions;
 public class DependencyTest {
 
     @Test
-    public void resolveMavenDependencies() throws Throwable {
+    public void resolveMavenDependencies() {
         /**
          * <dependency>
          *      <groupId>org.apache.flink</groupId>
