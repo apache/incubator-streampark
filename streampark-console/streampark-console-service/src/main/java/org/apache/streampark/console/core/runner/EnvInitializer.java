@@ -96,7 +96,7 @@ public class EnvInitializer implements ApplicationRunner {
             .filter(springEnv::containsProperty)
             .forEach(key -> {
                 InternalOption config = InternalConfigHolder.getConfig(key);
-                assert config != null;
+                AssertUtils.state(config != null);
                 InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
             });
 

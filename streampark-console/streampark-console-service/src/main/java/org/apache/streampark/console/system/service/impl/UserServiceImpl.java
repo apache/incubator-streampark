@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.system.service.impl;
 
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.system.entity.Menu;
@@ -84,7 +85,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             });
             resPage.setRecords(users);
         }
-        assert resPage != null;
+        AssertUtils.state(resPage != null);
         if (resPage.getTotal() == 0) {
             resPage.setRecords(Collections.emptyList());
         }

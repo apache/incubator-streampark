@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
@@ -71,7 +72,7 @@ import java.util.concurrent.TimeUnit;
 public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     implements ProjectService {
 
-    private volatile Map<Long, Byte> tailOutMap = new ConcurrentHashMap<>();
+    private final Map<Long, Byte> tailOutMap = new ConcurrentHashMap<>();
 
     private final Map<Long, StringBuilder> tailBuffer = new ConcurrentHashMap<>();
 
@@ -114,7 +115,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public boolean update(Project projectParam) {
         try {
             Project project = getById(projectParam.getId());
-            assert project != null;
+            AssertUtils.state(project != null);
             project.setName(projectParam.getName());
             project.setUrl(projectParam.getUrl());
             project.setBranches(projectParam.getBranches());
@@ -147,7 +148,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Transactional(rollbackFor = {Exception.class})
     public boolean delete(Long id) {
         Project project = getById(id);
-        assert project != null;
+        AssertUtils.state(project != null);
         LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>();
         queryWrapper.eq(Application::getProjectId, id);
         long count = applicationService.count(queryWrapper);
@@ -349,7 +350,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             }
             List<Map<String, Object>> list = new ArrayList<>();
             File[] files = unzipFile.listFiles(x -> "conf".equals(x.getName()));
-            assert files != null;
+            AssertUtils.state(files != null);
             for (File item : files) {
                 eachFile(item, list, true);
             }

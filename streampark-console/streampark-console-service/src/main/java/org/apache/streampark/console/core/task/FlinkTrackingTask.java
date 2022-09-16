@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.task;
 import static org.apache.streampark.common.enums.ExecutionMode.isKubernetesMode;
 
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.YarnUtils;
@@ -207,7 +208,7 @@ public class FlinkTrackingTask {
                     final OptionState optionState = OPTIONING.get(key);
                     try {
                         // query status from flink rest api
-                        assert application.getId() != null;
+                        AssertUtils.state(application.getId() != null);
                         getFromFlinkRestApi(application, stopFrom);
                     } catch (Exception flinkException) {
                         // query status from yarn rest api

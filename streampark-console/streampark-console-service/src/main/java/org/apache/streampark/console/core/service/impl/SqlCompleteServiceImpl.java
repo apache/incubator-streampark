@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.core.service.SqlCompleteService;
 
 import com.google.common.collect.Sets;
@@ -183,7 +184,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
                 nowStep = nowStep.get(nowChar).getNext();
                 loc += 1;
             }
-            assert preNode != null;
+            AssertUtils.state(preNode != null);
             preNode.setStop();
             preNode.setCount(count);
         }
