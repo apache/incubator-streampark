@@ -324,12 +324,11 @@ public class FlinkTrackingTask {
             }
         }
         application.setDuration(jobOverview.getDuration());
+        application.setTotalTask(jobOverview.getTasks().getTotal());
+        application.setOverview(jobOverview.getTasks());
 
         // get overview info at the first start time
         if (STARTING_CACHE.getIfPresent(application.getId()) != null) {
-            application.setTotalTask(jobOverview.getTasks().getTotal());
-            application.setOverview(jobOverview.getTasks());
-
             FlinkCluster flinkCluster = getFlinkCluster(application);
             Overview override = httpOverview(application, flinkCluster);
             if (override != null && override.getSlotsTotal() > 0) {
