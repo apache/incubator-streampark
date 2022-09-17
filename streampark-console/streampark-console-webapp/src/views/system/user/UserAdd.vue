@@ -183,9 +183,6 @@ export default {
     },
 
     handleSubmit() {
-      if (this.validateStatus !== 'success') {
-        this.handleUserNameBlur()
-      }
       this.form.validateFields((err, user) => {
         if (!err && this.validateStatus === 'success') {
           user.roleId = user.roleId.join(',')
@@ -207,10 +204,10 @@ export default {
       if (username.length) {
         if (username.length > 20) {
           this.validateStatus = 'error'
-          this.help = '用户名不能超过10个字符'
+          this.help = 'User name should not be longer than 20 characters'
         } else if (username.length < 4) {
           this.validateStatus = 'error'
-          this.help = '用户名不能少于4个字符'
+          this.help = 'Team name should not be less than 4 characters'
         } else {
           this.validateStatus = 'validating'
           checkUserName({
@@ -221,13 +218,13 @@ export default {
               this.help = ''
             } else {
               this.validateStatus = 'error'
-              this.help = '抱歉，该用户名已存在'
+              this.help = 'Sorry, the user name already exists'
             }
           })
         }
       } else {
         this.validateStatus = 'error'
-        this.help = '用户名不能为空'
+        this.help = 'User name cannot be empty'
       }
     }
   },
