@@ -15,20 +15,39 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.service;
+package org.apache.streampark.console.core.enums;
 
-import org.apache.streampark.console.system.entity.UserRole;
+import com.baomidou.mybatisplus.annotation.EnumValue;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import java.util.Arrays;
 
-import java.util.List;
+/**
+ * The user type.
+ */
+public enum UserType {
 
-public interface UserRoleService extends IService<UserRole> {
+    /**
+     * The admin of StreamPark.
+     */
+    ADMIN(1),
 
-    void deleteUserRolesByRoleId(String[] roleIds);
+    /**
+     * The user of StreamPark.
+     */
+    USER(2);
 
-    void deleteUserRolesByUserId(String[] userIds);
+    @EnumValue
+    private final int code;
 
-    List<Long> findUserIdsByRoleId(Long roleId);
+    UserType(int code) {
+        this.code = code;
+    }
 
+    public int getCode() {
+        return code;
+    }
+
+    public static UserType of(Integer code) {
+        return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
+    }
 }

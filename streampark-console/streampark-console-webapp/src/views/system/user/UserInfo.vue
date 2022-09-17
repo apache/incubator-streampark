@@ -35,10 +35,9 @@
           <a-icon
             type="user" />User Name：{{ data.username }}
         </p>
-        <p
-          :title="data.roleName">
+        <p>
           <a-icon
-            type="star" />Role：{{ data.roleName? data.roleName: '' }}
+            type="star" />User Type：{{ data.userType }}
         </p>
         <p>
           <a-icon

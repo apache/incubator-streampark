@@ -67,6 +67,21 @@
 
       <notice class="action"/>
 
+      <a> Team : </a>
+
+      <a-select
+        mode="single"
+        :allow-clear="false"
+        style="width: 200px"
+        @change="handleChangeTeam"
+        v-decorator="['teamId']">
+        <a-select-option
+          v-for="t in teamList"
+          :key="t.id">
+          {{ t.teamName }}
+        </a-select-option>
+      </a-select>
+
       <a-dropdown>
         <a class="ant-dropdown-link username" @click="e => e.preventDefault()">
           {{ userName }} <a-icon type="caret-down" />
@@ -168,9 +183,10 @@ import SvgIcon from '@/components/SvgIcon'
 
 import { mapState, mapActions } from 'vuex'
 import { password } from '@api/user'
+import {teams} from '@/api/member'
 import themeUtil from '@/utils/themeUtil'
 import storage from '@/utils/storage'
-import {USER_NAME} from '@/store/mutation-types'
+import {TEAM_ID, USER_INFO, USER_NAME} from '@/store/mutation-types'
 
 export default {
   name: 'UserMenu',
@@ -184,7 +200,9 @@ export default {
       passwordVisible: false,
       formPassword: null,
       confirmDirty: false,
-      themeDark: false
+      themeDark: false,
+      form: this.$form.createForm(this),
+      teamList: []
     }
   },
 
@@ -203,6 +221,7 @@ export default {
 
   mounted() {
     this.handleChangeTheme(true)
+    this.fetchTeams()
   },
 
   methods: {
@@ -296,6 +315,21 @@ export default {
       callback()
     },
 
+    handleChangeTeam(teamId) {
+      storage.set(TEAM_ID, teamId)
+    },
+
+    fetchTeams() {
+      teams({
+        userId: storage.get(USER_INFO).userId
+      }).then((r) => {
+        this.teamList = r.data
+      })
+    },
+  },
+  watch: {
+    visible() {
+    }
   }
 }
 </script>

@@ -21,6 +21,7 @@
 <mapper namespace="org.apache.streampark.console.core.mapper.ApplicationMapper">
     <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.Application">
         <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="project_id" jdbcType="BIGINT" property="projectId"/>
         <result column="module" jdbcType="VARCHAR" property="module"/>
         <result column="args" jdbcType="LONGVARCHAR" property="args"/>
@@ -94,6 +95,7 @@
         left join t_flink_project p
         on t.project_id = p.id
         <where>
+            t.team_id = #{application.teamId}
             <if test="application.jobType != null and application.jobType != ''">
                 and t.job_type = #{application.jobType}
             </if>

@@ -23,19 +23,37 @@
       class="table-page-search-wrapper">
       <a-form
         layout="inline">
-        <a-row
-          :gutter="48">
+        <a-row>
           <div
             class="fold">
             <a-col
-              :md="8"
-              :sm="24">
+              :md="4">
               <a-form-item
                 label="User Name"
                 :label-col="{span: 4}"
-                :wrapper-col="{span: 18, offset: 2}">
+                :wrapper-col="{span: 18}">
                 <a-input
-                  v-model="queryParams.username" />
+                  style="width: 90%"
+                  v-model="queryParams.userName"/>
+              </a-form-item>
+            </a-col>
+            <a-col
+              :md="3">
+              <a-form-item
+                label="Role"
+                v-bind="formItemLayout">
+                <a-select
+                  mode="single"
+                  :allow-clear="true"
+                  style="width: 80%"
+                  @change="handleQueryRoleChange"
+                  v-decorator="['roleName']">
+                  <a-select-option
+                    v-for="r in roleData"
+                    :key="r.roleName">
+                    {{ r.roleName }}
+                  </a-select-option>
+                </a-select>
               </a-form-item>
             </a-col>
             <template>
@@ -47,8 +65,8 @@
                   :label-col="{span: 4}"
                   :wrapper-col="{span: 18, offset: 2}">
                   <range-date
-                    @change="handleDateChange"
-                    ref="createTime" />
+                    @change="handleQueryDateChange"
+                    ref="createTime"/>
                 </a-form-item>
               </a-col>
             </template>
@@ -62,25 +80,25 @@
                 type="primary"
                 shape="circle"
                 icon="search"
-                @click="search" />
+                @click="search"/>
               <a-button
                 type="primary"
                 shape="circle"
                 icon="rest"
-                @click="reset" />
+                @click="reset"/>
               <a-button
                 type="primary"
                 shape="circle"
                 icon="plus"
-                v-permit="'user:add'"
-                @click="handleAdd" />
+                v-permit="'member:add'"
+                @click="handleMemberAdd"/>
             </span>
           </a-col>
         </a-row>
       </a-form>
     </div>
 
-    <!-- table area -->
+    <!-- Table -->
     <a-table
       ref="TableInfo"
       :columns="columns"
@@ -90,101 +108,68 @@
       :scroll="{ x: 900 }"
       @change="handleTableChange">
       <template
-        slot="email"
-        slot-scope="text">
-        <a-popover
-          placement="topLeft">
-          <template
-            slot="content">
-            <div>
-              {{ text }}
-            </div>
-          </template>
-          <p
-            style="width: 150px;margin-bottom: 0">
-            {{ text }}
-          </p>
-        </a-popover>
-      </template>
-      <template
         slot="operation"
-        slot-scope="text, record">
+        slot-scope="text, member">
         <svg-icon
-          v-permit="'user:update'"
-          v-if="(record.username !== 'admin' || userName === 'admin')"
+          v-permit="'member:update'"
           name="edit"
           border
-          @click.native="handleEdit(record)"
-          title="modify" />
-        <svg-icon
-          name="see"
-          border
-          @click.native="handleView(record)"
-          title="view" />
-        <svg-icon
-          v-permit="'user:reset'"
-          v-if="(record.username !== 'admin' || userName === 'admin')"
-          name="resetpass"
-          border
-          @click.native="resetPassword(record)"
-          title="reset password" />
+          @click.native="handleMemberEdit(member)"
+          title="modify"/>
         <a-popconfirm
-          v-permit="'user:delete'"
-          v-if="record.username !== 'admin'"
-          title="Are you sure delete this user ?"
+          v-permit="'member:delete'"
+          title="Are you sure delete this member ?"
           cancel-text="No"
           ok-text="Yes"
-          @confirm="handleDelete(record)">
+          @confirm="handleMemberDelete(member)">
           <svg-icon name="remove" border/>
         </a-popconfirm>
       </template>
     </a-table>
 
-    <!-- View user information -->
-    <user-info
-      :data="userInfo.data"
-      :visible="userInfo.visible"
-      @close="handleUserInfoClose" />
-    <!-- New users -->
-    <user-add
-      @close="handleUserAddClose"
-      @success="handleUserAddSuccess"
-      :visible="userAdd.visible" />
-    <!-- modify user -->
-    <user-edit
-      ref="userEdit"
-      @close="handleUserEditClose"
-      @success="handleUserEditSuccess"
-      :visible="userEdit.visible" />
+    <!-- Add member -->
+    <member-add
+      @close="handleMemberAddClose"
+      @success="handleMemberAddSuccess"
+      :visible="memberAdd.visible"/>
+    <!-- Edit member -->
+    <member-edit
+      ref="memberEdit"
+      @close="handleMemberEditClose"
+      @success="handleMemberEditSuccess"
+      :visible="memberEdit.visible"/>
   </a-card>
 </template>
 
 <script>
-import UserInfo from './UserInfo'
-import UserAdd from './UserAdd'
-import UserEdit from './UserEdit'
+import MemberAdd from './MemberAdd'
+import MemberEdit from './MemberEdit'
 import RangeDate from '@/components/DateTime/RangeDate'
 import SvgIcon from '@/components/SvgIcon'
 
-import { list, deleteUser, reset as resetPassword } from '@/api/user'
+import {list, remove} from '@/api/member'
+import {list as getRole} from '@/api/role'
 import storage from '@/utils/storage'
-import {USER_NAME} from '@/store/mutation-types'
+import {TEAM_ID} from '@/store/mutation-types'
 
+const formItemLayout = {
+  labelCol: { span: 4 },
+  wrapperCol: { span: 18 }
+}
 export default {
-  name: 'User',
-  components: { UserInfo, UserAdd, UserEdit, RangeDate, SvgIcon },
-  data () {
+  name: 'Member',
+  components: {MemberAdd, MemberEdit, RangeDate, SvgIcon},
+  data() {
     return {
-      userInfo: {
-        visible: false,
-        data: {}
-      },
-      userAdd: {
+      memberAdd: {
         visible: false
       },
-      userEdit: {
+      memberEdit: {
         visible: false
       },
+      formItemLayout,
+      roleData: [],
+      roleName: null,
       queryParams: {},
       filteredInfo: null,
       sortedInfo: null,
@@ -202,99 +187,83 @@ export default {
     }
   },
   computed: {
-    columns () {
-      let { sortedInfo, filteredInfo } = this
+    columns() {
+      let {sortedInfo} = this
       sortedInfo = sortedInfo || {}
-      filteredInfo = filteredInfo || {}
       return [{
         title: 'User Name',
-        dataIndex: 'username',
+        dataIndex: 'userName',
         sorter: true,
-        sortOrder: sortedInfo.columnKey === 'username' && sortedInfo.order
+        sortOrder: sortedInfo.columnKey === 'userName' && sortedInfo.order
       }, {
-        title: 'Nick Name',
-        dataIndex: 'nickName'
-      }, {
-        title: 'User Type',
-        dataIndex: 'userType'
-      }, {
-        title: 'Status',
-        dataIndex: 'status',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '0': return <a-tag color="red"> Locked </a-tag>
-            case '1': return <a-tag color="cyan"> Effective </a-tag>
-            default: return text
-          }
-        },
-        filters: [
-          { text: 'Effective', value: '1' },
-          { text: 'Locked', value: '0' }
-        ],
-        filterMultiple: false,
-        filteredValue: filteredInfo.status || null,
-        onFilter: (value, record) => value
+        title: 'Role Name',
+        dataIndex: 'roleName',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'roleName' && sortedInfo.order
       }, {
         title: 'Create Time',
         dataIndex: 'createTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'createTime' && sortedInfo.order
-      },
-        {
-          title: 'Operation',
-          dataIndex: 'operation',
-          scopedSlots: { customRender: 'operation' }
-        }]
-    },
-    userName() {
-      return storage.get(USER_NAME)
+      }, {
+        title: 'Modify Time',
+        dataIndex: 'modifyTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'modifyTime' && sortedInfo.order
+      }, {
+        title: 'Operation',
+        dataIndex: 'operation',
+        scopedSlots: {customRender: 'operation'}
+      }]
     }
   },
 
-  mounted () {
+  mounted() {
     this.fetch()
+    getRole(
+      {'pageSize': '9999'}
+    ).then((resp) => {
+      this.roleData = resp.data.records
+    })
   },
 
   methods: {
-    handleView (record) {
-      this.userInfo.data = record
-      this.userInfo.visible = true
+    handleMemberAdd() {
+      this.memberAdd.visible = true
     },
-    handleAdd () {
-      this.userAdd.visible = true
+    handleMemberAddClose() {
+      this.memberAdd.visible = false
     },
-    handleUserAddClose () {
-      this.userAdd.visible = false
-    },
-    handleUserAddSuccess () {
-      this.userAdd.visible = false
-      this.$message.success('add user successfully')
+    handleMemberAddSuccess() {
+      this.memberAdd.visible = false
+      this.$message.success('add member successfully')
       this.search()
     },
-    handleEdit (record) {
-      this.$refs.userEdit.setFormValues(record)
-      this.userEdit.visible = true
+    handleMemberEdit(record) {
+      this.$refs.memberEdit.setFormValues(record)
+      this.memberEdit.visible = true
     },
-    handleUserEditClose () {
-      this.userEdit.visible = false
+    handleMemberEditClose() {
+      this.memberEdit.visible = false
     },
-    handleUserEditSuccess () {
-      this.userEdit.visible = false
-      this.$message.success('modify user successfully')
+    handleMemberEditSuccess() {
+      this.memberEdit.visible = false
+      this.$message.success('modify member successfully')
       this.search()
     },
-    handleUserInfoClose () {
-      this.userInfo.visible = false
+    handleQueryRoleChange(roleName) {
+      this.roleName = roleName
+      this.search()
     },
-    handleDateChange (value) {
+    handleQueryDateChange(value) {
       if (value) {
         this.queryParams.createTimeFrom = value[0]
         this.queryParams.createTimeTo = value[1]
       }
     },
-    handleDelete (record) {
-      deleteUser({
-        userId: record.userId
+    handleMemberDelete(member) {
+      remove({
+        id: member.id
       }).then((resp) => {
         if (resp.status === 'success') {
           this.$message.success('delete successful')
@@ -305,31 +274,9 @@ export default {
       })
     },
 
-    resetPassword (user) {
-      this.$swal.fire({
-        title: 'reset password, are yor sure?',
-        showCancelButton: true,
-        confirmButtonText: `Yes`,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          resetPassword( {
-            usernames: user.username
-          }).then((resp) => {
-            if (resp.status === 'success') {
-              this.$swal.fire(
-                'reset password successful, user ['+ user.username + '] new password is streampark666', '',
-                'success'
-              )
-            }
-          })
-        }
-      })
-    },
-
-    search () {
-      const { sortedInfo, filteredInfo } = this
+    search() {
+      const {sortedInfo, filteredInfo} = this
       let sortField, sortOrder
-      // Get the sorting of the current column and the filter rules of the column
       if (sortedInfo) {
         sortField = sortedInfo.field
         sortOrder = sortedInfo.order
@@ -341,27 +288,24 @@ export default {
         ...filteredInfo
       })
     },
-    reset () {
-      // Reset pagination
+    reset() {
+      // reset pagination
       this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
       if (this.paginationInfo) {
         this.paginationInfo.current = this.pagination.defaultCurrent
         this.paginationInfo.pageSize = this.pagination.defaultPageSize
       }
-      // Reset filteredInfo
+      // reset filteredInfo, sortedInfo and queryParams
       this.filteredInfo = null
-      // Reset sortedInfo
       this.sortedInfo = null
-      // Reset queryParams
       this.queryParams = {}
       this.$refs.createTime.reset()
       this.fetch()
     },
-    handleTableChange (pagination, filters, sorter) {
+    handleTableChange(pagination, filters, sorter) {
       this.paginationInfo = pagination
       this.filteredInfo = filters
       this.sortedInfo = sorter
-      this.userInfo.visible = false
       this.fetch({
         sortField: sorter.field,
         sortOrder: sorter.order,
@@ -369,36 +313,48 @@ export default {
         ...filters
       })
     },
-    fetch (params = {}) {
-      // show loading
+    fetch(params = {}) {
       this.loading = true
       if (this.paginationInfo) {
-        // If the paging information is not empty, set the current page of the table, the number of items per page, and set the query paging parameters
+        // Set pagination
         this.$refs.TableInfo.pagination.current = this.paginationInfo.current
         this.$refs.TableInfo.pagination.pageSize = this.paginationInfo.pageSize
         params.pageSize = this.paginationInfo.pageSize
         params.pageNum = this.paginationInfo.current
       } else {
-        // If pagination information is empty, set to default
+        // Set the default pagination
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
-      if(params.status != null && params.status.length>0) {
+      if (params.status != null && params.status.length > 0) {
         params.status = params.status[0]
       } else {
         delete params.status
+      }
+
+      if (params.sortField === 'roleName') {
+        params.sortField = 'role_name'
       }
 
       if (params.sortField === 'createTime') {
         params.sortField = 'create_time'
       }
 
-      list({ ...params }).then((resp) => {
-        const pagination = { ...this.pagination }
+      if (params.sortField === 'modifyTime') {
+        params.sortField = 'modify_time'
+      }
+
+      list({
+        ...params,
+        teamId: storage.get(TEAM_ID),
+        roleName: this.roleName
+      }).then((resp) => {
+        const pagination = {...this.pagination}
         pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
         this.pagination = pagination
-        // After the data is loaded, close the loading
+        this.loading = false
+      }).catch(() => {
         this.loading = false
       })
     }

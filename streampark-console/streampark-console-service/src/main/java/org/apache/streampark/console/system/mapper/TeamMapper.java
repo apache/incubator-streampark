@@ -15,25 +15,21 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.entity;
+package org.apache.streampark.console.system.mapper;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import org.apache.streampark.console.system.entity.Team;
 
-import java.io.Serializable;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Param;
 
-@TableName("t_user_role")
-@Data
-public class UserRole implements Serializable {
+import java.util.List;
 
-    private static final long serialVersionUID = -3166012934498268403L;
+public interface TeamMapper extends BaseMapper<Team> {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+    IPage<Team> findTeam(Page<Team> page, @Param("team") Team team);
 
-    private Long userId;
+    List<Team> findUserTeams(Long userId);
 
-    private Long roleId;
 }

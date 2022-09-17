@@ -57,3 +57,7 @@ export function getRouter (queryParam) {
 export function deleteUser (queryParam) {
   return http.delete(api.User.DELETE, queryParam)
 }
+
+export function types() {
+  return http.post(api.User.TYPES, {})
+}

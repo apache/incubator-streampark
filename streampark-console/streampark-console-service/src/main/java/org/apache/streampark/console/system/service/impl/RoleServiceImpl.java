@@ -26,7 +26,7 @@ import org.apache.streampark.console.system.mapper.RoleMapper;
 import org.apache.streampark.console.system.mapper.RoleMenuMapper;
 import org.apache.streampark.console.system.service.RoleMenuServie;
 import org.apache.streampark.console.system.service.RoleService;
-import org.apache.streampark.console.system.service.UserRoleService;
+import org.apache.streampark.console.system.service.TeamMemberService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -56,7 +56,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     private RoleMenuMapper roleMenuMapper;
 
     @Autowired
-    private UserRoleService userRoleService;
+    private TeamMemberService teamMemberService;
 
     @Autowired
     private RoleMenuServie roleMenuService;
@@ -98,7 +98,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public void deleteRole(Long roleId) {
         Role role = Optional.ofNullable(this.getById(roleId))
             .orElseThrow(() -> new IllegalArgumentException(String.format("Role id [%s] not found", roleId)));
-        List<Long> userIdsByRoleId = userRoleService.findUserIdsByRoleId(roleId);
+        List<Long> userIdsByRoleId = teamMemberService.findUserIdsByRoleId(roleId);
         AssertUtils.isTrue(userIdsByRoleId == null || userIdsByRoleId.isEmpty(),
             String.format("There are some users are bound to role %s , please unbind it first.", role.getRoleName()));
         this.removeById(roleId);

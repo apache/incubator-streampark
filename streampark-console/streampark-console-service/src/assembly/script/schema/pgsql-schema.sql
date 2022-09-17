@@ -41,6 +41,7 @@ drop table if exists "public"."t_app_backup";
 drop table if exists "public"."t_alert_config";
 drop table if exists "public"."t_access_token";
 drop table if exists "public"."t_flink_log";
+drop table if exists "public"."t_team";
 
 -- ----------------------------
 -- drop sequence if exists
@@ -64,6 +65,7 @@ drop sequence if exists "public"."streampark_t_app_backup_id_seq";
 drop sequence if exists "public"."streampark_t_alert_config_id_seq";
 drop sequence if exists "public"."streampark_t_access_token_id_seq";
 drop sequence if exists "public"."streampark_t_flink_log_id_seq";
+drop sequence if exists "public"."streampark_t_team_id_seq";
 
 -- ----------------------------
 -- drop trigger if exists
@@ -209,6 +211,7 @@ create sequence "public"."streampark_t_flink_app_id_seq"
 
 create table "public"."t_flink_app" (
   "id" int8 not null default nextval('streampark_t_flink_app_id_seq'::regclass),
+  "team_id" int8,
   "job_type" int2,
   "execution_mode" int2,
   "resource_from" int2,
@@ -278,6 +281,9 @@ create index "inx_state" on "public"."t_flink_app" using btree (
 );
 create index "inx_track" on "public"."t_flink_app" using btree (
   "tracking" "pg_catalog"."int2_ops" asc nulls last
+);
+create index "inx_team" on "public"."t_flink_app" using btree (
+  "team_id" "pg_catalog"."int8_ops" asc nulls last
 );
 
 -- ----------------------------
@@ -437,6 +443,7 @@ create sequence "public"."streampark_t_flink_project_id_seq"
 
 create table "public"."t_flink_project" (
   "id" int8 not null default nextval('streampark_t_flink_project_id_seq'::regclass),
+  "team_id" int8,
   "name" varchar(255) collate "pg_catalog"."default",
   "url" varchar(1000) collate "pg_catalog"."default",
   "branches" varchar(1000) collate "pg_catalog"."default",
@@ -454,6 +461,9 @@ create table "public"."t_flink_project" (
 )
 ;
 alter table "public"."t_flink_project" add constraint "t_flink_project_pkey" primary key ("id");
+create index "inx_team" on "public"."t_flink_project" using btree (
+  "team_id" "pg_catalog"."int8_ops" asc nulls last
+);
 
 
 -- ----------------------------
@@ -568,6 +578,31 @@ create index "inx_mes_user" on "public"."t_message" using btree (
   "user_id" "pg_catalog"."int8_ops" asc nulls last
 );
 
+
+-- ----------------------------
+-- Table of t_team
+-- ----------------------------
+
+create sequence "public"."streampark_t_team_id_seq"
+    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+
+create table "public"."t_team" (
+  "id" int8 not null default nextval('streampark_t_team_id_seq'::regclass),
+  "team_name" varchar(50) collate "pg_catalog"."default" not null,
+  "description" varchar(255) collate "pg_catalog"."default" default null,
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+)
+;
+comment on column "public"."t_team"."id" is 'team id';
+comment on column "public"."t_team"."team_name" is 'team name';
+comment on column "public"."t_team"."create_time" is 'creation time';
+comment on column "public"."t_team"."modify_time" is 'modify time';
+create index "un_team_name" on "public"."t_team" using btree (
+  "team_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
+);
+
+
 -- ----------------------------
 -- table structure for t_role
 -- ----------------------------
@@ -639,6 +674,7 @@ create table "public"."t_user" (
   "salt" varchar(255) collate "pg_catalog"."default",
   "password" varchar(128) collate "pg_catalog"."default" not null,
   "email" varchar(128) collate "pg_catalog"."default",
+  "user_type" int4,
   "status" int2,
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
@@ -654,6 +690,7 @@ comment on column "public"."t_user"."nick_name" is 'nick name';
 comment on column "public"."t_user"."salt" is 'salt';
 comment on column "public"."t_user"."password" is 'password';
 comment on column "public"."t_user"."email" is 'email';
+comment on column "public"."t_user"."user_type" is 'user type 1:admin 2:user';
 comment on column "public"."t_user"."status" is 'status 0:locked 1:active';
 comment on column "public"."t_user"."create_time" is 'creation time';
 comment on column "public"."t_user"."modify_time" is 'change time';
@@ -675,14 +712,19 @@ create sequence "public"."streampark_t_user_role_id_seq"
 
 create table "public"."t_user_role" (
   "id" int8 not null default nextval('streampark_t_user_role_id_seq'::regclass),
+  "team_id" int8,
   "user_id" int8,
-  "role_id" int8
+  "role_id" int8,
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
 )
 ;
+comment on column "public"."t_user_role"."team_id" is 'team id';
 comment on column "public"."t_user_role"."user_id" is 'user id';
 comment on column "public"."t_user_role"."role_id" is 'role id';
 alter table "public"."t_user_role" add constraint "t_user_role_pkey" primary key ("id");
 create index "un_user_role_inx" on "public"."t_user_role" using btree (
+  "team_id" "pg_catalog"."int8_ops" asc nulls last,
   "user_id" "pg_catalog"."int8_ops" asc nulls last,
   "role_id" "pg_catalog"."int8_ops" asc nulls last
 );

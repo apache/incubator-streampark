@@ -15,29 +15,25 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.mapper;
+import api from './index'
+import http from '@/utils/request'
 
-import org.apache.streampark.console.system.entity.UserRole;
+export function post (queryParam) {
+  return http.post(api.Team.POST, queryParam)
+}
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Param;
+export function update (queryParam) {
+  return http.put(api.Team.UPDATE, queryParam)
+}
 
-public interface UserRoleMapper extends BaseMapper<UserRole> {
+export function list (queryParam) {
+  return http.post(api.Team.LIST, queryParam)
+}
 
-    /**
-     * delete role by user id
-     *
-     * @param userId user id
-     * @return boolean
-     */
-    Boolean deleteByUserId(@Param("userId") Long userId);
+export function checkName (queryParam) {
+  return http.post(api.Team.CHECK_NAME, queryParam)
+}
 
-    /**
-     * delete user by role id
-     *
-     * @param roleId role id
-     * @return boolean
-     */
-    Boolean deleteByRoleId(@Param("roleId") Long roleId);
-
+export function remove (queryParam) {
+  return http.delete(api.Team.DELETE, queryParam)
 }

@@ -20,6 +20,7 @@ package org.apache.streampark.console.system.controller;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -140,6 +141,12 @@ public class UserController {
         String[] usernameArr = usernames.split(StringPool.COMMA);
         this.userService.resetPassword(usernameArr);
         return RestResponse.success();
+    }
+
+    @PostMapping("types")
+    @RequiresPermissions("user:types")
+    public RestResponse userTypes() {
+        return RestResponse.success(UserType.values());
     }
 
 }
