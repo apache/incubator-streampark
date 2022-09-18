@@ -25,7 +25,7 @@ import java.io.Serializable;
 @FunctionalInterface
 public interface StreamEnvConfigFunction extends Serializable {
     /**
-     * 用于初始化StreamExecutionEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
+     * When used to initialize StreamExecutionEnvironment, it is used to implement this function and customize the parameters to be set...
      *
      * @param environment:   StreamExecutionEnvironment instance
      * @param parameterTool: ParameterTool

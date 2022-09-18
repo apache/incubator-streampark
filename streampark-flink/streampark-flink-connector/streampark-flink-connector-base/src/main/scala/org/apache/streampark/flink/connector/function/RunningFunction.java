@@ -23,7 +23,7 @@ import java.io.Serializable;
 public interface RunningFunction extends Serializable {
 
     /**
-     * 是否running...
+     * Is it running...
      *
      * @return Boolean: isRunning
      */

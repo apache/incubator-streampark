@@ -144,23 +144,22 @@ object KafkaSource {
 
 class KafkaSource(@(transient@param) private[this] val ctx: StreamingContext, property: Properties = new Properties()) {
   /**
+    * commit offset method:<br/>
+    * &nbsp;&nbsp;Flink kafka consumer commit offset method needs to distinguish whether checkpoint is enabled. <br/>
+    * &nbsp;&nbsp; 1) Checkpoint off: commit offset depends on auto commit of kafka client.
+    * Need to set enable.auto.commit, auto.commit.interval.ms parameters to consumer properties,
+    * It will periodically auto commit offset to kafka at regular intervals. <br/>
+    * &nbsp;&nbsp; 2) Checkpoint is enabled: At this time, the offset consumed by the job is managed and fault-tolerant by Flink in the state.
+    * Submitting offsets to kafka at this time is generally used as an external progress monitor. I want to know the location and lag of job consumption in real time.
+    * At this point, setCommitOffsetsOnCheckpoints needs to be true to set the offset to be submitted to kafka when the checkpoint is successful.
+    * At this time, the interval of commit offset depends on the interval of checkpoint
     *
-    * commit offset 方式:<br/>
-    * &nbsp;&nbsp;Flink kafka consumer commit offset 方式需要区分是否开启了 checkpoint。<br/>
-    * &nbsp;&nbsp; 1) checkpoint 关闭: commit offset 要依赖于 kafka 客户端的 auto commit。
-    * 需设置 enable.auto.commit，auto.commit.interval.ms 参数到 consumer properties，
-    * 就会按固定的时间间隔定期 auto commit offset 到 kafka。<br/>
-    * &nbsp;&nbsp; 2) checkpoint 开启: 这个时候作业消费的 offset 是 Flink 在 state 中自己管理和容错。
-    * 此时提交 offset 到 kafka，一般都是作为外部进度的监控，想实时知道作业消费的位置和 lag 情况。
-    * 此时需要 setCommitOffsetsOnCheckpoints 为 true 来设置当 checkpoint 成功时提交 offset 到 kafka。
-    * 此时 commit offset 的间隔就取决于 checkpoint 的间隔
+    * Get DStream stream
     *
-    * 获取DStream 流
-    *
-    * @param topic        一组topic或者单个topic
-    * @param alias        别名,区分不同的kafka连接实例
+    * @param topic        a group of topics or a single topic
+    * @param alias        Aliases to distinguish different kafka connection instances
     * @param deserializer DeserializationSchema
-    * @param strategy     Watermarks 策略
+    * @param strategy     Watermarks strategy
     * @tparam T
     */
   def getDataStream[T: TypeInformation](topic: java.io.Serializable = null,

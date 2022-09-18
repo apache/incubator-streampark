@@ -25,7 +25,7 @@ import java.io.Serializable;
 @FunctionalInterface
 public interface TableEnvConfigFunction extends Serializable {
     /**
-     * 用于初始化TableEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
+     * When used to initialize TableEnvironment, it is used to implement this function and customize the parameters to be set...
      *
      * @param tableConfig:   flink tableConfig
      * @param parameterTool: parameterTool

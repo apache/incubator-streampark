@@ -47,7 +47,7 @@ public class KafkaJavaSink<T> {
 
     public KafkaJavaSink(StreamingContext context) {
         this.context = context;
-        //默认partitioner为KafkaEqualityPartitioner
+        // The default partitioner is KafkaEqualityPartitioner
         partitioner = new KafkaEqualityPartitioner<T>(context.getParallelism());
     }
 
@@ -87,7 +87,7 @@ public class KafkaJavaSink<T> {
     }
 
     /**
-     * 设置要下沉的topic
+     * Set the topic to sink
      *
      * @param topic: topic name
      * @return KafkaSink: KafkaSink instance

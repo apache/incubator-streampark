@@ -97,7 +97,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
         case ApiType.scala =>
           if (scalaRunningFunc()) {
             ctx.getCheckpointLock.synchronized {
-              //将上次(或者从checkpoint中恢复)的query查询对象返回用户,用户根据这个构建下次要查询的条件.
+              // Returns the query object of the last (or recovered from checkpoint) query to the user, and the user constructs the conditions for the next query based on this.
               query = scalaQueryFunc(last)
               require(query != null && query.getTable != null, "[StreamPark] HBaseSource query and query's param table must not be null ")
               table = query.getTable(prop)
@@ -110,7 +110,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
         case ApiType.java =>
           if (javaRunningFunc.running()) {
             ctx.getCheckpointLock.synchronized {
-              //将上次(或者从checkpoint中恢复)的query查询对象返回用户,用户根据这个构建下次要查询的条件.
+              // Returns the query object of the last (or recovered from checkpoint) query to the user, and the user constructs the conditions for the next query based on this.
               query = javaQueryFunc.query(last)
               require(query != null && query.getTable != null, "[StreamPark] HBaseSource query and query's param table must not be null ")
               table = query.getTable(prop)
@@ -145,7 +145,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
   }
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
-    //从checkpoint中恢复...
+    // Recover from checkpoint...
     logInfo("HBaseSource snapshotState initialize")
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
