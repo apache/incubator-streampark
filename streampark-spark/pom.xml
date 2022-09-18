@@ -44,18 +44,17 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!--Spark 核心jar包-->
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_2.12</artifactId>
-            <version>${spark.version}</version>
-            <scope>provided</scope>
-        </dependency>
         <!--Spark Streaming 核心jar-->
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming_2.12</artifactId>
             <version>${spark.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>provided</scope>
         </dependency>
         <!--Spark Sql 核心jar-->
