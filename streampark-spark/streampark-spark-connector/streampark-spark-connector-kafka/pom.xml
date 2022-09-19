@@ -37,8 +37,6 @@
             <artifactId>streampark-spark-connector-base_2.12</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <!--Redis 依赖-->
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
@@ -49,14 +47,11 @@
             <artifactId>scalikejdbc_2.12</artifactId>
             <version>${scalikejdbc.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka_2.12</artifactId>
             <version>${kafka.version}</version>
         </dependency>
-
-        <!--hbase-->
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-common</artifactId>
