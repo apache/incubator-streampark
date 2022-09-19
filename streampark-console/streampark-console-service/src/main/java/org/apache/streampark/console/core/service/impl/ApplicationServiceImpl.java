@@ -1394,6 +1394,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     applicationLog.setJobManagerUrl(submitResponse.jobManagerUrl());
                 }
                 application.setFlameGraph(appParam.getFlameGraph());
+                application.setJobId(submitResponse.jobId());
                 applicationLog.setYarnAppId(submitResponse.clusterId());
                 application.setStartTime(new Date());
                 application.setEndTime(null);
