@@ -20,9 +20,6 @@ package org.apache.streampark.flink.kubernetes.watcher
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.language.implicitConversions
 
-/**
- * auth: Al-assad
- */
 trait FlinkWatcher extends AutoCloseable {
 
   private[this] val started: AtomicBoolean = new AtomicBoolean(false)

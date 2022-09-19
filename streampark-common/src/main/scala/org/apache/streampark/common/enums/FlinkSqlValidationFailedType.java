@@ -19,26 +19,25 @@ package org.apache.streampark.common.enums;
 
 import java.io.Serializable;
 
-
 public enum FlinkSqlValidationFailedType implements Serializable {
     /**
-     * 基本检验失败(如为null等)
+     * Basic test failed (such as null, etc.)
      */
     VERIFY_FAILED(1),
     /**
-     * 语法错误
+     * syntax error
      */
     SYNTAX_ERROR(2),
     /**
-     * 不支持的方言
+     * unsupported dialect
      */
     UNSUPPORTED_DIALECT(3),
     /**
-     * 不支持的sql命令
+     * unsupported sql command
      */
     UNSUPPORTED_SQL(4),
     /**
-     * 非";"结尾
+     * Not at the end of ";"
      */
     ENDS_WITH(5);
 

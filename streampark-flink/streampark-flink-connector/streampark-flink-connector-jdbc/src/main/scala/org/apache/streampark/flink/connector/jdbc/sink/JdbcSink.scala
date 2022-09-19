@@ -36,7 +36,7 @@ object JdbcSink {
 
   /**
    * @param ctx   : StreamingContext
-   * @param alias :    实例别名(用于区分多个不同的数据库实例...)
+   * @param alias : Instance alias (used to distinguish between multiple different database instances...)
    * @return
    */
   def apply(@(transient@param)
@@ -56,8 +56,8 @@ class JdbcSink(@(transient@param) ctx: StreamingContext,
   /**
    *
    * @param stream  : DataStream
-   * @param toSQLFn : 转换成SQL的函数,有用户提供.
-   * @tparam T : DataStream里的流的数据类型
+   * @param toSQLFn : The function converted to SQL is provided by the user.
+   * @tparam T : The data type of the stream in the DataStream
    * @return
    */
   def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
