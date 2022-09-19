@@ -2,7 +2,7 @@
     <br/>
     <h1>
         <a href="https://streampark.apache.org" target="_blank" rel="noopener noreferrer">
-        <img width="600" src="https://streampark.apache.org/image/logo_name.svg" alt="StreamPark logo">
+        <img width="600" src="https://streampark.apache.org/image/logo_name.png" alt="StreamPark logo">
         </a>
     </h1>
     <strong style="font-size: 1.5rem">Make stream processing easier!!!</strong>
