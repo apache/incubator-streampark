@@ -22,7 +22,7 @@ import java.io.Serializable;
 @FunctionalInterface
 public interface SQLQueryFunction<T> extends Serializable {
     /**
-     * 获取要查询的SQL
+     * Get the SQL to query
      *
      * @param last: last one
      * @return String: sql

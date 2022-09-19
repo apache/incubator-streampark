@@ -23,7 +23,7 @@ import java.util.Map;
 @FunctionalInterface
 public interface SQLResultFunction<T> extends Serializable {
     /**
-     * 将查下结果以Map的方式返回,用户去实现转成对象.
+     * The result of the search is returned as a Map, and the user can convert it into an object.
      *
      * @param map: sqlQuery result
      * @return Iterable: Iterable

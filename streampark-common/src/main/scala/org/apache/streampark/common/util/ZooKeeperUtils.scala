@@ -36,15 +36,15 @@ object ZooKeeperUtils {
       case Some(x) => x
       case None =>
         try {
-          // 设置重连策略ExponentialBackoffRetry, baseSleepTimeMs：初始sleep的时间,maxRetries：最大重试次数,maxSleepMs：最大重试时间
+          // Set the reconnection policy ExponentialBackoffRetry, baseSleepTimeMs: initial sleep time, maxRetries: maximum number of retries, maxSleepMs: maximum retry time
           //val retryPolicy = new ExponentialBackoffRetry(10000, 5)
-          //（推荐）curator链接zookeeper的策略:RetryNTimes n：重试的次数 sleepMsBetweenRetries：每次重试间隔的时间
+          // (Recommended) Curator link zookeeper strategy: RetryNTimes n: the number of retries sleepMsBetweenRetries: the time between each retry
           //val retryPolicy:RetryPolicy = new RetryNTimes(3, 5000)
-          // （不推荐） curator链接zookeeper的策略:RetryOneTime sleepMsBetweenRetry:每次重试间隔的时间,这个策略只会重试一次
+          // (Not recommended) Curator link zookeeper strategy: RetryOneTime sleepMsBetweenRetry: the time between each retry, this strategy will only be retried once
           // val retryPolicy:RetryPolicy = new RetryOneTime(3000)
-          // 永远重试，不推荐使用
+          // Retry forever, not recommended
           // val retryPolicy:RetryPolicy = new RetryForever(retryIntervalMs)
-          // curator链接zookeeper的策略:RetryUntilElapsed maxElapsedTimeMs:最大重试时间 sleepMsBetweenRetries:每次重试间隔 重试时间超过maxElapsedTimeMs后，就不再重试
+          // Curator link zookeeper strategy: RetryUntilElapsed maxElapsedTimeMs: Maximum retry time sleepMsBetweenRetries: After each retry interval, after the retry time exceeds maxElapsedTimeMs, it will not retry
           // val retryPolicy:RetryPolicy = new RetryUntilElapsed(2000, 3000)
           val retryPolicy: RetryPolicy = new RetryNTimes(5, 2000)
           val client = CuratorFrameworkFactory
