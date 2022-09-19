@@ -49,7 +49,7 @@
           v-decorator="[
             'remark',
             {rules: [
-              { max: 50, message: '长度不能超过50个字符'}
+              { max: 50, message: 'Description should not be longer than 50 characters'}
             ]}]" />
       </a-form-item>
       <a-form-item
@@ -153,7 +153,7 @@ export default {
         this.menuSelectHelp = ''
       } else {
         this.menuSelectStatus = 'error'
-        this.menuSelectHelp = '请选择相应的权限'
+        this.menuSelectHelp = 'Please select the permission.'
       }
     },
     handleExpand (expandedKeys) {
@@ -161,14 +161,12 @@ export default {
     },
     handleSubmit () {
       const checkedArr = this.selectedKeysAndHalfCheckedKeys
-      if (this.validateStatus !== 'success') {
-        this.handleRoleNameBlur()
-      } else if (checkedArr.length === 0) {
+      if (checkedArr.length === 0) {
         this.menuSelectStatus = 'error'
-        this.menuSelectHelp = '请选择相应的权限'
+        this.menuSelectHelp = 'Please select the permission.'
       } else {
         this.form.validateFields((err, values) => {
-          if (!err) {
+          if (!err && this.validateStatus === 'success') {
             this.loading = true
             const role = this.form.getFieldsValue()
             role.menuId = checkedArr.join(',')
@@ -193,7 +191,7 @@ export default {
       if (roleName.length) {
         if (roleName.length > 10) {
           this.validateStatus = 'error'
-          this.help = '角色名称不能超过10个字符'
+          this.help = 'Role name should not be longer than 10 characters'
         } else {
           this.validateStatus = 'validating'
           checkName({
@@ -204,13 +202,13 @@ export default {
               this.help = ''
             } else {
               this.validateStatus = 'error'
-              this.help = '抱歉，该角色名称已存在'
+              this.help = 'Sorry, the role name already exists'
             }
           })
         }
       } else {
         this.validateStatus = 'error'
-        this.help = '角色名称不能为空'
+        this.help = 'Role name cannot be empty'
       }
     }
   },
