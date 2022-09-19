@@ -37,9 +37,11 @@ import org.apache.flink.configuration._
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
+
 import java.util.{Map => JavaMap}
 import java.io.File
 import java.util.concurrent.TimeUnit
+import java.util.regex.Pattern
 import java.util.{Collections, List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -356,8 +358,12 @@ trait FlinkSubmitTrait extends Logger {
 
     val programArgs = new ArrayBuffer[String]()
 
-    Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
-
+    //    Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
+    val pattern = Pattern.compile("[^\\s\"']+|\"[^\"]*\"|'[^']*'")
+    val regexMatcher = pattern.matcher(submitRequest.args)
+    while (regexMatcher.find()) {
+      programArgs += regexMatcher.group().replaceAll("\"", "")
+    }
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
       programArgs += PARAM_KEY_FLINK_CONF
       programArgs += submitRequest.flinkYaml
