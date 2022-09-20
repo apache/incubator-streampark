@@ -56,7 +56,7 @@ insert into `t_menu` values (100014, 100013, 'Project', '/flink/project', 'flink
 insert into `t_menu` values (100015, 100013, 'Application', '/flink/app', 'flink/app/View', 'app:view', 'mobile', '0', '1', 2, now(), now());
 insert into `t_menu` values (100016, 100013, 'Add Application', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', '0', null, now(), now());
 insert into `t_menu` values (100017, 100013, 'Add Project', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', '0', null, now(), now());
-insert into `t_menu` values (100018, 100013, 'App Detail', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', '0', null, now(), now(), now());
+insert into `t_menu` values (100018, 100013, 'App Detail', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', '0', null, now(), now());
 insert into `t_menu` values (100019, 100013, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', '1', 3, now(), now());
 insert into `t_menu` values (100020, 100013, 'Edit Flink App', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', '0', null, now(), now());
 insert into `t_menu` values (100021, 100013, 'Edit StreamPark App', '/flink/app/edit_streampark', 'flink/app/EditStreamPark', 'app:update', '', '0', '0', null, now(), now());
