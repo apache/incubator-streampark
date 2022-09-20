@@ -17,22 +17,29 @@
 package org.apache.streampark.flink.submit.test
 
 import org.apache.flink.api.java.utils.ParameterTool
+import org.junit.jupiter.api.{Assertions, Test}
 
-object ParamAppTest extends App {
-  val arg = Array(
-    "--flink.deployment.option.parallelism",
-    "10"
-  )
-  val argsx = Array(
-    "--flink.home",
-    "hdfs://nameservice1/streampark/flink/flink-1.11.1",
-    "--app.name",
-    "testApp123",
-    "--flink.deployment.option.parallelism",
-    "5"
-  )
-  val param = ParameterTool.fromArgs(arg).mergeWith(ParameterTool.fromArgs(argsx))
-  // scalastyle:off println
-  println(param)
-  // scalastyle:on println
+class ParameterTestCase {
+
+  @Test def readArgs():Unit = {
+    val arg = Array(
+      "--flink.deployment.option.parallelism",
+      "10"
+    )
+    val args = Array(
+      "--flink.home",
+      "hdfs://nameservice1/streampark/flink/flink-1.11.1",
+      "--app.name",
+      "testApp123",
+      "--flink.deployment.option.parallelism",
+      "5"
+    )
+    val param = ParameterTool.fromArgs(arg).mergeWith(ParameterTool.fromArgs(args))
+
+    Assertions.assertEquals(param.get("flink.home"), "hdfs://nameservice1/streampark/flink/flink-1.11.1")
+    Assertions.assertEquals(param.get("app.name"), "testApp123")
+    Assertions.assertEquals(param.get("flink.deployment.option.parallelism"), "5")
+
+  }
+
 }
