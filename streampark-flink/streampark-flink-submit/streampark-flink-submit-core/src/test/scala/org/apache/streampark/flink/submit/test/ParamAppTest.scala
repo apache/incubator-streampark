@@ -18,6 +18,10 @@ package org.apache.streampark.flink.submit.test
 
 import org.apache.flink.api.java.utils.ParameterTool
 
+import java.util.regex.Pattern
+import scala.collection.mutable.ArrayBuffer
+import scala.util.Try
+
 object ParamAppTest extends App {
   val arg = Array(
     "--flink.deployment.option.parallelism",
@@ -35,4 +39,28 @@ object ParamAppTest extends App {
   // scalastyle:off println
   println(param)
   // scalastyle:on println
+
+  val argsStr = "--kafkaBootstrap 127.0.0.1:9092\n" +
+    "--kafkaTopic topic_test\n" +
+    "--kafkaGroupId topic_group\n" +
+    "--ckUrl jdbc:clickhouse://localhost:8123/default\n" +
+    "--ckUsername developer\n--ckPassword Mttproxy666\n" +
+    "--ckBatchSize 800\n" +
+    "--ckInsertSql 'insert into default.test values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'\n" +
+    "--checkpointType 'rocksdb'\n" +
+    "--checkpointInterval 5 \n" +
+    "--checkpointTimeOut 3"
+
+  //old
+  val oldProgramArgs = new ArrayBuffer[String]()
+  Try(argsStr.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) oldProgramArgs += x)
+  println(oldProgramArgs)
+  //new
+  val newProgramArgs = new ArrayBuffer[String]()
+  val pattern = Pattern.compile("[^\\s\"']+|\"[^\"]*\"|'[^']*'")
+  val regexMatcher = pattern.matcher(argsStr)
+  while (regexMatcher.find()) {
+    newProgramArgs += regexMatcher.group().replaceAll("\"", "")
+  }
+  println(newProgramArgs)
 }
