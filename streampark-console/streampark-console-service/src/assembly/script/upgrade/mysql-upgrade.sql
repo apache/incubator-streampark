@@ -188,5 +188,11 @@ insert into `t_role_menu` values (100066, 100000, 100047);
 -- remove user table contact phone field
 alter table `t_user` drop column `mobile`;
 
+-- update t_menu name
+update `t_menu` set `menu_name` = 'Edit StreamPark App', `path` = '/flink/app/edit_streampark', `component` = 'flink/app/EditStreamPark'
+where `menu_id` = 100021;
+
+update `t_menu` set `menu_name` = 'StreamPark' where `menu_id` = 100013;
+
 set foreign_key_checks = 1;
 -- -------------------------------------- version: 1.2.4 END ---------------------------------------
