@@ -47,21 +47,34 @@ class ParameterTestCase {
 
   @Test def testExtractProgramArgs(): Unit = {
     val argsStr = "--url localhost:8123 \n" +
-      "--insertSql 'insert into default.test values (?,?,?,?,?)'"
+      "--insertSql1 'insert into default.test values (?,?,?,?,?)'" +
+      "--insertSql2 'insert into default.test values (1,2,3,4,\"111\")'"+
+      "--insertSql2 \"insert into default.test values (1,2,3,4,\'111\')\""
 
     //old
     val oldProgramArgs = new ArrayBuffer[String]()
     Try(argsStr.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) oldProgramArgs += x)
     Assertions.assertEquals("localhost:8123", oldProgramArgs(1))
-    Assertions.assertNotEquals("'insert into default.test values (?,?,?,?,?)'", oldProgramArgs(3))
+    Assertions.assertNotEquals("insert into default.test values (?,?,?,?,?)", oldProgramArgs(3))
+    Assertions.assertNotEquals("insert into default.test values (1,2,3,4,\"111\")", oldProgramArgs(5))
+    Assertions.assertNotEquals("insert into default.test values (1,2,3,4,'111')", oldProgramArgs(7))
     //new
     val newProgramArgs = new ArrayBuffer[String]()
-    val pattern = Pattern.compile("[^\\s\"']+|\"[^\"]*\"|'[^']*'")
+    val pattern = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'")
     val regexMatcher = pattern.matcher(argsStr)
     while (regexMatcher.find()) {
-      newProgramArgs += regexMatcher.group().replaceAll("\"", "")
+      if (regexMatcher.group(1) != null) {
+        newProgramArgs += regexMatcher.group(1)
+      }
+      else if (regexMatcher.group(2) != null) {
+        newProgramArgs += regexMatcher.group(2)
+      } else {
+        newProgramArgs += regexMatcher.group
+      }
     }
     Assertions.assertEquals("localhost:8123", newProgramArgs(1))
-    Assertions.assertEquals("'insert into default.test values (?,?,?,?,?)'", newProgramArgs(3))
+    Assertions.assertEquals("insert into default.test values (?,?,?,?,?)", newProgramArgs(3))
+    Assertions.assertEquals("insert into default.test values (1,2,3,4,\"111\")", newProgramArgs(5))
+    Assertions.assertEquals("insert into default.test values (1,2,3,4,'111')", newProgramArgs(7))
   }
 }

@@ -58,7 +58,7 @@ trait FlinkSubmitTrait extends Logger {
   private[submit] lazy val PARAM_KEY_APP_CONF = KEY_APP_CONF("--")
   private[submit] lazy val PARAM_KEY_APP_NAME = KEY_APP_NAME("--")
   private[submit] lazy val PARAM_KEY_FLINK_PARALLELISM = KEY_FLINK_PARALLELISM("--")
-  private[this] lazy val PROGRAM_ARGS_PATTERN = Pattern.compile("[^\\s\"']+|\"[^\"]*\"|'[^']*'")
+  private[this] lazy val PROGRAM_ARGS_PATTERN = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'")
 
   @throws[Exception] def submit(submitRequest: SubmitRequest): SubmitResponse = {
     logInfo(
@@ -359,12 +359,18 @@ trait FlinkSubmitTrait extends Logger {
 
     val programArgs = new ArrayBuffer[String]()
 
-    //    Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
-    val pattern = Pattern.compile("[^\\s\"']+|\"[^\"]*\"|'[^']*'")
     val regexMatcher = PROGRAM_ARGS_PATTERN.matcher(submitRequest.args)
     while (regexMatcher.find()) {
-      programArgs += regexMatcher.group().replaceAll("\"", "")
+      if (regexMatcher.group(1) != null) {
+        programArgs += regexMatcher.group(1)
+      }
+      else if (regexMatcher.group(2) != null) {
+        programArgs += regexMatcher.group(2)
+      } else {
+        programArgs += regexMatcher.group
+      }
     }
+
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
       programArgs += PARAM_KEY_FLINK_CONF
       programArgs += submitRequest.flinkYaml
