@@ -18,16 +18,9 @@
 package org.apache.streampark.flink.submit.`trait`
 
 import com.google.common.collect.Lists
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, ResolveOrder}
-import org.apache.streampark.common.util.{Logger, SystemPropertyUtils, Utils}
-import org.apache.streampark.flink.core.conf.FlinkRunOption
-import org.apache.streampark.flink.core.{ClusterClient => ClusterClientWrapper}
-import org.apache.streampark.flink.submit.bean._
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.commons.collections.MapUtils
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
@@ -37,10 +30,17 @@ import org.apache.flink.configuration._
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
-import java.util.{Map => JavaMap}
+import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.Workspace
+import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, ResolveOrder}
+import org.apache.streampark.common.util.{Logger, SystemPropertyUtils, Utils}
+import org.apache.streampark.flink.core.conf.FlinkRunOption
+import org.apache.streampark.flink.core.{ClusterClient => ClusterClientWrapper}
+import org.apache.streampark.flink.submit.bean._
+
 import java.io.File
 import java.util.concurrent.TimeUnit
-import java.util.{Collections, List => JavaList}
+import java.util.{Collections, List => JavaList, Map => JavaMap}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -356,7 +356,57 @@ trait FlinkSubmitTrait extends Logger {
 
     val programArgs = new ArrayBuffer[String]()
 
-    Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
+    if (StringUtils.isNotEmpty(submitRequest.args)) {
+
+      val array = submitRequest.args.split("\\s")
+      val argsArray = new ArrayBuffer[String]()
+      val tempBuffer = new ArrayBuffer[String]()
+
+      def processElement(index: Int, num: Int): Unit = {
+
+        if (index == array.length) {
+          if (tempBuffer.nonEmpty) {
+            argsArray += tempBuffer.mkString(" ")
+          }
+          return
+        }
+
+        val next = index + 1
+        val elem = array(index)
+
+        if (elem.trim.nonEmpty) {
+          if (num == 0) {
+            if (elem.startsWith("'")) {
+              tempBuffer += elem
+              processElement(next, 1)
+            } else if (elem.startsWith("\"")) {
+              tempBuffer += elem
+              processElement(next, 2)
+            } else {
+              argsArray += elem
+              processElement(next, 0)
+            }
+          } else {
+            tempBuffer += elem
+            val end1 = elem.endsWith("'") && num == 1
+            val end2 = elem.endsWith("\"") && num == 2
+            if (end1 || end2) {
+              argsArray += tempBuffer.mkString(" ")
+              tempBuffer.clear()
+              processElement(next, 0)
+            } else {
+              processElement(next, num)
+            }
+          }
+        } else {
+          tempBuffer += elem
+          processElement(next, 0)
+        }
+      }
+
+      processElement(0, 0)
+      argsArray.foreach(x => programArgs += x.trim.replaceAll("^[\"|']|[\"|']$", ""))
+    }
 
     if (submitRequest.applicationType == ApplicationType.STREAMPARK_FLINK) {
       programArgs += PARAM_KEY_FLINK_CONF
