@@ -20,7 +20,7 @@ package org.apache.streampark.flink.submit.`trait`
 import com.google.common.collect.Lists
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.commons.collections.MapUtils
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
