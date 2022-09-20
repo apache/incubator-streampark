@@ -61,14 +61,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public boolean update(Setting setting) {
         try {
-            String value = setting.getSettingValue();
-            if (value != null) {
-                if (StringUtils.isEmpty(value.trim())) {
-                    value = null;
-                } else {
-                    value = setting.getSettingValue().trim();
-                }
-            }
+            String value = StringUtils.trimToNull(setting.getSettingValue());
             setting.setSettingValue(value);
             this.baseMapper.updateByKey(setting);
 
@@ -80,6 +73,9 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             }
             if (setting.getSettingKey().equals(CommonConfig.MAVEN_AUTH_PASSWORD().key())) {
                 InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), value);
+            }
+            if (settings == null || settings.size() == 0) {
+                initSetting();
             }
             settings.get(setting.getSettingKey()).setSettingValue(value);
             return true;
