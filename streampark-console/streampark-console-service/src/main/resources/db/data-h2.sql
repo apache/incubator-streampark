@@ -38,50 +38,50 @@ insert into `t_flink_sql` values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94
 -- ----------------------------
 -- Records of t_menu
 -- ----------------------------
-insert into `t_menu` values (100000, 0, 'System', '/system', 'PageView', null, 'desktop', '0', '1', 1, now(), now());
-insert into `t_menu` values (100001, 100000, 'User Management', '/system/user', 'system/user/User', 'user:view', 'user', '0', '1', 1, now(), now());
-insert into `t_menu` values (100002, 100000, 'Role Management', '/system/role', 'system/role/Role', 'role:view', 'smile', '0', '1', 2, now(), now());
-insert into `t_menu` values (100003, 100000, 'Router Management', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', '1', 3, now(), now());
-insert into `t_menu` values (100004, 100001, 'add', null, null, 'user:add', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100005, 100001, 'update', null, null, 'user:update', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100006, 100001, 'delete', null, null, 'user:delete', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100007, 100002, 'add', null, null, 'role:add', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100008, 100002, 'update', null, null, 'role:update', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100009, 100002, 'delete', null, null, 'role:delete', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100010, 100003, 'add', null, null, 'menu:add', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100011, 100003, 'update', null, null, 'menu:update', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100012, 100001, 'reset', null, null, 'user:reset', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100013, 0, 'StreamPark', '/flink', 'PageView', null, 'build', '0', '1', 2, now(), now());
-insert into `t_menu` values (100014, 100013, 'Project', '/flink/project', 'flink/project/View', 'project:view', 'github', '0', '1', 1, now(), now());
-insert into `t_menu` values (100015, 100013, 'Application', '/flink/app', 'flink/app/View', 'app:view', 'mobile', '0', '1', 2, now(), now());
-insert into `t_menu` values (100016, 100013, 'Add Application', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', '0', null, now(), now());
-insert into `t_menu` values (100017, 100013, 'Add Project', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', '0', null, now(), now());
-insert into `t_menu` values (100018, 100013, 'App Detail', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', '0', null, now(), now(), now());
-insert into `t_menu` values (100019, 100013, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', '1', 3, now(), now());
-insert into `t_menu` values (100020, 100013, 'Edit Flink App', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', '0', null, now(), now());
-insert into `t_menu` values (100021, 100013, 'Edit StreamPark App', '/flink/app/edit_streampark', 'flink/app/EditStreamPark', 'app:update', '', '0', '0', null, now(), now());
-insert into `t_menu` values (100022, 100014, 'build', null, null, 'project:build', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100023, 100014, 'delete', null, null, 'project:delete', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100024, 100015, 'mapping', null, null, 'app:mapping', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100025, 100015, 'launch', null, null, 'app:launch', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100026, 100015, 'start', null, null, 'app:start', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100027, 100015, 'clean', null, null, 'app:clean', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100028, 100015, 'cancel', null, null, 'app:cancel', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100029, 100015, 'savepoint delete', null, null, 'savepoint:delete', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100030, 100015, 'backup rollback', null, null, 'backup:rollback', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100031, 100015, 'backup delete', null, null, 'backup:delete', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100032, 100015, 'conf delete', null, null, 'conf:delete', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100033, 100015, 'flame Graph', null, null, 'app:flameGraph', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100034, 100013, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', '1', 4, now(), now());
-insert into `t_menu` values (100035, 100034, 'Setting Update', null, null, 'setting:update', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100036, 100013, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', null, '0', '0', null, now(), now());
-insert into `t_menu` values (100037, 100015, 'delete', null, null, 'app:delete', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100038, 100000, 'Token Management', '/system/token', 'system/token/Token', 'token:view', 'lock', '0', '1', 1.0, now(), now());
-insert into `t_menu` values (100039, 100038, 'add', null, null, 'token:add', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100040, 100038, 'delete', null, null, 'token:delete', null, '1', '1', null, now(), now());
-insert into `t_menu` values (100041, 100013, 'Add Cluster', '/flink/setting/add_cluster', 'flink/setting/AddCluster', 'cluster:create', '', '0', '0', null, now(), now());
-insert into `t_menu` values (100042, 100013, 'Edit Cluster', '/flink/setting/edit_cluster', 'flink/setting/EditCluster', 'cluster:update', '', '0', '0', null, now(), now());
-insert into `t_menu` values (100043, 100015, 'copy', null, null, 'app:copy', null, '1', '1', null, now(), now());
+insert into `t_menu` values (100000, 0, 'System', '/system', 'PageView', null, 'desktop', '0', 1, 1, now(), now());
+insert into `t_menu` values (100001, 100000, 'User Management', '/system/user', 'system/user/User', 'user:view', 'user', '0', 1, 1, now(), now());
+insert into `t_menu` values (100002, 100000, 'Role Management', '/system/role', 'system/role/Role', 'role:view', 'smile', '0', 1, 2, now(), now());
+insert into `t_menu` values (100003, 100000, 'Router Management', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', 1, 3, now(), now());
+insert into `t_menu` values (100004, 100001, 'add', null, null, 'user:add', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100005, 100001, 'update', null, null, 'user:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100006, 100001, 'delete', null, null, 'user:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100007, 100002, 'add', null, null, 'role:add', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100008, 100002, 'update', null, null, 'role:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100009, 100002, 'delete', null, null, 'role:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100010, 100003, 'add', null, null, 'menu:add', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100011, 100003, 'update', null, null, 'menu:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100012, 100001, 'reset', null, null, 'user:reset', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100013, 0, 'StreamPark', '/flink', 'PageView', null, 'build', '0', 1, 2, now(), now());
+insert into `t_menu` values (100014, 100013, 'Project', '/flink/project', 'flink/project/View', 'project:view', 'github', '0', 1, 1, now(), now());
+insert into `t_menu` values (100015, 100013, 'Application', '/flink/app', 'flink/app/View', 'app:view', 'mobile', '0', 1, 2, now(), now());
+insert into `t_menu` values (100016, 100013, 'Add Application', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', 0, null, now(), now());
+insert into `t_menu` values (100017, 100013, 'Add Project', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', 0, null, now(), now());
+insert into `t_menu` values (100018, 100013, 'App Detail', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', 0, null, now(), now());
+insert into `t_menu` values (100019, 100013, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', 1, 3, now(), now());
+insert into `t_menu` values (100020, 100013, 'Edit Flink App', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', 0, null, now(), now());
+insert into `t_menu` values (100021, 100013, 'Edit StreamPark App', '/flink/app/edit_streampark', 'flink/app/EditStreamPark', 'app:update', '', '0', 0, null, now(), now());
+insert into `t_menu` values (100022, 100014, 'build', null, null, 'project:build', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100023, 100014, 'delete', null, null, 'project:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100024, 100015, 'mapping', null, null, 'app:mapping', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100025, 100015, 'launch', null, null, 'app:launch', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100026, 100015, 'start', null, null, 'app:start', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100027, 100015, 'clean', null, null, 'app:clean', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100028, 100015, 'cancel', null, null, 'app:cancel', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100029, 100015, 'savepoint delete', null, null, 'savepoint:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100030, 100015, 'backup rollback', null, null, 'backup:rollback', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100031, 100015, 'backup delete', null, null, 'backup:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100032, 100015, 'conf delete', null, null, 'conf:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100033, 100015, 'flame Graph', null, null, 'app:flameGraph', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100034, 100013, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', 1, 4, now(), now());
+insert into `t_menu` values (100035, 100034, 'Setting Update', null, null, 'setting:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100036, 100013, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', null, '0', 0, null, now(), now());
+insert into `t_menu` values (100037, 100015, 'delete', null, null, 'app:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100038, 100000, 'Token Management', '/system/token', 'system/token/Token', 'token:view', 'lock', '0', 1, 1, now(), now());
+insert into `t_menu` values (100039, 100038, 'add', null, null, 'token:add', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100040, 100038, 'delete', null, null, 'token:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100041, 100013, 'Add Cluster', '/flink/setting/add_cluster', 'flink/setting/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());
+insert into `t_menu` values (100042, 100013, 'Edit Cluster', '/flink/setting/edit_cluster', 'flink/setting/EditCluster', 'cluster:update', '', '0', 0, null, now(), now());
+insert into `t_menu` values (100043, 100015, 'copy', null, null, 'app:copy', null, '1', 1, null, now(), now());
 
 
 -- ----------------------------
@@ -178,7 +178,7 @@ insert into `t_setting` values (14, 'docker.register.namespace', null, 'Namespac
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, '1', now(), now(),null,0,null,null );
+insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, '1', now(), now(),null,'0',null,null );
 
 -- ----------------------------
 -- Records of t_user_role
