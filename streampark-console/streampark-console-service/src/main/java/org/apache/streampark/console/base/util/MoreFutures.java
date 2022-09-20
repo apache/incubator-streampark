@@ -60,27 +60,27 @@ public final class MoreFutures {
     }
 
     public static <T> CompletionStage<T> exceptionallyCompose(CompletionStage<T> stage, Function<Throwable, ? extends CompletionStage<T>> fn) {
-        return stage.thenApply((res) -> CompletableFuture.completedFuture(res)).exceptionally((Function<Throwable, ? extends CompletableFuture<T>>) fn).thenCompose(Function.identity());
+        return stage.thenApply(CompletableFuture::completedFuture).exceptionally((Function<Throwable, ? extends CompletableFuture<T>>) fn).thenCompose(Function.identity());
     }
 
     public static <T> CompletableFuture<T> completeImmediately(Supplier<T> supplier) {
         try {
             return CompletableFuture.completedFuture(supplier.get());
         } catch (Throwable e) {
-            CompletableFuture<T> f = new CompletableFuture();
+            CompletableFuture<T> f = new CompletableFuture<>();
             f.completeExceptionally(e);
             return f;
         }
     }
 
     public static <T> CompletableFuture<T> completedExceptionally(Throwable cause) {
-        CompletableFuture<T> future = new CompletableFuture();
+        CompletableFuture<T> future = new CompletableFuture<>();
         future.completeExceptionally(cause);
         return future;
     }
 
     public static <T> ScheduledFuture<T> completedScheduledFuture(T value) {
-        return new CompletedScheduledFuture(value);
+        return new CompletedScheduledFuture<>(value);
     }
 
     private static final class CompletedScheduledFuture<T> implements ScheduledFuture<T> {
