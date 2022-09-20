@@ -105,7 +105,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void createUser(User user) throws Exception {
         user.setCreateTime(new Date());
         user.setAvatar(User.DEFAULT_AVATAR);
-        String salt = ShaHashUtils.getRandomSalt(26);
+        String salt = ShaHashUtils.getRandomSalt();
         String password = ShaHashUtils.encrypt(salt, user.getPassword());
         user.setSalt(salt);
         user.setPassword(password);
@@ -151,7 +151,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Transactional(rollbackFor = Exception.class)
     public void updatePassword(String username, String password) throws Exception {
         User user = new User();
-        String salt = ShaHashUtils.getRandomSalt(26);
+        String salt = ShaHashUtils.getRandomSalt();
         password = ShaHashUtils.encrypt(salt, password);
         user.setSalt(salt);
         user.setPassword(password);
@@ -163,7 +163,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void resetPassword(String[] usernames) throws Exception {
         for (String username : usernames) {
             User user = new User();
-            String salt = ShaHashUtils.getRandomSalt(26);
+            String salt = ShaHashUtils.getRandomSalt();
             String password = ShaHashUtils.encrypt(salt, User.DEFAULT_PASSWORD);
             user.setSalt(salt);
             user.setPassword(password);

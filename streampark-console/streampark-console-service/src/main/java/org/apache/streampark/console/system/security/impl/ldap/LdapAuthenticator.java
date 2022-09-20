@@ -46,28 +46,26 @@ public class LdapAuthenticator extends AbstractAuthenticator {
         // ldapUser is null, login by default
         if (ldapUser == null) {
             return passwordAuthenticator.login(userId, password);
-        } else {
-            //check if user exist
-            User user = usersService.findByName(userId);
-            if (user != null) {
-                return passwordAuthenticator.login(userId, password);
-            } else {
-                // create ....
-                User newUser = new User();
-                newUser.setCreateTime(new Date());
-                newUser.setUsername(userId);
-                newUser.setRoleId("100001");
-                newUser.setNickName(userId);
-                newUser.setStatus("1");
-                newUser.setSex("1");
-
-                String salt = ShaHashUtils.getRandomSalt(26);
-                String saltPass = ShaHashUtils.encrypt(salt, user.getPassword());
-                newUser.setSalt(salt);
-                newUser.setPassword(saltPass);
-                usersService.createUser(newUser);
-                return newUser;
-            }
         }
+        //check if user exist
+        User user = usersService.findByName(userId);
+        if (user != null) {
+            return passwordAuthenticator.login(userId, password);
+        }
+        // create ....
+        User newUser = new User();
+        newUser.setCreateTime(new Date());
+        newUser.setUsername(userId);
+        newUser.setRoleId("100001");
+        newUser.setNickName(userId);
+        newUser.setStatus("1");
+        newUser.setSex("1");
+
+        String salt = ShaHashUtils.getRandomSalt();
+        String saltPass = ShaHashUtils.encrypt(salt, password);
+        newUser.setSalt(salt);
+        newUser.setPassword(saltPass);
+        usersService.createUser(newUser);
+        return newUser;
     }
 }
