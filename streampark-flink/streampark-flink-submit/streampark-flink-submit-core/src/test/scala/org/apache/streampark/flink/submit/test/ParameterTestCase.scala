@@ -40,27 +40,20 @@ class ParameterTestCase {
     )
     val param = ParameterTool.fromArgs(arg).mergeWith(ParameterTool.fromArgs(args))
 
-    Assertions.assertEquals(param.get("flink.home"), "hdfs://nameservice1/streampark/flink/flink-1.11.1")
-    Assertions.assertEquals(param.get("app.name"), "testApp123")
-    Assertions.assertEquals(param.get("flink.deployment.option.parallelism"), "5")
+    Assertions.assertEquals("hdfs://nameservice1/streampark/flink/flink-1.11.1", param.get("flink.home"))
+    Assertions.assertEquals("testApp123", param.get("app.name"))
+    Assertions.assertEquals("5", param.get("flink.deployment.option.parallelism"))
   }
 
   @Test def testExtractProgramArgs(): Unit = {
-    val argsStr = "--kafkaBootstrap 127.0.0.1:9092\n" +
-      "--kafkaTopic topic_test\n" +
-      "--kafkaGroupId topic_group\n" +
-      "--ckUrl jdbc:clickhouse://localhost:8123/default\n" +
-      "--ckUsername developer\n--ckPassword Mttproxy666\n" +
-      "--ckBatchSize 800\n" +
-      "--ckInsertSql 'insert into default.test values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'\n" +
-      "--checkpointType 'rocksdb'\n" +
-      "--checkpointInterval 5 \n" +
-      "--checkpointTimeOut 3"
+    val argsStr = "--url localhost:8123 \n" +
+      "--insertSql 'insert into default.test values (?,?,?,?,?)'"
 
     //old
     val oldProgramArgs = new ArrayBuffer[String]()
     Try(argsStr.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) oldProgramArgs += x)
-    println(oldProgramArgs)
+    Assertions.assertEquals("localhost:8123", oldProgramArgs(1))
+    Assertions.assertNotEquals("'insert into default.test values (?,?,?,?,?)'", oldProgramArgs(3))
     //new
     val newProgramArgs = new ArrayBuffer[String]()
     val pattern = Pattern.compile("[^\\s\"']+|\"[^\"]*\"|'[^']*'")
@@ -68,6 +61,7 @@ class ParameterTestCase {
     while (regexMatcher.find()) {
       newProgramArgs += regexMatcher.group().replaceAll("\"", "")
     }
-    println(newProgramArgs)
+    Assertions.assertEquals("localhost:8123", newProgramArgs(1))
+    Assertions.assertEquals("'insert into default.test values (?,?,?,?,?)'", newProgramArgs(3))
   }
 }
