@@ -27,21 +27,22 @@ import org.apache.streampark.console.core.service.SettingService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
-    implements SettingService {
+    implements SettingService, ApplicationListener<ContextRefreshedEvent> {
 
     @Override
     public Setting get(String key) {
@@ -50,10 +51,10 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     private final Map<String, Setting> settings = new ConcurrentHashMap<>();
 
-    private final Setting defaultSetting = new Setting();
+    private final Setting emptySetting = new Setting();
 
-    @PostConstruct
-    public void initSetting() {
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
         List<Setting> settingList = super.list();
         settingList.forEach(x -> settings.put(x.getSettingKey(), x));
     }
@@ -61,27 +62,25 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public boolean update(Setting setting) {
         try {
-            String value = setting.getSettingValue();
-            if (value != null) {
-                if (StringUtils.isEmpty(value.trim())) {
-                    value = null;
-                } else {
-                    value = setting.getSettingValue().trim();
-                }
-            }
+            String value = StringUtils.trimToNull(setting.getSettingValue());
             setting.setSettingValue(value);
             this.baseMapper.updateByKey(setting);
 
-            if (setting.getSettingKey().equals(CommonConfig.MAVEN_REMOTE_URL().key())) {
+            String settingKey = setting.getSettingKey();
+            if (CommonConfig.MAVEN_REMOTE_URL().key().equals(settingKey)) {
                 InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), value);
             }
-            if (setting.getSettingKey().equals(CommonConfig.MAVEN_AUTH_USER().key())) {
+            if (CommonConfig.MAVEN_AUTH_USER().key().equals(settingKey)) {
                 InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), value);
             }
-            if (setting.getSettingKey().equals(CommonConfig.MAVEN_AUTH_PASSWORD().key())) {
+            if (CommonConfig.MAVEN_AUTH_PASSWORD().key().equals(settingKey)) {
                 InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), value);
             }
-            settings.get(setting.getSettingKey()).setSettingValue(value);
+
+            Optional<Setting> optional = Optional.ofNullable(settings.get(setting.getSettingKey()));
+            if (optional.isPresent()) {
+                optional.get().setSettingValue(value);
+            }
             return true;
         } catch (Exception e) {
             return false;
@@ -114,42 +113,41 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public String getDockerRegisterAddress() {
-        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_ADDRESS, defaultSetting).getSettingValue();
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_ADDRESS, emptySetting).getSettingValue();
     }
 
     @Override
     public String getDockerRegisterUser() {
-        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_USER, defaultSetting).getSettingValue();
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_USER, emptySetting).getSettingValue();
     }
 
     @Override
     public String getDockerRegisterPassword() {
-        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_PASSWORD, defaultSetting).getSettingValue();
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_PASSWORD, emptySetting).getSettingValue();
     }
 
     @Override
     public String getDockerRegisterNamespace() {
-        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_NAMESPACE, defaultSetting).getSettingValue();
+        return settings.getOrDefault(SettingService.KEY_DOCKER_REGISTER_NAMESPACE, emptySetting).getSettingValue();
     }
 
     @Override
     public String getStreamParkAddress() {
-        return settings.getOrDefault(SettingService.KEY_STREAMPARK_ADDRESS, defaultSetting).getSettingValue();
+        return settings.getOrDefault(SettingService.KEY_STREAMPARK_ADDRESS, emptySetting).getSettingValue();
     }
 
     @Override
     public String getMavenRepository() {
-        return settings.getOrDefault(SettingService.KEY_MAVEN_REPOSITORY, defaultSetting).getSettingValue();
+        return settings.getOrDefault(SettingService.KEY_MAVEN_REPOSITORY, emptySetting).getSettingValue();
     }
 
     @Override
     public String getMavenAuthUser() {
-        return settings.getOrDefault(SettingService.KEY_MAVEN_AUTH_USER, defaultSetting).getSettingValue();
+        return settings.getOrDefault(SettingService.KEY_MAVEN_AUTH_USER, emptySetting).getSettingValue();
     }
 
     @Override
     public String getMavenAuthPassword() {
-        return settings.getOrDefault(SettingService.KEY_MAVEN_AUTH_PASSWORD, defaultSetting).getSettingValue();
+        return settings.getOrDefault(SettingService.KEY_MAVEN_AUTH_PASSWORD, emptySetting).getSettingValue();
     }
-
 }
