@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -65,19 +66,23 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             setting.setSettingValue(value);
             this.baseMapper.updateByKey(setting);
 
-            if (setting.getSettingKey().equals(CommonConfig.MAVEN_REMOTE_URL().key())) {
+            String settingKey = setting.getSettingKey();
+            if (CommonConfig.MAVEN_REMOTE_URL().key().equals(settingKey)) {
                 InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), value);
             }
-            if (setting.getSettingKey().equals(CommonConfig.MAVEN_AUTH_USER().key())) {
+            if (CommonConfig.MAVEN_AUTH_USER().key().equals(settingKey)) {
                 InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), value);
             }
-            if (setting.getSettingKey().equals(CommonConfig.MAVEN_AUTH_PASSWORD().key())) {
+            if (CommonConfig.MAVEN_AUTH_PASSWORD().key().equals(settingKey)) {
                 InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), value);
             }
             if (settings == null || settings.size() == 0) {
                 initSetting();
             }
-            settings.get(setting.getSettingKey()).setSettingValue(value);
+            Optional<Setting> optional = Optional.ofNullable(settings.get(setting.getSettingKey()));
+            if (optional.isPresent()) {
+                optional.get().setSettingValue(value);
+            }
             return true;
         } catch (Exception e) {
             return false;
