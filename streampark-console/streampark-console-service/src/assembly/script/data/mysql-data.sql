@@ -164,20 +164,21 @@ insert into `t_role_menu` values (100062, 100000, 100043);
 -- ----------------------------
 -- Records of t_setting
 -- ----------------------------
-insert into `t_setting` values (1, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven 私服地址', 1);
-insert into `t_setting` values (2, 'streampark.maven.auth.user', null, 'Maven Central Repository Auth User', 'Maven 私服认证用户名', 1);
-insert into `t_setting` values (3, 'streampark.maven.auth.password', null, 'Maven Central Repository Auth Password', 'Maven 私服认证密码', 1);
-insert into `t_setting` values (4, 'streampark.console.webapp.address', null, 'StreamPark Webapp address', 'StreamPark Console Web 应用程序HTTP URL', 1);
-insert into `t_setting` values (5, 'alert.email.host', null, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
-insert into `t_setting` values (6, 'alert.email.port', null, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);
-insert into `t_setting` values (7, 'alert.email.from', null, 'Alert  Email From', '发送告警的邮箱', 1);
-insert into `t_setting` values (8, 'alert.email.userName', null, 'Alert  Email User', '用来发送告警邮箱的认证用户名', 1);
-insert into `t_setting` values (9, 'alert.email.password', null, 'Alert Email Password', '用来发送告警邮箱的认证密码', 1);
-insert into `t_setting` values (10, 'alert.email.ssl', 'false', 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL', 2);
-insert into `t_setting` values (11, 'docker.register.address', null, 'Docker Register Address', 'Docker容器服务地址', 1);
-insert into `t_setting` values (12, 'docker.register.user', null, 'Docker Register User', 'Docker容器服务认证用户名', 1);
-insert into `t_setting` values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker容器服务认证密码', 1);
-insert into `t_setting` values (14, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker命名空间', 1);
+insert into `t_setting` values (1, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml 完整路径', 1);
+insert into `t_setting` values (2, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven 私服地址', 1);
+insert into `t_setting` values (3, 'streampark.maven.auth.user', null, 'Maven Central Repository Auth User', 'Maven 私服认证用户名', 1);
+insert into `t_setting` values (4, 'streampark.maven.auth.password', null, 'Maven Central Repository Auth Password', 'Maven 私服认证密码', 1);
+insert into `t_setting` values (5, 'streampark.console.webapp.address', null, 'StreamPark Webapp address', 'StreamPark Console Web 应用程序HTTP URL', 1);
+insert into `t_setting` values (6, 'alert.email.host', null, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
+insert into `t_setting` values (7, 'alert.email.port', null, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);
+insert into `t_setting` values (8, 'alert.email.from', null, 'Alert  Email From', '发送告警的邮箱', 1);
+insert into `t_setting` values (9, 'alert.email.userName', null, 'Alert  Email User', '用来发送告警邮箱的认证用户名', 1);
+insert into `t_setting` values (10, 'alert.email.password', null, 'Alert Email Password', '用来发送告警邮箱的认证密码', 1);
+insert into `t_setting` values (11, 'alert.email.ssl', 'false', 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL', 2);
+insert into `t_setting` values (12, 'docker.register.address', null, 'Docker Register Address', 'Docker容器服务地址', 1);
+insert into `t_setting` values (13, 'docker.register.user', null, 'Docker Register User', 'Docker容器服务认证用户名', 1);
+insert into `t_setting` values (14, 'docker.register.password', null, 'Docker Register Password', 'Docker容器服务认证密码', 1);
+insert into `t_setting` values (15, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker命名空间', 1);
 
 -- ----------------------------
 -- Records of t_user

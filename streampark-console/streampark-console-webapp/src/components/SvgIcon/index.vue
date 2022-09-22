@@ -71,6 +71,7 @@
     <namespace v-if="name==='namespace'"></namespace>
     <auth v-if="name==='auth'"></auth>
     <password v-if="name==='password'"></password>
+    <settings v-if="name==='settings'"></settings>
   </span>
 </template>
 
@@ -127,7 +128,8 @@ import {
   docker,
   namespace,
   auth,
-  password
+  password,
+  settings
 } from '@/core/icons'
 
 export default {
@@ -184,7 +186,8 @@ export default {
     docker,
     namespace,
     auth,
-    password
+    password,
+    settings
   },
   props: {
     name: {

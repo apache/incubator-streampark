@@ -194,5 +194,7 @@ where `menu_id` = 100021;
 
 update `t_menu` set `menu_name` = 'StreamPark' where `menu_id` = 100013;
 
+insert into `t_setting` values (15, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml 完整路径', 1);
+
 set foreign_key_checks = 1;
 -- -------------------------------------- version: 1.2.4 END ---------------------------------------

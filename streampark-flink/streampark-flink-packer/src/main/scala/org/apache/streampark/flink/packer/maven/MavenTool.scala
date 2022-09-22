@@ -55,7 +55,7 @@ object MavenTool extends Logger {
     Artifact.of("org.apache.logging.log4j:*:*")
   )
 
-  private[this] lazy val remoteRepos: List[RemoteRepository] = {
+  private[this] def getRemoteRepos(): List[RemoteRepository] = {
     val builder = new RemoteRepository.Builder("central", "default", InternalConfigHolder.get(MAVEN_REMOTE_URL))
     val remoteRepository = if (InternalConfigHolder.get(MAVEN_AUTH_USER) == null || InternalConfigHolder.get(MAVEN_AUTH_PASSWORD) == null) {
       builder.build()
@@ -152,6 +152,7 @@ object MavenTool extends Logger {
       val artifacts = mavenArtifacts.map(e => new DefaultArtifact(e.groupId, e.artifactId, "jar", e.version))
       logInfo(s"start resolving dependencies: ${artifacts.mkString}")
 
+      val remoteRepos = getRemoteRepos()
       // read relevant artifact descriptor info
       // plz don't simplify the following lambda syntax to maintain the readability of the code.
       val resolvedArtifacts = artifacts

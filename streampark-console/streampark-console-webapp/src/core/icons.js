@@ -75,6 +75,7 @@ import docker from '@/assets/icons/docker.svg?inline'
 import namespace from '@/assets/icons/namespace.svg?inline'
 import auth from '@/assets/icons/auth.svg?inline'
 import password from '@/assets/icons/password.svg?inline'
+import settings from '@/assets/icons/settings.svg?inline'
 
 export {
   alarm,
@@ -128,5 +129,6 @@ export {
   namespace,
   auth,
   password,
-  lark
+  lark,
+  settings
 }

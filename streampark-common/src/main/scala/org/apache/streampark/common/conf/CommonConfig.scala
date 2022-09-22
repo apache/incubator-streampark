@@ -65,6 +65,12 @@ object CommonConfig {
     classType = classOf[JavaLong],
     description = "instantiating connection timeout for DockerHttpClient")
 
+  val MAVEN_SETTINGS_PATH: InternalOption = InternalOption(
+    key = "streampark.maven.settings",
+    defaultValue = null,
+    classType = classOf[String],
+    description = "maven settings.xml full path")
+
   val MAVEN_REMOTE_URL: InternalOption = InternalOption(
     key = "streampark.maven.central.repository",
     defaultValue = "https://repo1.maven.org/maven2/",

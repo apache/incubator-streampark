@@ -137,6 +137,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
+    public String getMavenSettings() {
+        return settings.getOrDefault(SettingService.KEY_MAVEN_SETTINGS, emptySetting).getSettingValue();
+    }
+
+    @Override
     public String getMavenRepository() {
         return settings.getOrDefault(SettingService.KEY_MAVEN_REPOSITORY, emptySetting).getSettingValue();
     }
