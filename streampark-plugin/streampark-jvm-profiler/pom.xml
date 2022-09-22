@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-plugin</artifactId>
-        <version>${reversion}</version>
+        <version>1.2.4-SNAPSHOT</version>
     </parent>
     <artifactId>streampark-jvm-profiler</artifactId>
     <name>StreamPark : JVM Profiler</name>

@@ -22,12 +22,11 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-spark</artifactId>
-        <version>${reversion}</version>
+        <version>1.2.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>streampark-spark-test</artifactId>
     <name>StreamPark : Spark Test</name>
-    <version>${reversion}</version>
 
     <dependencies>
         <dependency>

@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark</artifactId>
-        <version>${reversion}</version>
+        <version>1.2.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
