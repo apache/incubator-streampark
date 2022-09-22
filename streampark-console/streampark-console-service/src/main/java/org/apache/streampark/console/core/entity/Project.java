@@ -41,7 +41,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -216,7 +215,7 @@ public class Project implements Serializable {
     }
 
     @JsonIgnore
-    public List<String> getMavenArgs() {
+    public String getMavenArgs() {
         String mvn = "mvn";
         try {
             if (CommonUtils.isWindows()) {
@@ -231,7 +230,18 @@ public class Project implements Serializable {
                 mvn = WebUtils.getAppHome().concat("/bin/mvnw");
             }
         }
-        return Arrays.asList(mvn.concat(" clean package -DskipTests ").concat(StringUtils.isEmpty(this.buildArgs) ? "" : this.buildArgs.trim()));
+
+        StringBuffer cmdBuffer = new StringBuffer(mvn).append(" clean package -DskipTests ");
+
+        String settings = settingService.getMavenSettings();
+        if (StringUtils.isNotEmpty(settings)) {
+            cmdBuffer.append(" --settings ").append(settings);
+        }
+
+        if (StringUtils.isNotEmpty(this.buildArgs)) {
+            cmdBuffer.append(this.buildArgs.trim());
+        }
+        return cmdBuffer.toString();
     }
 
     @JsonIgnore

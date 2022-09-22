@@ -100,6 +100,11 @@ public class EnvInitializer implements ApplicationRunner {
                 InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
             });
 
+        String mvnSettings = settingService.getMavenSettings();
+        if (StringUtils.isNotEmpty(mvnSettings)) {
+            InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), mvnSettings);
+        }
+
         String mvnRepository = settingService.getMavenRepository();
         if (StringUtils.isNotEmpty(mvnRepository)) {
             InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);

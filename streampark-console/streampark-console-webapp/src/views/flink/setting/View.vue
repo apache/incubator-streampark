@@ -31,6 +31,12 @@
                   <a-list-item-meta style="width: 50%">
                     <svg-icon
                       class="avatar"
+                      name="settings"
+                      size="large"
+                      slot="avatar"
+                      v-if="item.settingKey === 'streampark.maven.settings'"></svg-icon>
+                    <svg-icon
+                      class="avatar"
                       name="maven"
                       size="large"
                       slot="avatar"
