@@ -22,7 +22,12 @@ import org.apache.streampark.console.core.entity.Setting;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public interface SettingService extends IService<Setting> {
+
+    Map<String, Setting> SETTINGS = new ConcurrentHashMap<>();
 
     String KEY_MAVEN_SETTINGS = "streampark.maven.settings";
     String KEY_MAVEN_REPOSITORY = "streampark.maven.central.repository";

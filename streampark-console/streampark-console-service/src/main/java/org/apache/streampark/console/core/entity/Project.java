@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.console.base.util.CommonUtils;
@@ -104,9 +105,6 @@ public class Project implements Serializable {
      */
     private transient String appSource;
 
-    @JsonIgnore
-    private transient SettingService settingService;
-
     /**
      * get project source
      */
@@ -145,7 +143,6 @@ public class Project implements Serializable {
         return new File(home, ".git");
     }
 
-    @JsonIgnore
     public void delete() throws IOException {
         FileUtils.deleteDirectory(getAppSource());
         FileUtils.deleteDirectory(getDistHome());
@@ -176,7 +173,6 @@ public class Project implements Serializable {
         return Collections.emptyList();
     }
 
-    @JsonIgnore
     public GitAuthorizedError gitCheck() {
         try {
             if (CommonUtils.notEmpty(userName, password)) {
@@ -233,14 +229,15 @@ public class Project implements Serializable {
 
         StringBuffer cmdBuffer = new StringBuffer(mvn).append(" clean package -DskipTests ");
 
-        String settings = settingService.getMavenSettings();
-        if (StringUtils.isNotEmpty(settings)) {
-            cmdBuffer.append(" --settings ").append(settings);
-        }
-
         if (StringUtils.isNotEmpty(this.buildArgs)) {
             cmdBuffer.append(this.buildArgs.trim());
         }
+
+        Setting setting = SettingService.SETTINGS.get(CommonConfig.MAVEN_SETTINGS_PATH());
+        if (setting != null) {
+            cmdBuffer.append(" --settings ").append(setting.getSettingValue());
+        }
+
         return cmdBuffer.toString();
     }
 

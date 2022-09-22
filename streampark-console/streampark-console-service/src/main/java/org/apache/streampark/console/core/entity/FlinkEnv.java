@@ -88,7 +88,6 @@ public class FlinkEnv implements Serializable {
         }
     }
 
-    @JsonIgnore
     public Map<String, String> convertFlinkYamlAsMap() {
         String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
         return PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
