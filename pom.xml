@@ -28,7 +28,7 @@
     <groupId>org.apache.streampark</groupId>
     <artifactId>streampark</artifactId>
     <packaging>pom</packaging>
-    <version>${reversion}</version>
+    <version>1.2.4-SNAPSHOT</version>
 
     <name>StreamPark</name>
 
@@ -81,7 +81,6 @@
     </modules>
 
     <properties>
-        <reversion>1.2.4</reversion>
         <project.build.jdk>1.8</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
