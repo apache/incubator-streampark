@@ -21,10 +21,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class Histogram {
 
-    private AtomicLong count = new AtomicLong(0);
-    private AtomicLong sum = new AtomicLong(0);
-    private AtomicLong min = new AtomicLong(Long.MAX_VALUE);
-    private AtomicLong max = new AtomicLong(Long.MIN_VALUE);
+    private final AtomicLong count = new AtomicLong(0);
+    private final AtomicLong sum = new AtomicLong(0);
+    private final AtomicLong min = new AtomicLong(Long.MAX_VALUE);
+    private final AtomicLong max = new AtomicLong(Long.MIN_VALUE);
 
     public void appendValue(long value) {
         count.incrementAndGet();

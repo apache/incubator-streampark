@@ -28,7 +28,7 @@ public class HelloWorldApplication {
      * -javaagent:target/jvm-profiler-1.0.0.jar=reporter=org.apache.streampark.plugin.profiling.reporter.ConsoleOutputReporter,tag=tag1,metricInterval=10000,durationProfiling=org.apache.streampark.plugin.profiling.example.HelloWorldApplication.*
      */
     public static void main(String[] args) throws Throwable {
-        long totalRunningMillis = 1 * 60 * 1000;
+        long totalRunningMillis = 60 * 1000;
         long sleepMillis = 1000;
 
         if (args.length >= 1) {

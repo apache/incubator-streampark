@@ -27,7 +27,7 @@ public class DorisSinkRowDataWithMeta implements Serializable {
 
     private String table;
     private String database;
-    private List<String> dataRows = new ArrayList<>();
+    private final List<String> dataRows = new ArrayList<>();
 
     public DorisSinkRowDataWithMeta database(String database) {
         this.database = database;

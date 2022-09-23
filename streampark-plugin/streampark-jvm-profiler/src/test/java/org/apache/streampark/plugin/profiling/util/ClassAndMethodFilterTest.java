@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class ClassAndMethodFilterTest {
     @Test
@@ -28,13 +29,13 @@ public class ClassAndMethodFilterTest {
         ClassAndMethodFilter filter = new ClassAndMethodFilter(null);
         Assert.assertFalse(filter.matchMethod("class1", "method1"));
 
-        filter = new ClassAndMethodFilter(Arrays.asList(new ClassAndMethod("class1", "")));
+        filter = new ClassAndMethodFilter(Collections.singletonList(new ClassAndMethod("class1", "")));
         Assert.assertTrue(filter.matchClass("class1"));
 
-        filter = new ClassAndMethodFilter(Arrays.asList(new ClassAndMethod("", "method1")));
+        filter = new ClassAndMethodFilter(Collections.singletonList(new ClassAndMethod("", "method1")));
         Assert.assertTrue(filter.matchClass("class1"));
 
-        filter = new ClassAndMethodFilter(Arrays.asList(new ClassAndMethod("class2", "method1")));
+        filter = new ClassAndMethodFilter(Collections.singletonList(new ClassAndMethod("class2", "method1")));
         Assert.assertFalse(filter.matchClass("class1"));
         Assert.assertTrue(filter.matchClass("class2"));
 
@@ -61,13 +62,13 @@ public class ClassAndMethodFilterTest {
         ClassAndMethodFilter filter = new ClassAndMethodFilter(null);
         Assert.assertFalse(filter.matchMethod("class1", "method1"));
 
-        filter = new ClassAndMethodFilter(Arrays.asList(new ClassAndMethod("class1", "")));
+        filter = new ClassAndMethodFilter(Collections.singletonList(new ClassAndMethod("class1", "")));
         Assert.assertFalse(filter.matchMethod("class1", "method1"));
 
-        filter = new ClassAndMethodFilter(Arrays.asList(new ClassAndMethod("", "method1")));
+        filter = new ClassAndMethodFilter(Collections.singletonList(new ClassAndMethod("", "method1")));
         Assert.assertTrue(filter.matchMethod("class1", "method1"));
 
-        filter = new ClassAndMethodFilter(Arrays.asList(new ClassAndMethod("class2", "method1")));
+        filter = new ClassAndMethodFilter(Collections.singletonList(new ClassAndMethod("class2", "method1")));
         Assert.assertFalse(filter.matchMethod("class1", "method1"));
 
         filter =
@@ -80,7 +81,7 @@ public class ClassAndMethodFilterTest {
     @Test
     public void matchMethod_wildcard() {
         ClassAndMethodFilter filter =
-            new ClassAndMethodFilter(Arrays.asList(new ClassAndMethod("class1", "")));
+            new ClassAndMethodFilter(Collections.singletonList(new ClassAndMethod("class1", "")));
         Assert.assertFalse(filter.matchMethod("class1", "method1"));
 
         filter =

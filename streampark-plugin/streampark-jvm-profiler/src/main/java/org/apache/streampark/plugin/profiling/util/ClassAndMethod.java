@@ -17,6 +17,8 @@
 
 package org.apache.streampark.plugin.profiling.util;
 
+import java.util.Objects;
+
 public class ClassAndMethod {
     private final String className;
     private final String methodName;
@@ -53,10 +55,10 @@ public class ClassAndMethod {
 
         ClassAndMethod that = (ClassAndMethod) o;
 
-        if (className != null ? !className.equals(that.className) : that.className != null) {
+        if (!Objects.equals(className, that.className)) {
             return false;
         }
-        return methodName != null ? methodName.equals(that.methodName) : that.methodName == null;
+        return Objects.equals(methodName, that.methodName);
     }
 
     @Override

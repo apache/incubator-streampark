@@ -18,6 +18,7 @@
 package org.apache.streampark.plugin.profiling.util;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class Stacktrace {
     private String threadName;
@@ -63,10 +64,10 @@ public class Stacktrace {
 
         Stacktrace that = (Stacktrace) o;
 
-        if (threadName != null ? !threadName.equals(that.threadName) : that.threadName != null) {
+        if (!Objects.equals(threadName, that.threadName)) {
             return false;
         }
-        if (threadState != null ? !threadState.equals(that.threadState) : that.threadState != null) {
+        if (!Objects.equals(threadState, that.threadState)) {
             return false;
         }
 

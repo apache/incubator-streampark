@@ -44,6 +44,6 @@ public class SparkUtilsTest {
             "executor",
             SparkUtils.probeRole("java org.apache.spark.executor.CoarseGrainedExecutorBackend"));
         Assert.assertEquals("driver", SparkUtils.probeRole("java org.apache.spark.MockDriver"));
-        Assert.assertEquals(null, SparkUtils.probeRole("java foo"));
+        Assert.assertNull(SparkUtils.probeRole("java foo"));
     }
 }

@@ -36,10 +36,10 @@ import java.util.List;
  */
 public class StacktraceCollectorProfiler implements Profiler {
     private long interval;
-    private StacktraceMetricBuffer buffer;
+    private final StacktraceMetricBuffer buffer;
     private String ignoreThreadNamePrefix = "";
     private int maxStringLength = Constants.MAX_STRING_LENGTH;
-    private ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+    private final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 
     public StacktraceCollectorProfiler(StacktraceMetricBuffer buffer, String ignoreThreadNamePrefix) {
         this(buffer, ignoreThreadNamePrefix, Constants.MAX_STRING_LENGTH);

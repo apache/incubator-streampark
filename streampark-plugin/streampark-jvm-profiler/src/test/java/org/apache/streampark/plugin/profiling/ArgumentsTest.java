@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +133,7 @@ public class ArgumentsTest {
         Assert.assertEquals("tag1", arguments.getTag());
         Assert.assertEquals("cluster1", arguments.getCluster());
         Assert.assertEquals(1000L, arguments.getMetricInterval());
-        Assert.assertEquals(true, arguments.isIoProfiling());
+        Assert.assertTrue(arguments.isIoProfiling());
         Assert.assertArrayEquals(
             new ClassAndMethod[]{
                 new ClassAndMethod("a.bc", "foo"), new ClassAndMethod("ab.c.d", "test")
@@ -150,7 +151,7 @@ public class ArgumentsTest {
 
         Assert.assertEquals("tag1", arguments.getTag());
         Assert.assertEquals(9000L, arguments.getMetricInterval());
-        Assert.assertEquals(false, arguments.isIoProfiling());
+        Assert.assertFalse(arguments.isIoProfiling());
         Assert.assertArrayEquals(
             new ClassAndMethod[]{
                 new ClassAndMethod("package.c900", "m900"), new ClassAndMethod("package.c901", "m901")
@@ -168,7 +169,7 @@ public class ArgumentsTest {
 
         Assert.assertEquals("tag1", arguments.getTag());
         Assert.assertEquals(9001L, arguments.getMetricInterval());
-        Assert.assertEquals(false, arguments.isIoProfiling());
+        Assert.assertFalse(arguments.isIoProfiling());
         Assert.assertArrayEquals(
             new ClassAndMethod[]{
                 new ClassAndMethod("package.c900", "m910"), new ClassAndMethod("package.c901", "m911")
@@ -183,7 +184,7 @@ public class ArgumentsTest {
 
         Assert.assertEquals("tag2", arguments.getTag());
         Assert.assertEquals(9002L, arguments.getMetricInterval());
-        Assert.assertEquals(true, arguments.isIoProfiling());
+        Assert.assertTrue(arguments.isIoProfiling());
         Assert.assertArrayEquals(
             new ClassAndMethod[]{
                 new ClassAndMethod("package.c900", "m920"), new ClassAndMethod("package.c901", "m921")
@@ -198,7 +199,7 @@ public class ArgumentsTest {
 
         Assert.assertEquals("tag3", arguments.getTag());
         Assert.assertEquals(9000L, arguments.getMetricInterval());
-        Assert.assertEquals(true, arguments.isIoProfiling());
+        Assert.assertTrue(arguments.isIoProfiling());
         Assert.assertArrayEquals(
             new ClassAndMethod[]{
                 new ClassAndMethod("package.c900", "m900"), new ClassAndMethod("package.c901", "m901")
@@ -229,8 +230,8 @@ public class ArgumentsTest {
             Map<String, Map<String, List<String>>> configMap = new HashMap<>();
 
             Map<String, List<String>> argMap = new HashMap<>();
-            argMap.put("metricInterval", Arrays.asList("9000"));
-            argMap.put("ioProfiling", Arrays.asList("false"));
+            argMap.put("metricInterval", Collections.singletonList("9000"));
+            argMap.put("ioProfiling", Collections.singletonList("false"));
             argMap.put("durationProfiling", Arrays.asList("package.c900.m900", "package.c901.m901"));
 
             configMap.put("", argMap);
@@ -245,22 +246,22 @@ public class ArgumentsTest {
             Map<String, Map<String, List<String>>> configMap = new HashMap<>();
 
             Map<String, List<String>> argMap = new HashMap<>();
-            argMap.put("metricInterval", Arrays.asList("9000"));
-            argMap.put("ioProfiling", Arrays.asList("true"));
+            argMap.put("metricInterval", Collections.singletonList("9000"));
+            argMap.put("ioProfiling", Collections.singletonList("true"));
             argMap.put("durationProfiling", Arrays.asList("package.c900.m900", "package.c901.m901"));
 
             configMap.put("", argMap);
 
             argMap = new HashMap<>();
-            argMap.put("metricInterval", Arrays.asList("9001"));
-            argMap.put("ioProfiling", Arrays.asList("false"));
+            argMap.put("metricInterval", Collections.singletonList("9001"));
+            argMap.put("ioProfiling", Collections.singletonList("false"));
             argMap.put("durationProfiling", Arrays.asList("package.c900.m910", "package.c901.m911"));
 
             configMap.put("tag1", argMap);
 
             argMap = new HashMap<>();
-            argMap.put("metricInterval", Arrays.asList("9002"));
-            argMap.put("ioProfiling", Arrays.asList("true"));
+            argMap.put("metricInterval", Collections.singletonList("9002"));
+            argMap.put("ioProfiling", Collections.singletonList("true"));
             argMap.put("durationProfiling", Arrays.asList("package.c900.m920", "package.c901.m921"));
 
             configMap.put("tag2", argMap);

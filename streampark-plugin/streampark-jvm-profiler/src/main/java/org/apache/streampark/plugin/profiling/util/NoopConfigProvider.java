@@ -19,7 +19,7 @@ package org.apache.streampark.plugin.profiling.util;
 
 import org.apache.streampark.plugin.profiling.ConfigProvider;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class NoopConfigProvider implements ConfigProvider {
         Map<String, Map<String, List<String>>> configMap = new HashMap<>();
 
         Map<String, List<String>> values = new HashMap<>();
-        values.put("noop", Arrays.asList("true"));
+        values.put("noop", Collections.singletonList("true"));
 
         configMap.put("", values);
 

@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -79,16 +80,16 @@ public class YamlConfigProviderTest {
 
             Map<String, List<String>> rootConfig = config.get("");
             Assert.assertEquals(4, rootConfig.size());
-            Assert.assertEquals(Arrays.asList("value1"), rootConfig.get("key1"));
+            Assert.assertEquals(Collections.singletonList("value1"), rootConfig.get("key1"));
             Assert.assertEquals(Arrays.asList("value2a", "value2b"), rootConfig.get("key2"));
-            Assert.assertEquals(Arrays.asList("value3a"), rootConfig.get("key3.key3a"));
+            Assert.assertEquals(Collections.singletonList("value3a"), rootConfig.get("key3.key3a"));
             Assert.assertEquals(Arrays.asList("value3b", "value3c"), rootConfig.get("key3.key3b"));
 
             Map<String, List<String>> override1Config = config.get("override1");
             Assert.assertEquals(3, override1Config.size());
-            Assert.assertEquals(Arrays.asList("value11"), override1Config.get("key1"));
+            Assert.assertEquals(Collections.singletonList("value11"), override1Config.get("key1"));
             Assert.assertEquals(Arrays.asList("value22a", "value22b"), override1Config.get("key2"));
-            Assert.assertEquals(Arrays.asList("value33a"), override1Config.get("key3.key3a"));
+            Assert.assertEquals(Collections.singletonList("value33a"), override1Config.get("key3.key3a"));
         }
     }
 
@@ -131,14 +132,14 @@ public class YamlConfigProviderTest {
 
         Map<String, List<String>> rootConfig = config.get("");
         Assert.assertEquals(4, rootConfig.size());
-        Assert.assertEquals(Arrays.asList("value1"), rootConfig.get("key1"));
+        Assert.assertEquals(Collections.singletonList("value1"), rootConfig.get("key1"));
         Assert.assertEquals(Arrays.asList("value2a", "value2b"), rootConfig.get("key2"));
         Assert.assertEquals(Arrays.asList("value3b", "value3c"), rootConfig.get("key3.key3b"));
 
         Map<String, List<String>> override1Config = config.get("override1");
         Assert.assertEquals(3, override1Config.size());
-        Assert.assertEquals(Arrays.asList("value11"), override1Config.get("key1"));
+        Assert.assertEquals(Collections.singletonList("value11"), override1Config.get("key1"));
         Assert.assertEquals(Arrays.asList("value22a", "value22b"), override1Config.get("key2"));
-        Assert.assertEquals(Arrays.asList("value33a"), override1Config.get("key3.key3a"));
+        Assert.assertEquals(Collections.singletonList("value33a"), override1Config.get("key3.key3a"));
     }
 }

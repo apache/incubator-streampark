@@ -17,6 +17,8 @@
 
 package org.apache.streampark.plugin.profiling.util;
 
+import java.util.Objects;
+
 public class ClassAndMethodMetricKey {
     private final String className;
     private final String methodName;
@@ -51,13 +53,13 @@ public class ClassAndMethodMetricKey {
 
         ClassAndMethodMetricKey that = (ClassAndMethodMetricKey) o;
 
-        if (className != null ? !className.equals(that.className) : that.className != null) {
+        if (!Objects.equals(className, that.className)) {
             return false;
         }
-        if (methodName != null ? !methodName.equals(that.methodName) : that.methodName != null) {
+        if (!Objects.equals(methodName, that.methodName)) {
             return false;
         }
-        return metricName != null ? metricName.equals(that.metricName) : that.metricName == null;
+        return Objects.equals(metricName, that.metricName);
     }
 
     @Override
