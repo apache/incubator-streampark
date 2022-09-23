@@ -41,7 +41,6 @@ import org.apache.flink.table.catalog.Catalog
 import org.apache.flink.table.expressions.Expression
 import org.apache.flink.table.functions._
 import org.apache.flink.table.module.Module
-import org.apache.flink.table.sources.TableSource
 import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.util.SplittableIterator
 

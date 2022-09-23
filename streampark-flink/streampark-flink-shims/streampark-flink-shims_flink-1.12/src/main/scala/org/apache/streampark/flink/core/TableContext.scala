@@ -39,7 +39,7 @@ class TableContext(override val parameter: ParameterTool,
    *
    * @param args
    */
-  def this(args: TableEnvConfig) = this(FlinkTableInitializer.initJavaTable(args))
+  def this(args: TableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
 
   @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)

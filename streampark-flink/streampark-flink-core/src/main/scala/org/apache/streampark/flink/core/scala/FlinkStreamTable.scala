@@ -51,7 +51,7 @@ trait FlinkStreamTable extends Logger {
 
   private[this] def init(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreamTable])
-    context = new StreamTableContext(FlinkTableInitializer.initStreamTable(args, configStream, configTable))
+    context = new StreamTableContext(FlinkTableInitializer.initialize(args, configStream, configTable))
   }
 
   def configStream(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
