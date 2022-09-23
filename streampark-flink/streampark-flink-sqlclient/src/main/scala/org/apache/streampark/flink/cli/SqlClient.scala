@@ -53,7 +53,7 @@ object SqlClient extends App {
   mode match {
     case "batch" => BatchSqlApp.main(args)
     case "streaming" => StreamSqlApp.main(args)
-    case _ => throw new IllegalArgumentException("Usage: execution.type is invalid, optional [streaming|batch]")
+    case _ => throw new IllegalArgumentException("Usage: runtime execution-mode invalid, optional [streaming|batch]")
   }
 
   private[this] object BatchSqlApp extends FlinkTable {
