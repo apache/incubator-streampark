@@ -135,7 +135,6 @@ public class FlinkCluster implements Serializable {
         return null;
     }
 
-    @JsonIgnore
     public boolean verifyConnection() {
         if (address == null) {
             return false;
