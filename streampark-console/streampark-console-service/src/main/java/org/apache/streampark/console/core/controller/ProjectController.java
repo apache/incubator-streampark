@@ -64,23 +64,15 @@ public class ProjectController {
 
     @PostMapping("build")
     @RequiresPermissions("project:build")
-    public RestResponse build(Long id, String socketId) throws Exception {
-        projectService.build(id, socketId);
+    public RestResponse build(Long id) throws Exception {
+        projectService.build(id);
         return RestResponse.success();
     }
 
     @PostMapping("buildlog")
     @RequiresPermissions("project:build")
     public RestResponse buildLog(Long id) throws Exception {
-        projectService.tailBuildLog(id);
-        return RestResponse.success();
-    }
-
-    @PostMapping("closebuild")
-    @RequiresPermissions("project:build")
-    public RestResponse closeBuild(Long id) {
-        projectService.closeBuildLog(id);
-        return RestResponse.success();
+        return RestResponse.success().data(projectService.getBuildLog(id));
     }
 
     @PostMapping("list")

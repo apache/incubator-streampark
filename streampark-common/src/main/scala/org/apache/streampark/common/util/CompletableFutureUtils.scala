@@ -81,4 +81,14 @@ object CompletableFutureUtils {
     })
   }
 
+  def runTimeoutAndCancelFuture[T](future: CompletableFuture[T],
+                                   timeout: Long,
+                                   unit: TimeUnit): CompletableFuture[Unit] = {
+    runTimeout(future, timeout, unit, (_: T) => {}, (_: Throwable) => {
+      if (!future.isDone) {
+        future.cancel(true)
+      }
+    })
+  }
+
 }
