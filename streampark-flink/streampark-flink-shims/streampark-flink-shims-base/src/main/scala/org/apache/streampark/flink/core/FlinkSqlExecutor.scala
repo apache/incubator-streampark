@@ -20,7 +20,7 @@ import org.apache.streampark.common.conf.ConfigConst.KEY_FLINK_SQL
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.core.SqlCommand._
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.{ConfigOption, Configuration}
+import org.apache.flink.configuration.{ConfigOption, Configuration, ExecutionOptions}
 import org.apache.flink.table.api.TableEnvironment
 import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
 
@@ -59,6 +59,7 @@ object FlinkSqlExecutor extends Logger {
     val configOptions = new JavaHashMap[String, ConfigOption[_]]
     val configList = List(
       //classOf[PythonOptions],
+      classOf[ExecutionOptions],
       classOf[ExecutionConfigOptions],
       classOf[OptimizerConfigOptions],
       classOf[TableConfigOptions]

@@ -38,7 +38,7 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
   /**
    * for Java
    */
-  def this(args: StreamEnvConfig) = this(FlinkStreamingInitializer.initJavaStream(args))
+  def this(args: StreamEnvConfig) = this(FlinkStreamingInitializer.initialize(args))
 
   /**
    * Recommend use this Api to start task
@@ -83,7 +83,7 @@ trait FlinkStreaming extends Serializable with Logger {
 
   private[this] def init(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
-    context = new StreamingContext(FlinkStreamingInitializer.initStream(args, config))
+    context = new StreamingContext(FlinkStreamingInitializer.initialize(args, config))
   }
 
   def ready(): Unit = {}

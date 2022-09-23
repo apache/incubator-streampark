@@ -47,7 +47,7 @@ class StreamTableContext(override val parameter: ParameterTool,
   /**
    * for Java
    */
-  def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initJavaStreamTable(args))
+  def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
 
   override def fromDataStream[T](dataStream: DataStream[T], schema: Schema): Table = tableEnv.fromDataStream[T](dataStream, schema)

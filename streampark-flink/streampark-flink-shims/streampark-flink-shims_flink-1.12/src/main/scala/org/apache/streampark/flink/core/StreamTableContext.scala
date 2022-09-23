@@ -43,7 +43,7 @@ class StreamTableContext(override val parameter: ParameterTool,
   /**
    * for Java
    */
-  def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initJavaStreamTable(args))
+  def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
 
   @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)

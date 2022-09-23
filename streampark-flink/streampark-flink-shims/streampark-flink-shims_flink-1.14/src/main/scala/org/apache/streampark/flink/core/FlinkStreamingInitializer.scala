@@ -45,26 +45,27 @@ private[flink] object FlinkStreamingInitializer {
 
   private[this] var flinkInitializer: FlinkStreamingInitializer = _
 
-  def initStream(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null): (ParameterTool, StreamExecutionEnvironment) = {
+  def initialize(args: Array[String],
+                 config: (StreamExecutionEnvironment, ParameterTool) => Unit): (ParameterTool, StreamExecutionEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
           flinkInitializer = new FlinkStreamingInitializer(args, ApiType.scala)
           flinkInitializer.streamEnvConfFunc = config
-          flinkInitializer.initStreamEnv()
+          flinkInitializer.initEnvironment()
         }
       }
     }
     (flinkInitializer.parameter, flinkInitializer.streamEnvironment)
   }
 
-  def initJavaStream(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment) = {
+  def initialize(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
           flinkInitializer = new FlinkStreamingInitializer(args.args, ApiType.java)
           flinkInitializer.javaStreamEnvConfFunc = args.conf
-          flinkInitializer.initStreamEnv()
+          flinkInitializer.initEnvironment()
         }
       }
     }
@@ -111,6 +112,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case x if x.startsWith("prop://") =>
         PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(x.drop(7)))
       case x if x.startsWith("hdfs://") =>
+
         /**
          * If the configuration file with the hdfs, user will need to copy the hdfs-related configuration files under the resources dir
          */
@@ -152,14 +154,14 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     if (localStreamEnv == null) {
       this.synchronized {
         if (localStreamEnv == null) {
-          initStreamEnv()
+          initEnvironment()
         }
       }
     }
     localStreamEnv
   }
 
-  def initStreamEnv(): Unit = {
+  def initEnvironment(): Unit = {
     localStreamEnv = StreamExecutionEnvironment.getExecutionEnvironment
     Try(parameter.get(KEY_FLINK_PARALLELISM()).toInt).getOrElse {
       Try(parameter.get(CoreOptions.DEFAULT_PARALLELISM.key()).toInt).getOrElse(CoreOptions.DEFAULT_PARALLELISM.defaultValue().toInt)
@@ -200,6 +202,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
     strategy match {
       case RestartStrategy.`failure-rate` =>
+
         /**
          * restart-strategy.failure-rate.max-failures-per-interval: maximum number of restarts before a Job is deemed to have failed
          * restart-strategy.failure-rate.failure-rate-interval: time interval for calculating the failure rate
@@ -235,6 +238,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           Time.of(delay._1, delay._2)
         ))
       case RestartStrategy.`fixed-delay` =>
+
         /**
          * restart-strategy.fixed-delay.attempts: the number of times Flink tries to execute a Job before it finally failure
          * restart-strategy.fixed-delay.delay: specific how long the restart interval

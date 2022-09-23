@@ -44,7 +44,7 @@ trait FlinkTable extends Logger {
 
   private[this] def init(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
-    context = new TableContext(FlinkTableInitializer.initTable(args, config))
+    context = new TableContext(FlinkTableInitializer.initialize(args, config))
   }
 
   def ready(): Unit = {}
