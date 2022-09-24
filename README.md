@@ -91,7 +91,8 @@ Thank you to all the people who already contributed to StreamPark!
 
 ## 👍Stargazers Over Time
 
-[![Star History Chart](https://api.star-history.com/svg?repos=apache/incubator-streampark&type=Date)](https://star-history.com/#apache/incubator-streampark&Date)
+![Stargazers over time](https://starchart.cc/apache/streampark.svg)
+
 
 
 ## 💬 Join us (微信公众号)
