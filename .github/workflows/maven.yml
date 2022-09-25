@@ -49,7 +49,6 @@ jobs:
   build:
     if: github.repository == 'apache/incubator-streampark'
     name: Build
-    needs: [ sanity-check ]
     strategy:
       matrix:
         java: [ '8', '11' ]
