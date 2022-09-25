@@ -77,7 +77,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             }
             result.put("total", menus.size());
         } catch (NumberFormatException e) {
-            log.info("查询菜单失败", e);
+            log.info("Failed to query menu", e);
             result.put("rows", null);
             result.put("total", 0);
         }
@@ -112,9 +112,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Transactional(rollbackFor = Exception.class)
     public void deleteMenus(String[] menuIds) throws Exception {
         for (String menuId : menuIds) {
-            // 查找与这些菜单/按钮关联的用户
+            // Find users associated with these menus/buttons
             this.baseMapper.deleteRoleMenuByMenuId(Long.parseLong(menuId));
-            // 递归删除这些菜单/按钮
+            // Recursively delete these menus/buttons
             this.baseMapper.deleteById(menuId);
         }
     }
@@ -122,7 +122,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public ArrayList<VueRouter<Menu>> getUserRouters(User user) {
         List<VueRouter<Menu>> routes = new ArrayList<>();
-        // 查询type为菜单类型
+        // The query type is the menu type
         List<Menu> menus = this.findUserMenus(user.getUsername());
         menus.forEach(menu -> {
             VueRouter<Menu> route = new VueRouter<>();

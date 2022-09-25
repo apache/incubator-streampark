@@ -430,7 +430,7 @@ public final class CommonUtils implements Serializable {
     }
 
     /**
-     * linux内核平台 1 window： 2 其他平台 0
+     * linux kernel platform 1 window: 2 other platforms 0
      */
     public static int getPlatform() {
         int platform = 0;

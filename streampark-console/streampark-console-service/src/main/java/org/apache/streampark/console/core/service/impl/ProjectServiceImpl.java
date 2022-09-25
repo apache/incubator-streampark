@@ -102,12 +102,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             project.setCreateTime(new Date());
             boolean status = save(project);
             if (status) {
-                return response.message("添加项目成功").data(true);
+                return response.message("Add project successfully").data(true);
             } else {
-                return response.message("添加项目失败").data(false);
+                return response.message("Add project failed").data(false);
             }
         } else {
-            return response.message("该名称的项目已存在,添加任务失败").data(false);
+            return response.message("A project with this name already exists, adding a task failed").data(false);
         }
     }
 
@@ -129,7 +129,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 project.setBuildState(projectParam.getBuildState());
                 if (BuildState.of(projectParam.getBuildState()).equals(BuildState.NEED_REBUILD)) {
                     List<Application> applications = getApplications(project);
-                    // 更新部署状态
+                    // Update deployment status
                     FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
                         log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
                         app.setLaunch(LaunchState.NEED_CHECK.get());
