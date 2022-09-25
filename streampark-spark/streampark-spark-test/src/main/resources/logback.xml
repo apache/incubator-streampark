@@ -18,7 +18,7 @@
 
 -->
 <configuration>
-    <!-- 日志文件存储路径 -->
+    <!-- log file storage path -->
     <property name="LOG_HOME" value="${app.home}/logs/"/>
     <property name="FILE_SIZE" value="50MB"/>
     <property name="MAX_HISTORY" value="100"/>
@@ -29,13 +29,13 @@
     <property name="log.pattern"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} %contextName [%thread] %-5level %logger{36} - %msg%n"/>
 
-    <!-- 控制台打印 -->
+    <!-- console print -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder charset="utf-8">
             <pattern>${log.colorPattern}</pattern>
         </encoder>
     </appender>
-    <!-- ERROR 输入到文件，按日期和文件大小 -->
+    <!-- ERROR input to file, by date and file size -->
     <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
             <pattern>${log.pattern}</pattern>
@@ -54,7 +54,7 @@
         </rollingPolicy>
     </appender>
 
-    <!-- WARN 输入到文件，按日期和文件大小 -->
+    <!-- WARN input to file, by date and file size -->
     <appender name="WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
             <pattern>${log.pattern}</pattern>
@@ -73,7 +73,7 @@
         </rollingPolicy>
     </appender>
 
-    <!-- INFO 输入到文件，按日期和文件大小 -->
+    <!-- INFO input to file, by date and file size -->
     <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
             <pattern>${log.pattern}</pattern>
@@ -91,7 +91,7 @@
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
-    <!-- DEBUG 输入到文件，按日期和文件大小 -->
+    <!-- DEBUG input to file, by date and file size -->
     <appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
             <pattern>${log.pattern}</pattern>
@@ -110,7 +110,7 @@
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
-    <!-- TRACE 输入到文件，按日期和文件大小 -->
+    <!-- TRACE input to file, by date and file size -->
     <appender name="TRACE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
             <pattern>${log.pattern}</pattern>
@@ -130,7 +130,7 @@
         </rollingPolicy>
     </appender>
 
-    <!-- Logger 根目录 -->
+    <!-- Logger root directory -->
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="DEBUG"/>

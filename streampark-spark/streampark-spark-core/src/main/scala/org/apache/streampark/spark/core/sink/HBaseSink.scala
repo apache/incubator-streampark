@@ -55,7 +55,7 @@
 //    connection.getTable(TableName.valueOf(tableName))
 //  }
 //
-//  /** 输出
+//  /** output
 //   *
 //   * @param rdd  RDD[Put]或者RDD[Delete]
 //   * @param time spark.streaming.Time
