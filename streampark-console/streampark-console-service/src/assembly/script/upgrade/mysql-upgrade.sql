@@ -196,5 +196,11 @@ update `t_menu` set `menu_name` = 'StreamPark' where `menu_id` = 100013;
 
 insert into `t_setting` values (15, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml 完整路径', 1);
 
+-- update the index field for t_user;
+alter table `t_user` drop index `un_username`;
+alter table `t_user`
+modify `username` varchar(255) collate utf8mb4_general_ci not null comment 'user name',
+add unique key `un_username` (`username`) using btree;
+
 set foreign_key_checks = 1;
 -- -------------------------------------- version: 1.2.4 END ---------------------------------------
