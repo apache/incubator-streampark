@@ -28,7 +28,7 @@
 ///**
 //  *
 //  *
-//  * 输出ES
+//  * output ES
 //  */
 //class EsSink[T](@transient override val sc: SparkContext, initParams: Map[String, String] = Map.empty[String, String])
 //  extends Sink[T] {
@@ -39,7 +39,7 @@
 //  lazy val esParam: Map[String, String] = (param++initParams).filter(_._1.startsWith(prefix))
 //
 //  /**
-//    * 输出
+//    * output
 //    *
 //    */
 //  def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {

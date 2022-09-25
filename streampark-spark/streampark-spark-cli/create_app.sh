@@ -81,7 +81,7 @@ create_module() {
     cp -r ${base}/bin ${name}/${module}/assembly/bin
 	cp ${name}/default.properties ${name}/${module}/${conf_dir}/${module}.properties
 
-	echo "# $module 模块说明文档" >${name}/${module}/README.md
+	echo "# $module module documentation" >${name}/${module}/README.md
 	cat > ${name}/${module}/assembly.xml <<EOF
 
 <assembly>
@@ -100,7 +100,7 @@ create_module() {
         </dependencySet>
         <dependencySet>
             <!--
-               不使用项目的artifact，第三方jar不要解压
+               Do not use the artifact of the project, do not decompress the third-party jar
             -->
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>lib</outputDirectory>
@@ -119,7 +119,7 @@ create_module() {
             <directory>\${project.basedir}/assembly</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
-        <!-- 把项目自己编译出来的jar文件，打包进gz文件的lib目录 -->
+        <!-- Package the jar file compiled by the project itself into the lib directory of the gz file -->
         <fileSet>
             <directory>\${project.build.directory}</directory>
             <outputDirectory>lib</outputDirectory>
@@ -224,11 +224,11 @@ cat > $name/pom.xml <<EOF
         <profile>
             <!--
             mvn clean package
-            直接打包，只会将 assembly.xml 文件中
+            Direct packaging, only the assembly.xml file will be
             <includes>
                 <include>org.apache.streampark:streampark-spark</include>
             </includes>
-            包含的Jar包打包进去
+            The included Jar package is packaged in
              -->
             <id>default</id>
             <properties>
@@ -241,12 +241,12 @@ cat > $name/pom.xml <<EOF
         <profile>
             <!--
              mvn clean package -Pwithjar -Dmaven.test.skip=true
-            包含依赖jar打包，会将assembly.xml 文件中
+            Including dependent jar packaging, will be included in the assembly.xml file
             <includes>
                 <include>org.apache.streampark.spark:spark-core</include>
             </includes>
-            包含的Jar和pom中设置 <scope>\${project.scope}</scope> 的jar一起打包进去，
-            这样蹩脚的设计，主要是因为我不知道怎么能优雅的把 运行、编译都依赖的JarA 抽离出来
+            The included Jar is packaged with the jar set in the pom <scope>\${project.scope}</scope>,
+            Such a crappy design is mainly because I don't know how to elegantly extract the JarA that depends on running and compiling.
              -->
             <id>withjar</id>
             <properties>
@@ -386,7 +386,7 @@ create_git_filter() {
 }
 
 create_readme() {
-	echo -e "# $name 项目说明" >$name/README.md
+	echo -e "# $name project instruction" >$name/README.md
 }
 
 create_default_conf() {
