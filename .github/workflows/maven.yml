@@ -51,7 +51,7 @@ jobs:
     name: Build
     strategy:
       matrix:
-        java: [ '8' ]
+        java: [ '8', '11' ]
         os: [ 'ubuntu-latest' ]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
@@ -69,11 +69,13 @@ jobs:
           ./mvnw -B -T 2C clean package scalastyle:check
           -D"maven.test.skip"=true
           -D"checkstyle.skip"=true
+          -D"maven.javadoc.skip"=true
           -D"license.skipAddThirdParty"=true
           -D"http.keepAlive"=false
           -D"maven.wagon.http.pool"=false
           -D"maven.wagon.http.retryHandler.count"=3
           -D"maven.wagon.httpconnectionManager.ttlSeconds"=120
+          --no-snapshot-updates
       - name: Test with Maven
         run: mvn -B test -pl '!streampark-plugin/streampark-jvm-profiler,!streampark-console/streampark-console-service' -am
 #      - name: Setup Go
