@@ -36,7 +36,7 @@ public class SecurityConfig {
     @Value("${security.authentication.type:PASSWORD}")
     private String type;
 
-    private AutowireCapableBeanFactory beanFactory;
+    private final AutowireCapableBeanFactory beanFactory;
     private AuthenticationType authenticationType;
 
     @Autowired

@@ -45,7 +45,7 @@ public class DorisSinkWriter implements Serializable {
     private static final Logger LOG = LoggerFactory.getLogger(DorisSinkWriter.class);
 
     private final DorisConfig dorisConfig;
-    private DorisStreamLoader streamLoader;
+    private final DorisStreamLoader streamLoader;
 
     private ScheduledExecutorService schedule;
     private ScheduledFuture<?> scheduledFuture;
@@ -58,7 +58,7 @@ public class DorisSinkWriter implements Serializable {
     private transient Counter totalFlushFailedTimes;
 
     private final Map<String, DorisSinkBufferEntry> bufferMap = new ConcurrentHashMap<>();
-    private Long timeout = 3000L;
+    private final Long timeout = 3000L;
     private volatile boolean closed = false;
     private volatile boolean flushThreadAlive = false;
     private volatile Throwable flushException;
@@ -72,7 +72,7 @@ public class DorisSinkWriter implements Serializable {
     private static final String COUNTER_TOTAL_FLUSH_SUCCEEDED_TIMES = "totalFlushSucceededTimes";
     private static final String COUNTER_TOTAL_FLUSH_FAILED_TIMES = "totalFlushFailedTimes";
 
-    private Semantic semantic;
+    private final Semantic semantic;
 
     public DorisSinkWriter(DorisConfig dorisConfig) {
         this.streamLoader = new DorisStreamLoader(dorisConfig);

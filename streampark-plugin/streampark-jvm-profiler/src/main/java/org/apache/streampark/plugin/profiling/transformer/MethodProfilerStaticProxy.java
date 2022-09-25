@@ -54,7 +54,7 @@ public class MethodProfilerStaticProxy {
         }
 
         try {
-            String argument = "arg." + argIndex + "." + String.valueOf(argValue);
+            String argument = "arg." + argIndex + "." + argValue;
             argumentCollectorSingleton.collectMetric(className, methodName, argument);
         } catch (Throwable ex) {
             ex.printStackTrace();

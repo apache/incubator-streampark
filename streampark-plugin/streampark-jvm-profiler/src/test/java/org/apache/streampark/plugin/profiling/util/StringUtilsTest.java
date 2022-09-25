@@ -70,9 +70,9 @@ public class StringUtilsTest {
 
     @Test
     public void getValueAsBytes() {
-        Assert.assertEquals(null, StringUtils.getBytesValueOrNull(null));
-        Assert.assertEquals(null, StringUtils.getBytesValueOrNull(""));
-        Assert.assertEquals(null, StringUtils.getBytesValueOrNull("xxx"));
+        Assert.assertNull(StringUtils.getBytesValueOrNull(null));
+        Assert.assertNull(StringUtils.getBytesValueOrNull(""));
+        Assert.assertNull(StringUtils.getBytesValueOrNull("xxx"));
 
         Assert.assertEquals(0L, StringUtils.getBytesValueOrNull("0").longValue());
         Assert.assertEquals(123L, StringUtils.getBytesValueOrNull("123").longValue());
@@ -106,13 +106,13 @@ public class StringUtilsTest {
 
     @Test
     public void getArgumentValue() {
-        Assert.assertEquals(null, StringUtils.getArgumentValue(null, null));
-        Assert.assertEquals(null, StringUtils.getArgumentValue(null, ""));
-        Assert.assertEquals(null, StringUtils.getArgumentValue("", null));
+        Assert.assertNull(StringUtils.getArgumentValue(null, null));
+        Assert.assertNull(StringUtils.getArgumentValue(null, ""));
+        Assert.assertNull(StringUtils.getArgumentValue("", null));
 
-        Assert.assertEquals(null, StringUtils.getArgumentValue("", ""));
-        Assert.assertEquals(null, StringUtils.getArgumentValue("test", ""));
-        Assert.assertEquals(null, StringUtils.getArgumentValue("", "test"));
+        Assert.assertNull(StringUtils.getArgumentValue("", ""));
+        Assert.assertNull(StringUtils.getArgumentValue("test", ""));
+        Assert.assertNull(StringUtils.getArgumentValue("", "test"));
 
         Assert.assertEquals(
             "com.foo.jobs.Abc", StringUtils.getArgumentValue("--class com.foo.jobs.Abc", "--class"));
