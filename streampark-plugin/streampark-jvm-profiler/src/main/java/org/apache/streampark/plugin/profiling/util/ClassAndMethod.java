@@ -52,20 +52,13 @@ public class ClassAndMethod {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         ClassAndMethod that = (ClassAndMethod) o;
-
-        if (!Objects.equals(className, that.className)) {
-            return false;
-        }
-        return Objects.equals(methodName, that.methodName);
+        return className.equals(that.className) && methodName.equals(that.methodName);
     }
 
     @Override
     public int hashCode() {
-        int result = className != null ? className.hashCode() : 0;
-        result = 31 * result + (methodName != null ? methodName.hashCode() : 0);
-        return result;
+        return Objects.hash(className, methodName);
     }
 
     @Override

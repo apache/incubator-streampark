@@ -63,24 +63,13 @@ public class ClassMethodArgument {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         ClassMethodArgument that = (ClassMethodArgument) o;
-
-        if (argumentIndex != that.argumentIndex) {
-            return false;
-        }
-        if (!Objects.equals(className, that.className)) {
-            return false;
-        }
-        return Objects.equals(methodName, that.methodName);
+        return argumentIndex == that.argumentIndex && Objects.equals(className, that.className) && Objects.equals(methodName, that.methodName);
     }
 
     @Override
     public int hashCode() {
-        int result = className != null ? className.hashCode() : 0;
-        result = 31 * result + (methodName != null ? methodName.hashCode() : 0);
-        result = 31 * result + argumentIndex;
-        return result;
+        return Objects.hash(className, methodName, argumentIndex);
     }
 
     @Override

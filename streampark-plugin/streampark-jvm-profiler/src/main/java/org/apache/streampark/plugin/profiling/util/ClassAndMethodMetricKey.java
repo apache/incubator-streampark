@@ -50,24 +50,13 @@ public class ClassAndMethodMetricKey {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         ClassAndMethodMetricKey that = (ClassAndMethodMetricKey) o;
-
-        if (!Objects.equals(className, that.className)) {
-            return false;
-        }
-        if (!Objects.equals(methodName, that.methodName)) {
-            return false;
-        }
-        return Objects.equals(metricName, that.metricName);
+        return Objects.equals(className, that.className) && Objects.equals(methodName, that.methodName) && Objects.equals(metricName, that.metricName);
     }
 
     @Override
     public int hashCode() {
-        int result = className != null ? className.hashCode() : 0;
-        result = 31 * result + (methodName != null ? methodName.hashCode() : 0);
-        result = 31 * result + (metricName != null ? metricName.hashCode() : 0);
-        return result;
+        return Objects.hash(className, methodName, metricName);
     }
 
     @Override

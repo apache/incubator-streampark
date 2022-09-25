@@ -61,23 +61,13 @@ public class Stacktrace {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         Stacktrace that = (Stacktrace) o;
-
-        if (!Objects.equals(threadName, that.threadName)) {
-            return false;
-        }
-        if (!Objects.equals(threadState, that.threadState)) {
-            return false;
-        }
-
-        return Arrays.equals(stack, that.stack);
+        return Objects.equals(threadName, that.threadName) && Objects.equals(threadState, that.threadState) && Arrays.equals(stack, that.stack);
     }
 
     @Override
     public int hashCode() {
-        int result = threadName != null ? threadName.hashCode() : 0;
-        result = 31 * result + (threadState != null ? threadState.hashCode() : 0);
+        int result = Objects.hash(threadName, threadState);
         result = 31 * result + Arrays.hashCode(stack);
         return result;
     }
