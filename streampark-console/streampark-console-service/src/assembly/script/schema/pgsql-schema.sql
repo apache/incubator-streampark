@@ -634,7 +634,7 @@ create sequence "public"."streampark_t_user_id_seq"
 
 create table "public"."t_user" (
   "user_id" int8 not null default nextval('streampark_t_user_id_seq'::regclass),
-  "username" varchar(255) collate "pg_catalog"."default",
+  "username" varchar(255) collate "pg_catalog"."default" not null,
   "nick_name" varchar(50) collate "pg_catalog"."default" not null,
   "salt" varchar(255) collate "pg_catalog"."default",
   "password" varchar(128) collate "pg_catalog"."default" not null,
@@ -663,7 +663,7 @@ comment on column "public"."t_user"."avatar" is 'avatar';
 comment on column "public"."t_user"."description" is 'description';
 alter table "public"."t_user" add constraint "t_user_pkey" primary key ("user_id");
 create index "un_username" on "public"."t_user" using btree (
-  "nick_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
+  "username" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
 );
 
 
