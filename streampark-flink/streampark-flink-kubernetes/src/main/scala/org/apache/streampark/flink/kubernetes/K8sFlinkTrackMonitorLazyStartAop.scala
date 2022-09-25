@@ -53,12 +53,12 @@ trait K8sFlinkTrackMonitorLazyStartAop extends K8sFlinkTrackMonitor {
     super.getJobStatus(trackId)
   }
 
-  abstract override def getJobStatus(trackIds: Set[TrackId]): Map[TrackId, JobStatusCV] = {
+  abstract override def getJobStatus(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] = {
     start()
     super.getJobStatus(trackIds)
   }
 
-  abstract override def getAllJobStatus: Map[TrackId, JobStatusCV] = {
+  abstract override def getAllJobStatus: Map[CacheKey, JobStatusCV] = {
     start()
     super.getAllJobStatus
   }
