@@ -77,9 +77,9 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
 
   override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = Option(trackController.jobStatuses.get(trackId))
 
-  override def getJobStatus(trackIds: Set[TrackId]): Map[TrackId, JobStatusCV] = trackController.jobStatuses.getAsMap(trackIds)
+  override def getJobStatus(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] = trackController.jobStatuses.getAsMap(trackIds)
 
-  override def getAllJobStatus: Map[TrackId, JobStatusCV] = trackController.jobStatuses.asMap()
+  override def getAllJobStatus: Map[CacheKey, JobStatusCV] = trackController.jobStatuses.asMap()
 
   override def getAccClusterMetrics: FlinkMetricCV = trackController.collectAccMetric()
 
