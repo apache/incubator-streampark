@@ -72,21 +72,21 @@ public class Utils {
     }
 
     public static String zipString(String text) {
-        // 使用指定的压缩级别创建一个新的压缩器。
+        // Creates a new compressor with the specified compression level.
         Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
-        // 设置压缩输入数据。
+        // Sets compressed input data.
         deflater.setInput(text.getBytes());
-        // 当被调用时，表示压缩应该以输入缓冲区的当前内容结束。
+        // When called, indicates that compression should end with the current contents of the input buffer.
         deflater.finish();
         final byte[] bytes = new byte[256];
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(256);
 
         while (!deflater.finished()) {
-            // 压缩输入数据并用压缩数据填充指定的缓冲区。
+            // Compresses the input data and fills the specified buffer with the compressed data.
             int length = deflater.deflate(bytes);
             outputStream.write(bytes, 0, length);
         }
-        // 关闭压缩器并丢弃任何未处理的输入。
+        // Turn off the compressor and discard any unprocessed input.
         deflater.end();
         return Base64.getEncoder().encodeToString(outputStream.toByteArray());
     }

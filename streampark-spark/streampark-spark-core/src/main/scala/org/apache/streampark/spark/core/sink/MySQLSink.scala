@@ -56,7 +56,7 @@
 //
 //
 //  /**
-//   * 输出 到 Mysql
+//   * output to Mysql
 //   *
 //   * @param rdd
 //   * @param time
@@ -68,7 +68,7 @@
 //    val begin = System.currentTimeMillis()
 //
 //    val df = rdd.toDF()
-//    //     写入 Mysql
+//    // write to Mysql
 //    df.write.mode(saveMode).jdbc(url, table, prop)
 //    val count = df.count()
 //    val end = System.currentTimeMillis()

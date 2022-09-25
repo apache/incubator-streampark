@@ -59,112 +59,119 @@ function _p(){
 	echo -e "$(_n $notes)\n${ph}.${k}=${v}\n"
 }
 
-#提交脚本run.sh需要的几个配置
+# Several configurations required to submit the script run.sh
 function user_run_params(){
 	local Lprefix="spark.run"
-	_p "必须设置,执行class的全包名称" "main" " "
-	_p "必须设置,包含main class的jar包名称\njar文件必须包含在lib.path当中" "main.jar" " "
-	_p "提供给执行class的命令行参数,多个参数之间用逗号隔开,参数中不能包含空格等空白符\nEx:param1,param2,.." \
+	_p "Must be set to execute the full package name of the class" "main" " "
+	_p "Must be set, the name of the jar package containing the main class\njar file must be included in lib.path" "main.jar" " "
+	_p "The command line parameters provided to execute the class. Multiple parameters are separated by commas. The parameters cannot contain spaces such as spaces\nEx:param1,param2,.." \
 	"self.params" " "
-	_p "用户代码依赖jar包的所在目录\n可以是绝对路径,也可以是相对此配置文件的相对路径,相对路径会自动补全" "lib.path" " "
+	_p "The directory where the user code depends on the jar package\n can be an absolute path or a relative path relative to this configuration file, and the relative path will be automatically completed" "lib.path" " "
 }
 
-#spark任务提交需要的几个基础配置
+# Several basic configurations required for spark task submission
 function spark_run_params(){
-	_p "执行集群设置,不用设置,一般使用YARN" "master" "yarn"
-	_p "YARN部署模式\ndefault=cluster" "submit.deployMode" "cluster"
-	_p "spark-streaming每个批次间隔时间\ndefault=300" "batch.duration" "300"
-	_p "spark on yarn的任务提交队列\ndefault=defalut" "yarn.queue" "default"
-	_p "spark 任务名称配置,建议保持任务名称全局唯一\n这样可以在设计任务失败的时候根据名称做一些唯一处理\n不设置使用类全名.App" \
+	_p "Perform cluster settings, do not need to set, generally use YARN" "master" "yarn"
+	_p "YARN deployment mode\ndefault=cluster" "submit.deployMode" "cluster"
+	_p "spark-streaming interval time per batch\ndefault=300" "batch.duration" "300"
+	_p "Task submission queue of spark on yarn\default=default" "yarn.queue" "default"
+	_p "Spark task name configuration, it is recommended to keep the task name globally unique\nThis can do some unique processing according to the name when the design task fails\nDo not set the use of the full class name.App" \
 	"app.name" ""
-	_p "spark网络序列化方式,默认是JavaSerializer,可针对所有类型但速度较慢\n这里使用推荐的Kryo方式\nkafka-0.10必须使用此方式" \
+	_p "The spark network serialization method, the default is JavaSerializer, which can be used for all types but is slower\nThe recommended Kryo method is used here\nkafka-0.10 must use this method" \
 	"serializer" "org.apache.spark.serializer.KryoSerializer"
 
-	_p "++++++++++++++++++++++Driver节点相关配置+++++++++++++++++++++++++++"
+	_p "++++++++++++++++++++++Driver node related configuration+++++++++++++++++++++++++++"
 	local Lprefix="spark.driver"
-	_p "Driver节点使用内存大小设置\ndefault=512MB" "memory" "512MB"
-	_p "Driver节点使用的cpu个数设置\ndefault=1" "cores" "1"
-	_p "Driver节点构建时spark-jar和user-jar冲突时优先使用用户提供的,这是一个实验性质的参数只对cluster模式有效\ndefault=false" \
+	_p "Driver node uses memory size setting\ndefault=512MB" "memory" "512MB"
+	_p "The number of CPUs used by the Driver node is set\ndefault=1" "cores" "1"
+	_p "When the driver node is built, spark-jar and user-jar conflict with user-supplied first. This is an experimental parameter that is only valid for cluster mode\ndefault=false" \
 	"userClassPathFirst" "false"
 
-	_p "++++++++++++++++++++++Executor节点相关配置+++++++++++++++++++++++++"
+	_p "++++++++++++++++++++++Executor node related configurationExecutor node related configuration+++++++++++++++++++++++++"
 	Lprefix="spark.executor"
-	_p "Executor个数设置\ndefault=1" "instances" "1"
-	_p "Executor使用cpu个数设置\ndefault=1" "cores" "1"
-	_p "Executor使用内存大小设置\ndefault=512MB" "memory" "512MB"
-	_p "同driver节点配置作用相同,但是是针对executor的\ndefault=false" "userClassPathFirst" "false"
+	_p "Executor number setting\ndefault=1" "instances" "1"
+	_p "Executor uses the number of cpu settings\ndefault=1" "cores" "1"
+	_p "Executor uses the memory size setting\ndefault=512MB" "memory" "512MB"
+	_p "The same as the driver node configuration, but for the executor\ndefault=false" "userClassPathFirst" "false"
 }
 
-#spark 任务动态资源分配的配置
+# Configuration of dynamic resource allocation for spark tasks
 function spark_dynamic_params(){
-	_p "++++++++++++++++++++++++Executor动态分配相关配置++++++++++++++++++++"
+	_p "++++++++++++++++++++++++Executor dynamically allocates related configuration++++++++++++++++++++"
 	local Lprefix="spark.shuffle.service"
-	_p "Executor动态分配的前置服务\ndefault=false" "enabled" "true"
-	_p "服务对应的端口,此端口服务是配置在yarn-site中的,由NodeManager服务加载启动\ndefault=7337" "port" "7337"
+	_p "Front-end services dynamically allocated by Executor\ndefault=false" "enabled" "true"
+	_p "The port corresponding to the service. This port service is configured in yarn-site and loaded and started by the NodeManager service\ndefault=7337" "port" "7337"
 
 	Lprefix="spark.dynamicAllocation"
-	_p "配置是否启用资源动态分配,此动态分配是针对executor的,需要yarn集群配置支持动态分配\ndefault=false" \
+	_p "Configure whether to enable dynamic resource allocation. This dynamic allocation is for executors and requires yarn cluster configuration to support dynamic allocation\ndefault=false" \
 	"enabled" "true"
-	_p "释放空闲的executor的时间\ndefault=60s" "executorIdleTimeout" "60s"
-	_p "有缓存的executor空闲释放时间\ndefault=infinity(默认不释放)" "cachedExecutorIdleTimeout" "-1"
-	_p "初始化executor的个数,如果设置spark.executor.instances谁小用谁\ndefault=minExecutors(不设置使用此项配置值)" \
+	_p "Time to release idle executors\ndefault=60s" "executorIdleTimeout" "60s"
+	_p "Idle release time of cached executors\ndefault=infinity (not released by default)" "cachedExecutorIdleTimeout" "-1"
+	_p "Initialize the number of executors. If spark.executor.instances is set, whoever uses it is smaller\ndefault=minExecutors (do not use this configuration value)" \
 	"initialExecutors" "1"
-	_p "executor动态分配可分配最大数量\ndefault=infinity" "maxExecutors" "60"
-	_p "executor动态收缩的最小数量\ndefault=0" "minExecutors" "1"
-	_p "批次调度延迟多长时间开始增加executor\ndefault=1s" "schedulerBacklogTimeout" "1s"
-	_p "同上,但是是针对之后的请求\ndefault=SchedulerBacklogTimeout(不设置使用此项配置值)" \
+	_p "The maximum number of executors that can be allocated dynamically by executor\ndefault=infinity" "maxExecutors" "60"
+	_p "Minimum number of executors to shrink dynamically\ndefault=0" "minExecutors" "1"
+	_p "How long the batch scheduling delay starts to increase the executor\ndefault=1s" "schedulerBacklogTimeout" "1s"
+	_p "Same as above, but for subsequent requests\ndefault=SchedulerBacklogTimeout (do not use this configuration value)" \
 	"sustainedSchedulerBacklogTimeout" "1s"
 }
 
-#消费kafka需要的基础配置
+# Basic configuration required to consume kafka
 function streampark_spark_source_kafka(){
 	create_notes "\nStreamPark-Spark Kafka Source\nbase config\n"
-	_p "spark.source.kafka.consume后面的配置是标准kafka配置"
+	_p "The configuration behind spark.source.kafka.consume is the standard kafka configuration"
 	local Lprefix="spark.source.kafka.consume"
-	_p "kafka消费的topics配置,可以配置多个,每个topic之间用逗号[,]隔开\ndefault=" "topics" ""
+	_p "The configuration of topics consumed by kafka can be configured multiple times.
+	Each topic is separated by a comma [,]\ndefault=" "topics" ""
 	_p "kafka consumer的group id.\ndefault=kafka.consumer.001" "group.id" "kafka.consumer.001"
-	_p "kafka集群的主机和端口号,可以配置多个,每个主机之间用逗号[,]隔开\ndefault=" "bootstrap.servers" ""
-	_p "第一次消费kafka topic的时候指定从什么位置消费
-		有两个可选值latest[最新位置],earliest[最早位置]\ndefault=earliest" "auto.offset.reset" "earliest"
-	_p "spark.source.kafka" "spark消费kafka的时候如何管理offset
-		这里可选的值有三种hbase,redis,kafka每种值对应一种存储方式\ndefault=kafka" "offset.store.type" "kafka"
-	_p "自定义spark管理kafka offset的方法,需要指定一个自定义类的名称\nspark.source.kafka.offset.store.class=none"
-	_p "新版本kafka使用的key序列化方式\ndefault=java.Serialization" \
+	_p "The host and port number of the kafka cluster. Multiple hosts can be configured.
+	Each host is separated by a comma [,]\ndefault=" "bootstrap.servers" ""
+	_p "When consuming a kafka topic for the first time, specify where to consume from.
+	There are two optional values, latest[latest location],
+	earliest[earliest location]\ndefault=earliest" "auto.offset.reset" "earliest"
+	_p "spark.source.kafka" "How to manage offset when Spark consumes kafka.
+	There are three optional values: hbase, redis, and kafka.
+	Each value corresponds to a storage method ndefault=kafka" "offset.store.type" "kafka"
+	_p "To customize the method of spark management kafka offset,
+	you need to specify the name of a custom class\nspark.source.kafka.offset.store.class=none"
+	_p "The key serialization method used by the new version of kafka\ndefault=java.Serialization" \
 		"key.deserializer" "org.apache.kafka.common.serialization.StringDeserializer"
-	_p "最新版kafka使用的value序列化方式\ndefault=java.Serialization" \
+	_p "The value serialization method used by the latest version of kafka\ndefault=java.Serialization" \
 		"value.deserializer" "org.apache.kafka.common.serialization.StringDeserializer"
-	_p "获取一次数据的最大长度,此值的大小需要kafka server端支持\ndefault=10485760" "max.partition.fetch.bytes" "10485760"
-	_p "获取一次数据请求的最大等待时间\ndefault=3000" "fetch.max.wait.ms" "3000"
+	_p "Get the maximum length of data at one time,
+	the size of this value needs to be supported by the kafka server\ndefault=10485760" "max.partition.fetch.bytes" "10485760"
+	_p "Get the maximum waiting time for a data request\ndefault=3000" "fetch.max.wait.ms" "3000"
 }
 
 function streampark_spark_sink_redis(){
 	create_notes "\nStreamPark-Spark Redis Sink\nbase config\n"
-	_p "StreamPark-Spark redis sink需要的几个配置"
+	_p "Several configurations required by StreamPark-Spark redis sink"
 	local Lprefix="spark.sink.redis"
-	_p "redis主机" "host" ""
-	_p "redis端口" "port" "6379"
-	_p "redis数据库" "db" "0"
-	_p "redis连接超时时间" "timeout" "30"
+	_p "redis host" "host" ""
+	_p "redis port" "port" "6379"
+	_p "redis database" "db" "0"
+	_p "redis connection timeout" "timeout" "30"
 }
 
 function streampark_spark_sink_influx(){
 	create_notes "\nStreamPark-Spark InfluxDB Sink\nbase config\n"
-	_p "StreamPark-Spark influxDB sink需要的几个配置"
+	_p "Several configurations required by StreamPark-Spark influxDB sink"
 	local Lprefix="spark.sink.influxDB"
-	_p "influxDB主机" "host" ""
-	_p "influxDB端口" "port" "8086"
-	_p "influxDB数据库" "db" ""
+	_p "influxDB host" "host" ""
+	_p "influxDB port" "port" "8086"
+	_p "influxDB database" "db" ""
 }
 
 function streampark_spark_congestion_monitor(){
 	create_notes "\nStreamPark-Spark Monitor\nCongestion base config\n"
-	_p "StreamPark-Spark 自带的拥堵监控需要的几个参数"
+	_p "Several parameters required for the congestion monitoring that comes with StreamPark-Spark"
 	local Lprefix="spark.monitor.congestion"
-	_p "钉钉机器人发送消息的api地址,需要从http开头的全路径" "send.api" ""
-	_p "堆积了几个批次之后开始告警,默认是0不告警\ndefault=0" "batch" "0"
-	_p "钉钉联系人注册钉钉使用的手机号" "ding.to" ""
+	_p "The api address of the message sent by the DingTalk robot requires a full path starting with http" "send.api" ""
+	_p "After a few batches are accumulated, the alarm will start. The default is 0, no alarm.\ndefault=0" "batch" "0"
+	_p "The mobile phone number used by DingTalk contacts to register with DingTalk" "ding.to" ""
 	Lprefix="spark.monitor.suicide"
-	_p "堆积多少个批次之后kill掉任务,默认是0不kill,配合任务自动重启功能可有效重启堆积任务使恢复\ndefault=0" "batch" "0"
+	_p "How many batches are accumulated to kill the task, the default is 0 not to kill,
+	with the automatic task restart function can effectively restart the accumulated task to restore \ndefault=0" "batch" "0"
 }
 
 function create_default(){
