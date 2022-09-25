@@ -47,7 +47,7 @@ jobs:
         uses: apache/skywalking-eyes/header@main
 
   build:
-    if: github.repository == 'apache/incubator-seatunnel'
+    if: github.repository == 'apache/incubator-streampark'
     name: Build
     needs: [ sanity-check ]
     strategy:
