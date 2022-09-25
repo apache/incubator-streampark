@@ -99,7 +99,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     @Override
     public boolean checkTokenEffective(Long userId, String token) {
         AccessToken res = baseMapper.getByUserToken(userId, token);
-        return !Objects.isNull(res) && !AccessToken.STATUS_DISABLE.equals(res.getFinalStatus());
+        return res != null && AccessToken.STATUS_ENABLE.equals(res.getFinalStatus());
     }
 
     @Override
