@@ -51,7 +51,7 @@ jobs:
     name: Build
     strategy:
       matrix:
-        java: [ '8', '11' ]
+        java: [ '8' ]
         os: [ 'ubuntu-latest' ]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
@@ -75,7 +75,7 @@ jobs:
           -D"maven.wagon.http.retryHandler.count"=3
           -D"maven.wagon.httpconnectionManager.ttlSeconds"=120
       - name: Test with Maven
-        run: mvn -B -T 2C test -pl '!streampark-plugin/streampark-jvm-profiler,!streampark-console/streampark-console-service' -am
+        run: mvn -B test -pl '!streampark-plugin/streampark-jvm-profiler,!streampark-console/streampark-console-service' -am
 #      - name: Setup Go
 #        uses: actions/setup-go@v3
 #        with:
