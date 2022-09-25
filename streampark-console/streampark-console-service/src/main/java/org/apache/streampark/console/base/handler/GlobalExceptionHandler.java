@@ -77,8 +77,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 统一处理请求参数校验(实体对象传参)
-     * Unified processing of request parameter verification
+     * Unified processing of request parameter verification (entity object parameter transfer)
      *
      * @param e BindException
      * @return RestResponse
@@ -96,7 +95,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 统一处理请求参数校验(普通传参)
+     * Unified processing of request parameter verification (ordinary parameter transfer)
      *
      * @param e ConstraintViolationException
      * @return RestResponse
