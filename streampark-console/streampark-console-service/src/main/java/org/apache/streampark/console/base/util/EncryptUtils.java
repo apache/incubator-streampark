@@ -23,7 +23,7 @@ import java.security.Key;
 
 public class EncryptUtils {
 
-    private static String strDefaultKey = "defaultKey";
+    private static final String DEFAULT_KEY = "defaultKey";
     private Cipher encryptCipher = null;
     private Cipher decryptCipher = null;
 
@@ -56,7 +56,7 @@ public class EncryptUtils {
     }
 
     public EncryptUtils() throws Exception {
-        this(strDefaultKey);
+        this(DEFAULT_KEY);
     }
 
     EncryptUtils(String strKey) throws Exception {

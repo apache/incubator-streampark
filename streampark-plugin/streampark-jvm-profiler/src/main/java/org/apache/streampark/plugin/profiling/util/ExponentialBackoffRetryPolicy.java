@@ -28,7 +28,7 @@ public class ExponentialBackoffRetryPolicy<T> {
     private final long minSleepMillis;
     private final float scaleFactor;
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     public ExponentialBackoffRetryPolicy(int maxAttemptCount, long minSleepMillis) {
         this(maxAttemptCount, minSleepMillis, 2.0f);

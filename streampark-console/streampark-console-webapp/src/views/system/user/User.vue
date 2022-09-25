@@ -339,23 +339,22 @@ export default {
       })
     },
     reset () {
-      // 重置分页
+      // Reset pagination
       this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
       if (this.paginationInfo) {
         this.paginationInfo.current = this.pagination.defaultCurrent
         this.paginationInfo.pageSize = this.pagination.defaultPageSize
       }
-      // 重置列过滤器规则
+      // Reset filteredInfo
       this.filteredInfo = null
-      // 重置列排序规则
+      // Reset sortedInfo
       this.sortedInfo = null
-      // 重置查询参数
+      // Reset queryParams
       this.queryParams = {}
       this.$refs.createTime.reset()
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
-      // 将这三个参数赋值给Vue data，用于后续使用
       this.paginationInfo = pagination
       this.filteredInfo = filters
       this.sortedInfo = sorter

@@ -228,8 +228,8 @@ public class StringUtils {
     }
 
     static class StringValueAndIndex {
-        private String str;
-        private int endIndex;
+        private final String str;
+        private final int endIndex;
 
         public StringValueAndIndex(String str, int endIndex) {
             this.str = str;

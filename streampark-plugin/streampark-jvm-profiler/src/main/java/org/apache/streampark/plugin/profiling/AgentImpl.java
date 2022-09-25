@@ -37,8 +37,8 @@ import org.apache.streampark.plugin.profiling.util.StacktraceMetricBuffer;
 
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -93,7 +93,7 @@ public class AgentImpl {
             new Thread(
                 new ShutdownHookRunner(
                     profilerGroup.getPeriodicProfilers(),
-                    Arrays.asList(reporter),
+                    Collections.singletonList(reporter),
                     objectsToCloseOnShutdown));
         Runtime.getRuntime().addShutdownHook(shutdownHook);
     }

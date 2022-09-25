@@ -38,8 +38,8 @@ public class JavaAgentFileTransformer implements ClassFileTransformer {
     private static final AgentLogger LOGGER =
         AgentLogger.getLogger(JavaAgentFileTransformer.class.getName());
 
-    private ClassAndMethodFilter durationProfilingFilter;
-    private ClassMethodArgumentFilter argumentFilterProfilingFilter;
+    private final ClassAndMethodFilter durationProfilingFilter;
+    private final ClassMethodArgumentFilter argumentFilterProfilingFilter;
 
     public JavaAgentFileTransformer(
         List<ClassAndMethod> durationProfiling, List<ClassMethodArgument> argumentProfiling) {

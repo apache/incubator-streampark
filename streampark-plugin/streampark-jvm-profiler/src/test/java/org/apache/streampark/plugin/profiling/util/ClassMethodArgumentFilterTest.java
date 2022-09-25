@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class ClassMethodArgumentFilterTest {
     @Test
@@ -28,16 +29,16 @@ public class ClassMethodArgumentFilterTest {
         ClassMethodArgumentFilter filter = new ClassMethodArgumentFilter(null);
         Assert.assertEquals(0, filter.matchMethod("class1", "method1").size());
 
-        filter = new ClassMethodArgumentFilter(Arrays.asList(new ClassMethodArgument("class1", "", 1)));
+        filter = new ClassMethodArgumentFilter(Collections.singletonList(new ClassMethodArgument("class1", "", 1)));
         Assert.assertTrue(filter.matchClass("class1"));
 
         filter =
-            new ClassMethodArgumentFilter(Arrays.asList(new ClassMethodArgument("", "method1", 1)));
+            new ClassMethodArgumentFilter(Collections.singletonList(new ClassMethodArgument("", "method1", 1)));
         Assert.assertTrue(filter.matchClass("class1"));
 
         filter =
             new ClassMethodArgumentFilter(
-                Arrays.asList(new ClassMethodArgument("class2", "method1", 1)));
+                Collections.singletonList(new ClassMethodArgument("class2", "method1", 1)));
         Assert.assertFalse(filter.matchClass("class1"));
         Assert.assertTrue(filter.matchClass("class2"));
 
@@ -65,17 +66,17 @@ public class ClassMethodArgumentFilterTest {
         ClassMethodArgumentFilter filter = new ClassMethodArgumentFilter(null);
         Assert.assertEquals(0, filter.matchMethod("class1", "method1").size());
 
-        filter = new ClassMethodArgumentFilter(Arrays.asList(new ClassMethodArgument("class1", "", 1)));
+        filter = new ClassMethodArgumentFilter(Collections.singletonList(new ClassMethodArgument("class1", "", 1)));
         Assert.assertEquals(0, filter.matchMethod("class1", "method1").size());
 
         filter =
-            new ClassMethodArgumentFilter(Arrays.asList(new ClassMethodArgument("", "method1", 10)));
+            new ClassMethodArgumentFilter(Collections.singletonList(new ClassMethodArgument("", "method1", 10)));
         Assert.assertEquals(1, filter.matchMethod("class1", "method1").size());
         Assert.assertEquals(10, filter.matchMethod("class1", "method1").get(0).intValue());
 
         filter =
             new ClassMethodArgumentFilter(
-                Arrays.asList(new ClassMethodArgument("class2", "method1", 1)));
+                    Collections.singletonList(new ClassMethodArgument("class2", "method1", 1)));
         Assert.assertEquals(0, filter.matchMethod("class1", "method1").size());
 
         filter =
@@ -91,7 +92,7 @@ public class ClassMethodArgumentFilterTest {
     @Test
     public void matchMethod_wildcard() {
         ClassMethodArgumentFilter filter =
-            new ClassMethodArgumentFilter(Arrays.asList(new ClassMethodArgument("class1", "", 10)));
+            new ClassMethodArgumentFilter(Collections.singletonList(new ClassMethodArgument("class1", "", 10)));
         Assert.assertEquals(0, filter.matchMethod("class1", "method1").size());
 
         filter =

@@ -27,9 +27,9 @@ import java.util.List;
 public class ShutdownHookRunner implements Runnable {
     private static final AgentLogger LOGGER = AgentLogger.getLogger(ShutdownHookRunner.class.getName());
 
-    private List<Profiler> profilers;
-    private List<Reporter> reporters;
-    private List<AutoCloseable> closeables;
+    private final List<Profiler> profilers;
+    private final List<Reporter> reporters;
+    private final List<AutoCloseable> closeables;
 
     public ShutdownHookRunner(
         Collection<Profiler> profilers,

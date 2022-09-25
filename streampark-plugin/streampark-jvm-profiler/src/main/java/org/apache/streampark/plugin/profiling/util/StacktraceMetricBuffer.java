@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  */
 public class StacktraceMetricBuffer {
-    private AtomicLong lastResetMillis = new AtomicLong(System.currentTimeMillis());
+    private final AtomicLong lastResetMillis = new AtomicLong(System.currentTimeMillis());
 
     private volatile ConcurrentHashMap<Stacktrace, AtomicLong> metrics = new ConcurrentHashMap<>();
 

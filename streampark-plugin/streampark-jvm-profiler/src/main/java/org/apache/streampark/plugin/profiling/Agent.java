@@ -25,7 +25,7 @@ public final class Agent {
 
     private static final AgentLogger LOGGER = AgentLogger.getLogger(Agent.class.getName());
 
-    private static AgentImpl agentImpl = new AgentImpl();
+    private static final AgentImpl AGENT_IMPL = new AgentImpl();
 
     private Agent() {
     }
@@ -38,6 +38,6 @@ public final class Agent {
         LOGGER.info("Java Agent " + AgentImpl.VERSION + " premain args: " + args);
         Arguments arguments = Arguments.parseArgs(args);
         arguments.runConfigProvider();
-        agentImpl.run(arguments, instrumentation, null);
+        AGENT_IMPL.run(arguments, instrumentation, null);
     }
 }

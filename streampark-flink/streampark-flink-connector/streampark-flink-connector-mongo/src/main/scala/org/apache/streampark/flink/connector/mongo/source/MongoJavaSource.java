@@ -30,7 +30,7 @@ import java.util.Properties;
 
 public class MongoJavaSource<T> {
     private final StreamingContext context;
-    private Properties property;
+    private final Properties property;
 
     public MongoJavaSource(StreamingContext context, Properties property) {
         this.context = context;

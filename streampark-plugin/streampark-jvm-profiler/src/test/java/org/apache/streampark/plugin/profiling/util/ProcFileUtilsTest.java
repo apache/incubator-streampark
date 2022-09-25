@@ -366,7 +366,7 @@ public class ProcFileUtilsTest {
         Files.write(file.toPath(), content.getBytes(), StandardOpenOption.CREATE);
 
         String result = ProcFileUtils.getPid(file.getPath());
-        Assert.assertEquals(null, result);
+        Assert.assertNull(result);
     }
 
     @Test

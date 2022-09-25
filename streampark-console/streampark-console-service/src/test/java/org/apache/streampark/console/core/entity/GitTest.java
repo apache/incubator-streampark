@@ -26,7 +26,7 @@ import java.util.List;
 
 public class GitTest {
 
-    private Project project = new Project();
+    private final Project project = new Project();
 
     @Before
     public void before() {

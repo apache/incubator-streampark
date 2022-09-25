@@ -20,7 +20,7 @@ package org.apache.streampark.plugin.profiling.profiler;
 import org.apache.streampark.plugin.profiling.util.ClassAndMethodLongMetricBuffer;
 
 public class MethodDurationCollector {
-    private ClassAndMethodLongMetricBuffer buffer;
+    private final ClassAndMethodLongMetricBuffer buffer;
 
     public MethodDurationCollector(ClassAndMethodLongMetricBuffer buffer) {
         this.buffer = buffer;

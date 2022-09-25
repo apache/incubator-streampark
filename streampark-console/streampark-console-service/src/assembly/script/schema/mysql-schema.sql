@@ -350,7 +350,7 @@ create table `t_setting` (
 drop table if exists `t_user`;
 create table `t_user` (
   `user_id` bigint not null auto_increment comment 'user id',
-  `username` varchar(255) collate utf8mb4_general_ci default null comment 'user name',
+  `username` varchar(255) collate utf8mb4_general_ci not null comment 'user name',
   `nick_name` varchar(50) collate utf8mb4_general_ci not null comment 'nick name',
   `salt` varchar(255) collate utf8mb4_general_ci default null comment 'salt',
   `password` varchar(128) collate utf8mb4_general_ci not null comment 'password',
@@ -363,7 +363,7 @@ create table `t_user` (
   `avatar` varchar(100) collate utf8mb4_general_ci default null comment 'avatar',
   `description` varchar(100) collate utf8mb4_general_ci default null comment 'description',
   primary key (`user_id`) using btree,
-  unique key `un_username` (`nick_name`) using btree
+  unique key `un_username` (`username`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 

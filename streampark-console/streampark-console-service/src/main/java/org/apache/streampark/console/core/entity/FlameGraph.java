@@ -52,7 +52,7 @@ public class FlameGraph {
 
     private transient Integer width = 1280;
 
-    private static final transient Integer QUERY_DURATION = 60 * 4;
+    private static final Integer QUERY_DURATION = 60 * 4;
 
     @JsonIgnore
     public Date getStart() {

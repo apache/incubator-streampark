@@ -71,8 +71,8 @@ public class Arguments {
     private String cluster;
     private boolean ioProfiling;
 
-    private List<ClassAndMethod> durationProfiling = new ArrayList<>();
-    private List<ClassMethodArgument> argumentProfiling = new ArrayList<>();
+    private final List<ClassAndMethod> durationProfiling = new ArrayList<>();
+    private final List<ClassMethodArgument> argumentProfiling = new ArrayList<>();
 
     private Arguments(Map<String, List<String>> parsedArgs) {
         doArguments(parsedArgs);
@@ -192,7 +192,7 @@ public class Arguments {
                     throw new IllegalArgumentException("Invalid argument value: " + str);
                 }
                 String className = str.substring(0, index);
-                String methodName = str.substring(index + 1, str.length());
+                String methodName = str.substring(index + 1);
                 ClassAndMethod classAndMethod = new ClassAndMethod(className, methodName);
                 durationProfiling.add(classAndMethod);
                 LOGGER.info("Got argument value for durationProfiling: " + classAndMethod);
@@ -208,7 +208,7 @@ public class Arguments {
                     throw new IllegalArgumentException("Invalid argument value: " + str);
                 }
                 String classMethodName = str.substring(0, index);
-                int argumentIndex = Integer.parseInt(str.substring(index + 1, str.length()));
+                int argumentIndex = Integer.parseInt(str.substring(index + 1));
 
                 index = classMethodName.lastIndexOf(".");
                 if (index <= 0 || index + 1 >= classMethodName.length()) {

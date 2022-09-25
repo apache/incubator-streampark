@@ -89,7 +89,9 @@ class FlinkTrackController extends Logger with AutoCloseable {
     collectTracks() match {
       case k if k.isEmpty => FlinkMetricCV.empty
       case k =>
-        flinkMetrics.getAll(for (elem <- k) yield {ClusterKey.of(elem)}) match {
+        flinkMetrics.getAll(for (elem <- k) yield {
+          ClusterKey.of(elem)
+        }) match {
           case m if m.isEmpty => FlinkMetricCV.empty
           case m =>
             // aggregate metrics
@@ -119,10 +121,9 @@ class FlinkTrackController extends Logger with AutoCloseable {
 }
 
 //----cache----
+case class CacheKey(key: java.lang.Long) extends Serializable
 
 class TrackIdCache {
-  case class CacheKey(key: java.lang.Long) extends Serializable
-
   private[this] lazy val cache: Cache[CacheKey, TrackId] = Caffeine.newBuilder.build()
 
   def update(k: TrackId): Unit = {
@@ -153,19 +154,19 @@ object TrackIdCache {
 
 class JobStatusCache {
 
-  private[this] lazy val cache: Cache[TrackId, JobStatusCV] = Caffeine.newBuilder.build()
+  private[this] lazy val cache: Cache[CacheKey, JobStatusCV] = Caffeine.newBuilder.build()
 
-  def putAll(kvs: Map[TrackId, JobStatusCV]): Unit = cache.putAll(kvs)
+  def putAll(kvs: Map[TrackId, JobStatusCV]): Unit = cache.putAll(kvs.map(t => (CacheKey(t._1.appId), t._2)))
 
-  def put(k: TrackId, v: JobStatusCV): Unit = cache.put(k, v)
+  def put(k: TrackId, v: JobStatusCV): Unit = cache.put(CacheKey(k.appId), v)
 
-  def asMap(): Map[TrackId, JobStatusCV] = cache.asMap().toMap
+  def asMap(): Map[CacheKey, JobStatusCV] = cache.asMap().toMap
 
-  def getAsMap(trackIds: Set[TrackId]): Map[TrackId, JobStatusCV] = cache.getAllPresent(trackIds).toMap
+  def getAsMap(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] = cache.getAllPresent(trackIds.map(t => t.appId)).toMap
 
-  def get(trackId: TrackId): JobStatusCV = cache.getIfPresent(trackId)
+  def get(k: TrackId): JobStatusCV = cache.getIfPresent(CacheKey(k.appId))
 
-  def invalidate(trackId: TrackId): Unit = cache.invalidate(trackId)
+  def invalidate(k: TrackId): Unit = cache.invalidate(CacheKey(k.appId))
 
   def cleanUp(): Unit = cache.cleanUp()
 

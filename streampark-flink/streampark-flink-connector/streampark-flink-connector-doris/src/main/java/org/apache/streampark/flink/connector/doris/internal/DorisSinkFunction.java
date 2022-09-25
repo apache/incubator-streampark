@@ -48,8 +48,8 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DorisSinkFunction.class);
     private final Properties properties;
-    private DorisSinkWriter dorisSinkWriter;
-    private DorisConfig dorisConfig;
+    private final DorisSinkWriter dorisSinkWriter;
+    private final DorisConfig dorisConfig;
     // state only works with `EXACTLY_ONCE`
     private transient ListState<Map<String, DorisSinkBufferEntry>> checkpointedState;
     private transient Counter totalInvokeRowsTime;
@@ -92,7 +92,6 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
         // raw data sink
         totalInvokeRows.inc(1);
         totalInvokeRowsTime.inc(System.nanoTime() - start);
-        return;
     }
 
     @Override
@@ -108,7 +107,6 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
             // save state
             checkpointedState.add(dorisSinkWriter.getBufferedBatchMap());
             flushPreviousState();
-            return;
         }
     }
 
