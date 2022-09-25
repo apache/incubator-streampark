@@ -90,7 +90,7 @@
     </div>
 
     <div>
-      <!-- 表格区域 -->
+      <!-- Table Info -->
       <a-table
         :columns="columns"
         :key="key"
@@ -297,16 +297,15 @@ export default {
       })
     },
     reset () {
-      // 重置列过滤器规则
+      // Reset filteredInfo
       this.filteredInfo = {}
-      // 重置查询参数
+      // Reset queryParams
       this.queryParams = {}
-      // 清空时间选择
+      // Reset createTime
       this.$refs.createTime.reset()
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
-      // 将这两个个参数赋值给Vue data，用于后续使用
       this.filteredInfo = filters || {}
       this.fetch({
         sortField: sorter.field,
