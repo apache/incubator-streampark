@@ -38,7 +38,7 @@
       </a>
 
       <a
-        href="http://streampark.apache.org/docs/user-guide/quick-start"
+        href="https://streampark.apache.org/docs/user-guide/quick-start"
         title="How to use"
         target="_blank">
         <svg-icon name="question" size="small" class="icon"></svg-icon>
