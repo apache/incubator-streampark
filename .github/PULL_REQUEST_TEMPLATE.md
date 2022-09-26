@@ -6,7 +6,7 @@ remember to adjust the documentation.
 
 -->
 
-## What problem does this PR solve?
+## What changes were proposed in this pull request?
 
 Issue Number: close #xxx <!-- REMOVE this line if no issue to close -->
 
