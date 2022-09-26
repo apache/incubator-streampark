@@ -17,13 +17,17 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.conf.CommonConfig;
+import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.domain.FlinkMemorySize;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.base.util.FileUtils;
 import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
@@ -49,8 +53,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -278,17 +280,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public String getBuildLog(Long id) {
-        Path logPath = Paths.get(getBuildLogPath(id));
-        if (!Files.exists(logPath)) {
-            String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logPath);
-            log.info(errorMsg);
+        File logFile = Paths.get(getBuildLogPath(id)).toFile();
+        if (!logFile.exists()) {
+            String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logFile);
+            log.warn(errorMsg);
             return errorMsg;
         }
         byte[] fileContent;
         try {
-            fileContent = Files.readAllBytes(logPath);
+            String maxSize = InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE());
+            fileContent = FileUtils.readEndOfFile(logFile, FlinkMemorySize.parse(maxSize).getBytes());
         } catch (IOException e) {
-            log.error("Read build log file(fileName={}) caused an exception: ", logPath, e);
+            log.error("Read build log file(fileName={}) caused an exception: ", logFile, e);
             return Strings.EMPTY;
         }
         return new String(fileContent, StandardCharsets.UTF_8);

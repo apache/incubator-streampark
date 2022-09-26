@@ -399,13 +399,6 @@ export default {
       })
     },
 
-    handleClose () {
-      this.controller.visible = false
-      this.terminal.clear()
-      this.terminal.clearSelection()
-      this.terminal = null
-    },
-
     handleQuery (state) {
       this.queryParams.buildState = state
       this.handleFetch({
