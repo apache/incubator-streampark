@@ -147,7 +147,7 @@
             "content": "Website"
           },
           "type": "primary",
-          "url": "http://streampark.apache.org"
+          "url": "https://streampark.apache.org"
         },
         {
           "tag": "button",

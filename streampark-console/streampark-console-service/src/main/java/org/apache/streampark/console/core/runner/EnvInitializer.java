@@ -76,7 +76,7 @@ public class EnvInitializer implements ApplicationRunner {
             throw new ExceptionInInitializerError("[StreamPark] System initialization check failed," +
                 " The system initialization check failed. If started local for development and debugging," +
                 " please ensure the -Dapp.home parameter is clearly specified," +
-                " more detail: http://streampark.apache.org/docs/user-guide/development");
+                " more detail: https://streampark.apache.org/docs/user-guide/development");
         }
 
         // init InternalConfig
