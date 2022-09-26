@@ -27,7 +27,7 @@ services:
     depends_on:
       - database
     volumes:
-      - flink1.14.5:/  streampark/flink/flink1.14.5
+      - flink1.14.5:/streampark/flink/flink1.14.5
     restart: unless-stopped
 
   database:
