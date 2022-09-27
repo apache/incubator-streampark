@@ -19,6 +19,7 @@ package org.apache.streampark.console.base.util;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -80,6 +81,39 @@ public class FileUtilsTest {
         byte[] bytes = FileUtils.readEndOfFile(file, 1000000);
         String readString = new String(bytes);
         assertEquals(logWithChinese, readString);
+    }
+
+    @Test
+    public void testReadFileFromOffset() throws IOException {
+        final File outDir = TEMP_FOLDER.newFolder();
+        File file = new File(outDir, "tmp_file");
+        FileOutputStream outputStream = new FileOutputStream(file);
+        Random random = new Random();
+        int fileSize = 1000000;
+        byte[] fileBytes = new byte[fileSize];
+        random.nextBytes(fileBytes);
+        outputStream.write(fileBytes);
+        outputStream.flush();
+        outputStream.close();
+
+        // The read size is larger than the file size
+        byte[] readBytes = FileUtils.readFileFromOffset(file, 0, fileSize + 1);
+        assertArrayEquals(fileBytes, readBytes);
+
+        // The read size is equals the file size
+        readBytes = FileUtils.readFileFromOffset(file, 0, fileSize);
+        assertArrayEquals(fileBytes, readBytes);
+
+        // The read size is less than the file size
+        int readSize = 3456;
+        readBytes = new byte[fileSize];
+        byte[] tmpReadBytes;
+        for (int i = 0; i < fileSize; i += tmpReadBytes.length) {
+            tmpReadBytes = FileUtils.readFileFromOffset(file, i, readSize);
+            assertTrue(tmpReadBytes.length <= readSize);
+            System.arraycopy(tmpReadBytes, 0, readBytes, i, tmpReadBytes.length);
+        }
+        assertArrayEquals(fileBytes, readBytes);
     }
 
 }

@@ -394,8 +394,18 @@ export default {
       })
       const container = document.getElementById('terminal')
       this.terminal.open(container, true)
-      buildlog({id:project.id}).then((resp) => {
-        this.terminal.writeln(resp.data)
+      this.fetchBuildLog(project, null)
+    },
+
+    fetchBuildLog(project, startOffset) {
+      buildlog({
+        id:project.id,
+        startOffset:startOffset
+      }).then((resp) => {
+        this.terminal.write(resp.data)
+        if(resp.readFinished === false) {
+          window.setTimeout(() => this.fetchBuildLog(project, resp.offset), 500)
+        }
       })
     },
 

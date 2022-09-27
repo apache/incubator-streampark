@@ -24,6 +24,7 @@ import org.apache.streampark.common.domain.FlinkMemorySize;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ThreadUtils;
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -44,7 +45,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -279,22 +279,39 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public String getBuildLog(Long id) {
+    public RestResponse getBuildLog(Long id, Long startOffset) {
         File logFile = Paths.get(getBuildLogPath(id)).toFile();
         if (!logFile.exists()) {
             String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logFile);
             log.warn(errorMsg);
-            return errorMsg;
+            return RestResponse.success().data(errorMsg);
         }
+        boolean isBuilding = this.getById(id).getBuildState() == 0;
         byte[] fileContent;
-        try {
-            String maxSize = InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE());
-            fileContent = FileUtils.readEndOfFile(logFile, FlinkMemorySize.parse(maxSize).getBytes());
-        } catch (IOException e) {
-            log.error("Read build log file(fileName={}) caused an exception: ", logFile, e);
-            return Strings.EMPTY;
+        long endOffset = 0L;
+        boolean readFinished = true;
+        // Read log from earliest when project is building
+        if (startOffset == null && isBuilding) {
+            startOffset = 0L;
         }
-        return new String(fileContent, StandardCharsets.UTF_8);
+        try {
+            long maxSize = FlinkMemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
+            if (startOffset == null) {
+                fileContent = FileUtils.readEndOfFile(logFile, maxSize);
+            } else {
+                fileContent = FileUtils.readFileFromOffset(logFile, startOffset, maxSize);
+                endOffset = startOffset + fileContent.length;
+                readFinished = logFile.length() == endOffset && !isBuilding;
+            }
+            return RestResponse.success()
+                .data(new String(fileContent, StandardCharsets.UTF_8))
+                .put("offset", endOffset)
+                .put("readFinished", readFinished);
+        } catch (IOException e) {
+            String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
+            log.error(error, e);
+            return RestResponse.fail(error + e.getMessage(), ResponseCode.CODE_FAIL);
+        }
     }
 
     private String getBuildLogPath(Long projectId) {

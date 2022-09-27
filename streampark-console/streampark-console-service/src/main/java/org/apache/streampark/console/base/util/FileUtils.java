@@ -47,4 +47,25 @@ public class FileUtils {
         return fileContent;
     }
 
+    /**
+     * Read the end of the file.
+     *
+     * @param file    The file
+     * @param maxSize Maximum size of read file
+     * @return The file content
+     * @throws IOException
+     */
+    public static byte[] readFileFromOffset(File file, long startOffset, long maxSize) throws IOException {
+        if (file.length() < startOffset) {
+            throw new IllegalArgumentException(
+                String.format("The startOffset %s is great than the file length %s", startOffset, file.length()));
+        }
+        RandomAccessFile raFile = new RandomAccessFile(file, "r");
+        long readSize = Math.min(maxSize, file.length() - startOffset);
+        raFile.seek(startOffset);
+        byte[] fileContent = new byte[(int) readSize];
+        raFile.read(fileContent);
+        return fileContent;
+    }
+
 }

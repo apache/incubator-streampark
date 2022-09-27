@@ -40,7 +40,7 @@ public interface ProjectService extends IService<Project> {
 
     void build(Long id) throws Exception;
 
-    String getBuildLog(Long id);
+    RestResponse getBuildLog(Long id, Long startOffset);
 
     List<String> modules(Long id);
 
