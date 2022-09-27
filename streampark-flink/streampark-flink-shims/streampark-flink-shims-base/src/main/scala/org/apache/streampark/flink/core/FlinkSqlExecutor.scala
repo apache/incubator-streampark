@@ -118,7 +118,6 @@ object FlinkSqlExecutor extends Logger {
           val tableResult = context.executeSql(x.originSql)
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
-
         // For specific statement, such as: SET/RESET/INSERT/SELECT
         case SET =>
           if (!tableConfigOptions.containsKey(args)) {
