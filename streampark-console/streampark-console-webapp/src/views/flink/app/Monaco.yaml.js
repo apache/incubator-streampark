@@ -16,5 +16,5 @@
  */
 
 import * as monaco from 'monaco-editor'
-// TODO yaml配置文件自动提示实现
+// TODO yaml configuration file automatic prompt implementation
 export default monaco

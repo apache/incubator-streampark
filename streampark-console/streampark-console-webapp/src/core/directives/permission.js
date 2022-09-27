@@ -17,7 +17,7 @@
 
 import Vue from 'vue'
 
-// 定义一些和权限有关的 Vue指令
+// Define some Vue directives related to permissions
 
 const doCheck = function (elems, values, filter, status, el) {
   let flag = !filter
@@ -31,7 +31,7 @@ const doCheck = function (elems, values, filter, status, el) {
   }
 }
 
-// 必须包含列出的所有权限，元素才显示
+// All permissions listed must be included for the element to display
 const permit = {
   install (Vue) {
     Vue.directive('permit', {
@@ -44,7 +44,7 @@ const permit = {
   }
 }
 
-// 当不包含列出的权限时，渲染该元素
+// Render the element when the listed permissions are not included
 const noPermit = {
   install (Vue) {
     Vue.directive('noPermit', {
@@ -57,7 +57,7 @@ const noPermit = {
   }
 }
 
-// 只要包含列出的任意一个权限，元素就会显示
+// The element displays as long as any of the listed permissions are included
 const anyPermit = {
   install (Vue) {
     Vue.directive('anyPermit', {
@@ -70,7 +70,7 @@ const anyPermit = {
   }
 }
 
-// 必须包含列出的所有角色，元素才显示
+// All roles listed must be included for the element to display
 const hasRole = {
   install (Vue) {
     Vue.directive('hasRole', {
@@ -83,7 +83,7 @@ const hasRole = {
   }
 }
 
-// 只要包含列出的任意一个角色，元素就会显示
+// The element will display as long as it contains any of the listed roles
 const hasAnyRole = {
   install (Vue) {
     Vue.directive('hasAnyRole', {

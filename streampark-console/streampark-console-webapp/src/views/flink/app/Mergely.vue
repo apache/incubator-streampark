@@ -123,10 +123,10 @@ export default {
           theme: this.ideTheme(),
           language: 'yaml',
           selectOnLineNumbers: false,
-          foldingStrategy: 'indentation', // 代码分小段折叠
-          overviewRulerBorder: false, // 不要滚动条边框
+          foldingStrategy: 'indentation', // code fragmentation
+          overviewRulerBorder: false, // Don't scroll bar borders
           autoClosingBrackets: true,
-          tabSize: 2, // tab 缩进长度
+          tabSize: 2, // tab indent length
           readOnly: this.readOnly,
           inherit: true,
           scrollBeyondLastLine: false,
@@ -138,7 +138,7 @@ export default {
           cursorWidth: 3,
           renderFinalNewline: true,
           renderLineHighlight: 'all',
-          quickSuggestionsDelay: 100,  //代码提示延时
+          quickSuggestionsDelay: 100,  // Code prompt delay
           scrollbar: {
             useShadows: false,
             vertical: 'visible',

@@ -303,7 +303,7 @@
             @change="handleChangeProcess"
             v-decorator="['totalOptions']">
             <a-select-opt-group
-              label="process memory(进程总内存)">
+              label="process memory(total process memory)">
               <a-select-option
                 v-for="(conf,index) in dynamicOptions('process-memory')"
                 :key="`process_memory_${index}`"
@@ -312,7 +312,7 @@
               </a-select-option>
             </a-select-opt-group>
             <a-select-opt-group
-              label="total memory(Flink 总内存)">
+              label="total memory(Flink total memory)">
               <a-select-option
                 v-for="(conf,index) in dynamicOptions('total-memory')"
                 :key="`total_memory_${index}`"
@@ -804,7 +804,7 @@ export default {
           }else{
             this.$message.error('error executionMode.')
           }
-          console.log('获取参数：' + JSON.stringify(params))
+          console.log('get parameters：' + JSON.stringify(params))
           checkCluster(params).then((resp)=> {
             console.log('resp.data：' + resp.data)
             if (resp.data === 'success') {

@@ -24,8 +24,8 @@ export function globalOption(vue) {
         theme: vue.ideTheme(),
         language: 'sql',
         selectOnLineNumbers: false,
-        foldingStrategy: 'indentation', // 代码分小段折叠
-        overviewRulerBorder: false, // 不要滚动条边框
+        foldingStrategy: 'indentation', // code fragmentation
+        overviewRulerBorder: false, // Don't scroll bar borders
         autoClosingBrackets: true,
         tabSize: 2, // tab 缩进长度
         readOnly: false,
@@ -39,7 +39,7 @@ export function globalOption(vue) {
         cursorWidth: 3,
         renderFinalNewline: true,
         renderLineHighlight: 'all',
-        quickSuggestionsDelay: 100,  //代码提示延时
+        quickSuggestionsDelay: 100,  // Code prompt delay
         scrollbar: {
             useShadows: false,
             vertical: 'visible',
@@ -68,7 +68,7 @@ export function initFlinkSqlEditor(vue) {
     option.value = controller.flinkSql.value
     option.minimap = {enabled: true}
     controller.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), option)
-    //输入事件触发...
+    // Input event triggers...
     controller.editor.flinkSql.onDidChangeModelContent(() => {
         controller.flinkSql.value = controller.editor.flinkSql.getValue()
     })

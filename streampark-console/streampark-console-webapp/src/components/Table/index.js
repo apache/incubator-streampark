@@ -116,8 +116,8 @@ export default {
   },
   methods: {
     /**
-     * 表格重新加载方法
-     * 如果参数为 true, 则强制刷新到第一页
+     * Form reload method
+     * If the parameter is true, force refresh to the first page
      * @param Boolean bool
      */
     refresh (bool = false) {
@@ -127,10 +127,10 @@ export default {
       this.loadData()
     },
     /**
-     * 加载数据方法
-     * @param {Object} pagination 分页选项器
-     * @param {Object} filters 过滤条件
-     * @param {Object} sorter 排序条件
+     * load data method
+     * @param {Object} pagination Pagination selector
+     * @param {Object} filters filters
+     * @param {Object} sorter Sort condition
      */
     loadData (pagination, filters, sorter) {
       this.localLoading = true
@@ -148,26 +148,26 @@ export default {
       }
       )
       const result = this.data(parameter)
-      // 对接自己的通用数据接口需要修改下方代码中的 r.pageNo, r.totalCount, r.data
+      // To connect your own general data interface, you need to modify r.pageNo, r.totalCount, r.data in the code below
       // eslint-disable-next-line
       if ((typeof result === 'object' || typeof result === 'function') && typeof result.then === 'function') {
         result.then(r => {
           this.localPagination = Object.assign({}, this.localPagination, {
-            current: r.pageNo, // 返回结果中的当前分页数
-            total: r.totalCount, // 返回结果中的总记录数
+            current: r.pageNo, // Returns the current number of pagination in the results
+            total: r.totalCount, // Returns the total number of records in the result
             showSizeChanger: this.showSizeChanger,
             pageSize: (pagination && pagination.pageSize) || this.localPagination.pageSize
           })
-          // 为防止删除数据后导致页面当前页面数据长度为 0 ,自动翻页到上一页
+          // In order to prevent the data length of the current page of the page from being 0 after deleting the data, the page is automatically turned to the previous page
           if (r.data.length === 0 && this.localPagination.current !== 1) {
             this.localPagination.current--
             this.loadData()
             return
           }
-          // 这里用于判断接口是否有返回 r.totalCount 或 this.showPagination = false
-          // 当情况满足时，表示数据不满足分页大小，关闭 table 分页功能
+          // This is used to determine whether the interface returns r.totalCount or this.showPagination = false
+          // When the situation is satisfied, it means that the data does not meet the paging size, and the table paging function is turned off
           (!this.showPagination || !r.totalCount && this.showPagination === 'auto') && (this.localPagination = false)
-          this.localDataSource = r.data // 返回结果中的数组数据
+          this.localDataSource = r.data // Returns the array data in the result
           this.localLoading = false
         })
       }
@@ -185,7 +185,7 @@ export default {
       return totalList
     },
     /**
-     * 用于更新已选中的列表数据 total 统计
+     * Used to update the selected list data total statistics
      * @param selectedRowKeys
      * @param selectedRows
      */
@@ -204,7 +204,7 @@ export default {
       })
     },
     /**
-     * 清空 table 已选中项
+     * Empty table selected items
      */
     clearSelected () {
       if (this.rowSelection) {
@@ -213,7 +213,7 @@ export default {
       }
     },
     /**
-     * 处理交给 table 使用者去处理 clear 事件时，内部选中统计同时调用
+     * When the processing is handed over to the table user to process the clear event, the internal selected statistics are called at the same time.
      * @param callback
      * @returns {*}
      */
@@ -223,29 +223,31 @@ export default {
         <a style="margin-left: 24px" onClick={() => {
           callback()
           this.clearSelected()
-        }}>清空</a>
+        }}>
+          clear
+        </a>
       )
     },
     renderAlert () {
-      // 绘制统计列数据
+      // Plot statistics column data
       const needTotalItems = this.needTotalList.map((item) => {
         return (<span style="margin-right: 12px">
           {item.title}总计 <a style="font-weight: 600">{!item.customRender ? item.total : item.customRender(item.total)}</a>
         </span>)
       })
 
-      // 绘制 清空 按钮
+      // draw clear button
       const clearItem = (typeof this.alert.clear === 'boolean' && this.alert.clear) ? (
         this.renderClear(this.clearSelected)
       ) : (this.alert !== null && typeof this.alert.clear === 'function') ? (
         this.renderClear(this.alert.clear)
       ) : null
 
-      // 绘制 alert 组件
+      // draw alert component
       return (
         <a-alert showIcon={true} style="margin-bottom: 16px">
           <template slot="message">
-            <span style="margin-right: 12px">已选择: <a style="font-weight: 600">{this.selectedRows.length}</a></span>
+            <span style="margin-right: 12px">Selected: <a style="font-weight: 600">{this.selectedRows.length}</a></span>
             {needTotalItems}
             {clearItem}
           </template>
@@ -267,7 +269,7 @@ export default {
       }
       if (k === 'rowSelection') {
         if (showAlert && this.rowSelection) {
-          // 如果需要使用alert，则重新绑定 rowSelection 事件
+          // Rebind rowSelection event if need to use alert
           props[k] = {
             selectedRows: this.selectedRows,
             selectedRowKeys: this.selectedRowKeys,
@@ -278,7 +280,7 @@ export default {
           }
           return props[k]
         } else if (!this.rowSelection) {
-          // 如果没打算开启 rowSelection 则清空默认的选择项
+          // If you do not intend to open rowSelection then clear the default selection
           props[k] = null
           return props[k]
         }

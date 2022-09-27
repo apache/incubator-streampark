@@ -28,11 +28,11 @@
     @cancel="cancel"
     :mask-closable="false"
     :mask="false"
-    ok-text="确认"
-    cancel-text="取消">
+    ok-text="confirm"
+    cancel-text="cancel">
     <a-tabs>
       <a-tab-pane
-        tab="方向性图标"
+        tab="Directional icons"
         key="1">
         <ul>
           <li
@@ -47,7 +47,7 @@
         </ul>
       </a-tab-pane>
       <a-tab-pane
-        tab="指示性图标"
+        tab="Indicative icons"
         key="2">
         <ul>
           <li
@@ -62,7 +62,7 @@
         </ul>
       </a-tab-pane>
       <a-tab-pane
-        tab="编辑类图标"
+        tab="edit icon"
         key="3">
         <ul>
           <li
@@ -77,7 +77,7 @@
         </ul>
       </a-tab-pane>
       <a-tab-pane
-        tab="数据类图标"
+        tab="data icon"
         key="4">
         <ul>
           <li
@@ -92,7 +92,7 @@
         </ul>
       </a-tab-pane>
       <a-tab-pane
-        tab="网站通用图标"
+        tab="Website Universal Icons"
         key="5">
         <ul>
           <li
@@ -107,7 +107,7 @@
         </ul>
       </a-tab-pane>
       <a-tab-pane
-        tab="品牌和标识"
+        tab="Brand and Identity"
         key="6">
         <ul>
           <li
@@ -169,11 +169,11 @@ export default {
     chooseIcon (icon) {
       this.activeIndex = icon
       this.choosedIcon = icon
-      this.$message.success(`选中 ${icon}`)
+      this.$message.success(`selected ${icon}`)
     },
     ok () {
       if (this.choosedIcon === '') {
-        this.$message.warning('尚未选择任何图标')
+        this.$message.warning('No icons have been selected')
         return
       }
       this.reset()

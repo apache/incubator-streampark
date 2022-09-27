@@ -54,7 +54,7 @@ const whiteList = ['signin']
 
 let asyncRouter
 
-// 导航守卫，渲染动态路由
+// Navigation guards, rendering dynamic routes
 router.beforeEach((to, from, next) => {
   NProgress.start() // start progress bar
   if (whiteList.indexOf(to.path) !== -1) {
@@ -63,15 +63,15 @@ router.beforeEach((to, from, next) => {
   const token = storage.get(TOKEN)
   if (token) {
     if (!asyncRouter) {
-      // 如果用户路由不存在
+      // If the user route does not exist
       const routers = store.getters.routers
       if (routers) {
         asyncRouter = routers
         go(to, next)
       } else {
-        // 获取当前这个用户所在角色可访问的全部路由
+        // Get all routes accessible by the role of the current user
         store.dispatch('GetRouter', {}).then((resp) => {
-          // 校验菜单权限
+          // Check menu permissions
           if (resp.length === 1 && resp[0].children.length === 0) {
             store.commit('SET_ROUTERS', null)
             notification.error({

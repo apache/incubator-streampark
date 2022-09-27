@@ -79,7 +79,7 @@ const user = {
   },
 
   actions: {
-    // 登录
+    // Log in
     SignIn ({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         signin(userInfo).then(response => {
@@ -109,7 +109,7 @@ const user = {
         })
       })
     },
-    // 登出
+    // Sign out
     SignOut ({ commit, state }) {
       return new Promise((resolve) => {
         signout().then((resp) => {

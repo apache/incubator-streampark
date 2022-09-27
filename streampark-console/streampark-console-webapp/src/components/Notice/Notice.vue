@@ -30,7 +30,7 @@
       <a-spin :spinning="loadding">
         <a-tabs default-active-key="1" @change="handleChange">
           <a-tab-pane
-            tab="异常告警"
+            tab="Abnormal alarm"
             key="1">
             <a-list>
               <a-list-item
@@ -61,7 +61,7 @@
             </a-list>
           </a-tab-pane>
           <a-tab-pane
-            tab="通知消息"
+            tab="notification message"
             key="2">
             <a-list>
               <a-list-item

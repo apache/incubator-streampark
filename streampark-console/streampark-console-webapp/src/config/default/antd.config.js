@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// antd 配置
+// antd configure
 const ANTD = {
   primary: {
     color: '#1890ff',

@@ -28,54 +28,54 @@
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <template slot="title">
       <a-icon type="menu" />
-      新增菜单
+      Add menu
     </template>
     <a-form
       :form="form">
       <a-form-item
-        label="菜单名称"
+        label="menu name"
         v-bind="formItemLayout">
         <a-input
           v-decorator="['menuName',
                         {rules: [
-                          { required: true, message: '菜单名称不能为空'},
-                          { max: 20, message: '长度不能超过20个字符'}
+                          { required: true, message: 'Menu name cannot be empty'},
+                          { max: 20, message: 'Length cannot exceed 20 characters'}
                         ]}]" />
       </a-form-item>
       <a-form-item
-        label="菜单URL"
+        label="Menu URL"
         v-bind="formItemLayout">
         <a-input
           v-decorator="['path',
                         {rules: [
-                          { required: true, message: '菜单URL不能为空'},
-                          { max: 50, message: '长度不能超过50个字符'}
+                          { required: true, message: 'Menu URL cannot be empty'},
+                          { max: 50, message: 'Length cannot exceed 50 characters'}
                         ]}]" />
       </a-form-item>
       <a-form-item
-        label="组件地址"
+        label="component address"
         v-bind="formItemLayout">
         <a-input
           v-decorator="['component',
                         {rules: [
-                          { required: true, message: '组件地址不能为空'},
-                          { max: 100, message: '长度不能超过100个字符'}
+                          { required: true, message: 'Component address cannot be empty'},
+                          { max: 100, message: 'Length cannot exceed 100 characters'}
                         ]}]" />
       </a-form-item>
       <a-form-item
-        label="相关权限"
+        label="Related permissions"
         v-bind="formItemLayout">
         <a-input
           v-decorator="['perms',
                         {rules: [
-                          { max: 50, message: '长度不能超过50个字符'}
+                          { max: 50, message: 'Length cannot exceed 50 characters'}
                         ]}]" />
       </a-form-item>
       <a-form-item
-        label="菜单图标"
+        label="menu icon"
         v-bind="formItemLayout">
         <a-input
-          placeholder="点击右侧按钮选择图标"
+          placeholder="Click the right button to select the icon"
           v-model="icon">
           <a-icon
             v-if="icon"
@@ -90,7 +90,7 @@
         </a-input>
       </a-form-item>
       <a-form-item
-        label="菜单排序"
+        label="menu sorting"
         v-bind="formItemLayout">
         <a-input-number
           v-decorator="['orderNum']"
@@ -98,7 +98,7 @@
       </a-form-item>
 
       <a-form-item
-        label="是否显示"
+        label="whether to display"
         v-bind="formItemLayout">
         <a-switch
           v-decorator="['display']"
@@ -110,7 +110,7 @@
       </a-form-item>
 
       <a-form-item
-        label="上级菜单"
+        label="parent menu"
         style="margin-bottom: 2rem"
         v-bind="formItemLayout">
         <a-tree
@@ -211,7 +211,7 @@ export default {
     handleSubmit () {
       const checkedArr = Object.is(this.checkedKeys.checked, undefined) ? this.checkedKeys : this.checkedKeys.checked
       if (checkedArr.length > 1) {
-        this.$message.error('最多只能选择一个上级菜单，请修改')
+        this.$message.error('At most one parent menu can be selected, please modify')
         return
       }
       this.form.validateFields((err, values) => {
@@ -223,7 +223,7 @@ export default {
           } else {
             menu.parentId = ''
           }
-          // 0 表示菜单 1 表示按钮
+          // 0 for menu 1 for button
           menu.type = '0'
           menu.icon = this.icon
           menu.display = this.display

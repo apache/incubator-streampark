@@ -105,7 +105,7 @@ export default {
   },
   computed: {
     ...mapState({
-      // 动态主路由
+      // Dynamic main route
       mainMenu: state => state.user.routers
     }),
     contentPaddingLeft () {

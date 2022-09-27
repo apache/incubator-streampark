@@ -155,8 +155,8 @@ export default {
       formItemLayout,
       form: this.$form.createForm(this),
       userTypeData: [
-        { 'value': 1, 'name': '内部用户' },
-        { 'value': 2, 'name': '外部用户' }
+        { 'value': 1, 'name': 'internal user' },
+        { 'value': 2, 'name': 'external user' }
       ],
       roleData: [],
       userId: '',
@@ -212,7 +212,7 @@ export default {
             if (r.status === 'success') {
               this.loading = false
               this.$emit('success')
-              // 如果修改用户就是当前登录用户的话，更新其state
+              // If the modified user is the currently logged in user, update its state
               if (user.username === this.currentUser.username) {
                 get({
                   username: user.username

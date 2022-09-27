@@ -192,7 +192,7 @@ export default {
         defaultPageSize: 10,
         showQuickJumper: true,
         showSizeChanger: true,
-        showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        showTotal: (total, range) => `show ${range[0]} ~ ${range[1]} records, total ${total} records`
       },
       loading: false
     }

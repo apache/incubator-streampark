@@ -39,7 +39,7 @@
         <a-button
           type="primary"
           @click="handleToHome">
-          返回首页
+          Back to Home
         </a-button>
       </div>
     </div>
