@@ -170,7 +170,7 @@
                 style="margin-left: 8px"
                 @click.native="handleSeeLog(item)"
                 class="control-button ctl-btn-color">
-                <a-icon type="file-text"/>
+                <a-icon type="eye"/>
               </a-button>
             </a-tooltip>
 
@@ -235,7 +235,7 @@
       :destroy-on-close="controller.modalDestroyOnClose"
       :footer="null">
       <template slot="title">
-        <svg-icon name="file-text" />&nbsp;
+        <a-icon type="file-text" />&nbsp;
         {{ controller.consoleName }}
       </template>
       <div
@@ -399,11 +399,11 @@ export default {
 
     fetchBuildLog(project, startOffset) {
       buildlog({
-        id:project.id,
-        startOffset:startOffset
+        id: project.id,
+        startOffset: startOffset
       }).then((resp) => {
         this.terminal.write(resp.data)
-        if(resp.readFinished === false) {
+        if (resp.readFinished === false) {
           window.setTimeout(() => this.fetchBuildLog(project, resp.offset), 500)
         }
       })
@@ -456,7 +456,7 @@ export default {
   display: inline-block;
   vertical-align: middle;
   font-size: 14px;
-  margin-left: 40px;
+  margin-left: 60px;
 
   span {
     line-height: 20px;
@@ -484,7 +484,7 @@ export default {
 }
 
 .operation {
-  width: 120px;
+  width: 150px;
 }
 
 .ant-tag {

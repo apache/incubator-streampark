@@ -173,7 +173,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         CompletableFuture<Void> buildTask = CompletableFuture.runAsync(
             new ProjectBuildTask(getBuildLogPath(id), project, baseMapper, applicationService), executorService);
         // TODO May need to define parameters to set the build timeout in the future.
-        CompletableFutureUtils.runTimeoutAndCancelFuture(buildTask, 20, TimeUnit.MINUTES);
+        CompletableFutureUtils.runTimeout(buildTask, 20, TimeUnit.MINUTES);
     }
 
     @Override

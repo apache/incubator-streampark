@@ -72,21 +72,27 @@ object CompletableFutureUtils {
                     exceptionally: Consumer[Throwable]): CompletableFuture[Unit] = {
     future.applyToEither(setTimeout(timeout, unit), new JavaFunc[T, Unit] {
       override def apply(t: T): Unit = {
-        handle.accept(t)
+        if (handle != null) {
+          handle.accept(t)
+        }
       }
     }).exceptionally(new JavaFunc[Throwable, Unit] {
       override def apply(t: Throwable): Unit = {
-        exceptionally.accept(t)
+        if (exceptionally != null) {
+          exceptionally.accept(t)
+        }
       }
     })
   }
 
-  def runTimeoutAndCancelFuture[T](future: CompletableFuture[T],
-                                   timeout: Long,
-                                   unit: TimeUnit): CompletableFuture[Unit] = {
-    runTimeout(future, timeout, unit, (_: T) => {}, (_: Throwable) => {
-      if (!future.isDone) {
-        future.cancel(true)
+  def runTimeout[T](future: CompletableFuture[T],
+                    timeout: Long,
+                    unit: TimeUnit): CompletableFuture[Unit] = {
+    runTimeout(future, timeout, unit, null, new Consumer[Throwable] {
+      override def accept(t: Throwable): Unit = {
+        if (!future.isDone) {
+          future.cancel(true)
+        }
       }
     })
   }
