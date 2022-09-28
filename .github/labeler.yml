@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 INFRA:
   - ".github/**/*"
@@ -22,137 +23,45 @@ INFRA:
   - ".licenserc.yaml"
 
 BUILD:
-  # Can be supported when a stable release with correct all/any is released
-  #- any: ['dev/**/*', '!dev/github_jira_sync.py', '!dev/merge_spark_pr.py', '!dev/.rat-excludes']
+  - ".husky/**/*"
   - ".mvn/**/*"
+  - "script/update_version.py"
+  - "tools/checkstyle/*"
+  - "build.sh"
   - "mvnw"
   - "mvnw.cmd"
-  - "tools/checkstyle/*"
   - "**/*pom.xml"
+  - "**/assembly/**/*"
 
-  - "dev/**/*"
-  - "build/**/*"
-  - "project/**/*"
-  - "assembly/**/*"
-  - "**/*pom.xml"
-  - "bin/docker-image-tool.sh"
-  - "bin/find-spark-home*"
-  - "scalastyle-config.xml"
-  # These can be added in the above `any` clause (and the /dev/**/* glob removed) when
-  # `any`/`all` support is released
-  # - "!dev/github_jira_sync.py"
-  # - "!dev/merge_spark_pr.py"
-  # - "!dev/run-tests-jenkins*"
-  # - "!dev/.rat-excludes"
+DOCKER:
+  - "deploy/**/*"
 
-BUILD_X:
- # Can be supported when a stable release with correct all/any is released
- #- any: ['dev/**/*', '!dev/github_jira_sync.py', '!dev/merge_spark_pr.py', '!dev/.rat-excludes']
- - "dev/**/*"
- - "build/**/*"
- - "project/**/*"
- - "assembly/**/*"
- - "**/*pom.xml"
- - "bin/docker-image-tool.sh"
- - "bin/find-spark-home*"
- - "scalastyle-config.xml"
- # These can be added in the above `any` clause (and the /dev/**/* glob removed) when
- # `any`/`all` support is released
- # - "!dev/github_jira_sync.py"
- # - "!dev/merge_spark_pr.py"
- # - "!dev/run-tests-jenkins*"
- # - "!dev/.rat-excludes"
 DOCS:
-  - "docs/**/*"
   - "**/README.md"
   - "**/README_CN.md"
-  - "**/CONTRIBUTING.md"
-EXAMPLES:
-  - "examples/**/*"
-  - "bin/run-example*"
-# CORE needs to be updated when all/any are released upstream.
-CORE:
-  # - any: ["core/**/*", "!**/*UI.scala", "!**/ui/**/*"] # If any file matches all of the globs defined in the list started by `any`, label is applied.
-  - "core/**/*"
-  - "common/kvstore/**/*"
-  - "common/network-common/**/*"
-  - "common/network-shuffle/**/*"
-  - "python/pyspark/**/*.py"
-  - "python/pyspark/tests/**/*.py"
-SPARK SUBMIT:
-  - "bin/spark-submit*"
-SPARK SHELL:
-  - "repl/**/*"
-  - "bin/spark-shell*"
-SQL:
-#- any: ["**/sql/**/*", "!python/pyspark/sql/avro/**/*", "!python/pyspark/sql/streaming/**/*", "!python/pyspark/sql/tests/test_streaming.py"]
-  - "**/sql/**/*"
-  - "common/unsafe/**/*"
-  #- "!python/pyspark/sql/avro/**/*"
-  #- "!python/pyspark/sql/streaming/**/*"
-  #- "!python/pyspark/sql/tests/test_streaming.py"
-  - "bin/spark-sql*"
-  - "bin/beeline*"
-  - "sbin/*thriftserver*.sh"
-  - "**/*SQL*.R"
-  - "**/DataFrame.R"
-  - "**/*WindowSpec.R"
-  - "**/*catalog.R"
-  - "**/*column.R"
-  - "**/*functions.R"
-  - "**/*group.R"
-  - "**/*schema.R"
-  - "**/*types.R"
-AVRO:
-  - "connector/avro/**/*"
-  - "python/pyspark/sql/avro/**/*"
-DSTREAM:
-  - "streaming/**/*"
-  - "data/streaming/**/*"
-  - "external/kinesis*"
-  - "external/kafka*"
-  - "python/pyspark/streaming/**/*"
-GRAPHX:
-  - "graphx/**/*"
-  - "data/graphx/**/*"
-ML:
-  - "**/ml/**/*"
-  - "**/*mllib_*.R"
-MLLIB:
-  - "**/spark/mllib/**/*"
-  - "mllib-local/**/*"
-  - "python/pyspark/mllib/**/*"
-STRUCTURED STREAMING:
-  - "**/sql/**/streaming/**/*"
-  - "connector/kafka-0-10-sql/**/*"
-  - "python/pyspark/sql/streaming/**/*"
-  - "python/pyspark/sql/tests/test_streaming.py"
-  - "**/*streaming.R"
-PYTHON:
-  - "bin/pyspark*"
-  - "**/python/**/*"
-PANDAS API ON SPARK:
-  - "python/pyspark/pandas/**/*"
-R:
-  - "**/r/**/*"
-  - "**/R/**/*"
-  - "bin/sparkR*"
-YARN:
-  - "resource-managers/yarn/**/*"
-MESOS:
-  - "resource-managers/mesos/**/*"
-  - "sbin/*mesos*.sh"
+  - "CODE_OF_CONDUCT.md"
+
+WEB UI:
+  - "streampark-console/streampark-console-webapp/**/*"
+
+BACKEND:
+  - "streampark-console/streampark-console-server/**/*"
+  - "streampark-common/**/*"
+  - "streampark-plugin/**/*"
+
+FLINK:
+  - "streampark-flink/**/*"
+
+SPARK:
+  - "streampark-spark/**/*"
+
 KUBERNETES:
-  - "resource-managers/kubernetes/**/*"
+  - "streampark-flink/streampark-flink-kubernetes/**/*"
+  - "streampark-flink-submit/**/Kubernetes*.scala"
+
+YARN:
+  - "streampark-common/**/Yarn*.scala"
+  - "streampark-flink-submit/**/Yarn*.scala"
+
 WINDOWS:
   - "**/*.cmd"
-  - "R/pkg/tests/fulltests/test_Windows.R"
-WEB UI:
-  - "**/ui/**/*"
-  - "**/*UI.scala"
-DEPLOY:
-  - "sbin/**/*"
-CONNECT:
-  - "connect/**/*"
-  - "**/sql/sparkconnect/**/*"
-  - "python/pyspark/sql/**/connect/**/*"
