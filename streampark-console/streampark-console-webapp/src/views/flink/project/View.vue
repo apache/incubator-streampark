@@ -395,13 +395,13 @@ export default {
         scrollback: 1000,
         tabstopwidth: 4,
         disableStdin: true,
-        rows: parseInt(rows), // 行数
+        rows: parseInt(rows), // Rows
         cols: parseInt(cols),
         fontSize: 14,
-        cursorStyle: 'underline', // 光标样式
+        cursorStyle: 'underline', // Cursor style
         theme: {
-          foreground: '#AAAAAA', // 字体
-          background: '#131D32', // 背景色
+          foreground: '#AAAAAA', // Font
+          background: '#131D32', // background color
           lineHeight: 16
         }
       })
@@ -455,13 +455,13 @@ export default {
         this.loading = true
       }
       if (this.paginationInfo) {
-        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        // If the paging information is not empty, set the current page of the table, the number of items per page, and set the query paging parameters
         this.$refs.TableInfo.pagination.current = this.paginationInfo.current
         this.$refs.TableInfo.pagination.pageSize = this.paginationInfo.pageSize
         params.pageSize = this.paginationInfo.pageSize
         params.pageNum = this.paginationInfo.current
       } else {
-        // 如果分页信息为空，则设置为默认值
+        // If pagination information is empty, set to default
         // params.pageSize = this.pagination.defaultPageSize
         // params.pageNum = this.pagination.current
       }

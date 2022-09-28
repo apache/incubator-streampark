@@ -25,7 +25,7 @@ export function baseUrl() {
     case 'production':
       url = process.env['VUE_APP_BASE_API']
       break
-    //开发测试阶段采用前后端分离,这里配置后端的请求URI
+    // In the development and testing phase, the front and back ends are separated, and the request URI of the back end is configured here.
     case 'development':
       url = process.env['VUE_APP_BASE_API']
       break

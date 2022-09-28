@@ -16,10 +16,10 @@
  */
 
 const {cssResolve} = require('../config/replacer')
-// 修正 webpack-theme-color-replacer 插件提取的 css 结果
+// Fix css results extracted by webpack-theme-color-replacer plugin
 function resolveCss(output, srcArr) {
   const regExps = []
-  // 提取 resolve 配置中所有的正则配置
+  // Extract all regular configuration in resolve configuration
   Object.keys(cssResolve).forEach(key => {
     let isRegExp = false
     let reg = {}
@@ -34,15 +34,15 @@ function resolveCss(output, srcArr) {
     }
   })
 
-  // 去重
+  // deduplication
   srcArr = dropDuplicate(srcArr)
 
-  // 处理 css
+  // handle css
   const outArr = []
   srcArr.forEach(text => {
-    // 转换为 css 对象
+    // Convert to css object
     const cssObj = parseCssObj(text)
-    // 根据selector匹配配置，匹配成功，则按配置处理 css
+    // Match the configuration according to the selector, if the match is successful, the css is processed according to the configuration
     if (cssResolve[cssObj.selector] !== undefined) {
       const cfg = cssResolve[cssObj.selector]
       if (cfg) {
@@ -50,14 +50,14 @@ function resolveCss(output, srcArr) {
       }
     } else {
       let cssText = ''
-      // 匹配不成功，则测试是否有匹配的正则配置，有则按正则对应的配置处理
+      // If the match is unsuccessful, test whether there is a matching regular configuration, and if there is, it will be processed according to the regular configuration
       for (const regExp of regExps) {
         if (regExp[0].test(cssObj.selector)) {
           const cssCfg = regExp[1]
           cssText = cssCfg ? cssCfg.resolve(text, cssObj) : ''
           break
         }
-        // 未匹配到正则，则设置 cssText 为默认的 css（即不处理）
+        // If no regularity is matched, set cssText as the default css (ie not processed)
         cssText = text
       }
       if (cssText !== '') {
@@ -69,7 +69,7 @@ function resolveCss(output, srcArr) {
   return output
 }
 
-// 数组去重
+// Array deduplication
 function dropDuplicate(arr) {
   const map = {}
   const r = []
@@ -83,7 +83,7 @@ function dropDuplicate(arr) {
 }
 
 /**
- * 从字符串解析 css 对象
+ * Parse css object from string
  * @param cssText
  * @returns {{
  *   name: String,

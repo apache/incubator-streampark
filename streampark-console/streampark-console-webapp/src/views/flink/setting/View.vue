@@ -1071,10 +1071,10 @@ export default {
         theme: this.ideTheme(),
         language: 'yaml',
         selectOnLineNumbers: false,
-        foldingStrategy: 'indentation', // 代码分小段折叠
-        overviewRulerBorder: false, // 不要滚动条边框
+        foldingStrategy: 'indentation', // code fragmentation
+        overviewRulerBorder: false, // Don't scroll bar borders
         autoClosingBrackets: true,
-        tabSize: 2, // tab 缩进长度
+        tabSize: 2, // tab indent length
         readOnly: true,
         inherit: true,
         scrollBeyondLastLine: false,
@@ -1086,7 +1086,7 @@ export default {
         cursorWidth: 3,
         renderFinalNewline: true,
         renderLineHighlight: 'all',
-        quickSuggestionsDelay: 100,  //代码提示延时
+        quickSuggestionsDelay: 100,  // Code prompt delay
         scrollbar: {
           useShadows: false,
           vertical: 'visible',
@@ -1168,11 +1168,11 @@ export default {
 
     handleIsStart(item) {
      /**
-      集群刚创建但未启动
+      The cluster was just created but not started
       CREATED(0),
-      集群已启动
+      cluster started
       STARTED(1),
-      集群已停止
+      cluster stopped
       STOPED(2);
     */
       return this.optionClusters.starting.get(item.id)
@@ -1341,7 +1341,7 @@ export default {
         this.larkSecretEnable = larkParams.secretEnable
       }
 
-      console.log('告警参数：' + JSON.stringify(item))
+      console.log('Alarm parameters：' + JSON.stringify(item))
       this.$nextTick(() => {
         this.alertForm.setFieldsValue({
           'alertName': item.alertName,
@@ -1459,9 +1459,9 @@ export default {
             secretToken: values.larkSecretToken
           }
         }
-        console.log('更新告警参数：' + JSON.stringify(param))
+        console.log('Update alarm parameters：' + JSON.stringify(param))
         if (!err) {
-          if(!param.id){//添加新告警
+          if(!param.id){// Add new alert
             existsAlert({'alertName': param.alertName}).then((resp)=>{
               if(resp.data){
                 this.$swal.fire(
@@ -1471,13 +1471,13 @@ export default {
                 )
               }else{
                 addAlert(param).then((resp) => {
-                if (!resp.data) {//告警添加失败
+                if (!resp.data) {// Failed to add alarm
                   this.$swal.fire(
                     'Failed create AlertConfig',
                     resp['message'].replaceAll(/\[StreamPark]/g, ''),
                     'error'
                   )
-                } else {//告警添加成功
+                } else {// Alarm added successfully
                   this.$swal.fire({
                     icon: 'success',
                     title: 'Create AlertConfig successful!',
@@ -1490,15 +1490,15 @@ export default {
               })
               }
             })
-          }else{//根据告警id更新告警参数
+          }else{// Update the alarm parameters according to the alarm id
             updateAlert(param).then((resp) => {
-              if (!resp.data) {//告警更新失败
+              if (!resp.data) {// Alarm update failed
                 this.$swal.fire(
                   'Failed update AlertConfig',
                   resp['message'].replaceAll(/\[StreamPark]/g, ''),
                   'error'
                 )
-              } else {//告警更新成功
+              } else {// Alarm update succeeded
                 this.$swal.fire({
                   icon: 'success',
                   title: 'Update AlertConfig successful!',
@@ -1513,7 +1513,7 @@ export default {
 
         }
       }).catch((err) => {
-        // callback(new Error('提交表单异常' + err))
+        // callback(new Error('Submit form exception' + err))
       })
       this.alertId = null
     },

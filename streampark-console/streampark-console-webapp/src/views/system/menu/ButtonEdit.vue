@@ -19,7 +19,7 @@
 
 <template>
   <a-drawer
-    title="修改按钮"
+    title="Modify button"
     :mask-closable="false"
     width="650"
     placement="right"
@@ -30,26 +30,26 @@
     <a-form
       :form="form">
       <a-form-item
-        label="按钮名称"
+        label="button name"
         v-bind="formItemLayout">
         <a-input
           v-decorator="['menuName',
                         {rules: [
-                          { required: true, message: '按钮名称不能为空'},
-                          { max: 20, message: '长度不能超过20个字符'}
+                          { required: true, message: 'Button name cannot be empty'},
+                          { max: 20, message: 'Length cannot exceed 20 characters'}
                         ]}]" />
       </a-form-item>
       <a-form-item
-        label="相关权限"
+        label="Related permissions"
         v-bind="formItemLayout">
         <a-input
           v-decorator="['perms',
                         {rules: [
-                          { max: 50, message: '长度不能超过50个字符'}
+                          { max: 50, message: 'Length cannot exceed 50 characters'}
                         ]}]" />
       </a-form-item>
       <a-form-item
-        label="上级菜单"
+        label="parent menu"
         style="margin-bottom: 2rem"
         v-bind="formItemLayout">
         <a-tree
@@ -73,28 +73,28 @@
           <a-menu-item
             key="1"
             @click="expandAll">
-            展开所有
+            expand all
           </a-menu-item>
           <a-menu-item
             key="2"
             @click="closeAll">
-            合并所有
+            close all
           </a-menu-item>
         </a-menu>
         <a-button>
-          树操作 <a-icon
+          tree operate <a-icon
             type="up" />
         </a-button>
       </a-dropdown>
       <a-button
         @click="onClose">
-        取消
+        cancel
       </a-button>
       <a-button
         @click="handleSubmit"
         type="primary"
         :loading="loading">
-        提交
+        submit
       </a-button>
     </div>
   </a-drawer>
@@ -165,11 +165,11 @@ export default {
     handleSubmit () {
       const checkedArr = Object.is(this.checkedKeys.checked, undefined) ? this.checkedKeys : this.checkedKeys.checked
       if (!checkedArr.length) {
-        this.$message.error('请为按钮选择一个上级菜单')
+        this.$message.error('Please select a parent menu for the button')
         return
       }
       if (checkedArr.length > 1) {
-        this.$message.error('最多只能选择一个上级菜单，请修改')
+        this.$message.error('At most one parent menu can be selected, please modify')
         return
       }
       this.form.validateFields((err, values) => {
@@ -177,7 +177,7 @@ export default {
           this.loading = true
           const button = this.form.getFieldsValue()
           button.parentId = checkedArr[0]
-          // 0 表示菜单 1 表示按钮
+          // 0 for menu 1 for button
           button.type = '1'
           button.menuId = this.button.menuId
           update({

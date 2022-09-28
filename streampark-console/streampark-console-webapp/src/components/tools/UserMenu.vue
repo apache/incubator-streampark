@@ -269,7 +269,7 @@ export default {
         this.themeDark = !this.themeDark
         _theme = this.themeDark ? 'dark': 'light'
         this.ChangeTheme(_theme)
-        const closeMessage = this.$message.loading(`您选择了主题模式 ${_theme}, 正在切换...`)
+        const closeMessage = this.$message.loading(`You have selected the theme ${_theme}, switching...`)
         themeUtil.changeThemeColor(null, _theme).then(closeMessage)
       }
     },

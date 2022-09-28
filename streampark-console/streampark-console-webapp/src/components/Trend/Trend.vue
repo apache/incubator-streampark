@@ -43,14 +43,14 @@ export default {
       default: 'ant-pro-trend'
     },
     /**
-       * 上升下降标识：up|down
+       * rising and falling signs：up|down
        */
     flag: {
       type: String,
       required: true
     },
     /**
-       * 颜色反转
+       * Color inversion
        */
     reverseColor: {
       type: Boolean,
