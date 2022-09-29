@@ -18,40 +18,35 @@
 package org.apache.streampark.console.core.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 
+@ApiModel(value = "AlertDingTalk")
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertDingTalkParams implements Serializable {
-    @NotBlank(message = "The access token of DingTalk must not be empty")
+
+    @ApiModelProperty(name = "token", value = "token")
+    @NotBlank(message = "The access token of DingTalk must be not empty")
     private String token;
 
-    /**
-     * alert phone, separated by ','
-     */
+    @ApiModelProperty(name = "contacts", value = "phone, multiple use ',' delimiter")
     private String contacts;
 
-    /**
-     * ding alert url
-     */
+    @ApiModelProperty(name = "alertDingUrl", value = "ding url")
     private String alertDingURL;
 
-    /**
-     * at all
-     */
+    @ApiModelProperty(name = "isAtAll", value = "is @all", example = "false")
     private Boolean isAtAll = false;
 
-    /**
-     * ding robot secret enabled, default false, if enable, need set secret token
-     */
+    @ApiModelProperty(name = "secretEnable", value = "is ding robot secret enabled", example = "false")
     private Boolean secretEnable = false;
 
-    /**
-     * ding robot webhook secret_token
-     */
+    @ApiModelProperty(name = "secretToken", value = "ding robot webhook secret token")
     private String secretToken;
 }
