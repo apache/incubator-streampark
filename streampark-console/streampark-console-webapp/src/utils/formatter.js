@@ -16,9 +16,9 @@
  */
 
 /**
- * 把对象按照 js配置文件的格式进行格式化
- * @param obj 格式化的对象
- * @param dep 层级，此项无需传值
+ * Format the object according to the format of the js configuration file
+ * @param obj formatted object
+ * @param dep level, this item does not need to pass a value
  * @returns {string}
  */
 function formatConfig(obj, dep) {

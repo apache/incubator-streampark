@@ -38,11 +38,9 @@ public interface ProjectService extends IService<Project> {
 
     IPage<Project> page(Project project, RestRequest restRequest);
 
-    void build(Long id, String socketId) throws Exception;
+    void build(Long id) throws Exception;
 
-    void tailBuildLog(Long id);
-
-    void closeBuildLog(Long id);
+    RestResponse getBuildLog(Long id, Long startOffset);
 
     List<String> modules(Long id);
 

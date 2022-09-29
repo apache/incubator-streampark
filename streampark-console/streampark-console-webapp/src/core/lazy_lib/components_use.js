@@ -17,10 +17,10 @@
 
 /* eslint-disable */
 /**
- * 该文件是为了按需加载，剔除掉了一些不需要的框架组件。
- * 减少了编译支持库包大小
+ * This file is for on-demand loading, with some unneeded framework components removed.
+ * Reduced compilation support library package size
  *
- * 当需要更多组件依赖时，在该文件加入即可
+ * When you need more component dependencies, you can add it to this file
  */
 import Vue from 'vue'
 import {

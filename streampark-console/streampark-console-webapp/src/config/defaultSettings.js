@@ -16,16 +16,16 @@
  */
 
 /**
- * 项目默认配置项
- * primaryColor - 默认主题色
- * colorWeak - 色盲模式
- * layout - 整体布局方式 ['sidemenu', 'topmenu'] 两种布局
- * fixedHeader - 固定 Header : boolean
- * fixSiderbar - 固定左侧菜单栏 ： boolean
- * autoHideHeader - 向下滚动时，隐藏 Header : boolean
- * contentWidth - 内容区布局： 流式 |  固定
+ * Project default configuration items
+ * primaryColor - the default theme color
+ * colorWeak - Colorblind mode
+ * layout - overall layout ['sidemenu', 'topmenu'] two layouts
+ * fixedHeader - the fixed Header : boolean
+ * fixSiderbar - fix left menu bar: boolean
+ * autoHideHeader - when scrolling down, hide the Header : boolean
+ * contentWidth - content area layout: fluid | fixed
  *
- * storageOptions: {} - Vue-ls 插件配置项 (localStorage/sessionStorage)
+ * storageOptions: {} - Vue-ls plugin configuration items (localStorage/sessionStorage)
  *
  */
 

@@ -112,5 +112,15 @@ case class Workspace(storageType: StorageType) {
    */
   lazy val PROJECT_LOCAL_DIR = s"${Workspace.local.WORKSPACE}/project"
 
+  /**
+   * local log dir.
+   */
+  lazy val LOG_LOCAL_DIR = s"${Workspace.local.WORKSPACE}/logs"
+
+  /**
+   * project build log dir.
+   */
+  lazy val PROJECT_BUILD_LOG_DIR = s"$LOG_LOCAL_DIR/build_logs"
+
 }
 

@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-// 此配置为系统默认设置，需修改的设置项，在src/config/config.js中添加修改项即可。也可直接在此文件中修改。
+// This configuration is the default setting of the system. To modify the setting items, you can add the modified items in src/config/config.js. It can also be modified directly in this file.
 module.exports = {
-  lang: 'CN',                           //语言，可选 CN(简体)、HK(繁体)、US(英语)，也可扩展其它语言
-  theme: {                              //主题
-    color: '#1890ff',                   //主题色
-    mode: 'dark',                       //主题模式 可选 dark、 light
-    success: '#52c41a',                 //成功色
-    warning: '#faad14',                 //警告色
-    error: '#f5222f',                   //错误色
+  lang: 'CN',                           //Language, optional CN (Simplified), HK (Traditional), US (English), other languages can also be extended
+  theme: {                              //theme
+    color: '#1890ff',                   //theme color
+    mode: 'dark',                       //Theme mode optional dark, light
+    success: '#52c41a',                 //success color
+    warning: '#faad14',                 //warning color
+    error: '#f5222f',                   //wrong color
   }
 }

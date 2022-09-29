@@ -90,9 +90,9 @@
 
       <div class="footer">
         <div class="links">
-          <a href="_self">帮助</a>
-          <a href="_self">隐私</a>
-          <a href="_self">条款</a>
+          <a href="_self">help</a>
+          <a href="_self">privacy</a>
+          <a href="_self">provision</a>
         </div>
         <div
           class="copyright">

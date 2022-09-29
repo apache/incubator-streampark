@@ -47,7 +47,7 @@
           v-decorator="[
             'remark',
             {rules: [
-              { max: 50, message: '长度不能超过50个字符'}
+              { max: 50, message: 'Length cannot exceed 50 characters'}
             ]}]" />
       </a-form-item>
       <a-form-item
@@ -161,7 +161,7 @@ export default {
         this.menuSelectHelp = ''
       } else {
         this.menuSelectStatus = 'error'
-        this.menuSelectHelp = '请选择相应的权限'
+        this.menuSelectHelp = 'Please select the appropriate permission'
       }
     },
     handleExpand (expandedKeys) {
@@ -182,7 +182,7 @@ export default {
       const checkedArr = this.selectedKeysAndHalfCheckedKeys
       if (checkedArr.length === 0) {
         this.menuSelectStatus = 'error'
-        this.menuSelectHelp = '请选择相应的权限'
+        this.menuSelectHelp = 'Please select the appropriate permission'
       } else {
         this.form.validateFields((err, values) => {
           if (!err) {
@@ -206,13 +206,13 @@ export default {
         })
       }
     },
-    // 默认父节点为 "/"
+    // The default parent node is "/"
     deepList(data) {
       data.map((item) => {
         if (item.children && item.children.length >0) {
           this.deepList(item.children)
         } else {
-          // 存放所有叶子节点
+          // Store all leaf nodes
           this.leftNodes.push (item.id)
         }
       })
@@ -222,7 +222,7 @@ export default {
     roleEditVisiable () {
       if (this.roleEditVisiable) {
         getMenu().then((r) => {
-          // 得到所有叶子节点
+          // get all leaf nodes
           this.deepList(r.data.rows.children)
           const data = r.data
           this.menuTreeData = data.rows.children
@@ -230,9 +230,9 @@ export default {
           roleMenu({
             roleId: this.roleInfoData.roleId
           }).then((resp) => {
-            // 后台返回的数据与叶子节点做交集,得到选中的子节点
+            // The data returned in the background is intersected with the leaf node to get the selected child node
             const result = [...new Set(this.leftNodes)].filter((item) => new Set(eval(resp.data)).has(item))
-            //将结果赋值给v-model绑定的属性
+            // Assign the result to the v-model bound property
             this.checkedKeys = [...result]
             const data = this.checkedKeys
             this.defaultCheckedKeys.splice(0, this.defaultCheckedKeys.length, data)
