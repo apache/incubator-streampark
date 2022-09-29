@@ -53,10 +53,6 @@ export function buildlog (params) {
   return http.post(api.Project.BUILD_LOG, params)
 }
 
-export function closebuild(params) {
-  return http.post(api.Project.CLOSE_BUILD, params)
-}
-
 export function fileList (params) {
   return http.post(api.Project.FILE_LIST, params)
 }

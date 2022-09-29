@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -64,23 +65,17 @@ public class ProjectController {
 
     @PostMapping("build")
     @RequiresPermissions("project:build")
-    public RestResponse build(Long id, String socketId) throws Exception {
-        projectService.build(id, socketId);
+    public RestResponse build(Long id) throws Exception {
+        projectService.build(id);
         return RestResponse.success();
     }
 
     @PostMapping("buildlog")
     @RequiresPermissions("project:build")
-    public RestResponse buildLog(Long id) throws Exception {
-        projectService.tailBuildLog(id);
-        return RestResponse.success();
-    }
-
-    @PostMapping("closebuild")
-    @RequiresPermissions("project:build")
-    public RestResponse closeBuild(Long id) {
-        projectService.closeBuildLog(id);
-        return RestResponse.success();
+    public RestResponse buildLog(
+        Long id,
+        @RequestParam(value = "startOffset", required = false) Long startOffset) {
+        return projectService.getBuildLog(id, startOffset);
     }
 
     @PostMapping("list")

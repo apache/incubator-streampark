@@ -30,7 +30,6 @@ export default {
     COPY: '/flink/project/copy',
     BUILD: '/flink/project/build',
     BUILD_LOG: '/flink/project/buildlog',
-    CLOSE_BUILD: '/flink/project/closebuild',
     LIST: '/flink/project/list',
     FILE_LIST: '/flink/project/filelist',
     MODULES: '/flink/project/modules',
