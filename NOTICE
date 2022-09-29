@@ -4,7 +4,7 @@ Copyright 2022 The Apache Software Foundation
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
 
-The Apache Flink project contains or reuses code that is licensed under the Apache 2.0 license from the following projects:
+This project contains or reuses code that is licensed under the Apache 2.0 license from the following projects:
 
 - Memory Size Tools (FlinkMemorySize) was created by Apache Flink. (https://flink.apache.org) Copyright 2010 The Apache Software Foundation
   see: src/main/scala/org/apache/streampark/common/domain/FlinkMemorySize.java
