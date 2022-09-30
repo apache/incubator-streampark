@@ -16,5 +16,6 @@
 ###############################################################################
 FROM biarms/mysql:5.7
 
-COPY streampark-console/streampark-console-service/src/assembly/script/final.sql /docker-entrypoint-initdb.d/01-streampark.sql
+COPY streampark-console/streampark-console-service/src/assembly/script/schema/mysql-schema.sql /docker-entrypoint-initdb.d/01-streampark-init.sql
+COPY streampark-console/streampark-console-service/src/assembly/script/data/mysql-data.sql /docker-entrypoint-initdb.d/02-streampark-data.sql
 EXPOSE 3306
