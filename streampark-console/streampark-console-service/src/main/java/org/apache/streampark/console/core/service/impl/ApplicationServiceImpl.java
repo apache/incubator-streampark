@@ -79,6 +79,7 @@ import org.apache.streampark.console.core.task.FlinkTrackingTask;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.IngressController;
 import org.apache.streampark.flink.kubernetes.K8sFlinkTrackMonitor;
+import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
@@ -905,6 +906,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (startFuture == null && cancelFuture == null) {
             this.updateToStopped(app);
         }
+        if (isKubernetesApp(app)) {
+            KubernetesDeploymentHelper.watchPodTerminatedLog(app.getK8sNamespace(), app.getJobName());
+            KubernetesDeploymentHelper.deleteTaskDeployment(app.getK8sNamespace(), app.getJobName());
+            KubernetesDeploymentHelper.deleteTaskConfigMap(app.getK8sNamespace(), app.getJobName());
+            IngressController.deleteIngress(app.getK8sNamespace(), app.getJobName());
+        }
+
     }
 
     @Override
