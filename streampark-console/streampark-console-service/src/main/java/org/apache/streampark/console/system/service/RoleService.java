@@ -38,7 +38,7 @@ public interface RoleService extends IService<Role> {
 
     void createRole(Role role);
 
-    void deleteRoles(String[] roleIds) throws Exception;
+    void deleteRole(Long roleId);
 
-    void updateRole(Role role) throws Exception;
+    void updateRole(Role role);
 }

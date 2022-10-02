@@ -37,9 +37,8 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu>
 
     @Override
     @Transactional
-    public void deleteRoleMenusByRoleId(String[] roleIds) {
-        List<String> list = Arrays.asList(roleIds);
-        baseMapper.delete(new LambdaQueryWrapper<RoleMenu>().in(RoleMenu::getRoleId, list));
+    public void deleteRoleMenusByRoleId(Long roleId) {
+        baseMapper.delete(new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, roleId));
     }
 
     @Override
