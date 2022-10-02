@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.security;
 
 import org.apache.streampark.console.system.entity.User;
 
+
 public interface Authenticator {
     /**
      * Verifying legality via username and password
@@ -27,5 +28,7 @@ public interface Authenticator {
      * @return result object
      */
     User authenticate(String username, String password) throws Exception;
+
+    User ldapAuthenticate(String username, String password) throws Exception;
 
 }

@@ -130,21 +130,15 @@ streampark:
       /*.less,
       /
 
-## select the login mode: 1. PASSWORD 2.LDAP
-security:
-  authentication:
-    type: PASSWORD
-
 ldap:
   ## AD server IP, default port 389
   urls: ldap://99.99.99.99:389
   ## Login Account
+  base-dn: dc=streampark,dc=com
   username: cn=Manager,dc=streampark,dc=com
   password: streampark
-  embedded:
-    base-dn: dc=streampark,dc=com
   user:
-    identity:
-      attribute: cn
-    email:
-      attribute: mail
+    identity-attribute: uid
+    email-attribute: mail
+    # action when ldap user is not exist (supported types: CREATE,DENY)
+    not-exist-action: CREATE

@@ -66,31 +66,23 @@ public class PassportController {
     public RestResponse signin(
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
-
         if (StringUtils.isEmpty(username)) {
             return RestResponse.success().put("code", 0);
         }
-
         User user = authenticator.authenticate(username, password);
+        Map<String, Object> userInfo = login(username, password, user);
+        return new RestResponse().data(userInfo);
+    }
 
-        if (user == null) {
+    @PostMapping("ldapSignin")
+    public RestResponse ldapSignin(
+        @NotBlank(message = "{required}") String username,
+        @NotBlank(message = "{required}") String password) throws Exception {
+        if (StringUtils.isEmpty(username)) {
             return RestResponse.success().put("code", 0);
         }
-
-        if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put("code", 1);
-        }
-
-        password = ShaHashUtils.encrypt(user.getSalt(), password);
-
-        this.userService.updateLoginTime(username);
-        String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
-        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
-        String expireTimeStr = DateUtils.formatFullTime(expireTime);
-        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
-        String userId = RandomStringUtils.randomAlphanumeric(20);
-        user.setId(userId);
-        Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
+        User user = authenticator.ldapAuthenticate(username, password);
+        Map<String, Object> userInfo = login(username, password, user);
         return new RestResponse().data(userInfo);
     }
 
@@ -124,4 +116,24 @@ public class PassportController {
         return userInfo;
     }
 
+    private Map<String, Object> login(String username, String password, User user) throws Exception {
+        if (user == null) {
+            return RestResponse.success().put("code", 0);
+        }
+
+        if (User.STATUS_LOCK.equals(user.getStatus())) {
+            return RestResponse.success().put("code", 1);
+        }
+
+        password = ShaHashUtils.encrypt(user.getSalt(), password);
+
+        this.userService.updateLoginTime(username);
+        String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
+        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
+        String expireTimeStr = DateUtils.formatFullTime(expireTime);
+        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
+        String userId = RandomStringUtils.randomAlphanumeric(20);
+        user.setId(userId);
+        return this.generateUserInfo(jwtToken, user);
+    }
 }
