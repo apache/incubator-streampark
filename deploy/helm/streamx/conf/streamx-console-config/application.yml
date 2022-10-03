@@ -1,3 +1,20 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 server:
   port: 10000
   undertow:
@@ -12,7 +29,7 @@ logging:
     root: info
 
 spring:
-  application.name: streamx
+  application.name: streampark
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -43,7 +60,7 @@ spring:
           username: root
           password: 123456
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/streamx?useSSL=false&useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+          url: jdbc:mysql://localhost:3306/streampark?useSSL=false&useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
   aop.proxy-target-class: true
   messages.encoding: utf-8
   jackson:
@@ -62,7 +79,7 @@ management:
 
 #mybatis plus 设置
 mybatis-plus:
-  type-aliases-package: com.streamxhub.streamx.console.*.entity
+  type-aliases-package: org.apache.streampark.console.*.entity
   mapper-locations: classpath:mapper/*/*.xml
   configuration:
     jdbc-type-for-null: null
@@ -72,7 +89,7 @@ mybatis-plus:
     # 关闭 mybatis-plus的 banner
     banner: false
 
-streamx:
+streampark:
   proxy:
     # knox 代理地址 https://cdpsit02.example.cn:8443/gateway/cdp-proxy/yarn
     yarn-url:
@@ -84,13 +101,13 @@ streamx:
   hadoop-user-name: hdfs
   # 本地的工作空间,用于存放项目源码,构建的目录等.
   workspace:
-    local: /opt/streamx_workspace
-    remote: hdfs://hdfscluster/streamx   # support hdfs:///streamx/ 、 /streamx 、hdfs://host:ip/streamx/
+    local: /opt/streampark_workspace
+    remote: hdfs://hdfscluster/streampark   # support hdfs:///streampark/ 、 /streampark 、hdfs://host:ip/streampark/
 
-  # remote docker register namespace for streamx
+  # remote docker register namespace for streampark
   docker:
     register:
-      image-namespace: streamx
+      image-namespace: streampark
     # instantiating DockerHttpClient
     http-client:
       max-connections: 10000

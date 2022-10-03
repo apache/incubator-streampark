@@ -1,4 +1,4 @@
-# Streamx on Docker and Kubernetes Quick Start
+# StreamPark on Docker and Kubernetes Quick Start
 
 ## Docker Quick Start
 
@@ -15,7 +15,7 @@ After installed docker-compose, it is recommended to modify some configurations 
     Hyper-V mode: Click Docker Desktop -> Settings -> Resources -> Memory modified it
     WSL 2 mode: see WSL 2 utility VM for more detail.
 
-After complete the configuration, we can get the streamx file from download page form its source package, and make sure you get the right version. After download the package, you can run the commands as below.
+After complete the configuration, we can get the StreamPark file from download page form its source package, and make sure you get the right version. After download the package, you can run the commands as below.
 
 1.Environment build via mvn
 ```
@@ -28,9 +28,9 @@ cd deploy/docker
 docker-compose up -d
 ```
 
-3.Set up flink home on the streamx web ui
+3.Set up flink home on the StreamPark web ui
 ```
-/streamx/flink/
+/streampark/flink/
 ```
 
 4.Setting up remote session clusters
@@ -42,21 +42,21 @@ docker-compose up -d
 ### Prerequisites
     Helm version 3.1.0+
     Kubernetes version 1.12+
-### Install Streamx
+### Install StreamPark
 #### Installing the Chart
 
 To install the chart with the release name `streamx`:
 ```
 cd helm
-helm install streamx streamx/ 
+helm install streampark streampark/ 
 ```
 
 #### Uninstalling the Chart
 
-To uninstall/delete the `streamx` deployment:
+To uninstall/delete the `streampark` deployment:
 
 ```
-helm uninstall streamx
+helm uninstall streampark
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.

@@ -1,1 +1,1 @@
-http://www.opensource.org/licenses/bsd-license.php
+License: {Name: The BSD License, URL: http://www.opensource.org/licenses/bsd-license.php, Distribution: repo, Comments: , }

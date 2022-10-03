@@ -1,5 +1,4 @@
 ###############################################################################
-#  Copyright (c) 2019 The StreamX Project
 #  Licensed to the Apache Software Foundation (ASF) under one or more
 #  contributor license agreements.  See the NOTICE file distributed with
 #  this work for additional information regarding copyright ownership.
@@ -7,7 +6,7 @@
 #  (the "License"); you may not use this file except in compliance with
 #  the License.  You may obtain a copy of the License at
 #
-#  https://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,5 +16,6 @@
 ###############################################################################
 FROM biarms/mysql:5.7
 
-COPY streamx-console/streamx-console-service/src/assembly/script/final.sql /docker-entrypoint-initdb.d/01-streamx.sql
+COPY streampark-console/streampark-console-service/src/assembly/script/schema/mysql-schema.sql /docker-entrypoint-initdb.d/01-streampark-init.sql
+COPY streampark-console/streampark-console-service/src/assembly/script/data/mysql-data.sql /docker-entrypoint-initdb.d/02-streampark-data.sql
 EXPOSE 3306

@@ -16,10 +16,10 @@
 #
 
 # When enabled RBAC is only created for said namespaces, otherwise it is done for the cluster scope.
-# watchNamespaces: ["streamx"]
+# watchNamespaces: ["streampark"]
 
 image:
-  repository: "streamxhub/streamx"
+  repository: "streamxhub/streampark"
   pullPolicy: "IfNotPresent"
   tag: "1.2.4"
   pullSecret: ""
@@ -51,16 +51,16 @@ spec:
 
 ingress:
   enabled: true
-  host: "streamxhub.org"
-  path: "/streamx"
+  host: "streamxhub.com"
+  path: "/streampark"
   annotations: {}
 
 service:
   ## type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer
   type: "NodePort"
-  name: "streamx-service"
+  name: "streampark-service"
 
-streamxDefaultConfiguration:
+streamParkDefaultConfiguration:
   create: true
   # Set append to false to replace configuration files
   append: true
@@ -69,14 +69,14 @@ streamxDefaultConfiguration:
   # logback-spring.xml: |+
   #   ...
 
-streamxServiceAccount:
+streamParkServiceAccount:
   create: true
   annotations: {}
-  name: "streamx"
+  name: "streampark"
 
 nginx:
   ingress:
     kubernetes:
-      configurationSnippet: "rewrite ^(/streamx)$ $1/ permanent;"
+      configurationSnippet: "rewrite ^(/streampark)$ $1/ permanent;"
       proxyBbodySize: "1024m"
       rewriteTarget: "/$2"
