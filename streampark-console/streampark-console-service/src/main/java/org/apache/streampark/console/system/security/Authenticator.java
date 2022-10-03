@@ -19,7 +19,6 @@ package org.apache.streampark.console.system.security;
 
 import org.apache.streampark.console.system.entity.User;
 
-
 public interface Authenticator {
     /**
      * Verifying legality via username and password
