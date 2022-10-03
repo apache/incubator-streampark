@@ -57,7 +57,7 @@ object FlinkShimsProxy extends Logger {
    * Get shimsClassLoader to execute for scala API
    *
    * @param flinkVersion flinkVersion
-   * @param func execute function
+   * @param func         execute function
    * @tparam T
    * @return
    */
@@ -70,7 +70,7 @@ object FlinkShimsProxy extends Logger {
    * Get shimsClassLoader to execute for java API
    *
    * @param flinkVersion flinkVersion
-   * @param func execute function
+   * @param func         execute function
    * @tparam T
    * @return
    */
@@ -88,10 +88,17 @@ object FlinkShimsProxy extends Logger {
 
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(s"${flinkVersion.fullVersion}", {
       // 1) flink/lib
-      val libURL = getFlinkHomeLib(flinkVersion.flinkHome)
-      val shimsUrls = ListBuffer[URL](libURL: _*)
+      def filterLib(filterLib: File): Boolean = {
+        !(filterLib.getName.startsWith("log4j") || filterLib.getName.startsWith("flink-table-planner-loader"))
+      }
 
-      // 2) shims jar
+      val libURL = getFlinkHomeLib(flinkVersion.flinkHome, "lib", filterLib)
+      // 2) After version 1.15 need add flink/opt/flink-table-planner*
+      val getFlinkTablePlanner: File => Boolean = _.getName.startsWith("flink-table-planner")
+      val optURL = getFlinkHomeLib(flinkVersion.flinkHome, "opt", getFlinkTablePlanner)
+      val shimsUrls = ListBuffer[URL](libURL ++ optURL: _*)
+
+      // 3) shims jar
       val appHome = System.getProperty(ConfigConst.KEY_APP_HOME)
       require(appHome != null, String.format("%s is not found on System env.", ConfigConst.KEY_APP_HOME))
 
@@ -130,10 +137,10 @@ object FlinkShimsProxy extends Logger {
     })
   }
 
-  private[this] def getFlinkHomeLib(flinkHome: String): List[URL] = {
-    val file = new File(flinkHome, "lib")
+  private[this] def getFlinkHomeLib(flinkHome: String, childDir: String, filterFun: File => Boolean): List[URL] = {
+    val file = new File(flinkHome, childDir)
     require(file.isDirectory, s"FLINK_HOME $file does not exist")
-    file.listFiles.filter(!_.getName.startsWith("log4j")).map(_.toURI.toURL).toList
+    file.listFiles.filter(filterFun).map(_.toURI.toURL).toList
   }
 
   @throws[Exception]
