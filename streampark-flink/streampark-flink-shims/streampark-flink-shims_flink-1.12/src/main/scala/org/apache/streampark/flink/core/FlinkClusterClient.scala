@@ -15,17 +15,9 @@
  * limitations under the License.
  */
 package org.apache.streampark.flink.core
-import org.apache.flink.api.common.JobID
-import org.apache.flink.client.program.{ClusterClient => FlinkClusterClient}
 
-import java.util.concurrent.CompletableFuture
+import org.apache.flink.client.program.ClusterClient
 
-class ClusterClient[T](clusterClient: FlinkClusterClient[T]) extends ClusterClientTrait[T](clusterClient) {
-
-  override def cancelWithSavepoint(jobID: JobID, s: String): CompletableFuture[String] = clusterClient.cancelWithSavepoint(jobID, s)
-
-  override def stopWithSavepoint(jobID: JobID, b: Boolean, s: String): CompletableFuture[String] = clusterClient.stopWithSavepoint(jobID, b, s)
-
-  override def triggerSavepoint(jobID: JobID, s: String): CompletableFuture[String] = clusterClient.triggerSavepoint(jobID, s)
+class FlinkClusterClient[T](clusterClient: ClusterClient[T]) extends FlinkClientTrait[T](clusterClient) {
 
 }
