@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.base.config;
 
+import org.apache.streampark.console.base.interceptor.FileHeaderCheckInterceptor;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -30,13 +32,19 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import javax.annotation.Resource;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+
+    @Resource
+    private FileHeaderCheckInterceptor fileHeaderCheckInterceptor;
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -71,5 +79,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
         mapper.registerModule(simpleModule);
         converter.setObjectMapper(mapper);
         return converter;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(fileHeaderCheckInterceptor)
+            .addPathPatterns("/flink/app/upload");
     }
 }
