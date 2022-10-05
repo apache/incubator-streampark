@@ -165,8 +165,6 @@ object ConfigConst {
 
   val KEY_EXECUTION_RUNTIME_MODE = "flink.execution.runtime-mode"
 
-  val KEY_FLINK_WATERMARK_INTERVAL = "flink.watermark.interval"
-
   // ---watermark---
   val KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC = "flink.watermark.time.characteristic"
 

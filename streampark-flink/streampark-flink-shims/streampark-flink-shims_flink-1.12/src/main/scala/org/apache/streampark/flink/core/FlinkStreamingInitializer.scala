@@ -169,10 +169,6 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case p if p > 0 => localStreamEnv.setParallelism(p)
       case _ => throw new IllegalArgumentException("[StreamPark] parallelism must be > 0. ")
     }
-    val interval = Try(parameter.get(KEY_FLINK_WATERMARK_INTERVAL).toInt).getOrElse(0)
-    if (interval > 0) {
-      localStreamEnv.getConfig.setAutoWatermarkInterval(interval)
-    }
 
     // Compatible with 1.12 and previous versions (TimeCharacteristic deprecated in version 1.12)
     if (classOf[TimeCharacteristic].getDeclaredAnnotation(classOf[Deprecated]) == null) {
