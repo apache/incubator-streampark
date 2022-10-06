@@ -149,20 +149,6 @@ object ConfigConst {
 
   val KEY_FLINK_STATE_ROCKSDB = "flink.state.backend.rocksdb"
 
-  //---restart-strategy---
-
-  val KEY_FLINK_RESTART_STRATEGY = "flink.restart-strategy.value"
-
-  val KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_PER_INTERVAL = "flink.restart-strategy.failure-rate.max-failures-per-interval"
-
-  val KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_RATE_INTERVAL = "flink.restart-strategy.failure-rate.failure-rate-interval"
-
-  val KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_DELAY = "flink.restart-strategy.failure-rate.delay"
-
-  val KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS = "flink.restart-strategy.fixed-delay.attempts"
-
-  val KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_DELAY = "flink.restart-strategy.fixed-delay.delay"
-
   val KEY_EXECUTION_RUNTIME_MODE = "flink.execution.runtime-mode"
 
   // ---watermark---
