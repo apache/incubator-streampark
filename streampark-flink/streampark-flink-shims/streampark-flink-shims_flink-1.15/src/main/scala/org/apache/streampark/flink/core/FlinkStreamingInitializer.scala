@@ -172,8 +172,6 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     val executionMode = Try(RuntimeExecutionMode.valueOf(parameter.get(KEY_EXECUTION_RUNTIME_MODE))).getOrElse(RuntimeExecutionMode.STREAMING)
     localStreamEnv.setRuntimeMode(executionMode)
 
-    restartStrategy()
-
     checkpoint()
 
     apiType match {
@@ -182,84 +180,6 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case _ =>
     }
     localStreamEnv.getConfig.setGlobalJobParameters(parameter)
-  }
-
-  private[this] def restartStrategy(): Unit = {
-    /**
-     * Priority to the current project configuration to find the configuration, if can not find,
-     * then take $FLINK_HOME/conf/flink-conf.yml as the configuration
-     */
-    val prefixLen = "flink.".length
-    val strategy = Try(RestartStrategy.byName(parameter.get(KEY_FLINK_RESTART_STRATEGY)))
-      .getOrElse(
-        Try(RestartStrategy.byName(defaultFlinkConf("restart-strategy"))).getOrElse(null)
-      )
-    strategy match {
-      case RestartStrategy.`failure-rate` =>
-        /**
-         * restart-strategy.failure-rate.max-failures-per-interval: maximum number of restarts before a Job is deemed to have failed
-         * restart-strategy.failure-rate.failure-rate-interval: time interval for calculating the failure rate
-         * restart-strategy.failure-rate.delay: time interval between two consecutive reboot attempts
-         * e.g:
-         * >>>
-         * max-failures-per-interval: 10
-         * failure-rate-interval: 5 min
-         * delay: 2 s
-         * <<<
-         * That is:
-         * the time interval of each abnormal restart is "2 seconds",
-         * if the total number of failures reaches "10" within "5 minutes", the task will fail.
-         */
-        val interval = Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_PER_INTERVAL).toInt)
-          .getOrElse(
-            Try(defaultFlinkConf(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_PER_INTERVAL.drop(prefixLen)).toInt).getOrElse(3)
-          )
-
-        val rateInterval = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_RATE_INTERVAL))
-          .getOrElse(
-            Try(defaultFlinkConf(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_RATE_INTERVAL.drop(prefixLen))).getOrElse(null)
-          ), (5, TimeUnit.MINUTES))
-
-        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_DELAY))
-          .getOrElse(
-            Try(defaultFlinkConf(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_DELAY.drop(prefixLen))).getOrElse(null)
-          ))
-
-        streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.failureRateRestart(
-          interval,
-          Time.of(rateInterval._1, rateInterval._2),
-          Time.of(delay._1, delay._2)
-        ))
-
-      case RestartStrategy.`fixed-delay` =>
-        /**
-         * restart-strategy.fixed-delay.attempts: the number of times Flink tries to execute a Job before it finally failure
-         * restart-strategy.fixed-delay.delay: specific how long the restart interval
-         * e.g:
-         * attempts: 5,delay: 3 s
-         * That is:
-         * The maximum number of failed retries for a task is 5, and the time interval for each task restart is 3 seconds,
-         * if the number of failed attempts reaches 5, the task will fail and exit
-         */
-        val attempts = Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS).toInt)
-          .getOrElse(
-            Try(defaultFlinkConf(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS.drop(prefixLen)).toInt).getOrElse(3)
-          )
-
-        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_DELAY))
-          .getOrElse(
-            Try(defaultFlinkConf(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_DELAY.drop(prefixLen))).getOrElse(null)
-          ))
-
-        /**
-         * Total `restartAttempts` after task execution failure, each restart interval `delayBetweenAttempts`
-         */
-        streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(attempts, Time.of(delay._1, delay._2)))
-
-      case RestartStrategy.`none` => streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.noRestart())
-
-      case null => logInfo("RestartStrategy not set,use default from $flink_conf")
-    }
   }
 
   private[this] def checkpoint(): Unit = {
