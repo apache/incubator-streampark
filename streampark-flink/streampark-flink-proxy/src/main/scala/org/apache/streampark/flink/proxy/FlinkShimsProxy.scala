@@ -57,7 +57,7 @@ object FlinkShimsProxy extends Logger {
    * Get shimsClassLoader to execute for scala API
    *
    * @param flinkVersion flinkVersion
-   * @param func         execute function
+   * @param func execute function
    * @tparam T
    * @return
    */
@@ -70,7 +70,7 @@ object FlinkShimsProxy extends Logger {
    * Get shimsClassLoader to execute for java API
    *
    * @param flinkVersion flinkVersion
-   * @param func         execute function
+   * @param func execute function
    * @tparam T
    * @return
    */
@@ -95,8 +95,8 @@ object FlinkShimsProxy extends Logger {
       val libURL = getFlinkHomeLib(flinkVersion.flinkHome, "lib", filterLib)
       // 2) After version 1.15 need add flink/opt/flink-table-planner*
       val getFlinkTablePlanner: File => Boolean = _.getName.startsWith("flink-table-planner")
-      val optURL = getFlinkHomeLib(flinkVersion.flinkHome, "opt", getFlinkTablePlanner)
-      val shimsUrls = ListBuffer[URL](libURL ++ optURL: _*)
+      val tablePlannerURL = getFlinkHomeLib(flinkVersion.flinkHome, "opt", getFlinkTablePlanner)
+      val shimsUrls = ListBuffer[URL](libURL ++ tablePlannerURL: _*)
 
       // 3) shims jar
       val appHome = System.getProperty(ConfigConst.KEY_APP_HOME)
