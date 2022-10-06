@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.{KEY_APP_CONF, KEY_APP_NAME, KEY_EXECUTION_RUNTIME_MODE, KEY_FLINK_APP_NAME, KEY_FLINK_PARALLELISM, KEY_FLINK_SQL, KEY_FLINK_TABLE_CATALOG, KEY_FLINK_TABLE_DATABASE, KEY_FLINK_TABLE_MODE, KEY_FLINK_WATERMARK_INTERVAL}
+import org.apache.streampark.common.conf.ConfigConst.{KEY_APP_CONF, KEY_APP_NAME, KEY_EXECUTION_RUNTIME_MODE, KEY_FLINK_APP_NAME, KEY_FLINK_PARALLELISM, KEY_FLINK_SQL, KEY_FLINK_TABLE_CATALOG, KEY_FLINK_TABLE_DATABASE, KEY_FLINK_TABLE_MODE}
 import org.apache.streampark.common.enums.{ApiType, TableMode}
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.enums.TableMode.TableMode

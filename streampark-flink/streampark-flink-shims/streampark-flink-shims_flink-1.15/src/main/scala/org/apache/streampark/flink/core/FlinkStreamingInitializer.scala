@@ -168,10 +168,6 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case p if p > 0 => localStreamEnv.setParallelism(p)
       case _ => throw new IllegalArgumentException("[StreamPark] parallelism must be > 0. ")
     }
-    val interval = Try(parameter.get(KEY_FLINK_WATERMARK_INTERVAL).toInt).getOrElse(0)
-    if (interval > 0) {
-      localStreamEnv.getConfig.setAutoWatermarkInterval(interval)
-    }
 
     val executionMode = Try(RuntimeExecutionMode.valueOf(parameter.get(KEY_EXECUTION_RUNTIME_MODE))).getOrElse(RuntimeExecutionMode.STREAMING)
     localStreamEnv.setRuntimeMode(executionMode)
