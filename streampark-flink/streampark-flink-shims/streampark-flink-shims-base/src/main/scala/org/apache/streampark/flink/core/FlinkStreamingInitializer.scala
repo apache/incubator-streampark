@@ -17,37 +17,27 @@
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.enums.{ApiType, CheckpointStorage, RestartStrategy, StateBackend => XStateBackend}
 import org.apache.streampark.common.util._
+
 import org.apache.flink.api.common.RuntimeExecutionMode
-import org.apache.flink.api.common.restartstrategy.RestartStrategies
-import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.{Configuration, CoreOptions}
-import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, EmbeddedRocksDBStateBackend}
-import org.apache.flink.runtime.state.hashmap.HashMapStateBackend
-import org.apache.flink.runtime.state.storage.{FileSystemCheckpointStorage, JobManagerCheckpointStorage}
-import org.apache.flink.streaming.api.CheckpointingMode
-import org.apache.flink.streaming.api.environment.CheckpointConfig
-import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
+import org.apache.flink.configuration.CoreOptions
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.TableConfig
 
 import java.io.File
-import java.util.concurrent.TimeUnit
-import java.util.{HashMap => JavaHashMap}
 import collection.JavaConversions._
 import collection.Map
-import util.{Failure, Success, Try}
+import util.Try
 
 private[flink] object FlinkStreamingInitializer {
 
   private[this] var flinkInitializer: FlinkStreamingInitializer = _
 
   def initialize(args: Array[String],
-                 config: (StreamExecutionEnvironment, ParameterTool) => Unit):
-  (ParameterTool, StreamExecutionEnvironment) = {
+                 config: (StreamExecutionEnvironment, ParameterTool) => Unit): (ParameterTool, StreamExecutionEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -99,7 +89,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         val yaml = new File(s"$flinkHome/conf/flink-conf.yaml")
         PropertiesUtils.loadFlinkConfYaml(yaml)
       case flinkConf =>
-        // passed in from streampark console backend
+        // passed in from the streampark console backend
         PropertiesUtils.loadFlinkConfYaml(DeflaterUtils.unzipString(flinkConf))
     }
   }
@@ -113,8 +103,9 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case x if x.startsWith("prop://") =>
         PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(x.drop(7)))
       case x if x.startsWith("hdfs://") =>
+
         /**
-         * If the config file is hdfs mode, needs copy the hdfs related configuration file to `resources` dir
+         * If the configuration file with the hdfs, user will need to copy the hdfs-related configuration files under the resources dir
          */
         val text = HdfsUtils.read(x)
         extension match {

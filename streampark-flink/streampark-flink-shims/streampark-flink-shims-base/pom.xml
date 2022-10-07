@@ -97,6 +97,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-yarn-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 
 </project>
