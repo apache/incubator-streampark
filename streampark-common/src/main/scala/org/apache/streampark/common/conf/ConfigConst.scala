@@ -114,8 +114,6 @@ object ConfigConst {
 
   val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
-  val KEY_EXECUTION_RUNTIME_MODE = "flink.execution.runtime-mode"
-
   // ---table---
   val KEY_FLINK_TABLE_PLANNER = "flink.table.planner"
 

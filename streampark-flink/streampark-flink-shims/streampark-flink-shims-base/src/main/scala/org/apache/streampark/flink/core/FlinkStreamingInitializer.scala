@@ -21,16 +21,13 @@ import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util._
 
-import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.CoreOptions
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.TableConfig
 
 import java.io.File
 import collection.JavaConversions._
 import collection.Map
-import util.Try
 
 private[flink] object FlinkStreamingInitializer {
 
@@ -154,15 +151,6 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   def initEnvironment(): Unit = {
     localStreamEnv = StreamExecutionEnvironment.getExecutionEnvironment
-    Try(parameter.get(KEY_FLINK_PARALLELISM()).toInt).getOrElse {
-      Try(parameter.get(CoreOptions.DEFAULT_PARALLELISM.key()).toInt).getOrElse(CoreOptions.DEFAULT_PARALLELISM.defaultValue().toInt)
-    } match {
-      case p if p > 0 => localStreamEnv.setParallelism(p)
-      case _ => throw new IllegalArgumentException("[StreamPark] parallelism must be > 0. ")
-    }
-
-    val executionMode = Try(RuntimeExecutionMode.valueOf(parameter.get(KEY_EXECUTION_RUNTIME_MODE))).getOrElse(RuntimeExecutionMode.STREAMING)
-    localStreamEnv.setRuntimeMode(executionMode)
 
     apiType match {
       case ApiType.java if javaStreamEnvConfFunc != null => javaStreamEnvConfFunc.configuration(localStreamEnv.getJavaEnv, parameter)
