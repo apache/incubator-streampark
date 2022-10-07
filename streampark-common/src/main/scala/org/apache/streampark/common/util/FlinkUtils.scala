@@ -19,7 +19,12 @@ package org.apache.streampark.common.util
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.FunctionInitializationContext
+import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions
+import org.apache.flink.util.TimeUtils
+
 import java.io.File
+import java.time.Duration
+import java.util
 
 object FlinkUtils {
 
@@ -33,6 +38,12 @@ object FlinkUtils {
       case array if array.length == 1 => s"$flinkHome/lib/${array.head}"
       case more => throw new IllegalArgumentException(s"[StreamPark] found multiple flink-dist jar in ${flinkHome}/lib,[${more.mkString(",")}]")
     }
+  }
+
+  def isCheckpointEnabled(map: util.Map[String, String]): Boolean = {
+    val checkpointInterval: Duration = TimeUtils.parseDuration(
+      map.getOrDefault(ExecutionCheckpointingOptions.CHECKPOINTING_INTERVAL.key, "0ms"))
+    checkpointInterval.toMillis > 0
   }
 
 }
