@@ -17,8 +17,7 @@
 
 package org.apache.streampark.flink.connector.redis.sink
 
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.util.Utils
+import org.apache.streampark.common.util.{FlinkUtils, Utils}
 import org.apache.streampark.flink.connector.redis.bean.RedisMapper
 import org.apache.streampark.flink.connector.redis.conf.RedisConfig
 import org.apache.streampark.flink.connector.redis.internal.{Redis2PCSinkFunction, RedisSinkFunction}
@@ -26,6 +25,7 @@ import org.apache.streampark.flink.connector.sink.Sink
 import org.apache.streampark.flink.core.scala.StreamingContext
 import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.datastream.{DataStreamSink, DataStream => JavaDataStream}
+import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig, FlinkJedisSentinelConfig}
 
@@ -60,11 +60,11 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
   val prop = ctx.parameter.getProperties
   Utils.copyProperties(property, prop)
   private val redisConfig: RedisConfig = new RedisConfig(prop)
-  val enableCheckpoint: Boolean = allProperties.getOrElse(KEY_FLINK_CHECKPOINTS_ENABLE, "false").toBoolean
+  val enableCheckpoint: Boolean = FlinkUtils.isCheckpointEnabled(allProperties)
 
   val cpMode: CheckpointingMode = Try(
-    CheckpointingMode.valueOf(allProperties.get(KEY_FLINK_CHECKPOINTS_MODE))
-  ).getOrElse(CheckpointingMode.AT_LEAST_ONCE)
+    CheckpointingMode.valueOf(allProperties.get(ExecutionCheckpointingOptions.CHECKPOINTING_MODE.key()))
+  ).getOrElse(ExecutionCheckpointingOptions.CHECKPOINTING_MODE.defaultValue())
 
 
   lazy val config: FlinkJedisConfigBase = {

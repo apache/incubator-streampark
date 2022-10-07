@@ -33,6 +33,7 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.common.util.FlinkUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
@@ -103,6 +104,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1478,7 +1480,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         // 1) dynamic parameters have the highest priority, read the dynamic parameters are set: -Dstate.savepoints.dir
         String savepointPath = FlinkSubmitter
             .extractDynamicOptionAsJava(application.getDynamicOptions())
-            .get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+            .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
 
         // Application conf configuration has the second priority. If it is a streampark|flinksql type task,
         // see if Application conf is configured when the task is defined, if checkpoints are configured and enabled,
@@ -1488,9 +1490,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 ApplicationConfig applicationConfig = configService.getEffective(application.getId());
                 if (applicationConfig != null) {
                     Map<String, String> map = applicationConfig.readConfig();
-                    boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()));
-                    if (checkpointEnable) {
-                        savepointPath = map.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR());
+                    if (FlinkUtils.isCheckpointEnabled(map)) {
+                        savepointPath = map.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
                     }
                 }
             }
@@ -1506,12 +1507,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         "the cluster has been deleted. Please contact the Admin.", application.getFlinkClusterId()));
                 Map<String, String> config = cluster.getFlinkConfig();
                 if (!config.isEmpty()) {
-                    savepointPath = config.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+                    savepointPath = config.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
                 }
             } else {
                 // 3.2) At the yarn or k8s mode, then read the savepoint in flink-conf.yml in the bound flink
                 FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
-                savepointPath = flinkEnv.convertFlinkYamlAsMap().get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+                savepointPath = flinkEnv.convertFlinkYamlAsMap().get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
             }
         }
 

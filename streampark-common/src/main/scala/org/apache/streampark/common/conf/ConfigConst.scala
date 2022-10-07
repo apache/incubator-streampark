@@ -114,41 +114,6 @@ object ConfigConst {
 
   val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
-  // --checkpoints--
-  val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"
-
-  val KEY_FLINK_CHECKPOINTS_UNALIGNED = "flink.checkpoints.unaligned"
-
-  val KEY_FLINK_CHECKPOINTS_INTERVAL = "flink.checkpoints.interval"
-
-  val KEY_FLINK_CHECKPOINTS_MODE = "flink.checkpoints.mode"
-
-  val KEY_FLINK_CHECKPOINTS_CLEANUP = "flink.checkpoints.cleanup"
-
-  val KEY_FLINK_CHECKPOINTS_TIMEOUT = "flink.checkpoints.timeout"
-
-  val KEY_FLINK_CHECKPOINTS_MAX_CONCURRENT = "flink.checkpoints.maxConcurrent"
-
-  val KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN = "flink.checkpoints.minPauseBetween"
-
-  //---state---
-
-  val KEY_FLINK_STATE_SAVEPOINTS_DIR = "flink.state.savepoints.dir"
-
-  val KEY_FLINK_STATE_CHECKPOINTS_DIR = "flink.state.checkpoints.dir"
-
-  val KEY_FLINK_STATE_CHECKPOINT_STORAGE = "flink.state.checkpoint-storage"
-
-  val KEY_FLINK_STATE_BACKEND = "flink.state.backend.value"
-
-  val KEY_FLINK_STATE_BACKEND_ASYNC = "flink.state.backend.async"
-
-  val KEY_FLINK_STATE_BACKEND_INCREMENTAL = "flink.state.backend.incremental"
-
-  val KEY_FLINK_STATE_BACKEND_MEMORY = "flink.state.backend.memory"
-
-  val KEY_FLINK_STATE_ROCKSDB = "flink.state.backend.rocksdb"
-
   val KEY_EXECUTION_RUNTIME_MODE = "flink.execution.runtime-mode"
 
   // ---watermark---
