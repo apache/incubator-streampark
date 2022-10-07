@@ -116,9 +116,6 @@ object ConfigConst {
 
   val KEY_EXECUTION_RUNTIME_MODE = "flink.execution.runtime-mode"
 
-  // ---watermark---
-  val KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC = "flink.watermark.time.characteristic"
-
   // ---table---
   val KEY_FLINK_TABLE_PLANNER = "flink.table.planner"
 

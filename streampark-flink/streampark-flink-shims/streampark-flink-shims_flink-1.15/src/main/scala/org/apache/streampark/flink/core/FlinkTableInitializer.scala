@@ -17,15 +17,13 @@
 
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.{KEY_APP_CONF, KEY_APP_NAME, KEY_EXECUTION_RUNTIME_MODE, KEY_FLINK_APP_NAME, KEY_FLINK_PARALLELISM, KEY_FLINK_SQL, KEY_FLINK_TABLE_CATALOG, KEY_FLINK_TABLE_DATABASE, KEY_FLINK_TABLE_MODE}
+import org.apache.streampark.common.conf.ConfigConst.{KEY_APP_CONF, KEY_APP_NAME, KEY_FLINK_APP_NAME, KEY_FLINK_SQL, KEY_FLINK_TABLE_CATALOG, KEY_FLINK_TABLE_DATABASE, KEY_FLINK_TABLE_MODE}
 import org.apache.streampark.common.enums.{ApiType, TableMode}
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.enums.TableMode.TableMode
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
-import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.api.scala.ExecutionEnvironment
-import org.apache.flink.configuration.{CoreOptions, PipelineOptions}
+import org.apache.flink.configuration.PipelineOptions
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableConfig, TableEnvironment}
