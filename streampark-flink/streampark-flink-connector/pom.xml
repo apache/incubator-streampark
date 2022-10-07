@@ -48,6 +48,7 @@
         <module>streampark-flink-connector-jdbc</module>
         <module>streampark-flink-connector-kafka</module>
         <module>streampark-flink-connector-mongo</module>
+        <module>streampark-flink-connector-redis</module>
     </modules>
 
     <dependencyManagement>
