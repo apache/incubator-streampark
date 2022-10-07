@@ -18,7 +18,6 @@
 package org.apache.streampark.common.util
 
 import org.apache.commons.lang3.StringUtils
-import org.apache.flink.api.scala.ClosureCleaner.LOG
 
 import java.lang.reflect.{Field, Modifier}
 import java.util.Objects
@@ -61,7 +60,7 @@ object ReflectUtils extends Logger {
       field.set(obj, value)
     catch {
       case e: IllegalAccessException =>
-        LOG.error("Failed to assign to the element.", e)
+        logError("Failed to assign to the element.", e)
         throw new Exception(e.getMessage)
     }
   }
