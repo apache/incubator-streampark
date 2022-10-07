@@ -21,18 +21,16 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.system.entity.Menu;
-import org.apache.streampark.console.system.entity.Role;
+import org.apache.streampark.console.system.entity.TeamMember;
 import org.apache.streampark.console.system.entity.User;
-import org.apache.streampark.console.system.entity.UserRole;
 import org.apache.streampark.console.system.mapper.UserMapper;
 import org.apache.streampark.console.system.service.MenuService;
 import org.apache.streampark.console.system.service.RoleService;
-import org.apache.streampark.console.system.service.UserRoleService;
+import org.apache.streampark.console.system.service.TeamMemberService;
 import org.apache.streampark.console.system.service.UserService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +52,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Autowired
-    private UserRoleService userRoleService;
+    private TeamMemberService teamMemberService;
 
     @Autowired
     private RoleService roleService;
@@ -74,17 +72,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         page.setSize(request.getPageSize());
         IPage<User> resPage = this.baseMapper.findUserDetail(page, user);
 
-        if (resPage != null && !resPage.getRecords().isEmpty()) {
-            List<User> users = resPage.getRecords();
-            users.forEach(u -> {
-                List<Role> roleList = roleService.findUserRole(u.getUsername());
-                String roleIds = roleList.stream().map((iter) -> iter.getRoleId().toString()).collect(Collectors.joining(","));
-                String roleNames = roleList.stream().map(Role::getRoleName).collect(Collectors.joining(","));
-                u.setRoleId(roleIds);
-                u.setRoleName(roleNames);
-            });
-            resPage.setRecords(users);
-        }
         AssertUtils.state(resPage != null);
         if (resPage.getTotal() == 0) {
             resPage.setRecords(Collections.emptyList());
@@ -110,8 +97,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setSalt(salt);
         user.setPassword(password);
         save(user);
-        String[] roles = user.getRoleId().split(StringPool.COMMA);
-        setUserRoles(user, roles);
     }
 
     @Override
@@ -120,9 +105,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setPassword(null);
         user.setModifyTime(new Date());
         updateById(user);
-        userRoleService.deleteUserRolesByUserId(new String[]{user.getUserId().toString()});
-        String[] roles = user.getRoleId().split(StringPool.COMMA);
-        setUserRoles(user, roles);
     }
 
     @Override
@@ -130,7 +112,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void deleteUsers(String[] userIds) throws Exception {
         List<String> list = Arrays.asList(userIds);
         removeByIds(list);
-        this.userRoleService.deleteUserRolesByUserId(userIds);
+        this.teamMemberService.deleteUserRolesByUserId(userIds);
     }
 
     @Override
@@ -190,7 +172,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             users.forEach(u -> {
                 u.setPassword(null);
                 u.setSalt(null);
-                u.setRoleId(null);
             });
         }
         return users;
@@ -198,10 +179,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private void setUserRoles(User user, String[] roles) {
         Arrays.stream(roles).forEach(roleId -> {
-            UserRole ur = new UserRole();
+            TeamMember ur = new TeamMember();
             ur.setUserId(user.getUserId());
             ur.setRoleId(Long.valueOf(roleId));
-            this.userRoleService.save(ur);
+            this.teamMemberService.save(ur);
         });
     }
 }

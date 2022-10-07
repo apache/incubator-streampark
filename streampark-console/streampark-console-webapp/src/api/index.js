@@ -158,6 +158,7 @@ export default {
   },
   User: {
     LIST: '/user/list',
+    TYPES: '/user/types',
     UPDATE: '/user/update',
     PASSWORD: '/user/password',
     RESET: '/user/password/reset',
@@ -183,6 +184,21 @@ export default {
     CHECK_NAME: '/role/check/name',
     DELETE: '/role/delete',
     MENU: '/role/menu'
+  },
+  Team: {
+    POST: '/team/post',
+    UPDATE: '/team/update',
+    LIST: '/team/list',
+    CHECK_NAME: '/team/check/name',
+    DELETE: '/team/delete'
+  },
+  Member: {
+    POST: '/member/post',
+    UPDATE: '/member/update',
+    LIST: '/member/list',
+    TEAMS: '/member/teams',
+    CHECK_NAME: '/member/check/name',
+    DELETE: '/member/delete'
   },
   Menu: {
     LIST: '/menu/list',

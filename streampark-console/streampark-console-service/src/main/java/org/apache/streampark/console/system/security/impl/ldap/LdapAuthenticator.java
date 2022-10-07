@@ -56,7 +56,6 @@ public class LdapAuthenticator extends AbstractAuthenticator {
         User newUser = new User();
         newUser.setCreateTime(new Date());
         newUser.setUsername(userId);
-        newUser.setRoleId("100001");
         newUser.setNickName(userId);
         newUser.setStatus("1");
         newUser.setSex("1");

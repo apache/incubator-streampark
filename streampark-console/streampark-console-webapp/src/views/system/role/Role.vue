@@ -111,7 +111,6 @@
         slot="operation"
         slot-scope="text, record">
         <svg-icon
-          v-if="(record.roleName !== 'admin' || userName === 'admin')"
           v-permit="'role:update'"
           name="edit"
           border
@@ -124,7 +123,6 @@
           title="View" />
         <a-popconfirm
           v-permit="'role:delete'"
-          v-if="record.roleName !== 'admin'"
           title="Are you sure delete this Role ?"
           cancel-text="No"
           ok-text="Yes"
@@ -160,8 +158,6 @@ import RoleInfo from './RoleInfo'
 import RoleEdit from './RoleEdit'
 import SvgIcon from '@/components/SvgIcon'
 import { list, remove } from '@/api/role'
-import storage from '@/utils/storage'
-import {USER_NAME} from '@/store/mutation-types'
 
 export default {
   name: 'Role',
@@ -224,9 +220,6 @@ export default {
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' }
       }]
-    },
-    userName() {
-      return storage.get(USER_NAME)
     }
   },
   mounted () {

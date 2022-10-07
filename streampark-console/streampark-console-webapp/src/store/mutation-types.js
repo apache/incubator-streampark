@@ -22,6 +22,7 @@ export const EXPIRE = 'EXPIRE'
 export const ROLES = 'ROLES'
 export const USER_INFO = 'USER_INFO'
 export const USER_NAME = 'USER_NAME'
+export const TEAM_ID = 'TEAM_ID'
 export const INVALID = 'INVALID'
 
 export const SIDEBAR_TYPE = 'SIDEBAR_TYPE'

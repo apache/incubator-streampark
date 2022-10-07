@@ -76,6 +76,8 @@ public class Application implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    private Long teamId;
+
     /**
      * 1) custom code
      * 2) flink SQL

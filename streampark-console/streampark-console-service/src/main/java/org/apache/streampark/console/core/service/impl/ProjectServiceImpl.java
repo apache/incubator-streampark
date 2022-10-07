@@ -112,6 +112,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         try {
             Project project = getById(projectParam.getId());
             AssertUtils.state(project != null);
+            AssertUtils.checkArgument(project.getTeamId().equals(projectParam.getTeamId()),
+                "TeamId cannot be changed.");
             project.setName(projectParam.getName());
             project.setUrl(projectParam.getUrl());
             project.setBranches(projectParam.getBranches());

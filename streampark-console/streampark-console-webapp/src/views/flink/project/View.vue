@@ -253,6 +253,8 @@ import { Terminal } from 'xterm'
 import 'xterm/css/xterm.css'
 
 import SvgIcon from '@/components/SvgIcon'
+import storage from '@/utils/storage'
+import {TEAM_ID} from '@/store/mutation-types'
 
 export default {
   components: { Ellipsis, SvgIcon },
@@ -432,7 +434,8 @@ export default {
         // params.pageNum = this.pagination.current
       }
       list({
-        ...params
+        ...params,
+        teamId: storage.get(TEAM_ID)
       }).then((resp) => {
         const pagination = { ...this.pagination }
         pagination.total = parseInt(resp.data.total)
