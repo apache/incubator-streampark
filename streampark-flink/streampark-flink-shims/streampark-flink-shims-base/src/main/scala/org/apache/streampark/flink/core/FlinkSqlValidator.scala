@@ -30,6 +30,7 @@ import org.apache.flink.table.api.{SqlDialect, TableConfig}
 import org.apache.flink.table.api.config.TableConfigOptions
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 
+import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Try}
 
 object FlinkSqlValidator extends Logger {
@@ -64,79 +65,49 @@ object FlinkSqlValidator extends Logger {
   }
 
   def verifySql(sql: String): FlinkSqlValidationResult = {
-    val sqlCommands = SqlCommandParser.parseSQL(sql, r => return r)
-    var sqlDialect = "default"
-    var hasInsert = false
-    for (call <- sqlCommands) {
-      val args = call.operands.head
-      lazy val command = call.command
-      command match {
-        case SET | RESET =>
-          if (!FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
-            return FlinkSqlValidationResult(
-              success = false,
-              failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
-              lineStart = call.lineStart,
-              lineEnd = call.lineEnd,
-              sql = sql.replaceFirst(";|$", ";"),
-              exception = s"$args is not a valid table/sql config"
-            )
+    val sqlCommands = SqlCommandParser
+      .parseSQL(sql, r => return r)
+      .filter(x => x.command != BEGIN_STATEMENT_SET && x.command != END_STATEMENT_SET)
+
+    var result: FlinkSqlValidationResult = null
+    val arrayBuffer = new ArrayBuffer[SqlCommandCall]()
+    var dialect: String = "DEFAULT"
+
+    sqlCommands.foreach(call => {
+      if (call.command == SET) {
+        val setKey = call.operands.head
+        val setValue = call.operands.last
+        if (!FlinkSqlExecutor.tableConfigOptions.containsKey(setKey)) {
+          return FlinkSqlValidationResult(
+            success = false,
+            failedType = FlinkSqlValidationFailedType.VERIFY_FAILED,
+            lineStart = call.lineStart,
+            lineEnd = call.lineEnd,
+            sql = sql.replaceFirst(";|$", ";"),
+            exception = s"$setKey is not a valid table/sql config"
+          )
+        }
+        if (setKey == TableConfigOptions.TABLE_SQL_DIALECT.key()) {
+          if (arrayBuffer.nonEmpty) {
+            result = doVerify(arrayBuffer.toList, dialect)
+            arrayBuffer.clear()
+            arrayBuffer += call
           }
-          if (command == SET && args == TableConfigOptions.TABLE_SQL_DIALECT.key()) {
-            sqlDialect = call.operands.last
-          }
-        case BEGIN_STATEMENT_SET | END_STATEMENT_SET =>
-          logWarn(s"SQL Client Syntax: ${call.command.name} ")
-        case _ =>
-          if (command == INSERT) {
-            hasInsert = true
-          }
-          Try {
-            val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_CALCITE_PARSER_CLASS))
-            sqlDialect.toUpperCase() match {
-              case "HIVE" | "DEFAULT" =>
-              case _ =>
-                throw new UnsupportedOperationException(s"unsupported dialect: ${sqlDialect}")
-            }
-            val parser = calciteClass.getConstructor(Array(classOf[Config]): _*).newInstance(sqlParserConfigMap(sqlDialect.toUpperCase()))
-            val method = parser.getClass.getDeclaredMethod("parse", classOf[String])
-            method.setAccessible(true)
-            method.invoke(parser, call.originSql)
-          } match {
-            case Failure(e) =>
-              val exception = ExceptionUtils.stringifyException(e)
-              val causedBy = exception.drop(exception.indexOf("Caused by:"))
-              val cleanUpError = exception.replaceAll("[\r\n]", "")
-              if (SYNTAX_ERROR_REGEXP.findAllMatchIn(cleanUpError).nonEmpty) {
-                val SYNTAX_ERROR_REGEXP(line, column) = cleanUpError
-                val errorLine = call.lineStart + line.toInt - 1
-                return FlinkSqlValidationResult(
-                  success = false,
-                  failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
-                  lineStart = call.lineStart,
-                  lineEnd = call.lineEnd,
-                  errorLine = errorLine,
-                  errorColumn = column.toInt,
-                  sql = call.originSql,
-                  exception = causedBy.replaceAll(s"at\\sline\\s$line", s"at line $errorLine")
-                )
-              } else {
-                return FlinkSqlValidationResult(
-                  success = false,
-                  failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
-                  lineStart = call.lineStart,
-                  lineEnd = call.lineEnd,
-                  sql = call.originSql,
-                  exception = causedBy
-                )
-              }
-            case _ =>
-          }
+          dialect = setValue
+        } else {
+          arrayBuffer += call
+        }
+      } else {
+        arrayBuffer += call
       }
+    })
+
+    if (result == null || (result.success && arrayBuffer.nonEmpty)) {
+      result = doVerify(arrayBuffer.toList, dialect)
     }
 
-    if (hasInsert) {
-      FlinkSqlValidationResult()
+    if (sqlCommands.find(_.command == INSERT).nonEmpty) {
+      result
     } else {
       FlinkSqlValidationResult(
         success = false,
@@ -147,5 +118,54 @@ object FlinkSqlValidator extends Logger {
       )
     }
   }
+
+  private[this] def doVerify(sqlCommands: List[SqlCommandCall], sqlDialect: String): FlinkSqlValidationResult = {
+    val lineStart = sqlCommands.head.lineStart
+    val lineEnd = sqlCommands.last.lineEnd
+    val originSql = sqlCommands.map(_.originSql).mkString("", ";\r\n", ";")
+    Try {
+      val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_CALCITE_PARSER_CLASS))
+      sqlDialect.toUpperCase() match {
+        case "HIVE" | "DEFAULT" =>
+        case _ =>
+          throw new UnsupportedOperationException(s"unsupported dialect: ${sqlDialect}")
+      }
+      val parser = calciteClass.getConstructor(Array(classOf[Config]): _*).newInstance(sqlParserConfigMap(sqlDialect.toUpperCase()))
+      val method = parser.getClass.getDeclaredMethod("parse", classOf[String])
+      method.setAccessible(true)
+      method.invoke(parser, originSql)
+    } match {
+      case Failure(e) =>
+        val exception = ExceptionUtils.stringifyException(e)
+        val causedBy = exception.drop(exception.indexOf("Caused by:"))
+        val cleanUpError = exception.replaceAll("[\r\n]", "")
+        if (SYNTAX_ERROR_REGEXP.findAllMatchIn(cleanUpError).nonEmpty) {
+          val SYNTAX_ERROR_REGEXP(line, column) = cleanUpError
+          val errorLine = lineStart + line.toInt - 1
+          return FlinkSqlValidationResult(
+            success = false,
+            failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
+            lineStart = lineStart,
+            lineEnd = lineEnd,
+            errorLine = errorLine,
+            errorColumn = column.toInt,
+            sql = originSql,
+            exception = causedBy.replaceAll(s"at\\sline\\s$line", s"at line $errorLine")
+          )
+        } else {
+          return FlinkSqlValidationResult(
+            success = false,
+            failedType = FlinkSqlValidationFailedType.SYNTAX_ERROR,
+            lineStart = lineStart,
+            lineEnd = lineEnd,
+            sql = originSql,
+            exception = causedBy
+          )
+        }
+      case _ =>
+    }
+    FlinkSqlValidationResult()
+  }
+
 
 }
