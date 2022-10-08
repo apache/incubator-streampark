@@ -1,10 +1,9 @@
 {
-  "name": "streamx-webapp",
+  "name": "streampark webapp",
   "version": "2.0.0",
   "author": {
     "name": "streampark",
-    "email": "benjobs@apache.org",
-    "url": "http://www.streamxhub.com"
+    "url": "https://streampark.apache.org"
   },
   "scripts": {
     "bootstrap": "pnpm install",
@@ -28,7 +27,6 @@
     "test:gzip": "npx http-server dist --cors --gzip -c-1",
     "test:br": "npx http-server dist --cors --brotli -c-1",
     "reinstall": "rimraf pnpm-lock.yaml && rimraf package.lock.json && rimraf node_modules && npm run bootstrap",
-    "prepare": "husky install",
     "gen:icon": "esno ./build/generate/icon/index.ts"
   },
   "dependencies": {
@@ -155,13 +153,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/streamxhub/streamx-webapp.git"
+    "url": "git+https://github.com/apache/incubator-streampark.git"
   },
-  "license": "MIT",
+  "license": "Apache-2.0 license",
   "bugs": {
-    "url": "https://github.com/streamxhub/streamx-webapp/issues"
+    "url": "https://github.com/apache/incubator-streampark/issues"
   },
-  "homepage": "https://github.com/streamxhub/streamx-webapp",
+  "homepage": "https://streampark.apache.org",
   "engines": {
     "node": "^12 || >=14"
   },
