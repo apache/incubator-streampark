@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import static org.apache.streampark.console.core.enums.Status.READ_BUILD_LOG_EXECPTION;
+
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
@@ -24,7 +26,6 @@ import org.apache.streampark.common.domain.FlinkMemorySize;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ThreadUtils;
-import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -310,7 +311,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         } catch (IOException e) {
             String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
             log.error(error, e);
-            return RestResponse.fail(error + e.getMessage(), ResponseCode.CODE_FAIL);
+            return RestResponse.fail(READ_BUILD_LOG_EXECPTION, error + e.getMessage());
         }
     }
 

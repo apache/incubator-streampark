@@ -17,6 +17,9 @@
 
 package org.apache.streampark.console.base.domain;
 
+import org.apache.streampark.console.core.enums.Status;
+
+import java.text.MessageFormat;
 import java.util.HashMap;
 
 public class RestResponse extends HashMap<String, Object> {
@@ -41,11 +44,11 @@ public class RestResponse extends HashMap<String, Object> {
         return resp;
     }
 
-    public static RestResponse fail(String message, Long code) {
+    public static RestResponse fail(Status status, Object... args) {
         RestResponse resp = new RestResponse();
         resp.put("status", STATUS_FAIL);
-        resp.put("message", message);
-        resp.put("code", code);
+        resp.put("message", MessageFormat.format(status.getMsg(), args));
+        resp.put("code", status.getCode());
         resp.put("data", null);
         return resp;
     }

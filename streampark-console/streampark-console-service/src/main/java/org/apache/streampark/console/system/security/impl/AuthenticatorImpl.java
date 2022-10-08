@@ -38,6 +38,9 @@ public class AuthenticatorImpl implements Authenticator {
     @Override
     public User authenticate(String username, String password) {
         User user = usersService.findByName(username);
+        if (user == null){
+            return null;
+        }
         String salt = user.getSalt();
         password = ShaHashUtils.encrypt(salt, password);
         if (!StringUtils.equals(user.getPassword(), password)) {

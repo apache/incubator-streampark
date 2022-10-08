@@ -17,6 +17,10 @@
 
 package org.apache.streampark.console.system.controller;
 
+import static org.apache.streampark.console.core.enums.Status.USER_CURRENTLY_LOCKED;
+import static org.apache.streampark.console.core.enums.Status.USER_NAME_NULL;
+import static org.apache.streampark.console.core.enums.Status.USER_NOT_EXIST;
+
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.properties.ShiroProperties;
@@ -67,11 +71,10 @@ public class PassportController {
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
         if (StringUtils.isEmpty(username)) {
-            return RestResponse.success().put("code", 0);
+            return RestResponse.fail(USER_NAME_NULL);
         }
         User user = authenticator.authenticate(username, password);
-        Map<String, Object> userInfo = login(username, password, user);
-        return new RestResponse().data(userInfo);
+        return login(username, password, user);
     }
 
     @PostMapping("ldapSignin")
@@ -79,11 +82,10 @@ public class PassportController {
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
         if (StringUtils.isEmpty(username)) {
-            return RestResponse.success().put("code", 0);
+            return RestResponse.fail(USER_NAME_NULL);
         }
         User user = authenticator.ldapAuthenticate(username, password);
-        Map<String, Object> userInfo = login(username, password, user);
-        return new RestResponse().data(userInfo);
+        return login(username, password, user);
     }
 
     @PostMapping("signout")
@@ -116,13 +118,13 @@ public class PassportController {
         return userInfo;
     }
 
-    private Map<String, Object> login(String username, String password, User user) throws Exception {
+    private RestResponse login(String username, String password, User user) throws Exception {
         if (user == null) {
-            return RestResponse.success().put("code", 0);
+            return RestResponse.fail(USER_NOT_EXIST, username);
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put("code", 1);
+            return RestResponse.fail(USER_CURRENTLY_LOCKED);
         }
 
         password = ShaHashUtils.encrypt(user.getSalt(), password);
@@ -134,6 +136,6 @@ public class PassportController {
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
-        return this.generateUserInfo(jwtToken, user);
+        return new RestResponse().data(this.generateUserInfo(jwtToken, user));
     }
 }
