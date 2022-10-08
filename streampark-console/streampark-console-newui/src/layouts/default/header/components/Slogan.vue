@@ -42,7 +42,7 @@
     overflow: hidden;
     line-height: @header-height;
     height: @header-height;
-    max-width: 600px;
+    max-width: 620px;
 
     &-streampark {
       background: linear-gradient(130deg, #24c6dc, #5433ff 41.07%, #f09 76.05%);
