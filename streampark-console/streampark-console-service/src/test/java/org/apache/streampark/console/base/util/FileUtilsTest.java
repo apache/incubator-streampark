@@ -17,18 +17,15 @@
 
 package org.apache.streampark.console.base.util;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.Random;
 
 /**
@@ -36,13 +33,10 @@ import java.util.Random;
  */
 public class FileUtilsTest {
 
-    @ClassRule
-    public static final TemporaryFolder TEMP_FOLDER = new TemporaryFolder();
-
     @Test
-    public void testReadEndOfFile() throws IOException {
-        final File outDir = TEMP_FOLDER.newFolder();
-        File file = new File(outDir, "tmp_file");
+    public void testReadEndOfFile(@TempDir Path tempDir) throws IOException {
+        Path filePath = tempDir.resolve("tmp_file");
+        File file = filePath.toFile();
         FileOutputStream outputStream = new FileOutputStream(file);
         Random random = new Random();
         int fileSize = 1000000;
@@ -54,25 +48,24 @@ public class FileUtilsTest {
 
         // The read size is larger than the file size
         byte[] readBytes = FileUtils.readEndOfFile(file, fileSize + 1);
-        assertArrayEquals(fileBytes, readBytes);
+        Assertions.assertArrayEquals(fileBytes, readBytes);
 
         // The read size is equals the file size
         readBytes = FileUtils.readEndOfFile(file, fileSize);
-        assertArrayEquals(fileBytes, readBytes);
+        Assertions.assertArrayEquals(fileBytes, readBytes);
 
         // The read size is less than the file size
         int readSize = 50000;
         readBytes = FileUtils.readEndOfFile(file, readSize);
         byte[] expectedBytes = new byte[readSize];
         System.arraycopy(fileBytes, fileSize - readSize, expectedBytes, 0, expectedBytes.length);
-        assertArrayEquals(expectedBytes, readBytes);
+        Assertions.assertArrayEquals(expectedBytes, readBytes);
     }
 
     @Test
-    public void testReadEndOfFileWithChinese() throws IOException {
-        final File outDir = TEMP_FOLDER.newFolder();
-
-        File file = new File(outDir, "tmp_file");
+    public void testReadEndOfFileWithChinese(@TempDir Path tempDir) throws IOException {
+        Path filePath = tempDir.resolve("tmp_file");
+        File file = filePath.toFile();
         PrintWriter writer = new PrintWriter(file);
         String logWithChinese = "Hello world! 你好啊，hello xxxx";
         writer.write(logWithChinese);
@@ -80,13 +73,13 @@ public class FileUtilsTest {
 
         byte[] bytes = FileUtils.readEndOfFile(file, 1000000);
         String readString = new String(bytes);
-        assertEquals(logWithChinese, readString);
+        Assertions.assertEquals(logWithChinese, readString);
     }
 
     @Test
-    public void testReadFileFromOffset() throws IOException {
-        final File outDir = TEMP_FOLDER.newFolder();
-        File file = new File(outDir, "tmp_file");
+    public void testReadFileFromOffset(@TempDir Path tempDir) throws IOException {
+        Path filePath = tempDir.resolve("tmp_file");
+        File file = filePath.toFile();
         FileOutputStream outputStream = new FileOutputStream(file);
         Random random = new Random();
         int fileSize = 1000000;
@@ -98,11 +91,11 @@ public class FileUtilsTest {
 
         // The read size is larger than the file size
         byte[] readBytes = FileUtils.readFileFromOffset(file, 0, fileSize + 1);
-        assertArrayEquals(fileBytes, readBytes);
+        Assertions.assertArrayEquals(fileBytes, readBytes);
 
         // The read size is equals the file size
         readBytes = FileUtils.readFileFromOffset(file, 0, fileSize);
-        assertArrayEquals(fileBytes, readBytes);
+        Assertions.assertArrayEquals(fileBytes, readBytes);
 
         // The read size is less than the file size
         int readSize = 3456;
@@ -110,10 +103,10 @@ public class FileUtilsTest {
         byte[] tmpReadBytes;
         for (int i = 0; i < fileSize; i += tmpReadBytes.length) {
             tmpReadBytes = FileUtils.readFileFromOffset(file, i, readSize);
-            assertTrue(tmpReadBytes.length <= readSize);
+            Assertions.assertTrue(tmpReadBytes.length <= readSize);
             System.arraycopy(tmpReadBytes, 0, readBytes, i, tmpReadBytes.length);
         }
-        assertArrayEquals(fileBytes, readBytes);
+        Assertions.assertArrayEquals(fileBytes, readBytes);
     }
 
 }

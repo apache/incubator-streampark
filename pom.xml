@@ -98,7 +98,6 @@
         <hive.version>2.3.4</hive.version>
         <hadoop.version>2.10.2</hadoop.version>
         <hbase.version>2.1.10</hbase.version>
-        <jupiter.version>5.6.3</jupiter.version>
         <zkclient.version>0.11</zkclient.version>
         <curator.version>4.2.0</curator.version>
         <redis.version>3.3.0</redis.version>
@@ -136,7 +135,7 @@
         <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
         <httpclient.version>4.5.13</httpclient.version>
         <lombok.version>1.18.24</lombok.version>
-        <junit.version>4.13.2</junit.version>
+        <jupiter.version>5.9.1</jupiter.version>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
@@ -559,10 +558,18 @@
                 <version>${lombok.version}</version>
             </dependency>
 
+            <!-- test -->
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${jupiter.version}</version>
+                <scope>test</scope>
             </dependency>
 
         </dependencies>

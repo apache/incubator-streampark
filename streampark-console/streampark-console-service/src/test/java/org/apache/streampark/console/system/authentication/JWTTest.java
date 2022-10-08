@@ -21,8 +21,8 @@ import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.system.entity.AccessToken;
 
 import com.auth0.jwt.JWT;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.TimeZone;
@@ -40,6 +40,6 @@ public class JWTTest {
         assert token != null;
         Date expiresAt = JWT.decode(token).getExpiresAt();
         String decodeExpireTime = DateUtils.format(expiresAt, DateUtils.fullFormat(), TimeZone.getDefault());
-        Assert.assertEquals(expireTime, decodeExpireTime);
+        Assertions.assertEquals(expireTime, decodeExpireTime);
     }
 }

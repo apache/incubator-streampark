@@ -17,120 +17,121 @@
 
 package org.apache.streampark.plugin.profiling.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 public class StringUtilsTest {
+
     @Test
     public void splitByLength() {
         List<String> list = StringUtils.splitByLength("a", 1);
-        Assert.assertEquals(1, list.size());
-        Assert.assertEquals("a", list.get(0));
+        Assertions.assertEquals(1, list.size());
+        Assertions.assertEquals("a", list.get(0));
 
         list = StringUtils.splitByLength("abc", 1);
-        Assert.assertEquals(3, list.size());
-        Assert.assertEquals("a", list.get(0));
-        Assert.assertEquals("c", list.get(2));
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertEquals("a", list.get(0));
+        Assertions.assertEquals("c", list.get(2));
 
         list = StringUtils.splitByLength("abcd", 2);
-        Assert.assertEquals(2, list.size());
-        Assert.assertEquals("ab", list.get(0));
-        Assert.assertEquals("cd", list.get(1));
+        Assertions.assertEquals(2, list.size());
+        Assertions.assertEquals("ab", list.get(0));
+        Assertions.assertEquals("cd", list.get(1));
 
         list = StringUtils.splitByLength("abcde", 2);
-        Assert.assertEquals(3, list.size());
-        Assert.assertEquals("ab", list.get(0));
-        Assert.assertEquals("cd", list.get(1));
-        Assert.assertEquals("e", list.get(2));
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertEquals("ab", list.get(0));
+        Assertions.assertEquals("cd", list.get(1));
+        Assertions.assertEquals("e", list.get(2));
     }
 
     @Test
     public void extractByRegex() {
-        Assert.assertEquals(0, StringUtils.extractByRegex(null, null).size());
-        Assert.assertEquals(1, StringUtils.extractByRegex("", "").size());
-        Assert.assertEquals("", StringUtils.extractByRegex("", "").get(0));
+        Assertions.assertEquals(0, StringUtils.extractByRegex(null, null).size());
+        Assertions.assertEquals(1, StringUtils.extractByRegex("", "").size());
+        Assertions.assertEquals("", StringUtils.extractByRegex("", "").get(0));
 
         List<String> list =
             StringUtils.extractByRegex(
                 "appcache/application_1498604172385_2751189/container_e241_1498604172385_2751189_01_000267",
                 "application_[\\w_]+");
-        Assert.assertEquals(1, list.size());
-        Assert.assertEquals("application_1498604172385_2751189", list.get(0));
+        Assertions.assertEquals(1, list.size());
+        Assertions.assertEquals("application_1498604172385_2751189", list.get(0));
 
         list =
             StringUtils.extractByRegex(
                 "appcache/application_1498604172385_2751189/container_e241_1498604172385_2751189_01_000267,appcache/application_1498604172385_2751190/container_e241_1498604172385_2751189_01_000267",
                 "application_[\\w_]+");
-        Assert.assertEquals(2, list.size());
-        Assert.assertEquals("application_1498604172385_2751189", list.get(0));
-        Assert.assertEquals("application_1498604172385_2751190", list.get(1));
+        Assertions.assertEquals(2, list.size());
+        Assertions.assertEquals("application_1498604172385_2751189", list.get(0));
+        Assertions.assertEquals("application_1498604172385_2751190", list.get(1));
     }
 
     @Test
     public void getValueAsBytes() {
-        Assert.assertNull(StringUtils.getBytesValueOrNull(null));
-        Assert.assertNull(StringUtils.getBytesValueOrNull(""));
-        Assert.assertNull(StringUtils.getBytesValueOrNull("xxx"));
+        Assertions.assertNull(StringUtils.getBytesValueOrNull(null));
+        Assertions.assertNull(StringUtils.getBytesValueOrNull(""));
+        Assertions.assertNull(StringUtils.getBytesValueOrNull("xxx"));
 
-        Assert.assertEquals(0L, StringUtils.getBytesValueOrNull("0").longValue());
-        Assert.assertEquals(123L, StringUtils.getBytesValueOrNull("123").longValue());
-        Assert.assertEquals(123L, StringUtils.getBytesValueOrNull("123.").longValue());
-        Assert.assertEquals(123L, StringUtils.getBytesValueOrNull("123.123").longValue());
+        Assertions.assertEquals(0L, StringUtils.getBytesValueOrNull("0").longValue());
+        Assertions.assertEquals(123L, StringUtils.getBytesValueOrNull("123").longValue());
+        Assertions.assertEquals(123L, StringUtils.getBytesValueOrNull("123.").longValue());
+        Assertions.assertEquals(123L, StringUtils.getBytesValueOrNull("123.123").longValue());
 
-        Assert.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123k").longValue());
-        Assert.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123kb").longValue());
-        Assert.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123 kb").longValue());
-        Assert.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123K").longValue());
-        Assert.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123KB").longValue());
-        Assert.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123 KB").longValue());
+        Assertions.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123k").longValue());
+        Assertions.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123kb").longValue());
+        Assertions.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123 kb").longValue());
+        Assertions.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123K").longValue());
+        Assertions.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123KB").longValue());
+        Assertions.assertEquals(123 * 1024L, StringUtils.getBytesValueOrNull("123 KB").longValue());
 
-        Assert.assertEquals(123 * 1024L * 1024L, StringUtils.getBytesValueOrNull("123m").longValue());
-        Assert.assertEquals(123 * 1024L * 1024L, StringUtils.getBytesValueOrNull("123mb").longValue());
-        Assert.assertEquals(123 * 1024L * 1024L, StringUtils.getBytesValueOrNull("123 mb").longValue());
-        Assert.assertEquals(123 * 1024L * 1024L, StringUtils.getBytesValueOrNull("123M").longValue());
+        Assertions.assertEquals(123 * 1024L * 1024L, StringUtils.getBytesValueOrNull("123m").longValue());
+        Assertions.assertEquals(123 * 1024L * 1024L, StringUtils.getBytesValueOrNull("123mb").longValue());
+        Assertions.assertEquals(123 * 1024L * 1024L, StringUtils.getBytesValueOrNull("123 mb").longValue());
+        Assertions.assertEquals(123 * 1024L * 1024L, StringUtils.getBytesValueOrNull("123M").longValue());
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
             123 * 1024L * 1024L * 1024L, StringUtils.getBytesValueOrNull("123g").longValue());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             123 * 1024L * 1024L * 1024L, StringUtils.getBytesValueOrNull("123gb").longValue());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             123 * 1024L * 1024L * 1024L, StringUtils.getBytesValueOrNull("123 gb").longValue());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             123 * 1024L * 1024L * 1024L, StringUtils.getBytesValueOrNull("123G").longValue());
 
-        Assert.assertEquals(123L, StringUtils.getBytesValueOrNull("123bytes").longValue());
-        Assert.assertEquals(123L, StringUtils.getBytesValueOrNull("123 Bytes").longValue());
+        Assertions.assertEquals(123L, StringUtils.getBytesValueOrNull("123bytes").longValue());
+        Assertions.assertEquals(123L, StringUtils.getBytesValueOrNull("123 Bytes").longValue());
     }
 
     @Test
     public void getArgumentValue() {
-        Assert.assertNull(StringUtils.getArgumentValue(null, null));
-        Assert.assertNull(StringUtils.getArgumentValue(null, ""));
-        Assert.assertNull(StringUtils.getArgumentValue("", null));
+        Assertions.assertNull(StringUtils.getArgumentValue(null, null));
+        Assertions.assertNull(StringUtils.getArgumentValue(null, ""));
+        Assertions.assertNull(StringUtils.getArgumentValue("", null));
 
-        Assert.assertNull(StringUtils.getArgumentValue("", ""));
-        Assert.assertNull(StringUtils.getArgumentValue("test", ""));
-        Assert.assertNull(StringUtils.getArgumentValue("", "test"));
+        Assertions.assertNull(StringUtils.getArgumentValue("", ""));
+        Assertions.assertNull(StringUtils.getArgumentValue("test", ""));
+        Assertions.assertNull(StringUtils.getArgumentValue("", "test"));
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
             "com.foo.jobs.Abc", StringUtils.getArgumentValue("--class com.foo.jobs.Abc", "--class"));
-        Assert.assertEquals(
+        Assertions.assertEquals(
             "com.foo.jobs.Abc", StringUtils.getArgumentValue(" --class  com.foo.jobs.Abc ", "--class"));
-        Assert.assertEquals(
+        Assertions.assertEquals(
             "com.foo.jobs.Abc", StringUtils.getArgumentValue(" --class  com.foo.jobs.Abc ", "--class"));
-        Assert.assertEquals(
+        Assertions.assertEquals(
             "com.foo.jobs.Abc",
             StringUtils.getArgumentValue(" --class  'com.foo.jobs.Abc' ", "--class"));
-        Assert.assertEquals(
+        Assertions.assertEquals(
             "com.foo.jobs.Abc",
             StringUtils.getArgumentValue(" --class  \"com.foo.jobs.Abc\" ", "--class"));
-        Assert.assertEquals(
+        Assertions.assertEquals(
             " com.foo.jobs.Abc ",
             StringUtils.getArgumentValue(" --class  ' com.foo.jobs.Abc ' ", "--class"));
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
             "com.foo.jobs.Abc",
             StringUtils.getArgumentValue(
                 "xyz --class com.foo.jobs.Abc --jar file:/home/test/hi.jar --others world", "--class"));
@@ -138,25 +139,25 @@ public class StringUtilsTest {
 
     @Test
     public void getArgumentValues() {
-        Assert.assertArrayEquals(new String[0], StringUtils.getArgumentValues(null, null));
-        Assert.assertArrayEquals(new String[0], StringUtils.getArgumentValues(null, ""));
-        Assert.assertArrayEquals(new String[0], StringUtils.getArgumentValues("", null));
+        Assertions.assertArrayEquals(new String[0], StringUtils.getArgumentValues(null, null));
+        Assertions.assertArrayEquals(new String[0], StringUtils.getArgumentValues(null, ""));
+        Assertions.assertArrayEquals(new String[0], StringUtils.getArgumentValues("", null));
 
-        Assert.assertArrayEquals(new String[0], StringUtils.getArgumentValues("", ""));
-        Assert.assertArrayEquals(new String[0], StringUtils.getArgumentValues("test", ""));
-        Assert.assertArrayEquals(new String[0], StringUtils.getArgumentValues("", "test"));
+        Assertions.assertArrayEquals(new String[0], StringUtils.getArgumentValues("", ""));
+        Assertions.assertArrayEquals(new String[0], StringUtils.getArgumentValues("test", ""));
+        Assertions.assertArrayEquals(new String[0], StringUtils.getArgumentValues("", "test"));
 
-        Assert.assertArrayEquals(
-            new String[]{"com.foo.jobs.Abc"},
+        Assertions.assertArrayEquals(
+            new String[] {"com.foo.jobs.Abc"},
             StringUtils.getArgumentValues("--class com.foo.jobs.Abc", "--class"));
-        Assert.assertArrayEquals(
-            new String[]{"com.foo.jobs.Abc", "com.foo.jobs.Abc", " com.foo.jobs.Abc "},
+        Assertions.assertArrayEquals(
+            new String[] {"com.foo.jobs.Abc", "com.foo.jobs.Abc", " com.foo.jobs.Abc "},
             StringUtils.getArgumentValues(
                 " --class  \"com.foo.jobs.Abc\"  --class com.foo.jobs.Abc --class  ' com.foo.jobs.Abc ' ",
                 "--class"));
 
-        Assert.assertArrayEquals(
-            new String[]{"com.foo.jobs.Abc"},
+        Assertions.assertArrayEquals(
+            new String[] {"com.foo.jobs.Abc"},
             StringUtils.getArgumentValues(
                 "xyz --class com.foo.jobs.Abc --jar file:/home/test/hi.jar --others world", "--class"));
     }

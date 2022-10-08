@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.util.DependencyUtils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;

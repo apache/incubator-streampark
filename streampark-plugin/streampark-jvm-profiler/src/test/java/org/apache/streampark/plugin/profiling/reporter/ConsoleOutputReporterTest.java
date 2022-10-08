@@ -17,11 +17,12 @@
 
 package org.apache.streampark.plugin.profiling.reporter;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
 public class ConsoleOutputReporterTest {
+
     @Test
     public void report() {
         ConsoleOutputReporter reporter = new ConsoleOutputReporter();

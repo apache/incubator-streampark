@@ -17,17 +17,18 @@
 
 package org.apache.streampark.console.base.util;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
-
-/** Test for {@link ShaHashUtils} */
+/**
+ * Test for {@link ShaHashUtils}
+ */
 public class ShaHashUtilsTest {
 
     @Test
     public void testEncrypt() {
         String randomSalt = "rh8b1ojwog777yrg0daesf04gk";
         String encryptPassword = ShaHashUtils.encrypt(randomSalt, "streampark");
-        assertEquals("2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f", encryptPassword);
+        Assertions.assertEquals("2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f", encryptPassword);
     }
 }

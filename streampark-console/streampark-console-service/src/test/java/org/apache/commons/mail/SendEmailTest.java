@@ -26,8 +26,8 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 
 import freemarker.template.Template;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.util.Date;
@@ -41,7 +41,7 @@ public class SendEmailTest {
 
     private SenderEmail senderEmail;
 
-    @Before
+    @BeforeEach
     public void initConfig() throws Exception {
         this.template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
         senderEmail = new SenderEmail();
@@ -108,7 +108,9 @@ public class SendEmailTest {
         template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
         template.setDuration(DateUtils.toRichTimeDuration(duration));
         template.setLink(url);
-        template.setEndTime(DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+        template.setEndTime(
+            DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(),
+                TimeZone.getDefault()));
         template.setRestart(application.isNeedRestartOnFailed());
         template.setRestartIndex(application.getRestartCount());
         template.setTotalRestart(application.getRestartSize());

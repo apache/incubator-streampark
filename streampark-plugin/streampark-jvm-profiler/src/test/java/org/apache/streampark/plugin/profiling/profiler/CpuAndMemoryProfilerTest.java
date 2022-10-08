@@ -19,14 +19,15 @@ package org.apache.streampark.plugin.profiling.profiler;
 
 import org.apache.streampark.plugin.profiling.Reporter;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class CpuAndMemoryProfilerTest {
+
     @Test
     public void profile() {
         final List<String> nameList = new ArrayList<>();
@@ -47,24 +48,24 @@ public class CpuAndMemoryProfilerTest {
                 });
 
         profiler.setInterval(123);
-        Assert.assertEquals(123L, profiler.getInterval());
+        Assertions.assertEquals(123L, profiler.getInterval());
 
         profiler.profile();
         profiler.profile();
 
-        Assert.assertEquals(2, nameList.size());
-        Assert.assertEquals(CpuAndMemoryProfiler.PROFILER_NAME, nameList.get(0));
+        Assertions.assertEquals(2, nameList.size());
+        Assertions.assertEquals(CpuAndMemoryProfiler.PROFILER_NAME, nameList.get(0));
 
-        Assert.assertEquals(2, metricList.size());
-        Assert.assertTrue(metricList.get(0).containsKey("processUuid"));
-        Assert.assertTrue(metricList.get(0).containsKey("processCpuLoad"));
-        Assert.assertTrue(metricList.get(0).containsKey("heapMemoryTotalUsed"));
-        Assert.assertTrue(metricList.get(0).containsKey("gc"));
+        Assertions.assertEquals(2, metricList.size());
+        Assertions.assertTrue(metricList.get(0).containsKey("processUuid"));
+        Assertions.assertTrue(metricList.get(0).containsKey("processCpuLoad"));
+        Assertions.assertTrue(metricList.get(0).containsKey("heapMemoryTotalUsed"));
+        Assertions.assertTrue(metricList.get(0).containsKey("gc"));
 
         Object obj = metricList.get(0).get("gc");
-        Assert.assertTrue(obj instanceof List);
+        Assertions.assertTrue(obj instanceof List);
 
         List<Map<String, Object>> gcMetrics = (List<Map<String, Object>>) obj;
-        Assert.assertTrue(gcMetrics.size() >= 1);
+        Assertions.assertTrue(gcMetrics.size() >= 1);
     }
 }

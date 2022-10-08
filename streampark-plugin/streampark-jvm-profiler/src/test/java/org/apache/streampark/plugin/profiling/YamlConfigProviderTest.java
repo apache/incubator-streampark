@@ -17,8 +17,8 @@
 
 package org.apache.streampark.plugin.profiling;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,11 +31,12 @@ import java.util.List;
 import java.util.Map;
 
 public class YamlConfigProviderTest {
+
     @Test
     public void getConfig() throws IOException {
         {
             YamlConfigProvider provider = new YamlConfigProvider("not_exiting_file");
-            Assert.assertEquals(0, provider.getConfig().size());
+            Assertions.assertEquals(0, provider.getConfig().size());
         }
 
         {
@@ -46,7 +47,7 @@ public class YamlConfigProviderTest {
             Files.write(file.toPath(), content.getBytes(), StandardOpenOption.CREATE);
 
             YamlConfigProvider provider = new YamlConfigProvider(file.getAbsolutePath());
-            Assert.assertEquals(0, provider.getConfig().size());
+            Assertions.assertEquals(0, provider.getConfig().size());
         }
 
         {
@@ -76,20 +77,20 @@ public class YamlConfigProviderTest {
 
             YamlConfigProvider provider = new YamlConfigProvider(file.getAbsolutePath());
             Map<String, Map<String, List<String>>> config = provider.getConfig();
-            Assert.assertEquals(2, config.size());
+            Assertions.assertEquals(2, config.size());
 
             Map<String, List<String>> rootConfig = config.get("");
-            Assert.assertEquals(4, rootConfig.size());
-            Assert.assertEquals(Collections.singletonList("value1"), rootConfig.get("key1"));
-            Assert.assertEquals(Arrays.asList("value2a", "value2b"), rootConfig.get("key2"));
-            Assert.assertEquals(Collections.singletonList("value3a"), rootConfig.get("key3.key3a"));
-            Assert.assertEquals(Arrays.asList("value3b", "value3c"), rootConfig.get("key3.key3b"));
+            Assertions.assertEquals(4, rootConfig.size());
+            Assertions.assertEquals(Collections.singletonList("value1"), rootConfig.get("key1"));
+            Assertions.assertEquals(Arrays.asList("value2a", "value2b"), rootConfig.get("key2"));
+            Assertions.assertEquals(Collections.singletonList("value3a"), rootConfig.get("key3.key3a"));
+            Assertions.assertEquals(Arrays.asList("value3b", "value3c"), rootConfig.get("key3.key3b"));
 
             Map<String, List<String>> override1Config = config.get("override1");
-            Assert.assertEquals(3, override1Config.size());
-            Assert.assertEquals(Collections.singletonList("value11"), override1Config.get("key1"));
-            Assert.assertEquals(Arrays.asList("value22a", "value22b"), override1Config.get("key2"));
-            Assert.assertEquals(Collections.singletonList("value33a"), override1Config.get("key3.key3a"));
+            Assertions.assertEquals(3, override1Config.size());
+            Assertions.assertEquals(Collections.singletonList("value11"), override1Config.get("key1"));
+            Assertions.assertEquals(Arrays.asList("value22a", "value22b"), override1Config.get("key2"));
+            Assertions.assertEquals(Collections.singletonList("value33a"), override1Config.get("key3.key3a"));
         }
     }
 
@@ -97,7 +98,7 @@ public class YamlConfigProviderTest {
     public void getConfigFromBadHttpUrl() throws IOException {
         YamlConfigProvider provider = new YamlConfigProvider("http://localhost/bad_url");
         Map<String, Map<String, List<String>>> config = provider.getConfig();
-        Assert.assertEquals(0, config.size());
+        Assertions.assertEquals(0, config.size());
     }
 
     @Test
@@ -128,18 +129,18 @@ public class YamlConfigProviderTest {
 
         YamlConfigProvider provider = new YamlConfigProvider(path.toString());
         Map<String, Map<String, List<String>>> config = provider.getConfig();
-        Assert.assertEquals(2, config.size());
+        Assertions.assertEquals(2, config.size());
 
         Map<String, List<String>> rootConfig = config.get("");
-        Assert.assertEquals(4, rootConfig.size());
-        Assert.assertEquals(Collections.singletonList("value1"), rootConfig.get("key1"));
-        Assert.assertEquals(Arrays.asList("value2a", "value2b"), rootConfig.get("key2"));
-        Assert.assertEquals(Arrays.asList("value3b", "value3c"), rootConfig.get("key3.key3b"));
+        Assertions.assertEquals(4, rootConfig.size());
+        Assertions.assertEquals(Collections.singletonList("value1"), rootConfig.get("key1"));
+        Assertions.assertEquals(Arrays.asList("value2a", "value2b"), rootConfig.get("key2"));
+        Assertions.assertEquals(Arrays.asList("value3b", "value3c"), rootConfig.get("key3.key3b"));
 
         Map<String, List<String>> override1Config = config.get("override1");
-        Assert.assertEquals(3, override1Config.size());
-        Assert.assertEquals(Collections.singletonList("value11"), override1Config.get("key1"));
-        Assert.assertEquals(Arrays.asList("value22a", "value22b"), override1Config.get("key2"));
-        Assert.assertEquals(Collections.singletonList("value33a"), override1Config.get("key3.key3a"));
+        Assertions.assertEquals(3, override1Config.size());
+        Assertions.assertEquals(Collections.singletonList("value11"), override1Config.get("key1"));
+        Assertions.assertEquals(Arrays.asList("value22a", "value22b"), override1Config.get("key2"));
+        Assertions.assertEquals(Collections.singletonList("value33a"), override1Config.get("key3.key3a"));
     }
 }
