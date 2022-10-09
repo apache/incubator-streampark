@@ -45,7 +45,18 @@ jobs:
           submodules: true
       - name: Check license header
         uses: apache/skywalking-eyes/header@main
-
+  dead-link:
+    if: github.repository == 'apache/incubator-streampark'
+    name: Dead links
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - run: sudo npm install -g markdown-link-check@3.10.3
+      - run: |
+          for file in $(find . -name "*.md"); do
+            markdown-link-check -c .dlc.json -q "$file"
+          done
   build:
     runs-on: ubuntu-latest
     name: Build with Scala_2.11
