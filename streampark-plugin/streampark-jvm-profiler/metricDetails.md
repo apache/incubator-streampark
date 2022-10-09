@@ -1,9 +1,9 @@
 # Details of Metrics Collected by the JVM-Profiler
 
-1. [CPU and Memory](#CPU-And-Memory)
-2. [IO](#IO)
-3. [Process Info](#Process-Info)
-4. [Stack Trace](#Stack-Trace)
+1. CPU and Memory
+2. IO
+3. Process Info
+4. Stack Trace
 
 ## 1. CPU and Memory
 
