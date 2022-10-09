@@ -18,7 +18,7 @@
 -->
 
 <template>
-  <!-- 两步验证 -->
+  <!-- 2-step verification -->
   <a-modal
     centered
     v-model="visible"
@@ -27,7 +27,7 @@
     <div
       slot="title"
       :style="{ textAlign: 'center' }">
-      两步验证
+      2-step verification
     </div>
     <template
       slot="footer">
@@ -36,14 +36,14 @@
         <a-button
           key="back"
           @click="handleCancel">
-          返回
+          back
         </a-button>
         <a-button
           key="submit"
           type="primary"
           :loading="stepLoading"
           @click="handleStepOk">
-          继续
+          continue
         </a-button>
       </div>
     </template>
@@ -58,18 +58,18 @@
           <p
             style="text-align: center"
             v-if="!stepLoading">
-            请在手机中打开 Google Authenticator 或两步验证 APP<br>输入 6 位动态码
+            Please open Google Authenticator or 2-step verification APP in your phone<br>Enter the 6-digit dynamic code
           </p>
           <p
             style="text-align: center"
             v-else>
-            正在验证..<br>请稍后
+            Verifying..<br>Please wait
           </p>
           <a-form-item
             :style="{ textAlign: 'center' }"
             has-feedback
             field-decorator-id="stepCode"
-            :field-decorator-options="{rules: [{ required: true, message: '请输入 6 位动态码!', pattern: /^\d{6}$/, len: 6 }]}">
+            :field-decorator-options="{rules: [{ required: true, message: 'Please enter a 6-digit dynamic code!', pattern: /^\d{6}$/, len: 6 }]}">
             <a-input
               :style="{ textAlign: 'center' }"
               @keyup.enter.native="handleStepOk"
@@ -78,7 +78,9 @@
           <p
             style="text-align: center">
             <a
-              @click="onForgeStepCode">遗失手机?</a>
+              @click="onForgeStepCode">
+              Lost your phone?
+            </a>
           </p>
         </div>
       </a-form>

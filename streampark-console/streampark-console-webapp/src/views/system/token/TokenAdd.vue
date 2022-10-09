@@ -123,7 +123,7 @@ export default {
 
   methods: {
 
-    //expireTime不可选择的日期
+    // expireTime non-selectable date
     tokenDisabledDate(current) {
       return current && current < moment().endOf('day')
     },
@@ -168,7 +168,7 @@ export default {
     },
 
     fetch(params = {}) {
-      // 显示loading
+      // show loading
       this.loading = true
       params.pageSize = 99999
       params.pageNum = 1
@@ -183,7 +183,7 @@ export default {
 
       getNoTokenUser().then((resp) => {
         this.dataSource = resp.data
-        // 数据加载完毕，关闭loading
+        // After the data is loaded, close the loading
         this.loading = false
       })
     }

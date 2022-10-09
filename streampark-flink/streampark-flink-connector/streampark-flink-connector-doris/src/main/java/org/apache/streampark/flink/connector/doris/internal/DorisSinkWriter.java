@@ -18,13 +18,13 @@
 package org.apache.streampark.flink.connector.doris.internal;
 
 import org.apache.streampark.common.enums.Semantic;
+import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.connector.doris.conf.DorisConfig;
 import org.apache.streampark.flink.connector.doris.bean.DorisSinkBufferEntry;
 import org.apache.streampark.flink.connector.doris.bean.LoadStatusFailedException;
 
 import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.metrics.Counter;
-import org.apache.flink.util.concurrent.ExecutorThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +120,7 @@ public class DorisSinkWriter implements Serializable {
             return;
         }
         stopSchedule();
-        this.schedule = Executors.newScheduledThreadPool(1, new ExecutorThreadFactory("doris-interval-sink"));
+        this.schedule = Executors.newScheduledThreadPool(1, ThreadUtils.threadFactory("doris-interval-sink"));
         this.scheduledFuture = this.schedule.schedule(() -> {
             synchronized (DorisSinkWriter.this) {
                 if (!closed) {

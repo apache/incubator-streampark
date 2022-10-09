@@ -787,7 +787,7 @@
         </p>
       </a-form-item>
 
-      <!--告警方式-->
+      <!--Alarm mode-->
       <template>
         <a-form-item
           label="Fault Alert Template"
@@ -1467,6 +1467,7 @@
   import configOptions from './Option'
   import SvgIcon from '@/components/SvgIcon'
   import { sysHadoopConf } from '@api/config'
+  import {TEAM_ID} from '@/store/mutation-types'
 
   import {
     uploadJars as histUploadJars,
@@ -2202,7 +2203,7 @@
       },
 
       /**
-       * TODO:解析出source和sink,画图!
+       * TODO: parse out source and sink, draw!
        */
       handleLeaderLine() {
         const elem = document.querySelectorAll('.CodeMirror-line>span[role=presentation]')
@@ -2310,6 +2311,7 @@
         }
         const params = {
           jobType: 1,
+          teamId: storage.get(TEAM_ID),
           executionMode: values.executionMode,
           versionId: values.versionId,
           projectId: values.project || null,
@@ -2414,6 +2416,7 @@
 
         const params = {
           jobType: 2,
+          teamId: storage.get(TEAM_ID),
           executionMode: values.executionMode,
           versionId: values.versionId,
           flinkSql: this.controller.flinkSql.value,

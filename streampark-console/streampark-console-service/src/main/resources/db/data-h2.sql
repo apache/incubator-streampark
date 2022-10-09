@@ -16,9 +16,16 @@
  */
 
 -- ----------------------------
+-- Records of t_team
+-- ----------------------------
+insert into `t_team` values (100000, 'default', 'The default team', now(), now());
+insert into `t_team` values (100001, 'test_team1', 'The test team1', now(), now());
+
+
+-- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
-insert into `t_flink_app` values (100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, '0', 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, 0, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, 0, null, null, null, 'streampark,test');
+insert into `t_flink_app` values (100000, 100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, '0', 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, 0, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, 0, null, null, null, 'streampark,test');
 
 -- ----------------------------
 -- Records of t_flink_effective
@@ -28,7 +35,7 @@ insert into `t_flink_effective` values (100000, 100000, 2, 100000, now());
 -- ----------------------------
 -- Records of t_flink_project
 -- ----------------------------
-insert into `t_flink_project` values (100000, 'streampark-quickstart', 'https://github.com/streamxhub/streampark-quickstart.git', 'main', null, null, null, null, 1, 1, null, 'streampark-quickstart', 1, now(), now());
+insert into `t_flink_project` values (100000, 100000, 'streampark-quickstart', 'https://github.com/streamxhub/streampark-quickstart.git', 'main', null, null, null, null, 1, 1, null, 'streampark-quickstart', 1, now(), now());
 
 -- ----------------------------
 -- Records of t_flink_sql
@@ -82,58 +89,26 @@ insert into `t_menu` values (100040, 100038, 'delete', null, null, 'token:delete
 insert into `t_menu` values (100041, 100013, 'Add Cluster', '/flink/setting/add_cluster', 'flink/setting/AddCluster', 'cluster:create', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100042, 100013, 'Edit Cluster', '/flink/setting/edit_cluster', 'flink/setting/EditCluster', 'cluster:update', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100043, 100015, 'copy', null, null, 'app:copy', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100044, 100000, 'Team Management', '/system/team', 'system/team/Team', 'team:view', 'team', '0', 1, 2, now(), now());
+insert into `t_menu` values (100045, 100044, 'add', null, null, 'team:add', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100046, 100044, 'update', null, null, 'team:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100047, 100044, 'delete', null, null, 'team:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100048, 100000, 'Member Management', '/system/member', 'system/member/Member', 'member:view', 'usergroup-add', '0', 1, 2, now(), now());
+insert into `t_menu` values (100049, 100048, 'add', null, null, 'member:add', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100050, 100048, 'update', null, null, 'member:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100051, 100048, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
 
 
 -- ----------------------------
 -- Records of t_role
 -- ----------------------------
-insert into `t_role` values (100000, 'admin', 'admin', now(), now(), null);
 insert into `t_role` values (100001, 'developer', 'developer', now(), now(), null);
 
 -- ----------------------------
 -- Records of t_role_menu
 -- ----------------------------
-insert into `t_role_menu` values (100000, 100000, 100000);
-insert into `t_role_menu` values (100001, 100000, 100001);
-insert into `t_role_menu` values (100002, 100000, 100002);
-insert into `t_role_menu` values (100003, 100000, 100003);
-insert into `t_role_menu` values (100004, 100000, 100004);
-insert into `t_role_menu` values (100005, 100000, 100005);
-insert into `t_role_menu` values (100006, 100000, 100006);
-insert into `t_role_menu` values (100007, 100000, 100007);
-insert into `t_role_menu` values (100008, 100000, 100008);
-insert into `t_role_menu` values (100009, 100000, 100009);
-insert into `t_role_menu` values (100010, 100000, 100010);
-insert into `t_role_menu` values (100011, 100000, 100011);
-insert into `t_role_menu` values (100012, 100000, 100012);
-insert into `t_role_menu` values (100013, 100000, 100013);
-insert into `t_role_menu` values (100014, 100000, 100014);
-insert into `t_role_menu` values (100015, 100000, 100015);
-insert into `t_role_menu` values (100016, 100000, 100016);
-insert into `t_role_menu` values (100017, 100000, 100017);
-insert into `t_role_menu` values (100018, 100000, 100018);
-insert into `t_role_menu` values (100019, 100000, 100019);
-insert into `t_role_menu` values (100020, 100000, 100020);
-insert into `t_role_menu` values (100021, 100000, 100021);
-insert into `t_role_menu` values (100022, 100000, 100022);
-insert into `t_role_menu` values (100023, 100000, 100023);
-insert into `t_role_menu` values (100024, 100000, 100024);
-insert into `t_role_menu` values (100025, 100000, 100025);
-insert into `t_role_menu` values (100026, 100000, 100026);
-insert into `t_role_menu` values (100027, 100000, 100027);
-insert into `t_role_menu` values (100028, 100000, 100028);
-insert into `t_role_menu` values (100029, 100000, 100029);
-insert into `t_role_menu` values (100030, 100000, 100030);
-insert into `t_role_menu` values (100031, 100000, 100031);
-insert into `t_role_menu` values (100032, 100000, 100032);
-insert into `t_role_menu` values (100033, 100000, 100033);
-insert into `t_role_menu` values (100034, 100000, 100034);
-insert into `t_role_menu` values (100035, 100000, 100035);
-insert into `t_role_menu` values (100036, 100000, 100036);
-insert into `t_role_menu` values (100037, 100000, 100037);
-insert into `t_role_menu` values (100038, 100000, 100038);
-insert into `t_role_menu` values (100039, 100000, 100039);
-insert into `t_role_menu` values (100040, 100000, 100040);
 insert into `t_role_menu` values (100041, 100001, 100014);
 insert into `t_role_menu` values (100042, 100001, 100016);
 insert into `t_role_menu` values (100043, 100001, 100017);
@@ -153,9 +128,6 @@ insert into `t_role_menu` values (100056, 100001, 100032);
 insert into `t_role_menu` values (100057, 100001, 100033);
 insert into `t_role_menu` values (100058, 100001, 100013);
 insert into `t_role_menu` values (100059, 100001, 100015);
-insert into `t_role_menu` values (100060, 100000, 100041);
-insert into `t_role_menu` values (100061, 100000, 100042);
-insert into `t_role_menu` values (100062, 100000, 100043);
 
 -- ----------------------------
 -- Records of t_setting
@@ -179,9 +151,15 @@ insert into `t_setting` values (15, 'docker.register.namespace', null, 'Namespac
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, '1', now(), now(),null,'0',null,null );
+insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, '1', now(), now(),null,'0',null,null );
+insert into `t_user` values (100001, 'test_user1', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, '1', now(), now(),null,'0',null,null );
+insert into `t_user` values (100002, 'test_user2', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, '1', now(), now(),null,'0',null,null );
+insert into `t_user` values (100003, 'test_user3', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, '1', now(), now(),null,'0',null,null );
 
 -- ----------------------------
 -- Records of t_user_role
 -- ----------------------------
-insert into `t_user_role` values (100000, 100000, 100000);
+insert into `t_user_role` values (100000, 100000, 100001, 100001, now(), now()); -- test_user1 is the developer of the default team
+insert into `t_user_role` values (100001, 100001, 100001, 100001, now(), now()); -- test_user1 is the developer of the test_team1 team
+insert into `t_user_role` values (100002, 100000, 100002, 100001, now(), now()); -- test_user2 is the developer of the test_team1 team
+insert into `t_user_role` values (100003, 100001, 100003, 100001, now(), now()); -- test_user3 is the developer of the test_team1 team

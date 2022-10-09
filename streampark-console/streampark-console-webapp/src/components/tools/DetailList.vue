@@ -18,7 +18,7 @@
 -->
 
 <script>
-/* WARNING: 兼容老引入，请勿继续使用 */
+/* WARNING: Compatible with old introduction, please do not continue to use */
 import DescriptionList from '@/components/DescriptionList'
 export default DescriptionList
 </script>

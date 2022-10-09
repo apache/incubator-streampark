@@ -22,6 +22,7 @@
 
     <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.Project">
         <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="url" jdbcType="VARCHAR" property="url"/>
         <result column="repository" jdbcType="INTEGER" property="repository"/>
@@ -41,6 +42,7 @@
     <select id="page" resultType="project" parameterType="project">
         select * from t_flink_project t
         <where>
+            t.team_id = #{project.teamId}
             <if test="project.name != null and project.name != ''">
                 and t.name like '%${project.name}%'
             </if>

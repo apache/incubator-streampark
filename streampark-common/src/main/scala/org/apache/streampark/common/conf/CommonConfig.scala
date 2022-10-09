@@ -95,4 +95,10 @@ object CommonConfig {
     classType = classOf[String],
     description = "kerberos default ttl")
 
+  val READ_LOG_MAX_SIZE: InternalOption = InternalOption(
+    key = "streampark.read-log.max-size",
+    defaultValue = "1mb",
+    classType = classOf[String],
+    description = "The maximum size of the default read log")
+
 }

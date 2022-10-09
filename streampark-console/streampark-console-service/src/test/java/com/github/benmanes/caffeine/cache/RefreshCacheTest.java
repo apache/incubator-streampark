@@ -17,7 +17,7 @@
 
 package com.github.benmanes.caffeine.cache;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;

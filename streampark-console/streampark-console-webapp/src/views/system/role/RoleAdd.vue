@@ -144,7 +144,7 @@ export default {
       this.checkStrictly = true
     },
     handleCheck (checkedKeys, info) {
-      // 半选中的父节点不参与校验
+      // The half-selected parent node does not participate in the verification
       this.selectedKeysAndHalfCheckedKeys = checkedKeys.concat(info.halfCheckedKeys)
       this.checkedKeys = checkedKeys
       const checkedArr = Object.is(checkedKeys.checked, undefined) ? checkedKeys : checkedKeys.checked

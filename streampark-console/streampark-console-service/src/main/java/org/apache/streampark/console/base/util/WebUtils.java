@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.base.util;
 
+import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.console.base.domain.Constant;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
@@ -94,7 +95,7 @@ public final class WebUtils {
     }
 
     public static String getAppHome() {
-        return System.getProperty("app.home");
+        return System.getProperty(ConfigConst.KEY_APP_HOME());
     }
 
     public static File getAppDir(String dir) {

@@ -73,10 +73,11 @@ public class EnvInitializer implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         String appHome = WebUtils.getAppHome();
         if (appHome == null) {
-            throw new ExceptionInInitializerError("[StreamPark] System initialization check failed," +
+            throw new ExceptionInInitializerError(String.format("[StreamPark] System initialization check failed," +
                 " The system initialization check failed. If started local for development and debugging," +
-                " please ensure the -Dapp.home parameter is clearly specified," +
-                " more detail: http://streampark.apache.org/docs/user-guide/development");
+                " please ensure the -D%s parameter is clearly specified," +
+                " more detail: https://streampark.apache.org/docs/user-guide/development",
+                ConfigConst.KEY_APP_HOME()));
         }
 
         // init InternalConfig

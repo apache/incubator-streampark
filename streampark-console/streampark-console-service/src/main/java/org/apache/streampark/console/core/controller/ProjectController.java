@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.Project;
@@ -30,8 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +50,7 @@ public class ProjectController {
     @PostMapping("create")
     @RequiresPermissions("project:create")
     public RestResponse create(Project project) {
+        AssertUtils.checkArgument(project.getTeamId() != null, "The teamId cannot be null");
         return projectService.create(project);
     }
 
@@ -64,28 +68,25 @@ public class ProjectController {
 
     @PostMapping("build")
     @RequiresPermissions("project:build")
-    public RestResponse build(Long id, String socketId) throws Exception {
-        projectService.build(id, socketId);
+    public RestResponse build(Long id) throws Exception {
+        projectService.build(id);
         return RestResponse.success();
     }
 
     @PostMapping("buildlog")
     @RequiresPermissions("project:build")
-    public RestResponse buildLog(Long id) throws Exception {
-        projectService.tailBuildLog(id);
-        return RestResponse.success();
-    }
-
-    @PostMapping("closebuild")
-    @RequiresPermissions("project:build")
-    public RestResponse closeBuild(Long id) {
-        projectService.closeBuildLog(id);
-        return RestResponse.success();
+    public RestResponse buildLog(
+        Long id,
+        @RequestParam(value = "startOffset", required = false) Long startOffset) {
+        return projectService.getBuildLog(id, startOffset);
     }
 
     @PostMapping("list")
     @RequiresPermissions("project:view")
     public RestResponse list(Project project, RestRequest restRequest) {
+        if (project.getTeamId() == null) {
+            return RestResponse.success(Collections.emptyList());
+        }
         IPage<Project> page = projectService.page(project, restRequest);
         return RestResponse.success().data(page);
     }

@@ -17,14 +17,18 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.conf.CommonConfig;
+import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.domain.FlinkMemorySize;
 import org.apache.streampark.common.util.AssertUtils;
-import org.apache.streampark.common.util.CommandUtils;
+import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ThreadUtils;
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.base.util.CommonUtils;
+import org.apache.streampark.console.base.util.FileUtils;
 import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
@@ -34,16 +38,13 @@ import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.task.FlinkTrackingTask;
-import org.apache.streampark.console.core.websocket.WebSocketEndpoint;
+import org.apache.streampark.console.core.task.ProjectBuildTask;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jgit.api.CloneCommand;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.lib.StoredConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -51,18 +52,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -72,12 +73,6 @@ import java.util.concurrent.TimeUnit;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     implements ProjectService {
-
-    private final Map<Long, Byte> tailOutMap = new ConcurrentHashMap<>();
-
-    private final Map<Long, StringBuilder> tailBuffer = new ConcurrentHashMap<>();
-
-    private final Map<Long, Byte> tailBeginning = new ConcurrentHashMap<>();
 
     @Autowired
     private ApplicationService applicationService;
@@ -117,6 +112,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         try {
             Project project = getById(projectParam.getId());
             AssertUtils.state(project != null);
+            AssertUtils.checkArgument(project.getTeamId().equals(projectParam.getTeamId()),
+                "TeamId cannot be changed.");
             project.setName(projectParam.getName());
             project.setUrl(projectParam.getUrl());
             project.setBranches(projectParam.getBranches());
@@ -172,123 +169,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public void build(Long id, String socketId) throws Exception {
+    public void build(Long id) throws Exception {
         Project project = getById(id);
         this.baseMapper.startBuild(project);
-        StringBuilder builder = new StringBuilder();
-        tailBuffer.put(id, builder.append(project.getLog4BuildStart()));
-        boolean cloneSuccess = cloneSourceCode(project, socketId);
-        if (!cloneSuccess) {
-            log.error("[StreamPark] clone or pull error.");
-            tailBuffer.remove(project.getId());
-            this.baseMapper.failureBuild(project);
-            return;
-        }
-        executorService.execute(() -> {
-            boolean build = projectBuild(project, socketId);
-            if (!build) {
-                this.baseMapper.failureBuild(project);
-                log.error("build error, project name: {} ", project.getName());
-                return;
-            }
-            this.baseMapper.successBuild(project);
-            try {
-                this.deploy(project);
-                List<Application> applications = getApplications(project);
-                // Update the deploy state
-                FlinkTrackingTask.refreshTracking(() -> applications.forEach((app) -> {
-                    log.info("update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                    app.setLaunch(LaunchState.NEED_LAUNCH.get());
-                    app.setBuild(true);
-                    this.applicationService.updateLaunch(app);
-                }));
-            } catch (Exception e) {
-                this.baseMapper.failureBuild(project);
-                log.error("deploy error, project name: {}, detail: {}", project.getName(), e.getMessage());
-            }
-        });
-    }
-
-    private void deploy(Project project) throws Exception {
-        File path = project.getAppSource();
-        List<File> apps = new ArrayList<>();
-        // find the compiled tar.gz (Stream Park project) file or jar (normal or official standard flink project) under the project path
-        findTarOrJar(apps, path);
-        if (apps.isEmpty()) {
-            throw new RuntimeException("[StreamPark] can't find tar.gz or jar in " + path.getAbsolutePath());
-        }
-        for (File app : apps) {
-            String appPath = app.getAbsolutePath();
-            // 1). tar.gz file
-            if (appPath.endsWith("tar.gz")) {
-                File deployPath = project.getDistHome();
-                if (!deployPath.exists()) {
-                    deployPath.mkdirs();
-                }
-                // xzvf jar
-                if (app.exists()) {
-                    String cmd = String.format(
-                        "tar -xzvf %s -C %s",
-                        app.getAbsolutePath(),
-                        deployPath.getAbsolutePath()
-                    );
-                    CommandUtils.execute(cmd);
-                }
-            } else {
-                // 2) .jar file(normal or official standard flink project)
-                Utils.checkJarFile(app.toURI().toURL());
-                String moduleName = app.getName().replace(".jar", "");
-                File distHome = project.getDistHome();
-                File targetDir = new File(distHome, moduleName);
-                if (!targetDir.exists()) {
-                    targetDir.mkdirs();
-                }
-                File targetJar = new File(targetDir, app.getName());
-                app.renameTo(targetJar);
-            }
-        }
-    }
-
-    private void findTarOrJar(List<File> list, File path) {
-        for (File file : Objects.requireNonNull(path.listFiles())) {
-            // navigate to the target directory:
-            if (file.isDirectory() && "target".equals(file.getName())) {
-                // find the tar.gz file or the jar file in the target path.
-                // note: only one of the two can be selected, which cannot be satisfied at the same time.
-                File tar = null;
-                File jar = null;
-                for (File targetFile : Objects.requireNonNull(file.listFiles())) {
-                    // 1) exit once the tar.gz file is found.
-                    if (targetFile.getName().endsWith("tar.gz")) {
-                        tar = targetFile;
-                        break;
-                    }
-                    // 2) try look for jar files, there may be multiple jars found.
-                    if (!targetFile.getName().startsWith("original-")
-                        && !targetFile.getName().endsWith("-sources.jar")
-                        && targetFile.getName().endsWith(".jar")) {
-                        if (jar == null) {
-                            jar = targetFile;
-                        } else {
-                            // there may be multiple jars found, in this case, select the jar with the largest and return
-                            if (targetFile.length() > jar.length()) {
-                                jar = targetFile;
-                            }
-                        }
-                    }
-                }
-                File target = tar == null ? jar : tar;
-                if (target == null) {
-                    log.warn("[StreamPark] can't find tar.gz or jar in {}", file.getAbsolutePath());
-                } else {
-                    list.add(target);
-                }
-            }
-
-            if (file.isDirectory()) {
-                findTarOrJar(list, file);
-            }
-        }
+        CompletableFuture<Void> buildTask = CompletableFuture.runAsync(
+            new ProjectBuildTask(getBuildLogPath(id), project, baseMapper, applicationService), executorService);
+        // TODO May need to define parameters to set the build timeout in the future.
+        CompletableFutureUtils.runTimeout(buildTask, 20, TimeUnit.MINUTES);
     }
 
     @Override
@@ -361,69 +248,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         return null;
     }
 
-    private boolean cloneSourceCode(Project project, String socketId) {
-        try {
-            project.cleanCloned();
-            log.info("clone {}, {} starting...", project.getName(), project.getUrl());
-
-            WebSocketEndpoint.writeMessage(socketId, String.format("clone %s starting..., url: %s", project.getName(), project.getUrl()));
-
-            tailBuffer.get(project.getId()).append(project.getLog4CloneStart());
-            CloneCommand cloneCommand = Git.cloneRepository()
-                .setURI(project.getUrl())
-                .setDirectory(project.getAppSource())
-                .setBranch(project.getBranches());
-
-            if (CommonUtils.notEmpty(project.getUserName(), project.getPassword())) {
-                cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
-            }
-
-            Future<Git> future = executorService.submit(cloneCommand);
-            Git git = future.get(60, TimeUnit.SECONDS);
-
-            StoredConfig config = git.getRepository().getConfig();
-            config.setBoolean("http", project.getUrl(), "sslVerify", false);
-            config.setBoolean("https", project.getUrl(), "sslVerify", false);
-            config.save();
-
-            File workTree = git.getRepository().getWorkTree();
-            gitWorkTree(project.getId(), workTree, "");
-            String successMsg = String.format(
-                "[StreamPark] project [%s] git clone successful!\n",
-                project.getName()
-            );
-            tailBuffer.get(project.getId()).append(successMsg);
-            WebSocketEndpoint.writeMessage(socketId, successMsg);
-            git.close();
-            return true;
-        } catch (Exception e) {
-            String errorLog = String.format(
-                "[StreamPark] project [%s] branch [%s] git clone failure, err: %s",
-                project.getName(),
-                project.getBranches(),
-                e
-            );
-            tailBuffer.get(project.getId()).append(errorLog);
-            WebSocketEndpoint.writeMessage(socketId, errorLog);
-            log.error(String.format("project %s clone error ", project.getName()), e);
-            return false;
-        }
-    }
-
-    private void gitWorkTree(Long id, File workTree, String space) {
-        File[] files = workTree.listFiles();
-        for (File file : Objects.requireNonNull(files)) {
-            if (!file.getName().startsWith(".git")) {
-                if (file.isFile()) {
-                    tailBuffer.get(id).append(space).append("/").append(file.getName()).append("\n");
-                } else if (file.isDirectory()) {
-                    tailBuffer.get(id).append(space).append("/").append(file.getName()).append("\n");
-                    gitWorkTree(id, file, space.concat("/").concat(file.getName()));
-                }
-            }
-        }
-    }
-
     private void eachFile(File file, List<Map<String, Object>> list, Boolean isRoot) {
         if (file != null && file.exists() && file.listFiles() != null) {
             if (isRoot) {
@@ -456,37 +280,44 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         }
     }
 
-    private boolean projectBuild(Project project, String socketId) {
-        StringBuilder builder = tailBuffer.get(project.getId());
-        int code = CommandUtils.execute(project.getMavenWorkHome(),
-            Collections.singletonList(project.getMavenArgs()),
-            (line) -> {
-                builder.append(line).append("\n");
-                if (tailOutMap.containsKey(project.getId())) {
-                    if (tailBeginning.containsKey(project.getId())) {
-                        tailBeginning.remove(project.getId());
-                        Arrays.stream(builder.toString().split("\n"))
-                            .forEach(out -> WebSocketEndpoint.writeMessage(socketId, out));
-                    }
-                    WebSocketEndpoint.writeMessage(socketId, line);
-                }
-            });
-        closeBuildLog(project.getId());
-        log.info(builder.toString());
-        tailBuffer.remove(project.getId());
-        return code == 0;
+    @Override
+    public RestResponse getBuildLog(Long id, Long startOffset) {
+        File logFile = Paths.get(getBuildLogPath(id)).toFile();
+        if (!logFile.exists()) {
+            String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logFile);
+            log.warn(errorMsg);
+            return RestResponse.success().data(errorMsg);
+        }
+        boolean isBuilding = this.getById(id).getBuildState() == 0;
+        byte[] fileContent;
+        long endOffset = 0L;
+        boolean readFinished = true;
+        // Read log from earliest when project is building
+        if (startOffset == null && isBuilding) {
+            startOffset = 0L;
+        }
+        try {
+            long maxSize = FlinkMemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
+            if (startOffset == null) {
+                fileContent = FileUtils.readEndOfFile(logFile, maxSize);
+            } else {
+                fileContent = FileUtils.readFileFromOffset(logFile, startOffset, maxSize);
+                endOffset = startOffset + fileContent.length;
+                readFinished = logFile.length() == endOffset && !isBuilding;
+            }
+            return RestResponse.success()
+                .data(new String(fileContent, StandardCharsets.UTF_8))
+                .put("offset", endOffset)
+                .put("readFinished", readFinished);
+        } catch (IOException e) {
+            String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
+            log.error(error, e);
+            return RestResponse.fail(error + e.getMessage(), ResponseCode.CODE_FAIL);
+        }
     }
 
-    @Override
-    public void tailBuildLog(Long id) {
-        this.tailOutMap.put(id, Byte.valueOf("0"));
-        this.tailBeginning.put(id, Byte.valueOf("0"));
-    }
-
-    @Override
-    public void closeBuildLog(Long id) {
-        tailOutMap.remove(id);
-        tailBeginning.remove(id);
+    private String getBuildLogPath(Long projectId) {
+        return String.format("%s/%s/build.log", Workspace.local().PROJECT_BUILD_LOG_DIR(), projectId);
     }
 
 }

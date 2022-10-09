@@ -21,6 +21,8 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.AlertConfig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,25 +30,36 @@ import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 
+@ApiModel(value = "AlertConfig")
 @Data
 @Slf4j
 public class AlertConfigWithParams implements Serializable {
+
+    @ApiModelProperty(name = "id", value = "id")
     private Long id;
 
+    @ApiModelProperty(name = "userId", value = "user id")
     private Long userId;
 
+    @ApiModelProperty(name = "alertName", value = "alert name")
     private String alertName;
 
+    @ApiModelProperty(name = "alertType", value = "alert type")
     private Integer alertType;
 
+    @ApiModelProperty(name = "emailParams", value = "email alert params")
     private AlertEmailParams emailParams;
 
+    @ApiModelProperty(name = "dingTalkParams", value = "ding-talk alert params")
     private AlertDingTalkParams dingTalkParams;
 
+    @ApiModelProperty(name = "weComParams", value = "we-com alert params")
     private AlertWeComParams weComParams;
 
+    @ApiModelProperty(name = "httpCallbackParams", value = "http callback alert params")
     private AlertHttpCallbackParams httpCallbackParams;
 
+    @ApiModelProperty(name = "larkParams", value = "lark alert params")
     private AlertLarkParams larkParams;
 
     public static AlertConfigWithParams of(AlertConfig config) {

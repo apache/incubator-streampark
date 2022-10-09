@@ -17,12 +17,13 @@
 
 package org.apache.streampark.plugin.profiling;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AgentThreadFactoryTest {
+
     @Test
     public void newThread() throws InterruptedException {
         final AtomicInteger i = new AtomicInteger(10);
@@ -40,6 +41,6 @@ public class AgentThreadFactoryTest {
         thread.start();
         thread.join();
 
-        Assert.assertEquals(11, i.get());
+        Assertions.assertEquals(11, i.get());
     }
 }

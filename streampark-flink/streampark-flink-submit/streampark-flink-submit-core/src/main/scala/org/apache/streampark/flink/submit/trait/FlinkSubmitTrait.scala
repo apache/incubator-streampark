@@ -31,11 +31,11 @@ import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.conf.Workspace
+import org.apache.streampark.common.conf.{ConfigConst, Workspace}
 import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode, ResolveOrder}
 import org.apache.streampark.common.util.{Logger, SystemPropertyUtils, Utils}
 import org.apache.streampark.flink.core.conf.FlinkRunOption
-import org.apache.streampark.flink.core.{ClusterClient => ClusterClientWrapper}
+import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.submit.bean._
 
 import java.io.File
@@ -187,7 +187,7 @@ trait FlinkSubmitTrait extends Logger {
   //----------Public Method end ------------------
 
   private[submit] lazy val jvmProfilerJar: String = {
-    val pluginsPath = SystemPropertyUtils.get("app.home").concat("/plugins")
+    val pluginsPath = SystemPropertyUtils.get(ConfigConst.KEY_APP_HOME).concat("/plugins")
     val pluginsDir = new File(pluginsPath)
     pluginsDir.list().filter(_.matches("streampark-jvm-profiler-.*\\.jar")) match {
       case Array() => throw new IllegalArgumentException(s"[StreamPark] can no found streampark-jvm-profiler jar in $pluginsPath")
@@ -486,11 +486,11 @@ trait FlinkSubmitTrait extends Logger {
 
     val clientTimeout = getOptionFromDefaultFlinkConfig(cancelRequest.flinkVersion.flinkHome, ClientOptions.CLIENT_TIMEOUT)
 
-    val clientWrapper = new ClusterClientWrapper(client)
+    val clientWrapper = new FlinkClusterClient(client)
 
     (Try(cancelRequest.withSavePoint).getOrElse(false), Try(cancelRequest.withDrain).getOrElse(false)) match {
       case (false, false) =>
-        clientWrapper.cancel(jobID).get()
+        client.cancel(jobID).get()
         null
       case (true, false) => clientWrapper.cancelWithSavepoint(jobID, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
       case (_, _) => clientWrapper.stopWithSavepoint(jobID, cancelRequest.withDrain, savePointDir).get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)

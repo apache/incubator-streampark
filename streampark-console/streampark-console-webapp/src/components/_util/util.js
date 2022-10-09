@@ -20,7 +20,7 @@
  */
 
 /**
- * 清理空值，对象
+ * cleanup nulls, objects
  * @param children
  * @returns {*[]}
  */
@@ -29,7 +29,7 @@ export function filterEmpty (children = []) {
 }
 
 /**
- * 获取字符串长度，英文字符 长度1，中文字符长度2
+ * Get string length, English character length 1, Chinese character length 2
  * @param {*} str
  */
 export const getStrFullLength = (str = '') =>
@@ -42,7 +42,7 @@ export const getStrFullLength = (str = '') =>
   }, 0)
 
 /**
- * 截取字符串，根据 maxLength 截取后返回
+ * Intercept the string and return it according to maxLength
  * @param {*} str
  * @param {*} maxLength
  */

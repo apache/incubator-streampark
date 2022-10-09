@@ -59,20 +59,17 @@
           ]" />
       </a-form-item>
       <a-form-item
-        label="Role"
+        label="User Type"
         v-bind="formItemLayout">
         <a-select
-          mode="multiple"
-          :allow-clear="true"
+          mode="single"
+          :allow-clear="false"
           style="width: 100%"
-          v-decorator="[
-            'roleId',
-            {rules: [{ required: true, message: 'please select role' }]}
-          ]">
+          v-decorator="['userType',{rules: [{ required: true, message: 'please select user type' }]}]">
           <a-select-option
-            v-for="r in roleData"
-            :key="r.roleId.toString()">
-            {{ r.roleName }}
+            v-for="userType in userTypeData"
+            :key="userType">
+            {{ userType }}
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -135,8 +132,7 @@
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex'
-import { list as getRole } from '@/api/role'
-import { update, get } from '@/api/user'
+import { update, get, types } from '@/api/user'
 
 const formItemLayout = {
   labelCol: { span: 4 },
@@ -154,10 +150,7 @@ export default {
     return {
       formItemLayout,
       form: this.$form.createForm(this),
-      userTypeData: [
-        { 'value': 1, 'name': '内部用户' },
-        { 'value': 2, 'name': '外部用户' }
-      ],
+      userTypeData: [],
       roleData: [],
       userId: '',
       loading: false
@@ -183,8 +176,7 @@ export default {
 
     setFormValues ({ ...user }) {
       this.userId = user.userId
-      this.userType = user.userType
-      const fields = ['username', 'nickName', 'email', 'status', 'sex']
+      const fields = ['username', 'nickName', 'email', 'status', 'sex', 'userType']
       Object.keys(user).forEach((key) => {
         if (fields.indexOf(key) !== -1) {
           this.form.getFieldDecorator(key)
@@ -193,12 +185,6 @@ export default {
           this.form.setFieldsValue(obj)
         }
       })
-
-      if (user.roleId) {
-        this.form.getFieldDecorator('roleId')
-        const roles = user.roleId.split(',')
-        this.form.setFieldsValue({ 'roleId': roles })
-      }
     },
 
     handleSubmit () {
@@ -206,13 +192,12 @@ export default {
         if (!err) {
           this.loading = true
           const user = this.form.getFieldsValue()
-          user.roleId = user.roleId.join(',')
           user.userId = this.userId
           update(user).then((r) => {
             if (r.status === 'success') {
               this.loading = false
               this.$emit('success')
-              // 如果修改用户就是当前登录用户的话，更新其state
+              // If the modified user is the currently logged in user, update its state
               if (user.username === this.currentUser.username) {
                 get({
                   username: user.username
@@ -233,8 +218,8 @@ export default {
   watch: {
     visible () {
       if (this.visible) {
-        getRole({ 'pageSize': '9999' }).then((resp) => {
-          this.roleData = resp.data.records
+        types().then((resp) => {
+          this.userTypeData = resp.data
         })
       }
     }

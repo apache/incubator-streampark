@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// 自定义配置，参考 ./default/setting.config.js，需要自定义的属性在这里配置即可
+// Custom configuration, refer to ./default/setting.config.js, the properties that need to be customized can be configured here
 module.exports = {
   theme: {
     color: '#1890ff',

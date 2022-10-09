@@ -32,7 +32,7 @@
     <artifactId>streampark-console-service</artifactId>
     <name>StreamPark : Console Service</name>
 
-    <!-- 定义统一版本号-->
+    <!-- unified define console-service version -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -99,9 +99,10 @@
             <artifactId>guava</artifactId>
         </dependency>
 
+        <!--test-->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -178,7 +179,7 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
-        <!-- aop依赖 -->
+        <!-- aop -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
@@ -203,7 +204,7 @@
             <version>${mybatis-plus.version}</version>
         </dependency>
 
-        <!-- sql 打印 -->
+        <!-- sql print -->
         <dependency>
             <groupId>p6spy</groupId>
             <artifactId>p6spy</artifactId>
@@ -273,7 +274,7 @@
             <version>${xml-apis.version}</version>
         </dependency>
 
-        <!--hadoop-->
+        <!-- hadoop -->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-yarn-client</artifactId>
@@ -357,7 +358,7 @@
             <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
         </dependency>
 
-
+        <!-- swagger 2 -->
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>

@@ -17,13 +17,14 @@
 
 package org.apache.streampark.plugin.profiling.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class ClassMethodArgmentMetricBufferTest {
+
     @Test
     public void appendValue() {
         ClassMethodArgumentMetricBuffer buffer = new ClassMethodArgumentMetricBuffer();
@@ -33,30 +34,30 @@ public class ClassMethodArgmentMetricBufferTest {
         buffer.appendValue("class2", "method2", "arg1");
 
         Map<ClassAndMethodMetricKey, AtomicLong> map = buffer.reset();
-        Assert.assertEquals(3, map.size());
+        Assertions.assertEquals(3, map.size());
 
         AtomicLong count = map.get(new ClassAndMethodMetricKey("class1", "method1", "arg1"));
-        Assert.assertEquals(1, count.get());
+        Assertions.assertEquals(1, count.get());
 
         count = map.get(new ClassAndMethodMetricKey("class1", "method2", "arg1"));
-        Assert.assertEquals(2, count.get());
+        Assertions.assertEquals(2, count.get());
 
         count = map.get(new ClassAndMethodMetricKey("class2", "method2", "arg1"));
-        Assert.assertEquals(1, count.get());
+        Assertions.assertEquals(1, count.get());
 
         map = buffer.reset();
-        Assert.assertEquals(0, map.size());
+        Assertions.assertEquals(0, map.size());
 
         map = buffer.reset();
-        Assert.assertEquals(0, map.size());
+        Assertions.assertEquals(0, map.size());
     }
 
     @Test
     public void appendValue_concurrent() throws InterruptedException {
         ClassMethodArgumentMetricBuffer buffer = new ClassMethodArgumentMetricBuffer();
 
-        String[] classNames = new String[]{"class1", "class2", "class1", "class2", "class101"};
-        String[] methodNames = new String[]{"method1", "method2", "method1", "method3", "method101"};
+        String[] classNames = new String[] {"class1", "class2", "class1", "class2", "class101"};
+        String[] methodNames = new String[] {"method1", "method2", "method1", "method3", "method101"};
 
         Thread[] threads = new Thread[classNames.length];
 
@@ -74,25 +75,25 @@ public class ClassMethodArgmentMetricBufferTest {
             threads[i] = thread;
         }
 
-        for (int i = 0; i < threads.length; i++) {
-            threads[i].start();
+        for (Thread thread : threads) {
+            thread.start();
         }
 
-        for (int i = 0; i < threads.length; i++) {
-            threads[i].join();
+        for (Thread thread : threads) {
+            thread.join();
         }
 
         Map<ClassAndMethodMetricKey, AtomicLong> result = buffer.reset();
-        Assert.assertEquals(4, result.size());
+        Assertions.assertEquals(4, result.size());
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
             2 * repeatTimes,
             result.get(new ClassAndMethodMetricKey("class1", "method1", "arg1")).get());
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
             repeatTimes, result.get(new ClassAndMethodMetricKey("class2", "method2", "arg1")).get());
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
             repeatTimes, result.get(new ClassAndMethodMetricKey("class2", "method3", "arg1")).get());
     }
 }

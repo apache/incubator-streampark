@@ -16,7 +16,7 @@
  */
 
 import { signin, signout } from '@/api/passport'
-import {TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO,USER_NAME, USER_ROUTER, INVALID} from '@/store/mutation-types'
+import {TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO, USER_NAME, USER_ROUTER, INVALID} from '@/store/mutation-types'
 import storage from '@/utils/storage'
 import { getRouter } from '@/api/menu'
 
@@ -70,6 +70,7 @@ const user = {
       state.welcome = null
       state.avatar = null
       storage.rm(USER_INFO)
+      storage.rm(USER_NAME)
       storage.rm(USER_ROUTER)
       storage.rm(TOKEN)
       storage.rm(ROLES)
@@ -79,7 +80,7 @@ const user = {
   },
 
   actions: {
-    // 登录
+    // Log in
     SignIn ({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         signin(userInfo).then(response => {
@@ -109,7 +110,7 @@ const user = {
         })
       })
     },
-    // 登出
+    // Sign out
     SignOut ({ commit, state }) {
       return new Promise((resolve) => {
         signout().then((resp) => {

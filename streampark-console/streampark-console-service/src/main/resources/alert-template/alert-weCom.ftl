@@ -27,5 +27,5 @@
 > Best Wishes!
 > Apache StreamPark
 
-<#if link??>[Details](${link})    </#if>[Website](http://streampark.apache.org)    [GitHub](https://github.com/apache/streampark)
+<#if link??>[Details](${link})    </#if>[Website](https://streampark.apache.org)    [GitHub](https://github.com/apache/streampark)
 

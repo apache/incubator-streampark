@@ -17,19 +17,20 @@
 
 package org.apache.streampark.plugin.profiling.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 
 public class IOUtilsTest {
+
     @Test
     public void toByteArray() {
-        byte[] bytes = new byte[]{1, 2, 3};
+        byte[] bytes = new byte[] {1, 2, 3};
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
         byte[] result = Utils.toByteArray(byteArrayInputStream);
-        Assert.assertEquals(3, result.length);
-        Assert.assertEquals(1, result[0]);
-        Assert.assertEquals(3, result[result.length - 1]);
+        Assertions.assertEquals(3, result.length);
+        Assertions.assertEquals(1, result[0]);
+        Assertions.assertEquals(3, result[result.length - 1]);
     }
 }

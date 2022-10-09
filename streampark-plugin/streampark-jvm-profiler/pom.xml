@@ -61,14 +61,12 @@
             <artifactId>snakeyaml</artifactId>
         </dependency>
 
-        <!--Test-->
+        <!--test-->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -101,7 +99,6 @@
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
-                <version>3.2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

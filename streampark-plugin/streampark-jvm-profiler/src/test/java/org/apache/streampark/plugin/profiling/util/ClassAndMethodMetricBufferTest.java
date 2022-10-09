@@ -17,12 +17,13 @@
 
 package org.apache.streampark.plugin.profiling.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
 public class ClassAndMethodMetricBufferTest {
+
     @Test
     public void appendValue() {
         ClassAndMethodLongMetricBuffer buffer = new ClassAndMethodLongMetricBuffer();
@@ -32,40 +33,40 @@ public class ClassAndMethodMetricBufferTest {
         buffer.appendValue("class2", "method2", "metric1", 1001);
 
         Map<ClassAndMethodMetricKey, Histogram> map = buffer.reset();
-        Assert.assertEquals(3, map.size());
+        Assertions.assertEquals(3, map.size());
 
         Histogram histogram = map.get(new ClassAndMethodMetricKey("class1", "method1", "metric1"));
-        Assert.assertEquals(1, histogram.getCount());
-        Assert.assertEquals(11, histogram.getSum());
-        Assert.assertEquals(11, histogram.getMin());
-        Assert.assertEquals(11, histogram.getMax());
+        Assertions.assertEquals(1, histogram.getCount());
+        Assertions.assertEquals(11, histogram.getSum());
+        Assertions.assertEquals(11, histogram.getMin());
+        Assertions.assertEquals(11, histogram.getMax());
 
         histogram = map.get(new ClassAndMethodMetricKey("class1", "method2", "metric1"));
-        Assert.assertEquals(2, histogram.getCount());
-        Assert.assertEquals(77, histogram.getSum());
-        Assert.assertEquals(22, histogram.getMin());
-        Assert.assertEquals(55, histogram.getMax());
+        Assertions.assertEquals(2, histogram.getCount());
+        Assertions.assertEquals(77, histogram.getSum());
+        Assertions.assertEquals(22, histogram.getMin());
+        Assertions.assertEquals(55, histogram.getMax());
 
         histogram = map.get(new ClassAndMethodMetricKey("class2", "method2", "metric1"));
-        Assert.assertEquals(1, histogram.getCount());
-        Assert.assertEquals(1001, histogram.getSum());
-        Assert.assertEquals(1001, histogram.getMin());
-        Assert.assertEquals(1001, histogram.getMax());
+        Assertions.assertEquals(1, histogram.getCount());
+        Assertions.assertEquals(1001, histogram.getSum());
+        Assertions.assertEquals(1001, histogram.getMin());
+        Assertions.assertEquals(1001, histogram.getMax());
 
         map = buffer.reset();
-        Assert.assertEquals(0, map.size());
+        Assertions.assertEquals(0, map.size());
 
         map = buffer.reset();
-        Assert.assertEquals(0, map.size());
+        Assertions.assertEquals(0, map.size());
     }
 
     @Test
     public void appendValue_concurrent() throws InterruptedException {
         ClassAndMethodLongMetricBuffer buffer = new ClassAndMethodLongMetricBuffer();
 
-        String[] classNames = new String[]{"class1", "class2", "class1", "class2", "class101"};
-        String[] methodNames = new String[]{"method1", "method2", "method1", "method3", "method101"};
-        int[] values = new int[]{1, 2, 10, 20, 101};
+        String[] classNames = new String[] {"class1", "class2", "class1", "class2", "class101"};
+        String[] methodNames = new String[] {"method1", "method2", "method1", "method3", "method101"};
+        int[] values = new int[] {1, 2, 10, 20, 101};
 
         Thread[] threads = new Thread[classNames.length];
 
@@ -93,39 +94,39 @@ public class ClassAndMethodMetricBufferTest {
         }
 
         Map<ClassAndMethodMetricKey, Histogram> result = buffer.reset();
-        Assert.assertEquals(4, result.size());
+        Assertions.assertEquals(4, result.size());
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
             2 * repeatTimes,
             result.get(new ClassAndMethodMetricKey("class1", "method1", "duration")).getCount());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             11 * repeatTimes,
             result.get(new ClassAndMethodMetricKey("class1", "method1", "duration")).getSum());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             1, result.get(new ClassAndMethodMetricKey("class1", "method1", "duration")).getMin());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             10, result.get(new ClassAndMethodMetricKey("class1", "method1", "duration")).getMax());
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
             repeatTimes,
             result.get(new ClassAndMethodMetricKey("class2", "method2", "duration")).getCount());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             2 * repeatTimes,
             result.get(new ClassAndMethodMetricKey("class2", "method2", "duration")).getSum());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             2, result.get(new ClassAndMethodMetricKey("class2", "method2", "duration")).getMin());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             2, result.get(new ClassAndMethodMetricKey("class2", "method2", "duration")).getMax());
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
             repeatTimes,
             result.get(new ClassAndMethodMetricKey("class2", "method3", "duration")).getCount());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             20 * repeatTimes,
             result.get(new ClassAndMethodMetricKey("class2", "method3", "duration")).getSum());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             20, result.get(new ClassAndMethodMetricKey("class2", "method3", "duration")).getMin());
-        Assert.assertEquals(
+        Assertions.assertEquals(
             20, result.get(new ClassAndMethodMetricKey("class2", "method3", "duration")).getMax());
     }
 }

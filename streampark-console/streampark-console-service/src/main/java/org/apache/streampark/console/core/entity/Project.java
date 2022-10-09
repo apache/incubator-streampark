@@ -54,6 +54,8 @@ public class Project implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    private Long teamId;
+
     private String name;
 
     private String url;

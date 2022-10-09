@@ -114,62 +114,6 @@ object ConfigConst {
 
   val KEY_YARN_APP_QUEUE = "yarn.application.queue"
 
-  // --checkpoints--
-  val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"
-
-  val KEY_FLINK_CHECKPOINTS_UNALIGNED = "flink.checkpoints.unaligned"
-
-  val KEY_FLINK_CHECKPOINTS_INTERVAL = "flink.checkpoints.interval"
-
-  val KEY_FLINK_CHECKPOINTS_MODE = "flink.checkpoints.mode"
-
-  val KEY_FLINK_CHECKPOINTS_CLEANUP = "flink.checkpoints.cleanup"
-
-  val KEY_FLINK_CHECKPOINTS_TIMEOUT = "flink.checkpoints.timeout"
-
-  val KEY_FLINK_CHECKPOINTS_MAX_CONCURRENT = "flink.checkpoints.maxConcurrent"
-
-  val KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN = "flink.checkpoints.minPauseBetween"
-
-  //---state---
-
-  val KEY_FLINK_STATE_SAVEPOINTS_DIR = "flink.state.savepoints.dir"
-
-  val KEY_FLINK_STATE_CHECKPOINTS_DIR = "flink.state.checkpoints.dir"
-
-  val KEY_FLINK_STATE_CHECKPOINT_STORAGE = "flink.state.checkpoint-storage"
-
-  val KEY_FLINK_STATE_BACKEND = "flink.state.backend.value"
-
-  val KEY_FLINK_STATE_BACKEND_ASYNC = "flink.state.backend.async"
-
-  val KEY_FLINK_STATE_BACKEND_INCREMENTAL = "flink.state.backend.incremental"
-
-  val KEY_FLINK_STATE_BACKEND_MEMORY = "flink.state.backend.memory"
-
-  val KEY_FLINK_STATE_ROCKSDB = "flink.state.backend.rocksdb"
-
-  //---restart-strategy---
-
-  val KEY_FLINK_RESTART_STRATEGY = "flink.restart-strategy.value"
-
-  val KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_PER_INTERVAL = "flink.restart-strategy.failure-rate.max-failures-per-interval"
-
-  val KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_RATE_INTERVAL = "flink.restart-strategy.failure-rate.failure-rate-interval"
-
-  val KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_DELAY = "flink.restart-strategy.failure-rate.delay"
-
-  val KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS = "flink.restart-strategy.fixed-delay.attempts"
-
-  val KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_DELAY = "flink.restart-strategy.fixed-delay.delay"
-
-  val KEY_EXECUTION_RUNTIME_MODE = "flink.execution.runtime-mode"
-
-  val KEY_FLINK_WATERMARK_INTERVAL = "flink.watermark.interval"
-
-  // ---watermark---
-  val KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC = "flink.watermark.time.characteristic"
-
   // ---table---
   val KEY_FLINK_TABLE_PLANNER = "flink.table.planner"
 
@@ -273,17 +217,14 @@ object ConfigConst {
   def printLogo(info: String): Unit = {
     // scalastyle:off println
     println("\n")
-    println("        ___                     __                  .+.                         ______             __       ")
-    println("       /   |  ____  ____ ______/ /_  ___      _____/ /_________  ____ _____ ___  , __ \\____ ______/ /__    ")
-    println("      / /| | / __ \\/ __ `/ ___/ __ \\/ _ \\    / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\  /_/ / __ `/ ___/ //_/")
-    println("     / ___ |/ /_/ / /_/ / /__/ / / /  __/   (__  ) /_/ /  /  __/ /_/ / / / / / / ____/ /_/ / /  / ,<        ")
-    println("    /_/  |_/ /___/\\__,_/\\___/_/ /_/\\___/   /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/_/    \\__,_/_/  /_/|_|")
-    println("           \\/                                                                                              ")
-    println("                                                                                                            ")
-    println("")
-    println("    WebSite:  http://streampark.apache.org                                                                  ")
-    println("    GitHub :  https://github.com/apache/streampark                                                          ")
-    println("    Ver    :  1.2.4                                  ")
+    println("       _____ __                            ____             __           ")
+    println("      / ___// /_________  ____ _____ ___  / __ \\____ ______/ /__        ")
+    println("      \\__ \\/ __/ ___/ _ \\/ __ `/ __ `__ \\/ /_/ / __ `/ ___/ //_/     ")
+    println("     ___/ / /_/ /  /  __/ /_/ / / / / / / ____/ /_/ / /  / ,<            ")
+    println("    /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/_/    \\__,_/_/  /_/|_|   \n\n")
+    println("    Version:  1.2.4                                                      ")
+    println("    WebSite:  https://streampark.apache.org                              ")
+    println("    GitHub :  https://github.com/apache/streampark                       ")
     println(s"    Info   :  $info                                 ")
     println(s"    Time   :  ${LocalDateTime.now}              \n\n")
     // scalastyle:on println

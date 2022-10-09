@@ -16,18 +16,18 @@
  */
 
 /**
- * webpack-theme-color-replacer 插件的 resolve 配置<br>
- * 为特定的 css 选择器（selector）配置 resolve 规则。<br>
+ * resolve config for webpack-theme-color-replacer plugin<br>
+ * Configure resolve rules for specific css selectors. <br>
  *
- * key 为 css selector 值或合法的正则表达式字符串<br>
- * 当 key 设置 css selector 值时，会匹配对应的 css<br>
- * 当 key 设置为正则表达式时，会匹配所有满足此正则表达式的的 css<br>
+ * key is a css selector value or a valid regular expression string<br>
+ * When the key sets the css selector value, it will match the corresponding css<br>
+ * When key is set to a regular expression, it will match all css<br> that satisfy this regular expression
  *
- * value 可以设置为 boolean 值 false 或 一个对象<br>
- * 当 value 为 false 时，则会忽略此 css，即此 css 不纳入 webpack-theme-color-replacer 管理<br>
- * 当 value 为 对象时，会调用该对象的 resolve 函数，并传入 cssText（原始的 css文本） 和 cssObj（css对象）参数; resolve函数应该返<br>
- * 回一个处理后的、合法的 css字符串（包含 selector）<br>
- * 注意: value 不能设置为 true<br>
+ * value can be set to boolean value false or an object<br>
+ * When the value is false, this css will be ignored, that is, this css will not be included in the webpack-theme-color-replacer management<br>
+ * When value is an object, the resolve function of the object is called, and the cssText (original css text) and cssObj (css object) parameters are passed in; the resolve function should return <br>
+ * Return a processed, valid css string (including selector)<br>
+ * Note: value cannot be set to true<br>
  */
 const cssResolve = {
   '.ant-checkbox-checked .ant-checkbox-inner::after': {

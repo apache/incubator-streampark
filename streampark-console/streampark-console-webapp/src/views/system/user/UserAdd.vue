@@ -27,7 +27,7 @@
     :visible="visible"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <template slot="title">
-      <a-icon type="user" />
+      <a-icon type="user-add" />
       Add User
     </template>
     <a-form
@@ -79,17 +79,17 @@
           ]}]" />
       </a-form-item>
       <a-form-item
-        label="Role"
+        label="User Type"
         v-bind="formItemLayout">
         <a-select
-          mode="multiple"
-          :allow-clear="true"
+          mode="single"
+          :allow-clear="false"
           style="width: 100%"
-          v-decorator="['roleId',{rules: [{ required: true, message: 'please select role' }]}]">
+          v-decorator="['userType',{rules: [{ required: true, message: 'please select user type' }]}]">
           <a-select-option
-            v-for="r in roleData"
-            :key="r.roleId">
-            {{ r.roleName }}
+            v-for="userType in userTypeData"
+            :key="userType">
+            {{ userType }}
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -144,8 +144,7 @@
   </a-drawer>
 </template>
 <script>
-import { list as getRole } from '@/api/role'
-import { checkUserName, post } from '@/api/user'
+import { checkUserName, post, types } from '@/api/user'
 
 const formItemLayout = {
   labelCol: { span: 4 },
@@ -162,7 +161,7 @@ export default {
   data () {
     return {
       loading: false,
-      roleData: [],
+      userTypeData: [],
       formItemLayout,
       form: this.$form.createForm(this),
       validateStatus: '',
@@ -185,7 +184,6 @@ export default {
     handleSubmit() {
       this.form.validateFields((err, user) => {
         if (!err && this.validateStatus === 'success') {
-          user.roleId = user.roleId.join(',')
           post({
             ...user
           }).then((r) => {
@@ -207,7 +205,7 @@ export default {
           this.help = 'User name should not be longer than 20 characters'
         } else if (username.length < 4) {
           this.validateStatus = 'error'
-          this.help = 'Team name should not be less than 4 characters'
+          this.help = 'User name should not be less than 4 characters'
         } else {
           this.validateStatus = 'validating'
           checkUserName({
@@ -231,10 +229,8 @@ export default {
   watch: {
     visible () {
       if (this.visible) {
-        getRole(
-          { 'pageSize': '9999' }
-        ).then((resp) => {
-          this.roleData = resp.data.records
+        types().then((resp) => {
+          this.userTypeData = resp.data
         })
       }
     }
