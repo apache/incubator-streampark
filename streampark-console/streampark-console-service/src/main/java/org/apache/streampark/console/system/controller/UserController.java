@@ -17,11 +17,16 @@
 
 package org.apache.streampark.console.system.controller;
 
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
+import org.apache.streampark.console.system.service.RoleService;
+import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -42,7 +47,11 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Validated
@@ -52,6 +61,15 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TeamService teamService;
+
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private CommonService commonService;
 
     @PostMapping("detail")
     public User detail(@NotBlank(message = "{required}") @PathVariable String username) {
@@ -147,6 +165,36 @@ public class UserController {
     @RequiresPermissions("user:types")
     public RestResponse userTypes() {
         return RestResponse.success(UserType.values());
+    }
+
+    @PostMapping("setTeam")
+    public RestResponse setTeam(Long teamId) {
+        Team team = teamService.getById(teamId);
+        if (team == null) {
+            return RestResponse.fail("teamId is invalid", ResponseCode.CODE_API_FAIL);
+        }
+
+        //1) set latest team
+        Date dateTime = new Date();
+        userService.setLatestTeam(teamId, dateTime);
+
+        //2) get latest userInfo
+        User user = commonService.getCurrentUser();
+        user.setPassword("******");
+        user.setSalt("******");
+
+        Map<String, Object> infoMap = new HashMap<>(8);
+        infoMap.put("time", dateTime.getTime());
+        infoMap.put("user", user);
+
+        String username = user.getUsername();
+        Set<String> roles = this.roleService.getUserRoleName(username);
+        infoMap.put("roles", roles);
+
+        Set<String> permissions = this.userService.getPermissions(username);
+        infoMap.put("permissions", permissions);
+
+        return new RestResponse().data(infoMap);
     }
 
 }

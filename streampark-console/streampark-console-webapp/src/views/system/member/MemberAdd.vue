@@ -77,8 +77,6 @@
 import {post} from '@/api/member'
 import {list as getRole} from '@/api/role'
 import {checkUserName} from '@/api/user'
-import storage from '@/utils/storage'
-import {TEAM_ID} from '@/store/mutation-types'
 
 const formItemLayout = {
   labelCol: {span: 4},
@@ -119,10 +117,7 @@ export default {
       this.form.validateFields((err, member) => {
         if (!err && this.validateStatus === 'success') {
           this.loading = true
-          post({
-            ...member,
-            teamId: storage.get(TEAM_ID)
-          }).then((r) => {
+          post(member).then((r) => {
             if (r.status === 'success') {
               this.reset()
               this.$emit('success')

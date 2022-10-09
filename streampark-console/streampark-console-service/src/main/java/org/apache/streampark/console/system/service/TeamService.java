@@ -39,4 +39,5 @@ public interface TeamService extends IService<Team> {
 
     List<Team> findUserTeams(Long userId);
 
+    Team getDefaultTeam();
 }

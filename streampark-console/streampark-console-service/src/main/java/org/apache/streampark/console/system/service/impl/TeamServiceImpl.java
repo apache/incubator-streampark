@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.system.entity.Team;
@@ -98,5 +99,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
             return this.list();
         }
         return baseMapper.findUserTeams(userId);
+    }
+
+    @Override
+    public Team getDefaultTeam() {
+        return getById(Constant.DEFAULT_TEAM_ID);
     }
 }

@@ -51,6 +51,24 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
+    public Long getUserId() {
+        User user = getCurrentUser();
+        if (user != null) {
+            return user.getUserId();
+        }
+        return null;
+    }
+
+    @Override
+    public Long getTeamId() {
+        User user = getCurrentUser();
+        if (user != null) {
+            return user.getTeamId();
+        }
+        return null;
+    }
+
+    @Override
     public String getSqlClientJar(FlinkEnv flinkEnv) {
         if (sqlClientJar == null) {
             File localClient = WebUtils.getAppClientDir();

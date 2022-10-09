@@ -18,32 +18,32 @@
 package org.apache.streampark.console.system.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
-import org.apache.streampark.console.system.entity.TeamMember;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
-public interface TeamMemberService extends IService<TeamMember> {
+public interface MemberService extends IService<Member> {
 
-    void deleteUserRolesByRoleId(String[] roleIds);
+    void deleteByRoleIds(String[] roleIds);
 
-    void deleteUserRolesByUserId(String[] userIds);
+    void deleteByUserIds(String[] userIds);
 
-    IPage<TeamMember> findUsers(TeamMember teamMember, RestRequest request);
+    IPage<Member> findUsers(Member member, RestRequest request);
 
     List<Team> findUserTeams(Long userId);
 
-    TeamMember findByUserName(String userName);
+    Member findByUserName(String userName);
 
     List<Long> findUserIdsByRoleId(Long roleId);
 
-    void createTeamMember(TeamMember teamMember);
+    void createMember(Member member);
 
-    void deleteTeamMember(TeamMember teamMember);
+    void deleteMember(Member member);
 
-    void updateTeamMember(TeamMember teamMember);
+    void updateMember(Member member);
 
 }

@@ -23,6 +23,7 @@ import org.apache.streampark.console.system.entity.User;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -106,4 +107,8 @@ public interface UserService extends IService<User> {
     Set<String> getPermissions(String username);
 
     List<User> getNoTokenUser();
+
+    void setLatestTeam(Long teamId, Date dateTime);
+
+    void checkTeam(User user);
 }

@@ -19,9 +19,9 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
-import org.apache.streampark.console.system.entity.TeamMember;
-import org.apache.streampark.console.system.service.TeamMemberService;
+import org.apache.streampark.console.system.service.MemberService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
@@ -43,47 +43,47 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("member")
-public class TeamMemberController {
+public class MemberController {
 
     @Autowired
-    private TeamMemberService teamMemberService;
+    private MemberService memberService;
 
     @PostMapping("list")
-    public RestResponse memberList(RestRequest restRequest, TeamMember teamMember) {
-        IPage<TeamMember> userList = teamMemberService.findUsers(teamMember, restRequest);
+    public RestResponse memberList(RestRequest restRequest, Member member) {
+        IPage<Member> userList = memberService.findUsers(member, restRequest);
         return RestResponse.success(userList);
     }
 
     @PostMapping("teams")
     public RestResponse listTeams(Long userId) {
-        List<Team> teamList = teamMemberService.findUserTeams(userId);
+        List<Team> teamList = memberService.findUserTeams(userId);
         return RestResponse.success(teamList);
     }
 
     @PostMapping("check/user")
-    public RestResponse checkTeamUser(@NotBlank(message = "{required}") String userName) {
-        TeamMember result = this.teamMemberService.findByUserName(userName);
+    public RestResponse check(@NotBlank(message = "{required}") String userName) {
+        Member result = this.memberService.findByUserName(userName);
         return RestResponse.success(result == null);
     }
 
     @PostMapping("post")
     @RequiresPermissions("member:add")
-    public RestResponse addUserTeamRole(@Valid TeamMember teamMember) {
-        this.teamMemberService.createTeamMember(teamMember);
+    public RestResponse create(@Valid Member member) {
+        this.memberService.createMember(member);
         return RestResponse.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("member:delete")
-    public RestResponse deleteUserTeamRole(TeamMember teamMember) {
-        this.teamMemberService.deleteTeamMember(teamMember);
+    public RestResponse delete(Member member) {
+        this.memberService.deleteMember(member);
         return RestResponse.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("member:update")
-    public RestResponse updateUserTeamRole(TeamMember teamMember) {
-        this.teamMemberService.updateTeamMember(teamMember);
+    public RestResponse update(Member member) {
+        this.memberService.updateMember(member);
         return RestResponse.success();
     }
 

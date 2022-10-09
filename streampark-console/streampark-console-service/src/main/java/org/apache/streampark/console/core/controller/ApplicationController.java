@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.ApiDocConstant;
@@ -59,7 +58,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +96,6 @@ public class ApplicationController {
     @PostMapping("create")
     @RequiresPermissions("app:create")
     public RestResponse create(Application app) throws IOException {
-        AssertUtils.checkArgument(app.getTeamId() != null, "The teamId cannot be null");
         boolean saved = applicationService.create(app);
         return RestResponse.success(saved);
     }
@@ -135,11 +132,7 @@ public class ApplicationController {
     @PostMapping("list")
     @RequiresPermissions("app:view")
     public RestResponse list(Application app, RestRequest request) {
-        if (app.getTeamId() == null) {
-            return RestResponse.success(Collections.emptyList());
-        }
         IPage<Application> applicationList = applicationService.page(app, request);
-
         List<Application> appRecords = applicationList.getRecords();
         List<Long> appIds = appRecords.stream().map(Application::getId).collect(Collectors.toList());
         Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);

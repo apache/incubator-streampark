@@ -184,8 +184,6 @@
 <script>
 
 import { create,branches,gitcheck,exists } from '@api/project'
-import storage from '@/utils/storage'
-import {TEAM_ID} from '@/store/mutation-types'
 
 export default {
   name: 'BaseForm',
@@ -267,7 +265,6 @@ export default {
               } else {
                 create({
                   name: values.name,
-                  teamId: storage.get(TEAM_ID),
                   url: values.url,
                   repository: values.repository,
                   type: values.type,

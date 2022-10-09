@@ -25,9 +25,9 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.Date;
 
-@TableName("t_user_role")
+@TableName("t_member")
 @Data
-public class TeamMember implements Serializable {
+public class Member implements Serializable {
 
     private static final long serialVersionUID = -3166012934498268403L;
 

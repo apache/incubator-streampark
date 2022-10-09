@@ -81,6 +81,8 @@ public class PassportController {
             return RestResponse.success().put("code", 1);
         }
 
+        userService.checkTeam(user);
+
         password = ShaHashUtils.encrypt(user.getSalt(), password);
 
         this.userService.updateLoginTime(username);

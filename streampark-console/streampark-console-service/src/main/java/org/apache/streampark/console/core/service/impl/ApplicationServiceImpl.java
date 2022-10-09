@@ -77,6 +77,7 @@ import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.task.FlinkTrackingTask;
+import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.IngressController;
 import org.apache.streampark.flink.kubernetes.K8sFlinkTrackMonitor;
@@ -459,6 +460,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
+        Long teamId = commonService.getTeamId();
+        if (teamId == null) {
+            return null;
+        }
+        appParam.setTeamId(teamId);
         Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
         if (CommonUtils.notEmpty(appParam.getStateArray())) {
             if (Arrays.stream(appParam.getStateArray()).anyMatch(x -> x == FlinkAppState.FINISHED.getValue())) {
@@ -571,7 +577,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean create(Application appParam) {
-        appParam.setUserId(commonService.getCurrentUser().getUserId());
+        User user = commonService.getCurrentUser();
+        AssertUtils.checkArgument(user.getTeamId() != null, "The teamId cannot be null");
+        appParam.setUserId(user.getUserId());
+        appParam.setTeamId(user.getTeamId());
         appParam.setState(FlinkAppState.ADDED.getValue());
         appParam.setLaunch(LaunchState.NEED_LAUNCH.get());
         appParam.setOptionState(OptionState.NONE.getValue());
@@ -646,7 +655,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setModule(oldApp.getModule());
         newApp.setDefaultModeIngress(oldApp.getDefaultModeIngress());
 
-        newApp.setUserId(commonService.getCurrentUser().getUserId());
+        newApp.setUserId(commonService.getUserId());
         newApp.setState(FlinkAppState.ADDED.getValue());
         newApp.setLaunch(LaunchState.NEED_LAUNCH.get());
         newApp.setOptionState(OptionState.NONE.getValue());
@@ -1069,7 +1078,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        Long userId = commonService.getCurrentUser().getUserId();
+        Long userId = commonService.getUserId();
         if (!application.getUserId().equals(userId)) {
             FlinkTrackingTask.addCanceledApp(application.getId(), userId);
         }

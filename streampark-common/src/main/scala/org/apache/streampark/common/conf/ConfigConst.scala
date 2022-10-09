@@ -153,8 +153,6 @@ object ConfigConst {
 
   val KEY_JDBC_DRIVER = "driverClassName"
 
-  val KEY_JDBC_DATABASE = "database"
-
   val KEY_JDBC_URL = "jdbcUrl"
 
   val KEY_JDBC_USER = "username"
@@ -163,11 +161,7 @@ object ConfigConst {
 
   val KEY_JDBC_INSERT_BATCH = "batch.size"
 
-  val KEY_JDBC_INSERT_BATCH_DELAYTIME = "batch.delayTime"
-
   val DEFAULT_JDBC_INSERT_BATCH = 1
-
-  val DEFAULT_JDBC_INSERT_BATCH_DELAYTIME = 1000L
 
   val MONGO_PREFIX = "mongodb."
 
@@ -206,25 +200,20 @@ object ConfigConst {
 
   val KEY_FLINK_TM_PROCESS_MEMORY = "taskmanager.memory.process.size"
 
-  val KEY_FLINK_TOTAL_MEMORY = "jobmanager.memory.flink.size"
-
-  val KEY_FLINK_JVM_HEAP_MEMORY = "jobmanager.memory.heap.size"
-
-  val KEY_FLINK_JVM_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size"
-
   val STREAMPARK_FLINKSQL_CLIENT_CLASS = "org.apache.streampark.flink.cli.SqlClient"
 
   def printLogo(info: String): Unit = {
     // scalastyle:off println
     println("\n")
-    println("       _____ __                            ____             __           ")
-    println("      / ___// /_________  ____ _____ ___  / __ \\____ ______/ /__        ")
-    println("      \\__ \\/ __/ ___/ _ \\/ __ `/ __ `__ \\/ /_/ / __ `/ ___/ //_/     ")
-    println("     ___/ / /_/ /  /  __/ /_/ / / / / / / ____/ /_/ / /  / ,<            ")
-    println("    /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/_/    \\__,_/_/  /_/|_|   \n\n")
-    println("    Version:  1.2.4                                                      ")
-    println("    WebSite:  https://streampark.apache.org                              ")
-    println("    GitHub :  https://github.com/apache/streampark                       ")
+    println("        _____ __                                             __       ")
+    println("       / ___// /_________  ____ _____ ___  ____  ____ ______/ /__     ")
+    println("       \\__ \\/ __/ ___/ _ \\/ __ `/ __ `__ \\/ __ \\  __ `/ ___/ //_/")
+    println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ")
+    println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ")
+    println("                                       /_/                        \n\n")
+    println("    Version:  1.2.4                                                   ")
+    println("    WebSite:  https://streampark.apache.org                           ")
+    println("    GitHub :  https://github.com/apache/streampark                    ")
     println(s"    Info   :  $info                                 ")
     println(s"    Time   :  ${LocalDateTime.now}              \n\n")
     // scalastyle:on println

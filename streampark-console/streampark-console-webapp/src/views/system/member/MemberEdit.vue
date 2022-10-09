@@ -72,8 +72,6 @@
 <script>
 import {update} from '@/api/member'
 import {list as getRole} from '@/api/role'
-import storage from '@/utils/storage'
-import {TEAM_ID} from '@/store/mutation-types'
 
 const formItemLayout = {
   labelCol: {span: 4},
@@ -127,7 +125,6 @@ export default {
           const member = this.form.getFieldsValue()
           member.id = this.memberId
           member.userId = this.userId
-          member.teamId = storage.get(TEAM_ID)
           update(member).then((r) => {
             if (r.status === 'success') {
               this.loading = false

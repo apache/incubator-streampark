@@ -27,7 +27,7 @@
       </a>
     </div>
     <div class="copyright">
-      Copyright<a-icon type="copyright" /> 2019~{{ year }} <span>Apache StreamPark </span>
+      Copyright <a-icon type="copyright" /> 2019 ~ {{ year }} <span>Apache StreamPark </span>
     </div>
   </div>
 </template>

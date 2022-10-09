@@ -30,6 +30,7 @@ const getters = {
   userName: state => state.user.userName,
   welcome: state => state.user.welcome,
   userInfo: state => state.user.info,
+  team: state => state.team,
   routers: state => state.user.routers,
   multiTab: state => state.app.multiTab,
   applicationId: state => state.application.appId,

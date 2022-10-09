@@ -31,8 +31,8 @@
     <select id="findUserRole" resultMap="roleMap">
         select r.*
         from t_role r
-        left join t_user_role ur on r.role_id = ur.role_id
-        left join t_user u on u.user_id = ur.user_id
+        left join t_member m on r.role_id = m.role_id
+        left join t_user u on u.user_id = m.user_id
         where u.username = #{userName}
     </select>
 

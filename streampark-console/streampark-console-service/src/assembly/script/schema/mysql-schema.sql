@@ -382,16 +382,18 @@ create table `t_user` (
   `sex` char(1) collate utf8mb4_general_ci default null comment 'gender 0:male 1:female 2:confidential',
   `avatar` varchar(100) collate utf8mb4_general_ci default null comment 'avatar',
   `description` varchar(100) collate utf8mb4_general_ci default null comment 'description',
+  `team_id` bigint default null comment 'latest team id',
+  `team_update_time` datetime default null comment 'latest team update time',
   primary key (`user_id`) using btree,
   unique key `un_username` (`username`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 
 -- ----------------------------
--- Table structure for t_user_role
+-- Table structure for t_member
 -- ----------------------------
-drop table if exists `t_user_role`;
-create table `t_user_role` (
+drop table if exists `t_member`;
+create table `t_member` (
   `id` bigint not null auto_increment,
   `team_id` bigint not null comment 'team id',
   `user_id` bigint not null comment 'user id',

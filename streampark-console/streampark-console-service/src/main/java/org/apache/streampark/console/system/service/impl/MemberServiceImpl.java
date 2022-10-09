@@ -20,12 +20,12 @@ package org.apache.streampark.console.system.service.impl;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
-import org.apache.streampark.console.system.entity.TeamMember;
 import org.apache.streampark.console.system.entity.User;
-import org.apache.streampark.console.system.mapper.TeamMemberMapper;
+import org.apache.streampark.console.system.mapper.MemberMapper;
+import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.RoleService;
-import org.apache.streampark.console.system.service.TeamMemberService;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -46,8 +46,8 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMember>
-    implements TeamMemberService {
+public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
+    implements MemberService {
 
     @Autowired
     private UserService userService;
@@ -63,25 +63,25 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
 
     @Override
     @Transactional
-    public void deleteUserRolesByRoleId(String[] roleIds) {
+    public void deleteByRoleIds(String[] roleIds) {
         Arrays.stream(roleIds).forEach(id -> baseMapper.deleteByRoleId(Long.valueOf(id)));
     }
 
     @Override
     @Transactional
-    public void deleteUserRolesByUserId(String[] userIds) {
+    public void deleteByUserIds(String[] userIds) {
         Arrays.stream(userIds).forEach(id -> baseMapper.deleteByUserId(Long.valueOf(id)));
     }
 
     @Override
-    public IPage<TeamMember> findUsers(TeamMember teamMember, RestRequest request) {
+    public IPage<Member> findUsers(Member member, RestRequest request) {
         Long teamId = commonService.getTeamId();
         AssertUtils.isTrue(teamId != null, "The team id is required.");
-        teamMember.setTeamId(teamId);
-        Page<TeamMember> page = new Page<>();
+        member.setTeamId(teamId);
+        Page<Member> page = new Page<>();
         page.setCurrent(request.getPageNum());
         page.setSize(request.getPageSize());
-        return baseMapper.findUsers(page, teamMember);
+        return baseMapper.findUsers(page, member);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
     }
 
     @Override
-    public TeamMember findByUserName(String userName) {
+    public Member findByUserName(String userName) {
         User user = userService.findByName(userName);
         if (user == null) {
             return null;
@@ -98,58 +98,58 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
         return findByUserId(user.getUserId());
     }
 
-    private TeamMember findByUserId(Long userId) {
+    private Member findByUserId(Long userId) {
         Long teamId = commonService.getTeamId();
         AssertUtils.isTrue(teamId != null, "The team id is required.");
         return baseMapper.selectOne(
-            new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getTeamId, teamId)
-                .eq(TeamMember::getUserId, userId));
+            new LambdaQueryWrapper<Member>().eq(Member::getTeamId, teamId)
+                .eq(Member::getUserId, userId));
     }
 
     @Override
     public List<Long> findUserIdsByRoleId(Long roleId) {
-        List<TeamMember> list =
+        List<Member> list =
             baseMapper.selectList(
-                new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getRoleId, roleId));
+                new LambdaQueryWrapper<Member>().eq(Member::getRoleId, roleId));
         return list.stream()
-            .map(TeamMember::getUserId)
+            .map(Member::getUserId)
             .collect(Collectors.toList());
     }
 
     @Override
-    public void createTeamMember(TeamMember teamMember) {
-        teamMember.setTeamId(commonService.getTeamId());
-        User user = Optional.ofNullable(userService.findByName(teamMember.getUserName()))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The username [%s] not found", teamMember.getUserName())));
-        Optional.ofNullable(roleService.getById(teamMember.getRoleId()))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The roleId [%s] not found", teamMember.getRoleId())));
-        Team team = Optional.ofNullable(teamService.getById(teamMember.getTeamId()))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The teamId [%s] not found", teamMember.getTeamId())));
+    public void createMember(Member member) {
+        member.setTeamId(commonService.getTeamId());
+        User user = Optional.ofNullable(userService.findByName(member.getUserName()))
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The username [%s] not found", member.getUserName())));
+        Optional.ofNullable(roleService.getById(member.getRoleId()))
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The roleId [%s] not found", member.getRoleId())));
+        Team team = Optional.ofNullable(teamService.getById(member.getTeamId()))
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The teamId [%s] not found", member.getTeamId())));
         AssertUtils.isTrue(findByUserId(user.getUserId()) == null,
-            String.format("The user [%s] has been added the team [%s], please don't add it again.", teamMember.getUserName(), team.getTeamName()));
+            String.format("The user [%s] has been added the team [%s], please don't add it again.", member.getUserName(), team.getTeamName()));
 
-        teamMember.setId(null);
-        teamMember.setUserId(user.getUserId());
-        teamMember.setCreateTime(new Date());
-        teamMember.setModifyTime(team.getCreateTime());
-        this.save(teamMember);
+        member.setId(null);
+        member.setUserId(user.getUserId());
+        member.setCreateTime(new Date());
+        member.setModifyTime(team.getCreateTime());
+        this.save(member);
     }
 
     @Override
-    public void deleteTeamMember(TeamMember teamMember) {
-        this.removeById(teamMember);
+    public void deleteMember(Member member) {
+        this.removeById(member);
     }
 
     @Override
-    public void updateTeamMember(TeamMember teamMember) {
-        teamMember.setTeamId(commonService.getTeamId());
-        TeamMember oldTeamMember = Optional.ofNullable(this.getById(teamMember.getId()))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The mapping [id=%s] not found", teamMember.getId())));
-        AssertUtils.isTrue(oldTeamMember.getTeamId().equals(teamMember.getTeamId()), "Team id cannot be changed.");
-        AssertUtils.isTrue(oldTeamMember.getUserId().equals(teamMember.getUserId()), "User id cannot be changed.");
-        Optional.ofNullable(roleService.getById(teamMember.getRoleId()))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The roleId [%s] not found", teamMember.getRoleId())));
-        oldTeamMember.setRoleId(teamMember.getRoleId());
-        updateById(oldTeamMember);
+    public void updateMember(Member member) {
+        member.setTeamId(commonService.getTeamId());
+        Member oldMember = Optional.ofNullable(this.getById(member.getId()))
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The mapping [id=%s] not found", member.getId())));
+        AssertUtils.isTrue(oldMember.getTeamId().equals(member.getTeamId()), "Team id cannot be changed.");
+        AssertUtils.isTrue(oldMember.getUserId().equals(member.getUserId()), "User id cannot be changed.");
+        Optional.ofNullable(roleService.getById(member.getRoleId()))
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The roleId [%s] not found", member.getRoleId())));
+        oldMember.setRoleId(member.getRoleId());
+        updateById(oldMember);
     }
 }

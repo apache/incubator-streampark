@@ -16,7 +16,8 @@
  */
 
 import { signin, signout } from '@/api/passport'
-import {TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO, USER_NAME, USER_ROUTER, INVALID} from '@/store/mutation-types'
+import { setTeam } from '@/api/user'
+import {TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO, USER_NAME, USER_ROUTER, INVALID, TEAM} from '@/store/mutation-types'
 import storage from '@/utils/storage'
 import { getRouter } from '@/api/menu'
 
@@ -25,6 +26,7 @@ const user = {
     expire: storage.get(EXPIRE),
     token: storage.get(TOKEN),
     info: storage.get(USER_INFO),
+    team: storage.get(TEAM),
     roles: storage.get(ROLES),
     permissions: storage.get(PERMISSIONS),
     routers: storage.get(USER_ROUTER),
@@ -41,6 +43,10 @@ const user = {
     SET_TOKEN: (state, token) => {
       storage.set(TOKEN, token)
       state.token = token
+    },
+    SET_TEAM: (state, team) => {
+      storage.set(TEAM, team)
+      state.team = team
     },
     SET_ROLES: (state, roles) => {
       storage.set(ROLES, roles)
@@ -67,12 +73,14 @@ const user = {
       state.roles = null
       state.permissions = null
       state.name = null
+      state.team = null
       state.welcome = null
       state.avatar = null
       storage.rm(USER_INFO)
       storage.rm(USER_NAME)
       storage.rm(USER_ROUTER)
       storage.rm(TOKEN)
+      storage.rm(TEAM)
       storage.rm(ROLES)
       storage.rm(PERMISSIONS)
       storage.rm(EXPIRE)
@@ -92,6 +100,13 @@ const user = {
             commit('SET_PERMISSIONS', respData.permissions)
             commit('SET_INFO', respData.user)
           }
+          if (respData.user.teamId != null) {
+            const team = {
+              id: respData.user['teamId'],
+              time: respData.user['teamUpdateTime']
+            }
+            commit('SET_TEAM', team)
+          }
           storage.rm(INVALID)
           resolve(response)
         }).catch(error => {
@@ -99,6 +114,7 @@ const user = {
         })
       })
     },
+
     GetRouter ({ commit }, data) {
       return new Promise((resolve, reject) => {
         getRouter({}).then(resp => {
@@ -118,6 +134,27 @@ const user = {
           resolve()
         }).catch(() => {
           resolve()
+        })
+      })
+    },
+
+    SetTeam({commit}, data) {
+      return new Promise((resolve, reject) => {
+        setTeam(data).then(resp => {
+          const respData = resp.data
+          console.log(respData)
+          const team = {
+            id: data.teamId,
+            time: respData.time
+          }
+          commit('SET_TEAM', team)
+          commit('SET_EXPIRE', respData.expire)
+          commit('SET_ROLES', respData.roles)
+          commit('SET_PERMISSIONS', respData.permissions)
+          commit('SET_INFO', respData.user)
+          resolve()
+        }).catch(error => {
+          reject(error)
         })
       })
     }

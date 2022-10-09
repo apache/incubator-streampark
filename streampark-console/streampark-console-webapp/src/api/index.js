@@ -167,7 +167,8 @@ export default {
     POST: '/user/post',
     DELETE: '/user/delete',
     CHECK_NAME: '/user/check/name',
-    CHECK_PASSWORD: '/user/check/password'
+    CHECK_PASSWORD: '/user/check/password',
+    SET_TEAM: '/user/setTeam'
   },
   Token: {
     LIST: '/token/list',
