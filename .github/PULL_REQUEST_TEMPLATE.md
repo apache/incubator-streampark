@@ -14,7 +14,7 @@ Problem Summary:
 
 ## What is changed and how it works?
 
-Proposal: [xxx](url) <!-- REMOVE this line if not applicable -->
+Proposal: url address <!-- REMOVE this line if not applicable -->
 
 Feel free to ping committers for the review!
 
