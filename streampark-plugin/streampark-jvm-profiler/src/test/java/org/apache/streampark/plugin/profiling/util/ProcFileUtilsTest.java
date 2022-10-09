@@ -17,8 +17,8 @@
 
 package org.apache.streampark.plugin.profiling.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ProcFileUtilsTest {
+
     @Test
     public void getProcFileAsMap() throws IOException {
         File file = File.createTempFile("test", "test");
@@ -46,36 +47,36 @@ public class ProcFileUtilsTest {
         Files.write(file.toPath(), content.getBytes(), StandardOpenOption.CREATE);
 
         Map<String, String> result = ProcFileUtils.getProcFileAsMap(file.getPath());
-        Assert.assertEquals(6, result.size());
+        Assertions.assertEquals(6, result.size());
 
-        Assert.assertEquals("cat", result.get("Name"));
-        Assert.assertEquals("676 kB", result.get("VmRSS"));
-        Assert.assertEquals("66646", result.get("Pid"));
-        Assert.assertEquals("1", result.get("Threads"));
+        Assertions.assertEquals("cat", result.get("Name"));
+        Assertions.assertEquals("676 kB", result.get("VmRSS"));
+        Assertions.assertEquals("66646", result.get("Pid"));
+        Assertions.assertEquals("1", result.get("Threads"));
     }
 
     @Test
     public void getProcFileAsMap_NotExistingFile() {
         Map<String, String> result = ProcFileUtils.getProcFileAsMap("/not/existing/file");
-        Assert.assertEquals(0, result.size());
+        Assertions.assertEquals(0, result.size());
     }
 
     @Test
     public void getProcFileAsMap_Directory() {
         Map<String, String> result = ProcFileUtils.getProcFileAsMap("/");
-        Assert.assertEquals(0, result.size());
+        Assertions.assertEquals(0, result.size());
     }
 
     @Test
     public void getProcFileAsRowColumn_NotExistingFile() {
         List<String[]> result = ProcFileUtils.getProcFileAsRowColumn("/not/existing/file");
-        Assert.assertEquals(0, result.size());
+        Assertions.assertEquals(0, result.size());
     }
 
     @Test
     public void getProcFileAsRowColumn_Directory() {
         List<String[]> result = ProcFileUtils.getProcFileAsRowColumn("/");
-        Assert.assertEquals(0, result.size());
+        Assertions.assertEquals(0, result.size());
     }
 
     @Test
@@ -85,10 +86,10 @@ public class ProcFileUtilsTest {
         // Mac has no proc file so result will be empty.
         // Linux has proc file and result should contain some keys;
         if (result.size() >= 1) {
-            Assert.assertTrue(result.containsKey("Pid"));
-            Assert.assertTrue(result.containsKey("VmRSS"));
-            Assert.assertTrue(result.containsKey("VmSize"));
-            Assert.assertTrue(result.containsKey("VmPeak"));
+            Assertions.assertTrue(result.containsKey("Pid"));
+            Assertions.assertTrue(result.containsKey("VmRSS"));
+            Assertions.assertTrue(result.containsKey("VmSize"));
+            Assertions.assertTrue(result.containsKey("VmPeak"));
         }
     }
 
@@ -99,10 +100,10 @@ public class ProcFileUtilsTest {
         // Mac has no proc file so result will be empty.
         // Linux has proc file and result should contain some keys;
         if (result.size() >= 1) {
-            Assert.assertTrue(result.containsKey("rchar"));
-            Assert.assertTrue(result.containsKey("wchar"));
-            Assert.assertTrue(result.containsKey("read_bytes"));
-            Assert.assertTrue(result.containsKey("write_bytes"));
+            Assertions.assertTrue(result.containsKey("rchar"));
+            Assertions.assertTrue(result.containsKey("wchar"));
+            Assertions.assertTrue(result.containsKey("read_bytes"));
+            Assertions.assertTrue(result.containsKey("write_bytes"));
         }
     }
 
@@ -111,7 +112,7 @@ public class ProcFileUtilsTest {
         {
             Map<String, String> map = Collections.emptyMap();
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertNull(bytesValue);
+            Assertions.assertNull(bytesValue);
         }
         {
             File file = File.createTempFile("test", "test");
@@ -122,7 +123,7 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertNull(bytesValue);
+            Assertions.assertNull(bytesValue);
         }
         {
             File file = File.createTempFile("test", "test");
@@ -138,7 +139,7 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertNull(bytesValue);
+            Assertions.assertNull(bytesValue);
         }
         {
             File file = File.createTempFile("test", "test");
@@ -154,7 +155,7 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertEquals(676L, bytesValue.longValue());
+            Assertions.assertEquals(676L, bytesValue.longValue());
         }
         {
             File file = File.createTempFile("test", "test");
@@ -170,7 +171,7 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertEquals(676 * 1024L, bytesValue.longValue());
+            Assertions.assertEquals(676 * 1024L, bytesValue.longValue());
         }
         {
             File file = File.createTempFile("test", "test");
@@ -186,7 +187,7 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertEquals(676 * 1024L, bytesValue.longValue());
+            Assertions.assertEquals(676 * 1024L, bytesValue.longValue());
         }
         {
             File file = File.createTempFile("test", "test");
@@ -202,7 +203,7 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertEquals(676 * 1024L, bytesValue.longValue());
+            Assertions.assertEquals(676 * 1024L, bytesValue.longValue());
         }
         {
             File file = File.createTempFile("test", "test");
@@ -218,7 +219,7 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertEquals(676 * 1024L, bytesValue.longValue());
+            Assertions.assertEquals(676 * 1024L, bytesValue.longValue());
         }
         {
             File file = File.createTempFile("test", "test");
@@ -234,7 +235,7 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertEquals(676 * 1024L, bytesValue.longValue());
+            Assertions.assertEquals(676 * 1024L, bytesValue.longValue());
         }
         {
             File file = File.createTempFile("test", "test");
@@ -250,7 +251,7 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertEquals(676 * 1024 * 1024L, bytesValue.longValue());
+            Assertions.assertEquals(676 * 1024 * 1024L, bytesValue.longValue());
         }
         {
             File file = File.createTempFile("test", "test");
@@ -266,7 +267,7 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertEquals(676 * 1024 * 1024L, bytesValue.longValue());
+            Assertions.assertEquals(676 * 1024 * 1024L, bytesValue.longValue());
         }
         {
             File file = File.createTempFile("test", "test");
@@ -282,7 +283,7 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertEquals(676 * 1024 * 1024 * 1024L, bytesValue.longValue());
+            Assertions.assertEquals(676 * 1024 * 1024 * 1024L, bytesValue.longValue());
         }
         {
             File file = File.createTempFile("test", "test");
@@ -298,15 +299,15 @@ public class ProcFileUtilsTest {
 
             Map<String, String> map = ProcFileUtils.getProcFileAsMap(file.getPath());
             Long bytesValue = ProcFileUtils.getBytesValue(map, "VmRSS");
-            Assert.assertEquals(676 * 1024 * 1024 * 1024L, bytesValue.longValue());
+            Assertions.assertEquals(676 * 1024 * 1024 * 1024L, bytesValue.longValue());
         }
     }
 
     @Test
     public void getProcStatCpuTime() throws IOException {
         {
-            Assert.assertEquals(0, ProcFileUtils.getProcStatCpuTime(null).size());
-            Assert.assertEquals(0, ProcFileUtils.getProcStatCpuTime(new ArrayList<>()).size());
+            Assertions.assertEquals(0, ProcFileUtils.getProcStatCpuTime(null).size());
+            Assertions.assertEquals(0, ProcFileUtils.getProcStatCpuTime(new ArrayList<>()).size());
         }
         {
             File file = File.createTempFile("test", "test");
@@ -322,38 +323,38 @@ public class ProcFileUtilsTest {
             Files.write(file.toPath(), content.getBytes(), StandardOpenOption.CREATE);
 
             List<String[]> rows = ProcFileUtils.getProcFileAsRowColumn(file.getPath());
-            Assert.assertEquals(7, rows.size());
+            Assertions.assertEquals(7, rows.size());
 
             List<Map<String, Object>> cpuTimes = ProcFileUtils.getProcStatCpuTime(rows);
-            Assert.assertEquals(4, cpuTimes.size());
+            Assertions.assertEquals(4, cpuTimes.size());
 
-            Assert.assertEquals("cpu", cpuTimes.get(0).get("cpu"));
-            Assert.assertEquals(1172937054L, cpuTimes.get(0).get("user"));
-            Assert.assertEquals(824289701L, cpuTimes.get(0).get("nice"));
-            Assert.assertEquals(468234436L, cpuTimes.get(0).get("system"));
-            Assert.assertEquals(75675853861L, cpuTimes.get(0).get("idle"));
-            Assert.assertEquals(1569550L, cpuTimes.get(0).get("iowait"));
+            Assertions.assertEquals("cpu", cpuTimes.get(0).get("cpu"));
+            Assertions.assertEquals(1172937054L, cpuTimes.get(0).get("user"));
+            Assertions.assertEquals(824289701L, cpuTimes.get(0).get("nice"));
+            Assertions.assertEquals(468234436L, cpuTimes.get(0).get("system"));
+            Assertions.assertEquals(75675853861L, cpuTimes.get(0).get("idle"));
+            Assertions.assertEquals(1569550L, cpuTimes.get(0).get("iowait"));
 
-            Assert.assertEquals("cpuXYZ", cpuTimes.get(1).get("cpu"));
-            Assert.assertEquals(1172937055L, cpuTimes.get(1).get("user"));
-            Assert.assertEquals(824289702L, cpuTimes.get(1).get("nice"));
-            Assert.assertEquals(468234436L, cpuTimes.get(1).get("system"));
-            Assert.assertEquals(75675853861L, cpuTimes.get(1).get("idle"));
-            Assert.assertEquals(1569550L, cpuTimes.get(1).get("iowait"));
+            Assertions.assertEquals("cpuXYZ", cpuTimes.get(1).get("cpu"));
+            Assertions.assertEquals(1172937055L, cpuTimes.get(1).get("user"));
+            Assertions.assertEquals(824289702L, cpuTimes.get(1).get("nice"));
+            Assertions.assertEquals(468234436L, cpuTimes.get(1).get("system"));
+            Assertions.assertEquals(75675853861L, cpuTimes.get(1).get("idle"));
+            Assertions.assertEquals(1569550L, cpuTimes.get(1).get("iowait"));
 
-            Assert.assertEquals("cpu0", cpuTimes.get(2).get("cpu"));
-            Assert.assertEquals(62086703L, cpuTimes.get(2).get("user"));
-            Assert.assertEquals(131209370L, cpuTimes.get(2).get("nice"));
-            Assert.assertEquals(38265368L, cpuTimes.get(2).get("system"));
-            Assert.assertEquals(3012668347L, cpuTimes.get(2).get("idle"));
-            Assert.assertEquals(284193L, cpuTimes.get(2).get("iowait"));
+            Assertions.assertEquals("cpu0", cpuTimes.get(2).get("cpu"));
+            Assertions.assertEquals(62086703L, cpuTimes.get(2).get("user"));
+            Assertions.assertEquals(131209370L, cpuTimes.get(2).get("nice"));
+            Assertions.assertEquals(38265368L, cpuTimes.get(2).get("system"));
+            Assertions.assertEquals(3012668347L, cpuTimes.get(2).get("idle"));
+            Assertions.assertEquals(284193L, cpuTimes.get(2).get("iowait"));
 
-            Assert.assertEquals("cpu1", cpuTimes.get(3).get("cpu"));
-            Assert.assertEquals(67845808L, cpuTimes.get(3).get("user"));
-            Assert.assertEquals(163124717L, cpuTimes.get(3).get("nice"));
-            Assert.assertEquals(46602120L, cpuTimes.get(3).get("system"));
-            Assert.assertEquals(2966238934L, cpuTimes.get(3).get("idle"));
-            Assert.assertEquals(85123L, cpuTimes.get(3).get("iowait"));
+            Assertions.assertEquals("cpu1", cpuTimes.get(3).get("cpu"));
+            Assertions.assertEquals(67845808L, cpuTimes.get(3).get("user"));
+            Assertions.assertEquals(163124717L, cpuTimes.get(3).get("nice"));
+            Assertions.assertEquals(46602120L, cpuTimes.get(3).get("system"));
+            Assertions.assertEquals(2966238934L, cpuTimes.get(3).get("idle"));
+            Assertions.assertEquals(85123L, cpuTimes.get(3).get("iowait"));
         }
     }
 
@@ -366,7 +367,7 @@ public class ProcFileUtilsTest {
         Files.write(file.toPath(), content.getBytes(), StandardOpenOption.CREATE);
 
         String result = ProcFileUtils.getPid(file.getPath());
-        Assert.assertNull(result);
+        Assertions.assertNull(result);
     }
 
     @Test
@@ -379,12 +380,12 @@ public class ProcFileUtilsTest {
         Files.write(file.toPath(), content.getBytes(), StandardOpenOption.CREATE);
 
         String result = ProcFileUtils.getPid(file.getPath());
-        Assert.assertEquals("66646", result);
+        Assertions.assertEquals("66646", result);
     }
 
     @Test
     public void getCmdline() throws IOException {
         String result = ProcFileUtils.getCmdline();
-        Assert.assertTrue(result == null || !result.isEmpty());
+        Assertions.assertTrue(result == null || !result.isEmpty());
     }
 }

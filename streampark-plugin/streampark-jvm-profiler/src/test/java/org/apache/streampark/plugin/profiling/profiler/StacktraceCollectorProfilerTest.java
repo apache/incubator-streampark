@@ -21,8 +21,8 @@ import org.apache.streampark.plugin.profiling.util.ClassAndMethod;
 import org.apache.streampark.plugin.profiling.util.Stacktrace;
 import org.apache.streampark.plugin.profiling.util.StacktraceMetricBuffer;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +31,14 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class StacktraceCollectorProfilerTest {
+
     @Test
     public void profile() throws InterruptedException {
         StacktraceMetricBuffer buffer = new StacktraceMetricBuffer();
         StacktraceCollectorProfiler profiler = new StacktraceCollectorProfiler(buffer, null);
 
         profiler.setInterval(123);
-        Assert.assertEquals(123L, profiler.getInterval());
+        Assertions.assertEquals(123L, profiler.getInterval());
 
         // Use a semaphore to make sure the test thread runs before profile method
         final Semaphore semaphore = new Semaphore(1);
@@ -68,7 +69,7 @@ public class StacktraceCollectorProfilerTest {
         profiler.profile();
 
         Map<Stacktrace, AtomicLong> map = buffer.reset();
-        Assert.assertTrue(map.size() > 0);
+        Assertions.assertTrue(map.size() > 0);
 
         int mainThreadCount = 0;
 
@@ -97,22 +98,22 @@ public class StacktraceCollectorProfilerTest {
             }
         }
 
-        Assert.assertTrue(mainThreadCount >= 3);
+        Assertions.assertTrue(mainThreadCount >= 3);
 
-        Assert.assertEquals(1, testThreadStacktrace.size());
-        Assert.assertEquals("testDummySleepThread", testThreadStacktrace.get(0).getThreadName());
-        Assert.assertEquals("TIMED_WAITING", testThreadStacktrace.get(0).getThreadState());
+        Assertions.assertEquals(1, testThreadStacktrace.size());
+        Assertions.assertEquals("testDummySleepThread", testThreadStacktrace.get(0).getThreadName());
+        Assertions.assertEquals("TIMED_WAITING", testThreadStacktrace.get(0).getThreadState());
 
         ClassAndMethod[] stack = testThreadStacktrace.get(0).getStack();
-        Assert.assertEquals(4, stack.length);
-        Assert.assertEquals(new ClassAndMethod("java.lang.Thread", "sleep"), stack[0]);
-        Assert.assertEquals(new ClassAndMethod("java.lang.Thread", "run"), stack[stack.length - 1]);
+        Assertions.assertEquals(4, stack.length);
+        Assertions.assertEquals(new ClassAndMethod("java.lang.Thread", "sleep"), stack[0]);
+        Assertions.assertEquals(new ClassAndMethod("java.lang.Thread", "run"), stack[stack.length - 1]);
 
-        Assert.assertEquals(1, testThreadStacktraceCount.size());
-        Assert.assertEquals(3L, testThreadStacktraceCount.get(0).longValue());
+        Assertions.assertEquals(1, testThreadStacktraceCount.size());
+        Assertions.assertEquals(3L, testThreadStacktraceCount.get(0).longValue());
 
-        Assert.assertTrue(runnableThreadCount >= 3);
-        Assert.assertTrue(waitingThreadCount >= 3);
+        Assertions.assertTrue(runnableThreadCount >= 3);
+        Assertions.assertTrue(waitingThreadCount >= 3);
 
         try {
             thread.interrupt();
@@ -128,7 +129,7 @@ public class StacktraceCollectorProfilerTest {
         StacktraceCollectorProfiler profiler = new StacktraceCollectorProfiler(buffer, "testDummy");
 
         profiler.setInterval(123);
-        Assert.assertEquals(123L, profiler.getInterval());
+        Assertions.assertEquals(123L, profiler.getInterval());
 
         // Use a semaphore to make sure the test thread runs before profile method
         final Semaphore semaphore = new Semaphore(1);
@@ -159,7 +160,7 @@ public class StacktraceCollectorProfilerTest {
         profiler.profile();
 
         Map<Stacktrace, AtomicLong> map = buffer.reset();
-        Assert.assertTrue(map.size() > 0);
+        Assertions.assertTrue(map.size() > 0);
 
         int mainThreadCount = 0;
 
@@ -188,12 +189,12 @@ public class StacktraceCollectorProfilerTest {
             }
         }
 
-        Assert.assertTrue(mainThreadCount >= 3);
+        Assertions.assertTrue(mainThreadCount >= 3);
 
-        Assert.assertEquals(0, testThreadStacktrace.size());
+        Assertions.assertEquals(0, testThreadStacktrace.size());
 
-        Assert.assertTrue(runnableThreadCount >= 3);
-        Assert.assertTrue(waitingThreadCount >= 3);
+        Assertions.assertTrue(runnableThreadCount >= 3);
+        Assertions.assertTrue(waitingThreadCount >= 3);
 
         try {
             thread.interrupt();
@@ -209,7 +210,7 @@ public class StacktraceCollectorProfilerTest {
         StacktraceCollectorProfiler profiler = new StacktraceCollectorProfiler(buffer, null, 20000);
 
         profiler.setInterval(123);
-        Assert.assertEquals(123L, profiler.getInterval());
+        Assertions.assertEquals(123L, profiler.getInterval());
 
         // Use a semaphore to make sure the test thread runs before profile method
         final Semaphore semaphore = new Semaphore(1);
@@ -233,7 +234,7 @@ public class StacktraceCollectorProfilerTest {
         profiler.profile();
 
         Map<Stacktrace, AtomicLong> map = buffer.reset();
-        Assert.assertTrue(map.size() > 0);
+        Assertions.assertTrue(map.size() > 0);
 
         List<Stacktrace> testThreadStacktrace = new ArrayList<>();
         List<Long> testThreadStacktraceCount = new ArrayList<>();
@@ -245,14 +246,14 @@ public class StacktraceCollectorProfilerTest {
             }
         }
 
-        Assert.assertEquals(1, testThreadStacktrace.size());
+        Assertions.assertEquals(1, testThreadStacktrace.size());
 
         ClassAndMethod[] stack = testThreadStacktrace.get(0).getStack();
-        Assert.assertTrue(stack.length > 1);
-        Assert.assertEquals(new ClassAndMethod("_stack_", "_trimmed_"), stack[0]);
+        Assertions.assertTrue(stack.length > 1);
+        Assertions.assertEquals(new ClassAndMethod("_stack_", "_trimmed_"), stack[0]);
 
-        Assert.assertEquals(1, testThreadStacktraceCount.size());
-        Assert.assertEquals(1L, testThreadStacktraceCount.get(0).longValue());
+        Assertions.assertEquals(1, testThreadStacktraceCount.size());
+        Assertions.assertEquals(1L, testThreadStacktraceCount.get(0).longValue());
 
         try {
             thread.interrupt();

@@ -20,8 +20,8 @@ package org.apache.streampark.plugin.profiling.profiler;
 import org.apache.streampark.plugin.profiling.Reporter;
 import org.apache.streampark.plugin.profiling.util.ClassAndMethodLongMetricBuffer;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MethodDurationProfilerTest {
+
     @Test
     public void profile() {
         final List<String> nameList = new ArrayList<>();
@@ -54,7 +55,7 @@ public class MethodDurationProfilerTest {
         MethodDurationProfiler profiler = new MethodDurationProfiler(buffer, reporter);
 
         profiler.setInterval(123);
-        Assert.assertEquals(123L, profiler.getInterval());
+        Assertions.assertEquals(123L, profiler.getInterval());
 
         collector.collectLongMetric("class1", "method1", "metric1", 111);
         collector.collectLongMetric("class1", "method1", "metric1", 333);
@@ -63,10 +64,10 @@ public class MethodDurationProfilerTest {
         profiler.profile();
 
         int metricCountForHistogram = 4;
-        Assert.assertEquals(2 * metricCountForHistogram, nameList.size());
-        Assert.assertEquals(MethodDurationProfiler.PROFILER_NAME, nameList.get(0));
+        Assertions.assertEquals(2 * metricCountForHistogram, nameList.size());
+        Assertions.assertEquals(MethodDurationProfiler.PROFILER_NAME, nameList.get(0));
 
-        Assert.assertEquals(2 * metricCountForHistogram, metricList.size());
+        Assertions.assertEquals(2 * metricCountForHistogram, metricList.size());
 
         List<Map<String, Object>> metricsToCheck =
             metricList.stream()
@@ -76,8 +77,8 @@ public class MethodDurationProfilerTest {
                             && t.get("methodName").equals("method1")
                             && t.get("metricName").equals("metric1.count"))
                 .collect(Collectors.toList());
-        Assert.assertEquals(1, metricsToCheck.size());
-        Assert.assertEquals(2.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
+        Assertions.assertEquals(1, metricsToCheck.size());
+        Assertions.assertEquals(2.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
 
         metricsToCheck =
             metricList.stream()
@@ -87,8 +88,8 @@ public class MethodDurationProfilerTest {
                             && t.get("methodName").equals("method1")
                             && t.get("metricName").equals("metric1.sum"))
                 .collect(Collectors.toList());
-        Assert.assertEquals(1, metricsToCheck.size());
-        Assert.assertEquals(444.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
+        Assertions.assertEquals(1, metricsToCheck.size());
+        Assertions.assertEquals(444.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
 
         metricsToCheck =
             metricList.stream()
@@ -98,8 +99,8 @@ public class MethodDurationProfilerTest {
                             && t.get("methodName").equals("method2")
                             && t.get("metricName").equals("metric2.count"))
                 .collect(Collectors.toList());
-        Assert.assertEquals(1, metricsToCheck.size());
-        Assert.assertEquals(1.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
+        Assertions.assertEquals(1, metricsToCheck.size());
+        Assertions.assertEquals(1.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
 
         metricsToCheck =
             metricList.stream()
@@ -109,7 +110,7 @@ public class MethodDurationProfilerTest {
                             && t.get("methodName").equals("method2")
                             && t.get("metricName").equals("metric2.sum"))
                 .collect(Collectors.toList());
-        Assert.assertEquals(1, metricsToCheck.size());
-        Assert.assertEquals(222.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
+        Assertions.assertEquals(1, metricsToCheck.size());
+        Assertions.assertEquals(222.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
     }
 }

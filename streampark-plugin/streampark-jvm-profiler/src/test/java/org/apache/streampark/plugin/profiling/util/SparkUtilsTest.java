@@ -19,31 +19,32 @@ package org.apache.streampark.plugin.profiling.util;
 
 import org.apache.streampark.plugin.profiling.Arguments;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
 
 public class SparkUtilsTest {
+
     @Test
     public void probeAppId() {
-        Assert.assertNull(SparkUtils.probeAppId(Arguments.ARG_APP_ID_REGEX));
-        Assert.assertEquals("jar", SparkUtils.probeAppId("jar"));
+        Assertions.assertNull(SparkUtils.probeAppId(Arguments.ARG_APP_ID_REGEX));
+        Assertions.assertEquals("jar", SparkUtils.probeAppId("jar"));
     }
 
     @Test
     public void getAppId()
         throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
         InvocationTargetException {
-        Assert.assertNull(SparkUtils.getSparkEnvAppId());
+        Assertions.assertNull(SparkUtils.getSparkEnvAppId());
     }
 
     @Test
     public void probeRole() {
-        Assert.assertEquals(
+        Assertions.assertEquals(
             "executor",
             SparkUtils.probeRole("java org.apache.spark.executor.CoarseGrainedExecutorBackend"));
-        Assert.assertEquals("driver", SparkUtils.probeRole("java org.apache.spark.MockDriver"));
-        Assert.assertNull(SparkUtils.probeRole("java foo"));
+        Assertions.assertEquals("driver", SparkUtils.probeRole("java org.apache.spark.MockDriver"));
+        Assertions.assertNull(SparkUtils.probeRole("java foo"));
     }
 }

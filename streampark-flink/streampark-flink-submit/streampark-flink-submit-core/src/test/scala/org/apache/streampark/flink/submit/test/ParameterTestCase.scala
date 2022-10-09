@@ -19,10 +19,7 @@ package org.apache.streampark.flink.submit.test
 import org.apache.flink.api.java.utils.ParameterTool
 import org.junit.jupiter.api.{Assertions, Test}
 
-import java.util.regex.Pattern
-import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Try
 
 class ParameterTestCase {
 
@@ -50,7 +47,7 @@ class ParameterTestCase {
 
     val argsStr = "--url localhost:8123 \n" +
       "--insertSql1 'insert \'\'into default.test values (?,?,?,?,?)' \n" +
-      "--insertSql2 'insert into default.test values (1,2,3,4,\"111\")'\n "+
+      "--insertSql2 'insert into default.test values (1,2,3,4,\"111\")'\n " +
       "--insertSql2 \"insert into default.test values (1,2,3,4,\'111\')\" \n" +
       "--insertSql2 'insert into default.test values (1,2,3,4,\"111\", \'22\', \'\')'"
 
@@ -99,9 +96,10 @@ class ParameterTestCase {
         processElement(next, 0)
       }
     }
+
     processElement(0, 0)
 
-    val programArgs = argsArray.map(_.trim.replaceAll("^[\"|']|[\"|']$","")).toList
+    val programArgs = argsArray.map(_.trim.replaceAll("^[\"|']|[\"|']$", "")).toList
 
     Assertions.assertEquals("localhost:8123", programArgs(1))
     Assertions.assertEquals("insert \'\'into default.test values (?,?,?,?,?)", programArgs(3))

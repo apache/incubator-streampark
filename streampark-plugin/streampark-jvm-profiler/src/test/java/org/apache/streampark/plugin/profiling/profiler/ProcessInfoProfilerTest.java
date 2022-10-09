@@ -21,14 +21,15 @@ import org.apache.streampark.plugin.profiling.Reporter;
 import org.apache.streampark.plugin.profiling.util.ProcFileUtils;
 import org.apache.streampark.plugin.profiling.util.ProcessUtils;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class ProcessInfoProfilerTest {
+
     @Test
     public void profile() {
         final List<String> nameList = new ArrayList<>();
@@ -48,7 +49,7 @@ public class ProcessInfoProfilerTest {
                     }
                 });
 
-        Assert.assertEquals(0L, profiler.getInterval());
+        Assertions.assertEquals(0L, profiler.getInterval());
 
         profiler.profile();
         profiler.profile();
@@ -56,40 +57,40 @@ public class ProcessInfoProfilerTest {
         System.out.println("Metric list:");
         System.out.println(metricList);
 
-        Assert.assertTrue(nameList.size() >= 2);
-        Assert.assertEquals(ProcessInfoProfiler.PROFILER_NAME, nameList.get(0));
+        Assertions.assertTrue(nameList.size() >= 2);
+        Assertions.assertEquals(ProcessInfoProfiler.PROFILER_NAME, nameList.get(0));
 
-        Assert.assertTrue(metricList.size() >= 2);
+        Assertions.assertTrue(metricList.size() >= 2);
 
-        Assert.assertTrue(metricList.get(0).containsKey("processUuid"));
-        Assert.assertTrue(metricList.get(0).containsKey("jvmInputArguments"));
-        Assert.assertTrue(metricList.get(0).containsKey("jvmClassPath"));
-        Assert.assertTrue(metricList.get(0).containsKey("cmdline"));
+        Assertions.assertTrue(metricList.get(0).containsKey("processUuid"));
+        Assertions.assertTrue(metricList.get(0).containsKey("jvmInputArguments"));
+        Assertions.assertTrue(metricList.get(0).containsKey("jvmClassPath"));
+        Assertions.assertTrue(metricList.get(0).containsKey("cmdline"));
 
-        Assert.assertTrue(metricList.get(metricList.size() - 1).containsKey("processUuid"));
-        Assert.assertTrue(metricList.get(metricList.size() - 1).containsKey("jvmInputArguments"));
-        Assert.assertTrue(metricList.get(metricList.size() - 1).containsKey("jvmClassPath"));
-        Assert.assertTrue(metricList.get(metricList.size() - 1).containsKey("cmdline"));
+        Assertions.assertTrue(metricList.get(metricList.size() - 1).containsKey("processUuid"));
+        Assertions.assertTrue(metricList.get(metricList.size() - 1).containsKey("jvmInputArguments"));
+        Assertions.assertTrue(metricList.get(metricList.size() - 1).containsKey("jvmClassPath"));
+        Assertions.assertTrue(metricList.get(metricList.size() - 1).containsKey("cmdline"));
 
         // Verify: if cmdline is empty, there should be jvmClassPath/jvmInputArguments,
         // otherwise there should be no jvmClassPath/jvmInputArguments
         if (ProcFileUtils.getCmdline() == null || ProcFileUtils.getCmdline().isEmpty()) {
-            Assert.assertEquals(0, metricList.stream().filter(map -> !map.get("cmdline").equals("")).count());
+            Assertions.assertEquals(0, metricList.stream().filter(map -> !map.get("cmdline").equals("")).count());
 
-            Assert.assertTrue(
+            Assertions.assertTrue(
                 metricList.stream().filter(map -> !map.get("jvmClassPath").equals("")).count() > 0);
 
             if (ProcessUtils.getJvmInputArguments().isEmpty()) {
-                Assert.assertEquals(0, metricList.stream().filter(map -> !map.get("jvmInputArguments").equals("")).count());
+                Assertions.assertEquals(0, metricList.stream().filter(map -> !map.get("jvmInputArguments").equals("")).count());
             } else {
-                Assert.assertTrue(
+                Assertions.assertTrue(
                     metricList.stream().filter(map -> !map.get("jvmInputArguments").equals("")).count() > 0);
             }
         } else {
-            Assert.assertTrue(
+            Assertions.assertTrue(
                 metricList.stream().filter(map -> !map.get("cmdline").equals("")).count() > 0);
-            Assert.assertEquals(0, metricList.stream().filter(map -> !map.get("jvmClassPath").equals("")).count());
-            Assert.assertEquals(0, metricList.stream().filter(map -> !map.get("jvmInputArguments").equals("")).count());
+            Assertions.assertEquals(0, metricList.stream().filter(map -> !map.get("jvmClassPath").equals("")).count());
+            Assertions.assertEquals(0, metricList.stream().filter(map -> !map.get("jvmInputArguments").equals("")).count());
         }
     }
 }

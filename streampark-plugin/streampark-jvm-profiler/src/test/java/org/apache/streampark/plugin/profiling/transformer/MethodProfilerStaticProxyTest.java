@@ -22,10 +22,10 @@ import org.apache.streampark.plugin.profiling.profiler.MethodArgumentCollector;
 import org.apache.streampark.plugin.profiling.util.ClassAndMethodMetricKey;
 import org.apache.streampark.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 
-import junit.framework.Assert;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -33,14 +33,14 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MethodProfilerStaticProxyTest {
     private ClassMethodArgumentMetricBuffer buffer;
 
-    @Before
+    @BeforeEach
     public void before() {
         buffer = new ClassMethodArgumentMetricBuffer();
         MethodArgumentCollector collector = new MethodArgumentCollector(buffer);
         MethodProfilerStaticProxy.setArgumentCollector(collector);
     }
 
-    @After
+    @AfterEach
     public void after() {
         MethodProfilerStaticProxy.setCollector(null);
     }
@@ -51,12 +51,12 @@ public class MethodProfilerStaticProxyTest {
         MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, null);
 
         Map<ClassAndMethodMetricKey, AtomicLong> metrics = buffer.reset();
-        Assert.assertEquals(1, metrics.size());
+        Assertions.assertEquals(1, metrics.size());
         ClassAndMethodMetricKey key = metrics.keySet().iterator().next();
-        Assert.assertEquals("class1", key.getClassName());
-        Assert.assertEquals("method1", key.getMethodName());
-        Assert.assertEquals("arg.1.null", key.getMetricName());
-        Assert.assertEquals(2, metrics.get(key).intValue());
+        Assertions.assertEquals("class1", key.getClassName());
+        Assertions.assertEquals("method1", key.getMethodName());
+        Assertions.assertEquals("arg.1.null", key.getMetricName());
+        Assertions.assertEquals(2, metrics.get(key).intValue());
     }
 
     @Test
@@ -72,12 +72,12 @@ public class MethodProfilerStaticProxyTest {
         MethodProfilerStaticProxy.collectMethodArgument("class1", "method1", 1, veryLongValue);
 
         Map<ClassAndMethodMetricKey, AtomicLong> metrics = buffer.reset();
-        Assert.assertEquals(1, metrics.size());
+        Assertions.assertEquals(1, metrics.size());
         ClassAndMethodMetricKey key = metrics.keySet().iterator().next();
-        Assert.assertEquals("class1", key.getClassName());
-        Assert.assertEquals("method1", key.getMethodName());
-        Assert.assertEquals(Constants.MAX_STRING_LENGTH, key.getMetricName().length());
-        Assert.assertTrue(key.getMetricName().startsWith("arg.1."));
-        Assert.assertEquals(2, metrics.get(key).intValue());
+        Assertions.assertEquals("class1", key.getClassName());
+        Assertions.assertEquals("method1", key.getMethodName());
+        Assertions.assertEquals(Constants.MAX_STRING_LENGTH, key.getMetricName().length());
+        Assertions.assertTrue(key.getMetricName().startsWith("arg.1."));
+        Assertions.assertEquals(2, metrics.get(key).intValue());
     }
 }

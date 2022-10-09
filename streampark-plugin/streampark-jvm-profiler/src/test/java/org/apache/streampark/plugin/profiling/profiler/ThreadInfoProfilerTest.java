@@ -19,14 +19,15 @@ package org.apache.streampark.plugin.profiling.profiler;
 
 import org.apache.streampark.plugin.profiling.Reporter;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class ThreadInfoProfilerTest {
+
     @Test
     public void profile() {
         final List<String> nameList = new ArrayList<>();
@@ -48,20 +49,20 @@ public class ThreadInfoProfilerTest {
                 });
         // Set interval
         profiler.setInterval(150);
-        Assert.assertEquals(150L, profiler.getInterval());
+        Assertions.assertEquals(150L, profiler.getInterval());
 
         // run 2 cycles on the profile.
         profiler.profile();
         profiler.profile();
 
         // start assertion.
-        Assert.assertEquals(2, nameList.size());
-        Assert.assertEquals(ThreadInfoProfiler.PROFILER_NAME, nameList.get(0));
+        Assertions.assertEquals(2, nameList.size());
+        Assertions.assertEquals(ThreadInfoProfiler.PROFILER_NAME, nameList.get(0));
 
-        Assert.assertEquals(2, metricList.size());
-        Assert.assertTrue(metricList.get(0).containsKey("totalStartedThreadCount"));
-        Assert.assertTrue(metricList.get(0).containsKey("newThreadCount"));
-        Assert.assertTrue(metricList.get(0).containsKey("liveThreadCount"));
-        Assert.assertTrue(metricList.get(0).containsKey("peakThreadCount"));
+        Assertions.assertEquals(2, metricList.size());
+        Assertions.assertTrue(metricList.get(0).containsKey("totalStartedThreadCount"));
+        Assertions.assertTrue(metricList.get(0).containsKey("newThreadCount"));
+        Assertions.assertTrue(metricList.get(0).containsKey("liveThreadCount"));
+        Assertions.assertTrue(metricList.get(0).containsKey("peakThreadCount"));
     }
 }

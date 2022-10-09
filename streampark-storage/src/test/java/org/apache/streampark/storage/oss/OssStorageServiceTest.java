@@ -19,8 +19,8 @@ package org.apache.streampark.storage.oss;
 
 import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSSException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class OssStorageServiceTest {
 
@@ -28,10 +28,10 @@ public class OssStorageServiceTest {
     public void testHandleException() throws Exception {
         OSSException ossException = new OSSException("mock error", "MOCK_CODE", "requestId", "hostId", "header", "resource", "GET");
         RuntimeException exp = OssStorageService.handleOssException(ossException);
-        Assert.assertEquals("Caught an OSSException. Error Message: mock error. Error Code: MOCK_CODE. Request ID: requestId", exp.getMessage());
+        Assertions.assertEquals("Caught an OSSException. Error Message: mock error. Error Code: MOCK_CODE. Request ID: requestId", exp.getMessage());
 
         ClientException ossClientException = new ClientException("Client ERROR");
         exp = OssStorageService.handleOssException(ossClientException);
-        Assert.assertTrue(exp.getMessage().startsWith("Caught an ClientException. Error Message: Client ERROR"));
+        Assertions.assertTrue(exp.getMessage().startsWith("Caught an ClientException. Error Message: Client ERROR"));
     }
 }
