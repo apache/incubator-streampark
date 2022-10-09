@@ -61,9 +61,8 @@ public class TeamMemberController {
     }
 
     @PostMapping("check/user")
-    public RestResponse checkTeamUser(@NotBlank(message = "{required}") Long teamId,
-                                      @NotBlank(message = "{required}") String userName) {
-        TeamMember result = this.teamMemberService.findByTeamAndUserName(teamId, userName);
+    public RestResponse checkTeamUser(@NotBlank(message = "{required}") String userName) {
+        TeamMember result = this.teamMemberService.findByUserName(userName);
         return RestResponse.success(result == null);
     }
 

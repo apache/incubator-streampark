@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.TeamMember;
 import org.apache.streampark.console.system.entity.User;
@@ -57,6 +58,9 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
     @Autowired
     private TeamService teamService;
 
+    @Autowired
+    private CommonService commonService;
+
     @Override
     @Transactional
     public void deleteUserRolesByRoleId(String[] roleIds) {
@@ -71,7 +75,9 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
 
     @Override
     public IPage<TeamMember> findUsers(TeamMember teamMember, RestRequest request) {
-        AssertUtils.isTrue(teamMember.getTeamId() != null, "The team id is required.");
+        Long teamId = commonService.getTeamId();
+        AssertUtils.isTrue(teamId != null, "The team id is required.");
+        teamMember.setTeamId(teamId);
         Page<TeamMember> page = new Page<>();
         page.setCurrent(request.getPageNum());
         page.setSize(request.getPageSize());
@@ -84,15 +90,17 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
     }
 
     @Override
-    public TeamMember findByTeamAndUserName(Long teamId, String userName) {
+    public TeamMember findByUserName(String userName) {
         User user = userService.findByName(userName);
         if (user == null) {
             return null;
         }
-        return findByTeamAndUserId(teamId, user.getUserId());
+        return findByUserId(user.getUserId());
     }
 
-    private TeamMember findByTeamAndUserId(Long teamId, Long userId) {
+    private TeamMember findByUserId(Long userId) {
+        Long teamId = commonService.getTeamId();
+        AssertUtils.isTrue(teamId != null, "The team id is required.");
         return baseMapper.selectOne(
             new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getTeamId, teamId)
                 .eq(TeamMember::getUserId, userId));
@@ -110,13 +118,14 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
 
     @Override
     public void createTeamMember(TeamMember teamMember) {
+        teamMember.setTeamId(commonService.getTeamId());
         User user = Optional.ofNullable(userService.findByName(teamMember.getUserName()))
             .orElseThrow(() -> new IllegalArgumentException(String.format("The username [%s] not found", teamMember.getUserName())));
         Optional.ofNullable(roleService.getById(teamMember.getRoleId()))
             .orElseThrow(() -> new IllegalArgumentException(String.format("The roleId [%s] not found", teamMember.getRoleId())));
         Team team = Optional.ofNullable(teamService.getById(teamMember.getTeamId()))
             .orElseThrow(() -> new IllegalArgumentException(String.format("The teamId [%s] not found", teamMember.getTeamId())));
-        AssertUtils.isTrue(findByTeamAndUserId(teamMember.getTeamId(), user.getUserId()) == null,
+        AssertUtils.isTrue(findByUserId(user.getUserId()) == null,
             String.format("The user [%s] has been added the team [%s], please don't add it again.", teamMember.getUserName(), team.getTeamName()));
 
         teamMember.setId(null);
@@ -133,6 +142,7 @@ public class TeamMemberServiceImpl extends ServiceImpl<TeamMemberMapper, TeamMem
 
     @Override
     public void updateTeamMember(TeamMember teamMember) {
+        teamMember.setTeamId(commonService.getTeamId());
         TeamMember oldTeamMember = Optional.ofNullable(this.getById(teamMember.getId()))
             .orElseThrow(() -> new IllegalArgumentException(String.format("The mapping [id=%s] not found", teamMember.getId())));
         AssertUtils.isTrue(oldTeamMember.getTeamId().equals(teamMember.getTeamId()), "Team id cannot be changed.");

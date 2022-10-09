@@ -36,7 +36,7 @@ public interface TeamMemberService extends IService<TeamMember> {
 
     List<Team> findUserTeams(Long userId);
 
-    TeamMember findByTeamAndUserName(Long teamId, String userName);
+    TeamMember findByUserName(String userName);
 
     List<Long> findUserIdsByRoleId(Long roleId);
 
@@ -45,4 +45,5 @@ public interface TeamMemberService extends IService<TeamMember> {
     void deleteTeamMember(TeamMember teamMember);
 
     void updateTeamMember(TeamMember teamMember);
+
 }
