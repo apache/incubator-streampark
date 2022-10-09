@@ -45,7 +45,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.function.Function;
 
 @Slf4j
 @Service
@@ -117,7 +116,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public List<FlinkSql> history(Application application) {
-        LambdaQueryWrapper<FlinkSql> wrapper = new LambdaQueryWrapper();
+        LambdaQueryWrapper<FlinkSql> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(FlinkSql::getAppId, application.getId())
             .orderByDesc(FlinkSql::getVersion);
 
@@ -185,7 +184,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     @Override
     public FlinkSqlValidationResult verifySql(String sql, Long versionId) {
         FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
-        return FlinkShimsProxy.proxy(flinkEnv.getFlinkVersion(), (Function<ClassLoader, FlinkSqlValidationResult>) classLoader -> {
+        return FlinkShimsProxy.proxyVerifySql(flinkEnv.getFlinkVersion(), classLoader -> {
             try {
                 Class<?> clazz = classLoader.loadClass("org.apache.streampark.flink.core.FlinkSqlValidator");
                 Method method = clazz.getDeclaredMethod("verifySql", String.class);
@@ -200,9 +199,5 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             }
             return null;
         });
-    }
-
-    private boolean isFlinkSqlBacked(FlinkSql sql) {
-        return backUpService.isFlinkSqlBacked(sql.getAppId(), sql.getId());
     }
 }
