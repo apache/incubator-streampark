@@ -1,5 +1,3 @@
-import { RuleObject, StoreValue } from 'ant-design-vue/lib/form/interface';
-import { fetchCheckName } from '/@/api/sys/role';
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ import { fetchCheckName } from '/@/api/sys/role';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { RuleObject, StoreValue } from 'ant-design-vue/lib/form/interface';
+import { fetchCheckName } from '/@/api/sys/role';
 import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
 
