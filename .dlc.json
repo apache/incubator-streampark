@@ -10,6 +10,9 @@
       "pattern": "^https://img.shields.io"
     },
     {
+      "pattern": "^https://tokei.rs"
+    },
+    {
       "pattern": "^https://json.org/"
     },
     {
