@@ -146,6 +146,7 @@ export const formSchema: FormSchema[] = [
     label: '排序',
     component: 'InputNumber',
     required: true,
+    ifShow: ({ values }) => !isButton(values.type),
   },
   {
     field: 'icon',

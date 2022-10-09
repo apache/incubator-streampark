@@ -17,9 +17,7 @@
 import { BasicColumn, FormSchema } from '/@/components/Table';
 import { h } from 'vue';
 import { Tag } from 'ant-design-vue';
-import { getRoleListByUser } from '/@/api/sys/role';
-import { getTeamListByUser } from '/@/api/sys/team';
-import { checkUserName } from '/@/api/sys/user';
+import { checkUserName, fetchUserTypes } from '/@/api/sys/user';
 import { FormTypeEnum } from '/@/enums/formEnum';
 
 // user status enum
@@ -40,7 +38,6 @@ export const columns: BasicColumn[] = [
     title: 'User Name',
     dataIndex: 'username',
     width: 200,
-    align: 'left',
     sorter: true,
   },
   {
@@ -48,8 +45,8 @@ export const columns: BasicColumn[] = [
     dataIndex: 'nickName',
   },
   {
-    title: 'Team',
-    dataIndex: 'teamName',
+    title: 'User Type',
+    dataIndex: 'userType',
     width: 180,
   },
   {
@@ -61,6 +58,11 @@ export const columns: BasicColumn[] = [
       const text = enable ? 'Effective' : 'locked';
       return h(Tag, { color }, () => text);
     },
+    filters: [
+      { text: 'Effective', value: '1' },
+      { text: 'Locked', value: '0' },
+    ],
+    filterMultiple: false,
   },
   {
     title: 'Create Time',
@@ -102,7 +104,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       label: 'User Name',
       component: 'Input',
       rules: [
-        { required: true, message: 'username is required' },
+        { required: isCreate, message: 'username is required' },
         { min: 4, message: 'username length cannot be less than 4 characters' },
         { max: 8, message: 'exceeds maximum length limit of 8 characters' },
         {
@@ -157,32 +159,14 @@ export const formSchema = (formType: string): FormSchema[] => {
       },
     },
     {
-      label: 'Role',
-      field: 'roleId',
+      label: 'User Type',
+      field: 'userType',
       component: 'ApiSelect',
       componentProps: {
         disabled: isView,
-        api: getRoleListByUser,
-        resultField: 'records',
-        labelField: 'roleName',
-        valueField: 'roleId',
-        mode: 'multiple',
+        api: fetchUserTypes,
       },
       required: true,
-    },
-    {
-      label: 'Team',
-      field: 'teamId',
-      component: 'ApiSelect',
-      componentProps: {
-        id: 'formTeamId',
-        api: getTeamListByUser,
-        resultField: 'records',
-        labelField: 'teamName',
-        valueField: 'teamId',
-      },
-      required: true,
-      show: isCreate,
     },
     {
       field: 'status',
@@ -195,7 +179,7 @@ export const formSchema = (formType: string): FormSchema[] => {
           { label: 'effective', value: StatusEnum.Effective },
         ],
       },
-      required: true,
+      rules: [{ required: true, message: 'please select status' }],
     },
     {
       field: 'sex',
@@ -210,6 +194,12 @@ export const formSchema = (formType: string): FormSchema[] => {
         ],
       },
       required: true,
+    },
+    {
+      field: 'description',
+      label: 'Description',
+      component: 'InputTextArea',
+      ifShow: isCreate,
     },
   ];
 };

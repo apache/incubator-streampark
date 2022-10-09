@@ -14,32 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { DropMenu } from '../components/Dropdown';
-import type { LocaleSetting, LocaleType } from '/#/config';
-
-export const LOCALE: { [key: string]: LocaleType } = {
-  ZH_CN: 'zh_CN',
-  EN_US: 'en',
-};
-
-export const localeSetting: LocaleSetting = {
-  showPicker: true,
-  // Locale
-  locale: LOCALE.EN_US,
-  // Default locale
-  fallback: LOCALE.EN_US,
-  // available Locales
-  availableLocales: [LOCALE.ZH_CN, LOCALE.EN_US],
-};
-
-// locale list
-export const localeList: DropMenu[] = [
-  {
-    text: '简体中文',
-    event: LOCALE.ZH_CN,
+export default {
+  addMember: 'Add Member',
+  modifyMember: 'Modify Member',
+  deleteMember: 'Delete Member',
+  deletePopConfirm: 'Are you sure delete this member ?',
+  add: 'Add',
+  success: 'successful',
+  fail: 'failed',
+  table: {
+    title: 'Member List',
+    userName: 'User Name',
+    roleName: 'Role',
+    createTime: 'Create Time',
+    modifyTime: 'Modify Time',
   },
-  {
-    text: 'English',
-    event: LOCALE.EN_US,
-  },
-];
+};

@@ -18,7 +18,7 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> Add Role</a-button>
+        <a-button type="primary" @click="handleCreate" v-auth="'role:add'"> Add Role</a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -26,6 +26,7 @@
             :actions="[
               {
                 icon: 'clarity:note-edit-line',
+                auth: 'role:update',
                 onClick: handleEdit.bind(null, record),
               },
               {
@@ -36,9 +37,9 @@
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
-                tooltip: 'delete role',
+                auth: 'role:delete',
                 popConfirm: {
-                  title: '是否确认删除',
+                  title: 'Are you sure delete this Role',
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
                 },
