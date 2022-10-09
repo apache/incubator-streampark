@@ -14,6 +14,9 @@
     },
     {
       "pattern": "^https://opencollective.com"
+    },
+    {
+      "pattern": "^.github/PULL_REQUEST_TEMPLATE.md"
     }
   ],
   "timeout": "10s",
