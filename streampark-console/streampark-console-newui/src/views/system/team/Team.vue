@@ -16,31 +16,42 @@
 -->
 <template>
   <div>
-    <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
+    <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> Add Team </a-button>
+        <a-button type="primary" @click="handleCreate" v-auth="'team:add'">
+          {{ t('system.team.addTeam') }}
+        </a-button>
       </template>
-      <template #action="{ record }">
-        <TableAction
-          :actions="[
-            {
-              icon: 'ant-design:delete-outlined',
-              color: 'error',
-              tooltip: 'delete Team',
-              popConfirm: {
-                title: 'delete Team, are you sure',
-                confirm: handleDelete.bind(null, record),
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'ant-design:edit-outlined',
+                auth: 'team:update',
+                tooltip: t('system.team.modifyTeam'),
+                onClick: handleTeamEdit.bind(null, record),
               },
-            },
-          ]"
-        />
+              {
+                icon: 'ant-design:delete-outlined',
+                color: 'error',
+                tooltip: t('system.team.deleteTeam'),
+                auth: 'team:delete',
+                popConfirm: {
+                  title: t('system.team.deletePopConfirm'),
+                  confirm: handleDelete.bind(null, record),
+                },
+              },
+            ]"
+          />
+        </template>
       </template>
     </BasicTable>
     <TeamDrawer @register="registerDrawer" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, nextTick } from 'vue';
+  import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
   import TeamDrawer from './TeamDrawer.vue';
@@ -48,15 +59,16 @@
   import { columns, searchFormSchema } from './team.data';
   import { getTeamList, deleteTeam } from '/@/api/sys/team';
   import { useMessage } from '/@/hooks/web/useMessage';
-
+  import { useI18n } from '/@/hooks/web/useI18n';
   export default defineComponent({
-    name: 'User',
+    name: 'Team',
     components: { BasicTable, TeamDrawer, TableAction },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { createMessage } = useMessage();
-      const [registerTable, { reload, expandAll }] = useTable({
-        title: 'Team List',
+      const { t } = useI18n();
+      const [registerTable, { reload }] = useTable({
+        title: t('system.team.table.title'),
         api: getTeamList,
         columns,
         formConfig: {
@@ -64,21 +76,22 @@
           schemas: searchFormSchema,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
-        rowKey: 'teamId',
-        isTreeTable: true,
+        beforeFetch: (params) => {
+          if (params?.sortField) {
+            params.sortField = params.sortField.replace(/([a-z])([A-Z])/, '$1_$2').toLowerCase();
+          }
+          return params;
+        },
+        rowKey: 'id',
         pagination: true,
-        striped: false,
         useSearchForm: true,
         showTableSetting: false,
-        bordered: true,
         showIndexColumn: false,
         canResize: false,
         actionColumn: {
-          width: 120,
-          title: 'Operation',
+          width: 200,
+          title: t('component.table.operation'),
           dataIndex: 'action',
-          slots: { customRender: 'action' },
-          fixed: 'right',
         },
       });
 
@@ -88,46 +101,42 @@
         });
       }
 
-      function handleEdit(record: Recordable) {
+      function handleTeamEdit(record: Recordable) {
         openDrawer(true, {
           record,
           isUpdate: true,
         });
       }
 
-      function handleView(record: Recordable) {
-        console.log(record);
-      }
-
-      function handleDelete(record: Recordable) {
-        deleteTeam({ teamId: record.teamId }).then((_) => {
-          createMessage.success('delete successful');
+      /* 删除组织 */
+      async function handleDelete(record: Recordable) {
+        const { data } = await deleteTeam({ id: record.id });
+        if (data.status === 'success') {
+          createMessage.success(t('system.team.deleteTeam') + t('system.team.success'));
           reload();
-        });
+        } else {
+          createMessage.error(t('system.team.deleteTeam') + t('system.team.fail'));
+        }
       }
 
-      function handleSuccess() {
-        createMessage.success('add successful');
+      function handleSuccess(isUpdate: boolean) {
+        createMessage.success(
+          `${isUpdate ? t('common.edit') : t('system.team.add')}${t('system.team.success')}`,
+        );
         reload();
-      }
-
-      function onFetchSuccess() {
-        // 演示默认展开所有表项
-        nextTick(expandAll);
       }
 
       function onChange(val) {
         console.log(val);
       }
       return {
+        t,
         registerTable,
         registerDrawer,
         handleCreate,
-        handleEdit,
+        handleTeamEdit,
         handleDelete,
         handleSuccess,
-        onFetchSuccess,
-        handleView,
         onChange,
       };
     },

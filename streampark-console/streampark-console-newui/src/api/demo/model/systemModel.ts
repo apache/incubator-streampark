@@ -112,3 +112,9 @@ export type UserListGetResultModel = BasicFetchResult<UserListItem>;
 export type RolePageListGetResultModel = BasicFetchResult<RoleListItem>;
 
 export type RoleListGetResultModel = RoleListItem[];
+
+export interface MenuListModel {
+  ids: Array<string>;
+  rows: any;
+  total: number;
+}

@@ -14,32 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { DropMenu } from '../components/Dropdown';
-import type { LocaleSetting, LocaleType } from '/#/config';
-
-export const LOCALE: { [key: string]: LocaleType } = {
-  ZH_CN: 'zh_CN',
-  EN_US: 'en',
-};
-
-export const localeSetting: LocaleSetting = {
-  showPicker: true,
-  // Locale
-  locale: LOCALE.EN_US,
-  // Default locale
-  fallback: LOCALE.EN_US,
-  // available Locales
-  availableLocales: [LOCALE.ZH_CN, LOCALE.EN_US],
-};
-
-// locale list
-export const localeList: DropMenu[] = [
-  {
-    text: '简体中文',
-    event: LOCALE.ZH_CN,
+export default {
+  addTeam: '创建Team',
+  modifyTeam: '编辑Team',
+  deleteTeam: '删除Team',
+  deletePopConfirm: '确定要删除这个Team ?',
+  add: '创建',
+  success: '成功',
+  fail: '失败',
+  table: {
+    title: 'Team列表',
+    teamName: 'Team名称',
+    description: '描述',
+    createTime: '创建时间',
+    modifyTime: '修改时间',
+    descriptionMessage: '超过了100个字符的最大长度限制',
   },
-  {
-    text: 'English',
-    event: LOCALE.EN_US,
-  },
-];
+};

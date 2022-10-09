@@ -21,10 +21,9 @@
   <a href="https://www.apache.org/licenses/LICENSE-2.0.html"><img src="https://img.shields.io/badge/license-Apache%202-4EB1BA.svg"></a>
 </p>
 
-
 <div align="center">
 
-**[官网](https://streampark.apache.org)** 
+**[官网](https://streampark.apache.org)**
 
 </div>
 
@@ -42,27 +41,36 @@ Make stream processing easier
 
 在 Gitpod（适用于 GitHub 的免费在线开发环境）中打开项目，并立即开始编码.
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/streamxhub/streamx-webapp)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://github.com/apache/incubator-streampark)
 
 ## 安装使用
+
+- Node.js
+
+webui 是用 Javascript 编写的。如果你没有 Node.js 开发环境，请[设置](https://nodejs.org/en/download/)它。需要的最低版本是 14.0。
 
 - 安装依赖
 
 ```bash
 pnpm install
-
+# or
+yarn install
 ```
 
 - 运行
 
 ```bash
 pnpm serve
+# or
+yarn serve
 ```
 
 - 打包
 
 ```bash
 pnpm build
+# or
+yarn build
 ```
 
 ## 浏览器支持
@@ -74,4 +82,3 @@ pnpm build
 | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt=" Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>IE | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt=" Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Safari |
 | :-: | :-: | :-: | :-: | :-: |
 | not support | last 2 versions | last 2 versions | last 2 versions | last 2 versions |
-

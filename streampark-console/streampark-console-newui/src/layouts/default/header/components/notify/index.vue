@@ -137,7 +137,7 @@
         }
       }
       const wbSocketUrl = `${window.location.origin}${
-        import.meta.env.VITE_APP_BASE_API
+        import.meta.env.VITE_GLOB_API_URL
       }/websocket/${userStore.getUserInfo.userId}`;
 
       const { data } = useWebSocket(wbSocketUrl.replace(/http/, 'ws'), {

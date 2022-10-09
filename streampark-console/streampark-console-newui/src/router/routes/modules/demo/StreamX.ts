@@ -26,7 +26,7 @@ const streamxConsole: AppRouteModule = {
   meta: {
     orderNo: 1,
     icon: 'fluent:stream-input-20-regular',
-    title: 'StreamX',
+    title: 'StreamPark',
   },
   children: [
     {

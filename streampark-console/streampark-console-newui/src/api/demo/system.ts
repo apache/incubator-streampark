@@ -26,6 +26,7 @@ import {
   AccountListGetResultModel,
   RolePageListGetResultModel,
   RoleListGetResultModel,
+  MenuListModel,
 } from './model/systemModel';
 import { defHttp } from '/@/utils/http/axios';
 import { ContentTypeEnum } from '/@/enums/httpEnum';
@@ -49,7 +50,7 @@ export const getDeptList = (params?: DeptListItem) =>
   defHttp.get<DeptListGetResultModel>({ url: Api.DeptList, params });
 
 export const getMenuList = (params?: MenuParams) =>
-  defHttp.post<MenuListGetResultModel>({
+  defHttp.post<MenuListModel>({
     url: Api.MenuList,
     params,
     headers: {

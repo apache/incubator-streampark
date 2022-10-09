@@ -16,10 +16,10 @@
 -->
 <script lang="ts">
   export default defineComponent({
-    name: 'EditStreamX',
+    name: 'EditStreamPark',
   });
 </script>
-<script setup lang="ts" name="EditStreamX">
+<script setup lang="ts" name="EditStreamPark">
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
   import { onMounted, reactive, ref, nextTick, unref, defineComponent } from 'vue';

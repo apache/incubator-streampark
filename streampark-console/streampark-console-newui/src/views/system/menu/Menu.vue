@@ -20,15 +20,17 @@
       <template #toolbar>
         <a-button type="primary" @click="handleCreate"> Add Menu </a-button>
       </template>
-      <template #action="{ record }">
-        <TableAction
-          :actions="[
-            {
-              icon: 'clarity:note-edit-line',
-              onClick: handleEdit.bind(null, record),
-            },
-          ]"
-        />
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'clarity:note-edit-line',
+                onClick: handleEdit.bind(null, record),
+              },
+            ]"
+          />
+        </template>
       </template>
     </BasicTable>
     <MenuDrawer @register="registerDrawer" @success="handleSuccess" />
@@ -75,8 +77,6 @@
           width: 100,
           title: 'Operation',
           dataIndex: 'action',
-          slots: { customRender: 'action' },
-          fixed: 'right',
         },
       });
 

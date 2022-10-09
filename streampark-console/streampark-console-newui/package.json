@@ -1,5 +1,5 @@
 {
-  "name": "streampark webapp",
+  "name": "streampark-webapp",
   "version": "2.0.0",
   "author": {
     "name": "streampark",
@@ -64,6 +64,7 @@
     "sortablejs": "^1.15.0",
     "sweetalert2": "^11.4.18",
     "tinymce": "^5.10.3",
+    "terser": "^5.4.0",
     "vditor": "^3.8.13",
     "vue": "^3.2.39",
     "vue-i18n": "^9.2.2",
@@ -135,16 +136,14 @@
     "vite-plugin-html": "^3.2.0",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-plugin-mkcert": "^1.10.1",
-    "vite-plugin-mock": "^2.9.6",
     "vite-plugin-purge-icons": "^0.9.1",
-    "vite-plugin-pwa": "^0.13.1",
     "vite-plugin-style-import": "^2.0.0",
     "vite-plugin-svg-icons": "^2.0.1",
     "vite-plugin-theme": "^0.8.6",
     "vite-plugin-vue-setup-extend": "^0.4.0",
     "vite-plugin-windicss": "^1.8.8",
     "vue-eslint-parser": "^9.1.0",
-    "vue-tsc": "^0.40.13"
+    "vue-tsc": "^1.0.1"
   },
   "resolutions": {
     "bin-wrapper": "npm:bin-wrapper-china",
