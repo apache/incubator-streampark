@@ -16,7 +16,7 @@
       "pattern": "^https://opencollective.com"
     }
   ],
-  "timeout": "10s",
+  "timeout": "30s",
   "retryOn429": true,
   "retryCount": 10,
   "fallbackRetryDelay": "1000s",
