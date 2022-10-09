@@ -20,42 +20,44 @@
       <template #toolbar>
         <a-button type="primary" @click="handleCreate"> Add User </a-button>
       </template>
-      <template #action="{ record }">
-        <TableAction
-          :actions="[
-            {
-              icon: 'clarity:note-edit-line',
-              tooltip: 'modify',
-              auth: 'user:update',
-              onClick: handleEdit.bind(null, record),
-            },
-            {
-              icon: 'carbon:data-view-alt',
-              tooltip: 'view detail',
-              onClick: handleView.bind(null, record),
-            },
-            {
-              icon: 'bx:reset',
-              auth: 'user:reset',
-              tooltip: 'reset password',
-              popConfirm: {
-                title: 'reset password, are you sure',
-                confirm: handleReset.bind(null, record),
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'clarity:note-edit-line',
+                tooltip: 'modify',
+                auth: 'user:update',
+                onClick: handleEdit.bind(null, record),
               },
-            },
-            {
-              icon: 'ant-design:delete-outlined',
-              color: 'error',
-              auth: 'user:delete',
-              ifShow: record.username !== 'admin',
-              tooltip: 'delete user',
-              popConfirm: {
-                title: 'delete user, are you sure',
-                confirm: handleDelete.bind(null, record),
+              {
+                icon: 'carbon:data-view-alt',
+                tooltip: 'view detail',
+                onClick: handleView.bind(null, record),
               },
-            },
-          ]"
-        />
+              {
+                icon: 'bx:reset',
+                auth: 'user:reset',
+                tooltip: 'reset password',
+                popConfirm: {
+                  title: 'reset password, are you sure',
+                  confirm: handleReset.bind(null, record),
+                },
+              },
+              {
+                icon: 'ant-design:delete-outlined',
+                color: 'error',
+                auth: 'user:delete',
+                ifShow: record.username !== 'admin',
+                tooltip: 'delete user',
+                popConfirm: {
+                  title: 'delete user, are you sure',
+                  confirm: handleDelete.bind(null, record),
+                },
+              },
+            ]"
+          />
+        </template>
       </template>
     </BasicTable>
     <UserDrawer @register="registerDrawer" @success="handleSuccess" />
@@ -100,8 +102,6 @@
           width: 140,
           title: 'Operation',
           dataIndex: 'action',
-          slots: { customRender: 'action' },
-          fixed: 'right',
         },
       });
 

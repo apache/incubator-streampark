@@ -14,28 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Result } from '../utils';
-
-const fakeUserInfo = {
-  userId: '1',
-  username: 'test',
-  realName: 'test',
-  desc: 'manager',
-  password: '123456',
-  token: 'fakeToken1',
-  roles: [
-    {
-      roleName: 'Super Admin',
-      value: 'super',
-    },
-  ],
+export default {
+  addTeam: 'Add Team',
+  modifyTeam: 'Modify Team',
+  deleteTeam: 'Delete Team',
+  deletePopConfirm: 'Are you sure delete this team ?',
+  add: 'Add',
+  success: 'successful',
+  fail: 'failed',
+  table: {
+    title: 'Team List',
+    teamName: 'Team Name',
+    description: 'Description',
+    createTime: 'Create Time',
+    modifyTime: 'Modify Time',
+    descriptionMessage: 'exceeds maximum length limit of 100 characters',
+  },
 };
-export default class UserService {
-  async login() {
-    return Result.success(fakeUserInfo);
-  }
-
-  async getUserInfoById() {
-    return Result.success(fakeUserInfo);
-  }
-}

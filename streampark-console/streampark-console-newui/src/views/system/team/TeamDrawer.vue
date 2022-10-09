@@ -15,66 +15,93 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer
-    v-bind="$attrs"
-    @register="registerDrawer"
-    showFooter
-    :title="getTitle"
-    width="50%"
-    @ok="handleSubmit"
-  >
-    <BasicForm @register="registerForm" />
+  <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="650" @ok="handleSubmit">
+    <template #title>
+      <Icon icon="ant-design:team-outlined" />
+      {{ getTitle }}
+    </template>
+    <BasicForm @register="registerForm" :schemas="getTeamFormSchema" />
   </BasicDrawer>
 </template>
 <script lang="ts">
   import { defineComponent, ref, computed, unref } from 'vue';
-  import { BasicForm, useForm } from '/@/components/Form';
-  import { formSchema } from './team.data';
+  import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
-  import { addTeam } from '/@/api/sys/team';
+  import { fetchTeamCreate, fetchTeamUpdate } from '/@/api/sys/team';
+  import { Icon } from '/@/components/Icon';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
   export default defineComponent({
-    name: 'MenuDrawer',
-    components: { BasicDrawer, BasicForm },
+    name: 'TeamDrawer',
+    components: { BasicDrawer, BasicForm, Icon },
     emits: ['success', 'register'],
     setup(_, { emit }) {
-      const isUpdate = ref(true);
+      const { t } = useI18n();
 
+      const isUpdate = ref(false);
+      const teamId = ref<Nullable<number>>(null);
+      const getTeamFormSchema = computed((): FormSchema[] => {
+        return [
+          {
+            field: 'teamName',
+            label: t('system.team.table.teamName'),
+            component: 'Input',
+            componentProps: { disabled: isUpdate.value },
+            required: !isUpdate.value,
+          },
+          {
+            field: 'description',
+            label: t('system.team.table.description'),
+            component: 'InputTextArea',
+            componentProps: { rows: 4 },
+            rules: [{ max: 100, message: t('system.team.table.descriptionMessage') }],
+          },
+        ];
+      });
       const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
-        labelWidth: 120,
-        schemas: formSchema,
+        name: 'TeamEditForm',
+        colon: true,
         showActionButtonGroup: false,
-        baseColProps: { lg: 22, md: 22 },
+        baseColProps: { span: 24 },
+        labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
+        wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
       });
 
-      const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
-        resetFields();
-        setDrawerProps({ confirmLoading: false });
-        isUpdate.value = !!data?.isUpdate;
+      const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(
+        async (data: Recordable) => {
+          teamId.value = null;
+          resetFields();
+          setDrawerProps({ confirmLoading: false });
+          isUpdate.value = !!data?.isUpdate;
+          if (isUpdate.value) teamId.value = data.record.id;
+          if (unref(isUpdate)) {
+            setFieldsValue({
+              ...data.record,
+            });
+          }
+        },
+      );
 
-        if (unref(isUpdate)) {
-          setFieldsValue({
-            ...data.record,
-          });
-        }
-      });
-
-      const getTitle = computed(() => (!unref(isUpdate) ? 'Add User' : 'Edit User'));
-
+      const getTitle = computed(() =>
+        !unref(isUpdate) ? t('system.team.addTeam') : t('system.team.modifyTeam'),
+      );
+      /* 表单提交 */
       async function handleSubmit() {
         try {
           const values = await validate();
           setDrawerProps({ confirmLoading: true });
-          addTeam(values);
+          await (isUpdate.value
+            ? fetchTeamUpdate({ id: teamId.value, ...values })
+            : fetchTeamCreate(values));
           closeDrawer();
-          emit('success');
+          emit('success', isUpdate.value);
         } finally {
           setDrawerProps({ confirmLoading: false });
         }
       }
 
-      return { registerDrawer, registerForm, getTitle, handleSubmit };
+      return { registerDrawer, registerForm, getTitle, getTeamFormSchema, handleSubmit };
     },
   });
 </script>

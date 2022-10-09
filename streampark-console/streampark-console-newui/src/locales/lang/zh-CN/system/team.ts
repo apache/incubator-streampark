@@ -14,28 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Result } from '../utils';
-
-const fakeUserInfo = {
-  userId: '1',
-  username: 'test',
-  realName: 'test',
-  desc: 'manager',
-  password: '123456',
-  token: 'fakeToken1',
-  roles: [
-    {
-      roleName: 'Super Admin',
-      value: 'super',
-    },
-  ],
+export default {
+  addTeam: '创建Team',
+  modifyTeam: '编辑Team',
+  deleteTeam: '删除Team',
+  deletePopConfirm: '确定要删除这个Team ?',
+  add: '创建',
+  success: '成功',
+  fail: '失败',
+  table: {
+    title: 'Team列表',
+    teamName: 'Team名称',
+    description: '描述',
+    createTime: '创建时间',
+    modifyTime: '修改时间',
+    descriptionMessage: '超过了100个字符的最大长度限制',
+  },
 };
-export default class UserService {
-  async login() {
-    return Result.success(fakeUserInfo);
-  }
-
-  async getUserInfoById() {
-    return Result.success(fakeUserInfo);
-  }
-}
