@@ -64,7 +64,7 @@ app.use(
     encoding: 'gzip',
     multipart: true,
     formidable: {
-      // uploadDir: path.join(__dirname, '/upload/'), // 设置文件上传目录
+      // uploadDir: path.join(__dirname, '/upload/'), // Set file upload directory
       keepExtensions: true,
       maxFieldsSize: 20 * 1024 * 1024,
     },

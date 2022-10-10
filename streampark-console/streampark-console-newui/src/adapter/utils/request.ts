@@ -29,10 +29,10 @@ import { SignOut } from '../store/modules/user';
 const http = axios.create({
   baseURL: baseUrl(),
   withCredentials: false,
-  timeout: 1000 * 10, // 请求超时时间
+  timeout: 1000 * 10, // request timeout
   responseType: 'json',
   validateStatus(status) {
-    // 200 外的状态码都认定为失败
+    // Status codes other than 200 are considered failures
     return status === 200;
   },
 });
@@ -42,7 +42,7 @@ http.interceptors.request.use(
   (config) => {
     const expire = store.getters.expire;
     const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
-    // 让token早10秒种过期，提升“请重新登录”弹窗体验
+    // Let the token expire 10 seconds earlier to improve the "Please log in again" pop-up experience
     if (now > expire) {
       Modal.error({
         title: 'Sign in expired',
@@ -69,7 +69,7 @@ http.interceptors.request.use(
     }
     config.transformRequest = [
       function (data) {
-        // 在请求之前对data传参进行格式转换
+        // Format the data parameter before the request
         if (config.method === 'get' || config.method === 'post') {
           if (data.sortField && data.sortOrder) {
             data.sortOrder = data.sortOrder === 'descend' ? 'desc' : 'asc';
@@ -113,7 +113,7 @@ http.interceptors.response.use(
           break;
         case 403:
         case 401:
-          //避免在某些页面有密集的ajax请求数据时反复的弹窗
+          // Avoid repeated pop-ups when some pages have dense ajax request data
           if (!storage.get(INVALID, false)) {
             storage.set(INVALID, true);
             notification.warn({
@@ -178,14 +178,14 @@ export default {
     return http
       .post(url, params, {
         responseType: 'blob',
-        timeout: blobTimeout, // 上传文件超时10分钟
+        timeout: blobTimeout, // Uploading files timed out for 10 minutes
       })
       .then((resp) => {
         respBlob(resp, filename);
       })
       .catch((r) => {
         console.error(r);
-        message.error('下载失败');
+        message.error('download failed');
       });
   },
   upload(url, params) {
@@ -193,7 +193,7 @@ export default {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      timeout: blobTimeout, // 上传文件超时10分钟
+      timeout: blobTimeout, // Uploading files timed out for 10 minutes
     });
   },
   export(url, params = {}, blobCallback, msg) {
@@ -201,7 +201,7 @@ export default {
       blobCallback = respBlob;
     }
     msg = msg == null ? {} : msg;
-    message.loading(msg.loading || '导入文件中...');
+    message.loading(msg.loading || 'import file...');
     return http
       .post(url, params, {
         responseType: 'blob',
@@ -211,7 +211,7 @@ export default {
       })
       .catch((r) => {
         console.error(r);
-        message.error(msg.error || '导出文件失败!');
+        message.error(msg.error || 'Failed to export file!');
       });
   },
 };

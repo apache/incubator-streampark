@@ -86,7 +86,7 @@
       const getTitle = computed(() =>
         !unref(isUpdate) ? t('system.team.addTeam') : t('system.team.modifyTeam'),
       );
-      /* 表单提交 */
+      // form submit
       async function handleSubmit() {
         try {
           const values = await validate();

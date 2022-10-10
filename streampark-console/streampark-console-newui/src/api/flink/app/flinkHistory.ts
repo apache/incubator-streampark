@@ -28,7 +28,7 @@ enum HISTORY_API {
 }
 
 /**
- * 获取k8s
+ * get k8s
  * @returns Promise<any>
  */
 export function fetchK8sNamespaces() {
@@ -41,7 +41,7 @@ export function fetchK8sNamespaces() {
 }
 
 /**
- * 上传jar
+ * upload jar
  * @returns Promise<DashboardResponse>
  */
 export function fetchUploadJars() {

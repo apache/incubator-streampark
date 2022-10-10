@@ -31,7 +31,7 @@
               icon: 'ant-design:delete-outlined',
               color: 'error',
               popConfirm: {
-                title: '是否确认删除',
+                title: 'Whether to confirm the deletion',
                 placement: 'left',
                 confirm: handleDelete.bind(null, record),
               },
@@ -60,7 +60,7 @@
     setup() {
       const [registerModal, { openModal }] = useModal();
       const [registerTable, { reload }] = useTable({
-        title: '部门列表',
+        title: 'Department List',
         api: getDeptList,
         columns,
         formConfig: {
@@ -76,7 +76,7 @@
         canResize: false,
         actionColumn: {
           width: 80,
-          title: '操作',
+          title: 'operate',
           dataIndex: 'action',
           slots: { customRender: 'action' },
           fixed: undefined,

@@ -154,7 +154,7 @@
   const getTitle = computed(() =>
     !unref(isUpdate) ? t('system.member.addMember') : t('system.member.modifyMember'),
   );
-  /* 表单提交 */
+  // form submit
   async function handleSubmit() {
     try {
       const values = await validate();

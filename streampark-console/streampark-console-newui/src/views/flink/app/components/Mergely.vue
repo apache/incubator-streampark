@@ -48,7 +48,7 @@
   const monacoConfig = ref();
   const loading = ref(false);
 
-  /* 点击下一步 */
+  /* Click Next */
   function handleNext() {
     visibleDiff.value = true;
     title.value = 'Compare configuration';
@@ -70,26 +70,26 @@
     options: getMonacoOptions(props.readOnly) as any,
   });
   onChange((value) => {
-    // 第一次
+    // the first time
     if (targetValue.value) {
       changed.value = true;
     }
     targetValue.value = value;
   });
 
-  /* 更改编辑器高度 */
+  /* Change editor height */
   function handleHeight(ele: Ref, h: number) {
     const height = document.documentElement.offsetHeight || document.body.offsetHeight;
     unref(ele).style.height = height - h + 'px';
   }
 
-  /* 关闭比对 */
+  /* close match */
   function handleCloseDiff() {
     title.value = 'Edit configuration';
     visibleDiff.value = false;
   }
 
-  /* 点击确定 */
+  /* Click OK */
   function handleOk() {
     const value = unref(targetValue);
     if (value == null || !value.replace(/^\s+|\s+$/gm, '')) {
@@ -101,7 +101,7 @@
     handleCancel();
   }
 
-  /* 点击取消 */
+  /* Click to cancel */
   function handleCancel() {
     changed.value = false;
     targetValue.value = null;
@@ -116,7 +116,7 @@
       data && onReceiveDrawerData(data);
     },
   );
-  /* 数据接收 */
+  /* data reception */
   function onReceiveDrawerData(data) {
     compareMode.value = false;
     changed.value = false;

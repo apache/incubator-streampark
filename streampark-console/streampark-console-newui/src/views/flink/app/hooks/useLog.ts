@@ -27,8 +27,8 @@ export const useLog = () => {
         theme: 'log',
         readOnly: true,
         scrollBeyondLastLine: false,
-        overviewRulerBorder: false, // 不要滚动条边框
-        tabSize: 2, // tab 缩进长度
+        overviewRulerBorder: false, // Don't scroll bar borders
+        tabSize: 2, // tab indent length
         minimap: { enabled: true },
         scrollbar: {
           useShadows: false,
@@ -43,7 +43,7 @@ export const useLog = () => {
     },
     handleLogMonaco,
   );
-  /* 注册语言 */
+  /* registered language */
   async function handleLogMonaco(monaco: any) {
     monaco.languages.register({ id: 'log' });
     monaco.languages.setMonarchTokensProvider('log', {

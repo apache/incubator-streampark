@@ -37,11 +37,11 @@
   export default defineComponent({
     name: 'ImportExcel',
     props: {
-      // 日期时间格式。如果不提供或者提供空值，将返回原始Date对象
+      // Datetime format. If not provided or a null value is provided, the original Date object will be returned
       dateFormat: {
         type: String,
       },
-      // 时区调整。实验性功能，仅为了解决读取日期时间值有偏差的问题。目前仅提供了+08:00时区的偏差修正值
+      // Time zone adjustment. Experimental feature, only to solve the problem of reading datetime values skewed. Currently only offset corrections for the +08:00 time zone are available
       // https://github.com/SheetJS/sheetjs/issues/1470#issuecomment-501108554
       timeZone: {
         type: Number,
@@ -54,7 +54,7 @@
       const loadingRef = ref<Boolean>(false);
 
       /**
-       * @description: 第一行作为头部
+       * @description: first line as header
        */
       function getHeaderRow(sheet: XLSX.WorkSheet) {
         if (!sheet || !sheet['!ref']) return [];
@@ -76,7 +76,7 @@
       }
 
       /**
-       * @description: 获得excel数据
+       * @description: get excel data
        */
       function getExcelData(workbook: XLSX.WorkBook) {
         const excelData: ExcelData[] = [];
@@ -114,7 +114,7 @@
       }
 
       /**
-       * @description: 读取excel数据
+       * @description: read excel data
        */
       function readerData(rawFile: File) {
         loadingRef.value = true;
@@ -150,7 +150,7 @@
       }
 
       /**
-       * @description: 触发选择文件管理器
+       * @description: Trigger select file manager
        */
       function handleInputClick(e: Event) {
         const files = e && (e.target as HTMLInputElement).files;
@@ -160,7 +160,7 @@
       }
 
       /**
-       * @description: 点击上传按钮
+       * @description: Click the upload button
        */
       function handleUpload() {
         const inputRefDom = unref(inputRef);

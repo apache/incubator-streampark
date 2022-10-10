@@ -42,7 +42,7 @@ export function getTeamList(params) {
   });
 }
 /**
- *  创建组织
+ * Create an organization
  * @param {Recordable} teamParams
  * @returns Promise<Boolean>
  */
@@ -57,7 +57,7 @@ export function fetchTeamCreate(params) {
 }
 
 /**
- *  更新组织
+ * update organization
  * @param {Recordable} teamParams
  * @returns Promise<Boolean>
  */
@@ -71,8 +71,8 @@ export function fetchTeamUpdate(params: Recordable) {
   });
 }
 /**
- * 组织删除
- * @param {String} id 组织id
+ * delete organization
+ * @param {String} id organization id
  * @returns Promise<AxiosResponse>
  */
 export function deleteTeam(params: { id: string }) {

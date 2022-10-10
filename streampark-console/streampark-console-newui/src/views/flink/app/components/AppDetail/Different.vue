@@ -73,7 +73,7 @@
       setupEditor(elem);
     });
   }
-  /* 更改编辑器高度 */
+  /* Change editor height */
   function handleHeight(ele: any, h: number) {
     const height = document.documentElement.offsetHeight || document.body.offsetHeight;
     ele.style.height = height - h + 'px';

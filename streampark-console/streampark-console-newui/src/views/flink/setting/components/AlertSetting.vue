@@ -46,27 +46,27 @@
   const [registerAlertModal, { openModal: openAlertModal }] = useModal();
   const alerts = ref<AlertSetting[]>([]);
   const alertType = ref<number[]>([]);
-  /* 获取告警配置 */
+  /* Get alert configuration */
   async function getAlertSetting() {
     const res = await fetchAlertSetting();
     alerts.value = res;
   }
-  /* 计算类型 */
+  /* compute type */
   function computeAlertType(level: number) {
     if (level === null) {
       level = 0;
     }
     const result: number[] = [];
     while (level != 0) {
-      // 获取最低位的 1
+      // Get the lowest 1
       const code = level & -level;
       result.push(code);
-      // 将最低位置 0
+      // Set the lowest position to 0
       level ^= code;
     }
     return result;
   }
-  /* 测试连接 */
+  /* test connection */
   async function handleTestAlarm(item) {
     const hide = createMessage.loading(' Testing', 0);
     try {
@@ -74,7 +74,7 @@
       createMessage.success('Test Alert Config  successful!');
       getAlertSetting();
     } catch (error: any) {
-      /* 自定义提示消息 */
+      /* custom alert message */
       if (error?.response?.data?.message) {
         createConfirm({
           iconType: 'error',
@@ -88,7 +88,7 @@
       hide();
     }
   }
-  /* 点击编辑按扭 */
+  /* Click the edit button */
   function handleEditAlertConf(item: AlertSetting) {
     alertType.value = computeAlertType(item.alertType);
 
@@ -113,7 +113,7 @@
       // larkSecretEnable = larkParams.secretEnable;
     }
 
-    console.log('告警参数：' + JSON.stringify(item));
+    console.log('Alarm parameters：' + JSON.stringify(item));
     openAlertModal(true, {
       alertId: item.id,
       alertName: item.alertName,
@@ -133,7 +133,7 @@
     });
   }
 
-  /* 删除配置 */
+  /* delete configuration */
   async function handleDeleteAlertConf(item: AlertSetting) {
     try {
       await fetchAlertDelete({ id: item.id });

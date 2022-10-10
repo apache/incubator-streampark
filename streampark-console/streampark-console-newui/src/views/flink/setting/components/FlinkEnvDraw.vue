@@ -46,9 +46,9 @@
     language: 'yaml',
     options: {
       selectOnLineNumbers: false,
-      foldingStrategy: 'indentation', // 代码分小段折叠
-      overviewRulerBorder: false, // 不要滚动条边框
-      tabSize: 2, // tab 缩进长度
+      foldingStrategy: 'indentation', // code fragmentation
+      overviewRulerBorder: false, // Don't scroll bar borders
+      tabSize: 2, // tab indent length
       readOnly: true,
       scrollBeyondLastLine: false,
       lineNumbersMinChars: 5,
@@ -58,7 +58,7 @@
       cursorWidth: 3,
       renderFinalNewline: true,
       renderLineHighlight: 'all',
-      quickSuggestionsDelay: 100, //代码提示延时
+      quickSuggestionsDelay: 100, // Code prompt delay
       minimap: { enabled: true },
       scrollbar: {
         useShadows: false,
@@ -71,7 +71,7 @@
       },
     },
   });
-  /* 同步配置 */
+  /* Sync configuration */
   async function handleSync() {
     try {
       syncLoading.value = true;

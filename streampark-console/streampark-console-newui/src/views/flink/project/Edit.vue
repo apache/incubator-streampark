@@ -53,7 +53,7 @@
       buildState.value = projectResource.buildState;
     }
   }
-  /* 更新项目 */
+  /* Update project */
   async function handleEditAction(values: Recordable) {
     try {
       handleCheckRebuild(values);

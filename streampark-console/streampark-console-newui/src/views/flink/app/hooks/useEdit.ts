@@ -35,7 +35,7 @@ export const useEdit = (alerts?: Ref) => {
     jmMemoryItems: [],
     tmMemoryItems: [],
   });
-  /* 初始化信息 */
+  /* initialization information */
   async function handleGetApplication() {
     const returnData = {};
     const appId = route.query.appId;
@@ -52,7 +52,7 @@ export const useEdit = (alerts?: Ref) => {
     }
     return returnData;
   }
-  /* 表单重置 */
+  /* Form reset */
   function handleResetApplication() {
     let parallelism: Nullable<number> = null;
     let slot: Nullable<number> = null;

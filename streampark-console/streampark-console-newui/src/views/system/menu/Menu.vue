@@ -97,7 +97,7 @@
       }
 
       function onFetchSuccess() {
-        // 演示默认展开所有表项
+        // Demo expands all table items by default
         nextTick(expandAll);
       }
 

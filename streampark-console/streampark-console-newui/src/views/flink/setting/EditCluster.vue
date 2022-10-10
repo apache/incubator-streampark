@@ -90,7 +90,7 @@
       changeLoading(false);
     }
   }
-  /* 获取cluster数据 */
+  // Get cluster data
   async function getClusterInfo() {
     const res = await fetchGetCluster({ id: route?.query?.clusterId });
     Object.assign(cluster, res);

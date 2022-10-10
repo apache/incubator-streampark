@@ -104,7 +104,7 @@
     wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 4, offset: 0 } },
     baseColProps: { span: 24 },
   });
-  /* 提交 */
+  /* submit */
   async function handleSubmit() {
     try {
       const formValue = (await validate()) as Recordable;

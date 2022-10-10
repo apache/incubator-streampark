@@ -92,7 +92,7 @@ export function handleAppBuildStepText(stepStatus) {
   }
 }
 
-// 字段描述过滤器
+// Field Description Filter
 export function descriptionFilter(option) {
   if (option.unit) {
     return option.description + ' (Unit ' + option.unit + ')';
@@ -138,14 +138,14 @@ export function handleIsStart(app, optionApps) {
   const status = [0, 7, 9, 10, 11, 13, 16, 18, 19, 20, -9].includes(app.state);
 
   /**
-   * 部署失败 FAILED(-1),
-   * 完结 DONE(0),
-   * 任务修改完毕需要重新发布 NEED_LAUNCH(1),
-   * 上线中 LAUNCHING(2),
-   * 上线完毕,需要重启 NEED_RESTART(3),
-   * 需要回滚 NEED_ROLLBACK(4),
-   * 项目发生变化,任务需检查(是否需要重新选择jar) NEED_CHECK(5),
-   * 发布的任务已经撤销 REVOKED(10);
+   * Deployment failed FAILED(-1),
+   * Done DONE(0),
+   * After the task is modified, NEED_LAUNCH(1) needs to be reissued,
+   * Online LAUNCHING(2),
+   * After going online, you need to restart NEED_RESTART(3),
+   * Need to rollback NEED_ROLLBACK(4),
+   * When the project changes, the task needs to be checked (whether the jar needs to be re-selected) NEED_CHECK(5),
+   * The posted task has been revoked REVOKED(10);
    */
 
   const launch = [0, 3].includes(app.launch);
@@ -165,7 +165,7 @@ export function handleYarnQueue(values) {
   }
 }
 
-/* 拼接参数 */
+/* Splice parameters */
 export function handleFormValue(values) {
   const options = {};
   for (const k in omit(values, ['totalOptions', 'jmOptions', 'tmOptions'])) {
