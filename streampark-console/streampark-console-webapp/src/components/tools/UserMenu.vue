@@ -73,8 +73,7 @@
         style="min-width: 100px; margin-right: 10px"
         @change="handleChangeTeam"
         class="team-select"
-        v-model="teamId"
-        v-decorator="['teamId']">
+        v-model="teamId">
         <a-select-option
           v-for="t in teamList"
           :value="t.id"
@@ -189,7 +188,7 @@ import { password } from '@api/user'
 import {teams} from '@/api/member'
 import themeUtil from '@/utils/themeUtil'
 import storage from '@/utils/storage'
-import {TEAM, USER_INFO, USER_NAME} from '@/store/mutation-types'
+import {TEAM_ID, USER_INFO, USER_NAME} from '@/store/mutation-types'
 import {message} from 'ant-design-vue'
 
 export default {
@@ -319,22 +318,19 @@ export default {
     },
 
     handlePrepareTeam() {
-      const team = storage.get(TEAM)
-      if (team != null) {
-        this.teamId = team.id
-      }
+      const teamId = storage.get(TEAM_ID) || []
+      this.teamId = teamId
     },
 
     handleChangeTeam(teamId) {
+      message.config({
+        top: `200px`
+      })
+      message.loading(' loading...  ', 3, () => {
+        message.destroy()
+      })
       this.SetTeam({
         teamId: teamId
-      }).then((resp) => {
-        message.config({
-          top: `200px`
-        })
-        message.loading(' loading...          ', 5, () => {
-          message.destroy()
-        })
       })
     },
 

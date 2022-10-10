@@ -75,9 +75,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
 
     @Override
     public IPage<Member> findUsers(Member member, RestRequest request) {
-        Long teamId = commonService.getTeamId();
-        AssertUtils.isTrue(teamId != null, "The team id is required.");
-        member.setTeamId(teamId);
+        AssertUtils.isTrue(member.getTeamId() != null, "The team id is required.");
         Page<Member> page = new Page<>();
         page.setCurrent(request.getPageNum());
         page.setSize(request.getPageSize());
@@ -90,16 +88,15 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
     }
 
     @Override
-    public Member findByUserName(String userName) {
+    public Member findByUserName(Long teamId, String userName) {
         User user = userService.findByName(userName);
         if (user == null) {
             return null;
         }
-        return findByUserId(user.getUserId());
+        return findByUserId(teamId, user.getUserId());
     }
 
-    private Member findByUserId(Long userId) {
-        Long teamId = commonService.getTeamId();
+    private Member findByUserId(Long teamId, Long userId) {
         AssertUtils.isTrue(teamId != null, "The team id is required.");
         return baseMapper.selectOne(
             new LambdaQueryWrapper<Member>().eq(Member::getTeamId, teamId)
@@ -118,14 +115,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
 
     @Override
     public void createMember(Member member) {
-        member.setTeamId(commonService.getTeamId());
         User user = Optional.ofNullable(userService.findByName(member.getUserName()))
             .orElseThrow(() -> new IllegalArgumentException(String.format("The username [%s] not found", member.getUserName())));
         Optional.ofNullable(roleService.getById(member.getRoleId()))
             .orElseThrow(() -> new IllegalArgumentException(String.format("The roleId [%s] not found", member.getRoleId())));
         Team team = Optional.ofNullable(teamService.getById(member.getTeamId()))
             .orElseThrow(() -> new IllegalArgumentException(String.format("The teamId [%s] not found", member.getTeamId())));
-        AssertUtils.isTrue(findByUserId(user.getUserId()) == null,
+        AssertUtils.isTrue(findByUserId(member.getTeamId(), user.getUserId()) == null,
             String.format("The user [%s] has been added the team [%s], please don't add it again.", member.getUserName(), team.getTeamName()));
 
         member.setId(null);
@@ -142,7 +138,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
 
     @Override
     public void updateMember(Member member) {
-        member.setTeamId(commonService.getTeamId());
         Member oldMember = Optional.ofNullable(this.getById(member.getId()))
             .orElseThrow(() -> new IllegalArgumentException(String.format("The mapping [id=%s] not found", member.getId())));
         AssertUtils.isTrue(oldMember.getTeamId().equals(member.getTeamId()), "Team id cannot be changed.");

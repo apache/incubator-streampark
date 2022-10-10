@@ -329,6 +329,7 @@ create table if not exists `t_user` (
   `password` varchar(128)  not null comment 'password',
   `email` varchar(128)  default null comment 'email',
   `user_type` int  not null comment 'user type 1:admin 2:user',
+  `team_id` bigint default null comment 'latest team id',
   `status` char(1)  not null comment 'status 0:locked 1:active',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
@@ -336,8 +337,6 @@ create table if not exists `t_user` (
   `sex` char(1)  default null comment 'gender 0:male 1:female 2:confidential',
   `avatar` varchar(100)  default null comment 'avatar',
   `description` varchar(100)  default null comment 'description',
-  `team_id` bigint default null comment 'latest team id',
-  `team_update_time` datetime default null comment 'latest team update time',
   primary key(`user_id`),
   unique (`username`)
 );

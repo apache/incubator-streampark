@@ -108,7 +108,7 @@ public interface UserService extends IService<User> {
 
     List<User> getNoTokenUser();
 
-    void setLatestTeam(Long teamId, Date dateTime);
+    void setLatestTeam(Long teamId);
 
     void checkTeam(User user);
 }

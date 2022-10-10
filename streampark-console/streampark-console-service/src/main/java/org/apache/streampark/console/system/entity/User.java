@@ -102,9 +102,4 @@ public class User implements Serializable {
      */
     private Long teamId;
 
-    /**
-     * The last set teamId time
-     */
-    private Date teamUpdateTime;
-
 }

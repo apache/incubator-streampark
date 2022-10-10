@@ -144,9 +144,7 @@ modify `username` varchar(255) collate utf8mb4_general_ci not null comment 'user
 add unique key `un_username` (`username`) using btree;
 
 -- add team_id for t_user;
-alter table `t_user` add column `team_id` bigint default null comment 'latest team id' after `description`;
--- add team_update_time for t_user;
-alter table `t_user` add column `team_update_time` datetime default null comment 'latest team update time' after `team_id`;
+alter table `t_user` add column `team_id` bigint default null comment 'latest team id' after `user_type`;
 
 -- alter t_role_user to t_member
 alter table t_user_role rename t_member;

@@ -675,15 +675,14 @@ create table "public"."t_user" (
   "password" varchar(128) collate "pg_catalog"."default" not null,
   "email" varchar(128) collate "pg_catalog"."default",
   "user_type" int4,
+  "team_id" int8,
   "status" int2,
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "last_login_time" timestamp(6),
   "sex" char(1) collate "pg_catalog"."default",
   "avatar" varchar(100) collate "pg_catalog"."default",
-  "description" varchar(100) collate "pg_catalog"."default",
-  "team_id" bigint collate "pg_catalog"."default",
-  "team_update_time" timestamp(6) collate "pg_catalog"."default"
+  "description" varchar(100) collate "pg_catalog"."default"
 )
 ;
 comment on column "public"."t_user"."user_id" is 'user id';
@@ -693,6 +692,7 @@ comment on column "public"."t_user"."salt" is 'salt';
 comment on column "public"."t_user"."password" is 'password';
 comment on column "public"."t_user"."email" is 'email';
 comment on column "public"."t_user"."user_type" is 'user type 1:admin 2:user';
+comment on column "public"."t_user"."team_id" is 'latest team id';
 comment on column "public"."t_user"."status" is 'status 0:locked 1:active';
 comment on column "public"."t_user"."create_time" is 'creation time';
 comment on column "public"."t_user"."modify_time" is 'change time';
@@ -700,8 +700,6 @@ comment on column "public"."t_user"."last_login_time" is 'last login time';
 comment on column "public"."t_user"."sex" is 'gender 0:male 1:female 2:confidential';
 comment on column "public"."t_user"."avatar" is 'avatar';
 comment on column "public"."t_user"."description" is 'description';
-comment on column "public"."t_user"."team_id" is 'latest team id';
-comment on column "public"."t_user"."description" is 'latest team update time';
 alter table "public"."t_user" add constraint "t_user_pkey" primary key ("user_id");
 create index "un_username" on "public"."t_user" using btree (
   "username" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last

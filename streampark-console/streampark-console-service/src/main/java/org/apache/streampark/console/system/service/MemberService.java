@@ -36,7 +36,7 @@ public interface MemberService extends IService<Member> {
 
     List<Team> findUserTeams(Long userId);
 
-    Member findByUserName(String userName);
+    Member findByUserName(Long teamId, String userName);
 
     List<Long> findUserIdsByRoleId(Long roleId);
 

@@ -26,8 +26,6 @@ public interface CommonService {
 
     Long getUserId();
 
-    Long getTeamId();
-
     String getSqlClientJar(FlinkEnv flinkEnv);
 
 }

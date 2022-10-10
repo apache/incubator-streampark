@@ -17,7 +17,7 @@
 
 import { signin, signout } from '@/api/passport'
 import { setTeam } from '@/api/user'
-import {TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO, USER_NAME, USER_ROUTER, INVALID, TEAM} from '@/store/mutation-types'
+import {TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO, USER_NAME, USER_ROUTER, INVALID, TEAM_ID} from '@/store/mutation-types'
 import storage from '@/utils/storage'
 import { getRouter } from '@/api/menu'
 
@@ -26,7 +26,7 @@ const user = {
     expire: storage.get(EXPIRE),
     token: storage.get(TOKEN),
     info: storage.get(USER_INFO),
-    team: storage.get(TEAM),
+    teamId: storage.get(TEAM_ID),
     roles: storage.get(ROLES),
     permissions: storage.get(PERMISSIONS),
     routers: storage.get(USER_ROUTER),
@@ -44,9 +44,9 @@ const user = {
       storage.set(TOKEN, token)
       state.token = token
     },
-    SET_TEAM: (state, team) => {
-      storage.set(TEAM, team)
-      state.team = team
+    SET_TEAM: (state, teamId) => {
+      storage.set(TEAM_ID, teamId)
+      state.teamId = teamId
     },
     SET_ROLES: (state, roles) => {
       storage.set(ROLES, roles)
@@ -73,14 +73,14 @@ const user = {
       state.roles = null
       state.permissions = null
       state.name = null
-      state.team = null
+      state.teamId = null
       state.welcome = null
       state.avatar = null
       storage.rm(USER_INFO)
       storage.rm(USER_NAME)
       storage.rm(USER_ROUTER)
       storage.rm(TOKEN)
-      storage.rm(TEAM)
+      storage.rm(TEAM_ID)
       storage.rm(ROLES)
       storage.rm(PERMISSIONS)
       storage.rm(EXPIRE)
@@ -101,11 +101,7 @@ const user = {
             commit('SET_INFO', respData.user)
           }
           if (respData.user.teamId != null) {
-            const team = {
-              id: respData.user['teamId'],
-              time: respData.user['teamUpdateTime']
-            }
-            commit('SET_TEAM', team)
+            commit('SET_TEAM', respData.user['teamId'])
           }
           storage.rm(INVALID)
           resolve(response)
@@ -142,12 +138,7 @@ const user = {
       return new Promise((resolve, reject) => {
         setTeam(data).then(resp => {
           const respData = resp.data
-          console.log(respData)
-          const team = {
-            id: data.teamId,
-            time: respData.time
-          }
-          commit('SET_TEAM', team)
+          commit('SET_TEAM', data.teamId)
           commit('SET_EXPIRE', respData.expire)
           commit('SET_ROLES', respData.roles)
           commit('SET_PERMISSIONS', respData.permissions)

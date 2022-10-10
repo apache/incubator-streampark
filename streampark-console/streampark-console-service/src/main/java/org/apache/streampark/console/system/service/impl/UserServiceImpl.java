@@ -184,11 +184,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public void setLatestTeam(Long teamId, Date dateTime) {
+    public void setLatestTeam(Long teamId) {
         User user = commonService.getCurrentUser();
         AssertUtils.checkArgument(user != null);
         user.setTeamId(teamId);
-        user.setTeamUpdateTime(dateTime);
         this.baseMapper.updateById(user);
     }
 
@@ -200,7 +199,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 throw new ApiException("get default team failed");
             }
             user.setTeamId(team.getId());
-            user.setTeamUpdateTime(new Date());
             this.baseMapper.updateById(user);
         }
     }

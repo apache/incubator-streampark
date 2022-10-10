@@ -18,7 +18,7 @@
 import axios from 'axios'
 import $qs from 'qs'
 import notification from 'ant-design-vue/es/notification'
-import {INVALID, TOKEN} from '@/store/mutation-types'
+import {INVALID, TEAM_ID, TOKEN} from '@/store/mutation-types'
 import storage from '@/utils/storage'
 import store from '@/store'
 import moment from 'moment'
@@ -75,6 +75,10 @@ http.interceptors.request.use(config => {
         delete data.sortField
         delete data.sortOrder
       }
+    }
+    const teamId = storage.get(TEAM_ID)
+    if (teamId) {
+      data['teamId'] = teamId
     }
     if (config.method === 'get') {
       // filter undefined params

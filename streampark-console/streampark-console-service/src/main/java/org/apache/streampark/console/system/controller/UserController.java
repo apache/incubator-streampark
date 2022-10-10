@@ -47,7 +47,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,8 +174,7 @@ public class UserController {
         }
 
         //1) set latest team
-        Date dateTime = new Date();
-        userService.setLatestTeam(teamId, dateTime);
+        userService.setLatestTeam(teamId);
 
         //2) get latest userInfo
         User user = commonService.getCurrentUser();
@@ -184,7 +182,6 @@ public class UserController {
         user.setSalt("******");
 
         Map<String, Object> infoMap = new HashMap<>(8);
-        infoMap.put("time", dateTime.getTime());
         infoMap.put("user", user);
 
         String username = user.getUsername();
