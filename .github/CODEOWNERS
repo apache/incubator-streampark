@@ -39,7 +39,6 @@ pom.xml @wolfboys
 # DOCS
 README.md @wolfboys
 README_CN.md @wolfboys
-CODE_OF_CONDUCT.md @wolfboys
 SECURITY.md @wolfboys
 
 # COMMON
@@ -74,5 +73,3 @@ SECURITY.md @wolfboys
 
 # STORAGE
 /streampark-storage/ @MonsterChenzhuo @lvshaokang
-
-

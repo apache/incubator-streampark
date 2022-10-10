@@ -39,7 +39,6 @@ DOCKER:
 DOCS:
   - "**/README.md"
   - "**/README_CN.md"
-  - "CODE_OF_CONDUCT.md"
 
 WEB UI:
   - "streampark-console/streampark-console-webapp/**/*"

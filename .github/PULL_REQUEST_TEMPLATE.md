@@ -1,31 +1,41 @@
 <!--
-
 Thank you for contributing to StreamPark! Please make sure that your code changes
 are covered with tests. And in case of new features or big changes
-remember to adjust the documentation.
-
+remember to adjust the documentation. Here are some tips for you:
+1. If this is your first time, please read our contributor guidelines: https://streampark.apache.org/community/submit_guide/submit_code
+2. If the PR is unfinished, add '[WIP]' in your PR title, e.g., '[WIP][Bug] Your PR title ...'.
+3. If possible, provide a concise example to reproduce the issue for a faster review.
 -->
 
 ## What changes were proposed in this pull request?
 
 Issue Number: close #xxx <!-- REMOVE this line if no issue to close -->
 
-Problem Summary:
+<!--(For example: This pull request proposed to add checkstyle plugin).-->
 
-## What is changed and how it works?
+## Brief change log
 
-Proposal: [xxx](url) <!-- REMOVE this line if not applicable -->
+<!--*(for example:)*
+- *Add maven-checkstyle-plugin to root pom.xml*
+-->
 
-Feel free to ping committers for the review!
+## Verifying this change
+<!--*(Please pick either of the following options)*-->
 
-## Contribution Checklist
+This change is a trivial rework / code cleanup without any test coverage.
 
-  - Make sure that the pull request corresponds to a [GITHUB issue](https://github.com/apache/streampark/issues).
+*(or)*
 
-  - Name the pull request in the form "[Feature] [component] Title of the pull request", where *Feature* can be replaced by `Hotfix`, `Bug`, etc.
+This change is already covered by existing tests, such as *(please describe tests)*.
 
-  - Minor fixes should be named following this pattern: `[hotfix] [docs] Fix typo in README.md doc`.
+*(or)*
 
-## Purpose of this pull request
+This change added tests and can be verified as follows:
 
-<!-- Describe the purpose of this pull request. For example: This pull request adds checkstyle plugin.-->
+<!--*(example:)*
+- *Added integration tests for end-to-end.*
+- *Added *Test to verify the change.*
+- *Manually verified the change by testing locally.* -->
+
+## Does this pull request potentially affect one of the following parts:
+ - Dependencies (does it add or upgrade a dependency): (yes / no)
