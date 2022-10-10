@@ -18,21 +18,19 @@
 package org.apache.streampark.console.base.exception;
 
 /**
- * api business exceptions, need to return a friendly message, just for front-end alert
+ * api business exceptions, as different from internal errors, need to return a friendly exception message
  */
-public class ApiException extends RuntimeException {
+public class DetailException extends RuntimeException {
 
-    private static final long serialVersionUID = -994962710559017255L;
-
-    public ApiException(String message) {
+    public DetailException(String message) {
         super(message);
     }
 
-    public ApiException(Throwable cause) {
+    public DetailException(Throwable cause) {
         super(cause);
     }
 
-    public ApiException(String message, Throwable cause) {
+    public DetailException(String message, Throwable cause) {
         super(message, cause);
     }
 

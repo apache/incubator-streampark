@@ -166,18 +166,29 @@ public class UserController {
         return RestResponse.success(UserType.values());
     }
 
+    @PostMapping("initTeam")
+    public RestResponse initTeam(Long teamId, Long userId) {
+        Team team = teamService.getById(teamId);
+        if (team == null) {
+            return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
+        }
+        userService.setLatestTeam(teamId, userId);
+        return RestResponse.success();
+    }
+
     @PostMapping("setTeam")
     public RestResponse setTeam(Long teamId) {
         Team team = teamService.getById(teamId);
         if (team == null) {
-            return RestResponse.fail("teamId is invalid", ResponseCode.CODE_API_FAIL);
+            return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
         }
 
+        User user = commonService.getCurrentUser();
+
         //1) set latest team
-        userService.setLatestTeam(teamId);
+        userService.setLatestTeam(teamId, user.getUserId());
 
         //2) get latest userInfo
-        User user = commonService.getCurrentUser();
         user.setPassword("******");
         user.setSalt("******");
 

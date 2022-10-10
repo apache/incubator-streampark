@@ -65,3 +65,7 @@ export function types() {
 export function setTeam(queryParam) {
   return http.post(api.User.SET_TEAM, queryParam)
 }
+
+export function initTeam(queryParam) {
+  return http.post(api.User.INIT_TEAM, queryParam)
+}

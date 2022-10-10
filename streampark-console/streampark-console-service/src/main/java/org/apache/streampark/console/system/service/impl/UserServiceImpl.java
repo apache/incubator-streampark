@@ -37,6 +37,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -184,8 +185,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public void setLatestTeam(Long teamId) {
-        User user = commonService.getCurrentUser();
+    public void setLatestTeam(Long teamId, Long userId) {
+        User user = getById(userId);
         AssertUtils.checkArgument(user != null);
         user.setTeamId(teamId);
         this.baseMapper.updateById(user);
@@ -194,12 +195,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public void checkTeam(User user) {
         if (user.getTeamId() == null) {
-            Team team = teamService.getDefaultTeam();
-            if (team == null) {
-                throw new ApiException("get default team failed");
+            List<Team> teams = memberService.findUserTeams(user.getUserId());
+            if (CollectionUtils.isEmpty(teams)) {
+                throw new ApiException("There is no team to assign, please contact the administrator!");
+            } else if (teams.size() == 1) {
+                Team team = teams.get(0);
+                user.setTeamId(team.getId());
+                this.baseMapper.updateById(user);
             }
-            user.setTeamId(team.getId());
-            this.baseMapper.updateById(user);
         }
     }
 

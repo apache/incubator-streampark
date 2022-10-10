@@ -20,6 +20,7 @@ package org.apache.streampark.console.base.handler;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiException;
+import org.apache.streampark.console.base.exception.DetailException;
 import org.apache.streampark.console.base.exception.InternalException;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
@@ -73,8 +74,16 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(ApiException e) {
         log.info("api exception：{}", e.getMessage());
-        return RestResponse.fail("api fail, exception:\n" + e.getMessage(), ResponseCode.CODE_API_FAIL);
+        return RestResponse.fail(e.getMessage(), ResponseCode.CODE_FAIL_ALERT);
     }
+
+    @ExceptionHandler(value = DetailException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public RestResponse handleException(DetailException e) {
+        log.info("detail exception：{}", e.getMessage());
+        return RestResponse.fail("exception detail:\n" + e.getMessage(), ResponseCode.CODE_FAIL_DETAIL);
+    }
+
 
     /**
      * Unified processing of request parameter verification (entity object parameter transfer)
