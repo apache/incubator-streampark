@@ -103,6 +103,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.RestOptions;
@@ -293,7 +294,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public String upload(MultipartFile file) throws ApplicationException {
         File temp = WebUtils.getAppTempDir();
-        File saveFile = new File(temp, Objects.requireNonNull(file.getOriginalFilename()));
+        String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
+        File saveFile = new File(temp, fileName);
         // delete when exists
         if (saveFile.exists()) {
             saveFile.delete();

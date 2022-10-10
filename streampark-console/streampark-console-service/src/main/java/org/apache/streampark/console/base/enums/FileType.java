@@ -22,7 +22,7 @@ public enum FileType {
     /**
      * JAR Archive
      */
-    JAR("JAR", "504B03040A00000");
+    JAR("JAR", "504B0304");
 
     private final String alias;
     private final String magicNumber;
