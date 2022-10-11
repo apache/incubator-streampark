@@ -67,6 +67,7 @@ http.interceptors.request.use(config => {
     config.headers['Authorization'] = token
   }
   config.transformRequest = [function (data) {
+
     // Format the data parameter before the request
     if (config.method === 'get' || config.method === 'post') {
       if (data.sortField && data.sortOrder) {

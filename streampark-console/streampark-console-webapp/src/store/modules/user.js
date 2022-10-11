@@ -29,7 +29,7 @@ const user = {
     roles: storage.get(ROLES),
     permissions: storage.get(PERMISSIONS),
     routers: storage.get(USER_ROUTER),
-    teamId: sessionStorage.getItem(TEAM_ID),
+    teamId: storage.get(USER_ROUTER),
     name: '',
     welcome: '',
     avatar: ''
@@ -45,8 +45,10 @@ const user = {
       state.token = token
     },
     SET_TEAM: (state, teamId) => {
-      sessionStorage.setItem(TEAM_ID, teamId)
-      state.teamId = teamId
+      const stringId = teamId.toString()
+      sessionStorage.setItem(TEAM_ID, stringId)
+      storage.set(TEAM_ID, stringId)
+      state.teamId = stringId
     },
     SET_ROLES: (state, roles) => {
       storage.set(ROLES, roles)

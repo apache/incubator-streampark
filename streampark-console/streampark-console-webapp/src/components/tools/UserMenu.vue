@@ -317,7 +317,12 @@ export default {
     },
 
     handlePrepareTeam() {
-      this.teamId = sessionStorage.getItem(TEAM_ID)
+      let id = sessionStorage.getItem(TEAM_ID)
+      if (id == null) {
+        id = storage.get(TEAM_ID)
+        sessionStorage.setItem(TEAM_ID, id)
+      }
+      this.teamId = id
     },
 
     handleChangeTeam(teamId) {
