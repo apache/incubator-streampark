@@ -26,10 +26,13 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: Setup Java and Scala
-        uses: olafurpg/setup-scala@v13
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
         with:
-            java-version: adopt@1.8
+          ava-version: 8
+
+      - name: Launch Scala Steward
+        uses: scala-steward-org/scala-steward-action@v2
 
       - uses: actions/setup-node@v2
         with:
