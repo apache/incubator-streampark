@@ -322,7 +322,7 @@ export default {
         id = storage.get(TEAM_ID)
         sessionStorage.setItem(TEAM_ID, id)
       }
-      this.teamId = id
+      this.teamId = id.toString()
     },
 
     handleChangeTeam(teamId) {

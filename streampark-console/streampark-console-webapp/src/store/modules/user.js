@@ -45,10 +45,9 @@ const user = {
       state.token = token
     },
     SET_TEAM: (state, teamId) => {
-      const stringId = teamId.toString()
-      sessionStorage.setItem(TEAM_ID, stringId)
-      storage.set(TEAM_ID, stringId)
-      state.teamId = stringId
+      sessionStorage.setItem(TEAM_ID, teamId)
+      storage.set(TEAM_ID, teamId)
+      state.teamId = teamId
     },
     SET_ROLES: (state, roles) => {
       storage.set(ROLES, roles)
