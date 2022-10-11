@@ -48,7 +48,7 @@ insert into `t_flink_sql` values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94
 insert into `t_menu` values (100000, 0, 'System', '/system', 'PageView', null, 'desktop', '0', 1, 1, now(), now());
 insert into `t_menu` values (100001, 100000, 'User Management', '/system/user', 'system/user/User', 'user:view', 'user', '0', 1, 1, now(), now());
 insert into `t_menu` values (100002, 100000, 'Role Management', '/system/role', 'system/role/Role', 'role:view', 'smile', '0', 1, 2, now(), now());
-insert into `t_menu` values (100003, 100000, 'Router Management', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', 1, 3, now(), now());
+insert into `t_menu` values (100003, 100000, 'Menu Management', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', 1, 3, now(), now());
 insert into `t_menu` values (100004, 100001, 'add', null, null, 'user:add', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100005, 100001, 'update', null, null, 'user:update', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100006, 100001, 'delete', null, null, 'user:delete', null, '1', 1, null, now(), now());
@@ -151,15 +151,15 @@ insert into `t_setting` values (15, 'docker.register.namespace', null, 'Namespac
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, '1', now(), now(),null,'0',null,null );
-insert into `t_user` values (100001, 'test_user1', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, '1', now(), now(),null,'0',null,null );
-insert into `t_user` values (100002, 'test_user2', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, '1', now(), now(),null,'0',null,null );
-insert into `t_user` values (100003, 'test_user3', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, '1', now(), now(),null,'0',null,null );
+insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, null, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100001, 'test_user1', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, null, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100002, 'test_user2', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, null, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100003, 'test_user3', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, null, '1', now(), now(),null,'0',null,null);
 
 -- ----------------------------
--- Records of t_user_role
+-- Records of t_member
 -- ----------------------------
-insert into `t_user_role` values (100000, 100000, 100001, 100001, now(), now()); -- test_user1 is the developer of the default team
-insert into `t_user_role` values (100001, 100001, 100001, 100001, now(), now()); -- test_user1 is the developer of the test_team1 team
-insert into `t_user_role` values (100002, 100000, 100002, 100001, now(), now()); -- test_user2 is the developer of the test_team1 team
-insert into `t_user_role` values (100003, 100001, 100003, 100001, now(), now()); -- test_user3 is the developer of the test_team1 team
+insert into `t_member` values (100000, 100000, 100001, 100001, now(), now()); -- test_user1 is the developer of the default team
+insert into `t_member` values (100001, 100001, 100001, 100001, now(), now()); -- test_user1 is the developer of the test_team1 team
+insert into `t_member` values (100002, 100000, 100002, 100001, now(), now()); -- test_user2 is the developer of the test_team1 team
+insert into `t_member` values (100003, 100001, 100003, 100001, now(), now()); -- test_user3 is the developer of the test_team1 team

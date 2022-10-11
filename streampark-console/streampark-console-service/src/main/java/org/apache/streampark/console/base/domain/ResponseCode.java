@@ -23,6 +23,9 @@ public interface ResponseCode {
 
     Long CODE_FAIL = 500L;
 
-    Long CODE_API_FAIL = 501L;
+    Long CODE_FORBIDDEN = 403L;
 
+    Long CODE_FAIL_ALERT = 501L;
+
+    Long CODE_FAIL_DETAIL = 502L;
 }

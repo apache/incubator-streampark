@@ -16,7 +16,8 @@
  */
 
 import { signin, signout } from '@/api/passport'
-import {TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO, USER_NAME, USER_ROUTER, INVALID} from '@/store/mutation-types'
+import { setTeam, initTeam } from '@/api/user'
+import {TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO, USER_NAME, USER_ROUTER, INVALID, TEAM_ID} from '@/store/mutation-types'
 import storage from '@/utils/storage'
 import { getRouter } from '@/api/menu'
 
@@ -25,6 +26,7 @@ const user = {
     expire: storage.get(EXPIRE),
     token: storage.get(TOKEN),
     info: storage.get(USER_INFO),
+    teamId: storage.get(TEAM_ID),
     roles: storage.get(ROLES),
     permissions: storage.get(PERMISSIONS),
     routers: storage.get(USER_ROUTER),
@@ -41,6 +43,10 @@ const user = {
     SET_TOKEN: (state, token) => {
       storage.set(TOKEN, token)
       state.token = token
+    },
+    SET_TEAM: (state, teamId) => {
+      storage.set(TEAM_ID, teamId)
+      state.teamId = teamId
     },
     SET_ROLES: (state, roles) => {
       storage.set(ROLES, roles)
@@ -67,12 +73,14 @@ const user = {
       state.roles = null
       state.permissions = null
       state.name = null
+      state.teamId = null
       state.welcome = null
       state.avatar = null
       storage.rm(USER_INFO)
       storage.rm(USER_NAME)
       storage.rm(USER_ROUTER)
       storage.rm(TOKEN)
+      storage.rm(TEAM_ID)
       storage.rm(ROLES)
       storage.rm(PERMISSIONS)
       storage.rm(EXPIRE)
@@ -84,21 +92,29 @@ const user = {
     SignIn ({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         signin(userInfo).then(response => {
-          const respData = response.data
-          if (respData != null && respData.token) {
-            commit('SET_EXPIRE', respData.expire)
-            commit('SET_TOKEN', respData.token)
-            commit('SET_ROLES', respData.roles)
-            commit('SET_PERMISSIONS', respData.permissions)
-            commit('SET_INFO', respData.user)
+          if (response.code == 403 || response.code == 1 || response.code == 0) {
+            reject(response)
+          } else {
+            const respData = response.data
+            if (respData != null && respData.token) {
+              commit('SET_EXPIRE', respData.expire)
+              commit('SET_TOKEN', respData.token)
+              commit('SET_ROLES', respData.roles)
+              commit('SET_PERMISSIONS', respData.permissions)
+              commit('SET_INFO', respData.user)
+            }
+            if (respData.user.teamId != null) {
+              commit('SET_TEAM', respData.user['teamId'])
+            }
+            storage.rm(INVALID)
+            resolve(response)
           }
-          storage.rm(INVALID)
-          resolve(response)
         }).catch(error => {
           reject(error)
         })
       })
     },
+
     GetRouter ({ commit }, data) {
       return new Promise((resolve, reject) => {
         getRouter({}).then(resp => {
@@ -119,6 +135,25 @@ const user = {
         }).catch(() => {
           resolve()
         })
+      })
+    },
+
+    SetTeam({commit}, data) {
+      return new Promise((resolve, reject) => {
+        if (data.userId != null) {
+          initTeam(data).then(() => resolve()).catch(error => reject(error))
+        } else {
+          setTeam(data).then(resp => {
+            const respData = resp.data
+            commit('SET_TEAM', data.teamId)
+            commit('SET_ROLES', respData.roles)
+            commit('SET_PERMISSIONS', respData.permissions)
+            commit('SET_INFO', respData.user)
+            resolve()
+          }).catch(error => {
+            reject(error)
+          })
+        }
       })
     }
 

@@ -120,7 +120,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                 return result;
             }
         }
-        flinkCluster.setUserId(commonService.getCurrentUser().getUserId());
+        flinkCluster.setUserId(commonService.getUserId());
         flinkCluster.setCreateTime(new Date());
         // remote mode directly set STARTED
         if (ExecutionMode.REMOTE.equals(flinkCluster.getExecutionModeEnum())) {

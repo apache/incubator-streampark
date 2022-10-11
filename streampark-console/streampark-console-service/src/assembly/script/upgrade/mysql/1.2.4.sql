@@ -149,4 +149,11 @@ alter table `t_user`
 modify `username` varchar(255) collate utf8mb4_general_ci not null comment 'user name',
 add unique key `un_username` (`username`) using btree;
 
+-- add team_id for t_user;
+alter table `t_user` add column `team_id` bigint default null comment 'latest team id' after `user_type`;
+
+-- alter t_role_user to t_member
+alter table t_user_role rename t_member;
+
 set foreign_key_checks = 1;
+

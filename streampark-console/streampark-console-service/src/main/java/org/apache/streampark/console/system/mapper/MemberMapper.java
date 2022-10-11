@@ -15,20 +15,33 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.exception;
+package org.apache.streampark.console.system.mapper;
 
-import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.console.system.entity.Member;
 
-public class AlertException extends ApiAlertException {
-    public AlertException(String message) {
-        super(message);
-    }
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Param;
 
-    public AlertException(Throwable cause) {
-        super(ExceptionUtils.stringifyException(cause));
-    }
+public interface MemberMapper extends BaseMapper<Member> {
 
-    public AlertException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    /**
+     * delete role by user id
+     *
+     * @param userId user id
+     * @return boolean
+     */
+    Boolean deleteByUserId(@Param("userId") Long userId);
+
+    /**
+     * delete user by role id
+     *
+     * @param roleId role id
+     * @return boolean
+     */
+    Boolean deleteByRoleId(@Param("roleId") Long roleId);
+
+    IPage<Member> findUsers(Page<Member> page, @Param("member") Member member);
+
 }

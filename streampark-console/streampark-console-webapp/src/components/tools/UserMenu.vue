@@ -65,19 +65,19 @@
         <img src="https://img.shields.io/github/forks/streamxhub/streampark.svg?sanitize=true" class="shields">
       </a>
 
-      <notice class="action"/>
-
       <a> Team : </a>
 
       <a-select
         mode="single"
         :allow-clear="false"
-        style="width: 200px"
+        style="min-width: 100px; margin-right: 10px"
         @change="handleChangeTeam"
-        v-decorator="['teamId']">
+        class="team-select"
+        v-model="teamId">
         <a-select-option
           v-for="t in teamList"
-          :key="t.id">
+          :value="t.id"
+          :key="`team_`.concat(t.id)">
           {{ t.teamName }}
         </a-select-option>
       </a-select>
@@ -105,6 +105,9 @@
           </a-menu-item>
         </a-menu>
       </a-dropdown>
+
+      <notice class="action"/>
+
     </div>
 
     <a-modal
@@ -120,7 +123,7 @@
       </template>
       <a-form
         @submit="handleChangeOk"
-        :form="formPassword">
+        :form="form">
         <a-form-item
           label="User Name"
           :label-col="{lg: {span: 7}, sm: {span: 7}}"
@@ -173,7 +176,6 @@
         </a-button>
       </template>
     </a-modal>
-
   </div>
 </template>
 
@@ -187,6 +189,7 @@ import {teams} from '@/api/member'
 import themeUtil from '@/utils/themeUtil'
 import storage from '@/utils/storage'
 import {TEAM_ID, USER_INFO, USER_NAME} from '@/store/mutation-types'
+import {message} from 'ant-design-vue'
 
 export default {
   name: 'UserMenu',
@@ -198,11 +201,11 @@ export default {
   data() {
     return {
       passwordVisible: false,
-      formPassword: null,
+      form: null,
       confirmDirty: false,
       themeDark: false,
-      form: this.$form.createForm(this),
-      teamList: []
+      teamList: [],
+      teamId: null
     }
   },
 
@@ -216,16 +219,17 @@ export default {
   },
 
   beforeMount() {
-    this.formPassword = this.$form.createForm(this)
+    this.form = this.$form.createForm(this)
   },
 
   mounted() {
     this.handleChangeTheme(true)
+    this.handlePrepareTeam()
     this.fetchTeams()
   },
 
   methods: {
-    ...mapActions(['SignOut','ChangeTheme']),
+    ...mapActions(['SignOut','ChangeTheme', 'SetTeam']),
     handleLogout () {
       const that = this
       this.$confirm({
@@ -249,7 +253,7 @@ export default {
     },
 
     handleChangeOk() {
-      this.formPassword.validateFields((err, values) => {
+      this.form.validateFields((err, values) => {
         if (!err) {
           this.handleChangeCancel()
           password({
@@ -274,7 +278,7 @@ export default {
     handleChangeCancel () {
         this.passwordVisible = false
         setTimeout(() => {
-          this.formPassword.resetFields()
+          this.form.resetFields()
         }, 1000)
     },
 
@@ -299,8 +303,7 @@ export default {
     },
 
     compareToFirstPassword(rule, value, callback) {
-      const form = this.formPassword
-      if (value && value !== form.getFieldValue('password')) {
+      if (value && value !== this.form.getFieldValue('password')) {
         callback('Two passwords that you enter is inconsistent!')
       } else {
         callback()
@@ -308,15 +311,50 @@ export default {
     },
 
     validateToNextPassword(rule, value, callback) {
-      const form = this.formPassword
       if (value && this.confirmDirty) {
-        form.validateFields(['confirm'], { force: true })
+        this.form.validateFields(['confirm'], { force: true })
       }
       callback()
     },
 
+    handlePrepareTeam() {
+      const teamId = storage.get(TEAM_ID) || []
+      this.teamId = teamId
+    },
+
     handleChangeTeam(teamId) {
-      storage.set(TEAM_ID, teamId)
+      this.SetTeam({
+        teamId: teamId
+      }).then(() => {
+        //refresh...
+        this.handleRefreshPage()
+      }).catch((err) => message.error(err))
+    },
+
+    handleRefreshPage() {
+      const defaultPage = '/flink/app'
+      const pages = [
+        '/system/user',
+        '/system/role',
+        '/system/menu',
+        '/system/token',
+        '/system/team',
+        '/system/member',
+        '/flink/project',
+        '/flink/app'
+      ]
+      const skipPages = [
+        '/flink/notebook/view',
+        '/flink/setting'
+      ]
+      const currPath = location.href.replace(/(.*)#/,'')
+      if (!skipPages.includes(currPath)) {
+        if (pages.includes(currPath)) {
+          window.location.reload()
+        } else {
+          this.$router.push({path: defaultPage})
+        }
+      }
     },
 
     fetchTeams() {
@@ -367,6 +405,23 @@ export default {
     -webkit-text-fill-color: transparent;
     -webkit-background-clip: text;
     -webkit-box-decoration-break: clone;
+  }
+}
+
+.team-select {
+  .ant-select-selection__rendered {
+    position: relative;
+    display: block;
+    margin: 0px 6px;
+    line-height: 22px;
+  }
+  .ant-select-selection--single {
+    height: unset;
+  }
+  .ant-select-arrow {
+    right: 5px;
+    margin-top: -6px;
+    font-size: 8px;
   }
 }
 

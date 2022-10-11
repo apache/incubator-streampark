@@ -461,6 +461,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
+        if (appParam.getTeamId() == null) {
+            return null;
+        }
         Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
         if (CommonUtils.notEmpty(appParam.getStateArray())) {
             if (Arrays.stream(appParam.getStateArray()).anyMatch(x -> x == FlinkAppState.FINISHED.getValue())) {
@@ -573,7 +576,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean create(Application appParam) {
-        appParam.setUserId(commonService.getCurrentUser().getUserId());
+        AssertUtils.checkArgument(appParam.getTeamId() != null, "The teamId cannot be null");
+        appParam.setUserId(commonService.getUserId());
         appParam.setState(FlinkAppState.ADDED.getValue());
         appParam.setLaunch(LaunchState.NEED_LAUNCH.get());
         appParam.setOptionState(OptionState.NONE.getValue());
@@ -648,7 +652,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setModule(oldApp.getModule());
         newApp.setDefaultModeIngress(oldApp.getDefaultModeIngress());
 
-        newApp.setUserId(commonService.getCurrentUser().getUserId());
+        newApp.setUserId(commonService.getUserId());
         newApp.setState(FlinkAppState.ADDED.getValue());
         newApp.setLaunch(LaunchState.NEED_LAUNCH.get());
         newApp.setOptionState(OptionState.NONE.getValue());
@@ -1071,7 +1075,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        Long userId = commonService.getCurrentUser().getUserId();
+        Long userId = commonService.getUserId();
         if (!application.getUserId().equals(userId)) {
             FlinkTrackingTask.addCanceledApp(application.getId(), userId);
         }

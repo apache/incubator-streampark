@@ -253,11 +253,12 @@ fi
 
 print_logo() {
   printf '\n'
-  printf '      %s    _____ __                            ____             __       %s\n'          $PRIMARY $RESET
-  printf '      %s   / ___// /_________  ____ _____ ___  / __ \____ ______/ /__     %s\n'          $PRIMARY $RESET
-  printf '      %s   \__ \/ __/ ___/ _ \/ __ `/ __ `__ \/ /_/ / __ `/ ___/ //_/     %s\n'          $PRIMARY $RESET
-  printf '      %s  ___/ / /_/ /  /  __/ /_/ / / / / / / ____/ /_/ / /  / ,<        %s\n'          $PRIMARY $RESET
-  printf '      %s /____/\__/_/   \___/\__,_/_/ /_/ /_/_/    \__,_/_/  /_/|_|       %s\n\n'        $PRIMARY $RESET
+  printf '      %s    _____ __                                             __       %s\n'          $PRIMARY $RESET
+  printf '      %s   / ___// /_________  ____ _____ ___  ____  ____ ______/ /__     %s\n'          $PRIMARY $RESET
+  printf '      %s   \__ \/ __/ ___/ _ \/ __ `/ __ `__ \/ __ \  __ `/ ___/ //_/     %s\n'          $PRIMARY $RESET
+  printf '      %s  ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        %s\n'          $PRIMARY $RESET
+  printf '      %s /____/\__/_/   \___/\__,_/_/ /_/ /_/ ____/\__,_/_/  /_/|_|       %s\n'          $PRIMARY $RESET
+  printf '      %s                                   /_/                            %s\n\n'        $PRIMARY $RESET
   printf '      %s   Version:  1.2.4 %s\n'                                                         $BLUE   $RESET
   printf '      %s   WebSite:  https://streampark.apache.org%s\n'                                   $BLUE   $RESET
   printf '      %s   GitHub :  http://github.com/apache/streampark%s\n\n'                          $BLUE   $RESET

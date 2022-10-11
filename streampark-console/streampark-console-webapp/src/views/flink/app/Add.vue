@@ -1467,7 +1467,6 @@
   import configOptions from './Option'
   import SvgIcon from '@/components/SvgIcon'
   import { sysHadoopConf } from '@api/config'
-  import {TEAM_ID} from '@/store/mutation-types'
 
   import {
     uploadJars as histUploadJars,
@@ -2311,7 +2310,6 @@
         }
         const params = {
           jobType: 1,
-          teamId: storage.get(TEAM_ID),
           executionMode: values.executionMode,
           versionId: values.versionId,
           projectId: values.project || null,
@@ -2416,7 +2414,6 @@
 
         const params = {
           jobType: 2,
-          teamId: storage.get(TEAM_ID),
           executionMode: values.executionMode,
           versionId: values.versionId,
           flinkSql: this.controller.flinkSql.value,

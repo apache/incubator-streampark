@@ -24,7 +24,6 @@ import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.enums.AccessTokenState;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.AccessToken;
-import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -60,10 +59,10 @@ public class AccessTokenController {
 
     @PostMapping(value = "check")
     public RestResponse checkToken() {
-        User user = commonService.getCurrentUser();
+        Long userId = commonService.getUserId();
         RestResponse restResponse = RestResponse.success();
-        if (user != null) {
-            AccessToken accessToken = accessTokenService.getByUserId(user.getUserId());
+        if (userId != null) {
+            AccessToken accessToken = accessTokenService.getByUserId(userId);
             if (accessToken == null) {
                 restResponse.data(AccessTokenState.NULL.get());
             } else if (AccessToken.STATUS_DISABLE.equals(accessToken.getFinalStatus())) {
@@ -117,11 +116,9 @@ public class AccessTokenController {
         String resultCURL = null;
         CURLBuilder curlBuilder = new CURLBuilder(baseUrl + path);
 
-        User user = commonService.getCurrentUser();
-
         curlBuilder
             .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-            .addHeader("Authorization", accessTokenService.getByUserId(user.getUserId()).getToken());
+            .addHeader("Authorization", accessTokenService.getByUserId(commonService.getUserId()).getToken());
 
         if ("/flink/app/start".equalsIgnoreCase(path)) {
             resultCURL = curlBuilder

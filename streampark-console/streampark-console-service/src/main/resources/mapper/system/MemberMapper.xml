@@ -18,9 +18,9 @@
 
 -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.apache.streampark.console.system.mapper.TeamMemberMapper">
+<mapper namespace="org.apache.streampark.console.system.mapper.MemberMapper">
 
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.system.entity.TeamMember">
+    <resultMap id="BaseResultMap" type="org.apache.streampark.console.system.entity.Member">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="user_id" jdbcType="BIGINT" property="userId"/>
@@ -31,42 +31,42 @@
 
     <delete id="deleteByUserId">
         delete
-        from t_user_role
+        from t_member
         where user_id = #{userId}
     </delete>
 
     <delete id="deleteByRoleId">
         delete
-        from t_user_role
+        from t_member
         where role_id = #{roleId}
     </delete>
 
-    <select id="findUsers" resultType="teamMember" parameterType="teamMember">
+    <select id="findUsers" resultType="member" parameterType="member">
         select tur.*,
         u.username,
         r.role_name
-        from t_user_role tur
+        from t_member tur
         join t_user u
         on u.user_id = tur.user_id
         join t_role r
         on r.role_id = tur.role_id
         <where>
-            tur.team_id = ${teamMember.teamId}
-            <if test="teamMember.userName != null and teamMember.userName != ''">
-                and u.username like '%${teamMember.userName}%'
+            tur.team_id = ${member.teamId}
+            <if test="member.userName != null and member.userName != ''">
+                and u.username like '%${member.userName}%'
             </if>
-            <if test="teamMember.roleName != null and teamMember.roleName != ''">
-                and r.role_name = '${teamMember.roleName}'
+            <if test="member.roleName != null and member.roleName != ''">
+                and r.role_name = '${member.roleName}'
             </if>
-            <if test="teamMember.createTimeFrom != null and teamMember.createTimeFrom !=''">
-                and tur.create_time &gt; #{teamMember.createTimeFrom}
+            <if test="member.createTimeFrom != null and member.createTimeFrom !=''">
+                and tur.create_time &gt; #{member.createTimeFrom}
             </if>
-            <if test="teamMember.createTimeTo!= null and teamMember.createTimeTo !=''">
-                and tur.create_time &lt; #{teamMember.createTimeTo}
+            <if test="member.createTimeTo!= null and member.createTimeTo !=''">
+                and tur.create_time &lt; #{member.createTimeTo}
             </if>
         </where>
-        <if test="teamMember.sortField != null and teamMember.sortField != ''">
-            order by ${teamMember.sortField} ${teamMember.sortOrder}
+        <if test="member.sortField != null and member.sortField != ''">
+            order by ${member.sortField} ${member.sortOrder}
         </if>
     </select>
 

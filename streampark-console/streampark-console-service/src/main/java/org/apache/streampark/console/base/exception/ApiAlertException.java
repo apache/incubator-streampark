@@ -17,18 +17,27 @@
 
 package org.apache.streampark.console.base.exception;
 
-import org.apache.streampark.common.util.ExceptionUtils;
+/**
+ * <pre>
+ * An exception message that needs to be notified to front-end,
+ * usually a <strong>simple</strong>, clear</strong> message, e.g:
+ * <p>1. Username already exists</p>
+ * <p>2. No permission, please contact the administrator</p>
+ * ...
+ * </pre>
+ */
+public class ApiAlertException extends RuntimeException {
 
-public class AlertException extends ApiAlertException {
-    public AlertException(String message) {
+    public ApiAlertException(String message) {
         super(message);
     }
 
-    public AlertException(Throwable cause) {
-        super(ExceptionUtils.stringifyException(cause));
+    public ApiAlertException(Throwable cause) {
+        super(cause);
     }
 
-    public AlertException(String message, Throwable cause) {
+    public ApiAlertException(String message, Throwable cause) {
         super(message, cause);
     }
+
 }
