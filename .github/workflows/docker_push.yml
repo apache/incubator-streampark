@@ -63,7 +63,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: streamxhub/streampark-console
+          images: apache/streampark
 
       - name: Build and push streamx
         uses: docker/build-push-action@v3
