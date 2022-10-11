@@ -31,7 +31,7 @@
 
     <properties>
         <apache.httpclient5.version>5.1</apache.httpclient5.version>
-        <snakeyaml.version>1.29</snakeyaml.version>
+        <snakeyaml.version>1.32</snakeyaml.version>
         <scalatest.skiptests>true</scalatest.skiptests>
     </properties>
 
