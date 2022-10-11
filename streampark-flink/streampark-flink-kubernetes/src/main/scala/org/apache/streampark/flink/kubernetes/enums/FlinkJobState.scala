@@ -42,7 +42,7 @@ object FlinkJobState extends Enumeration {
   val INITIALIZING, CREATED, RUNNING, FAILING, FAILED, CANCELLING, CANCELED, FINISHED, RESTARTING, SUSPENDED, RECONCILING = Value
 
   // ending flink states, the tracking monitor will stop tracking these states of flink job.
-  val endingStates = Seq(FAILED, CANCELED, FINISHED, POS_TERMINATED, TERMINATED, LOST)
+  val endingStates: Seq[FlinkJobState.Value] = Seq(FAILED, CANCELED, FINISHED, POS_TERMINATED, TERMINATED, LOST)
 
   def of(value: String): FlinkJobState.Value = {
     this.values.find(_.toString == value).getOrElse(OTHER)

@@ -73,9 +73,7 @@ class JdbcSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, j
     this(ApiType.java, jdbc)
     this.javaSqlFunc = javaSqlFunc
     this.javaResultFunc = javaResultFunc
-    this.javaRunningFunc = if (runningFunc != null) runningFunc else new RunningFunction {
-      override def running(): lang.Boolean = true
-    }
+    this.javaRunningFunc = if (runningFunc != null) runningFunc else () => true
   }
 
   @throws[Exception]

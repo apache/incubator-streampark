@@ -17,14 +17,13 @@
 
 package org.apache.streampark.flink.connector.jdbc.internal
 
-import org.apache.streampark.common.util.{JdbcUtils, Logger}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
+import org.apache.streampark.common.util.{JdbcUtils, Logger}
 
 import java.util.Properties
 import java.util.concurrent.{CompletableFuture, ExecutorService, Executors}
-import java.util.function.{Consumer, Supplier}
 
 /**
  * Based on thread pool
@@ -53,16 +52,12 @@ class JdbcASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => Str
 
   @throws[Exception]
   def asyncInvoke(input: T, resultFuture: ResultFuture[R]): Unit = {
-    CompletableFuture.supplyAsync(new Supplier[Iterable[Map[String, _]]] {
-      override def get(): Iterable[Map[String, _]] = JdbcUtils.select(sqlFun(input))(jdbc)
-    }, executorService).thenAccept(new Consumer[Iterable[Map[String, _]]] {
-      override def accept(result: Iterable[Map[String, _]]): Unit = {
-        val list = result.toList
-        if (list.isEmpty) {
-          resultFuture.complete(List(resultFun(input, Map.empty[String, Any])))
-        } else {
-          resultFuture.complete(list.map(x => resultFun(input, x)))
-        }
+    CompletableFuture.supplyAsync(() => JdbcUtils.select(sqlFun(input))(jdbc), executorService).thenAccept((result: Iterable[Map[String, _]]) => {
+      val list = result.toList
+      if (list.isEmpty) {
+        resultFuture.complete(List(resultFun(input, Map.empty[String, Any])))
+      } else {
+        resultFuture.complete(list.map(x => resultFun(input, x)))
       }
     })
 
