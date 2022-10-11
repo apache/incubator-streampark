@@ -78,9 +78,7 @@ object FlinkShimsProxy extends Logger {
    */
   def proxy[T](flinkVersion: FlinkVersion, func: JavaFunc[ClassLoader, T]): T = {
     val shimsClassLoader = getFlinkShimsClassLoader(flinkVersion)
-    ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, new Supplier[T]() {
-      override def get(): T = func.apply(shimsClassLoader)
-    })
+    ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
   // flink 1.12 1.13~1.14 1.15 parseSql class exist in different dependencies,
@@ -97,7 +95,11 @@ object FlinkShimsProxy extends Logger {
       val shimsUrls = ListBuffer[URL](libTableURL ++ optTableURL: _*)
 
       // 3) add only streampark shims jar
-      addShimsUrls(flinkVersion, shimsUrls, _.getName.startsWith("streampark-flink-shims"))
+      addShimsUrls(flinkVersion, file => {
+        if (file != null && file.getName.startsWith("streampark-flink-shims")) {
+          shimsUrls += file.toURI.toURL
+        }
+      })
       new ChildFirstClassLoader(
         shimsUrls.toArray,
         Thread.currentThread().getContextClassLoader,
@@ -106,7 +108,7 @@ object FlinkShimsProxy extends Logger {
     })
   }
 
-  def addShimsUrls(flinkVersion: FlinkVersion, shimsUrls: ListBuffer[URL], filterJar: File => Boolean): Unit = {
+  def addShimsUrls(flinkVersion: FlinkVersion, addShimUrl: File => Unit): Unit = {
     val appHome = System.getProperty(ConfigConst.KEY_APP_HOME)
     require(appHome != null, String.format("%s is not found on System env.", ConfigConst.KEY_APP_HOME))
 
@@ -115,12 +117,6 @@ object FlinkShimsProxy extends Logger {
     val majorVersion = flinkVersion.majorVersion
     val scalaVersion = flinkVersion.scalaVersion
     val streamParkMatcher = getStreamParkLibPattern(scalaVersion)
-
-    def addShimUrl(jar: File): Unit = {
-      if (filterJar.apply(jar)) {
-        shimsUrls += jar.toURI.toURL
-      }
-    }
 
     libPath.listFiles().foreach((jar: File) => {
       try {
@@ -155,9 +151,7 @@ object FlinkShimsProxy extends Logger {
    */
   def proxyVerifySql[T](flinkVersion: FlinkVersion, func: JavaFunc[ClassLoader, T]): T = {
     val shimsClassLoader = getVerifySqlLibClassLoader(flinkVersion)
-    ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, new Supplier[T]() {
-      override def get(): T = func.apply(shimsClassLoader)
-    })
+    ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
   private[this] def getFlinkShimsClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
@@ -169,7 +163,11 @@ object FlinkShimsProxy extends Logger {
       val shimsUrls = ListBuffer[URL](libURL: _*)
 
       // 2) add all shims jar
-      addShimsUrls(flinkVersion, shimsUrls, (file: File) => file != null)
+      addShimsUrls(flinkVersion, file => {
+        if (file != null) {
+          shimsUrls += file.toURI.toURL
+        }
+      })
 
       new ChildFirstClassLoader(
         shimsUrls.toArray,
