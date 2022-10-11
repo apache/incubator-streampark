@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-name: "pull-request-robot"
+name: "Pull Request Robot"
 on:
   - pull_request_target
 
