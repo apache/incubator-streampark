@@ -323,15 +323,38 @@ export default {
     },
 
     handleChangeTeam(teamId) {
-      message.config({
-        top: `200px`
-      })
-      message.loading(' loading...  ', 3, () => {
-        message.destroy()
-      })
       this.SetTeam({
         teamId: teamId
-      })
+      }).then(() => {
+        //refresh...
+        this.handleRefreshPage()
+      }).catch((err) => message.error(err))
+    },
+
+    handleRefreshPage() {
+      const defaultPage = '/flink/app'
+      const pages = [
+        '/system/user',
+        '/system/role',
+        '/system/menu',
+        '/system/token',
+        '/system/team',
+        '/system/member',
+        '/flink/project',
+        '/flink/app'
+      ]
+      const skipPages = [
+        '/flink/notebook/view',
+        '/flink/setting'
+      ]
+      const currPath = location.href.replace(/(.*)#/,'')
+      if (!skipPages.includes(currPath)) {
+        if (pages.includes(currPath)) {
+          window.location.reload()
+        } else {
+          this.$router.push({path: defaultPage})
+        }
+      }
     },
 
     fetchTeams() {
