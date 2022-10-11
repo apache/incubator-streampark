@@ -77,7 +77,7 @@
 
   const [registerConfDrawer, { openDrawer: openConfDrawer }] = useDrawer();
 
-  /* 初始化表单 */
+  /* Initialize the form */
   async function handleInitForm() {
     const defaultValue = {
       resolveOrder: 0,
@@ -95,7 +95,7 @@
     setFieldsValue(defaultValue);
   }
 
-  /* 打开sqlConf drawer */
+  /* Open the sqlConf drawer */
   async function handleSQLConf(checked: boolean, model: Recordable) {
     if (checked) {
       if (model.configOverride != null) {
@@ -114,7 +114,7 @@
     }
   }
 
-  /* 自定义job 上传 */
+  /* Custom job upload */
   async function handleCustomJobRequest(data) {
     const formData = new FormData();
     formData.append('file', data.file);
@@ -158,7 +158,7 @@
     }
   }
 
-  /* custom模式 */
+  /* custom mode */
   async function handleSubmitCustomJob(values) {
     handleCluster(values);
     const params = {
@@ -205,9 +205,9 @@
       }
     }
   }
-  /* flink sql 模式 */
+  /* flink sql mode */
   function handleSubmitSQL(values) {
-    //触发一次pom确认操作.
+    // Trigger a pom confirmation operation.
     unref(dependencyRef)?.handleApplyPom();
     // common params...
     const dependency: { pom?: string; jar?: string } = {};
@@ -244,7 +244,7 @@
     handleSubmitParams(params, values, k8sTemplate);
     handleCreateApp(params);
   }
-  /* 提交创建 */
+  /* Submit to create */
   function handleAppCreate(formValue: Recordable) {
     try {
       submitLoading.value = true;
@@ -265,7 +265,7 @@
       submitLoading.value = false;
     }
   }
-  /* 发送创建请求 */
+  /* send create request */
   async function handleCreateApp(params: Recordable) {
     const param = {};
     for (const k in params) {

@@ -113,7 +113,7 @@
     ],
   });
 
-  /* 提交新建设置 */
+  // Submit new settings
   async function handleSubmit() {
     try {
       changeOkLoading(true);
@@ -143,11 +143,11 @@
         },
         isJsonType: true,
       };
-      console.log('更新告警参数：' + JSON.stringify(param));
+      console.log('Update alarm parameters：' + JSON.stringify(param));
 
-      /* 无id 表示新增操作 */
+      // No id means new operation
       if (!param.id) {
-        // 提交之前检测一下是否存在相同名称的告警
+        // Check if there is an alarm with the same name before submitting
         const isExist = await fetchExistsAlert({ alertName: param.alertName });
         if (isExist) {
           createConfirm({

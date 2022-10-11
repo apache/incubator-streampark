@@ -18,7 +18,7 @@
 import axios from 'axios'
 import $qs from 'qs'
 import notification from 'ant-design-vue/es/notification'
-import {INVALID, TOKEN} from '@/store/mutation-types'
+import {INVALID, TEAM_ID, TOKEN} from '@/store/mutation-types'
 import storage from '@/utils/storage'
 import store from '@/store'
 import moment from 'moment'
@@ -76,6 +76,10 @@ http.interceptors.request.use(config => {
         delete data.sortOrder
       }
     }
+    const teamId = storage.get(TEAM_ID)
+    if (teamId) {
+      data['teamId'] = teamId
+    }
     if (config.method === 'get') {
       // filter undefined params
       data = Object.fromEntries(Object.entries(data).filter(([_,value]) => value !== undefined))
@@ -100,16 +104,24 @@ http.interceptors.response.use((response) => {
 }, error => {
   if (error.response) {
     if (error.response.data.code == 501) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: error.response.data.message,
+        footer: '<a href="https://streampark.apache.org/">View the official documentation?</a>'
+      })
+    } else if (error.response.data.code == 502) {
       let width = document.documentElement.clientWidth || document.body.clientWidth
       if (width > 1200) {
         width = 1080
       }
       width *= 0.96
       Swal.fire({
-        title: 'Operation Failed',
         icon: 'error',
+        title: 'Oops...',
         width: width,
         html: '<pre class="propException">' + error.response.data.message + '</pre>',
+        footer: '<a href="https://github.com/apache/incubator-streampark/issues/new/choose">report issue ?</a>',
         focusConfirm: false
       })
     } else {

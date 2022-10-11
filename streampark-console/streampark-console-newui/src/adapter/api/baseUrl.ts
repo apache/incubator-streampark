@@ -19,7 +19,7 @@ export function baseUrl() {
     return `${location.protocol}//${location.host}`;
   }
 
-  const baseApi = import.meta.env.VITE_APP_BASE_API;
+  const baseApi = import.meta.env.VITE_GLOB_API_URL;
 
   return baseApi ? baseApi : '';
 }

@@ -115,16 +115,22 @@ alter table `t_menu` modify `modify_time` datetime not null default current_time
 alter table `t_role` modify `modify_time` datetime not null default current_timestamp on update current_timestamp;
 alter table `t_user` modify `modify_time` datetime not null default current_timestamp on update current_timestamp;
 
--- add permissions for user group management
-insert into `t_menu` values (100047, 100015, 'copy', null, null, 'app:copy', null, '1', '1', null, now(), now());
+-- add new modules to the menu
+insert into `t_menu` values (100043, 100015, 'copy', null, null, 'app:copy', null, 1, 1, null, now(), now());
+insert into `t_menu` values (100044, 100000, 'Team Management', '/system/team', 'system/team/Team', 'team:view', 'team', '0', 1, 2, now(), now());
+insert into `t_menu` values (100045, 100044, 'add', null, null, 'team:add', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100046, 100044, 'update', null, null, 'team:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100047, 100044, 'delete', null, null, 'team:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100048, 100000, 'Member Management', '/system/member', 'system/member/Member', 'member:view', 'usergroup-add', '0', 1, 2, now(), now());
+insert into `t_menu` values (100049, 100048, 'add', null, null, 'member:add', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100050, 100048, 'update', null, null, 'member:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100051, 100048, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
 
-
--- add permissions to admin
-insert into `t_role_menu` values (100062, 100000, 100043);
-insert into `t_role_menu` values (100063, 100000, 100044);
-insert into `t_role_menu` values (100064, 100000, 100045);
-insert into `t_role_menu` values (100065, 100000, 100046);
-insert into `t_role_menu` values (100066, 100000, 100047);
+-- after adding team module, admin has all permissions by default, so admin does not need to add permissions separately, so delete admin related roles and associations
+delete from t_role_menu where role_id = 100000;
+delete from t_role where role_id = 100000;
 
 -- remove user table contact phone field
 alter table `t_user` drop column `mobile`;
@@ -143,4 +149,11 @@ alter table `t_user`
 modify `username` varchar(255) collate utf8mb4_general_ci not null comment 'user name',
 add unique key `un_username` (`username`) using btree;
 
+-- add team_id for t_user;
+alter table `t_user` add column `team_id` bigint default null comment 'latest team id' after `user_type`;
+
+-- alter t_role_user to t_member
+alter table t_user_role rename t_member;
+
 set foreign_key_checks = 1;
+

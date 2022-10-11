@@ -22,6 +22,7 @@ enum Api {
   AddRole = '/role/post',
   UpdateRole = '/role/update',
   DeleteRole = '/role/delete',
+  CHECK_NAME = '/role/check/name',
 }
 
 export function getRoleListByUser(params?) {
@@ -51,6 +52,16 @@ export function editRole(params?) {
 export function deleteRole(params?) {
   return defHttp.delete({
     url: Api.DeleteRole,
+    params,
+    headers: {
+      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
+    },
+  });
+}
+
+export function fetchCheckName(params) {
+  return defHttp.post({
+    url: Api.CHECK_NAME,
     params,
     headers: {
       'Content-Type': ContentTypeEnum.FORM_URLENCODED,

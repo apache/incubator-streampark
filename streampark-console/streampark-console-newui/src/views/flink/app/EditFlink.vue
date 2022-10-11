@@ -63,7 +63,7 @@
     showActionButtonGroup: false,
   });
 
-  /* 表单重置 */
+  /* Form reset */
   function handleReset(executionMode?: string) {
     nextTick(async () => {
       const resetParams = await handleResetApplication();
@@ -98,7 +98,7 @@
       setFieldsValue(defaultParams);
     });
   }
-  /* 自定义job 上传 */
+  /* Custom job upload */
   async function handleCustomJobRequest(data) {
     const formData = new FormData();
     formData.append('file', data.file);
@@ -117,7 +117,7 @@
     }
   }
 
-  /* 处理更新参数 */
+  /* Handling update parameters */
   function handleAppUpdate(values) {
     submitLoading.value = true;
     try {
@@ -163,7 +163,7 @@
     }
   }
 
-  /* 提交更新 */
+  /* Submit an update */
   async function handleUpdateApp(params: Recordable) {
     const updated = await fetchUpdate(params);
     if (updated) {

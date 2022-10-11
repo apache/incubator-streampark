@@ -24,7 +24,7 @@ enum Metrics_API {
   DEL_NOTICE = '/metrics/delnotice',
 }
 /**
- * 导出
+ * export
  * @param {String} appId application id
  * @param {Number} width The width of the screen
  * @returns {Promise<AxiosResponse<Blob>>} Promise<AxiosResponse<Blob>>

@@ -114,7 +114,9 @@ streampark:
     anonUrl: >
       /passport/**,
       /systemName,
+      /member/teams,
       /user/check/**,
+      /user/initTeam,
       /websocket/**,
       /metrics/**,
       /index.html,

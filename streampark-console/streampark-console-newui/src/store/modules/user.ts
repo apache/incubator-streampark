@@ -47,6 +47,7 @@ interface UserState {
   permissions: string[];
   sessionTimeout?: boolean;
   lastUpdateTime: number;
+  teamId?: string;
 }
 
 export const useUserStore = defineStore({
@@ -64,6 +65,8 @@ export const useUserStore = defineStore({
     sessionTimeout: false,
     // Last fetch time
     lastUpdateTime: 0,
+    // user Team
+    teamId: undefined,
   }),
   getters: {
     getUserInfo(): UserInfo {
@@ -88,6 +91,9 @@ export const useUserStore = defineStore({
       return this.permissions?.length > 0
         ? this.permissions
         : getAuthCache<string[]>(PERMISSION_KEY);
+    },
+    getTeamId(): string | undefined {
+      return this.teamId;
     },
   },
   actions: {
@@ -129,6 +135,9 @@ export const useUserStore = defineStore({
       this.setUserInfo(user);
       this.setRoleList(roles);
       this.setPermissions(permissions);
+    },
+    setTeamId(teamId: string) {
+      this.teamId = teamId;
     },
     /**
      * @description: login

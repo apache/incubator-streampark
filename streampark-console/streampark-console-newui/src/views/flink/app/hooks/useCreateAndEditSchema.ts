@@ -71,20 +71,20 @@ export const useCreateAndEditSchema = (
   const [registerConfDrawer, { openDrawer: openConfDrawer }] = useDrawer();
 
   /* 
-  !原项目也未赋值 
+  !The original item is also unassigned
   */
   function getConfigSchemas() {
     return [];
   }
 
-  /* 过滤cluster */
+  /* filter cluster */
   const getExecutionCluster = (
     executionMode: number,
     valueKey: string,
   ): Array<{ label: string; value: string }> => {
     return (unref(flinkClusters) || [])
       .filter((o) => {
-        // 编辑模式多了一个过滤条件
+        // Edit mode has one more filter condition
         if (edit?.mode) {
           return o.executionMode == executionMode && o.clusterState === 1;
         } else {
@@ -283,7 +283,7 @@ export const useCreateAndEditSchema = (
     ];
   });
 
-  /* 检测job name 字段 */
+  /* Detect job name field */
   async function getJobNameCheck(_rule: RuleObject, value: StoreValue) {
     if (value === null || value === undefined || value === '') {
       return Promise.reject('Application Name is required');
@@ -527,10 +527,10 @@ export const useCreateAndEditSchema = (
   });
 
   onMounted(async () => {
-    /* 获取项目数据 */
+    /* Get project data */
     projectList.value = await fetchSelect({});
     flinkEnvs.value = await fetchFlinkEnv();
-    /* 获取告警数据 */
+    /* Get project data */
     alerts.value = await fetchAlertSetting();
     flinkClusters.value = await fetchFlinkCluster();
     historyRecord.k8sNamespace = await fetchK8sNamespaces();

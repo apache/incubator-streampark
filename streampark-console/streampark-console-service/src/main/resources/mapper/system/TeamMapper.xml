@@ -47,8 +47,8 @@
 
     <select id="findUserTeams" resultType="team" parameterType="team">
         select t.* from t_team t
-        join t_user_role ur
-        on t.id = ur.team_id
-        where ur.user_id = #{userId}
+        join t_member m
+        on t.id = m.team_id
+        where m.user_id = #{userId}
     </select>
 </mapper>

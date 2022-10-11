@@ -62,7 +62,7 @@ export function fetchListVer(params) {
   });
 }
 /**
- * 删除配置
+ * delete configuration
  * @param {String}
  * @returns {Promise<Boolean>}
  */

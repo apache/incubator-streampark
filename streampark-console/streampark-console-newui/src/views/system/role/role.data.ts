@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { RuleObject, StoreValue } from 'ant-design-vue/lib/form/interface';
+import { fetchCheckName } from '/@/api/sys/role';
 import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
 
@@ -50,7 +52,24 @@ export const searchFormSchema: FormSchema[] = [
     colProps: { span: 8 },
   },
 ];
-
+async function handleRoleCheck(_rule: RuleObject, value: StoreValue) {
+  if (value) {
+    if (value.length > 10) {
+      return Promise.reject('Role name should not be longer than 10 characters');
+    } else {
+      const res = await fetchCheckName({
+        roleName: value,
+      });
+      if (res) {
+        return Promise.resolve();
+      } else {
+        return Promise.reject('Sorry, the role name already exists');
+      }
+    }
+  } else {
+    return Promise.reject('Role name cannot be empty');
+  }
+}
 export const formSchema: FormSchema[] = [
   {
     field: 'roleId',
@@ -63,6 +82,7 @@ export const formSchema: FormSchema[] = [
     label: 'Role Name',
     required: true,
     component: 'Input',
+    rules: [{ required: true, validator: handleRoleCheck, trigger: 'blur' }],
   },
   {
     label: 'Description',
@@ -75,5 +95,6 @@ export const formSchema: FormSchema[] = [
     slot: 'menu',
     defaultValue: [],
     component: 'Input',
+    rules: [{ required: true, message: 'Please select the permission.' }],
   },
 ];

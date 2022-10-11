@@ -76,20 +76,20 @@
 
   function handleIsStart(item) {
     /**
-      集群刚创建但未启动
-      CREATED(0),
-      集群已启动
-      STARTED(1),
-      集群已停止
-      STOPED(2);
+     The cluster was just created but not started
+     CREATED(0),
+     cluster started
+     STARTED(1),
+     cluster stopped
+     STOPED(2);
     */
     return optionClusters.starting.get(item.id);
   }
-  /* 前往编辑集群 */
+  /* Go to edit cluster */
   function handleEditCluster(item: FlinkCluster) {
     go(`/flink/setting/edit_cluster?clusterId=${item.id}`);
   }
-  /* 部署 */
+  /* deploy */
   async function handleDeployCluser(item: FlinkCluster) {
     const hide = createMessage.loading('The current cluster is starting', 0);
     try {
@@ -117,7 +117,7 @@
       hide();
     }
   }
-  /* 删除 */
+  /* delete */
   async function handleDelete(item: FlinkCluster) {
     const { data } = await fetchClusterRemove(item.id);
     if (data?.data?.status) {

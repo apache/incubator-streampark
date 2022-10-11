@@ -16,21 +16,39 @@
  */
 import { defHttp } from '/@/utils/http/axios';
 import { ContentTypeEnum } from '/@/enums/httpEnum';
+import { Result } from '/#/axios';
+import { AxiosResponse } from 'axios';
 
 enum Api {
   TeamListByUser = '/team/listByUser',
-  TeamList = '/team/list',
-  AddTeam = '/team/post',
-  DeleteTeam = '/team/delete',
+  POST = '/team/post',
+  UPDATE = '/team/update',
+  LIST = '/team/list',
+  CHECK_NAME = '/team/check/name',
+  DELETE = '/team/delete',
 }
 
 export function getTeamListByUser(params?) {
   return defHttp.post({ url: Api.TeamListByUser, params });
 }
 
-export function getTeamList(params?) {
+export function getTeamList(params) {
   return defHttp.post({
-    url: Api.TeamList,
+    url: Api.LIST,
+    params,
+    headers: {
+      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
+    },
+  });
+}
+/**
+ * Create an organization
+ * @param {Recordable} teamParams
+ * @returns Promise<Boolean>
+ */
+export function fetchTeamCreate(params) {
+  return defHttp.post({
+    url: Api.POST,
     params,
     headers: {
       'Content-Type': ContentTypeEnum.FORM_URLENCODED,
@@ -38,22 +56,37 @@ export function getTeamList(params?) {
   });
 }
 
-export function addTeam(params) {
-  return defHttp.post({
-    url: Api.AddTeam,
+/**
+ * update organization
+ * @param {Recordable} teamParams
+ * @returns Promise<Boolean>
+ */
+export function fetchTeamUpdate(params: Recordable) {
+  return defHttp.put<boolean>({
+    url: Api.UPDATE,
     params,
     headers: {
       'Content-Type': ContentTypeEnum.FORM_URLENCODED,
     },
   });
 }
-
-export function deleteTeam(params) {
-  return defHttp.delete({
-    url: Api.DeleteTeam,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
+/**
+ * delete organization
+ * @param {String} id organization id
+ * @returns Promise<AxiosResponse>
+ */
+export function deleteTeam(params: { id: string }) {
+  return defHttp.delete<AxiosResponse<Result>>(
+    {
+      url: Api.DELETE,
+      params,
+      headers: {
+        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
+      },
     },
-  });
+    {
+      isReturnNativeResponse: true,
+      errorMessageMode: 'none',
+    },
+  );
 }

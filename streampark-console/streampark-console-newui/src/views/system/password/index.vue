@@ -15,12 +15,15 @@
   limitations under the License.
 -->
 <template>
-  <PageWrapper title="修改当前用户密码" content="修改成功后会自动退出当前登录！">
+  <PageWrapper
+    title="Modify the current user password"
+    content="After the modification is successful, the current login will be automatically logged out！"
+  >
     <div class="py-8 bg-white flex flex-col justify-center items-center">
       <BasicForm @register="register" />
       <div class="flex justify-center">
-        <a-button @click="resetFields"> 重置 </a-button>
-        <a-button class="!ml-4" type="primary" @click="handleSubmit"> 确认 </a-button>
+        <a-button @click="resetFields"> reset </a-button>
+        <a-button class="!ml-4" type="primary" @click="handleSubmit"> confirm </a-button>
       </div>
     </div>
   </PageWrapper>

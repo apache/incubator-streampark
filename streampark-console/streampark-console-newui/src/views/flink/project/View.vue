@@ -123,7 +123,7 @@
         2000,
         { immediate: false },
       );
-      /* 查看日志 */
+      /* View log */
       function handleViewLog(value) {
         openLogModal(true, { project: value });
       }

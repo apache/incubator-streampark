@@ -151,7 +151,7 @@
   }
   function handleConfDetail() {}
 
-  /* 删除配置 */
+  /* delete configuration */
   async function handleDeleteConf(record) {
     await fetchRemoveConf({ id: record.id });
     reloadConf();
@@ -184,13 +184,13 @@
       },
     ];
   }
-  /* 删除 savePoint */
+  /* delete savePoint */
   async function handleDeleteSavePoint(record) {
     await fetchRemoveSavePoint({ id: record.id });
     reloadSavePoint();
   }
 
-  /* 复制路径 */
+  /* copy path */
   function handleCopy(record: Recordable) {
     try {
       copy(record.path);

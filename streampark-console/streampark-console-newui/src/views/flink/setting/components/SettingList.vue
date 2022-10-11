@@ -65,14 +65,14 @@
   function handleSwitch(record: SystemSetting) {
     emits('updateValue', record);
   }
-  /* 编辑输入 */
+  /* edit input */
   function handleEdit(record: SystemSetting) {
     if (!record.editable) {
       record.submitting = true;
     }
     record.editable = !record.editable;
   }
-  /* 编辑提交 */
+  /* edit commit */
   async function handleSubmit(record: SystemSetting) {
     record.submitting = false;
     record.editable = false;

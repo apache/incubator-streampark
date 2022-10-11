@@ -61,3 +61,11 @@ export function deleteUser (queryParam) {
 export function types() {
   return http.post(api.User.TYPES, {})
 }
+
+export function setTeam(queryParam) {
+  return http.post(api.User.SET_TEAM, queryParam)
+}
+
+export function initTeam(queryParam) {
+  return http.post(api.User.INIT_TEAM, queryParam)
+}

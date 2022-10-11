@@ -71,7 +71,7 @@
   const userId = ref(undefined);
   const yarn = ref<Nullable<string>>(null);
 
-  // 获取仪表盘指标数据
+  // Get Dashboard Metrics Data
   async function handleDashboard() {
     try {
       const res = await fetchDashboard();
@@ -182,11 +182,11 @@
     openBuildDrawer(true, { appId: app.id });
   }
 
-  /* 点击添加 */
+  /* Click to add */
   function handleAdd() {
     router.push({ path: '/flink/app/add' });
   }
-  /* 点击编辑 */
+  /* Click to edit */
   function handleEdit(app: AppListRecord) {
     flinkAppStore.setApplicationId(app.id);
     if (app.appType === 1) {
@@ -197,7 +197,7 @@
       router.push({ path: '/flink/app/edit_flink' });
     }
   }
-  /* 点击详情 */
+  /* Click for details */
   function handleDetail(app: AppListRecord) {
     flinkAppStore.setApplicationId(app.id);
     router.push({ path: '/flink/app/detail', query: { appId: app.id } });
@@ -205,13 +205,13 @@
 
   /* view */
   async function handleJobView(app: AppListRecord) {
-    // 任务正在运行中, 重启中, 正在 savePoint 中
+    // Task is running, restarting, in savePoint
     if ([4, 5].includes(app.state) || app['optionState'] === 4) {
       // yarn-per-job|yarn-session|yarn-application
       handleView(app, unref(yarn));
     }
   }
-  /* 点击删除 */
+  /* Click to delete */
   async function handleDelete(app: AppListRecord) {
     const hide = createMessage.loading('deleting', 0);
     try {
@@ -252,7 +252,7 @@
       });
     }
   }
-  /* 日志查看 */
+  /* log view */
   function handleSeeLog(app: AppListRecord) {
     openLogModal(true, { app: unref(app) });
   }
@@ -289,7 +289,7 @@
     });
   }
 
-  /* 操作按扭 */
+  /* Operation button */
   function getTableActions(record: AppListRecord): ActionItem[] {
     return [
       {
@@ -364,7 +364,7 @@
     ];
   }
 
-  /* 下拉操作按扭 */
+  /* pull down button */
   function getActionDropdown(record: AppListRecord): ActionItem[] {
     return [
       {
@@ -404,7 +404,7 @@
       },
     ];
   }
-  /* 更新options数据 */
+  /* Update options data */
   function handleOptionApp(data: {
     type: 'starting' | 'stopping' | 'launch';
     key: any;

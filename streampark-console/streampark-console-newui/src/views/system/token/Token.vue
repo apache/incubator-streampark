@@ -20,25 +20,27 @@
       <template #toolbar>
         <a-button type="primary" @click="handleCreate"> Add Token</a-button>
       </template>
-      <template #action="{ record }">
-        <TableAction
-          :actions="[
-            {
-              icon: 'ant-design:copy-outlined',
-              tooltip: 'Copy Token',
-              onClick: handleCopy.bind(null, record),
-            },
-            {
-              icon: 'ant-design:delete-outlined',
-              color: 'error',
-              tooltip: 'Delete Token',
-              popConfirm: {
-                title: 'are you sure delete this token ?',
-                confirm: handleDelete.bind(null, record),
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'ant-design:copy-outlined',
+                tooltip: 'Copy Token',
+                onClick: handleCopy.bind(null, record),
               },
-            },
-          ]"
-        />
+              {
+                icon: 'ant-design:delete-outlined',
+                color: 'error',
+                tooltip: 'Delete Token',
+                popConfirm: {
+                  title: 'are you sure delete this token ?',
+                  confirm: handleDelete.bind(null, record),
+                },
+              },
+            ]"
+          />
+        </template>
       </template>
     </BasicTable>
     <TokenDrawer @register="registerDrawer" @success="handleSuccess" />
@@ -89,8 +91,6 @@
           width: 120,
           title: 'Operation',
           dataIndex: 'action',
-          slots: { customRender: 'action' },
-          fixed: 'right',
         },
       });
 
@@ -127,7 +127,7 @@
 
       function onFetchSuccess(res) {
         console.log(res);
-        // 演示默认展开所有表项
+        // Demo expands all table items by default
         nextTick(expandAll);
       }
 

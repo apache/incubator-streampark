@@ -103,6 +103,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.RestOptions;
@@ -293,7 +294,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public String upload(MultipartFile file) throws ApplicationException {
         File temp = WebUtils.getAppTempDir();
-        File saveFile = new File(temp, Objects.requireNonNull(file.getOriginalFilename()));
+        String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
+        File saveFile = new File(temp, fileName);
         // delete when exists
         if (saveFile.exists()) {
             saveFile.delete();
@@ -459,6 +461,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
+        if (appParam.getTeamId() == null) {
+            return null;
+        }
         Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
         if (CommonUtils.notEmpty(appParam.getStateArray())) {
             if (Arrays.stream(appParam.getStateArray()).anyMatch(x -> x == FlinkAppState.FINISHED.getValue())) {
@@ -571,7 +576,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean create(Application appParam) {
-        appParam.setUserId(commonService.getCurrentUser().getUserId());
+        AssertUtils.checkArgument(appParam.getTeamId() != null, "The teamId cannot be null");
+        appParam.setUserId(commonService.getUserId());
         appParam.setState(FlinkAppState.ADDED.getValue());
         appParam.setLaunch(LaunchState.NEED_LAUNCH.get());
         appParam.setOptionState(OptionState.NONE.getValue());
@@ -646,7 +652,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setModule(oldApp.getModule());
         newApp.setDefaultModeIngress(oldApp.getDefaultModeIngress());
 
-        newApp.setUserId(commonService.getCurrentUser().getUserId());
+        newApp.setUserId(commonService.getUserId());
         newApp.setState(FlinkAppState.ADDED.getValue());
         newApp.setLaunch(LaunchState.NEED_LAUNCH.get());
         newApp.setOptionState(OptionState.NONE.getValue());
@@ -1069,7 +1075,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        Long userId = commonService.getCurrentUser().getUserId();
+        Long userId = commonService.getUserId();
         if (!application.getUserId().equals(userId)) {
             FlinkTrackingTask.addCanceledApp(application.getId(), userId);
         }

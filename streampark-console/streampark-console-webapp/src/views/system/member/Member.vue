@@ -149,8 +149,6 @@ import SvgIcon from '@/components/SvgIcon'
 
 import {list, remove} from '@/api/member'
 import {list as getRole} from '@/api/role'
-import storage from '@/utils/storage'
-import {TEAM_ID} from '@/store/mutation-types'
 
 const formItemLayout = {
   labelCol: { span: 4 },
@@ -346,7 +344,6 @@ export default {
 
       list({
         ...params,
-        teamId: storage.get(TEAM_ID),
         roleName: this.roleName
       }).then((resp) => {
         const pagination = {...this.pagination}

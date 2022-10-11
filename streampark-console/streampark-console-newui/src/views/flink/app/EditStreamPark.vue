@@ -16,10 +16,10 @@
 -->
 <script lang="ts">
   export default defineComponent({
-    name: 'EditStreamX',
+    name: 'EditStreamPark',
   });
 </script>
-<script setup lang="ts" name="EditStreamX">
+<script setup lang="ts" name="EditStreamPark">
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
   import { onMounted, reactive, ref, nextTick, unref, defineComponent } from 'vue';
@@ -83,7 +83,7 @@
 
   const [registerConfDrawer, { openDrawer: openConfDrawer }] = useDrawer();
 
-  /* 表单重置 */
+  /* Form reset */
   function handleReset(executionMode?: string) {
     nextTick(() => {
       const resetParams = handleResetApplication();
@@ -115,7 +115,7 @@
       setFieldsValue(defaultParams);
     });
   }
-  /* 自定义job 上传 */
+  /* Custom job upload */
   async function handleCustomJobRequest(data) {
     const formData = new FormData();
     formData.append('file', data.file);
@@ -134,7 +134,7 @@
     }
   }
 
-  /* 处理更新参数 */
+  /* Handling update parameters */
   async function handleAppUpdate(values) {
     try {
       submitLoading.value = true;
@@ -159,7 +159,7 @@
 
   function handleSubmitSQL(values) {
     try {
-      //触发一次pom确认操作.
+      // Trigger a pom confirmation operation.
       unref(dependencyRef)?.handleApplyPom();
       // common params...
       const dependency: { pom?: any; jar?: any } = {};
@@ -193,7 +193,7 @@
       submitLoading.value = false;
     }
   }
-  /* 提交更新 */
+  /* Submit an update */
   async function handleSubmitCustomJob(values: Recordable) {
     try {
       const format =
@@ -219,7 +219,7 @@
     }
   }
 
-  /* 发送提交接口 */
+  /* Send submission interface */
   async function handleUpdateApp(params: Recordable) {
     try {
       const updated = await fetchUpdate(params);
@@ -233,7 +233,7 @@
     }
   }
 
-  /* 初始化信息 */
+  /* initialization information */
   async function handleStreamParkInfo() {
     const appId = route.query.appId;
     const res = await fetchGet({ id: appId as string });

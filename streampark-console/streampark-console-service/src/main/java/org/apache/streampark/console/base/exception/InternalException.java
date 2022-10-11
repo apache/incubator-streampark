@@ -22,8 +22,6 @@ package org.apache.streampark.console.base.exception;
  */
 public class InternalException extends Exception {
 
-    private static final long serialVersionUID = -994962710559017255L;
-
     public InternalException(String message) {
         super(message);
     }

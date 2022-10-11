@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 import { ref } from 'vue';
-// 每行个数
+// number of lines
 export const grid = ref(12);
-// slider属性
+// slider property
 export const useSlider = (min = 6, max = 12) => {
-  // 每行显示个数滑动条
+  // Display count sliders per line
   const getMarks = () => {
     const l = {};
     for (let i = min; i < max + 1; i++) {

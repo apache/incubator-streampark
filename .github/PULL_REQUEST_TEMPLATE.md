@@ -30,6 +30,7 @@ Issue Number: close #xxx <!-- REMOVE this line if no issue to close -->
 -->
 
 ## Verifying this change
+
 <!--*(Please pick either of the following options)*-->
 
 This change is a trivial rework / code cleanup without any test coverage.

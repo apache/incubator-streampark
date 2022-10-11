@@ -30,7 +30,7 @@ enum FLINK_API {
   DEFAULT = '/flink/env/default',
 }
 /**
- * flink 环境数据
+ * flink environment data
  * @returns Promise<FlinkEnv[]>
  */
 export function fetchFlinkEnv() {
@@ -40,7 +40,7 @@ export function fetchFlinkEnv() {
 }
 
 /**
- * 设置默认
+ * Set the default
  * @param {String} id
  * @returns Promise<Boolean>
  */
@@ -54,7 +54,7 @@ export function fetchDefaultSet(id: string) {
   });
 }
 /**
- * 获取flink 详细信息
+ * Get flink details
  * @param {String} id
  * @returns Promise<Boolean>
  */
@@ -69,7 +69,7 @@ export function fetchFlinkInfo(id: string) {
 }
 
 /**
- * 检测环境是否存在
+ * Check if the environment exists
  * @param {String} id
  * @returns Promise<Boolean>
  */
@@ -87,7 +87,7 @@ export function fetchExistsEnv(params: {
   });
 }
 /**
- * 创建 flink
+ * Create flink
  * @param {FlinkCreate} params
  * @returns Promise<Boolean>
  */
@@ -107,7 +107,7 @@ export function fetchFlinkCreate(params: FlinkCreate) {
 }
 
 /**
- * 更新 flink
+ * update flink
  * @param {FlinkCreate} params
  * @returns Promise<Boolean>
  */
@@ -127,7 +127,7 @@ export function fetchFlinkUpdate(params: FlinkCreate) {
 }
 
 /**
- * 配置同步
+ * Configure synchronization
  * @param {String} id
  * @returns Promise<Boolean>
  */

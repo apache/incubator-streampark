@@ -27,7 +27,7 @@ enum SETTING_APi {
   UPDATE = '/flink/setting/update',
 }
 /**
- * 获取系统设置
+ * Get system settings
  * @returns Promise<MavenSetting[]>
  */
 export function fetchSystemSetting() {
@@ -37,7 +37,7 @@ export function fetchSystemSetting() {
 }
 
 /**
- * 更新系统设置
+ * Update system settings
  * @param {String} settingKey key
  * @param {Boolean} settingValue value
  * @returns Promise<boolean>
@@ -52,7 +52,7 @@ export function fetchSystemSettingUpdate(params: { settingKey: string; settingVa
   });
 }
 /**
- * 检查配置
+ * Check configuration
  * @returns Promise<boolean>
  */
 export function fetchCheckHadoop() {

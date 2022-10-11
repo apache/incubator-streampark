@@ -86,7 +86,7 @@
     baseColProps: { span: 24 },
   });
 
-  /* 提交 */
+  /* submit */
   async function handleSubmit() {
     try {
       const { stopSavePointed, drain, customSavepoint } = (await validate()) as Recordable;

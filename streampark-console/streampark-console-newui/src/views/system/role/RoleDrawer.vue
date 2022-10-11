@@ -31,7 +31,7 @@
           :fieldNames="{ title: 'text', key: 'id' }"
           checkable
           toolbar
-          title="菜单分配"
+          title="menu assignment"
         />
       </template>
     </BasicForm>
@@ -81,7 +81,7 @@
         });
 
         formType.value = data.formType;
-        // 需要在setFieldsValue之前先填充treeData，否则Tree组件可能会报key not exist警告
+        // You need to fill in treeData before setFieldsValue, otherwise the Tree component may report a key not exist warning
         if (!unref(isCreate)) {
           const res = await getRoleMenu({ roleId: data.record.roleId });
           data.record.menuId = res || [];

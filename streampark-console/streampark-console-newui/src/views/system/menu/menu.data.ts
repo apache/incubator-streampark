@@ -51,7 +51,7 @@ export const columns: BasicColumn[] = [
     title: 'Type',
     dataIndex: 'type',
     customRender: ({ record }) => {
-      const text = isMenu(record.type) ? '菜单' : '按钮';
+      const text = isMenu(record.type) ? 'menu' : 'button';
       return h(Tag, { color: isMenu(record.type) ? 'cyan' : 'pink' }, () => text);
     },
   },
@@ -143,40 +143,41 @@ export const formSchema: FormSchema[] = [
   },
   {
     field: 'orderNum',
-    label: '排序',
+    label: 'sort',
     component: 'InputNumber',
     required: true,
+    ifShow: ({ values }) => !isButton(values.type),
   },
   {
     field: 'icon',
-    label: '图标',
+    label: 'icon',
     component: 'IconPicker',
     required: true,
     ifShow: ({ values }) => !isButton(values.type),
   },
   {
     field: 'path',
-    label: '菜单URL',
+    label: 'Menu URL',
     component: 'Input',
     required: true,
     ifShow: ({ values }) => !isButton(values.type),
   },
   {
     field: 'component',
-    label: '组件地址',
+    label: 'component address',
     component: 'Input',
     ifShow: ({ values }) => isMenu(values.type),
   },
   {
     field: 'perms',
-    label: '相关权限',
+    label: 'Related permissions',
     component: 'Input',
-    rules: [{ max: 50, message: '长度不能超过50个字符' }],
+    rules: [{ max: 50, message: 'Length cannot exceed 50 characters' }],
     ifShow: ({ values }) => !isDir(values.type),
   },
   {
     field: 'display',
-    label: '是否显示',
+    label: 'whether to display',
     component: 'Switch',
     defaultValue: '1',
     componentProps: {

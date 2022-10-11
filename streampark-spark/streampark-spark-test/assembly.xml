@@ -22,7 +22,7 @@
         <format>tar.gz</format>
     </formats>
     <dependencySets>
-        <!-- 需要打进去的jar包都写在这里，是的我没有找到好的方法😅       -->
+        <!-- The jar packages that need to be entered are all written here, yes I have not found a good way😅 -->
         <dependencySet>
             <useProjectArtifact>true</useProjectArtifact>
             <outputDirectory>lib</outputDirectory>

@@ -15,33 +15,35 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.mapper;
+package org.apache.streampark.console.system.service;
 
-import org.apache.streampark.console.system.entity.TeamMember;
+import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.system.entity.Member;
+import org.apache.streampark.console.system.entity.Team;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Param;
+import com.baomidou.mybatisplus.extension.service.IService;
 
-public interface TeamMemberMapper extends BaseMapper<TeamMember> {
+import java.util.List;
 
-    /**
-     * delete role by user id
-     *
-     * @param userId user id
-     * @return boolean
-     */
-    Boolean deleteByUserId(@Param("userId") Long userId);
+public interface MemberService extends IService<Member> {
 
-    /**
-     * delete user by role id
-     *
-     * @param roleId role id
-     * @return boolean
-     */
-    Boolean deleteByRoleId(@Param("roleId") Long roleId);
+    void deleteByRoleIds(String[] roleIds);
 
-    IPage<TeamMember> findUsers(Page<TeamMember> page, @Param("teamMember") TeamMember teamMember);
+    void deleteByUserIds(String[] userIds);
+
+    IPage<Member> findUsers(Member member, RestRequest request);
+
+    List<Team> findUserTeams(Long userId);
+
+    Member findByUserName(Long teamId, String userName);
+
+    List<Long> findUserIdsByRoleId(Long roleId);
+
+    void createMember(Member member);
+
+    void deleteMember(Member member);
+
+    void updateMember(Member member);
 
 }

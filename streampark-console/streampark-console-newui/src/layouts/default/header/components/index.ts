@@ -28,6 +28,8 @@ export const Notify = createAsyncComponent(() => import('./notify/index.vue'));
 export const Github = createAsyncComponent(() => import('./Github.vue'));
 /* Slogan */
 export const Slogan = createAsyncComponent(() => import('./Slogan.vue'));
+/* User Team */
+export const UserTeam = createAsyncComponent(() => import('./UserTeam.vue'));
 
 export const ErrorAction = createAsyncComponent(() => import('./ErrorAction.vue'));
 

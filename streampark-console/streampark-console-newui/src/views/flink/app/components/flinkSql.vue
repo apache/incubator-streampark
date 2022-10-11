@@ -58,7 +58,7 @@
   });
   const defaultValue = '';
 
-  /* 验证 */
+  /* verify */
   async function handleVerifySql() {
     if (isEmpty(props.value)) {
       vertifyRes.errorMsg = 'empty sql';
@@ -128,13 +128,13 @@
       }
     }
   }
-  /* 格式化 */
+  /* format */
   function handleFormatSql() {
     if (isEmpty(props.value)) return;
     const formatSql = format(props.value);
     setContent(formatSql);
   }
-  /* 全屏 */
+  /* full screen */
   function handleBigScreen() {
     toggle();
     unref(flinkSql).style.width = '0';

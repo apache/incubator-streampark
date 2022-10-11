@@ -54,7 +54,7 @@
     1000,
     { immediate: false },
   );
-  /* 构建详情 */
+  /* Build Detail */
   async function handleFetchBuildDetail() {
     try {
       if (unref(appId) == null) {
@@ -75,7 +75,7 @@
   const [registerBuild] = useDrawerInner((data: { app: AppListRecord }) => {
     data && onReceiveData(data);
   });
-  /* 数据接收 */
+  /* data reception */
   function onReceiveData(data) {
     appId.value = data.appId;
     if (!isPending.value) start();

@@ -363,7 +363,7 @@ export const useFlinkSchema = (editModel?: string) => {
     },
   ];
 
-  /* flink 类型数据 */
+  /* flink type data */
   const getFlinkTypeSchema = (): FormSchema[] => {
     return [
       {
@@ -397,7 +397,7 @@ export const useFlinkSchema = (editModel?: string) => {
   };
   /**
    *
-   * @param appId 编辑状态传递app数据,创建不传递
+   * @param appId Edit state passes app data, create does not pass
    * @returns
    */
   const getFlinkSqlSchema = (appId?: string): FormSchema[] => [
@@ -458,16 +458,16 @@ export const useFlinkSchema = (editModel?: string) => {
   });
 
   /* 
-  !原项目也未赋值 
+  !The original item is also unassigned
   */
   function getConfigSchemas() {
     return [];
   }
 
   onMounted(async () => {
-    /* 获取项目数据 */
+    /* Get project data */
     projectList.value = await fetchSelect({});
-    /* 获取告警数据 */
+    /* Get alarm data */
     alerts.value = await fetchAlertSetting();
     const cluster = await fetchFlinkCluster();
     flinkClusters.value = cluster;

@@ -18,32 +18,35 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> Add Role</a-button>
+        <a-button type="primary" @click="handleCreate" v-auth="'role:add'"> Add Role</a-button>
       </template>
-      <template #action="{ record }">
-        <TableAction
-          :actions="[
-            {
-              icon: 'clarity:note-edit-line',
-              onClick: handleEdit.bind(null, record),
-            },
-            {
-              icon: 'carbon:data-view-alt',
-              tooltip: 'view detail',
-              onClick: handleView.bind(null, record),
-            },
-            {
-              icon: 'ant-design:delete-outlined',
-              color: 'error',
-              tooltip: 'delete role',
-              popConfirm: {
-                title: '是否确认删除',
-                placement: 'left',
-                confirm: handleDelete.bind(null, record),
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'clarity:note-edit-line',
+                auth: 'role:update',
+                onClick: handleEdit.bind(null, record),
               },
-            },
-          ]"
-        />
+              {
+                icon: 'carbon:data-view-alt',
+                tooltip: 'view detail',
+                onClick: handleView.bind(null, record),
+              },
+              {
+                icon: 'ant-design:delete-outlined',
+                color: 'error',
+                auth: 'role:delete',
+                popConfirm: {
+                  title: 'Are you sure delete this Role',
+                  placement: 'left',
+                  confirm: handleDelete.bind(null, record),
+                },
+              },
+            ]"
+          />
+        </template>
       </template>
     </BasicTable>
     <RoleDrawer @register="registerDrawer" @success="handleSuccess" />
@@ -86,8 +89,6 @@
           width: 120,
           title: 'Operation',
           dataIndex: 'action',
-          slots: { customRender: 'action' },
-          fixed: 'right',
         },
       });
 

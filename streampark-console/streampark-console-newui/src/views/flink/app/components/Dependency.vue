@@ -157,7 +157,7 @@
       ]),
     });
   }
-  /* 自定义http  */
+  /* custom http  */
   async function handleCustomDepsRequest(data) {
     try {
       const formData = new FormData();

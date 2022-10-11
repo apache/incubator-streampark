@@ -62,13 +62,13 @@
     ];
   });
   const collapseActive = ref(['1', '2', '3', '4']);
-  /* 获取所有系统设置 */
+  /* Get all system settings */
   async function getSettingAll() {
     const res = await fetchSystemSetting();
     settings.value = res;
   }
 
-  /* 更新设置值 */
+  /* Update setting value */
   async function handleSettingUpdate(record: SystemSetting) {
     await fetchSystemSettingUpdate({
       settingKey: record.settingKey,

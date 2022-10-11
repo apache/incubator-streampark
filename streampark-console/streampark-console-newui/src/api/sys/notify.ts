@@ -23,10 +23,10 @@ enum NOTIFY_API {
   DEL = '/metrics/delnotice',
 }
 /**
- * 获取通知列表
- * @param {number} type 通知类型 1:异常告警 2:通知消息,
- * @param {number} pageNum 页码
- * @param {number} pageSize 页大小
+ * Get notification list
+ * @param {number} type Notification Type 1: Abnormal Alarm 2: Notification Message,
+ * @param {number} pageNum page number
+ * @param {number} pageSize page size
  * @returns Promise<NoticyList>
  */
 export const fetchNotify = (params: { type: number; pageNum: number; pageSize: number }) => {
@@ -40,8 +40,8 @@ export const fetchNotify = (params: { type: number; pageNum: number; pageSize: n
 };
 
 /**
- * 删除通知
- * @param {number} id 通知id,
+ * delete notification
+ * @param {number} id notification id,
  * @returns Promise<boolean>
  */
 export const fetchNotifyDelete = (id: string) => {

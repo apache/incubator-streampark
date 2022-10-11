@@ -30,7 +30,7 @@ export function configStyleImportPlugin(_isBuild: boolean) {
         libraryName: 'ant-design-vue',
         esModule: true,
         resolveStyle: (name) => {
-          // 这里是无需额外引入样式文件的“子组件”列表
+          // Here is a list of "subcomponents" that do not require additional style files
           const ignoreList = [
             'anchor-link',
             'sub-menu',
@@ -62,8 +62,8 @@ export function configStyleImportPlugin(_isBuild: boolean) {
             'skeleton-image',
             'skeleton-button',
           ];
-          // 这里是需要额外引入样式的子组件列表
-          // 单独引入子组件时需引入组件样式，否则会在打包后导致子组件样式丢失
+          // Here is a list of subcomponents that require additional styles
+          // When importing sub-components separately, you need to import component styles, otherwise the styles of sub-components will be lost after packaging
           const replaceList = {
             'typography-text': 'typography',
             'typography-title': 'typography',

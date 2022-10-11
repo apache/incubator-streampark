@@ -109,9 +109,9 @@
     code: woldCount,
     options: {
       selectOnLineNumbers: false,
-      foldingStrategy: 'indentation', // 代码分小段折叠
-      overviewRulerBorder: false, // 不要滚动条边框
-      tabSize: 2, // tab 缩进长度
+      foldingStrategy: 'indentation', // code fragmentation
+      overviewRulerBorder: false, // Don't scroll bar borders
+      tabSize: 2, // tab indent length
       readOnly: false,
       scrollBeyondLastLine: false,
       lineNumbersMinChars: 4,
@@ -121,7 +121,7 @@
       cursorWidth: 3,
       renderFinalNewline: true,
       renderLineHighlight: 'line',
-      quickSuggestionsDelay: 100, //代码提示延时
+      quickSuggestionsDelay: 100, // Code prompt delay
       minimap: { enabled: true },
       scrollbar: {
         useShadows: false,
@@ -142,7 +142,7 @@
     }
   });
 
-  /* 提交 */
+  /* submit */
   async function handleReplSubmit() {
     const code = await getContent();
     const hide = createMessage.loading('submiting', 0);
@@ -158,7 +158,7 @@
       hide();
     }
   }
-  /* 设置/取消全屏内容 */
+  /* Set/unset fullscreen content */
   function toggle() {
     appStore.setProjectConfig({ fullContent: !isFullscreen.value });
   }

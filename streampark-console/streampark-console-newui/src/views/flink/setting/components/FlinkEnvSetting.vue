@@ -43,7 +43,7 @@
   const flinks = ref<FlinkEnv[]>([]);
   const [registerModal, { openModal: openFlinkModal }] = useModal();
   const [registerFlinkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
-  /* 编辑按扭 */
+  /* Edit button */
   function handleEditFlink(item: FlinkEnv) {
     versionId.value = item.id;
     openFlinkModal(true, {
@@ -54,13 +54,13 @@
     });
   }
 
-  /* 查看配置 */
+  /* View configuration */
   async function handleFlinkConf(item: FlinkEnv) {
     const res = await fetchFlinkInfo(item.id);
     openEnvDrawer(true, res);
   }
 
-  /* 设为默认环境 */
+  /* set as default environment */
   async function handleSetDefault(item: FlinkEnv) {
     if (item.isDefault) {
       await fetchDefaultSet(item.id);
@@ -69,7 +69,7 @@
     }
   }
 
-  /* 获取flink环境数据 */
+  /* Get flink environment data */
   async function getFlinkSetting() {
     flinks.value = await fetchFlinkEnv();
   }

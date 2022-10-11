@@ -315,7 +315,7 @@ export const renderIsSetConfig = (
   registerConfDrawer: Fn,
   openConfDrawer: Fn,
 ) => {
-  /* 打开sqlConf drawer */
+  /* Open the sqlConf drawer */
   async function handleSQLConf(checked: boolean) {
     if (checked) {
       if (unref(model.configOverride) != null) {

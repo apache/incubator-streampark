@@ -87,20 +87,20 @@
     }
   });
 
-  /* 表单提交 */
+  /* form submit */
   async function handleSubmit() {
     try {
       changeOkLoading(true);
       const formValue = await validate();
-      // 检测环境
+      // Detection environment
       const isExist = await fetchExistsEnv({
         id: versionId.value,
         flinkName: formValue.flinkName,
         flinkHome: formValue.flinkHome,
       });
-      // 环境检测成功
+      // Environment detection is successful
       if (isExist) {
-        // 创建
+        // create
         if (versionId.value == null) {
           const { data } = await fetchFlinkCreate(formValue);
           if (data.data) {
@@ -111,7 +111,7 @@
             createMessage.error(data.message.replaceAll(/\[StreamPark]/g, ''));
           }
         } else {
-          //更新
+          // update
           const { data } = await fetchFlinkUpdate({
             id: versionId.value,
             ...formValue,
@@ -132,7 +132,7 @@
         });
       }
     } catch (error: any) {
-      /* 自定义提示消息 */
+      /* custom alert message */
       if (error?.response?.data?.message) {
         createConfirm({
           iconType: 'error',

@@ -34,6 +34,7 @@ enum Api {
   ResetPassword = '/user/password/reset',
   Password = '/user/password',
   CheckName = '/user/check/name',
+  TYPES = '/user/types',
 }
 
 /**
@@ -138,10 +139,24 @@ export function checkUserName(params) {
     },
   });
 }
+
+export function fetchUserTypes() {
+  return defHttp
+    .post({
+      url: Api.TYPES,
+      data: {},
+      headers: {
+        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
+      },
+    })
+    .then((res) => {
+      return res.map((t) => ({ label: t, value: t }));
+    });
+}
 /**
- * 用户修改密码
- * @param{String} username 用户名
- * @param{String} password 密码
+ * User change password
+ * @param{String} username username
+ * @param{String} password password
  */
 export function fetchUserPasswordUpdate(params: { username: string; password: string }) {
   return defHttp.put<boolean>({

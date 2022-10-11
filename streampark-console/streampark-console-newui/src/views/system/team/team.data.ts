@@ -15,51 +15,43 @@
  * limitations under the License.
  */
 import { BasicColumn, FormSchema } from '/@/components/Table';
-
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
 export const columns: BasicColumn[] = [
   {
-    title: 'Team Code',
-    dataIndex: 'teamCode',
-    width: 200,
-    align: 'left',
-  },
-  {
-    title: 'Team Name',
+    title: t('system.team.table.teamName'),
     dataIndex: 'teamName',
+    sorter: true,
   },
   {
-    title: 'Create Time',
+    title: t('system.team.table.description'),
+    dataIndex: 'description',
+    ellipsis: true,
+    width: 350,
+  },
+  {
+    title: t('system.team.table.createTime'),
     dataIndex: 'createTime',
-    width: 180,
+    sorter: true,
+  },
+  {
+    title: t('system.team.table.modifyTime'),
+    dataIndex: 'modifyTime',
+    sorter: true,
   },
 ];
 
 export const searchFormSchema: FormSchema[] = [
   {
     field: 'teamName',
-    label: 'Team Name',
+    label: t('system.team.table.teamName'),
     component: 'Input',
     colProps: { span: 8 },
   },
   {
     field: 'createTime',
-    label: 'Create Time',
+    label: t('system.team.table.createTime'),
     component: 'RangePicker',
     colProps: { span: 8 },
-  },
-];
-
-export const formSchema: FormSchema[] = [
-  {
-    field: 'teamName',
-    label: 'Team Name',
-    component: 'Input',
-    required: true,
-  },
-  {
-    field: 'teamCode',
-    label: 'Team Code',
-    component: 'Input',
-    required: true,
   },
 ];
