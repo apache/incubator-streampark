@@ -76,7 +76,7 @@ http.interceptors.request.use(config => {
         delete data.sortOrder
       }
     }
-    const teamId = storage.get(TEAM_ID)
+    const teamId = sessionStorage.getItem(TEAM_ID)
     if (teamId) {
       data['teamId'] = teamId
     }

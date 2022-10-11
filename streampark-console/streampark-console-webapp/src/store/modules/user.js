@@ -26,10 +26,10 @@ const user = {
     expire: storage.get(EXPIRE),
     token: storage.get(TOKEN),
     info: storage.get(USER_INFO),
-    teamId: storage.get(TEAM_ID),
     roles: storage.get(ROLES),
     permissions: storage.get(PERMISSIONS),
     routers: storage.get(USER_ROUTER),
+    teamId: sessionStorage.getItem(TEAM_ID),
     name: '',
     welcome: '',
     avatar: ''
@@ -45,7 +45,7 @@ const user = {
       state.token = token
     },
     SET_TEAM: (state, teamId) => {
-      storage.set(TEAM_ID, teamId)
+      sessionStorage.setItem(TEAM_ID, teamId)
       state.teamId = teamId
     },
     SET_ROLES: (state, roles) => {
@@ -73,7 +73,6 @@ const user = {
       state.roles = null
       state.permissions = null
       state.name = null
-      state.teamId = null
       state.welcome = null
       state.avatar = null
       storage.rm(USER_INFO)
