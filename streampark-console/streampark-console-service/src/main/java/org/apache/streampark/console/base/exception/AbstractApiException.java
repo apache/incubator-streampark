@@ -17,29 +17,32 @@
 
 package org.apache.streampark.console.base.exception;
 
-import org.apache.streampark.console.base.domain.ResponseCode;
-
 /**
  * <pre>
- * An exception message that needs to be notified to front-end,
- * usually a <strong>simple</strong>, clear</strong> message, e.g:
- * <p>1. Username already exists</p>
- * <p>2. No permission, please contact the administrator</p>
- * ...
+ * An exception message that needs to be notified to front-end.
  * </pre>
  */
-public class ApiAlertException extends AbstractApiException {
+public abstract class AbstractApiException extends RuntimeException {
 
-    public ApiAlertException(String message) {
-        super(message, ResponseCode.CODE_FAIL_ALERT);
+    private final long responseCode;
+
+    protected AbstractApiException(String message, long responseCode) {
+        super(message);
+        this.responseCode = responseCode;
     }
 
-    public ApiAlertException(Throwable cause) {
-        super(cause, ResponseCode.CODE_FAIL_ALERT);
+    protected AbstractApiException(Throwable cause, long responseCode) {
+        super(cause);
+        this.responseCode = responseCode;
     }
 
-    public ApiAlertException(String message, Throwable cause) {
-        super(message, cause, ResponseCode.CODE_FAIL_ALERT);
+    protected AbstractApiException(String message, Throwable cause, long responseCode) {
+        super(message, cause);
+        this.responseCode = responseCode;
+    }
+
+    public long getResponseCode() {
+        return responseCode;
     }
 
 }
