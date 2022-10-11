@@ -82,7 +82,7 @@ public class PassportController {
             return RestResponse.success().put("code", 1);
         }
 
-        userService.checkTeam(user);
+        userService.fillInTeam(user);
 
         //no team.
         if (user.getTeamId() == null) {

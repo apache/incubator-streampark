@@ -19,7 +19,7 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.exception.ApiException;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Member;
@@ -193,11 +193,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public void checkTeam(User user) {
+    public void fillInTeam(User user) {
         if (user.getTeamId() == null) {
             List<Team> teams = memberService.findUserTeams(user.getUserId());
             if (CollectionUtils.isEmpty(teams)) {
-                throw new ApiException("There is no team to assign, please contact the administrator!");
+                throw new ApiAlertException("The current user not belong to any team, please contact the administrator!");
             } else if (teams.size() == 1) {
                 Team team = teams.get(0);
                 user.setTeamId(team.getId());

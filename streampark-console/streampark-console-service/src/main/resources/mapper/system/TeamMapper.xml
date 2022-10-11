@@ -49,6 +49,6 @@
         select t.* from t_team t
         join t_member m
         on t.id = m.team_id
-        where ur.user_id = #{userId}
+        where m.user_id = #{userId}
     </select>
 </mapper>

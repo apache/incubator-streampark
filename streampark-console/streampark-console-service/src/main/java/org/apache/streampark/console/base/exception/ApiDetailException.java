@@ -17,23 +17,28 @@
 
 package org.apache.streampark.console.base.exception;
 
+import org.apache.streampark.common.util.ExceptionUtils;
+
 /**
- * api business exceptions, need to return a friendly message, just for front-end alert
+ * <pre>
+ * An exception message that needs to be notified to front-end,
+ * is a detailed exception message,such as the stackTrace info,
+ * often accompanied by a large number of exception logs, e.g:
+ * <p>1. Failed to start job, need to display the exception(stackTrace info) to front-end</p>
+ * </pre>
  */
-public class ApiException extends RuntimeException {
+public class ApiDetailException extends RuntimeException {
 
-    private static final long serialVersionUID = -994962710559017255L;
-
-    public ApiException(String message) {
+    public ApiDetailException(String message) {
         super(message);
     }
 
-    public ApiException(Throwable cause) {
-        super(cause);
+    public ApiDetailException(Throwable cause) {
+        super(ExceptionUtils.stringifyException(cause));
     }
 
-    public ApiException(String message, Throwable cause) {
-        super(message, cause);
+    public ApiDetailException(String message, Throwable cause) {
+        super(message + ExceptionUtils.stringifyException(cause));
     }
 
 }

@@ -18,19 +18,25 @@
 package org.apache.streampark.console.base.exception;
 
 /**
- * api business exceptions, as different from internal errors, need to return a friendly exception message
+ * <pre>
+ * An exception message that needs to be notified to front-end,
+ * usually a <strong>simple</strong>, clear</strong> message, e.g:
+ * <p>1. Username already exists</p>
+ * <p>2. No permission, please contact the administrator</p>
+ * ...
+ * </pre>
  */
-public class DetailException extends RuntimeException {
+public class ApiAlertException extends RuntimeException {
 
-    public DetailException(String message) {
+    public ApiAlertException(String message) {
         super(message);
     }
 
-    public DetailException(Throwable cause) {
+    public ApiAlertException(Throwable cause) {
         super(cause);
     }
 
-    public DetailException(String message, Throwable cause) {
+    public ApiAlertException(String message, Throwable cause) {
         super(message, cause);
     }
 

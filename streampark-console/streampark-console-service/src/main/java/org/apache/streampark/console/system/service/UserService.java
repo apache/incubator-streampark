@@ -109,5 +109,6 @@ public interface UserService extends IService<User> {
 
     void setLatestTeam(Long teamId, Long userId);
 
-    void checkTeam(User user);
+    void fillInTeam(User user);
+
 }
