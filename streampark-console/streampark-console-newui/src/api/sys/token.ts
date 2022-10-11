@@ -66,7 +66,7 @@ export function deleteToken(data) {
 }
 
 /**
- * 检查token
+ * check token
  * @param data
  * @returns {Promise<number>}
  */

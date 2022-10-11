@@ -39,7 +39,7 @@ enum MEMBER_API {
   DELETE = '/member/delete',
 }
 /**
- * 获取member 列表
+ * get member list
  * @param params
  * @returns
  */
@@ -54,10 +54,10 @@ export function fetchMemberList(params) {
 }
 
 /**
- * 添加member
- * @param {String} teamId 组织id
- * @param {String} userName 用户名
- * @param {Number} roleId 角色ID
+ * add member
+ * @param {String} teamId organization id
+ * @param {String} userName username
+ * @param {Number} roleId role id
  * @returns Promise<boolean>
  */
 export function fetchAddMember(params: AddMemberParams) {
@@ -70,7 +70,7 @@ export function fetchAddMember(params: AddMemberParams) {
   });
 }
 /**
- * 更新member
+ * update member
  * @param params
  * @returns
  */
@@ -84,7 +84,7 @@ export function fetchUpdateMember(params) {
   });
 }
 /**
- * 查找用户team
+ * Find user team
  * @param {Number|String} userId
  * @returns Promise<Array<{ id: string; teamName: string }>>
  */
@@ -98,8 +98,8 @@ export function fetchUserTeam(params: { userId: number | string }) {
   });
 }
 /**
- * 名称检查
- * @param {String} username 名称
+ * name check
+ * @param {String} username name
  * @returns Promise<boolean>
  */
 export function fetchCheckUserName(params: { username: string }) {
@@ -113,7 +113,7 @@ export function fetchCheckUserName(params: { username: string }) {
 }
 
 /**
- * 删除
+ * delete
  * @param {String} id memeber Id
  * @returns Promise<boolean>
  */

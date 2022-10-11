@@ -33,7 +33,7 @@
   const { createMessage } = useMessage();
   const { t } = useI18n();
 
-  /* 创建项目 */
+  /* Create project */
   async function handleCreateAction(values: Recordable) {
     try {
       const res = await createProject({

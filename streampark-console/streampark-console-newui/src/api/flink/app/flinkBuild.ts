@@ -38,7 +38,7 @@ export function fetchBuild(params) {
   );
 }
 /**
- * 获取构建详情
+ * Get build details
  * @param params appId:string
  * @returns
  */

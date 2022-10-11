@@ -35,7 +35,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     launch: new Map(),
   };
 
-  /* 检测 */
+  /* check */
   function handleCheckLaunchApp(app) {
     if (app['appControl']['allowBuild'] === true) {
       handleLaunchApp(app, false);

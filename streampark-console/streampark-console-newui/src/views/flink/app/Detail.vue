@@ -142,7 +142,7 @@
     const res = await fetchGet({
       id: route.query.appId as string,
     });
-    // 首次获取数据
+    // Get data for the first time
     if (Object.keys(app).length == 0) {
       if ([2, 3, 4].includes(res.executionMode)) {
         handleYarn();
@@ -170,7 +170,7 @@
     if (optionList.records.length > 0) detailTabs.showOptionLog = true;
   }
 
-  /* 获取yarn 数据 */
+  /* Get yarn data */
   async function handleYarn() {
     const res = await fetchYarn();
     yarn.value = res;
@@ -195,7 +195,7 @@
     }
   }
 
-  /* 文档页 */
+  /* Documentation page */
   function handleDocPage() {
     const res = window.origin.split(':')[1] + ':10000/doc.html';
     window.open(res);

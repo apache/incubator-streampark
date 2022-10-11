@@ -30,7 +30,7 @@
             ><slot name="header"></slot>
             <Tooltip>
               <template #title>
-                <div class="w-50">每行显示数量</div
+                <div class="w-50">Display quantity per line</div
                 ><Slider
                   id="slider"
                   v-bind="sliderProp"
@@ -40,7 +40,7 @@
               <Button><TableOutlined /></Button>
             </Tooltip>
             <Tooltip @click="fetch">
-              <template #title>刷新</template>
+              <template #title>refresh</template>
               <Button><RedoOutlined /></Button>
             </Tooltip>
           </div>
@@ -61,10 +61,10 @@
                   :trigger="['hover']"
                   :dropMenuList="[
                     {
-                      text: '删除',
+                      text: 'delete',
                       event: '1',
                       popConfirm: {
-                        title: '是否确认删除',
+                        title: 'Whether to confirm the deletion',
                         confirm: handleDelete.bind(null, item.id),
                       },
                     },
@@ -109,27 +109,27 @@
   const ListItem = List.Item;
   const CardMeta = Card.Meta;
   const TypographyText = Typography.Text;
-  // 获取slider属性
+  // Get slider property
   const sliderProp = computed(() => useSlider(4));
-  // 组件接收参数
+  // Component receives parameters
   const props = defineProps({
-    // 请求API的参数
+    // Request API parameters
     params: propTypes.object.def({}),
     //api
     api: propTypes.func,
   });
-  //暴露内部方法
+  // expose internal methods
   const emit = defineEmits(['getMethod', 'delete']);
-  //数据
+  // data
   const data = ref([]);
-  // 切换每行个数
-  // cover图片自适应高度
-  //修改pageSize并重新请求数据
+  // Switch the number of lines per line
+  // cover image adaptive height
+  // Modify pageSize and re-request data
 
   const height = computed(() => {
     return `h-${120 - grid.value * 6}`;
   });
-  //表单
+  // form
   const [registerForm, { validate }] = useForm({
     schemas: [{ field: 'type', component: 'Input', label: '类型' }],
     labelWidth: 80,
@@ -138,7 +138,7 @@
     autoSubmitOnEnter: true,
     submitFunc: handleSubmit,
   });
-  //表单提交
+  // form submit
   async function handleSubmit() {
     const data = await validate();
     await fetch(data);
@@ -148,7 +148,7 @@
     fetch();
   }
 
-  // 自动请求并暴露内部方法
+  // Automatically request and expose internal methods
   onMounted(() => {
     fetch();
     emit('getMethod', fetch);
@@ -162,7 +162,7 @@
       total.value = res.total;
     }
   }
-  //分页相关
+  // Pagination related
   const page = ref(1);
   const pageSize = ref(36);
   const total = ref(0);

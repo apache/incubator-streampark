@@ -28,7 +28,7 @@ export interface AlertSetting {
   modifyTime: string;
 }
 
-/* 创建告警 */
+// Create an alert
 export interface AlertCreate {
   id?: any;
   alertName: string;

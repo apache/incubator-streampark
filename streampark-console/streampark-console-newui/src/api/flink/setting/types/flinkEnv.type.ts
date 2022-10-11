@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* flink home 数据 */
+// flink home data
 export interface FlinkEnv {
   id: string;
   flinkName: string;

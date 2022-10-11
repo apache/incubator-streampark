@@ -60,7 +60,7 @@ export const userDetail = (
     ];
   }
 
-  /* 删除配置 */
+  /* delete configuration */
   async function handleDeleteConf(record) {
     await fetchRemoveConf({ id: record.id });
     reloadConf();
@@ -94,7 +94,7 @@ export const userDetail = (
     ];
   }
 
-  /* 复制路径 */
+  /* copy path */
   function handleCopy(record: Recordable) {
     try {
       copy(record.path);
@@ -104,7 +104,7 @@ export const userDetail = (
       createMessage.error('copied to clipboard failed');
     }
   }
-  /* 删除 savePoint */
+  /* delete savePoint */
   async function handleDeleteSavePoint(record) {
     await fetchRemoveSavePoint({ id: record.id });
     reloadSavePoint();

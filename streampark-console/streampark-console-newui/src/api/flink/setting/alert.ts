@@ -29,7 +29,7 @@ enum ALERT_APi {
   SEND = '/flink/alert/send',
 }
 /**
- * 获取告警设置
+ * Get alert settings
  * @returns Promise<AlertSetting[]>
  */
 export function fetchAlertSetting() {
@@ -38,7 +38,7 @@ export function fetchAlertSetting() {
   });
 }
 /**
- * 测试告警设置
+ * Test alert settings
  * @returns Promise<boolean>
  */
 export function fetchSendAlert(params: { id: string }) {
@@ -56,7 +56,7 @@ export function fetchSendAlert(params: { id: string }) {
   );
 }
 /**
- * 删除告警设置
+ * Delete alert settings
  * @returns Promise<MavenSetting[]>
  */
 export function fetchAlertDelete(params: { id: string }) {
@@ -69,7 +69,7 @@ export function fetchAlertDelete(params: { id: string }) {
   });
 }
 /**
- * 告警名称测试
+ * Alarm name test
  * @returns Promise<boolean>
  */
 export function fetchExistsAlert(params: { alertName: string; isJsonType?: boolean }) {
@@ -80,7 +80,7 @@ export function fetchExistsAlert(params: { alertName: string; isJsonType?: boole
 }
 
 /**
- * 添加告警设置
+ * Add alert settings
  * @param {AlertCreate} params
  * @returns Promise<boolean>
  */
@@ -91,7 +91,7 @@ export function fetchAlertAdd(params: AlertCreate) {
   });
 }
 /**
- * 更新告警设置
+ * Update alert settings
  * @param {AlertCreate} params
  * @returns Promise<boolean>
  */
@@ -103,7 +103,7 @@ export function fetchAlertUpdate(params: AlertCreate) {
 }
 
 /**
- * 更新系统设置
+ * Update system settings
  * @param {String} settingKey key
  * @param {Boolean} settingValue value
  * @returns Promise<boolean>

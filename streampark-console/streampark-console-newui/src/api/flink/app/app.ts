@@ -53,7 +53,7 @@ enum APP_API {
 }
 
 /**
- * 读取配置文件
+ * read configuration file
  * @returns Promise<any>
  */
 export function fetchAppConf(params?: { config: any }) {
@@ -64,7 +64,7 @@ export function fetchAppConf(params?: { config: any }) {
 }
 
 /**
- * 仪表盘数据
+ * Dashboard data
  * @returns Promise<DashboardResponse>
  */
 export function fetchDashboard() {
@@ -75,7 +75,7 @@ export function fetchDashboard() {
 }
 
 /**
- * 获取 app 列表数据
+ * Get app list data
  * @returns Promise<AppListResponse>
  */
 export function fetchAppRecord(params) {
@@ -88,7 +88,7 @@ export function fetchAppRecord(params) {
   });
 }
 /**
- * 移出 app
+ * remove the app
  * @returns Promise<boolean>
  */
 export function fetchAppRemove(id: string) {
@@ -101,7 +101,7 @@ export function fetchAppRemove(id: string) {
   });
 }
 /**
- * 获取 yarn 地址
+ * get yarn address
  * @returns Promise<any>
  */
 export function fetchYarn() {
@@ -114,7 +114,7 @@ export function fetchYarn() {
 }
 
 /**
- * 获取项目
+ * get item
  * @returns Promise<any>
  */
 export function fetchCheckName(params: { id?: string; jobName: string }) {
@@ -137,9 +137,9 @@ export function fetchMain(params) {
   });
 }
 /**
- * 上传
+ * upload
  * @param params
- * @returns {String} 文件路径
+ * @returns {String} file path
  */
 export function fetchUpload(params) {
   return defHttp.post<string>({
@@ -148,14 +148,14 @@ export function fetchUpload(params) {
     headers: {
       'Content-Type': ContentTypeEnum.FORM_DATA,
     },
-    timeout: 1000 * 60 * 10, // 上传文件超时10分钟
+    timeout: 1000 * 60 * 10, // Uploading files timed out for 10 minutes
   });
 }
 
 /**
- * 创建
- * @param params 创建参数
- * @returns {Promise<AxiosResponse<Result>>} data 创建是否成功 message: 错误提示
+ * create
+ * @param params Create parameters
+ * @returns {Promise<AxiosResponse<Result>>} Whether the data creation was successful message: error message
  */
 export function fetchCreate(params) {
   return defHttp.post<AxiosResponse<Result>>(
@@ -172,9 +172,9 @@ export function fetchCreate(params) {
   );
 }
 /**
- * 更新
- * @param params 更新参数
- * @returns {Promise<AxiosResponse<Result>>} data 更新是否成功 message: 错误提示
+ * update
+ * @param params update parameters
+ * @returns {Promise<AxiosResponse<Result>>} Whether the data update is successful message: error message
  */
 export function fetchUpdate(params) {
   return defHttp.post<AxiosResponse<Result>>(
@@ -192,9 +192,9 @@ export function fetchUpdate(params) {
 }
 
 /**
- * 通过id 获取application 信息
- * @param params 创建参数
- * @returns {Promise<AxiosResponse<Result>>} data 创建是否成功 message: 错误提示
+ * Get application information by id
+ * @param params get parameters
+ * @returns {Promise<AxiosResponse<Result>>} Whether the data get is successful message: error message
  */
 export function fetchGet(params: { id: string }) {
   return defHttp.post<AppListRecord>({
@@ -225,7 +225,7 @@ export function fetchOptionLog(params) {
   });
 }
 /**
- * 强制停止
+ * forced stop
  * @param params id:string
  * @returns
  */

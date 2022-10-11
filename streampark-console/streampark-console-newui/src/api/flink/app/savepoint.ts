@@ -42,7 +42,7 @@ export function fetchSavePonitHistory(params) {
   });
 }
 /**
- * 删除
+ * delete
  * @param params id
  * @returns
  */

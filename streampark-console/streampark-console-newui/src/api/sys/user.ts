@@ -154,9 +154,9 @@ export function fetchUserTypes() {
     });
 }
 /**
- * 用户修改密码
- * @param{String} username 用户名
- * @param{String} password 密码
+ * User change password
+ * @param{String} username username
+ * @param{String} password password
  */
 export function fetchUserPasswordUpdate(params: { username: string; password: string }) {
   return defHttp.put<boolean>({
