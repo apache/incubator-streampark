@@ -33,7 +33,7 @@ services:
 
 
   jobmanager:
-    image: ${FLINK_VERSION}
+    image: ${FLINK_BASE_IMAGE}
     ports:
       - "8081:8081"
     command: jobmanager
@@ -46,7 +46,7 @@ services:
 
 
   taskmanager:
-    image: ${FLINK_VERSION}
+    image: ${FLINK_BASE_IMAGE}
     depends_on:
       - jobmanager
     command: taskmanager
