@@ -42,6 +42,8 @@ class FlinkSqlExecuteFunSuite extends AnyFunSuite {
         |reset 'table.local-time-zone';
         |reset;
         |
+        |set 'table.sql-dialect' = 'default';
+        |
         |CREATE temporary TABLE source_kafka1(
         |    `id` int COMMENT '',
         |    `name` string COMMENT '',
@@ -59,6 +61,8 @@ class FlinkSqlExecuteFunSuite extends AnyFunSuite {
         |    'csv.allow-comments' = 'true'
         |);
         |
+        |set 'table.sql-dialect' = 'hive';
+        |
         |create table sink_kafka1(
         |    `id` int COMMENT '',
         |    `name` string COMMENT '',
@@ -69,6 +73,8 @@ class FlinkSqlExecuteFunSuite extends AnyFunSuite {
         |    'properties.bootstrap.servers' = 'node01:9092,node02:9092,node03:9092',
         |    'format' = 'csv'
         |);
+        |
+        |set 'table.sql-dialect' = 'default';
         |
         |insert into sink_kafka1
         |select id, name, age
