@@ -141,6 +141,16 @@ where `menu_id` = 100021;
 
 update `t_menu` set `menu_name` = 'StreamPark' where `menu_id` = 100013;
 
+alter table `t_setting` drop primary key;
+alter table `t_setting`
+change column `NUM` `order_num` int default null,
+change column `KEY` `setting_key` varchar(50) collate utf8mb4_general_ci not null,
+change column `VALUE` `setting_value` text collate utf8mb4_general_ci default null,
+change column `TITLE` `setting_name` varchar(255) collate utf8mb4_general_ci default null,
+change column `DESCRIPTION` `description` varchar(255) collate utf8mb4_general_ci default null,
+change column `TYPE` `type` tinyint not null comment '1: input 2: boolean 3: number',
+add primary key (`setting_key`);
+
 insert into `t_setting` values (15, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml 完整路径', 1);
 
 -- update the index field for t_user;
@@ -150,3 +160,4 @@ modify `username` varchar(255) collate utf8mb4_general_ci not null comment 'user
 add unique key `un_username` (`username`) using btree;
 
 set foreign_key_checks = 1;
+
