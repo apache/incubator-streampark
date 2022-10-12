@@ -17,6 +17,8 @@
 
 package org.apache.streampark.plugin.profiling.util;
 
+import java.util.Objects;
+
 public class ClassMethodArgument {
     private final String className;
     private final String methodName;
@@ -61,24 +63,13 @@ public class ClassMethodArgument {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         ClassMethodArgument that = (ClassMethodArgument) o;
-
-        if (argumentIndex != that.argumentIndex) {
-            return false;
-        }
-        if (className != null ? !className.equals(that.className) : that.className != null) {
-            return false;
-        }
-        return methodName != null ? methodName.equals(that.methodName) : that.methodName == null;
+        return argumentIndex == that.argumentIndex && Objects.equals(className, that.className) && Objects.equals(methodName, that.methodName);
     }
 
     @Override
     public int hashCode() {
-        int result = className != null ? className.hashCode() : 0;
-        result = 31 * result + (methodName != null ? methodName.hashCode() : 0);
-        result = 31 * result + argumentIndex;
-        return result;
+        return Objects.hash(className, methodName, argumentIndex);
     }
 
     @Override

@@ -25,7 +25,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-flink-connector-elasticsearch</artifactId>
-        <version>${reversion}</version>
+        <version>1.2.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>streampark-flink-connector-elasticsearch5_${scala.binary.version}</artifactId>

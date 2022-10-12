@@ -30,7 +30,6 @@ export default {
     COPY: '/flink/project/copy',
     BUILD: '/flink/project/build',
     BUILD_LOG: '/flink/project/buildlog',
-    CLOSE_BUILD: '/flink/project/closebuild',
     LIST: '/flink/project/list',
     FILE_LIST: '/flink/project/filelist',
     MODULES: '/flink/project/modules',
@@ -159,6 +158,7 @@ export default {
   },
   User: {
     LIST: '/user/list',
+    TYPES: '/user/types',
     UPDATE: '/user/update',
     PASSWORD: '/user/password',
     RESET: '/user/password/reset',
@@ -167,7 +167,9 @@ export default {
     POST: '/user/post',
     DELETE: '/user/delete',
     CHECK_NAME: '/user/check/name',
-    CHECK_PASSWORD: '/user/check/password'
+    CHECK_PASSWORD: '/user/check/password',
+    SET_TEAM: '/user/setTeam',
+    INIT_TEAM: '/user/initTeam'
   },
   Token: {
     LIST: '/token/list',
@@ -184,6 +186,21 @@ export default {
     CHECK_NAME: '/role/check/name',
     DELETE: '/role/delete',
     MENU: '/role/menu'
+  },
+  Team: {
+    POST: '/team/post',
+    UPDATE: '/team/update',
+    LIST: '/team/list',
+    CHECK_NAME: '/team/check/name',
+    DELETE: '/team/delete'
+  },
+  Member: {
+    POST: '/member/post',
+    UPDATE: '/member/update',
+    LIST: '/member/list',
+    TEAMS: '/member/teams',
+    CHECK_NAME: '/member/check/name',
+    DELETE: '/member/delete'
   },
   Menu: {
     LIST: '/menu/list',

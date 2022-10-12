@@ -15,10 +15,17 @@
  * limitations under the License.
  */
 
+
+-- ----------------------------
+-- Records of t_team
+-- ----------------------------
+insert into "public"."t_team" values (100000, 'default', null, now(), now());
+
+
 -- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
-insert into "public"."t_flink_app" values (100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, 0, 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, false, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, true, null, null, null, null, null, null, false, null, null, null, 'streampark,test');
+insert into "public"."t_flink_app" values (100000, 100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, 0, 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, false, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, true, null, null, null, null, null, null, false, null, null, null, 'streampark,test');
 
 -- ----------------------------
 -- Records of t_flink_effective
@@ -28,7 +35,7 @@ insert into "public"."t_flink_effective" values (100000, 100000, 2, 100000, now(
 -- ----------------------------
 -- Records of t_flink_project
 -- ----------------------------
-insert into "public"."t_flink_project" values (100000, 'streampark-quickstart', 'https://github.com/streamxhub/streampark-quickstart.git', 'main', null, null, null, null, 1, 1, null, 'streampark-quickstart', 1, now(), now());
+insert into "public"."t_flink_project" values (100000, 100000, 'streampark-quickstart', 'https://github.com/streamxhub/streampark-quickstart.git', 'main', null, null, null, null, 1, 1, null, 'streampark-quickstart', 1, now(), now());
 
 
 -- ----------------------------
@@ -83,58 +90,26 @@ insert into "public"."t_menu" values (100040, 100038, 'delete', null, null, 'tok
 insert into "public"."t_menu" values (100041, 100013, 'Add Cluster', '/flink/setting/add_cluster', 'flink/setting/AddCluster', 'cluster:create', '', 0, false, null, now(), now());
 insert into "public"."t_menu" values (100042, 100013, 'Edit Cluster', '/flink/setting/edit_cluster', 'flink/setting/EditCluster', 'cluster:update', '', 0, false, null, now(), now());
 insert into "public"."t_menu" values (100043, 100015, 'copy', null, null, 'app:copy', null, 1, true, null, now(), now());
+insert into "public"."t_menu" values (100044, 100000, 'Team Management', '/system/team', 'system/team/Team', 'team:view', 'team', '0', 1, 2, now(), now());
+insert into "public"."t_menu" values (100045, 100044, 'add', null, null, 'team:add', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (100046, 100044, 'update', null, null, 'team:update', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (100047, 100044, 'delete', null, null, 'team:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (100048, 100000, 'Member Management', '/system/member', 'system/member/Member', 'member:view', 'usergroup-add', '0', 1, 2, now(), now());
+insert into "public"."t_menu" values (100049, 100048, 'add', null, null, 'member:add', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (100050, 100048, 'update', null, null, 'member:update', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (100051, 100048, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
 
 
 -- ----------------------------
 -- Records of t_role
 -- ----------------------------
-insert into "public"."t_role" values (100000, 'admin', 'admin', now(), now(), null);
 insert into "public"."t_role" values (100001, 'developer', 'developer', now(), now(), null);
 
 -- ----------------------------
 -- Records of t_role_menu
 -- ----------------------------
-insert into "public"."t_role_menu" values (100000, 100000, 100000);
-insert into "public"."t_role_menu" values (100001, 100000, 100001);
-insert into "public"."t_role_menu" values (100002, 100000, 100002);
-insert into "public"."t_role_menu" values (100003, 100000, 100003);
-insert into "public"."t_role_menu" values (100004, 100000, 100004);
-insert into "public"."t_role_menu" values (100005, 100000, 100005);
-insert into "public"."t_role_menu" values (100006, 100000, 100006);
-insert into "public"."t_role_menu" values (100007, 100000, 100007);
-insert into "public"."t_role_menu" values (100008, 100000, 100008);
-insert into "public"."t_role_menu" values (100009, 100000, 100009);
-insert into "public"."t_role_menu" values (100010, 100000, 100010);
-insert into "public"."t_role_menu" values (100011, 100000, 100011);
-insert into "public"."t_role_menu" values (100012, 100000, 100012);
-insert into "public"."t_role_menu" values (100013, 100000, 100013);
-insert into "public"."t_role_menu" values (100014, 100000, 100014);
-insert into "public"."t_role_menu" values (100015, 100000, 100015);
-insert into "public"."t_role_menu" values (100016, 100000, 100016);
-insert into "public"."t_role_menu" values (100017, 100000, 100017);
-insert into "public"."t_role_menu" values (100018, 100000, 100018);
-insert into "public"."t_role_menu" values (100019, 100000, 100019);
-insert into "public"."t_role_menu" values (100020, 100000, 100020);
-insert into "public"."t_role_menu" values (100021, 100000, 100021);
-insert into "public"."t_role_menu" values (100022, 100000, 100022);
-insert into "public"."t_role_menu" values (100023, 100000, 100023);
-insert into "public"."t_role_menu" values (100024, 100000, 100024);
-insert into "public"."t_role_menu" values (100025, 100000, 100025);
-insert into "public"."t_role_menu" values (100026, 100000, 100026);
-insert into "public"."t_role_menu" values (100027, 100000, 100027);
-insert into "public"."t_role_menu" values (100028, 100000, 100028);
-insert into "public"."t_role_menu" values (100029, 100000, 100029);
-insert into "public"."t_role_menu" values (100030, 100000, 100030);
-insert into "public"."t_role_menu" values (100031, 100000, 100031);
-insert into "public"."t_role_menu" values (100032, 100000, 100032);
-insert into "public"."t_role_menu" values (100033, 100000, 100033);
-insert into "public"."t_role_menu" values (100034, 100000, 100034);
-insert into "public"."t_role_menu" values (100035, 100000, 100035);
-insert into "public"."t_role_menu" values (100036, 100000, 100036);
-insert into "public"."t_role_menu" values (100037, 100000, 100037);
-insert into "public"."t_role_menu" values (100038, 100000, 100038);
-insert into "public"."t_role_menu" values (100039, 100000, 100039);
-insert into "public"."t_role_menu" values (100040, 100000, 100040);
 insert into "public"."t_role_menu" values (100041, 100001, 100014);
 insert into "public"."t_role_menu" values (100042, 100001, 100016);
 insert into "public"."t_role_menu" values (100043, 100001, 100017);
@@ -154,35 +129,34 @@ insert into "public"."t_role_menu" values (100056, 100001, 100032);
 insert into "public"."t_role_menu" values (100057, 100001, 100033);
 insert into "public"."t_role_menu" values (100058, 100001, 100013);
 insert into "public"."t_role_menu" values (100059, 100001, 100015);
-insert into "public"."t_role_menu" values (100060, 100000, 100041);
-insert into "public"."t_role_menu" values (100061, 100000, 100042);
-insert into "public"."t_role_menu" values (100062, 100000, 100043);
+
 
 -- ----------------------------
 -- Records of t_setting
 -- ----------------------------
-insert into "public"."t_setting" values (1, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven 私服地址', 1);
-insert into "public"."t_setting" values (2, 'streampark.maven.auth.user', null, 'Maven Central Repository Auth User', 'Maven 私服认证用户名', 1);
-insert into "public"."t_setting" values (3, 'streampark.maven.auth.password', null, 'Maven Central Repository Auth Password', 'Maven 私服认证密码', 1);
-insert into "public"."t_setting" values (4, 'streampark.console.webapp.address', null, 'StreamPark Webapp address', 'StreamPark Console Web 应用程序HTTP URL', 1);
-insert into "public"."t_setting" values (5, 'alert.email.host', null, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
-insert into "public"."t_setting" values (6, 'alert.email.port', null, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);
-insert into "public"."t_setting" values (7, 'alert.email.from', null, 'Alert  Email From', '发送告警的邮箱', 1);
-insert into "public"."t_setting" values (8, 'alert.email.userName', null, 'Alert  Email User', '用来发送告警邮箱的认证用户名', 1);
-insert into "public"."t_setting" values (9, 'alert.email.password', null, 'Alert Email Password', '用来发送告警邮箱的认证密码', 1);
-insert into "public"."t_setting" values (10, 'alert.email.ssl', 'false', 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL', 2);
-insert into "public"."t_setting" values (11, 'docker.register.address', null, 'Docker Register Address', 'Docker容器服务地址', 1);
-insert into "public"."t_setting" values (12, 'docker.register.user', null, 'Docker Register User', 'Docker容器服务认证用户名', 1);
-insert into "public"."t_setting" values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker容器服务认证密码', 1);
-insert into "public"."t_setting" values (14, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker命名空间', 1);
+insert into "public"."t_setting" values (1, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml 完整路径', 1);
+insert into "public"."t_setting" values (2, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven 私服地址', 1);
+insert into "public"."t_setting" values (3, 'streampark.maven.auth.user', null, 'Maven Central Repository Auth User', 'Maven 私服认证用户名', 1);
+insert into "public"."t_setting" values (4, 'streampark.maven.auth.password', null, 'Maven Central Repository Auth Password', 'Maven 私服认证密码', 1);
+insert into "public"."t_setting" values (5, 'streampark.console.webapp.address', null, 'StreamPark Webapp address', 'StreamPark Console Web 应用程序HTTP URL', 1);
+insert into "public"."t_setting" values (6, 'alert.email.host', null, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
+insert into "public"."t_setting" values (7, 'alert.email.port', null, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);
+insert into "public"."t_setting" values (8, 'alert.email.from', null, 'Alert  Email From', '发送告警的邮箱', 1);
+insert into "public"."t_setting" values (9, 'alert.email.userName', null, 'Alert  Email User', '用来发送告警邮箱的认证用户名', 1);
+insert into "public"."t_setting" values (10, 'alert.email.password', null, 'Alert Email Password', '用来发送告警邮箱的认证密码', 1);
+insert into "public"."t_setting" values (11, 'alert.email.ssl', 'false', 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL', 2);
+insert into "public"."t_setting" values (12, 'docker.register.address', null, 'Docker Register Address', 'Docker容器服务地址', 1);
+insert into "public"."t_setting" values (13, 'docker.register.user', null, 'Docker Register User', 'Docker容器服务认证用户名', 1);
+insert into "public"."t_setting" values (14, 'docker.register.password', null, 'Docker Register Password', 'Docker容器服务认证密码', 1);
+insert into "public"."t_setting" values (15, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker命名空间', 1);
 
 
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-insert into "public"."t_user" values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, now(), now(), null, 0, null, null);
+insert into "public"."t_user" values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, null, '1', now(), now(), null, 0, null, null);
 
 -- ----------------------------
--- Records of t_user_role
+-- Records of t_member
 -- ----------------------------
-insert into "public"."t_user_role" values (100000, 100000, 100000);
+insert into "public"."t_member" values (100000, 100000, 100000, 100001, now(), now());

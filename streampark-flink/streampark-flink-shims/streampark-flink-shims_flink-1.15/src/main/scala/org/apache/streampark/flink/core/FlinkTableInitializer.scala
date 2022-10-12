@@ -17,15 +17,13 @@
 
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.{KEY_APP_CONF, KEY_APP_NAME, KEY_EXECUTION_RUNTIME_MODE, KEY_FLINK_APP_NAME, KEY_FLINK_PARALLELISM, KEY_FLINK_SQL, KEY_FLINK_TABLE_CATALOG, KEY_FLINK_TABLE_DATABASE, KEY_FLINK_TABLE_MODE, KEY_FLINK_WATERMARK_INTERVAL}
+import org.apache.streampark.common.conf.ConfigConst.{KEY_APP_NAME, KEY_FLINK_APP_NAME, KEY_FLINK_SQL, KEY_FLINK_TABLE_CATALOG, KEY_FLINK_TABLE_DATABASE, KEY_FLINK_TABLE_MODE}
 import org.apache.streampark.common.enums.{ApiType, TableMode}
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.enums.TableMode.TableMode
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
-import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.api.scala.ExecutionEnvironment
-import org.apache.flink.configuration.{CoreOptions, PipelineOptions}
+import org.apache.flink.configuration.{Configuration, PipelineOptions}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableConfig, TableEnvironment}
@@ -39,58 +37,64 @@ private[flink] object FlinkTableInitializer {
 
   private[this] var flinkInitializer: FlinkTableInitializer = _
 
-  def initTable(args: Array[String], config: (TableConfig, ParameterTool) => Unit = null): (ParameterTool, TableEnvironment) = {
+  def initialize(args: Array[String],
+                 config: (TableConfig, ParameterTool) => Unit):
+  (ParameterTool, TableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
           flinkInitializer = new FlinkTableInitializer(args, ApiType.scala)
           flinkInitializer.tableConfFunc = config
-          flinkInitializer.initTableEnv(TableMode.batch)
+          flinkInitializer.initEnvironment(TableMode.batch)
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.tableEnvironment)
+    (flinkInitializer.userParameter, flinkInitializer.tableEnvironment)
   }
 
-  def initJavaTable(args: TableEnvConfig): (ParameterTool, TableEnvironment) = {
+  def initialize(args: TableEnvConfig): (ParameterTool, TableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
           flinkInitializer = new FlinkTableInitializer(args.args, ApiType.java)
           flinkInitializer.javaTableEnvConfFunc = args.conf
-          flinkInitializer.initTableEnv(TableMode.batch)
+          flinkInitializer.initEnvironment(TableMode.batch)
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.tableEnvironment)
+    (flinkInitializer.userParameter, flinkInitializer.tableEnvironment)
   }
 
-  def initStreamTable(args: Array[String], configStream: (StreamExecutionEnvironment, ParameterTool) => Unit = null, configTable: (TableConfig, ParameterTool) => Unit = null): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
+  def initialize(args: Array[String],
+                 configStream: (StreamExecutionEnvironment, ParameterTool) => Unit,
+                 configTable: (TableConfig, ParameterTool) => Unit):
+  (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
           flinkInitializer = new FlinkTableInitializer(args, ApiType.scala)
           flinkInitializer.streamEnvConfFunc = configStream
           flinkInitializer.tableConfFunc = configTable
-          flinkInitializer.initTableEnv(TableMode.streaming)
+          flinkInitializer.initEnvironment(TableMode.streaming)
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
+    (flinkInitializer.userParameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
   }
 
-  def initJavaStreamTable(args: StreamTableEnvConfig): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
+  def initialize(args: StreamTableEnvConfig):
+  (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
           flinkInitializer = new FlinkTableInitializer(args.args, ApiType.java)
           flinkInitializer.javaStreamEnvConfFunc = args.streamConfig
           flinkInitializer.javaTableEnvConfFunc = args.tableConfig
-          flinkInitializer.initTableEnv(TableMode.streaming)
+          flinkInitializer.initEnvironment(TableMode.streaming)
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
+    (flinkInitializer.userParameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
   }
 }
 
@@ -105,7 +109,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
     if (localStreamTableEnv == null) {
       this.synchronized {
         if (localStreamTableEnv == null) {
-          initTableEnv(TableMode.streaming)
+          initEnvironment(TableMode.streaming)
         }
       }
     }
@@ -116,7 +120,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
     if (localTableEnv == null) {
       this.synchronized {
         if (localTableEnv == null) {
-          initTableEnv(TableMode.batch)
+          initEnvironment(TableMode.batch)
         }
       }
     }
@@ -126,39 +130,29 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
   /**
    * In case of table SQL, the parameter conf is not required, it depends on the developer.
    */
-  override def initParameter(): ParameterTool = {
-    val argsMap = ParameterTool.fromArgs(args)
-    val parameter = argsMap.get(KEY_APP_CONF(), null) match {
-      case null | "" =>
-        logWarn("Usage:can't fond config,you can set \"--conf $path \" in main arguments")
-        ParameterTool.fromSystemProperties().mergeWith(argsMap)
-      case file =>
-        val configArgs = super.readFlinkConf(file)
-        // config priority: explicitly specified priority > project profiles > system profiles
-        ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(configArgs)).mergeWith(argsMap)
-    }
-    parameter.get(KEY_FLINK_SQL()) match {
-      case null => parameter
+  override def initParameter(): (ParameterTool, Configuration) = {
+    val (userParameter: ParameterTool, flinkConf: Configuration) = super.initParameter()
+    (userParameter.get(KEY_FLINK_SQL()) match {
+      case null => userParameter
       case param =>
         // for streampark-console
         Try(DeflaterUtils.unzipString(param)) match {
-          case Success(value) => parameter.mergeWith(ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value)))
+          case Success(value) => userParameter.mergeWith(ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value)))
           case Failure(_) =>
             val sqlFile = new File(param)
             Try(PropertiesUtils.fromYamlFile(sqlFile.getAbsolutePath)) match {
-              case Success(value) => parameter.mergeWith(ParameterTool.fromMap(value))
+              case Success(value) => userParameter.mergeWith(ParameterTool.fromMap(value))
               case Failure(e) =>
                 new IllegalArgumentException(s"[StreamPark] init sql error.$e")
-                parameter
+                userParameter
             }
         }
-    }
-
+    }, flinkConf)
   }
 
-  def initTableEnv(tableMode: TableMode): Unit = {
+  def initEnvironment(tableMode: TableMode): Unit = {
     val builder = EnvironmentSettings.newInstance()
-    val mode = Try(TableMode.withName(parameter.get(KEY_FLINK_TABLE_MODE))).getOrElse(tableMode)
+    val mode = Try(TableMode.withName(userParameter.get(KEY_FLINK_TABLE_MODE))).getOrElse(tableMode)
     mode match {
       case TableMode.batch =>
         logInfo(s"components should work in $tableMode mode")
@@ -168,7 +162,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         builder.inStreamingMode()
     }
 
-    val buildWith = (parameter.get(KEY_FLINK_TABLE_CATALOG), parameter.get(KEY_FLINK_TABLE_DATABASE))
+    val buildWith = (userParameter.get(KEY_FLINK_TABLE_CATALOG), userParameter.get(KEY_FLINK_TABLE_DATABASE))
     buildWith match {
       case (x: String, y: String) if x != null && y != null =>
         logInfo(s"with built in catalog: $x")
@@ -187,16 +181,16 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
     tableMode match {
       case TableMode.batch => localTableEnv = TableEnvironment.create(setting)
       case TableMode.streaming =>
-        initStreamEnv()
+        initEnvironment()
         if (streamEnvConfFunc != null) {
-          streamEnvConfFunc(streamEnvironment, parameter)
+          streamEnvConfFunc(streamEnvironment, userParameter)
         }
         if (javaStreamEnvConfFunc != null) {
-          javaStreamEnvConfFunc.configuration(streamEnvironment.getJavaEnv, parameter)
+          javaStreamEnvConfFunc.configuration(streamEnvironment.getJavaEnv, userParameter)
         }
         localStreamTableEnv = StreamTableEnvironment.create(streamEnvironment, setting)
     }
-    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
+    val appName = (userParameter.get(KEY_APP_NAME(), null), userParameter.get(KEY_FLINK_APP_NAME, null)) match {
       case (appName: String, _) => appName
       case (null, appName: String) => appName
       case _ => null
@@ -212,15 +206,15 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
       case ApiType.java =>
         if (javaTableEnvConfFunc != null) {
           tableMode match {
-            case TableMode.batch => javaTableEnvConfFunc.configuration(localTableEnv.getConfig, parameter)
-            case TableMode.streaming => javaTableEnvConfFunc.configuration(localStreamTableEnv.getConfig, parameter)
+            case TableMode.batch => javaTableEnvConfFunc.configuration(localTableEnv.getConfig, userParameter)
+            case TableMode.streaming => javaTableEnvConfFunc.configuration(localStreamTableEnv.getConfig, userParameter)
           }
         }
       case ApiType.scala =>
         if (tableConfFunc != null) {
           tableMode match {
-            case TableMode.batch => tableConfFunc(localTableEnv.getConfig, parameter)
-            case TableMode.streaming => tableConfFunc(localStreamTableEnv.getConfig, parameter)
+            case TableMode.batch => tableConfFunc(localTableEnv.getConfig, userParameter)
+            case TableMode.streaming => tableConfFunc(localStreamTableEnv.getConfig, userParameter)
           }
         }
     }

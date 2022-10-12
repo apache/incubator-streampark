@@ -80,7 +80,7 @@
       </a-form>
     </div>
 
-    <!-- 表格区域 -->
+    <!-- table area -->
     <a-table
       ref="TableInfo"
       :columns="columns"
@@ -140,17 +140,17 @@
       </template>
     </a-table>
 
-    <!-- 用户信息查看 -->
+    <!-- View user information -->
     <user-info
       :data="userInfo.data"
       :visible="userInfo.visible"
       @close="handleUserInfoClose" />
-    <!-- 新增用户 -->
+    <!-- New users -->
     <user-add
       @close="handleUserAddClose"
       @success="handleUserAddSuccess"
       :visible="userAdd.visible" />
-    <!-- 修改用户 -->
+    <!-- modify user -->
     <user-edit
       ref="userEdit"
       @close="handleUserEditClose"
@@ -214,6 +214,9 @@ export default {
       }, {
         title: 'Nick Name',
         dataIndex: 'nickName'
+      }, {
+        title: 'User Type',
+        dataIndex: 'userType'
       }, {
         title: 'Status',
         dataIndex: 'status',
@@ -326,7 +329,7 @@ export default {
     search () {
       const { sortedInfo, filteredInfo } = this
       let sortField, sortOrder
-      // 获取当前列的排序和列的过滤规则
+      // Get the sorting of the current column and the filter rules of the column
       if (sortedInfo) {
         sortField = sortedInfo.field
         sortOrder = sortedInfo.order
@@ -339,23 +342,22 @@ export default {
       })
     },
     reset () {
-      // 重置分页
+      // Reset pagination
       this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
       if (this.paginationInfo) {
         this.paginationInfo.current = this.pagination.defaultCurrent
         this.paginationInfo.pageSize = this.pagination.defaultPageSize
       }
-      // 重置列过滤器规则
+      // Reset filteredInfo
       this.filteredInfo = null
-      // 重置列排序规则
+      // Reset sortedInfo
       this.sortedInfo = null
-      // 重置查询参数
+      // Reset queryParams
       this.queryParams = {}
       this.$refs.createTime.reset()
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
-      // 将这三个参数赋值给Vue data，用于后续使用
       this.paginationInfo = pagination
       this.filteredInfo = filters
       this.sortedInfo = sorter
@@ -368,16 +370,16 @@ export default {
       })
     },
     fetch (params = {}) {
-      // 显示loading
+      // show loading
       this.loading = true
       if (this.paginationInfo) {
-        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        // If the paging information is not empty, set the current page of the table, the number of items per page, and set the query paging parameters
         this.$refs.TableInfo.pagination.current = this.paginationInfo.current
         this.$refs.TableInfo.pagination.pageSize = this.paginationInfo.pageSize
         params.pageSize = this.paginationInfo.pageSize
         params.pageNum = this.paginationInfo.current
       } else {
-        // 如果分页信息为空，则设置为默认值
+        // If pagination information is empty, set to default
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
@@ -396,7 +398,7 @@ export default {
         pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
         this.pagination = pagination
-        // 数据加载完毕，关闭loading
+        // After the data is loaded, close the loading
         this.loading = false
       })
     }

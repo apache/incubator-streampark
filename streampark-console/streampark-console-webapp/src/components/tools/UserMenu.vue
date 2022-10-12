@@ -38,7 +38,7 @@
       </a>
 
       <a
-        href="http://streampark.apache.org/docs/user-guide/quick-start"
+        href="https://streampark.apache.org/docs/user-guide/quick-start"
         title="How to use"
         target="_blank">
         <svg-icon name="question" size="small" class="icon"></svg-icon>
@@ -65,7 +65,21 @@
         <img src="https://img.shields.io/github/forks/streamxhub/streampark.svg?sanitize=true" class="shields">
       </a>
 
-      <notice class="action"/>
+      <a> Team : </a>
+
+      <a-select
+        v-model="teamId"
+        mode="single"
+        style="min-width: 100px; margin-right: 10px"
+        @change="handleChangeTeam"
+        class="team-select">
+        <a-select-option
+          v-for="team in teamList"
+          :key="team.id"
+          :value="team.id">
+          {{ team.teamName }}
+        </a-select-option>
+      </a-select>
 
       <a-dropdown>
         <a class="ant-dropdown-link username" @click="e => e.preventDefault()">
@@ -90,6 +104,9 @@
           </a-menu-item>
         </a-menu>
       </a-dropdown>
+
+      <notice class="action"/>
+
     </div>
 
     <a-modal
@@ -105,7 +122,7 @@
       </template>
       <a-form
         @submit="handleChangeOk"
-        :form="formPassword">
+        :form="form">
         <a-form-item
           label="User Name"
           :label-col="{lg: {span: 7}, sm: {span: 7}}"
@@ -158,7 +175,6 @@
         </a-button>
       </template>
     </a-modal>
-
   </div>
 </template>
 
@@ -168,9 +184,11 @@ import SvgIcon from '@/components/SvgIcon'
 
 import { mapState, mapActions } from 'vuex'
 import { password } from '@api/user'
+import {teams} from '@/api/member'
 import themeUtil from '@/utils/themeUtil'
 import storage from '@/utils/storage'
-import {USER_NAME} from '@/store/mutation-types'
+import {TEAM_ID, USER_INFO, USER_NAME} from '@/store/mutation-types'
+import {message} from 'ant-design-vue'
 
 export default {
   name: 'UserMenu',
@@ -182,9 +200,11 @@ export default {
   data() {
     return {
       passwordVisible: false,
-      formPassword: null,
+      form: null,
       confirmDirty: false,
-      themeDark: false
+      themeDark: false,
+      teamList: [],
+      teamId: null
     }
   },
 
@@ -198,15 +218,17 @@ export default {
   },
 
   beforeMount() {
-    this.formPassword = this.$form.createForm(this)
+    this.form = this.$form.createForm(this)
   },
 
   mounted() {
     this.handleChangeTheme(true)
+    this.handlePrepareTeam()
+    this.fetchTeams()
   },
 
   methods: {
-    ...mapActions(['SignOut','ChangeTheme']),
+    ...mapActions(['SignOut','ChangeTheme', 'SetTeam']),
     handleLogout () {
       const that = this
       this.$confirm({
@@ -230,7 +252,7 @@ export default {
     },
 
     handleChangeOk() {
-      this.formPassword.validateFields((err, values) => {
+      this.form.validateFields((err, values) => {
         if (!err) {
           this.handleChangeCancel()
           password({
@@ -255,7 +277,7 @@ export default {
     handleChangeCancel () {
         this.passwordVisible = false
         setTimeout(() => {
-          this.formPassword.resetFields()
+          this.form.resetFields()
         }, 1000)
     },
 
@@ -269,7 +291,7 @@ export default {
         this.themeDark = !this.themeDark
         _theme = this.themeDark ? 'dark': 'light'
         this.ChangeTheme(_theme)
-        const closeMessage = this.$message.loading(`您选择了主题模式 ${_theme}, 正在切换...`)
+        const closeMessage = this.$message.loading(`You have selected the theme ${_theme}, switching...`)
         themeUtil.changeThemeColor(null, _theme).then(closeMessage)
       }
     },
@@ -280,8 +302,7 @@ export default {
     },
 
     compareToFirstPassword(rule, value, callback) {
-      const form = this.formPassword
-      if (value && value !== form.getFieldValue('password')) {
+      if (value && value !== this.form.getFieldValue('password')) {
         callback('Two passwords that you enter is inconsistent!')
       } else {
         callback()
@@ -289,13 +310,67 @@ export default {
     },
 
     validateToNextPassword(rule, value, callback) {
-      const form = this.formPassword
       if (value && this.confirmDirty) {
-        form.validateFields(['confirm'], { force: true })
+        this.form.validateFields(['confirm'], { force: true })
       }
       callback()
     },
 
+    handlePrepareTeam() {
+      let id = sessionStorage.getItem(TEAM_ID)
+      if (id == null) {
+        id = storage.get(TEAM_ID)
+        sessionStorage.setItem(TEAM_ID, id)
+      }
+      this.teamId = id.toString()
+    },
+
+    handleChangeTeam(teamId) {
+      this.SetTeam({
+        teamId: teamId
+      }).then(() => {
+        //refresh...
+        this.handleRefreshPage()
+      }).catch((err) => message.error(err))
+    },
+
+    handleRefreshPage() {
+      const defaultPage = '/flink/app'
+      const pages = [
+        '/system/user',
+        '/system/role',
+        '/system/menu',
+        '/system/token',
+        '/system/team',
+        '/system/member',
+        '/flink/project',
+        '/flink/app'
+      ]
+      const skipPages = [
+        '/flink/notebook/view',
+        '/flink/setting'
+      ]
+      const currPath = location.href.replace(/(.*)#/,'')
+      if (!skipPages.includes(currPath)) {
+        if (pages.includes(currPath)) {
+          window.location.reload()
+        } else {
+          this.$router.push({path: defaultPage})
+        }
+      }
+    },
+
+    fetchTeams() {
+      teams({
+        userId: storage.get(USER_INFO).userId
+      }).then((r) => {
+        this.teamList = r.data
+      })
+    },
+  },
+  watch: {
+    visible() {
+    }
   }
 }
 </script>
@@ -333,6 +408,23 @@ export default {
     -webkit-text-fill-color: transparent;
     -webkit-background-clip: text;
     -webkit-box-decoration-break: clone;
+  }
+}
+
+.team-select {
+  .ant-select-selection__rendered {
+    position: relative;
+    display: block;
+    margin: 0px 6px;
+    line-height: 22px;
+  }
+  .ant-select-selection--single {
+    height: unset;
+  }
+  .ant-select-arrow {
+    right: 5px;
+    margin-top: -6px;
+    font-size: 8px;
   }
 }
 

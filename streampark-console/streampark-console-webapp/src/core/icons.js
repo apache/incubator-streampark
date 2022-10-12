@@ -20,8 +20,8 @@
  * All icons are loaded here for easy management
  * @see https://vue.ant.design/components/icon/#Custom-Font-Icon
  *
- * 自定义图标加载表
- * 所有图标均从这里加载，方便管理
+ * Custom Icon Loading Form
+ * All icons are loaded from here for easy management
  */
 import alarm from '@/assets/icons/alarm.svg?inline'
 import testalarm from '@/assets/icons/testalarm.svg?inline'
@@ -75,6 +75,7 @@ import docker from '@/assets/icons/docker.svg?inline'
 import namespace from '@/assets/icons/namespace.svg?inline'
 import auth from '@/assets/icons/auth.svg?inline'
 import password from '@/assets/icons/password.svg?inline'
+import settings from '@/assets/icons/settings.svg?inline'
 
 export {
   alarm,
@@ -128,5 +129,6 @@ export {
   namespace,
   auth,
   password,
-  lark
+  lark,
+  settings
 }

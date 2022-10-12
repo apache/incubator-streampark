@@ -19,7 +19,7 @@ const plugins = []
 plugins.push(['import', {
   'libraryName': 'Antd',
   'libraryDirectory': 'es',
-  'style': true // `style: true` 会加载 less 文件
+  'style': true // `style: true` will load the less file
 }])
 
 module.exports = {

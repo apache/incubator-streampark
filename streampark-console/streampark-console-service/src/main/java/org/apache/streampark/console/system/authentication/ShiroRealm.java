@@ -58,10 +58,10 @@ public class ShiroRealm extends AuthorizingRealm {
     }
 
     /**
-     * ` 授权模块，获取用户角色和权限
+     * Authorization module to get user roles and permissions
      *
      * @param token token
-     * @return AuthorizationInfo 权限信息
+     * @return AuthorizationInfo permission information
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection token) {
@@ -69,32 +69,32 @@ public class ShiroRealm extends AuthorizingRealm {
 
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
 
-        // 获取用户角色集
+        // Get user role set
         Set<String> roleSet = roleService.getUserRoleName(username);
         simpleAuthorizationInfo.setRoles(roleSet);
 
-        // 获取用户权限集
+        // Get user permission set
         Set<String> permissionSet = userService.getPermissions(username);
         simpleAuthorizationInfo.setStringPermissions(permissionSet);
         return simpleAuthorizationInfo;
     }
 
     /**
-     * 用户认证
+     * User Authentication
      *
-     * @param authenticationToken 身份认证 token
-     * @return AuthenticationInfo 身份认证信息
-     * @throws AuthenticationException 认证相关异常
+     * @param authenticationToken authentication token
+     * @return AuthenticationInfo authentication information
+     * @throws AuthenticationException authentication related exceptions
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        // 这里的 token是从 JWTFilter 的 executeLogin 方法传递过来的，已经经过了解密
+        // The token here is passed from the executeLogin method of JWTFilter and has been decrypted
         String token = (String) authenticationToken.getCredentials();
         String username = JWTUtil.getUsername(token);
         if (StringUtils.isBlank(username)) {
             throw new AuthenticationException("Token verification failed");
         }
-        // 通过用户名查询用户信息
+        // Query user information by user name
         User user = userService.findByName(username);
 
         if (user == null) {
@@ -102,7 +102,7 @@ public class ShiroRealm extends AuthorizingRealm {
         }
 
         if (!JWTUtil.verify(token, username, user.getPassword())) {
-            //校验是否属于api的token，权限是否有效
+            // Check whether the token belongs to the api and whether the permission is valid
             String tokenDb = WebUtils.encryptToken(token);
             boolean effective = accessTokenService.checkTokenEffective(user.getUserId(), tokenDb);
             if (!effective) {

@@ -67,9 +67,9 @@
                   icon="rest"
                   @click="reset" />
                 <a-popconfirm
-                  title="请选择创建类型"
-                  ok-text="按钮"
-                  cancel-text="菜单"
+                  title="Please select a creation type"
+                  ok-text="button"
+                  cancel-text="menu"
                   @cancel="() => createMenu()"
                   @confirm="() => createButton()">
                   <a-icon
@@ -90,7 +90,7 @@
     </div>
 
     <div>
-      <!-- 表格区域 -->
+      <!-- Table Info -->
       <a-table
         :columns="columns"
         :key="key"
@@ -113,32 +113,32 @@
             name="edit"
             border
             @click.native="edit(record)"
-            title="修改" />
+            title="edit" />
           <a-badge
             v-noPermit="'menu:update'"
             status="warning"
-            text="无权限" />
+            text="No permission" />
         </template>
       </a-table>
     </div>
 
-    <!-- 新增菜单 -->
+    <!-- Add menu -->
     <menu-add
       @close="handleMenuAddClose"
       @success="handleMenuAddSuccess"
       :menu-add-visiable="menuAddVisiable" />
-    <!-- 修改菜单 -->
+    <!-- Modify menu -->
     <menu-edit
       ref="menuEdit"
       @close="handleMenuEditClose"
       @success="handleMenuEditSuccess"
       :menu-edit-visiable="menuEditVisiable" />
-    <!-- 新增按钮 -->
+    <!-- Add button -->
     <button-add
       @close="handleButtonAddClose"
       @success="handleButtonAddSuccess"
       :button-add-visiable="buttonAddVisiable" />
-    <!-- 修改按钮 -->
+    <!-- Modify button -->
     <button-edit
       ref="buttonEdit"
       @close="handleButtonEditClose"
@@ -197,8 +197,8 @@ export default {
         dataIndex: 'type',
         customRender: (text) => {
           switch (text) {
-            case '0': return <a-tag color = "cyan" >菜单</a-tag>
-            case '1': return <a-tag color = "pink"> 按钮 </a-tag>
+            case '0': return <a-tag color = "cyan" >menu</a-tag>
+            case '1': return <a-tag color = "pink"> button </a-tag>
             default: return text
           }
         }
@@ -241,7 +241,7 @@ export default {
     },
     handleMenuEditSuccess () {
       this.menuEditVisiable = false
-      this.$message.success('修改菜单成功')
+      this.$message.success('Modify the menu successfully')
       this.fetch()
     },
     handleButtonEditClose () {
@@ -249,7 +249,7 @@ export default {
     },
     handleButtonEditSuccess () {
       this.buttonEditVisiable = false
-      this.$message.success('修改按钮成功')
+      this.$message.success('Modify button successfully')
       this.fetch()
     },
     edit (record) {
@@ -266,7 +266,7 @@ export default {
     },
     handleButtonAddSuccess () {
       this.buttonAddVisiable = false
-      this.$message.success('新增按钮成功')
+      this.$message.success('Add button successfully')
       this.fetch()
     },
     createButton () {
@@ -277,7 +277,7 @@ export default {
     },
     handleMenuAddSuccess () {
       this.menuAddVisiable = false
-      this.$message.success('新增菜单成功')
+      this.$message.success('Added menu successfully')
       this.fetch()
     },
     createMenu () {
@@ -297,16 +297,15 @@ export default {
       })
     },
     reset () {
-      // 重置列过滤器规则
+      // Reset filteredInfo
       this.filteredInfo = {}
-      // 重置查询参数
+      // Reset queryParams
       this.queryParams = {}
-      // 清空时间选择
+      // Reset createTime
       this.$refs.createTime.reset()
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
-      // 将这两个个参数赋值给Vue data，用于后续使用
       this.filteredInfo = filters || {}
       this.fetch({
         sortField: sorter.field,

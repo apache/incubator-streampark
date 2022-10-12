@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// admin 配置
+// admin configure
 const ADMIN = {
   theme: {
     mode: {

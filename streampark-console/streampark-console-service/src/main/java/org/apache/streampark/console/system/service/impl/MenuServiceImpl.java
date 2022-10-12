@@ -22,15 +22,18 @@ import org.apache.streampark.console.base.domain.router.RouterMeta;
 import org.apache.streampark.console.base.domain.router.RouterTree;
 import org.apache.streampark.console.base.domain.router.VueRouter;
 import org.apache.streampark.console.base.util.TreeUtils;
+import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.system.entity.Menu;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.MenuMapper;
 import org.apache.streampark.console.system.service.MenuService;
+import org.apache.streampark.console.system.service.UserService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,19 +43,35 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
+    @Autowired
+    private UserService userService;
+
     @Override
     public List<Menu> findUserPermissions(String username) {
+        User user = Optional.ofNullable(userService.findByName(username))
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The username [%s] not found", username)));
+        // Admin has the permission for all menus.
+        if (UserType.ADMIN.equals(user.getUserType())) {
+            return this.list();
+        }
         return this.baseMapper.findUserPermissions(username);
     }
 
     @Override
     public List<Menu> findUserMenus(String username) {
+        User user = Optional.ofNullable(userService.findByName(username))
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The username [%s] not found", username)));
+        // Admin has the permission for all menus.
+        if (UserType.ADMIN.equals(user.getUserType())) {
+            return this.list(new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0"));
+        }
         return this.baseMapper.findUserMenus(username);
     }
 
@@ -77,7 +96,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             }
             result.put("total", menus.size());
         } catch (NumberFormatException e) {
-            log.info("查询菜单失败", e);
+            log.info("Failed to query menu", e);
             result.put("rows", null);
             result.put("total", 0);
         }
@@ -112,9 +131,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Transactional(rollbackFor = Exception.class)
     public void deleteMenus(String[] menuIds) throws Exception {
         for (String menuId : menuIds) {
-            // 查找与这些菜单/按钮关联的用户
+            // Find users associated with these menus/buttons
             this.baseMapper.deleteRoleMenuByMenuId(Long.parseLong(menuId));
-            // 递归删除这些菜单/按钮
+            // Recursively delete these menus/buttons
             this.baseMapper.deleteById(menuId);
         }
     }
@@ -122,7 +141,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public ArrayList<VueRouter<Menu>> getUserRouters(User user) {
         List<VueRouter<Menu>> routes = new ArrayList<>();
-        // 查询type为菜单类型
+        // The query type is the menu type
         List<Menu> menus = this.findUserMenus(user.getUsername());
         menus.forEach(menu -> {
             VueRouter<Menu> route = new VueRouter<>();

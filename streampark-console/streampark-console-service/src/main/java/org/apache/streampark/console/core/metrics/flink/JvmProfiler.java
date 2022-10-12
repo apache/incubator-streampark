@@ -32,8 +32,7 @@ import java.util.Map;
 @Data
 public class JvmProfiler implements Serializable {
 
-    @JsonIgnore
-    private ObjectMapper mapper = new ObjectMapper();
+    private transient ObjectMapper mapper = new ObjectMapper();
 
     private String metric;
     private Long id;

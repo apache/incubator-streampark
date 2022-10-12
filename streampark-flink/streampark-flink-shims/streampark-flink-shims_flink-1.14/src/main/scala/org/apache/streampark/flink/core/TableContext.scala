@@ -39,7 +39,9 @@ class TableContext(override val parameter: ParameterTool,
    *
    * @param args
    */
-  def this(args: TableEnvConfig) = this(FlinkTableInitializer.initJavaTable(args))
+  def this(args: TableEnvConfig) = {
+    this(FlinkTableInitializer.initialize(args))
+  }
 
 
   override def useModules(strings: String*): Unit = tableEnv.useModules(strings: _*)

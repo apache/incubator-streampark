@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.console.base.util.CommonUtils;
@@ -41,7 +42,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -53,6 +53,8 @@ import java.util.List;
 public class Project implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
+
+    private Long teamId;
 
     private String name;
 
@@ -105,9 +107,6 @@ public class Project implements Serializable {
      */
     private transient String appSource;
 
-    @JsonIgnore
-    private transient SettingService settingService;
-
     /**
      * get project source
      */
@@ -146,7 +145,6 @@ public class Project implements Serializable {
         return new File(home, ".git");
     }
 
-    @JsonIgnore
     public void delete() throws IOException {
         FileUtils.deleteDirectory(getAppSource());
         FileUtils.deleteDirectory(getDistHome());
@@ -177,7 +175,6 @@ public class Project implements Serializable {
         return Collections.emptyList();
     }
 
-    @JsonIgnore
     public GitAuthorizedError gitCheck() {
         try {
             if (CommonUtils.notEmpty(userName, password)) {
@@ -216,7 +213,7 @@ public class Project implements Serializable {
     }
 
     @JsonIgnore
-    public List<String> getMavenArgs() {
+    public String getMavenArgs() {
         String mvn = "mvn";
         try {
             if (CommonUtils.isWindows()) {
@@ -231,7 +228,19 @@ public class Project implements Serializable {
                 mvn = WebUtils.getAppHome().concat("/bin/mvnw");
             }
         }
-        return Arrays.asList(mvn.concat(" clean package -DskipTests ").concat(StringUtils.isEmpty(this.buildArgs) ? "" : this.buildArgs.trim()));
+
+        StringBuffer cmdBuffer = new StringBuffer(mvn).append(" clean package -DskipTests ");
+
+        if (StringUtils.isNotEmpty(this.buildArgs)) {
+            cmdBuffer.append(this.buildArgs.trim());
+        }
+
+        Setting setting = SettingService.SETTINGS.get(CommonConfig.MAVEN_SETTINGS_PATH());
+        if (setting != null) {
+            cmdBuffer.append(" --settings ").append(setting.getSettingValue());
+        }
+
+        return cmdBuffer.toString();
     }
 
     @JsonIgnore

@@ -80,7 +80,7 @@
       </a-form>
     </div>
 
-    <!-- 表格区域 -->
+    <!-- Table Info -->
     <a-table
       ref="TableInfo"
       :columns="columns"
@@ -111,20 +111,18 @@
         slot="operation"
         slot-scope="text, record">
         <svg-icon
-          v-if="(record.roleName !== 'admin' || userName === 'admin')"
           v-permit="'role:update'"
           name="edit"
           border
           @click.native="edit(record)"
-          title="修改角色" />
+          title="Edit role" />
         <svg-icon
           name="see"
           border
           @click.native="view(record)"
-          title="查看" />
+          title="View" />
         <a-popconfirm
           v-permit="'role:delete'"
-          v-if="record.roleName !== 'admin'"
           title="Are you sure delete this Role ?"
           cancel-text="No"
           ok-text="Yes"
@@ -133,17 +131,17 @@
         </a-popconfirm>
       </template>
     </a-table>
-    <!-- 角色信息查看 -->
+    <!-- View role info -->
     <role-info
       @close="handleRoleInfoClose"
       :role-info-visiable="roleInfo.visiable"
       :role-info-data="roleInfo.data" />
-    <!-- 新增角色 -->
+    <!-- Add role -->
     <role-add
       @close="handleRoleAddClose"
       @success="handleRoleAddSuccess"
       :role-add-visiable="roleAdd.visiable" />
-    <!-- 修改角色 -->
+    <!-- Edit role -->
     <role-edit
       ref="roleEdit"
       :role-info-data="roleInfo.data"
@@ -160,8 +158,6 @@ import RoleInfo from './RoleInfo'
 import RoleEdit from './RoleEdit'
 import SvgIcon from '@/components/SvgIcon'
 import { list, remove } from '@/api/role'
-import storage from '@/utils/storage'
-import {USER_NAME} from '@/store/mutation-types'
 
 export default {
   name: 'Role',
@@ -192,7 +188,7 @@ export default {
         defaultPageSize: 10,
         showQuickJumper: true,
         showSizeChanger: true,
-        showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        showTotal: (total, range) => `show ${range[0]} ~ ${range[1]} records, total ${total} records`
       },
       loading: false
     }
@@ -224,9 +220,6 @@ export default {
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' }
       }]
-    },
-    userName() {
-      return storage.get(USER_NAME)
     }
   },
   mounted () {
@@ -241,7 +234,7 @@ export default {
     },
     handleRoleAddSuccess () {
       this.roleAdd.visiable = false
-      this.$message.success('新增角色成功')
+      this.$message.success('Add role success')
       this.search()
     },
     view (record) {
@@ -258,7 +251,7 @@ export default {
     },
     handleRoleEditSuccess () {
       this.roleEdit.visiable = false
-      this.$message.success('修改角色成功')
+      this.$message.success('Edit role success.')
       this.search()
     },
     handleRoleEditClose () {
@@ -271,7 +264,6 @@ export default {
       }
     },
     handleDelete (record) {
-      alert(record.roleId)
       remove({
         roleId: record.roleId
       }).then((resp) => {
@@ -284,7 +276,6 @@ export default {
     search () {
       const { sortedInfo } = this
       let sortField, sortOrder
-      // 获取当前列的排序和列的过滤规则
       if (sortedInfo) {
         sortField = sortedInfo.field
         sortOrder = sortedInfo.order
@@ -296,22 +287,21 @@ export default {
       })
     },
     reset () {
-      // 重置分页
+      // Reset pagination
       this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
       if (this.paginationInfo) {
         this.paginationInfo.current = this.pagination.defaultCurrent
         this.paginationInfo.pageSize = this.pagination.defaultPageSize
       }
-      // 重置列排序规则
+      // Reset sortedInfo
       this.sortedInfo = null
-      // 重置查询参数
+      // Reset queryParams
       this.queryParams = {}
-      // 清空时间选择
+      // Reset createTime
       this.$refs.createTime.reset()
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
-      // 将这两个参数赋值给Vue data，用于后续使用
       this.paginationInfo = pagination
       this.sortedInfo = sorter
       this.fetch({
@@ -323,13 +313,11 @@ export default {
     fetch (params = {}) {
       this.loading = true
       if (this.paginationInfo) {
-        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
         this.$refs.TableInfo.pagination.current = this.paginationInfo.current
         this.$refs.TableInfo.pagination.pageSize = this.paginationInfo.pageSize
         params.pageSize = this.paginationInfo.pageSize
         params.pageNum = this.paginationInfo.current
       } else {
-        // 如果分页信息为空，则设置为默认值
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }

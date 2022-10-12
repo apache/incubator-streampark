@@ -108,4 +108,17 @@ object KubernetesDeploymentHelper extends Logger {
       }.getOrElse(null)
     }(error => throw error)
   }
+
+  def deleteTaskConfigMap(nameSpace: String, deploymentName: String): Boolean = {
+    tryWithResource(KubernetesRetriever.newK8sClient()) { client =>
+      Try {
+        val r = client.configMaps()
+          .inNamespace(nameSpace)
+          .withLabel("app", deploymentName)
+          .delete
+        Boolean.unbox(r)
+      }.getOrElse(false)
+    }
+  }
+
 }

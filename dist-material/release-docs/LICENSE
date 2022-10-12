@@ -190,10 +190,10 @@ licenses.
 The following components are provided under the  License. See project link for details.
 The text of each license is also included in licenses/LICENSE-[project].txt.
 
-    https://mvnrepository.com/artifact/com.aliyun.oss/aliyun-sdk-oss/3.15.0 
-    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-core/4.5.10 
-    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-kms/2.11.0 
-    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-ram/3.1.0 
+    https://mvnrepository.com/artifact/com.aliyun.oss/aliyun-sdk-oss/3.15.0
+    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-core/4.5.10
+    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-kms/2.11.0
+    https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-ram/3.1.0
 
 ========================================================================
 Apache-2.0 licenses
@@ -610,8 +610,7 @@ The text of each license is the standard Apache 2.0 license.
     https://mvnrepository.com/artifact/org.xerial.snappy/snappy-java/1.1.7.3 Apache-2.0
     https://mvnrepository.com/artifact/org.xerial.snappy/snappy-java/1.0.5 Apache-2.0
     https://mvnrepository.com/artifact/org.xerial.snappy/snappy-java/1.1.8.4 Apache-2.0
-    https://mvnrepository.com/artifact/org.yaml/snakeyaml/1.31 Apache-2.0
-    https://mvnrepository.com/artifact/org.yaml/snakeyaml/1.29 Apache-2.0
+    https://mvnrepository.com/artifact/org.yaml/snakeyaml/1.32 Apache-2.0
     https://mvnrepository.com/artifact/p6spy/p6spy/3.9.1 Apache-2.0
     https://mvnrepository.com/artifact/ru.yandex.clickhouse/clickhouse-jdbc/0.3.2 Apache-2.0
     https://mvnrepository.com/artifact/stax/stax-api/1.0.1 Apache-2.0

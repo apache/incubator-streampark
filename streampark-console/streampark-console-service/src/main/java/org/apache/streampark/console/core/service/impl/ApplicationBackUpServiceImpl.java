@@ -72,7 +72,7 @@ public class ApplicationBackUpServiceImpl
     @Autowired
     private FlinkSqlService flinkSqlService;
 
-    private ExecutorService executorService = new ThreadPoolExecutor(
+    private final ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 5,
         Runtime.getRuntime().availableProcessors() * 10,
         60L,

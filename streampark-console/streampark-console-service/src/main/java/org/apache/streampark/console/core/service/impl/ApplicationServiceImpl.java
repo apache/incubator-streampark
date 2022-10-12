@@ -33,6 +33,7 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.common.util.FlinkUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
@@ -79,6 +80,7 @@ import org.apache.streampark.console.core.task.FlinkTrackingTask;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.IngressController;
 import org.apache.streampark.flink.kubernetes.K8sFlinkTrackMonitor;
+import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
@@ -101,8 +103,9 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.common.JobID;
+import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -291,7 +294,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public String upload(MultipartFile file) throws ApplicationException {
         File temp = WebUtils.getAppTempDir();
-        File saveFile = new File(temp, Objects.requireNonNull(file.getOriginalFilename()));
+        String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
+        File saveFile = new File(temp, fileName);
         // delete when exists
         if (saveFile.exists()) {
             saveFile.delete();
@@ -457,6 +461,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
+        if (appParam.getTeamId() == null) {
+            return null;
+        }
         Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
         if (CommonUtils.notEmpty(appParam.getStateArray())) {
             if (Arrays.stream(appParam.getStateArray()).anyMatch(x -> x == FlinkAppState.FINISHED.getValue())) {
@@ -569,7 +576,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean create(Application appParam) {
-        appParam.setUserId(commonService.getCurrentUser().getUserId());
+        AssertUtils.checkArgument(appParam.getTeamId() != null, "The teamId cannot be null");
+        appParam.setUserId(commonService.getUserId());
         appParam.setState(FlinkAppState.ADDED.getValue());
         appParam.setLaunch(LaunchState.NEED_LAUNCH.get());
         appParam.setOptionState(OptionState.NONE.getValue());
@@ -644,7 +652,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setModule(oldApp.getModule());
         newApp.setDefaultModeIngress(oldApp.getDefaultModeIngress());
 
-        newApp.setUserId(commonService.getCurrentUser().getUserId());
+        newApp.setUserId(commonService.getUserId());
         newApp.setState(FlinkAppState.ADDED.getValue());
         newApp.setLaunch(LaunchState.NEED_LAUNCH.get());
         newApp.setOptionState(OptionState.NONE.getValue());
@@ -654,6 +662,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setJar(oldApp.getJar());
         newApp.setJarCheckSum(oldApp.getJarCheckSum());
         newApp.setTags(oldApp.getTags());
+        newApp.setTeamId(oldApp.getTeamId());
 
         boolean saved = save(newApp);
         if (saved) {
@@ -906,6 +915,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (startFuture == null && cancelFuture == null) {
             this.updateToStopped(app);
         }
+        if (isKubernetesApp(app)) {
+            KubernetesDeploymentHelper.watchPodTerminatedLog(app.getK8sNamespace(), app.getJobName());
+            KubernetesDeploymentHelper.deleteTaskDeployment(app.getK8sNamespace(), app.getJobName());
+            KubernetesDeploymentHelper.deleteTaskConfigMap(app.getK8sNamespace(), app.getJobName());
+            IngressController.deleteIngress(app.getK8sNamespace(), app.getJobName());
+        }
+
     }
 
     @Override
@@ -1059,7 +1075,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        Long userId = commonService.getCurrentUser().getUserId();
+        Long userId = commonService.getUserId();
         if (!application.getUserId().equals(userId)) {
             FlinkTrackingTask.addCanceledApp(application.getId(), userId);
         }
@@ -1192,7 +1208,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         AssertUtils.state(application != null);
 
-        application.setJobId(new JobID().toHexString());
         // if manually started, clear the restart flag
         if (!auto) {
             application.setRestartCount(0);
@@ -1269,7 +1284,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         Map<String, Object> extraParameter = new HashMap<>(0);
         extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());
-        extraParameter.put(ConfigConst.KEY_FLINK_JOB_ID(), application.getJobId());
 
         if (appParam.getAllowNonRestored()) {
             extraParameter.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
@@ -1388,6 +1402,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     }
                 }
                 application.setAppId(submitResponse.clusterId());
+                if (StringUtils.isNoneEmpty(submitResponse.jobId())) {
+                    application.setJobId(submitResponse.jobId());
+                }
 
                 if (StringUtils.isNoneEmpty(submitResponse.jobManagerUrl())) {
                     application.setJobManagerUrl(submitResponse.jobManagerUrl());
@@ -1470,7 +1487,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         // 1) dynamic parameters have the highest priority, read the dynamic parameters are set: -Dstate.savepoints.dir
         String savepointPath = FlinkSubmitter
             .extractDynamicOptionAsJava(application.getDynamicOptions())
-            .get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+            .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
 
         // Application conf configuration has the second priority. If it is a streampark|flinksql type task,
         // see if Application conf is configured when the task is defined, if checkpoints are configured and enabled,
@@ -1480,9 +1497,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 ApplicationConfig applicationConfig = configService.getEffective(application.getId());
                 if (applicationConfig != null) {
                     Map<String, String> map = applicationConfig.readConfig();
-                    boolean checkpointEnable = Boolean.parseBoolean(map.get(ConfigConst.KEY_FLINK_CHECKPOINTS_ENABLE()));
-                    if (checkpointEnable) {
-                        savepointPath = map.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR());
+                    if (FlinkUtils.isCheckpointEnabled(map)) {
+                        savepointPath = map.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
                     }
                 }
             }
@@ -1498,12 +1514,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         "the cluster has been deleted. Please contact the Admin.", application.getFlinkClusterId()));
                 Map<String, String> config = cluster.getFlinkConfig();
                 if (!config.isEmpty()) {
-                    savepointPath = config.get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+                    savepointPath = config.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
                 }
             } else {
                 // 3.2) At the yarn or k8s mode, then read the savepoint in flink-conf.yml in the bound flink
                 FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
-                savepointPath = flinkEnv.convertFlinkYamlAsMap().get(ConfigConst.KEY_FLINK_STATE_SAVEPOINTS_DIR().substring(6));
+                savepointPath = flinkEnv.convertFlinkYamlAsMap().get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
             }
         }
 

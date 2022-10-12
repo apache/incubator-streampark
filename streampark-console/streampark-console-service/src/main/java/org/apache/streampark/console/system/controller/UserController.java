@@ -17,10 +17,16 @@
 
 package org.apache.streampark.console.system.controller;
 
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
+import org.apache.streampark.console.system.service.RoleService;
+import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -41,7 +47,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Validated
@@ -51,6 +60,15 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TeamService teamService;
+
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private CommonService commonService;
 
     @PostMapping("detail")
     public User detail(@NotBlank(message = "{required}") @PathVariable String username) {
@@ -140,6 +158,51 @@ public class UserController {
         String[] usernameArr = usernames.split(StringPool.COMMA);
         this.userService.resetPassword(usernameArr);
         return RestResponse.success();
+    }
+
+    @PostMapping("types")
+    @RequiresPermissions("user:types")
+    public RestResponse userTypes() {
+        return RestResponse.success(UserType.values());
+    }
+
+    @PostMapping("initTeam")
+    public RestResponse initTeam(Long teamId, Long userId) {
+        Team team = teamService.getById(teamId);
+        if (team == null) {
+            return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
+        }
+        userService.setLatestTeam(teamId, userId);
+        return RestResponse.success();
+    }
+
+    @PostMapping("setTeam")
+    public RestResponse setTeam(Long teamId) {
+        Team team = teamService.getById(teamId);
+        if (team == null) {
+            return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
+        }
+
+        User user = commonService.getCurrentUser();
+
+        //1) set latest team
+        userService.setLatestTeam(teamId, user.getUserId());
+
+        //2) get latest userInfo
+        user.setPassword("******");
+        user.setSalt("******");
+
+        Map<String, Object> infoMap = new HashMap<>(8);
+        infoMap.put("user", user);
+
+        String username = user.getUsername();
+        Set<String> roles = this.roleService.getUserRoleName(username);
+        infoMap.put("roles", roles);
+
+        Set<String> permissions = this.userService.getPermissions(username);
+        infoMap.put("permissions", permissions);
+
+        return new RestResponse().data(infoMap);
     }
 
 }

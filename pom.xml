@@ -28,7 +28,7 @@
     <groupId>org.apache.streampark</groupId>
     <artifactId>streampark</artifactId>
     <packaging>pom</packaging>
-    <version>${reversion}</version>
+    <version>1.2.4-SNAPSHOT</version>
 
     <name>StreamPark</name>
 
@@ -81,7 +81,6 @@
     </modules>
 
     <properties>
-        <reversion>1.2.4</reversion>
         <project.build.jdk>1.8</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -99,7 +98,6 @@
         <hive.version>2.3.4</hive.version>
         <hadoop.version>2.10.2</hadoop.version>
         <hbase.version>2.1.10</hbase.version>
-        <jupiter.version>5.6.3</jupiter.version>
         <zkclient.version>0.11</zkclient.version>
         <curator.version>4.2.0</curator.version>
         <redis.version>3.3.0</redis.version>
@@ -115,14 +113,21 @@
         <caffeine.version>2.8.6</caffeine.version>
         <mysql.version>8.0.16</mysql.version>
         <hikariCP.version>3.4.5</hikariCP.version>
-        <snakeyaml.version>1.31</snakeyaml.version>
+        <snakeyaml.version>1.32</snakeyaml.version>
         <json4s-jackson.version>3.7.0-M2</json4s-jackson.version>
         <hbase-client.version>1.3.5</hbase-client.version>
         <commons-cli.version>1.3.1</commons-cli.version>
         <commons-lang3.version>3.8.1</commons-lang3.version>
         <enumeratum.version>1.6.1</enumeratum.version>
 
-        <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
+        <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+        <scala-maven-plugin.version>4.7.1</scala-maven-plugin.version>
+        <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
+        <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
+        <maven-source-plugin.version> 2.2.1</maven-source-plugin.version>
+        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <checkstyle.fails.on.error>true</checkstyle.fails.on.error>
         <scalastyle.fails.on.error>true</scalastyle.fails.on.error>
         <scalastyle-maven-plugin.version>1.0.0</scalastyle-maven-plugin.version>
@@ -130,7 +135,7 @@
         <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
         <httpclient.version>4.5.13</httpclient.version>
         <lombok.version>1.18.24</lombok.version>
-        <junit.version>4.13.2</junit.version>
+        <jupiter.version>5.9.1</jupiter.version>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
@@ -553,10 +558,18 @@
                 <version>${lombok.version}</version>
             </dependency>
 
+            <!-- test -->
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${jupiter.version}</version>
+                <scope>test</scope>
             </dependency>
 
         </dependencies>
@@ -652,7 +665,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.7</version>
+                    <version>${build-helper-maven-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>add-source</id>
@@ -677,7 +690,8 @@
                     <configuration>
                         <!--suppress UnresolvedMavenProperty -->
                         <configLocation>${maven.multiModuleProjectDirectory}/tools/checkstyle/checkstyle.xml</configLocation>
-                        <encoding>UTF-8</encoding>
+                        <inputEncoding>UTF-8</inputEncoding>
+                        <outputEncoding>UTF-8</outputEncoding>
                         <consoleOutput>true</consoleOutput>
                         <includeTestSourceDirectory>false</includeTestSourceDirectory>
                         <failOnViolation>${checkstyle.fails.on.error}</failOnViolation>
@@ -757,7 +771,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
                         <source>${project.build.jdk}</source>
                         <target>${project.build.jdk}</target>
@@ -775,7 +789,7 @@
                 <plugin>
                     <groupId>net.alchim31.maven</groupId>
                     <artifactId>scala-maven-plugin</artifactId>
-                    <version>4.3.0</version>
+                    <version>${scala-maven-plugin.version}</version>
                     <configuration>
                         <addScalacArgs>-target:jvm-${project.build.jdk}</addScalacArgs>
                         <target>${project.build.jdk}</target>
@@ -804,7 +818,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.2.4</version>
+                    <version>${maven-shade-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>shade-flink</id>
@@ -845,7 +859,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>2.2.1</version>
+                    <version>${maven-source-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
@@ -859,7 +873,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.9.1</version>
+                    <version>${maven-javadoc-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
@@ -873,7 +887,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
-                    <version>1.5</version>
+                    <version>${maven-gpg-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>sign-artifacts</id>

@@ -323,6 +323,8 @@ public class FlinkTrackingTask {
                 application.setEndTime(new Date(endTime));
             }
         }
+
+        application.setJobId(jobOverview.getId());
         application.setDuration(jobOverview.getDuration());
         application.setTotalTask(jobOverview.getTasks().getTotal());
         application.setOverview(jobOverview.getTasks());

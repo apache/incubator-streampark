@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.domain.FlinkVersion;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.console.base.exception.ApiException;
+import org.apache.streampark.console.base.exception.ApiDetailException;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -64,13 +64,13 @@ public class FlinkEnv implements Serializable {
 
     private transient String streamParkScalaVersion = scala.util.Properties.versionNumberString();
 
-    public void doSetFlinkConf() throws ApiException {
+    public void doSetFlinkConf() throws ApiDetailException {
         try {
             File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
             String flinkConf = FileUtils.readFileToString(yaml);
             this.flinkConf = DeflaterUtils.zipString(flinkConf);
         } catch (Exception e) {
-            throw new ApiException(e);
+            throw new ApiDetailException(e);
         }
     }
 
@@ -88,7 +88,6 @@ public class FlinkEnv implements Serializable {
         }
     }
 
-    @JsonIgnore
     public Map<String, String> convertFlinkYamlAsMap() {
         String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
         return PropertiesUtils.loadFlinkConfYaml(flinkYamlString);

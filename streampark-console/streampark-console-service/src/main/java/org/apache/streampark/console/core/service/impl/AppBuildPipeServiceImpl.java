@@ -260,7 +260,7 @@ public class AppBuildPipeServiceImpl
 
                 } else {
                     Message message = new Message(
-                        commonService.getCurrentUser().getUserId(),
+                        commonService.getUserId(),
                         app.getId(),
                         app.getJobName().concat(" launch failed"),
                         ExceptionUtils.stringifyException(snapshot.error().exception()),

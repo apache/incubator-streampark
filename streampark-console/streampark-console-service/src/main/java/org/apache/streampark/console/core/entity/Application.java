@@ -76,6 +76,8 @@ public class Application implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    private Long teamId;
+
     /**
      * 1) custom code
      * 2) flink SQL
@@ -96,6 +98,7 @@ public class Application implements Serializable {
     @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String appId;
 
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String jobId;
 
     /**
@@ -397,12 +400,10 @@ public class Application implements Serializable {
         return ExecutionMode.of(executionMode);
     }
 
-    @JsonIgnore
     public boolean cpFailedTrigger() {
         return this.cpMaxFailureInterval != null && this.cpFailureRateInterval != null && this.cpFailureAction != null;
     }
 
-    @JsonIgnore
     public boolean eqFlinkJob(Application other) {
         if (this.isFlinkSqlJob() && other.isFlinkSqlJob()) {
             if (this.getFlinkSql().trim().equals(other.getFlinkSql().trim())) {
@@ -542,7 +543,6 @@ public class Application implements Serializable {
     /**
      * Parameter comparison, mainly to compare whether the parameters related to Flink runtime have changed
      */
-    @JsonIgnore
     public boolean eqJobParam(Application other) {
         // 1) Resolve Order has it changed
         // 2) flink Version has it changed
@@ -630,10 +630,12 @@ public class Application implements Serializable {
         }
     }
 
+    @JsonIgnore
     public FsOperator getFsOperator() {
         return FsOperator.of(getStorageType());
     }
 
+    @JsonIgnore
     public Workspace getWorkspace() {
         return Workspace.of(getStorageType());
     }
@@ -650,7 +652,6 @@ public class Application implements Serializable {
         return Collections.EMPTY_MAP;
     }
 
-    @JsonIgnore
     @SneakyThrows
     public void doSetHotParams() {
         Map<String, String> hotParams = new HashMap<>();
@@ -670,7 +671,6 @@ public class Application implements Serializable {
         }
     }
 
-    @JsonIgnore
     @SneakyThrows
     public void updateHotParams(Application appParam) {
         ExecutionMode executionModeEnum = appParam.getExecutionModeEnum();
@@ -693,7 +693,6 @@ public class Application implements Serializable {
         private List<Pom> pom = Collections.emptyList();
         private List<String> jar = Collections.emptyList();
 
-        @JsonIgnore
         @SneakyThrows
         public static Dependency toDependency(String dependency) {
             if (Utils.notEmpty(dependency)) {
@@ -729,7 +728,6 @@ public class Application implements Serializable {
             return new HashSet<>(pom).containsAll(other.pom);
         }
 
-        @JsonIgnore
         public DependencyInfo toJarPackDeps() {
             List<Artifact> mvnArts = this.pom.stream()
                 .map(pom -> new Artifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))

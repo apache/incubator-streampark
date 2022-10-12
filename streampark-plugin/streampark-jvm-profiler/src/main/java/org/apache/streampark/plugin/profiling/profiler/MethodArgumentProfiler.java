@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MethodArgumentProfiler extends ProfilerBase implements Profiler {
     public static final String PROFILER_NAME = "MethodArgument";
 
-    private ClassMethodArgumentMetricBuffer buffer;
+    private final ClassMethodArgumentMetricBuffer buffer;
 
     private Reporter reporter = new ConsoleOutputReporter();
 

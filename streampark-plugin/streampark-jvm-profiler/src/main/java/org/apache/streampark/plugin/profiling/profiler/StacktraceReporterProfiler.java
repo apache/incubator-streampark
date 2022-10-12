@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class StacktraceReporterProfiler extends ProfilerBase implements Profiler {
     public static final String PROFILER_NAME = "Stacktrace";
 
-    private StacktraceMetricBuffer buffer;
+    private final StacktraceMetricBuffer buffer;
 
     private Reporter reporter = new ConsoleOutputReporter();
 

@@ -18,29 +18,29 @@
 package org.apache.streampark.console.core.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 
+@ApiModel(value = "AlertHttpCallback")
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertHttpCallbackParams implements Serializable {
-    @NotBlank(message = "The url of alert must not be empty")
+
+    @ApiModelProperty(name = "url", value = "callback url")
+    @NotBlank(message = "The url of callback must be not empty")
     private String url;
-    /**
-     * http request method, default is  POST
-     */
+
+    @ApiModelProperty(name = "method", value = "http method")
     private String method = "POST";
 
-    /**
-     * http request contentType, default is application/json
-     */
+    @ApiModelProperty(name = "contentType", value = "content type", example = "application/json")
     private String contentType;
 
-    /**
-     * use freemarker replace the params
-     */
+    @ApiModelProperty(name = "requestTemplate", value = "use freemarker template replace the params")
     private String requestTemplate;
 }

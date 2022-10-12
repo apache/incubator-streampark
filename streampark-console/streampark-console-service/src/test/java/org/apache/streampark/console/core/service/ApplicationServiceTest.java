@@ -20,19 +20,24 @@ package org.apache.streampark.console.core.service;
 import org.apache.streampark.console.StreamParkConsoleBootstrap;
 import org.apache.streampark.console.core.entity.Application;
 
-import org.junit.Test;
+import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Date;
 
 /**
  * org.apache.streampark.console.core.service.ApplicationServiceTest
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = StreamParkConsoleBootstrap.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ApplicationServiceTest {
 
@@ -89,4 +94,15 @@ public class ApplicationServiceTest {
         applicationService.start(application, false);
     }
 
+    @Test
+    public void uploadTest() throws Exception {
+        File file = new File(""); // specify the file path
+        MultipartFile mulFile = new MockMultipartFile(
+            "", // fileName (eg: streampark.jar)
+            "", // originalFilename (eg: path + fileName = /tmp/file/streampark.jar)
+            ContentType.APPLICATION_OCTET_STREAM.toString(),
+            new FileInputStream(file)
+        );
+        applicationService.upload(mulFile);
+    }
 }

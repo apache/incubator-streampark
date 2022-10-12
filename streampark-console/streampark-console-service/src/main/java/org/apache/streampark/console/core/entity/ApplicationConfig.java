@@ -25,7 +25,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -74,7 +73,6 @@ public class ApplicationConfig {
         application.setFormat(this.format);
     }
 
-    @JsonIgnore
     public Map<String, String> readConfig() {
         switch (this.getFormat()) {
             case 1:

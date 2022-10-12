@@ -90,9 +90,9 @@
 
       <div class="footer">
         <div class="links">
-          <a href="_self">帮助</a>
-          <a href="_self">隐私</a>
-          <a href="_self">条款</a>
+          <a href="_self">help</a>
+          <a href="_self">privacy</a>
+          <a href="_self">provision</a>
         </div>
         <div
           class="copyright">
@@ -116,12 +116,58 @@
       hover-mode="grab"
       :click-effect="true"
       click-mode="push"/>
+
+    <a-modal
+      v-model="teamVisible"
+      on-ok="handleTeamOk">
+      <template
+        slot="title">
+        <a-icon
+          slot="icon"
+          type="setting"
+          style="color: green"/>
+        Select Team
+      </template>
+
+      <a-form
+        :form="teamForm"
+        @submit="handleTeamOk">
+        <a-form-item
+          label="Please select a team">
+          <a-select
+            v-decorator="['teamId',{ rules: [{ required: true } ]}]">
+            <a-select-option
+              v-for="t in teamList"
+              :value="t.id"
+              :key="`sign_team_`.concat(t.id)">
+              {{ t.teamName }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-form>
+
+      <template slot="footer">
+        <a-button
+          key="back"
+          @click="handleTeamCancel">
+          Cancel
+        </a-button>
+        <a-button
+          key="submit"
+          type="primary"
+          @click="handleTeamOk">
+          Submit
+        </a-button>
+      </template>
+    </a-modal>
+
   </div>
 </template>
 
 <script type="application/ecmascript">
 import {mapActions} from 'vuex'
 import {mixinDevice} from '@/utils/mixin'
+import {teams} from '@/api/member'
 
 export default {
   mixins: [mixinDevice],
@@ -129,10 +175,16 @@ export default {
     return {
       loginBtn: false,
       form: this.$form.createForm(this),
+      teamForm: this.$form.createForm(this),
       state: {
         time: 60,
         loginBtn: false
       },
+      loginInfo: {},
+      teamList: [],
+      teamId: null,
+      userId: null,
+      teamVisible: false,
       year: new Date().getFullYear()
     }
   },
@@ -147,9 +199,11 @@ export default {
   },
 
   methods: {
-    ...mapActions(['SignIn']),
-    handleSubmit(e) {
-      e.preventDefault()
+
+    ...mapActions(['SignIn', 'SetTeam']),
+
+    handleSubmit() {
+      arguments[0] && arguments[0].preventDefault()
       const {
         form: { validateFields },
         state,
@@ -161,25 +215,57 @@ export default {
         if (!err) {
           const loginParams = {...values}
           SignIn(loginParams)
-            .then(resp => {
-              if (resp.code != null) {
-                const message = 'SignIn failed,' + (resp.code === 0 ? ' authentication error' : ' current User is locked.')
-                this.$message.error(message)
-              } else {
-                this.$router.push({path: '/flink/app'})
+            .then(() => {
+              this.$router.push({path: '/flink/app'})
+            }).catch(resp => {
+              const code = resp.code
+              if (code != null && code != undefined) {
+                if (code == 0 || code == 1) {
+                  const message = 'SignIn failed,' + (resp.code === 0 ? ' authentication error' : ' current User is locked.')
+                  this.$message.error(message)
+                } else if (resp.code == 403) {
+                  this.loginInfo = values
+                  this.teamVisible = true
+                  this.userId = resp.data
+                  teams({
+                    userId: this.userId
+                  }).then((r) => {
+                    this.teamList = r.data
+                  })
+                } else {
+                  console.log(resp)
+                }
               }
-            })
-            .catch(err => console.log(err))
-            .finally(() => {
+          }).finally(() => {
               state.loginBtn = false
-            })
+          })
         } else {
           setTimeout(() => {
             state.loginBtn = false
           }, 600)
         }
       })
-    }
+    },
+
+    handleTeamOk(e) {
+      e.preventDefault()
+      const {teamForm: { validateFields }} = this
+      validateFields(['teamId'], {force: true}, (err, values) => {
+        if (!err) {
+          this.SetTeam({
+            teamId: values.teamId,
+            userId: this.userId
+          }).then((resp) => {
+            this.handleSubmit()
+          })
+        }
+      })
+    },
+
+    handleTeamCancel() {
+      this.teamVisible = false
+    },
+
   }
 }
 </script>

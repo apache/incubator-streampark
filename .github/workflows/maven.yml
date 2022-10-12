@@ -45,9 +45,21 @@ jobs:
           submodules: true
       - name: Check license header
         uses: apache/skywalking-eyes/header@main
-
+  dead-link:
+    if: github.repository == 'apache/incubator-streampark'
+    name: Dead links
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+      - run: sudo npm install -g markdown-link-check@3.10.3
+      - run: |
+          for file in $(find . -name "*.md"); do
+            markdown-link-check -c .dlc.json -q "$file"
+          done
   build:
     runs-on: ubuntu-latest
+    name: Build with Scala_2.11
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 8
@@ -56,10 +68,10 @@ jobs:
           java-version: '8'
           distribution: 'adopt'
           cache: maven
-      - name: Build with Maven
-        run: mvn -B clean package -DskipTests
+      - name: Build with Scala_2.11
+        run: mvn -B clean package -Dscala.version=2.11.12 -Dscala.binary.version=2.11 -DskipTests
       - name: Test with Maven
-        run: mvn -B test -pl '!streampark-plugin/streampark-jvm-profiler,!streampark-console/streampark-console-service' -am
+        run: mvn -B test -Dscala.version=2.11.12 -Dscala.binary.version=2.11 -pl '!streampark-plugin/streampark-jvm-profiler,!streampark-console/streampark-console-service' -am
 #      - name: Setup Go
 #        uses: actions/setup-go@v3
 #        with:
@@ -68,3 +80,19 @@ jobs:
 #        run: |
 #          go install github.com/apache/skywalking-eyes/cmd/license-eye@47febf5
 #          license-eye dependency resolve --summary ./dist-material/release-docs/LICENSE.tpl
+
+  build2:
+    runs-on: ubuntu-latest
+    name: Build with Scala_2.12
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+          cache: maven
+      - name: Build with Scala_2.12
+        run: mvn -B clean package -Dscala.version=2.12.8 -Dscala.binary.version=2.12 -DskipTests
+      - name: Test with Maven
+        run: mvn -B test -Dscala.version=2.12.8 -Dscala.binary.version=2.12 -pl '!streampark-plugin/streampark-jvm-profiler,!streampark-console/streampark-console-service' -am

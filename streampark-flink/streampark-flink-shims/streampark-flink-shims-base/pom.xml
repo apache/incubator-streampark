@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-flink-shims</artifactId>
-        <version>${reversion}</version>
+        <version>1.2.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>streampark-flink-shims-base_${scala.binary.version}</artifactId>
@@ -89,12 +89,10 @@
             <scope>provided</scope>
         </dependency>
 
-
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-            <scope>test</scope>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-yarn-api</artifactId>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>

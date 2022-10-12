@@ -28,8 +28,8 @@ import org.apache.streampark.console.core.service.alert.impl.LarkAlertNotifyServ
 import org.apache.streampark.console.core.service.alert.impl.WeComAlertNotifyServiceImpl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
@@ -41,7 +41,7 @@ public class AlertServiceTest {
     ObjectMapper mapper = new ObjectMapper();
     RestTemplate restTemplate = new RestTemplate();
 
-    @Before
+    @BeforeEach
     public void before1() {
         alertTemplate = new AlertTemplate();
         alertTemplate.setTitle("Notify: StreamPark alert job for test");

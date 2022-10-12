@@ -42,12 +42,12 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
 /**
- * perJob 编程方式提交任务,
+ * perJob to submit jobs programmatically,
  */
 object YarnPerJobTestCase extends Logger {
 
   /**
-   * 必须要在本机安装部署flink,并且配置FLINK_HOME
+   * You must install and deploy flink locally, and configure FLINK_HOME
    */
   lazy val FLINK_HOME = {
     val flinkLocalHome = System.getenv("FLINK_HOME")
@@ -56,16 +56,16 @@ object YarnPerJobTestCase extends Logger {
   }
 
   /**
-   * SocketWindowWordCount.jar 在flink/examples下载自带的示例程序
+   * SocketWindowWordCount.jar Download the built-in sample program in flink/examples
    */
   val userJar = s"$FLINK_HOME/examples/streaming/SocketWindowWordCount.jar"
   /**
-   * 运行该程序需要传入的参数
+   * Parameters required to run the program
    */
   val programArgs = "--hostname localhost --port 9999"
 
   /**
-   * 运行指定的option参数
+   * Run the specified option parameter
    */
   val option = "-e yarn-per-job -p 2 -n"
 
@@ -83,9 +83,8 @@ object YarnPerJobTestCase extends Logger {
   }
 
   /**
-   * 瞒天过海,偷天换日,鱼目混珠.
-   * 反射出YarnClusterDescriptor的私有方法deployInternal,
-   * 主要是为了传入applicationName,原始该方法里applicationName是写死的.
+   * The private method deployInternal of YarnClusterDescriptor is reflected, mainly to pass in applicationName.
+   * In the original method, applicationName is hard-coded.
    */
   lazy val deployInternalMethod: Method = {
     val paramClass = Array(

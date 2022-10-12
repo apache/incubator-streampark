@@ -18,7 +18,7 @@
 import axios from 'axios'
 import $qs from 'qs'
 import notification from 'ant-design-vue/es/notification'
-import {INVALID, TOKEN} from '@/store/mutation-types'
+import {INVALID, TEAM_ID, TOKEN} from '@/store/mutation-types'
 import storage from '@/utils/storage'
 import store from '@/store'
 import moment from 'moment'
@@ -30,10 +30,10 @@ import {baseUrl} from '@/api/baseUrl'
 const http = axios.create({
   baseURL: baseUrl(),
   withCredentials: false,
-  timeout: 1000 * 10, // 请求超时时间
+  timeout: 1000 * 10, // request timeout
   responseType: 'json',
   validateStatus(status) {
-    // 200 外的状态码都认定为失败
+    // Status codes other than 200 are considered failures
     return status === 200
   }
 })
@@ -42,7 +42,7 @@ const http = axios.create({
 http.interceptors.request.use(config => {
   const expire = store.getters.expire
   const now = moment().format('YYYYMMDDHHmmss')
-  // 让token早10秒种过期，提升“请重新登录”弹窗体验
+  // Let the token expire 10 seconds earlier to improve the "Please log in again" pop-up experience
   if (now - expire >= -10) {
     Modal.error({
       title: 'Sign in expired',
@@ -67,7 +67,8 @@ http.interceptors.request.use(config => {
     config.headers['Authorization'] = token
   }
   config.transformRequest = [function (data) {
-    // 在请求之前对data传参进行格式转换
+
+    // Format the data parameter before the request
     if (config.method === 'get' || config.method === 'post') {
       if (data.sortField && data.sortOrder) {
         data.sortOrder = data.sortOrder === 'descend' ? 'desc' : 'asc'
@@ -75,6 +76,10 @@ http.interceptors.request.use(config => {
         delete data.sortField
         delete data.sortOrder
       }
+    }
+    const teamId = sessionStorage.getItem(TEAM_ID)
+    if (teamId) {
+      data['teamId'] = teamId
     }
     if (config.method === 'get') {
       // filter undefined params
@@ -100,16 +105,24 @@ http.interceptors.response.use((response) => {
 }, error => {
   if (error.response) {
     if (error.response.data.code == 501) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: error.response.data.message,
+        footer: '<a href="https://streampark.apache.org/">View the official documentation?</a>'
+      })
+    } else if (error.response.data.code == 502) {
       let width = document.documentElement.clientWidth || document.body.clientWidth
       if (width > 1200) {
         width = 1080
       }
       width *= 0.96
       Swal.fire({
-        title: 'Operation Failed',
         icon: 'error',
+        title: 'Oops...',
         width: width,
         html: '<pre class="propException">' + error.response.data.message + '</pre>',
+        footer: '<a href="https://github.com/apache/incubator-streampark/issues/new/choose">report issue ?</a>',
         focusConfirm: false
       })
     } else {
@@ -123,7 +136,7 @@ http.interceptors.response.use((response) => {
           break
         case 403:
         case 401:
-          //避免在某些页面有密集的ajax请求数据时反复的弹窗
+          // Avoid repeated pop-ups when some pages have dense ajax request data
           if (!storage.get(INVALID, false)) {
             storage.set(INVALID, true)
             notification.warn({
@@ -169,7 +182,7 @@ const blobTimeout = 1000 * 60 * 10
 export default {
   postJson(url, data) {
     data.isJsonType = true
-    console.log('最终提交参数： ' + JSON.stringify(data))
+    console.log('final submission parameters： ' + JSON.stringify(data))
     return http.post(url, data , {
       headers: {
         'Content-Type': 'application/json; charset=UTF-8'
@@ -195,12 +208,12 @@ export default {
     message.loading('File transfer in progress')
     return http.post(url, params, {
       responseType: 'blob',
-      timeout: blobTimeout // 上传文件超时10分钟
+      timeout: blobTimeout // Uploading files timed out for 10 minutes
     }).then((resp) => {
       respBlob(resp, filename)
     }).catch((r) => {
       console.error(r)
-      message.error('下载失败')
+      message.error('download failed')
     })
   },
   upload(url, params) {
@@ -208,7 +221,7 @@ export default {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
-      timeout: blobTimeout // 上传文件超时10分钟
+      timeout: blobTimeout // Uploading files timed out for 10 minutes
     })
   },
   export(url, params = {}, blobCallback, msg) {
@@ -216,14 +229,14 @@ export default {
       blobCallback = respBlob
     }
     msg = msg == null ? {} : msg
-    message.loading(msg.loading || '导入文件中...')
+    message.loading(msg.loading || 'import file...')
     return http.post(url, params, {
       responseType: 'blob'
     }).then((resp) => {
       blobCallback(resp)
     }).catch((r) => {
       console.error(r)
-      message.error(msg.error || '导出文件失败!')
+      message.error(msg.error || 'Failed to export file!')
     })
   },
 

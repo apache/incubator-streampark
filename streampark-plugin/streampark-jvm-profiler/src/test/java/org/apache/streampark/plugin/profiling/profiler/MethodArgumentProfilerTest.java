@@ -20,8 +20,8 @@ package org.apache.streampark.plugin.profiling.profiler;
 import org.apache.streampark.plugin.profiling.Reporter;
 import org.apache.streampark.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MethodArgumentProfilerTest {
+
     @Test
     public void profile() {
         final List<String> nameList = new ArrayList<>();
@@ -54,7 +55,7 @@ public class MethodArgumentProfilerTest {
         MethodArgumentProfiler profiler = new MethodArgumentProfiler(buffer, reporter);
 
         profiler.setInterval(123);
-        Assert.assertEquals(123L, profiler.getInterval());
+        Assertions.assertEquals(123L, profiler.getInterval());
 
         collector.collectMetric("class1", "method1", "arg1");
         collector.collectMetric("class1", "method1", "arg1");
@@ -62,10 +63,10 @@ public class MethodArgumentProfilerTest {
 
         profiler.profile();
 
-        Assert.assertEquals(2, nameList.size());
-        Assert.assertEquals(MethodArgumentProfiler.PROFILER_NAME, nameList.get(0));
+        Assertions.assertEquals(2, nameList.size());
+        Assertions.assertEquals(MethodArgumentProfiler.PROFILER_NAME, nameList.get(0));
 
-        Assert.assertEquals(2, metricList.size());
+        Assertions.assertEquals(2, metricList.size());
 
         List<Map<String, Object>> metricsToCheck =
             metricList.stream()
@@ -75,8 +76,8 @@ public class MethodArgumentProfilerTest {
                             && t.get("methodName").equals("method1")
                             && t.get("metricName").equals("arg1"))
                 .collect(Collectors.toList());
-        Assert.assertEquals(1, metricsToCheck.size());
-        Assert.assertEquals(2.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
+        Assertions.assertEquals(1, metricsToCheck.size());
+        Assertions.assertEquals(2.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
 
         metricsToCheck =
             metricList.stream()
@@ -86,7 +87,7 @@ public class MethodArgumentProfilerTest {
                             && t.get("methodName").equals("method2")
                             && t.get("metricName").equals("arg2"))
                 .collect(Collectors.toList());
-        Assert.assertEquals(1, metricsToCheck.size());
-        Assert.assertEquals(1.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
+        Assertions.assertEquals(1, metricsToCheck.size());
+        Assertions.assertEquals(1.0, (Double) metricsToCheck.get(0).get("metricValue"), 0.01);
     }
 }

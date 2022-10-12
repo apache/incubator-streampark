@@ -33,6 +33,7 @@
         <result column="sex" jdbcType="CHAR" property="sex"/>
         <result column="avatar" jdbcType="VARCHAR" property="avatar"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="team_id" jdbcType="BIGINT" property="teamId"/>
     </resultMap>
 
     <select id="findUserDetail" resultType="user" parameterType="user">

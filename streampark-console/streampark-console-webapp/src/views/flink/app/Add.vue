@@ -787,7 +787,7 @@
         </p>
       </a-form-item>
 
-      <!--告警方式-->
+      <!--Alarm mode-->
       <template>
         <a-form-item
           label="Fault Alert Template"
@@ -2202,7 +2202,7 @@
       },
 
       /**
-       * TODO:解析出source和sink,画图!
+       * TODO: parse out source and sink, draw!
        */
       handleLeaderLine() {
         const elem = document.querySelectorAll('.CodeMirror-line>span[role=presentation]')

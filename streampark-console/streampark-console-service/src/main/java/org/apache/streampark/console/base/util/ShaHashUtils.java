@@ -24,6 +24,8 @@ import java.util.Random;
 
 public final class ShaHashUtils {
 
+    public static final int DEFAULT_SALT_LENGTH = 26;
+
     private ShaHashUtils() {
 
     }
@@ -36,8 +38,11 @@ public final class ShaHashUtils {
      * @return
      */
     public static String encrypt(String salt, String password) {
-        String pass = new Sha256Hash(password, ByteSource.Util.bytes(salt), 1024).toHex();
-        return pass;
+        return new Sha256Hash(password, ByteSource.Util.bytes(salt), 1024).toHex();
+    }
+
+    public static String getRandomSalt() {
+        return getRandomSalt(DEFAULT_SALT_LENGTH);
     }
 
     /**

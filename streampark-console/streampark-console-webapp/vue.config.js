@@ -98,7 +98,7 @@ module.exports = {
         name: 'assets/[name].[hash:8].[ext]'
       })
 
-    // 生产环境下关闭css压缩的 colormin 项，因为此项优化与主题色替换功能冲突
+    // Turn off the colormin item of CSS compression in the production environment, because this optimization conflicts with the theme color replacement function
     if (isProd) {
       config.plugin('optimize-css')
         .tap(args => {

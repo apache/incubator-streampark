@@ -797,7 +797,7 @@ export default {
           defaultPageSize: 10,
           showQuickJumper: true,
           showSizeChanger: true,
-          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+          showTotal: (total, range) => `show ${range[0]} ~ ${range[1]} records, total ${total} records`
         },
         savePoints: {
           pageSizeOptions: ['10', '20', '30', '40', '100'],
@@ -805,7 +805,7 @@ export default {
           defaultPageSize: 10,
           showQuickJumper: true,
           showSizeChanger: true,
-          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+          showTotal: (total, range) => `show ${range[0]} ~ ${range[1]} records, total ${total} records`
         },
         backUp: {
           pageSizeOptions: ['10', '20', '30', '40', '100'],
@@ -813,7 +813,7 @@ export default {
           defaultPageSize: 10,
           showQuickJumper: true,
           showSizeChanger: true,
-          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+          showTotal: (total, range) => `show ${range[0]} ~ ${range[1]} records, total ${total} records`
         },
         optionLog: {
           pageSizeOptions: ['10', '20', '30', '40', '100'],
@@ -821,7 +821,7 @@ export default {
           defaultPageSize: 10,
           showQuickJumper: true,
           showSizeChanger: true,
-          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+          showTotal: (total, range) => `show ${range[0]} ~ ${range[1]} records, total ${total} records`
         }
       },
 
@@ -830,10 +830,10 @@ export default {
           theme: this.ideTheme(),
           language: 'sql',
           selectOnLineNumbers: false,
-          foldingStrategy: 'indentation', // 代码分小段折叠
-          overviewRulerBorder: false, // 不要滚动条边框
+          foldingStrategy: 'indentation', // code fragmentation
+          overviewRulerBorder: false, // Don't scroll bar borders
           autoClosingBrackets: true,
-          tabSize: 2, // tab 缩进长度
+          tabSize: 2, // tab indent length
           readOnly: true,
           inherit: true,
           scrollBeyondLastLine: false,
@@ -845,7 +845,7 @@ export default {
           cursorWidth: 3,
           renderFinalNewline: true,
           renderLineHighlight: 'all',
-          quickSuggestionsDelay: 100,  //代码提示延时
+          quickSuggestionsDelay: 100,  // Code prompt delay
           scrollbar: {
             useShadows: false,
             vertical: 'visible',
@@ -1097,7 +1097,7 @@ export default {
           })
         } else {
           /**
-           * 第一次之后,每次轮询只管基本信息的变更
+           * After the first time, each poll only changes the basic information
            * @type {any}
            */
           this.app = resp.data
@@ -1116,13 +1116,13 @@ export default {
         appId: this.app.id
       }
       if (this.pager.config.info) {
-        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        // If the paging information is not empty, set the current page of the table, the number of items per page, and set the query paging parameters
         this.$refs.TableConf.pagination.current = this.pager.config.info.current
         this.$refs.TableConf.pagination.pageSize = this.pager.config.info.pageSize
         params.pageSize = this.pager.config.info.pageSize
         params.pageNum = this.pager.config.info.current
       } else {
-        // 如果分页信息为空，则设置为默认值
+        // If pagination information is empty, set to default
         params.pageSize = this.pagination.config.defaultPageSize
         params.pageNum = this.pagination.config.defaultCurrent
       }
@@ -1179,13 +1179,13 @@ export default {
         appId: this.app.id
       }
       if (this.pager.savePoints.info) {
-        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        // If the paging information is not empty, set the current page of the table, the number of items per page, and set the query paging parameters
         this.$refs.TableSavePoints.pagination.current = this.pager.savePoints.info.current
         this.$refs.TableSavePoints.pagination.pageSize = this.pager.savePoints.info.pageSize
         params.pageSize = this.pager.savePoints.info.pageSize
         params.pageNum = this.pager.savePoints.info.current
       } else {
-        // 如果分页信息为空，则设置为默认值
+        // If pagination information is empty, set to default
         params.pageSize = this.pagination.savePoints.defaultPageSize
         params.pageNum = this.pagination.savePoints.defaultCurrent
       }
@@ -1204,13 +1204,13 @@ export default {
         appId: this.app.id
       }
       if (this.pager.backUp.info) {
-        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        // If the paging information is not empty, set the current page of the table, the number of items per page, and set the query paging parameters
         this.$refs.TableBackUp.pagination.current = this.pager.backUp.info.current
         this.$refs.TableBackUp.pagination.pageSize = this.pager.backUp.info.pageSize
         params.pageSize = this.pager.backUp.info.pageSize
         params.pageNum = this.pager.backUp.info.current
       } else {
-        // 如果分页信息为空，则设置为默认值
+        // If pagination information is empty, set to default
         params.pageSize = this.pagination.backUp.defaultPageSize
         params.pageNum = this.pagination.backUp.defaultCurrent
       }
@@ -1229,13 +1229,13 @@ export default {
         appId: this.app.id
       }
       if (this.pager.optionLog.info) {
-        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        // If the paging information is not empty, set the current page of the table, the number of items per page, and set the query paging parameters
         this.$refs.TableOptLog.pagination.current = this.pager.optionLog.info.current
         this.$refs.TableOptLog.pagination.pageSize = this.pager.optionLog.info.pageSize
         params.pageSize = this.pager.optionLog.info.pageSize
         params.pageNum = this.pager.optionLog.info.current
       } else {
-        // 如果分页信息为空，则设置为默认值
+        // If pagination information is empty, set to default
         params.pageSize = this.pagination.optionLog.defaultPageSize
         params.pageNum = this.pagination.optionLog.defaultCurrent
       }
@@ -1399,9 +1399,9 @@ export default {
           readOnly: true,
           inherit: true,
           scrollBeyondLastLine: false,
-          overviewRulerBorder: false, // 不要滚动条边框
+          overviewRulerBorder: false, // Don't scroll bar borders
           autoClosingBrackets: true,
-          tabSize: 2, // tab 缩进长度
+          tabSize: 2, // tab indent length
           scrollbar: {
             useShadows: false,
             vertical: 'visible',
@@ -1425,7 +1425,7 @@ export default {
     },
 
     handleTableChange(pagination, filters, sorter) {
-      // 将这两个参数赋值给Vue data，用于后续使用
+      // Assign these two parameters to Vue data for subsequent use
       switch (this.activeTab) {
         case '2':
           this.pager.config.info = pagination

@@ -30,7 +30,7 @@ import java.util.Map;
 public class MethodDurationProfiler extends ProfilerBase implements Profiler {
     public static final String PROFILER_NAME = "MethodDuration";
 
-    private ClassAndMethodLongMetricBuffer buffer;
+    private final ClassAndMethodLongMetricBuffer buffer;
 
     private Reporter reporter = new ConsoleOutputReporter();
 

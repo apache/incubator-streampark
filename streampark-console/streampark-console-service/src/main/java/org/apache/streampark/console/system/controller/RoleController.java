@@ -84,7 +84,7 @@ public class RoleController {
     @DeleteMapping("delete")
     @RequiresPermissions("role:delete")
     public RestResponse deleteRole(Long roleId) {
-        this.roleService.removeById(roleId);
+        this.roleService.deleteRole(roleId);
         return RestResponse.success();
     }
 

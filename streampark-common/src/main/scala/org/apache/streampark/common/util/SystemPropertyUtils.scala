@@ -107,12 +107,13 @@ object SystemPropertyUtils extends Logger {
   }
 
   def setAppHome(key: String, clazz: Class[_]): Unit = {
-    if (get(key) == null) { //获取主类所在jar位置或class位置.
+    if (get(key) == null) { // get the jar location or class location where the main class is located
       val jarOrClassPath = clazz.getProtectionDomain.getCodeSource.getLocation.getPath
       val file = new File(jarOrClassPath)
-      val appHome: String = if (jarOrClassPath.endsWith("jar")) { //jar包运行,将app.home定位到当前jar所在位置上两层目录
+      // jar package run, locate app.home to the current jar location two levels above the directory
+      val appHome: String = if (jarOrClassPath.endsWith("jar")) {
         file.getParentFile.getParentFile.getPath
-      } else { //开发阶段,将app.home定位到target下.
+      } else { // during the development phase, locate the app.home under target.
         file.getPath.replaceAll("classes/$", "")
       }
       SystemPropertyUtils.set(key, appHome)

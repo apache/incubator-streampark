@@ -163,19 +163,14 @@
 
           <div class="operation">
 
-            <a-tooltip
-              title="See Build log"
-              v-if="item.buildState === 0">
+            <a-tooltip title="See Build log">
               <a-button
                 shape="circle"
                 size="small"
                 style="margin-left: 8px"
                 @click.native="handleSeeLog(item)"
                 class="control-button ctl-btn-color">
-                <a-icon
-                  spin
-                  type="sync"
-                  style="color:#4a9ff5"/>
+                <a-icon type="eye"/>
               </a-button>
             </a-tooltip>
 
@@ -238,10 +233,9 @@
       width="65%"
       :body-style="controller.modalStyle"
       :destroy-on-close="controller.modalDestroyOnClose"
-      :footer="null"
-      @cancel="handleClose">
+      :footer="null">
       <template slot="title">
-        <svg-icon name="code" />&nbsp;
+        <a-icon type="file-text" />&nbsp;
         {{ controller.consoleName }}
       </template>
       <div
@@ -252,15 +246,13 @@
   </div>
 </template>
 <script>
-import { build, buildlog, list,remove,closebuild } from '@api/project'
+import { build, buildlog, list,remove } from '@api/project'
 import Ellipsis from '@comp/Ellipsis'
 import {mapActions} from 'vuex'
 import { Terminal } from 'xterm'
 import 'xterm/css/xterm.css'
 
 import SvgIcon from '@/components/SvgIcon'
-import {baseUrl} from '@/api/baseUrl'
-import storage from '@/utils/storage'
 
 export default {
   components: { Ellipsis, SvgIcon },
@@ -274,8 +266,6 @@ export default {
       stompClient: null,
       terminal: null,
       projectId: null,
-      socketId: null,
-      storageKey: 'BUILD_SOCKET_ID',
       controller: {
         ellipsis: 100,
         modalStyle: {
@@ -332,11 +322,8 @@ export default {
         showConfirmButton: false,
         timer: 2000
       }).then((r)=> {
-        this.socketId = this.uuid()
-        storage.set(this.storageKey,this.socketId)
         build({
           id: record.id,
-          socketId: this.socketId
         })
       })
     },
@@ -395,52 +382,31 @@ export default {
         scrollback: 1000,
         tabstopwidth: 4,
         disableStdin: true,
-        rows: parseInt(rows), // 行数
+        rows: parseInt(rows), // Rows
         cols: parseInt(cols),
         fontSize: 14,
-        cursorStyle: 'underline', // 光标样式
+        cursorStyle: 'underline', // Cursor style
         theme: {
-          foreground: '#AAAAAA', // 字体
-          background: '#131D32', // 背景色
+          foreground: '#AAAAAA', // Font
+          background: '#131D32', // background color
           lineHeight: 16
         }
       })
       const container = document.getElementById('terminal')
       this.terminal.open(container, true)
-
-      const url = baseUrl().concat('/websocket/' + this.handleGetSocketId())
-
-      const socket = this.getSocket(url)
-
-      socket.onopen = () => {
-        buildlog({id:project.id})
-      }
-
-      socket.onmessage = (event) => {
-        this.terminal.writeln(event.data)
-      }
-
-      socket.onclose = () => {
-        this.socketId = null
-        storage.rm(this.storageKey)
-      }
-
+      this.fetchBuildLog(project, null)
     },
 
-    handleGetSocketId() {
-      if (this.socketId == null) {
-        return storage.get(this.storageKey) || null
-      }
-      return this.socketId
-    },
-
-    handleClose () {
-      closebuild({ id: this.projectId })
-      this.stompClient.disconnect()
-      this.controller.visible = false
-      this.terminal.clear()
-      this.terminal.clearSelection()
-      this.terminal = null
+    fetchBuildLog(project, startOffset) {
+      buildlog({
+        id: project.id,
+        startOffset: startOffset
+      }).then((resp) => {
+        this.terminal.write(resp.data)
+        if (resp.readFinished === false) {
+          window.setTimeout(() => this.fetchBuildLog(project, resp.offset), 500)
+        }
+      })
     },
 
     handleQuery (state) {
@@ -455,19 +421,17 @@ export default {
         this.loading = true
       }
       if (this.paginationInfo) {
-        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        // If the paging information is not empty, set the current page of the table, the number of items per page, and set the query paging parameters
         this.$refs.TableInfo.pagination.current = this.paginationInfo.current
         this.$refs.TableInfo.pagination.pageSize = this.paginationInfo.pageSize
         params.pageSize = this.paginationInfo.pageSize
         params.pageNum = this.paginationInfo.current
       } else {
-        // 如果分页信息为空，则设置为默认值
+        // If pagination information is empty, set to default
         // params.pageSize = this.pagination.defaultPageSize
         // params.pageNum = this.pagination.current
       }
-      list({
-        ...params
-      }).then((resp) => {
+      list(params).then((resp) => {
         const pagination = { ...this.pagination }
         pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
@@ -490,7 +454,7 @@ export default {
   display: inline-block;
   vertical-align: middle;
   font-size: 14px;
-  margin-left: 40px;
+  margin-left: 60px;
 
   span {
     line-height: 20px;
@@ -518,7 +482,7 @@ export default {
 }
 
 .operation {
-  width: 120px;
+  width: 150px;
 }
 
 .ant-tag {

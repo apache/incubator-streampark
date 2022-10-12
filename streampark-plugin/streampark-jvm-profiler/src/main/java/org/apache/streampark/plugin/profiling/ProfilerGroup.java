@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProfilerGroup {
-    private List<Profiler> oneTimeProfilers;
-    private List<Profiler> periodicProfilers;
+    private final List<Profiler> oneTimeProfilers;
+    private final List<Profiler> periodicProfilers;
 
     public ProfilerGroup(List<Profiler> oneTimeProfilers, List<Profiler> periodicProfilers) {
         this.oneTimeProfilers = new ArrayList<>(oneTimeProfilers);

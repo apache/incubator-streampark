@@ -17,19 +17,51 @@
 
 package org.apache.streampark.flink.cli
 
-import org.apache.streampark.flink.core.scala.FlinkStreamTable
+import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.configuration.ExecutionOptions
+import org.apache.streampark.common.conf.ConfigConst.{KEY_APP_CONF, KEY_FLINK_SQL, KEY_FLINK_TABLE_MODE}
+import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
+import org.apache.streampark.flink.core.{SqlCommand, SqlCommandParser}
+import org.apache.streampark.flink.core.scala.{FlinkStreamTable, FlinkTable}
 
 import scala.language.implicitConversions
+import scala.util.Try
 
+object SqlClient extends App {
 
-object SqlClient extends FlinkStreamTable {
+  val parameterTool = ParameterTool.fromArgs(args)
 
-  override def handle(): Unit = context.sql()
+  val flinkSql = {
+    val sql = parameterTool.get(KEY_FLINK_SQL())
+    require(sql != null && sql.trim.nonEmpty, "Usage: flink sql cannot be null")
+    Try(DeflaterUtils.unzipString(sql)).getOrElse(throw new IllegalArgumentException("Usage: flink sql is invalid or null, please check"))
+  }
 
-  implicit def callback(message: String): Unit = {
-    // scalastyle:off println
-    println(message)
-    // scalastyle:on println
+  val sets = SqlCommandParser.parseSQL(flinkSql).filter(_.command == SqlCommand.SET)
+
+  val mode = sets.find(_.operands.head == ExecutionOptions.RUNTIME_MODE.key()) match {
+    case Some(e) => e.operands(1)
+    case None =>
+      val appConf = parameterTool.get(KEY_APP_CONF(), null)
+      val defaultMode = "streaming"
+      if (appConf == null) defaultMode else {
+        val parameter = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(appConf.drop(7)))
+        parameter.getOrElse(KEY_FLINK_TABLE_MODE, defaultMode)
+      }
+  }
+
+  mode match {
+    case "batch" => BatchSqlApp.main(args)
+    case "streaming" => StreamSqlApp.main(args)
+    case _ => throw new IllegalArgumentException("Usage: runtime execution-mode invalid, optional [streaming|batch]")
+  }
+
+  private[this] object BatchSqlApp extends FlinkTable {
+    override def handle(): Unit = context.sql()
+  }
+
+  private[this] object StreamSqlApp extends FlinkStreamTable {
+    override def handle(): Unit = context.sql()
   }
 
 }

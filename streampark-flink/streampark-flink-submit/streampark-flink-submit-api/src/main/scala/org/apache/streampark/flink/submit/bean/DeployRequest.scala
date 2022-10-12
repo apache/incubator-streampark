@@ -39,7 +39,7 @@ case class DeployRequest(flinkVersion: FlinkVersion,
                          ) {
   private[submit] lazy val hdfsWorkspace = {
     /**
-      * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
+      * You must keep the flink version and configuration in the native flink and hdfs exactly the same.
       */
     val workspace = Workspace.remote
     val flinkHome = flinkVersion.flinkHome

@@ -20,7 +20,7 @@ package org.apache.streampark.plugin.profiling.profiler;
 import org.apache.streampark.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 
 public class MethodArgumentCollector {
-    private ClassMethodArgumentMetricBuffer buffer;
+    private final ClassMethodArgumentMetricBuffer buffer;
 
     public MethodArgumentCollector(ClassMethodArgumentMetricBuffer buffer) {
         this.buffer = buffer;

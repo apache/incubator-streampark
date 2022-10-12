@@ -19,8 +19,7 @@ package org.apache.streampark.console.base.handler;
 
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.ApiException;
-import org.apache.streampark.console.base.exception.InternalException;
+import org.apache.streampark.console.base.exception.AbstractApiException;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
@@ -55,13 +54,6 @@ public class GlobalExceptionHandler {
         return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
     }
 
-    @ExceptionHandler(value = InternalException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public RestResponse handleParamsInvalidException(InternalException e) {
-        log.info("Internal server error：{}", e.getMessage());
-        return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
-    }
-
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
@@ -69,16 +61,16 @@ public class GlobalExceptionHandler {
         return RestResponse.fail("not supported request method，exception：" + e.getMessage(), ResponseCode.CODE_FAIL);
     }
 
-    @ExceptionHandler(value = ApiException.class)
+    @ExceptionHandler(value = AbstractApiException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public RestResponse handleException(ApiException e) {
+    public RestResponse handleException(AbstractApiException e) {
         log.info("api exception：{}", e.getMessage());
-        return RestResponse.fail("api fail, exception:\n" + e.getMessage(), ResponseCode.CODE_API_FAIL);
+        return RestResponse.fail(e.getMessage(), e.getResponseCode());
     }
 
+
     /**
-     * 统一处理请求参数校验(实体对象传参)
-     * Unified processing of request parameter verification
+     * Unified processing of request parameter verification (entity object parameter transfer)
      *
      * @param e BindException
      * @return RestResponse
@@ -96,7 +88,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 统一处理请求参数校验(普通传参)
+     * Unified processing of request parameter verification (ordinary parameter transfer)
      *
      * @param e ConstraintViolationException
      * @return RestResponse

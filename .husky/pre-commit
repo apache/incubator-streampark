@@ -22,3 +22,8 @@
 
 cd streampark-console/streampark-console-webapp
 npm run lint
+
+# newui pre commit lint
+cd ../streampark-console-newui
+npm run bootstrap
+npm run lint:lint-staged

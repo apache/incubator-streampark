@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-flink</artifactId>
-        <version>${reversion}</version>
+        <version>1.2.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>streampark-flink-kubernetes_${scala.binary.version}</artifactId>
@@ -31,7 +31,7 @@
 
     <properties>
         <apache.httpclient5.version>5.1</apache.httpclient5.version>
-        <snakeyaml.version>1.29</snakeyaml.version>
+        <snakeyaml.version>1.32</snakeyaml.version>
         <scalatest.skiptests>true</scalatest.skiptests>
     </properties>
 

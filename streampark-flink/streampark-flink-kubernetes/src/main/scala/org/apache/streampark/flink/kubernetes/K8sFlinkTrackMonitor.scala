@@ -94,12 +94,12 @@ trait K8sFlinkTrackMonitor extends Logger with AutoCloseable {
   /**
    * get flink status
    */
-  def getJobStatus(trackIds: Set[TrackId]): Map[TrackId, JobStatusCV]
+  def getJobStatus(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV]
 
   /**
    * get all flink status in tracking result pool
    */
-  def getAllJobStatus: Map[TrackId, JobStatusCV]
+  def getAllJobStatus: Map[CacheKey, JobStatusCV]
 
   /**
    * get flink cluster metrics aggregation

@@ -54,7 +54,7 @@
 //  private def getTable: Table = getConnect.getTable(TableName.valueOf(tableName))
 //
 //  /**
-//   * 输出
+//   * output
 //   *
 //   * @param rdd  spark.RDD
 //   * @param time spark.streaming.Time
@@ -76,7 +76,7 @@
 //  }
 //
 //  /**
-//   * 批量插入
+//   * Bulk insert
 //   *
 //   * @param actions
 //   */

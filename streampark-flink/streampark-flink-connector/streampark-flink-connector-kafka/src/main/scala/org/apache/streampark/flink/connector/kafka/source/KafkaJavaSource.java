@@ -29,7 +29,7 @@ import java.util.Properties;
 
 public class KafkaJavaSource<T> {
 
-    private StreamingContext context;
+    private final StreamingContext context;
     private String[] topics;
     private String alias = "";
     private KafkaDeserializationSchema<T> deserializer;

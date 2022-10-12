@@ -2,7 +2,7 @@
     <br/>
     <h1>
         <a href="https://streampark.apache.org" target="_blank" rel="noopener noreferrer">
-        <img width="600" src="https://streampark.apache.org/image/logo1.svg" alt="StreamPark logo">
+        <img width="600" src="https://streampark.apache.org/image/logo_name.png" alt="StreamPark logo">
         </a>
     </h1>
     <strong style="font-size: 1.5rem">Make stream processing easier!!!</strong>
@@ -66,7 +66,7 @@ click [Document](https://streampark.apache.org/docs/intro) for more information
 
 Various companies and organizations use StreamPark for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/apache/streampark/issues/163)
 
-![image](https://user-images.githubusercontent.com/13284744/182794423-b77a09dd-ed45-4e87-a1bb-2a4646951f22.png)
+![Our users](https://streampark.apache.org/image/users.png)
 
 
 ## 🤝 Contribution

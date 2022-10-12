@@ -28,6 +28,10 @@ import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -43,10 +47,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+@Api(tags = {"ALERT_TAG"})
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("flink/alert")
+@RequestMapping("/flink/alert")
 public class AlertController {
 
     @Autowired
@@ -55,55 +60,68 @@ public class AlertController {
     @Autowired
     private AlertService alertService;
 
-    @PostMapping(value = "add")
-    public RestResponse addAlertConf(@RequestBody AlertConfigWithParams params) {
-        log.info("received alert config：{}", params);
-        AlertConfig alertConfig = AlertConfig.of(params);
-        boolean save = alertConfigService.save(alertConfig);
+    @ApiOperation(value = "createAlertConfig")
+    @PostMapping(value = "/add")
+    public RestResponse createAlertConfig(@RequestBody AlertConfigWithParams params) {
+        boolean save = alertConfigService.save(AlertConfig.of(params));
         return RestResponse.success(save);
     }
 
-    @PostMapping(value = "exists")
-    public RestResponse exists(@RequestBody AlertConfigWithParams params) throws Exception {
-        AlertConfig alertConfig = AlertConfig.of(params);
-        boolean exist = alertConfigService.exist(alertConfig);
+    @ApiOperation(value = "existsAlertConfig")
+    @PostMapping(value = "/exists")
+    public RestResponse existsAlertConfig(@RequestBody AlertConfigWithParams params) {
+        boolean exist = alertConfigService.exist(AlertConfig.of(params));
         return RestResponse.success(exist);
     }
 
-    @PostMapping(value = "update")
-    public RestResponse update(@RequestBody AlertConfigWithParams params) throws Exception {
+    @ApiOperation(value = "updateAlertConfig")
+    @PostMapping(value = "/update")
+    public RestResponse updateAlertConfig(@RequestBody AlertConfigWithParams params) {
         boolean update = alertConfigService.updateById(AlertConfig.of(params));
         return RestResponse.success(update);
     }
 
-    @PostMapping("get")
-    public RestResponse get(@RequestBody AlertConfigWithParams params) throws Exception {
+    @ApiOperation(value = "getAlertConfig")
+    @PostMapping("/get")
+    public RestResponse getAlertConfig(@RequestBody AlertConfigWithParams params) {
         AlertConfig alertConfig = alertConfigService.getById(params.getId());
         return RestResponse.success(AlertConfigWithParams.of(alertConfig));
     }
 
-    @PostMapping(value = "list")
-    public RestResponse list(@RequestBody AlertConfigWithParams params, RestRequest request) throws Exception {
+    @ApiOperation(value = "listPageAlertConfigs")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "pageSize", value = "page size", required = true, example = "10"),
+        @ApiImplicitParam(name = "pageNum", value = "page num", required = true, example = "1"),
+        @ApiImplicitParam(name = "sortField", value = "sort field"),
+        @ApiImplicitParam(name = "sortOrder", value = "sort order")
+    })
+    @PostMapping(value = "/list")
+    public RestResponse listPageAlertConfigs(@RequestBody AlertConfigWithParams params, RestRequest request) {
         IPage<AlertConfigWithParams> page = alertConfigService.page(params, request);
         return RestResponse.success(page);
     }
 
-    @PostMapping(value = "listWithOutPage")
-    public RestResponse listWithOutPage() throws Exception {
+    @ApiOperation(value = "listAlertConfigs")
+    @PostMapping(value = "/listWithOutPage")
+    public RestResponse listAlertConfigs() {
         List<AlertConfig> page = alertConfigService.list();
         return RestResponse.success(page);
     }
 
-    @DeleteMapping("delete")
-    public RestResponse deleteAlertConf(@NotNull(message = "id must not be empty") Long id) {
+    @ApiOperation(value = "deleteAlertConfig")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "id", value = "config id", required = true)
+    })
+    @DeleteMapping("/delete")
+    public RestResponse deleteAlertConfig(@NotNull(message = "config id must be not null") Long id) {
         boolean result = alertConfigService.deleteById(id);
         return RestResponse.success(result);
     }
 
     /**
-     * send alert message for test
+     * TODO after remove to unit test
      */
-    @PostMapping("send")
+    @PostMapping("/send")
     public RestResponse sendAlert(Long id) throws AlertException {
         AlertTemplate alertTemplate = new AlertTemplate();
         alertTemplate.setTitle("Notify: StreamPark alert job for test");

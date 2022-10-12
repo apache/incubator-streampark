@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.system.entity;
 
+import org.apache.streampark.console.core.enums.UserType;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -63,6 +65,8 @@ public class User implements Serializable {
     @Email(message = "{email}")
     private String email;
 
+    private UserType userType;
+
     @NotBlank(message = "{required}")
     private String status;
 
@@ -80,11 +84,6 @@ public class User implements Serializable {
 
     private String avatar;
 
-    @NotBlank(message = "{required}")
-    private transient String roleId;
-
-    private transient String roleName;
-
     private transient String sortField;
 
     private transient String sortOrder;
@@ -99,16 +98,8 @@ public class User implements Serializable {
     private String nickName;
 
     /**
-     * shiro-redis v3.1.0 must have getAuthCacheKey() or getId() function # Principal id field name.
-     * The field which you can get unique id to identify this principal. # For example, if you use UserInfo as
-     * Principal class, the id field maybe userId, userName, email, etc. # Remember to add getter to
-     * this id field. For example, getUserId(), getUserName(), getEmail(), etc. # Default value is
-     * authCacheKey or id, that means your principal object has a method called "getAuthCacheKey()" or
-     * "getId()"
-     *
-     * @return userId as Principal id field name
+     * The last set teamId
      */
-    public Long getAuthCacheKey() {
-        return userId;
-    }
+    private Long teamId;
+
 }

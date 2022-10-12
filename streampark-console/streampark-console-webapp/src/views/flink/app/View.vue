@@ -268,7 +268,7 @@
         </a-input-group>
       </div>
 
-      <!-- 表格区域 -->
+      <!-- table area -->
       <a-table
         ref="TableInfo"
         :columns="columns"
@@ -1223,7 +1223,7 @@ export default {
         defaultPageSize: 10,
         showQuickJumper: true,
         showSizeChanger: true,
-        showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        showTotal: (total, range) => `show ${range[0]} ~ ${range[1]} records, total ${total} records`
       },
       socketId: null,
       storageKey: 'DOWN_SOCKET_ID',
@@ -1583,21 +1583,21 @@ export default {
 
       /**
        *
-       * // 部署失败
+       * // deployment failed
        * FAILED(-1),
-       * // 完结
+       * // finish
        * DONE(0),
-       * // 任务修改完毕需要重新发布
+       * // The task needs to be republished after modification
        * NEED_LAUNCH(1),
-       * // 上线中
+       * // online
        * LAUNCHING(2),
-       * // 上线完毕,需要重启
+       * // After going online, you need to restart
        * NEED_RESTART(3),
-       * //需要回滚
+       * // need to rollback
        * NEED_ROLLBACK(4),
-       * // 项目发生变化,任务需检查(是否需要重新选择jar)
+       * // The project has changed, the task needs to be checked (whether the jar needs to be re-selected)
        * NEED_CHECK(5),
-       * // 发布的任务已经撤销
+       * // The posted task has been cancelled
        * REVOKED(10);
        */
 
@@ -2007,7 +2007,7 @@ export default {
       const params = Object.assign(this.queryParams, {})
       params.pageSize = 999999999
       params.pageNum = 1
-      list({...params}).then((resp) => {
+      list(params).then((resp) => {
           const dataSource = resp.data.records
           dataSource.forEach(record => {
             if (record.tags !== null && record.tags !== undefined && record.tags !== '') {
@@ -2041,7 +2041,7 @@ export default {
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
-      list({...params}).then((resp) => {
+      list(params).then((resp) => {
         this.loading = false
         const pagination = {...this.pagination}
         pagination.total = parseInt(resp.data.total)
@@ -2177,13 +2177,13 @@ export default {
         scrollback: 1000,
         tabstopwidth: 4,
         disableStdin: true,
-        rows: parseInt(rows), // 行数
+        rows: parseInt(rows), // Rows
         cols: parseInt(cols),
         fontSize: 14,
-        cursorStyle: 'underline', // 光标样式
+        cursorStyle: 'underline', // Cursor style
         theme: {
-          foreground: '#AAAAAA', // 字体
-          background: '#131D32', // 背景色
+          foreground: '#AAAAAA', // font
+          background: '#131D32', // background color
           lineHeight: 16
         }
       })

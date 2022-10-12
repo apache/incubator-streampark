@@ -20,7 +20,7 @@ html {
 }
 
 body {
-  // 打开滚动条固定显示
+  // Turn on scrollbar fixed display
   overflow-y: scroll;
 
   &.colorWeak {
@@ -53,7 +53,7 @@ body {
 
     /**
      * ant-table-wrapper
-     * 覆盖的表格手机模式样式，如果想修改在手机上表格最低宽度，可以在这里改动
+     * Overriding table mobile mode style, if you want to modify the minimum width of the table on the mobile phone, you can change it here
      */
 
     .ant-table-wrapper {
@@ -67,7 +67,7 @@ body {
     }
 
     .topmenu {
-      /* 必须为 topmenu  才能启用流式布局 */
+      /* Must be topmenu to enable fluid layout */
 
       &.content-width-Fluid {
         .header-index-wide {
@@ -122,7 +122,7 @@ body {
       }
     }
 
-    /* 必须为 topmenu  才能启用流式布局 */
+    /* Must be topmenu to enable fluid layout */
 
     &.content-width-Fluid {
       .header-index-wide {
@@ -157,7 +157,6 @@ body {
 
   .header {
     height: 64px;
-    padding: 0 12px 0 0;
     box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
     position: relative;
   }
@@ -344,12 +343,11 @@ body {
     }
   }
 
-  // 内容区
+  // Content area
   .layout-content {
     margin: 24px 24px 0px;
     height: 100%;
     height: 64px;
-    padding: 0 12px 0 0;
   }
 
   // footer
@@ -365,7 +363,7 @@ body {
   }
 }
 
-// drawer-sider 自定义
+// drawer-sider custom
 .ant-drawer.drawer-sider {
   .sider {
     box-shadow: none;
@@ -397,7 +395,7 @@ body {
   }
 }
 
-// 菜单样式
+// menu style
 .sider {
   box-shadow: 2px 0 6px rgba(0, 21, 41, 0.35);
   position: relative;
@@ -471,7 +469,7 @@ body {
   }
 }
 
-// 外置的样式控制
+// External style control
 .user-dropdown-menu {
   span {
     user-select: none;
@@ -493,7 +491,7 @@ body {
   }
 }
 
-// 数据列表 样式
+// data list style
 .table-alert {
   margin-bottom: 16px;
 }
@@ -597,20 +595,20 @@ body {
   border-radius: 50% !important;
 }
 
-  /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+  /*Define the height, width and background of the scroll bar. The height and width correspond to the size of the horizontal and vertical scroll bars.*/
 ::-webkit-scrollbar {
-  width: 14px;  /*滚动条宽度*/
-  height: 14px;  /*滚动条高度*/
+  width: 14px;  /*scroll bar width*/
+  height: 14px;  /*scroll bar height*/
 }
 
-/*定义滚动条轨道 内阴影+圆角*/
+/*Define the scroll bar track inner shadow + rounded corners*/
 ::-webkit-scrollbar-track {
   background-color: unset;
 }
 
-/*定义滑块 内阴影+圆角*/
+/*Define slider inner shadow + rounded corners*/
 ::-webkit-scrollbar-thumb {
-  background-color: @background-color-base  /*滚动条的背景颜色*/
+  background-color: @background-color-base  /*scrollbar background color*/
 }
 
 .ant-radio-button-wrapper:first-child {

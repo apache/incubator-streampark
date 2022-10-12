@@ -65,6 +65,12 @@ object CommonConfig {
     classType = classOf[JavaLong],
     description = "instantiating connection timeout for DockerHttpClient")
 
+  val MAVEN_SETTINGS_PATH: InternalOption = InternalOption(
+    key = "streampark.maven.settings",
+    defaultValue = null,
+    classType = classOf[String],
+    description = "maven settings.xml full path")
+
   val MAVEN_REMOTE_URL: InternalOption = InternalOption(
     key = "streampark.maven.central.repository",
     defaultValue = "https://repo1.maven.org/maven2/",
@@ -88,5 +94,11 @@ object CommonConfig {
     defaultValue = "2h",
     classType = classOf[String],
     description = "kerberos default ttl")
+
+  val READ_LOG_MAX_SIZE: InternalOption = InternalOption(
+    key = "streampark.read-log.max-size",
+    defaultValue = "1mb",
+    classType = classOf[String],
+    description = "The maximum size of the default read log")
 
 }

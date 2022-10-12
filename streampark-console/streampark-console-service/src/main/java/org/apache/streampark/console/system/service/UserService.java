@@ -106,4 +106,9 @@ public interface UserService extends IService<User> {
     Set<String> getPermissions(String username);
 
     List<User> getNoTokenUser();
+
+    void setLatestTeam(Long teamId, Long userId);
+
+    void fillInTeam(User user);
+
 }

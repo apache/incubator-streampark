@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-plugin</artifactId>
-        <version>${reversion}</version>
+        <version>1.2.4-SNAPSHOT</version>
     </parent>
     <artifactId>streampark-jvm-profiler</artifactId>
     <name>StreamPark : JVM Profiler</name>
@@ -61,14 +61,12 @@
             <artifactId>snakeyaml</artifactId>
         </dependency>
 
-        <!--Test-->
+        <!--test-->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -101,7 +99,6 @@
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
-                <version>3.2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

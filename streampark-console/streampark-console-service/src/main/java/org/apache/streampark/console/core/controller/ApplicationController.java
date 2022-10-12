@@ -133,7 +133,6 @@ public class ApplicationController {
     @RequiresPermissions("app:view")
     public RestResponse list(Application app, RestRequest request) {
         IPage<Application> applicationList = applicationService.page(app, request);
-
         List<Application> appRecords = applicationList.getRecords();
         List<Long> appIds = appRecords.stream().map(Application::getId).collect(Collectors.toList());
         Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
