@@ -530,6 +530,7 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>3.1.1</version>
                         <configuration>
+                            <tarLongFileMode>gnu</tarLongFileMode>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
                                 <descriptor>src/assembly/assembly.xml</descriptor>
