@@ -18,7 +18,7 @@ version: '3.8'
 services:
   streampark-server:
     image: ${HUB}/streampark:${TAG}
-    command: ${COMMAND_MYSQL}
+    command: ${COMMAND}
     ports:
       - 10000:10000
     env_file: .env
@@ -33,7 +33,7 @@ services:
 
 
   jobmanager:
-    image: flink:${FLINK_VERSION}-scala_2.12
+    image: ${FLINK_VERSION}
     ports:
       - "8081:8081"
     command: jobmanager
@@ -46,7 +46,7 @@ services:
 
 
   taskmanager:
-    image: flink:${FLINK_VERSION}-scala_2.12
+    image: ${FLINK_VERSION}
     depends_on:
       - jobmanager
     command: taskmanager
