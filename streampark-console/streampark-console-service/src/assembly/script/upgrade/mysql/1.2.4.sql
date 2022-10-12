@@ -128,9 +128,51 @@ insert into `t_menu` values (100051, 100048, 'delete', null, null, 'member:delet
 insert into `t_menu` values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
 
+-- Add team related sql
+create table `t_team` (
+  `id` bigint not null auto_increment comment 'team id',
+  `team_name` varchar(50) collate utf8mb4_general_ci not null comment 'team name',
+  `description` varchar(255) collate utf8mb4_general_ci default null,
+  `create_time` datetime not null default current_timestamp comment 'create time',
+  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  primary key (`id`) using btree,
+  unique key `team_name_idx` (`team_name`) using btree
+) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
+
+insert into `t_team` values (100000, 'default', null, now(), now());
+
+alter table `t_flink_app`
+add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
+add index `inx_team` (`team_id`) using btree;
+
+alter table `t_flink_project`
+add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
+add index `inx_team` (`team_id`) using btree;
+
+-- Update user
+alter table `t_user`
+add column `user_type` int  not null default 2 comment 'user type 1:admin 2:user' after `email`,
+add column `team_id` bigint default null comment 'latest team id' after `user_type`;
+
 -- after adding team module, admin has all permissions by default, so admin does not need to add permissions separately, so delete admin related roles and associations
+update `t_user` set `user_type` = 1
+where `user_id` in (select user_id from `t_user_role` where role_id = 100000);
+
 delete from t_role_menu where role_id = 100000;
 delete from t_role where role_id = 100000;
+delete from `t_user_role` where role_id = 100000;
+
+-- alter t_role_user to t_member and update the schema
+alter table `t_user_role` rename `t_member`;
+
+alter table `t_member`
+add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
+modify   `user_id` bigint not null comment 'user id',
+modify   `role_id` bigint not null comment 'role id',
+add column   `create_time` datetime not null default current_timestamp comment 'create time',
+add column   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+drop index `UN_INX`,
+add unique key `un_user_team_role_inx` (`user_id`,`team_id`,`role_id`) using btree;
 
 -- remove user table contact phone field
 alter table `t_user` drop column `mobile`;
@@ -148,12 +190,6 @@ alter table `t_user` drop index `un_username`;
 alter table `t_user`
 modify `username` varchar(255) collate utf8mb4_general_ci not null comment 'user name',
 add unique key `un_username` (`username`) using btree;
-
--- add team_id for t_user;
-alter table `t_user` add column `team_id` bigint default null comment 'latest team id' after `user_type`;
-
--- alter t_role_user to t_member
-alter table t_user_role rename t_member;
 
 set foreign_key_checks = 1;
 
