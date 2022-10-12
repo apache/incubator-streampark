@@ -67,6 +67,7 @@ http.interceptors.request.use(config => {
     config.headers['Authorization'] = token
   }
   config.transformRequest = [function (data) {
+
     // Format the data parameter before the request
     if (config.method === 'get' || config.method === 'post') {
       if (data.sortField && data.sortOrder) {
@@ -76,7 +77,7 @@ http.interceptors.request.use(config => {
         delete data.sortOrder
       }
     }
-    const teamId = storage.get(TEAM_ID)
+    const teamId = sessionStorage.getItem(TEAM_ID)
     if (teamId) {
       data['teamId'] = teamId
     }

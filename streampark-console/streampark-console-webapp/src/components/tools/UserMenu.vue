@@ -68,17 +68,16 @@
       <a> Team : </a>
 
       <a-select
+        v-model="teamId"
         mode="single"
-        :allow-clear="false"
         style="min-width: 100px; margin-right: 10px"
         @change="handleChangeTeam"
-        class="team-select"
-        v-model="teamId">
+        class="team-select">
         <a-select-option
-          v-for="t in teamList"
-          :value="t.id"
-          :key="`team_`.concat(t.id)">
-          {{ t.teamName }}
+          v-for="team in teamList"
+          :key="team.id"
+          :value="team.id">
+          {{ team.teamName }}
         </a-select-option>
       </a-select>
 
@@ -318,8 +317,12 @@ export default {
     },
 
     handlePrepareTeam() {
-      const teamId = storage.get(TEAM_ID) || []
-      this.teamId = teamId
+      let id = sessionStorage.getItem(TEAM_ID)
+      if (id == null) {
+        id = storage.get(TEAM_ID)
+        sessionStorage.setItem(TEAM_ID, id)
+      }
+      this.teamId = id.toString()
     },
 
     handleChangeTeam(teamId) {
