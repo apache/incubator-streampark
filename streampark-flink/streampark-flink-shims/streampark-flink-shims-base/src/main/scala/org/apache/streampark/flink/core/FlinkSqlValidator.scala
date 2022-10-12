@@ -36,7 +36,7 @@ object FlinkSqlValidator extends Logger {
 
   private[this] val FLINK112_CALCITE_PARSER_CLASS = "org.apache.flink.table.planner.calcite.CalciteParser"
 
-  private[this] val FLINK113_CALCITE_PARSER_CLASS = "org.apache.flink.table.planner.parse.CalciteParser"
+  private[this] val FLINK113_PLUS_CALCITE_PARSER_CLASS = "org.apache.flink.table.planner.parse.CalciteParser"
 
   private[this] val SYNTAX_ERROR_REGEXP = ".*at\\sline\\s(\\d+),\\scolumn\\s(\\d+).*".r
 
@@ -92,7 +92,7 @@ object FlinkSqlValidator extends Logger {
             hasInsert = true
           }
           Try {
-            val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_CALCITE_PARSER_CLASS))
+            val calciteClass = Try(Class.forName(FLINK112_CALCITE_PARSER_CLASS)).getOrElse(Class.forName(FLINK113_PLUS_CALCITE_PARSER_CLASS))
             sqlDialect.toUpperCase() match {
               case "HIVE" | "DEFAULT" =>
               case _ =>
