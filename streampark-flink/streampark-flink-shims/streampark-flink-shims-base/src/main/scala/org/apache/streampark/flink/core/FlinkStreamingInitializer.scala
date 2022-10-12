@@ -28,7 +28,7 @@ import org.apache.flink.table.api.TableConfig
 
 import java.io.File
 import collection.JavaConversions._
-import collection.Map
+import collection.{Map, mutable}
 
 private[flink] object FlinkStreamingInitializer {
 
@@ -45,7 +45,7 @@ private[flink] object FlinkStreamingInitializer {
         }
       }
     }
-    (flinkInitializer.userParameter, flinkInitializer.streamEnvironment)
+    (flinkInitializer.parameter, flinkInitializer.streamEnvironment)
   }
 
   def initialize(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment) = {
@@ -58,7 +58,7 @@ private[flink] object FlinkStreamingInitializer {
         }
       }
     }
-    (flinkInitializer.userParameter, flinkInitializer.streamEnvironment)
+    (flinkInitializer.parameter, flinkInitializer.streamEnvironment)
   }
 }
 
@@ -73,26 +73,26 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   var javaTableEnvConfFunc: TableEnvConfigFunction = _
 
-  lazy val (userParameter: ParameterTool, flinkConf: Configuration) = initParameter()
-
   private[this] var localStreamEnv: StreamExecutionEnvironment = _
 
-  def readUserAndFlinkConf(config: String): (Map[String, String], Map[String, String]) = {
-    val allConf = readConf(config)
-    val userConf = allConf
-      .filter(!_._1.startsWith(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX))
-      .map(x => x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2)
+  lazy val (parameter: ParameterTool, flinkConf: Configuration) = initParameter()
 
-    val flinkConf = allConf
-      .filter(_._1.startsWith(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX))
-      .map(x => x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2)
-    (userConf, flinkConf)
+  def initParameter(): (ParameterTool, Configuration) = {
+    val argsMap = ParameterTool.fromArgs(args)
+    val config = argsMap.get(KEY_APP_CONF(), null) match {
+      // scalastyle:off throwerror
+      case null | "" => throw new ExceptionInInitializerError("[StreamPark] Usage:can't fond config,please set \"--conf $path \" in main arguments")
+      // scalastyle:on throwerror
+      case file => file
+    }
+    val (userConf, flinkConf) = parseConfig(config)
+    // config priority: explicitly specified priority > project profiles > system profiles
+    ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(userConf)).mergeWith(argsMap) -> Configuration.fromMap(flinkConf)
   }
 
-  def readConf(config: String): Map[String, String] = {
+  def parseConfig(config: String): (Map[String, String], Map[String, String]) = {
     val extension = config.split("\\.").last.toLowerCase
-
-    config match {
+    val configMap = config match {
       case x if x.startsWith("yaml://") =>
         PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.drop(7)))
       case x if x.startsWith("prop://") =>
@@ -117,19 +117,17 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           case _ => throw new IllegalArgumentException("[StreamPark] Usage:flink.conf file error,must be properties or yml")
         }
     }
-  }
-
-  def initParameter(): (ParameterTool, Configuration) = {
-    val argsMap = ParameterTool.fromArgs(args)
-    val config = argsMap.get(KEY_APP_CONF(), null) match {
-      // scalastyle:off throwerror
-      case null | "" => throw new ExceptionInInitializerError("[StreamPark] Usage:can't fond config,please set \"--conf $path \" in main arguments")
-      // scalastyle:on throwerror
-      case file => file
-    }
-    val (userConf, flinkConf) = readUserAndFlinkConf(config)
-    // config priority: explicitly specified priority > project profiles > system profiles
-    (ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(userConf)).mergeWith(argsMap), Configuration.fromMap(flinkConf))
+    val appConf = mutable.Map[String, String]()
+    val flinkConf = mutable.Map[String, String]()
+    configMap.foreach(x => {
+      if (x._1.startsWith(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)) {
+        flinkConf += x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2
+      }
+      if (!x._1.startsWith(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX)) {
+        appConf += x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2
+      }
+    })
+    appConf -> flinkConf
   }
 
   def streamEnvironment: StreamExecutionEnvironment = {
@@ -147,11 +145,11 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     localStreamEnv = new StreamExecutionEnvironment(JavaStreamEnv.getExecutionEnvironment(flinkConf))
 
     apiType match {
-      case ApiType.java if javaStreamEnvConfFunc != null => javaStreamEnvConfFunc.configuration(localStreamEnv.getJavaEnv, userParameter)
-      case ApiType.scala if streamEnvConfFunc != null => streamEnvConfFunc(localStreamEnv, userParameter)
+      case ApiType.java if javaStreamEnvConfFunc != null => javaStreamEnvConfFunc.configuration(localStreamEnv.getJavaEnv, parameter)
+      case ApiType.scala if streamEnvConfFunc != null => streamEnvConfFunc(localStreamEnv, parameter)
       case _ =>
     }
-    localStreamEnv.getConfig.setGlobalJobParameters(userParameter)
+    localStreamEnv.getConfig.setGlobalJobParameters(parameter)
   }
 
 }
