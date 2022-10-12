@@ -18,6 +18,7 @@
 package org.apache.streampark.console.base.exception;
 
 import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.console.base.domain.ResponseCode;
 
 /**
  * <pre>
@@ -27,18 +28,22 @@ import org.apache.streampark.common.util.ExceptionUtils;
  * <p>1. Failed to start job, need to display the exception(stackTrace info) to front-end</p>
  * </pre>
  */
-public class ApiDetailException extends RuntimeException {
+public class ApiDetailException extends AbstractApiException {
 
     public ApiDetailException(String message) {
-        super(message);
+        super(message, ResponseCode.CODE_FAIL_DETAIL);
     }
 
     public ApiDetailException(Throwable cause) {
-        super(ExceptionUtils.stringifyException(cause));
+        super(ExceptionUtils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
     }
 
     public ApiDetailException(String message, Throwable cause) {
-        super(message + ExceptionUtils.stringifyException(cause));
+        super(message + ExceptionUtils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
     }
 
+    @Override
+    public String getMessage() {
+        return "Detail exception: \n" + super.getMessage();
+    }
 }
