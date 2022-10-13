@@ -291,7 +291,7 @@ create table if not exists `t_variable` (
   `variable_value` varchar(1024) not null comment 'variable value',
   `variable_name` varchar(100) not null comment 'variable name',
   `description` varchar(100) default null comment 'description',
-  `user_id` bigint not null comment 'user id',
+  `creator` bigint not null comment 'creator',
   `team_id` bigint not null comment 'team id',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',

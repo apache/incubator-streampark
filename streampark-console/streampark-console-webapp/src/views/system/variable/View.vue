@@ -150,9 +150,9 @@
 </template>
 
 <script>
-import VariableInfo from './VariableInfo'
-import VariableAdd from './VariableAdd'
-import VariableEdit from './VariableEdit'
+import VariableInfo from './Detail'
+import VariableAdd from './Add'
+import VariableEdit from './Edit'
 import SvgIcon from '@/components/SvgIcon'
 import { list, deleteVariable} from '@/api/variable'
 

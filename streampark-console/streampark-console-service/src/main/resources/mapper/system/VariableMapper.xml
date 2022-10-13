@@ -24,7 +24,7 @@
         <result column="variable_code" jdbcType="VARCHAR" property="variableCode"/>
         <result column="variable_value" jdbcType="VARCHAR" property="variableValue"/>
         <result column="variable_name" jdbcType="VARCHAR" property="variableName"/>
-        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="creator" jdbcType="BIGINT" property="creator"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
@@ -34,7 +34,7 @@
         select v.*, u.username, t.team_name
         from t_variable v, t_user u, t_team t
         <where>
-            v.user_id = u.user_id
+            v.creator = u.user_id
             and v.team_id = t.id
             and v.team_id = ${variable.teamId}
             <if test="variable.variableName != null and variable.variableName != ''">

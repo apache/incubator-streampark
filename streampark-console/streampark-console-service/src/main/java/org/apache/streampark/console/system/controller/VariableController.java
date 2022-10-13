@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Variable;
@@ -49,7 +49,7 @@ import java.util.List;
 public class VariableController {
 
     @Autowired
-    CommonService commonService;
+    private CommonService commonService;
 
     @Autowired
     private VariableService variableService;
@@ -66,13 +66,13 @@ public class VariableController {
     public RestResponse addVariable(@Valid Variable variable) throws Exception {
         boolean isExists = this.variableService.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null;
         if (isExists) {
-            return RestResponse.fail("Sorry, the variable Code already exists", ResponseCode.CODE_FAIL_ALERT);
+            throw new ApiAlertException("Sorry, the variable code already exists.");
         }
         isExists = this.variableService.findByVariableName(variable.getTeamId(), variable.getVariableName()) != null;
         if (isExists) {
-            return RestResponse.fail("Sorry, the variable Name already exists", ResponseCode.CODE_FAIL_ALERT);
+            throw new ApiAlertException("Sorry, the variable name already exists.");
         }
-        variable.setUserId(commonService.getCurrentUser().getUserId());
+        variable.setCreator(commonService.getCurrentUser().getUserId());
         this.variableService.createVariable(variable);
         return RestResponse.success();
     }
@@ -82,10 +82,10 @@ public class VariableController {
     public RestResponse updateVariable(@Valid Variable variable) throws Exception {
         Variable findVariable = this.variableService.findByVariableCode(variable.getTeamId(), variable.getVariableCode());
         if (findVariable == null) {
-            return RestResponse.fail("Sorry, the variable does not exist!", ResponseCode.CODE_FAIL_ALERT);
+            throw new ApiAlertException("Sorry, the variable does not exist.");
         }
-        if (findVariable.getId() != variable.getId()) {
-            return RestResponse.fail("Sorry, the variable id is inconsistent!", ResponseCode.CODE_FAIL_ALERT);
+        if (findVariable.getId().longValue() != variable.getId().longValue()) {
+            throw new ApiAlertException("Sorry, the variable id is inconsistent.");
         }
         this.variableService.updateVariable(variable);
         return RestResponse.success();
@@ -96,14 +96,14 @@ public class VariableController {
     public RestResponse deleteVariables(@Valid Variable variable) {
         Variable findVariable = this.variableService.findByVariableCode(variable.getTeamId(), variable.getVariableCode());
         if (findVariable == null) {
-            return RestResponse.fail("Sorry, the variable does not exist!", ResponseCode.CODE_FAIL_ALERT);
+            throw new ApiAlertException("Sorry, the variable does not exist.");
         }
-        if (findVariable.getId() != variable.getId()) {
-            return RestResponse.fail("Sorry, the variable id is inconsistent!", ResponseCode.CODE_FAIL_ALERT);
+        if (findVariable.getId().longValue() != variable.getId().longValue()) {
+            throw new ApiAlertException("Sorry, the variable id is inconsistent.");
         }
         List<Application> dependApps = this.variableService.findDependByCode(variable);
         if (!(dependApps == null || dependApps.isEmpty())) {
-            return RestResponse.fail("Sorry, this variable is being used by " + dependApps.size() + " applications", ResponseCode.CODE_FAIL_ALERT);
+            throw new ApiAlertException(String.format("Sorry, this variable is being used by [%s] applications.", dependApps.size()));
         }
         this.variableService.removeById(findVariable.getId());
         return RestResponse.success();
@@ -135,7 +135,7 @@ public class VariableController {
     @PostMapping("check/updateName")
     public RestResponse checkVariableNameForUpdate(@Valid Variable variable) {
         Variable findVariable = this.variableService.findByVariableName(variable.getTeamId(), variable.getVariableName());
-        if (findVariable == null || findVariable.getId() == variable.getId()) {
+        if (findVariable == null || findVariable.getId().longValue() == variable.getId().longValue()) {
             return RestResponse.success(true);
         }
         return RestResponse.success(false);

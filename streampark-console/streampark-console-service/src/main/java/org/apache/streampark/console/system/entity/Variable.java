@@ -50,7 +50,7 @@ public class Variable implements Serializable {
     @Size(max = 100, message = "{noMoreThan}")
     private String description;
 
-    private Long userId;
+    private Long creator;
 
     private transient String userName;
 

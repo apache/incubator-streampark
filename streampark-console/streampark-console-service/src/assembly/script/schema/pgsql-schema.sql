@@ -616,7 +616,7 @@ create table "public"."t_variable" (
   "variable_value" varchar(1024) collate "pg_catalog"."default" not null,
   "variable_name" varchar(100) collate "pg_catalog"."default" not null,
   "description" varchar(100) collate "pg_catalog"."default" default null,
-  "user_id" int8 collate "pg_catalog"."default" not null,
+  "creator" int8 collate "pg_catalog"."default" not null,
   "team_id" int8 collate "pg_catalog"."default" not null,
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
   "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
@@ -627,7 +627,7 @@ comment on column "public"."t_variable"."variable_code" is 'variable code';
 comment on column "public"."t_variable"."variable_value" is 'variable value';
 comment on column "public"."t_variable"."variable_name" is 'variable name';
 comment on column "public"."t_variable"."description" is 'description';
-comment on column "public"."t_variable"."user_id" is 'user id';
+comment on column "public"."t_variable"."creator" is 'creator';
 comment on column "public"."t_variable"."team_id" is 'team id';
 comment on column "public"."t_variable"."create_time" is 'creation time';
 comment on column "public"."t_variable"."modify_time" is 'modify time';

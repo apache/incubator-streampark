@@ -329,7 +329,7 @@ create table `t_variable` (
   `variable_value` varchar(1024) collate utf8mb4_general_ci not null comment 'variable value',
   `variable_name` varchar(100) collate utf8mb4_general_ci not null comment 'variable name',
   `description` varchar(100) collate utf8mb4_general_ci default null comment 'description',
-  `user_id` bigint collate utf8mb4_general_ci not null comment 'user id',
+  `creator` bigint collate utf8mb4_general_ci not null comment 'creator',
   `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',

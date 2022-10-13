@@ -127,7 +127,7 @@ insert into `t_menu` values (100050, 100048, 'update', null, null, 'member:updat
 insert into `t_menu` values (100051, 100048, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
-insert into `t_menu` VALUES (100054, 100000, 'Variable Management', '/system/variable', 'system/variable/Variable', 'variable:view', 'code', '0', 1, 3, now(), now());
+insert into `t_menu` VALUES (100054, 100000, 'Variable Management', '/system/variable', 'system/variable/View', 'variable:view', 'code', '0', 1, 3, now(), now());
 insert into `t_menu` VALUES (100055, 100054, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100056, 100054, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
@@ -212,7 +212,7 @@ create table `t_variable` (
   `variable_value` varchar(1024) collate utf8mb4_general_ci not null comment 'variable value',
   `variable_name` varchar(100) collate utf8mb4_general_ci not null comment 'variable name',
   `description` varchar(100) collate utf8mb4_general_ci default null comment 'description',
-  `user_id` bigint collate utf8mb4_general_ci not null comment 'user id',
+  `creator` bigint collate utf8mb4_general_ci not null comment 'creator',
   `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
