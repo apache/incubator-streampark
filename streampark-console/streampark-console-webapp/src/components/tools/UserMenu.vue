@@ -343,6 +343,7 @@ export default {
         '/system/token',
         '/system/team',
         '/system/member',
+        '/system/variable',
         '/flink/project',
         '/flink/app'
       ]

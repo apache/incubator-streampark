@@ -99,7 +99,10 @@ insert into `t_menu` values (100050, 100048, 'update', null, null, 'member:updat
 insert into `t_menu` values (100051, 100048, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
-
+insert into `t_menu` VALUES (100054, 100000, 'Variable Management', '/system/variable', 'system/variable/Variable', 'variable:view', 'code', '0', 1, 3, now(), now());
+insert into `t_menu` VALUES (100055, 100054, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` VALUES (100056, 100054, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` VALUES (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
 
 -- ----------------------------
 -- Records of t_role

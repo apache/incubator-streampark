@@ -42,6 +42,7 @@ drop table if exists "public"."t_alert_config";
 drop table if exists "public"."t_access_token";
 drop table if exists "public"."t_flink_log";
 drop table if exists "public"."t_team";
+drop table if exists "public"."t_variable";
 
 -- ----------------------------
 -- drop sequence if exists
@@ -66,6 +67,7 @@ drop sequence if exists "public"."streampark_t_alert_config_id_seq";
 drop sequence if exists "public"."streampark_t_access_token_id_seq";
 drop sequence if exists "public"."streampark_t_flink_log_id_seq";
 drop sequence if exists "public"."streampark_t_team_id_seq";
+drop sequence if exists "public"."streampark_t_variable_id_seq";
 
 -- ----------------------------
 -- drop trigger if exists
@@ -600,6 +602,44 @@ comment on column "public"."t_team"."create_time" is 'creation time';
 comment on column "public"."t_team"."modify_time" is 'modify time';
 create index "un_team_name" on "public"."t_team" using btree (
   "team_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
+);
+
+-- ----------------------------
+-- Table of t_variable
+-- ----------------------------
+create sequence "public"."streampark_t_variable_id_seq"
+    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+
+create table "public"."t_variable" (
+  "id" int8 not null default nextval('streampark_t_variable_id_seq'::regclass),
+  "variable_code" varchar(100) collate "pg_catalog"."default" not null,
+  "variable_value" varchar(1024) collate "pg_catalog"."default" not null,
+  "variable_name" varchar(100) collate "pg_catalog"."default" not null,
+  "description" varchar(100) collate "pg_catalog"."default" default null,
+  "user_id" int8 collate "pg_catalog"."default" not null,
+  "team_id" int8 collate "pg_catalog"."default" not null,
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+)
+;
+comment on column "public"."t_variable"."id" is 'variable id';
+comment on column "public"."t_variable"."variable_code" is 'variable code';
+comment on column "public"."t_variable"."variable_value" is 'variable value';
+comment on column "public"."t_variable"."variable_name" is 'variable name';
+comment on column "public"."t_variable"."description" is 'description';
+comment on column "public"."t_variable"."user_id" is 'user id';
+comment on column "public"."t_variable"."team_id" is 'team id';
+comment on column "public"."t_variable"."create_time" is 'creation time';
+comment on column "public"."t_variable"."modify_time" is 'modify time';
+
+alter table "public"."t_variable" add constraint "t_variable_pkey" primary key ("id");
+create index "un_team_vcode_inx" on "public"."t_variable" using btree (
+  "team_id" "pg_catalog"."int8_ops" asc nulls last,
+  "variable_code" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
+);
+create index "un_team_vname_inx" on "public"."t_variable" using btree (
+  "team_id" "pg_catalog"."int8_ops" asc nulls last,
+  "variable_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
 );
 
 

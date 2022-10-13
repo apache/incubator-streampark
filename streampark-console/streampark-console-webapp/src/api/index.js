@@ -209,6 +209,17 @@ export default {
     UPDATE: '/menu/update',
     ROUTER: '/menu/router'
   },
+  Variable: {
+    LIST: '/variable/list',
+    UPDATE: '/variable/update',
+    GET: '/variable/get',
+    POST: '/variable/post',
+    DELETE: '/variable/delete',
+    SELECT: '/variable/select',
+    CHECK_CODE: '/variable/check/code',
+    CHECK_ADD_NAME: '/variable/check/addName',
+    CHECK_UPDATE_NAME: '/variable/check/updateName',
+  },
   Log: {
     LIST: '/log/list',
     DELETE: '/log/delete',
