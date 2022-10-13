@@ -1142,7 +1142,7 @@ import {activeURL} from '@/api/flinkCluster'
 import {Terminal} from 'xterm'
 import 'xterm/css/xterm.css'
 import SvgIcon from '@/components/SvgIcon'
-import {list as listUser} from '@/api/user'
+import {users as teamUser} from '@/api/team'
 
 export default {
   components: {Ellipsis, State, SvgIcon},
@@ -1309,8 +1309,8 @@ export default {
 
   mounted() {
     this.handleDashboard()
-    listUser({'pageSize': '9999'}).then((resp) => {
-      this.users = resp.data.records
+    teamUser().then((resp) => {
+      this.users = resp.data
     })
     this.handleInitTagsOptions()
     this.handleFetch(true)

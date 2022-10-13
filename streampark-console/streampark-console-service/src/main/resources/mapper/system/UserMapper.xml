@@ -59,4 +59,17 @@
             order by ${user.sortField} ${user.sortOrder}
         </if>
     </select>
+
+    <select id="getNoTokenUser" resultType="user" parameterType="user">
+        select u.* from t_user u left join t_access_token t
+        on u.user_id = t.user_id
+        where t.user_id is null
+    </select>
+
+    <select id="findByTeam" resultType="user" parameterType="user">
+        select u.* from t_user u inner join t_member m
+        on u.user_id = m.user_id
+        where m.team_id = #{teamId}
+    </select>
+
 </mapper>

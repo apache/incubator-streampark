@@ -102,4 +102,9 @@ public class User implements Serializable {
      */
     private Long teamId;
 
+    public void dataMasking() {
+        this.setPassword("******");
+        this.setSalt("******");
+    }
+
 }

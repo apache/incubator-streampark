@@ -189,8 +189,7 @@ public class UserController {
         userService.setLatestTeam(teamId, user.getUserId());
 
         //2) get latest userInfo
-        user.setPassword("******");
-        user.setSalt("******");
+        user.dataMasking();
 
         Map<String, Object> infoMap = new HashMap<>(8);
         infoMap.put("user", user);

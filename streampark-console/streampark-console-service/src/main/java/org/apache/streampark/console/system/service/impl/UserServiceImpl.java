@@ -21,7 +21,6 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Menu;
 import org.apache.streampark.console.system.entity.Team;
@@ -29,7 +28,6 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.UserMapper;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.MenuService;
-import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -60,12 +58,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private MenuService menuService;
-
-    @Autowired
-    private CommonService commonService;
-
-    @Autowired
-    private TeamService teamService;
 
     @Override
     public User findByName(String username) {
@@ -204,6 +196,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 this.baseMapper.updateById(user);
             }
         }
+    }
+
+    @Override
+    public List<User> findByTeam(Long teamId) {
+        return baseMapper.findByTeam(teamId);
     }
 
     private void setUserRoles(User user, String[] roles) {
