@@ -15,24 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.security.impl;
+package org.apache.streampark.console.system.security.impl.ldap;
 
-import org.apache.streampark.console.system.entity.User;
-import org.apache.streampark.console.system.security.Authenticator;
+import com.baomidou.mybatisplus.annotation.EnumValue;
 
-public abstract class AbstractAuthenticator implements Authenticator {
+public enum LdapUserNotExistActionType {
 
-    /**
-     * user login and return user in db
-     *
-     * @param userId user identity field
-     * @param password user login password
-     * @return user object in databse
-     */
-    public abstract User login(String userId, String password) throws Exception;
+    CREATE(0, "automatically create user when user not exist"),
+    DENY(1, "deny log-in when user not exist"),
+    ;
 
-    @Override
-    public User authenticate(String username, String password) throws Exception {
-        return login(username, password);
+    LdapUserNotExistActionType(int code, String desc) {
+        this.code = code;
+        this.desc = desc;
     }
+
+    @EnumValue
+    private final int code;
+    private final String desc;
 }

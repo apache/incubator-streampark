@@ -17,7 +17,10 @@
 
 package org.apache.streampark.console.base.handler;
 
-import org.apache.streampark.console.base.domain.ResponseCode;
+import static org.apache.streampark.console.core.enums.Status.INTERNAL_SERVER_ERROR_ARGS;
+import static org.apache.streampark.console.core.enums.Status.NOT_SUPPORTED_REQUEST_METHOD;
+import static org.apache.streampark.console.core.enums.Status.REQUEST_PARAMS_NOT_VALID_ERROR;
+
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.AbstractApiException;
 
@@ -51,21 +54,21 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(Exception e) {
         log.info("Internal server error：", e);
-        return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
+        return RestResponse.fail(INTERNAL_SERVER_ERROR_ARGS, e.getMessage());
     }
 
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
         log.info("not supported request method，exception：{}", e.getMessage());
-        return RestResponse.fail("not supported request method，exception：" + e.getMessage(), ResponseCode.CODE_FAIL);
+        return RestResponse.fail(NOT_SUPPORTED_REQUEST_METHOD, e.getMessage());
     }
 
     @ExceptionHandler(value = AbstractApiException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(AbstractApiException e) {
         log.info("api exception：{}", e.getMessage());
-        return RestResponse.fail(e.getMessage(), e.getResponseCode());
+        return RestResponse.fail(INTERNAL_SERVER_ERROR_ARGS, e.getMessage());
     }
 
 
@@ -84,7 +87,8 @@ public class GlobalExceptionHandler {
             message.append(error.getField()).append(error.getDefaultMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
-        return RestResponse.fail(message.toString(), ResponseCode.CODE_FAIL);
+        return RestResponse.fail(REQUEST_PARAMS_NOT_VALID_ERROR, message.toString());
+
     }
 
     /**
@@ -104,7 +108,7 @@ public class GlobalExceptionHandler {
             message.append(pathArr[1]).append(violation.getMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
-        return RestResponse.fail(message.toString(), ResponseCode.CODE_FAIL);
+        return RestResponse.fail(REQUEST_PARAMS_NOT_VALID_ERROR, message.toString());
     }
 
     @ExceptionHandler(value = UnauthorizedException.class)
