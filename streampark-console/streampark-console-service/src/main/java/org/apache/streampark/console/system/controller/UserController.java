@@ -204,4 +204,11 @@ public class UserController {
         return new RestResponse().data(infoMap);
     }
 
+    @PostMapping("appOwners")
+    public RestResponse appOnwers(Long teamId) {
+        List<User> userList = userService.findByAppOwner(teamId);
+        userList.forEach((u) -> u.dataMasking());
+        return RestResponse.success(userList);
+    }
+
 }

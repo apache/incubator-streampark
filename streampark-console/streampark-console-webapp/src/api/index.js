@@ -169,7 +169,8 @@ export default {
     CHECK_NAME: '/user/check/name',
     CHECK_PASSWORD: '/user/check/password',
     SET_TEAM: '/user/setTeam',
-    INIT_TEAM: '/user/initTeam'
+    INIT_TEAM: '/user/initTeam',
+    APP_OWNERS: '/user/appOwners'
   },
   Token: {
     LIST: '/token/list',
@@ -191,7 +192,6 @@ export default {
     POST: '/team/post',
     UPDATE: '/team/update',
     LIST: '/team/list',
-    USERS: '/team/users',
     CHECK_NAME: '/team/check/name',
     DELETE: '/team/delete'
   },

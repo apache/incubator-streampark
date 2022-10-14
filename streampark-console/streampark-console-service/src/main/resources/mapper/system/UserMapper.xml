@@ -83,7 +83,7 @@
                     on u.user_id = m.user_id
                     inner join t_flink_app p
                     on u.user_id = p.user_id
-                where m.team_id = #{teamId}
+                    where m.team_id = #{teamId}
             )
         ) as t
         where u.user_id = t.user_id

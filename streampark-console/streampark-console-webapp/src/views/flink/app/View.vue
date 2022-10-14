@@ -1142,7 +1142,7 @@ import {activeURL} from '@/api/flinkCluster'
 import {Terminal} from 'xterm'
 import 'xterm/css/xterm.css'
 import SvgIcon from '@/components/SvgIcon'
-import {users as teamUser} from '@/api/team'
+import {appOwners} from '@/api/user'
 
 export default {
   components: {Ellipsis, State, SvgIcon},
@@ -1309,7 +1309,7 @@ export default {
 
   mounted() {
     this.handleDashboard()
-    teamUser().then((resp) => {
+    appOwners().then((resp) => {
       this.users = resp.data
     })
     this.handleInitTagsOptions()

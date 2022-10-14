@@ -20,9 +20,7 @@ package org.apache.streampark.console.system.controller;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.system.entity.Team;
-import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.TeamService;
-import org.apache.streampark.console.system.service.UserService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +36,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
-import java.util.List;
-
 @Slf4j
 @Validated
 @RestController
@@ -49,20 +45,10 @@ public class TeamController {
     @Autowired
     private TeamService teamService;
 
-    @Autowired
-    private UserService userService;
-
     @PostMapping("list")
     public RestResponse teamList(RestRequest restRequest, Team team) {
         IPage<Team> teamList = teamService.findTeams(team, restRequest);
         return RestResponse.success(teamList);
-    }
-
-    @PostMapping("users")
-    public RestResponse users(Long teamId) {
-        List<User> userList = userService.findByAppOwner(teamId);
-        userList.forEach((u) -> u.dataMasking());
-        return RestResponse.success(userList);
     }
 
     @PostMapping("check/name")
