@@ -67,16 +67,26 @@
     </select>
 
     <select id="findByAppOwner" resultType="user" parameterType="user">
-        select a.* from t_user a inner join t_flink_app b
-        on a.user_id = b.user_id
-        where a.user_id = #{userId}
-        and a.user_type = 1
-        union all
-        select u.* from t_user u inner join t_member m
-        on u.user_id = m.user_id
-        inner join t_flink_app p
-        on u.user_id = p.user_id
-        where m.team_id = #{teamId}
+        select u.* from t_user u
+        inner join (
+            select distinct(user_id) as user_id from (
+                select a.user_id
+                    from t_user a
+                    inner join t_flink_app b
+                    on a.user_id = b.user_id
+                    where a.user_id = #{userId}
+                    and a.user_type = 1
+                union all
+                select u.user_id
+                    from t_user u
+                    inner join t_member m
+                    on u.user_id = m.user_id
+                    inner join t_flink_app p
+                    on u.user_id = p.user_id
+                where m.team_id = #{teamId}
+            )
+        ) as t
+        where u.user_id = t.user_id
     </select>
 
 </mapper>
