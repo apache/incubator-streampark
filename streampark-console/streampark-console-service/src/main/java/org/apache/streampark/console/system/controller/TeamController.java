@@ -60,7 +60,7 @@ public class TeamController {
 
     @PostMapping("users")
     public RestResponse users(Long teamId) {
-        List<User> userList = userService.findByTeam(teamId);
+        List<User> userList = userService.findByAppOwner(teamId);
         userList.forEach((u) -> u.dataMasking());
         return RestResponse.success(userList);
     }

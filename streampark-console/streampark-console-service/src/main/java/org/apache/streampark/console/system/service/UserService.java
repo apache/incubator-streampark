@@ -111,5 +111,5 @@ public interface UserService extends IService<User> {
 
     void fillInTeam(User user);
 
-    List<User> findByTeam(Long teamId);
+    List<User> findByAppOwner(Long teamId);
 }

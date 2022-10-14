@@ -21,7 +21,6 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
-import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Menu;
@@ -204,12 +203,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public List<User> findByTeam(Long teamId) {
-        User user = commonService.getCurrentUser();
-        if (UserType.ADMIN.equals(user.getUserType())) {
-            return this.list();
-        }
-        return baseMapper.findByTeam(teamId);
+    public List<User> findByAppOwner(Long teamId) {
+        return baseMapper.findByAppOwner(commonService.getUserId(), teamId);
     }
 
     private void setUserRoles(User user, String[] roles) {
