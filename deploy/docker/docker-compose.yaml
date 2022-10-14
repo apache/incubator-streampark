@@ -1,83 +1,65 @@
-###############################################################################
-#  Licensed to the Apache Software Foundation (ASF) under one or more
-#  contributor license agreements.  See the NOTICE file distributed with
-#  this work for additional information regarding copyright ownership.
-#  The ASF licenses this file to You under the Apache License, Version 2.0
-#  (the "License"); you may not use this file except in compliance with
-#  the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-###############################################################################
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 version: '3.8'
 services:
   streampark-server:
-    build:
-      context: ../..
-      dockerfile: deploy/docker/compose/Dockerfile
-      args:
-        DB: database
+    image: ${HUB}/streampark:${TAG}
+    command: ${COMMAND}
     ports:
       - 10000:10000
-    depends_on:
-      - database
+    env_file: .env
     volumes:
-      - flink1.14.5:/  streampark/flink/flink1.14.5
+      - flink:/streampark/flink/${FLINK}
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/hosts:/etc/hosts:ro
+      - ~/.kube:/root/.kube:ro
     restart: unless-stopped
+    networks:
+      - streampark
 
-  database:
-    build:
-      context: ../..
-      dockerfile: deploy/docker/mysql/Dockerfile
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    ports:
-      - 3306:3306
-    volumes:
-      - mysql-data:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: streampark
-      MYSQL_USER: streampark
-      MYSQL_PASSWORD: 123456
-    healthcheck:
-      test: [ "CMD", "mysqladmin" ,"-uroot","-p123456","ping", "-h", "localhost" ]
-      timeout: 20s
-      retries: 10
-    restart: unless-stopped
 
   jobmanager:
-    image: flink:1.14.5-scala_2.12
+    image: ${FLINK_BASE_IMAGE}
     ports:
       - "8081:8081"
     command: jobmanager
     volumes:
-      - flink1.14.5:/opt/flink
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
+      - flink:/opt/flink
+    env_file: .env
     restart: unless-stopped
+    networks:
+      - streampark
+
 
   taskmanager:
-    image: flink:1.14.5-scala_2.12
+    image: ${FLINK_BASE_IMAGE}
     depends_on:
       - jobmanager
     command: taskmanager
     deploy:
       replicas: 1
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 10
+    env_file: .env
     restart: unless-stopped
+    networks:
+      - streampark
+
+networks:
+  streampark:
+    driver: bridge
 
 volumes:
-  mysql-data:
-  flink1.14.5:
+  flink:
