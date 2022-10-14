@@ -17,8 +17,11 @@
 
 package org.apache.streampark.console.system.controller;
 
+import static org.apache.streampark.console.core.enums.Status.USER_CURRENTLY_LOCKED;
+import static org.apache.streampark.console.core.enums.Status.USER_NAME_NULL;
+import static org.apache.streampark.console.core.enums.Status.USER_NOT_EXIST;
+
 import org.apache.streampark.common.util.DateUtils;
-import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
@@ -67,39 +70,22 @@ public class PassportController {
     public RestResponse signin(
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
-
         if (StringUtils.isEmpty(username)) {
-            return RestResponse.success().put("code", 0);
+            return RestResponse.fail(USER_NAME_NULL);
         }
-
         User user = authenticator.authenticate(username, password);
+        return login(username, password, user);
+    }
 
-        if (user == null) {
-            return RestResponse.success().put("code", 0);
+    @PostMapping("ldapSignin")
+    public RestResponse ldapSignin(
+        @NotBlank(message = "{required}") String username,
+        @NotBlank(message = "{required}") String password) throws Exception {
+        if (StringUtils.isEmpty(username)) {
+            return RestResponse.fail(USER_NAME_NULL);
         }
-
-        if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put("code", 1);
-        }
-
-        userService.fillInTeam(user);
-
-        //no team.
-        if (user.getTeamId() == null) {
-            return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
-        }
-
-        password = ShaHashUtils.encrypt(user.getSalt(), password);
-
-        this.userService.updateLoginTime(username);
-        String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
-        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
-        String expireTimeStr = DateUtils.formatFullTime(expireTime);
-        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
-        String userId = RandomStringUtils.randomAlphanumeric(20);
-        user.setId(userId);
-        Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
-        return new RestResponse().data(userInfo);
+        User user = authenticator.ldapAuthenticate(username, password);
+        return login(username, password, user);
     }
 
     @PostMapping("signout")
@@ -132,4 +118,24 @@ public class PassportController {
         return userInfo;
     }
 
+    private RestResponse login(String username, String password, User user) throws Exception {
+        if (user == null) {
+            return RestResponse.fail(USER_NOT_EXIST, username);
+        }
+
+        if (User.STATUS_LOCK.equals(user.getStatus())) {
+            return RestResponse.fail(USER_CURRENTLY_LOCKED);
+        }
+
+        password = ShaHashUtils.encrypt(user.getSalt(), password);
+
+        this.userService.updateLoginTime(username);
+        String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
+        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
+        String expireTimeStr = DateUtils.formatFullTime(expireTime);
+        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
+        String userId = RandomStringUtils.randomAlphanumeric(20);
+        user.setId(userId);
+        return new RestResponse().data(this.generateUserInfo(jwtToken, user));
+    }
 }
