@@ -104,7 +104,7 @@
         }
         return columns;
       });
-      return { getColumns, getDataSource };
+      return { getColumns: getColumns as any, getDataSource };
     },
   });
 </script>

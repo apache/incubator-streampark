@@ -17,7 +17,7 @@
 import { BasicColumn, FormSchema } from '/@/components/Table';
 import { h } from 'vue';
 import { Tag } from 'ant-design-vue';
-import { checkUserName, fetchUserTypes } from '/@/api/sys/user';
+import { checkUserName, fetchUserTypes } from '/@/api/system/user';
 import { FormTypeEnum } from '/@/enums/formEnum';
 
 // user status enum

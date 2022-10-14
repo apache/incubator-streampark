@@ -15,14 +15,11 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer
-    v-bind="$attrs"
-    @register="registerDrawer"
-    showFooter
-    :title="getTitle"
-    width="40%"
-    @ok="handleSubmit"
-  >
+  <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="40%" @ok="handleSubmit">
+    <template #title>
+      <a-icon type="user-add" />
+      {{ getTitle }}
+    </template>
     <BasicForm @register="registerForm" />
   </BasicDrawer>
 </template>
@@ -33,7 +30,7 @@
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
-  import { addUser, updateUser } from '/@/api/sys/user';
+  import { addUser, updateUser } from '/@/api/system/user';
 
   export default defineComponent({
     name: 'MenuDrawer',

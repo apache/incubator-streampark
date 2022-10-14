@@ -57,7 +57,7 @@
   import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import { getRoleListByPage } from '/@/api/demo/system';
+  import { getRoleListByPage } from '/@/api/base/system';
 
   import { useDrawer } from '/@/components/Drawer';
   import RoleDrawer from './RoleDrawer.vue';
@@ -65,7 +65,7 @@
   import { columns, searchFormSchema } from './role.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { FormTypeEnum } from '/@/enums/formEnum';
-  import { deleteRole } from '/@/api/sys/role';
+  import { deleteRole } from '/@/api/system/role';
 
   export default defineComponent({
     name: 'RoleManagement',

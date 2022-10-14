@@ -18,8 +18,8 @@ import { BasicColumn, FormSchema } from '/@/components/Table';
 import { h } from 'vue';
 import { Switch } from 'ant-design-vue';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { setTokenStatus } from '/@/api/sys/token';
-import { getNoTokenUserList } from '/@/api/sys/user';
+import { setTokenStatus } from '/@/api/system/token';
+import { getNoTokenUserList } from '/@/api/system/user';
 import dayjs from 'dayjs';
 
 // status enum

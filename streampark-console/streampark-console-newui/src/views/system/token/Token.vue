@@ -53,7 +53,7 @@
   import TokenDrawer from './TokenDrawer.vue';
   import { useCopyToClipboard } from '/@/hooks/web/useCopyToClipboard';
   import { useDrawer } from '/@/components/Drawer';
-  import { deleteToken, getTokenList } from '/@/api/sys/token';
+  import { deleteToken, getTokenList } from '/@/api/system/token';
   import { columns, searchFormSchema } from './token.data';
   import { useMessage } from '/@/hooks/web/useMessage';
 

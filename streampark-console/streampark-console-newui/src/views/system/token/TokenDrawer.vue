@@ -32,7 +32,7 @@
   import { formSchema } from './token.data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
-  import { addToken } from '/@/api/sys/token';
+  import { addToken } from '/@/api/system/token';
 
   export default defineComponent({
     name: 'MenuDrawer',

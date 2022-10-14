@@ -20,7 +20,7 @@ import { handleAppBuildStatueText } from '../utils';
 import { fetchCopy, fetchForcedStop, fetchMapping } from '/@/api/flink/app/app';
 import { fetchBuild, fetchBuildDetail } from '/@/api/flink/app/flinkBuild';
 import { fetchLatest, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
-import { getUserList } from '/@/api/sys/user';
+import { getUserList } from '/@/api/system/user';
 import { SvgIcon } from '/@/components/Icon';
 import { useMessage } from '/@/hooks/web/useMessage';
 

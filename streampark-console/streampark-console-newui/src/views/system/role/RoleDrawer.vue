@@ -43,8 +43,8 @@
   import { formSchema } from './role.data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { BasicTree, TreeItem } from '/@/components/Tree';
-  import { addRole, editRole } from '/@/api/sys/role';
-  import { getMenuList, getRoleMenu } from '/@/api/demo/system';
+  import { addRole, editRole } from '/@/api/system/role';
+  import { getMenuList, getRoleMenu } from '/@/api/base/system';
   import { FormTypeEnum } from '/@/enums/formEnum';
 
   const handleTreeIcon = (treeData: TreeItem[]): TreeItem[] => {

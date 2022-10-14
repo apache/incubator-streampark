@@ -47,7 +47,7 @@
   import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import { getDeptList } from '/@/api/demo/system';
+  import { getDeptList } from '/@/api/base/system';
 
   import { useModal } from '/@/components/Modal';
   import DeptModal from './DeptModal.vue';

@@ -55,8 +55,8 @@
   import { BellOutlined } from '@ant-design/icons-vue';
   import NoticeList from './NoticeList.vue';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { fetchNotify, fetchNotifyDelete } from '/@/api/sys/notify';
-  import { NoticyItem } from '/@/api/sys/model/notifyModel';
+  import { fetchNotify, fetchNotifyDelete } from '/@/api/system/notify';
+  import { NoticyItem } from '/@/api/system/model/notifyModel';
   import { useWebSocket } from '@vueuse/core';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';

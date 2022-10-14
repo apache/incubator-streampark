@@ -71,7 +71,7 @@
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
   import UserDrawer from './UserDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { deleteUser, getUserList, resetPassword } from '/@/api/sys/user';
+  import { deleteUser, getUserList, resetPassword } from '/@/api/system/user';
   import { columns, searchFormSchema } from './user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { useMessage } from '/@/hooks/web/useMessage';

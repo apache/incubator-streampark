@@ -52,7 +52,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useErrorLogStore } from '/@/store/modules/errorLog';
-  import { fireErrorApi } from '/@/api/demo/error';
+  import { fireErrorApi } from '/@/api/base/error';
   import { getColumns } from './data';
   import { cloneDeep } from 'lodash-es';
 

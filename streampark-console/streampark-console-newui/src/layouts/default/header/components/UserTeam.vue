@@ -18,7 +18,7 @@
   import { onMounted, ref } from 'vue';
   import { Select } from 'ant-design-vue';
   import { useUserStoreWithOut } from '/@/store/modules/user';
-  import { fetchUserTeam } from '/@/api/sys/member';
+  import { fetchUserTeam } from '/@/api/system/member';
   const SelectOption = Select.Option;
 
   const userStore = useUserStoreWithOut();

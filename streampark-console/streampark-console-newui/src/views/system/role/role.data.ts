@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { RuleObject, StoreValue } from 'ant-design-vue/lib/form/interface';
-import { fetchCheckName } from '/@/api/sys/role';
+import { fetchCheckName } from '/@/api/system/role';
 import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
 

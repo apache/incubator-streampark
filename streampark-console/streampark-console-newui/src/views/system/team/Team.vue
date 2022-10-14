@@ -57,7 +57,7 @@
   import TeamDrawer from './TeamDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
   import { columns, searchFormSchema } from './team.data';
-  import { getTeamList, deleteTeam } from '/@/api/sys/team';
+  import { getTeamList, deleteTeam } from '/@/api/system/team';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   export default defineComponent({
