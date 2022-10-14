@@ -208,11 +208,11 @@ add unique key `un_username` (`username`) using btree;
 drop table if exists `t_variable`;
 create table `t_variable` (
   `id` bigint not null auto_increment,
-  `variable_code` varchar(100) collate utf8mb4_general_ci not null comment 'variable code',
-  `variable_value` varchar(1024) collate utf8mb4_general_ci not null comment 'variable value',
-  `variable_name` varchar(100) collate utf8mb4_general_ci not null comment 'variable name',
-  `description` varchar(100) collate utf8mb4_general_ci default null comment 'description',
-  `creator` bigint collate utf8mb4_general_ci not null comment 'creator',
+  `variable_code` varchar(100) collate utf8mb4_general_ci not null comment 'Variable code is used for parameter names passed to the program or as placeholders',
+  `variable_value` text collate utf8mb4_general_ci not null comment 'The specific value corresponding to the variable',
+  `variable_name` varchar(100) collate utf8mb4_general_ci not null comment 'The name of the variable is used for simple display and for searching',
+  `description` text collate utf8mb4_general_ci default null comment 'More detailed description of variables, only for display, not involved in program logic',
+  `creator` bigint collate utf8mb4_general_ci not null comment 'user_id of creator',
   `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',

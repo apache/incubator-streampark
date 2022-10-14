@@ -613,9 +613,9 @@ create sequence "public"."streampark_t_variable_id_seq"
 create table "public"."t_variable" (
   "id" int8 not null default nextval('streampark_t_variable_id_seq'::regclass),
   "variable_code" varchar(100) collate "pg_catalog"."default" not null,
-  "variable_value" varchar(1024) collate "pg_catalog"."default" not null,
+  "variable_value" text collate "pg_catalog"."default" not null,
   "variable_name" varchar(100) collate "pg_catalog"."default" not null,
-  "description" varchar(100) collate "pg_catalog"."default" default null,
+  "description" text collate "pg_catalog"."default" default null,
   "creator" int8 collate "pg_catalog"."default" not null,
   "team_id" int8 collate "pg_catalog"."default" not null,
   "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
@@ -623,11 +623,11 @@ create table "public"."t_variable" (
 )
 ;
 comment on column "public"."t_variable"."id" is 'variable id';
-comment on column "public"."t_variable"."variable_code" is 'variable code';
-comment on column "public"."t_variable"."variable_value" is 'variable value';
-comment on column "public"."t_variable"."variable_name" is 'variable name';
-comment on column "public"."t_variable"."description" is 'description';
-comment on column "public"."t_variable"."creator" is 'creator';
+comment on column "public"."t_variable"."variable_code" is 'Variable code is used for parameter names passed to the program or as placeholders';
+comment on column "public"."t_variable"."variable_value" is 'The specific value corresponding to the variable';
+comment on column "public"."t_variable"."variable_name" is 'The name of the variable is used for simple display and for searching';
+comment on column "public"."t_variable"."description" is 'More detailed description of variables, only for display, not involved in program logic';
+comment on column "public"."t_variable"."creator" is 'user_id of creator';
 comment on column "public"."t_variable"."team_id" is 'team id';
 comment on column "public"."t_variable"."create_time" is 'creation time';
 comment on column "public"."t_variable"."modify_time" is 'modify time';
