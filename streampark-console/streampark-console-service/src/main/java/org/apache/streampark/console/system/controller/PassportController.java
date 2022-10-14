@@ -129,6 +129,7 @@ public class PassportController {
             Date date = new Date();
             user2.setCreateTime(date);
             user2.setModifyTime(date);
+            user2.setTeamId(100000L);
             userService.createUser(user2);
             username = user2.getUsername();
             password = user2.getPassword();
