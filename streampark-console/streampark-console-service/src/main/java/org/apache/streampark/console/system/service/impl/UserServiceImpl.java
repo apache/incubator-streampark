@@ -21,6 +21,8 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Menu;
 import org.apache.streampark.console.system.entity.Team;
@@ -55,6 +57,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private CommonService commonService;
 
     @Autowired
     private MenuService menuService;
@@ -200,6 +205,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public List<User> findByTeam(Long teamId) {
+        User user = commonService.getCurrentUser();
+        if (UserType.ADMIN.equals(user.getUserType())) {
+            return this.list();
+        }
         return baseMapper.findByTeam(teamId);
     }
 

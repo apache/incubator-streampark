@@ -19,7 +19,7 @@
 -- Records of t_team
 -- ----------------------------
 insert into `t_team` values (100000, 'default', 'The default team', now(), now());
-insert into `t_team` values (100001, 'test_team1', 'The test team1', now(), now());
+insert into `t_team` values (100001, 'test', 'The test team', now(), now());
 
 
 -- ----------------------------
@@ -152,14 +152,14 @@ insert into `t_setting` values (15, 'docker.register.namespace', null, 'Namespac
 -- Records of t_user
 -- ----------------------------
 insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, null, '1', now(), now(),null,'0',null,null);
-insert into `t_user` values (100001, 'test_user1', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, null, '1', now(), now(),null,'0',null,null);
-insert into `t_user` values (100002, 'test_user2', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, null, '1', now(), now(),null,'0',null,null);
-insert into `t_user` values (100003, 'test_user3', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, null, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100001, 'test1', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, null, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100002, 'test2', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, null, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100003, 'test3', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, null, '1', now(), now(),null,'0',null,null);
 
 -- ----------------------------
 -- Records of t_member
 -- ----------------------------
 insert into `t_member` values (100000, 100000, 100001, 100001, now(), now()); -- test_user1 is the developer of the default team
-insert into `t_member` values (100001, 100001, 100001, 100001, now(), now()); -- test_user1 is the developer of the test_team1 team
-insert into `t_member` values (100002, 100000, 100002, 100001, now(), now()); -- test_user2 is the developer of the test_team1 team
-insert into `t_member` values (100003, 100001, 100003, 100001, now(), now()); -- test_user3 is the developer of the test_team1 team
+insert into `t_member` values (100001, 100001, 100001, 100001, now(), now()); -- test_user1 is the developer of the test team
+insert into `t_member` values (100002, 100000, 100002, 100001, now(), now()); -- test_user2 is the developer of the test team
+insert into `t_member` values (100003, 100001, 100003, 100001, now(), now()); -- test_user3 is the developer of the test team
