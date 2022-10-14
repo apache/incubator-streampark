@@ -23,8 +23,7 @@ import static org.apache.streampark.console.core.enums.Status.NOT_SUPPORTED_REQU
 import static org.apache.streampark.console.core.enums.Status.REQUEST_PARAMS_NOT_VALID_ERROR;
 
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.base.exception.InternalException;
+import org.apache.streampark.console.base.exception.AbstractApiException;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
@@ -59,13 +58,6 @@ public class GlobalExceptionHandler {
         return RestResponse.fail(INTERNAL_SERVER_ERROR_ARGS, e.getMessage());
     }
 
-    @ExceptionHandler(value = InternalException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public RestResponse handleParamsInvalidException(InternalException e) {
-        log.info("Internal server error：{}", e.getMessage());
-        return RestResponse.fail(INTERNAL_SERVER_ERROR_ARGS, e.getMessage());
-    }
-
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
@@ -73,9 +65,9 @@ public class GlobalExceptionHandler {
         return RestResponse.fail(NOT_SUPPORTED_REQUEST_METHOD, e.getMessage());
     }
 
-    @ExceptionHandler(value = ApiAlertException.class)
+    @ExceptionHandler(value = AbstractApiException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public RestResponse handleException(ApiAlertException e) {
+    public RestResponse handleException(AbstractApiException e) {
         log.info("api exception：{}", e.getMessage());
         return RestResponse.fail(API_FAIL, e.getMessage());
     }
