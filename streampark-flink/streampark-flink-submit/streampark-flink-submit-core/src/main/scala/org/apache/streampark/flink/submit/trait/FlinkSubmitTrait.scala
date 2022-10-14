@@ -105,6 +105,9 @@ trait FlinkSubmitTrait extends Logger {
     val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
     flinkConfig.set(retainedOption, flinkDefaultConfiguration.get(retainedOption))
 
+    //set savepoint.ignore-unclaimed-state parameter
+    flinkConfig.setBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, submitRequest.savepointRestoreSettings.allowNonRestoredState())
+
     setConfig(submitRequest, flinkConfig)
 
     doSubmit(submitRequest, flinkConfig)
