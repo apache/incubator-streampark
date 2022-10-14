@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.security.impl;
 
 import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
 import org.apache.streampark.console.system.security.impl.ldap.LdapService;

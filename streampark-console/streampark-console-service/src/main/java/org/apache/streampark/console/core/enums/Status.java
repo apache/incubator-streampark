@@ -27,7 +27,6 @@ public enum Status {
     SUCCESS(0, "success"),
 
     INTERNAL_SERVER_ERROR_ARGS(10000, "Internal Server Error: {0}"),
-
     USER_CURRENTLY_LOCKED(10002, "user is currently locked"),
     USER_NAME_EXIST(10003, "user name already exists"),
     USER_NAME_NULL(10004, "user name is null"),
@@ -36,7 +35,9 @@ public enum Status {
     API_FAIL(10007, "API Invoke exception：{0}"),
     REQUEST_PARAMS_NOT_VALID_ERROR(10007, "request parameter {0} is not valid"),
     READ_BUILD_LOG_EXECPTION(10008, "read build log exception: {0}"),
-    ACCESSTOKEN_COULD_NOT_FOUND(10009, "accesstoken_could_not_found");
+    ACCESSTOKEN_COULD_NOT_FOUND(10009, "accesstoken_could_not_found"),
+    TEAMID_INVALID(10010, "teamId is invalid");
+
     private final int code;
     private final String enMsg;
 

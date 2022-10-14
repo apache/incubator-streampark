@@ -17,7 +17,8 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.console.base.domain.ResponseCode;
+import static org.apache.streampark.console.core.enums.Status.TEAMID_INVALID;
+
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.util.ShaHashUtils;
@@ -170,7 +171,7 @@ public class UserController {
     public RestResponse initTeam(Long teamId, Long userId) {
         Team team = teamService.getById(teamId);
         if (team == null) {
-            return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
+            return RestResponse.fail(TEAMID_INVALID);
         }
         userService.setLatestTeam(teamId, userId);
         return RestResponse.success();
@@ -180,7 +181,7 @@ public class UserController {
     public RestResponse setTeam(Long teamId) {
         Team team = teamService.getById(teamId);
         if (team == null) {
-            return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
+            return RestResponse.fail(TEAMID_INVALID);
         }
 
         User user = commonService.getCurrentUser();
