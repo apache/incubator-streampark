@@ -78,7 +78,7 @@ http.interceptors.request.use(config => {
       }
     }
     const teamId = sessionStorage.getItem(TEAM_ID)
-    if (data['teamId'] == null && teamId) {
+    if (teamId) {
       data['teamId'] = teamId
     }
     if (config.method === 'get') {

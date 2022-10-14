@@ -23,6 +23,7 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.User;
@@ -33,15 +34,19 @@ import org.apache.streampark.console.system.service.UserService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.casbin.casdoor.entity.CasdoorUser;
+import org.casbin.casdoor.service.CasdoorAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +67,9 @@ public class PassportController {
 
     @Autowired
     private Authenticator authenticator;
+
+    @Resource
+    private CasdoorAuthService casdoorAuthService;
 
     @PostMapping("signin")
     public RestResponse signin(
@@ -96,6 +104,45 @@ public class PassportController {
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
         String expireTimeStr = DateUtils.formatFullTime(expireTime);
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
+        String userId = RandomStringUtils.randomAlphanumeric(20);
+        user.setId(userId);
+        Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
+        return new RestResponse().data(userInfo);
+    }
+
+    @PostMapping("signinbycasdoor")
+    public RestResponse signinByCasdoor(@NotBlank(message = "{required}") String code,
+                                        @NotBlank(message = "{required}") String state) throws Exception {
+        String token = "";
+        String username = "";
+        String password = "";
+        token = casdoorAuthService.getOAuthToken(code, state);
+        CasdoorUser casdoorUser = casdoorAuthService.parseJwtToken(token);
+        User user = userService.findByName(casdoorUser.getName());
+        if (user == null) {
+            User user2 = new User();
+            user2.setUsername(casdoorUser.getName());
+            user2.setNickName(casdoorUser.getDisplayName());
+            user2.setPassword(casdoorUser.getPassword());
+            user2.setUserType(UserType.ADMIN);
+            user2.setStatus("1");
+            Date date = new Date();
+            user2.setCreateTime(date);
+            user2.setModifyTime(date);
+            userService.createUser(user2);
+            username = user2.getUsername();
+            password = user2.getPassword();
+            user = user2;
+        } else {
+            username = user.getUsername();
+            password = user.getPassword();
+        }
+
+        this.userService.updateLoginTime(username);
+        String token2 = WebUtils.encryptToken(JWTUtil.sign(username, password));
+        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
+        String expireTimeStr = DateUtils.formatFullTime(expireTime);
+        JWTToken jwtToken = new JWTToken(token2, expireTimeStr);
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
         Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);

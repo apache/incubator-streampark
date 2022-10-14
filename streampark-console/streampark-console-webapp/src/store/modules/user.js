@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { signin, signout } from '@/api/passport'
+import { signin, signout ,signinbycasdoor} from '@/api/passport'
 import { setTeam, initTeam } from '@/api/user'
 import {TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO, USER_NAME, USER_ROUTER, INVALID, TEAM_ID} from '@/store/mutation-types'
 import storage from '@/utils/storage'
@@ -114,7 +114,24 @@ const user = {
         })
       })
     },
-
+    SignInByCasdoor({commit},userInfo){
+      return new Promise((resolve,reject)=>{
+        signinbycasdoor(userInfo).then(response => {
+          const respData = response.data
+          if (respData != null && respData.token) {
+            commit('SET_EXPIRE', respData.expire)
+            commit('SET_TOKEN', respData.token)
+            commit('SET_ROLES', respData.roles)
+            commit('SET_PERMISSIONS', respData.permissions)
+            commit('SET_INFO', respData.user)
+          }
+          storage.rm(INVALID)
+          resolve(response)
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    },
     GetRouter ({ commit }, data) {
       return new Promise((resolve, reject) => {
         getRouter({}).then(resp => {

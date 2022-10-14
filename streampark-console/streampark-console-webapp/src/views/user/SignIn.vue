@@ -86,6 +86,21 @@
             </a-button>
           </a-form-item>
         </a-form>
+        <a-form-item
+          style="margin-top:40px">
+          <a-button
+            style="padding: 0 90px"
+            size="large"
+            type="primary"
+            html-type="button"
+            class="signin-button"
+            href="http://localhost:7001/login/oauth/authorize?client_id=b6f7a3bdee5d3f424ee2&response_type=code&redirect_uri=http://localhost:10003&scope=read&state=app-test"
+            :loading="state.loginBtn"
+            :disabled="state.loginBtn">
+            Sign in with casdoor
+          </a-button>
+        </a-form-item>
+
       </div>
 
       <div class="footer">
@@ -180,6 +195,10 @@ export default {
         time: 60,
         loginBtn: false
       },
+      c_data:{
+        c_code:'',
+        c_state:''
+      },
       loginInfo: {},
       teamList: [],
       teamId: null,
@@ -187,6 +206,41 @@ export default {
       teamVisible: false,
       year: new Date().getFullYear()
     }
+  },
+
+  watch: {
+    $route: {
+      handler: function(route) {
+      const {
+        state,
+        SignInByCasdoor
+      }=this
+      const url = window.document.location.href
+      const u = new URL(url)
+      this.c_data.c_code = u.searchParams.get('code')
+      this.c_data.c_state = u.searchParams.get('state')
+      if(this.c_data.c_code!=null&&this.c_data.c_state!=null){
+      SignInByCasdoor({
+        code : this.c_data.c_code ,
+        state : this.c_data.c_state
+      })
+      .then(resp => {
+            if (resp.code != null) {
+              const message = 'SignIn failed,' + (resp.code === 0 ? ' authentication error' : ' current User is locked.')
+               this.$message.error(message)
+            } else {
+              this.$router.push({path: '/'})
+            }
+           })
+          .catch(err => console.log(err))
+          .finally(() => {
+            state.loginBtn = false
+          })
+      }
+      },
+      immediate: true
+    }
+
   },
 
   mounted() {
@@ -200,7 +254,7 @@ export default {
 
   methods: {
 
-    ...mapActions(['SignIn', 'SetTeam']),
+    ...mapActions(['SignIn', 'SetTeam','SignInByCasdoor']),
 
     handleSubmit() {
       arguments[0] && arguments[0].preventDefault()

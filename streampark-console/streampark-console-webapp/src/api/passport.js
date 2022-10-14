@@ -24,3 +24,7 @@ export function signin (parameter) {
 export function signout () {
   return http.post(api.Passport.SIGN_OUT)
 }
+
+export function signinbycasdoor(parameter){
+  return http.post(api.Passport.SIGN_IN_CASDOOR,parameter)
+}

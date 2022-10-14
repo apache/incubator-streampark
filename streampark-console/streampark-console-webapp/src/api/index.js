@@ -18,7 +18,8 @@
 export default {
   Passport: {
     SIGN_IN: '/passport/signin',
-    SIGN_OUT: '/passport/signout'
+    SIGN_OUT: '/passport/signout',
+    SIGN_IN_CASDOOR:'/passport/signinbycasdoor'
   },
   Project: {
     BRANCHES: '/flink/project/branches',
