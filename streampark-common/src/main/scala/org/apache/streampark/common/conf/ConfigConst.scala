@@ -19,6 +19,14 @@ package org.apache.streampark.common.conf
 import java.time.LocalDateTime
 
 object ConfigConst {
+
+  /**
+   * common const
+   *
+   */
+
+  val DEFAULT_DATAMASK_STRING = "********"
+
   /**
    *
    * about parameter...

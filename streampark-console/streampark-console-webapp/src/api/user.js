@@ -69,3 +69,7 @@ export function setTeam(queryParam) {
 export function initTeam(queryParam) {
   return http.post(api.User.INIT_TEAM, queryParam)
 }
+
+export function appOwners(queryParam) {
+  return http.post(api.User.APP_OWNERS, queryParam)
+}

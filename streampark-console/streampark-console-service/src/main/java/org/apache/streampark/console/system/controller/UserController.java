@@ -189,8 +189,7 @@ public class UserController {
         userService.setLatestTeam(teamId, user.getUserId());
 
         //2) get latest userInfo
-        user.setPassword("******");
-        user.setSalt("******");
+        user.dataMasking();
 
         Map<String, Object> infoMap = new HashMap<>(8);
         infoMap.put("user", user);
@@ -203,6 +202,13 @@ public class UserController {
         infoMap.put("permissions", permissions);
 
         return new RestResponse().data(infoMap);
+    }
+
+    @PostMapping("appOwners")
+    public RestResponse appOnwers(Long teamId) {
+        List<User> userList = userService.findByAppOwner(teamId);
+        userList.forEach((u) -> u.dataMasking());
+        return RestResponse.success(userList);
     }
 
 }
