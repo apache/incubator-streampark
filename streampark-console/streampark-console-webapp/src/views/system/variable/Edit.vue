@@ -102,7 +102,7 @@ export default {
 
     setFormValues ({ ...variable }) {
       this.id = variable.id
-      const fields = ['variableCode', 'variableValue', 'Description']
+      const fields = ['variableCode', 'variableValue', 'description']
       Object.keys(variable).forEach((key) => {
         if (fields.indexOf(key) !== -1) {
           this.form.getFieldDecorator(key)

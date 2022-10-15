@@ -63,7 +63,7 @@ public class VariableController {
     @PutMapping("update")
     @RequiresPermissions("variable:update")
     public RestResponse updateVariable(@Valid Variable variable) throws Exception {
-        this.variableService.updateVariable(variable);
+        this.variableService.updateById(variable);
         return RestResponse.success();
     }
 

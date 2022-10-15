@@ -69,31 +69,12 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     }
 
     @Override
-    public void updateVariable(Variable variable) throws Exception {
-        Variable findVariable = this.findByVariableCode(variable.getTeamId(), variable.getVariableCode());
-        if (findVariable == null) {
-            throw new ApiAlertException("Sorry, the variable code already exists.");
-        }
-        if (findVariable.getId().longValue() != variable.getId().longValue()) {
-            throw new ApiAlertException("Sorry, the variable id is inconsistent.");
-        }
-        updateById(variable);
-    }
-
-    @Override
     public void deleteVariable(Variable variable) throws Exception {
-        Variable findVariable = this.findByVariableCode(variable.getTeamId(), variable.getVariableCode());
-        if (findVariable == null) {
-            throw new ApiAlertException("Sorry, the variable code already exists.");
-        }
-        if (findVariable.getId().longValue() != variable.getId().longValue()) {
-            throw new ApiAlertException("Sorry, the variable id is inconsistent.");
-        }
         List<Application> dependApplications = this.findDependByCode(variable);
         if (!(dependApplications == null || dependApplications.isEmpty())) {
             throw new ApiAlertException(String.format("Sorry, this variable is being used by [%s] applications.", dependApplications.size()));
         }
-        this.removeById(findVariable.getId());
+        this.removeById(variable.getId());
     }
 
     @Override

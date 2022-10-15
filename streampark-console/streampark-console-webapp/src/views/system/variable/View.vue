@@ -192,9 +192,7 @@ export default {
       filteredInfo = filteredInfo || {}
       return [{
         title: 'Variable Code',
-        dataIndex: 'variableCode',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'variableCode' && sortedInfo.order
+        dataIndex: 'variableCode'
       }, {
         title: 'Variable Value',
         dataIndex: 'variableValue'
@@ -330,6 +328,10 @@ export default {
 
       if (params.sortField === 'createTime') {
         params.sortField = 'create_time'
+      }
+
+      if (params.sortField === 'modifyTime') {
+        params.sortField = 'modify_time'
       }
 
       list({ ...params }).then((resp) => {

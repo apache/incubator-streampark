@@ -58,13 +58,6 @@ public interface VariableService extends IService<Variable> {
      */
     void deleteVariable(Variable variable) throws Exception;
 
-    /**
-     * update variable
-     *
-     * @param variable variable
-     */
-    void updateVariable(Variable variable) throws Exception;
-
     Variable findByVariableCode(Long teamId, String variableCode);
 
     boolean isExists(Variable variable);
