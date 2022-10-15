@@ -162,6 +162,37 @@ delete from t_role_menu where role_id = 100000;
 delete from t_role where role_id = 100000;
 delete from `t_user_role` where role_id = 100000;
 
+-- Add team admin
+insert into `t_role` values (100002, 'team admin', 'Team Admin has all permissions inside the team.', now(), now(), null);
+
+insert into `t_role_menu` values (100060, 100002, 100014);
+insert into `t_role_menu` values (100061, 100002, 100016);
+insert into `t_role_menu` values (100062, 100002, 100017);
+insert into `t_role_menu` values (100063, 100002, 100018);
+insert into `t_role_menu` values (100064, 100002, 100019);
+insert into `t_role_menu` values (100065, 100002, 100020);
+insert into `t_role_menu` values (100066, 100002, 100021);
+insert into `t_role_menu` values (100067, 100002, 100022);
+insert into `t_role_menu` values (100068, 100002, 100025);
+insert into `t_role_menu` values (100069, 100002, 100026);
+insert into `t_role_menu` values (100070, 100002, 100027);
+insert into `t_role_menu` values (100071, 100002, 100028);
+insert into `t_role_menu` values (100072, 100002, 100029);
+insert into `t_role_menu` values (100073, 100002, 100030);
+insert into `t_role_menu` values (100074, 100002, 100031);
+insert into `t_role_menu` values (100075, 100002, 100032);
+insert into `t_role_menu` values (100076, 100002, 100033);
+insert into `t_role_menu` values (100077, 100002, 100013);
+insert into `t_role_menu` values (100079, 100002, 100015);
+insert into `t_role_menu` values (100080, 100002, 100000);
+insert into `t_role_menu` values (100081, 100002, 100037);
+insert into `t_role_menu` values (100082, 100002, 100048);
+insert into `t_role_menu` values (100083, 100002, 100049);
+insert into `t_role_menu` values (100084, 100002, 100050);
+insert into `t_role_menu` values (100085, 100002, 100051);
+insert into `t_role_menu` values (100086, 100002, 100052);
+insert into `t_role_menu` values (100087, 100002, 100053);
+
 -- alter t_role_user to t_member and update the schema
 alter table `t_user_role` rename `t_member`;
 
