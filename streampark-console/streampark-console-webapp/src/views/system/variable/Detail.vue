@@ -38,10 +38,7 @@
           <a-icon type="down-circle" />Variable Value：<br>{{ data.variableValue }}
         </p>
         <p>
-          <a-icon type="user" />Create User：{{ data.userName }}
-        </p>
-        <p>
-          <a-icon type="team" />Team：{{ data.teamName }}
+          <a-icon type="user" />Create User：{{ data.creatorName }}
         </p>
         <p>
           <a-icon type="clock-circle" />Create Time：{{ data.createTime }}

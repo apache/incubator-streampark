@@ -50,12 +50,10 @@ public class Variable implements Serializable {
 
     private Long creator;
 
-    private transient String userName;
+    private transient String creatorName;
 
     @NotNull(message = "{required}")
     private Long teamId;
-
-    private transient String teamName;
 
     private transient Date createTime;
 

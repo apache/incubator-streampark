@@ -108,7 +108,6 @@
         slot-scope="text, record">
         <svg-icon
           v-permit="'variable:update'"
-          v-if="(record.username !== 'admin' || userName === 'admin')"
           name="edit"
           border
           @click.native="handleEdit(record)"
@@ -120,7 +119,6 @@
           title="view" />
         <a-popconfirm
           v-permit="'variable:delete'"
-          v-if="record.username !== 'admin'"
           title="Are you sure delete this variable ?"
           cancel-text="No"
           ok-text="Yes"

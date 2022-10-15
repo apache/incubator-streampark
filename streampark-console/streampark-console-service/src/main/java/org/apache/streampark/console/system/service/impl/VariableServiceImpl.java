@@ -18,8 +18,10 @@
 package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Variable;
 import org.apache.streampark.console.system.mapper.VariableMapper;
 import org.apache.streampark.console.system.service.VariableService;
@@ -45,9 +47,16 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     @Autowired
     private ApplicationService applicationService;
 
+    @Autowired
+    private CommonService commonService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void createVariable(Variable variable) throws Exception {
+        if (isExists(variable)) {
+            throw new ApiAlertException("Sorry, the variable code already exists.");
+        }
+        variable.setCreator(commonService.getCurrentUser().getUserId());
         this.save(variable);
     }
 
@@ -61,7 +70,30 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
 
     @Override
     public void updateVariable(Variable variable) throws Exception {
+        Variable findVariable = this.findByVariableCode(variable.getTeamId(), variable.getVariableCode());
+        if (findVariable == null) {
+            throw new ApiAlertException("Sorry, the variable code already exists.");
+        }
+        if (findVariable.getId().longValue() != variable.getId().longValue()) {
+            throw new ApiAlertException("Sorry, the variable id is inconsistent.");
+        }
         updateById(variable);
+    }
+
+    @Override
+    public void deleteVariable(Variable variable) throws Exception {
+        Variable findVariable = this.findByVariableCode(variable.getTeamId(), variable.getVariableCode());
+        if (findVariable == null) {
+            throw new ApiAlertException("Sorry, the variable code already exists.");
+        }
+        if (findVariable.getId().longValue() != variable.getId().longValue()) {
+            throw new ApiAlertException("Sorry, the variable id is inconsistent.");
+        }
+        List<Application> dependApplications = this.findDependByCode(variable);
+        if (!(dependApplications == null || dependApplications.isEmpty())) {
+            throw new ApiAlertException(String.format("Sorry, this variable is being used by [%s] applications.", dependApplications.size()));
+        }
+        this.removeById(findVariable.getId());
     }
 
     @Override
@@ -77,6 +109,10 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     }
 
     @Override
+    public boolean isExists(Variable variable) {
+        return this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null;
+    }
+
     @SneakyThrows
     public List<Application> findDependByCode(Variable variable) {
         return null;

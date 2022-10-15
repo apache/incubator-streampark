@@ -19,9 +19,6 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Variable;
 import org.apache.streampark.console.system.service.VariableService;
 
@@ -40,16 +37,11 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
-import java.util.List;
-
 @Slf4j
 @Validated
 @RestController
 @RequestMapping("variable")
 public class VariableController {
-
-    @Autowired
-    private CommonService commonService;
 
     @Autowired
     private VariableService variableService;
@@ -64,11 +56,6 @@ public class VariableController {
     @PostMapping("post")
     @RequiresPermissions("variable:add")
     public RestResponse addVariable(@Valid Variable variable) throws Exception {
-        boolean isExists = this.variableService.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null;
-        if (isExists) {
-            throw new ApiAlertException("Sorry, the variable code already exists.");
-        }
-        variable.setCreator(commonService.getCurrentUser().getUserId());
         this.variableService.createVariable(variable);
         return RestResponse.success();
     }
@@ -76,32 +63,14 @@ public class VariableController {
     @PutMapping("update")
     @RequiresPermissions("variable:update")
     public RestResponse updateVariable(@Valid Variable variable) throws Exception {
-        Variable findVariable = this.variableService.findByVariableCode(variable.getTeamId(), variable.getVariableCode());
-        if (findVariable == null) {
-            throw new ApiAlertException("Sorry, the variable does not exist.");
-        }
-        if (findVariable.getId().longValue() != variable.getId().longValue()) {
-            throw new ApiAlertException("Sorry, the variable id is inconsistent.");
-        }
         this.variableService.updateVariable(variable);
         return RestResponse.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("variable:delete")
-    public RestResponse deleteVariables(@Valid Variable variable) {
-        Variable findVariable = this.variableService.findByVariableCode(variable.getTeamId(), variable.getVariableCode());
-        if (findVariable == null) {
-            throw new ApiAlertException("Sorry, the variable does not exist.");
-        }
-        if (findVariable.getId().longValue() != variable.getId().longValue()) {
-            throw new ApiAlertException("Sorry, the variable id is inconsistent.");
-        }
-        List<Application> dependApps = this.variableService.findDependByCode(variable);
-        if (!(dependApps == null || dependApps.isEmpty())) {
-            throw new ApiAlertException(String.format("Sorry, this variable is being used by [%s] applications.", dependApps.size()));
-        }
-        this.variableService.removeById(findVariable.getId());
+    public RestResponse deleteVariables(@Valid Variable variable) throws Exception {
+        this.variableService.deleteVariable(variable);
         return RestResponse.success();
     }
 
