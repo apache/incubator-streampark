@@ -18,7 +18,6 @@
 package org.apache.streampark.console.system.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.system.entity.Variable;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
