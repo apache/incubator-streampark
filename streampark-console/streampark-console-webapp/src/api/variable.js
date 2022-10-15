@@ -26,10 +26,6 @@ export function update (queryParam) {
   return http.put(api.Variable.UPDATE, queryParam)
 }
 
-export function get (queryParam) {
-  return http.get(api.Variable.GET, queryParam)
-}
-
 export function checkVariableCode (queryParam) {
   return http.post(api.Variable.CHECK_CODE, queryParam)
 }

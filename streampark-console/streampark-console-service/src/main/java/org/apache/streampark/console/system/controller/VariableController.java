@@ -70,7 +70,7 @@ public class VariableController {
     @DeleteMapping("delete")
     @RequiresPermissions("variable:delete")
     public RestResponse deleteVariables(@Valid Variable variable) throws Exception {
-        this.variableService.deleteVariable(variable);
+        this.variableService.removeById(variable);
         return RestResponse.success();
     }
 

@@ -212,7 +212,6 @@ export default {
   Variable: {
     LIST: '/variable/list',
     UPDATE: '/variable/update',
-    GET: '/variable/get',
     POST: '/variable/post',
     DELETE: '/variable/delete',
     SELECT: '/variable/select',

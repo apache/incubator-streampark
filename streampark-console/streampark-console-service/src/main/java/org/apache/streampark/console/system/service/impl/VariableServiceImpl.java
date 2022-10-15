@@ -53,7 +53,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void createVariable(Variable variable) throws Exception {
-        if (isExists(variable)) {
+        if (this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null) {
             throw new ApiAlertException("Sorry, the variable code already exists.");
         }
         variable.setCreator(commonService.getCurrentUser().getUserId());
@@ -69,15 +69,6 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     }
 
     @Override
-    public void deleteVariable(Variable variable) throws Exception {
-        List<Application> dependApplications = this.findDependByCode(variable);
-        if (!(dependApplications == null || dependApplications.isEmpty())) {
-            throw new ApiAlertException(String.format("Sorry, this variable is being used by [%s] applications.", dependApplications.size()));
-        }
-        this.removeById(variable.getId());
-    }
-
-    @Override
     public Variable findByVariableCode(Long teamId, String variableCode) {
         return baseMapper.selectOne(new LambdaQueryWrapper<Variable>()
             .eq(Variable::getVariableCode, variableCode)
@@ -87,15 +78,5 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     @Override
     public List<Variable> findByTeamId(Long teamId) {
         return baseMapper.selectByTeamId(teamId);
-    }
-
-    @Override
-    public boolean isExists(Variable variable) {
-        return this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null;
-    }
-
-    @SneakyThrows
-    public List<Application> findDependByCode(Variable variable) {
-        return null;
     }
 }
