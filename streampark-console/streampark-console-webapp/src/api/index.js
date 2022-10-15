@@ -216,9 +216,7 @@ export default {
     POST: '/variable/post',
     DELETE: '/variable/delete',
     SELECT: '/variable/select',
-    CHECK_CODE: '/variable/check/code',
-    CHECK_ADD_NAME: '/variable/check/addName',
-    CHECK_UPDATE_NAME: '/variable/check/updateName',
+    CHECK_CODE: '/variable/check/code'
   },
   Log: {
     LIST: '/log/list',

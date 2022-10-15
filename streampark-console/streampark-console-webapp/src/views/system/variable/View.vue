@@ -42,11 +42,11 @@
               :md="8"
               :sm="24">
               <a-form-item
-                label="Variable Name"
+                label="Description"
                 :label-col="{span: 4}"
                 :wrapper-col="{span: 18, offset: 2}">
                 <a-input
-                  v-model="queryParams.variableName" />
+                  v-model="queryParams.description" />
               </a-form-item>
             </a-col>
           </div>
@@ -201,8 +201,8 @@ export default {
         title: 'Variable Value',
         dataIndex: 'variableValue'
       }, {
-        title: 'Variable Name',
-        dataIndex: 'variableName'
+        title: 'Description',
+        dataIndex: 'description'
       }, {
         title: 'Create Time',
         dataIndex: 'createTime',
@@ -261,8 +261,7 @@ export default {
         id: record.id,
         teamId : record.teamId,
         variableCode : record.variableCode,
-        variableValue : record.variableValue,
-        variableName : record.variableName
+        variableValue : record.variableValue
       }).then((resp) => {
         if (resp.status === 'success') {
           this.$message.success('delete successful')

@@ -38,9 +38,6 @@
           <a-icon type="down-circle" />Variable Value：<br>{{ data.variableValue }}
         </p>
         <p>
-          <a-icon type="message" />Variable Name：{{ data.variableName }}
-        </p>
-        <p>
           <a-icon type="user" />Create User：{{ data.userName }}
         </p>
         <p>

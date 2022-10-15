@@ -60,7 +60,5 @@ public interface VariableService extends IService<Variable> {
 
     Variable findByVariableCode(Long teamId, String variableCode);
 
-    Variable findByVariableName(Long teamId, String variableName);
-
     List<Application> findDependByCode(Variable variable);
 }

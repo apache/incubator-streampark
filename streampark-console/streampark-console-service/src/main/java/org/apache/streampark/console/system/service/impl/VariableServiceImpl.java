@@ -72,13 +72,6 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     }
 
     @Override
-    public Variable findByVariableName(Long teamId, String variableName) {
-        return baseMapper.selectOne(new LambdaQueryWrapper<Variable>()
-            .eq(Variable::getVariableName, variableName)
-            .eq(Variable::getTeamId, teamId));
-    }
-
-    @Override
     public List<Variable> findByTeamId(Long teamId) {
         return baseMapper.selectByTeamId(teamId);
     }

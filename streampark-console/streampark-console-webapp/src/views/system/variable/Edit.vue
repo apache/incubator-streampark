@@ -46,15 +46,6 @@
           v-decorator="['variableValue', {rules: [{ required: true }]}]" />
       </a-form-item>
       <a-form-item
-        label="Variable Name"
-        v-bind="formItemLayout"
-        :validate-status="validateStatus"
-        :help="help">
-        <a-input
-          @blur="handleVariableNameBlur"
-          v-decorator="['variableName', {rules: [{ required: true }]}]" />
-      </a-form-item>
-      <a-form-item
         label="Description"
         v-bind="formItemLayout">
         <a-textarea
@@ -78,7 +69,7 @@
   </a-drawer>
 </template>
 <script>
-import { update, checkUpdateVariableName } from '@/api/variable'
+import { update } from '@/api/variable'
 
 const formItemLayout = {
   labelCol: { span: 4 },
@@ -111,7 +102,7 @@ export default {
 
     setFormValues ({ ...variable }) {
       this.id = variable.id
-      const fields = ['variableCode', 'variableValue', 'variableName', 'Description']
+      const fields = ['variableCode', 'variableValue', 'Description']
       Object.keys(variable).forEach((key) => {
         if (fields.indexOf(key) !== -1) {
           this.form.getFieldDecorator(key)
@@ -120,31 +111,6 @@ export default {
           this.form.setFieldsValue(obj)
         }
       })
-    },
-
-    handleVariableNameBlur () {
-      const variable = this.form.getFieldsValue()
-      variable.id = this.id
-      if (variable.variableName.length) {
-        if (variable.variableName.length > 100) {
-          this.validateStatus = 'error'
-          this.help = 'Variable Name should not be longer than 100 characters'
-        } else {
-          this.validateStatus = 'validating'
-          checkUpdateVariableName(variable).then((resp) => {
-            if (resp.data) {
-              this.validateStatus = 'success'
-              this.help = ''
-            } else {
-              this.validateStatus = 'error'
-              this.help = 'Sorry, the Variable Name already exists'
-            }
-          })
-        }
-      } else {
-        this.validateStatus = 'error'
-        this.help = 'Variable Name cannot be empty'
-      }
     },
 
     handleSubmit () {

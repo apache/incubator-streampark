@@ -68,10 +68,6 @@ public class VariableController {
         if (isExists) {
             throw new ApiAlertException("Sorry, the variable code already exists.");
         }
-        isExists = this.variableService.findByVariableName(variable.getTeamId(), variable.getVariableName()) != null;
-        if (isExists) {
-            throw new ApiAlertException("Sorry, the variable name already exists.");
-        }
         variable.setCreator(commonService.getCurrentUser().getUserId());
         this.variableService.createVariable(variable);
         return RestResponse.success();
@@ -113,32 +109,6 @@ public class VariableController {
     public RestResponse checkVariableCode(@RequestParam Long teamId, @NotBlank(message = "{required}") String variableCode) {
         boolean result = this.variableService.findByVariableCode(teamId, variableCode) == null;
         return RestResponse.success(result);
-    }
-
-    /**
-     * Check variable name when adding variable
-     * @param teamId
-     * @param variableName
-     * @return
-     */
-    @PostMapping("check/addName")
-    public RestResponse checkVariableNameForAdd(@RequestParam Long teamId, @NotBlank(message = "{required}") String variableName) {
-        boolean result = this.variableService.findByVariableName(teamId, variableName) == null;
-        return RestResponse.success(result);
-    }
-
-    /**
-     * Check variable names when updating
-     * @param variable
-     * @return
-     */
-    @PostMapping("check/updateName")
-    public RestResponse checkVariableNameForUpdate(@Valid Variable variable) {
-        Variable findVariable = this.variableService.findByVariableName(variable.getTeamId(), variable.getVariableName());
-        if (findVariable == null || findVariable.getId().longValue() == variable.getId().longValue()) {
-            return RestResponse.success(true);
-        }
-        return RestResponse.success(false);
     }
 
     @PostMapping("select")

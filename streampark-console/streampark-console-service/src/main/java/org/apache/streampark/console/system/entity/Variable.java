@@ -42,10 +42,8 @@ public class Variable implements Serializable {
     private String variableCode;
 
     @NotBlank(message = "{required}")
+    @Size(max = 50, message = "{noMoreThan}")
     private String variableValue;
-
-    @NotBlank(message = "{required}")
-    private String variableName;
 
     @Size(max = 100, message = "{noMoreThan}")
     private String description;

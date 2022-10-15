@@ -39,7 +39,7 @@
         :help="help">
         <a-input
           @blur="handleVariableCodeBlur"
-          v-decorator="['variableCode', {rules: [{ required: true}]}]" />
+          v-decorator="['variableCode', {rules: [{ required: true, max: 50, message: 'please enter Variable Code'}]}]" />
       </a-form-item>
       <a-form-item
         label="Variable Value"
@@ -47,16 +47,7 @@
         <a-textarea
           rows="4"
           placeholder="Please enter Variable Value"
-          v-decorator="['variableValue', {rules: [{ required: true, message: 'please enter Variable Value' }]}]" />
-      </a-form-item>
-      <a-form-item
-        label="Variable Name"
-        v-bind="formItemLayout"
-        :validate-status="validateStatus"
-        :help="help">
-        <a-input
-          @blur="handleVariableNameBlur"
-          v-decorator="['variableName', {rules: [{ required: true }]}]" />
+          v-decorator="['variableValue', {rules: [{ required: true, max: 100, message: 'please enter Variable Value' }]}]" />
       </a-form-item>
       <a-form-item
         label="Description"
@@ -83,7 +74,7 @@
   </a-drawer>
 </template>
 <script>
-import { post, checkVariableCode, checkAddVariableName } from '@/api/variable'
+import { post, checkVariableCode } from '@/api/variable'
 
 const formItemLayout = {
   labelCol: { span: 4 },
@@ -156,31 +147,6 @@ export default {
       } else {
         this.validateStatus = 'error'
         this.help = 'Variable Code cannot be empty'
-      }
-    },
-    handleVariableNameBlur (e) {
-      const variableName = (e && e.target.value) || ''
-      if (variableName.length) {
-        if (variableName.length > 100) {
-          this.validateStatus = 'error'
-          this.help = 'Variable Name should not be longer than 100 characters'
-        } else {
-          this.validateStatus = 'validating'
-          checkAddVariableName({
-            variableName: variableName
-          }).then((resp) => {
-            if (resp.data) {
-              this.validateStatus = 'success'
-              this.help = ''
-            } else {
-              this.validateStatus = 'error'
-              this.help = 'Sorry, the Variable Name already exists'
-            }
-          })
-        }
-      } else {
-        this.validateStatus = 'error'
-        this.help = 'Variable Name cannot be empty'
       }
     }
   }

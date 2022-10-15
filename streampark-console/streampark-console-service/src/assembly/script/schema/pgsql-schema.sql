@@ -614,7 +614,6 @@ create table "public"."t_variable" (
   "id" int8 not null default nextval('streampark_t_variable_id_seq'::regclass),
   "variable_code" varchar(100) collate "pg_catalog"."default" not null,
   "variable_value" text collate "pg_catalog"."default" not null,
-  "variable_name" varchar(100) collate "pg_catalog"."default" not null,
   "description" text collate "pg_catalog"."default" default null,
   "creator" int8 collate "pg_catalog"."default" not null,
   "team_id" int8 collate "pg_catalog"."default" not null,
@@ -625,8 +624,7 @@ create table "public"."t_variable" (
 comment on column "public"."t_variable"."id" is 'variable id';
 comment on column "public"."t_variable"."variable_code" is 'Variable code is used for parameter names passed to the program or as placeholders';
 comment on column "public"."t_variable"."variable_value" is 'The specific value corresponding to the variable';
-comment on column "public"."t_variable"."variable_name" is 'The name of the variable is used for simple display and for searching';
-comment on column "public"."t_variable"."description" is 'More detailed description of variables, only for display, not involved in program logic';
+comment on column "public"."t_variable"."description" is 'More detailed description of variables';
 comment on column "public"."t_variable"."creator" is 'user_id of creator';
 comment on column "public"."t_variable"."team_id" is 'team id';
 comment on column "public"."t_variable"."create_time" is 'creation time';
@@ -636,10 +634,6 @@ alter table "public"."t_variable" add constraint "t_variable_pkey" primary key (
 create index "un_team_vcode_inx" on "public"."t_variable" using btree (
   "team_id" "pg_catalog"."int8_ops" asc nulls last,
   "variable_code" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
-);
-create index "un_team_vname_inx" on "public"."t_variable" using btree (
-  "team_id" "pg_catalog"."int8_ops" asc nulls last,
-  "variable_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
 );
 
 

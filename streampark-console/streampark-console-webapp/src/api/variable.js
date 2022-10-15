@@ -34,14 +34,6 @@ export function checkVariableCode (queryParam) {
   return http.post(api.Variable.CHECK_CODE, queryParam)
 }
 
-export function checkAddVariableName (queryParam) {
-  return http.post(api.Variable.CHECK_ADD_NAME, queryParam)
-}
-
-export function checkUpdateVariableName (queryParam) {
-  return http.post(api.Variable.CHECK_UPDATE_NAME, queryParam)
-}
-
 export function post (queryParam) {
   return http.post(api.Variable.POST, queryParam)
 }
