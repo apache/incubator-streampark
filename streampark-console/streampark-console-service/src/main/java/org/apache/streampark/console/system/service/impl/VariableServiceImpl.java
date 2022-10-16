@@ -55,7 +55,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
         if (this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null) {
             throw new ApiAlertException("Sorry, the variable code already exists.");
         }
-        variable.setCreatorId(commonService.getCurrentUser().getUserId());
+        variable.setCreatorId(commonService.getUserId());
         this.save(variable);
     }
 
