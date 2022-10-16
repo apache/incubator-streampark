@@ -96,7 +96,7 @@
         <spark.version>3.2.0</spark.version>
         <scalikejdbc.version>4.0.0</scalikejdbc.version>
         <hive.version>2.3.4</hive.version>
-        <hadoop.version>2.10.2</hadoop.version>
+        <hadoop.version>3.3.2</hadoop.version>
         <hbase.version>2.1.10</hbase.version>
         <zkclient.version>0.11</zkclient.version>
         <curator.version>4.2.0</curator.version>
