@@ -85,7 +85,6 @@
               Sign in
             </a-button>
           </a-form-item>
-        </a-form>
         <a-form-item
           style="margin-top:40px">
           <a-button
@@ -94,12 +93,13 @@
             type="primary"
             html-type="button"
             class="signin-button"
-            href="http://localhost:7001/login/oauth/authorize?client_id=b6f7a3bdee5d3f424ee2&response_type=code&redirect_uri=http://localhost:10003&scope=read&state=app-test"
+            @click="login"
             :loading="state.loginBtn"
             :disabled="state.loginBtn">
             Sign in with casdoor
           </a-button>
         </a-form-item>
+      </a-form>
 
       </div>
 
@@ -320,6 +320,10 @@ export default {
       this.teamVisible = false
     },
 
+    login() {
+      window.location.href = this.getSigninUrl()
+    }
+    
   }
 }
 </script>

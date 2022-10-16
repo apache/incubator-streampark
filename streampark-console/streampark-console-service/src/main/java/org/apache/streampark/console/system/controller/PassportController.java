@@ -68,7 +68,7 @@ public class PassportController {
     @Autowired
     private Authenticator authenticator;
 
-    @Resource
+    @Autowired
     private CasdoorAuthService casdoorAuthService;
 
     @PostMapping("signin")

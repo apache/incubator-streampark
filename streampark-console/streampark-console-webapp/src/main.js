@@ -28,8 +28,20 @@ import $ from 'jquery'
 import './core/use'
 import './core/prototype'
 import './utils/filter' // global filter
+import Casdoor from 'casdoor-vue-sdk'
+import VueCompositionAPI from '@vue/composition-api'
+
+const config = {
+  serverUrl: 'http://localhost:7001',
+  clientId: 'b6f7a3bdee5d3f424ee2',
+  organizationName: 'test',
+  appName: 'app-test',
+  redirectPath: '/callback',
+}
 
 Vue.config.productionTip = false
+Vue.use(VueCompositionAPI)
+Vue.use(Casdoor,config)
 
 new Vue({
   router,
