@@ -325,15 +325,6 @@ export default {
       } else {
         delete params.status
       }
-
-      if (params.sortField === 'createTime') {
-        params.sortField = 'create_time'
-      }
-
-      if (params.sortField === 'modifyTime') {
-        params.sortField = 'modify_time'
-      }
-
       list({ ...params }).then((resp) => {
         const pagination = { ...this.pagination }
         pagination.total = parseInt(resp.data.total)

@@ -35,10 +35,10 @@
           <a-icon type="code" />Variable Code：{{ data.variableCode }}
         </p>
         <p>
-          <a-icon type="down-circle" />Variable Value：<br>{{ data.variableValue }}
+          <a-icon type="down-circle" />Variable Value：{{ data.variableValue }}
         </p>
         <p>
-          <a-icon type="user" />Create User：{{ data.userName }}
+          <a-icon type="user" />Create User：{{ data.creatorName }}
         </p>
         <p>
           <a-icon type="clock-circle" />Create Time：{{ data.createTime }}

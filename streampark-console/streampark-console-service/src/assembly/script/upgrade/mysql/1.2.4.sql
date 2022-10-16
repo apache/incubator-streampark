@@ -211,7 +211,7 @@ create table `t_variable` (
   `variable_code` varchar(100) collate utf8mb4_general_ci not null comment 'Variable code is used for parameter names passed to the program or as placeholders',
   `variable_value` text collate utf8mb4_general_ci not null comment 'The specific value corresponding to the variable',
   `description` text collate utf8mb4_general_ci default null comment 'More detailed description of variables',
-  `user_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
+  `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
   `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',

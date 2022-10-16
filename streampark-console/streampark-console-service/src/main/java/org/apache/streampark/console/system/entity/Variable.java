@@ -51,12 +51,12 @@ public class Variable implements Serializable {
     /**
      * user id of creator
      */
-    private Long userId;
+    private Long creatorId;
 
     /**
      * user name of creator
      */
-    private transient String userName;
+    private transient String creatorName;
 
     @NotNull(message = "{required}")
     private Long teamId;

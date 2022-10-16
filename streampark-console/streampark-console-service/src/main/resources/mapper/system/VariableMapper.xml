@@ -24,17 +24,17 @@
         <result column="variable_code" jdbcType="VARCHAR" property="variableCode"/>
         <result column="variable_value" jdbcType="VARCHAR" property="variableValue"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="creator_id" jdbcType="BIGINT" property="creatorId"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
     <select id="page" resultType="variable" parameterType="variable">
-        select v.*, u.username
+        select v.*, u.username as creatorName
         from t_variable v, t_user u
         <where>
-            v.user_id = u.user_id
+            v.creator_id = u.user_id
             and v.team_id = ${variable.teamId}
             <if test="variable.description != null and variable.description != ''">
                 and v.description like '%${variable.description}%'
@@ -43,9 +43,6 @@
                 and v.variable_code like '%${variable.variableCode}%'
             </if>
         </where>
-        <if test="variable.sortField != null and variable.sortField != ''">
-            order by ${variable.sortField} ${variable.sortOrder}
-        </if>
     </select>
 
 </mapper>

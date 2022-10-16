@@ -55,12 +55,15 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
         if (this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null) {
             throw new ApiAlertException("Sorry, the variable code already exists.");
         }
-        variable.setUserId(commonService.getCurrentUser().getUserId());
+        variable.setCreatorId(commonService.getCurrentUser().getUserId());
         this.save(variable);
     }
 
     @Override
     public IPage<Variable> page(Variable variable, RestRequest request) {
+        if (variable.getTeamId() == null) {
+            return null;
+        }
         Page<Variable> page = new MybatisPager<Variable>().getDefaultPage(request);
         return this.baseMapper.page(page, variable);
     }
