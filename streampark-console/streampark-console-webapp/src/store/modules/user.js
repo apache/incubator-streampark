@@ -29,7 +29,7 @@ const user = {
     roles: storage.get(ROLES),
     permissions: storage.get(PERMISSIONS),
     routers: storage.get(USER_ROUTER),
-    teamId: storage.get(USER_ROUTER),
+    teamId: storage.get(TEAM_ID),
     name: '',
     welcome: '',
     avatar: ''
