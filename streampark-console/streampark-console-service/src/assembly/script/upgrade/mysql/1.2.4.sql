@@ -127,6 +127,10 @@ insert into `t_menu` values (100050, 100048, 'update', null, null, 'member:updat
 insert into `t_menu` values (100051, 100048, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
+insert into `t_menu` VALUES (100054, 100000, 'Variable Management', '/system/variable', 'system/variable/View', 'variable:view', 'code', '0', 1, 3, now(), now());
+insert into `t_menu` VALUES (100055, 100054, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` VALUES (100056, 100054, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` VALUES (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
 
 -- Add team related sql
 create table `t_team` (
@@ -231,6 +235,20 @@ alter table `t_user` drop index `un_username`;
 alter table `t_user`
 modify `username` varchar(255) collate utf8mb4_general_ci not null comment 'user name',
 add unique key `un_username` (`username`) using btree;
+
+drop table if exists `t_variable`;
+create table `t_variable` (
+  `id` bigint not null auto_increment,
+  `variable_code` varchar(100) collate utf8mb4_general_ci not null comment 'Variable code is used for parameter names passed to the program or as placeholders',
+  `variable_value` text collate utf8mb4_general_ci not null comment 'The specific value corresponding to the variable',
+  `description` text collate utf8mb4_general_ci default null comment 'More detailed description of variables',
+  `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
+  `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
+  `create_time` datetime not null default current_timestamp comment 'create time',
+  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  primary key (`id`) using btree,
+  unique key `un_team_vcode_inx` (`team_id`,`variable_code`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 set foreign_key_checks = 1;
 

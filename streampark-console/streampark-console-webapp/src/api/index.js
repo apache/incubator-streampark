@@ -210,6 +210,14 @@ export default {
     UPDATE: '/menu/update',
     ROUTER: '/menu/router'
   },
+  Variable: {
+    LIST: '/variable/list',
+    UPDATE: '/variable/update',
+    POST: '/variable/post',
+    DELETE: '/variable/delete',
+    SELECT: '/variable/select',
+    CHECK_CODE: '/variable/check/code'
+  },
   Log: {
     LIST: '/log/list',
     DELETE: '/log/delete',
