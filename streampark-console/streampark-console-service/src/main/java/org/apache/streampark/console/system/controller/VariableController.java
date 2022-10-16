@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.system.controller;
 
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -38,11 +39,15 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
+import java.util.regex.Pattern;
+
 @Slf4j
 @Validated
 @RestController
 @RequestMapping("variable")
 public class VariableController {
+
+    private final String formatPattern = "^([A-Za-z])+([A-Za-z0-9._-])+$";
 
     @Autowired
     private VariableService variableService;
@@ -87,6 +92,11 @@ public class VariableController {
 
     @PostMapping("check/code")
     public RestResponse checkVariableCode(@RequestParam Long teamId, @NotBlank(message = "{required}") String variableCode) {
+        try {
+            this.checkVariableCodeFormat(variableCode);
+        } catch (ApiAlertException e) {
+            return RestResponse.fail(e.getMessage(), ResponseCode.CODE_FAIL_ALERT);
+        }
         boolean result = this.variableService.findByVariableCode(teamId, variableCode) == null;
         return RestResponse.success(result);
     }
@@ -94,5 +104,14 @@ public class VariableController {
     @PostMapping("select")
     public RestResponse selectVariables(@RequestParam Long teamId) {
         return RestResponse.success().data(this.variableService.findByTeamId(teamId));
+    }
+
+    private void checkVariableCodeFormat(String variableCode) {
+        if (variableCode.length() < 3 || variableCode.length() > 50) {
+            throw new ApiAlertException("Sorry, variable code length should be no less than 3 and no more than 50 characters.");
+        }
+        if (!Pattern.matches(formatPattern, variableCode)) {
+            throw new ApiAlertException("Sorry, variable code can only contain letters, numbers, middle bars, bottom bars and dots, and the beginning can only be letters, For example, kafka_cluster.brokers-520");
+        }
     }
 }

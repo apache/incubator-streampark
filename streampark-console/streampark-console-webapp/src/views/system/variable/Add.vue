@@ -127,23 +127,21 @@ export default {
     handleVariableCodeBlur (e) {
       const variableCode = (e && e.target.value) || ''
       if (variableCode.length) {
-        if (variableCode.length > 100) {
-          this.validateStatus = 'error'
-          this.help = 'Variable Code should not be longer than 100 characters'
-        } else {
-          this.validateStatus = 'validating'
-          checkVariableCode({
-            variableCode: variableCode
-          }).then((resp) => {
-            if (resp.data) {
-              this.validateStatus = 'success'
-              this.help = ''
-            } else {
-              this.validateStatus = 'error'
-              this.help = 'Sorry, the Variable Code already exists'
-            }
-          })
-        }
+        this.validateStatus = 'validating'
+        checkVariableCode({
+          variableCode: variableCode
+        }).then((resp) => {
+          if (resp.status !== 'success') {
+            this.validateStatus = 'error'
+            this.help = resp.message
+          } else if (resp.data) {
+            this.validateStatus = 'success'
+            this.help = ''
+          } else {
+            this.validateStatus = 'error'
+            this.help = 'Sorry, the Variable Code already exists'
+          }
+        })
       } else {
         this.validateStatus = 'error'
         this.help = 'Variable Code cannot be empty'
