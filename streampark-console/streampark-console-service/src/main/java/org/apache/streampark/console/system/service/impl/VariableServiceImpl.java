@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Variable;
@@ -54,16 +55,14 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
         if (this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null) {
             throw new ApiAlertException("Sorry, the variable code already exists.");
         }
-        variable.setCreator(commonService.getCurrentUser().getUserId());
+        variable.setUserId(commonService.getCurrentUser().getUserId());
         this.save(variable);
     }
 
     @Override
-    public IPage<Variable> findVariables(Variable variable, RestRequest request) {
-        Page<Variable> page = new Page<>();
-        page.setCurrent(request.getPageNum());
-        page.setSize(request.getPageSize());
-        return this.baseMapper.findVariable(page, variable);
+    public IPage<Variable> page(Variable variable, RestRequest request) {
+        Page<Variable> page = new MybatisPager<Variable>().getDefaultPage(request);
+        return this.baseMapper.page(page, variable);
     }
 
     @Override

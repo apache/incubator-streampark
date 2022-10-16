@@ -34,7 +34,7 @@ public interface VariableService extends IService<Variable> {
      * @param restRequest queryRequest
      * @return IPage
      */
-    IPage<Variable> findVariables(Variable variable, RestRequest restRequest);
+    IPage<Variable> page(Variable variable, RestRequest restRequest);
 
     /**
      * get variables through team

@@ -24,17 +24,17 @@
         <result column="variable_code" jdbcType="VARCHAR" property="variableCode"/>
         <result column="variable_value" jdbcType="VARCHAR" property="variableValue"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="creator" jdbcType="BIGINT" property="creator"/>
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="findVariable" resultType="variable" parameterType="variable">
-        select v.*, u.username as creator_name
+    <select id="page" resultType="variable" parameterType="variable">
+        select v.*, u.username
         from t_variable v, t_user u
         <where>
-            v.creator = u.user_id
+            v.user_id = u.user_id
             and v.team_id = ${variable.teamId}
             <if test="variable.description != null and variable.description != ''">
                 and v.description like '%${variable.description}%'

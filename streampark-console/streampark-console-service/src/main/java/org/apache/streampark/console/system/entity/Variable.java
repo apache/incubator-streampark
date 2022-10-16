@@ -48,9 +48,15 @@ public class Variable implements Serializable {
     @Size(max = 100, message = "{noMoreThan}")
     private String description;
 
-    private Long creator;
+    /**
+     * user id of creator
+     */
+    private Long userId;
 
-    private transient String creatorName;
+    /**
+     * user name of creator
+     */
+    private transient String userName;
 
     @NotNull(message = "{required}")
     private Long teamId;

@@ -290,7 +290,7 @@ create table if not exists `t_variable` (
   `variable_code` varchar(100) not null comment 'Variable code is used for parameter names passed to the program or as placeholders',
   `variable_value` text not null comment 'The specific value corresponding to the variable',
   `description` text default null comment 'More detailed description of variables, only for display, not involved in program logic',
-  `creator` bigint not null comment 'user_id of creator',
+  `user_id` bigint not null comment 'user id of creator',
   `team_id` bigint not null comment 'team id',
   `create_time` datetime not null default current_timestamp comment 'create time',
   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
