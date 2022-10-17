@@ -25,6 +25,7 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironment => JavaStreamEnv}
 import org.apache.flink.table.api.TableConfig
+import org.apache.streampark.flink.core.conf.FlinkConfiguration
 
 import java.io.File
 import collection.JavaConversions._
@@ -45,7 +46,7 @@ private[flink] object FlinkStreamingInitializer {
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.streamEnvironment)
+    (flinkInitializer.configuration.parameter, flinkInitializer.streamEnvironment)
   }
 
   def initialize(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment) = {
@@ -58,7 +59,7 @@ private[flink] object FlinkStreamingInitializer {
         }
       }
     }
-    (flinkInitializer.parameter, flinkInitializer.streamEnvironment)
+    (flinkInitializer.configuration.parameter, flinkInitializer.streamEnvironment)
   }
 }
 
@@ -75,9 +76,9 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   private[this] var localStreamEnv: StreamExecutionEnvironment = _
 
-  lazy val (parameter: ParameterTool, flinkConf: Configuration) = initParameter()
+  lazy val configuration: FlinkConfiguration = initParameter()
 
-  def initParameter(): (ParameterTool, Configuration) = {
+  def initParameter(): FlinkConfiguration = {
     val argsMap = ParameterTool.fromArgs(args)
     val config = argsMap.get(KEY_APP_CONF(), null) match {
       // scalastyle:off throwerror
@@ -85,14 +86,17 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       // scalastyle:on throwerror
       case file => file
     }
-    val (userConf, flinkConf) = parseConfig(config)
+    val configMap = parseConfig(config)
+    val (envConf, appConf) = extractEnvAndAppConfig(configMap)
     // config priority: explicitly specified priority > project profiles > system profiles
-    ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(userConf)).mergeWith(argsMap) -> Configuration.fromMap(flinkConf)
+    val parameter = ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(appConf)).mergeWith(argsMap)
+    val envConfig = Configuration.fromMap(envConf)
+    FlinkConfiguration(parameter, envConfig, null)
   }
 
-  def parseConfig(config: String): (Map[String, String], Map[String, String]) = {
+  def parseConfig(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
-    val configMap = config match {
+    config match {
       case x if x.startsWith("yaml://") =>
         PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.drop(7)))
       case x if x.startsWith("prop://") =>
@@ -117,17 +121,20 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           case _ => throw new IllegalArgumentException("[StreamPark] Usage:flink.conf file error,must be properties or yml")
         }
     }
+  }
+
+  def extractEnvAndAppConfig(configMap: Map[String, String]): (Map[String, String], Map[String, String]) = {
     val appConf = mutable.Map[String, String]()
-    val flinkConf = mutable.Map[String, String]()
+    val envConf = mutable.Map[String, String]()
     configMap.foreach(x => {
-      if (x._1.startsWith(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)) {
-        flinkConf += x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2
+      if (x._1.startsWith(KEY_ENV_PROPERTY_PREFIX)) {
+        envConf += x._1.replace(KEY_ENV_PROPERTY_PREFIX, "") -> x._2
       }
-      if (!x._1.startsWith(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX)) {
-        appConf += x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2
+      if (x._1.startsWith(KEY_APP_PREFIX)) {
+        appConf += x._1.replace(KEY_APP_PREFIX, "") -> x._2
       }
     })
-    appConf -> flinkConf
+    envConf -> appConf
   }
 
   def streamEnvironment: StreamExecutionEnvironment = {
@@ -142,14 +149,14 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   }
 
   def initEnvironment(): Unit = {
-    localStreamEnv = new StreamExecutionEnvironment(JavaStreamEnv.getExecutionEnvironment(flinkConf))
+    localStreamEnv = new StreamExecutionEnvironment(JavaStreamEnv.getExecutionEnvironment(configuration.envConfig))
 
     apiType match {
-      case ApiType.java if javaStreamEnvConfFunc != null => javaStreamEnvConfFunc.configuration(localStreamEnv.getJavaEnv, parameter)
-      case ApiType.scala if streamEnvConfFunc != null => streamEnvConfFunc(localStreamEnv, parameter)
+      case ApiType.java if javaStreamEnvConfFunc != null => javaStreamEnvConfFunc.configuration(localStreamEnv.getJavaEnv, configuration.parameter)
+      case ApiType.scala if streamEnvConfFunc != null => streamEnvConfFunc(localStreamEnv, configuration.parameter)
       case _ =>
     }
-    localStreamEnv.getConfig.setGlobalJobParameters(parameter)
+    localStreamEnv.getConfig.setGlobalJobParameters(configuration.parameter)
   }
 
 }

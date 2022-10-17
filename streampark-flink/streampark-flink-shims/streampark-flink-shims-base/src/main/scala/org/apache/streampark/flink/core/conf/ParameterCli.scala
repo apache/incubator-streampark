@@ -17,7 +17,7 @@
 package org.apache.streampark.flink.core.conf
 
 import org.apache.streampark.common.conf.ConfigConst
-import org.apache.streampark.common.conf.ConfigConst.{KEY_FLINK_DEPLOYMENT_OPTION_PREFIX, KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX}
+import org.apache.streampark.common.conf.ConfigConst.{KEY_ENV_OPTION_PREFIX, KEY_ENV_PROPERTY_PREFIX}
 import org.apache.streampark.common.util.PropertiesUtils
 import org.apache.commons.cli.{DefaultParser, Options}
 
@@ -28,8 +28,8 @@ import scala.util.{Failure, Success, Try}
 
 object ParameterCli {
 
-  private[this] val propertyPrefix = KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX
-  private[this] val optionPrefix = KEY_FLINK_DEPLOYMENT_OPTION_PREFIX
+  private[this] val propertyPrefix = KEY_ENV_PROPERTY_PREFIX
+  private[this] val optionPrefix = KEY_ENV_OPTION_PREFIX
   private[this] val optionMain = s"$propertyPrefix$$internal.application.main"
 
   lazy val flinkOptions: Options = FlinkRunOption.allOptions

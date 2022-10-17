@@ -110,9 +110,13 @@ object ConfigConst {
 
   def KEY_FLINK_PARALLELISM(prefix: String = null): String = if (prefix == null) "parallelism.default" else s"${prefix}parallelism.default"
 
-  val KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX = "flink.deployment.property."
+  val KEY_ENV_PROPERTY_PREFIX = "env.property."
 
-  val KEY_FLINK_DEPLOYMENT_OPTION_PREFIX = "flink.deployment.option."
+  val KEY_ENV_OPTION_PREFIX = "env.option."
+
+  val KEY_APP_PREFIX = "app."
+
+  val KEY_SQL_PREFIX = "sql."
 
   val KEY_FLINK_APP_NAME = "pipeline.name"
 
