@@ -319,6 +319,22 @@ create table `t_team` (
   unique key `team_name_idx` (`team_name`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
+-- ----------------------------
+-- Table of t_variable
+-- ----------------------------
+drop table if exists `t_variable`;
+create table `t_variable` (
+  `id` bigint not null auto_increment,
+  `variable_code` varchar(100) collate utf8mb4_general_ci not null comment 'Variable code is used for parameter names passed to the program or as placeholders',
+  `variable_value` text collate utf8mb4_general_ci not null comment 'The specific value corresponding to the variable',
+  `description` text collate utf8mb4_general_ci default null comment 'More detailed description of variables',
+  `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
+  `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
+  `create_time` datetime not null default current_timestamp comment 'create time',
+  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  primary key (`id`) using btree,
+  unique key `un_team_vcode_inx` (`team_id`,`variable_code`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Table structure for t_role

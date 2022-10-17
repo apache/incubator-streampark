@@ -176,7 +176,7 @@ object InternalConfigHolder extends Logger {
     logInfo(
       s"""registered configs:
          |ConfigHub collected configs: ${configKeys.size}
-         |  ${configKeys.map(key => s"$key = ${if (key.contains("password")) "********" else get(key)}").mkString("\n  ")}""".stripMargin)
+         |  ${configKeys.map(key => s"$key = ${if (key.contains("password")) ConfigConst.DEFAULT_DATAMASK_STRING else get(key)}").mkString("\n  ")}""".stripMargin)
   }
 
 

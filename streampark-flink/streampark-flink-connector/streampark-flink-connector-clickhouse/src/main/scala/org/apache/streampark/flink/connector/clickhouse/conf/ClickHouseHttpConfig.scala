@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.connector.clickhouse.conf
 
+import org.apache.streampark.common.conf.ConfigConst
 import org.apache.streampark.flink.connector.conf.ThresholdConf
 
 import java.util.{Base64, Properties}
@@ -67,7 +68,7 @@ class ClickHouseHttpConfig(parameters: Properties) extends ThresholdConf(ClickHo
 
   override def toString: String = {
     s"""
-       |{ user: $user, password: ******, hosts: ${hosts.mkString(",")} }
+       |{ user: $user, password: ${ConfigConst.DEFAULT_DATAMASK_STRING}, hosts: ${hosts.mkString(",")} }
        |""".stripMargin
   }
 }
