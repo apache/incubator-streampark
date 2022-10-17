@@ -99,13 +99,13 @@ export const formSchema: FormSchema[] = [
     field: 'userId',
     label: 'User',
     component: 'ApiSelect',
-    required: true,
     componentProps: {
       api: getNoTokenUserList,
       resultField: 'records',
       labelField: 'username',
       valueField: 'userId',
     },
+    rules: [{ required: true, message: 'Please select a user', trigger: 'blur' }],
   },
   {
     field: 'description',

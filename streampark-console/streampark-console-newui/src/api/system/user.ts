@@ -152,7 +152,7 @@ export function fetchUserTypes() {
       },
     })
     .then((res) => {
-      return res.map((t) => ({ label: t, value: t }));
+      return res.map((t: string) => ({ label: t, value: t }));
     });
 }
 /**

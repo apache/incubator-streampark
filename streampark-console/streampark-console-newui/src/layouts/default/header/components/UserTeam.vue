@@ -39,7 +39,13 @@
 <template>
   <div class="flex items-center min-w-160px">
     <span class="text-blue-500 pr-10px"> Team : </span>
-    <Select :allow-clear="false" class="flex-1" v-model:value="userStore.teamId" placeholder="Team">
+    <Select
+      :allow-clear="false"
+      class="flex-1"
+      @change="userStore.setTeamId"
+      :value="userStore.teamId"
+      placeholder="Team"
+    >
       <SelectOption v-for="t in teamList" :key="t.id">
         {{ t.teamName }}
       </SelectOption>

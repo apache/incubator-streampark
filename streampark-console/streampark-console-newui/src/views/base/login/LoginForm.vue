@@ -106,6 +106,7 @@
   import { useUserStore } from '/@/store/modules/user';
   import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
   import { useDesign } from '/@/hooks/web/useDesign';
+  import { loginApi } from '/@/api/system/user';
   //import { onKeyStroke } from '@vueuse/core';
 
   const ACol = Col;
@@ -134,24 +135,90 @@
   //onKeyStroke('Enter', handleLogin);
 
   const getShow = computed(() => unref(getLoginState) === LoginStateEnum.LOGIN);
-
+  async function createTeamModal(): Promise<void> {
+    // let teamId = '';
+    // const teamList: Array<Recordable> = await getTeamList({});
+    // console.log('teamList', teamList);
+    // const { createConfirm, createMessage } = useMessage();
+    // createConfirm({
+    //   iconType: 'warning',
+    //   title: () => {
+    //     return (
+    //       <div>
+    //         <Icon icon="ant-design:setting-outlined" />
+    //         <span>Select Team</span>
+    //       </div>
+    //     );
+    //   },
+    //   content: () => {
+    //     return (
+    //       <div>
+    //         <Icon icon="ant-design:setting-outlined" />
+    //         <Select value={teamId} onChange={(value: string) => (teamId = value)}>
+    //           {teamList.map((team: Recordable) => {
+    //             return <Select.Option value={team.id}>{team.teamName}</Select.Option>;
+    //           })}
+    //         </Select>
+    //       </div>
+    //     );
+    //   },
+    //   onOk: () => {
+    //     if (!teamId) {
+    //       createMessage.warning('please select a team');
+    //       return Promise.reject();
+    //     }
+    //     this.setTeamId(teamId);
+    //     return Promise.resolve();
+    //   },
+    // });
+  }
   async function handleLogin() {
-    const data = await validForm();
-    if (!data) return;
+    const loginFormValue = await validForm();
+    if (!loginFormValue) return;
     try {
       loading.value = true;
-      const userInfo = await userStore.login({
-        password: data.password,
-        username: data.account,
-        mode: 'none', //不要默认的错误提示
-      });
+      const { createMessage } = useMessage();
+      // const { t } = useI18n();
+      try {
+        const { data } = await loginApi(
+          {
+            password: loginFormValue.password,
+            username: loginFormValue.account,
+          },
+          'none',
+        );
 
-      userInfo &&
-        notification.success({
-          message: t('sys.login.loginSuccessTitle'),
-          description: `${t('sys.login.loginSuccessDesc')}: ${userInfo.nickName}`,
-          duration: 3,
-        });
+        const { code } = data;
+        if (code != null && code != undefined) {
+          if (code == 0 || code == 1) {
+            const message =
+              'SignIn failed,' +
+              (code === 0 ? ' authentication error' : ' current User is locked.');
+            createMessage.error(message);
+            return;
+          } else if (code == 403) {
+            await createTeamModal();
+          } else {
+            console.log(data);
+          }
+        }
+        userStore.setData(data.data);
+        const userInfo = await userStore.afterLoginAction(true);
+        userInfo &&
+          notification.success({
+            message: t('sys.login.loginSuccessTitle'),
+            description: `${t('sys.login.loginSuccessDesc')}: ${userInfo.nickName}`,
+            duration: 3,
+          });
+      } catch (error) {
+        // createErrorModal({ title: t('sys.api.errorTip'), content: 'login failed' });
+        return Promise.reject(error);
+      }
+      // const userInfo = await userStore.login({
+      //   password: data.password,
+      //   username: data.account,
+      //   mode: 'none', //Do not default to the error message
+      // });
     } catch (error) {
       createErrorModal({
         title: t('sys.api.errorTip'),

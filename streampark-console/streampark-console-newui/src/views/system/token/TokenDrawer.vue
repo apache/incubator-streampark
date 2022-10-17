@@ -66,9 +66,9 @@
         try {
           const values = await validate();
           setDrawerProps({ confirmLoading: true });
-          await addToken(values);
+          const res = await addToken(values);
           closeDrawer();
-          emit('success');
+          emit('success', { isUpdate: unref(isUpdate), values: res });
         } finally {
           setDrawerProps({ confirmLoading: false });
         }

@@ -213,41 +213,50 @@ export const usePermissionStore = defineStore({
 
         //  If you are sure that you do not need to do background dynamic permissions, please comment the entire judgment below
         case PermissionModeEnum.BACK:
-          const { createMessage } = useMessage();
+          const { createErrorModal, createMessage } = useMessage();
 
-          createMessage.loading({
+          const hideLoading = createMessage.loading({
             content: t('sys.app.menuLoading'),
-            duration: 1,
+            duration: 0,
           });
 
-          // this function may only need to be executed once, and the actual project can be put at the right time by itself
-          let routeList: AppRouteRecordRaw[] = [];
           try {
+            // this function may only need to be executed once, and the actual project can be put at the right time by itself
+            let routeList: AppRouteRecordRaw[] = [];
             // await this.changePermissionCode();
             routeList = (await getMenuRouter()) as AppRouteRecordRaw[];
+            if (routeList.length == 1 && routeList[0]?.children?.length === 0) {
+              createErrorModal({
+                title: t('sys.api.errorTip'),
+                content: 'No permission, please contact the administrator',
+              });
+              return Promise.reject(new Error('routeList is empty'));
+            }
             routeList = (routeList[0].children as AppRouteRecordRaw[]).map((v) => {
               v.redirect = ((v?.children ?? []) as AppRouteRecordRaw[]).find(
                 (item) => !item?.meta?.hidden,
               )?.path;
               return v;
             });
+
+            // Dynamically introduce components
+            routeList = transformObjToRoute(routeList);
+
+            //  Background routing to menu structure
+            const backMenuList = transformRouteToMenu(routeList);
+            this.setBackMenuList(backMenuList);
+
+            // remove meta.ignoreRoute item
+            routeList = filter(routeList, routeRemoveIgnoreFilter);
+            routeList = routeList.filter(routeRemoveIgnoreFilter);
+
+            routeList = flatMultiLevelRoutes(routeList);
+            routes = [PAGE_NOT_FOUND_ROUTE, ...routeList];
           } catch (error) {
             console.error(error);
+          } finally {
+            hideLoading();
           }
-
-          // Dynamically introduce components
-          routeList = transformObjToRoute(routeList);
-
-          //  Background routing to menu structure
-          const backMenuList = transformRouteToMenu(routeList);
-          this.setBackMenuList(backMenuList);
-
-          // remove meta.ignoreRoute item
-          routeList = filter(routeList, routeRemoveIgnoreFilter);
-          routeList = routeList.filter(routeRemoveIgnoreFilter);
-
-          routeList = flatMultiLevelRoutes(routeList);
-          routes = [PAGE_NOT_FOUND_ROUTE, ...routeList];
           break;
       }
 

@@ -40,9 +40,6 @@ import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 import { h } from 'vue';
 import { SignOut } from '/@/adapter/store/modules/user';
 import { getUserTeamId } from '/@/utils';
-import Icon from '/@/components/Icon';
-import { Select } from 'ant-design-vue';
-import { getTeamList } from '/@/api/system/team';
 
 interface UserState {
   userInfo: Nullable<UserInfo>;
@@ -162,7 +159,6 @@ export const useUserStore = defineStore({
 
         const { data } = await loginApi(loginParams, mode);
 
-        this.setData(data.data);
         const { code } = data;
         if (code != null && code != undefined) {
           if (code == 0 || code == 1) {
@@ -170,54 +166,16 @@ export const useUserStore = defineStore({
               'SignIn failed,' +
               (code === 0 ? ' authentication error' : ' current User is locked.');
             createMessage.error(message);
-          } else if (code == 403) {
-            await this.createTeamModal();
           } else {
             console.log(data);
           }
         }
+        this.setData(data.data);
         return this.afterLoginAction(goHome);
       } catch (error) {
         // createErrorModal({ title: t('sys.api.errorTip'), content: 'login failed' });
         return Promise.reject(error);
       }
-    },
-    async createTeamModal(): Promise<void> {
-      let teamId = '';
-      const teamList: Array<Recordable> = await getTeamList({});
-      console.log('teamList', teamList);
-      const { createConfirm, createMessage } = useMessage();
-      createConfirm({
-        iconType: 'warning',
-        title: () => {
-          return (
-            <div>
-              <Icon icon="ant-design:setting-outlined" />
-              <span>Select Team</span>
-            </div>
-          );
-        },
-        content: () => {
-          return (
-            <div>
-              <Icon icon="ant-design:setting-outlined" />
-              <Select value={teamId} onChange={(value: string) => (teamId = value)}>
-                {teamList.map((team: Recordable) => {
-                  return <Select.Option value={team.id}>{team.teamName}</Select.Option>;
-                })}
-              </Select>
-            </div>
-          );
-        },
-        onOk: () => {
-          if (!teamId) {
-            createMessage.warning('please select a team');
-            return Promise.reject();
-          }
-          this.setTeamId(teamId);
-          return Promise.resolve();
-        },
-      });
     },
     async afterLoginAction(goHome?: boolean): Promise<GetUserInfoModel | null> {
       if (!this.getToken) return null;
@@ -225,16 +183,23 @@ export const useUserStore = defineStore({
       if (sessionTimeout) {
         this.setSessionTimeout(false);
       } else {
-        const permissionStore = usePermissionStore();
-        if (!permissionStore.isDynamicAddedRoute) {
-          const routes = await permissionStore.buildRoutesAction();
-          routes.forEach((route) => {
-            router.addRoute(route as unknown as RouteRecordRaw);
-          });
-          router.addRoute(PAGE_NOT_FOUND_ROUTE as unknown as RouteRecordRaw);
-          permissionStore.setDynamicAddedRoute(true);
+        try {
+          const permissionStore = usePermissionStore();
+          if (!permissionStore.isDynamicAddedRoute) {
+            const routes = await permissionStore.buildRoutesAction();
+            routes.forEach((route) => {
+              router.addRoute(route as unknown as RouteRecordRaw);
+            });
+            router.addRoute(PAGE_NOT_FOUND_ROUTE as unknown as RouteRecordRaw);
+            permissionStore.setDynamicAddedRoute(true);
+          }
+          goHome && (await router.replace(PageEnum.BASE_HOME));
+        } catch (error) {
+          this.setToken(undefined);
+          this.setSessionTimeout(false);
+          this.setUserInfo(null);
+          console.error(error, 'error');
         }
-        goHome && (await router.replace(PageEnum.BASE_HOME));
       }
       return null;
     },
@@ -248,7 +213,7 @@ export const useUserStore = defineStore({
 
           await SignOut();
         } catch {
-          console.log('注销Token失败');
+          console.log('Token cancellation failed');
         }
       }
       this.setToken(undefined);

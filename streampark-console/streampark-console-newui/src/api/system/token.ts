@@ -20,8 +20,8 @@ import { ContentTypeEnum } from '/@/enums/httpEnum';
 enum Api {
   TokenList = '/token/list',
   ToggleTokenStatus = '/token/toggle',
-  AddToken = 'token/create',
-  DeleteToken = 'token/delete',
+  AddToken = '/token/create',
+  DeleteToken = '/token/delete',
   CHECK = 'token/check',
   CURL = '/token/curl',
 }
@@ -48,7 +48,7 @@ export function setTokenStatus(data) {
 
 export function addToken(data) {
   return defHttp.post({
-    url: Api.ToggleTokenStatus,
+    url: Api.AddToken,
     data,
     headers: {
       'Content-Type': ContentTypeEnum.FORM_URLENCODED,
@@ -56,7 +56,7 @@ export function addToken(data) {
   });
 }
 export function deleteToken(data) {
-  return defHttp.post({
+  return defHttp.delete({
     url: Api.DeleteToken,
     data,
     headers: {

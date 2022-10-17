@@ -35,7 +35,7 @@
             <div class="mt-10 font-medium text-white -enter-x">
               <span class="inline-block mt-4 text-3xl"> {{ t('sys.login.signInTitle') }}</span>
             </div>
-            <div class="mt-5 font-normal text-gray-500 text-md dark:text-gray-400 -enter-x">
+            <div class="mt-5 font-normal text-gray-300 text-md -enter-x">
               {{ t('sys.login.signInDesc') }}
             </div>
           </div>

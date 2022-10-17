@@ -61,7 +61,7 @@
     name: 'User',
     components: { BasicTable, TokenDrawer, TableAction },
     setup() {
-      const { notification, createMessage } = useMessage();
+      const { createMessage } = useMessage();
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { clipboardRef, copiedRef } = useCopyToClipboard();
       const [registerTable, { reload, expandAll, updateTableDataRecord }] = useTable({
@@ -88,7 +88,7 @@
         showIndexColumn: false,
         canResize: false,
         actionColumn: {
-          width: 120,
+          width: 170,
           title: 'Operation',
           dataIndex: 'action',
         },
@@ -109,8 +109,12 @@
         console.log(record);
       }
 
-      function handleDelete(record: Recordable) {
-        deleteToken({ tokenId: record.id });
+      async function handleDelete(record: Recordable) {
+        const res = await deleteToken({ tokenId: record.id });
+        if (res) {
+          createMessage.success('delete token successfully');
+          reload();
+        }
       }
 
       // function handleSuccess() {
@@ -118,11 +122,13 @@
       // }
 
       function handleSuccess({ isUpdate, values }) {
-        notification.success({
-          message: 'Tip',
-          description: 'Success',
-        });
-        isUpdate ? updateTableDataRecord(values.tokenId, values) : reload();
+        if (isUpdate) {
+          createMessage.success('update token successfully');
+          updateTableDataRecord(values.tokenId, values);
+        } else {
+          createMessage.success('create token successfully');
+          reload();
+        }
       }
 
       function onFetchSuccess(res) {

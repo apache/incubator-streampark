@@ -138,6 +138,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       field: 'password',
       label: 'Password',
       component: 'InputPassword',
+      componentProps: { placeholder: 'please enter password' },
       rules: [
         { required: true, message: 'password is required' },
         { min: 8, message: 'Password length cannot be less than 8 characters' },
@@ -165,8 +166,9 @@ export const formSchema = (formType: string): FormSchema[] => {
       componentProps: {
         disabled: isView,
         api: fetchUserTypes,
+        placeholder: 'Please select a user type',
       },
-      required: true,
+      rules: [{ required: true, message: 'Please select a user type' }],
     },
     {
       field: 'status',

@@ -27,7 +27,7 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { RequestEnum, ResultEnum, ContentTypeEnum } from '/@/enums/httpEnum';
 import { isString } from '/@/utils/is';
 import { getToken } from '/@/utils/auth';
-import { setObjToUrlParams, deepMerge } from '/@/utils';
+import { setObjToUrlParams, deepMerge, getUserTeamId } from '/@/utils';
 import { useErrorLogStoreWithOut } from '/@/store/modules/errorLog';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { joinTimestamp, formatRequestDate } from './helper';
@@ -135,10 +135,12 @@ const transform: AxiosTransform = {
     const params = config.params || {};
     const data = config.data || false;
     formatDate && data && !isString(data) && formatRequestDate(data);
+    const teamId = getUserTeamId();
     if (config.method?.toUpperCase() === RequestEnum.GET) {
       if (!isString(params)) {
         // Add a timestamp parameter to the get request to avoid taking data from the cache.
         config.params = Object.assign(params || {}, joinTimestamp(joinTime, false));
+        if (teamId) config.params['teamId'] = teamId;
       } else {
         config.url = config.url + params + `${joinTimestamp(joinTime, true)}`;
         config.params = undefined;
@@ -154,6 +156,7 @@ const transform: AxiosTransform = {
           config.data = params;
           config.params = undefined;
         }
+        if (teamId) config.data['teamId'] = teamId;
         if (joinParamsToUrl) {
           config.url = setObjToUrlParams(
             config.url as string,
