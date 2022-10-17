@@ -18,7 +18,7 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> 新增部门 </a-button>
+        <a-button type="primary" @click="handleCreate"> add dept </a-button>
       </template>
       <template #action="{ record }">
         <TableAction

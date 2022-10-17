@@ -30,7 +30,7 @@ export interface RequestOptions {
   joinPrefix?: boolean;
   // Interface address, use the default apiUrl if you leave it blank
   apiUrl?: string;
-  // 请求拼接路径
+  // Request a stitched path
   urlPrefix?: string;
   // Error message prompt type
   errorMessageMode?: ErrorMessageMode;
@@ -39,7 +39,7 @@ export interface RequestOptions {
   ignoreCancelToken?: boolean;
   // Whether to send token in header
   withToken?: boolean;
-  // 请求重试机制
+  // Request a retry mechanism
   retryRequest?: RetryRequest;
 }
 

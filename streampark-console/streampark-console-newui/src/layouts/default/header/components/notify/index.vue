@@ -61,7 +61,8 @@
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { isObject } from '/@/utils/is';
-
+  import { useI18n } from '/@/hooks/web/useI18n';
+  const { t } = useI18n();
   export interface TabItem {
     key: number;
     name: string;
@@ -79,8 +80,8 @@
       const currentPage = ref(1);
       const noticyVisible = ref(false);
       const listData = ref<TabItem[]>([
-        { key: 1, name: '异常告警', list: [] },
-        { key: 2, name: '通知消息', list: [] },
+        { key: 1, name: t('routes.basic.notice.exception'), list: [] },
+        { key: 2, name: t('routes.basic.notice.message'), list: [] },
       ]);
       const noticyLoading = ref(false);
       const count = computed(() => {
@@ -90,20 +91,20 @@
         }
         return count;
       });
-      /* 查看通知消息 */
+      /* View notification messages */
       async function handleNoticyInfo(record: NoticyItem) {
         noticyVisible.value = false;
         createConfirm({
           iconType: unref(noticyType) == 1 ? 'error' : 'info',
           title: record.title,
           content: h('div', {}, record.context),
-          okText: '删除',
+          okText: t('common.delText'),
           okType: 'danger',
           onOk: () => handleDelete(record.id),
         });
       }
 
-      /* 删除 */
+      /* delete */
       async function handleDelete(id: string) {
         try {
           noticyLoading.value = true;
@@ -115,7 +116,7 @@
           noticyLoading.value = false;
         }
       }
-      /* 获取通知列表 */
+      /* Get a list of notifications */
       async function getNoticyList(type: number) {
         try {
           noticyLoading.value = true;
@@ -127,9 +128,9 @@
           noticyLoading.value = false;
         }
       }
-      /* 处理通知消息数据 */
+      /* Process notification message data */
       function handleNoticyMessage(type: number, data: NoticyItem[]) {
-        /* 异常告警 */
+        /* The abnormal alarm */
         if (type === 1) {
           listData.value[0].list = [...data];
         } else {
@@ -145,13 +146,13 @@
           retries: 3,
           delay: 1000,
           onFailed() {
-            createMessage.warning('消息服务器连接失败!');
+            createMessage.warning('Message server connection failed!');
           },
         },
       });
       watch([data, currentPage], ([newData]: [NoticyItem], [newPage]) => {
         if (newData && isObject(newData)) {
-          /* 异常告警 */
+          /* The abnormal alarm */
           if (unref(noticyType) === 1) {
             listData.value[0].list.push(newData);
           } else {

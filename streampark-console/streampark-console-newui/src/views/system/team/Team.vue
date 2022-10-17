@@ -108,7 +108,7 @@
         });
       }
 
-      /* 删除组织 */
+      /* Delete the organization */
       async function handleDelete(record: Recordable) {
         const { data } = await deleteTeam({ id: record.id });
         if (data.status === 'success') {

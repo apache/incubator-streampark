@@ -152,7 +152,7 @@
     });
   }
 
-  /* 删除成员 */
+  /* Delete members */
   async function handleDelete(record: Recordable) {
     const { data } = await fetchMemberDelete({ id: record.id });
     if (data.status === 'success') {

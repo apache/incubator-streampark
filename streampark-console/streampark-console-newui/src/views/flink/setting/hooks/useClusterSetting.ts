@@ -60,7 +60,7 @@ export const useClusterSetting = () => {
   };
   const getLoading = computed(() => submitLoading.value);
 
-  /* 校验 */
+  /* check */
   async function handleCheckExecMode(_rule: RuleObject, value: StoreValue) {
     if (value === null || value === undefined || value === '') {
       return Promise.reject('Execution Mode is required');

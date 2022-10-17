@@ -162,7 +162,7 @@
       function handleNoticyClick(item: NoticyItem) {
         props.onNoticyClick && props.onNoticyClick(item);
       }
-      /* 删除 */
+      /* delete */
       async function handleDelete(item: NoticyItem) {
         props.onNoticyClick && props.onNoticyClick(item);
       }
