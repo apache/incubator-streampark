@@ -39,7 +39,7 @@
         :help="help">
         <a-input
           @blur="handleVariableCodeBlur"
-          v-decorator="['variableCode', {rules: [{ required: true, max: 50, message: 'please enter Variable Code'}]}]" />
+          v-decorator="['variableCode', {rules: [{ required: true, message: 'please enter Variable Code'}]}]" />
       </a-form-item>
       <a-form-item
         label="Variable Value"
@@ -127,15 +127,21 @@ export default {
     handleVariableCodeBlur (e) {
       const variableCode = (e && e.target.value) || ''
       if (variableCode.length) {
-        if (variableCode.length > 100) {
+        this.validateStatus = 'validating'
+        if (variableCode.length < 3 || variableCode.length > 50) {
           this.validateStatus = 'error'
-          this.help = 'Variable Code should not be longer than 100 characters'
+          this.help = 'Sorry, variable code length should be no less than 3 and no more than 50 characters.'
+        } else if (!new RegExp(/^([A-Za-z])+([A-Za-z0-9._-])+$/).test(variableCode)) {
+          this.validateStatus = 'error'
+          this.help = 'Sorry, variable code can only contain letters, numbers, middle bars, bottom bars and dots, and the beginning can only be letters, For example, kafka_cluster.brokers-520'
         } else {
-          this.validateStatus = 'validating'
           checkVariableCode({
             variableCode: variableCode
           }).then((resp) => {
-            if (resp.data) {
+            if (resp.status !== 'success') {
+              this.validateStatus = 'error'
+              this.help = resp.message
+            } else if (resp.data) {
               this.validateStatus = 'success'
               this.help = ''
             } else {

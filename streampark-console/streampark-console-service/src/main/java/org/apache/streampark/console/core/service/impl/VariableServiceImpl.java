@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.service.impl;
+package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.core.entity.Variable;
+import org.apache.streampark.console.core.mapper.VariableMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
-import org.apache.streampark.console.system.entity.Variable;
-import org.apache.streampark.console.system.mapper.VariableMapper;
-import org.apache.streampark.console.system.service.VariableService;
+import org.apache.streampark.console.core.service.VariableService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
