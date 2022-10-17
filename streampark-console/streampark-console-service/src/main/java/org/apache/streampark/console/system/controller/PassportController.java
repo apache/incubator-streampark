@@ -108,8 +108,7 @@ public class PassportController {
 
         Set<String> permissions = this.userService.getPermissions(username);
         userInfo.put("permissions", permissions);
-        user.setPassword("******");
-        user.setSalt("******");
+        user.dataMasking();
         userInfo.put("user", user);
         return userInfo;
     }

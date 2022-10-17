@@ -17,10 +17,13 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import static org.apache.streampark.console.core.enums.Status.ACCESSTOKEN_COULD_NOT_FOUND;
-import static org.apache.streampark.console.core.enums.Status.USER_CURRENTLY_LOCKED;
-
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.streampark.common.util.DateUtils;
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -32,12 +35,6 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.AccessTokenMapper;
 import org.apache.streampark.console.system.service.AccessTokenService;
 import org.apache.streampark.console.system.service.UserService;
-
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -108,11 +105,11 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     public RestResponse toggleToken(Long tokenId) {
         AccessToken tokenInfo = baseMapper.getById(tokenId);
         if (Objects.isNull(tokenInfo)) {
-            return RestResponse.fail(ACCESSTOKEN_COULD_NOT_FOUND);
+            return RestResponse.fail("accessToken could not be found!", ResponseCode.CODE_FAIL_ALERT);
         }
 
         if (User.STATUS_LOCK.equals(tokenInfo.getUserStatus())) {
-            return RestResponse.fail(USER_CURRENTLY_LOCKED, "could not operate this accessToken!");
+            return RestResponse.fail("user status is locked, could not operate this accessToken!", ResponseCode.CODE_FAIL_ALERT);
         }
 
         Integer status = tokenInfo.getStatus().equals(AccessToken.STATUS_ENABLE) ? AccessToken.STATUS_DISABLE : AccessToken.STATUS_ENABLE;

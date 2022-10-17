@@ -17,13 +17,11 @@
 
 package org.apache.streampark.console.system.mapper;
 
-import org.apache.streampark.console.system.entity.User;
-
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.streampark.console.system.entity.User;
 
 import java.util.List;
 
@@ -31,7 +29,7 @@ public interface UserMapper extends BaseMapper<User> {
 
     IPage<User> findUserDetail(Page page, @Param("user") User user);
 
-    @Select("SELECT u.* FROM t_user u LEFT JOIN t_access_token t ON u.USER_ID = t.USER_ID WHERE t.USER_ID IS NULL")
     List<User> getNoTokenUser();
 
+    List<User> findByAppOwner(@Param("teamId") Long teamId);
 }
