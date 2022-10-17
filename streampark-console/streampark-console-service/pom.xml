@@ -58,6 +58,7 @@
         <xml-apis.version>1.4.01</xml-apis.version>
         <ivy.version>2.5.0</ivy.version>
         <eclipse.jgit.version>5.13.0.202109080827-r</eclipse.jgit.version>
+        <casdoor.version>1.5.1</casdoor.version>
     </properties>
 
     <dependencyManagement>
@@ -386,7 +387,7 @@
         <dependency>
             <groupId>org.casbin</groupId>
             <artifactId>casdoor-spring-boot-starter</artifactId>
-            <version>1.5.1</version>
+            <version>${casdoor.version}</version>
         </dependency>
 
     </dependencies>
