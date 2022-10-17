@@ -125,6 +125,9 @@ const user = {
             commit('SET_PERMISSIONS', respData.permissions)
             commit('SET_INFO', respData.user)
           }
+          if (respData.user.teamId != null) {
+            commit('SET_TEAM', respData.user['teamId'])
+          }
           storage.rm(INVALID)
           resolve(response)
         }).catch(error => {
