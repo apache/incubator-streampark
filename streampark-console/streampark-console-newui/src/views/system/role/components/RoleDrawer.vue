@@ -40,7 +40,7 @@
 <script lang="ts">
   import { defineComponent, ref, computed, unref } from 'vue';
   import { BasicForm, useForm } from '/@/components/Form';
-  import { formSchema } from './role.data';
+  import { formSchema } from '../role.data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { BasicTree, TreeItem } from '/@/components/Tree';
   import { addRole, editRole } from '/@/api/system/role';

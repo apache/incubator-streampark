@@ -403,6 +403,6 @@ class FlinkSqlFormatter extends Formatter {
  *  @param {Object} cfg.params Collection of params for placeholder replacement
  * @return {String}
  */
-export const format = (query, config = {}) => {
-  return new FlinkSqlFormatter(config).format(query);
+export const format = (query) => {
+  return (new FlinkSqlFormatter() as any).format(query);
 };

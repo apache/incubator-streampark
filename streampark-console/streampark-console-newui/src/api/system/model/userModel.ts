@@ -41,14 +41,9 @@ export interface LoginResultModel {
  */
 export interface GetUserInfoModel {
   roles: RoleInfo[];
-  // 用户id
   userId: string | number;
-  // 用户名
   username: string;
-  // 昵称
   nickName: string;
-  // 头像
   avatar: string;
-  // 介绍
   desc?: string;
 }

@@ -17,7 +17,7 @@
 <template>
   <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="40%" @ok="handleSubmit">
     <template #title>
-      <a-icon type="user-add" />
+      <Icon icon="ant-design:user-add-outlined" />
       {{ getTitle }}
     </template>
     <BasicForm @register="registerForm" />
@@ -26,15 +26,15 @@
 <script lang="ts">
   import { computed, defineComponent, ref, unref } from 'vue';
   import { BasicForm, useForm } from '/@/components/Form';
-  import { formSchema } from './user.data';
+  import { formSchema } from '../user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
-
   import { addUser, updateUser } from '/@/api/system/user';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
     name: 'MenuDrawer',
-    components: { BasicDrawer, BasicForm },
+    components: { BasicDrawer, Icon, BasicForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const formType = ref(FormTypeEnum.Edit);

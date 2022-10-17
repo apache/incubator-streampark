@@ -23,7 +23,7 @@ import { isNumber, isObject } from '/@/utils/is';
 const { t } = useI18n();
 
 /**
- * @description: 生成placeholder
+ * @description: generate placeholder
  */
 export function createPlaceholderMessage(component: ComponentType) {
   if (component.includes('Input') || component.includes('Complete')) {
@@ -39,7 +39,6 @@ export function createPlaceholderMessage(component: ComponentType) {
     component.includes('Radio') ||
     component.includes('Switch')
   ) {
-    // return `请选择${label}`;
     return t('common.chooseText');
   }
   return '';
@@ -68,7 +67,7 @@ export function setComponentRuleType(
 export function processDateValue(attr: Recordable, component: string) {
   const { valueFormat, value } = attr;
   if (valueFormat) {
-    attr.value = isObject(value) ? dateUtil(value).format(valueFormat) : value;
+    attr.value = isObject(value) ? dateUtil(value as any).format(valueFormat) : value;
   } else if (DATE_TYPE.includes(component) && value) {
     attr.value = dateUtil(attr.value);
   }
@@ -83,7 +82,7 @@ export function handleInputNumberValue(component?: ComponentType, val?: any) {
 }
 
 /**
- * 时间字段
+ * The time field
  */
 export const dateItemType = genType();
 

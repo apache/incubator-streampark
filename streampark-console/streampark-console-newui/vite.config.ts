@@ -85,7 +85,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       outDir: OUTPUT_DIR,
       // minify: 'terser',
       /**
-       * 当 minify=“minify:'terser'” 解开注释
+       * When minify="minify:'terser'" unwraps the comment
        * Uncomment when minify="minify:'terser'"
        */
       // terserOptions: {

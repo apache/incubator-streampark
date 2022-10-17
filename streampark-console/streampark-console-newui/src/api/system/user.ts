@@ -1,3 +1,4 @@
+import { AxiosResponse } from 'axios';
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,7 +18,7 @@
 import { defHttp } from '/@/utils/http/axios';
 import { LoginParams, LoginResultModel, GetUserInfoModel } from './model/userModel';
 
-import { ErrorMessageMode } from '/#/axios';
+import { ErrorMessageMode, Result } from '/#/axios';
 import { ContentTypeEnum } from '/@/enums/httpEnum';
 
 enum Api {
@@ -41,7 +42,7 @@ enum Api {
  * @description: user login api
  */
 export function loginApi(params: LoginParams, mode: ErrorMessageMode = 'modal') {
-  return defHttp.post<LoginResultModel>(
+  return defHttp.post<AxiosResponse<Result<LoginResultModel>>>(
     {
       url: Api.Login,
       params,
@@ -50,6 +51,7 @@ export function loginApi(params: LoginParams, mode: ErrorMessageMode = 'modal') 
       },
     },
     {
+      isReturnNativeResponse: true,
       errorMessageMode: mode,
     },
   );

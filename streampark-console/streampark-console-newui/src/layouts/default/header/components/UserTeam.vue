@@ -24,23 +24,22 @@
   const userStore = useUserStoreWithOut();
 
   const teamList = ref<Array<{ id: string; teamName: string }>>([]);
-
+  const teamId = ref<string | undefined>(userStore.getTeamId);
   onMounted(async () => {
     const res = await fetchUserTeam({ userId: userStore?.getUserInfo?.userId });
     teamList.value = [...res];
+    // set default team
+    if (!teamId.value && res.length > 0) {
+      teamId.value = res[0].id;
+      userStore.setTeamId(teamId.value);
+    }
   });
 </script>
 
 <template>
   <div class="flex items-center min-w-160px">
     <span class="text-blue-500 pr-10px"> Team : </span>
-    <Select
-      :allow-clear="false"
-      class="flex-1"
-      @change="userStore.setTeamId"
-      :value="userStore.getTeamId"
-      placeholder="Team"
-    >
+    <Select :allow-clear="false" class="flex-1" v-model:value="userStore.teamId" placeholder="Team">
       <SelectOption v-for="t in teamList" :key="t.id">
         {{ t.teamName }}
       </SelectOption>

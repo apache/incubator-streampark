@@ -21,6 +21,7 @@ import { store } from '/@/store';
 import { RoleEnum } from '/@/enums/roleEnum';
 import { PageEnum } from '/@/enums/pageEnum';
 import {
+  APP_TEAMID_KEY_,
   EXPIRE_KEY,
   PERMISSION_KEY,
   ROLES_KEY,
@@ -38,6 +39,10 @@ import { RouteRecordRaw } from 'vue-router';
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 import { h } from 'vue';
 import { SignOut } from '/@/adapter/store/modules/user';
+import { getUserTeamId } from '/@/utils';
+import Icon from '/@/components/Icon';
+import { Select } from 'ant-design-vue';
+import { getTeamList } from '/@/api/system/team';
 
 interface UserState {
   userInfo: Nullable<UserInfo>;
@@ -66,7 +71,7 @@ export const useUserStore = defineStore({
     // Last fetch time
     lastUpdateTime: 0,
     // user Team
-    teamId: undefined,
+    teamId: getUserTeamId(),
   }),
   getters: {
     getUserInfo(): UserInfo {
@@ -138,6 +143,8 @@ export const useUserStore = defineStore({
     },
     setTeamId(teamId: string) {
       this.teamId = teamId;
+      sessionStorage.setItem(APP_TEAMID_KEY_, teamId);
+      localStorage.setItem(APP_TEAMID_KEY_, teamId);
     },
     /**
      * @description: login
@@ -148,16 +155,69 @@ export const useUserStore = defineStore({
         mode?: ErrorMessageMode;
       },
     ): Promise<GetUserInfoModel | null> {
+      const { createMessage } = useMessage();
+      // const { t } = useI18n();
       try {
         const { goHome = true, mode, ...loginParams } = params;
 
-        const data = await loginApi(loginParams, mode);
+        const { data } = await loginApi(loginParams, mode);
 
-        this.setData(data);
+        this.setData(data.data);
+        const { code } = data;
+        if (code != null && code != undefined) {
+          if (code == 0 || code == 1) {
+            const message =
+              'SignIn failed,' +
+              (code === 0 ? ' authentication error' : ' current User is locked.');
+            createMessage.error(message);
+          } else if (code == 403) {
+            await this.createTeamModal();
+          } else {
+            console.log(data);
+          }
+        }
         return this.afterLoginAction(goHome);
       } catch (error) {
+        // createErrorModal({ title: t('sys.api.errorTip'), content: 'login failed' });
         return Promise.reject(error);
       }
+    },
+    async createTeamModal(): Promise<void> {
+      let teamId = '';
+      const teamList: Array<Recordable> = await getTeamList({});
+      console.log('teamList', teamList);
+      const { createConfirm, createMessage } = useMessage();
+      createConfirm({
+        iconType: 'warning',
+        title: () => {
+          return (
+            <div>
+              <Icon icon="ant-design:setting-outlined" />
+              <span>Select Team</span>
+            </div>
+          );
+        },
+        content: () => {
+          return (
+            <div>
+              <Icon icon="ant-design:setting-outlined" />
+              <Select value={teamId} onChange={(value: string) => (teamId = value)}>
+                {teamList.map((team: Recordable) => {
+                  return <Select.Option value={team.id}>{team.teamName}</Select.Option>;
+                })}
+              </Select>
+            </div>
+          );
+        },
+        onOk: () => {
+          if (!teamId) {
+            createMessage.warning('please select a team');
+            return Promise.reject();
+          }
+          this.setTeamId(teamId);
+          return Promise.resolve();
+        },
+      });
     },
     async afterLoginAction(goHome?: boolean): Promise<GetUserInfoModel | null> {
       if (!this.getToken) return null;

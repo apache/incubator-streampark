@@ -21,7 +21,6 @@ import {
   UserParams,
   RoleParams,
   RolePageParams,
-  MenuListGetResultModel,
   DeptListGetResultModel,
   AccountListGetResultModel,
   RolePageListGetResultModel,
@@ -59,7 +58,7 @@ export const getMenuList = (params?: MenuParams) =>
   });
 
 export const getRoleMenu = (params?: MenuParams) =>
-  defHttp.post<MenuListGetResultModel>(
+  defHttp.post<Array<string>>(
     {
       url: Api.RoleMenu,
       params,

@@ -15,8 +15,9 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent, onMounted, ref, reactive, unref, onUnmounted } from 'vue';
+  import { defineComponent, onMounted, ref, reactive, unref, onUnmounted, watch } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { useUserStore } from '/@/store/modules/user';
 
   export default defineComponent({
     name: 'AppView',
@@ -53,6 +54,7 @@
 
   const { t } = useI18n();
   const router = useRouter();
+  const userStore = useUserStore();
   const flinkAppStore = useFlinkAppStore();
   const { createMessage } = useMessage();
 
@@ -123,6 +125,7 @@
         delete params.state;
       }
       Object.assign(params, {
+        teamId: userStore.getTeamId,
         jobName: searchText.value,
         jobType: jobType.value,
         userId: userId.value,
@@ -176,6 +179,18 @@
       width: 200,
     },
   });
+
+  watch(
+    () => userStore.getTeamId,
+    async (val) => {
+      if (val) {
+        tags.value = undefined;
+        jobType.value = undefined;
+        userId.value = undefined;
+        reload();
+      }
+    },
+  );
 
   // build Detail
   function openBuildProgressDetailDrawer(app: AppListRecord) {
@@ -276,7 +291,7 @@
       },
     );
     const res = await fetchAppRecord(params);
-    const dataSource = res.records;
+    const dataSource = res?.records || [];
     dataSource.forEach((record) => {
       if (record.tags !== null && record.tags !== undefined && record.tags !== '') {
         const tagsArray = record.tags.split(',');
