@@ -15,21 +15,40 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.mapper;
+package org.apache.streampark.console.core.service;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.core.entity.Variable;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Param;
-import org.apache.streampark.console.system.entity.User;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
-public interface UserMapper extends BaseMapper<User> {
+public interface VariableService extends IService<Variable> {
 
-    IPage<User> findUserDetail(Page page, @Param("user") User user);
+    /**
+     * find variable
+     *
+     * @param variable        variable
+     * @param restRequest queryRequest
+     * @return IPage
+     */
+    IPage<Variable> page(Variable variable, RestRequest restRequest);
 
-    List<User> getNoTokenUser();
+    /**
+     * get variables through team
+     * @param teamId
+     * @return
+     */
+    List<Variable> findByTeamId(Long teamId);
 
-    List<User> findByAppOwner(@Param("teamId") Long teamId);
+    /**
+     * create variable
+     *
+     * @param variable variable
+     */
+    void createVariable(Variable variable) throws Exception;
+
+    Variable findByVariableCode(Long teamId, String variableCode);
 }

@@ -17,8 +17,13 @@
 
 package org.apache.streampark.console.system.controller;
 
-import static org.apache.streampark.console.core.enums.Status.TEAMID_INVALID;
-
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.util.ShaHashUtils;
@@ -29,13 +34,6 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
-
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.annotation.Logical;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -171,7 +169,7 @@ public class UserController {
     public RestResponse initTeam(Long teamId, Long userId) {
         Team team = teamService.getById(teamId);
         if (team == null) {
-            return RestResponse.fail(TEAMID_INVALID);
+            return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
         }
         userService.setLatestTeam(teamId, userId);
         return RestResponse.success();
@@ -181,7 +179,7 @@ public class UserController {
     public RestResponse setTeam(Long teamId) {
         Team team = teamService.getById(teamId);
         if (team == null) {
-            return RestResponse.fail(TEAMID_INVALID);
+            return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
         }
 
         User user = commonService.getCurrentUser();
@@ -190,8 +188,7 @@ public class UserController {
         userService.setLatestTeam(teamId, user.getUserId());
 
         //2) get latest userInfo
-        user.setPassword("******");
-        user.setSalt("******");
+        user.dataMasking();
 
         Map<String, Object> infoMap = new HashMap<>(8);
         infoMap.put("user", user);
@@ -204,6 +201,13 @@ public class UserController {
         infoMap.put("permissions", permissions);
 
         return new RestResponse().data(infoMap);
+    }
+
+    @PostMapping("appOwners")
+    public RestResponse appOnwers(Long teamId) {
+        List<User> userList = userService.findByAppOwner(teamId);
+        userList.forEach((u) -> u.dataMasking());
+        return RestResponse.success(userList);
     }
 
 }

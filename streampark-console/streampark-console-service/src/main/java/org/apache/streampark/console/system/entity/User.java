@@ -17,12 +17,12 @@
 
 package org.apache.streampark.console.system.entity;
 
-import org.apache.streampark.console.core.enums.UserType;
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import org.apache.streampark.common.conf.ConfigConst;
+import org.apache.streampark.console.core.enums.UserType;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -101,5 +101,11 @@ public class User implements Serializable {
      * The last set teamId
      */
     private Long teamId;
+
+    public void dataMasking() {
+        String dataMask = ConfigConst.DEFAULT_DATAMASK_STRING();
+        this.setPassword(dataMask);
+        this.setSalt(dataMask);
+    }
 
 }

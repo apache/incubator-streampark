@@ -17,10 +17,9 @@
 
 package org.apache.streampark.console.system.controller;
 
-import static org.apache.streampark.console.core.enums.Status.USER_CURRENTLY_LOCKED;
-import static org.apache.streampark.console.core.enums.Status.USER_NAME_NULL;
-import static org.apache.streampark.console.core.enums.Status.USER_NOT_EXIST;
-
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.properties.ShiroProperties;
@@ -32,10 +31,6 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
 import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.UserService;
-
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -71,7 +66,8 @@ public class PassportController {
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
         if (StringUtils.isEmpty(username)) {
-            return RestResponse.fail(USER_NAME_NULL);
+            return RestResponse.fail("User name cannot be empty", 1L);
+
         }
         User user = authenticator.authenticate(username, password);
         return login(username, password, user);
@@ -82,7 +78,8 @@ public class PassportController {
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
         if (StringUtils.isEmpty(username)) {
-            return RestResponse.fail(USER_NAME_NULL);
+            return RestResponse.fail("User name cannot be empty", 1L);
+
         }
         User user = authenticator.ldapAuthenticate(username, password);
         return login(username, password, user);
@@ -120,11 +117,12 @@ public class PassportController {
 
     private RestResponse login(String username, String password, User user) throws Exception {
         if (user == null) {
-            return RestResponse.fail(USER_NOT_EXIST, username);
+            return RestResponse.fail("User not exists", 1L);
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.fail(USER_CURRENTLY_LOCKED);
+            return RestResponse.fail("User is currently locked", 2L);
+
         }
 
         password = ShaHashUtils.encrypt(user.getSalt(), password);
