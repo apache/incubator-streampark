@@ -53,28 +53,27 @@ public class AuthenticatorImpl implements Authenticator {
 
     @Override
     public User ldapAuthenticate(String username, String password) throws Exception {
-        User user = null;
         String ldapEmail = ldapService.ldapLogin(username, password);
-        if (ldapEmail != null) {
-            //check if user exist
-            user = usersService.findByName(username);
-            if (user == null && ldapService.createIfUserNotExists()) {
-                User newUser = new User();
-                newUser.setCreateTime(new Date());
-                newUser.setUsername(username);
-                newUser.setNickName(username);
-                newUser.setUserType(UserType.USER);
-                newUser.setStatus("1");
-                newUser.setSex("1");
-
-                String salt = ShaHashUtils.getRandomSalt();
-                String saltPass = ShaHashUtils.encrypt(salt, password);
-                newUser.setSalt(salt);
-                newUser.setPassword(saltPass);
-                usersService.createUser(newUser);
-                return newUser;
-            }
+        if (ldapEmail == null) {
+            return null;
         }
-        return user;
+        //check if user exist
+        User user = usersService.findByName(username);
+        if (user != null || !ldapService.createIfUserNotExists()) {
+            return user;
+        }
+        User newUser = new User();
+        newUser.setCreateTime(new Date());
+        newUser.setUsername(username);
+        newUser.setNickName(username);
+        newUser.setUserType(UserType.USER);
+        newUser.setStatus("1");
+        newUser.setSex("1");
+        String salt = ShaHashUtils.getRandomSalt();
+        String saltPass = ShaHashUtils.encrypt(salt, password);
+        newUser.setSalt(salt);
+        newUser.setPassword(saltPass);
+        usersService.createUser(newUser);
+        return newUser;
     }
 }
