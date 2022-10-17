@@ -129,6 +129,7 @@
             break;
           case 'doc':
             openDoc();
+            break;
           case 'password':
             openChangePassword();
             break;
