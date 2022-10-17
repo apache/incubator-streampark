@@ -59,20 +59,4 @@
             order by ${user.sortField} ${user.sortOrder}
         </if>
     </select>
-
-    <select id="getNoTokenUser" resultType="user" parameterType="user">
-        select u.* from t_user u left join t_access_token t
-        on u.user_id = t.user_id
-        where t.user_id is null
-    </select>
-
-    <select id="findByAppOwner" resultType="user" parameterType="user">
-        select u.* from t_user u inner join (
-            select distinct(user_id) as user_id
-            from t_flink_app
-            where team_id = #{teamId}
-        ) t
-        where u.user_id = t.user_id
-    </select>
-
 </mapper>

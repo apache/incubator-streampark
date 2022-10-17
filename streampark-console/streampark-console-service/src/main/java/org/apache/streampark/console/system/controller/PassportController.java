@@ -21,6 +21,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.streampark.common.util.DateUtils;
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
@@ -66,8 +67,7 @@ public class PassportController {
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
         if (StringUtils.isEmpty(username)) {
-            return RestResponse.fail("User name cannot be empty", 1L);
-
+            return RestResponse.success().put("code", 0);
         }
         User user = authenticator.authenticate(username, password);
         return login(username, password, user);
@@ -78,8 +78,7 @@ public class PassportController {
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
         if (StringUtils.isEmpty(username)) {
-            return RestResponse.fail("User name cannot be empty", 1L);
-
+            return RestResponse.success().put("code", 0);
         }
         User user = authenticator.ldapAuthenticate(username, password);
         return login(username, password, user);
@@ -117,12 +116,18 @@ public class PassportController {
 
     private RestResponse login(String username, String password, User user) throws Exception {
         if (user == null) {
-            return RestResponse.fail("User not exists", 1L);
+            return RestResponse.success().put("code", 0);
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.fail("User is currently locked", 2L);
+            return RestResponse.success().put("code", 1);
+        }
 
+        userService.fillInTeam(user);
+
+        //no team.
+        if (user.getTeamId() == null) {
+            return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
         }
 
         password = ShaHashUtils.encrypt(user.getSalt(), password);
