@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.controller;
+package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.system.entity.Variable;
-import org.apache.streampark.console.system.service.VariableService;
+import org.apache.streampark.console.core.entity.Variable;
+import org.apache.streampark.console.core.service.VariableService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;

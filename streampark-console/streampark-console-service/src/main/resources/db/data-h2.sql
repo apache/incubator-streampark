@@ -64,7 +64,7 @@ insert into `t_menu` values (100015, 100013, 'Application', '/flink/app', 'flink
 insert into `t_menu` values (100016, 100013, 'Add Application', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100017, 100013, 'Add Project', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100018, 100013, 'App Detail', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', 0, null, now(), now());
-insert into `t_menu` values (100019, 100013, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', 1, 3, now(), now());
+insert into `t_menu` values (100019, 100013, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', 1, 4, now(), now());
 insert into `t_menu` values (100020, 100013, 'Edit Flink App', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100021, 100013, 'Edit StreamPark App', '/flink/app/edit_streampark', 'flink/app/EditStreamPark', 'app:update', '', '0', 0, null, now(), now());
 insert into `t_menu` values (100022, 100014, 'build', null, null, 'project:build', null, '1', 1, null, now(), now());
@@ -79,7 +79,7 @@ insert into `t_menu` values (100030, 100015, 'backup rollback', null, null, 'bac
 insert into `t_menu` values (100031, 100015, 'backup delete', null, null, 'backup:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100032, 100015, 'conf delete', null, null, 'conf:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100033, 100015, 'flame Graph', null, null, 'app:flameGraph', null, '1', 1, null, now(), now());
-insert into `t_menu` values (100034, 100013, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', 1, 4, now(), now());
+insert into `t_menu` values (100034, 100013, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', 1, 5, now(), now());
 insert into `t_menu` values (100035, 100034, 'Setting Update', null, null, 'setting:update', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100036, 100013, 'Edit Project', '/flink/project/edit', 'flink/project/Edit', 'project:update', null, '0', 0, null, now(), now());
 insert into `t_menu` values (100037, 100015, 'delete', null, null, 'app:delete', null, '1', 1, null, now(), now());
@@ -99,7 +99,7 @@ insert into `t_menu` values (100050, 100048, 'update', null, null, 'member:updat
 insert into `t_menu` values (100051, 100048, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
-insert into `t_menu` VALUES (100054, 100000, 'Variable Management', '/system/variable', 'system/variable/View', 'variable:view', 'code', '0', 1, 3, now(), now());
+insert into `t_menu` VALUES (100054, 100013, 'Variable', '/system/variable', 'system/variable/View', 'variable:view', 'code', '0', 1, 3, now(), now());
 insert into `t_menu` VALUES (100055, 100054, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100056, 100054, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());

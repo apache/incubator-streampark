@@ -70,7 +70,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             .orElseThrow(() -> new IllegalArgumentException(String.format("The username [%s] not found", username)));
         // Admin has the permission for all menus.
         if (UserType.ADMIN.equals(user.getUserType())) {
-            return this.list(new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0"));
+            return this.list(new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0").orderByAsc(Menu::getOrderNum));
         }
         return this.baseMapper.findUserMenus(username);
     }

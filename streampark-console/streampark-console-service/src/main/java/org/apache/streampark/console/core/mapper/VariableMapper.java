@@ -15,40 +15,21 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.service;
+package org.apache.streampark.console.core.mapper;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.system.entity.Variable;
+import org.apache.streampark.console.core.entity.Variable;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
-public interface VariableService extends IService<Variable> {
+public interface VariableMapper extends BaseMapper<Variable> {
+    IPage<Variable> page(Page<Variable> page, @Param("variable") Variable variable);
 
-    /**
-     * find variable
-     *
-     * @param variable        variable
-     * @param restRequest queryRequest
-     * @return IPage
-     */
-    IPage<Variable> page(Variable variable, RestRequest restRequest);
-
-    /**
-     * get variables through team
-     * @param teamId
-     * @return
-     */
-    List<Variable> findByTeamId(Long teamId);
-
-    /**
-     * create variable
-     *
-     * @param variable variable
-     */
-    void createVariable(Variable variable) throws Exception;
-
-    Variable findByVariableCode(Long teamId, String variableCode);
+    @Select("select * from t_variable where team_id = #{teamId}")
+    List<Variable> selectByTeamId(@Param("teamId") Long teamId);
 }

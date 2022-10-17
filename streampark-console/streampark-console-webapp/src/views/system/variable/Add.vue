@@ -39,7 +39,7 @@
         :help="help">
         <a-input
           @blur="handleVariableCodeBlur"
-          v-decorator="['variableCode', {rules: [{ required: true, max: 50, message: 'please enter Variable Code'}]}]" />
+          v-decorator="['variableCode', {rules: [{ required: true, message: 'please enter Variable Code'}]}]" />
       </a-form-item>
       <a-form-item
         label="Variable Value"
@@ -128,20 +128,28 @@ export default {
       const variableCode = (e && e.target.value) || ''
       if (variableCode.length) {
         this.validateStatus = 'validating'
-        checkVariableCode({
-          variableCode: variableCode
-        }).then((resp) => {
-          if (resp.status !== 'success') {
-            this.validateStatus = 'error'
-            this.help = resp.message
-          } else if (resp.data) {
-            this.validateStatus = 'success'
-            this.help = ''
-          } else {
-            this.validateStatus = 'error'
-            this.help = 'Sorry, the Variable Code already exists'
-          }
-        })
+        if (variableCode.length < 3 || variableCode.length > 50) {
+          this.validateStatus = 'error'
+          this.help = 'Sorry, variable code length should be no less than 3 and no more than 50 characters.'
+        } else if (!new RegExp(/^([A-Za-z])+([A-Za-z0-9._-])+$/).test(variableCode)) {
+          this.validateStatus = 'error'
+          this.help = 'Sorry, variable code can only contain letters, numbers, middle bars, bottom bars and dots, and the beginning can only be letters, For example, kafka_cluster.brokers-520'
+        } else {
+          checkVariableCode({
+            variableCode: variableCode
+          }).then((resp) => {
+            if (resp.status !== 'success') {
+              this.validateStatus = 'error'
+              this.help = resp.message
+            } else if (resp.data) {
+              this.validateStatus = 'success'
+              this.help = ''
+            } else {
+              this.validateStatus = 'error'
+              this.help = 'Sorry, the Variable Code already exists'
+            }
+          })
+        }
       } else {
         this.validateStatus = 'error'
         this.help = 'Variable Code cannot be empty'
