@@ -36,6 +36,8 @@ enum Api {
   Password = '/user/password',
   CheckName = '/user/check/name',
   TYPES = '/user/types',
+  INIT_TEAM = '/user/initTeam',
+  APP_OWNERS = '/user/appOwners',
 }
 
 /**
@@ -170,15 +172,12 @@ export function fetchUserPasswordUpdate(params: { username: string; password: st
   });
 }
 
-export function testRetry() {
-  return defHttp.get(
-    { url: Api.TestRetry },
-    {
-      retryRequest: {
-        isOpenRetry: true,
-        count: 5,
-        waitTime: 1000,
-      },
+export function fetchAppOwners(params) {
+  return defHttp.post({
+    url: Api.APP_OWNERS,
+    params,
+    headers: {
+      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
     },
-  );
+  });
 }
