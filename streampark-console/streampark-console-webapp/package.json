@@ -45,7 +45,7 @@
     "vue-stomp": "0.0.5",
     "vue-svg-component-runtime": "^1.0.1",
     "vue-sweetalert2": "^5.0.2",
-    "vue-template-compiler": "^2.6.14",
+    "vue-template-compiler": "2.6.14",
     "vuex": "^3.6.2",
     "webstomp-client": "^1.2.6",
     "ws": "^8.3.0",
