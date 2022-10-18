@@ -28,6 +28,9 @@ logging:
   level:
     root: info
 
+swagger:
+  enable: false
+
 spring:
   profiles.active: h2 #[h2,pgsql,mysql]
   application.name: StreamPark
