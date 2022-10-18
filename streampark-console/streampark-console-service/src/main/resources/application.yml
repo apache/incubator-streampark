@@ -29,7 +29,7 @@ logging:
     root: info
 
 swagger:
-  enable: false
+  enable: true
 
 spring:
   profiles.active: h2 #[h2,pgsql,mysql]
