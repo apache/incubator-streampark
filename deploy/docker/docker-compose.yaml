@@ -16,7 +16,7 @@
 
 version: '3.8'
 services:
-  streampark-server:
+  streampark-console:
     image: ${HUB}/streampark:${TAG}
     command: ${COMMAND}
     ports:
