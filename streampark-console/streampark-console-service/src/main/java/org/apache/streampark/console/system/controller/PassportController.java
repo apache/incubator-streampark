@@ -67,39 +67,22 @@ public class PassportController {
     public RestResponse signin(
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
-
         if (StringUtils.isEmpty(username)) {
             return RestResponse.success().put("code", 0);
         }
-
         User user = authenticator.authenticate(username, password);
+        return login(username, password, user);
+    }
 
-        if (user == null) {
+    @PostMapping("ldapSignin")
+    public RestResponse ldapSignin(
+        @NotBlank(message = "{required}") String username,
+        @NotBlank(message = "{required}") String password) throws Exception {
+        if (StringUtils.isEmpty(username)) {
             return RestResponse.success().put("code", 0);
         }
-
-        if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put("code", 1);
-        }
-
-        userService.fillInTeam(user);
-
-        //no team.
-        if (user.getTeamId() == null) {
-            return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
-        }
-
-        password = ShaHashUtils.encrypt(user.getSalt(), password);
-
-        this.userService.updateLoginTime(username);
-        String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
-        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
-        String expireTimeStr = DateUtils.formatFullTime(expireTime);
-        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
-        String userId = RandomStringUtils.randomAlphanumeric(20);
-        user.setId(userId);
-        Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
-        return new RestResponse().data(userInfo);
+        User user = authenticator.ldapAuthenticate(username, password);
+        return login(username, password, user);
     }
 
     @PostMapping("signout")
@@ -131,4 +114,31 @@ public class PassportController {
         return userInfo;
     }
 
+    private RestResponse login(String username, String password, User user) throws Exception {
+        if (user == null) {
+            return RestResponse.success().put("code", 0);
+        }
+
+        if (User.STATUS_LOCK.equals(user.getStatus())) {
+            return RestResponse.success().put("code", 1);
+        }
+
+        userService.fillInTeam(user);
+
+        //no team.
+        if (user.getTeamId() == null) {
+            return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
+        }
+
+        password = ShaHashUtils.encrypt(user.getSalt(), password);
+
+        this.userService.updateLoginTime(username);
+        String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
+        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
+        String expireTimeStr = DateUtils.formatFullTime(expireTime);
+        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
+        String userId = RandomStringUtils.randomAlphanumeric(20);
+        user.setId(userId);
+        return new RestResponse().data(this.generateUserInfo(jwtToken, user));
+    }
 }
