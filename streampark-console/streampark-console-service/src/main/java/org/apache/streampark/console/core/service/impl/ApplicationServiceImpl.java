@@ -906,6 +906,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public void forcedStop(Application app) {
         CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(app.getId());
         CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(app.getId());
+        Application application = this.baseMapper.getApp(app);
+        if (isKubernetesApp(application)) {
+            KubernetesDeploymentHelper.watchPodTerminatedLog(application.getK8sNamespace(), application.getJobName());
+            KubernetesDeploymentHelper.deleteTaskDeployment(application.getK8sNamespace(), application.getJobName());
+            KubernetesDeploymentHelper.deleteTaskConfigMap(application.getK8sNamespace(), application.getJobName());
+            IngressController.deleteIngress(application.getK8sNamespace(), application.getJobName());
+        }
         if (startFuture != null) {
             startFuture.cancel(true);
         }
@@ -914,12 +921,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
         if (startFuture == null && cancelFuture == null) {
             this.updateToStopped(app);
-        }
-        if (isKubernetesApp(app)) {
-            KubernetesDeploymentHelper.watchPodTerminatedLog(app.getK8sNamespace(), app.getJobName());
-            KubernetesDeploymentHelper.deleteTaskDeployment(app.getK8sNamespace(), app.getJobName());
-            KubernetesDeploymentHelper.deleteTaskConfigMap(app.getK8sNamespace(), app.getJobName());
-            IngressController.deleteIngress(app.getK8sNamespace(), app.getJobName());
         }
 
     }
