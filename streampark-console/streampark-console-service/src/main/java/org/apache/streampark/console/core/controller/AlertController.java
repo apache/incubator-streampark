@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
@@ -110,10 +111,10 @@ public class AlertController {
 
     @ApiOperation(value = "deleteAlertConfig")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "id", value = "config id", required = true, dataTypeClass = Long.class)
+        @ApiImplicitParam(name = "id", value = "config id", required = true, paramType = "query", dataTypeClass = Long.class)
     })
     @DeleteMapping("/delete")
-    public RestResponse deleteAlertConfig(@NotNull(message = "config id must be not null") Long id) {
+    public RestResponse deleteAlertConfig(@RequestParam("id") @NotNull(message = "config id must be not null") Long id) {
         boolean result = alertConfigService.deleteById(id);
         return RestResponse.success(result);
     }

@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.base.config;
 
-import com.github.xiaoymin.swaggerbootstrapui.annotations.EnableSwaggerBootstrapUI;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -40,7 +39,6 @@ import java.util.Collections;
 
 @Configuration
 @EnableOpenApi
-@EnableSwaggerBootstrapUI
 @ConditionalOnWebApplication
 public class SwaggerConfig implements WebMvcConfigurer {
 

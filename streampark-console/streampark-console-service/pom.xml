@@ -44,7 +44,7 @@
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
 
-        <swagger-bootstrap.version>1.9.3</swagger-bootstrap.version>
+        <swagger-bootstrap.version>2.0.9</swagger-bootstrap.version>
         <springfox.version>3.0.0</springfox.version>
         <commons-compress.version>1.21</commons-compress.version>
         <javax-mail.version>1.4.7</javax-mail.version>
@@ -367,10 +367,15 @@
         <!-- swagger-bootstrap -->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
-            <artifactId>swagger-bootstrap-ui</artifactId>
+            <artifactId>knife4j-spring-ui</artifactId>
             <version>${swagger-bootstrap.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-spring-boot-autoconfigure</artifactId>
+            <version>${swagger-bootstrap.version}</version>
+        </dependency>
     </dependencies>
 
     <profiles>

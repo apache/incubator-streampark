@@ -31,6 +31,14 @@ logging:
 swagger:
   enable: true
 
+knife4j:
+  enable: true
+  basic:
+    # basic authentication, used to access swagger-ui and doc
+    enable: false
+    username: admin
+    password: streampark
+
 spring:
   profiles.active: h2 #[h2,pgsql,mysql]
   application.name: StreamPark

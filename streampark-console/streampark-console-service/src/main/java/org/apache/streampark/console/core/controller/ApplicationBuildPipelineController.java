@@ -69,8 +69,8 @@ public class ApplicationBuildPipelineController {
     @ApiAccess
     @ApiOperation(value = "Launch application", notes = "Launch application", tags = ApiDocConstant.FLINK_APP_OP_TAG, consumes = "application/x-www-form-urlencoded")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "appId", value = "APP_ID", required = true, paramType = "form", dataTypeClass = Long.class),
-        @ApiImplicitParam(name = "forceBuild", value = "FORCE_BUILD", required = true, paramType = "form", dataTypeClass = Boolean.class, defaultValue = "false"),
+        @ApiImplicitParam(name = "appId", value = "APP_ID", required = true, paramType = "query", dataTypeClass = Long.class),
+        @ApiImplicitParam(name = "forceBuild", value = "FORCE_BUILD", required = true, paramType = "query", dataTypeClass = Boolean.class, defaultValue = "false"),
     })
     @PostMapping(value = "build", consumes = "application/x-www-form-urlencoded")
     @RequiresPermissions("app:create")
