@@ -131,7 +131,7 @@ export default {
         if (variableCode.length < 3 || variableCode.length > 50) {
           this.validateStatus = 'error'
           this.help = 'Sorry, variable code length should be no less than 3 and no more than 50 characters.'
-        } else if (!new RegExp(/([A-Za-z])+([A-Za-z0-9._-])+/).test(variableCode)) {
+        } else if (!new RegExp(/^([A-Za-z])+([A-Za-z0-9._-])+$/).test(variableCode)) {
           this.validateStatus = 'error'
           this.help = 'Sorry, variable code can only contain letters, numbers, middle bars, bottom bars and dots, and the beginning can only be letters, For example, kafka_cluster.brokers-520'
         } else {
