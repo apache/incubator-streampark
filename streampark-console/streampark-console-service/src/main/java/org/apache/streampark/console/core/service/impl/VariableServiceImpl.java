@@ -17,13 +17,17 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.mapper.VariableMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.VariableService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -31,32 +35,54 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> implements VariableService {
 
+    private final Pattern placeholderPattern = Pattern.compile("\\$\\{([A-Za-z])+([A-Za-z0-9._-])+\\}");
+
+    private final String placeholderLeft = "${";
+
+    private final String placeholderRight  = "}";
+
     @Autowired
     private ApplicationService applicationService;
+
+    @Autowired
+    private FlinkSqlService flinkSqlService;
 
     @Autowired
     private CommonService commonService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void createVariable(Variable variable) throws Exception {
+    public void createVariable(Variable variable) {
         if (this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null) {
             throw new ApiAlertException("Sorry, the variable code already exists.");
         }
         variable.setCreatorId(commonService.getUserId());
         this.save(variable);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteVariable(Variable variable) {
+        if (isDependByApplications(variable)) {
+            throw new ApiAlertException("Sorry, the variable is actually used.");
+        }
+        this.removeById(variable);
     }
 
     @Override
@@ -78,5 +104,66 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     @Override
     public List<Variable> findByTeamId(Long teamId) {
         return baseMapper.selectByTeamId(teamId);
+    }
+
+    /**
+     * Replace placeholders with defined variable codes.
+     * @param teamId
+     * @param paramWithPlaceholders Parameters with placeholders
+     * @return
+     */
+    @Override
+    public String replacePlaceholder(Long teamId, String paramWithPlaceholders) {
+        if (StringUtils.isEmpty(paramWithPlaceholders)) {
+            return paramWithPlaceholders;
+        }
+        String restore = paramWithPlaceholders;
+        Matcher matcher = placeholderPattern.matcher(paramWithPlaceholders);
+        while (matcher.find()) {
+            String placeholder = matcher.group();
+            String variableCode = getCodeFromPlaceholder(placeholder);
+            Variable variable = findByVariableCode(teamId, variableCode);
+            if (variable != null) {
+                restore = restore.replace(placeholder, variable.getVariableValue());
+            }
+        }
+        return restore;
+    }
+
+    private boolean isDependByApplications(Variable variable) {
+        // Detect whether the variable is dependent on the args of the application
+        List<Application> applications = applicationService.getByTeamId(variable.getTeamId());
+        Iterator<Application> appIt = applications.iterator();
+        while (appIt.hasNext()) {
+            Application application = appIt.next();
+            Matcher matcher = placeholderPattern.matcher(application.getArgs());
+            if (matcher.find()) {
+                String placeholder = matcher.group();
+                String dependVariableCode = getCodeFromPlaceholder(placeholder);
+                if (variable.getVariableCode().equals(dependVariableCode)) {
+                    return true;
+                }
+            }
+        }
+
+        // Detect whether variables are dependent on all versions of flink sql
+        List<FlinkSql> sqls = flinkSqlService.getByTeamId(variable.getTeamId());
+        Iterator<FlinkSql> sqlIt = sqls.iterator();
+        while (sqlIt.hasNext()) {
+            FlinkSql sql = sqlIt.next();
+            Matcher matcher = placeholderPattern.matcher(DeflaterUtils.unzipString(sql.getSql()));
+            if (matcher.find()) {
+                String placeholder = matcher.group();
+                String dependVariableCode = getCodeFromPlaceholder(placeholder);
+                if (variable.getVariableCode().equals(dependVariableCode)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private String getCodeFromPlaceholder(String placeholder) {
+        return placeholder.substring(placeholderLeft.length(), placeholder.length() - placeholderRight.length());
     }
 }

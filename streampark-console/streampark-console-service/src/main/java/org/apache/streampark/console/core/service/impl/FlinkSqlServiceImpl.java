@@ -30,6 +30,7 @@ import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
+import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 import org.apache.streampark.flink.proxy.FlinkShimsProxy;
 
@@ -59,6 +60,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Autowired
     private FlinkEnvService flinkEnvService;
+
+    @Autowired
+    private VariableService variableService;
 
     @Override
     public FlinkSql getEffective(Long appId, boolean decode) {
@@ -199,5 +203,10 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             }
             return null;
         });
+    }
+
+    @Override
+    public List<FlinkSql> getByTeamId(Long teamId) {
+        return this.baseMapper.getByTeamId(teamId);
     }
 }

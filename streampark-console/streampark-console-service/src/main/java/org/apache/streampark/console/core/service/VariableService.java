@@ -48,7 +48,11 @@ public interface VariableService extends IService<Variable> {
      *
      * @param variable variable
      */
-    void createVariable(Variable variable) throws Exception;
+    void createVariable(Variable variable);
+
+    void deleteVariable(Variable variable);
 
     Variable findByVariableCode(Long teamId, String variableCode);
+
+    String replacePlaceholder(Long teamId, String paramWithPlaceholders);
 }
