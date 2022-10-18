@@ -157,7 +157,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
           val sqlConf = mutable.Map[String, String]()
           configMap.foreach(x => {
             if (x._1.startsWith(KEY_SQL_PREFIX)) {
-              sqlConf += x._1.replaceFirst(s"^$KEY_SQL_PREFIX", "") -> x._2
+              sqlConf += x._1.drop(KEY_SQL_PREFIX.length) -> x._2
             }
           })
 

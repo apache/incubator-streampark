@@ -128,10 +128,10 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     val envConf = mutable.Map[String, String]()
     configMap.foreach(x => {
       if (x._1.startsWith(KEY_ENV_PROPERTY_PREFIX)) {
-        envConf += x._1.replaceFirst(s"^$KEY_ENV_PROPERTY_PREFIX", "") -> x._2
+        envConf += x._1.drop(KEY_ENV_PROPERTY_PREFIX.length) -> x._2
       }
       if (x._1.startsWith(KEY_APP_PREFIX)) {
-        appConf += x._1.replaceFirst(s"^$KEY_APP_PREFIX", "") -> x._2
+        appConf += x._1.drop(KEY_APP_PREFIX.length) -> x._2
       }
     })
     envConf -> appConf
