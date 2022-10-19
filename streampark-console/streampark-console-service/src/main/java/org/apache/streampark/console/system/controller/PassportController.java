@@ -42,9 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @Validated
 @RestController
@@ -91,29 +89,6 @@ public class PassportController {
         return new RestResponse();
     }
 
-    /**
-     * generate user info, contains: 1.token, 2.vue router, 3.role, 4.permission, 5.personalized config info of frontend
-     *
-     * @param token token
-     * @param user  user
-     * @return UserInfo
-     */
-    private Map<String, Object> generateUserInfo(JWTToken token, User user) {
-        String username = user.getUsername();
-        Map<String, Object> userInfo = new HashMap<>(8);
-        userInfo.put("token", token.getToken());
-        userInfo.put("expire", token.getExpireAt());
-
-        Set<String> roles = this.roleService.getUserRoleName(username);
-        userInfo.put("roles", roles);
-
-        Set<String> permissions = this.userService.getPermissions(username);
-        userInfo.put("permissions", permissions);
-        user.dataMasking();
-        userInfo.put("user", user);
-        return userInfo;
-    }
-
     private RestResponse login(String username, String password, User user) throws Exception {
         if (user == null) {
             return RestResponse.success().put("code", 0);
@@ -139,6 +114,7 @@ public class PassportController {
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
-        return new RestResponse().data(this.generateUserInfo(jwtToken, user));
+        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, jwtToken);
+        return new RestResponse().data(userInfo);
     }
 }

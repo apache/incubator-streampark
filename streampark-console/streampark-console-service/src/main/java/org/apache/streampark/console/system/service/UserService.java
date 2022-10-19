@@ -18,12 +18,14 @@
 package org.apache.streampark.console.system.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.User;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface UserService extends IService<User> {
@@ -112,4 +114,6 @@ public interface UserService extends IService<User> {
     void fillInTeam(User user);
 
     List<User> findByAppOwner(Long teamId);
+
+    Map<String, Object> generateFrontendUserInfo(User user, JWTToken token);
 }

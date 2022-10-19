@@ -228,7 +228,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['SignOut','ChangeTheme', 'SetTeam']),
+    ...mapActions(['SignOut','ChangeTheme', 'SetTeam', 'GetRouter']),
     handleLogout () {
       const that = this
       this.$confirm({
@@ -335,7 +335,6 @@ export default {
     },
 
     handleRefreshPage() {
-      const defaultPage = '/flink/app'
       const pages = [
         '/system/user',
         '/system/role',
@@ -354,9 +353,19 @@ export default {
       const currPath = location.href.replace(/(.*)#/,'')
       if (!skipPages.includes(currPath)) {
         if (pages.includes(currPath)) {
-          window.location.reload()
+          this.GetRouter({}).then(resp => {
+            const routers = resp || []
+            if (routers != null) {
+              const hasAuth = this.handleFilterRouter(routers[0], currPath)
+              if (hasAuth) {
+                window.location.reload()
+              } else {
+                window.location.href = '/'
+              }
+            }
+          })
         } else {
-          this.$router.push({path: defaultPage})
+          window.location.href = '/'
         }
       }
     },
@@ -368,6 +377,25 @@ export default {
         this.teamList = r.data
       })
     },
+
+    handleFilterRouter(src, target) {
+      if (src.path === target) {
+        if (src.meta && src.meta.hidden) {
+          return false
+        }
+        return true
+      }
+      if (src.children && src.children.length > 0) {
+        for (let i=0; i< src.children.length; i++) {
+          const child = src.children[i]
+          if (this.handleFilterRouter(child, target)) {
+            return true
+          }
+        }
+        return false
+      }
+    }
+
   },
   watch: {
     visible() {

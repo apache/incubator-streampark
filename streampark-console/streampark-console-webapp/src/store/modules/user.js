@@ -61,6 +61,10 @@ const user = {
       storage.set(USER_ROUTER, routers)
       state.routers = routers
     },
+    CLEAR_ROUTERS: (state, empty) => {
+      state.roles = null
+      storage.rm(USER_ROUTER)
+    },
     SET_INFO: (state, info) => {
       storage.set(USER_INFO, info)
       storage.set(USER_NAME, info.username)
@@ -149,6 +153,7 @@ const user = {
             commit('SET_ROLES', respData.roles)
             commit('SET_PERMISSIONS', respData.permissions)
             commit('SET_INFO', respData.user)
+            commit('CLEAR_ROUTERS', null)
             resolve()
           }).catch(error => {
             reject(error)
