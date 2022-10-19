@@ -23,6 +23,7 @@ export const getAppColumns = (): BasicColumn[] => [
     title: 'Application Name',
     dataIndex: 'jobName',
     align: 'left',
+    fixed: 'left',
     width: 300,
   },
   {

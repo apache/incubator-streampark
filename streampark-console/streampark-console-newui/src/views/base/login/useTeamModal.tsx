@@ -19,15 +19,12 @@ import { ref } from 'vue';
 import { getTeamList } from '/@/api/system/team';
 import Icon from '/@/components/Icon';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { useUserStoreWithOut } from '/@/store/modules/user';
-
-export const useTeamModal = () => {
-  const userStore = useUserStoreWithOut();
+import { useUserStore } from '/@/store/modules/user';
+export const useTeamModal = (handleTeamSelect: Fn) => {
   const teamId = ref('');
   const { createConfirm, createMessage } = useMessage();
-
+  const userStore = useUserStore();
   async function createTeamModal() {
-    const teamList: Array<Recordable> = await getTeamList({});
     createConfirm({
       iconType: 'warning',
       title: () => {
@@ -41,21 +38,21 @@ export const useTeamModal = () => {
       content: () => {
         return (
           <div>
-            <Icon icon="ant-design:setting-outlined" />
-            <Select value={teamId} onChange={(value: string) => (teamId.value = value)}>
-              {teamList.map((team: Recordable) => {
-                return <Select.Option value={team.id}>{team.teamName}</Select.Option>;
-              })}
-            </Select>
+            <span>Team</span>
+            <Select
+              value={teamId}
+              onChange={(value: string) => (teamId.value = value)}
+              options={userStore.getTeamList}
+            ></Select>
           </div>
         );
       },
-      onOk: () => {
+      onOk: async () => {
         if (!teamId.value) {
           createMessage.warning('please select a team');
           return Promise.reject();
         }
-        userStore.setTeamId(teamId.value);
+        await handleTeamSelect(teamId.value);
         return Promise.resolve();
       },
     });

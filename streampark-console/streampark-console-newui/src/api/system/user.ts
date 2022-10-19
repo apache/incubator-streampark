@@ -1,4 +1,3 @@
-import { AxiosResponse } from 'axios';
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,8 +14,14 @@ import { AxiosResponse } from 'axios';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { AxiosResponse } from 'axios';
 import { defHttp } from '/@/utils/http/axios';
-import { LoginParams, LoginResultModel, GetUserInfoModel } from './model/userModel';
+import {
+  LoginParams,
+  LoginResultModel,
+  GetUserInfoModel,
+  TeamSetResponse,
+} from './model/userModel';
 
 import { ErrorMessageMode, Result } from '/#/axios';
 import { ContentTypeEnum } from '/@/enums/httpEnum';
@@ -36,6 +41,7 @@ enum Api {
   Password = '/user/password',
   CheckName = '/user/check/name',
   TYPES = '/user/types',
+  SET_TEAM = '/user/setTeam',
   INIT_TEAM = '/user/initTeam',
   APP_OWNERS = '/user/appOwners',
 }
@@ -175,6 +181,26 @@ export function fetchUserPasswordUpdate(params: { username: string; password: st
 export function fetchAppOwners(params) {
   return defHttp.post({
     url: Api.APP_OWNERS,
+    params,
+    headers: {
+      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
+    },
+  });
+}
+
+export function fetchInitUserTeam(params: { userId: string; teamId: string }) {
+  return defHttp.post({
+    url: Api.INIT_TEAM,
+    params,
+    headers: {
+      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
+    },
+  });
+}
+
+export function fetchSetUserTeam(params: { teamId: string }) {
+  return defHttp.post<TeamSetResponse>({
+    url: Api.SET_TEAM,
     params,
     headers: {
       'Content-Type': ContentTypeEnum.FORM_URLENCODED,

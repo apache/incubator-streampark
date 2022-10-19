@@ -1,4 +1,3 @@
-import { AxiosResponse } from 'axios';
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,11 +17,16 @@ import { AxiosResponse } from 'axios';
 import { defHttp } from '/@/utils/http/axios';
 import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { Result } from '/#/axios';
-
+import { AxiosResponse } from 'axios';
 export interface AddMemberParams {
   teamId: string;
   userName: string;
   roleId: number;
+}
+
+export interface TeamMemberResp {
+  id: string;
+  teamName: string;
 }
 
 export interface UpdateMemberParams extends AddMemberParams {
@@ -89,7 +93,7 @@ export function fetchUpdateMember(params) {
  * @returns Promise<Array<{ id: string; teamName: string }>>
  */
 export function fetchUserTeam(params: { userId: number | string }) {
-  return defHttp.post<Array<{ id: string; teamName: string }>>({
+  return defHttp.post<Array<TeamMemberResp>>({
     url: MEMBER_API.TEAMS,
     params,
     headers: {

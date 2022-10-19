@@ -32,7 +32,7 @@
         :check-strictly="false"
         :checkable="true"
         :defaultExpandedKeys="checkedKeys"
-        :defaultCheckedKeys="checkedKeys"
+        v-model:checkedKeys="checkedKeys"
         v-if="menuTreeData.length > 0"
         :tree-data="menuTreeData"
       />
@@ -41,7 +41,7 @@
 </template>
 <script lang="ts">
   export default defineComponent({
-    name: 'RoleDrawer',
+    name: 'RoleInfo',
   });
 </script>
 

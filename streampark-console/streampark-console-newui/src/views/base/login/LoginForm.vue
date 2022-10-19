@@ -70,28 +70,9 @@
       <Button type="primary" block @click="handleLogin" :loading="loading">
         {{ t('sys.login.loginButton') }}
       </Button>
-      <!-- <Button size="large" class="mt-4 enter-x" block @click="handleRegister">
-        {{ t('sys.login.registerButton') }}
-      </Button> -->
     </FormItem>
-    <!-- <ARow class="enter-x">
-      <ACol :md="8" :xs="24">
-        <Button block @click="setLoginState(LoginStateEnum.MOBILE)">
-          {{ t('sys.login.mobileSignInFormTitle') }}
-        </Button>
-      </ACol>
-      <ACol :md="8" :xs="24" class="!my-2 !md:my-0 xs:mx-0 md:mx-2">
-        <Button block @click="setLoginState(LoginStateEnum.QR_CODE)">
-          {{ t('sys.login.qrSignInFormTitle') }}
-        </Button>
-      </ACol>
-      <ACol :md="6" :xs="24">
-        <Button block @click="setLoginState(LoginStateEnum.REGISTER)">
-          {{ t('sys.login.registerButton') }}
-        </Button>
-      </ACol>
-    </ARow> -->
   </Form>
+  <TeamModal v-model:visible="modelVisible" :userId="userId" @success="handleTeamSuccess" />
 </template>
 <script lang="ts" setup>
   import { reactive, ref, unref, computed } from 'vue';
@@ -107,22 +88,25 @@
   import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { loginApi } from '/@/api/system/user';
-  //import { onKeyStroke } from '@vueuse/core';
+  import { APP_TEAMID_KEY_ } from '/@/enums/cacheEnum';
+  import TeamModal from './teamModal.vue';
+  import { fetchUserTeam } from '/@/api/system/member';
 
   const ACol = Col;
   const ARow = Row;
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
   const { t } = useI18n();
-  const { notification, createErrorModal } = useMessage();
+  const { notification, createErrorModal, createMessage } = useMessage();
   const { prefixCls } = useDesign('login');
   const userStore = useUserStore();
-
   const { setLoginState, getLoginState } = useLoginState();
   const { getFormRules } = useFormRules();
 
   const formRef = ref();
   const loading = ref(false);
+  const userId = ref('');
+  const modelVisible = ref(false);
   const rememberMe = ref(false);
 
   const formData = reactive({
@@ -132,53 +116,16 @@
 
   const { validForm } = useFormValid(formRef);
 
-  //onKeyStroke('Enter', handleLogin);
-
   const getShow = computed(() => unref(getLoginState) === LoginStateEnum.LOGIN);
-  async function createTeamModal(): Promise<void> {
-    // let teamId = '';
-    // const teamList: Array<Recordable> = await getTeamList({});
-    // console.log('teamList', teamList);
-    // const { createConfirm, createMessage } = useMessage();
-    // createConfirm({
-    //   iconType: 'warning',
-    //   title: () => {
-    //     return (
-    //       <div>
-    //         <Icon icon="ant-design:setting-outlined" />
-    //         <span>Select Team</span>
-    //       </div>
-    //     );
-    //   },
-    //   content: () => {
-    //     return (
-    //       <div>
-    //         <Icon icon="ant-design:setting-outlined" />
-    //         <Select value={teamId} onChange={(value: string) => (teamId = value)}>
-    //           {teamList.map((team: Recordable) => {
-    //             return <Select.Option value={team.id}>{team.teamName}</Select.Option>;
-    //           })}
-    //         </Select>
-    //       </div>
-    //     );
-    //   },
-    //   onOk: () => {
-    //     if (!teamId) {
-    //       createMessage.warning('please select a team');
-    //       return Promise.reject();
-    //     }
-    //     this.setTeamId(teamId);
-    //     return Promise.resolve();
-    //   },
-    // });
-  }
+
   async function handleLogin() {
     const loginFormValue = await validForm();
     if (!loginFormValue) return;
+    handleLoginAction(loginFormValue);
+  }
+  async function handleLoginAction(loginFormValue: { password: string; account: string }) {
     try {
       loading.value = true;
-      const { createMessage } = useMessage();
-      // const { t } = useI18n();
       try {
         const { data } = await loginApi(
           {
@@ -197,28 +144,38 @@
             createMessage.error(message);
             return;
           } else if (code == 403) {
-            await createTeamModal();
+            userId.value = data.data as unknown as string;
+            const teamList = await fetchUserTeam({ userId: userId.value });
+            userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
+
+            modelVisible.value = true;
+            return;
           } else {
             console.log(data);
           }
         }
         userStore.setData(data.data);
-        const userInfo = await userStore.afterLoginAction(true);
-        userInfo &&
+        let successText = t('sys.login.loginSuccessDesc');
+        if (data.data?.user) {
+          const { teamId, nickName } = data.data.user;
+          userStore.teamId = teamId || '';
+          sessionStorage.setItem(APP_TEAMID_KEY_, teamId || '');
+          localStorage.setItem(APP_TEAMID_KEY_, teamId || '');
+          successText += `: ${nickName}`;
+        }
+
+        const loginSuccess = await userStore.afterLoginAction(true);
+        if (loginSuccess) {
           notification.success({
             message: t('sys.login.loginSuccessTitle'),
-            description: `${t('sys.login.loginSuccessDesc')}: ${userInfo.nickName}`,
+            description: successText,
             duration: 3,
           });
-      } catch (error) {
-        // createErrorModal({ title: t('sys.api.errorTip'), content: 'login failed' });
+        }
+      } catch (error: any) {
+        createMessage.error(error.response?.data?.data?.message || 'login failed');
         return Promise.reject(error);
       }
-      // const userInfo = await userStore.login({
-      //   password: data.password,
-      //   username: data.account,
-      //   mode: 'none', //Do not default to the error message
-      // });
     } catch (error) {
       createErrorModal({
         title: t('sys.api.errorTip'),
@@ -228,5 +185,10 @@
     } finally {
       loading.value = false;
     }
+  }
+
+  function handleTeamSuccess() {
+    modelVisible.value = false;
+    handleLogin();
   }
 </script>

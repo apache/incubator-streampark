@@ -44,7 +44,7 @@
       <div :class="`${prefixCls}-entry`" v-show="!showDate">
         <div :class="`${prefixCls}-entry-content`">
           <div :class="`${prefixCls}-entry__header enter-x`">
-            <img :src="userinfo.avatar || headerImg" :class="`${prefixCls}-entry__header-img`" />
+            <img :src="getUserAvatar" :class="`${prefixCls}-entry__header-img`" />
             <p :class="`${prefixCls}-entry__header-name`">
               {{ userinfo.username }}
             </p>
@@ -110,6 +110,9 @@
   const errMsg = ref(false);
   const showDate = ref(true);
 
+  const getUserAvatar = computed(() => {
+    return userinfo.value.avatar !== 'default.jpg' ? userinfo.value.avatar : headerImg;
+  });
   const { prefixCls } = useDesign('lock-page');
   const lockStore = useLockStore();
   const userStore = useUserStore();

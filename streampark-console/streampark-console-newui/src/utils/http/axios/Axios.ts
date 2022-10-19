@@ -194,8 +194,17 @@ export class VAxios {
   get<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
     return this.request({ ...config, method: 'GET' }, options);
   }
-
+  // form data
   post<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+    if (config.headers) {
+      Object.assign(config.headers, {
+        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
+      });
+    }
+    return this.request({ ...config, method: 'POST' }, options);
+  }
+  // json
+  postJson<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
     return this.request({ ...config, method: 'POST' }, options);
   }
 

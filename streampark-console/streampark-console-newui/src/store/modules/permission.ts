@@ -39,6 +39,10 @@ import { getPermCode } from '/@/api/system/user';
 
 import { useMessage } from '/@/hooks/web/useMessage';
 import { PageEnum } from '/@/enums/pageEnum';
+import { fetchUserTeam } from '/@/api/system/member';
+import { Persistent } from '/@/utils/cache/persistent';
+import { USER_INFO_KEY } from '/@/enums/cacheEnum';
+import { UserInfo } from '/#/store';
 
 interface PermissionState {
   // Permission code list
@@ -121,7 +125,12 @@ export const usePermissionStore = defineStore({
       const { t } = useI18n();
       const userStore = useUserStore();
       const appStore = useAppStoreWithOut();
-
+      // get teamList
+      const { userId } = Persistent.getLocal(USER_INFO_KEY) as UserInfo;
+      if (userStore.teamList.length == 0 && userId) {
+        const teamList = await fetchUserTeam({ userId });
+        userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
+      }
       let routes: AppRouteRecordRaw[] = [];
       const roleList = toRaw(userStore.getRoleList) || [];
       const { permissionMode = projectSetting.permissionMode } = appStore.getProjectConfig;

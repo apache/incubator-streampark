@@ -31,9 +31,11 @@ export interface RoleInfo {
  * @description: Login interface return value
  */
 export interface LoginResultModel {
-  userId: string | number;
+  expire?: string;
+  permissions: string[];
+  roles: string[];
   token: string;
-  role: RoleInfo;
+  user: GetUserInfoModel;
 }
 
 /**
@@ -46,4 +48,10 @@ export interface GetUserInfoModel {
   nickName: string;
   avatar: string;
   desc?: string;
+  teamId?: string;
+}
+export interface TeamSetResponse {
+  permissions: string[];
+  roles: string[];
+  user: GetUserInfoModel;
 }

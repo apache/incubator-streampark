@@ -116,7 +116,9 @@
     title: t('system.member.table.title'),
     api: fetchMemberList,
     beforeFetch: (params) => {
-      params.teamId = userStore.getTeamId;
+      if (params?.sortField) {
+        params.sortField = params.sortField.replace(/([a-z])([A-Z])/, '$1_$2').toLowerCase();
+      }
       return params;
     },
     columns: [

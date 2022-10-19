@@ -140,7 +140,7 @@ const transform: AxiosTransform = {
       if (!isString(params)) {
         // Add a timestamp parameter to the get request to avoid taking data from the cache.
         config.params = Object.assign(params || {}, joinTimestamp(joinTime, false));
-        if (teamId) config.params['teamId'] = teamId;
+        if (!config.params['teamId'] && teamId) config.params['teamId'] = teamId;
       } else {
         config.url = config.url + params + `${joinTimestamp(joinTime, true)}`;
         config.params = undefined;
@@ -156,7 +156,7 @@ const transform: AxiosTransform = {
           config.data = params;
           config.params = undefined;
         }
-        if (teamId) config.data['teamId'] = teamId;
+        if (!config.data['teamId'] && teamId) config.data['teamId'] = teamId;
         if (joinParamsToUrl) {
           config.url = setObjToUrlParams(
             config.url as string,
@@ -252,7 +252,10 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
         // authentication schemes，e.g: Bearer
         // authenticationScheme: 'Bearer',
         authenticationScheme: '',
-        timeout: 10 * 1000,
+        timeout: 30 * 1000,
+        withCredentials: false,
+        responseType: 'json',
+
         // baseURL: globSetting.apiUrl,
 
         headers: { 'Content-Type': ContentTypeEnum.JSON },

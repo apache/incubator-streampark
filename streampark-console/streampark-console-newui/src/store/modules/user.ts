@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import type { UserInfo } from '/#/store';
-import type { ErrorMessageMode } from '/#/axios';
 import { defineStore } from 'pinia';
 import { store } from '/@/store';
 import { RoleEnum } from '/@/enums/roleEnum';
@@ -29,8 +28,7 @@ import {
   USER_INFO_KEY,
 } from '/@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '/@/utils/auth';
-import { GetUserInfoModel, LoginParams } from '/@/api/system/model/userModel';
-import { doLogout, loginApi } from '/@/api/system/user';
+import { doLogout, fetchInitUserTeam, fetchSetUserTeam } from '/@/api/system/user';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { router } from '/@/router';
@@ -40,7 +38,12 @@ import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 import { h } from 'vue';
 import { SignOut } from '/@/adapter/store/modules/user';
 import { getUserTeamId } from '/@/utils';
+import { usePermission } from '/@/hooks/web/usePermission';
 
+interface TeamListType {
+  label: string;
+  value: string;
+}
 interface UserState {
   userInfo: Nullable<UserInfo>;
   token?: string;
@@ -49,7 +52,8 @@ interface UserState {
   permissions: string[];
   sessionTimeout?: boolean;
   lastUpdateTime: number;
-  teamId?: string;
+  teamId: string;
+  teamList: Array<TeamListType>;
 }
 
 export const useUserStore = defineStore({
@@ -69,6 +73,8 @@ export const useUserStore = defineStore({
     lastUpdateTime: 0,
     // user Team
     teamId: getUserTeamId(),
+    // Maintain teamlist data
+    teamList: [],
   }),
   getters: {
     getUserInfo(): UserInfo {
@@ -96,6 +102,9 @@ export const useUserStore = defineStore({
     },
     getTeamId(): string | undefined {
       return this.teamId;
+    },
+    getTeamList(): TeamListType[] {
+      return this.teamList;
     },
   },
   actions: {
@@ -129,7 +138,7 @@ export const useUserStore = defineStore({
       this.permissions = permissions;
       setAuthCache(PERMISSION_KEY, permissions);
     },
-    setData(data) {
+    setData(data: Recordable) {
       const { token, expire, user, permissions, roles } = data;
 
       this.setToken(token);
@@ -138,47 +147,37 @@ export const useUserStore = defineStore({
       this.setRoleList(roles);
       this.setPermissions(permissions);
     },
-    setTeamId(teamId: string) {
-      this.teamId = teamId;
-      sessionStorage.setItem(APP_TEAMID_KEY_, teamId);
-      localStorage.setItem(APP_TEAMID_KEY_, teamId);
-    },
-    /**
-     * @description: login
-     */
-    async login(
-      params: LoginParams & {
-        goHome?: boolean;
-        mode?: ErrorMessageMode;
-      },
-    ): Promise<GetUserInfoModel | null> {
-      const { createMessage } = useMessage();
-      // const { t } = useI18n();
+    // set team
+    async setTeamId(data: { teamId: string; userId?: string }): Promise<boolean> {
       try {
-        const { goHome = true, mode, ...loginParams } = params;
+        const { refreshMenu } = usePermission();
 
-        const { data } = await loginApi(loginParams, mode);
+        // The userId passed in is the binding operation at login
+        if (data.userId) {
+          await fetchInitUserTeam(data as { teamId: string; userId: string });
+        } else {
+          const resp = await fetchSetUserTeam(data);
 
-        const { code } = data;
-        if (code != null && code != undefined) {
-          if (code == 0 || code == 1) {
-            const message =
-              'SignIn failed,' +
-              (code === 0 ? ' authentication error' : ' current User is locked.');
-            createMessage.error(message);
-          } else {
-            console.log(data);
-          }
+          const { permissions, roles, user } = resp;
+          this.setUserInfo(user);
+          this.setRoleList(roles as RoleEnum[]);
+          this.setPermissions(permissions);
+          refreshMenu();
         }
-        this.setData(data.data);
-        return this.afterLoginAction(goHome);
+        // If it returns success, it will be stored in the local cache
+        this.teamId = data.teamId;
+        sessionStorage.setItem(APP_TEAMID_KEY_, data.teamId);
+        localStorage.setItem(APP_TEAMID_KEY_, data.teamId);
+        return Promise.resolve(true);
       } catch (error) {
-        // createErrorModal({ title: t('sys.api.errorTip'), content: 'login failed' });
         return Promise.reject(error);
       }
     },
-    async afterLoginAction(goHome?: boolean): Promise<GetUserInfoModel | null> {
-      if (!this.getToken) return null;
+    setTeamList(teamList: Array<TeamListType>) {
+      this.teamList = teamList;
+    },
+    async afterLoginAction(goHome?: boolean): Promise<boolean> {
+      if (!this.getToken) return false;
       const sessionTimeout = this.sessionTimeout;
       if (sessionTimeout) {
         this.setSessionTimeout(false);
@@ -194,6 +193,7 @@ export const useUserStore = defineStore({
             permissionStore.setDynamicAddedRoute(true);
           }
           goHome && (await router.replace(PageEnum.BASE_HOME));
+          return true;
         } catch (error) {
           this.setToken(undefined);
           this.setSessionTimeout(false);
@@ -201,7 +201,7 @@ export const useUserStore = defineStore({
           console.error(error, 'error');
         }
       }
-      return null;
+      return false;
     },
     /**
      * @description: logout
@@ -219,6 +219,8 @@ export const useUserStore = defineStore({
       this.setToken(undefined);
       this.setSessionTimeout(false);
       this.setUserInfo(null);
+      sessionStorage.removeItem(APP_TEAMID_KEY_);
+      localStorage.removeItem(APP_TEAMID_KEY_);
       goLogin && router.push(PageEnum.BASE_LOGIN);
     },
 

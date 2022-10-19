@@ -94,6 +94,12 @@
       const [registerTable, { reload }] = useTable({
         title: '',
         api: getUserList,
+        beforeFetch: (params) => {
+          if (params.sortField === 'createTime') {
+            params.sortField = 'create_time';
+          }
+          return params;
+        },
         columns,
         formConfig: {
           labelWidth: 120,

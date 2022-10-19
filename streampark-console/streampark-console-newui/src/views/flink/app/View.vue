@@ -542,6 +542,7 @@
             <span
               v-for="(tag, index) in record.tags.split(',')"
               :key="'tag-'.concat(index.toString())"
+              class="pl-4px"
             >
               <Tag color="blue" class="app-tag">{{ tag }}</Tag>
             </span>

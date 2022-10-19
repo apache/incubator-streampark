@@ -174,7 +174,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       field: 'status',
       label: 'Status',
       component: 'RadioGroup',
-      defaultValue: StatusEnum.Locked,
+      defaultValue: StatusEnum.Effective,
       componentProps: {
         options: [
           { label: 'locked', value: StatusEnum.Locked },
