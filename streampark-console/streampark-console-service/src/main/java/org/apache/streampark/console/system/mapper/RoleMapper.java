@@ -28,7 +28,7 @@ import java.util.List;
 
 public interface RoleMapper extends BaseMapper<Role> {
 
-    List<Role> findUserRole(String userName);
+    List<Role> findUserRole(Long userId);
 
     IPage<Role> findRole(Page<Role> page, @Param("role") Role role);
 }
