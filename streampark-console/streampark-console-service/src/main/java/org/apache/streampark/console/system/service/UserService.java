@@ -24,6 +24,8 @@ import org.apache.streampark.console.system.entity.User;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,7 +107,16 @@ public interface UserService extends IService<User> {
      */
     void resetPassword(String[] usernames) throws Exception;
 
-    Set<String> getPermissions(String username);
+    Set<String> getAllTeamPermissions(String username);
+
+    /**
+     * Get the permissions of current userId.
+     *
+     * @param userId the user Id
+     * @param teamId team id. If it's null, will find permissions from all teams.
+     * @return permissions
+     */
+    Set<String> getPermissions(Long userId, @Nullable Long teamId);
 
     List<User> getNoTokenUser();
 
@@ -115,5 +126,5 @@ public interface UserService extends IService<User> {
 
     List<User> findByAppOwner(Long teamId);
 
-    Map<String, Object> generateFrontendUserInfo(User user, JWTToken token);
+    Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
 }

@@ -27,7 +27,7 @@ import java.util.List;
 
 public interface MenuMapper extends BaseMapper<Menu> {
 
-    List<Menu> findUserPermissions(String userName);
+    List<String> findUserPermissions(@Param("userId") Long userId, @Param("teamId") Long teamId);
 
     List<Menu> findUserMenus(@Param("userId")Long userId, @Param("teamId") Long teamId);
 

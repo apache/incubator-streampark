@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -54,20 +55,20 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     private UserService userService;
 
     @Override
-    public List<Menu> findUserPermissions(String username) {
-        User user = Optional.ofNullable(userService.findByName(username))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The username [%s] not found", username)));
+    public List<String> findUserPermissions(Long userId, Long teamId) {
+        User user = Optional.ofNullable(userService.getById(userId))
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The userId [%s] not found", userId)));
         // Admin has the permission for all menus.
         if (UserType.ADMIN.equals(user.getUserType())) {
-            return this.list();
+            return this.list().stream().map(Menu::getPerms).collect(Collectors.toList());
         }
-        return this.baseMapper.findUserPermissions(username);
+        return this.baseMapper.findUserPermissions(userId, teamId);
     }
 
     @Override
     public List<Menu> findUserMenus(Long userId, Long teamId) {
         User user = Optional.ofNullable(userService.getById(userId))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The user, id:[%s] not found", userId)));
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The userId:[%s] not found", userId)));
         // Admin has the permission for all menus.
         if (UserType.ADMIN.equals(user.getUserType())) {
             return this.list(new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0").orderByAsc(Menu::getOrderNum));

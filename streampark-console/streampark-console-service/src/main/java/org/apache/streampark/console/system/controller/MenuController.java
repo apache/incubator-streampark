@@ -54,6 +54,7 @@ public class MenuController {
 
     @PostMapping("router")
     public RestResponse getUserRouters(Long teamId) {
+        // TODO The teamId is required, get routers should be called after choose teamId.
         ArrayList<VueRouter<Menu>> routers = this.menuService.getUserRouters(commonService.getUserId(), teamId);
         return RestResponse.success(routers);
     }

@@ -189,7 +189,7 @@ public class UserController {
         //2) get latest userInfo
         user.dataMasking();
 
-        Map<String, Object> infoMap = userService.generateFrontendUserInfo(user, null);
+        Map<String, Object> infoMap = userService.generateFrontendUserInfo(user, teamId, null);
         return new RestResponse().data(infoMap);
     }
 
