@@ -127,10 +127,13 @@ insert into `t_menu` values (100050, 100048, 'update', null, null, 'member:updat
 insert into `t_menu` values (100051, 100048, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
-insert into `t_menu` VALUES (100054, 100000, 'Variable Management', '/system/variable', 'system/variable/View', 'variable:view', 'code', '0', 1, 3, now(), now());
+insert into `t_menu` VALUES (100054, 100000, 'Variable', '/system/variable', 'system/variable/View', 'variable:view', 'code', '0', 1, 3, now(), now());
 insert into `t_menu` VALUES (100055, 100054, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100056, 100054, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
+
+update `t_menu` set order_num=4 where menu_id=100019;
+update `t_menu` set order_num=5 where menu_id=100034;
 
 -- Add team related sql
 create table `t_team` (
@@ -196,6 +199,10 @@ insert into `t_role_menu` values (100084, 100002, 100050);
 insert into `t_role_menu` values (100085, 100002, 100051);
 insert into `t_role_menu` values (100086, 100002, 100052);
 insert into `t_role_menu` values (100087, 100002, 100053);
+insert into `t_role_menu` values (100088, 100002, 100054);
+insert into `t_role_menu` values (100089, 100002, 100055);
+insert into `t_role_menu` values (100090, 100002, 100056);
+insert into `t_role_menu` values (100091, 100002, 100057);
 
 -- alter t_role_user to t_member and update the schema
 alter table `t_user_role` rename `t_member`;

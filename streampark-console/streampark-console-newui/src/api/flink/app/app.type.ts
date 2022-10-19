@@ -37,7 +37,7 @@ interface Task {
   failed: number;
   reconciling: number;
 }
-// 列表数据
+// The list of data
 export interface AppListResponse {
   total: string;
   records: AppListRecord[];

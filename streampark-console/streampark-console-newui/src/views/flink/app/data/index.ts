@@ -17,12 +17,13 @@
 import { dateToDuration } from '/@/utils/dateUtil';
 import { BasicColumn } from '/@/components/Table';
 
-/* app 表格列 */
+/* app */
 export const getAppColumns = (): BasicColumn[] => [
   {
     title: 'Application Name',
     dataIndex: 'jobName',
     align: 'left',
+    fixed: 'left',
     width: 300,
   },
   {

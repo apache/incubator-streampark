@@ -63,7 +63,7 @@
       // The code on this page is only for demonstration. In fact, the relevant information of the user should be obtained from the interface through the userId
 
       // Set the title of the tab (does not affect the title of the page)
-      setTitle('详情：用户' + userId.value);
+      setTitle('detail: user' + userId.value);
 
       // What to do when you click the back link on the left side of the page
       function goBack() {

@@ -65,14 +65,14 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     }
 
     @Override
-    public List<Menu> findUserMenus(String username) {
-        User user = Optional.ofNullable(userService.findByName(username))
-            .orElseThrow(() -> new IllegalArgumentException(String.format("The username [%s] not found", username)));
+    public List<Menu> findUserMenus(Long userId, Long teamId) {
+        User user = Optional.ofNullable(userService.getById(userId))
+            .orElseThrow(() -> new IllegalArgumentException(String.format("The user, id:[%s] not found", userId)));
         // Admin has the permission for all menus.
         if (UserType.ADMIN.equals(user.getUserType())) {
-            return this.list(new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0"));
+            return this.list(new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0").orderByAsc(Menu::getOrderNum));
         }
-        return this.baseMapper.findUserMenus(username);
+        return this.baseMapper.findUserMenus(userId, teamId);
     }
 
     @Override
@@ -139,10 +139,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     }
 
     @Override
-    public ArrayList<VueRouter<Menu>> getUserRouters(User user) {
+    public ArrayList<VueRouter<Menu>> getUserRouters(Long userId, Long teamId) {
         List<VueRouter<Menu>> routes = new ArrayList<>();
         // The query type is the menu type
-        List<Menu> menus = this.findUserMenus(user.getUsername());
+        List<Menu> menus = this.findUserMenus(userId, teamId);
         menus.forEach(menu -> {
             VueRouter<Menu> route = new VueRouter<>();
             route.setId(menu.getMenuId().toString());

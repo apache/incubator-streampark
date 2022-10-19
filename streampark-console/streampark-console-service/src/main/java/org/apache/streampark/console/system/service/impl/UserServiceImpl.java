@@ -21,6 +21,7 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Menu;
 import org.apache.streampark.console.system.entity.Team;
@@ -28,6 +29,7 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.UserMapper;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.MenuService;
+import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.UserService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -44,7 +46,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,6 +62,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private MenuService menuService;
+
+    @Autowired
+    private RoleService roleService;
 
     @Override
     public User findByName(String username) {
@@ -201,6 +208,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public List<User> findByAppOwner(Long teamId) {
         return baseMapper.findByAppOwner(teamId);
+    }
+
+    /**
+     * generate user info, contains: 1.token, 2.vue router, 3.role, 4.permission, 5.personalized config info of frontend
+     *
+     * @param user  user
+     * @return UserInfo
+     */
+    @Override
+    public Map<String, Object> generateFrontendUserInfo(User user, JWTToken token) {
+        AssertUtils.checkNotNull(user);
+        String username = user.getUsername();
+        Map<String, Object> userInfo = new HashMap<>(8);
+
+        // 1) token & expire
+        if (token != null) {
+            userInfo.put("token", token.getToken());
+            userInfo.put("expire", token.getExpireAt());
+        }
+
+        // 2) user
+        user.dataMasking();
+        userInfo.put("user", user);
+
+        // 3) roles
+        Set<String> roles = this.roleService.getUserRoleName(username);
+        userInfo.put("roles", roles);
+
+        // 4) permissions
+        Set<String> permissions = this.getPermissions(username);
+        userInfo.put("permissions", permissions);
+
+        return userInfo;
     }
 
     private void setUserRoles(User user, String[] roles) {

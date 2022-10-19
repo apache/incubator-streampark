@@ -96,7 +96,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import svgIcons from 'virtual:svg-icons-names';
 
-  // 没有使用别名引入，是因为WebStorm当前版本还不能正确识别，会报unused警告
+  // The use of alias is not introduced because the current version of WebStorm is not yet correctly recognized and will report an unused warning
   const AInput = Input;
   const APopover = Popover;
   const APagination = Pagination;

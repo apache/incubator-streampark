@@ -25,9 +25,9 @@ export interface ActionItem extends ButtonProps {
   popConfirm?: PopConfirm;
   disabled?: boolean;
   divider?: boolean;
-  // 权限编码控制是否显示
+  // The permission encoding controls whether it is displayed
   auth?: RoleEnum | RoleEnum[] | string | string[];
-  // 业务控制是否显示
+  // Whether business controls are displayed
   ifShow?: boolean | ((action: ActionItem) => boolean);
   tooltip?: string | TooltipProps;
 }

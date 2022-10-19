@@ -19,6 +19,7 @@ import { optionsKeyMapping } from '../data/option';
 import { fetchYarn } from '/@/api/flink/app/app';
 import { AppListRecord } from '/@/api/flink/app/app.type';
 import { fetchActiveURL } from '/@/api/flink/setting/flinkCluster';
+import { useUserStore } from '/@/store/modules/user';
 
 export function handleAppBuildStatusColor(statusCode) {
   switch (statusCode) {
@@ -245,8 +246,10 @@ export function handleSubmitParams(
   values: Recordable,
   k8sTemplate: Recordable,
 ) {
+  const useStore = useUserStore();
   const options = handleFormValue(values);
   Object.assign(params, {
+    teamId: useStore?.getTeamId,
     executionMode: values.executionMode,
     versionId: values.versionId,
     jobName: values.jobName,

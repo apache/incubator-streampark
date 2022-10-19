@@ -55,7 +55,7 @@
     created: new Map(),
     stoped: new Map(),
   };
-  /* 获取flink环境数据 */
+  /* Get flink environmental data*/
   async function getFlinkClusterSetting() {
     const clusterList = await fetchFlinkCluster();
     clusters.value = clusterList;
