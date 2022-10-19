@@ -20,6 +20,7 @@ package org.apache.streampark.console.system.controller;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
@@ -111,7 +112,7 @@ public class PassportController {
 
     @PostMapping("signinbycasdoor")
     public RestResponse signinByCasdoor(@NotBlank(message = "{required}") String code,
-                                        @NotBlank(message = "{required}") String state) throws Exception {
+                                        @NotBlank(message = "{required}") String state) {
         String token = "";
         String username = "";
         String password = "";
@@ -129,7 +130,11 @@ public class PassportController {
             user2.setCreateTime(date);
             user2.setModifyTime(date);
             user2.setTeamId(100000L);
-            userService.createUser(user2);
+            try {
+                userService.createUser(user2);
+            } catch (Exception e) {
+                throw new ApiAlertException("user create error");
+            }
             username = user2.getUsername();
             password = user2.getPassword();
             user = user2;
@@ -138,7 +143,11 @@ public class PassportController {
             password = user.getPassword();
         }
 
-        this.userService.updateLoginTime(username);
+        try {
+            this.userService.updateLoginTime(username);
+        } catch (Exception e) {
+            throw new ApiAlertException("user not exist");
+        }
         String token2 = WebUtils.encryptToken(JWTUtil.sign(username, password));
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
         String expireTimeStr = DateUtils.formatFullTime(expireTime);
