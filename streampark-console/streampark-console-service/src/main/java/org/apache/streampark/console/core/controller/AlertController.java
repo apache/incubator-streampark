@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
@@ -90,10 +91,10 @@ public class AlertController {
 
     @ApiOperation(value = "listPageAlertConfigs")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "pageSize", value = "page size", required = true, example = "10"),
-        @ApiImplicitParam(name = "pageNum", value = "page num", required = true, example = "1"),
-        @ApiImplicitParam(name = "sortField", value = "sort field"),
-        @ApiImplicitParam(name = "sortOrder", value = "sort order")
+        @ApiImplicitParam(name = "pageSize", value = "page size", required = true, example = "10", dataTypeClass = Integer.class),
+        @ApiImplicitParam(name = "pageNum", value = "page num", required = true, example = "1", dataTypeClass = Integer.class),
+        @ApiImplicitParam(name = "sortField", value = "sort field", dataType = "string", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "sortOrder", value = "sort order", dataType = "string", dataTypeClass = String.class)
     })
     @PostMapping(value = "/list")
     public RestResponse listPageAlertConfigs(@RequestBody AlertConfigWithParams params, RestRequest request) {
@@ -110,10 +111,10 @@ public class AlertController {
 
     @ApiOperation(value = "deleteAlertConfig")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "id", value = "config id", required = true)
+        @ApiImplicitParam(name = "id", value = "config id", required = true, paramType = "query", dataTypeClass = Long.class)
     })
     @DeleteMapping("/delete")
-    public RestResponse deleteAlertConfig(@NotNull(message = "config id must be not null") Long id) {
+    public RestResponse deleteAlertConfig(@RequestParam("id") @NotNull(message = "config id must be not null") Long id) {
         boolean result = alertConfigService.deleteById(id);
         return RestResponse.success(result);
     }
