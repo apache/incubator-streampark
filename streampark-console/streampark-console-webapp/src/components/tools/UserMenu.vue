@@ -317,10 +317,10 @@ export default {
     },
 
     handlePrepareTeam() {
-      let id = sessionStorage.getItem(TEAM_ID)
+      let id = storage.getSession(TEAM_ID)
       if (id == null) {
         id = storage.get(TEAM_ID)
-        sessionStorage.setItem(TEAM_ID, id)
+        storage.setSession(TEAM_ID, id)
       }
       this.teamId = id.toString()
     },
@@ -344,29 +344,29 @@ export default {
         '/system/member',
         '/system/variable',
         '/flink/project',
-        '/flink/app'
-      ]
-      const skipPages = [
-        '/flink/notebook/view',
+        '/flink/app',
         '/flink/setting'
       ]
+      const whiteList = [
+        '/flink/notebook/view',
+      ]
       const currPath = location.href.replace(/(.*)#/,'')
-      if (!skipPages.includes(currPath)) {
-        if (pages.includes(currPath)) {
-          this.GetRouter({}).then(resp => {
-            const routers = resp || []
-            if (routers != null) {
-              const hasAuth = this.handleFilterRouter(routers[0], currPath)
-              if (hasAuth) {
-                window.location.reload()
-              } else {
-                window.location.href = '/'
-              }
+      if (pages.includes(currPath)) {
+        this.GetRouter({}).then(resp => {
+          const routers = resp || []
+          if (routers != null) {
+            const hasAuth = this.handleFilterRouter(routers[0], currPath)
+            if (hasAuth) {
+              window.location.reload()
+            } else {
+              window.location.href = '/'
             }
-          })
-        } else {
-          window.location.href = '/'
-        }
+          }
+        })
+      } else if (whiteList.includes(currPath)) {
+        window.location.reload()
+      } else {
+        window.location.href = '/'
       }
     },
 

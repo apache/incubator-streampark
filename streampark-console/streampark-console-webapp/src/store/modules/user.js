@@ -26,10 +26,10 @@ const user = {
     expire: storage.get(EXPIRE),
     token: storage.get(TOKEN),
     info: storage.get(USER_INFO),
-    roles: storage.get(ROLES),
-    permissions: storage.get(PERMISSIONS),
-    routers: storage.get(USER_ROUTER),
-    teamId: storage.get(TEAM_ID),
+    roles: storage.getSession(ROLES) || storage.get(ROLES),
+    permissions: storage.getSession(PERMISSIONS) || storage.get(PERMISSIONS),
+    routers: storage.getSession(USER_ROUTER) || storage.get(USER_ROUTER),
+    teamId: storage.getSession(TEAM_ID) || storage.get(TEAM_ID),
     name: '',
     welcome: '',
     avatar: ''
@@ -44,27 +44,6 @@ const user = {
       storage.set(TOKEN, token)
       state.token = token
     },
-    SET_TEAM: (state, teamId) => {
-      sessionStorage.setItem(TEAM_ID, teamId)
-      storage.set(TEAM_ID, teamId)
-      state.teamId = teamId
-    },
-    SET_ROLES: (state, roles) => {
-      storage.set(ROLES, roles)
-      state.roles = roles
-    },
-    SET_PERMISSIONS: (state, permissions) => {
-      storage.set(PERMISSIONS, permissions)
-      state.permissions = permissions
-    },
-    SET_ROUTERS: (state, routers) => {
-      storage.set(USER_ROUTER, routers)
-      state.routers = routers
-    },
-    CLEAR_ROUTERS: (state, empty) => {
-      state.roles = null
-      storage.rm(USER_ROUTER)
-    },
     SET_INFO: (state, info) => {
       storage.set(USER_INFO, info)
       storage.set(USER_NAME, info.username)
@@ -72,6 +51,32 @@ const user = {
       state.name = info.username
       state.avatar = info.avatar
     },
+    SET_TEAM: (state, teamId) => {
+      storage.setSession(TEAM_ID, teamId)
+      storage.set(TEAM_ID, teamId)
+      state.teamId = teamId
+    },
+    SET_ROLES: (state, roles) => {
+      storage.set(ROLES, roles)
+      storage.setSession(ROLES, roles)
+      state.roles = roles
+    },
+    SET_PERMISSIONS: (state, permissions) => {
+      storage.set(PERMISSIONS, permissions)
+      storage.setSession(PERMISSIONS, permissions)
+      state.permissions = permissions
+    },
+    SET_ROUTERS: (state, routers) => {
+      storage.set(USER_ROUTER, routers)
+      storage.setSession(USER_ROUTER, routers)
+      state.routers = routers
+    },
+    CLEAR_ROUTERS: (state, empty) => {
+      state.roles = null
+      storage.rm(USER_ROUTER)
+      storage.rmSession(USER_ROUTER)
+    },
+
     SET_EMPTY: (state, empty) => {
       state.token = null
       state.info = null
@@ -82,12 +87,18 @@ const user = {
       state.avatar = null
       storage.rm(USER_INFO)
       storage.rm(USER_NAME)
-      storage.rm(USER_ROUTER)
       storage.rm(TOKEN)
+      storage.rm(EXPIRE)
+
+      storage.rm(USER_ROUTER)
       storage.rm(TEAM_ID)
       storage.rm(ROLES)
       storage.rm(PERMISSIONS)
-      storage.rm(EXPIRE)
+
+      storage.rmSession(USER_ROUTER)
+      storage.rmSession(TEAM_ID)
+      storage.rmSession(ROLES)
+      storage.rmSession(PERMISSIONS)
     }
   },
 
