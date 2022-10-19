@@ -38,7 +38,7 @@
   </BasicDrawer>
 </template>
 <script lang="ts">
-  import { defineComponent, ref, computed, unref } from 'vue';
+  import { defineComponent, ref, computed, unref, nextTick } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { handleRoleCheck } from '../role.data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
@@ -65,7 +65,6 @@
     setup(_, { emit }) {
       const formType = ref(FormTypeEnum.Edit);
       const treeData = ref<TreeItem[]>([]);
-
       const isCreate = computed(() => unref(formType) === FormTypeEnum.Create);
 
       const formSchemas = computed((): FormSchema[] => {
@@ -95,7 +94,7 @@
             field: 'menuId',
             slot: 'menu',
             component: 'Select',
-            rules: [{ required: true, message: 'Please select the permission.' }],
+            dynamicRules: () => [{ required: true, message: 'Please select the permission.' }],
           },
         ];
       });
@@ -131,11 +130,13 @@
             remark: data.record.remark,
             menuId: [...data.record.menuId],
           });
-          setFieldsValue({
-            roleName: data.record.roleName,
-            roleId: data.record.roleId,
-            remark: data.record.remark,
-            menuId: [...data.record.menuId],
+          nextTick(() => {
+            setFieldsValue({
+              roleName: data.record.roleName,
+              roleId: data.record.roleId,
+              remark: data.record.remark,
+              menuId: [...data.record.menuId],
+            });
           });
         }
       });

@@ -58,13 +58,10 @@ export const getMenuList = (params?: MenuParams) =>
   });
 
 export const getRoleMenu = (params?: MenuParams) =>
-  defHttp.post<Array<string>>(
-    {
-      url: Api.RoleMenu,
-      params,
-    },
-    { joinParamsToUrl: true },
-  );
+  defHttp.post<Array<string>>({
+    url: Api.RoleMenu,
+    params,
+  });
 
 export const getRoleListByPage = (params?: RolePageParams) =>
   defHttp.post<RolePageListGetResultModel>({

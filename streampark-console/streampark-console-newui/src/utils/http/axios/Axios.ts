@@ -200,6 +200,8 @@ export class VAxios {
       Object.assign(config.headers, {
         'Content-Type': ContentTypeEnum.FORM_URLENCODED,
       });
+    } else {
+      config.headers = { 'Content-Type': ContentTypeEnum.FORM_URLENCODED };
     }
     return this.request({ ...config, method: 'POST' }, options);
   }
