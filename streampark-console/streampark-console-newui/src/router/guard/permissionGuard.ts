@@ -122,7 +122,7 @@ export function createPermissionGuard(router: Router) {
     permissionStore.setDynamicAddedRoute(true);
 
     if (to.name === PAGE_NOT_FOUND_ROUTE.name) {
-      // 动态添加路由后，此处应当重定向到fullPath，否则会加载404页面内容
+      // After dynamically adding the route, it should be redirected to fullPath here, otherwise the 404 page content will load
       next({ path: to.fullPath, replace: true, query: to.query });
     } else {
       const redirectPath = (from.query.redirect || to.path) as string;

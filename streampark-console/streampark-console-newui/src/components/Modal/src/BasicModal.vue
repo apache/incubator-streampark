@@ -190,10 +190,9 @@
         },
       );
 
-      // 取消事件
       async function handleCancel(e: Event) {
         e?.stopPropagation();
-        // 过滤自定义关闭按钮的空白区域
+        // Filter the empty space of the custom close button
         if ((e.target as HTMLElement)?.classList?.contains(prefixCls + '-close--custom')) return;
         if (props.closeFunc && isFunction(props.closeFunc)) {
           const isClose: boolean = await props.closeFunc();
@@ -206,7 +205,7 @@
       }
 
       /**
-       * @description: 设置modal参数
+       * @description: modal
        */
       function setModalProps(props: Partial<ModalProps>): void {
         // Keep the last setModalProps

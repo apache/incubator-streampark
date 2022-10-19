@@ -93,7 +93,7 @@
         fileList: [],
       });
 
-      //   是否正在上传
+      //   Whether it is uploading
       const isUploadingRef = ref(false);
       const fileListRef = ref<FileItem[]>([]);
       const { accept, helpText, maxNumber, maxSize } = toRefs(props);
@@ -137,11 +137,10 @@
           : t('component.upload.startUpload');
       });
 
-      // 上传前校验
       function beforeUpload(file: File) {
         const { size, name } = file;
         const { maxSize } = props;
-        // 设置最大值，则判断
+        // Set the maximum value, then judge
         if (maxSize && file.size / 1024 / 1024 >= maxSize) {
           createMessage.error(t('component.upload.maxSizeMultiple', [maxSize]));
           return false;
@@ -155,9 +154,9 @@
           percent: 0,
           type: name.split('.').pop(),
         };
-        // 生成图片缩略图
+        // Generate a thumbnail of the picture
         if (checkImgType(file)) {
-          // beforeUpload，如果异步会调用自带上传方法
+          // beforeUpload, if asynchronous, the out-of-the-box upload method is called
           // file.thumbUrl = await getBase64(file);
           getBase64WithFile(file).then(({ result: thumbUrl }) => {
             fileListRef.value = [
@@ -174,20 +173,11 @@
         return false;
       }
 
-      // 删除
       function handleRemove(record: FileItem) {
         const index = fileListRef.value.findIndex((item) => item.uuid === record.uuid);
         index !== -1 && fileListRef.value.splice(index, 1);
         emit('delete', record);
       }
-
-      // 预览
-      // function handlePreview(record: FileItem) {
-      //   const { thumbUrl = '' } = record;
-      //   createImgPreview({
-      //     imageList: [thumbUrl],
-      //   });
-      // }
 
       async function uploadApiByItem(item: FileItem) {
         const { api } = props;
@@ -226,7 +216,7 @@
         }
       }
 
-      // 点击开始上传
+      // Click to start uploading
       async function handleStartUpload() {
         const { maxNumber } = props;
         if ((fileListRef.value.length + props.previewFileList?.length ?? 0) > maxNumber) {
@@ -234,7 +224,7 @@
         }
         try {
           isUploadingRef.value = true;
-          // 只上传不是成功状态的
+          // Only uploads are not successful
           const uploadFileList =
             fileListRef.value.filter((item) => item.status !== UploadResultStatus.SUCCESS) || [];
           const data = await Promise.all(
@@ -243,7 +233,7 @@
             }),
           );
           isUploadingRef.value = false;
-          // 生产环境:抛出错误
+          // Production environment: Throws an error
           const errorList = data.filter((item: any) => !item.success);
           if (errorList.length > 0) throw errorList;
         } catch (e) {
@@ -252,7 +242,6 @@
         }
       }
 
-      //   点击保存
       function handleOk() {
         const { maxNumber } = props;
 
@@ -270,7 +259,7 @@
             fileList.push(responseData.url);
           }
         }
-        // 存在一个上传成功的即可保存
+        // If there is a successful upload, it can be saved
         if (fileList.length <= 0) {
           return createMessage.warning(t('component.upload.saveError'));
         }
@@ -279,7 +268,7 @@
         emit('change', fileList);
       }
 
-      // 点击关闭：则所有操作不保存，包括上传的
+      // Click Close: All operations are not saved, including uploaded
       async function handleCloseFunc() {
         if (!isUploadingRef.value) {
           fileListRef.value = [];

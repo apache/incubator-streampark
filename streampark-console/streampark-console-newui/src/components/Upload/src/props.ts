@@ -22,17 +22,15 @@ export const basicProps = {
     type: String as PropType<string>,
     default: '',
   },
-  // 文件最大多少MB
   maxSize: {
     type: Number as PropType<number>,
     default: 2,
   },
-  // 最大数量的文件，Infinity不限制
+  // The maximum number of files is not limited by Infinity
   maxNumber: {
     type: Number as PropType<number>,
     default: Infinity,
   },
-  // 根据后缀，或者其他
   accept: {
     type: Array as PropType<string[]>,
     default: () => [],

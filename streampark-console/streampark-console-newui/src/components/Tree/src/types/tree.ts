@@ -128,23 +128,23 @@ export const treeProps = buildProps({
   rightMenuList: {
     type: Array as PropType<ContextMenuItem[]>,
   },
-  // 自定义数据过滤判断方法(注: 不是整个过滤方法，而是内置过滤的判断方法，用于增强原本仅能通过title进行过滤的方式)
+  // Custom data filtering judgment method (Note: not the entire filtering method, but the built-in filtering judgment method, which is used to enhance the method that can only be filtered by title)
   filterFn: {
     type: Function as PropType<
       (searchValue: any, node: TreeItem, fieldNames: FieldNames) => boolean
     >,
     default: undefined,
   },
-  // 高亮搜索值，仅高亮具体匹配值（通过title）值为true时使用默认色值，值为#xxx时使用此值替代且高亮开启
+  //Highlight the search value, only highlight the default color value when the specific matching value (via title) value is true, and use this value instead when the value is #xxx and highlight it on
   highlight: {
     type: [Boolean, String] as PropType<Boolean | String>,
     default: false,
   },
-  // 搜索完成时自动展开结果
+  // Automatically expand the results when the search is complete
   expandOnSearch: Boolean,
-  // 搜索完成自动选中所有结果,当且仅当 checkable===true 时生效
+  // Search completion automatically selects all results if and only if checkable===true
   checkOnSearch: Boolean,
-  // 搜索完成自动select所有结果
+  // Search complete automatically select all results
   selectedOnSearch: Boolean,
   loading: {
     type: Boolean,

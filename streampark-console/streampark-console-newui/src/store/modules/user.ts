@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 import type { UserInfo } from '/#/store';
-import type { ErrorMessageMode } from '/#/axios';
 import { defineStore } from 'pinia';
 import { store } from '/@/store';
 import { RoleEnum } from '/@/enums/roleEnum';
 import { PageEnum } from '/@/enums/pageEnum';
 import {
+  APP_TEAMID_KEY_,
   EXPIRE_KEY,
   PERMISSION_KEY,
   ROLES_KEY,
@@ -28,8 +28,7 @@ import {
   USER_INFO_KEY,
 } from '/@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '/@/utils/auth';
-import { GetUserInfoModel, LoginParams } from '/@/api/sys/model/userModel';
-import { doLogout, loginApi } from '/@/api/sys/user';
+import { doLogout, fetchInitUserTeam, fetchSetUserTeam } from '/@/api/system/user';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { router } from '/@/router';
@@ -38,7 +37,13 @@ import { RouteRecordRaw } from 'vue-router';
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 import { h } from 'vue';
 import { SignOut } from '/@/adapter/store/modules/user';
+import { getUserTeamId } from '/@/utils';
+import { usePermission } from '/@/hooks/web/usePermission';
 
+interface TeamListType {
+  label: string;
+  value: string;
+}
 interface UserState {
   userInfo: Nullable<UserInfo>;
   token?: string;
@@ -47,7 +52,8 @@ interface UserState {
   permissions: string[];
   sessionTimeout?: boolean;
   lastUpdateTime: number;
-  teamId?: string;
+  teamId: string;
+  teamList: Array<TeamListType>;
 }
 
 export const useUserStore = defineStore({
@@ -66,7 +72,9 @@ export const useUserStore = defineStore({
     // Last fetch time
     lastUpdateTime: 0,
     // user Team
-    teamId: undefined,
+    teamId: getUserTeamId(),
+    // Maintain teamlist data
+    teamList: [],
   }),
   getters: {
     getUserInfo(): UserInfo {
@@ -94,6 +102,9 @@ export const useUserStore = defineStore({
     },
     getTeamId(): string | undefined {
       return this.teamId;
+    },
+    getTeamList(): TeamListType[] {
+      return this.teamList;
     },
   },
   actions: {
@@ -127,7 +138,7 @@ export const useUserStore = defineStore({
       this.permissions = permissions;
       setAuthCache(PERMISSION_KEY, permissions);
     },
-    setData(data) {
+    setData(data: Recordable) {
       const { token, expire, user, permissions, roles } = data;
 
       this.setToken(token);
@@ -136,47 +147,61 @@ export const useUserStore = defineStore({
       this.setRoleList(roles);
       this.setPermissions(permissions);
     },
-    setTeamId(teamId: string) {
-      this.teamId = teamId;
-    },
-    /**
-     * @description: login
-     */
-    async login(
-      params: LoginParams & {
-        goHome?: boolean;
-        mode?: ErrorMessageMode;
-      },
-    ): Promise<GetUserInfoModel | null> {
+    // set team
+    async setTeamId(data: { teamId: string; userId?: string }): Promise<boolean> {
       try {
-        const { goHome = true, mode, ...loginParams } = params;
+        const { refreshMenu } = usePermission();
 
-        const data = await loginApi(loginParams, mode);
+        // The userId passed in is the binding operation at login
+        if (data.userId) {
+          await fetchInitUserTeam(data as { teamId: string; userId: string });
+        } else {
+          const resp = await fetchSetUserTeam(data);
 
-        this.setData(data);
-        return this.afterLoginAction(goHome);
+          const { permissions, roles, user } = resp;
+          this.setUserInfo(user);
+          this.setRoleList(roles as RoleEnum[]);
+          this.setPermissions(permissions);
+          refreshMenu();
+        }
+        // If it returns success, it will be stored in the local cache
+        this.teamId = data.teamId;
+        sessionStorage.setItem(APP_TEAMID_KEY_, data.teamId);
+        localStorage.setItem(APP_TEAMID_KEY_, data.teamId);
+        return Promise.resolve(true);
       } catch (error) {
         return Promise.reject(error);
       }
     },
-    async afterLoginAction(goHome?: boolean): Promise<GetUserInfoModel | null> {
-      if (!this.getToken) return null;
+    setTeamList(teamList: Array<TeamListType>) {
+      this.teamList = teamList;
+    },
+    async afterLoginAction(goHome?: boolean): Promise<boolean> {
+      if (!this.getToken) return false;
       const sessionTimeout = this.sessionTimeout;
       if (sessionTimeout) {
         this.setSessionTimeout(false);
       } else {
-        const permissionStore = usePermissionStore();
-        if (!permissionStore.isDynamicAddedRoute) {
-          const routes = await permissionStore.buildRoutesAction();
-          routes.forEach((route) => {
-            router.addRoute(route as unknown as RouteRecordRaw);
-          });
-          router.addRoute(PAGE_NOT_FOUND_ROUTE as unknown as RouteRecordRaw);
-          permissionStore.setDynamicAddedRoute(true);
+        try {
+          const permissionStore = usePermissionStore();
+          if (!permissionStore.isDynamicAddedRoute) {
+            const routes = await permissionStore.buildRoutesAction();
+            routes.forEach((route) => {
+              router.addRoute(route as unknown as RouteRecordRaw);
+            });
+            router.addRoute(PAGE_NOT_FOUND_ROUTE as unknown as RouteRecordRaw);
+            permissionStore.setDynamicAddedRoute(true);
+          }
+          goHome && (await router.replace(PageEnum.BASE_HOME));
+          return true;
+        } catch (error) {
+          this.setToken(undefined);
+          this.setSessionTimeout(false);
+          this.setUserInfo(null);
+          console.error(error, 'error');
         }
-        goHome && (await router.replace(PageEnum.BASE_HOME));
       }
-      return null;
+      return false;
     },
     /**
      * @description: logout
@@ -188,12 +213,14 @@ export const useUserStore = defineStore({
 
           await SignOut();
         } catch {
-          console.log('注销Token失败');
+          console.log('Token cancellation failed');
         }
       }
       this.setToken(undefined);
       this.setSessionTimeout(false);
       this.setUserInfo(null);
+      sessionStorage.removeItem(APP_TEAMID_KEY_);
+      localStorage.removeItem(APP_TEAMID_KEY_);
       goLogin && router.push(PageEnum.BASE_LOGIN);
     },
 
