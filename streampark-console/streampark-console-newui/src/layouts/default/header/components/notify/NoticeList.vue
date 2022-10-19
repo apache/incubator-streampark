@@ -81,7 +81,7 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   import { List, Avatar, Tag, Typography } from 'ant-design-vue';
   import { isNumber } from '/@/utils/is';
-  import { NoticyItem } from '/@/api/sys/model/notifyModel';
+  import { NoticyItem } from '/@/api/system/model/notifyModel';
   export default defineComponent({
     components: {
       [Avatar.name]: Avatar,
@@ -162,7 +162,7 @@
       function handleNoticyClick(item: NoticyItem) {
         props.onNoticyClick && props.onNoticyClick(item);
       }
-      /* 删除 */
+      /* delete */
       async function handleDelete(item: NoticyItem) {
         props.onNoticyClick && props.onNoticyClick(item);
       }

@@ -131,7 +131,7 @@
   });
   // form
   const [registerForm, { validate }] = useForm({
-    schemas: [{ field: 'type', component: 'Input', label: '类型' }],
+    schemas: [{ field: 'type', component: 'Input', label: 'type' }],
     labelWidth: 80,
     baseColProps: { span: 6 },
     actionColOptions: { span: 24 },
@@ -172,7 +172,7 @@
     pageSize,
     current: page,
     total,
-    showTotal: (total) => `总 ${total} 条`,
+    showTotal: (total) => `total ${total} records`,
     onChange: pageChange,
     onShowSizeChange: pageSizeChange,
   });

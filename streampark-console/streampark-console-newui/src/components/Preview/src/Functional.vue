@@ -96,7 +96,6 @@
       const wrapElRef = ref<HTMLDivElement | null>(null);
       const imgElRef = ref<HTMLImageElement | null>(null);
 
-      // 初始化
       function init() {
         initMouseWheel();
         const { index, imageList } = props;
@@ -108,7 +107,7 @@
         handleIChangeImage(imageList[index]);
       }
 
-      // 重置
+      // reset
       function initState() {
         imgState.imgScale = 1;
         imgState.imgRotate = 0;
@@ -116,16 +115,16 @@
         imgState.imgLeft = 0;
       }
 
-      // 初始化鼠标滚轮事件
+      // Initialize the mouse wheel event
       function initMouseWheel() {
         const wrapEl = unref(wrapElRef);
         if (!wrapEl) {
           return;
         }
         (wrapEl as any).onmousewheel = scrollFunc;
-        // 火狐浏览器没有onmousewheel事件，用DOMMouseScroll代替
+        // Firefox does not have an onmousewheel event, use DOMMouseScroll instead
         document.body.addEventListener('DOMMouseScroll', scrollFunc);
-        // 禁止火狐浏览器下拖拽图片的默认事件
+        // Default event to disable dragging and dropping images in Firefox
         document.ondragstart = function () {
           return false;
         };
@@ -140,40 +139,40 @@
         }
       });
 
-      // 监听鼠标滚轮
+      // Listen to the mouse wheel
       function scrollFunc(e: any) {
         e = e || window.event;
         e.delta = e.wheelDelta || -e.detail;
 
         e.preventDefault();
         if (e.delta > 0) {
-          // 滑轮向上滚动
+          // The pulley rolls up
           scaleFunc(getScaleStep.value);
         }
         if (e.delta < 0) {
-          // 滑轮向下滚动
+          // The pulley rolls down
           scaleFunc(-getScaleStep.value);
         }
       }
-      // 缩放函数
+      // The zoom function
       function scaleFunc(num: number) {
         if (imgState.imgScale <= 0.2 && num < 0) return;
         imgState.imgScale += num;
       }
 
-      // 旋转图片
+      // rotate image
       function rotateFunc(deg: number) {
         imgState.imgRotate += deg;
       }
 
-      // 鼠标事件
+      // Mouse events
       function handleMouseUp() {
         const imgEl = unref(imgElRef);
         if (!imgEl) return;
         imgEl.onmousemove = null;
       }
 
-      // 更换图片
+      // Replace the picture
       function handleIChangeImage(url: string) {
         imgState.status = StatueEnum.LOADING;
         const img = new Image();
@@ -182,14 +181,14 @@
           if (imgState.currentUrl !== url) {
             const ele: any[] = e.composedPath();
             if (props.rememberState) {
-              // 保存当前图片的缩放信息
+              // Saves the zoom information for the current picture
               stateMap.set(imgState.currentUrl, {
                 scale: imgState.imgScale,
                 top: imgState.imgTop,
                 left: imgState.imgLeft,
                 rotate: imgState.imgRotate,
               });
-              // 如果之前已存储缩放信息，就应用
+              // If the scaling information has been previously stored, it is applied
               const stateInfo = stateMap.get(url);
               if (stateInfo) {
                 imgState.imgScale = stateInfo.scale;
@@ -230,7 +229,6 @@
         };
       }
 
-      // 关闭
       function handleClose(e: MouseEvent) {
         e && e.stopPropagation();
         close();
@@ -238,13 +236,13 @@
 
       function close() {
         imgState.show = false;
-        // 移除火狐浏览器下的鼠标滚动事件
+        // Remove the mouse scroll event under Firefox
         document.body.removeEventListener('DOMMouseScroll', scrollFunc);
-        // 恢复火狐及Safari浏览器下的图片拖拽
+        // Restore image dragging and dropping in Firefox and Safari
         document.ondragstart = null;
       }
 
-      // 图片复原
+      // Image restoration
       function resume() {
         initState();
       }
@@ -262,7 +260,7 @@
         },
       });
 
-      // 上一页下一页
+      // Last page, next page
       function handleChange(direction: 'left' | 'right') {
         const { currentIndex } = imgState;
         const { imageList } = props;
@@ -302,7 +300,7 @@
         imgState.moveY = e.clientY;
       }
 
-      // 获取图片样式
+      // Gets the picture style
       const getImageStyle = computed(() => {
         const { imgScale, imgRotate, imgTop, imgLeft } = imgState;
         return {

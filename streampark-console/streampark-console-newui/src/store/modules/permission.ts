@@ -34,45 +34,41 @@ import { ERROR_LOG_ROUTE, PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 
 import { filter } from '/@/utils/helper/treeHelper';
 
-import { getMenuRouter } from '/@/api/sys/menu';
-import { getPermCode } from '/@/api/sys/user';
+import { getMenuRouter } from '/@/api/system/menu';
+import { getPermCode } from '/@/api/system/user';
 
 import { useMessage } from '/@/hooks/web/useMessage';
 import { PageEnum } from '/@/enums/pageEnum';
+import { fetchUserTeam } from '/@/api/system/member';
+import { Persistent } from '/@/utils/cache/persistent';
+import { USER_INFO_KEY } from '/@/enums/cacheEnum';
+import { UserInfo } from '/#/store';
 
 interface PermissionState {
   // Permission code list
-  // 权限代码列表
   permCodeList: string[] | number[];
   // Whether the route has been dynamically added
-  // 路由是否动态添加
   isDynamicAddedRoute: boolean;
   // To trigger a menu update
-  // 触发菜单更新
   lastBuildMenuTime: number;
   // Backstage menu list
-  // 后台菜单列表
   backMenuList: Menu[];
-  // 菜单列表
+  // menu List
   frontMenuList: Menu[];
 }
 
 export const usePermissionStore = defineStore({
   id: 'app-permission',
   state: (): PermissionState => ({
-    // 权限代码列表
+    // List of permission codes
     permCodeList: [],
     // Whether the route has been dynamically added
-    // 路由是否动态添加
     isDynamicAddedRoute: false,
     // To trigger a menu update
-    // 触发菜单更新
     lastBuildMenuTime: 0,
     // Backstage menu list
-    // 后台菜单列表
     backMenuList: [],
     // menu List
-    // 菜单列表
     frontMenuList: [],
   }),
   getters: {
@@ -124,36 +120,41 @@ export const usePermissionStore = defineStore({
       this.setPermCodeList(codeList);
     },
 
-    // 构建路由
+    // Build routing
     async buildRoutesAction(): Promise<AppRouteRecordRaw[]> {
       const { t } = useI18n();
       const userStore = useUserStore();
       const appStore = useAppStoreWithOut();
-
+      // get teamList
+      const { userId } = Persistent.getLocal(USER_INFO_KEY) as UserInfo;
+      if (userStore.teamList.length == 0 && userId) {
+        const teamList = await fetchUserTeam({ userId });
+        userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
+      }
       let routes: AppRouteRecordRaw[] = [];
       const roleList = toRaw(userStore.getRoleList) || [];
       const { permissionMode = projectSetting.permissionMode } = appStore.getProjectConfig;
 
-      // 路由过滤器 在 函数filter 作为回调传入遍历使用
+      // The route filter is used in the function filter as a callback incoming traversal
       const routeFilter = (route: AppRouteRecordRaw) => {
         const { meta } = route;
-        // 抽出角色
+        // Pull out the character
         const { roles } = meta || {};
         if (!roles) return true;
-        // 进行角色权限判断
+        // Make role permission judgments
         return roleList.some((role) => roles.includes(role));
       };
 
       const routeRemoveIgnoreFilter = (route: AppRouteRecordRaw) => {
         const { meta } = route;
-        // ignoreRoute 为true 则路由仅用于菜单生成，不会在实际的路由表中出现
+        // If ignoreRoute is true, the route is only used for menu generation and does not appear in the actual routing table
         const { ignoreRoute } = meta || {};
-        // arr.filter 返回 true 表示该元素通过测试
+        // arr.filter returns true to indicate that the element passed the test
         return !ignoreRoute;
       };
 
       /**
-       * @description 根据设置的首页path，修正routes中的affix标记（固定首页）
+       * @description Fix the affix tag in routes according to the homepage path set (fixed homepage)
        * */
       const patchHomeAffix = (routes: AppRouteRecordRaw[]) => {
         if (!routes || routes.length === 0) return;
@@ -179,92 +180,92 @@ export const usePermissionStore = defineStore({
         try {
           patcher(routes);
         } catch (e) {
-          // 已处理完毕跳出循环
+          // Processed out of loop
         }
         return;
       };
 
       switch (permissionMode) {
-        // 角色权限
+        // Role authorization
         case PermissionModeEnum.ROLE:
-          // 对非一级路由进行过滤
+          // Filter for non-first-level routes
           routes = filter(asyncRoutes, routeFilter);
-          // 对一级路由根据角色权限过滤
+          // Level 1 routes are filtered based on role permissions
           routes = routes.filter(routeFilter);
           // Convert multi-level routing to level 2 routing
-          // 将多级路由转换为 2 级路由
           routes = flatMultiLevelRoutes(routes);
           break;
 
-        // 路由映射， 默认进入该case
+        // Route map, which goes into the case by default
         case PermissionModeEnum.ROUTE_MAPPING:
-          // 对非一级路由进行过滤
+          // Filter for non-first-level routes
           routes = filter(asyncRoutes, routeFilter);
-          // 对一级路由再次根据角色权限过滤
+          // Level 1 routes are filtered again based on role permissions
           routes = routes.filter(routeFilter);
-          // 将路由转换成菜单
+          // Convert routes to menus
           const menuList = transformRouteToMenu(routes, true);
-          // 移除掉 ignoreRoute: true 的路由 非一级路由
+          // Removes the route ignoreRoute: true that is not a Level 1 route
           routes = filter(routes, routeRemoveIgnoreFilter);
-          // 移除掉 ignoreRoute: true 的路由 一级路由；
+          // Remove the ignoreRoute: true route first-level route;
           routes = routes.filter(routeRemoveIgnoreFilter);
-          // 对菜单进行排序
+          // Sort the menu
           menuList.sort((a, b) => {
             return (a.meta?.orderNo || 0) - (b.meta?.orderNo || 0);
           });
 
-          // 设置菜单列表
+          // Set the menu list
           this.setFrontMenuList(menuList);
 
           // Convert multi-level routing to level 2 routing
-          // 将多级路由转换为 2 级路由
           routes = flatMultiLevelRoutes(routes);
           break;
 
         //  If you are sure that you do not need to do background dynamic permissions, please comment the entire judgment below
-        //  如果确定不需要做后台动态权限，请在下方评论整个判断
         case PermissionModeEnum.BACK:
-          const { createMessage } = useMessage();
+          const { createErrorModal, createMessage } = useMessage();
 
-          createMessage.loading({
+          const hideLoading = createMessage.loading({
             content: t('sys.app.menuLoading'),
-            duration: 1,
+            duration: 0,
           });
 
-          // !Simulate to obtain permission codes from the background,
-          // 模拟从后台获取权限码，
-          // this function may only need to be executed once, and the actual project can be put at the right time by itself
-          // 这个功能可能只需要执行一次，实际项目可以自己放在合适的时间
-          let routeList: AppRouteRecordRaw[] = [];
           try {
+            // this function may only need to be executed once, and the actual project can be put at the right time by itself
+            let routeList: AppRouteRecordRaw[] = [];
             // await this.changePermissionCode();
             routeList = (await getMenuRouter()) as AppRouteRecordRaw[];
+            if (routeList.length == 1 && routeList[0]?.children?.length === 0) {
+              createErrorModal({
+                title: t('sys.api.errorTip'),
+                content: 'No permission, please contact the administrator',
+              });
+              return Promise.reject(new Error('routeList is empty'));
+            }
             routeList = (routeList[0].children as AppRouteRecordRaw[]).map((v) => {
               v.redirect = ((v?.children ?? []) as AppRouteRecordRaw[]).find(
                 (item) => !item?.meta?.hidden,
               )?.path;
               return v;
             });
+
+            // Dynamically introduce components
+            routeList = transformObjToRoute(routeList);
+
+            //  Background routing to menu structure
+            const backMenuList = transformRouteToMenu(routeList);
+            this.setBackMenuList(backMenuList);
+
+            // remove meta.ignoreRoute item
+            routeList = filter(routeList, routeRemoveIgnoreFilter);
+            routeList = routeList.filter(routeRemoveIgnoreFilter);
+
+            routeList = flatMultiLevelRoutes(routeList);
+            routes = [PAGE_NOT_FOUND_ROUTE, ...routeList];
           } catch (error) {
             console.error(error);
+          } finally {
+            hideLoading();
           }
-
-          // Dynamically introduce components
-          // 动态引入组件
-          routeList = transformObjToRoute(routeList);
-
-          //  Background routing to menu structure
-          //  后台路由到菜单结构
-          const backMenuList = transformRouteToMenu(routeList);
-          this.setBackMenuList(backMenuList);
-
-          // remove meta.ignoreRoute item
-          // 删除 meta.ignoreRoute 项
-          routeList = filter(routeList, routeRemoveIgnoreFilter);
-          routeList = routeList.filter(routeRemoveIgnoreFilter);
-
-          routeList = flatMultiLevelRoutes(routeList);
-          routes = [PAGE_NOT_FOUND_ROUTE, ...routeList];
           break;
       }
 
@@ -276,7 +277,6 @@ export const usePermissionStore = defineStore({
 });
 
 // Need to be used outside the setup
-// 需要在设置之外使用
 export function usePermissionStoreWithOut() {
   return usePermissionStore(store);
 }

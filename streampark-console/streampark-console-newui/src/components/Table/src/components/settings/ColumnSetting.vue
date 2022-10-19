@@ -340,7 +340,7 @@
               );
             },
           });
-          // 记录原始order 序列
+          // Record the original order sequence
           sortableOrder = sortable.toArray();
           inited = true;
         });

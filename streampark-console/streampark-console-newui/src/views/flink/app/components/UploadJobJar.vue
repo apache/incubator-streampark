@@ -49,7 +49,7 @@
     }
     emit('update:loading', false);
   }
-  /* 文件上传前回调 */
+  /* Callback before file upload */
   function handleBeforeUpload(file) {
     if (file.type !== 'application/java-archive') {
       if (!/\.(jar|JAR)$/.test(file.name)) {

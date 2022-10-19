@@ -17,7 +17,7 @@
 import { BasicColumn, FormSchema } from '/@/components/Table';
 import { h } from 'vue';
 import { Tag } from 'ant-design-vue';
-import { checkUserName, fetchUserTypes } from '/@/api/sys/user';
+import { checkUserName, fetchUserTypes } from '/@/api/system/user';
 import { FormTypeEnum } from '/@/enums/formEnum';
 
 // user status enum
@@ -138,6 +138,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       field: 'password',
       label: 'Password',
       component: 'InputPassword',
+      componentProps: { placeholder: 'please enter password' },
       rules: [
         { required: true, message: 'password is required' },
         { min: 8, message: 'Password length cannot be less than 8 characters' },
@@ -165,14 +166,15 @@ export const formSchema = (formType: string): FormSchema[] => {
       componentProps: {
         disabled: isView,
         api: fetchUserTypes,
+        placeholder: 'Please select a user type',
       },
-      required: true,
+      rules: [{ required: true, message: 'Please select a user type' }],
     },
     {
       field: 'status',
       label: 'Status',
       component: 'RadioGroup',
-      defaultValue: StatusEnum.Locked,
+      defaultValue: StatusEnum.Effective,
       componentProps: {
         options: [
           { label: 'locked', value: StatusEnum.Locked },

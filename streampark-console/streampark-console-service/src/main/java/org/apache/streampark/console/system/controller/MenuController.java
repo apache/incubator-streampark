@@ -53,8 +53,8 @@ public class MenuController {
     private CommonService commonService;
 
     @PostMapping("router")
-    public RestResponse getUserRouters() {
-        ArrayList<VueRouter<Menu>> routers = this.menuService.getUserRouters(commonService.getCurrentUser());
+    public RestResponse getUserRouters(Long teamId) {
+        ArrayList<VueRouter<Menu>> routers = this.menuService.getUserRouters(commonService.getUserId(), teamId);
         return RestResponse.success(routers);
     }
 

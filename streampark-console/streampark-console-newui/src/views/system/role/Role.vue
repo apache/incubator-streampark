@@ -27,6 +27,7 @@
               {
                 icon: 'clarity:note-edit-line',
                 auth: 'role:update',
+                ifShow: record.roleName !== 'admin' || userName === 'admin',
                 onClick: handleEdit.bind(null, record),
               },
               {
@@ -38,6 +39,7 @@
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 auth: 'role:delete',
+                ifShow: record.roleName !== 'admin',
                 popConfirm: {
                   title: 'Are you sure delete this Role',
                   placement: 'left',
@@ -50,6 +52,7 @@
       </template>
     </BasicTable>
     <RoleDrawer @register="registerDrawer" @success="handleSuccess" />
+    <RoleInfo @register="registerInfo" />
   </div>
 </template>
 
@@ -57,22 +60,26 @@
   import { defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import { getRoleListByPage } from '/@/api/demo/system';
+  import { getRoleListByPage } from '/@/api/base/system';
 
   import { useDrawer } from '/@/components/Drawer';
-  import RoleDrawer from './RoleDrawer.vue';
+  import RoleDrawer from './components/RoleDrawer.vue';
+  import RoleInfo from './components/RoleInfo.vue';
 
   import { columns, searchFormSchema } from './role.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { FormTypeEnum } from '/@/enums/formEnum';
-  import { deleteRole } from '/@/api/sys/role';
+  import { deleteRole } from '/@/api/system/role';
+  import { useUserStoreWithOut } from '/@/store/modules/user';
 
   export default defineComponent({
     name: 'RoleManagement',
-    components: { BasicTable, RoleDrawer, TableAction },
+    components: { BasicTable, RoleInfo, RoleDrawer, TableAction },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
+      const [registerInfo, { openDrawer: openInfoDraw }] = useDrawer();
       const { createMessage } = useMessage();
+      const useStore = useUserStoreWithOut();
       const [registerTable, { reload }] = useTable({
         title: '',
         api: getRoleListByPage,
@@ -113,17 +120,19 @@
       }
 
       function handleView(record: Recordable) {
-        openDrawer(true, { record, formType: FormTypeEnum.View });
+        openInfoDraw(true, record);
       }
 
       return {
         registerTable,
+        registerInfo,
         registerDrawer,
         handleCreate,
         handleEdit,
         handleDelete,
         handleSuccess,
         handleView,
+        userName: useStore.getUserInfo?.username,
       };
     },
   });

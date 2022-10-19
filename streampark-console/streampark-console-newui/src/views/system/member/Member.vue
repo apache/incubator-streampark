@@ -59,7 +59,7 @@
   import { computed, defineComponent, onMounted, ref, unref } from 'vue';
   import { useTabs } from '/@/hooks/web/useTabs';
   import { useUserStoreWithOut } from '/@/store/modules/user';
-  import { RoleListItem } from '/@/api/demo/model/systemModel';
+  import { RoleListItem } from '/@/api/base/model/systemModel';
 
   export default defineComponent({
     name: 'Member',
@@ -72,8 +72,8 @@
   import { useDrawer } from '/@/components/Drawer';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { getRoleListByPage } from '/@/api/demo/system';
-  import { fetchMemberDelete, fetchMemberList } from '/@/api/sys/member';
+  import { getRoleListByPage } from '/@/api/base/system';
+  import { fetchMemberDelete, fetchMemberList } from '/@/api/system/member';
 
   const roleListOptions = ref<Array<Partial<RoleListItem>>>([]);
 
@@ -116,7 +116,9 @@
     title: t('system.member.table.title'),
     api: fetchMemberList,
     beforeFetch: (params) => {
-      params.teamId = userStore.getTeamId;
+      if (params?.sortField) {
+        params.sortField = params.sortField.replace(/([a-z])([A-Z])/, '$1_$2').toLowerCase();
+      }
       return params;
     },
     columns: [
@@ -152,7 +154,7 @@
     });
   }
 
-  /* 删除成员 */
+  /* Delete members */
   async function handleDelete(record: Recordable) {
     const { data } = await fetchMemberDelete({ id: record.id });
     if (data.status === 'success') {

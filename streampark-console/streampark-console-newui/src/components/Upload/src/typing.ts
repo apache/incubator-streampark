@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { UploadApiResult } from '/@/api/sys/model/uploadModel';
 
 export enum UploadResultStatus {
   SUCCESS = 'success',
@@ -30,7 +29,7 @@ export interface FileItem {
   percent: number;
   file: File;
   status?: UploadResultStatus;
-  responseData?: UploadApiResult;
+  responseData?: any;
   uuid: string;
 }
 

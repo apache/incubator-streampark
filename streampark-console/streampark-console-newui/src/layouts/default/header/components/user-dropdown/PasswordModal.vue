@@ -23,7 +23,7 @@
   import { BasicModal } from '/@/components/Modal';
   import { BasicForm } from '/@/components/Form';
   import { useUserStoreWithOut } from '/@/store/modules/user';
-  import { fetchUserPasswordUpdate } from '/@/api/sys/user';
+  import { fetchUserPasswordUpdate } from '/@/api/system/user';
   import { useI18n } from 'vue-i18n';
   import { useMessage } from '/@/hooks/web/useMessage';
 

@@ -37,11 +37,11 @@
 
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { RoleListItem } from '/@/api/demo/model/systemModel';
+  import { RoleListItem } from '/@/api/base/model/systemModel';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { RuleObject } from 'ant-design-vue/lib/form';
   import { StoreValue } from 'ant-design-vue/lib/form/interface';
-  import { fetchAddMember, fetchCheckUserName, fetchUpdateMember } from '/@/api/sys/member';
+  import { fetchAddMember, fetchCheckUserName, fetchUpdateMember } from '/@/api/system/member';
 
   const { t } = useI18n();
   const userStore = useUserStoreWithOut();

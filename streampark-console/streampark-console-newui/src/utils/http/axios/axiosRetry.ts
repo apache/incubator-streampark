@@ -16,12 +16,12 @@
  */
 import { AxiosError, AxiosInstance } from 'axios';
 /**
- *  请求重试机制
+ *  Request a retry mechanism
  */
 
 export class AxiosRetry {
   /**
-   * 重试
+   * retry
    */
   retry(AxiosInstance: AxiosInstance, error: AxiosError) {
     // @ts-ignore
@@ -36,7 +36,7 @@ export class AxiosRetry {
   }
 
   /**
-   * 延迟
+   * delay
    */
   private delay(waitTime: number) {
     return new Promise((resolve) => setTimeout(resolve, waitTime));
