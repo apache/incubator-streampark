@@ -15,51 +15,60 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.security.impl.ldap;
+package org.apache.streampark.console.system.security.impl;
 
 import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.system.entity.User;
-import org.apache.streampark.console.system.security.impl.AbstractAuthenticator;
-import org.apache.streampark.console.system.security.impl.pwd.PasswordAuthenticator;
+import org.apache.streampark.console.system.security.Authenticator;
+import org.apache.streampark.console.system.security.impl.ldap.LdapService;
 import org.apache.streampark.console.system.service.UserService;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-public class LdapAuthenticator extends AbstractAuthenticator {
+@Component
+public class AuthenticatorImpl implements Authenticator {
     @Autowired
     private UserService usersService;
     @Autowired
     private LdapService ldapService;
 
-    @Autowired
-    private PasswordAuthenticator passwordAuthenticator;
+    @Override
+    public User authenticate(String username, String password) {
+        User user = usersService.findByName(username);
+        if (user == null) {
+            return null;
+        }
+        String salt = user.getSalt();
+        password = ShaHashUtils.encrypt(salt, password);
+        if (!StringUtils.equals(user.getPassword(), password)) {
+            return null;
+        }
+        return user;
+    }
 
     @Override
-    public User login(String userId, String password) throws Exception {
-        // admin login by username and password
-        if ("admin".equals(userId)) {
-            return passwordAuthenticator.login(userId, password);
-        }
-        String ldapUser = ldapService.ldapLogin(userId, password);
-        // ldapUser is null, login by default
-        if (ldapUser == null) {
-            return passwordAuthenticator.login(userId, password);
+    public User ldapAuthenticate(String username, String password) throws Exception {
+        String ldapEmail = ldapService.ldapLogin(username, password);
+        if (ldapEmail == null) {
+            return null;
         }
         //check if user exist
-        User user = usersService.findByName(userId);
-        if (user != null) {
-            return passwordAuthenticator.login(userId, password);
+        User user = usersService.findByName(username);
+        if (user != null || !ldapService.createIfUserNotExists()) {
+            return user;
         }
-        // create ....
         User newUser = new User();
         newUser.setCreateTime(new Date());
-        newUser.setUsername(userId);
-        newUser.setNickName(userId);
+        newUser.setUsername(username);
+        newUser.setNickName(username);
+        newUser.setUserType(UserType.USER);
         newUser.setStatus("1");
         newUser.setSex("1");
-
         String salt = ShaHashUtils.getRandomSalt();
         String saltPass = ShaHashUtils.encrypt(salt, password);
         newUser.setSalt(salt);

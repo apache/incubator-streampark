@@ -205,9 +205,9 @@ public class UserController {
     }
 
     @PostMapping("appOwners")
-    public RestResponse appOnwers(Long teamId) {
+    public RestResponse appOwners(Long teamId) {
         List<User> userList = userService.findByAppOwner(teamId);
-        userList.forEach((u) -> u.dataMasking());
+        userList.forEach(User::dataMasking);
         return RestResponse.success(userList);
     }
 
