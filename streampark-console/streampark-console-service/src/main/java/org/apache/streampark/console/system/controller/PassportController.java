@@ -164,5 +164,4 @@ public class PassportController {
         return new RestResponse().data(userInfo);
     }
 
-
 }
