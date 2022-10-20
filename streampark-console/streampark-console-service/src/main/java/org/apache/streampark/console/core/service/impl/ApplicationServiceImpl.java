@@ -105,6 +105,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
@@ -1340,6 +1341,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
         } else {
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
+                extraParameter.put(ConfigConst.KEY_FLINK_JOB_ID(), new JobID().toHexString());
                 AssertUtils.state(buildResult != null);
                 DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
                 String ingressTemplates = application.getIngressTemplate();

@@ -74,6 +74,8 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
 
   lazy val jobID: String = extraParameter.get(KEY_JOB_ID).toString
 
+  lazy val flinkJobID: String = extraParameter.get(KEY_FLINK_JOB_ID).toString
+
   lazy val savepointRestoreSettings: SavepointRestoreSettings = {
     lazy val allowNonRestoredState = Try(extraParameter.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key).toString.toBoolean).getOrElse(false)
     savePoint match {
