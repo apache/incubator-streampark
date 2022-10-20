@@ -28,7 +28,14 @@ import java.util.Map;
 
 public interface MenuService extends IService<Menu> {
 
-    List<Menu> findUserPermissions(String username);
+    /**
+     * Get the permissions of current userId.
+     *
+     * @param userId the user Id
+     * @param teamId team id. If it's null, will find permissions from all teams.
+     * @return permissions
+     */
+    List<String> findUserPermissions(Long userId, Long teamId);
 
     List<Menu> findUserMenus(Long userId, Long teamId);
 

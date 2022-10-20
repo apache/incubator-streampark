@@ -23,7 +23,6 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.Member;
-import org.apache.streampark.console.system.entity.Menu;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.UserMapper;
@@ -43,14 +42,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -166,9 +167,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return permissions
      */
     @Override
-    public Set<String> getPermissions(String username) {
-        List<Menu> permissionList = this.menuService.findUserPermissions(username);
-        return permissionList.stream().map(Menu::getPerms).collect(Collectors.toSet());
+    public Set<String> getAllTeamPermissions(String username) {
+        return getPermissions(this.findByName(username).getUserId(), null);
+    }
+
+    @Override
+    public Set<String> getPermissions(Long userId, @Nullable Long teamId) {
+        List<String> userPermissions = this.menuService.findUserPermissions(userId, teamId);
+        return new HashSet<>(userPermissions);
     }
 
     @Override
@@ -217,7 +223,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return UserInfo
      */
     @Override
-    public Map<String, Object> generateFrontendUserInfo(User user, JWTToken token) {
+    public Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token) {
         AssertUtils.checkNotNull(user);
         String username = user.getUsername();
         Map<String, Object> userInfo = new HashMap<>(8);
@@ -237,7 +243,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userInfo.put("roles", roles);
 
         // 4) permissions
-        Set<String> permissions = this.getPermissions(username);
+        Set<String> permissions = this.getPermissions(user.getUserId(), teamId);
         userInfo.put("permissions", permissions);
 
         return userInfo;
