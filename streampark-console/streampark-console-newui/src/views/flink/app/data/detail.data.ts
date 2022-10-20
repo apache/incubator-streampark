@@ -91,7 +91,7 @@ export const getDescSchema = (): DescItem[] => {
     { field: 'description', label: 'Description', span: 2 },
   ];
 };
-/* 配置 */
+/* setting */
 export const getConfColumns = (): BasicColumn[] => [
   {
     title: 'Version',

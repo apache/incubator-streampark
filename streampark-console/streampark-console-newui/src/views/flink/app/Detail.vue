@@ -33,7 +33,7 @@
   import { handleView } from './utils';
   import { Button } from '/@/components/Button';
   import { getDescSchema } from './data/detail.data';
-  import { fetchCheckToken, fetchCopyCurl } from '/@/api/sys/token';
+  import { fetchCheckToken, fetchCopyCurl } from '/@/api/system/token';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { baseUrl } from '/@/adapter/api/baseUrl';
   import { fetchListVer } from '/@/api/flink/config';

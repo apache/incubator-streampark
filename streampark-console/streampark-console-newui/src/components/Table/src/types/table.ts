@@ -136,13 +136,13 @@ export interface TableActionType {
 }
 
 export interface FetchSetting {
-  // 请求接口当前页数
+  // current page field
   pageField: string;
-  // 每页显示多少条
+  // page size field
   sizeField: string;
-  // 请求结果列表字段  支持 a.b.c
+  // result field  support a.b.c
   listField: string;
-  // 请求结果总数字段  支持 a.b.c
+  // The Total Request Results field, supported a.b.c
   totalField: string;
 }
 
@@ -154,83 +154,65 @@ export interface TableSetting {
 }
 
 export interface BasicTableProps<T = any> {
-  // 点击行选中
+  // Click on Row select
   clickToRowSelect?: boolean;
   isTreeTable?: boolean;
-  // 自定义排序方法
+  // Custom sorting methods
   sortFn?: (sortInfo: SorterResult) => any;
-  // 排序方法
   filterFn?: (data: Partial<Recordable<string[]>>) => any;
-  // 取消表格的默认padding
+  // Cancel the default padding for the table
   inset?: boolean;
-  // 显示表格设置
   showTableSetting?: boolean;
   tableSetting?: TableSetting;
-  // 斑马纹
   striped?: boolean;
-  // 是否自动生成key
+  // Whether to automatically generate a key
   autoCreateKey?: boolean;
-  // 计算合计行的方法
+  // Method of calculating total rows
   summaryFunc?: (...arg: any) => Recordable[];
-  // 自定义合计表格内容
+  // Method of calculating the total number of rows
   summaryData?: Recordable[];
-  // 是否显示合计行
+  // Whether to display summary lines
   showSummary?: boolean;
-  // 是否可拖拽列
   canColDrag?: boolean;
-  // 接口请求对象
   api?: (...arg: any) => Promise<any>;
-  // 请求之前处理参数
   beforeFetch?: Fn;
-  // 自定义处理接口返回参数
   afterFetch?: Fn;
-  // 查询条件请求之前处理
+  // Query criteria are processed before requesting
   handleSearchInfoFn?: Fn;
-  // 请求接口配置
   fetchSetting?: Partial<FetchSetting>;
-  // 立即请求接口
+  // Request the interface now
   immediate?: boolean;
-  // 在开起搜索表单的时候，如果没有数据是否显示表格
+  // When the search form is launched, whether to display the table if there is no data
   emptyDataIsShowTable?: boolean;
-  // 额外的请求参数
+  // Additional request parameters
   searchInfo?: Recordable;
-  // 默认的排序参数
   defSort?: Recordable;
-  // 使用搜索表单
   useSearchForm?: boolean;
-  // 表单配置
   formConfig?: Partial<FormProps>;
-  // 列配置
   columns: BasicColumn[];
-  // 是否显示序号列
   showIndexColumn?: boolean;
-  // 序号列配置
   indexColumnProps?: BasicColumn;
   actionColumn?: BasicColumn;
-  // 文本超过宽度是否显示。。。
   ellipsis?: boolean;
-  // 是否继承父级高度（父级高度-表单高度-padding高度）
+  // Whether to inherit the parent height (parent height - form height - padding height)
   isCanResizeParent?: boolean;
-  // 是否可以自适应高度
+  // Whether it can adapt to the height
   canResize?: boolean;
-  // 自适应高度偏移， 计算结果-偏移量
+  // Adaptive height offset, calculation result - offset
   resizeHeightOffset?: number;
 
-  // 在分页改变的时候清空选项
+  // Clear options when pagination changes
   clearSelectOnPageChange?: boolean;
   //
   rowKey?: string | ((record: Recordable) => string);
-  // 数据
   dataSource?: Recordable[];
-  // 标题右侧提示
+  // Hint to the right of the title
   titleHelpMessage?: string | string[];
-  // 表格滚动最大高度
+  // The maximum height of the table scroll
   maxHeight?: number;
-  // 是否显示边框
+  // Whether to display borders
   bordered?: boolean;
-  // 分页配置
   pagination?: PaginationProps | boolean;
-  // loading加载
   loading?: boolean;
 
   /**
@@ -470,11 +452,11 @@ export interface BasicColumn extends ColumnProps<Recordable> {
   editRule?: boolean | ((text: string, record: Recordable) => Promise<string>);
   editValueMap?: (value: any) => string;
   onEditRow?: () => void;
-  // 权限编码控制是否显示
+  // The permission encoding controls whether it is displayed
   auth?: RoleEnum | RoleEnum[] | string | string[];
-  // 业务控制是否显示
+  // Whether business controls are displayed
   ifShow?: boolean | ((column: BasicColumn) => boolean);
-  // 自定义修改后显示的内容
+  // Customize what is displayed after modifications
   editRender?: (opt: {
     text: string | number | boolean | Recordable;
     record: Recordable;

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { getAllRoleList, isAccountExist } from '/@/api/demo/system';
+import { getAllRoleList, isAccountExist } from '/@/api/base/system';
 import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
 

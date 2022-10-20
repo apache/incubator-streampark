@@ -18,6 +18,9 @@
 package org.apache.streampark.console.system.security.impl.ldap;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
@@ -38,23 +41,29 @@ import java.util.Properties;
 @Configuration
 @Slf4j
 public class LdapService {
-    @Value("${ldap.urls:null}")
+
+    private static final Logger LOG = LoggerFactory.getLogger(LdapService.class);
+
+    @Value("${ldap.urls:#{null}}")
     private String ldapUrls;
 
-    @Value("${ldap.embedded.base-dn:null}")
+    @Value("${ldap.base-dn:#{null}}")
     private String ldapBaseDn;
 
-    @Value("${ldap.username:null}")
+    @Value("${ldap.username:#{null}}")
     private String ldapSecurityPrincipal;
 
-    @Value("${ldap.password:null}")
+    @Value("${ldap.password:#{null}}")
     private String ldapPrincipalPassword;
 
-    @Value("${ldap.user.identity.attribute:null}")
+    @Value("${ldap.user.identity-attribute:#{null}}")
     private String ldapUserIdentifyingAttribute;
 
-    @Value("${ldap.user.email.attribute:null}")
+    @Value("${ldap.user.email-attribute:#{null}}")
     private String ldapEmailAttribute;
+
+    @Value("${ldap.user.not-exist-action:CREATE}")
+    private String ldapUserNotExistAction;
 
     /**
      * login by userId and return user email
@@ -115,5 +124,18 @@ public class LdapService {
         env.put(Context.SECURITY_CREDENTIALS, ldapPrincipalPassword);
         env.put(Context.PROVIDER_URL, ldapUrls);
         return env;
+    }
+
+    public LdapUserNotExistActionType getLdapUserNotExistAction() {
+        if (StringUtils.isBlank(ldapUserNotExistAction)) {
+            LOG.info("security.authentication.ldap.user.not.exist.action configuration is empty, the default value 'CREATE'");
+            return LdapUserNotExistActionType.CREATE;
+        }
+
+        return LdapUserNotExistActionType.valueOf(ldapUserNotExistAction);
+    }
+
+    public boolean createIfUserNotExists() {
+        return getLdapUserNotExistAction() == LdapUserNotExistActionType.CREATE;
     }
 }

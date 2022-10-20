@@ -22,8 +22,8 @@ export interface Options {
   defaultWidth?: number;
   maskClosable?: boolean;
   rememberState?: boolean;
-  onImgLoad?: ({ index: number, url: string, dom: HTMLImageElement }) => void;
-  onImgError?: ({ index: number, url: string, dom: HTMLImageElement }) => void;
+  onImgLoad?: ({ index, url, dom }: { index: number; url: string; dom: HTMLImageElement }) => void;
+  onImgError?: ({ index, url, dom }: { index: number; url: string; dom: HTMLImageElement }) => void;
 }
 
 export interface Props {

@@ -17,7 +17,7 @@
 version: '3.8'
 services:
   streampark-server:
-    image: ${HUB}/streampark:${TAG}
+    image: ${HUB}:${TAG}
     command: ${COMMAND}
     ports:
       - 10000:10000

@@ -99,7 +99,7 @@
 
       const getUserInfo = computed(() => {
         const { username = '', avatar, desc } = userStore.getUserInfo || {};
-        return { username, avatar: avatar || headerImg, desc };
+        return { username, avatar: avatar && avatar !== 'default.jpg' ? avatar : headerImg, desc };
       });
       const [registerPasswordModal, { openModal: openPasswordModal }] = useModal();
       const [register, { openModal }] = useModal();
@@ -129,6 +129,7 @@
             break;
           case 'doc':
             openDoc();
+            break;
           case 'password':
             openChangePassword();
             break;

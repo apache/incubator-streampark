@@ -160,7 +160,7 @@
           createMessage.success('Create AlertConfig successful!');
         }
       } else {
-        //更新操作
+        //update
         await fetchAlertUpdate(param);
         createMessage.success('Update AlertConfig successful!');
       }

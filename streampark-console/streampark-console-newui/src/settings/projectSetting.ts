@@ -31,7 +31,7 @@ import { primaryColor } from '../../build/config/themeConfig';
 // ! You need to clear the browser cache after the change
 const setting: ProjectConfig = {
   // Whether to show the configuration button
-  showSettingButton: true,
+  showSettingButton: false,
 
   // Whether to show the theme switch button
   showDarkModeToggle: true,
@@ -88,7 +88,7 @@ const setting: ProjectConfig = {
     // Whether to show the notification button
     showNotice: true,
     // Whether to display the menu search
-    showSearch: true,
+    showSearch: false,
   },
 
   // Menu configuration
@@ -138,7 +138,7 @@ const setting: ProjectConfig = {
   multiTabsSetting: {
     cache: false,
     // Turn on
-    show: true,
+    show: false,
     // Is it possible to drag and drop sorting tabs
     canDrag: true,
     // Turn on quick actions

@@ -19,7 +19,7 @@
     <DeptTree class="w-1/4 xl:w-1/5" @select="handleSelect" />
     <BasicTable @register="registerTable" class="w-3/4 xl:w-4/5" :searchInfo="searchInfo">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate">新增账号</a-button>
+        <a-button type="primary" @click="handleCreate">add account</a-button>
       </template>
       <template #action="{ record }">
         <TableAction
@@ -55,7 +55,7 @@
   import { defineComponent, reactive } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import { getAccountList } from '/@/api/demo/system';
+  import { getAccountList } from '/@/api/base/system';
   import { PageWrapper } from '/@/components/Page';
   import DeptTree from './DeptTree.vue';
 
@@ -73,7 +73,7 @@
       const [registerModal, { openModal }] = useModal();
       const searchInfo = reactive<Recordable>({});
       const [registerTable, { reload, updateTableDataRecord }] = useTable({
-        title: '账号列表',
+        title: 'Account list',
         api: getAccountList,
         rowKey: 'id',
         columns,

@@ -33,22 +33,19 @@
         type: [String, Array] as PropType<string | any[]>,
         default: null,
       },
-      // 参数
+      // parameter
       options: {
         type: Object as PropType<QRCodeRenderersOptions>,
         default: null,
       },
-      // 宽度
       width: {
         type: Number as PropType<number>,
         default: 200,
       },
-      // 中间logo图标
       logo: {
         type: [String, Object] as PropType<Partial<LogoType> | string>,
         default: '',
       },
-      // img 不支持内嵌logo
       tag: {
         type: String as PropType<'canvas' | 'img'>,
         default: 'canvas',
@@ -111,7 +108,7 @@
 
       onMounted(createQrcode);
 
-      // 监听参数变化重新生成二维码
+      // Monitor parameter changes to regenerate QR codes
       watch(
         props,
         () => {

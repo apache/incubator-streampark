@@ -19,7 +19,6 @@ package org.apache.streampark.console.system.service;
 
 import org.apache.streampark.console.base.domain.router.VueRouter;
 import org.apache.streampark.console.system.entity.Menu;
-import org.apache.streampark.console.system.entity.User;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -29,9 +28,16 @@ import java.util.Map;
 
 public interface MenuService extends IService<Menu> {
 
-    List<Menu> findUserPermissions(String username);
+    /**
+     * Get the permissions of current userId.
+     *
+     * @param userId the user Id
+     * @param teamId team id. If it's null, will find permissions from all teams.
+     * @return permissions
+     */
+    List<String> findUserPermissions(Long userId, Long teamId);
 
-    List<Menu> findUserMenus(String username);
+    List<Menu> findUserMenus(Long userId, Long teamId);
 
     Map<String, Object> findMenus(Menu menu);
 
@@ -48,5 +54,5 @@ public interface MenuService extends IService<Menu> {
      */
     void deleteMenus(String[] menuIds) throws Exception;
 
-    ArrayList<VueRouter<Menu>> getUserRouters(User user);
+    ArrayList<VueRouter<Menu>> getUserRouters(Long userId, Long teamId);
 }
