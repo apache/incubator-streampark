@@ -74,13 +74,31 @@ public class PassportController {
     public RestResponse signin(
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
-
         if (StringUtils.isEmpty(username)) {
             return RestResponse.success().put("code", 0);
         }
-
         User user = authenticator.authenticate(username, password);
+        return login(username, password, user);
+    }
 
+    @PostMapping("ldapSignin")
+    public RestResponse ldapSignin(
+        @NotBlank(message = "{required}") String username,
+        @NotBlank(message = "{required}") String password) throws Exception {
+        if (StringUtils.isEmpty(username)) {
+            return RestResponse.success().put("code", 0);
+        }
+        User user = authenticator.ldapAuthenticate(username, password);
+        return login(username, password, user);
+    }
+
+    @PostMapping("signout")
+    public RestResponse signout() {
+        SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
+        return new RestResponse();
+    }
+
+    private RestResponse login(String username, String password, User user) throws Exception {
         if (user == null) {
             return RestResponse.success().put("code", 0);
         }
@@ -105,7 +123,7 @@ public class PassportController {
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
-        Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
+        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, user.getTeamId(), jwtToken);
         return new RestResponse().data(userInfo);
     }
 
@@ -144,38 +162,9 @@ public class PassportController {
         JWTToken jwtToken = new JWTToken(token2, expireTimeStr);
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
-        Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
+        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, user.getTeamId(), jwtToken);
         return new RestResponse().data(userInfo);
     }
 
-    @PostMapping("signout")
-    public RestResponse signout() {
-        SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
-        return new RestResponse();
-    }
-
-    /**
-     * generate user info, contains: 1.token, 2.vue router, 3.role, 4.permission, 5.personalized config info of frontend
-     *
-     * @param token token
-     * @param user  user
-     * @return UserInfo
-     */
-    private Map<String, Object> generateUserInfo(JWTToken token, User user) {
-        String username = user.getUsername();
-        Map<String, Object> userInfo = new HashMap<>(8);
-        userInfo.put("token", token.getToken());
-        userInfo.put("expire", token.getExpireAt());
-
-        Set<String> roles = this.roleService.getUserRoleName(username);
-        userInfo.put("roles", roles);
-
-        Set<String> permissions = this.userService.getPermissions(username);
-        userInfo.put("permissions", permissions);
-        user.setPassword("******");
-        user.setSalt("******");
-        userInfo.put("user", user);
-        return userInfo;
-    }
 
 }
