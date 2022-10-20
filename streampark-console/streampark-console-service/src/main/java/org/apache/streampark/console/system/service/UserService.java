@@ -107,8 +107,6 @@ public interface UserService extends IService<User> {
      */
     void resetPassword(String[] usernames) throws Exception;
 
-    Set<String> getAllTeamPermissions(String username);
-
     /**
      * Get the permissions of current userId.
      *

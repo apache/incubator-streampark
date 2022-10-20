@@ -62,8 +62,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     private RoleMenuServie roleMenuService;
 
     @Override
-    public Set<String> getUserRoleName(String username) {
-        List<Role> roleList = this.findUserRole(username);
+    public Set<String> getUserRoleName(Long userId) {
+        List<Role> roleList = this.findUserRole(userId);
         return roleList.stream().map(Role::getRoleName).collect(Collectors.toSet());
     }
 
@@ -76,8 +76,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     @Override
-    public List<Role> findUserRole(String userName) {
-        return baseMapper.findUserRole(userName);
+    public List<Role> findUserRole(Long userId) {
+        return baseMapper.findUserRole(userId);
     }
 
     @Override
