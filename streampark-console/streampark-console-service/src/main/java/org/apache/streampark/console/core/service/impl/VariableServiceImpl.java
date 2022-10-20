@@ -109,7 +109,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     /**
      * Replace placeholders with defined variable codes.
      * @param teamId
-     * @param paramWithPlaceholders Parameters with placeholders
+     * @param paramWithPlaceholders Parameters with placeholders, e.g. "--cluster ${kafka.cluster}"
      * @return
      */
     @Override
@@ -133,14 +133,11 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     private boolean isDependByApplications(Variable variable) {
         // Detect whether the variable is dependent on the args of the application
         List<Application> applications = applicationService.getByTeamId(variable.getTeamId());
-        Iterator<Application> appIt = applications.iterator();
-        while (appIt.hasNext()) {
-            Application application = appIt.next();
-            Matcher matcher = placeholderPattern.matcher(application.getArgs());
-            if (matcher.find()) {
-                String placeholder = matcher.group();
-                String dependVariableCode = getCodeFromPlaceholder(placeholder);
-                if (variable.getVariableCode().equals(dependVariableCode)) {
+        if (applications != null) {
+            Iterator<Application> appIt = applications.iterator();
+            while (appIt.hasNext()) {
+                Application application = appIt.next();
+                if (isDepend(variable.getVariableCode(), application.getArgs())) {
                     return true;
                 }
             }
@@ -148,19 +145,30 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
 
         // Detect whether variables are dependent on all versions of flink sql
         List<FlinkSql> sqls = flinkSqlService.getByTeamId(variable.getTeamId());
-        Iterator<FlinkSql> sqlIt = sqls.iterator();
-        while (sqlIt.hasNext()) {
-            FlinkSql sql = sqlIt.next();
-            Matcher matcher = placeholderPattern.matcher(DeflaterUtils.unzipString(sql.getSql()));
-            if (matcher.find()) {
-                String placeholder = matcher.group();
-                String dependVariableCode = getCodeFromPlaceholder(placeholder);
-                if (variable.getVariableCode().equals(dependVariableCode)) {
+        if (sqls != null) {
+            Iterator<FlinkSql> sqlIt = sqls.iterator();
+            while (sqlIt.hasNext()) {
+                FlinkSql sql = sqlIt.next();
+                if (isDepend(variable.getVariableCode(), DeflaterUtils.unzipString(sql.getSql()))) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    /**
+     * Determine whether variableCode is dependent on paramWithPlaceholders.
+     * @param variableCode Variable code, e.g. "kafka.cluster"
+     * @param paramWithPlaceholders Parameters with placeholders, e.g. "--cluster ${kafka.cluster}"
+     * @return If paramWithPlaceholders can match the variableCode, return true, otherwise return false
+     */
+    private boolean isDepend(String variableCode, String paramWithPlaceholders) {
+        if (StringUtils.isEmpty(paramWithPlaceholders)) {
+            return false;
+        }
+        String placeholder = String.format("%s%s%s", placeholderLeft, variableCode, placeholderRight);
+        return paramWithPlaceholders.contains(placeholder);
     }
 
     private String getCodeFromPlaceholder(String placeholder) {
