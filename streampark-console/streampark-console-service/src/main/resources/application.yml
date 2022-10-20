@@ -89,7 +89,7 @@ streampark:
   hadoop-user-name: hdfs
   # local workspace, used to store source code and build dir etc.
   workspace:
-    local: /home/huk/open/incubator-streampark-dev/workspace
+    local: /opt/streampark_workspace
     remote: hdfs://hdfscluster/streampark   # support hdfs:///streampark/ 、 /streampark 、hdfs://host:ip/streampark/
 
   # remote docker register namespace for streampark
