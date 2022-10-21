@@ -47,10 +47,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Slf4j
 @Validated
@@ -185,29 +183,20 @@ public class UserController {
 
         User user = commonService.getCurrentUser();
 
-        //1) set latest team
+        //1) set the latest team
         userService.setLatestTeam(teamId, user.getUserId());
 
         //2) get latest userInfo
         user.dataMasking();
 
-        Map<String, Object> infoMap = new HashMap<>(8);
-        infoMap.put("user", user);
-
-        String username = user.getUsername();
-        Set<String> roles = this.roleService.getUserRoleName(username);
-        infoMap.put("roles", roles);
-
-        Set<String> permissions = this.userService.getPermissions(username);
-        infoMap.put("permissions", permissions);
-
+        Map<String, Object> infoMap = userService.generateFrontendUserInfo(user, teamId, null);
         return new RestResponse().data(infoMap);
     }
 
     @PostMapping("appOwners")
-    public RestResponse appOnwers(Long teamId) {
+    public RestResponse appOwners(Long teamId) {
         List<User> userList = userService.findByAppOwner(teamId);
-        userList.forEach((u) -> u.dataMasking());
+        userList.forEach(User::dataMasking);
         return RestResponse.success(userList);
     }
 

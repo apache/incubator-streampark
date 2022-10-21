@@ -85,7 +85,6 @@
     if (!unref(visualType)) return '';
     return titleMap[unref(visualType)];
   });
-  /* 关闭 */
   function handleCloseDrawer() {
     closeDrawer();
     hostAliasPreview.value = '';

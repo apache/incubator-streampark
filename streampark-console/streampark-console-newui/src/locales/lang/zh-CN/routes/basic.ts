@@ -17,4 +17,8 @@
 export default {
   login: '登录',
   errorLogList: '错误日志列表',
+  notice: {
+    message: '通知消息',
+    exception: '异常告警',
+  },
 };

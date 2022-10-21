@@ -15,20 +15,15 @@
   limitations under the License.
 -->
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue';
   import { Select } from 'ant-design-vue';
   import { useUserStoreWithOut } from '/@/store/modules/user';
-  import { fetchUserTeam } from '/@/api/sys/member';
   const SelectOption = Select.Option;
 
   const userStore = useUserStoreWithOut();
 
-  const teamList = ref<Array<{ id: string; teamName: string }>>([]);
-
-  onMounted(async () => {
-    const res = await fetchUserTeam({ userId: userStore?.getUserInfo?.userId });
-    teamList.value = [...res];
-  });
+  function handleSetTeamId(value: string) {
+    userStore.setTeamId({ teamId: value });
+  }
 </script>
 
 <template>
@@ -37,12 +32,12 @@
     <Select
       :allow-clear="false"
       class="flex-1"
-      @change="userStore.setTeamId"
-      :value="userStore.getTeamId"
+      @change="handleSetTeamId"
+      :value="userStore.teamId"
       placeholder="Team"
     >
-      <SelectOption v-for="t in teamList" :key="t.id">
-        {{ t.teamName }}
+      <SelectOption v-for="t in userStore.getTeamList" :key="t.value">
+        {{ t.label }}
       </SelectOption>
     </Select>
   </div>

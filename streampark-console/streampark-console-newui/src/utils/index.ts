@@ -19,6 +19,7 @@ import type { App, Plugin } from 'vue';
 
 import { unref } from 'vue';
 import { isObject } from '/@/utils/is';
+import { APP_TEAMID_KEY_ } from '../enums/cacheEnum';
 
 export const noop = () => {};
 
@@ -48,7 +49,6 @@ export function setObjToUrlParams(baseUrl: string, obj: any): string {
   return /\?$/.test(baseUrl) ? baseUrl + parameters : baseUrl.replace(/\/?$/, '?') + parameters;
 }
 
-// 深度合并
 export function deepMerge<T = any>(src: any = {}, target: any = {}): T {
   let key: string;
   for (key in target) {
@@ -106,3 +106,13 @@ export const withInstall = <T>(component: T, alias?: string) => {
   };
   return component as T & Plugin;
 };
+
+export function getUserTeamId() {
+  if (!!sessionStorage.getItem(APP_TEAMID_KEY_)) {
+    return sessionStorage.getItem(APP_TEAMID_KEY_)!;
+  }
+  if (!!localStorage.getItem(APP_TEAMID_KEY_)) {
+    return localStorage.getItem(APP_TEAMID_KEY_)!;
+  }
+  return '';
+}

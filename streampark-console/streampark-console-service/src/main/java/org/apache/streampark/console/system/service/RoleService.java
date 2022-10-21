@@ -28,11 +28,11 @@ import java.util.Set;
 
 public interface RoleService extends IService<Role> {
 
-    Set<String> getUserRoleName(String username);
+    Set<String> getUserRoleName(Long userId);
 
     IPage<Role> findRoles(Role role, RestRequest request);
 
-    List<Role> findUserRole(String userName);
+    List<Role> findUserRole(Long userId);
 
     Role findByName(String roleName);
 

@@ -74,7 +74,7 @@
         type: [String, Array],
         default: '',
       },
-      noresize: Boolean, // 如果 container 尺寸不会发生变化，最好设置它可以优化性能
+      noresize: Boolean, // If the container size does not change, it is best to set it to optimize performance
       tag: {
         type: String,
         default: 'div',

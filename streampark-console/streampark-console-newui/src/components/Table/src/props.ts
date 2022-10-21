@@ -79,22 +79,21 @@ export const basicProps = {
       return FETCH_SETTING;
     },
   },
-  // 立即请求接口
+  // Request the interface now
   immediate: { type: Boolean, default: true },
   emptyDataIsShowTable: { type: Boolean, default: true },
-  // 额外的请求参数
+  // Additional request parameters
   searchInfo: {
     type: Object as PropType<Recordable>,
     default: null,
   },
-  // 默认的排序参数
+  // The default sort parameter
   defSort: {
     type: Object as PropType<Recordable>,
     default: null,
   },
-  // 使用搜索表单
+  // Use the search form
   useSearchForm: propTypes.bool,
-  // 表单配置
   formConfig: {
     type: Object as PropType<Partial<FormProps>>,
     default: null,

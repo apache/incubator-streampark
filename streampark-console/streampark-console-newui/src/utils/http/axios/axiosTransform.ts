@@ -39,12 +39,12 @@ export abstract class AxiosTransform {
   transformRequestHook?: (res: AxiosResponse<Result>, options: RequestOptions) => any;
 
   /**
-   * @description: 请求失败处理
+   * @description: Request failure processing
    */
   requestCatchHook?: (e: Error, options: RequestOptions) => Promise<any>;
 
   /**
-   * @description: 请求之前的拦截器
+   * @description: The interceptor before the request
    */
   requestInterceptors?: (
     config: AxiosRequestConfig,
@@ -52,17 +52,17 @@ export abstract class AxiosTransform {
   ) => AxiosRequestConfig;
 
   /**
-   * @description: 请求之后的拦截器
+   * @description: The interceptor after the request
    */
   responseInterceptors?: (res: AxiosResponse<any>) => AxiosResponse<any>;
 
   /**
-   * @description: 请求之前的拦截器错误处理
+   * @description: Interceptor error handling before requesting
    */
   requestInterceptorsCatch?: (error: Error) => void;
 
   /**
-   * @description: 请求之后的拦截器错误处理
+   * @description: Interceptor error handling after the request
    */
   responseInterceptorsCatch?: (axiosInstance: AxiosResponse, error: Error) => void;
 }

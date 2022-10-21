@@ -32,8 +32,8 @@
   import { formSchema, TypeEnum } from './menu.data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
-  import { getMenuList } from '/@/api/demo/system';
-  import { addMenu, editMenu } from '/@/api/sys/menu';
+  import { getMenuList } from '/@/api/base/system';
+  import { addMenu, editMenu } from '/@/api/system/menu';
 
   export default defineComponent({
     name: 'MenuDrawer',

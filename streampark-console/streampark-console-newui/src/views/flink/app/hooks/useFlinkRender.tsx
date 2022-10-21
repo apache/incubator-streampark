@@ -190,7 +190,7 @@ export const renderInputGroup = (model: Recordable) => {
     </div>
   );
 };
-/* 获取totalOptions 的选择项 */
+/*Gets the selection of totalOptions */
 function getTotalOptions() {
   return [
     {
