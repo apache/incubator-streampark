@@ -202,11 +202,11 @@
             type="text"
             placeholder="~/.kube/config"
             allowClear
-            v-decorator="[ 'kubeConfFile']">
+            v-decorator="[ 'k8sConf']">
             <a-dropdown slot="addonAfter" placement="bottomRight">
               <a-menu slot="overlay" trigger="['click', 'hover']">
                 <a-menu-item
-                  v-for="item in historyRecord.kubeConfFile"
+                  v-for="item in historyRecord.k8sConf"
                   :key="item"
                   @click="handleSelectHistoryKubeConfFile(item)"
                   style="padding-right: 60px">
@@ -664,7 +664,7 @@ export default {
           'k8sRestExposedType': this.cluster.k8sRestExposedType,
           'flinkImage': this.cluster.flinkImage,
           'serviceAccount': this.cluster.serviceAccount,
-          'kubeConfFile': this.cluster.kubeConfFile,
+          'k8sConf': this.cluster.k8sConf,
           'flameGraph': this.cluster.flameGraph,
           'k8sNamespace': this.cluster.k8sNamespace
         })
@@ -795,7 +795,7 @@ export default {
               k8sRestExposedType: values.k8sRestExposedType,
               k8sNamespace: values.k8sNamespace || null,
               serviceAccount: values.serviceAccount,
-              k8sConf: values.kubeConfFile,
+              k8sConf: values.k8sConf,
               flinkImage: values.flinkImage || null,
               address: values.address,
               flameGraph: values.flameGraph,
@@ -976,7 +976,7 @@ export default {
     },
 
     handleSelectHistoryKubeConfFile(value) {
-      this.form.setFieldsValue({'kubeConfFile': value})
+      this.form.setFieldsValue({'k8sConf': value})
     },
 
     handleSelectHistoryK8sSessionClusterId(value) {

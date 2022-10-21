@@ -113,7 +113,7 @@
         k8sRestExposedType: cluster.k8sRestExposedType,
         flinkImage: cluster.flinkImage,
         serviceAccount: cluster.serviceAccount,
-        kubeConfFile: cluster.kubeConfFile,
+        k8sConf: cluster.k8sConf,
         flameGraph: cluster.flameGraph,
         k8sNamespace: cluster.k8sNamespace,
         ...resetParams,
