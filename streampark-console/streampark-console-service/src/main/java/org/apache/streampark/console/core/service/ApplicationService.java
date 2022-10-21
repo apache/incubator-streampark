@@ -90,6 +90,8 @@ public interface ApplicationService extends IService<Application> {
 
     List<Application> getByProjectId(Long id);
 
+    List<Application> getByTeamId(Long teamId);
+
     boolean checkBuildAndUpdate(Application app);
 
     void forcedStop(Application app);

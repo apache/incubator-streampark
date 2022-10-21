@@ -23,6 +23,7 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.SqlCompleteService;
+import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 
 import io.swagger.annotations.Api;
@@ -48,10 +49,14 @@ public class FlinkSqlController {
     private FlinkSqlService flinkSqlService;
 
     @Autowired
+    private VariableService variableService;
+
+    @Autowired
     private SqlCompleteService sqlComplete;
 
     @PostMapping("verify")
-    public RestResponse verify(String sql, Long versionId) {
+    public RestResponse verify(String sql, Long versionId, Long teamId) {
+        sql = variableService.replaceVariable(teamId, sql);
         FlinkSqlValidationResult flinkSqlValidationResult = flinkSqlService.verifySql(sql, versionId);
         if (!flinkSqlValidationResult.success()) {
             // record error type, such as error sql, reason and error start/end line

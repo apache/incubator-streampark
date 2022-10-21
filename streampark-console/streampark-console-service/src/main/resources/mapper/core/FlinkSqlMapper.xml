@@ -27,4 +27,11 @@
         <result column="dependency" jdbcType="VARCHAR" property="dependency"/>
         <result column="create_time" jdbcType="DATE" property="createTime"/>
     </resultMap>
+
+    <select id="getByTeamId" resultType="flinkSql" parameterType="Long">
+        select s.*
+        from t_flink_sql s, t_flink_app a
+        where s.app_id = a.id
+        and a.team_id = #{teamId}
+    </select>
 </mapper>

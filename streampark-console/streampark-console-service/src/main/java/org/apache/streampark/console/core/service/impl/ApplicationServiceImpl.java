@@ -76,6 +76,7 @@ import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
+import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.task.FlinkTrackingTask;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.IngressController;
@@ -203,6 +204,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private FlinkClusterService flinkClusterService;
+
+    @Autowired
+    private VariableService variableService;
 
     @PostConstruct
     public void resetOptionState() {
@@ -869,6 +873,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public List<Application> getByTeamId(Long teamId) {
+        return baseMapper.getByTeamId(teamId);
+    }
+
+    @Override
     @RefreshCache
     public boolean checkBuildAndUpdate(Application application) {
         boolean build = application.getBuild();
@@ -1315,7 +1324,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         if (application.isFlinkSqlJob()) {
-            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
+            // Get the sql of the replaced placeholder
+            String realSql = variableService.replaceVariable(application.getTeamId(), flinkSql.getSql());
+            flinkSql.setSql(DeflaterUtils.zipString(realSql));
             extraParameter.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
         }
 
@@ -1364,6 +1376,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             }
         }
+
+        // Get the args after placeholder replacement
+        String applicationArgs = variableService.replaceVariable(application.getTeamId(), application.getArgs());
+
         SubmitRequest submitRequest = new SubmitRequest(
             flinkEnv.getFlinkVersion(),
             flinkEnv.getFlinkConf(),
@@ -1377,7 +1393,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.getFlameGraph() ? getFlameGraph(application) : null,
             application.getOptionMap(),
             dynamicOption,
-            application.getArgs(),
+            applicationArgs,
             buildResult,
             kubernetesSubmitParam,
             extraParameter
