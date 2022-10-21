@@ -54,5 +54,5 @@ public interface VariableService extends IService<Variable> {
 
     Variable findByVariableCode(Long teamId, String variableCode);
 
-    String parseVariable(Long teamId, String paramWithPlaceholders);
+    String replaceVariable(Long teamId, String mixed);
 }

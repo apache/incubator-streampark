@@ -92,11 +92,6 @@ streampark:
     local: /opt/streampark_workspace
     remote: hdfs://hdfscluster/streampark   # support hdfs:///streampark/ 、 /streampark 、hdfs://host:ip/streampark/
 
-  # The placeholder format definition of the variable module, such as ${xxx}, generally does not need to be changed
-  variable:
-    placeholder-start: '${'
-    placeholder-end: '}'
-
   # remote docker register namespace for streampark
   docker:
     # instantiating DockerHttpClient

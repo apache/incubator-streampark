@@ -38,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,13 +53,11 @@ import java.util.stream.Collectors;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> implements VariableService {
 
-    private final Pattern placeholderPattern = Pattern.compile("\\$\\{([A-Za-z])+([A-Za-z0-9._-])+\\}");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([A-Za-z])+([A-Za-z0-9._-])+\\}");
 
-    @Value("${streampark.variable.placeholder-start}")
-    private String placeholderStart;
+    private static final String PLACEHOLDER_START = "${";
 
-    @Value("${streampark.variable.placeholder-end}")
-    private String placeholderEnd;
+    private static final String PLACEHOLDER_END = "}";
 
     @Autowired
     private ApplicationService applicationService;
@@ -112,29 +109,29 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     }
 
     /**
-     * Replace placeholders with defined variable codes.
+     * Replace variable with defined variable codes.
      * @param teamId
-     * @param paramWithPlaceholders Parameters with placeholders, e.g. "--cluster ${kafka.cluster}"
+     * @param mixed Text with placeholders, e.g. "--cluster ${kafka.cluster}"
      * @return
      */
     @Override
-    public String parseVariable(Long teamId, String paramWithPlaceholders) {
-        if (StringUtils.isEmpty(paramWithPlaceholders)) {
-            return paramWithPlaceholders;
+    public String replaceVariable(Long teamId, String mixed) {
+        if (StringUtils.isEmpty(mixed)) {
+            return mixed;
         }
         List<Variable> variables = findByTeamId(teamId);
         if (CollectionUtils.isEmpty(variables)) {
-            return paramWithPlaceholders;
+            return mixed;
         }
         Map<String, String> variableMap = variables.stream().collect(Collectors.toMap(Variable::getVariableCode, Variable::getVariableValue));
-        String restore = paramWithPlaceholders;
-        Matcher matcher = placeholderPattern.matcher(restore);
+        String restore = mixed;
+        Matcher matcher = PLACEHOLDER_PATTERN.matcher(restore);
         while (matcher.find()) {
             String placeholder = matcher.group();
             String variableCode = getCodeFromPlaceholder(placeholder);
-            String variableVaule = variableMap.get(variableCode);
-            if (StringUtils.isNotEmpty(variableVaule)) {
-                restore = restore.replace(placeholder, variableVaule);
+            String variableValue = variableMap.get(variableCode);
+            if (StringUtils.isNotEmpty(variableValue)) {
+                restore = restore.replace(placeholder, variableValue);
             }
         }
         return restore;
@@ -164,20 +161,20 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     }
 
     /**
-     * Determine whether variableCode is dependent on paramWithPlaceholders.
+     * Determine whether variableCode is dependent on mixed.
      * @param variableCode Variable code, e.g. "kafka.cluster"
-     * @param paramWithPlaceholders Parameters with placeholders, e.g. "--cluster ${kafka.cluster}"
-     * @return If paramWithPlaceholders can match the variableCode, return true, otherwise return false
+     * @param mixed Text with placeholders, e.g. "--cluster ${kafka.cluster}"
+     * @return If mixed can match the variableCode, return true, otherwise return false
      */
-    private boolean isDepend(String variableCode, String paramWithPlaceholders) {
-        if (StringUtils.isEmpty(paramWithPlaceholders)) {
+    private boolean isDepend(String variableCode, String mixed) {
+        if (StringUtils.isEmpty(mixed)) {
             return false;
         }
-        String placeholder = String.format("%s%s%s", placeholderStart, variableCode, placeholderEnd);
-        return paramWithPlaceholders.contains(placeholder);
+        String placeholder = String.format("%s%s%s", PLACEHOLDER_START, variableCode, PLACEHOLDER_END);
+        return mixed.contains(placeholder);
     }
 
     private String getCodeFromPlaceholder(String placeholder) {
-        return placeholder.substring(placeholderStart.length(), placeholder.length() - placeholderEnd.length());
+        return placeholder.substring(PLACEHOLDER_START.length(), placeholder.length() - PLACEHOLDER_END.length());
     }
 }

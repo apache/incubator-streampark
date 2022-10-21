@@ -56,7 +56,7 @@ public class VariableServiceTest {
         Variable findVariable = variableService.findByVariableCode(teamId, variableCode);
         Assertions.assertTrue(findVariable != null);
         String paramWithPlaceholders = "--kafka.brokers ${" + variableCode + "}";
-        String realParam = variableService.parseVariable(teamId, paramWithPlaceholders);
+        String realParam = variableService.replaceVariable(teamId, paramWithPlaceholders);
         Assertions.assertEquals(realParam, "--kafka.brokers " + variableVariable);
     }
 
@@ -80,7 +80,7 @@ public class VariableServiceTest {
         Variable findVariable = variableService.findByVariableCode(teamId, variableCode);
         Assertions.assertTrue(findVariable != null);
         String paramWithPlaceholders = "--kafka.brokers ${" + variableCode + "}";
-        String realParam = variableService.parseVariable(teamId, paramWithPlaceholders);
+        String realParam = variableService.replaceVariable(teamId, paramWithPlaceholders);
         Assertions.assertNotEquals("--kafka.brokers " + variableVariable, realParam);
     }
 }
