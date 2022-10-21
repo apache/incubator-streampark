@@ -110,9 +110,11 @@ object ConfigConst {
 
   def KEY_FLINK_PARALLELISM(prefix: String = null): String = if (prefix == null) "parallelism.default" else s"${prefix}parallelism.default"
 
-  val KEY_ENV_PROPERTY_PREFIX = "env.property."
+  val KEY_FLINK_OPTION_PREFIX = "flink.option."
 
-  val KEY_ENV_OPTION_PREFIX = "env.option."
+  val KEY_FLINK_PROPERTY_PREFIX = "flink.property."
+
+  val KEY_FLINK_TABLE_PREFIX = "flink.table."
 
   val KEY_APP_PREFIX = "app."
 

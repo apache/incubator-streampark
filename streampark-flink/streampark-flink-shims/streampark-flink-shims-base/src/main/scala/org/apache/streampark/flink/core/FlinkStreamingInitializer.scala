@@ -87,10 +87,11 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case file => file
     }
     val configMap = parseConfig(config)
-    val (envConf, appConf) = extractEnvAndAppConfig(configMap)
+    val properConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
+    val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
     // config priority: explicitly specified priority > project profiles > system profiles
     val parameter = ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(appConf)).mergeWith(argsMap)
-    val envConfig = Configuration.fromMap(envConf)
+    val envConfig = Configuration.fromMap(properConf)
     FlinkConfiguration(parameter, envConfig, null)
   }
 
@@ -123,18 +124,12 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     }
   }
 
-  def extractEnvAndAppConfig(configMap: Map[String, String]): (Map[String, String], Map[String, String]) = {
-    val appConf = mutable.Map[String, String]()
-    val envConf = mutable.Map[String, String]()
-    configMap.foreach(x => {
-      if (x._1.startsWith(KEY_ENV_PROPERTY_PREFIX)) {
-        envConf += x._1.drop(KEY_ENV_PROPERTY_PREFIX.length) -> x._2
-      }
-      if (x._1.startsWith(KEY_APP_PREFIX)) {
-        appConf += x._1.drop(KEY_APP_PREFIX.length) -> x._2
-      }
+  def extractConfigByPrefix(configMap: Map[String, String], prefix: String): Map[String, String] = {
+    val map = mutable.Map[String, String]()
+    configMap.foreach(x => if (x._1.startsWith(prefix)) {
+      map += x._1.drop(prefix.length) -> x._2
     })
-    envConf -> appConf
+    map
   }
 
   def streamEnvironment: StreamExecutionEnvironment = {

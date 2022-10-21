@@ -142,17 +142,6 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
           FlinkConfiguration(parameter, new Configuration(), new Configuration())
         case file =>
           val configMap = parseConfig(file)
-          val (envAllConf, appConf) = extractEnvAndAppConfig(configMap)
-
-          val envConf = mutable.Map[String, String]()
-          val tableConf = mutable.Map[String, String]()
-          envAllConf.foreach(x => {
-            x._1 match {
-              case k if k.startsWith("table.") => tableConf += k -> x._2
-              case k => envConf += k -> x._2
-            }
-          })
-
           // set sql..
           val sqlConf = mutable.Map[String, String]()
           configMap.foreach(x => {
@@ -162,13 +151,18 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
           })
 
           // config priority: explicitly specified priority > project profiles > system profiles
+          val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
           val parameter = ParameterTool.fromSystemProperties()
             .mergeWith(ParameterTool.fromMap(appConf))
             .mergeWith(ParameterTool.fromMap(sqlConf))
             .mergeWith(argsMap)
 
-          val envConfig = Configuration.fromMap(envConf)
+          val properConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
+          val envConfig = Configuration.fromMap(properConf)
+
+          val tableConf = extractConfigByPrefix(configMap, KEY_FLINK_TABLE_PREFIX)
           val tableConfig = Configuration.fromMap(tableConf)
+
           FlinkConfiguration(parameter, envConfig, tableConfig)
       }
     }

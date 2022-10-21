@@ -59,9 +59,9 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
                          @Nullable k8sSubmitParam: KubernetesSubmitParam,
                          @Nullable extraParameter: JavaMap[String, Any]) {
 
-  lazy val appProperties: Map[String, String] = getParameterMap(KEY_ENV_PROPERTY_PREFIX)
+  lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_PROPERTY_PREFIX)
 
-  lazy val appOption: Map[String, String] = getParameterMap(KEY_ENV_OPTION_PREFIX)
+  lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_OPTION_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
     case DevelopmentMode.FLINKSQL => ConfigConst.STREAMPARK_FLINKSQL_CLIENT_CLASS
