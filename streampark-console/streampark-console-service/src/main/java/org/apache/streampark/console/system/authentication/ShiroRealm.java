@@ -21,7 +21,6 @@ import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.AccessTokenService;
-import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,9 +46,6 @@ public class ShiroRealm extends AuthorizingRealm {
     private UserService userService;
 
     @Autowired
-    private RoleService roleService;
-
-    @Autowired
     private AccessTokenService accessTokenService;
 
     @Override
@@ -68,10 +64,6 @@ public class ShiroRealm extends AuthorizingRealm {
         Long userId = JWTUtil.getUserId(token.toString());
 
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
-
-        // Get user role set
-        Set<String> roleSet = roleService.getUserRoleName(userId);
-        simpleAuthorizationInfo.setRoles(roleSet);
 
         // Get user permission set
         Set<String> permissionSet = userService.getPermissions(userId, null);
