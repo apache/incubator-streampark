@@ -509,6 +509,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public long countByTeamId(Long teamId) {
+        return this.count(new LambdaQueryWrapper<Application>().eq(Application::getTeamId, teamId));
+    }
+
+    @Override
     public String getYarnName(Application appParam) {
         String[] args = new String[2];
         args[0] = "--name";

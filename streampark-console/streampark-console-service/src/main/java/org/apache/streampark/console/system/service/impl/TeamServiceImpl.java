@@ -19,10 +19,16 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.ProjectService;
+import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.TeamMapper;
+import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -47,6 +53,21 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ApplicationService applicationService;
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private MemberService memberService;
+
+    @Autowired
+    private VariableService variableService;
+
+    @Autowired
+    private CommonService commonService;
 
     @Override
     public IPage<Team> findTeams(Team team, RestRequest request) {
@@ -74,9 +95,25 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     }
 
     @Override
-    public void deleteTeam(Team team) {
-        // TODO 查询 app 和 project，如果还有 app 或 project 没有删除，则 team 不能被删除。
-        this.removeById(team);
+    public void deleteTeam(Long teamId) {
+        log.info("{} Proceed delete team[Id={}]", commonService.getCurrentUser().getUsername(), teamId);
+        Team team = this.getById(teamId);
+        // TODO The AssertUtils.checkApiAlert can simplify the exception.
+        if (team == null) {
+            throw new ApiAlertException(String.format("The team[Id=%s] doesn't exists.", teamId));
+        }
+        if (applicationService.countByTeamId(teamId) > 0) {
+            throw new ApiAlertException(String.format("Please delete the applications under the team[name=%s] first!", team.getTeamName()));
+        }
+        if (projectService.countByTeamId(teamId) > 0) {
+            throw new ApiAlertException(String.format("Please delete the projects under the team[name=%s] first!", team.getTeamName()));
+        }
+        if (variableService.countByTeamId(teamId) > 0) {
+            throw new ApiAlertException(String.format("Please delete the variables under the team[name=%s] first!", team.getTeamName()));
+        }
+
+        memberService.deleteByTeamId(teamId);
+        this.removeById(teamId);
     }
 
     @Override

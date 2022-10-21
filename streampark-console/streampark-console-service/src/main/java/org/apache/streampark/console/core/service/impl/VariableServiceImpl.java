@@ -177,4 +177,9 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     private String getCodeFromPlaceholder(String placeholder) {
         return placeholder.substring(PLACEHOLDER_START.length(), placeholder.length() - PLACEHOLDER_END.length());
     }
+
+    @Override
+    public long countByTeamId(Long teamId) {
+        return this.count(new LambdaQueryWrapper<Variable>().eq(Variable::getTeamId, teamId));
+    }
 }
