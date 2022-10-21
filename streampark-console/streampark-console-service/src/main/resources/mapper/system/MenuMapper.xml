@@ -42,7 +42,7 @@
         left join t_role_menu rm on (rm.role_id = r.role_id)
         left join t_menu m on (m.menu_id = rm.menu_id)
         where ur.user_id = #{userId}
-          and (#{teamId} is null or ur.team_id = #{teamId})
+        and (#{teamId} is null or ur.team_id = #{teamId})
         and m.perms is not null
         and m.perms &lt;&gt; ''
     </select>

@@ -160,17 +160,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
     }
 
-    /**
-     * get user permissions by name
-     *
-     * @param username name
-     * @return permissions
-     */
-    @Override
-    public Set<String> getAllTeamPermissions(String username) {
-        return getPermissions(this.findByName(username).getUserId(), null);
-    }
-
     @Override
     public Set<String> getPermissions(Long userId, @Nullable Long teamId) {
         List<String> userPermissions = this.menuService.findUserPermissions(userId, teamId);
@@ -239,7 +228,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userInfo.put("user", user);
 
         // 3) roles
-        Set<String> roles = this.roleService.getUserRoleName(username);
+        Set<String> roles = this.roleService.getUserRoleName(user.getUserId());
         userInfo.put("roles", roles);
 
         // 4) permissions
