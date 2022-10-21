@@ -56,7 +56,7 @@ public class FlinkSqlController {
 
     @PostMapping("verify")
     public RestResponse verify(String sql, Long versionId, Long teamId) {
-        sql = variableService.replacePlaceholder(teamId, sql);
+        sql = variableService.parseVariable(teamId, sql);
         FlinkSqlValidationResult flinkSqlValidationResult = flinkSqlService.verifySql(sql, versionId);
         if (!flinkSqlValidationResult.success()) {
             // record error type, such as error sql, reason and error start/end line

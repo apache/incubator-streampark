@@ -35,16 +35,19 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -53,9 +56,11 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
 
     private final Pattern placeholderPattern = Pattern.compile("\\$\\{([A-Za-z])+([A-Za-z0-9._-])+\\}");
 
-    private final String placeholderLeft = "${";
+    @Value("${streampark.variable.placeholder-start}")
+    private String placeholderStart;
 
-    private final String placeholderRight  = "}";
+    @Value("${streampark.variable.placeholder-end}")
+    private String placeholderEnd  = "}";
 
     @Autowired
     private ApplicationService applicationService;
@@ -113,18 +118,23 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
      * @return
      */
     @Override
-    public String replacePlaceholder(Long teamId, String paramWithPlaceholders) {
+    public String parseVariable(Long teamId, String paramWithPlaceholders) {
         if (StringUtils.isEmpty(paramWithPlaceholders)) {
             return paramWithPlaceholders;
         }
+        List<Variable> variables = findByTeamId(teamId);
+        if (CollectionUtils.isEmpty(variables)) {
+            return paramWithPlaceholders;
+        }
+        Map<String, String> variableMap = variables.stream().collect(Collectors.toMap(Variable::getVariableCode, Variable::getVariableValue));
         String restore = paramWithPlaceholders;
-        Matcher matcher = placeholderPattern.matcher(paramWithPlaceholders);
+        Matcher matcher = placeholderPattern.matcher(restore);
         while (matcher.find()) {
             String placeholder = matcher.group();
             String variableCode = getCodeFromPlaceholder(placeholder);
-            Variable variable = findByVariableCode(teamId, variableCode);
-            if (variable != null) {
-                restore = restore.replace(placeholder, variable.getVariableValue());
+            String variableVaule = variableMap.get(variableCode);
+            if (StringUtils.isNotEmpty(variableVaule)) {
+                restore = restore.replace(placeholder, variableVaule);
             }
         }
         return restore;
@@ -134,22 +144,18 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
         // Detect whether the variable is dependent on the args of the application
         List<Application> applications = applicationService.getByTeamId(variable.getTeamId());
         if (applications != null) {
-            Iterator<Application> appIt = applications.iterator();
-            while (appIt.hasNext()) {
-                Application application = appIt.next();
-                if (isDepend(variable.getVariableCode(), application.getArgs())) {
+            for (Application app : applications) {
+                if (isDepend(variable.getVariableCode(), app.getArgs())) {
                     return true;
                 }
             }
         }
 
         // Detect whether variables are dependent on all versions of flink sql
-        List<FlinkSql> sqls = flinkSqlService.getByTeamId(variable.getTeamId());
-        if (sqls != null) {
-            Iterator<FlinkSql> sqlIt = sqls.iterator();
-            while (sqlIt.hasNext()) {
-                FlinkSql sql = sqlIt.next();
-                if (isDepend(variable.getVariableCode(), DeflaterUtils.unzipString(sql.getSql()))) {
+        List<FlinkSql> flinkSqls = flinkSqlService.getByTeamId(variable.getTeamId());
+        if (flinkSqls != null) {
+            for (FlinkSql flinkSql : flinkSqls) {
+                if (isDepend(variable.getVariableCode(), DeflaterUtils.unzipString(flinkSql.getSql()))) {
                     return true;
                 }
             }
@@ -167,11 +173,11 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
         if (StringUtils.isEmpty(paramWithPlaceholders)) {
             return false;
         }
-        String placeholder = String.format("%s%s%s", placeholderLeft, variableCode, placeholderRight);
+        String placeholder = String.format("%s%s%s", placeholderStart, variableCode, placeholderEnd);
         return paramWithPlaceholders.contains(placeholder);
     }
 
     private String getCodeFromPlaceholder(String placeholder) {
-        return placeholder.substring(placeholderLeft.length(), placeholder.length() - placeholderRight.length());
+        return placeholder.substring(placeholderStart.length(), placeholder.length() - placeholderEnd.length());
     }
 }

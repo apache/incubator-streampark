@@ -1326,7 +1326,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (application.isFlinkSqlJob()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
             // Get the sql of the replaced placeholder
-            String realSql = variableService.replacePlaceholder(application.getTeamId(), flinkSql.getSql());
+            String realSql = variableService.parseVariable(application.getTeamId(), flinkSql.getSql());
             flinkSql.setSql(DeflaterUtils.zipString(realSql));
             extraParameter.put(ConfigConst.KEY_FLINK_SQL(null), flinkSql.getSql());
         }
@@ -1378,7 +1378,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         // Get the args after placeholder replacement
-        String applicationArgs = variableService.replacePlaceholder(application.getTeamId(), application.getArgs());
+        String applicationArgs = variableService.parseVariable(application.getTeamId(), application.getArgs());
 
         SubmitRequest submitRequest = new SubmitRequest(
             flinkEnv.getFlinkVersion(),
