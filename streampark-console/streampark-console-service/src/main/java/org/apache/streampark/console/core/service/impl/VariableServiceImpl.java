@@ -60,7 +60,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     private String placeholderStart;
 
     @Value("${streampark.variable.placeholder-end}")
-    private String placeholderEnd  = "}";
+    private String placeholderEnd;
 
     @Autowired
     private ApplicationService applicationService;
