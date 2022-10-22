@@ -45,7 +45,7 @@ object ConfigConst {
   val KEY_PASSWORD = "password"
 
   val KEY_TIMEOUT = "timeout"
-  
+
   val KEY_SEMANTIC = "semantic"
 
   /**
