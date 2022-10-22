@@ -47,6 +47,8 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
                          developmentMode: DevelopmentMode,
                          executionMode: ExecutionMode,
                          resolveOrder: ResolveOrder,
+                         id: Long,
+                         jobId: String,
                          appName: String,
                          appConf: String,
                          applicationType: ApplicationType,
@@ -71,10 +73,6 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
   lazy val effectiveAppName: String = if (this.appName == null) appProperties(KEY_FLINK_APP_NAME) else this.appName
 
   lazy val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
-
-  lazy val jobID: String = extraParameter.get(KEY_JOB_ID).toString
-
-  lazy val flinkJobID: String = extraParameter.get(KEY_FLINK_JOB_ID).toString
 
   lazy val savepointRestoreSettings: SavepointRestoreSettings = {
     lazy val allowNonRestoredState = Try(extraParameter.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key).toString.toBoolean).getOrElse(false)

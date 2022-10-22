@@ -1285,7 +1285,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Map<String, String> dynamicOption = FlinkSubmitter.extractDynamicOptionAsJava(application.getDynamicOptions());
 
         Map<String, Object> extraParameter = new HashMap<>(0);
-        extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());
 
         if (appParam.getAllowNonRestored()) {
             extraParameter.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
@@ -1341,7 +1340,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
         } else {
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
-                extraParameter.put(ConfigConst.KEY_FLINK_JOB_ID(), new JobID().toHexString());
                 AssertUtils.state(buildResult != null);
                 DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
                 String ingressTemplates = application.getIngressTemplate();
@@ -1372,6 +1370,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             DevelopmentMode.of(application.getJobType()),
             ExecutionMode.of(application.getExecutionMode()),
             resolveOrder,
+            application.getId(),
+            new JobID().toHexString(),
             application.getJobName(),
             appConf,
             application.getApplicationType(),
