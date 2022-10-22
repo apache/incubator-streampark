@@ -106,6 +106,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
@@ -1293,7 +1294,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Map<String, String> dynamicOption = FlinkSubmitter.extractDynamicOptionAsJava(application.getDynamicOptions());
 
         Map<String, Object> extraParameter = new HashMap<>(0);
-        extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());
 
         if (appParam.getAllowNonRestored()) {
             extraParameter.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
@@ -1386,6 +1386,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             DevelopmentMode.of(application.getJobType()),
             ExecutionMode.of(application.getExecutionMode()),
             resolveOrder,
+            application.getId(),
+            new JobID().toHexString(),
             application.getJobName(),
             appConf,
             application.getApplicationType(),

@@ -282,7 +282,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
     val jobStatusCV = JobStatusCV(
       jobState = jobState,
-      jobId = null,
+      jobId = trackId.jobId,
       pollEmitTime = pollEmitTime,
       pollAckTime = System.currentTimeMillis
     )
