@@ -28,14 +28,6 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="findUserRole" resultMap="roleMap">
-        select r.*
-        from t_role r
-        left join t_member m on r.role_id = m.role_id
-        left join t_user u on u.user_id = m.user_id
-        where u.user_id = #{userId}
-    </select>
-
     <select id="findRole" resultType="role" parameterType="role">
         select * from t_role
         <where>
