@@ -106,7 +106,7 @@
         address: cluster.address,
         clusterId: cluster.clusterId,
         description: cluster.description,
-        dynamicOptions: cluster.dynamicOptions,
+        properties: cluster.properties,
         resolveOrder: cluster.resolveOrder,
         yarnQueue: cluster.yarnQueue,
         versionId: cluster.versionId || null,

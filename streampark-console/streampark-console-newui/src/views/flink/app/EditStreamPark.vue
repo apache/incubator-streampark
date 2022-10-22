@@ -92,7 +92,7 @@
         tags: app.tags,
         args: app.args,
         description: app.description,
-        dynamicOptions: app.dynamicOptions,
+        properties: app.properties,
         resolveOrder: app.resolveOrder,
         versionId: app.versionId || null,
         k8sRestExposedType: app.k8sRestExposedType,

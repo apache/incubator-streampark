@@ -167,14 +167,14 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             FlinkEnv flinkEnv = flinkEnvService.getById(flinkCluster.getVersionId());
             Map<String, Object> extraParameter = flinkCluster.getOptionMap();
             ResolveOrder resolveOrder = ResolveOrder.of(flinkCluster.getResolveOrder());
-            Map<String, String> dynamicOption = FlinkSubmitter.extractDynamicOptionAsJava(flinkCluster.getDynamicOptions());
+            Map<String, String> properties = FlinkSubmitter.extractPropertiesAsJava(flinkCluster.getProperties());
             DeployRequest deployRequest = new DeployRequest(
                 flinkEnv.getFlinkVersion(),
                 flinkCluster.getClusterId(),
                 executionModeEnum,
                 resolveOrder,
                 flinkCluster.getFlameGraph() ? getFlameGraph(flinkCluster) : null,
-                dynamicOption,
+                properties,
                 kubernetesDeployParam,
                 extraParameter
             );
