@@ -45,11 +45,7 @@ object ConfigConst {
   val KEY_PASSWORD = "password"
 
   val KEY_TIMEOUT = "timeout"
-
-  val KEY_JOB_ID = "jobId"
-
-  val KEY_FLINK_JOB_ID = "flinkJobId"
-
+  
   val KEY_SEMANTIC = "semantic"
 
   /**
