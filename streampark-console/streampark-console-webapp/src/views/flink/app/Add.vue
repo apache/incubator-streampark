@@ -1355,14 +1355,14 @@
       </a-form-item>
 
       <a-form-item
-        label="Dynamic Option"
+        label="Properties"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
           rows="4"
-          name="dynamicOptions"
+          name="properties"
           placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
-          v-decorator="['dynamicOptions']"/>
+          v-decorator="['properties']"/>
         <p class="conf-desc">
           <span class="note-info">
             <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
@@ -2322,7 +2322,7 @@
           cpMaxFailureInterval: values.cpMaxFailureInterval || null,
           cpFailureRateInterval: values.cpFailureRateInterval || null,
           cpFailureAction: values.cpFailureAction || null,
-          dynamicOptions: values.dynamicOptions,
+          properties: values.properties,
           resolveOrder: values.resolveOrder,
           k8sRestExposedType: values.k8sRestExposedType,
           restartSize: values.restartSize,
@@ -2429,7 +2429,7 @@
           cpMaxFailureInterval: values.cpMaxFailureInterval || null,
           cpFailureRateInterval: values.cpFailureRateInterval || null,
           cpFailureAction: values.cpFailureAction || null,
-          dynamicOptions: values.dynamicOptions || null,
+          properties: values.properties || null,
           resolveOrder: values.resolveOrder,
           k8sRestExposedType: values.k8sRestExposedType,
           restartSize: values.restartSize,

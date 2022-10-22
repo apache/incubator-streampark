@@ -132,7 +132,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
          |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
          |    resolveOrder     : ${deployRequest.resolveOrder.getName}
          |    flameGraph       : ${deployRequest.flameGraph != null}
-         |    dynamicOption    : ${deployRequest.dynamicOption.mkString(" ")}
+         |    properties       : ${deployRequest.properties.mkString(" ")}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
     var clusterDescriptor: KubernetesClusterDescriptor = null
@@ -141,7 +141,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     try {
       val flinkConfig = extractConfiguration(
         deployRequest.flinkVersion.flinkHome,
-        deployRequest.dynamicOption,
+        deployRequest.properties,
         deployRequest.extraParameter,
         deployRequest.resolveOrder)
 

@@ -58,25 +58,26 @@ set email_params = concat('{"contacts":"', email_params, '"}'),
     we_com_params='{}',
     lark_params='{}'
 where alert_type = 1;
--- remove the original alert_email field
-alter table t_flink_app drop column alert_email;
 
-alter table `t_flink_app` add column `option_time` datetime default null after `create_time`;
-alter table t_setting modify column `value` text ;
-insert into `t_setting` values (14, 'docker.register.namespace', null, 'Docker Register Image namespace', 'Docker命名空间', 1);
-alter table `t_flink_app` add column `ingress_template` text collate utf8mb4_general_ci comment 'ingress模版文件';
-alter table `t_flink_app` add column `default_mode_ingress` text collate utf8mb4_general_ci comment '配置ingress的域名';
-alter table `t_flink_app` add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`;
--- add tags field
-alter table `t_flink_app` add column `tags` varchar(500) default null;
--- add job_manager_url field
-alter table `t_flink_app` add column `job_manager_url` varchar(255) default null after `job_id`;
--- add job_manager_url field
+-- t_flink_app
+alter table `t_flink_app`
+    drop column alert_email,
+    change column dynamic_option properties text comment 'allows specifying multiple generic configuration options',
+    add column `job_manager_url` varchar(255) default null after `job_id`,
+    add column `option_time` datetime default null after `create_time`,
+    add column `ingress_template` text collate utf8mb4_general_ci comment 'ingress模版文件',
+    add column `default_mode_ingress` text collate utf8mb4_general_ci comment '配置ingress的域名',
+    add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`,
+    add column `tags` varchar(500) default null;
+
 alter table `t_flink_log` add column `job_manager_url` varchar(255) default null after `yarn_app_id`;
 
+-- t_flink_project
 alter table `t_flink_project`
-change column `date` `create_time` datetime default current_timestamp not null,
-add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`;
+    change column `date` `create_time` datetime default current_timestamp not null,
+    add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
+    add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`,
+    add index `inx_team` (`team_id`) using btree;
 
 
 -- change `update_time` to `modify_time`
@@ -152,9 +153,6 @@ alter table `t_flink_app`
 add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
 add index `inx_team` (`team_id`) using btree;
 
-alter table `t_flink_project`
-add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
-add index `inx_team` (`team_id`) using btree;
 
 -- Update user
 alter table `t_user`
@@ -209,10 +207,10 @@ alter table `t_user_role` rename `t_member`;
 
 alter table `t_member`
 add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
-modify   `user_id` bigint not null comment 'user id',
-modify   `role_id` bigint not null comment 'role id',
-add column   `create_time` datetime not null default current_timestamp comment 'create time',
-add column   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+modify column `user_id` bigint not null comment 'user id',
+modify column `role_id` bigint not null comment 'role id',
+add column  `create_time` datetime not null default current_timestamp comment 'create time',
+add column  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
 drop index `UN_INX`,
 add unique key `un_user_team_role_inx` (`user_id`,`team_id`,`role_id`) using btree;
 
@@ -225,6 +223,7 @@ where `menu_id` = 100021;
 
 update `t_menu` set `menu_name` = 'StreamPark' where `menu_id` = 100013;
 
+-- t_setting
 alter table `t_setting` drop primary key;
 alter table `t_setting`
 change column `NUM` `order_num` int default null,
@@ -234,14 +233,15 @@ change column `TITLE` `setting_name` varchar(255) collate utf8mb4_general_ci def
 change column `DESCRIPTION` `description` varchar(255) collate utf8mb4_general_ci default null,
 change column `TYPE` `type` tinyint not null comment '1: input 2: boolean 3: number',
 add primary key (`setting_key`);
-
+insert into `t_setting` values (14, 'docker.register.namespace', null, 'Docker Register Image namespace', 'Docker命名空间', 1);
 insert into `t_setting` values (15, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml 完整路径', 1);
 
--- update the index field for t_user;
-alter table `t_user` drop index `un_username`;
+
+-- t_user
 alter table `t_user`
-modify `username` varchar(255) collate utf8mb4_general_ci not null comment 'user name',
-add unique key `un_username` (`username`) using btree;
+    drop index `un_username`,
+    modify column `username` varchar(255) collate utf8mb4_general_ci not null comment 'user name',
+    add unique key `un_username` (`username`) using btree;
 
 drop table if exists `t_variable`;
 create table `t_variable` (

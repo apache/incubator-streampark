@@ -74,8 +74,7 @@ trait FlinkSubmitTrait extends Logger {
          |    flameGraph       : ${submitRequest.flameGraph != null}
          |    savePoint        : ${submitRequest.savePoint}
          |    option           : ${submitRequest.option}
-         |    property         : ${submitRequest.option}
-         |    dynamicOption    : ${submitRequest.dynamicOption.mkString(" ")}
+         |    properties       : ${submitRequest.properties.mkString(" ")}
          |    args             : ${submitRequest.args}
          |    appConf          : ${submitRequest.appConf}
          |    flinkBuildResult : ${submitRequest.buildResult}
@@ -289,8 +288,8 @@ trait FlinkSubmitTrait extends Logger {
       }
 
       //-D other dynamic parameter
-      if (submitRequest.dynamicOption != null && submitRequest.dynamicOption.nonEmpty) {
-        submitRequest.dynamicOption
+      if (submitRequest.properties != null && submitRequest.properties.nonEmpty) {
+        submitRequest.properties
           .filter(_._1 != "classloader.resolve-order")
           .foreach(x => array += s"-D${x._1}=${x._2}")
       }
@@ -325,7 +324,7 @@ trait FlinkSubmitTrait extends Logger {
   }
 
   private[submit] def extractConfiguration(flinkHome: String,
-                                           dynamicOption: JavaMap[String, String],
+                                           properties: JavaMap[String, String],
                                            extraParameter: JavaMap[String, Any],
                                            resolveOrder: ResolveOrder): Configuration = {
     val commandLine = {
@@ -337,8 +336,8 @@ trait FlinkSubmitTrait extends Logger {
         if (MapUtils.isNotEmpty(extraParameter)) {
           extraParameter.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
         }
-        if (dynamicOption != null && dynamicOption.nonEmpty) {
-          dynamicOption
+        if (properties != null && properties.nonEmpty) {
+          properties
             .filter(_._1 != "classloader.resolve-order")
             .foreach(x => array += s"-D${x._1}=${x._2}")
         }

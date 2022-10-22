@@ -20,7 +20,7 @@ import { k8sRestExposedType, resolveOrder } from '../data';
 import optionData from '../data/option';
 import {
   getAlertSvgIcon,
-  renderDynamicOption,
+  renderProperties,
   renderInputDropdown,
   renderInputGroup,
   renderIsSetConfig,
@@ -467,10 +467,10 @@ export const useCreateAndEditSchema = (
         ifShow: ({ values }) => values.executionMode == 6,
       },
       {
-        field: 'dynamicOptions',
-        label: 'Dynamic Option',
+        field: 'properties',
+        label: 'Properties',
         component: 'Input',
-        render: (renderCallbackParams) => renderDynamicOption(renderCallbackParams),
+        render: (renderCallbackParams) => renderProperties(renderCallbackParams),
       },
       {
         field: 'args',

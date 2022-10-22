@@ -30,7 +30,7 @@ import { fetchAlertSetting } from '/@/api/flink/setting/alert';
 
 import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
 import {
-  renderDynamicOption,
+  renderProperties,
   renderInputDropdown,
   renderInputGroup,
   renderTotalMemory,
@@ -337,10 +337,10 @@ export const useFlinkSchema = (editModel?: string) => {
       ifShow: ({ values }) => values.executionMode == 6,
     },
     {
-      field: 'dynamicOptions',
-      label: 'Dynamic Option',
+      field: 'properties',
+      label: 'Properties',
       component: 'Input',
-      render: (renderCallbackParams) => renderDynamicOption(renderCallbackParams),
+      render: (renderCallbackParams) => renderProperties(renderCallbackParams),
     },
     {
       field: 'args',
