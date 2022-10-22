@@ -45,13 +45,13 @@ export const useClusterSetting = () => {
     k8sNamespace: string[];
     k8sSessionClusterId: string[];
     serviceAccount: string[];
-    kubeConfFile: string[];
+    k8sConf: string[];
     flinkImage: string[];
   }>({
     k8sNamespace: [],
     k8sSessionClusterId: [],
     serviceAccount: [],
-    kubeConfFile: [],
+    k8sConf: [],
     flinkImage: [],
   });
 
@@ -188,14 +188,14 @@ export const useClusterSetting = () => {
           }),
       },
       {
-        field: 'kubeConfFile',
+        field: 'k8sConf',
         label: 'Kube Conf File',
         ifShow: ({ values }) => values.executionMode == 5,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
             placeholder: '~/.kube/config',
-            options: historyRecord.kubeConfFile,
+            options: historyRecord.k8sConf,
           }),
       },
       {
@@ -352,7 +352,7 @@ export const useClusterSetting = () => {
           k8sRestExposedType: values.k8sRestExposedType,
           k8sNamespace: values.k8sNamespace || null,
           serviceAccount: values.serviceAccount,
-          k8sConf: values.kubeConfFile,
+          k8sConf: values.k8sConf,
           flinkImage: values.flinkImage || null,
           address: values.address,
           flameGraph: values.flameGraph,

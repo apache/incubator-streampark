@@ -32,7 +32,7 @@ export interface FlinkCluster {
   dynamicOptions: string;
   k8sRestExposedType: number;
   flameGraph: boolean;
-  k8sConf?: any;
+  ?: any;
   resolveOrder: number;
   exception?: any;
   clusterState: number;
