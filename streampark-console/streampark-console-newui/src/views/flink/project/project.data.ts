@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const enum BuildStatusEnum {
+export enum BuildStatusEnum {
   All = ' ',
   NotBuild = '-1',
   Building = '0',

@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="40%" @ok="handleSubmit">
+  <BasicDrawer okText="Submit" @register="registerDrawer" showFooter width="40%" @ok="handleSubmit">
     <template #title>
       <Icon icon="ant-design:user-add-outlined" />
       {{ getTitle }}

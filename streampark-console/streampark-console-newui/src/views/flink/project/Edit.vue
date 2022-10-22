@@ -21,25 +21,24 @@
 </script>
 <script setup lang="ts" name="EditProject">
   import { defineComponent, onMounted, ref } from 'vue';
-  import { useRoute } from 'vue-router';
+  import { useRouter, useRoute } from 'vue-router';
   import { useProject } from './useProject';
   import { updateProject } from '/@/api/flink/project';
   import { BasicForm } from '/@/components/Form';
   import { PageWrapper } from '/@/components/Page';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { useGo } from '/@/hooks/web/usePage';
-  const { getLoading, close, registerForm, submit, handleSubmit, handleGet, projectResource } =
+  const { getLoading, registerForm, submit, handleSubmit, handleGet, projectResource } =
     useProject();
 
   const { createMessage } = useMessage();
   const { t } = useI18n();
-  const go = useGo();
   const route = useRoute();
+  const router = useRouter();
 
   const buildState = ref<Nullable<number | string> | undefined>(null);
   if (!route.query.id) {
-    go('/flink/project');
+    router.go(-1);
   }
 
   function handleCheckRebuild(values: Recordable) {
@@ -73,7 +72,7 @@
       });
       if (res.data) {
         createMessage.success('created successfully');
-        close(undefined, { path: '/flink/project' });
+        router.go(-1);
       } else {
         createMessage.error('Project save failed :' + res['message']);
       }
@@ -88,7 +87,7 @@
 
   onMounted(() => {
     if (!route?.query?.id) {
-      close(undefined, { path: '/flink/project' });
+      router.go(-1);
       createMessage.warning('appid can not be empty');
       return;
     }
@@ -103,7 +102,7 @@
     >
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button @click="close(undefined, { path: '/flink/project' })">
+          <a-button @click="router.go(-1)">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button class="ml-4" :loading="getLoading" type="primary" @click="submit()">

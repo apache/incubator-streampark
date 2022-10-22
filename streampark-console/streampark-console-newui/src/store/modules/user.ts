@@ -162,12 +162,13 @@ export const useUserStore = defineStore({
           this.setUserInfo(user);
           this.setRoleList(roles as RoleEnum[]);
           this.setPermissions(permissions);
-          refreshMenu();
         }
         // If it returns success, it will be stored in the local cache
         this.teamId = data.teamId;
         sessionStorage.setItem(APP_TEAMID_KEY_, data.teamId);
         localStorage.setItem(APP_TEAMID_KEY_, data.teamId);
+
+        if (!data.userId) refreshMenu();
         return Promise.resolve(true);
       } catch (error) {
         return Promise.reject(error);

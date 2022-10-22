@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 import { defHttp } from '/@/utils/http/axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { Result } from '/#/axios';
 import { AxiosResponse } from 'axios';
+import { BasicTableParams } from '../model/baseModel';
+import { TeamListRecord, TeamParam } from './model/teamModel';
 
 enum Api {
   TeamListByUser = '/team/listByUser',
@@ -32,61 +33,39 @@ export function getTeamListByUser(params?) {
   return defHttp.post({ url: Api.TeamListByUser, params });
 }
 
-export function getTeamList(params) {
-  return defHttp.post({
-    url: Api.LIST,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+/**
+ * get team list
+ * @param {BasicTableParams} data
+ * @returns {Promise<>}
+ */
+export function fetTeamList(data: BasicTableParams): Promise<TeamListRecord[]> {
+  return defHttp.post({ url: Api.LIST, data });
 }
 /**
  * Create an organization
- * @param {Recordable} teamParams
- * @returns Promise<Boolean>
+ * @param {TeamParam} data
+ * @returns {Promise<boolean | undefined>}
  */
-export function fetchTeamCreate(params) {
-  return defHttp.post({
-    url: Api.POST,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchTeamCreate(data: TeamParam): Promise<boolean | undefined> {
+  return defHttp.post({ url: Api.POST, data });
 }
 
 /**
  * update organization
- * @param {Recordable} teamParams
- * @returns Promise<Boolean>
+ * @param {TeamParam} data
+ * @returns {Promise<boolean>}
  */
-export function fetchTeamUpdate(params: Recordable) {
-  return defHttp.put<boolean>({
-    url: Api.UPDATE,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchTeamUpdate(data: TeamParam): Promise<boolean | undefined> {
+  return defHttp.put({ url: Api.UPDATE, data });
 }
 /**
  * delete organization
  * @param {String} id organization id
- * @returns Promise<AxiosResponse>
+ * @returns {Promise<AxiosResponse<Result>>}
  */
-export function deleteTeam(params: { id: string }) {
-  return defHttp.delete<AxiosResponse<Result>>(
-    {
-      url: Api.DELETE,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-      errorMessageMode: 'none',
-    },
+export function fetchTeamDelete(params: { id: string }): Promise<AxiosResponse<Result>> {
+  return defHttp.delete(
+    { url: Api.DELETE, params },
+    { isReturnNativeResponse: true, errorMessageMode: 'none' },
   );
 }

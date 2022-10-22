@@ -17,6 +17,7 @@
 <script lang="ts">
   import { defineComponent } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { useGo } from '/@/hooks/web/usePage';
   export default defineComponent({
     name: 'AddCluster',
   });
@@ -24,13 +25,12 @@
 <script setup lang="ts" name="AddCluster">
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
-  import { useTabs } from '/@/hooks/web/useTabs';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchCheckCluster, fetchCreateCluster } from '/@/api/flink/setting/flinkCluster';
 
   import { useClusterSetting } from './hooks/useClusterSetting';
 
-  const { close } = useTabs();
+  const go = useGo();
   const { t } = useI18n();
   const { createMessage, createErrorModal } = useMessage();
 
@@ -54,7 +54,7 @@
           const resp = await fetchCreateCluster(params);
           if (resp.status) {
             createMessage.success(values.clusterName.concat(' create successful!'));
-            close(undefined, { path: '/flink/setting', query: { activeKey: 'cluster' } });
+            go('/flink/setting?activeKey=cluster');
           } else {
             createMessage.error(resp.msg);
           }
@@ -82,9 +82,7 @@
     <BasicForm @register="registerForm" @submit="handleSubmitCluster" :schemas="getClusterSchema">
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button
-            @click="close(undefined, { path: '/flink/setting', query: { activeKey: 'cluster' } })"
-          >
+          <a-button @click="go('/flink/setting?activeKey=cluster')">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button class="ml-4" :loading="getLoading" type="primary" @click="submit()">

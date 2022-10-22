@@ -19,7 +19,7 @@
     <BasicTable @register="registerTable">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'team:add'">
-          {{ t('system.team.addTeam') }}
+          {{ t('common.add') }}
         </a-button>
       </template>
       <template #bodyCell="{ column, record }">
@@ -27,7 +27,7 @@
           <TableAction
             :actions="[
               {
-                icon: 'ant-design:edit-outlined',
+                icon: 'clarity:note-edit-line',
                 auth: 'team:update',
                 tooltip: t('system.team.modifyTeam'),
                 onClick: handleTeamEdit.bind(null, record),
@@ -47,7 +47,7 @@
         </template>
       </template>
     </BasicTable>
-    <TeamDrawer @register="registerDrawer" @success="handleSuccess" />
+    <TeamDrawer okText="Submit" @register="registerDrawer" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
@@ -57,7 +57,7 @@
   import TeamDrawer from './TeamDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
   import { columns, searchFormSchema } from './team.data';
-  import { getTeamList, deleteTeam } from '/@/api/system/team';
+  import { fetTeamList, fetchTeamDelete } from '/@/api/system/team';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   export default defineComponent({
@@ -68,19 +68,14 @@
       const { createMessage } = useMessage();
       const { t } = useI18n();
       const [registerTable, { reload }] = useTable({
-        title: t('system.team.table.title'),
-        api: getTeamList,
+        // title: t('system.team.table.title'),
+        api: fetTeamList,
         columns,
         formConfig: {
           labelWidth: 120,
           schemas: searchFormSchema,
+          colon: true,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
-        },
-        beforeFetch: (params) => {
-          if (params?.sortField) {
-            params.sortField = params.sortField.replace(/([a-z])([A-Z])/, '$1_$2').toLowerCase();
-          }
-          return params;
         },
         rowKey: 'id',
         pagination: true,
@@ -110,18 +105,18 @@
 
       /* Delete the organization */
       async function handleDelete(record: Recordable) {
-        const { data } = await deleteTeam({ id: record.id });
+        const { data } = await fetchTeamDelete({ id: record.id });
         if (data.status === 'success') {
-          createMessage.success(t('system.team.deleteTeam') + t('system.team.success'));
+          createMessage.success(`${t('system.team.deleteTeam')} ${t('system.team.success')}`);
           reload();
         } else {
-          createMessage.error(t('system.team.deleteTeam') + t('system.team.fail'));
+          createMessage.error(`${t('system.team.deleteTeam')} ${t('system.team.fail')}`);
         }
       }
 
       function handleSuccess(isUpdate: boolean) {
         createMessage.success(
-          `${isUpdate ? t('common.edit') : t('system.team.add')}${t('system.team.success')}`,
+          `${isUpdate ? t('common.edit') : t('system.team.add')} ${t('system.team.success')}`,
         );
         reload();
       }

@@ -50,7 +50,7 @@ import { useMessage } from '/@/hooks/web/useMessage';
 
 export const useCreateAndEditSchema = (
   dependencyRef: Ref | null,
-  edit?: { appId: string; mode: 'streamx' | 'flink' },
+  edit?: { appId: string; mode: 'streampark' | 'flink' },
 ) => {
   const { createErrorModal } = useMessage();
   const flinkEnvs = ref<FlinkEnv[]>([]);

@@ -17,7 +17,7 @@
 const config = {
   // storage options
   storageOptions: {
-    namespace: 'STREAMX_', // key prefix
+    namespace: 'STREAMPARK_', // key prefix
     name: 'ls', // name variable Vue.[ls] or this.[$ls],
     storage: 'local', // storage name session, local, memory
   },

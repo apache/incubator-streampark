@@ -18,13 +18,16 @@
   <div>
     <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> Add Menu </a-button>
+        <a-button type="primary" @click="handleCreate" v-auth="'menu:add'">
+          {{ t('common.add') }}
+        </a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
           <TableAction
             :actions="[
               {
+                auth: 'menu:update',
                 icon: 'clarity:note-edit-line',
                 onClick: handleEdit.bind(null, record),
               },
@@ -33,7 +36,7 @@
         </template>
       </template>
     </BasicTable>
-    <MenuDrawer @register="registerDrawer" @success="handleSuccess" />
+    <MenuDrawer okText="Submit" @register="registerDrawer" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
@@ -47,6 +50,7 @@
 
   import { columns, searchFormSchema } from './menu.data';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useI18n } from '/@/hooks/web/useI18n';
 
   export default defineComponent({
     name: 'MenuManagement',
@@ -54,13 +58,16 @@
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { createMessage } = useMessage();
+      const { t } = useI18n();
       const [registerTable, { reload, expandAll }] = useTable({
         title: '',
         api: getMenuList,
         columns,
         formConfig: {
           labelWidth: 120,
+          colon: true,
           schemas: searchFormSchema,
+          fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
         fetchSetting: {
           listField: 'rows.children',
@@ -102,6 +109,7 @@
       }
 
       return {
+        t,
         registerTable,
         registerDrawer,
         handleCreate,

@@ -312,7 +312,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
 
   onMounted(async () => {
     const res = await fetchAppOwners({});
-    users.value = res.records;
+    users.value = res;
   });
 
   return {

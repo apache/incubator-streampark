@@ -14,25 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { BasicTableParams } from './../model/baseModel';
 import { defHttp } from '/@/utils/http/axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { Result } from '/#/axios';
 import { AxiosResponse } from 'axios';
-export interface AddMemberParams {
-  teamId: string;
-  userName: string;
-  roleId: number;
-}
-
-export interface TeamMemberResp {
-  id: string;
-  teamName: string;
-}
-
-export interface UpdateMemberParams extends AddMemberParams {
-  id: string;
-  userId: string;
-}
+import { AddMemberParams, MemberListRecord, UpdateMemberParams } from './model/memberModel';
 
 enum MEMBER_API {
   POST = '/member/post',
@@ -47,14 +33,8 @@ enum MEMBER_API {
  * @param params
  * @returns
  */
-export function fetchMemberList(params) {
-  return defHttp.post({
-    url: MEMBER_API.LIST,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchMemberList(data: BasicTableParams): Promise<MemberListRecord[]> {
+  return defHttp.post({ url: MEMBER_API.LIST, data });
 }
 
 /**
@@ -62,76 +42,43 @@ export function fetchMemberList(params) {
  * @param {String} teamId organization id
  * @param {String} userName username
  * @param {Number} roleId role id
- * @returns Promise<boolean>
+ * @returns {Promise<boolean>}
  */
-export function fetchAddMember(params: AddMemberParams) {
-  return defHttp.post<boolean>({
-    url: MEMBER_API.POST,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchAddMember(data: AddMemberParams) {
+  return defHttp.post({ url: MEMBER_API.POST, data });
 }
 /**
  * update member
- * @param params
- * @returns
+ * @param {UpdateMemberParams} data
+ * @returns {Promise<boolean|undefined>}
  */
-export function fetchUpdateMember(params) {
-  return defHttp.put({
-    url: MEMBER_API.UPDATE,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchUpdateMember(data: UpdateMemberParams): Promise<boolean | undefined> {
+  return defHttp.put({ url: MEMBER_API.UPDATE, data });
 }
 /**
  * Find user team
- * @param {Number|String} userId
- * @returns Promise<Array<{ id: string; teamName: string }>>
+ * @param {Object} data
+ * @returns {Promise<Array<{ id: string; teamName: string }>>}
  */
-export function fetchUserTeam(params: { userId: number | string }) {
-  return defHttp.post<Array<TeamMemberResp>>({
-    url: MEMBER_API.TEAMS,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchUserTeam(data: {
+  userId: number | string;
+}): Promise<Array<{ id: string; teamName: string }>> {
+  return defHttp.post({ url: MEMBER_API.TEAMS, data });
 }
 /**
  * name check
- * @param {String} username name
- * @returns Promise<boolean>
+ * @param {Object} data username
+ * @returns {Promise<boolean>}
  */
-export function fetchCheckUserName(params: { username: string }) {
-  return defHttp.post<boolean>({
-    url: MEMBER_API.CHECK_NAME,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchCheckUserName(data: { username: string }): Promise<boolean> {
+  return defHttp.post({ url: MEMBER_API.CHECK_NAME, data });
 }
 
 /**
  * delete
- * @param {String} id memeber Id
- * @returns Promise<boolean>
+ * @param {String} data memeber Id
+ * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchMemberDelete(params: { id: string }) {
-  return defHttp.delete<AxiosResponse<Result>>(
-    {
-      url: MEMBER_API.DELETE,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
-  );
+export function fetchMemberDelete(data: { id: string }): Promise<AxiosResponse<Result>> {
+  return defHttp.delete({ url: MEMBER_API.DELETE, data }, { isReturnNativeResponse: true });
 }

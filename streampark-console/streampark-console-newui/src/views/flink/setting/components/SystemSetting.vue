@@ -38,8 +38,8 @@
       {
         key: 1,
         title: 'Maven Setting',
-        isPassword: (item) => item.settingKey === 'streamx.maven.auth.password',
-        data: settings.value.filter((i) => i.settingKey.indexOf('streamx.maven') > -1),
+        isPassword: (item) => item.settingKey === 'streampark.maven.auth.password',
+        data: settings.value.filter((i) => i.settingKey.indexOf('streampark.maven') > -1),
       },
       {
         key: 2,
@@ -57,7 +57,7 @@
         key: 4,
         title: 'Console Setting',
         isPassword: () => false,
-        data: settings.value.filter((i) => i.settingKey.indexOf('streamx.console') > -1),
+        data: settings.value.filter((i) => i.settingKey.indexOf('streampark.console') > -1),
       },
     ];
   });

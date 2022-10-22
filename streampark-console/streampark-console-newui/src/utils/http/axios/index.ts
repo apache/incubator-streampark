@@ -258,7 +258,7 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
 
         // baseURL: globSetting.apiUrl,
 
-        headers: { 'Content-Type': ContentTypeEnum.JSON },
+        headers: { 'Content-Type': ContentTypeEnum.FORM_URLENCODED },
         // If it is in form-data format
         // headers: { 'Content-Type': ContentTypeEnum.FORM_URLENCODED },
         // Data processing method

@@ -176,7 +176,7 @@
     actionColumn: {
       dataIndex: 'operation',
       title: 'Operation',
-      width: 200,
+      width: 180,
     },
   });
 
@@ -310,18 +310,14 @@
       {
         tooltip: { title: 'Edit Application' },
         auth: 'app:update',
-        icon: 'ant-design:edit-outlined',
+        icon: 'clarity:note-edit-line',
         onClick: handleEdit.bind(null, record),
-        type: 'default',
-        shape: 'circle',
       },
       {
         tooltip: { title: 'Launch Application' },
         ifShow: [-1, 1, 4].includes(record.launch) && record['optionState'] === 0,
         icon: 'ant-design:cloud-upload-outlined',
         onClick: handleCheckLaunchApp.bind(null, record),
-        type: 'default',
-        shape: 'circle',
       },
       {
         tooltip: { title: 'Launching Progress Detail' },
@@ -329,8 +325,6 @@
         auth: 'app:update',
         icon: 'ant-design:container-outlined',
         onClick: openBuildProgressDetailDrawer.bind(null, record),
-        type: 'default',
-        shape: 'circle',
       },
       {
         tooltip: { title: 'Start Application' },
@@ -338,8 +332,6 @@
         auth: 'app:start',
         icon: 'ant-design:play-circle-outlined',
         onClick: handleAppCheckStart.bind(null, record),
-        type: 'default',
-        shape: 'circle',
       },
       {
         tooltip: { title: 'Cancel Application' },
@@ -347,16 +339,12 @@
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleCancel.bind(null, record),
-        type: 'default',
-        shape: 'circle',
       },
       {
         tooltip: { title: 'View Application Detail' },
         auth: 'app:detail',
         icon: 'ant-design:eye-outlined',
         onClick: handleDetail.bind(null, record),
-        type: 'default',
-        shape: 'circle',
       },
       {
         tooltip: { title: 'See Flink Start log' },
@@ -364,8 +352,6 @@
         auth: 'app:detail',
         icon: 'ant-design:sync-outlined',
         onClick: handleSeeLog.bind(null, record),
-        type: 'default',
-        shape: 'circle',
       },
       {
         tooltip: { title: 'Forced Stop Application' },
@@ -373,8 +359,6 @@
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleForcedStop.bind(null, record),
-        type: 'default',
-        shape: 'circle',
       },
     ];
   }
@@ -387,7 +371,6 @@
         auth: 'app:copy',
         icon: 'ant-design:copy-outlined',
         onClick: handleCopy.bind(null, record),
-        shape: 'circle',
       },
       {
         label: 'Remapping Application',
@@ -395,7 +378,6 @@
         auth: 'app:mapping',
         icon: 'ant-design:deployment-unit-outlined',
         onClick: handleMapping.bind(null, record),
-        shape: 'circle',
       },
       {
         label: 'View FlameGraph',
@@ -403,7 +385,6 @@
         auth: 'app:flameGraph',
         icon: 'ant-design:fire-outlined',
         onClick: handleFlameGraph.bind(null, record),
-        shape: 'circle',
       },
       {
         popConfirm: {
@@ -414,7 +395,6 @@
         ifShow: [0, 7, 9, 10, 13, 18, 19].includes(record.state),
         auth: 'app:delete',
         icon: 'ant-design:delete-outlined',
-        shape: 'circle',
         color: 'error',
       },
     ];
@@ -567,13 +547,7 @@
           <TableAction
             :actions="getTableActions(record)"
             :dropDownActions="getActionDropdown(record)"
-          >
-            <template #more>
-              <a-button type="default" shape="circle" size="small" class="ml-6px">
-                <Icon icon="ant-design:more-outlined" class="icon-more" />
-              </a-button>
-            </template>
-          </TableAction>
+          />
         </template>
       </template>
     </BasicTable>

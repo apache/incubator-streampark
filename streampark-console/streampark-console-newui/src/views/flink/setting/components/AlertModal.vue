@@ -30,7 +30,7 @@
   import { Form, Select, Input, Divider, Tooltip, Switch } from 'ant-design-vue';
   import { SvgIcon } from '/@/components/Icon';
   import { fetchAlertAdd, fetchAlertUpdate, fetchExistsAlert } from '/@/api/flink/setting/alert';
-  import { useUserStoreWithOut } from '/@/store/modules/user';
+  import { useUserStore } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
 
   const FormItem = Form.Item;
@@ -51,15 +51,16 @@
   const larkSecretEnable = ref(false);
 
   const { createConfirm, createMessage } = useMessage();
-  const userStore = useUserStoreWithOut();
+  const userStore = useUserStore();
   const [registerModal, { changeOkLoading, closeModal }] = useModalInner((data) => {
+    resetFields();
     if (data) {
       alertId.value = data.alertId;
       alertType.value = data.alertType;
       setFieldsValue(omit(data, 'alertId'));
     }
   });
-  const [registerForm, { validateFields, setFieldsValue }] = useForm({
+  const [registerForm, { validateFields, resetFields, setFieldsValue }] = useForm({
     labelWidth: 160,
     colon: true,
     showActionButtonGroup: false,
@@ -72,7 +73,6 @@
         label: 'Alert Name',
         component: 'Input',
         componentProps: { allowClear: true, placeholder: 'Please enter alert name' },
-        helpMessage: 'the alert name, e.g: streamx team alert',
         colProps: {
           style: { marginBottom: '20px' },
         },
@@ -85,10 +85,7 @@
                 } else {
                   if (!alertId.value) {
                     try {
-                      const isExist = await fetchExistsAlert({
-                        alertName: value,
-                        isJsonType: true,
-                      });
+                      const isExist = await fetchExistsAlert({ alertName: value });
                       if (isExist) {
                         return Promise.reject(
                           'Alert Name must be unique. The alert name already exists',
@@ -104,7 +101,7 @@
                 return Promise.resolve();
               },
               required: true,
-              message: 'Alert Name is required',
+              trigger: 'blur',
             },
           ];
         },
@@ -175,7 +172,7 @@
 </script>
 
 <template>
-  <BasicModal @register="registerModal" v-bind="$attrs" @ok="handleSubmit">
+  <BasicModal ok-text="Submit" @register="registerModal" v-bind="$attrs" @ok="handleSubmit">
     <template #title>
       <SvgIcon name="alarm" size="25" />
       Alert Setting

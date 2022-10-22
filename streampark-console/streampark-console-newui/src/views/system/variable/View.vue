@@ -19,7 +19,8 @@
     <BasicTable @register="registerTable">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'variable:add'">
-          {{ t('system.variable.addVariable') }}
+          <Icon icon="ant-design:plus-outlined" />
+          {{ t('common.add') }}
         </a-button>
       </template>
       <template #bodyCell="{ column, record }">
@@ -27,7 +28,7 @@
           <TableAction
             :actions="[
               {
-                icon: 'ant-design:edit-outlined',
+                icon: 'clarity:note-edit-line',
                 auth: 'variable:update',
                 tooltip: t('system.variable.modifyVariable'),
                 onClick: handleEdit.bind(null, record),
@@ -72,17 +73,19 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { fetchVariableDelete, fetchVariableList } from '/@/api/system/variable';
+  import Icon from '/@/components/Icon';
 
   const [registerDrawer, { openDrawer }] = useDrawer();
   const [registerInfo, { openDrawer: openInfoDraw }] = useDrawer();
   const { createMessage } = useMessage();
   const { t } = useI18n();
   const [registerTable, { reload }] = useTable({
-    title: t('system.variable.table.title'),
+    // title: t('system.variable.table.title'),
     api: fetchVariableList,
     columns,
     formConfig: {
       labelWidth: 120,
+      colon: true,
       schemas: searchFormSchema,
     },
     rowKey: 'id',

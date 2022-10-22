@@ -20,13 +20,11 @@ import { computed, nextTick, reactive, ref, unref } from 'vue';
 import { branches, getDetail, gitCheck, isExist } from '/@/api/flink/project';
 import { useForm } from '/@/components/Form';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { useTabs } from '/@/hooks/web/useTabs';
 import { filterOption } from '../app/utils';
 import { useRoute } from 'vue-router';
 import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 
 export const useProject = () => {
-  const { close } = useTabs();
   const route = useRoute();
   const { createMessage, createErrorModal } = useMessage();
 
@@ -43,7 +41,7 @@ export const useProject = () => {
         field: 'name',
         label: 'Project Name',
         component: 'Input',
-        rules: [{ validator: checkProjectName, trigger: 'blur' }],
+        rules: [{ required: true, validator: checkProjectName, trigger: 'blur' }],
         componentProps: { placeholder: 'the project name' },
       },
       {
@@ -53,7 +51,6 @@ export const useProject = () => {
         defaultValue: 1,
         componentProps: {
           placeholder: 'the project type',
-          disabled: route?.query?.id != '',
           options: [
             { label: 'apache flink', value: 1, disabled: false },
             { label: 'apache spark', value: 2, disabled: true },
@@ -72,7 +69,6 @@ export const useProject = () => {
           showSearch: true,
           optionFilterProp: 'children',
           filterOption,
-          disabled: route?.query?.id != '',
           options: [
             { label: 'GitHub/GitLab', value: 1, disabled: false },
             { label: 'Subversion', value: 2, disabled: true },
@@ -253,7 +249,6 @@ export const useProject = () => {
     });
   }
   return {
-    close,
     submit,
     handleSubmit,
     getLoading,

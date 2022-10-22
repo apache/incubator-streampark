@@ -15,7 +15,13 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer @register="registerDrawer" showFooter width="40%" @ok="handleSubmit">
+  <BasicDrawer
+    :showOkBtn="false"
+    @register="registerDrawer"
+    showFooter
+    width="40%"
+    @ok="handleSubmit"
+  >
     <template #title>
       <Icon icon="ant-design:smile-outlined" />
       Role Info
