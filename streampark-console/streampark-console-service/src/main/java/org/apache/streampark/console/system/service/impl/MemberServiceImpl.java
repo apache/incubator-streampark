@@ -74,6 +74,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
     }
 
     @Override
+    public void deleteByTeamId(Long teamId) {
+        this.remove(new LambdaQueryWrapper<Member>().eq(Member::getTeamId, teamId));
+    }
+
+    @Override
     public IPage<Member> findUsers(Member member, RestRequest request) {
         AssertUtils.isTrue(member.getTeamId() != null, "The team id is required.");
         Page<Member> page = new Page<>();
