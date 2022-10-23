@@ -36,7 +36,6 @@ import { usePermissionStore } from '/@/store/modules/permission';
 import { RouteRecordRaw } from 'vue-router';
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 import { h } from 'vue';
-import { SignOut } from '/@/adapter/store/modules/user';
 import { getUserTeamId } from '/@/utils';
 import { usePermission } from '/@/hooks/web/usePermission';
 
@@ -211,8 +210,6 @@ export const useUserStore = defineStore({
       if (this.getToken) {
         try {
           await doLogout();
-
-          await SignOut();
         } catch {
           console.log('Token cancellation failed');
         }

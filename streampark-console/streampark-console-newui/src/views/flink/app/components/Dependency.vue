@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { computed, defineComponent, h, onMounted, reactive, ref } from 'vue';
+  import { computed, defineComponent, onMounted, reactive, ref } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
 
   export default defineComponent({
@@ -62,7 +62,7 @@
   });
   const { t } = useI18n();
   const defaultValue = '';
-  const { createMessage, createConfirm } = useMessage();
+  const { Swal } = useMessage();
   const { onChange, setContent } = useMonaco(pomBox, {
     language: 'xml',
     code: props.value || defaultValue,
@@ -75,7 +75,7 @@
   function handleApplyPom() {
     const versionId = props.formModel?.versionId;
     if (versionId == null) {
-      createMessage.error(t('flink.app.dependencyError'));
+      Swal.fire('Failed', t('flink.app.dependencyError'), 'error');
       return;
     }
     const scalaVersion = props.flinkEnvs.find((v) => v.id === versionId)?.scalaVersion;
@@ -144,17 +144,20 @@
     invalidArtifact.forEach((dep) => {
       depCode += `<div class="text-base pb-1">${dep}</div>`;
     });
-    createConfirm({
-      iconType: 'error',
+    Swal.fire({
       title: 'Dependencies invalid',
-      content: h('div', { class: 'text-left' }, [
-        h('div', { class: 'p-2 text-base' }, [
-          h('span', {}, 'current flink scala version:'),
-          h('strong', {}, scalaVersion),
-          h('span', {}, ',some dependencies scala version is invalid,dependencies list:'),
-        ]),
-        h('div', { class: 'text-red-500 text-base p-2' }, depCode),
-      ]),
+      icon: 'error',
+      width: 500,
+      html: `
+        <div style="text-align: left;">
+         <div style="padding:0.5em;font-size: 1rem">
+         current flink scala version: <strong>${scalaVersion}</strong>,some dependencies scala version is invalid,dependencies list:
+         </div>
+         <div style="color: red;font-size: 1em;padding:0.5em;">
+           ${depCode}
+         </div>
+        </div>`,
+      focusConfirm: false,
     });
   }
   /* custom http  */

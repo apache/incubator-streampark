@@ -17,7 +17,7 @@
 <template>
   <div>
     <BasicTable @register="registerTable">
-      <template #toolbar>
+      <template #form-advanceBefore>
         <a-button type="primary" @click="handleCreate" v-auth="'user:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
@@ -61,7 +61,7 @@
       });
       const [registerDrawer, { openDrawer }] = useDrawer();
       const [registerModal, { openModal }] = useModal();
-      const { createMessage, createSuccessModal } = useMessage();
+      const { createMessage, Swal } = useMessage();
       const [registerTable, { reload }] = useTable({
         title: '',
         api: getUserList,
@@ -69,6 +69,7 @@
         formConfig: {
           labelWidth: 120,
           schemas: searchFormSchema,
+          colon: true,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
         rowKey: 'userId',
@@ -157,10 +158,13 @@
         const hide = createMessage.loading('reseting');
         try {
           await resetPassword({ usernames: record.username });
-          createSuccessModal({
-            title: 'reset password successful',
-            content: `user [${record.username}] new password is streampark666`,
-          });
+          Swal.fire(
+            'reset password successful, user [' +
+              record.username +
+              '] new password is streampark666',
+            '',
+            'success',
+          );
         } catch (error) {
           console.error('user password fail:', error);
         } finally {

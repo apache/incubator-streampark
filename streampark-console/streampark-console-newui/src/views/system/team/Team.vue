@@ -17,8 +17,9 @@
 <template>
   <div>
     <BasicTable @register="registerTable">
-      <template #toolbar>
+      <template #form-advanceBefore>
         <a-button type="primary" @click="handleCreate" v-auth="'team:add'">
+          <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
       </template>
@@ -60,9 +61,10 @@
   import { fetTeamList, fetchTeamDelete } from '/@/api/system/team';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
   export default defineComponent({
     name: 'Team',
-    components: { BasicTable, TeamDrawer, TableAction },
+    components: { BasicTable, TeamDrawer, TableAction, Icon },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { createMessage } = useMessage();

@@ -17,6 +17,7 @@
 <script lang="ts">
   import { reactive, defineComponent } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { exceptionPropWidth } from '/@/utils';
 
   export default defineComponent({
     name: 'StartApplicationModal',
@@ -34,7 +35,7 @@
   const SelectOption = Select.Option;
 
   const { t } = useI18n();
-  const { createMessage, createConfirm } = useMessage();
+  const { Swal } = useMessage();
   const router = useRouter();
 
   const emits = defineEmits(['register', 'updateOption']);
@@ -120,7 +121,12 @@
         allowNonRestored: formValue.allowNonRestoredState,
       });
       if (data.data) {
-        createMessage.success('The current job is starting');
+        Swal.fire({
+          icon: 'success',
+          title: 'The current job is starting',
+          showConfirmButton: false,
+          timer: 2000,
+        });
         emits('updateOption', {
           type: 'starting',
           key: receiveData.application.id,
@@ -129,20 +135,25 @@
         closeModal();
       } else {
         closeModal();
-        createConfirm({
-          iconType: 'error',
+        Swal.fire({
           title: 'Failed',
-          content:
+          icon: 'error',
+          width: exceptionPropWidth(),
+          html:
             '<pre class="propException"> startup failed, ' +
             data.message.replaceAll(/\[StreamPark]/g, '') +
             '</pre>',
-          okText: t('common.detailText'),
-          onOk: () => {
+          showCancelButton: true,
+          confirmButtonColor: '#55BDDDFF',
+          confirmButtonText: 'Detail',
+          cancelButtonText: 'Close',
+        }).then((isConfirm: Recordable) => {
+          if (isConfirm.value) {
             router.push({
               path: '/flink/app/detail',
               query: { appId: receiveData.application.id },
             });
-          },
+          }
         });
       }
     } catch (error) {

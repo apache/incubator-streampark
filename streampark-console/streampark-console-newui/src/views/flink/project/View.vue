@@ -44,6 +44,7 @@
             v-for="item in projectDataSource"
             :item="item"
             @view-log="handleViewLog"
+            @success="queryData"
           />
         </a-list>
       </a-spin>
@@ -104,13 +105,14 @@
         Object.assign(queryParams, { name: value });
         queryData();
       }
-      const queryData = (showLoading = true) => {
+
+      function queryData(showLoading = true) {
         if (showLoading) loading.value = true;
         getList({ ...queryParams, teamId: userStore.getTeamId }).then((res) => {
           loading.value = false;
           projectDataSource.value = res.records;
         });
-      };
+      }
 
       const handleQuery = function (val) {
         queryParams.buildState = val;
@@ -154,6 +156,7 @@
         handleSearch,
         registerLogModal,
         handleViewLog,
+        queryData,
       };
     },
   });

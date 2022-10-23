@@ -50,16 +50,8 @@
   const dingtalkSecretEnable = ref(false);
   const larkSecretEnable = ref(false);
 
-  const { createConfirm, createMessage } = useMessage();
+  const { Swal } = useMessage();
   const userStore = useUserStore();
-  const [registerModal, { changeOkLoading, closeModal }] = useModalInner((data) => {
-    resetFields();
-    if (data) {
-      alertId.value = data.alertId;
-      alertType.value = data.alertType;
-      setFieldsValue(omit(data, 'alertId'));
-    }
-  });
   const [registerForm, { validateFields, resetFields, setFieldsValue }] = useForm({
     labelWidth: 160,
     colon: true,
@@ -109,6 +101,16 @@
       ...alertFormSchema,
     ],
   });
+  const [registerModal, { changeOkLoading, closeModal }] = useModalInner((data) => {
+    resetFields();
+    alertId.value = '';
+    alertType.value = [];
+    if (data && Object.keys(data).length > 0) {
+      alertId.value = data.alertId;
+      alertType.value = data.alertType;
+      setFieldsValue(omit(data, 'alertId'));
+    }
+  });
 
   // Submit new settings
   async function handleSubmit() {
@@ -147,19 +149,45 @@
         // Check if there is an alarm with the same name before submitting
         const isExist = await fetchExistsAlert({ alertName: param.alertName });
         if (isExist) {
-          createConfirm({
-            iconType: 'error',
-            title: 'Failed create AlertConfig',
-            content: `alertName ${param.alertName} is already exists!`,
-          });
+          Swal.fire(
+            'Failed create AlertConfig',
+            'alertName ' + param.alertName + ' is already exists!',
+            'error',
+          );
         } else {
-          await fetchAlertAdd(param);
-          createMessage.success('Create AlertConfig successful!');
+          const { data } = await fetchAlertAdd(param);
+          if (!data.data) {
+            Swal.fire(
+              'Failed create AlertConfig',
+              data['message'].replaceAll(/\[StreamPark]/g, ''),
+              'error',
+            );
+          } else {
+            Swal.fire({
+              icon: 'success',
+              title: 'Create AlertConfig successful!',
+              showConfirmButton: false,
+              timer: 2000,
+            });
+          }
         }
       } else {
         //update
-        await fetchAlertUpdate(param);
-        createMessage.success('Update AlertConfig successful!');
+        const { data } = await fetchAlertUpdate(param);
+        if (!data.data) {
+          Swal.fire(
+            'Failed update AlertConfig',
+            data['message'].replaceAll(/\[StreamPark]/g, ''),
+            'error',
+          );
+        } else {
+          Swal.fire({
+            icon: 'success',
+            title: 'Update AlertConfig successful!',
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        }
       }
       closeModal();
       emit('reload');

@@ -17,7 +17,7 @@
 <template>
   <div>
     <BasicTable @register="registerTable">
-      <template #toolbar>
+      <template #form-advanceBefore>
         <a-button type="primary" @click="handleCreate" v-auth="'variable:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}

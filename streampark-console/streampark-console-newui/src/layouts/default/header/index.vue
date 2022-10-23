@@ -34,7 +34,7 @@
       />
       <LayoutBreadcrumb v-if="getShowContent && getShowBread" :theme="getHeaderTheme" />
       <!-- slogan -->
-      <Slogan class="hidden lg:block" />
+      <Slogan class="hidden xl:block" />
     </div>
     <!-- left end -->
 

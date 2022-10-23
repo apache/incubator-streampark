@@ -145,7 +145,7 @@ export function fetchUpdate(data): Promise<AxiosResponse<Result>> {
  * @param params get parameters
  * @returns {Promise<AxiosResponse<Result>>} Whether the data get is successful message: error message
  */
-export function fetchGet(data: { id: string }): Promise<AxiosResponse<Result>> {
+export function fetchGet(data: { id: string }): Promise<any> {
   return defHttp.post({ url: APP_API.GET, data });
 }
 

@@ -17,8 +17,9 @@
 <template>
   <div>
     <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
-      <template #toolbar>
+      <template #form-advanceBefore>
         <a-button type="primary" @click="handleCreate" v-auth="'menu:add'">
+          <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
       </template>
@@ -51,10 +52,11 @@
   import { columns, searchFormSchema } from './menu.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
     name: 'MenuManagement',
-    components: { BasicTable, MenuDrawer, TableAction },
+    components: { BasicTable, MenuDrawer, TableAction, Icon },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { createMessage } = useMessage();

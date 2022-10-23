@@ -70,11 +70,8 @@ export function fetchExistsEnv(data: {
   id: string | null;
   flinkName: string;
   flinkHome: string;
-}): Promise<boolean> {
-  return defHttp.post<boolean>({
-    url: FLINK_API.EXISTS,
-    data,
-  });
+}): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.post({ url: FLINK_API.EXISTS, data }, { isReturnNativeResponse: true });
 }
 /**
  * Create flink

@@ -16,12 +16,13 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
+  import { exceptionPropWidth } from '/@/utils';
   export default defineComponent({
     name: 'FlinkClusterSetting',
   });
 </script>
 <script lang="ts" setup name="FlinkClusterSetting">
-  import { onMounted, ref, h } from 'vue';
+  import { onMounted, ref } from 'vue';
   import { SvgIcon } from '/@/components/Icon';
   import { List, Popconfirm, Tooltip } from 'ant-design-vue';
   import {
@@ -48,7 +49,7 @@
 
   const go = useGo();
   const { t } = useI18n();
-  const { createMessage, createConfirm } = useMessage();
+  const { Swal, createMessage } = useMessage();
   const clusters = ref<FlinkCluster[]>([]);
   const optionClusters = {
     starting: new Map(),
@@ -98,17 +99,22 @@
         optionClusters.starting.set(item.id, new Date().getTime());
         handleMapUpdate('starting');
         getFlinkClusterSetting();
-        createMessage.success('The current cluster is started');
+        Swal.fire({
+          icon: 'success',
+          title: 'The current cluster is started',
+          showConfirmButton: false,
+          timer: 2000,
+        });
       } else {
-        createConfirm({
-          iconType: 'error',
+        Swal.fire({
           title: 'Failed',
-          content: h(
-            'div',
-            { class: 'whitespace-pre-wrap', style: { maxHeight: '550px', overflow: 'auto' } },
-            data?.data?.msg,
-          ),
-          width: '800px',
+          icon: 'error',
+          width: exceptionPropWidth(),
+          html: '<pre class="propsException">' + data?.data?.msg + '</pre>',
+          showCancelButton: true,
+          confirmButtonColor: '#55BDDDFF',
+          confirmButtonText: 'OK',
+          cancelButtonText: 'Close',
         });
       }
     } catch (error) {
@@ -137,10 +143,15 @@
         handleMapUpdate('starting');
         createMessage.success('The current cluster is shutdown');
       } else {
-        createConfirm({
-          iconType: 'error',
+        Swal.fire({
           title: 'Failed',
-          content: h('pre', { class: 'propsException' }, data?.data?.msg),
+          icon: 'error',
+          width: exceptionPropWidth(),
+          html: '<pre class="propsException">' + data.data.msg + '</pre>',
+          showCancelButton: true,
+          confirmButtonColor: '#55BDDDFF',
+          confirmButtonText: 'OK',
+          cancelButtonText: 'Close',
         });
       }
     } catch (error) {
@@ -204,10 +215,9 @@
             v-auth="'app:update'"
             :disabled="true"
             @click="handleEditCluster(item)"
-            shape="circle"
+            type="link"
             size="large"
-            style="margin-left: 3px"
-            class="control-button ctl-btn-color"
+            class="control-button"
           >
             <EditOutlined />
           </a-button>
@@ -215,10 +225,9 @@
             v-if="!handleIsStart(item) || item.executionMode === 1"
             v-auth="'app:update'"
             @click="handleEditCluster(item)"
-            shape="circle"
+            type="link"
             size="large"
-            style="margin-left: 3px"
-            class="control-button ctl-btn-color"
+            class="control-button"
           >
             <EditOutlined />
           </a-button>
@@ -229,10 +238,9 @@
               v-if="item.executionMode === 3 || item.executionMode === 5"
               v-auth="'cluster:create'"
               @click="handleDeployCluser(item)"
-              shape="circle"
+              type="link"
               size="large"
-              style="margin-left: 3px"
-              class="control-button ctl-btn-color"
+              class="control-button"
             >
               <PlayCircleOutlined />
             </a-button>
@@ -240,10 +248,10 @@
               v-else
               :disabled="true"
               v-auth="'cluster:create'"
-              shape="circle"
+              type="link"
               size="large"
               style="margin-left: 3px"
-              class="control-button ctl-btn-color"
+              class="control-button"
             >
               <PlayCircleOutlined />
             </a-button>
@@ -256,10 +264,10 @@
               v-if="[3, 5].includes(item.executionMode)"
               v-auth="'cluster:create'"
               @click="handleShutdownCluster(item)"
-              shape="circle"
+              type="link"
               size="large"
               style="margin-left: 3px"
-              class="control-button ctl-btn-color"
+              class="control-button"
             >
               <PauseCircleOutlined />
             </a-button>
@@ -267,10 +275,9 @@
               v-else
               :disabled="true"
               v-auth="'cluster:create'"
-              shape="circle"
+              type="link"
               size="large"
-              style="margin-left: 3px"
-              class="control-button ctl-btn-color"
+              class="control-button"
             >
               <PauseCircleOutlined />
             </a-button>
@@ -282,20 +289,18 @@
             v-if="!handleIsStart(item)"
             v-auth="'app:detail'"
             :disabled="true"
-            shape="circle"
+            type="link"
             size="large"
-            style="margin-left: 3px"
-            class="control-button ctl-btn-color"
+            class="control-button"
           >
             <EyeOutlined />
           </a-button>
           <a-button
             v-else
             v-auth="'app:detail'"
-            shape="circle"
+            type="link"
             size="large"
-            style="margin-left: 3px"
-            class="control-button ctl-btn-color"
+            class="control-button"
             :href="item.address"
             target="_blank"
           >
@@ -309,14 +314,8 @@
           :ok-text="t('common.yes')"
           @confirm="handleDelete(item)"
         >
-          <a-button
-            type="danger"
-            shape="circle"
-            size="large"
-            style="margin-left: 3px"
-            class="control-button"
-          >
-            <DeleteOutlined />
+          <a-button type="link" size="large" class="control-button">
+            <DeleteOutlined style="color: red" />
           </a-button>
         </Popconfirm>
       </template>

@@ -63,7 +63,7 @@
     </ul>
     <div class="operation">
       <a-tooltip title="See Build log" v-if="isBuilding">
-        <a-button shape="circle" @click="handleSeeLog">
+        <a-button type="link" @click="handleSeeLog">
           <Icon spin icon="ant-design:sync-outlined" style="color: #4a9ff5" />
         </a-button>
       </a-tooltip>
@@ -76,7 +76,7 @@
             ok-text="Yes"
             @confirm="handleBuild"
           >
-            <a-button shape="circle" class="ml-8px" v-auth="'project:build'">
+            <a-button type="link" size="large" class="ml-8px" v-auth="'project:build'">
               <ThunderboltOutlined />
             </a-button>
           </a-popconfirm>
@@ -84,7 +84,13 @@
       </template>
 
       <a-tooltip title="Update Project">
-        <a-button v-auth="'project:update'" @click="handleEdit" shape="circle" class="ml-8px">
+        <a-button
+          v-auth="'project:update'"
+          size="large"
+          @click="handleEdit"
+          type="link"
+          class="ml-8px"
+        >
           <EditOutlined />
         </a-button>
       </a-tooltip>
@@ -95,8 +101,8 @@
           ok-text="Yes"
           @confirm="handleDelete"
         >
-          <a-button type="danger" shape="circle" style="margin-left: 8px">
-            <DeleteOutlined />
+          <a-button type="link" size="large" style="margin-left: 8px">
+            <DeleteOutlined style="color: red" />
           </a-button>
         </a-popconfirm>
       </a-tooltip>
@@ -120,9 +126,9 @@
   import { useGo } from '/@/hooks/web/usePage';
   import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 
-  const emit = defineEmits(['viewLog']);
+  const emit = defineEmits(['viewLog', 'success']);
 
-  const { createMessage } = useMessage();
+  const { Swal, createMessage } = useMessage();
   const go = useGo();
   const props = defineProps({
     item: { type: Object as PropType<ProjectRecord>, required: true },
@@ -148,7 +154,12 @@
         id: props.item.id,
         socketId: buildUUID(),
       });
-      createMessage.success('The current project is building');
+      Swal.fire({
+        icon: 'success',
+        title: 'The current project is building',
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } catch (e) {
       createMessage.error('Build Fail');
     }
@@ -160,8 +171,18 @@
 
   async function handleDelete() {
     try {
-      await deleteProject({ id: props.item.id });
-      createMessage.success('Delete Successful');
+      const { data } = await deleteProject({ id: props.item.id });
+      if (data.data) {
+        Swal.fire({
+          icon: 'success',
+          title: 'delete successful',
+          showConfirmButton: false,
+          timer: 2000,
+        });
+        emit('success', true);
+      } else {
+        Swal.fire('Failed', 'Please check if any application belongs to this project', 'error');
+      }
     } catch (e) {
       createMessage.error('Delete Fail');
     }
@@ -237,5 +258,13 @@
       margin-left: 0;
       padding-left: 0;
     }
+  }
+  .ant-tag {
+    border-radius: 0;
+    font-weight: 700;
+    text-align: center;
+    padding: 0 4px;
+    margin-right: 0;
+    cursor: default;
   }
 </style>

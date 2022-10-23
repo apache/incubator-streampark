@@ -17,10 +17,11 @@
 <template>
   <div>
     <BasicTable @register="registerTable">
-      <template #toolbar>
+      <template #form-advanceBefore>
         <a-button type="primary" @click="handleCreate" v-auth="'role:add'">
-          {{ t('common.add') }}</a-button
-        >
+          <Icon icon="ant-design:plus-outlined" />
+          {{ t('common.add') }}
+        </a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -75,10 +76,11 @@
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { RoleListRecord } from '/@/api/system/model/roleModel';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
     name: 'RoleManagement',
-    components: { BasicTable, RoleInfo, RoleDrawer, TableAction },
+    components: { BasicTable, RoleInfo, RoleDrawer, TableAction, Icon },
     setup() {
       const { t } = useI18n();
       const [registerDrawer, { openDrawer }] = useDrawer();

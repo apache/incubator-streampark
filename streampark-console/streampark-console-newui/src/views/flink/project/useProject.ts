@@ -17,7 +17,7 @@
 import { FormSchema } from '/@/components/Table';
 import { RuleObject, StoreValue } from 'ant-design-vue/lib/form/interface';
 import { computed, nextTick, reactive, ref, unref } from 'vue';
-import { branches, getDetail, gitCheck, isExist } from '/@/api/flink/project';
+import { fetchBranches, getDetail, gitCheck, isExist } from '/@/api/flink/project';
 import { useForm } from '/@/components/Form';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { filterOption } from '../app/utils';
@@ -26,7 +26,7 @@ import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 
 export const useProject = () => {
   const route = useRoute();
-  const { createMessage, createErrorModal } = useMessage();
+  const { createMessage, createErrorSwal } = useMessage();
 
   const submitLoading = ref(false);
   const projectResource = reactive<Partial<ProjectRecord>>({});
@@ -194,20 +194,20 @@ export const useProject = () => {
           handleBranches(values);
         }
         if (branchList.value.indexOf(values.branches) === -1) {
-          createMessage.error(
-            'branch [' + values.branches + '] does not exist or authentication error,please check',
+          createErrorSwal(
+            'branch [' +
+              values.branches +
+              '] does not exist<br>or authentication error,please check',
           );
         } else {
           await FetchAction(values);
         }
       } else {
-        createErrorModal({
-          title: 'Fail',
-          content:
-            res === 1
-              ? 'not authorized ..> <.. <br><br> userName and password is required'
-              : 'authentication error ..> <.. <br><br> please check userName and password',
-        });
+        createErrorSwal(
+          res === 1
+            ? 'not authorized ..>﹏<.. <br><br> userName and password is required'
+            : 'authentication error ..>﹏<.. <br><br> please check userName and password',
+        );
       }
     } catch (error) {
       console.error(error);
@@ -217,16 +217,23 @@ export const useProject = () => {
   }
 
   async function handleBranches(values: Recordable) {
-    const url = values.url;
-    if (url) {
-      const userName = values.userName || null;
-      const password = values.password || null;
-      const userNull = userName === null || userName === undefined || userName === '';
-      const passNull = password === null || password === undefined || password === '';
-      if ((userNull && passNull) || (!userNull && !passNull)) {
-        const res = await branches({ url, userName, password });
-        if (res) branchList.value = res;
+    const hide = createMessage.loading('Getting branch');
+    try {
+      const url = values.url;
+      if (url) {
+        const userName = values.userName || null;
+        const password = values.password || null;
+        const userNull = userName === null || userName === undefined || userName === '';
+        const passNull = password === null || password === undefined || password === '';
+        if ((userNull && passNull) || (!userNull && !passNull)) {
+          const res = await fetchBranches({ url, userName, password });
+          if (res) branchList.value = res.map((i) => ({ label: i, value: i }));
+        }
       }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      hide();
     }
   }
 

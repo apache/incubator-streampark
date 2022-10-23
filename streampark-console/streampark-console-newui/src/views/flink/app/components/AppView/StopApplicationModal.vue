@@ -34,7 +34,7 @@
   const app = reactive<Recordable>({});
 
   const { t } = useI18n();
-  const { createMessage, createErrorModal } = useMessage();
+  const { createErrorSwal, Swal, createErrorModal } = useMessage();
   const [registerModal, { closeModal }] = useModalInner((data) => {
     if (data) {
       Object.assign(app, data.application);
@@ -103,10 +103,7 @@
             path: customSavepoint,
           });
           if (data.data === false) {
-            createErrorModal({
-              title: t('common.failed'),
-              content: 'custom savePoint path is invalid, ' + data.message,
-            });
+            createErrorSwal('custom savePoint path is invalid, ' + data.message);
           } else {
             handleStopAction(stopReq);
           }
@@ -121,6 +118,8 @@
               title: t('common.failed'),
               content: data.message,
             });
+
+            createErrorSwal(data.message);
           }
         }
       } else {
@@ -138,7 +137,12 @@
 
   async function handleStopAction(stopReq: CancelParam) {
     await fetchCancel(stopReq);
-    createMessage.success('The current job is canceling');
+    Swal.fire({
+      icon: 'success',
+      title: 'The current job is canceling',
+      showConfirmButton: false,
+      timer: 2000,
+    });
     closeModal();
   }
 </script>

@@ -59,8 +59,12 @@ export function gitCheck(data: Recordable) {
     data,
   });
 }
-
-export function branches(data: Recordable) {
+/**
+ *
+ * @param data
+ * @returns
+ */
+export function fetchBranches(data: Recordable): Promise<string[]> {
   return defHttp.post({
     url: Api.BRANCHES,
     data,
@@ -78,11 +82,8 @@ export function getDetail(data: Recordable) {
   });
 }
 
-export function updateProject(data: Recordable) {
-  return defHttp.post({
-    url: Api.UPDATE,
-    data,
-  });
+export function updateProject(data: Recordable): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.post({ url: Api.UPDATE, data }, { isReturnNativeResponse: true });
 }
 
 export function buildProject(data: Recordable): Promise<boolean> {
@@ -103,11 +104,8 @@ export function closeBuild(data: Recordable) {
   });
 }
 
-export function deleteProject(data: Recordable) {
-  return defHttp.post({
-    url: Api.DELETE,
-    data,
-  });
+export function deleteProject(data: Recordable): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.post({ url: Api.DELETE, data }, { isReturnNativeResponse: true });
 }
 
 export function modules(data: Recordable) {

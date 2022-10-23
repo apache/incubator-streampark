@@ -331,7 +331,7 @@
       }
 
       &-with-help {
-        margin-bottom: 0;
+        margin-bottom: 6px;
       }
       /*
       &:not(.ant-form-item-with-help) {

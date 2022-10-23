@@ -21,7 +21,7 @@ import { clone } from 'lodash-es';
 import type { RequestOptions, Result } from '/#/axios';
 import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';
 import { VAxios } from './Axios';
-import { checkStatus } from './checkStatus';
+// import { checkStatus } from './checkStatus';
 import { useGlobSetting } from '/@/hooks/setting';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { RequestEnum, ResultEnum, ContentTypeEnum } from '/@/enums/httpEnum';
@@ -33,6 +33,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 import { joinTimestamp, formatRequestDate } from './helper';
 import { useUserStoreWithOut } from '/@/store/modules/user';
 import { AxiosRetry } from '/@/utils/http/axios/axiosRetry';
+import { errorHandler } from './errorHandle';
 
 const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix;
@@ -77,33 +78,6 @@ const transform: AxiosTransform = {
         userStore.setToken(undefined);
         userStore.logout(true);
         break;
-      case '501':
-        createErrorModal({
-          title: t('sys.api.errorTip'),
-          content: `
-          <div class="py-10px">
-            ${message}
-          </div>
-          <a href="https://streampark.apache.org/">View the official documentation?</a>`,
-        });
-        throw new Error(message);
-      case '502':
-        let width = document.documentElement.clientWidth || document.body.clientWidth;
-        if (width > 1200) {
-          width = 1080;
-        }
-        width *= 0.96;
-        createErrorModal({
-          title: t('sys.api.errorTip'),
-          width,
-          content: `
-            <pre class="propException">${message}</pre><br />
-            <a href="https://github.com/apache/incubator-streampark/issues/new/choose">
-              report issue ?
-            </a>
-          `,
-        });
-        throw new Error(message);
       default:
         if (message) {
           timeoutMsg = message;
@@ -202,7 +176,7 @@ const transform: AxiosTransform = {
     errorLogStore.addAjaxErrorInfo(error);
     const { response, code, message, config } = error || {};
     const errorMessageMode = config?.requestOptions?.errorMessageMode || 'none';
-    const msg: string = response?.data?.error?.message ?? '';
+    // const msg: string = response?.data?.error?.message ?? '';
     const err: string = error?.toString?.() ?? '';
     let errMessage = '';
 
@@ -213,10 +187,6 @@ const transform: AxiosTransform = {
       }
       if (err?.includes('Network Error')) {
         errMessage = t('sys.api.networkExceptionMsg');
-      }
-      // The backend returns a message
-      if (response?.data?.message) {
-        errMessage = response?.data?.message;
       }
       if (errMessage) {
         if (errorMessageMode === 'modal') {
@@ -229,8 +199,8 @@ const transform: AxiosTransform = {
     } catch (error) {
       throw new Error(error as unknown as string);
     }
-
-    checkStatus(error?.response?.status, msg, errorMessageMode);
+    errorHandler(response);
+    // checkStatus(error?.response?.status, msg, errorMessageMode);
 
     // Added an automatic retry mechanism for insurance purposes only for GET requests
     const retryRequest = new AxiosRetry();

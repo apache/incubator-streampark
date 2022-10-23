@@ -31,7 +31,7 @@
   const { getLoading, registerForm, submit, handleSubmit, handleGet, projectResource } =
     useProject();
 
-  const { createMessage } = useMessage();
+  const { createErrorSwal, createMessage } = useMessage();
   const { t } = useI18n();
   const route = useRoute();
   const router = useRouter();
@@ -56,7 +56,7 @@
   async function handleEditAction(values: Recordable) {
     try {
       handleCheckRebuild(values);
-      const res = await updateProject({
+      const { data } = await updateProject({
         id: route.query.id,
         name: values.name,
         url: values.url,
@@ -70,17 +70,17 @@
         description: values.description,
         buildState: buildState.value,
       });
-      if (res.data) {
-        createMessage.success('created successfully');
+      if (data.data) {
         router.go(-1);
+        createMessage.success('update successfully');
       } else {
-        createMessage.error('Project save failed :' + res['message']);
+        createErrorSwal('Project update failed ..>﹏<.. <br><br>' + data['message']);
       }
     } catch (error: any) {
       if (error?.data?.message) {
-        createMessage.error('Project save failed:' + error.data['message']);
+        createMessage.error('Project update failed:' + error.data['message']);
       } else {
-        createMessage.error('Project save failed ..>﹏<.. ');
+        createMessage.error('Project update failed ..>﹏<.. ');
       }
     }
   }

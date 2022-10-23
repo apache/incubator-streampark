@@ -30,12 +30,9 @@ import { setupStore } from '/@/store';
 import { setupGlobDirectives } from '/@/directives';
 import { setupI18n } from '/@/locales/setupI18n';
 import { registerGlobComp } from '/@/components/registerGlobComp';
-import { setupAdapter } from './adapter';
 
 async function bootstrap() {
   const app = createApp(App);
-
-  setupAdapter(app);
 
   // Configure store
   setupStore(app);

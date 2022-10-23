@@ -82,7 +82,7 @@ export default {
     settingFixedRight: 'Fixed Right',
     settingFullScreen: 'Full Screen',
     index: 'Index',
-    total: 'total of {total}',
+    total: 'show {0} ~ {1} records, total {2}',
     operation: 'Operation',
   },
   time: {

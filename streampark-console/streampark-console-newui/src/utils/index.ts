@@ -116,3 +116,11 @@ export function getUserTeamId() {
   }
   return '';
 }
+
+export const exceptionPropWidth = function () {
+  const width = document.documentElement.clientWidth || document.body.clientWidth;
+  if (width > 1200) {
+    return 1080;
+  }
+  return width * 0.96;
+};

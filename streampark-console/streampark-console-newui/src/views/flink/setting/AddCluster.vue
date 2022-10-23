@@ -32,7 +32,7 @@
 
   const go = useGo();
   const { t } = useI18n();
-  const { createMessage, createErrorModal } = useMessage();
+  const { Swal } = useMessage();
 
   const { getLoading, changeLoading, getClusterSchema, handleSubmitParams } = useClusterSetting();
 
@@ -53,21 +53,28 @@
         if (res === 'success') {
           const resp = await fetchCreateCluster(params);
           if (resp.status) {
-            createMessage.success(values.clusterName.concat(' create successful!'));
+            Swal.fire({
+              icon: 'success',
+              title: values.clusterName.concat(' create successful!'),
+              showConfirmButton: false,
+              timer: 2000,
+            });
             go('/flink/setting?activeKey=cluster');
           } else {
-            createMessage.error(resp.msg);
+            Swal.fire(resp.msg);
           }
         } else if (res === 'exists') {
-          createErrorModal({
-            title: 'Failed',
-            content: 'the cluster name: ' + values.clusterName + ' is already exists,please check',
-          });
+          Swal.fire(
+            'Failed',
+            'the cluster name: ' + values.clusterName + ' is already exists,please check',
+            'error',
+          );
         } else {
-          createErrorModal({
-            title: 'Failed',
-            content: 'the address is invalid or connection failure, please check',
-          });
+          Swal.fire(
+            'Failed',
+            'the address is invalid or connection failure, please check',
+            'error',
+          );
         }
       }
     } catch (error) {

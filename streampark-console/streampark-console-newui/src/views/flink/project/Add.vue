@@ -32,7 +32,7 @@
   import { getUserTeamId } from '/@/utils';
   const { getLoading, registerForm, submit, handleSubmit } = useProject();
 
-  const { createMessage } = useMessage();
+  const { Swal, createMessage } = useMessage();
   const router = useRouter();
   const { t } = useI18n();
 
@@ -56,7 +56,7 @@
         createMessage.success('created successfully');
         router.go(-1);
       } else {
-        createMessage.error('Project save failed :' + res['message']);
+        Swal.fire('Failed', 'Project save failed ..>﹏<.. <br><br>' + res['message'], 'error');
       }
     } catch (error: any) {
       if (error?.data?.message) {

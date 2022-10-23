@@ -18,8 +18,9 @@
 <template>
   <div>
     <BasicTable @register="registerTable" :formConfig="formConfig">
-      <template #toolbar>
+      <template #form-advanceBefore>
         <a-button type="primary" @click="handleCreate" v-auth="'member:add'">
+          <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
       </template>
@@ -74,6 +75,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { getRoleListByPage } from '/@/api/base/system';
   import { fetchMemberDelete, fetchMemberList } from '/@/api/system/member';
+  import Icon from '/@/components/Icon';
 
   const roleListOptions = ref<Array<Partial<RoleListItem>>>([]);
 

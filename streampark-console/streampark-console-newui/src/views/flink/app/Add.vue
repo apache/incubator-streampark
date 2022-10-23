@@ -25,16 +25,14 @@
   import { Switch, Alert } from 'ant-design-vue';
   import { onMounted, reactive, ref, unref } from 'vue';
   import { PageWrapper } from '/@/components/Page';
+  import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
+
   import { BasicForm, useForm } from '/@/components/Form';
   import { SettingTwoTone } from '@ant-design/icons-vue';
   import { useDrawer } from '/@/components/Drawer';
   import Mergely from './components/Mergely.vue';
   import { handleConfTemplate } from '/@/api/flink/config';
   import { decodeByBase64 } from '/@/utils/cipher';
-  import FlinkSqlEditor from './components/flinkSql.vue';
-  import Dependency from './components/Dependency.vue';
-  import UseSysHadoopConf from './components/UseSysHadoopConf.vue';
-  import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
   import UploadJobJar from './components/UploadJobJar.vue';
   import { fetchAppConf, fetchCreate, fetchMain, fetchUpload } from '/@/api/flink/app/app';
   import options from './data/option';
@@ -44,6 +42,13 @@
   import { createLocalStorage } from '/@/utils/cache';
   import { buildUUID } from '/@/utils/uuid';
   import { useI18n } from '/@/hooks/web/useI18n';
+
+  const FlinkSqlEditor = createAsyncComponent(() => import('./components/flinkSql.vue'));
+  const Dependency = createAsyncComponent(() => import('./components/Dependency.vue'));
+  const PomTemplateTab = createAsyncComponent(
+    () => import('./components/PodTemplate/PomTemplateTab.vue'),
+  );
+  const UseSysHadoopConf = createAsyncComponent(() => import('./components/UseSysHadoopConf.vue'));
 
   const go = useGo();
   const flinkSql = ref();

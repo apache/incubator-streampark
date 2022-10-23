@@ -17,7 +17,7 @@
 <template>
   <div>
     <BasicTable @register="registerTable">
-      <template #toolbar>
+      <template #form-advanceBefore>
         <a-button type="primary" @click="handleCreate" v-auth="'token:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
@@ -75,7 +75,7 @@
       const [registerTable, { reload, updateTableDataRecord }] = useTable({
         api: fetTokenList,
         columns,
-        formConfig: { labelWidth: 120, schemas: searchFormSchema },
+        formConfig: { labelWidth: 120, colon: true, schemas: searchFormSchema },
         useSearchForm: true,
         showTableSetting: false,
         rowKey: 'tokenId',

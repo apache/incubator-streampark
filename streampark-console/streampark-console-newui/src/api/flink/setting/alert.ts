@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 import { AlertCreate, AlertSetting, AlertUpdateParam } from './types/alert.type';
+import { Result } from '/#/axios';
 import { defHttp } from '/@/utils/http/axios';
+import { AxiosResponse } from 'axios';
 
 enum ALERT_APi {
   ADD = '/flink/alert/add',
@@ -45,8 +47,10 @@ export function fetchSendAlert(data: { id: string }): Promise<boolean> {
  * Delete alert settings
  * @returns {Promise<boolean|undefined>}
  */
-export function fetchAlertDelete(data: { id: string }): Promise<boolean | undefined> {
-  return defHttp.delete({ url: ALERT_APi.DELETE, data });
+export function fetchAlertDelete(data: {
+  id: string;
+}): Promise<AxiosResponse<Result<boolean | undefined>>> {
+  return defHttp.delete({ url: ALERT_APi.DELETE, data }, { isReturnNativeResponse: true });
 }
 /**
  * Alarm name test
@@ -58,19 +62,19 @@ export function fetchExistsAlert(data: { alertName: string }): Promise<boolean> 
 
 /**
  * Add alert settings
- * @param {AlertCreate} params
- * @returns {Promise<boolean>}
+ * @param {AlertCreate} data
+ * @returns {Promise<AxiosResponse<Result<boolean>>>}
  */
-export function fetchAlertAdd(data: AlertCreate): Promise<boolean> {
-  return defHttp.postJson({ url: ALERT_APi.ADD, data });
+export function fetchAlertAdd(data: AlertCreate): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.postJson({ url: ALERT_APi.ADD, data }, { isReturnNativeResponse: true });
 }
 /**
  * Update alert settings
  * @param {AlertCreate} params
  * @returns {Promise<boolean>}
  */
-export function fetchAlertUpdate(data: AlertCreate): Promise<boolean> {
-  return defHttp.postJson({ url: ALERT_APi.UPDATE, data });
+export function fetchAlertUpdate(data: AlertCreate): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.postJson({ url: ALERT_APi.UPDATE, data }, { isReturnNativeResponse: true });
 }
 
 /**
