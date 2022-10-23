@@ -74,13 +74,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
 
   lazy val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
 
-  lazy val savepointRestoreSettings: SavepointRestoreSettings = {
-    lazy val allowNonRestoredState = Try(extraParameter.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key).toString.toBoolean).getOrElse(false)
-    savePoint match {
-      case sp if Try(sp.isEmpty).getOrElse(true) => SavepointRestoreSettings.none
-      case sp => SavepointRestoreSettings.forPath(sp, allowNonRestoredState)
-    }
-  }
+  lazy val allowNonRestoredState = Try(extraParameter.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key).toString.toBoolean).getOrElse(false)
 
   lazy val userJarFile: File = {
     executionMode match {
