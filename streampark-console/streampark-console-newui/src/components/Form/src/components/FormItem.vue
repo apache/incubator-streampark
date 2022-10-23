@@ -333,7 +333,7 @@
       }
 
       function renderItem() {
-        const { itemProps, slot, render, field, suffix, component } = props.schema;
+        const { itemProps, slot, render, field, suffix, itemExtra, component } = props.schema;
         const { labelCol, wrapperCol } = unref(itemLabelWidthProp);
         const { colon } = props.formProps;
 
@@ -353,7 +353,9 @@
           };
 
           const showSuffix = !!suffix;
+          const showItemExtra = !!itemExtra;
           const getSuffix = isFunction(suffix) ? suffix(unref(getValues)) : suffix;
+          const getItemExtra = isFunction(itemExtra) ? itemExtra(unref(getValues)) : itemExtra;
 
           return (
             <Form.Item
@@ -370,6 +372,7 @@
                 <div style="flex:1;">{getContent()}</div>
                 {showSuffix && <span class="suffix">{getSuffix}</span>}
               </div>
+              {showItemExtra && <div class="extra">{getItemExtra}</div>}
             </Form.Item>
           );
         }

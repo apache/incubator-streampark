@@ -17,48 +17,15 @@
 <template>
   <div>
     <BasicTable @register="registerTable">
-      <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'user:add'"> Add User </a-button>
+      <template #form-advanceBefore>
+        <a-button type="primary" @click="handleCreate" v-auth="'user:add'">
+          <Icon icon="ant-design:plus-outlined" />
+          {{ t('common.add') }}
+        </a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
-          <TableAction
-            :actions="[
-              {
-                icon: 'clarity:note-edit-line',
-                tooltip: 'modify',
-                auth: 'user:update',
-                ifShow: () => record.username !== 'admin' || userName === 'admin',
-                onClick: handleEdit.bind(null, record),
-              },
-              {
-                icon: 'carbon:data-view-alt',
-                tooltip: 'view detail',
-                onClick: handleView.bind(null, record),
-              },
-              {
-                icon: 'bx:reset',
-                auth: 'user:reset',
-                tooltip: 'reset password',
-                ifShow: () => record.username !== 'admin' || userName === 'admin',
-                popConfirm: {
-                  title: 'reset password, are you sure',
-                  confirm: handleReset.bind(null, record),
-                },
-              },
-              {
-                icon: 'ant-design:delete-outlined',
-                color: 'error',
-                auth: 'user:delete',
-                ifShow: record.username !== 'admin',
-                tooltip: 'delete user',
-                popConfirm: {
-                  title: 'delete user, are you sure',
-                  confirm: handleDelete.bind(null, record),
-                },
-              },
-            ]"
-          />
+          <TableAction :actions="getUserAction(record)" />
         </template>
       </template>
     </BasicTable>
@@ -69,7 +36,7 @@
 <script lang="ts">
   import { computed, defineComponent } from 'vue';
 
-  import { BasicTable, useTable, TableAction } from '/@/components/Table';
+  import { BasicTable, useTable, TableAction, ActionItem } from '/@/components/Table';
   import UserDrawer from './components/UserDrawer.vue';
   import UserModal from './components/UserModal.vue';
   import { useDrawer } from '/@/components/Drawer';
@@ -79,32 +46,31 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { useModal } from '/@/components/Modal';
+  import { UserListRecord } from '/@/api/system/model/userModel';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
     name: 'User',
-    components: { BasicTable, UserModal, UserDrawer, TableAction },
+    components: { BasicTable, UserModal, UserDrawer, TableAction, Icon },
     setup() {
+      const { t } = useI18n();
       const userStore = useUserStoreWithOut();
       const userName = computed(() => {
         return userStore.getUserInfo?.username;
       });
       const [registerDrawer, { openDrawer }] = useDrawer();
       const [registerModal, { openModal }] = useModal();
-      const { createMessage, createSuccessModal } = useMessage();
+      const { createMessage, Swal } = useMessage();
       const [registerTable, { reload }] = useTable({
         title: '',
         api: getUserList,
-        beforeFetch: (params) => {
-          if (params.sortField === 'createTime') {
-            params.sortField = 'create_time';
-          }
-          return params;
-        },
         columns,
         formConfig: {
           labelWidth: 120,
           schemas: searchFormSchema,
-          fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM']],
+          colon: true,
+          fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
         rowKey: 'userId',
         pagination: true,
@@ -115,17 +81,54 @@
         showIndexColumn: false,
         canResize: false,
         actionColumn: {
-          width: 140,
+          width: 200,
           title: 'Operation',
           dataIndex: 'action',
         },
       });
-
+      function getUserAction(record: UserListRecord): ActionItem[] {
+        return [
+          {
+            icon: 'clarity:note-edit-line',
+            tooltip: 'modify user',
+            auth: 'user:update',
+            ifShow: () => record.username !== 'admin' || userName.value === 'admin',
+            onClick: handleEdit.bind(null, record),
+          },
+          {
+            icon: 'carbon:data-view-alt',
+            tooltip: 'view detail',
+            onClick: handleView.bind(null, record),
+          },
+          {
+            icon: 'bx:reset',
+            auth: 'user:reset',
+            tooltip: 'reset password',
+            ifShow: () => record.username !== 'admin' || userName.value === 'admin',
+            popConfirm: {
+              title: 'reset password, are you sure',
+              confirm: handleReset.bind(null, record),
+            },
+          },
+          {
+            icon: 'ant-design:delete-outlined',
+            color: 'error',
+            auth: 'user:delete',
+            ifShow: record.username !== 'admin',
+            tooltip: 'delete user',
+            popConfirm: {
+              title: 'delete user, are you sure',
+              confirm: handleDelete.bind(null, record),
+            },
+          },
+        ];
+      }
+      // user create
       function handleCreate() {
         openDrawer(true, { formType: FormTypeEnum.Create });
       }
-
-      function handleEdit(record: Recordable) {
+      // edit user
+      function handleEdit(record: UserListRecord) {
         openDrawer(true, {
           record,
           formType: FormTypeEnum.Edit,
@@ -133,25 +136,40 @@
       }
 
       // see detail
-      function handleView(record: Recordable) {
+      function handleView(record: UserListRecord) {
         openModal(true, record);
       }
 
       // delete current user
-      function handleDelete(record: Recordable) {
-        deleteUser({ userId: record.userId }).then((_) => {
-          createMessage.success('success');
+      async function handleDelete(record: UserListRecord) {
+        const hide = createMessage.loading('deleteing');
+        try {
+          await deleteUser({ userId: record.userId });
+          createMessage.success('delete successful');
           reload();
-        });
+        } catch (error) {
+          console.error('user delete fail:', error);
+        } finally {
+          hide();
+        }
       }
 
-      function handleReset(record: Recordable) {
-        resetPassword({ usernames: record.username }).then((_) => {
-          createSuccessModal({
-            title: 'reset password successful',
-            content: `user [${record.username}] new password is streamx666`,
-          });
-        });
+      async function handleReset(record: Recordable) {
+        const hide = createMessage.loading('reseting');
+        try {
+          await resetPassword({ usernames: record.username });
+          Swal.fire(
+            'reset password successful, user [' +
+              record.username +
+              '] new password is streampark666',
+            '',
+            'success',
+          );
+        } catch (error) {
+          console.error('user password fail:', error);
+        } finally {
+          hide();
+        }
       }
 
       // add/edit user success
@@ -161,6 +179,7 @@
       }
 
       return {
+        t,
         userName,
         registerTable,
         registerDrawer,
@@ -171,6 +190,7 @@
         handleSuccess,
         handleView,
         handleReset,
+        getUserAction,
       };
     },
   });

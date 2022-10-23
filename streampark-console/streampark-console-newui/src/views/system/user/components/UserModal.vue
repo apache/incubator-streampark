@@ -63,65 +63,53 @@
     }
     Object.assign(userInfo.value, data);
   }
-
+  // Dynamically generate label icons
   const generatedLabelIcon = (icon: string, label: string) => {
-    return h('div', null, [h(Icon, { icon }), h('span', { class: 'px-5px' }, label)]);
+    return h('div', null, [
+      h(Icon, { icon: `ant-design:${icon}-outlined` }),
+      h('span', { class: 'px-5px' }, label),
+    ]);
   };
   const userColumn = [
+    { label: generatedLabelIcon('user', 'User Name'), field: 'username' },
+    { label: generatedLabelIcon('star', 'User Type'), field: 'userType' },
     {
-      label: generatedLabelIcon('ant-design:user-outlined', 'User Name'),
-      field: 'username',
-    },
-    {
-      label: generatedLabelIcon('ant-design:star-outlined', 'User Type'),
-      field: 'userType',
-    },
-    {
-      label: generatedLabelIcon('ant-design:skin-outlined', 'Gender'),
+      label: generatedLabelIcon('skin', 'Gender'),
       field: 'sex',
-      render: (curVal) => {
-        switch (curVal) {
-          case '0':
-            return 'male';
-          case '1':
-            return 'female';
-          case '2':
-            return 'secret';
-          default:
-            return curVal;
-        }
+      render: (curVal: string) => {
+        const sexMap = {
+          '0': 'male',
+          '1': 'female',
+          '2': 'secret',
+          [curVal]: curVal,
+        };
+        return sexMap[curVal];
       },
     },
+    { label: generatedLabelIcon('mail', 'E-Mail'), field: 'email' },
     {
-      label: generatedLabelIcon('ant-design:mail-outlined', 'E-Mail'),
-      field: 'email',
-    },
-    {
-      label: generatedLabelIcon(
-        `ant-design:${userInfo.value?.status === '1' ? 'smile' : 'frown'}-outlined`,
-        'Status',
-      ),
+      label: generatedLabelIcon(`${userInfo.value?.status === '1' ? 'smile' : 'frown'}`, 'Status'),
       field: 'status',
       render: (curVal) => {
         if (curVal === '0') {
           return h(Tag, { color: 'red' }, () => 'locked');
         } else if (curVal === '1') {
-          return h(Tag, { color: 'cyan' }, () => 'effective');
+          return h(Tag, { color: 'green' }, () => 'effective');
         } else {
           return h('span', null, curVal);
         }
       },
     },
     {
-      label: generatedLabelIcon(`ant-design:clock-circle-outlined`, 'Creation'),
+      label: generatedLabelIcon(`clock-circle`, 'Creation'),
       field: 'createTime',
     },
     {
-      label: generatedLabelIcon(`ant-design:login-outlined`, 'Recent Login'),
+      label: generatedLabelIcon(`login`, 'Recent Login'),
       field: 'lastLoginTime',
     },
     {
-      label: generatedLabelIcon(`ant-design:message-outlined`, 'Description'),
+      label: generatedLabelIcon(`message`, 'Description'),
       field: 'description',
     },
   ];

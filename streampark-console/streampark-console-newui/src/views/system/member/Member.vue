@@ -18,9 +18,10 @@
 <template>
   <div>
     <BasicTable @register="registerTable" :formConfig="formConfig">
-      <template #toolbar>
+      <template #form-advanceBefore>
         <a-button type="primary" @click="handleCreate" v-auth="'member:add'">
-          {{ t('system.member.addMember') }}
+          <Icon icon="ant-design:plus-outlined" />
+          {{ t('common.add') }}
         </a-button>
       </template>
       <template #bodyCell="{ column, record }">
@@ -28,7 +29,7 @@
           <TableAction
             :actions="[
               {
-                icon: 'ant-design:edit-outlined',
+                icon: 'clarity:note-edit-line',
                 auth: 'member:update',
                 tooltip: t('system.member.modifyMember'),
                 onClick: handleEdit.bind(null, record),
@@ -52,21 +53,21 @@
       @register="registerDrawer"
       @success="handleSuccess"
       :roleOptions="roleListOptions"
+      okText="Submit"
     />
   </div>
 </template>
 <script lang="ts">
-  import { computed, defineComponent, onMounted, ref, unref } from 'vue';
-  import { useTabs } from '/@/hooks/web/useTabs';
-  import { useUserStoreWithOut } from '/@/store/modules/user';
-  import { RoleListItem } from '/@/api/base/model/systemModel';
-
   export default defineComponent({
     name: 'Member',
   });
 </script>
 
 <script setup lang="ts" name="member">
+  import { computed, defineComponent, onMounted, ref, unref } from 'vue';
+  import { useUserStoreWithOut } from '/@/store/modules/user';
+  import { RoleListItem } from '/@/api/base/model/systemModel';
+  import { useGo } from '/@/hooks/web/usePage';
   import { BasicTable, useTable, TableAction, FormProps } from '/@/components/Table';
   import MemberDrawer from './MemberDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
@@ -74,17 +75,19 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { getRoleListByPage } from '/@/api/base/system';
   import { fetchMemberDelete, fetchMemberList } from '/@/api/system/member';
+  import Icon from '/@/components/Icon';
 
   const roleListOptions = ref<Array<Partial<RoleListItem>>>([]);
 
   const [registerDrawer, { openDrawer }] = useDrawer();
   const { createMessage } = useMessage();
-  const { close } = useTabs();
+  const go = useGo();
   const { t } = useI18n();
   const userStore = useUserStoreWithOut();
   const formConfig = computed((): Partial<FormProps> => {
     return {
       labelWidth: 120,
+      colon: true,
       schemas: [
         {
           field: 'userName',
@@ -115,12 +118,6 @@
   const [registerTable, { reload }] = useTable({
     title: t('system.member.table.title'),
     api: fetchMemberList,
-    beforeFetch: (params) => {
-      if (params?.sortField) {
-        params.sortField = params.sortField.replace(/([a-z])([A-Z])/, '$1_$2').toLowerCase();
-      }
-      return params;
-    },
     columns: [
       { title: t('system.member.table.userName'), dataIndex: 'userName', sorter: true },
       { title: t('system.member.table.roleName'), dataIndex: 'roleName', sorter: true },
@@ -134,7 +131,7 @@
     showIndexColumn: false,
     canResize: false,
     actionColumn: {
-      width: 120,
+      width: 200,
       title: t('component.table.operation'),
       dataIndex: 'action',
     },
@@ -174,7 +171,7 @@
   onMounted(async () => {
     if (!userStore.getTeamId) {
       createMessage.warning('Please select Team first!!!');
-      close(undefined, { path: '/system/team' });
+      go('/system/team');
     } else {
       reload();
       const roleList = await getRoleListByPage({ page: 1, pageSize: 9999 });

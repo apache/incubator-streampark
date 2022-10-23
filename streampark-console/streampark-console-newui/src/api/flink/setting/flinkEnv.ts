@@ -17,7 +17,6 @@
 import { AxiosResponse } from 'axios';
 import { FlinkCreate, FlinkEnv } from './types/flinkEnv.type';
 import { Result } from '/#/axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
 
 enum FLINK_API {
@@ -42,101 +41,67 @@ export function fetchFlinkEnv() {
 /**
  * Set the default
  * @param {String} id
- * @returns Promise<Boolean>
+ * @returns {Promise<FlinkEnv[]>}
  */
-export function fetchDefaultSet(id: string) {
-  return defHttp.post<FlinkEnv[]>({
+export function fetchDefaultSet(id: string): Promise<FlinkEnv[]> {
+  return defHttp.post({
     url: FLINK_API.DEFAULT,
-    params: { id },
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data: { id },
   });
 }
 /**
  * Get flink details
  * @param {String} id
- * @returns Promise<Boolean>
+ * @returns {Promise<FlinkEnv>}
  */
-export function fetchFlinkInfo(id: string) {
-  return defHttp.post<FlinkEnv>({
+export function fetchFlinkInfo(id: string): Promise<FlinkEnv> {
+  return defHttp.post({
     url: FLINK_API.GET,
-    params: { id },
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data: { id },
   });
 }
 
 /**
  * Check if the environment exists
- * @param {String} id
- * @returns Promise<Boolean>
+ * @param {Recordable} data
+ * @returns {Promise<Boolean>}
  */
-export function fetchExistsEnv(params: {
+export function fetchExistsEnv(data: {
   id: string | null;
   flinkName: string;
   flinkHome: string;
-}) {
-  return defHttp.post<boolean>({
-    url: FLINK_API.EXISTS,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+}): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.post({ url: FLINK_API.EXISTS, data }, { isReturnNativeResponse: true });
 }
 /**
  * Create flink
- * @param {FlinkCreate} params
- * @returns Promise<Boolean>
+ * @param {FlinkCreate} data
+ * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchFlinkCreate(params: FlinkCreate) {
-  return defHttp.post<AxiosResponse<Result>>(
-    {
-      url: FLINK_API.CREATE,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
-  );
+export function fetchFlinkCreate(data: FlinkCreate): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: FLINK_API.CREATE, data }, { isReturnNativeResponse: true });
 }
 
 /**
  * update flink
  * @param {FlinkCreate} params
- * @returns Promise<Boolean>
+ * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchFlinkUpdate(params: FlinkCreate) {
+export function fetchFlinkUpdate(data: FlinkCreate): Promise<AxiosResponse<Result>> {
   return defHttp.post<AxiosResponse<Result>>(
-    {
-      url: FLINK_API.UPDATE,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
+    { url: FLINK_API.UPDATE, data },
+    { isReturnNativeResponse: true },
   );
 }
 
 /**
  * Configure synchronization
  * @param {String} id
- * @returns Promise<Boolean>
+ * @returns {Promise<Boolean>}
  */
-export function fetchFlinkSync(id: string) {
+export function fetchFlinkSync(id: string): Promise<boolean> {
   return defHttp.post<boolean>({
     url: FLINK_API.SYNC,
-    params: { id },
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data: { id },
   });
 }

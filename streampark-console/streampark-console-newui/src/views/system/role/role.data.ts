@@ -32,10 +32,12 @@ export const columns: BasicColumn[] = [
   {
     title: 'Create Time',
     dataIndex: 'createTime',
+    sorter: true,
   },
   {
     title: 'Modify Time',
     dataIndex: 'modifyTime',
+    sorter: true,
   },
 ];
 

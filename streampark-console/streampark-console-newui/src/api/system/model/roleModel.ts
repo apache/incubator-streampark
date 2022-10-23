@@ -14,14 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export enum ToolbarTypeEnum {
-  ZOOM_IN = 'zoomIn',
-  ZOOM_OUT = 'zoomOut',
-  RESET_ZOOM = 'resetZoom',
+export interface RoleParam {
+  roleId?: number;
+  roleName: string;
+  remark: string;
+  menuId: string[];
+}
 
-  UNDO = 'undo',
-  REDO = 'redo',
-
-  SNAPSHOT = 'snapshot',
-  VIEW_DATA = 'viewData',
+export interface RoleListRecord {
+  roleId: string;
+  roleName: string;
+  roleCode?: any;
+  remark: string;
+  createTime: string;
+  modifyTime: string;
+  sortField?: any;
+  sortOrder?: any;
+  createTimeFrom?: any;
+  createTimeTo?: any;
+  menuId?: any;
 }

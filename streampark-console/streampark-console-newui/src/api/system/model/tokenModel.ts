@@ -14,20 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type LogicFlow from '@logicflow/core';
-
-import { provide, inject } from 'vue';
-
-const key = Symbol('flow-chart');
-
-type Instance = {
-  logicFlow: LogicFlow;
-};
-
-export function createFlowChartContext(instance: Instance) {
-  provide(key, instance);
+// token list record
+export interface TokenListRecord {
+  id: string;
+  userId: string;
+  token: string;
+  status: number;
+  expireTime: string;
+  description: string;
+  createTime: string;
+  modifyTime: string;
+  username: string;
+  userStatus: string;
+  finalStatus: number;
 }
 
-export function useFlowChartContext(): Instance {
-  return inject(key) as Instance;
+export interface TokenCreateParam {
+  userId: number;
+  description: string;
+  expireTime: string;
+  teamId: string;
 }

@@ -16,24 +16,9 @@
  */
 import { AxiosResponse } from 'axios';
 import { defHttp } from '/@/utils/http/axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { Result } from '/#/axios';
-
-export interface AddMemberParams {
-  teamId: string;
-  userName: string;
-  roleId: number;
-}
-
-export interface TeamMemberResp {
-  id: string;
-  teamName: string;
-}
-
-export interface UpdateMemberParams extends AddMemberParams {
-  id: string;
-  userId: string;
-}
+import { BasicTableParams } from '../model/baseModel';
+import { VariableDeleteParam, VariableListRecord, VariableParam } from './model/variableModel';
 
 enum VARIABLE_API {
   LIST = '/variable/list',
@@ -48,58 +33,42 @@ enum VARIABLE_API {
  * @param params
  * @returns
  */
-export function fetchVariableList(params: Recordable) {
-  return defHttp.post({ url: VARIABLE_API.LIST, params });
+export function fetchVariableList(data: BasicTableParams): Promise<VariableListRecord[]> {
+  return defHttp.post({ url: VARIABLE_API.LIST, data });
 }
 
 /**
  * add member
- * @param {String} teamId organization id
- * @param {String} userName username
- * @param {Number} roleId role id
- * @returns Promise<boolean>
+ * @param {VariableParam} data
+ * @returns {Promise<boolean>}
  */
-export function fetchAddVariable(params: AddMemberParams) {
-  return defHttp.post<boolean>({
-    url: VARIABLE_API.POST,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchAddVariable(data: VariableParam): Promise<boolean> {
+  return defHttp.post({ url: VARIABLE_API.POST, data });
 }
-
-export function fetchUpdateVariable(params) {
-  return defHttp.put({
-    url: VARIABLE_API.UPDATE,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+/**
+ * update member
+ * @param {VariableParam} data
+ * @returns {Promise<boolean|undefined>}
+ */
+export function fetchUpdateVariable(data: VariableParam): Promise<boolean | undefined> {
+  return defHttp.put({ url: VARIABLE_API.UPDATE, data });
 }
 
 /**
  * delete
- * @param {String} id memeber Id
- * @returns Promise<boolean>
+ * @param {VariableDeleteParam} data
+ * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchVariableDelete(params: Recordable) {
-  return defHttp.delete<AxiosResponse<Result>>(
-    {
-      url: VARIABLE_API.DELETE,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    { isReturnNativeResponse: true },
-  );
+export function fetchVariableDelete(data: VariableDeleteParam): Promise<AxiosResponse<Result>> {
+  return defHttp.delete({ url: VARIABLE_API.DELETE, data }, { isReturnNativeResponse: true });
 }
-
-export function fetchCheckVariableCode(params: { variableCode: string }) {
-  return defHttp.post<AxiosResponse<Result>>(
-    { url: VARIABLE_API.CHECK_CODE, params },
-    { isReturnNativeResponse: true },
-  );
+/**
+ * Code check
+ * @param {Object} data
+ * @returns {Promise<AxiosResponse<Result>>}
+ */
+export function fetchCheckVariableCode(data: {
+  variableCode: string;
+}): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: VARIABLE_API.CHECK_CODE, data }, { isReturnNativeResponse: true });
 }

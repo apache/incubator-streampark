@@ -22,6 +22,7 @@ import { InfoCircleFilled, CheckCircleFilled, CloseCircleFilled } from '@ant-des
 import { NotificationArgsProps, ConfigProps } from 'ant-design-vue/lib/notification';
 import { useI18n } from './useI18n';
 import { isString } from '/@/utils/is';
+import Swal from 'sweetalert2';
 
 export interface NotifyApi {
   info(config: NotificationArgsProps): void;
@@ -118,6 +119,10 @@ function createWarningModal(options: ModalOptionsPartial) {
   return Modal.warning(createModalOptions(options, 'warning'));
 }
 
+function createErrorSwal(msg: string) {
+  return Swal.fire('Failed', msg, 'error');
+}
+
 notification.config({
   placement: 'topRight',
   duration: 3,
@@ -128,6 +133,8 @@ notification.config({
  */
 export function useMessage() {
   return {
+    Swal,
+    createErrorSwal,
     createMessage: Message,
     notification: notification as NotifyApi,
     createConfirm: createConfirm,

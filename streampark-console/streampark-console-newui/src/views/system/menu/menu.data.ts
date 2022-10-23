@@ -145,6 +145,7 @@ export const formSchema: FormSchema[] = [
     field: 'orderNum',
     label: 'sort',
     component: 'InputNumber',
+    componentProps: { class: '!w-full' },
     required: true,
     ifShow: ({ values }) => !isButton(values.type),
   },

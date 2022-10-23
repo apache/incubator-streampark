@@ -13,7 +13,8 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---><template>
+-->
+<template>
   <a-input
     disabled
     :style="{ width }"
@@ -192,7 +193,7 @@
     }
 
     &-popover {
-      width: 300px;
+      width: 350px;
 
       .ant-popover-inner-content {
         padding: 0;

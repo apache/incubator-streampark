@@ -122,7 +122,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       ],
       componentProps: {
         id: 'formUserName',
-        readonly: !isCreate,
+        disabled: !isCreate,
       },
     },
     {
@@ -130,15 +130,14 @@ export const formSchema = (formType: string): FormSchema[] => {
       label: 'Nick Name',
       component: 'Input',
       rules: [{ required: isCreate, message: 'nickName is required' }],
-      componentProps: {
-        readonly: !isCreate,
-      },
+      componentProps: { disabled: !isCreate },
     },
     {
       field: 'password',
       label: 'Password',
       component: 'InputPassword',
       componentProps: { placeholder: 'please enter password' },
+      helpMessage: 'Password length cannot be less than 8 characters',
       rules: [
         { required: true, message: 'password is required' },
         { min: 8, message: 'Password length cannot be less than 8 characters' },
@@ -156,7 +155,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       ],
       componentProps: {
         readonly: isView,
-        placeholder: 'input email',
+        placeholder: 'please enter email',
       },
     },
     {
@@ -201,6 +200,7 @@ export const formSchema = (formType: string): FormSchema[] => {
       field: 'description',
       label: 'Description',
       component: 'InputTextArea',
+      componentProps: { rows: 5, placeholder: 'Please enter description' },
       ifShow: isCreate,
     },
   ];

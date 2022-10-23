@@ -178,6 +178,13 @@ export interface FormSchema {
 
   suffix?: string | number | ((values: RenderCallbackParams) => string | number);
 
+  itemExtra?:
+    | string
+    | number
+    | VNode
+    | VNode[]
+    | ((values: RenderCallbackParams) => VNode | VNode[] | string | number);
+
   // Validation rules
   rules?: Rule[];
   // Check whether the information is added to the label

@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 import { defHttp } from '/@/utils/http/axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
+import { BasicTableParams } from '../model/baseModel';
+import { TokenCreateParam, TokenListRecord } from './model/tokenModel';
 
 enum Api {
   TokenList = '/token/list',
@@ -25,44 +26,39 @@ enum Api {
   CHECK = 'token/check',
   CURL = '/token/curl',
 }
-
-export function getTokenList(params?) {
-  return defHttp.post({
-    url: Api.TokenList,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+/**
+ * get token list
+ * @param {BasicTableParams} data
+ * @returns {Promise<TokenListRecord[]>}
+ */
+export function fetTokenList(data?: BasicTableParams) {
+  return defHttp.post<TokenListRecord[]>({ url: Api.TokenList, data });
+}
+/**
+ * add token
+ * @param {TokenCreateParam} data
+ * @returns {Promise<TokenListRecord>}
+ */
+export function fetchTokenCreate(data: TokenCreateParam) {
+  return defHttp.post<TokenListRecord>({ url: Api.AddToken, data });
 }
 
-export function setTokenStatus(data) {
-  return defHttp.post({
-    url: Api.ToggleTokenStatus,
-    data,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+/**
+ * change token status
+ * @param {String} tokenId
+ * @returns {Promise<boolean>}
+ */
+export function fetTokenStatusToggle(data: { tokenId: string }) {
+  return defHttp.post<boolean>({ url: Api.ToggleTokenStatus, data });
 }
 
-export function addToken(data) {
-  return defHttp.post({
-    url: Api.AddToken,
-    data,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
-}
-export function deleteToken(data) {
-  return defHttp.delete({
-    url: Api.DeleteToken,
-    data,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+/**
+ * delete token
+ * @param {string} tokenId
+ * @returns {Promise<boolean>}
+ */
+export function fetchTokenDelete(data?: { tokenId: string }) {
+  return defHttp.delete<boolean>({ url: Api.DeleteToken, data });
 }
 
 /**
@@ -71,25 +67,13 @@ export function deleteToken(data) {
  * @returns {Promise<number>}
  */
 export function fetchCheckToken(data) {
-  return defHttp.post<number>({
-    url: Api.CHECK,
-    data,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+  return defHttp.post<number>({ url: Api.CHECK, data });
 }
 /**
  * copyCurl
  * @param data
  * @returns {Promise<string>}
  */
-export function fetchCopyCurl(data) {
-  return defHttp.post<string>({
-    url: Api.CURL,
-    data,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchCopyCurl(data): Promise<string> {
+  return defHttp.post<string>({ url: Api.CURL, data });
 }

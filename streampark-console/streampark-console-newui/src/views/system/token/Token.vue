@@ -16,9 +16,12 @@
 -->
 <template>
   <div>
-    <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
-      <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> Add Token</a-button>
+    <BasicTable @register="registerTable">
+      <template #form-advanceBefore>
+        <a-button type="primary" @click="handleCreate" v-auth="'token:add'">
+          <Icon icon="ant-design:plus-outlined" />
+          {{ t('common.add') }}
+        </a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -27,11 +30,13 @@
               {
                 icon: 'ant-design:copy-outlined',
                 tooltip: 'Copy Token',
+                auth: 'token:view',
                 onClick: handleCopy.bind(null, record),
               },
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
+                auth: 'token:delete',
                 tooltip: 'Delete Token',
                 popConfirm: {
                   title: 'are you sure delete this token ?',
@@ -47,48 +52,37 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, nextTick, unref } from 'vue';
+  import { defineComponent, unref } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import TokenDrawer from './TokenDrawer.vue';
+  import TokenDrawer from './components/TokenDrawer.vue';
   import { useCopyToClipboard } from '/@/hooks/web/useCopyToClipboard';
   import { useDrawer } from '/@/components/Drawer';
-  import { deleteToken, getTokenList } from '/@/api/system/token';
+  import { fetchTokenDelete, fetTokenList } from '/@/api/system/token';
   import { columns, searchFormSchema } from './token.data';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
-    name: 'User',
-    components: { BasicTable, TokenDrawer, TableAction },
+    name: 'UserToken',
+    components: { BasicTable, TokenDrawer, TableAction, Icon },
     setup() {
+      const { t } = useI18n();
       const { createMessage } = useMessage();
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { clipboardRef, copiedRef } = useCopyToClipboard();
-      const [registerTable, { reload, expandAll, updateTableDataRecord }] = useTable({
-        title: '',
-        api: getTokenList,
+      const [registerTable, { reload, updateTableDataRecord }] = useTable({
+        api: fetTokenList,
         columns,
-        formConfig: {
-          labelWidth: 120,
-          schemas: searchFormSchema,
-          resetButtonOptions: {
-            text: 'reset',
-          },
-          submitButtonOptions: {
-            text: 'search',
-          },
-        },
-        isTreeTable: true,
-        pagination: true,
-        striped: false,
+        formConfig: { labelWidth: 120, colon: true, schemas: searchFormSchema },
         useSearchForm: true,
         showTableSetting: false,
-        bordered: true,
         rowKey: 'tokenId',
         showIndexColumn: false,
         canResize: false,
         actionColumn: {
-          width: 170,
+          width: 200,
           title: 'Operation',
           dataIndex: 'action',
         },
@@ -105,21 +99,15 @@
         unref(copiedRef) && createMessage.success('copy success！');
       }
 
-      function handleView(record: Recordable) {
-        console.log(record);
-      }
-
       async function handleDelete(record: Recordable) {
-        const res = await deleteToken({ tokenId: record.id });
+        const res = await fetchTokenDelete({ tokenId: record.id });
         if (res) {
           createMessage.success('delete token successfully');
           reload();
+        } else {
+          createMessage.success('delete token failed');
         }
       }
-
-      // function handleSuccess() {
-      //   reload();
-      // }
 
       function handleSuccess({ isUpdate, values }) {
         if (isUpdate) {
@@ -131,21 +119,14 @@
         }
       }
 
-      function onFetchSuccess(res) {
-        console.log(res);
-        // Demo expands all table items by default
-        nextTick(expandAll);
-      }
-
       return {
+        t,
         registerTable,
         registerDrawer,
         handleCreate,
         handleCopy,
         handleDelete,
         handleSuccess,
-        onFetchSuccess,
-        handleView,
       };
     },
   });

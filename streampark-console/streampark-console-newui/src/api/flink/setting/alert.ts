@@ -14,9 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AlertCreate, AlertSetting } from './types/alert.type';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
+import { AlertCreate, AlertSetting, AlertUpdateParam } from './types/alert.type';
+import { Result } from '/#/axios';
 import { defHttp } from '/@/utils/http/axios';
+import { AxiosResponse } from 'axios';
 
 enum ALERT_APi {
   ADD = '/flink/alert/add',
@@ -30,90 +31,57 @@ enum ALERT_APi {
 }
 /**
  * Get alert settings
- * @returns Promise<AlertSetting[]>
+ * @returns {Promise<AlertSetting[]>}
  */
-export function fetchAlertSetting() {
-  return defHttp.post<AlertSetting[]>({
-    url: ALERT_APi.LIST_WITHOUTPAGE,
-  });
+export function fetchAlertSetting(): Promise<AlertSetting[]> {
+  return defHttp.post({ url: ALERT_APi.LIST_WITHOUTPAGE });
 }
 /**
  * Test alert settings
- * @returns Promise<boolean>
+ * @returns {Promise<boolean>}
  */
-export function fetchSendAlert(params: { id: string }) {
-  return defHttp.post<boolean>(
-    {
-      url: ALERT_APi.SEND,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      errorMessageMode: 'none',
-    },
-  );
+export function fetchSendAlert(data: { id: string }): Promise<boolean> {
+  return defHttp.post<boolean>({ url: ALERT_APi.SEND, data }, { errorMessageMode: 'none' });
 }
 /**
  * Delete alert settings
- * @returns Promise<MavenSetting[]>
+ * @returns {Promise<boolean|undefined>}
  */
-export function fetchAlertDelete(params: { id: string }) {
-  return defHttp.delete<boolean>({
-    url: ALERT_APi.DELETE,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchAlertDelete(data: {
+  id: string;
+}): Promise<AxiosResponse<Result<boolean | undefined>>> {
+  return defHttp.delete({ url: ALERT_APi.DELETE, data }, { isReturnNativeResponse: true });
 }
 /**
  * Alarm name test
- * @returns Promise<boolean>
+ * @returns {Promise<boolean>}
  */
-export function fetchExistsAlert(params: { alertName: string; isJsonType?: boolean }) {
-  return defHttp.post<boolean>({
-    url: ALERT_APi.EXISTS,
-    params,
-  });
+export function fetchExistsAlert(data: { alertName: string }): Promise<boolean> {
+  return defHttp.postJson({ url: ALERT_APi.EXISTS, data });
 }
 
 /**
  * Add alert settings
- * @param {AlertCreate} params
- * @returns Promise<boolean>
+ * @param {AlertCreate} data
+ * @returns {Promise<AxiosResponse<Result<boolean>>>}
  */
-export function fetchAlertAdd(params: AlertCreate) {
-  return defHttp.post<boolean>({
-    url: ALERT_APi.ADD,
-    params,
-  });
+export function fetchAlertAdd(data: AlertCreate): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.postJson({ url: ALERT_APi.ADD, data }, { isReturnNativeResponse: true });
 }
 /**
  * Update alert settings
  * @param {AlertCreate} params
- * @returns Promise<boolean>
+ * @returns {Promise<boolean>}
  */
-export function fetchAlertUpdate(params: AlertCreate) {
-  return defHttp.post<boolean>({
-    url: ALERT_APi.UPDATE,
-    params,
-  });
+export function fetchAlertUpdate(data: AlertCreate): Promise<AxiosResponse<Result<boolean>>> {
+  return defHttp.postJson({ url: ALERT_APi.UPDATE, data }, { isReturnNativeResponse: true });
 }
 
 /**
  * Update system settings
- * @param {String} settingKey key
- * @param {Boolean} settingValue value
- * @returns Promise<boolean>
+ * @param {AlertUpdateParam} data key
+ * @returns {Promise<boolean>}
  */
-export function fetchSystemSettingUpdate(params: { settingKey: string; settingValue: boolean }) {
-  return defHttp.post<boolean>({
-    url: ALERT_APi.UPDATE,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchSystemSettingUpdate(data: AlertUpdateParam): Promise<boolean> {
+  return defHttp.post({ url: ALERT_APi.UPDATE, data });
 }

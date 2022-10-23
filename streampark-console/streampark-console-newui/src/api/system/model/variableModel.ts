@@ -14,7 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { withInstall } from '/@/utils/index';
-import tinymce from './src/Editor.vue';
+export interface VariableListRecord {
+  id: string;
+  variableCode: string;
+  variableValue: string;
+  description: string;
+  creatorId: string;
+  creatorName: string;
+  teamId: string;
+  createTime: string;
+  modifyTime: string;
+  sortField?: string;
+  sortOrder?: string;
+}
 
-export const Tinymce = withInstall(tinymce);
+export interface VariableParam {
+  id?: string;
+  variableCode: string;
+  variableValue: string;
+  description: string;
+}
+
+export interface VariableDeleteParam {
+  id: string;
+  variableCode: string;
+  variableValue: string;
+  teamId: string;
+}

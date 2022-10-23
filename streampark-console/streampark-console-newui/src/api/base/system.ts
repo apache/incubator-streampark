@@ -18,7 +18,6 @@ import {
   AccountParams,
   DeptListItem,
   MenuParams,
-  UserParams,
   RoleParams,
   RolePageParams,
   DeptListGetResultModel,
@@ -62,15 +61,13 @@ export const getRoleMenu = (params?: MenuParams) =>
     url: Api.RoleMenu,
     params,
   });
-
+/**
+ * get role list
+ * @param {RolePageParams} params
+ * @returns {Promise<RolePageListGetResultModel>}
+ */
 export const getRoleListByPage = (params?: RolePageParams) =>
-  defHttp.post<RolePageListGetResultModel>({
-    url: Api.RolePageList,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+  defHttp.post<RolePageListGetResultModel>({ url: Api.RolePageList, params });
 
 export const getAllRoleList = (params?: RoleParams) =>
   defHttp.get<RoleListGetResultModel>({ url: Api.GetAllRoleList, params });
@@ -80,5 +77,3 @@ export const setRoleStatus = (id: number, status: string) =>
 
 export const isAccountExist = (account: string) =>
   defHttp.post({ url: Api.IsAccountExist, params: { account } }, { errorMessageMode: 'none' });
-
-export const getUserList = (params?: UserParams) => defHttp.post({ url: Api.userList, params });

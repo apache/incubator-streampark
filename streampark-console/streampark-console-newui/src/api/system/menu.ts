@@ -16,7 +16,6 @@
  */
 import { defHttp } from '/@/utils/http/axios';
 import { getMenuListResultModel } from './model/menuModel';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 
 enum Api {
   MenuRouter = '/menu/router',
@@ -28,22 +27,10 @@ export const getMenuRouter = () => {
   return defHttp.post<getMenuListResultModel>({ url: Api.MenuRouter });
 };
 
-export function editMenu(params?) {
-  return defHttp.put({
-    url: Api.UpdateMenu,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function editMenu(data?): Promise<boolean | undefined> {
+  return defHttp.put({ url: Api.UpdateMenu, data });
 }
 
-export function addMenu(params?) {
-  return defHttp.post({
-    url: Api.AddMenu,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function addMenu(data?) {
+  return defHttp.post({ url: Api.AddMenu, data });
 }

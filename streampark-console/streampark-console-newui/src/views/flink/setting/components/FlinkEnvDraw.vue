@@ -34,7 +34,7 @@
   const flinkInfo = reactive<Recordable>({});
   const conf = ref();
   const syncLoading = ref(false);
-  const { createMessage } = useMessage();
+  const { Swal } = useMessage();
   const [registerDrawer] = useDrawerInner((data: FlinkEnv) => {
     Object.assign(flinkInfo, data);
     setContent(flinkInfo.flinkConf);
@@ -79,7 +79,12 @@
       const flinkResult = await fetchFlinkInfo(flinkInfo.id);
       Object.assign(flinkInfo, flinkResult);
       setContent(flinkInfo.flinkConf);
-      createMessage.success(flinkResult.flinkName.concat(' conf sync successful!'));
+      Swal.fire({
+        icon: 'success',
+        title: flinkResult.flinkName.concat(' conf sync successful!'),
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } catch (error) {
       console.error(error);
     } finally {

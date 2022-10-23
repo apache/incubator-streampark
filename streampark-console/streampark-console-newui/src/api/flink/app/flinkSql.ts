@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import { AxiosResponse } from 'axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
 
 enum FLINK_SQL_API {
@@ -24,37 +23,20 @@ enum FLINK_SQL_API {
   HISTORY = '/flink/sql/history',
 }
 
-export function fetchFlinkSqlVerify(params) {
-  return defHttp.post<AxiosResponse<any>>(
-    {
-      url: FLINK_SQL_API.VERIFY,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
-  );
+export function fetchFlinkSqlVerify(data): Promise<AxiosResponse<any>> {
+  return defHttp.post({ url: FLINK_SQL_API.VERIFY, data }, { isReturnNativeResponse: true });
 }
 
-export function fetchFlinkSql(params) {
+export function fetchFlinkSql(data) {
   return defHttp.post({
     url: FLINK_SQL_API.GET,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function fetchFlinkHistory(params) {
+export function fetchFlinkHistory(data) {
   return defHttp.post({
     url: FLINK_SQL_API.HISTORY,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }

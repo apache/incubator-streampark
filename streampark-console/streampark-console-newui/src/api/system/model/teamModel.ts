@@ -14,24 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import CodeMirror from 'codemirror';
-import './codemirror.css';
-import 'codemirror/theme/idea.css';
-import 'codemirror/theme/material-palenight.css';
-// import 'codemirror/addon/lint/lint.css';
+export interface TeamListRecord {
+  id: string;
+  teamName: string;
+  description: string;
+  createTime: string;
+  modifyTime: string;
+  sortField?: any;
+  sortOrder?: any;
+  createTimeFrom?: any;
+  createTimeTo?: any;
+}
 
-// modes
-import 'codemirror/mode/javascript/javascript';
-import 'codemirror/mode/css/css';
-import 'codemirror/mode/htmlmixed/htmlmixed';
-// addons
-// import 'codemirror/addon/edit/closebrackets';
-// import 'codemirror/addon/edit/closetag';
-// import 'codemirror/addon/comment/comment';
-// import 'codemirror/addon/fold/foldcode';
-// import 'codemirror/addon/fold/foldgutter';
-// import 'codemirror/addon/fold/brace-fold';
-// import 'codemirror/addon/fold/indent-fold';
-// import 'codemirror/addon/lint/json-lint';
-// import 'codemirror/addon/fold/comment-fold';
-export { CodeMirror };
+export interface TeamParam {
+  id?: string;
+  teamName: string;
+  description: string;
+}

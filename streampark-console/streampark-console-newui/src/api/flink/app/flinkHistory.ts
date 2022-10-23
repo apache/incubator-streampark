@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
 
 enum HISTORY_API {
@@ -29,72 +28,36 @@ enum HISTORY_API {
 
 /**
  * get k8s
- * @returns Promise<any>
+ * @returns {Promise<string[]>}
  */
-export function fetchK8sNamespaces() {
-  return defHttp.post<string[]>({
-    url: HISTORY_API.K8S_NAMESPACES,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchK8sNamespaces(): Promise<string[]> {
+  return defHttp.post({ url: HISTORY_API.K8S_NAMESPACES });
 }
 
 /**
  * upload jar
- * @returns Promise<DashboardResponse>
+ * @returns {Promise<string[]>}
  */
-export function fetchUploadJars() {
-  return defHttp.post<string[]>({
-    url: HISTORY_API.UPLOAD_JARS,
-  });
+export function fetchUploadJars(): Promise<string[]> {
+  return defHttp.post({ url: HISTORY_API.UPLOAD_JARS });
 }
 
-export function fetchSessionClusterIds(params) {
-  return defHttp.post({
-    url: HISTORY_API.SESSION_CLUSTER_IDS,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchSessionClusterIds(data) {
+  return defHttp.post({ url: HISTORY_API.SESSION_CLUSTER_IDS, data });
 }
 
 export function fetchFlinkBaseImages() {
-  return defHttp.post({
-    url: HISTORY_API.FLINK_BASE_IMAGES,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+  return defHttp.post({ url: HISTORY_API.FLINK_BASE_IMAGES });
 }
 
-export function fetchFlinkPodTemplates(params) {
-  return defHttp.post<string[]>({
-    url: HISTORY_API.FLINK_POD_TEMPLATES,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchFlinkPodTemplates(data: Recordable): Promise<string[]> {
+  return defHttp.post({ url: HISTORY_API.FLINK_POD_TEMPLATES, data });
 }
 
-export function fetchFlinkJmPodTemplates(params) {
-  return defHttp.post<string[]>({
-    url: HISTORY_API.FLINK_JM_POD_TEMPLATES,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchFlinkJmPodTemplates(data: Recordable): Promise<string[]> {
+  return defHttp.post({ url: HISTORY_API.FLINK_JM_POD_TEMPLATES, data });
 }
 
-export function fetchFlinkTmPodTemplates(params) {
-  return defHttp.post<string[]>({
-    url: HISTORY_API.FLINK_TM_POD_TEMPLATES,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchFlinkTmPodTemplates(data: Recordable): Promise<string[]> {
+  return defHttp.post({ url: HISTORY_API.FLINK_TM_POD_TEMPLATES, data });
 }

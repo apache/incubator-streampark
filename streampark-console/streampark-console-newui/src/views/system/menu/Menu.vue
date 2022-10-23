@@ -17,14 +17,18 @@
 <template>
   <div>
     <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
-      <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> Add Menu </a-button>
+      <template #form-advanceBefore>
+        <a-button type="primary" @click="handleCreate" v-auth="'menu:add'">
+          <Icon icon="ant-design:plus-outlined" />
+          {{ t('common.add') }}
+        </a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
           <TableAction
             :actions="[
               {
+                auth: 'menu:update',
                 icon: 'clarity:note-edit-line',
                 onClick: handleEdit.bind(null, record),
               },
@@ -33,7 +37,7 @@
         </template>
       </template>
     </BasicTable>
-    <MenuDrawer @register="registerDrawer" @success="handleSuccess" />
+    <MenuDrawer okText="Submit" @register="registerDrawer" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
@@ -47,20 +51,25 @@
 
   import { columns, searchFormSchema } from './menu.data';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
     name: 'MenuManagement',
-    components: { BasicTable, MenuDrawer, TableAction },
+    components: { BasicTable, MenuDrawer, TableAction, Icon },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { createMessage } = useMessage();
+      const { t } = useI18n();
       const [registerTable, { reload, expandAll }] = useTable({
         title: '',
         api: getMenuList,
         columns,
         formConfig: {
           labelWidth: 120,
+          colon: true,
           schemas: searchFormSchema,
+          fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
         fetchSetting: {
           listField: 'rows.children',
@@ -102,6 +111,7 @@
       }
 
       return {
+        t,
         registerTable,
         registerDrawer,
         handleCreate,

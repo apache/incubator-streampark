@@ -97,7 +97,7 @@
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
   const { t } = useI18n();
-  const { notification, createErrorModal, createMessage } = useMessage();
+  const { createErrorModal, createMessage } = useMessage();
   const { prefixCls } = useDesign('login');
   const userStore = useUserStore();
   const { setLoginState, getLoginState } = useLoginState();
@@ -110,8 +110,8 @@
   const rememberMe = ref(false);
 
   const formData = reactive({
-    account: 'admin',
-    password: 'streampark',
+    account: '',
+    password: '',
   });
 
   const { validForm } = useFormValid(formRef);
@@ -166,11 +166,7 @@
 
         const loginSuccess = await userStore.afterLoginAction(true);
         if (loginSuccess) {
-          notification.success({
-            message: t('sys.login.loginSuccessTitle'),
-            description: successText,
-            duration: 3,
-          });
+          createMessage.success(`${t('sys.login.loginSuccessTitle')} ${successText}`);
         }
       } catch (error: any) {
         createMessage.error(error.response?.data?.data?.message || 'login failed');

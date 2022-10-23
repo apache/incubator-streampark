@@ -90,7 +90,7 @@
       title: t('component.table.operation'),
       dataIndex: 'operation',
       key: 'operation',
-      width: 150,
+      width: 200,
     },
   };
 

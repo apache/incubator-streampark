@@ -14,8 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import getters from './getters';
+export interface MemberListRecord {
+  id: string;
+  teamId: string;
+  userId: string;
+  roleId: string;
+  createTime: string;
+  modifyTime: string;
+  userName: string;
+  roleName: string;
+  sortField?: string;
+  sortOrder?: string;
+  createTimeFrom?: string;
+  createTimeTo?: string;
+}
+export interface AddMemberParams {
+  teamId: string;
+  userName: string;
+  roleId: number;
+}
 
-export default {
-  getters,
-};
+export interface TeamMemberResp {
+  id: string;
+  teamName: string;
+}
+
+export interface UpdateMemberParams extends AddMemberParams {
+  id: string;
+  userId: string;
+}
