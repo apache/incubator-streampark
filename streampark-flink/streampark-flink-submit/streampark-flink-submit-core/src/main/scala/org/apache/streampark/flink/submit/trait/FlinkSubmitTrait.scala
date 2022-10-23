@@ -104,6 +104,9 @@ trait FlinkSubmitTrait extends Logger {
     val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
     flinkConfig.set(retainedOption, flinkDefaultConfiguration.get(retainedOption))
 
+    //set savepoint.ignore-unclaimed-state parameter
+    flinkConfig.setBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, submitRequest.allowNonRestoredState)
+
     setConfig(submitRequest, flinkConfig)
 
     doSubmit(submitRequest, flinkConfig)
@@ -159,7 +162,6 @@ trait FlinkSubmitTrait extends Logger {
   private[submit] def getJobGraph(flinkConfig: Configuration, submitRequest: SubmitRequest, jarFile: File): (PackagedProgram, JobGraph) = {
     val packageProgram = PackagedProgram
       .newBuilder
-      .setSavepointRestoreSettings(submitRequest.savepointRestoreSettings)
       .setJarFile(jarFile)
       .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
       .setArguments(
