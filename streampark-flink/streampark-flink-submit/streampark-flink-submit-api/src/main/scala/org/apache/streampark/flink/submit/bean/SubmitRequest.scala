@@ -25,7 +25,7 @@ import org.apache.streampark.common.enums._
 import org.apache.streampark.common.util.{DeflaterUtils, FlinkUtils, HdfsUtils, PropertiesUtils}
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
 import org.apache.commons.io.FileUtils
-import org.apache.flink.runtime.jobgraph.{SavepointConfigOptions, SavepointRestoreSettings}
+import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
 import java.io.File
 import java.util.{Map => JavaMap}
