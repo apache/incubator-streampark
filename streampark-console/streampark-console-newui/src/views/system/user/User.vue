@@ -63,33 +63,43 @@
       </template>
     </BasicTable>
     <UserDrawer @register="registerDrawer" @success="handleSuccess" />
+    <UserModal @register="registerModal" />
   </div>
 </template>
 <script lang="ts">
   import { computed, defineComponent } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import UserDrawer from './UserDrawer.vue';
+  import UserDrawer from './components/UserDrawer.vue';
+  import UserModal from './components/UserModal.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { deleteUser, getUserList, resetPassword } from '/@/api/sys/user';
+  import { deleteUser, getUserList, resetPassword } from '/@/api/system/user';
   import { columns, searchFormSchema } from './user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useUserStoreWithOut } from '/@/store/modules/user';
+  import { useModal } from '/@/components/Modal';
 
   export default defineComponent({
     name: 'User',
-    components: { BasicTable, UserDrawer, TableAction },
+    components: { BasicTable, UserModal, UserDrawer, TableAction },
     setup() {
       const userStore = useUserStoreWithOut();
       const userName = computed(() => {
         return userStore.getUserInfo?.username;
       });
       const [registerDrawer, { openDrawer }] = useDrawer();
+      const [registerModal, { openModal }] = useModal();
       const { createMessage, createSuccessModal } = useMessage();
       const [registerTable, { reload }] = useTable({
         title: '',
         api: getUserList,
+        beforeFetch: (params) => {
+          if (params.sortField === 'createTime') {
+            params.sortField = 'create_time';
+          }
+          return params;
+        },
         columns,
         formConfig: {
           labelWidth: 120,
@@ -124,10 +134,7 @@
 
       // see detail
       function handleView(record: Recordable) {
-        openDrawer(true, {
-          record,
-          formType: FormTypeEnum.View,
-        });
+        openModal(true, record);
       }
 
       // delete current user
@@ -157,6 +164,7 @@
         userName,
         registerTable,
         registerDrawer,
+        registerModal,
         handleCreate,
         handleEdit,
         handleDelete,

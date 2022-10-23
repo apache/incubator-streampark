@@ -28,6 +28,7 @@
   import { PageWrapper } from '/@/components/Page';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { getUserTeamId } from '/@/utils';
   const { getLoading, close, registerForm, submit, handleSubmit } = useProject();
 
   const { createMessage } = useMessage();
@@ -37,6 +38,7 @@
   async function handleCreateAction(values: Recordable) {
     try {
       const res = await createProject({
+        teamId: getUserTeamId(),
         name: values.name,
         url: values.url,
         repository: values.repository,

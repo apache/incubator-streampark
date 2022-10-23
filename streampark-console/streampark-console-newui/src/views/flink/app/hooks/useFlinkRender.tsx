@@ -190,7 +190,7 @@ export const renderInputGroup = (model: Recordable) => {
     </div>
   );
 };
-/* 获取totalOptions 的选择项 */
+/*Gets the selection of totalOptions */
 function getTotalOptions() {
   return [
     {
@@ -264,12 +264,12 @@ export const renderOptionsItems = (model: Recordable, field: string, reg: string
 };
 
 /* render memory option */
-export const renderDynamicOption = ({ model, field }: RenderCallbackParams) => {
+export const renderProperties = ({ model, field }: RenderCallbackParams) => {
   return (
     <div>
       <Input.TextArea
         rows={8}
-        name="dynamicOptions"
+        name="properties"
         placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
         value={model[field]}
         onInput={(e) => (model[field] = e.target.value)}

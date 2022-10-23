@@ -32,6 +32,8 @@ public interface MemberService extends IService<Member> {
 
     void deleteByUserIds(String[] userIds);
 
+    void deleteByTeamId(Long teamId);
+
     IPage<Member> findUsers(Member member, RestRequest request);
 
     List<Team> findUserTeams(Long userId);

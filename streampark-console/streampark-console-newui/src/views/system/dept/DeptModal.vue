@@ -25,7 +25,7 @@
   import { BasicForm, useForm } from '/@/components/Form';
   import { formSchema } from './dept.data';
 
-  import { getDeptList } from '/@/api/demo/system';
+  import { getDeptList } from '/@/api/base/system';
   export default defineComponent({
     name: 'DeptModal',
     components: { BasicModal, BasicForm },

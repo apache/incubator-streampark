@@ -19,6 +19,14 @@ package org.apache.streampark.common.conf
 import java.time.LocalDateTime
 
 object ConfigConst {
+
+  /**
+   * common const
+   *
+   */
+
+  val DEFAULT_DATAMASK_STRING = "********"
+
   /**
    *
    * about parameter...
@@ -37,8 +45,6 @@ object ConfigConst {
   val KEY_PASSWORD = "password"
 
   val KEY_TIMEOUT = "timeout"
-
-  val KEY_JOB_ID = "jobId"
 
   val KEY_SEMANTIC = "semantic"
 

@@ -199,6 +199,11 @@
       img {
         width: @logo-width;
         height: @logo-width;
+
+        &.logo-text {
+          width: 180px;
+          height: auto !important;
+        }
       }
     }
 

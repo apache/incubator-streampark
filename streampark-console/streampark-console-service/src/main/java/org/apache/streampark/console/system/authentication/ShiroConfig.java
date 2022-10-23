@@ -28,9 +28,6 @@ import javax.servlet.Filter;
 
 import java.util.LinkedHashMap;
 
-/**
- * Shiro Config
- */
 @Configuration
 public class ShiroConfig {
 
@@ -45,13 +42,12 @@ public class ShiroConfig {
 
         LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         filterChainDefinitionMap.put("/doc.html", "anon");
-        filterChainDefinitionMap.put("/swagger-ui.html", "anon");
+        filterChainDefinitionMap.put("/swagger-ui/**", "anon");
         filterChainDefinitionMap.put("/swagger-resources", "anon");
         filterChainDefinitionMap.put("/swagger-resources/configuration/security", "anon");
         filterChainDefinitionMap.put("/swagger-resources/configuration/ui", "anon");
-        filterChainDefinitionMap.put("/v2/api-docs", "anon");
+        filterChainDefinitionMap.put("/v3/api-docs", "anon");
         filterChainDefinitionMap.put("/webjars/**", "anon");
-
         filterChainDefinitionMap.put("/**", "jwt");
 
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);

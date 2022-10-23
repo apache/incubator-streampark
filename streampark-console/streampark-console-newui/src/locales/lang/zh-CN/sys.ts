@@ -81,8 +81,8 @@ export default {
     signUpFormTitle: '注册',
     forgetFormTitle: '重置密码',
 
-    signInTitle: '开箱即用的中后台管理系统',
-    signInDesc: '输入您的个人详细信息开始使用！',
+    signInTitle: '流处理极速开发框架',
+    signInDesc: '流批一体 & 湖仓一体的云原生平台, 一站式流处理计算平台!',
     policy: '我同意xxx隐私政策',
     scanSign: `扫码后点击"确认"，即可完成登录`,
 

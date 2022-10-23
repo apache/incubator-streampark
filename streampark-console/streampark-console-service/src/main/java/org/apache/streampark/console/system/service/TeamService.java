@@ -33,7 +33,7 @@ public interface TeamService extends IService<Team> {
 
     void createTeam(Team team);
 
-    void deleteTeam(Team team);
+    void deleteTeam(Long teamId);
 
     void updateTeam(Team team);
 

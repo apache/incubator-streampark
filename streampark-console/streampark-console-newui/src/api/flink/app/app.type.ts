@@ -37,7 +37,7 @@ interface Task {
   failed: number;
   reconciling: number;
 }
-// 列表数据
+// The list of data
 export interface AppListResponse {
   total: string;
   records: AppListRecord[];
@@ -69,7 +69,7 @@ export interface AppListRecord {
   hotParams?: string;
   resolveOrder: number;
   executionMode: number;
-  dynamicOptions?: string;
+  properties?: string;
   appType: number;
   flameGraph: boolean;
   tracking: number;

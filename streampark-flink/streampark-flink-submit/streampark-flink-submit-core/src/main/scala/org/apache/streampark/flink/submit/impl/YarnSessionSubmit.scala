@@ -175,14 +175,14 @@ object YarnSessionSubmit extends YarnSubmitTrait {
          |    clusterId        : ${deployRequest.clusterId}
          |    resolveOrder     : ${deployRequest.resolveOrder.getName}
          |    flameGraph       : ${deployRequest.flameGraph != null}
-         |    dynamicOption    : ${deployRequest.dynamicOption.mkString(" ")}
+         |    properties       : ${deployRequest.properties.mkString(" ")}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
     var clusterDescriptor: YarnClusterDescriptor = null
     var client: ClusterClient[ApplicationId] = null
     try {
       val flinkConfig = extractConfiguration(deployRequest.flinkVersion.flinkHome,
-        deployRequest.dynamicOption,
+        deployRequest.properties,
         deployRequest.extraParameter,
         deployRequest.resolveOrder)
       setConfig(deployRequest, flinkConfig)

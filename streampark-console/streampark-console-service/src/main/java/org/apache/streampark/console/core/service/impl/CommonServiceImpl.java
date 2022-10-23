@@ -46,8 +46,8 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public User getCurrentUser() {
         String token = (String) SecurityUtils.getSubject().getPrincipal();
-        String username = JWTUtil.getUsername(token);
-        return userService.findByName(username);
+        Long userId = JWTUtil.getUserId(token);
+        return userService.getById(userId);
     }
 
     @Override

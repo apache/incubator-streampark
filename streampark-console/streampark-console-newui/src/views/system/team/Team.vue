@@ -57,7 +57,7 @@
   import TeamDrawer from './TeamDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
   import { columns, searchFormSchema } from './team.data';
-  import { getTeamList, deleteTeam } from '/@/api/sys/team';
+  import { getTeamList, deleteTeam } from '/@/api/system/team';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   export default defineComponent({
@@ -108,7 +108,7 @@
         });
       }
 
-      /* 删除组织 */
+      /* Delete the organization */
       async function handleDelete(record: Recordable) {
         const { data } = await deleteTeam({ id: record.id });
         if (data.status === 'success') {

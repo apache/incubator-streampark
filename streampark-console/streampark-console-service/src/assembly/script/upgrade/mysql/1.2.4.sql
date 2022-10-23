@@ -58,25 +58,26 @@ set email_params = concat('{"contacts":"', email_params, '"}'),
     we_com_params='{}',
     lark_params='{}'
 where alert_type = 1;
--- remove the original alert_email field
-alter table t_flink_app drop column alert_email;
 
-alter table `t_flink_app` add column `option_time` datetime default null after `create_time`;
-alter table t_setting modify column `value` text ;
-insert into `t_setting` values (14, 'docker.register.namespace', null, 'Docker Register Image namespace', 'Docker命名空间', 1);
-alter table `t_flink_app` add column `ingress_template` text collate utf8mb4_general_ci comment 'ingress模版文件';
-alter table `t_flink_app` add column `default_mode_ingress` text collate utf8mb4_general_ci comment '配置ingress的域名';
-alter table `t_flink_app` add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`;
--- add tags field
-alter table `t_flink_app` add column `tags` varchar(500) default null;
--- add job_manager_url field
-alter table `t_flink_app` add column `job_manager_url` varchar(255) default null after `job_id`;
--- add job_manager_url field
+-- t_flink_app
+alter table `t_flink_app`
+    drop column alert_email,
+    change column dynamic_option properties text comment 'allows specifying multiple generic configuration options',
+    add column `job_manager_url` varchar(255) default null after `job_id`,
+    add column `option_time` datetime default null after `create_time`,
+    add column `ingress_template` text collate utf8mb4_general_ci comment 'ingress模版文件',
+    add column `default_mode_ingress` text collate utf8mb4_general_ci comment '配置ingress的域名',
+    add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`,
+    add column `tags` varchar(500) default null;
+
 alter table `t_flink_log` add column `job_manager_url` varchar(255) default null after `yarn_app_id`;
 
+-- t_flink_project
 alter table `t_flink_project`
-change column `date` `create_time` datetime default current_timestamp not null,
-add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`;
+    change column `date` `create_time` datetime default current_timestamp not null,
+    add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
+    add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`,
+    add index `inx_team` (`team_id`) using btree;
 
 
 -- change `update_time` to `modify_time`
@@ -127,6 +128,13 @@ insert into `t_menu` values (100050, 100048, 'update', null, null, 'member:updat
 insert into `t_menu` values (100051, 100048, 'delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100052, 100048, 'role view', null, null, 'role:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (100053, 100001, 'types', null, null, 'user:types', null, '1', 1, null, now(), now());
+insert into `t_menu` VALUES (100054, 100013, 'Variable', '/system/variable', 'system/variable/View', 'variable:view', 'code', '0', 1, 3, now(), now());
+insert into `t_menu` VALUES (100055, 100054, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` VALUES (100056, 100054, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` VALUES (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
+
+update `t_menu` set order_num=4 where menu_id=100019;
+update `t_menu` set order_num=5 where menu_id=100034;
 
 -- Add team related sql
 create table `t_team` (
@@ -145,9 +153,6 @@ alter table `t_flink_app`
 add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
 add index `inx_team` (`team_id`) using btree;
 
-alter table `t_flink_project`
-add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
-add index `inx_team` (`team_id`) using btree;
 
 -- Update user
 alter table `t_user`
@@ -162,15 +167,50 @@ delete from t_role_menu where role_id = 100000;
 delete from t_role where role_id = 100000;
 delete from `t_user_role` where role_id = 100000;
 
+-- Add team admin
+insert into `t_role` values (100002, 'team admin', 'Team Admin has all permissions inside the team.', now(), now(), null);
+
+insert into `t_role_menu` values (100060, 100002, 100014);
+insert into `t_role_menu` values (100061, 100002, 100016);
+insert into `t_role_menu` values (100062, 100002, 100017);
+insert into `t_role_menu` values (100063, 100002, 100018);
+insert into `t_role_menu` values (100064, 100002, 100019);
+insert into `t_role_menu` values (100065, 100002, 100020);
+insert into `t_role_menu` values (100066, 100002, 100021);
+insert into `t_role_menu` values (100067, 100002, 100022);
+insert into `t_role_menu` values (100068, 100002, 100025);
+insert into `t_role_menu` values (100069, 100002, 100026);
+insert into `t_role_menu` values (100070, 100002, 100027);
+insert into `t_role_menu` values (100071, 100002, 100028);
+insert into `t_role_menu` values (100072, 100002, 100029);
+insert into `t_role_menu` values (100073, 100002, 100030);
+insert into `t_role_menu` values (100074, 100002, 100031);
+insert into `t_role_menu` values (100075, 100002, 100032);
+insert into `t_role_menu` values (100076, 100002, 100033);
+insert into `t_role_menu` values (100077, 100002, 100013);
+insert into `t_role_menu` values (100079, 100002, 100015);
+insert into `t_role_menu` values (100080, 100002, 100000);
+insert into `t_role_menu` values (100081, 100002, 100037);
+insert into `t_role_menu` values (100082, 100002, 100048);
+insert into `t_role_menu` values (100083, 100002, 100049);
+insert into `t_role_menu` values (100084, 100002, 100050);
+insert into `t_role_menu` values (100085, 100002, 100051);
+insert into `t_role_menu` values (100086, 100002, 100052);
+insert into `t_role_menu` values (100087, 100002, 100053);
+insert into `t_role_menu` values (100088, 100002, 100054);
+insert into `t_role_menu` values (100089, 100002, 100055);
+insert into `t_role_menu` values (100090, 100002, 100056);
+insert into `t_role_menu` values (100091, 100002, 100057);
+
 -- alter t_role_user to t_member and update the schema
 alter table `t_user_role` rename `t_member`;
 
 alter table `t_member`
 add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
-modify   `user_id` bigint not null comment 'user id',
-modify   `role_id` bigint not null comment 'role id',
-add column   `create_time` datetime not null default current_timestamp comment 'create time',
-add column   `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+modify column `user_id` bigint not null comment 'user id',
+modify column `role_id` bigint not null comment 'role id',
+add column  `create_time` datetime not null default current_timestamp comment 'create time',
+add column  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
 drop index `UN_INX`,
 add unique key `un_user_team_role_inx` (`user_id`,`team_id`,`role_id`) using btree;
 
@@ -183,6 +223,7 @@ where `menu_id` = 100021;
 
 update `t_menu` set `menu_name` = 'StreamPark' where `menu_id` = 100013;
 
+-- t_setting
 alter table `t_setting` drop primary key;
 alter table `t_setting`
 change column `NUM` `order_num` int default null,
@@ -192,14 +233,29 @@ change column `TITLE` `setting_name` varchar(255) collate utf8mb4_general_ci def
 change column `DESCRIPTION` `description` varchar(255) collate utf8mb4_general_ci default null,
 change column `TYPE` `type` tinyint not null comment '1: input 2: boolean 3: number',
 add primary key (`setting_key`);
-
+insert into `t_setting` values (14, 'docker.register.namespace', null, 'Docker Register Image namespace', 'Docker命名空间', 1);
 insert into `t_setting` values (15, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml 完整路径', 1);
 
--- update the index field for t_user;
-alter table `t_user` drop index `un_username`;
+
+-- t_user
 alter table `t_user`
-modify `username` varchar(255) collate utf8mb4_general_ci not null comment 'user name',
-add unique key `un_username` (`username`) using btree;
+    drop index `un_username`,
+    modify column `username` varchar(255) collate utf8mb4_general_ci not null comment 'user name',
+    add unique key `un_username` (`username`) using btree;
+
+drop table if exists `t_variable`;
+create table `t_variable` (
+  `id` bigint not null auto_increment,
+  `variable_code` varchar(100) collate utf8mb4_general_ci not null comment 'Variable code is used for parameter names passed to the program or as placeholders',
+  `variable_value` text collate utf8mb4_general_ci not null comment 'The specific value corresponding to the variable',
+  `description` text collate utf8mb4_general_ci default null comment 'More detailed description of variables',
+  `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
+  `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
+  `create_time` datetime not null default current_timestamp comment 'create time',
+  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  primary key (`id`) using btree,
+  unique key `un_team_vcode_inx` (`team_id`,`variable_code`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 set foreign_key_checks = 1;
 

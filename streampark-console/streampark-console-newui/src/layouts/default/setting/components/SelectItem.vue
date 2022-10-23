@@ -65,7 +65,7 @@
         return props.def ? { value: props.def, defaultValue: props.initValue || props.def } : {};
       });
 
-      function handleChange(e: ChangeEvent) {
+      function handleChange(e) {
         props.event && baseHandler(props.event, e);
       }
       return {

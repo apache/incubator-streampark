@@ -26,7 +26,7 @@ export const renderQrCode = ({
   options: params = {},
 }: RenderQrCodeParams) => {
   const options = cloneDeep(params);
-  // 容错率，默认对内容少的二维码采用高容错率，内容多的二维码采用低容错率
+  // Fault tolerance rate, the default for two-dimensional codes with less content adopts high fault tolerance rate, and two-dimensional codes with more content adopt low fault tolerance rate
   options.errorCorrectionLevel = options.errorCorrectionLevel || getErrorCorrectionLevel(content);
 
   return getOriginWidth(content, options).then((_width: number) => {
@@ -35,13 +35,13 @@ export const renderQrCode = ({
   });
 };
 
-// 得到原QrCode的大小，以便缩放得到正确的QrCode大小
+// Get the size of the original QrCode so that you can scale to get the correct QrCode size
 function getOriginWidth(content: ContentType, options: QRCodeRenderersOptions) {
   const _canvas = document.createElement('canvas');
   return toCanvas(_canvas, content, options).then(() => _canvas.width);
 }
 
-// 对于内容少的QrCode，增大容错率
+// For QrCode with little content, increase the fault tolerance
 function getErrorCorrectionLevel(content: ContentType) {
   if (content.length > 36) {
     return 'M';

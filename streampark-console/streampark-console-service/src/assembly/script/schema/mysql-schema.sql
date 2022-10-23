@@ -90,7 +90,7 @@ create table `t_flink_app` (
   `cp_max_failure_interval` int default null,
   `cp_failure_rate_interval` int default null,
   `cp_failure_action` tinyint default null,
-  `dynamic_options` text collate utf8mb4_general_ci,
+  `properties` text collate utf8mb4_general_ci,
   `description` varchar(255) collate utf8mb4_general_ci default null,
   `resolve_order` tinyint default null,
   `k8s_rest_exposed_type` tinyint default null,
@@ -319,6 +319,22 @@ create table `t_team` (
   unique key `team_name_idx` (`team_name`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
+-- ----------------------------
+-- Table of t_variable
+-- ----------------------------
+drop table if exists `t_variable`;
+create table `t_variable` (
+  `id` bigint not null auto_increment,
+  `variable_code` varchar(100) collate utf8mb4_general_ci not null comment 'Variable code is used for parameter names passed to the program or as placeholders',
+  `variable_value` text collate utf8mb4_general_ci not null comment 'The specific value corresponding to the variable',
+  `description` text collate utf8mb4_general_ci default null comment 'More detailed description of variables',
+  `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
+  `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
+  `create_time` datetime not null default current_timestamp comment 'create time',
+  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  primary key (`id`) using btree,
+  unique key `un_team_vcode_inx` (`team_id`,`variable_code`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Table structure for t_role
@@ -441,7 +457,7 @@ create table `t_flink_cluster` (
   `description` varchar(255) default null,
   `user_id` bigint default null,
   `flink_image` varchar(255) default null comment 'flink image',
-  `dynamic_options` text comment 'dynamic parameters',
+  `properties` text comment 'allows specifying multiple generic configuration options',
   `k8s_rest_exposed_type` tinyint default 2 comment 'k8s export(0:loadbalancer,1:clusterip,2:nodeport)',
   `k8s_hadoop_integration` tinyint default 0,
   `flame_graph` tinyint default 0 comment 'flameGraph enable，default disable',
