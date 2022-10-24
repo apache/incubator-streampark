@@ -117,8 +117,8 @@
         id: receiveData.application.id,
         savePointed,
         savePoint: savePointPath,
-        flameGraph: formValue.flameGraph,
-        allowNonRestored: formValue.allowNonRestoredState,
+        flameGraph: formValue.flameGraph || false,
+        allowNonRestored: formValue.allowNonRestoredState || false
       });
       if (data.data) {
         Swal.fire({
