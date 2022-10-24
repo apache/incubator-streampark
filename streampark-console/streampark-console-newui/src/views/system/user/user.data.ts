@@ -37,7 +37,6 @@ export const columns: BasicColumn[] = [
   {
     title: 'User Name',
     dataIndex: 'username',
-    width: 200,
     sorter: true,
   },
   {
@@ -47,7 +46,6 @@ export const columns: BasicColumn[] = [
   {
     title: 'User Type',
     dataIndex: 'userType',
-    width: 180,
   },
   {
     title: 'Status',
@@ -67,7 +65,6 @@ export const columns: BasicColumn[] = [
   {
     title: 'Create Time',
     dataIndex: 'createTime',
-    width: 180,
     sorter: true,
   },
 ];

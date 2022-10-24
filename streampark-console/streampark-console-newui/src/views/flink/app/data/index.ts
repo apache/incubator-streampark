@@ -75,14 +75,7 @@ export const getAppColumns = (): BasicColumn[] => [
     title: 'Launch | Build',
     dataIndex: 'launch',
     width: 220,
-  },
-
-  {
-    title: 'Modified Time',
-    dataIndex: 'modifyTime',
-    sorter: true,
-    width: 170,
-  },
+  }
 ];
 
 /* Get diff editor configuration */

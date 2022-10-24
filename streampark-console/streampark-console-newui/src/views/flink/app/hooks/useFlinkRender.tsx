@@ -175,7 +175,7 @@ export const renderInputGroup = (model: Recordable) => {
         </Form.Item>
       </Input.Group>
 
-      <p class="conf-desc my-0">
+      <p class="conf-desc mt-10px">
         <span class="note-info">
           <Tag color="#2db7f5" class="tag-note">
             Note
@@ -274,7 +274,7 @@ export const renderProperties = ({ model, field }: RenderCallbackParams) => {
         value={model[field]}
         onInput={(e) => (model[field] = e.target.value)}
       />
-      <p class="conf-desc">
+      <p class="conf-desc mt-10px">
         <span class="note-info">
           <Tag color="#2db7f5" class="tag-note">
             Note

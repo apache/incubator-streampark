@@ -116,7 +116,6 @@
     };
   });
   const [registerTable, { reload }] = useTable({
-    title: t('system.member.table.title'),
     api: fetchMemberList,
     columns: [
       { title: t('system.member.table.userName'), dataIndex: 'userName', sorter: true },

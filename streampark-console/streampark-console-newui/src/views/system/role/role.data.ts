@@ -25,11 +25,6 @@ export const columns: BasicColumn[] = [
     dataIndex: 'roleName',
   },
   {
-    title: 'Description',
-    dataIndex: 'remark',
-    ellipsis: true,
-  },
-  {
     title: 'Create Time',
     dataIndex: 'createTime',
     sorter: true,
@@ -38,6 +33,11 @@ export const columns: BasicColumn[] = [
     title: 'Modify Time',
     dataIndex: 'modifyTime',
     sorter: true,
+  },
+  {
+    title: 'Description',
+    dataIndex: 'remark',
+    ellipsis: true,
   },
 ];
 
