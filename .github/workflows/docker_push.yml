@@ -25,6 +25,9 @@ on:
       - '**'
     tags:
       - 'v*.*.*'
+  pull_request:
+    branches:
+      - 'dev'
 jobs:
   build_image:
     runs-on: ubuntu-latest
