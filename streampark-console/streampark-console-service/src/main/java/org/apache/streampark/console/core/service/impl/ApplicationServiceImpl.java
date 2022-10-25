@@ -219,7 +219,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private final Map<Long, CompletableFuture<CancelResponse>> cancelFutureMap = new ConcurrentHashMap<>();
 
     @Override
-    public Map<String, Serializable> dashboard() {
+    public Map<String, Serializable> dashboard(Long teamId) {
         JobsOverview.Task overview = new JobsOverview.Task();
         Integer totalJmMemory = 0;
         Integer totalTmMemory = 0;
@@ -229,26 +229,29 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Integer runningJob = 0;
 
         // stat metrics from other than kubernetes mode
-        for (Application v : FlinkTrackingTask.getAllTrackingApp().values()) {
-            if (v.getJmMemory() != null) {
-                totalJmMemory += v.getJmMemory();
+        for (Application app : FlinkTrackingTask.getAllTrackingApp().values()) {
+            if (!teamId.equals(app.getTeamId())) {
+                continue;
             }
-            if (v.getTmMemory() != null) {
-                totalTmMemory += v.getTmMemory() * (v.getTotalTM() == null ? 1 : v.getTotalTM());
+            if (app.getJmMemory() != null) {
+                totalJmMemory += app.getJmMemory();
             }
-            if (v.getTotalTM() != null) {
-                totalTm += v.getTotalTM();
+            if (app.getTmMemory() != null) {
+                totalTmMemory += app.getTmMemory() * (app.getTotalTM() == null ? 1 : app.getTotalTM());
             }
-            if (v.getTotalSlot() != null) {
-                totalSlot += v.getTotalSlot();
+            if (app.getTotalTM() != null) {
+                totalTm += app.getTotalTM();
             }
-            if (v.getAvailableSlot() != null) {
-                availableSlot += v.getAvailableSlot();
+            if (app.getTotalSlot() != null) {
+                totalSlot += app.getTotalSlot();
             }
-            if (v.getState() == FlinkAppState.RUNNING.getValue()) {
+            if (app.getAvailableSlot() != null) {
+                availableSlot += app.getAvailableSlot();
+            }
+            if (app.getState() == FlinkAppState.RUNNING.getValue()) {
                 runningJob++;
             }
-            JobsOverview.Task task = v.getOverview();
+            JobsOverview.Task task = app.getOverview();
             if (task != null) {
                 overview.setTotal(overview.getTotal() + task.getTotal());
                 overview.setCreated(overview.getCreated() + task.getCreated());
