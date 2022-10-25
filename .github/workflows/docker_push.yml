@@ -72,7 +72,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: apache/streampark
+          images: goodboy008/streampark
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=tag
