@@ -73,10 +73,10 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: apache/streampark
-        tags: |
-          type=raw,value=latest,enable={{is_default_branch}}
-          type=ref,event=tag
-          type=ref,event=branch
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=tag
+            type=ref,event=branch
 
       - name: Build and push streampark
         uses: docker/build-push-action@v3
