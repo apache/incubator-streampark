@@ -69,7 +69,7 @@ public interface ApplicationService extends IService<Application> {
 
     boolean mapping(Application app);
 
-    Map<String, Serializable> dashboard();
+    Map<String, Serializable> dashboard(Long teamId);
 
     void tailMvnDownloading(Long id);
 

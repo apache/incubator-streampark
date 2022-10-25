@@ -123,8 +123,8 @@ public class ApplicationController {
     }
 
     @PostMapping("dashboard")
-    public RestResponse dashboard() {
-        Map<String, Serializable> map = applicationService.dashboard();
+    public RestResponse dashboard(Long teamId) {
+        Map<String, Serializable> map = applicationService.dashboard(teamId);
         return RestResponse.success(map);
     }
 
