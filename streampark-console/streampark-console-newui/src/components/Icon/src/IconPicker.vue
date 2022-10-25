@@ -41,7 +41,7 @@
 
         <template #content>
           <div v-if="getPaginationList.length">
-            <ScrollContainer class="border border-solid border-t-0">
+            <ScrollContainer class="border border-solid border-transparent border-t-0">
               <ul class="flex flex-wrap px-2">
                 <li
                   v-for="icon in getPaginationList"

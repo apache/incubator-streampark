@@ -17,10 +17,10 @@
 <template>
   <div>
     <BasicTable @register="registerTable">
-      <template #form-advanceBefore>
+      <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'user:add'">
           <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
+          Add New
         </a-button>
       </template>
       <template #bodyCell="{ column, record }">
@@ -63,11 +63,12 @@
       const [registerModal, { openModal }] = useModal();
       const { createMessage, Swal } = useMessage();
       const [registerTable, { reload }] = useTable({
-        title: '',
+        title: 'User List',
         api: getUserList,
         columns,
         formConfig: {
-          labelWidth: 120,
+          // labelWidth: 120,
+          baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
           colon: true,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
@@ -76,7 +77,7 @@
         pagination: true,
         striped: false,
         useSearchForm: true,
-        showTableSetting: false,
+        showTableSetting: true,
         bordered: false,
         showIndexColumn: false,
         canResize: false,

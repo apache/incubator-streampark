@@ -197,14 +197,16 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     let copyAppName: string | undefined = '';
     createConfirm({
       width: '600px',
-      iconType: 'info',
       title: () => [
-        h(SvgIcon, { name: 'copy', style: { color: 'red', display: 'inline-block' } }),
+        h(SvgIcon, {
+          name: 'copy',
+          style: { color: 'red', display: 'inline-block', marginRight: '10px' },
+        }),
         'Copy Application',
       ],
       content: () => {
         return (
-          <Form>
+          <Form class="!pt-20px">
             <Form.Item
               label="Application Name"
               labelCol={{ lg: { span: 7 }, sm: { span: 7 } }}
@@ -266,9 +268,11 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     const formValue = reactive<any>({});
     createConfirm({
       width: '600px',
-      iconType: 'info',
       title: () => [
-        h(SvgIcon, { name: 'mapping', style: { color: 'green', display: 'inline-block' } }),
+        h(SvgIcon, {
+          name: 'mapping',
+          style: { color: 'green', display: 'inline-block', marginRight: '10px' },
+        }),
         'Mapping Application',
       ],
       content: () => {
@@ -326,9 +330,10 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     });
   }
 
-  onMounted(async () => {
-    const res = await fetchAppOwners({});
-    users.value = res;
+  onMounted(() => {
+    fetchAppOwners({}).then((res) => {
+      users.value = res;
+    });
   });
 
   return {

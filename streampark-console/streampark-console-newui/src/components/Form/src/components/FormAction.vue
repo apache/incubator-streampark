@@ -65,6 +65,8 @@
   import { useFormContext } from '../hooks/useFormContext';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { propTypes } from '/@/utils/propTypes';
+  // import { ClearOutlined, SearchOutlined } from '@ant-design/icons-vue';
+  import { omit } from 'lodash-es';
 
   type ButtonOptions = Partial<ButtonProps> & { text: string };
 
@@ -74,6 +76,8 @@
       FormItem: Form.Item,
       Button,
       BasicArrow,
+      // ClearOutlined,
+      // SearchOutlined,
       [Col.name]: Col,
     },
     props: {
@@ -129,8 +133,9 @@
         return Object.assign(
           {
             text: t('common.queryText'),
+            disabled: props.submitButtonOptions?.loading,
           },
-          props.submitButtonOptions,
+          omit(props.submitButtonOptions, 'loading'),
         );
       });
 

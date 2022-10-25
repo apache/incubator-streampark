@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <BasicModal :width="600" @register="registerModal" @ok="handleSubmit">
+  <BasicModal :width="600" :show-cancel-btn="false" @register="registerModal" @ok="handleSubmit">
     <template #title>
       <Icon icon="ant-design:user-add-outlined" />
       User Info

@@ -27,7 +27,11 @@
             >{{ item.label }}</a-radio-button
           >
         </a-radio-group>
-        <a-input-search @search="handleSearch" class="search-input" />
+        <a-input-search
+          @search="handleSearch"
+          placeholder="please enter a keyword search"
+          class="search-input"
+        />
       </template>
     </a-card>
     <div class="operate pt-20px bg-white" v-auth="'project:create'">

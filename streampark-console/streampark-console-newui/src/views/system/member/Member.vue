@@ -18,7 +18,7 @@
 <template>
   <div>
     <BasicTable @register="registerTable" :formConfig="formConfig">
-      <template #form-advanceBefore>
+      <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'member:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
@@ -86,7 +86,7 @@
   const userStore = useUserStoreWithOut();
   const formConfig = computed((): Partial<FormProps> => {
     return {
-      labelWidth: 120,
+      baseColProps: { style: { paddingRight: '30px' } },
       colon: true,
       schemas: [
         {
@@ -116,6 +116,7 @@
     };
   });
   const [registerTable, { reload }] = useTable({
+    title: 'Member List',
     api: fetchMemberList,
     columns: [
       { title: t('system.member.table.userName'), dataIndex: 'userName', sorter: true },
@@ -126,7 +127,7 @@
     rowKey: 'id',
     pagination: true,
     useSearchForm: true,
-    showTableSetting: false,
+    showTableSetting: true,
     showIndexColumn: false,
     canResize: false,
     actionColumn: {

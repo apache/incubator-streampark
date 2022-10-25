@@ -59,9 +59,15 @@
         isPassword: () => false,
         data: settings.value.filter((i) => i.settingKey.indexOf('streampark.console') > -1),
       },
+      {
+        key: 5,
+        title: 'Ingrsss Setting',
+        isPassword: () => false,
+        data: settings.value.filter((i) => i.settingKey.indexOf('ingrsss') > -1),
+      },
     ];
   });
-  const collapseActive = ref(['1', '2', '3', '4']);
+  const collapseActive = ref(['1', '2', '3', '4', '5']);
   /* Get all system settings */
   async function getSettingAll() {
     const res = await fetchSystemSetting();

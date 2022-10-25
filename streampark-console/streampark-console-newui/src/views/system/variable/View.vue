@@ -17,7 +17,7 @@
 <template>
   <div>
     <BasicTable @register="registerTable">
-      <template #form-advanceBefore>
+      <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'variable:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
@@ -80,18 +80,18 @@
   const { createMessage } = useMessage();
   const { t } = useI18n();
   const [registerTable, { reload }] = useTable({
-    // title: t('system.variable.table.title'),
+    title: t('system.variable.table.title'),
     api: fetchVariableList,
     columns,
     formConfig: {
-      labelWidth: 120,
+      baseColProps: { style: { paddingRight: '30px' } },
       colon: true,
       schemas: searchFormSchema,
     },
     rowKey: 'id',
     pagination: true,
     useSearchForm: true,
-    showTableSetting: false,
+    showTableSetting: true,
     showIndexColumn: false,
     canResize: false,
     actionColumn: {
