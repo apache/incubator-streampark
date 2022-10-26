@@ -117,6 +117,11 @@
           border
           @click.native="handleView(record)"
           title="view" />
+        <svg-icon
+          name="see"
+          border
+          @click.native="handleDependApps(record)"
+          title="depend apps" />
         <a-popconfirm
           v-permit="'variable:delete'"
           title="Are you sure delete this variable ?"
@@ -152,7 +157,8 @@ import VariableInfo from './Detail'
 import VariableAdd from './Add'
 import VariableEdit from './Edit'
 import SvgIcon from '@/components/SvgIcon'
-import { list, deleteVariable} from '@/api/variable'
+import {list, deleteVariable} from '@/api/variable'
+import {mapActions} from 'vuex'
 
 export default {
   name: 'Variable',
@@ -222,9 +228,15 @@ export default {
   },
 
   methods: {
+    ...mapActions(['SetVariableCode']),
+
     handleView (record) {
       this.variableInfo.data = record
       this.variableInfo.visible = true
+    },
+    handleDependApps(record) {
+      this.SetVariableCode(record.variableCode)
+      this.$router.push({'path': '/system/variable/depend_apps'})
     },
     handleAdd () {
       this.variableAdd.visible = true

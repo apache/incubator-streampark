@@ -22,6 +22,10 @@ export function list (queryParam) {
   return http.post(api.Variable.LIST, queryParam)
 }
 
+export function dependApps (queryParam) {
+  return http.post(api.Variable.DEPEND, queryParam)
+}
+
 export function update (queryParam) {
   return http.put(api.Variable.UPDATE, queryParam)
 }

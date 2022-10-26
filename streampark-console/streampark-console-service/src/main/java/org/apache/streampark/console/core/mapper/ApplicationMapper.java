@@ -38,7 +38,15 @@ public interface ApplicationMapper extends BaseMapper<Application> {
     @Select("select * from t_flink_app where project_id=#{projectId}")
     List<Application> getByProjectId(@Param("projectId") Long projectId);
 
-    @Select("select * from t_flink_app where team_id=#{teamId}")
+    @Select("select a.*, " +
+            "       u.username, " +
+            "       case when trim(u.nick_name) = ''" +
+            "           then u.username" +
+            "           else u.nick_name" +
+            "           end as nick_name " +
+            "from t_flink_app a, t_user u " +
+            "where a.user_id = u.user_id " +
+            "   and a.team_id=#{teamId}")
     List<Application> getByTeamId(@Param("teamId") Long teamId);
 
     @Update("update t_flink_app set app_id=#{application.appId},job_id=#{application.jobId},state=14,end_time=null where id=#{application.id}")

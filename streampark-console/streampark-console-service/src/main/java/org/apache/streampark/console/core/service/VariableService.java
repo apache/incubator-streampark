@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Variable;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -55,4 +56,6 @@ public interface VariableService extends IService<Variable> {
     Variable findByVariableCode(Long teamId, String variableCode);
 
     String replaceVariable(Long teamId, String mixed);
+
+    IPage<Application> dependAppsPage(Variable variable, RestRequest request);
 }

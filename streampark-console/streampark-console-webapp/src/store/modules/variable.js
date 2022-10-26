@@ -15,28 +15,28 @@
  * limitations under the License.
  */
 
-const getters = {
-  // app
-  device: state => state.app.device,
-  theme: state => state.app.theme,
-  color: state => state.app.color,
+const variable = {
+  state: {
+    variableCode: null
+  },
 
-  // user
-  permissions: state => state.user.permissions,
-  roles: state => state.user.roles,
-  token: state => state.user.token,
-  avatar: state => state.user.avatar,
-  nickname: state => state.user.name,
-  userName: state => state.user.userName,
-  welcome: state => state.user.welcome,
-  userInfo: state => state.user.info,
-  teamId: state => state.teamId,
-  routers: state => state.user.routers,
-  multiTab: state => state.app.multiTab,
-  applicationId: state => state.application.appId,
-  clusterId: state => state.cluster.clusterId,
-  projectId: state => state.project.projectId,
-  variableCode: state => state.variable.variableCode
+  mutations: {
+    SET_VARIABLE_CODE: (state, variableCode) => {
+      state.variableCode = variableCode
+    },
+    CLEAN_VARIABLE_CODE: (state, empty) => {
+      state.variableCode = null
+    }
+  },
+
+  actions: {
+    SetVariableCode ({ commit }, variableCode) {
+      commit('SET_VARIABLE_CODE', variableCode)
+    },
+    CleanVariableCode ({ commit }, empty) {
+      commit('CLEAN_VARIABLE_CODE', empty)
+    }
+  }
 }
 
-export default getters
+export default variable

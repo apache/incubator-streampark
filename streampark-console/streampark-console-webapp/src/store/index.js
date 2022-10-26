@@ -23,6 +23,7 @@ import application from './modules/application'
 import project from './modules/project'
 import cluster from './modules/cluster'
 import user from './modules/user'
+import variable from './modules/variable'
 import getters from './getters'
 
 Vue.use(Vuex)
@@ -33,7 +34,8 @@ export default new Vuex.Store({
     user,
     application,
     cluster,
-    project
+    project,
+    variable
   },
   state: {},
   mutations: {},
