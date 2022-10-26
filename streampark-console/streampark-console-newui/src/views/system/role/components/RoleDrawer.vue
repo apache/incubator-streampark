@@ -43,7 +43,7 @@
   import { handleRoleCheck } from '../role.data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { BasicTree, TreeItem } from '/@/components/Tree';
-  import { addRole, editRole } from '/@/api/system/role';
+  import { fetchRoleCreate, fetchRoleUpdate } from '/@/api/system/role';
   import { getMenuList, getRoleMenu } from '/@/api/base/system';
   import { FormTypeEnum } from '/@/enums/formEnum';
 
@@ -155,7 +155,7 @@
           setDrawerProps({ confirmLoading: true });
           const params = { ...values };
           params.menuId = values.menuId.join(',');
-          !unref(isCreate) ? await editRole(params) : await addRole(params);
+          !unref(isCreate) ? await fetchRoleUpdate(params) : await fetchRoleCreate(params);
           closeDrawer();
           emit('success');
         } catch (e) {

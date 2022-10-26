@@ -17,18 +17,16 @@
 import { FormSchema } from '/@/components/Table';
 import { RuleObject, StoreValue } from 'ant-design-vue/lib/form/interface';
 import { computed, nextTick, reactive, ref, unref } from 'vue';
-import { branches, getDetail, gitCheck, isExist } from '/@/api/flink/project';
+import { fetchBranches, getDetail, gitCheck, isExist } from '/@/api/flink/project';
 import { useForm } from '/@/components/Form';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { useTabs } from '/@/hooks/web/useTabs';
 import { filterOption } from '../app/utils';
 import { useRoute } from 'vue-router';
 import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 
 export const useProject = () => {
-  const { close } = useTabs();
   const route = useRoute();
-  const { createMessage, createErrorModal } = useMessage();
+  const { createMessage, createErrorSwal } = useMessage();
 
   const submitLoading = ref(false);
   const projectResource = reactive<Partial<ProjectRecord>>({});
@@ -43,7 +41,7 @@ export const useProject = () => {
         field: 'name',
         label: 'Project Name',
         component: 'Input',
-        rules: [{ validator: checkProjectName, trigger: 'blur' }],
+        rules: [{ required: true, validator: checkProjectName, trigger: 'blur' }],
         componentProps: { placeholder: 'the project name' },
       },
       {
@@ -53,7 +51,6 @@ export const useProject = () => {
         defaultValue: 1,
         componentProps: {
           placeholder: 'the project type',
-          disabled: route?.query?.id != '',
           options: [
             { label: 'apache flink', value: 1, disabled: false },
             { label: 'apache spark', value: 2, disabled: true },
@@ -72,7 +69,6 @@ export const useProject = () => {
           showSearch: true,
           optionFilterProp: 'children',
           filterOption,
-          disabled: route?.query?.id != '',
           options: [
             { label: 'GitHub/GitLab', value: 1, disabled: false },
             { label: 'Subversion', value: 2, disabled: true },
@@ -198,20 +194,20 @@ export const useProject = () => {
           handleBranches(values);
         }
         if (branchList.value.indexOf(values.branches) === -1) {
-          createMessage.error(
-            'branch [' + values.branches + '] does not exist or authentication error,please check',
+          createErrorSwal(
+            'branch [' +
+              values.branches +
+              '] does not exist<br>or authentication error,please check',
           );
         } else {
           await FetchAction(values);
         }
       } else {
-        createErrorModal({
-          title: 'Fail',
-          content:
-            res === 1
-              ? 'not authorized ..> <.. <br><br> userName and password is required'
-              : 'authentication error ..> <.. <br><br> please check userName and password',
-        });
+        createErrorSwal(
+          res === 1
+            ? 'not authorized ..>﹏<.. <br><br> userName and password is required'
+            : 'authentication error ..>﹏<.. <br><br> please check userName and password',
+        );
       }
     } catch (error) {
       console.error(error);
@@ -221,16 +217,23 @@ export const useProject = () => {
   }
 
   async function handleBranches(values: Recordable) {
-    const url = values.url;
-    if (url) {
-      const userName = values.userName || null;
-      const password = values.password || null;
-      const userNull = userName === null || userName === undefined || userName === '';
-      const passNull = password === null || password === undefined || password === '';
-      if ((userNull && passNull) || (!userNull && !passNull)) {
-        const res = await branches({ url, userName, password });
-        if (res) branchList.value = res;
+    const hide = createMessage.loading('Getting branch');
+    try {
+      const url = values.url;
+      if (url) {
+        const userName = values.userName || null;
+        const password = values.password || null;
+        const userNull = userName === null || userName === undefined || userName === '';
+        const passNull = password === null || password === undefined || password === '';
+        if ((userNull && passNull) || (!userNull && !passNull)) {
+          const res = await fetchBranches({ url, userName, password });
+          if (res) branchList.value = res.map((i) => ({ label: i, value: i }));
+        }
       }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      hide();
     }
   }
 
@@ -253,7 +256,6 @@ export const useProject = () => {
     });
   }
   return {
-    close,
     submit,
     handleSubmit,
     getLoading,

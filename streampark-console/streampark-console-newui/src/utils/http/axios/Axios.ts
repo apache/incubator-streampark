@@ -196,17 +196,21 @@ export class VAxios {
   }
   // form data
   post<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
-    if (config.headers) {
-      Object.assign(config.headers, {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      });
-    } else {
-      config.headers = { 'Content-Type': ContentTypeEnum.FORM_URLENCODED };
-    }
     return this.request({ ...config, method: 'POST' }, options);
   }
   // json
   postJson<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+    if (config.headers) {
+      Object.assign(config.headers, {
+        'Content-Type': ContentTypeEnum.JSON,
+      });
+    } else {
+      config.headers = { 'Content-Type': ContentTypeEnum.JSON };
+    }
+    config.data = Object.assign({}, config.data, {
+      isJsonType: true,
+    });
+
     return this.request({ ...config, method: 'POST' }, options);
   }
 

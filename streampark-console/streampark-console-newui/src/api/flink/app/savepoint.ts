@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
 
 enum SAVE_POINT_API {
@@ -23,35 +22,20 @@ enum SAVE_POINT_API {
   DELETE = '/flink/savepoint/delete',
 }
 
-export function fetchLatest(params) {
-  return defHttp.post({
-    url: SAVE_POINT_API.LATEST,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchLatest(data: Recordable) {
+  return defHttp.post({ url: SAVE_POINT_API.LATEST, data });
 }
-export function fetchSavePonitHistory(params) {
-  return defHttp.post({
-    url: SAVE_POINT_API.HISTORY,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchSavePonitHistory(data: Recordable) {
+  return defHttp.post({ url: SAVE_POINT_API.HISTORY, data });
 }
 /**
  * delete
- * @param params id
- * @returns
+ * @param data id
+ * @returns {Promise<boolean>}
  */
-export function fetchRemoveSavePoint(params: { id: string }) {
-  return defHttp.post<boolean>({
+export function fetchRemoveSavePoint(data: { id: string }): Promise<boolean> {
+  return defHttp.post({
     url: SAVE_POINT_API.DELETE,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }

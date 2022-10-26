@@ -43,12 +43,18 @@ public interface VariableService extends IService<Variable> {
      */
     List<Variable> findByTeamId(Long teamId);
 
+    long countByTeamId(Long teamId);
+
     /**
      * create variable
      *
      * @param variable variable
      */
-    void createVariable(Variable variable) throws Exception;
+    void createVariable(Variable variable);
+
+    void deleteVariable(Variable variable);
 
     Variable findByVariableCode(Long teamId, String variableCode);
+
+    String replaceVariable(Long teamId, String mixed);
 }

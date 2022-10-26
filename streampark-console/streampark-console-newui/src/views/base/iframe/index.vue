@@ -35,8 +35,6 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useLayoutHeight } from '/@/layouts/default/content/useContentViewHeight';
 
-  import { swal } from '/@/adapter';
-
   defineProps({
     frameSrc: propTypes.string.def(''),
     // TODO
@@ -95,8 +93,6 @@
           $success: Modal.success,
           $error: Modal.error,
           $warning: Modal.warning,
-          // vue-sweetalert2
-          $swal: swal,
         },
       });
     });

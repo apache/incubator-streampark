@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import { SystemSetting } from './types/setting.type';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
 
 enum SETTING_APi {
@@ -40,26 +39,23 @@ export function fetchSystemSetting() {
  * Update system settings
  * @param {String} settingKey key
  * @param {Boolean} settingValue value
- * @returns Promise<boolean>
+ * @returns {Promise<Boolean>}
  */
-export function fetchSystemSettingUpdate(params: { settingKey: string; settingValue: boolean }) {
-  return defHttp.post<boolean>({
+export function fetchSystemSettingUpdate(data: {
+  settingKey: string;
+  settingValue: boolean;
+}): Promise<boolean> {
+  return defHttp.post({
     url: SETTING_APi.UPDATE,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 /**
  * Check configuration
- * @returns Promise<boolean>
+ * @returns {Promise<Boolean>}
  */
-export function fetchCheckHadoop() {
-  return defHttp.post<boolean>({
+export function fetchCheckHadoop(): Promise<boolean> {
+  return defHttp.post({
     url: SETTING_APi.CHECK_HADOOP,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
   });
 }

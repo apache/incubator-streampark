@@ -90,7 +90,7 @@
       title: t('component.table.operation'),
       dataIndex: 'operation',
       key: 'operation',
-      width: 150,
+      width: 200,
     },
   };
 
@@ -312,6 +312,7 @@
                     auth: 'app:detail',
                     shape: 'circle',
                     type: 'default',
+                    ifShow: !record.success,
                     icon: 'ant-design:eye-outlined',
                     onClick: handleException.bind(null, record),
                   },

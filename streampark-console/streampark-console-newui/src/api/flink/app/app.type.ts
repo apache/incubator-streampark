@@ -69,7 +69,7 @@ export interface AppListRecord {
   hotParams?: string;
   resolveOrder: number;
   executionMode: number;
-  dynamicOptions?: string;
+  properties?: string;
   appType: number;
   flameGraph: boolean;
   tracking: number;

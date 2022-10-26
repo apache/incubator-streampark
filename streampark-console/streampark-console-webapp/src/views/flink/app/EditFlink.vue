@@ -811,14 +811,14 @@
       </a-form-item>
 
       <a-form-item
-        label="Dynamic Option"
+        label="Properties"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
           rows="8"
-          name="dynamicOptions"
+          name="properties"
           placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
-          v-decorator="['dynamicOptions']" />
+          v-decorator="['properties']" />
         <p class="conf-desc">
           <span class="note-info">
             <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
@@ -1280,7 +1280,7 @@ export default {
               cpMaxFailureInterval: values.cpMaxFailureInterval || null,
               cpFailureRateInterval: values.cpFailureRateInterval || null,
               cpFailureAction: values.cpFailureAction || null,
-              dynamicOptions: values.dynamicOptions,
+              properties: values.properties,
               restartSize: values.restartSize,
               // alertEmail: values.alertEmail || null,
               alertId: values.alertId,
@@ -1369,7 +1369,7 @@ export default {
           'args': this.app.args,
           'jar': this.app.jar,
           'description': this.app.description,
-          'dynamicOptions': this.app.dynamicOptions,
+          'properties': this.app.properties,
           'resolveOrder': this.app.resolveOrder,
           'executionMode': this.executionMode || this.app.executionMode,
           'yarnQueue': this.app.yarnQueue,

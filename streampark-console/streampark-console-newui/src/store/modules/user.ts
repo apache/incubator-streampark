@@ -36,7 +36,6 @@ import { usePermissionStore } from '/@/store/modules/permission';
 import { RouteRecordRaw } from 'vue-router';
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 import { h } from 'vue';
-import { SignOut } from '/@/adapter/store/modules/user';
 import { getUserTeamId } from '/@/utils';
 import { usePermission } from '/@/hooks/web/usePermission';
 
@@ -139,7 +138,7 @@ export const useUserStore = defineStore({
       setAuthCache(PERMISSION_KEY, permissions);
     },
     setData(data: Recordable) {
-      const { token, expire, user, permissions, roles } = data;
+      const { token, expire, user, permissions, roles = [] } = data;
 
       this.setToken(token);
       this.setExpire(expire);
@@ -162,12 +161,13 @@ export const useUserStore = defineStore({
           this.setUserInfo(user);
           this.setRoleList(roles as RoleEnum[]);
           this.setPermissions(permissions);
-          refreshMenu();
         }
         // If it returns success, it will be stored in the local cache
         this.teamId = data.teamId;
         sessionStorage.setItem(APP_TEAMID_KEY_, data.teamId);
         localStorage.setItem(APP_TEAMID_KEY_, data.teamId);
+
+        if (!data.userId) refreshMenu();
         return Promise.resolve(true);
       } catch (error) {
         return Promise.reject(error);
@@ -210,8 +210,6 @@ export const useUserStore = defineStore({
       if (this.getToken) {
         try {
           await doLogout();
-
-          await SignOut();
         } catch {
           console.log('Token cancellation failed');
         }

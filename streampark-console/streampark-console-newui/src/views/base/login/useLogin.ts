@@ -25,6 +25,10 @@ export enum LoginStateEnum {
   MOBILE,
   QR_CODE,
 }
+export enum LoginTypeEnum {
+  LOCAL,
+  LDAP,
+}
 
 const currentState = ref(LoginStateEnum.LOGIN);
 

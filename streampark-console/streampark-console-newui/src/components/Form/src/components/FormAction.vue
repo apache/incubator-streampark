@@ -74,6 +74,8 @@
       FormItem: Form.Item,
       Button,
       BasicArrow,
+      // ClearOutlined,
+      // SearchOutlined,
       [Col.name]: Col,
     },
     props: {

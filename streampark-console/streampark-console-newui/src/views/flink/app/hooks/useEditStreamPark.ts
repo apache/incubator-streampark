@@ -48,7 +48,7 @@ export const useEditStreamParkSchema = (
     alerts,
   } = useCreateAndEditSchema(dependencyRef, {
     appId: route.query.appId as string,
-    mode: 'streamx',
+    mode: 'streampark',
   });
 
   const [registerDifferentDrawer, { openDrawer: openDiffDrawer }] = useDrawer();

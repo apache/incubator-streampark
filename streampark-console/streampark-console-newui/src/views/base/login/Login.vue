@@ -87,6 +87,9 @@
     .@{prefix-cls} {
       background-color: @dark-bg;
 
+      .ant-input-affix-wrapper {
+        background-color: #232a3b !important;
+      }
       .ant-input,
       .ant-input-password {
         background-color: #232a3b;
@@ -107,7 +110,6 @@
 
     input.fix-auto-fill,
     .fix-auto-fill input {
-      -webkit-text-fill-color: #c9d1d9 !important;
       box-shadow: inherit !important;
     }
   }

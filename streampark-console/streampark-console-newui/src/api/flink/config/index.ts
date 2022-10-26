@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import { HadoopConf } from './index.type';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
 
 enum CONFIG_API {
@@ -27,38 +26,23 @@ enum CONFIG_API {
   SYS_HADOOP_CONF = '/flink/conf/sysHadoopConf',
 }
 
-export function fetchGetVer(params: { id: string }) {
-  return defHttp.post({
-    url: CONFIG_API.GET,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchGetVer(data: { id: string }) {
+  return defHttp.post({ url: CONFIG_API.GET, data });
 }
 export function handleConfTemplate() {
   return defHttp.post<string>({
     url: CONFIG_API.TEMPLATE,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
   });
 }
 export function fetchSysHadoopConf() {
   return defHttp.post<HadoopConf>({
     url: CONFIG_API.SYS_HADOOP_CONF,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
   });
 }
-export function fetchListVer(params) {
+export function fetchListVer(data) {
   return defHttp.post({
     url: CONFIG_API.LIST,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 /**
@@ -66,22 +50,16 @@ export function fetchListVer(params) {
  * @param {String}
  * @returns {Promise<Boolean>}
  */
-export function fetchRemoveConf(params: { id: string }) {
-  return defHttp.post<boolean>({
+export function fetchRemoveConf(data: { id: string }): Promise<boolean> {
+  return defHttp.post({
     url: CONFIG_API.DELETE,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }
 
-export function fetchConfHistory(params) {
+export function fetchConfHistory(data) {
   return defHttp.post({
     url: CONFIG_API.HISTORY,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data,
   });
 }

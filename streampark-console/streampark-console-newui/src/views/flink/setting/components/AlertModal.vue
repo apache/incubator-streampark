@@ -30,7 +30,7 @@
   import { Form, Select, Input, Divider, Tooltip, Switch } from 'ant-design-vue';
   import { SvgIcon } from '/@/components/Icon';
   import { fetchAlertAdd, fetchAlertUpdate, fetchExistsAlert } from '/@/api/flink/setting/alert';
-  import { useUserStoreWithOut } from '/@/store/modules/user';
+  import { useUserStore } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
 
   const FormItem = Form.Item;
@@ -50,16 +50,9 @@
   const dingtalkSecretEnable = ref(false);
   const larkSecretEnable = ref(false);
 
-  const { createConfirm, createMessage } = useMessage();
-  const userStore = useUserStoreWithOut();
-  const [registerModal, { changeOkLoading, closeModal }] = useModalInner((data) => {
-    if (data) {
-      alertId.value = data.alertId;
-      alertType.value = data.alertType;
-      setFieldsValue(omit(data, 'alertId'));
-    }
-  });
-  const [registerForm, { validateFields, setFieldsValue }] = useForm({
+  const { Swal } = useMessage();
+  const userStore = useUserStore();
+  const [registerForm, { validateFields, resetFields, setFieldsValue }] = useForm({
     labelWidth: 160,
     colon: true,
     showActionButtonGroup: false,
@@ -72,7 +65,6 @@
         label: 'Alert Name',
         component: 'Input',
         componentProps: { allowClear: true, placeholder: 'Please enter alert name' },
-        helpMessage: 'the alert name, e.g: streamx team alert',
         colProps: {
           style: { marginBottom: '20px' },
         },
@@ -85,10 +77,7 @@
                 } else {
                   if (!alertId.value) {
                     try {
-                      const isExist = await fetchExistsAlert({
-                        alertName: value,
-                        isJsonType: true,
-                      });
+                      const isExist = await fetchExistsAlert({ alertName: value });
                       if (isExist) {
                         return Promise.reject(
                           'Alert Name must be unique. The alert name already exists',
@@ -104,13 +93,23 @@
                 return Promise.resolve();
               },
               required: true,
-              message: 'Alert Name is required',
+              trigger: 'blur',
             },
           ];
         },
       },
       ...alertFormSchema,
     ],
+  });
+  const [registerModal, { changeOkLoading, closeModal }] = useModalInner((data) => {
+    resetFields();
+    alertId.value = '';
+    alertType.value = [];
+    if (data && Object.keys(data).length > 0) {
+      alertId.value = data.alertId;
+      alertType.value = data.alertType;
+      setFieldsValue(omit(data, 'alertId'));
+    }
   });
 
   // Submit new settings
@@ -150,19 +149,45 @@
         // Check if there is an alarm with the same name before submitting
         const isExist = await fetchExistsAlert({ alertName: param.alertName });
         if (isExist) {
-          createConfirm({
-            iconType: 'error',
-            title: 'Failed create AlertConfig',
-            content: `alertName ${param.alertName} is already exists!`,
-          });
+          Swal.fire(
+            'Failed create AlertConfig',
+            'alertName ' + param.alertName + ' is already exists!',
+            'error',
+          );
         } else {
-          await fetchAlertAdd(param);
-          createMessage.success('Create AlertConfig successful!');
+          const { data } = await fetchAlertAdd(param);
+          if (!data.data) {
+            Swal.fire(
+              'Failed create AlertConfig',
+              data['message'].replaceAll(/\[StreamPark]/g, ''),
+              'error',
+            );
+          } else {
+            Swal.fire({
+              icon: 'success',
+              title: 'Create AlertConfig successful!',
+              showConfirmButton: false,
+              timer: 2000,
+            });
+          }
         }
       } else {
         //update
-        await fetchAlertUpdate(param);
-        createMessage.success('Update AlertConfig successful!');
+        const { data } = await fetchAlertUpdate(param);
+        if (!data.data) {
+          Swal.fire(
+            'Failed update AlertConfig',
+            data['message'].replaceAll(/\[StreamPark]/g, ''),
+            'error',
+          );
+        } else {
+          Swal.fire({
+            icon: 'success',
+            title: 'Update AlertConfig successful!',
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        }
       }
       closeModal();
       emit('reload');
@@ -175,7 +200,7 @@
 </script>
 
 <template>
-  <BasicModal @register="registerModal" v-bind="$attrs" @ok="handleSubmit">
+  <BasicModal ok-text="Submit" @register="registerModal" v-bind="$attrs" @ok="handleSubmit">
     <template #title>
       <SvgIcon name="alarm" size="25" />
       Alert Setting

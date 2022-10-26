@@ -26,7 +26,7 @@
         <result column="module" jdbcType="VARCHAR" property="module"/>
         <result column="args" jdbcType="LONGVARCHAR" property="args"/>
         <result column="options" jdbcType="LONGVARCHAR" property="options"/>
-        <result column="dynamic_options" jdbcType="LONGVARCHAR" property="dynamicOptions"/>
+        <result column="properties" jdbcType="LONGVARCHAR" property="properties"/>
         <result column="hot_params" jdbcType="VARCHAR" property="hotParams"/>
         <result column="job_name" jdbcType="VARCHAR" property="jobName"/>
         <result column="app_id" jdbcType="VARCHAR" property="appId"/>

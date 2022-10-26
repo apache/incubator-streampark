@@ -47,7 +47,7 @@
         <a-textarea
           rows="4"
           placeholder="Please enter Variable Value"
-          v-decorator="['variableValue', {rules: [{ required: true, max: 100, message: 'please enter Variable Value' }]}]" />
+          v-decorator="['variableValue', {rules: [{ required: true, message: 'please enter Variable Value' }]}]" />
       </a-form-item>
       <a-form-item
         label="Description"

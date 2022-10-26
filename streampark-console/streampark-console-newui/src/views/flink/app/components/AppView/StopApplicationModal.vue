@@ -29,12 +29,12 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchCancel, fetchCheckSavepointPath, fetchVerifySchema } from '/@/api/flink/app/app';
   import { CancelParam } from '/@/api/flink/app/app.type';
-
+  import { h } from 'vue';
   const emit = defineEmits(['register', 'updateOption']);
   const app = reactive<Recordable>({});
 
   const { t } = useI18n();
-  const { createMessage, createErrorModal } = useMessage();
+  const { createErrorSwal, Swal } = useMessage();
   const [registerModal, { closeModal }] = useModalInner((data) => {
     if (data) {
       Object.assign(app, data.application);
@@ -54,7 +54,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        helpMessage: 'trigger savePoint before taking cancel',
+        itemExtra: h('span', { class: 'conf-switch' }, 'trigger savePoint before taking cancel'),
       },
       {
         field: 'customSavepoint',
@@ -64,7 +64,11 @@
           placeholder: 'Entry the custom savepoint path',
           allowClear: true,
         },
-        helpMessage: 'restore the application from savepoint or latest checkpoint',
+        itemExtra: h(
+          'span',
+          { class: 'conf-switch' },
+          'restore the application from savepoint or latest checkpoint',
+        ),
         ifShow: ({ values }) => !!values.stopSavePointed,
       },
       {
@@ -76,7 +80,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        helpMessage: 'Send max watermark before stopped',
+        itemExtra: h('span', { class: 'conf-switch' }, 'Send max watermark before stopped'),
       },
     ],
     colon: true,
@@ -103,10 +107,7 @@
             path: customSavepoint,
           });
           if (data.data === false) {
-            createErrorModal({
-              title: t('common.failed'),
-              content: 'custom savePoint path is invalid, ' + data.message,
-            });
+            createErrorSwal('custom savePoint path is invalid, ' + data.message);
           } else {
             handleStopAction(stopReq);
           }
@@ -117,10 +118,7 @@
           if (data.data) {
             handleStopAction(stopReq);
           } else {
-            createErrorModal({
-              title: t('common.failed'),
-              content: data.message,
-            });
+            createErrorSwal(data.message);
           }
         }
       } else {
@@ -138,7 +136,12 @@
 
   async function handleStopAction(stopReq: CancelParam) {
     await fetchCancel(stopReq);
-    createMessage.success('The current job is canceling');
+    Swal.fire({
+      icon: 'success',
+      title: 'The current job is canceling',
+      showConfirmButton: false,
+      timer: 2000,
+    });
     closeModal();
   }
 </script>

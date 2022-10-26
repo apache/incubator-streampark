@@ -16,19 +16,18 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigConst.KEY_FLINK_SQL
-import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.core.SqlCommand._
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.{ConfigOption, Configuration, ExecutionOptions}
 import org.apache.flink.table.api.TableEnvironment
 import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
+import org.apache.streampark.common.conf.ConfigConst.KEY_FLINK_SQL
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.core.SqlCommand._
 
 import java.util
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.{HashMap => JavaHashMap, Map => JavaMap}
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 object FlinkSqlExecutor extends Logger {
@@ -79,7 +78,8 @@ object FlinkSqlExecutor extends Logger {
       }
     }
 
-    val insertArray = new ArrayBuffer[String]()
+    var hasInsert = false
+    val statementSet = context.createStatementSet()
     SqlCommandParser.parseSQL(flinkSql).foreach(x => {
       val args = if (x.operands.isEmpty) null else x.operands.head
       val command = x.command.name
@@ -141,7 +141,9 @@ object FlinkSqlExecutor extends Logger {
           logInfo(s"$command: $args")
         case BEGIN_STATEMENT_SET | END_STATEMENT_SET =>
           logWarn(s"SQL Client Syntax: ${x.command.name} ")
-        case INSERT => insertArray += x.originSql
+        case INSERT =>
+          statementSet.addInsertSql(x.originSql)
+          hasInsert = true
         case SELECT =>
           logError("StreamPark dose not support 'SELECT' statement now!")
           throw new RuntimeException("StreamPark dose not support 'select' statement now!")
@@ -157,9 +159,7 @@ object FlinkSqlExecutor extends Logger {
       }
     })
 
-    if (insertArray.nonEmpty) {
-      val statementSet = context.createStatementSet()
-      insertArray.foreach(statementSet.addInsertSql)
+    if (hasInsert) {
       statementSet.execute() match {
         case t if t != null =>
           Try(t.getJobClient.get.getJobID).getOrElse(null) match {

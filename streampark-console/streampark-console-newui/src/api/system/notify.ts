@@ -15,41 +15,37 @@
  * limitations under the License.
  */
 import { NoticyList } from './model/notifyModel';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
 
+interface NotifyParam {
+  // Notification Type 1: Abnormal Alarm 2: Notification Message,
+  type: number;
+  // page number
+  pageNum: number;
+  // page size
+  pageSize: number;
+}
 enum NOTIFY_API {
   NOTICE = '/metrics/notice',
   DEL = '/metrics/delnotice',
 }
 /**
  * Get notification list
- * @param {number} type Notification Type 1: Abnormal Alarm 2: Notification Message,
- * @param {number} pageNum page number
- * @param {number} pageSize page size
- * @returns Promise<NoticyList>
+ * @param {NotifyParam} data
+ * @returns {Promise<NoticyList>}
  */
-export const fetchNotify = (params: { type: number; pageNum: number; pageSize: number }) => {
-  return defHttp.post<NoticyList>({
-    url: NOTIFY_API.NOTICE,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
-};
+export function fetchNotify(data: NotifyParam): Promise<NoticyList> {
+  return defHttp.post({ url: NOTIFY_API.NOTICE, data });
+}
 
 /**
  * delete notification
  * @param {number} id notification id,
- * @returns Promise<boolean>
+ * @returns {Promise<NoticyList>}
  */
-export const fetchNotifyDelete = (id: string) => {
-  return defHttp.post<NoticyList>({
+export function fetchNotifyDelete(id: string): Promise<NoticyList> {
+  return defHttp.post({
     url: NOTIFY_API.DEL,
-    params: { id },
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
+    data: { id },
   });
-};
+}

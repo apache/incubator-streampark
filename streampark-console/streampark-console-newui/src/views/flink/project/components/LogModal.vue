@@ -35,12 +35,14 @@
   let startOffset: Nullable<number> = null;
   const logTime = ref<string>('');
   const getLogLoading = ref<boolean>(false);
+  const showRefresh = ref<boolean>(false);
   const project = reactive<Recordable>({});
   const [registerModal, { changeLoading, closeModal }] = useModalInner((data) => {
     data && onReceiveModalData(data);
   });
   const { setContent, logRef } = useLog();
-  function onReceiveModalData(data) {
+  function onReceiveModalData(data: Recordable) {
+    showRefresh.value = true;
     Object.assign(project, unref(data.project));
     changeLoading(true);
     refreshLog();
@@ -62,9 +64,12 @@
         startOffset,
       });
       if (data.readFinished === false) {
+        showRefresh.value = true;
         start();
         if (data.data) setContent(data.data);
         logTime.value = formatToDateTime(new Date());
+      } else {
+        showRefresh.value = false;
       }
     } catch (error) {
       closeModal();
@@ -89,7 +94,13 @@
       <div class="flex align-items-center">
         <div class="flex-1 text-left">{{ t('flink.app.view.refreshTime') }}:{{ logTime }}</div>
         <div class="button-group">
-          <a-button key="refresh" type="primary" @click="refreshLog" :loading="getLogLoading">
+          <a-button
+            key="refresh"
+            v-if="showRefresh"
+            type="primary"
+            @click="refreshLog"
+            :loading="getLogLoading"
+          >
             {{ t('flink.app.view.refresh') }}
           </a-button>
           <a-button key="close" type="primary" @click="closeModal()">

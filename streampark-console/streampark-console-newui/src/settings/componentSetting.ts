@@ -45,7 +45,7 @@ export default {
       if (field && order) {
         return {
           // The sort field passed to the backend you
-          sortField: field,
+          sortField: field.replace(/([a-z])([A-Z])/, '$1_$2').toLowerCase(),
           // Sorting method passed to the background asc/desc
           sortOrder: order === 'ascend' ? 'asc' : 'desc',
         };

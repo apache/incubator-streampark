@@ -38,7 +38,7 @@ export const modalProps = {
 export const basicProps = Object.assign({}, modalProps, {
   defaultFullscreen: { type: Boolean },
   // Can it be full screen
-  canFullscreen: { type: Boolean, default: true },
+  canFullscreen: { type: Boolean, default: false },
   // After enabling the wrapper, the bottom can be increased in height
   wrapperFooterOffset: { type: Number, default: 0 },
   // Warm reminder message

@@ -34,7 +34,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useAppStore } from '/@/store/modules/app';
 
-  const { createMessage } = useMessage();
+  const { Swal } = useMessage();
   const appStore = useAppStore();
 
   const SelectOption = Select.Option;
@@ -145,17 +145,19 @@
   /* submit */
   async function handleReplSubmit() {
     const code = await getContent();
-    const hide = createMessage.loading('submiting', 0);
     try {
       await fetchNotebookSubmit({
         env: 'senv',
         text: code,
       });
-      createMessage.success('this features is experimental\ncurrent job is starting...');
+      Swal.fire({
+        icon: 'success',
+        title: 'this features is experimental\ncurrent job is starting...',
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } catch (error) {
       console.error(error);
-    } finally {
-      hide();
     }
   }
   /* Set/unset fullscreen content */

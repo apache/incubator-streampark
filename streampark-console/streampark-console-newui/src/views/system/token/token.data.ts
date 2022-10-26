@@ -18,7 +18,7 @@ import { BasicColumn, FormSchema } from '/@/components/Table';
 import { h } from 'vue';
 import { Switch } from 'ant-design-vue';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { setTokenStatus } from '/@/api/system/token';
+import { fetTokenStatusToggle } from '/@/api/system/token';
 import { getNoTokenUserList } from '/@/api/system/user';
 import dayjs from 'dayjs';
 
@@ -37,6 +37,7 @@ export const columns: BasicColumn[] = [
   },
   {
     title: 'Token',
+    ellipsis: true,
     width: 250,
     dataIndex: 'token',
   },
@@ -71,7 +72,7 @@ export const columns: BasicColumn[] = [
           const newStatus = checked ? StatusEnum.On : StatusEnum.Off;
           const { createMessage } = useMessage();
 
-          setTokenStatus({ tokenId: record.id })
+          fetTokenStatusToggle({ tokenId: record.id })
             .then(() => {
               record.userStatus = newStatus;
               createMessage.success(`success`);

@@ -55,3 +55,27 @@ export interface TeamSetResponse {
   roles: string[];
   user: GetUserInfoModel;
 }
+
+// user list api response
+export interface UserListRecord {
+  userId: string;
+  username: string;
+  password: string;
+  email?: string;
+  userType: string;
+  status: string;
+  createTime: string;
+  modifyTime: string;
+  lastLoginTime: string;
+  sex: string;
+  description?: string;
+  avatar?: string;
+  sortField?: string;
+  sortOrder?: string;
+  createTimeFrom?: string;
+  createTimeTo?: string;
+  id?: string;
+  salt: string;
+  nickName: string;
+  teamId: string;
+}

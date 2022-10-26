@@ -16,6 +16,7 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
+  import { useGo } from '/@/hooks/web/usePage';
   export default defineComponent({
     name: 'AppCreate',
   });
@@ -24,20 +25,17 @@
   import { Switch, Alert } from 'ant-design-vue';
   import { onMounted, reactive, ref, unref } from 'vue';
   import { PageWrapper } from '/@/components/Page';
+  import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
+
   import { BasicForm, useForm } from '/@/components/Form';
   import { SettingTwoTone } from '@ant-design/icons-vue';
   import { useDrawer } from '/@/components/Drawer';
   import Mergely from './components/Mergely.vue';
   import { handleConfTemplate } from '/@/api/flink/config';
   import { decodeByBase64 } from '/@/utils/cipher';
-  import FlinkSqlEditor from './components/flinkSql.vue';
-  import Dependency from './components/Dependency.vue';
-  import UseSysHadoopConf from './components/UseSysHadoopConf.vue';
-  import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
   import UploadJobJar from './components/UploadJobJar.vue';
   import { fetchAppConf, fetchCreate, fetchMain, fetchUpload } from '/@/api/flink/app/app';
   import options from './data/option';
-  import { useTabs } from '/@/hooks/web/useTabs';
   import { useCreateSchema } from './hooks/useCreateSchema';
   import { handleSubmitParams } from './utils';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -45,7 +43,14 @@
   import { buildUUID } from '/@/utils/uuid';
   import { useI18n } from '/@/hooks/web/useI18n';
 
-  const { close } = useTabs();
+  const FlinkSqlEditor = createAsyncComponent(() => import('./components/flinkSql.vue'));
+  const Dependency = createAsyncComponent(() => import('./components/Dependency.vue'));
+  const PomTemplateTab = createAsyncComponent(
+    () => import('./components/PodTemplate/PomTemplateTab.vue'),
+  );
+  const UseSysHadoopConf = createAsyncComponent(() => import('./components/UseSysHadoopConf.vue'));
+
+  const go = useGo();
   const flinkSql = ref();
   const dependencyRef = ref();
   const uploadLoading = ref(false);
@@ -279,7 +284,7 @@
     Object.assign(param, { socketId });
     const { data } = await fetchCreate(param);
     if (data.data) {
-      close(undefined, { path: '/flink/app' });
+      go('/flink/app');
     } else {
       createMessage.error(data.message);
     }
@@ -343,7 +348,7 @@
       </template>
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button @click="close(undefined, { path: '/flink/app' })">
+          <a-button @click="go('/flink/app')">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button class="ml-4" :loading="submitLoading" type="primary" @click="submit()">
