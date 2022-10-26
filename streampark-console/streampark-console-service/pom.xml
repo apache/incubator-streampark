@@ -48,7 +48,7 @@
         <springfox.version>3.0.0</springfox.version>
         <commons-compress.version>1.21</commons-compress.version>
         <javax-mail.version>1.4.7</javax-mail.version>
-        <shiro.version>1.9.1</shiro.version>
+        <shiro.version>1.10.0</shiro.version>
         <p6spy.version>3.9.1</p6spy.version>
         <freemarker.version>2.3.30</freemarker.version>
         <commons-email.version>1.5</commons-email.version>
