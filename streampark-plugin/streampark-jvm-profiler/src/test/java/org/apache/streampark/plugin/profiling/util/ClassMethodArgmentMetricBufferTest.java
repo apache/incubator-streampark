@@ -23,10 +23,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class ClassMethodArgmentMetricBufferTest {
+class ClassMethodArgmentMetricBufferTest {
 
     @Test
-    public void appendValue() {
+    void appendValue() {
         ClassMethodArgumentMetricBuffer buffer = new ClassMethodArgumentMetricBuffer();
         buffer.appendValue("class1", "method1", "arg1");
         buffer.appendValue("class1", "method2", "arg1");
@@ -53,7 +53,7 @@ public class ClassMethodArgmentMetricBufferTest {
     }
 
     @Test
-    public void appendValue_concurrent() throws InterruptedException {
+    void appendValue_concurrent() throws InterruptedException {
         ClassMethodArgumentMetricBuffer buffer = new ClassMethodArgumentMetricBuffer();
 
         String[] classNames = new String[] {"class1", "class2", "class1", "class2", "class101"};

@@ -23,10 +23,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class ClassMethodArgumentFilterTest {
+class ClassMethodArgumentFilterTest {
 
     @Test
-    public void matchClass() {
+    void matchClass() {
         ClassMethodArgumentFilter filter = new ClassMethodArgumentFilter(null);
         Assertions.assertEquals(0, filter.matchMethod("class1", "method1").size());
 
@@ -63,7 +63,7 @@ public class ClassMethodArgumentFilterTest {
     }
 
     @Test
-    public void matchMethod() {
+    void matchMethod() {
         ClassMethodArgumentFilter filter = new ClassMethodArgumentFilter(null);
         Assertions.assertEquals(0, filter.matchMethod("class1", "method1").size());
 
@@ -91,7 +91,7 @@ public class ClassMethodArgumentFilterTest {
     }
 
     @Test
-    public void matchMethod_wildcard() {
+    void matchMethod_wildcard() {
         ClassMethodArgumentFilter filter =
             new ClassMethodArgumentFilter(Collections.singletonList(new ClassMethodArgument("class1", "", 10)));
         Assertions.assertEquals(0, filter.matchMethod("class1", "method1").size());
@@ -106,7 +106,7 @@ public class ClassMethodArgumentFilterTest {
     }
 
     @Test
-    public void matchMethod_prefix() {
+    void matchMethod_prefix() {
         ClassMethodArgumentFilter filter =
             new ClassMethodArgumentFilter(
                 Arrays.asList(

@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 
-public class IOUtilsTest {
+class IOUtilsTest {
 
     @Test
-    public void toByteArray() {
+    void toByteArray() {
         byte[] bytes = new byte[] {1, 2, 3};
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
         byte[] result = Utils.toByteArray(byteArrayInputStream);
