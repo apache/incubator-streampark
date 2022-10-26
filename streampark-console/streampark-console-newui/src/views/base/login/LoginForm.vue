@@ -17,7 +17,7 @@
 <template>
   <LoginFormTitle v-show="getShow" class="enter-x mb-40px text-light-50" />
   <Form
-    class="p-4 enter-x"
+    class="p-4 enter-x signin-form"
     :model="formData"
     :rules="getFormRules"
     ref="formRef"
@@ -46,26 +46,7 @@
         </template>
       </InputPassword>
     </FormItem>
-
-    <ARow class="enter-x">
-      <ACol :span="12">
-        <FormItem>
-          <!-- No logic, you need to deal with it yourself -->
-          <Checkbox v-model:checked="rememberMe" size="small" class="!text-light-500">
-            {{ t('sys.login.rememberMe') }}
-          </Checkbox>
-        </FormItem>
-      </ACol>
-      <!-- No logic, you need to deal with it yourself -->
-      <!-- <ACol :span="12">
-        <FormItem :style="{ 'text-align': 'right' }">
-          <Button type="link" size="small" @click="setLoginState(LoginStateEnum.RESET_PASSWORD)">
-            {{ t('sys.login.forgetPassword') }}
-          </Button>
-        </FormItem>
-      </ACol> -->
-    </ARow>
-    <FormItem class="enter-x">
+    <FormItem class="enter-x signin-btn">
       <Button type="primary" block @click="handleLogin" :loading="loading">
         {{ loginText.buttonText }}
       </Button>
