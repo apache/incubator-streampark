@@ -18,7 +18,6 @@
   import { defineComponent, onMounted, ref, reactive, unref, onUnmounted, watch } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useUserStore } from '/@/store/modules/user';
-
   export default defineComponent({
     name: 'AppView',
   });
@@ -41,12 +40,14 @@
   import { handleIsStart, handleView } from './utils';
   import { useDrawer } from '/@/components/Drawer';
   import { useModal } from '/@/components/Modal';
-  import StatisticCard from './components/AppView/statisticCard.vue';
+
   import StartApplicationModal from './components/AppView/StartApplicationModal.vue';
   import StopApplicationModal from './components/AppView/StopApplicationModal.vue';
   import LogModal from './components/AppView/LogModal.vue';
   import BuildDrawer from './components/AppView/BuildDrawer.vue';
   import State from './components/State';
+
+  import StatisticCard from './components/AppView/statisticCard.vue';
 
   const SelectOption = Select.Option;
   const InputGroup = Input.Group;
@@ -74,8 +75,9 @@
   const yarn = ref<Nullable<string>>(null);
 
   // Get Dashboard Metrics Data
-  async function handleDashboard() {
+  async function handleDashboard(showLoading: boolean) {
     try {
+      dashboardLoading.value = showLoading;
       const res = await fetchDashboard();
       if (res) {
         Object.assign(dashBigScreenMap, {
@@ -125,7 +127,6 @@
         delete params.state;
       }
       Object.assign(params, {
-        teamId: userStore.getTeamId,
         jobName: searchText.value,
         jobType: jobType.value,
         userId: userId.value,
@@ -172,12 +173,8 @@
     columns: getAppColumns(),
     showIndexColumn: false,
     showTableSetting: true,
-    tableSetting: { fullScreen: true },
-    actionColumn: {
-      dataIndex: 'operation',
-      title: 'Operation',
-      width: 180,
-    },
+    tableSetting: { fullScreen: true, redo: false },
+    actionColumn: { dataIndex: 'operation', title: 'Operation', width: 180 },
   });
 
   watch(
@@ -197,10 +194,6 @@
     openBuildDrawer(true, { appId: app.id });
   }
 
-  /* Click to add */
-  function handleAdd() {
-    router.push({ path: '/flink/app/add' });
-  }
   /* Click to edit */
   function handleEdit(app: AppListRecord) {
     flinkAppStore.setApplicationId(app.id);
@@ -220,8 +213,10 @@
 
   /* view */
   async function handleJobView(app: AppListRecord) {
+    console.log('app', app.state, app.optionState);
     // Task is running, restarting, in savePoint
     if ([4, 5].includes(app.state) || app['optionState'] === 4) {
+      console.log(app);
       // yarn-per-job|yarn-session|yarn-application
       handleView(app, unref(yarn));
     }
@@ -262,9 +257,7 @@
 
   function handleCancel(app: AppListRecord) {
     if (!optionApps.stopping.get(app.id) || app['optionState'] === 0) {
-      openStopModal(true, {
-        application: app,
-      });
+      openStopModal(true, { application: app });
     }
   }
   /* log view */
@@ -282,25 +275,20 @@
   } = useFlinkApplication(openStartModal);
 
   /*  tag */
-  async function handleInitTagsOptions() {
-    const params = Object.assign(
-      {},
-      {
-        pageSize: 999999999,
-        pageNum: 1,
-      },
-    );
-    const res = await fetchAppRecord(params);
-    const dataSource = res?.records || [];
-    dataSource.forEach((record) => {
-      if (record.tags !== null && record.tags !== undefined && record.tags !== '') {
-        const tagsArray = record.tags.split(',');
-        tagsArray.forEach((x) => {
-          if (x.length > 0 && tagsOptions.value.indexOf(x) == -1) {
-            tagsOptions.value.push(x);
-          }
-        });
-      }
+  function handleInitTagsOptions() {
+    const params = Object.assign({}, { pageSize: 999999999, pageNum: 1 });
+    fetchAppRecord(params).then((res) => {
+      const dataSource = res?.records || [];
+      dataSource.forEach((record) => {
+        if (record.tags !== null && record.tags !== undefined && record.tags !== '') {
+          const tagsArray = record.tags.split(',') as string[];
+          tagsArray.forEach((x: string) => {
+            if (x.length > 0 && tagsOptions.value.indexOf(x) == -1) {
+              tagsOptions.value.push(x);
+            }
+          });
+        }
+      });
     });
   }
 
@@ -409,8 +397,8 @@
   }
 
   const { start, stop } = useTimeoutFn(() => {
-    handleDashboard();
     if (!getLoading()) {
+      handleDashboard(false);
       reload({ polling: true });
     }
     start();
@@ -420,10 +408,16 @@
     stop();
   });
 
-  onMounted(async () => {
-    handleDashboard();
+  onMounted(() => {
+    handleDashboard(true);
     handleInitTagsOptions();
   });
+  watch(
+    () => [tags.value, userId.value, jobType.value],
+    () => {
+      reload({ polling: true });
+    },
+  );
 </script>
 <template>
   <PageWrapper contentFullHeight>
@@ -446,41 +440,55 @@
       <template #headerTop>
         <div class="text-right my-15px">
           <InputGroup compact>
-            <Select
-              placeholder="Tags"
-              show-search
-              allowClear
-              v-model:value="tags"
-              class="!ml-16px !w-150px text-left"
+            <div class="pr-16px">
+              <Select
+                placeholder="Tags"
+                show-search
+                allowClear
+                v-model:value="tags"
+                class="!w-150px text-left"
+              >
+                <SelectOption v-for="tag in tagsOptions" :key="tag">{{ tag }}</SelectOption>
+              </Select>
+            </div>
+
+            <div class="pr-16px">
+              <Select
+                placeholder="Owner"
+                allowClear
+                v-model:value="userId"
+                class="!w-120px text-left"
+              >
+                <SelectOption v-for="u in users" :key="u.userId">
+                  <span v-if="u.nickName"> {{ u.nickName }} </span>
+                  <span v-else> {{ u.username }} </span>
+                </SelectOption>
+              </Select>
+            </div>
+            <div class="pr-16px">
+              <Select
+                placeholder="Type"
+                allowClear
+                v-model:value="jobType"
+                class="w-100px text-left"
+              >
+                <SelectOption value="1">JAR</SelectOption>
+                <SelectOption value="2">SQL</SelectOption>
+              </Select>
+            </div>
+            <div class="pr-16px">
+              <InputSearch
+                placeholder="Search..."
+                v-model:value="searchText"
+                @search="reload({ polling: true })"
+                class="!w-250px text-left"
+              />
+            </div>
+            <a-button
+              type="primary"
+              style="margin-left: 20px"
+              @click="router.push({ path: '/flink/app/add' })"
             >
-              <SelectOption v-for="tag in tagsOptions" :key="tag">{{ tag }}</SelectOption>
-            </Select>
-            <Select
-              placeholder="Owner"
-              allowClear
-              v-model:value="userId"
-              class="!ml-16px !w-120px text-left"
-            >
-              <SelectOption v-for="u in users" :key="u.userId">
-                <span v-if="u.nickName"> {{ u.nickName }} </span>
-                <span v-else> {{ u.username }} </span>
-              </SelectOption>
-            </Select>
-            <Select
-              placeholder="Type"
-              allowClear
-              v-model:value="jobType"
-              class="!ml-16px w-80px text-left"
-            >
-              <SelectOption value="1">JAR</SelectOption>
-              <SelectOption value="2">SQL</SelectOption>
-            </Select>
-            <InputSearch
-              placeholder="Search..."
-              v-model:value="searchText"
-              class="!w-250px text-left"
-            />
-            <a-button type="primary" style="margin-left: 20px" @click="handleAdd">
               <Icon icon="ant-design:plus-outlined" />
               {{ t('common.add') }}
             </a-button>

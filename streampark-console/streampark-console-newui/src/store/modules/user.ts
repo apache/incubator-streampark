@@ -138,7 +138,7 @@ export const useUserStore = defineStore({
       setAuthCache(PERMISSION_KEY, permissions);
     },
     setData(data: Recordable) {
-      const { token, expire, user, permissions, roles } = data;
+      const { token, expire, user, permissions, roles = [] } = data;
 
       this.setToken(token);
       this.setExpire(expire);

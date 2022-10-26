@@ -17,7 +17,7 @@
 <template>
   <div>
     <BasicTable @register="registerTable">
-      <template #form-advanceBefore>
+      <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'role:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
@@ -88,14 +88,16 @@
       const { createMessage } = useMessage();
       const useStore = useUserStoreWithOut();
       const [registerTable, { reload }] = useTable({
+        title: 'Role List',
         api: getRoleListByPage,
         columns,
         formConfig: {
-          labelWidth: 120,
+          baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
           colon: true,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
+        showTableSetting: true,
         useSearchForm: true,
         showIndexColumn: false,
         canResize: false,

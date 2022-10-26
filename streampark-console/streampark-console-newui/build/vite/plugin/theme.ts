@@ -97,8 +97,9 @@ export function configThemePlugin(isBuild: boolean): PluginOption[] {
         'alert-error-border-color': '#58181c',
         'alert-error-bg-color': '#2a1215',
         'alert-error-icon-color': '#a61d24',
-        'background-color-light': '#fafafa',
-        'background-color-base': '#e6f7ff',
+        'background-color-light': 'rgba(255,255,255,.04)',
+        'background-color-base': '#2a2a2a',
+        'modal-mask-bg': 'rgba(255,255,255, 0.45)',
       },
     }),
   ];

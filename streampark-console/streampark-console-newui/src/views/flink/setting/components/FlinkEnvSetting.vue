@@ -94,7 +94,7 @@
     <ListItem v-for="(item, index) in flinks" :key="index">
       <ListItemMeta style="width: 60%" :title="item.flinkName" :description="item.description">
         <template #avatar>
-          <SvgIcon class="avatar" name="flink" size="25" />
+          <SvgIcon class="avatar p-15px" name="flink" size="60" />
         </template>
       </ListItemMeta>
 

@@ -381,7 +381,7 @@ export const useCreateAndEditSchema = (
         field: 'cpMaxFailureInterval',
         label: 'CheckPoint Failure Options',
         component: 'InputNumber',
-        render: ({ model }) => renderInputGroup(model),
+        renderColContent: ({ model }) => renderInputGroup(model),
         show: ({ values }) =>
           edit?.mode == 'flink' ? true : ![5, 6].includes(values.executionMode),
       },
@@ -507,8 +507,11 @@ export const useCreateAndEditSchema = (
               { type: 'info' },
               {
                 message: () => [
-                  h(Icon, { icon: 'ant-design:code-outlined', style: { color: '#108ee9' } }),
-                  h('span', { class: 'pl-5px' }, 'Custom Code'),
+                  h(Icon, {
+                    icon: 'ant-design:code-outlined',
+                    style: { color: '#108ee9' },
+                  }),
+                  h('span', { class: 'pl-8px' }, 'Custom Code'),
                 ],
               },
             );

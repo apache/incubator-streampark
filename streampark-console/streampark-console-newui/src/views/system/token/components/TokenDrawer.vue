@@ -15,72 +15,60 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer okText="Submit" @register="registerDrawer" showFooter width="40%" @ok="handleSubmit">
-    <template #title>
-      <Icon icon="ant-design:user-add-outlined" />
-      {{ getTitle }}
-    </template>
+  <BasicDrawer
+    okText="Submit"
+    @register="registerDrawer"
+    showFooter
+    :title="getTitle"
+    width="40%"
+    @ok="handleSubmit"
+  >
     <BasicForm @register="registerForm" />
   </BasicDrawer>
 </template>
 <script lang="ts">
-  import { computed, defineComponent, ref, unref } from 'vue';
+  import { defineComponent, ref, computed, unref } from 'vue';
   import { BasicForm, useForm } from '/@/components/Form';
-  import { formSchema } from '../user.data';
-  import { FormTypeEnum } from '/@/enums/formEnum';
+  import { formSchema } from '../token.data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
-  import { addUser, updateUser } from '/@/api/system/user';
-  import Icon from '/@/components/Icon';
+
+  import { fetchTokenCreate } from '/@/api/system/token';
 
   export default defineComponent({
-    name: 'MenuDrawer',
-    components: { BasicDrawer, Icon, BasicForm },
+    name: 'TokenDrawer',
+    components: { BasicDrawer, BasicForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
-      const formType = ref(FormTypeEnum.Edit);
+      const isUpdate = ref(true);
 
-      const [registerForm, { resetFields, setFieldsValue, updateSchema, validate, clearValidate }] =
-        useForm({
-          labelWidth: 120,
-          schemas: formSchema(unref(formType)),
-          showActionButtonGroup: false,
-          baseColProps: { lg: 22, md: 22 },
-        });
+      const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
+        labelWidth: 120,
+        schemas: formSchema,
+        showActionButtonGroup: false,
+        baseColProps: { lg: 22, md: 22 },
+      });
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
-        formType.value = data.formType;
         resetFields();
-        clearValidate();
-        updateSchema(formSchema(unref(formType)));
-        setDrawerProps({
-          confirmLoading: false,
-          showFooter: data.formType !== FormTypeEnum.View,
-        });
+        setDrawerProps({ confirmLoading: false });
+        isUpdate.value = !!data?.isUpdate;
 
-        if (unref(formType) !== FormTypeEnum.Create) {
-          const roleIds = data.record?.roleId ?? [];
-          data.record.roleId = Array.isArray(roleIds) ? roleIds : roleIds.split(',');
+        if (unref(isUpdate)) {
           setFieldsValue({
             ...data.record,
           });
         }
       });
 
-      const getTitle = computed(() => {
-        return {
-          [FormTypeEnum.Create]: 'Add User',
-          [FormTypeEnum.Edit]: 'Edit User',
-          [FormTypeEnum.View]: 'View User',
-        }[unref(formType)];
-      });
+      const getTitle = computed(() => (!unref(isUpdate) ? 'Add Token' : 'Edit Token'));
 
       async function handleSubmit() {
         try {
           const values = await validate();
           setDrawerProps({ confirmLoading: true });
-          unref(formType) === FormTypeEnum.Edit ? await updateUser(values) : await addUser(values);
+          const res = await fetchTokenCreate(values);
           closeDrawer();
-          emit('success');
+          emit('success', { isUpdate: unref(isUpdate), values: res });
         } finally {
           setDrawerProps({ confirmLoading: false });
         }

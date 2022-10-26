@@ -34,7 +34,7 @@ import {
 } from '/@/enums/cacheEnum';
 import { DEFAULT_CACHE_TIME } from '/@/settings/encryptionSetting';
 import { toRaw } from 'vue';
-import { pick, omit } from 'lodash-es';
+import { pick, omit, debounce } from 'lodash-es';
 
 interface BasicStore {
   [TOKEN_KEY]: string | number | null | undefined;
@@ -147,6 +147,6 @@ function storageChange(e: any) {
   }
 }
 
-window.addEventListener('storage', storageChange);
+window.addEventListener('storage', debounce(storageChange, 500));
 
 initPersistentMemory();

@@ -68,8 +68,11 @@
 
     <FormItem class="enter-x">
       <Button type="primary" block @click="handleLogin" :loading="loading">
-        {{ t('sys.login.loginButton') }}
+        通过 {{ loginText.buttonText }} 登录
       </Button>
+    </FormItem>
+    <FormItem class="enter-x text-center">
+      <Button type="link" @click="changeLoginType"> 使用 {{ loginText.linkText }} </Button>
     </FormItem>
   </Form>
   <TeamModal v-model:visible="modelVisible" :userId="userId" @success="handleTeamSuccess" />
@@ -85,33 +88,54 @@
   import { useMessage } from '/@/hooks/web/useMessage';
 
   import { useUserStore } from '/@/store/modules/user';
-  import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
+  import {
+    LoginStateEnum,
+    useLoginState,
+    useFormRules,
+    useFormValid,
+    LoginTypeEnum,
+  } from './useLogin';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { loginApi } from '/@/api/system/user';
+  import { loginApi, loginLadpApi } from '/@/api/system/user';
   import { APP_TEAMID_KEY_ } from '/@/enums/cacheEnum';
   import TeamModal from './teamModal.vue';
   import { fetchUserTeam } from '/@/api/system/member';
+  import { LoginResultModel } from '/@/api/system/model/userModel';
+  import { Result } from '/#/axios';
 
   const ACol = Col;
   const ARow = Row;
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
+
   const { t } = useI18n();
   const { createErrorModal, createMessage } = useMessage();
   const { prefixCls } = useDesign('login');
   const userStore = useUserStore();
   const { setLoginState, getLoginState } = useLoginState();
   const { getFormRules } = useFormRules();
-
+  interface LoginForm {
+    account: string;
+    password: string;
+  }
   const formRef = ref();
   const loading = ref(false);
   const userId = ref('');
   const modelVisible = ref(false);
   const rememberMe = ref(false);
-
-  const formData = reactive({
+  const loginType = ref(LoginTypeEnum.LOCAL);
+  const formData = reactive<LoginForm>({
     account: '',
     password: '',
+  });
+
+  const loginText = computed(() => {
+    const localText = '本地账户';
+    const ldapText = 'openLDAP';
+    if (loginType.value === LoginTypeEnum.LOCAL) {
+      return { buttonText: localText, linkText: ldapText };
+    }
+    return { buttonText: ldapText, linkText: localText };
   });
 
   const { validForm } = useFormValid(formRef);
@@ -119,23 +143,35 @@
   const getShow = computed(() => unref(getLoginState) === LoginStateEnum.LOGIN);
 
   async function handleLogin() {
-    const loginFormValue = await validForm();
-    if (!loginFormValue) return;
-    handleLoginAction(loginFormValue);
+    try {
+      const loginFormValue = await validForm();
+      if (!loginFormValue) return;
+      handleLoginAction(loginFormValue);
+    } catch (error) {
+      console.error(error);
+    }
   }
-  async function handleLoginAction(loginFormValue: { password: string; account: string }) {
+  async function handleLoginRequest(loginFormValue: LoginForm): Promise<Result<LoginResultModel>> {
+    // local login
+    if (loginType.value == LoginTypeEnum.LOCAL) {
+      const { data } = await loginApi(
+        { password: loginFormValue.password, username: loginFormValue.account },
+        'none',
+      );
+      return data;
+    }
+    const { data } = await loginLadpApi(
+      { password: loginFormValue.password, username: loginFormValue.account },
+      'none',
+    );
+    return data;
+  }
+  async function handleLoginAction(loginFormValue: LoginForm) {
     try {
       loading.value = true;
       try {
-        const { data } = await loginApi(
-          {
-            password: loginFormValue.password,
-            username: loginFormValue.account,
-          },
-          'none',
-        );
+        const { code, data } = await handleLoginRequest(loginFormValue);
 
-        const { code } = data;
         if (code != null && code != undefined) {
           if (code == 0 || code == 1) {
             const message =
@@ -144,7 +180,7 @@
             createMessage.error(message);
             return;
           } else if (code == 403) {
-            userId.value = data.data as unknown as string;
+            userId.value = data as unknown as string;
             const teamList = await fetchUserTeam({ userId: userId.value });
             userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
 
@@ -154,10 +190,10 @@
             console.log(data);
           }
         }
-        userStore.setData(data.data);
+        userStore.setData(data);
         let successText = t('sys.login.loginSuccessDesc');
-        if (data.data?.user) {
-          const { teamId, nickName } = data.data.user;
+        if (data?.user) {
+          const { teamId, nickName } = data.user;
           userStore.teamId = teamId || '';
           sessionStorage.setItem(APP_TEAMID_KEY_, teamId || '');
           localStorage.setItem(APP_TEAMID_KEY_, teamId || '');
@@ -186,5 +222,12 @@
   function handleTeamSuccess() {
     modelVisible.value = false;
     handleLogin();
+  }
+  function changeLoginType() {
+    if (loginType.value === LoginTypeEnum.LOCAL) {
+      loginType.value = LoginTypeEnum.LDAP;
+      return;
+    }
+    loginType.value = LoginTypeEnum.LOCAL;
   }
 </script>

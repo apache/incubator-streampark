@@ -57,8 +57,8 @@ export const searchFormSchema: FormSchema[] = [
 ];
 export async function handleRoleCheck(_rule: RuleObject, value: StoreValue) {
   if (value) {
-    if (value.length > 10) {
-      return Promise.reject('Role name should not be longer than 10 characters');
+    if (value.length > 255) {
+      return Promise.reject('Role name should not be longer than 255 characters');
     } else {
       const res = await fetchCheckName({
         roleName: value,
