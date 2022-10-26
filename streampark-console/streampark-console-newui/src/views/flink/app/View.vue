@@ -440,41 +440,50 @@
       <template #headerTop>
         <div class="text-right my-15px">
           <InputGroup compact>
-            <Select
-              placeholder="Tags"
-              show-search
-              allowClear
-              v-model:value="tags"
-              class="!ml-16px !w-150px text-left"
-            >
-              <SelectOption v-for="tag in tagsOptions" :key="tag">{{ tag }}</SelectOption>
-            </Select>
-            <Select
-              placeholder="Owner"
-              allowClear
-              v-model:value="userId"
-              class="!ml-16px !w-120px text-left"
-            >
-              <SelectOption v-for="u in users" :key="u.userId">
-                <span v-if="u.nickName"> {{ u.nickName }} </span>
-                <span v-else> {{ u.username }} </span>
-              </SelectOption>
-            </Select>
-            <Select
-              placeholder="Type"
-              allowClear
-              v-model:value="jobType"
-              class="!ml-16px w-100px text-left"
-            >
-              <SelectOption value="1">JAR</SelectOption>
-              <SelectOption value="2">SQL</SelectOption>
-            </Select>
-            <InputSearch
-              placeholder="Search..."
-              v-model:value="searchText"
-              @search="reload({ polling: true })"
-              class="!ml-16px !w-250px text-left"
-            />
+            <div class="pr-16px">
+              <Select
+                placeholder="Tags"
+                show-search
+                allowClear
+                v-model:value="tags"
+                class="!w-150px text-left"
+              >
+                <SelectOption v-for="tag in tagsOptions" :key="tag">{{ tag }}</SelectOption>
+              </Select>
+            </div>
+
+            <div class="pr-16px">
+              <Select
+                placeholder="Owner"
+                allowClear
+                v-model:value="userId"
+                class="!w-120px text-left"
+              >
+                <SelectOption v-for="u in users" :key="u.userId">
+                  <span v-if="u.nickName"> {{ u.nickName }} </span>
+                  <span v-else> {{ u.username }} </span>
+                </SelectOption>
+              </Select>
+            </div>
+            <div class="pr-16px">
+              <Select
+                placeholder="Type"
+                allowClear
+                v-model:value="jobType"
+                class="w-100px text-left"
+              >
+                <SelectOption value="1">JAR</SelectOption>
+                <SelectOption value="2">SQL</SelectOption>
+              </Select>
+            </div>
+            <div class="pr-16px">
+              <InputSearch
+                placeholder="Search..."
+                v-model:value="searchText"
+                @search="reload({ polling: true })"
+                class="!w-250px text-left"
+              />
+            </div>
             <a-button
               type="primary"
               style="margin-left: 20px"
