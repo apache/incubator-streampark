@@ -120,7 +120,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
       }.getOrElse(throw getError.exception)
 
     val dockerConf = request.dockerConfig
-    val baseImageTag = request.flinkBaseImage
+    val baseImageTag = request.flinkBaseImage.trim
     val pushImageTag = {
       val expectedImageTag = s"streamparkflinkjob-${request.k8sNamespace}-${request.clusterId}"
       compileTag(expectedImageTag, dockerConf.registerAddress, dockerConf.imageNamespace)
@@ -134,9 +134,9 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
             // when the register address prefix is explicitly identified on base image tag,
             // the user's pre-saved docker register auth info would be used.
             if (dockerConf.registerAddress != null && !baseImageTag.startsWith(dockerConf.registerAddress)) {
-              dockerClient.pullImageCmd(baseImageTag.trim)
+              dockerClient.pullImageCmd(baseImageTag)
             } else {
-              dockerClient.pullImageCmd(baseImageTag.trim).withAuthConfig(dockerConf.toAuthConf)
+              dockerClient.pullImageCmd(baseImageTag).withAuthConfig(dockerConf.toAuthConf)
             }
           }
           val pullCmdCallback = pullImageCmd.asInstanceOf[HackPullImageCmd]
