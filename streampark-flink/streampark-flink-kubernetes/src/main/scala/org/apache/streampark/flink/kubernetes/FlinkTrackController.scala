@@ -18,6 +18,7 @@
 package org.apache.streampark.flink.kubernetes
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
+import org.apache.flink.annotation.Public
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.model._
 
@@ -45,6 +46,9 @@ class FlinkTrackController extends Logger with AutoCloseable {
 
   // cache for last each flink cluster metrics (such as a session cluster or a application cluster)
   lazy val flinkMetrics: MetricCache = MetricCache.build()
+
+  // cache for last each flink cluster metrics (such as a session cluster or a application cluster)
+  lazy val flinkArchives: ArchivesCache = ArchivesCache.build()
 
   override def close(): Unit = {
     jobStatuses.cleanUp()
@@ -235,4 +239,20 @@ object MetricCache {
 
   def build(): MetricCache = new MetricCache()
 
+}
+
+class ArchivesCache {
+  def put(k: String, v: String): Unit = cache.put(k, v)
+
+  def get(k: String): String = cache.getIfPresent(k)
+
+  def asMap(): Map[String, String] = cache.asMap().toMap
+
+  def cleanUp(): Unit = cache.cleanUp()
+
+  val cache: Cache[String, String] = Caffeine.newBuilder.build()
+}
+
+object ArchivesCache {
+  def build(): ArchivesCache = new ArchivesCache()
 }

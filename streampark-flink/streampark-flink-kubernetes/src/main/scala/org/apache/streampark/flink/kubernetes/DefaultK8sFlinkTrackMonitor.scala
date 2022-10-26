@@ -69,6 +69,10 @@ class DefaultK8sFlinkTrackMonitor(conf: FlinkTrackConfig = FlinkTrackConfig.defa
     }
   }
 
+  def archivesJob(jobId: String, archivePath: String): Unit = {
+    trackController.flinkArchives.put(jobId, archivePath)
+  }
+
   def unTrackingJob(trackId: TrackId): Unit = {
     trackController.canceling.set(trackId)
   }

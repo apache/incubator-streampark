@@ -26,6 +26,7 @@ import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkTrackControl
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
+import org.apache.streampark.archives.FetchArchives
 import org.json4s.{DefaultFormats, JNothing, JNull}
 import org.json4s.JsonAST.JArray
 import org.json4s.jackson.JsonMethods.parse
@@ -276,7 +277,9 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
           }
         } else if (isConnection) {
           logger.info("The deployment is deleted and enters the task failure process.")
-          FlinkJobState.FAILED
+          val jobId = trackId.jobId
+          val archivePath = trackController.flinkArchives.get(jobId)
+          FlinkJobState.of(FetchArchives.fetchArchives(trackId.jobId, archivePath))
         } else {
           inferSilentOrLostFromPreCache(latest)
         }

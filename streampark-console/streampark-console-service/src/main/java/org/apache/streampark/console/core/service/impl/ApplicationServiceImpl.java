@@ -107,10 +107,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,6 +131,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -205,6 +208,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private FlinkClusterService flinkClusterService;
+
+    @Value("${streampark.archive.path:#{null}}")
+    private String archivePath;
 
     @Autowired
     private VariableService variableService;
@@ -1240,6 +1246,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         String appConf;
         String flinkUserJar = null;
+        String jobId = new JobID().toHexString();
         ApplicationLog applicationLog = new ApplicationLog();
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());
@@ -1361,6 +1368,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         } else {
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
                 AssertUtils.state(buildResult != null);
+                String flinkConfPath = String.format("%s/conf/flink-conf.yaml", flinkEnv.getFlinkHome());
+                ParameterTool parameter = ParameterTool.fromPropertiesFile(flinkConfPath);
+                String fsPath = Optional.ofNullable(parameter.get("jobmanager.archive.fs.dir")).orElse(archivePath);
+                k8SFlinkTrackMonitor.archivesJob(jobId, fsPath);
+                properties.put(ConfigConst.KEY_JOBMANAGER_ARCHIVE_FS_DIR(), fsPath);
                 DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
                 String ingressTemplates = application.getIngressTemplate();
                 String domainName = application.getDefaultModeIngress();
@@ -1395,7 +1407,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             ExecutionMode.of(application.getExecutionMode()),
             resolveOrder,
             application.getId(),
-            new JobID().toHexString(),
+            jobId,
             application.getJobName(),
             appConf,
             application.getApplicationType(),

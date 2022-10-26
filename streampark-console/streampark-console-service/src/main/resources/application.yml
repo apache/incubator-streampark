@@ -91,6 +91,8 @@ streampark:
   workspace:
     local: /opt/streampark_workspace
     remote: hdfs://hdfscluster/streampark   # support hdfs:///streampark/ 、 /streampark 、hdfs://host:ip/streampark/
+  archive:
+    path: hdfs:///streampark/completed-jobs/
 
   # remote docker register namespace for streampark
   docker:
