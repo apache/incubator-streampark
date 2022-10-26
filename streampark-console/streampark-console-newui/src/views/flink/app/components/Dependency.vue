@@ -232,10 +232,3 @@
     </TabPane>
   </Tabs>
 </template>
-<style lang="less">
-  .pom-card {
-    .ant-tabs-nav {
-      margin-bottom: 0 !important;
-    }
-  }
-</style>

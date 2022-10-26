@@ -268,7 +268,7 @@
   }
 </script>
 <template>
-  <Tabs type="card" v-model:activeKey="podTemplateTab">
+  <Tabs type="card" v-model:activeKey="podTemplateTab" class="pom-card">
     <TabPane key="pod-template" tab="Pod Template" forceRender>
       <TemplateButtonGroup
         visualType="ptVisual"

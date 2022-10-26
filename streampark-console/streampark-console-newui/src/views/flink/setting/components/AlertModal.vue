@@ -205,7 +205,7 @@
       <SvgIcon name="alarm" size="25" />
       Alert Setting
     </template>
-    <BasicForm @register="registerForm">
+    <BasicForm @register="registerForm" class="!mt-15px">
       <template #type="{ model, field }">
         <Select
           v-model:value="model[field]"
