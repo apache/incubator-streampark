@@ -39,13 +39,13 @@ import java.util.Date;
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = StreamParkConsoleBootstrap.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ApplicationServiceTest {
+class ApplicationServiceTest {
 
     @Autowired
     private ApplicationService applicationService;
 
     @Test
-    public void revokeTest() {
+    void revokeTest() {
         Date now = new Date();
         Application app = new Application();
         app.setId(100001L);
@@ -83,7 +83,7 @@ public class ApplicationServiceTest {
     }
 
     @Test
-    public void start() throws Exception {
+    void start() throws Exception {
         Application application = new Application();
         application.setId(1304056220683497473L);
         application.setFlameGraph(false);
@@ -95,7 +95,7 @@ public class ApplicationServiceTest {
     }
 
     @Test
-    public void uploadTest() throws Exception {
+    void uploadTest() throws Exception {
         File file = new File(""); // specify the file path
         MultipartFile mulFile = new MockMultipartFile(
             "", // fileName (eg: streampark.jar)

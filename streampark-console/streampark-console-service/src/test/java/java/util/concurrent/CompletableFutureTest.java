@@ -24,10 +24,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CompletableFutureTest {
+class CompletableFutureTest {
 
     @Test
-    public void testStartJobNormally() throws Exception {
+    void testStartJobNormally() throws Exception {
         // It takes 5 seconds to start job.
         CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> runStart(5));
 
@@ -52,7 +52,7 @@ public class CompletableFutureTest {
     }
 
     @Test
-    public void testStopJobEarly() throws Exception {
+    void testStopJobEarly() throws Exception {
         // It takes 10 seconds to start job.
         CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> runStart(10));
 
@@ -84,7 +84,7 @@ public class CompletableFutureTest {
     }
 
     @Test
-    public void testStartJobTimeout() throws Exception {
+    void testStartJobTimeout() throws Exception {
 
         // It takes 10 seconds to start job.
         CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> runStart(10));

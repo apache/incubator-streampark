@@ -35,14 +35,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class SendEmailTest {
+class SendEmailTest {
 
     private Template template;
 
     private SenderEmail senderEmail;
 
     @BeforeEach
-    public void initConfig() throws Exception {
+    void initConfig() throws Exception {
         this.template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
         senderEmail = new SenderEmail();
         senderEmail.setFrom("****@domain.com");
@@ -54,7 +54,7 @@ public class SendEmailTest {
     }
 
     @Test
-    public void alert() {
+    void alert() {
         Application application = new Application();
         application.setStartTime(new Date());
         application.setJobName("Test My Job");

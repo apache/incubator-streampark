@@ -25,10 +25,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class StacktraceMetricBufferTest {
+class StacktraceMetricBufferTest {
 
     @Test
-    public void appendValue() {
+    void appendValue() {
         StacktraceMetricBuffer buffer = new StacktraceMetricBuffer();
 
         Set<Stacktrace> distinctStacktraces = new HashSet<>();

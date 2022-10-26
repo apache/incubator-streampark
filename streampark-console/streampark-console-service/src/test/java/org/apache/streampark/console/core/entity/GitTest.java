@@ -24,23 +24,23 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class GitTest {
+class GitTest {
 
     private final Project project = new Project();
 
     @BeforeEach
-    public void before() {
+    void before() {
         project.setUrl("https://github.com/streamxhub/streampark-quickstart");
     }
 
     @Test
-    public void getBranchs() {
+    void getBranchs() {
         List<String> branches = project.getAllBranches();
         branches.forEach(System.out::println);
     }
 
     @Test
-    public void auth() {
+    void auth() {
         GitAuthorizedError error = project.gitCheck();
         System.out.println(error);
     }
