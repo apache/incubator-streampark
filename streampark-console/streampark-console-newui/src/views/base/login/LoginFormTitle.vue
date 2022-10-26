@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <h2 class="mb-3 text-2xl font-bold text-center xl:text-3xl enter-x xl:text-left">
+  <h2 class="mb-6 text-2xl font-bold text-center xl:text-3xl enter-x">
     {{ getFormTitle }}
   </h2>
 </template>

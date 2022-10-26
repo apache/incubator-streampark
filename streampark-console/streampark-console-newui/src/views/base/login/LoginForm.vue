@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <LoginFormTitle v-show="getShow" class="enter-x mb-40px" />
+  <LoginFormTitle v-show="getShow" class="enter-x mb-40px text-light-50" />
   <Form
     class="p-4 enter-x"
     :model="formData"
@@ -51,28 +51,27 @@
       <ACol :span="12">
         <FormItem>
           <!-- No logic, you need to deal with it yourself -->
-          <Checkbox v-model:checked="rememberMe" size="small">
+          <Checkbox v-model:checked="rememberMe" size="small" class="!text-light-500">
             {{ t('sys.login.rememberMe') }}
           </Checkbox>
         </FormItem>
       </ACol>
-      <ACol :span="12">
+      <!-- No logic, you need to deal with it yourself -->
+      <!-- <ACol :span="12">
         <FormItem :style="{ 'text-align': 'right' }">
-          <!-- No logic, you need to deal with it yourself -->
           <Button type="link" size="small" @click="setLoginState(LoginStateEnum.RESET_PASSWORD)">
             {{ t('sys.login.forgetPassword') }}
           </Button>
         </FormItem>
-      </ACol>
+      </ACol> -->
     </ARow>
-
     <FormItem class="enter-x">
       <Button type="primary" block @click="handleLogin" :loading="loading">
-        通过 {{ loginText.buttonText }} 登录
+        {{ loginText.buttonText }}
       </Button>
     </FormItem>
-    <FormItem class="enter-x text-center">
-      <Button type="link" @click="changeLoginType"> 使用 {{ loginText.linkText }} </Button>
+    <FormItem class="enter-x text-left">
+      <Button type="link" @click="changeLoginType"> {{ loginText.linkText }} </Button>
     </FormItem>
   </Form>
   <TeamModal v-model:visible="modelVisible" :userId="userId" @success="handleTeamSuccess" />
@@ -112,7 +111,7 @@
   const { createErrorModal, createMessage } = useMessage();
   const { prefixCls } = useDesign('login');
   const userStore = useUserStore();
-  const { setLoginState, getLoginState } = useLoginState();
+  const { getLoginState } = useLoginState();
   const { getFormRules } = useFormRules();
   interface LoginForm {
     account: string;
@@ -130,12 +129,12 @@
   });
 
   const loginText = computed(() => {
-    const localText = '本地账户';
+    const localText = 'Login';
     const ldapText = 'openLDAP';
     if (loginType.value === LoginTypeEnum.LOCAL) {
-      return { buttonText: localText, linkText: ldapText };
+      return { buttonText: localText, linkText: 'Login by openLDAP' };
     }
-    return { buttonText: ldapText, linkText: localText };
+    return { buttonText: ldapText, linkText: 'Login by Password' };
   });
 
   const { validForm } = useFormValid(formRef);

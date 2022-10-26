@@ -34,7 +34,7 @@ import {
 } from '/@/enums/cacheEnum';
 import { DEFAULT_CACHE_TIME } from '/@/settings/encryptionSetting';
 import { toRaw } from 'vue';
-import { pick, omit, debounce } from 'lodash-es';
+import { pick, omit } from 'lodash-es';
 
 interface BasicStore {
   [TOKEN_KEY]: string | number | null | undefined;
@@ -131,12 +131,21 @@ window.addEventListener('beforeunload', function () {
 
 function storageChange(e: any) {
   const { key, newValue, oldValue } = e;
-
   if (!key) {
     Persistent.clearAll();
     return;
   }
-
+  // token change reload
+  if (key === TOKEN_KEY && oldValue !== newValue) {
+    const { [TOKEN_KEY]: tokenCache } = pick(ls.get(APP_LOCAL_CACHE_KEY), TOKEN_KEY);
+    // no token or token value is invalid
+    if (tokenCache?.value !== newValue) {
+      Persistent.clearLocal();
+      return;
+    }
+    window.location.reload();
+    return;
+  }
   if (!!newValue && !!oldValue) {
     if (APP_LOCAL_CACHE_KEY === key) {
       Persistent.clearLocal();
@@ -147,6 +156,6 @@ function storageChange(e: any) {
   }
 }
 
-window.addEventListener('storage', debounce(storageChange, 500));
+window.addEventListener('storage', storageChange);
 
 initPersistentMemory();
