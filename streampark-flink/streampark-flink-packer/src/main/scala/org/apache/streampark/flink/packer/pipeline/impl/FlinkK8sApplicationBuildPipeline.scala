@@ -134,9 +134,9 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
             // when the register address prefix is explicitly identified on base image tag,
             // the user's pre-saved docker register auth info would be used.
             if (dockerConf.registerAddress != null && !baseImageTag.startsWith(dockerConf.registerAddress)) {
-              dockerClient.pullImageCmd(baseImageTag)
+              dockerClient.pullImageCmd(baseImageTag.trim)
             } else {
-              dockerClient.pullImageCmd(baseImageTag).withAuthConfig(dockerConf.toAuthConf)
+              dockerClient.pullImageCmd(baseImageTag.trim).withAuthConfig(dockerConf.toAuthConf)
             }
           }
           val pullCmdCallback = pullImageCmd.asInstanceOf[HackPullImageCmd]
