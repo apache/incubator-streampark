@@ -103,6 +103,7 @@ export default {
       return [{
         title: 'Application Name',
         dataIndex: 'jobName',
+        width: 500,
         scopedSlots: {customRender: 'jobName'},
       }, {
         title: 'Owner',
