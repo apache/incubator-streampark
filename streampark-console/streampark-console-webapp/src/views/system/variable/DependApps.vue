@@ -24,7 +24,7 @@
       size="middle"
       layout="vertical">
       <template slot="title">
-        <span class="app-bar">List of applications dependent on the variable "{{ this.variable }}"</span>
+        <span class="app-bar">Variable "{{ this.variable }}" used list</span>
         <a-button
           type="primary"
           shape="circle"

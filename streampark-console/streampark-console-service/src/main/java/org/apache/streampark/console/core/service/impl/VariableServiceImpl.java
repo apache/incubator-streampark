@@ -157,10 +157,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable> i
     }
 
     private boolean isDependByApplications(Variable variable) {
-        if (CollectionUtils.isEmpty(getDependApplicationsByCode(variable))) {
-            return false;
-        }
-        return true;
+        return CollectionUtils.isNotEmpty(getDependApplicationsByCode(variable));
     }
 
     private List<Application> getDependApplicationsByCode(Variable variable) {
