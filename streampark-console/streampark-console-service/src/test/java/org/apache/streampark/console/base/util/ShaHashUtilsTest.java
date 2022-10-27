@@ -23,10 +23,10 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link ShaHashUtils}
  */
-public class ShaHashUtilsTest {
+class ShaHashUtilsTest {
 
     @Test
-    public void testEncrypt() {
+    void testEncrypt() {
         String randomSalt = "rh8b1ojwog777yrg0daesf04gk";
         String encryptPassword = ShaHashUtils.encrypt(randomSalt, "streampark");
         Assertions.assertEquals("2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f", encryptPassword);

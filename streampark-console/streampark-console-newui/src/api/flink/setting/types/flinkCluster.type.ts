@@ -29,10 +29,10 @@ export interface FlinkCluster {
   options: string;
   yarnQueue: string;
   k8sHadoopIntegration: boolean;
-  dynamicOptions: string;
+  properties: string;
   k8sRestExposedType: number;
   flameGraph: boolean;
-  ?: any;
+  k8sConf?: any;
   resolveOrder: number;
   exception?: any;
   clusterState: number;

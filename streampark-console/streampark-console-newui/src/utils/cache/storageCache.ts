@@ -61,7 +61,7 @@ export const createStorage = ({
       this.hasEncrypt = hasEncrypt;
     }
 
-    private getKey(key: string) {
+    getKey(key: string) {
       return `${this.prefixKey}${key}`.toUpperCase();
     }
 

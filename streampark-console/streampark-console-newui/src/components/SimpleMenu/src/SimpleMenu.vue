@@ -43,7 +43,7 @@
   import SimpleSubMenu from './SimpleSubMenu.vue';
   import { listenerRouteChange } from '/@/logics/mitt/routeChange';
   import { propTypes } from '/@/utils/propTypes';
-  import { REDIRECT_NAME } from '/@/router/constant';
+  import { menuMap, REDIRECT_NAME } from '/@/router/constant';
   import { useRouter } from 'vue-router';
   import { isFunction, isUrl } from '/@/utils/is';
   import { openWindow } from '/@/utils';
@@ -93,7 +93,6 @@
         mixSider,
         collapse,
       );
-
       const getBindValues = computed(() => ({ ...attrs, ...props }));
 
       watch(
@@ -137,8 +136,11 @@
           return;
         }
         const path = (route || unref(currentRoute)).path;
-
-        menuState.activeName = path;
+        if (Reflect.has(menuMap, path)) {
+          menuState.activeName = menuMap[path];
+        } else {
+          menuState.activeName = path;
+        }
 
         setOpenKeys(path);
       }

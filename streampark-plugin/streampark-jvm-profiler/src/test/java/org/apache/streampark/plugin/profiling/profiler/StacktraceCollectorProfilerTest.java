@@ -30,10 +30,10 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class StacktraceCollectorProfilerTest {
+class StacktraceCollectorProfilerTest {
 
     @Test
-    public void profile() throws InterruptedException {
+    void profile() throws InterruptedException {
         StacktraceMetricBuffer buffer = new StacktraceMetricBuffer();
         StacktraceCollectorProfiler profiler = new StacktraceCollectorProfiler(buffer, null);
 
@@ -124,7 +124,7 @@ public class StacktraceCollectorProfilerTest {
     }
 
     @Test
-    public void profile_ignoreThread() throws InterruptedException {
+    void profile_ignoreThread() throws InterruptedException {
         StacktraceMetricBuffer buffer = new StacktraceMetricBuffer();
         StacktraceCollectorProfiler profiler = new StacktraceCollectorProfiler(buffer, "testDummy");
 
@@ -205,7 +205,7 @@ public class StacktraceCollectorProfilerTest {
     }
 
     @Test
-    public void profile_largeStack() throws InterruptedException {
+    void profile_largeStack() throws InterruptedException {
         StacktraceMetricBuffer buffer = new StacktraceMetricBuffer();
         StacktraceCollectorProfiler profiler = new StacktraceCollectorProfiler(buffer, null, 20000);
 

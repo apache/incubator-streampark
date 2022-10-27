@@ -33,7 +33,7 @@ case class DeployRequest(flinkVersion: FlinkVersion,
                          executionMode: ExecutionMode,
                          resolveOrder: ResolveOrder,
                          flameGraph: JavaMap[String, java.io.Serializable],
-                         dynamicOption: JavaMap[String, String],
+                         properties: JavaMap[String, String],
                          @Nullable k8sDeployParam: KubernetesDeployParam,
                          @Nullable extraParameter: JavaMap[String, Any]
                          ) {

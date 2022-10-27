@@ -22,6 +22,7 @@
 
 <script setup lang="ts" name="AddProject">
   import { defineComponent } from 'vue';
+  import { useRouter } from 'vue-router';
   import { useProject } from './useProject';
   import { createProject } from '/@/api/flink/project';
   import { BasicForm } from '/@/components/Form';
@@ -29,9 +30,10 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { getUserTeamId } from '/@/utils';
-  const { getLoading, close, registerForm, submit, handleSubmit } = useProject();
+  const { getLoading, registerForm, submit, handleSubmit } = useProject();
 
-  const { createMessage } = useMessage();
+  const { Swal, createMessage } = useMessage();
+  const router = useRouter();
   const { t } = useI18n();
 
   /* Create project */
@@ -52,9 +54,9 @@
       });
       if (res.data) {
         createMessage.success('created successfully');
-        close(undefined, { path: '/flink/project' });
+        router.go(-1);
       } else {
-        createMessage.error('Project save failed :' + res['message']);
+        Swal.fire('Failed', 'Project save failed ..>﹏<.. <br><br>' + res['message'], 'error');
       }
     } catch (error: any) {
       if (error?.data?.message) {
@@ -73,7 +75,7 @@
     >
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button @click="close(undefined, { path: '/flink/app' })">
+          <a-button @click="router.go(-1)">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button class="ml-4" :loading="getLoading" type="primary" @click="submit()">

@@ -25,7 +25,7 @@ import { SvgIcon } from '/@/components/Icon';
 import { useMessage } from '/@/hooks/web/useMessage';
 
 export const useFlinkApplication = (openStartModal: Fn) => {
-  const { createConfirm, createMessage, createWarningModal } = useMessage();
+  const { Swal, createConfirm, createMessage, createWarningModal } = useMessage();
   const users = ref<Recordable>([]);
   const appBuildDetail = reactive<Recordable>({});
   const historySavePoint = ref<any>([]);
@@ -59,14 +59,18 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       forceBuild: force,
     });
     if (!data.data) {
-      createConfirm({
-        iconType: 'error',
-        title: 'Failed',
-        content:
-          'lanuch application failed, ' + (data.message || '').replaceAll(/\[StreamPark]/g, ''),
-      });
+      Swal.fire(
+        'Failed',
+        'lanuch application failed, ' + (data.message || '').replaceAll(/\[StreamPark]/g, ''),
+        'error',
+      );
     } else {
-      createMessage.success('Current Application is launching');
+      Swal.fire({
+        icon: 'success',
+        title: 'Current Application is launching',
+        showConfirmButton: false,
+        timer: 2000,
+      });
     }
   }
 
@@ -109,7 +113,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
 
   async function handleStart(app) {
     if (app.flinkVersion == null) {
-      createMessage.error('please set flink version first.');
+      Swal.fire('Failed', 'please set flink version first.', 'error');
     } else {
       if (!optionApps.starting.get(app.id) || app['optionState'] === 0) {
         const res = await fetchLatest({
@@ -163,13 +167,18 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     } else {
       option = optionStateMap[optionState];
     }
-    createConfirm({
-      iconType: 'warning',
+    Swal.fire({
       title: 'Are you sure?',
-      content: `current job is ${option}, are you sure forced stop?`,
-      okText: 'Yes, forced stop!',
-      cancelText: 'No, cancel',
-      onOk: async () => {
+      text: `current job is ${option}, are you sure forced stop?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, forced stop!',
+      denyButtonText: `No, cancel`,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        Swal.fire('forced stopping', '', 'success');
         const res = await fetchForcedStop({
           id: app.id,
         });
@@ -177,7 +186,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
           createMessage.success('forced stopping');
         }
         return Promise.resolve();
-      },
+      }
     });
   }
 
@@ -188,14 +197,16 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     let copyAppName: string | undefined = '';
     createConfirm({
       width: '600px',
-      iconType: 'info',
       title: () => [
-        h(SvgIcon, { name: 'copy', style: { color: 'red', display: 'inline-block' } }),
+        h(SvgIcon, {
+          name: 'copy',
+          style: { color: 'red', display: 'inline-block', marginRight: '10px' },
+        }),
         'Copy Application',
       ],
       content: () => {
         return (
-          <Form>
+          <Form class="!pt-20px">
             <Form.Item
               label="Application Name"
               labelCol={{ lg: { span: 7 }, sm: { span: 7 } }}
@@ -231,9 +242,11 @@ export const useFlinkApplication = (openStartModal: Fn) => {
           });
           const status = data.status || 'error';
           if (status === 'success') {
-            createMessage.success('copy successful');
-          } else {
-            createMessage.error(data.message || 'copy failed');
+            Swal.fire({
+              icon: 'success',
+              title: 'copy successful',
+              timer: 1500,
+            });
           }
         } catch (error: any) {
           if (error?.response?.data?.message) {
@@ -255,9 +268,11 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     const formValue = reactive<any>({});
     createConfirm({
       width: '600px',
-      iconType: 'info',
       title: () => [
-        h(SvgIcon, { name: 'mapping', style: { color: 'green', display: 'inline-block' } }),
+        h(SvgIcon, {
+          name: 'mapping',
+          style: { color: 'green', display: 'inline-block', marginRight: '10px' },
+        }),
         'Mapping Application',
       ],
       content: () => {
@@ -301,7 +316,12 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             appId: formValue.appId,
             jobId: formValue.jobId,
           });
-          createMessage.success('The current job is mapping');
+          Swal.fire({
+            icon: 'success',
+            title: 'The current job is mapping',
+            showConfirmButton: false,
+            timer: 2000,
+          });
           return Promise.resolve();
         } catch (error) {
           return Promise.reject(error);
@@ -310,9 +330,10 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     });
   }
 
-  onMounted(async () => {
-    const res = await fetchAppOwners({});
-    users.value = res.records;
+  onMounted(() => {
+    fetchAppOwners({}).then((res) => {
+      users.value = res;
+    });
   });
 
   return {

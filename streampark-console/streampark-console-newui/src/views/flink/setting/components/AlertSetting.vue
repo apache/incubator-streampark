@@ -23,7 +23,7 @@
   });
 </script>
 <script setup lang="ts" name="AlertSetting">
-  import { h, onMounted, ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import { List, Popconfirm, Tooltip } from 'ant-design-vue';
   import {
     ThunderboltOutlined,
@@ -42,7 +42,7 @@
   const ListItemMeta = ListItem.Meta;
 
   const { t } = useI18n();
-  const { createMessage, createConfirm } = useMessage();
+  const { Swal, createMessage } = useMessage();
   const [registerAlertModal, { openModal: openAlertModal }] = useModal();
   const alerts = ref<AlertSetting[]>([]);
   const alertType = ref<number[]>([]);
@@ -71,19 +71,15 @@
     const hide = createMessage.loading(' Testing', 0);
     try {
       await fetchSendAlert({ id: item.id });
-      createMessage.success('Test Alert Config  successful!');
+      Swal.fire({
+        icon: 'success',
+        title: 'Test Alert Config  successful!',
+        showConfirmButton: false,
+        timer: 2000,
+      });
       getAlertSetting();
     } catch (error: any) {
-      /* custom alert message */
-      if (error?.response?.data?.message) {
-        createConfirm({
-          iconType: 'error',
-          title: 'Operation Failed',
-          content: h('div', { class: 'whitespace-pre-wrap' }, error?.response?.data?.message),
-        });
-      } else {
-        console.error(error);
-      }
+      console.error(error);
     } finally {
       hide();
     }
@@ -136,8 +132,22 @@
   /* delete configuration */
   async function handleDeleteAlertConf(item: AlertSetting) {
     try {
-      await fetchAlertDelete({ id: item.id });
-      createMessage.success('Delete Alert Config  successful!');
+      const { data } = await fetchAlertDelete({ id: item.id });
+      if (data.data) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Delete Alert Config  successful!',
+          showConfirmButton: false,
+          timer: 2000,
+        });
+      } else {
+        Swal.fire(
+          'Failed delete AlertConfig',
+          data['message'].replaceAll(/\[StreamPark]/g, ''),
+          'error',
+        );
+      }
+
       getAlertSetting();
     } catch (error) {
       console.error(error);
@@ -150,7 +160,7 @@
 
 <template>
   <div v-auth="'project:create'">
-    <a-button type="dashed" style="width: 100%; margin-top: 20px" @click="openAlertModal(true)">
+    <a-button type="dashed" style="width: 100%; margin-top: 20px" @click="openAlertModal(true, {})">
       <PlusOutlined />
       {{ t('common.add') }}
     </a-button>
@@ -181,7 +191,7 @@
         <Tooltip title="Alert Test">
           <a-button
             @click="handleTestAlarm(item)"
-            shape="circle"
+            type="link"
             size="large"
             style="margin-left: 3px"
             class="control-button ctl-btn-color"
@@ -192,7 +202,7 @@
         <Tooltip title="Edit Alert Config">
           <a-button
             @click="handleEditAlertConf(item)"
-            shape="circle"
+            type="link"
             size="large"
             style="margin-left: 3px"
             class="control-button ctl-btn-color"
@@ -206,14 +216,8 @@
           :ok-text="t('common.yes')"
           @confirm="handleDeleteAlertConf(item)"
         >
-          <a-button
-            type="danger"
-            shape="circle"
-            size="large"
-            style="margin-left: 3px"
-            class="control-button"
-          >
-            <DeleteOutlined />
+          <a-button type="link" size="large" style="margin-left: 3px" class="control-button">
+            <DeleteOutlined style="color: red" />
           </a-button>
         </Popconfirm>
       </template>

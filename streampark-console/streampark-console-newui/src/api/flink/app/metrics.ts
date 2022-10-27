@@ -15,9 +15,14 @@
  * limitations under the License.
  */
 import { AxiosResponse } from 'axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
 
+interface FlameGraphParam {
+  //application id
+  appId: string;
+  //The width of the screen
+  width: Number;
+}
 enum Metrics_API {
   FLAME_GRAPH = '/metrics/flamegraph',
   NOTICE = '/metrics/notice',
@@ -25,22 +30,16 @@ enum Metrics_API {
 }
 /**
  * export
- * @param {String} appId application id
- * @param {Number} width The width of the screen
- * @returns {Promise<AxiosResponse<Blob>>} Promise<AxiosResponse<Blob>>
+ * @param {FlameGraphParam} data
+ * @returns {Promise<AxiosResponse<Blob>>}
  */
-export function fetchFlamegraph(params) {
-  return defHttp.post<AxiosResponse<Blob>>(
+export function fetchFlamegraph(data: FlameGraphParam): Promise<AxiosResponse<Blob>> {
+  return defHttp.post(
     {
       url: Metrics_API.FLAME_GRAPH,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
+      data,
       responseType: 'blob',
     },
-    {
-      isReturnNativeResponse: true,
-    },
+    { isReturnNativeResponse: true },
   );
 }

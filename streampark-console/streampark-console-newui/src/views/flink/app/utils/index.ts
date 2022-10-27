@@ -260,7 +260,7 @@ export function handleSubmitParams(
     cpMaxFailureInterval: values.cpMaxFailureInterval || null,
     cpFailureRateInterval: values.cpFailureRateInterval || null,
     cpFailureAction: values.cpFailureAction || null,
-    dynamicOptions: values.dynamicOptions || null,
+    properties: values.properties || null,
     resolveOrder: values.resolveOrder,
     k8sRestExposedType: values.k8sRestExposedType,
     restartSize: values.restartSize,

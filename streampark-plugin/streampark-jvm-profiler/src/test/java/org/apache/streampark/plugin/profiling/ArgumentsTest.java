@@ -30,10 +30,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ArgumentsTest {
+class ArgumentsTest {
 
     @Test
-    public void allArguments() {
+    void allArguments() {
         Arguments arguments =
             Arguments.parseArgs(
                 "reporter=org.apache.streampark.plugin.profiling.ArgumentsTest$DummyReporter,durationProfiling=a.bc.foo,metricInterval=123,appIdVariable=APP_ID1,appIdRegex=app123,argumentProfiling=package1.class1.method1.1");
@@ -53,7 +53,7 @@ public class ArgumentsTest {
     }
 
     @Test
-    public void emptyArguments() {
+    void emptyArguments() {
         Arguments arguments = Arguments.parseArgs("");
         Assertions.assertEquals(0, arguments.getRawArgValues().size());
         Assertions.assertFalse(arguments.isNoop());
@@ -67,13 +67,13 @@ public class ArgumentsTest {
     }
 
     @Test()
-    public void emptyArgumentValue() {
+    void emptyArgumentValue() {
         Assertions.assertThrows(IllegalArgumentException.class,
             () -> Arguments.parseArgs("reporter=,durationProfiling=,metricInterval=,appIdRegex=,"));
     }
 
     @Test
-    public void noop() {
+    void noop() {
         Arguments arguments =
             Arguments.parseArgs("durationProfiling=a.bc.foo,noop=true,durationProfiling=ab.c.d.test");
         Assertions.assertEquals(2, arguments.getRawArgValues().size());
@@ -82,7 +82,7 @@ public class ArgumentsTest {
     }
 
     @Test
-    public void durationProfiling() {
+    void durationProfiling() {
         Arguments arguments =
             Arguments.parseArgs("durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test");
         Assertions.assertEquals(2, arguments.getDurationProfiling().size());
@@ -94,7 +94,7 @@ public class ArgumentsTest {
     }
 
     @Test
-    public void argumentProfiling() {
+    void argumentProfiling() {
         Arguments arguments =
             Arguments.parseArgs("durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test");
         Assertions.assertEquals(2, arguments.getDurationProfiling().size());
@@ -106,7 +106,7 @@ public class ArgumentsTest {
     }
 
     @Test
-    public void setReporter() {
+    void setReporter() {
         Arguments arguments = Arguments.parseArgs("");
 
         arguments.setReporter("org.apache.streampark.plugin.profiling.ArgumentsTest$DummyReporter");
@@ -115,7 +115,7 @@ public class ArgumentsTest {
     }
 
     @Test
-    public void setConfigProvider() {
+    void setConfigProvider() {
         Arguments arguments = Arguments.parseArgs("");
 
         arguments.setConfigProvider(
@@ -125,7 +125,7 @@ public class ArgumentsTest {
     }
 
     @Test
-    public void processConfigProvider_DummyConfigProvider() {
+    void processConfigProvider_DummyConfigProvider() {
         Arguments arguments =
             Arguments.parseArgs(
                 "tag=tag1,cluster=cluster1,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=org.apache.streampark.plugin.profiling.ArgumentsTest$DummyConfigProvider");
@@ -144,7 +144,7 @@ public class ArgumentsTest {
     }
 
     @Test
-    public void processConfigProvider_SimpleConfigProvider() {
+    void processConfigProvider_SimpleConfigProvider() {
         Arguments arguments =
             Arguments.parseArgs(
                 "tag=tag1,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=org.apache.streampark.plugin.profiling.ArgumentsTest$SimpleConfigProvider");
@@ -162,7 +162,7 @@ public class ArgumentsTest {
     }
 
     @Test
-    public void processConfigProvider_OverrideConfigProvider() {
+    void processConfigProvider_OverrideConfigProvider() {
         Arguments arguments =
             Arguments.parseArgs(
                 "tag=tag1,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=org.apache.streampark.plugin.profiling.ArgumentsTest$OverrideConfigProvider");

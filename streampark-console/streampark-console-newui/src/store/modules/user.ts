@@ -36,9 +36,10 @@ import { usePermissionStore } from '/@/store/modules/permission';
 import { RouteRecordRaw } from 'vue-router';
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 import { h } from 'vue';
-import { SignOut } from '/@/adapter/store/modules/user';
 import { getUserTeamId } from '/@/utils';
 import { usePermission } from '/@/hooks/web/usePermission';
+import { AesEncryption } from '/@/utils/cipher';
+import { cacheCipher } from '/@/settings/encryptionSetting';
 
 interface TeamListType {
   label: string;
@@ -87,7 +88,7 @@ export const useUserStore = defineStore({
       return this.expire || getAuthCache<string>(EXPIRE_KEY);
     },
     getRoleList(): RoleEnum[] {
-      return this.roleList.length > 0 ? this.roleList : getAuthCache<RoleEnum[]>(ROLES_KEY);
+      return this.roleList?.length > 0 ? this.roleList : getAuthCache<RoleEnum[]>(ROLES_KEY);
     },
     getSessionTimeout(): boolean {
       return !!this.sessionTimeout;
@@ -111,13 +112,20 @@ export const useUserStore = defineStore({
     setToken(info: string | undefined) {
       this.token = info ? info : ''; // for null or undefined value
       setAuthCache(TOKEN_KEY, info);
+      let cacheToken = this.token;
+      // production encrypted
+      if (import.meta.env.PROD && cacheToken) {
+        const encryption = new AesEncryption({ key: cacheCipher.key, iv: cacheCipher.iv });
+        cacheToken = encryption.encryptByAES(cacheToken);
+      }
+      localStorage.setItem(TOKEN_KEY, cacheToken);
     },
     setExpire(info: string | undefined) {
       this.expire = info || '';
       setAuthCache(EXPIRE_KEY, info);
     },
     setRoleList(roleList: RoleEnum[]) {
-      this.roleList = roleList;
+      this.roleList = roleList || [];
       setAuthCache(ROLES_KEY, roleList);
     },
     setUserInfo(info: UserInfo | null) {
@@ -139,13 +147,14 @@ export const useUserStore = defineStore({
       setAuthCache(PERMISSION_KEY, permissions);
     },
     setData(data: Recordable) {
-      const { token, expire, user, permissions, roles } = data;
+      const { token, expire, user, permissions, roles = [] } = data;
 
-      this.setToken(token);
       this.setExpire(expire);
       this.setUserInfo(user);
       this.setRoleList(roles);
       this.setPermissions(permissions);
+      // set token must be placed at the end, need to listen to this value
+      this.setToken(token);
     },
     // set team
     async setTeamId(data: { teamId: string; userId?: string }): Promise<boolean> {
@@ -158,16 +167,17 @@ export const useUserStore = defineStore({
         } else {
           const resp = await fetchSetUserTeam(data);
 
-          const { permissions, roles, user } = resp;
+          const { permissions, roles = [], user } = resp;
           this.setUserInfo(user);
           this.setRoleList(roles as RoleEnum[]);
           this.setPermissions(permissions);
-          refreshMenu();
         }
         // If it returns success, it will be stored in the local cache
         this.teamId = data.teamId;
         sessionStorage.setItem(APP_TEAMID_KEY_, data.teamId);
         localStorage.setItem(APP_TEAMID_KEY_, data.teamId);
+
+        if (!data.userId) refreshMenu();
         return Promise.resolve(true);
       } catch (error) {
         return Promise.reject(error);
@@ -210,17 +220,15 @@ export const useUserStore = defineStore({
       if (this.getToken) {
         try {
           await doLogout();
-
-          await SignOut();
         } catch {
           console.log('Token cancellation failed');
         }
       }
-      this.setToken(undefined);
       this.setSessionTimeout(false);
       this.setUserInfo(null);
       sessionStorage.removeItem(APP_TEAMID_KEY_);
       localStorage.removeItem(APP_TEAMID_KEY_);
+      this.setToken(undefined);
       goLogin && router.push(PageEnum.BASE_LOGIN);
     },
 

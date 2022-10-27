@@ -19,7 +19,6 @@ package org.apache.streampark.common.enums;
 
 import java.io.Serializable;
 
-
 public enum DevelopmentMode implements Serializable {
 
     /**

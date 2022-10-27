@@ -18,7 +18,10 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'role:add'"> Add Role</a-button>
+        <a-button type="primary" @click="handleCreate" v-auth="'role:add'">
+          <Icon icon="ant-design:plus-outlined" />
+          {{ t('common.add') }}
+        </a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -51,7 +54,7 @@
         </template>
       </template>
     </BasicTable>
-    <RoleDrawer @register="registerDrawer" @success="handleSuccess" />
+    <RoleDrawer okText="Submit" @register="registerDrawer" @success="handleSuccess" />
     <RoleInfo @register="registerInfo" />
   </div>
 </template>
@@ -69,31 +72,37 @@
   import { columns, searchFormSchema } from './role.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { FormTypeEnum } from '/@/enums/formEnum';
-  import { deleteRole } from '/@/api/system/role';
+  import { fetchRoleDelete } from '/@/api/system/role';
   import { useUserStoreWithOut } from '/@/store/modules/user';
+  import { RoleListRecord } from '/@/api/system/model/roleModel';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
     name: 'RoleManagement',
-    components: { BasicTable, RoleInfo, RoleDrawer, TableAction },
+    components: { BasicTable, RoleInfo, RoleDrawer, TableAction, Icon },
     setup() {
+      const { t } = useI18n();
       const [registerDrawer, { openDrawer }] = useDrawer();
       const [registerInfo, { openDrawer: openInfoDraw }] = useDrawer();
       const { createMessage } = useMessage();
       const useStore = useUserStoreWithOut();
       const [registerTable, { reload }] = useTable({
-        title: '',
+        title: 'Role List',
         api: getRoleListByPage,
         columns,
         formConfig: {
-          labelWidth: 120,
+          baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
+          colon: true,
+          fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
+        showTableSetting: true,
         useSearchForm: true,
-        showTableSetting: false,
-        bordered: true,
         showIndexColumn: false,
+        canResize: false,
         actionColumn: {
-          width: 120,
+          width: 200,
           title: 'Operation',
           dataIndex: 'action',
         },
@@ -103,15 +112,18 @@
         openDrawer(true, { formType: FormTypeEnum.Create });
       }
 
-      function handleEdit(record: Recordable) {
+      function handleEdit(record: RoleListRecord) {
         openDrawer(true, { record, formType: FormTypeEnum.Edit });
       }
 
-      function handleDelete(record: Recordable) {
-        deleteRole({ roleId: record.roleId }).then((_) => {
+      async function handleDelete(record: RoleListRecord) {
+        try {
+          await fetchRoleDelete({ roleId: record.roleId });
           createMessage.success('success');
           reload();
-        });
+        } catch (error: any) {
+          console.log('role delete failed: ' + error.message);
+        }
       }
 
       function handleSuccess() {
@@ -119,11 +131,12 @@
         reload();
       }
 
-      function handleView(record: Recordable) {
+      function handleView(record: RoleListRecord) {
         openInfoDraw(true, record);
       }
 
       return {
+        t,
         registerTable,
         registerInfo,
         registerDrawer,

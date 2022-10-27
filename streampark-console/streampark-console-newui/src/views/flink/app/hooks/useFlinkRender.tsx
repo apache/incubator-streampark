@@ -17,8 +17,9 @@
 import { RenderCallbackParams } from '/@/components/Form/src/types/form';
 import { Icon, SvgIcon } from '/@/components/Icon';
 import options from '../data/option';
-import { cpTriggerAction } from '../data';
+
 import Mergely from '../components/Mergely.vue';
+import CustomForm from '../components/customForm';
 import {
   Alert,
   Dropdown,
@@ -33,7 +34,7 @@ import {
 import { Button } from '/@/components/Button';
 import { descriptionFilter } from '../utils';
 import { SettingTwoTone } from '@ant-design/icons-vue';
-import { ref, unref } from 'vue';
+import { reactive, ref, unref } from 'vue';
 import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
@@ -83,8 +84,9 @@ export const renderInputDropdown = (
   );
 };
 
-function handleCheckCheckpoint(values: Recordable) {
+export function handleCheckCheckpoint(values: Recordable) {
   const { cpMaxFailureInterval, cpFailureRateInterval, cpFailureAction } = values;
+  console.log('values', cpMaxFailureInterval, cpFailureRateInterval, cpFailureAction);
   if (cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null) {
     if (cpFailureAction === 1) {
       const alertEmail = values.alertEmail;
@@ -114,80 +116,22 @@ function handleCheckCheckpoint(values: Recordable) {
 
 /* render input Group component */
 export const renderInputGroup = (model: Recordable) => {
+  const formValue = reactive({
+    cpMaxFailureInterval: model.cpMaxFailureInterval,
+    cpFailureRateInterval: model.cpFailureRateInterval,
+    cpFailureAction: model.cpFailureAction,
+  });
   return (
-    <div>
-      <Input.Group compact>
-        <Form.Item
-          name="cpMaxFailureInterval"
-          rules={{ trigger: 'blur', validator: () => handleCheckCheckpoint(model) }}
-        >
-          <InputNumber
-            min={1}
-            step={1}
-            placeholder="checkpoint failure rate interval"
-            allow-clear
-            class="!w-260px mr-10px"
-            value={model.cpMaxFailureInterval}
-            onInput={(value) => (model.cpMaxFailureInterval = value)}
-          />
-        </Form.Item>
-
-        <Button style="width: 70px"> minute </Button>
-        <Form.Item
-          name="cpFailureRateInterval"
-          rules={{ trigger: 'blur', validator: () => handleCheckCheckpoint(model) }}
-          style="margin-left: 1%"
-        >
-          <InputNumber
-            min={1}
-            step={1}
-            placeholder="max failures per interval"
-            class="!w-200px"
-            value={model.cpFailureRateInterval}
-            onInput={(value) => (model.cpFailureRateInterval = value)}
-          />
-        </Form.Item>
-
-        <Button style="width: 70px"> count </Button>
-        <Form.Item
-          name="cpFailureAction"
-          rules={{ trigger: 'change', validator: () => handleCheckCheckpoint(model) }}
-          style="margin-left: 1%"
-        >
-          <Select
-            placeholder="trigger action"
-            allow-clear
-            class="!w-170px"
-            value={model.cpFailureAction}
-            onChange={(value) => (model.cpFailureAction = value)}
-          >
-            {cpTriggerAction.map((o) => {
-              return (
-                <Select.Option key={o.value}>
-                  <Icon
-                    icon={o.value === 1 ? 'ant-design:alert-outlined' : 'ant-design:sync-outlined'}
-                  />
-                  {o.label}
-                </Select.Option>
-              );
-            })}
-          </Select>
-        </Form.Item>
-      </Input.Group>
-
-      <p class="conf-desc my-0">
-        <span class="note-info">
-          <Tag color="#2db7f5" class="tag-note">
-            Note
-          </Tag>
-          Operation after checkpoint failure, e.g:
-          <br />
-          Within <span class="note-elem">5 minutes</span>(checkpoint failure rate interval), if the
-          number of checkpoint failures reaches <span class="note-elem">10</span> (max failures per
-          interval),action will be triggered(alert or restart job)
-        </span>
-      </p>
-    </div>
+    <Form.Item
+      label="CheckPoint Failure Options"
+      name="CheckPointFailure"
+      rules={[{ validator: () => handleCheckCheckpoint(model) }]}
+    >
+      <CustomForm
+        value={formValue}
+        onUpdateValue={(value: any) => Object.assign(model, value)}
+      ></CustomForm>
+    </Form.Item>
   );
 };
 /*Gets the selection of totalOptions */
@@ -264,17 +208,17 @@ export const renderOptionsItems = (model: Recordable, field: string, reg: string
 };
 
 /* render memory option */
-export const renderDynamicOption = ({ model, field }: RenderCallbackParams) => {
+export const renderProperties = ({ model, field }: RenderCallbackParams) => {
   return (
     <div>
       <Input.TextArea
         rows={8}
-        name="dynamicOptions"
+        name="properties"
         placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
         value={model[field]}
         onInput={(e) => (model[field] = e.target.value)}
       />
-      <p class="conf-desc">
+      <p class="conf-desc mt-10px">
         <span class="note-info">
           <Tag color="#2db7f5" class="tag-note">
             Note
@@ -300,7 +244,7 @@ export const getAlertSvgIcon = (name: string, text: string) => {
       {{
         message: () => (
           <div>
-            <SvgIcon name={name} style={{ color: '#108ee9' }} />
+            <SvgIcon class="mr-8px" name={name} style={{ color: '#108ee9' }} />
             <span>{text}</span>
           </div>
         ),

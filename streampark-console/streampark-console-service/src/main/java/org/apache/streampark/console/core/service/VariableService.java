@@ -44,6 +44,8 @@ public interface VariableService extends IService<Variable> {
      */
     List<Variable> findByTeamId(Long teamId);
 
+    long countByTeamId(Long teamId);
+
     /**
      * create variable
      *

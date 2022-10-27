@@ -106,6 +106,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
@@ -218,7 +219,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private final Map<Long, CompletableFuture<CancelResponse>> cancelFutureMap = new ConcurrentHashMap<>();
 
     @Override
-    public Map<String, Serializable> dashboard() {
+    public Map<String, Serializable> dashboard(Long teamId) {
         JobsOverview.Task overview = new JobsOverview.Task();
         Integer totalJmMemory = 0;
         Integer totalTmMemory = 0;
@@ -228,26 +229,29 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Integer runningJob = 0;
 
         // stat metrics from other than kubernetes mode
-        for (Application v : FlinkTrackingTask.getAllTrackingApp().values()) {
-            if (v.getJmMemory() != null) {
-                totalJmMemory += v.getJmMemory();
+        for (Application app : FlinkTrackingTask.getAllTrackingApp().values()) {
+            if (!teamId.equals(app.getTeamId())) {
+                continue;
             }
-            if (v.getTmMemory() != null) {
-                totalTmMemory += v.getTmMemory() * (v.getTotalTM() == null ? 1 : v.getTotalTM());
+            if (app.getJmMemory() != null) {
+                totalJmMemory += app.getJmMemory();
             }
-            if (v.getTotalTM() != null) {
-                totalTm += v.getTotalTM();
+            if (app.getTmMemory() != null) {
+                totalTmMemory += app.getTmMemory() * (app.getTotalTM() == null ? 1 : app.getTotalTM());
             }
-            if (v.getTotalSlot() != null) {
-                totalSlot += v.getTotalSlot();
+            if (app.getTotalTM() != null) {
+                totalTm += app.getTotalTM();
             }
-            if (v.getAvailableSlot() != null) {
-                availableSlot += v.getAvailableSlot();
+            if (app.getTotalSlot() != null) {
+                totalSlot += app.getTotalSlot();
             }
-            if (v.getState() == FlinkAppState.RUNNING.getValue()) {
+            if (app.getAvailableSlot() != null) {
+                availableSlot += app.getAvailableSlot();
+            }
+            if (app.getState() == FlinkAppState.RUNNING.getValue()) {
                 runningJob++;
             }
-            JobsOverview.Task task = v.getOverview();
+            JobsOverview.Task task = app.getOverview();
             if (task != null) {
                 overview.setTotal(overview.getTotal() + task.getTotal());
                 overview.setCreated(overview.getCreated() + task.getCreated());
@@ -508,6 +512,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public long countByTeamId(Long teamId) {
+        return this.count(new LambdaQueryWrapper<Application>().eq(Application::getTeamId, teamId));
+    }
+
+    @Override
     public String getYarnName(Application appParam) {
         String[] args = new String[2];
         args[0] = "--name";
@@ -634,7 +643,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         newApp.setRestartSize(oldApp.getRestartSize());
         newApp.setJobType(oldApp.getJobType());
         newApp.setOptions(oldApp.getOptions());
-        newApp.setDynamicOptions(oldApp.getDynamicOptions());
+        newApp.setProperties(oldApp.getProperties());
         newApp.setResolveOrder(oldApp.getResolveOrder());
         newApp.setExecutionMode(oldApp.getExecutionMode());
         newApp.setFlinkImage(oldApp.getFlinkImage());
@@ -744,7 +753,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setVersionId(appParam.getVersionId());
             application.setArgs(appParam.getArgs());
             application.setOptions(appParam.getOptions());
-            application.setDynamicOptions(appParam.getDynamicOptions());
+            application.setProperties(appParam.getProperties());
             application.setResolveOrder(appParam.getResolveOrder());
             application.setExecutionMode(appParam.getExecutionMode());
             application.setClusterId(appParam.getClusterId());
@@ -1099,7 +1108,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.getDrain(),
             customSavepoint,
             application.getK8sNamespace(),
-            application.getDynamicOptions(),
+            application.getProperties(),
             extraParameter
         );
 
@@ -1185,7 +1194,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             return error;
         } else {
-            return "When custom savepoint is not set, state.savepoints.dir needs to be set in Dynamic Option or flink-conf.yaml of application";
+            return "When custom savepoint is not set, state.savepoints.dir needs to be set in properties or flink-conf.yaml of application";
         }
     }
 
@@ -1290,10 +1299,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             throw new UnsupportedOperationException("Unsupported...");
         }
 
-        Map<String, String> dynamicOption = FlinkSubmitter.extractDynamicOptionAsJava(application.getDynamicOptions());
+        Map<String, String> properties = FlinkSubmitter.extractPropertiesAsJava(application.getProperties());
 
         Map<String, Object> extraParameter = new HashMap<>(0);
-        extraParameter.put(ConfigConst.KEY_JOB_ID(), application.getId());
 
         if (appParam.getAllowNonRestored()) {
             extraParameter.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
@@ -1312,7 +1320,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
             String yarnQueue = (String) application.getHotParamsMap().get(ConfigConst.KEY_YARN_APP_QUEUE());
             if (yarnQueue != null) {
-                dynamicOption.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
+                properties.put(ConfigConst.KEY_YARN_APP_QUEUE(), yarnQueue);
             }
             if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
                 FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
@@ -1386,13 +1394,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             DevelopmentMode.of(application.getJobType()),
             ExecutionMode.of(application.getExecutionMode()),
             resolveOrder,
+            application.getId(),
+            new JobID().toHexString(),
             application.getJobName(),
             appConf,
             application.getApplicationType(),
             getSavePointed(appParam),
             appParam.getFlameGraph() ? getFlameGraph(application) : null,
             application.getOptionMap(),
-            dynamicOption,
+            properties,
             applicationArgs,
             buildResult,
             kubernetesSubmitParam,
@@ -1501,9 +1511,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private String getSavePointPath(Application appParam) throws Exception {
         Application application = getById(appParam.getId());
 
-        // 1) dynamic parameters have the highest priority, read the dynamic parameters are set: -Dstate.savepoints.dir
+        // 1) properties have the highest priority, read the properties are set: -Dstate.savepoints.dir
         String savepointPath = FlinkSubmitter
-            .extractDynamicOptionAsJava(application.getDynamicOptions())
+            .extractPropertiesAsJava(application.getProperties())
             .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
 
         // Application conf configuration has the second priority. If it is a streampark|flinksql type task,

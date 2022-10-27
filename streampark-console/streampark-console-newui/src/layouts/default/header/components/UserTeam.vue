@@ -35,6 +35,7 @@
       @change="handleSetTeamId"
       :value="userStore.teamId"
       placeholder="Team"
+      size="small"
     >
       <SelectOption v-for="t in userStore.getTeamList" :key="t.value">
         {{ t.label }}

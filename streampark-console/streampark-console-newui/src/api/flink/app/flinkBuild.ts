@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import { AxiosResponse } from 'axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
 
 enum BUILD_API {
@@ -23,31 +22,14 @@ enum BUILD_API {
   DETAIL = '/flink/pipe/detail',
 }
 
-export function fetchBuild(params) {
-  return defHttp.post<AxiosResponse<any>>(
-    {
-      url: BUILD_API.BUILD,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
-  );
+export function fetchBuild(data): Promise<AxiosResponse<any>> {
+  return defHttp.post({ url: BUILD_API.BUILD, data }, { isReturnNativeResponse: true });
 }
 /**
  * Get build details
  * @param params appId:string
  * @returns
  */
-export function fetchBuildDetail(params: { appId: string }) {
-  return defHttp.post<{ pipeline: any; docker: any }>({
-    url: BUILD_API.DETAIL,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchBuildDetail(data: { appId: string }): Promise<{ pipeline: any; docker: any }> {
+  return defHttp.post({ url: BUILD_API.DETAIL, data });
 }

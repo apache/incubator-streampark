@@ -227,11 +227,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.dataMasking();
         userInfo.put("user", user);
 
-        // 3) roles
-        Set<String> roles = this.roleService.getUserRoleName(user.getUserId());
-        userInfo.put("roles", roles);
-
-        // 4) permissions
+        // 3) permissions
         Set<String> permissions = this.getPermissions(user.getUserId(), teamId);
         userInfo.put("permissions", permissions);
 

@@ -79,7 +79,7 @@ public class FlinkCluster implements Serializable {
 
     private Boolean k8sHadoopIntegration;
 
-    private String dynamicOptions;
+    private String properties;
 
     private Integer k8sRestExposedType;
 

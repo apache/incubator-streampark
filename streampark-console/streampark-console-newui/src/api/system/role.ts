@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { defHttp } from '/@/utils/http/axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
+import { RoleParam } from './model/roleModel';
 
 enum Api {
   RoleUserList = '/role/listByUser',
@@ -28,43 +28,37 @@ enum Api {
 export function getRoleListByUser(params?) {
   return defHttp.post({ url: Api.RoleUserList, params });
 }
-
-export function addRole(params?) {
-  return defHttp.post({
-    url: Api.AddRole,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+/**
+ *
+ * @param {RoleParam} data role param
+ * @returns {Promise<boolean | undefined>}
+ */
+export function fetchRoleCreate(data: RoleParam): Promise<boolean | undefined> {
+  return defHttp.post({ url: Api.AddRole, data });
 }
 
-export function editRole(params?) {
-  return defHttp.put({
-    url: Api.UpdateRole,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+/**
+ * role update
+ * @param {RoleParam} data role param
+ * @returns {Promise<boolean | undefined>}
+ */
+export function fetchRoleUpdate(data: RoleParam): Promise<boolean | undefined> {
+  return defHttp.put({ url: Api.UpdateRole, data });
 }
 
-export function deleteRole(params?) {
-  return defHttp.delete({
-    url: Api.DeleteRole,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+/**
+ * delete role
+ * @param {String} roleId role id
+ * @returns {Promise<boolean | undefined>}
+ */
+export function fetchRoleDelete({ roleId }: { roleId: string }): Promise<boolean | undefined> {
+  return defHttp.delete({ url: Api.DeleteRole, data: { roleId } });
 }
-
-export function fetchCheckName(params) {
-  return defHttp.post({
-    url: Api.CHECK_NAME,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+/**
+ * Check if the role name exists
+ * @param params
+ * @returns {Promise<boolean>}
+ */
+export function fetchCheckName(data: { roleName: string }): Promise<boolean> {
+  return defHttp.post({ url: Api.CHECK_NAME, data });
 }

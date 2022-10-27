@@ -25,7 +25,7 @@ import org.apache.streampark.common.enums._
 import org.apache.streampark.common.util.{DeflaterUtils, FlinkUtils, HdfsUtils, PropertiesUtils}
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
 import org.apache.commons.io.FileUtils
-import org.apache.flink.runtime.jobgraph.{SavepointConfigOptions, SavepointRestoreSettings}
+import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
 import java.io.File
 import java.util.{Map => JavaMap}
@@ -47,13 +47,15 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
                          developmentMode: DevelopmentMode,
                          executionMode: ExecutionMode,
                          resolveOrder: ResolveOrder,
+                         id: Long,
+                         jobId: String,
                          appName: String,
                          appConf: String,
                          applicationType: ApplicationType,
                          savePoint: String,
                          flameGraph: JavaMap[String, java.io.Serializable],
                          option: JavaMap[String, Any],
-                         dynamicOption: JavaMap[String, String],
+                         properties: JavaMap[String, String],
                          args: String,
                          @Nullable buildResult: BuildResult,
                          @Nullable k8sSubmitParam: KubernetesSubmitParam,
@@ -72,15 +74,7 @@ case class SubmitRequest(flinkVersion: FlinkVersion,
 
   lazy val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
 
-  lazy val jobID: String = extraParameter.get(KEY_JOB_ID).toString
-
-  lazy val savepointRestoreSettings: SavepointRestoreSettings = {
-    lazy val allowNonRestoredState = Try(extraParameter.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key).toString.toBoolean).getOrElse(false)
-    savePoint match {
-      case sp if Try(sp.isEmpty).getOrElse(true) => SavepointRestoreSettings.none
-      case sp => SavepointRestoreSettings.forPath(sp, allowNonRestoredState)
-    }
-  }
+  lazy val allowNonRestoredState = Try(extraParameter.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key).toString.toBoolean).getOrElse(false)
 
   lazy val userJarFile: File = {
     executionMode match {

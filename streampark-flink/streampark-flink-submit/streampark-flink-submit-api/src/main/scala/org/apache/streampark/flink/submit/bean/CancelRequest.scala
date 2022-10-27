@@ -32,7 +32,7 @@ case class CancelRequest(flinkVersion: FlinkVersion,
                          withDrain: Boolean,
                          customSavePointPath: String,
                          kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE,
-                         @Nullable dynamicOption: String,
+                         @Nullable properties: String,
                          @Nullable extraParameter: JavaMap[String, Any]
                       ) {
 

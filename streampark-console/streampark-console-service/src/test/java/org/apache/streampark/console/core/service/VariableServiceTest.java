@@ -32,7 +32,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = StreamParkConsoleBootstrap.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class VariableServiceTest {
+class VariableServiceTest {
 
     @Autowired
     private VariableService variableService;
@@ -41,7 +41,7 @@ public class VariableServiceTest {
      * Test whether the variable will be replaced normally
      */
     @Test
-    public void testNormalReplace() {
+    void testNormalReplace() {
         Long teamId = 100000L;
         Long userId = 100000L;
         String variableCode = "collect_kafka.brokers-520room";
@@ -64,7 +64,7 @@ public class VariableServiceTest {
      * Test whether the variable cannot be replaced normally
      */
     @Test
-    public void testAbnormalReplace() {
+    void testAbnormalReplace() {
         Long teamId = 100000L;
         Long userId = 100000L;
         // It contains a non-normal character '#' which should not be matched

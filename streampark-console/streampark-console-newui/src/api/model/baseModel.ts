@@ -23,3 +23,10 @@ export interface BasicFetchResult<T> {
   records: T[];
   total: number;
 }
+
+export interface BasicTableParams {
+  page: number;
+  pageSize: number;
+  teamId: string;
+  [key: string]: Nullable<string | number>;
+}

@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class StringUtilsTest {
+class StringUtilsTest {
 
     @Test
-    public void splitByLength() {
+    void splitByLength() {
         List<String> list = StringUtils.splitByLength("a", 1);
         Assertions.assertEquals(1, list.size());
         Assertions.assertEquals("a", list.get(0));
@@ -48,7 +48,7 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void extractByRegex() {
+    void extractByRegex() {
         Assertions.assertEquals(0, StringUtils.extractByRegex(null, null).size());
         Assertions.assertEquals(1, StringUtils.extractByRegex("", "").size());
         Assertions.assertEquals("", StringUtils.extractByRegex("", "").get(0));
@@ -70,7 +70,7 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void getValueAsBytes() {
+    void getValueAsBytes() {
         Assertions.assertNull(StringUtils.getBytesValueOrNull(null));
         Assertions.assertNull(StringUtils.getBytesValueOrNull(""));
         Assertions.assertNull(StringUtils.getBytesValueOrNull("xxx"));
@@ -106,7 +106,7 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void getArgumentValue() {
+    void getArgumentValue() {
         Assertions.assertNull(StringUtils.getArgumentValue(null, null));
         Assertions.assertNull(StringUtils.getArgumentValue(null, ""));
         Assertions.assertNull(StringUtils.getArgumentValue("", null));
@@ -138,7 +138,7 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void getArgumentValues() {
+    void getArgumentValues() {
         Assertions.assertArrayEquals(new String[0], StringUtils.getArgumentValues(null, null));
         Assertions.assertArrayEquals(new String[0], StringUtils.getArgumentValues(null, ""));
         Assertions.assertArrayEquals(new String[0], StringUtils.getArgumentValues("", null));

@@ -14,13 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { watch, Ref, unref, ref } from 'vue';
+import { watch, Ref, unref, ref, computed } from 'vue';
 import { until, createEventHook, tryOnUnmounted } from '@vueuse/core';
 
 import type { editor as Editor } from 'monaco-editor';
 import setupMonaco from '/@/monaco';
-import { useDark } from '@vueuse/core';
-export const isDark = useDark();
+import { ThemeEnum } from '/@/enums/appEnum';
+import { useRootSetting } from '/@/hooks/setting/useRootSetting';
+const { getDarkMode } = useRootSetting();
+export const isDark = computed(() => getDarkMode.value === ThemeEnum.DARK);
 
 export function useDiffMonaco(
   target: Nullable<Ref>,
