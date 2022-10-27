@@ -166,6 +166,8 @@
       const formData = new FormData();
       formData.append('file', data.file);
       await fetchUpload(formData);
+      // eslint-disable-next-line vue/no-mutating-props
+      if (!props?.formModel?.historyjar) props.formModel.historyjar = {};
       Object.assign(props.formModel.historyjar, {
         [data.file.name]: data.file.name,
       });
@@ -201,7 +203,7 @@
 </script>
 
 <template>
-  <Tabs type="card" v-model:activeKey="activeTab">
+  <Tabs type="card" v-model:activeKey="activeTab" class="pom-card">
     <TabPane key="pom" tab="Maven pom">
       <div ref="pomBox" class="pom-box syntax-true" style="height: 300px"></div>
       <a-button type="primary" class="apply-pom" @click="handleApplyPom()">

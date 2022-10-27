@@ -31,10 +31,10 @@ import java.util.TimerTask;
 import scala.collection.JavaConversions;
 
 @Slf4j
-public class DependencyTest {
+class DependencyTest {
 
     @Test
-    public void resolveMavenDependencies() {
+    void resolveMavenDependencies() {
         /**
          * <dependency>
          *      <groupId>org.apache.flink</groupId>

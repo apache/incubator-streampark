@@ -22,10 +22,10 @@ import com.aliyun.oss.OSSException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class OssStorageServiceTest {
+class OssStorageServiceTest {
 
     @Test
-    public void testHandleException() throws Exception {
+    void testHandleException() {
         OSSException ossException = new OSSException("mock error", "MOCK_CODE", "requestId", "hostId", "header", "resource", "GET");
         RuntimeException exp = OssStorageService.handleOssException(ossException);
         Assertions.assertEquals("Caught an OSSException. Error Message: mock error. Error Code: MOCK_CODE. Request ID: requestId", exp.getMessage());

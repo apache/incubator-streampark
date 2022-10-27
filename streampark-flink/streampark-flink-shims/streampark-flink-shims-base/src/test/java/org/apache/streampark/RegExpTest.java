@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 /**
  * some simple tests
  */
-public class RegExpTest {
+class RegExpTest {
 
     /**
      * Case insensitive, matches everything as one line, . matches newlines, note: \s matches any whitespace character, including newlines
@@ -39,7 +39,7 @@ public class RegExpTest {
     private static final Pattern CREATE_HIVE_CATALOG = Pattern.compile("CREATE\\s+CATALOG\\s+.+", DEFAULT_PATTERN_FLAGS);
 
     @Test
-    public void testCreateHiveCatalog() {
+    void testCreateHiveCatalog() {
         String str = "create catalog hive with (\n" +
             "    'type' = 'hive',\n" +
             "    'hadoop-conf-dir' = 'D:\\IDEAWorkspace\\work\\baishan\\log\\data-max\\src\\main\\resources',\n" +
@@ -58,7 +58,7 @@ public class RegExpTest {
         DEFAULT_PATTERN_FLAGS);
 
     @Test
-    public void testCreateFunction() {
+    void testCreateFunction() {
         String str = "create   function if not exists hive.get_json_value as 'com.flink.function.JsonValueFunction' language java";
         Matcher matcher = CREATE_FUNCTION.matcher(str);
         System.out.println(matcher.matches());
@@ -70,7 +70,7 @@ public class RegExpTest {
     private static final Pattern USE_DATABASE = Pattern.compile("USE\\s+(?!(CATALOG|MODULES)).*", DEFAULT_PATTERN_FLAGS);
 
     @Test
-    public void testUseDatabase() {
+    void testUseDatabase() {
         String str = "use modul.a ";
         Matcher matcher = USE_DATABASE.matcher(str);
         System.out.println(matcher.matches());
@@ -82,7 +82,7 @@ public class RegExpTest {
     private static final Pattern SHOW_FUNCTIONS = Pattern.compile("SHOW\\s+(USER\\s+|)FUNCTIONS", DEFAULT_PATTERN_FLAGS);
 
     @Test
-    public void testShowFunction() {
+    void testShowFunction() {
         String str = "show user functions";
         Matcher matcher = SHOW_FUNCTIONS.matcher(str);
         System.out.println(matcher.matches());

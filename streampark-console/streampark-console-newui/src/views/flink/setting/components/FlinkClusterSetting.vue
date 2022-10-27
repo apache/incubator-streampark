@@ -181,10 +181,10 @@
     <ListItem v-for="(item, index) in clusters" :key="index">
       <ListItemMeta :title="item.clusterName" :description="item.description">
         <template #avatar>
-          <SvgIcon class="avatar" name="flink" size="25" />
+          <SvgIcon class="avatar p-15px" name="flink" size="60" />
         </template>
       </ListItemMeta>
-      <div class="list-content" style="width: 20%">
+      <div class="list-content" style="width: 15%">
         <div class="list-content-item" style="width: 60%">
           <span>ExecutionMode</span>
           <p style="margin-top: 10px">
@@ -192,7 +192,7 @@
           </p>
         </div>
       </div>
-      <div class="list-content" style="width: 20%">
+      <div class="list-content" style="width: 15%">
         <div class="list-content-item" style="width: 80%">
           <span>ClusterId</span>
           <p style="margin-top: 10px">
@@ -200,7 +200,7 @@
           </p>
         </div>
       </div>
-      <div class="list-content" style="width: 30%">
+      <div class="list-content" style="width: 20%">
         <div class="list-content-item" style="width: 60%">
           <span>Address</span>
           <p style="margin-top: 10px">
@@ -215,7 +215,7 @@
             v-auth="'app:update'"
             :disabled="true"
             @click="handleEditCluster(item)"
-            type="link"
+            shape="circle"
             size="large"
             class="control-button"
           >
@@ -225,7 +225,7 @@
             v-if="!handleIsStart(item) || item.executionMode === 1"
             v-auth="'app:update'"
             @click="handleEditCluster(item)"
-            type="link"
+            shape="circle"
             size="large"
             class="control-button"
           >
@@ -238,7 +238,7 @@
               v-if="item.executionMode === 3 || item.executionMode === 5"
               v-auth="'cluster:create'"
               @click="handleDeployCluser(item)"
-              type="link"
+              shape="circle"
               size="large"
               class="control-button"
             >
@@ -248,7 +248,7 @@
               v-else
               :disabled="true"
               v-auth="'cluster:create'"
-              type="link"
+              shape="circle"
               size="large"
               style="margin-left: 3px"
               class="control-button"
@@ -264,7 +264,7 @@
               v-if="[3, 5].includes(item.executionMode)"
               v-auth="'cluster:create'"
               @click="handleShutdownCluster(item)"
-              type="link"
+              shape="circle"
               size="large"
               style="margin-left: 3px"
               class="control-button"
@@ -275,7 +275,7 @@
               v-else
               :disabled="true"
               v-auth="'cluster:create'"
-              type="link"
+              shape="circle"
               size="large"
               class="control-button"
             >
@@ -289,7 +289,7 @@
             v-if="!handleIsStart(item)"
             v-auth="'app:detail'"
             :disabled="true"
-            type="link"
+            shape="circle"
             size="large"
             class="control-button"
           >
@@ -298,7 +298,7 @@
           <a-button
             v-else
             v-auth="'app:detail'"
-            type="link"
+            shape="circle"
             size="large"
             class="control-button"
             :href="item.address"
@@ -314,8 +314,8 @@
           :ok-text="t('common.yes')"
           @confirm="handleDelete(item)"
         >
-          <a-button type="link" size="large" class="control-button">
-            <DeleteOutlined style="color: red" />
+          <a-button type="danger" shape="circle" size="large" class="control-button">
+            <DeleteOutlined />
           </a-button>
         </Popconfirm>
       </template>

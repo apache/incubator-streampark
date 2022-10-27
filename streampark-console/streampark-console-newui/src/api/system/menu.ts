@@ -23,11 +23,11 @@ enum Api {
   UpdateMenu = '/menu/update',
 }
 
-export const getMenuRouter = () => {
-  return defHttp.post<getMenuListResultModel>({ url: Api.MenuRouter });
+export const getMenuRouter = (): Promise<getMenuListResultModel> => {
+  return defHttp.post({ url: Api.MenuRouter });
 };
 
-export function editMenu(data?): Promise<boolean | undefined> {
+export function editMenu(data?: Recordable): Promise<boolean | undefined> {
   return defHttp.put({ url: Api.UpdateMenu, data });
 }
 

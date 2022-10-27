@@ -17,7 +17,7 @@
 <template>
   <div>
     <BasicTable @register="registerTable">
-      <template #form-advanceBefore>
+      <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'token:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
@@ -73,11 +73,16 @@
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { clipboardRef, copiedRef } = useCopyToClipboard();
       const [registerTable, { reload, updateTableDataRecord }] = useTable({
+        title: 'Token List',
         api: fetTokenList,
         columns,
-        formConfig: { labelWidth: 120, colon: true, schemas: searchFormSchema },
+        formConfig: {
+          baseColProps: { style: { paddingRight: '30px' } },
+          colon: true,
+          schemas: searchFormSchema,
+        },
         useSearchForm: true,
-        showTableSetting: false,
+        showTableSetting: true,
         rowKey: 'tokenId',
         showIndexColumn: false,
         canResize: false,

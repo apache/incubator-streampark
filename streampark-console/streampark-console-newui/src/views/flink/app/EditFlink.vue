@@ -225,4 +225,6 @@
     </BasicForm>
   </PageWrapper>
 </template>
-<style scoped></style>
+<style lang="less">
+  @import url('./styles/Add.less');
+</style>

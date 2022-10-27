@@ -48,14 +48,14 @@
         });
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
+        formType.value = data.formType;
         resetFields();
+        clearValidate();
+        updateSchema(formSchema(unref(formType)));
         setDrawerProps({
           confirmLoading: false,
           showFooter: data.formType !== FormTypeEnum.View,
         });
-        formType.value = data.formType;
-
-        updateSchema(formSchema(unref(formType)));
 
         if (unref(formType) !== FormTypeEnum.Create) {
           const roleIds = data.record?.roleId ?? [];
@@ -63,8 +63,6 @@
           setFieldsValue({
             ...data.record,
           });
-          clearValidate('username');
-          clearValidate('nickname');
         }
       });
 

@@ -120,7 +120,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
       }.getOrElse(throw getError.exception)
 
     val dockerConf = request.dockerConfig
-    val baseImageTag = request.flinkBaseImage
+    val baseImageTag = request.flinkBaseImage.trim
     val pushImageTag = {
       val expectedImageTag = s"streamparkflinkjob-${request.k8sNamespace}-${request.clusterId}"
       compileTag(expectedImageTag, dockerConf.registerAddress, dockerConf.imageNamespace)

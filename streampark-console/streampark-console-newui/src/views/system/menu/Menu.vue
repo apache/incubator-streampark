@@ -17,7 +17,7 @@
 <template>
   <div>
     <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
-      <template #form-advanceBefore>
+      <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'menu:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
@@ -62,11 +62,11 @@
       const { createMessage } = useMessage();
       const { t } = useI18n();
       const [registerTable, { reload, expandAll }] = useTable({
-        title: '',
+        title: 'Menu List',
         api: getMenuList,
         columns,
         formConfig: {
-          labelWidth: 120,
+          baseColProps: { style: { paddingRight: '30px' } },
           colon: true,
           schemas: searchFormSchema,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
@@ -78,7 +78,7 @@
         pagination: false,
         striped: false,
         useSearchForm: true,
-        showTableSetting: false,
+        showTableSetting: true,
         bordered: true,
         showIndexColumn: false,
         canResize: false,

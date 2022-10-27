@@ -34,19 +34,9 @@ const enum GenderEnum {
 }
 
 export const columns: BasicColumn[] = [
-  {
-    title: 'User Name',
-    dataIndex: 'username',
-    sorter: true,
-  },
-  {
-    title: 'Nick Name',
-    dataIndex: 'nickName',
-  },
-  {
-    title: 'User Type',
-    dataIndex: 'userType',
-  },
+  { title: 'User Name', dataIndex: 'username', sorter: true },
+  { title: 'Nick Name', dataIndex: 'nickName' },
+  { title: 'User Type', dataIndex: 'userType' },
   {
     title: 'Status',
     dataIndex: 'status',
@@ -70,18 +60,8 @@ export const columns: BasicColumn[] = [
 ];
 
 export const searchFormSchema: FormSchema[] = [
-  {
-    field: 'username',
-    label: 'User Name',
-    component: 'Input',
-    colProps: { span: 8 },
-  },
-  {
-    label: 'Create Time',
-    field: 'createTime',
-    component: 'RangePicker',
-    colProps: { span: 8 },
-  },
+  { field: 'username', label: 'User Name', component: 'Input', colProps: { span: 8 } },
+  { label: 'Create Time', field: 'createTime', component: 'RangePicker', colProps: { span: 8 } },
 ];
 
 export const formSchema = (formType: string): FormSchema[] => {
@@ -90,12 +70,7 @@ export const formSchema = (formType: string): FormSchema[] => {
   const isView = formType === FormTypeEnum.View;
 
   return [
-    {
-      field: 'userId',
-      label: 'User Id',
-      component: 'Input',
-      show: false,
-    },
+    { field: 'userId', label: 'User Id', component: 'Input', show: false },
     {
       field: 'username',
       label: 'User Name',
@@ -126,7 +101,9 @@ export const formSchema = (formType: string): FormSchema[] => {
       field: 'nickName',
       label: 'Nick Name',
       component: 'Input',
-      rules: [{ required: isCreate, message: 'nickName is required' }],
+      dynamicRules: () => {
+        return [{ required: isCreate, message: 'nickName is required' }];
+      },
       componentProps: { disabled: !isCreate },
     },
     {

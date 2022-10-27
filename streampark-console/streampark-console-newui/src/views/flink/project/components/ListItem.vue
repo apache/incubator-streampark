@@ -19,7 +19,8 @@
   <a-list-item>
     <a-list-item-meta class="item-meta">
       <template #title>
-        <a>{{ item.name }}<a-badge status="processing" title="installing" v-if="isBuilding" /></a>
+        <a-badge status="processing" title="installing" class="mr-10px" v-if="isBuilding" />
+        <span>{{ item.name }}</span>
       </template>
       <template #description>
         <a-popover arrow-point-at-center trigger="hover" :content="item.url">
@@ -76,7 +77,7 @@
             ok-text="Yes"
             @confirm="handleBuild"
           >
-            <a-button type="link" size="large" class="ml-8px" v-auth="'project:build'">
+            <a-button shape="circle" size="large" class="ml-8px" v-auth="'project:build'">
               <ThunderboltOutlined />
             </a-button>
           </a-popconfirm>
@@ -88,7 +89,7 @@
           v-auth="'project:update'"
           size="large"
           @click="handleEdit"
-          type="link"
+          shape="circle"
           class="ml-8px"
         >
           <EditOutlined />
@@ -101,8 +102,8 @@
           ok-text="Yes"
           @confirm="handleDelete"
         >
-          <a-button type="link" size="large" style="margin-left: 8px">
-            <DeleteOutlined style="color: red" />
+          <a-button type="danger" shape="circle" size="large" style="margin-left: 8px">
+            <DeleteOutlined />
           </a-button>
         </a-popconfirm>
       </a-tooltip>

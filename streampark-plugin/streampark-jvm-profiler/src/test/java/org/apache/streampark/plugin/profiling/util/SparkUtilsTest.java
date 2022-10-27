@@ -22,25 +22,21 @@ import org.apache.streampark.plugin.profiling.Arguments;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.InvocationTargetException;
-
-public class SparkUtilsTest {
+class SparkUtilsTest {
 
     @Test
-    public void probeAppId() {
+    void probeAppId() {
         Assertions.assertNull(SparkUtils.probeAppId(Arguments.ARG_APP_ID_REGEX));
         Assertions.assertEquals("jar", SparkUtils.probeAppId("jar"));
     }
 
     @Test
-    public void getAppId()
-        throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
-        InvocationTargetException {
+    void getAppId() {
         Assertions.assertNull(SparkUtils.getSparkEnvAppId());
     }
 
     @Test
-    public void probeRole() {
+    void probeRole() {
         Assertions.assertEquals(
             "executor",
             SparkUtils.probeRole("java org.apache.spark.executor.CoarseGrainedExecutorBackend"));

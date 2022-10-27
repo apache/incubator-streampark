@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 export const buttonProps = {
-  color: { type: String, validator: (v) => ['error', 'warning', 'success', ''].includes(v) },
+  color: {
+    type: String,
+    validator: (v) => ['error', 'warning', 'success', 'primary', ''].includes(v),
+  },
   loading: { type: Boolean },
   disabled: { type: Boolean },
   /**

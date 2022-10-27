@@ -24,6 +24,7 @@
   });
 </script>
 <script setup lang="ts" name="StartApplicationModal">
+  import { h } from 'vue';
   import { Select, Input } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { SvgIcon, Icon } from '/@/components/Icon';
@@ -60,7 +61,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        helpMessage: 'flame Graph support',
+        itemExtra: h('span', { class: 'conf-switch' }, 'flame Graph support'),
         ifShow: () => [5, 6].includes(receiveData.executionMode),
       },
       {
@@ -72,7 +73,11 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        helpMessage: 'restore the application from savepoint or latest checkpoint',
+        itemExtra: h(
+          'span',
+          { class: 'conf-switch' },
+          'restore the application from savepoint or latest checkpoint',
+        ),
       },
       {
         field: 'startSavePoint',
@@ -81,7 +86,11 @@
           receiveData.historySavePoint && receiveData.historySavePoint.length > 0
             ? 'Select'
             : 'Input',
-        helpMessage: 'restore the application from savepoint or latest checkpoint',
+        itemExtra: h(
+          'span',
+          { class: 'conf-switch' },
+          'restore the application from savepoint or latest checkpoint',
+        ),
         slot: 'savepoint',
         ifShow: ({ values }) => values.startSavePointed && !receiveData.latestSavePoint,
         required: true,
@@ -94,7 +103,11 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        helpMessage: 'restore the application from savepoint or latest checkpoint',
+        itemExtra: h(
+          'span',
+          { class: 'conf-switch' },
+          'restore the application from savepoint or latest checkpoint',
+        ),
         defaultValue: false,
         ifShow: ({ values }) => values.startSavePointed,
       },
@@ -118,7 +131,7 @@
         savePointed,
         savePoint: savePointPath,
         flameGraph: formValue.flameGraph || false,
-        allowNonRestored: formValue.allowNonRestoredState || false
+        allowNonRestored: formValue.allowNonRestoredState || false,
       });
       if (data.data) {
         Swal.fire({

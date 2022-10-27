@@ -23,6 +23,7 @@ import { NotificationArgsProps, ConfigProps } from 'ant-design-vue/lib/notificat
 import { useI18n } from './useI18n';
 import { isString } from '/@/utils/is';
 import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 export interface NotifyApi {
   info(config: NotificationArgsProps): void;
@@ -39,7 +40,7 @@ export interface NotifyApi {
 export declare type NotificationPlacement = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
 export declare type IconType = 'success' | 'info' | 'error' | 'warning';
 export interface ModalOptionsEx extends Omit<ModalFuncProps, 'iconType'> {
-  iconType: 'warning' | 'success' | 'error' | 'info';
+  iconType?: 'warning' | 'success' | 'error' | 'info';
 }
 export type ModalOptionsPartial = Partial<ModalOptionsEx> & Pick<ModalOptionsEx, 'content'>;
 
@@ -76,10 +77,11 @@ function renderContent({ content }: Pick<ModalOptionsEx, 'content'>) {
  */
 function createConfirm(options: ModalOptionsEx): ConfirmOptions {
   const iconType = options.iconType || 'warning';
+  const showIcon = options.iconType;
   Reflect.deleteProperty(options, 'iconType');
   const opt: ModalFuncProps = {
     centered: true,
-    icon: getIcon(iconType),
+    icon: showIcon ? getIcon(iconType) : false,
     ...options,
     content: renderContent(options),
   };

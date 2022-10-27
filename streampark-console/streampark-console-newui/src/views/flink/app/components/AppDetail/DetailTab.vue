@@ -312,6 +312,7 @@
                     auth: 'app:detail',
                     shape: 'circle',
                     type: 'default',
+                    ifShow: !record.success,
                     icon: 'ant-design:eye-outlined',
                     onClick: handleException.bind(null, record),
                   },

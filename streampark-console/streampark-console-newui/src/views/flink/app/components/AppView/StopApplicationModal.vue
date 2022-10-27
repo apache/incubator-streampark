@@ -29,12 +29,12 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchCancel, fetchCheckSavepointPath, fetchVerifySchema } from '/@/api/flink/app/app';
   import { CancelParam } from '/@/api/flink/app/app.type';
-
+  import { h } from 'vue';
   const emit = defineEmits(['register', 'updateOption']);
   const app = reactive<Recordable>({});
 
   const { t } = useI18n();
-  const { createErrorSwal, Swal, createErrorModal } = useMessage();
+  const { createErrorSwal, Swal } = useMessage();
   const [registerModal, { closeModal }] = useModalInner((data) => {
     if (data) {
       Object.assign(app, data.application);
@@ -54,7 +54,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        helpMessage: 'trigger savePoint before taking cancel',
+        itemExtra: h('span', { class: 'conf-switch' }, 'trigger savePoint before taking cancel'),
       },
       {
         field: 'customSavepoint',
@@ -64,7 +64,11 @@
           placeholder: 'Entry the custom savepoint path',
           allowClear: true,
         },
-        helpMessage: 'restore the application from savepoint or latest checkpoint',
+        itemExtra: h(
+          'span',
+          { class: 'conf-switch' },
+          'restore the application from savepoint or latest checkpoint',
+        ),
         ifShow: ({ values }) => !!values.stopSavePointed,
       },
       {
@@ -76,7 +80,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        helpMessage: 'Send max watermark before stopped',
+        itemExtra: h('span', { class: 'conf-switch' }, 'Send max watermark before stopped'),
       },
     ],
     colon: true,
@@ -114,11 +118,6 @@
           if (data.data) {
             handleStopAction(stopReq);
           } else {
-            createErrorModal({
-              title: t('common.failed'),
-              content: data.message,
-            });
-
             createErrorSwal(data.message);
           }
         }

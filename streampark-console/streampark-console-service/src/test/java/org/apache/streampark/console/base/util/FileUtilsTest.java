@@ -31,10 +31,10 @@ import java.util.Random;
 /**
  * Test for {@link FileUtils}
  */
-public class FileUtilsTest {
+class FileUtilsTest {
 
     @Test
-    public void testReadEndOfFile(@TempDir Path tempDir) throws IOException {
+    void testReadEndOfFile(@TempDir Path tempDir) throws IOException {
         Path filePath = tempDir.resolve("tmp_file");
         File file = filePath.toFile();
         FileOutputStream outputStream = new FileOutputStream(file);
@@ -63,7 +63,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    public void testReadEndOfFileWithChinese(@TempDir Path tempDir) throws IOException {
+    void testReadEndOfFileWithChinese(@TempDir Path tempDir) throws IOException {
         Path filePath = tempDir.resolve("tmp_file");
         File file = filePath.toFile();
         PrintWriter writer = new PrintWriter(file);
@@ -77,7 +77,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    public void testReadFileFromOffset(@TempDir Path tempDir) throws IOException {
+    void testReadFileFromOffset(@TempDir Path tempDir) throws IOException {
         Path filePath = tempDir.resolve("tmp_file");
         File file = filePath.toFile();
         FileOutputStream outputStream = new FileOutputStream(file);
