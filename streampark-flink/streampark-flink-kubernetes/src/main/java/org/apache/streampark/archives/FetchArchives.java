@@ -32,6 +32,8 @@ import java.util.Objects;
 
 public class FetchArchives {
 
+    private static String FAILED = "FAILED";
+
     public static String getJobStateFromArchiveFile(String jobId, String archivePath) {
         try {
             Objects.requireNonNull(jobId, "JobId cannot be empty.");
@@ -55,9 +57,9 @@ public class FetchArchives {
                     return overviews.get(0).getState();
                 }
             }
-            return "FAILED";
+            return FAILED;
         } catch (Exception e) {
-            return "FAILED";
+            return FAILED;
         }
     }
 
