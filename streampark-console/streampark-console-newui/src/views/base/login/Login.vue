@@ -16,13 +16,12 @@
 -->
 <template>
   <div :class="prefixCls" class="relative w-full h-full px-4">
-    <div class="container relative h-full py-2">
+    <div class="relative h-full">
       <div class="flex h-full">
         <div class="flex w-full h-full py-5 xl:h-auto xl:py-0 xl:my-0">
           <div
             :class="`${prefixCls}-form`"
-            class="relative w-auto px-8 bg-[rgba(0,20,25,0.6)] py-12 mx-auto my-auto shadow-md enter-y"
-          >
+            class="relative w-auto px-12 bg-[rgba(0,0,0,0.4)] py-5 mx-auto my-auto shadow-md enter-y">
             <LoginForm/>
           </div>
         </div>
@@ -51,8 +50,7 @@ const {prefixCls} = useDesign('login');
 @countdown-prefix-cls: ~'@{namespace}-countdown-input';
 @active-color: 255, 255, 255;
 
-input.fix-auto-fill,
-.fix-auto-fill input {
+input.fix-auto-fill, .fix-auto-fill input {
   box-shadow: inherit !important;
 }
 
@@ -79,20 +77,20 @@ input.fix-auto-fill,
   }
 
   .logo {
+    padding-top: 20px;
     height: 130px;
     margin: auto;
   }
 
   .signin-form {
     .ant-input {
-      padding-top: 5px;
-      padding-bottom: 5px;
+      padding-top: 3px;
+      padding-bottom: 3px;
 
       .ant-input-affix-wrapper:hover, .ant-input:not(.ant-input-disabled) {
         border-color: rgba(@active-color, .95);
       }
     }
-
 
     .signin-btn {
       .ant-btn {
@@ -100,6 +98,12 @@ input.fix-auto-fill,
         height: 40px;
         background: rgba(@active-color, .40);
         border: unset;
+      }
+    }
+
+    .text-left {
+      .ant-btn {
+        padding: 0px;
       }
     }
 
@@ -117,37 +121,6 @@ input.fix-auto-fill,
     filter: blur(1px);
   }
 
-  .@{logo-prefix-cls} {
-    position: absolute;
-    top: 12px;
-    height: 30px;
-
-    &__title {
-      font-size: 16px;
-      color: #fff;
-    }
-
-    img {
-      width: 180px;
-    }
-  }
-
-  .container {
-    .@{logo-prefix-cls} {
-      display: flex;
-      width: 60%;
-      height: 80px;
-
-      &__title {
-        font-size: 24px;
-        color: #fff;
-      }
-
-      img {
-        width: 180px;
-      }
-    }
-  }
 
   &-sign-in-way {
     .anticon {
@@ -161,23 +134,23 @@ input.fix-auto-fill,
     }
   }
 
-  input:not([type='checkbox']) {
-    min-width: 360px;
+  input {
+    min-width: 300px;
 
     @media (max-width: @screen-xl) {
-      min-width: 320px;
-    }
-
-    @media (max-width: @screen-lg) {
       min-width: 260px;
     }
 
+    @media (max-width: @screen-lg) {
+      min-width: 200px;
+    }
+
     @media (max-width: @screen-md) {
-      min-width: 240px;
+      min-width: 180px;
     }
 
     @media (max-width: @screen-sm) {
-      min-width: 160px;
+      min-width: 100px;
     }
   }
 
