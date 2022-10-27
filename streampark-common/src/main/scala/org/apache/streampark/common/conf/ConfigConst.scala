@@ -112,8 +112,6 @@ object ConfigConst {
 
   val KEY_FLINK_DEPLOYMENT_OPTION_PREFIX = "flink.deployment.option."
 
-  val KEY_JOBMANAGER_ARCHIVE_FS_DIR = "jobmanager.archive.fs.dir"
-
   val KEY_FLINK_APP_NAME = "pipeline.name"
 
   val KEY_YARN_APP_ID = "yarn.application.id"

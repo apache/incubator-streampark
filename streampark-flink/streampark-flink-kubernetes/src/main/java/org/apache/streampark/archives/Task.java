@@ -17,34 +17,25 @@
 
 package org.apache.streampark.archives;
 
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
-
 public class Task {
-    @JsonProperty("total")
     private Integer total;
-    @JsonProperty("created")
+
     private Integer created;
-    @JsonProperty("scheduled")
+
     private Integer scheduled;
-    @JsonProperty("deploying")
+
     private Integer deploying;
 
-    @JsonProperty("running")
     private Integer running;
 
-    @JsonProperty("finished")
     private Integer finished;
 
-    @JsonProperty("canceling")
     private Integer canceling;
 
-    @JsonProperty("canceled")
     private Integer canceled;
 
-    @JsonProperty("failed")
     private Integer failed;
 
-    @JsonProperty("reconciling")
     private Integer reconciling;
 }
 

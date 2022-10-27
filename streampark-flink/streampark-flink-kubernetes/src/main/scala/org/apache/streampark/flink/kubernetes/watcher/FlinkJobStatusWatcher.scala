@@ -279,7 +279,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
           logger.info("The deployment is deleted and enters the task failure process.")
           val jobId = trackId.jobId
           val archivePath = trackController.flinkArchives.get(jobId)
-          FlinkJobState.of(FetchArchives.fetchArchives(trackId.jobId, archivePath))
+          FlinkJobState.of(FetchArchives.getJobStateFromArchiveFile(trackId.jobId, archivePath))
         } else {
           inferSilentOrLostFromPreCache(latest)
         }

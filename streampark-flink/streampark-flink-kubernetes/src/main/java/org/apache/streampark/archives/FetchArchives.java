@@ -32,17 +32,14 @@ import java.util.Objects;
 
 public class FetchArchives {
 
-    public static String fetchArchives(String jobId, String archivePath) {
+    public static String getJobStateFromArchiveFile(String jobId, String archivePath) {
         try {
             Objects.requireNonNull(jobId, "JobId cannot be empty.");
             Objects.requireNonNull(archivePath, "archivePath cannot be empty.");
             Path refreshPath = new Path(archivePath);
             FileSystem refreshFS = refreshPath.getFileSystem();
-            RefreshLocation refreshLocation = new RefreshLocation(refreshPath, refreshFS);
-            Path refreshDir = refreshLocation.getPath();
             // contents of /:refreshDir
-            FileStatus[] jobArchives;
-            jobArchives = listArchives(refreshLocation.getFs(), refreshDir);
+            FileStatus[] jobArchives = listArchives(refreshFS, refreshPath);
             Path jobArchivePath = Arrays.stream(jobArchives)
                 .map(FileStatus::getPath)
                 .filter(path -> path.getName().equals(jobId)).findFirst().orElse(null);
@@ -50,16 +47,13 @@ public class FetchArchives {
             Objects.requireNonNull(jobArchivePath, "Archive Log Path Exception");
             for (ArchivedJson archive : FsJobArchivist.getArchivedJsons(jobArchivePath)) {
                 String path = archive.getPath();
-                System.out.println(path);
                 if (path.equals("/jobs/overview")) {
                     String json = archive.getJson();
                     ObjectMapper objectMapper = new ObjectMapper();
                     Jobs jobs = objectMapper.readValue(json, Jobs.class);
-                    System.out.println(json);
                     List<Overview> overviews = jobs.getJobs();
                     return overviews.get(0).getState();
                 }
-                return "FAILED";
             }
             return "FAILED";
         } catch (Exception e) {
