@@ -43,7 +43,8 @@
       :data-source="dataSource"
       :pagination="pagination"
       :loading="loading"
-      :scroll="{ x: 900 }">
+      :scroll="{ x: 900 }"
+      @change="handleTableChange">
       <template
         slot="jobName"
         slot-scope="text, record">
@@ -151,6 +152,11 @@ export default {
         this.pagination = pagination
         this.loading = false
       })
+    },
+    handleTableChange (pagination, filters, sorter) {
+      this.paginationInfo = pagination
+      const params = {variableCode: this.variable}
+      this.fetch(params)
     },
     handleGoBack() {
       this.$router.back(-1)

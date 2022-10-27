@@ -118,7 +118,7 @@
           @click.native="handleView(record)"
           title="view" />
         <svg-icon
-          name="see"
+          name="mapping"
           border
           @click.native="handleDependApps(record)"
           title="depend apps" />
@@ -162,7 +162,7 @@ import {mapActions} from 'vuex'
 
 export default {
   name: 'Variable',
-  components: { VariableInfo, VariableAdd, VariableEdit, SvgIcon },
+  components: {VariableInfo, VariableAdd, VariableEdit, SvgIcon},
   data () {
     return {
       variableInfo: {
