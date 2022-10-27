@@ -103,6 +103,7 @@ insert into `t_menu` VALUES (100054, 100013, 'Variable', '/system/variable', 'sy
 insert into `t_menu` VALUES (100055, 100054, 'add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100056, 100054, 'update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` VALUES (100057, 100054, 'delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
+insert into `t_menu` VALUES (100058, 100013, 'Depend Apps', '/system/variable/depend_apps', 'system/variable/DependApps', 'variable:dependApps', '', '0', 0, NULL, now(), now());
 
 -- ----------------------------
 -- Records of t_role

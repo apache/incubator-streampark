@@ -34,7 +34,8 @@ const getters = {
   multiTab: state => state.app.multiTab,
   applicationId: state => state.application.appId,
   clusterId: state => state.cluster.clusterId,
-  projectId: state => state.project.projectId
+  projectId: state => state.project.projectId,
+  variableCode: state => state.variable.variableCode
 }
 
 export default getters

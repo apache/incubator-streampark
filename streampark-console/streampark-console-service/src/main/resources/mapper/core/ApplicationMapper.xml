@@ -143,6 +143,14 @@
         where t.id = #{application.id}
     </select>
 
+    <select id="getByTeamId" resultType="application" parameterType="Long">
+        select t.*, u.username, case when trim(u.nick_name) = '' then u.username else u.nick_name end as nick_name
+        from t_flink_app t
+        inner join t_user u
+        on t.user_id = u.user_id
+        where t.team_id=#{teamId}
+    </select>
+
     <update id="updateTracking" parameterType="application">
         update t_flink_app
         <set>

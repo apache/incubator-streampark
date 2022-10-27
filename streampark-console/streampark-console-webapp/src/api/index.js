@@ -212,6 +212,7 @@ export default {
   },
   Variable: {
     LIST: '/variable/list',
+    DEPEND: '/variable/dependApps',
     UPDATE: '/variable/update',
     POST: '/variable/post',
     DELETE: '/variable/delete',
