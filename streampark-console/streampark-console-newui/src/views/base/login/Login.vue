@@ -16,15 +16,13 @@
 -->
 <template>
   <div :class="prefixCls" class="relative w-full h-full px-4">
-    <div class="container relative h-full py-2">
+    <div class="relative h-full">
       <div class="flex h-full">
         <div class="flex w-full h-full py-5 xl:h-auto xl:py-0 xl:my-0">
           <div
             :class="`${prefixCls}-form`"
-            class="relative w-auto px-8 bg-[rgba(0,0,0,0.5)] py-10 mx-auto my-auto rounded-md shadow-md enter-y"
-          >
-            <LoginForm />
-            <ForgetPasswordForm />
+            class="relative w-auto px-12 bg-[rgba(0,0,0,0.4)] py-5 mx-auto my-auto shadow-md enter-y">
+            <LoginForm/>
           </div>
         </div>
       </div>
@@ -32,141 +30,137 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import LoginForm from './LoginForm.vue';
-  import ForgetPasswordForm from './ForgetPasswordForm.vue';
-  import { useDesign } from '/@/hooks/web/useDesign';
+import LoginForm from './LoginForm.vue';
+import ForgetPasswordForm from './ForgetPasswordForm.vue';
+import {useDesign} from '/@/hooks/web/useDesign';
 
-  defineProps({
-    sessionTimeout: {
-      type: Boolean,
-    },
-  });
+defineProps({
+  sessionTimeout: {
+    type: Boolean,
+  },
+});
 
-  // const globSetting = useGlobSetting();
-  const { prefixCls } = useDesign('login');
-  // const title = computed(() => globSetting?.title ?? '');
+// const globSetting = useGlobSetting();
+const {prefixCls} = useDesign('login');
+// const title = computed(() => globSetting?.title ?? '');
 </script>
 <style lang="less">
-  @prefix-cls: ~'@{namespace}-login';
-  @logo-prefix-cls: ~'@{namespace}-app-logo';
-  @countdown-prefix-cls: ~'@{namespace}-countdown-input';
-  @dark-bg: #293146;
+@prefix-cls: ~'@{namespace}-login';
+@logo-prefix-cls: ~'@{namespace}-app-logo';
+@countdown-prefix-cls: ~'@{namespace}-countdown-input';
+@active-color: 255, 255, 255;
 
-  html[data-theme='dark'] {
-    .@{prefix-cls} {
-      background-color: @dark-bg;
+input.fix-auto-fill, .fix-auto-fill input {
+  box-shadow: inherit !important;
+}
 
-      .ant-input-affix-wrapper {
-        background-color: #232a3b !important;
-      }
-      .ant-input,
-      .ant-input-password {
-        background-color: #232a3b;
-      }
+.@{prefix-cls} {
+  min-height: 100%;
+  overflow: hidden;
+  background: url('/@/assets/images/sign-bg.jpg') no-repeat 50%;
+  background-size: cover;
 
-      .ant-btn:not(.ant-btn-link):not(.ant-btn-primary) {
-        border: 1px solid #4a5569;
-      }
+  .ant-input-affix-wrapper {
+    border: 1px solid rgba(@active-color, 0.55);
+    border-radius: 1px;
+    color: rgba(@active-color, 0.65);
+    margin-top: 10px;
+    background-color: rgba(@active-color, 0.05) !important;
+  }
 
-      .app-iconify {
-        color: #fff;
+  .signin-title {
+    padding-top: 20px;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 12px;
+    margin-bottom: 20px;
+  }
+
+  .logo {
+    padding-top: 20px;
+    height: 130px;
+    margin: auto;
+  }
+
+  .signin-form {
+    .ant-input {
+      padding-top: 3px;
+      padding-bottom: 3px;
+
+      .ant-input-affix-wrapper:hover, .ant-input:not(.ant-input-disabled) {
+        border-color: rgba(@active-color, .95);
       }
     }
 
-    input.fix-auto-fill,
-    .fix-auto-fill input {
-      box-shadow: inherit !important;
+    .signin-btn {
+      .ant-btn {
+        margin-top: 30px;
+        height: 40px;
+        background: rgba(@active-color, .40);
+        border: unset;
+      }
+    }
+
+    .text-left {
+      .ant-btn {
+        padding: 0px;
+      }
+    }
+
+  }
+
+  &::after {
+    content: '';
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: -20px;
+    background: inherit;
+    z-index: 2;
+    filter: blur(1px);
+  }
+
+
+  &-sign-in-way {
+    .anticon {
+      font-size: 22px;
+      color: #888;
+      cursor: pointer;
+
+      &:hover {
+        color: @primary-color;
+      }
     }
   }
 
-  .@{prefix-cls} {
-    min-height: 100%;
-    overflow: hidden;
-    background: url('/@/assets/images/logo-bg.jpg') no-repeat 50%;
-    background-size: cover;
-    &::after {
-      content: '';
-      width: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: -20px;
-      background: inherit;
-      filter: blur(4px);
-      z-index: 2;
+  input {
+    min-width: 300px;
+
+    @media (max-width: @screen-xl) {
+      min-width: 260px;
     }
 
-    .@{logo-prefix-cls} {
-      position: absolute;
-      top: 12px;
-      height: 30px;
-
-      &__title {
-        font-size: 16px;
-        color: #fff;
-      }
-
-      img {
-        width: 180px;
-      }
+    @media (max-width: @screen-lg) {
+      min-width: 200px;
     }
 
-    .container {
-      .@{logo-prefix-cls} {
-        display: flex;
-        width: 60%;
-        height: 80px;
-
-        &__title {
-          font-size: 24px;
-          color: #fff;
-        }
-
-        img {
-          width: 180px;
-        }
-      }
+    @media (max-width: @screen-md) {
+      min-width: 180px;
     }
 
-    &-sign-in-way {
-      .anticon {
-        font-size: 22px;
-        color: #888;
-        cursor: pointer;
-
-        &:hover {
-          color: @primary-color;
-        }
-      }
-    }
-
-    input:not([type='checkbox']) {
-      min-width: 360px;
-
-      @media (max-width: @screen-xl) {
-        min-width: 320px;
-      }
-
-      @media (max-width: @screen-lg) {
-        min-width: 260px;
-      }
-
-      @media (max-width: @screen-md) {
-        min-width: 240px;
-      }
-
-      @media (max-width: @screen-sm) {
-        min-width: 160px;
-      }
-    }
-
-    .@{countdown-prefix-cls} input {
-      min-width: unset;
-    }
-
-    .ant-divider-inner-text {
-      font-size: 12px;
-      color: @text-color-secondary;
+    @media (max-width: @screen-sm) {
+      min-width: 100px;
     }
   }
+
+  .@{countdown-prefix-cls} input {
+    min-width: unset;
+  }
+
+  .ant-divider-inner-text {
+    font-size: 12px;
+    color: @text-color-secondary;
+  }
+}
 </style>

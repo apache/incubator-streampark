@@ -15,9 +15,12 @@
   limitations under the License.
 -->
 <template>
-  <h2 class="mb-6 text-2xl font-bold text-center xl:text-3xl enter-x">
-    {{ getFormTitle }}
-  </h2>
+  <div class="text-center enter-x">
+    <img class="logo" src="/@/assets/images/logo.png">
+    <div class="signin-title">
+      StreamPark ── Make stream processing easier!
+    </div>
+  </div>
 </template>
 <script lang="ts" setup>
   import { computed, unref } from 'vue';

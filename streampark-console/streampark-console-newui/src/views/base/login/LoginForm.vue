@@ -17,7 +17,7 @@
 <template>
   <LoginFormTitle v-show="getShow" class="enter-x mb-40px text-light-50" />
   <Form
-    class="p-4 enter-x"
+    class="p-4 enter-x signin-form"
     :model="formData"
     :rules="getFormRules"
     ref="formRef"
@@ -28,8 +28,7 @@
       <Input
         v-model:value="formData.account"
         :placeholder="t('sys.login.userName')"
-        class="fix-auto-fill"
-      >
+        class="fix-auto-fill">
         <template #prefix>
           <user-outlined type="user" />
         </template>
@@ -39,33 +38,13 @@
       <InputPassword
         visibilityToggle
         v-model:value="formData.password"
-        :placeholder="t('sys.login.password')"
-      >
+        :placeholder="t('sys.login.password')">
         <template #prefix>
           <lock-outlined type="user" />
         </template>
       </InputPassword>
     </FormItem>
-
-    <ARow class="enter-x">
-      <ACol :span="12">
-        <FormItem>
-          <!-- No logic, you need to deal with it yourself -->
-          <Checkbox v-model:checked="rememberMe" size="small" class="!text-light-500">
-            {{ t('sys.login.rememberMe') }}
-          </Checkbox>
-        </FormItem>
-      </ACol>
-      <!-- No logic, you need to deal with it yourself -->
-      <!-- <ACol :span="12">
-        <FormItem :style="{ 'text-align': 'right' }">
-          <Button type="link" size="small" @click="setLoginState(LoginStateEnum.RESET_PASSWORD)">
-            {{ t('sys.login.forgetPassword') }}
-          </Button>
-        </FormItem>
-      </ACol> -->
-    </ARow>
-    <FormItem class="enter-x">
+    <FormItem class="enter-x signin-btn">
       <Button type="primary" block @click="handleLogin" :loading="loading">
         {{ loginText.buttonText }}
       </Button>
@@ -80,7 +59,7 @@
   import { reactive, ref, unref, computed } from 'vue';
   import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 
-  import { Checkbox, Form, Input, Row, Col, Button } from 'ant-design-vue';
+  import { Form, Input, Button } from 'ant-design-vue';
   import LoginFormTitle from './LoginFormTitle.vue';
 
   import { useI18n } from '/@/hooks/web/useI18n';
@@ -101,9 +80,6 @@
   import { fetchUserTeam } from '/@/api/system/member';
   import { LoginResultModel } from '/@/api/system/model/userModel';
   import { Result } from '/#/axios';
-
-  const ACol = Col;
-  const ARow = Row;
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
 
@@ -121,7 +97,6 @@
   const loading = ref(false);
   const userId = ref('');
   const modelVisible = ref(false);
-  const rememberMe = ref(false);
   const loginType = ref(LoginTypeEnum.LOCAL);
   const formData = reactive<LoginForm>({
     account: '',
@@ -145,7 +120,7 @@
     try {
       const loginFormValue = await validForm();
       if (!loginFormValue) return;
-      handleLoginAction(loginFormValue);
+      await handleLoginAction(loginFormValue);
     } catch (error) {
       console.error(error);
     }
@@ -182,7 +157,6 @@
             userId.value = data as unknown as string;
             const teamList = await fetchUserTeam({ userId: userId.value });
             userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
-
             modelVisible.value = true;
             return;
           } else {
