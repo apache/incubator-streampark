@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class ReflectionUtilsTest {
+class ReflectionUtilsTest {
 
     @Test
-    public void executeStaticMethods()
+    void executeStaticMethods()
         throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
         InvocationTargetException {
         Object result =

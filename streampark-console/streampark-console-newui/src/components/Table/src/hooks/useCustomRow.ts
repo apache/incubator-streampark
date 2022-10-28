@@ -62,12 +62,12 @@ export function useCustomRow(
 
           const isCheckbox = rowSelection.type === 'checkbox';
           if (isCheckbox) {
-            // 找到tr
+            // find tr
             const tr: HTMLElement = (e as MouseEvent)
               .composedPath?.()
               .find((dom: HTMLElement) => dom.tagName === 'TR') as HTMLElement;
             if (!tr) return;
-            // 找到Checkbox，检查是否为disabled
+            // find Checkbox，check disabled
             const checkBox = tr.querySelector('input[type=checkbox]');
             if (!checkBox || checkBox.hasAttribute('disabled')) return;
             if (!keys.includes(key)) {

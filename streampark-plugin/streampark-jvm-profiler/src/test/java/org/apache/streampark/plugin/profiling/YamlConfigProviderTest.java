@@ -30,10 +30,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class YamlConfigProviderTest {
+class YamlConfigProviderTest {
 
     @Test
-    public void getConfig() throws IOException {
+    void getConfig() throws IOException {
         {
             YamlConfigProvider provider = new YamlConfigProvider("not_exiting_file");
             Assertions.assertEquals(0, provider.getConfig().size());
@@ -95,14 +95,14 @@ public class YamlConfigProviderTest {
     }
 
     @Test
-    public void getConfigFromBadHttpUrl() throws IOException {
+    void getConfigFromBadHttpUrl() {
         YamlConfigProvider provider = new YamlConfigProvider("http://localhost/bad_url");
         Map<String, Map<String, List<String>>> config = provider.getConfig();
         Assertions.assertEquals(0, config.size());
     }
 
     @Test
-    public void getConfigFromFile() throws IOException {
+    void getConfigFromFile() throws IOException {
         String content =
             "key1: value1\n"
                 + "key2:\n"

@@ -28,6 +28,17 @@ logging:
   level:
     root: info
 
+swagger:
+  enable: true
+
+knife4j:
+  enable: true
+  basic:
+    # basic authentication, used to access swagger-ui and doc
+    enable: false
+    username: admin
+    password: streampark
+
 spring:
   profiles.active: h2 #[h2,pgsql,mysql]
   application.name: StreamPark
@@ -132,21 +143,15 @@ streampark:
       /*.less,
       /
 
-## select the login mode: 1. PASSWORD 2.LDAP
-security:
-  authentication:
-    type: PASSWORD
-
 ldap:
   ## AD server IP, default port 389
   urls: ldap://99.99.99.99:389
   ## Login Account
+  base-dn: dc=streampark,dc=com
   username: cn=Manager,dc=streampark,dc=com
   password: streampark
-  embedded:
-    base-dn: dc=streampark,dc=com
   user:
-    identity:
-      attribute: cn
-    email:
-      attribute: mail
+    identity-attribute: uid
+    email-attribute: mail
+    # action when ldap user is not exist (supported types: CREATE,DENY)
+    not-exist-action: CREATE

@@ -17,8 +17,8 @@
 <template>
   <Dropdown placement="bottomLeft" :overlayClassName="`${prefixCls}-dropdown-overlay`">
     <span :class="[prefixCls, `${prefixCls}--${theme}`]" class="flex">
-      <img :class="`${prefixCls}__header`" :src="getUserInfo.avatar" />
-      <span :class="`${prefixCls}__info hidden md:block`">
+      <!-- <img :class="`${prefixCls}__header`" :src="getUserInfo.avatar" /> -->
+      <span :class="`${prefixCls}__info hidden md:block px-10px`">
         <span :class="`${prefixCls}__name  `" class="truncate">
           {{ getUserInfo.username }}
         </span>
@@ -99,7 +99,7 @@
 
       const getUserInfo = computed(() => {
         const { username = '', avatar, desc } = userStore.getUserInfo || {};
-        return { username, avatar: avatar || headerImg, desc };
+        return { username, avatar: avatar && avatar !== 'default.jpg' ? avatar : headerImg, desc };
       });
       const [registerPasswordModal, { openModal: openPasswordModal }] = useModal();
       const [register, { openModal }] = useModal();
@@ -129,6 +129,7 @@
             break;
           case 'doc':
             openDoc();
+            break;
           case 'password':
             openChangePassword();
             break;

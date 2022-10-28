@@ -84,7 +84,7 @@ object SqlCommandParser extends Logger {
             } else {
               throw new UnsupportedOperationException("flink sql syntax error, no executable sql")
             }
-          case r => r.sortWith((a, b) => a.lineStart < b.lineStart)
+          case r => r
         }
     }
   }

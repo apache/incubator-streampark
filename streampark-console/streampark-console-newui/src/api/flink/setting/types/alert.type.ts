@@ -64,3 +64,8 @@ interface DingTalkParams {
 interface EmailParams {
   contacts: string;
 }
+
+export interface AlertUpdateParam {
+  settingKey: string;
+  settingValue: boolean;
+}

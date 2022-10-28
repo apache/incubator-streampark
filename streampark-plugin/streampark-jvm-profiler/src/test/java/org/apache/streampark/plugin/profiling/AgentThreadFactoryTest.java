@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class AgentThreadFactoryTest {
+class AgentThreadFactoryTest {
 
     @Test
-    public void newThread() throws InterruptedException {
+    void newThread() throws InterruptedException {
         final AtomicInteger i = new AtomicInteger(10);
 
         AgentThreadFactory threadFactory = new AgentThreadFactory();

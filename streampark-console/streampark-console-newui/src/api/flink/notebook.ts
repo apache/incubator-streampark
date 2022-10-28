@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import { AxiosResponse } from 'axios';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
 
 enum NOTEBOOK_API {
@@ -30,32 +29,18 @@ interface TutorialResponse {
   createTime: string;
 }
 /**
- * @returns Promise<TutorialResponse>
+ * @returns {Promise<TutorialResponse>}
  */
-export function fetchReadmd(params: { name: string }) {
-  return defHttp.post<TutorialResponse>({
-    url: NOTEBOOK_API.TUTORIAL,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchReadmd(data: { name: string }): Promise<TutorialResponse> {
+  return defHttp.post({ url: NOTEBOOK_API.TUTORIAL, data });
 }
 /**
  * submit notebook
- * @returns Promise<AxiosResponse>
+ * @returns {Promise<AxiosResponse<any>>}
  */
-export function fetchNotebookSubmit(params: { env: string; text: string }) {
-  return defHttp.post<AxiosResponse<any>>(
-    {
-      url: NOTEBOOK_API.SUBMIT,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
-  );
+export function fetchNotebookSubmit(data: {
+  env: string;
+  text: string;
+}): Promise<AxiosResponse<any>> {
+  return defHttp.post({ url: NOTEBOOK_API.SUBMIT, data }, { isReturnNativeResponse: true });
 }

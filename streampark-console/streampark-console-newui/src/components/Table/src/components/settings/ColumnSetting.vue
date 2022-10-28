@@ -44,6 +44,7 @@
             v-model:checked="checkSelect"
             @change="handleSelectCheckChange"
             :disabled="!defaultRowSelection"
+            v-if="getSelectColumn"
           >
             {{ t('component.table.settingSelectColumnShow') }}
           </Checkbox>
@@ -168,11 +169,13 @@
       Icon,
     },
     emits: ['columns-change'],
-
     setup(_, { emit, attrs }) {
       const { t } = useI18n();
       const table = useTableContext();
 
+      const getSelectColumn = computed(() => {
+        return false;
+      });
       const defaultRowSelection = omit(table.getRowSelection(), 'selectedRowKeys');
       let inited = false;
 
@@ -340,7 +343,7 @@
               );
             },
           });
-          // 记录原始order 序列
+          // Record the original order sequence
           sortableOrder = sortable.toArray();
           inited = true;
         });
@@ -400,6 +403,7 @@
 
       return {
         t,
+        getSelectColumn,
         ...toRefs(state),
         indeterminate,
         onCheckAllChange,

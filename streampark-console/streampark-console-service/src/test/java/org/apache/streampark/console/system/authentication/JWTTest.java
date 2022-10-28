@@ -28,14 +28,14 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 
-public class JWTTest {
+class JWTTest {
 
     @Test
-    public void getExpireTime() {
+    void getExpireTime() {
         String userName = "black";
         String secret = UUID.randomUUID().toString();
         String expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
-        String token = JWTUtil.sign(userName, secret, DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault()));
+        String token = JWTUtil.sign(10000L, userName, secret, DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault()));
 
         assert token != null;
         Date expiresAt = JWT.decode(token).getExpiresAt();

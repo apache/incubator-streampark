@@ -28,7 +28,7 @@
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
-  import { fetchTeamCreate, fetchTeamUpdate } from '/@/api/sys/team';
+  import { fetchTeamCreate, fetchTeamUpdate } from '/@/api/system/team';
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
 

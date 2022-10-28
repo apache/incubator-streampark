@@ -96,7 +96,7 @@ object YarnPerJobSubmit extends YarnSubmitTrait {
           submitRequest.effectiveAppName,
           classOf[YarnJobClusterEntrypoint].getName,
           jobGraph,
-          false
+          true
         ).getClusterClient
 
       }

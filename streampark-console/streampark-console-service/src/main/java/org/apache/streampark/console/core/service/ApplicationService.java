@@ -35,6 +35,8 @@ public interface ApplicationService extends IService<Application> {
 
     IPage<Application> page(Application app, RestRequest request);
 
+    long countByTeamId(Long teamId);
+
     boolean create(Application app) throws IOException;
 
     Long copy(Application app) throws IOException;
@@ -67,7 +69,7 @@ public interface ApplicationService extends IService<Application> {
 
     boolean mapping(Application app);
 
-    Map<String, Serializable> dashboard();
+    Map<String, Serializable> dashboard(Long teamId);
 
     void tailMvnDownloading(Long id);
 
@@ -89,6 +91,8 @@ public interface ApplicationService extends IService<Application> {
     void updateLaunch(Application application);
 
     List<Application> getByProjectId(Long id);
+
+    List<Application> getByTeamId(Long teamId);
 
     boolean checkBuildAndUpdate(Application app);
 

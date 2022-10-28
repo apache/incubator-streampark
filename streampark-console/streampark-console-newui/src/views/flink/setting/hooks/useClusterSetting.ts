@@ -19,7 +19,7 @@ import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { computed, onMounted, reactive, ref, unref } from 'vue';
 import { executionModes, k8sRestExposedType, resolveOrder } from '../../app/data';
 import {
-  renderDynamicOption,
+  renderProperties,
   renderInputDropdown,
   renderOptionsItems,
   renderTotalMemory,
@@ -45,13 +45,13 @@ export const useClusterSetting = () => {
     k8sNamespace: string[];
     k8sSessionClusterId: string[];
     serviceAccount: string[];
-    kubeConfFile: string[];
+    k8sConf: string[];
     flinkImage: string[];
   }>({
     k8sNamespace: [],
     k8sSessionClusterId: [],
     serviceAccount: [],
-    kubeConfFile: [],
+    k8sConf: [],
     flinkImage: [],
   });
 
@@ -60,7 +60,7 @@ export const useClusterSetting = () => {
   };
   const getLoading = computed(() => submitLoading.value);
 
-  /* 校验 */
+  /* check */
   async function handleCheckExecMode(_rule: RuleObject, value: StoreValue) {
     if (value === null || value === undefined || value === '') {
       return Promise.reject('Execution Mode is required');
@@ -188,14 +188,14 @@ export const useClusterSetting = () => {
           }),
       },
       {
-        field: 'kubeConfFile',
+        field: 'k8sConf',
         label: 'Kube Conf File',
         ifShow: ({ values }) => values.executionMode == 5,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
             placeholder: '~/.kube/config',
-            options: historyRecord.kubeConfFile,
+            options: historyRecord.k8sConf,
           }),
       },
       {
@@ -302,11 +302,11 @@ export const useClusterSetting = () => {
           renderOptionsItems(model, 'tmOptions', 'taskmanager.memory.'),
       },
       {
-        field: 'dynamicOptions',
-        label: 'Dynamic Option',
+        field: 'properties',
+        label: 'Properties',
         ifShow: ({ values }) => [3, 5].includes(values.executionMode),
         component: 'Input',
-        render: (renderCallbackParams) => renderDynamicOption(renderCallbackParams),
+        render: (renderCallbackParams) => renderProperties(renderCallbackParams),
       },
       {
         field: 'description',
@@ -338,7 +338,7 @@ export const useClusterSetting = () => {
         Object.assign(params, {
           options: JSON.stringify(options),
           yarnQueue: handleYarnQueue(values),
-          dynamicOptions: values.dynamicOptions,
+          properties: values.properties,
           resolveOrder: values.resolveOrder,
           address: values.address,
           flameGraph: values.flameGraph,
@@ -347,12 +347,12 @@ export const useClusterSetting = () => {
       case 5:
         Object.assign(params, {
           options: JSON.stringify(options),
-          dynamicOptions: values.dynamicOptions,
+          properties: values.properties,
           resolveOrder: values.resolveOrder,
           k8sRestExposedType: values.k8sRestExposedType,
           k8sNamespace: values.k8sNamespace || null,
           serviceAccount: values.serviceAccount,
-          k8sConf: values.kubeConfFile,
+          k8sConf: values.k8sConf,
           flinkImage: values.flinkImage || null,
           address: values.address,
           flameGraph: values.flameGraph,

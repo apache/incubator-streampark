@@ -178,6 +178,13 @@ export interface FormSchema {
 
   suffix?: string | number | ((values: RenderCallbackParams) => string | number);
 
+  itemExtra?:
+    | string
+    | number
+    | VNode
+    | VNode[]
+    | ((values: RenderCallbackParams) => VNode | VNode[] | string | number);
+
   // Validation rules
   rules?: Rule[];
   // Check whether the information is added to the label
@@ -189,7 +196,6 @@ export interface FormSchema {
   // col configuration outside formModelItem
   colProps?: Partial<ColEx>;
 
-  // 默认值
   defaultValue?: any;
   isAdvanced?: boolean;
 

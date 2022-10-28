@@ -42,13 +42,13 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchConfHistory } from '/@/api/flink/config';
   import { useDrawer } from '/@/components/Drawer';
-  import { useTabs } from '/@/hooks/web/useTabs';
   import { useEditStreamParkSchema } from './hooks/useEditStreamPark';
   import { useEdit } from './hooks/useEdit';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { useGo } from '/@/hooks/web/usePage';
 
   const route = useRoute();
-  const { close } = useTabs();
+  const go = useGo();
   const { t } = useI18n();
   const { createMessage } = useMessage();
   const app = reactive<Partial<AppListRecord>>({});
@@ -92,7 +92,7 @@
         tags: app.tags,
         args: app.args,
         description: app.description,
-        dynamicOptions: app.dynamicOptions,
+        properties: app.properties,
         resolveOrder: app.resolveOrder,
         versionId: app.versionId || null,
         k8sRestExposedType: app.k8sRestExposedType,
@@ -224,7 +224,7 @@
     try {
       const updated = await fetchUpdate(params);
       if (updated) {
-        close(undefined, { path: '/flink/app' });
+        go('/flink/app');
       }
     } catch (error) {
       console.error('error', error);
@@ -297,7 +297,7 @@
   }
   onMounted(() => {
     if (!route?.query?.appId) {
-      close(undefined, { path: '/flink/app' });
+      go('/flink/app');
       createMessage.warning('appid can not be empty');
       return;
     }
@@ -348,7 +348,7 @@
 
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button @click="close(undefined, { path: '/flink/app' })">
+          <a-button @click="go('/flink/app')">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button class="ml-4" :loading="submitLoading" type="primary" @click="submit()">

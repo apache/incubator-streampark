@@ -169,7 +169,8 @@ export default {
     CHECK_NAME: '/user/check/name',
     CHECK_PASSWORD: '/user/check/password',
     SET_TEAM: '/user/setTeam',
-    INIT_TEAM: '/user/initTeam'
+    INIT_TEAM: '/user/initTeam',
+    APP_OWNERS: '/user/appOwners'
   },
   Token: {
     LIST: '/token/list',
@@ -208,6 +209,15 @@ export default {
     POST: '/menu/post',
     UPDATE: '/menu/update',
     ROUTER: '/menu/router'
+  },
+  Variable: {
+    LIST: '/variable/list',
+    DEPEND: '/variable/dependApps',
+    UPDATE: '/variable/update',
+    POST: '/variable/post',
+    DELETE: '/variable/delete',
+    SELECT: '/variable/select',
+    CHECK_CODE: '/variable/check/code'
   },
   Log: {
     LIST: '/log/list',

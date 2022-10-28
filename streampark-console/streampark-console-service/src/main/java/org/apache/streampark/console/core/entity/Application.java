@@ -166,7 +166,7 @@ public class Application implements Serializable {
     private String hotParams;
     private Integer resolveOrder;
     private Integer executionMode;
-    private String dynamicOptions;
+    private String properties;
     private Integer appType;
     private Boolean flameGraph;
 
@@ -550,7 +550,7 @@ public class Application implements Serializable {
         // 4) Parallelism has it changed
         // 5) Task Slots has it changed
         // 6) Options has it changed
-        // 7) Dynamic Option has it changed
+        // 7) properties has it changed
         // 8) Program Args has it changed
         // 9) Flink Version  has it changed
 
@@ -585,15 +585,15 @@ public class Application implements Serializable {
             return false;
         }
 
-        if (this.getDynamicOptions() != null) {
-            if (other.getDynamicOptions() != null) {
-                if (!this.getDynamicOptions().trim().equals(other.getDynamicOptions().trim())) {
+        if (this.getProperties() != null) {
+            if (other.getProperties() != null) {
+                if (!this.getProperties().trim().equals(other.getProperties().trim())) {
                     return false;
                 }
             } else {
                 return false;
             }
-        } else if (other.getDynamicOptions() != null) {
+        } else if (other.getProperties() != null) {
             return false;
         }
 
@@ -738,6 +738,22 @@ public class Application implements Serializable {
             return new DependencyInfo(mvnArts, extJars);
         }
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        return id.equals(((Application) o).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Data

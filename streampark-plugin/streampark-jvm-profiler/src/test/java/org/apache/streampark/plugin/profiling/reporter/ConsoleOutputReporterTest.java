@@ -21,10 +21,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
-public class ConsoleOutputReporterTest {
+class ConsoleOutputReporterTest {
 
     @Test
-    public void report() {
+    void report() {
         ConsoleOutputReporter reporter = new ConsoleOutputReporter();
         reporter.report("Test", new HashMap<String, Object>());
     }

@@ -39,7 +39,7 @@
 
   const { t } = useI18n();
   const versionId = ref<string | null>(null);
-  const { createMessage } = useMessage();
+  const { Swal } = useMessage();
   const flinks = ref<FlinkEnv[]>([]);
   const [registerModal, { openModal: openFlinkModal }] = useModal();
   const [registerFlinkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
@@ -64,7 +64,12 @@
   async function handleSetDefault(item: FlinkEnv) {
     if (item.isDefault) {
       await fetchDefaultSet(item.id);
-      createMessage.success(item.flinkName.concat(' set default successful!'));
+      Swal.fire({
+        icon: 'success',
+        title: item.flinkName.concat(' set default successful!'),
+        showConfirmButton: false,
+        timer: 2000,
+      });
       getFlinkSetting();
     }
   }
@@ -89,7 +94,7 @@
     <ListItem v-for="(item, index) in flinks" :key="index">
       <ListItemMeta style="width: 60%" :title="item.flinkName" :description="item.description">
         <template #avatar>
-          <SvgIcon class="avatar" name="flink" size="25" />
+          <SvgIcon class="avatar p-15px" name="flink" size="60" />
         </template>
       </ListItemMeta>
 

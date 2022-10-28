@@ -77,10 +77,11 @@ http.interceptors.request.use(config => {
         delete data.sortOrder
       }
     }
-    const teamId = sessionStorage.getItem(TEAM_ID)
-    if (teamId) {
+    const teamId = storage.getSession(TEAM_ID)
+    if (data['teamId'] == null && teamId) {
       data['teamId'] = teamId
     }
+
     if (config.method === 'get') {
       // filter undefined params
       data = Object.fromEntries(Object.entries(data).filter(([_,value]) => value !== undefined))

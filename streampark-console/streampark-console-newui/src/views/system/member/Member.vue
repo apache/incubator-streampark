@@ -20,7 +20,8 @@
     <BasicTable @register="registerTable" :formConfig="formConfig">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'member:add'">
-          {{ t('system.member.addMember') }}
+          <Icon icon="ant-design:plus-outlined" />
+          {{ t('common.add') }}
         </a-button>
       </template>
       <template #bodyCell="{ column, record }">
@@ -28,7 +29,7 @@
           <TableAction
             :actions="[
               {
-                icon: 'ant-design:edit-outlined',
+                icon: 'clarity:note-edit-line',
                 auth: 'member:update',
                 tooltip: t('system.member.modifyMember'),
                 onClick: handleEdit.bind(null, record),
@@ -52,39 +53,41 @@
       @register="registerDrawer"
       @success="handleSuccess"
       :roleOptions="roleListOptions"
+      okText="Submit"
     />
   </div>
 </template>
 <script lang="ts">
-  import { computed, defineComponent, onMounted, ref, unref } from 'vue';
-  import { useTabs } from '/@/hooks/web/useTabs';
-  import { useUserStoreWithOut } from '/@/store/modules/user';
-  import { RoleListItem } from '/@/api/demo/model/systemModel';
-
   export default defineComponent({
     name: 'Member',
   });
 </script>
 
 <script setup lang="ts" name="member">
+  import { computed, defineComponent, onMounted, ref, unref } from 'vue';
+  import { useUserStoreWithOut } from '/@/store/modules/user';
+  import { RoleListItem } from '/@/api/base/model/systemModel';
+  import { useGo } from '/@/hooks/web/usePage';
   import { BasicTable, useTable, TableAction, FormProps } from '/@/components/Table';
   import MemberDrawer from './MemberDrawer.vue';
   import { useDrawer } from '/@/components/Drawer';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { getRoleListByPage } from '/@/api/demo/system';
-  import { fetchMemberDelete, fetchMemberList } from '/@/api/sys/member';
+  import { getRoleListByPage } from '/@/api/base/system';
+  import { fetchMemberDelete, fetchMemberList } from '/@/api/system/member';
+  import Icon from '/@/components/Icon';
 
   const roleListOptions = ref<Array<Partial<RoleListItem>>>([]);
 
   const [registerDrawer, { openDrawer }] = useDrawer();
   const { createMessage } = useMessage();
-  const { close } = useTabs();
+  const go = useGo();
   const { t } = useI18n();
   const userStore = useUserStoreWithOut();
   const formConfig = computed((): Partial<FormProps> => {
     return {
-      labelWidth: 120,
+      baseColProps: { style: { paddingRight: '30px' } },
+      colon: true,
       schemas: [
         {
           field: 'userName',
@@ -113,12 +116,8 @@
     };
   });
   const [registerTable, { reload }] = useTable({
-    title: t('system.member.table.title'),
+    title: 'Member List',
     api: fetchMemberList,
-    beforeFetch: (params) => {
-      params.teamId = userStore.getTeamId;
-      return params;
-    },
     columns: [
       { title: t('system.member.table.userName'), dataIndex: 'userName', sorter: true },
       { title: t('system.member.table.roleName'), dataIndex: 'roleName', sorter: true },
@@ -128,11 +127,11 @@
     rowKey: 'id',
     pagination: true,
     useSearchForm: true,
-    showTableSetting: false,
+    showTableSetting: true,
     showIndexColumn: false,
     canResize: false,
     actionColumn: {
-      width: 120,
+      width: 200,
       title: t('component.table.operation'),
       dataIndex: 'action',
     },
@@ -152,7 +151,7 @@
     });
   }
 
-  /* 删除成员 */
+  /* Delete members */
   async function handleDelete(record: Recordable) {
     const { data } = await fetchMemberDelete({ id: record.id });
     if (data.status === 'success') {
@@ -172,7 +171,7 @@
   onMounted(async () => {
     if (!userStore.getTeamId) {
       createMessage.warning('Please select Team first!!!');
-      close(undefined, { path: '/system/team' });
+      go('/system/team');
     } else {
       reload();
       const roleList = await getRoleListByPage({ page: 1, pageSize: 9999 });

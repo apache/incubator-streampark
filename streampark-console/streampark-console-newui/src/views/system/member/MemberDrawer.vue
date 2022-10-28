@@ -37,14 +37,16 @@
 
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { RoleListItem } from '/@/api/demo/model/systemModel';
+  import { RoleListItem } from '/@/api/base/model/systemModel';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { RuleObject } from 'ant-design-vue/lib/form';
   import { StoreValue } from 'ant-design-vue/lib/form/interface';
-  import { fetchAddMember, fetchCheckUserName, fetchUpdateMember } from '/@/api/sys/member';
+  import { fetchAddMember, fetchCheckUserName, fetchUpdateMember } from '/@/api/system/member';
+  import { useFormValidate } from '/@/hooks/web/useFormValidate';
 
   const { t } = useI18n();
   const userStore = useUserStoreWithOut();
+  const { getItemProp, setValidateStatus, setHelp } = useFormValidate();
 
   const emit = defineEmits(['success', 'register']);
   const props = defineProps({
@@ -55,8 +57,6 @@
   });
 
   const isUpdate = ref(false);
-  const validateStatus = ref<'success' | 'warning' | 'error' | 'validating' | ''>('');
-  const help = ref('');
   const editParams: { userId: Nullable<number>; id: Nullable<number>; teamId: Nullable<number> } = {
     userId: null,
     id: null,
@@ -66,31 +66,31 @@
   async function checkUserName(_rule: RuleObject, value: StoreValue) {
     if (value) {
       if (value.length > 20) {
-        validateStatus.value = 'error';
-        help.value = 'User name should not be longer than 20 characters';
+        setValidateStatus('error');
+        setHelp('User name should not be longer than 20 characters');
         return Promise.reject();
       } else if (value.length < 4) {
-        validateStatus.value = 'error';
-        help.value = 'User name should not be less than 4 characters';
+        setValidateStatus('error');
+        setHelp('User name should not be less than 4 characters');
         return Promise.reject();
       } else {
-        validateStatus.value = 'validating';
+        setValidateStatus('validating');
         const res = await fetchCheckUserName({
           username: value,
         });
         if (res) {
-          validateStatus.value = 'error';
-          help.value = "Sorry, the user name doesn't exists";
+          setValidateStatus('error');
+          setHelp("Sorry, the user name doesn't exists");
           return Promise.reject();
         } else {
-          validateStatus.value = 'success';
-          help.value = '';
+          setValidateStatus('success');
+          setHelp('');
           return Promise.resolve();
         }
       }
     } else {
-      validateStatus.value = 'error';
-      help.value = 'User name cannot be empty';
+      setValidateStatus('error');
+      setHelp('User name cannot be empty');
       return Promise.reject();
     }
   }
@@ -101,7 +101,7 @@
         label: t('system.member.table.userName'),
         component: 'Input',
         componentProps: { disabled: unref(isUpdate) },
-        itemProps: { validateStatus: unref(validateStatus), help: unref(help), hasFeedback: true },
+        itemProps: getItemProp.value,
         rules: unref(isUpdate)
           ? []
           : [{ required: true, validator: checkUserName, trigger: 'blur' }],
@@ -129,8 +129,8 @@
 
   const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(
     async (data: Recordable) => {
-      validateStatus.value = '';
-      help.value = '';
+      setValidateStatus('');
+      setHelp('');
       Object.assign(editParams, { userId: null, id: null });
       resetFields();
       setDrawerProps({ confirmLoading: false });

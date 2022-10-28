@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { AxiosResponse } from 'axios';
-import { AppListRecord, AppListResponse, CancelParam, DashboardResponse } from './app.type';
+import { AppListResponse, CancelParam, DashboardResponse } from './app.type';
 import { Result } from '/#/axios';
 import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
@@ -76,65 +76,36 @@ export function fetchDashboard() {
 
 /**
  * Get app list data
- * @returns Promise<AppListResponse>
+ * @returns {Promise<AppListResponse>}
  */
-export function fetchAppRecord(params) {
-  return defHttp.post<AppListResponse>({
-    url: APP_API.LIST,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchAppRecord(data): Promise<AppListResponse> {
+  return defHttp.post({ url: APP_API.LIST, data });
 }
 /**
  * remove the app
- * @returns Promise<boolean>
+ * @returns {Promise<boolean>}
  */
-export function fetchAppRemove(id: string) {
-  return defHttp.post<boolean>({
-    url: APP_API.DELETE,
-    params: { id },
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchAppRemove(id: string): Promise<boolean> {
+  return defHttp.post({ url: APP_API.DELETE, data: { id } });
 }
 /**
  * get yarn address
- * @returns Promise<any>
+ * @returns {Promise<string>}
  */
-export function fetchYarn() {
-  return defHttp.post<string>({
-    url: APP_API.YARN,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchYarn(): Promise<string> {
+  return defHttp.post({ url: APP_API.YARN });
 }
 
 /**
  * get item
- * @returns Promise<any>
+ * @returns {Promise<number>}
  */
-export function fetchCheckName(params: { id?: string; jobName: string }) {
-  return defHttp.post<number>({
-    url: APP_API.CHECK_NAME,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchCheckName(data: { id?: string; jobName: string }): Promise<number> {
+  return defHttp.post({ url: APP_API.CHECK_NAME, data });
 }
 
-export function fetchMain(params) {
-  return defHttp.post({
-    url: APP_API.MAIN,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchMain(data) {
+  return defHttp.post({ url: APP_API.MAIN, data });
 }
 /**
  * upload
@@ -157,38 +128,16 @@ export function fetchUpload(params) {
  * @param params Create parameters
  * @returns {Promise<AxiosResponse<Result>>} Whether the data creation was successful message: error message
  */
-export function fetchCreate(params) {
-  return defHttp.post<AxiosResponse<Result>>(
-    {
-      url: APP_API.CREATE,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
-  );
+export function fetchCreate(data): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: APP_API.CREATE, data }, { isReturnNativeResponse: true });
 }
 /**
  * update
  * @param params update parameters
  * @returns {Promise<AxiosResponse<Result>>} Whether the data update is successful message: error message
  */
-export function fetchUpdate(params) {
-  return defHttp.post<AxiosResponse<Result>>(
-    {
-      url: APP_API.UPDATE,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
-  );
+export function fetchUpdate(data): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: APP_API.UPDATE, data }, { isReturnNativeResponse: true });
 }
 
 /**
@@ -196,76 +145,33 @@ export function fetchUpdate(params) {
  * @param params get parameters
  * @returns {Promise<AxiosResponse<Result>>} Whether the data get is successful message: error message
  */
-export function fetchGet(params: { id: string }) {
-  return defHttp.post<AppListRecord>({
-    url: APP_API.GET,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchGet(data: { id: string }): Promise<any> {
+  return defHttp.post({ url: APP_API.GET, data });
 }
 
-export function fetchBackUps(params) {
-  return defHttp.post({
-    url: APP_API.BACKUPS,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchBackUps(data) {
+  return defHttp.post({ url: APP_API.BACKUPS, data });
 }
-export function fetchOptionLog(params) {
-  return defHttp.post({
-    url: APP_API.OPTION_LOG,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchOptionLog(data) {
+  return defHttp.post({ url: APP_API.OPTION_LOG, data });
 }
 /**
  * forced stop
  * @param params id:string
  * @returns
  */
-export function fetchForcedStop(params: { id: string }) {
-  return defHttp.post<boolean>({
-    url: APP_API.FORCED_STOP,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchForcedStop(data: { id: string }): Promise<boolean> {
+  return defHttp.post({ url: APP_API.FORCED_STOP, data });
 }
 
-export function fetchStart(params) {
-  return defHttp.post<AxiosResponse<Result>>(
-    {
-      url: APP_API.START,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
-  );
+export function fetchStart(data): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: APP_API.START, data }, { isReturnNativeResponse: true });
 }
-export function fetchCopy(params) {
-  return defHttp.post<AxiosResponse<any>>(
-    {
-      url: APP_API.COPY,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-      errorMessageMode: 'none',
-    },
+
+export function fetchCopy(data): Promise<AxiosResponse<any>> {
+  return defHttp.post(
+    { url: APP_API.COPY, data },
+    { isReturnNativeResponse: true, errorMessageMode: 'none' },
   );
 }
 /**
@@ -273,52 +179,27 @@ export function fetchCopy(params) {
  * @param params {id:string,appId:string,jobId:string}
  * @returns {Promise<Boolean>}
  */
-export function fetchMapping(params) {
-  return defHttp.post<boolean>({
-    url: APP_API.MAPPING,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchMapping(data): Promise<boolean> {
+  return defHttp.post({ url: APP_API.MAPPING, data });
 }
 
 /**
  * log
  * @param params
- * @returns
+ * @returns {Promise<AxiosResponse<any>>}
  */
-export function fetchStartLog(params) {
-  return defHttp.post<AxiosResponse<any>>(
-    {
-      url: APP_API.START_LOG,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
-  );
+export function fetchStartLog(data): Promise<AxiosResponse<any>> {
+  return defHttp.post({ url: APP_API.START_LOG, data }, { isReturnNativeResponse: true });
 }
 /**
  * SavepointPath
- * @param {String} id app Id
+ * @param {Object} data app Id
  * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchCheckSavepointPath(params: { id: string }) {
-  return defHttp.post<AxiosResponse<Result>>(
-    {
-      url: APP_API.CHECK_SAVEPOINT_PATH,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
+export function fetchCheckSavepointPath(data: { id: string }): Promise<AxiosResponse<Result>> {
+  return defHttp.post(
+    { url: APP_API.CHECK_SAVEPOINT_PATH, data },
+    { isReturnNativeResponse: true },
   );
 }
 /**
@@ -326,42 +207,22 @@ export function fetchCheckSavepointPath(params: { id: string }) {
  * @param {String} path
  * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchVerifySchema(params: { path: string }) {
-  return defHttp.post<AxiosResponse<Result>>(
-    {
-      url: APP_API.CHECK_SAVEPOINT_PATH,
-      params,
-      headers: {
-        'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-      },
-    },
-    {
-      isReturnNativeResponse: true,
-    },
+export function fetchVerifySchema(data: { path: string }): Promise<AxiosResponse<Result>> {
+  return defHttp.post(
+    { url: APP_API.CHECK_SAVEPOINT_PATH, data },
+    { isReturnNativeResponse: true },
   );
 }
 
 /**
  * Cancel
- * @param {CancelParam} params
+ * @param {CancelParam} data
  * @returns {Promise<Boolean>}
  */
-export function fetchCancel(params: CancelParam) {
-  return defHttp.post<boolean>({
-    url: APP_API.CANCEL,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchCancel(data: CancelParam): Promise<boolean> {
+  return defHttp.post({ url: APP_API.CANCEL, data });
 }
 
-export function fetchName(params) {
-  return defHttp.post({
-    url: APP_API.NAME,
-    params,
-    headers: {
-      'Content-Type': ContentTypeEnum.FORM_URLENCODED,
-    },
-  });
+export function fetchName(data) {
+  return defHttp.post({ url: APP_API.NAME, data });
 }

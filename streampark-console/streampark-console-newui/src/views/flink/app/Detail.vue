@@ -33,9 +33,9 @@
   import { handleView } from './utils';
   import { Button } from '/@/components/Button';
   import { getDescSchema } from './data/detail.data';
-  import { fetchCheckToken, fetchCopyCurl } from '/@/api/sys/token';
+  import { fetchCheckToken, fetchCopyCurl } from '/@/api/system/token';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { baseUrl } from '/@/adapter/api/baseUrl';
+  import { baseUrl } from '/@/api/index';
   import { fetchListVer } from '/@/api/flink/config';
   import { fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
   import Mergely from './components/Mergely.vue';
@@ -46,7 +46,7 @@
   const route = useRoute();
   const router = useRouter();
 
-  const { createMessage } = useMessage();
+  const { Swal, createMessage } = useMessage();
   const { copy } = useClipboard();
 
   const app = reactive<Partial<AppListRecord>>({});
@@ -181,9 +181,19 @@
     const resp = await fetchCheckToken({});
     const result = parseInt(resp);
     if (result === 0) {
-      createMessage.error('access token is null,please contact the administrator to add.');
+      Swal.fire({
+        icon: 'error',
+        title: 'access token is null,please contact the administrator to add.',
+        showConfirmButton: true,
+        timer: 3500,
+      });
     } else if (result === 1) {
-      createMessage.error('access token is invalid,please contact the administrator.');
+      Swal.fire({
+        icon: 'error',
+        title: 'access token is invalid,please contact the administrator.',
+        showConfirmButton: true,
+        timer: 3500,
+      });
     } else {
       const res = await fetchCopyCurl({
         appId: app.id,

@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class MethodArgumentProfilerTest {
+class MethodArgumentProfilerTest {
 
     @Test
-    public void profile() {
+    void profile() {
         final List<String> nameList = new ArrayList<>();
         final List<Map<String, Object>> metricList = new ArrayList<>();
 

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.system.entity;
 
+import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.console.core.enums.UserType;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -101,5 +102,11 @@ public class User implements Serializable {
      * The last set teamId
      */
     private Long teamId;
+
+    public void dataMasking() {
+        String dataMask = ConfigConst.DEFAULT_DATAMASK_STRING();
+        this.setPassword(dataMask);
+        this.setSalt(dataMask);
+    }
 
 }

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.conf.ConfigConst
 import redis.clients.jedis._
 import redis.clients.jedis.exceptions.JedisConnectionException
 
@@ -86,7 +87,7 @@ object RedisClient extends Logger {
    * @return
    */
   def createJedisPool(endpoint: RedisEndpoint): JedisPool = {
-    val endpointEn: RedisEndpoint = endpoint.copy(auth = "********")
+    val endpointEn: RedisEndpoint = endpoint.copy(auth = ConfigConst.DEFAULT_DATAMASK_STRING)
     logInfo(s"[StreamPark] RedisClient: createJedisPool with $endpointEn ")
     new JedisPool(poolConfig, endpoint.host, endpoint.port, endpoint.timeout, endpoint.auth, endpoint.db)
   }

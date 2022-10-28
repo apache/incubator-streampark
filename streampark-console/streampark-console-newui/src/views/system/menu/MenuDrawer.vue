@@ -32,8 +32,8 @@
   import { formSchema, TypeEnum } from './menu.data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 
-  import { getMenuList } from '/@/api/demo/system';
-  import { addMenu, editMenu } from '/@/api/sys/menu';
+  import { getMenuList } from '/@/api/base/system';
+  import { addMenu, editMenu } from '/@/api/system/menu';
 
   export default defineComponent({
     name: 'MenuDrawer',
@@ -43,10 +43,11 @@
       const isUpdate = ref(true);
 
       const [registerForm, { resetFields, setFieldsValue, updateSchema, validate }] = useForm({
-        labelWidth: 120,
+        labelWidth: 200,
         schemas: formSchema,
         showActionButtonGroup: false,
-        baseColProps: { lg: 22, md: 22 },
+        colon: true,
+        baseColProps: { span: 24 },
       });
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {

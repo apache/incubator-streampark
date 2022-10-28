@@ -27,7 +27,6 @@ import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
-import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -42,9 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @Validated
 @RestController
@@ -53,9 +50,6 @@ public class PassportController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private RoleService roleService;
 
     @Autowired
     private ShiroProperties properties;
@@ -67,13 +61,31 @@ public class PassportController {
     public RestResponse signin(
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) throws Exception {
-
         if (StringUtils.isEmpty(username)) {
             return RestResponse.success().put("code", 0);
         }
-
         User user = authenticator.authenticate(username, password);
+        return login(username, password, user);
+    }
 
+    @PostMapping("ldapSignin")
+    public RestResponse ldapSignin(
+        @NotBlank(message = "{required}") String username,
+        @NotBlank(message = "{required}") String password) throws Exception {
+        if (StringUtils.isEmpty(username)) {
+            return RestResponse.success().put("code", 0);
+        }
+        User user = authenticator.ldapAuthenticate(username, password);
+        return login(username, password, user);
+    }
+
+    @PostMapping("signout")
+    public RestResponse signout() {
+        SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
+        return new RestResponse();
+    }
+
+    private RestResponse login(String username, String password, User user) throws Exception {
         if (user == null) {
             return RestResponse.success().put("code", 0);
         }
@@ -92,44 +104,13 @@ public class PassportController {
         password = ShaHashUtils.encrypt(user.getSalt(), password);
 
         this.userService.updateLoginTime(username);
-        String token = WebUtils.encryptToken(JWTUtil.sign(username, password));
+        String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), username, password));
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
         String expireTimeStr = DateUtils.formatFullTime(expireTime);
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
-        Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
+        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, user.getTeamId(), jwtToken);
         return new RestResponse().data(userInfo);
     }
-
-    @PostMapping("signout")
-    public RestResponse signout() {
-        SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
-        return new RestResponse();
-    }
-
-    /**
-     * generate user info, contains: 1.token, 2.vue router, 3.role, 4.permission, 5.personalized config info of frontend
-     *
-     * @param token token
-     * @param user  user
-     * @return UserInfo
-     */
-    private Map<String, Object> generateUserInfo(JWTToken token, User user) {
-        String username = user.getUsername();
-        Map<String, Object> userInfo = new HashMap<>(8);
-        userInfo.put("token", token.getToken());
-        userInfo.put("expire", token.getExpireAt());
-
-        Set<String> roles = this.roleService.getUserRoleName(username);
-        userInfo.put("roles", roles);
-
-        Set<String> permissions = this.userService.getPermissions(username);
-        userInfo.put("permissions", permissions);
-        user.setPassword("******");
-        user.setSalt("******");
-        userInfo.put("user", user);
-        return userInfo;
-    }
-
 }

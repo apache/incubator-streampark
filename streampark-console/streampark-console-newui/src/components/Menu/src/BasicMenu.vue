@@ -113,12 +113,10 @@
         }
         return inlineCollapseOptions;
       });
-
       listenerRouteChange((route) => {
         if (route.name === REDIRECT_NAME) return;
         handleMenuChange(route);
         currentActiveMenu.value = route.meta?.currentActiveMenu as string;
-
         if (unref(currentActiveMenu)) {
           menuState.selectedKeys = [unref(currentActiveMenu)];
           setOpenKeys(unref(currentActiveMenu));
@@ -132,8 +130,7 @@
             handleMenuChange();
           },
         );
-
-      async function handleMenuClick({ key }: { key: string; keyPath: string[] }) {
+      async function handleMenuClick({ key }) {
         const { beforeClickFn } = props;
         if (beforeClickFn && isFunction(beforeClickFn)) {
           const flag = await beforeClickFn(key);

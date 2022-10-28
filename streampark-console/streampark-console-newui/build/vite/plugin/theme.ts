@@ -53,7 +53,7 @@ export function configThemePlugin(isBuild: boolean): PluginOption[] {
             return s;
           default:
             if (s.indexOf('.ant-btn') >= -1) {
-              // 按钮被重新定制过，需要过滤掉class防止覆盖
+              // The buttons have been re-customized and need to filter out the class to prevent overwriting
               return s;
             }
         }
@@ -97,8 +97,9 @@ export function configThemePlugin(isBuild: boolean): PluginOption[] {
         'alert-error-border-color': '#58181c',
         'alert-error-bg-color': '#2a1215',
         'alert-error-icon-color': '#a61d24',
-        'background-color-light': '#fafafa',
-        'background-color-base': '#e6f7ff',
+        'background-color-light': 'rgba(255,255,255,.04)',
+        'background-color-base': '#2a2a2a',
+        'modal-mask-bg': 'rgba(255,255,255, 0.45)',
       },
     }),
   ];

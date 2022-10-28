@@ -168,13 +168,13 @@
         function validator(rule: any, value: any) {
           const msg = rule.message || defaultMsg;
           if (value === undefined || isNull(value)) {
-            // 空值
+            // null
             return Promise.reject(msg);
           } else if (Array.isArray(value) && value.length === 0) {
-            // 数组类型
+            // Array
             return Promise.reject(msg);
           } else if (typeof value === 'string' && value.trim() === '') {
-            // 空字符串
+            // An empty string
             return Promise.reject(msg);
           } else if (
             typeof value === 'object' &&
@@ -185,7 +185,7 @@
             value.checked.length === 0 &&
             value.halfChecked.length === 0
           ) {
-            // 非关联选择的tree组件
+            // A non-associative selected tree component
             return Promise.reject(msg);
           }
           return Promise.resolve();
@@ -194,9 +194,8 @@
         const getRequired = isFunction(required) ? required(unref(getValues)) : required;
 
         /*
-         * 1、若设置了required属性，又没有其他的rules，就创建一个验证规则；
-         * 2、若设置了required属性，又存在其他的rules，则只rules中不存在required属性时，才添加验证required的规则
-         *     也就是说rules中的required，优先级大于required
+         * 1、If the required attribute is set and there are no other rules, a validation rule is created;
+         * 2、If the required attribute is set and there are other rules, the rule to verify the required is added only if the required attribute does not exist in the rules, that is, the required in the rules takes precedence greater than required
          */
         if (getRequired) {
           if (!rules || rules.length === 0) {
@@ -334,7 +333,7 @@
       }
 
       function renderItem() {
-        const { itemProps, slot, render, field, suffix, component } = props.schema;
+        const { itemProps, slot, render, field, suffix, itemExtra, component } = props.schema;
         const { labelCol, wrapperCol } = unref(itemLabelWidthProp);
         const { colon } = props.formProps;
 
@@ -354,7 +353,9 @@
           };
 
           const showSuffix = !!suffix;
+          const showItemExtra = !!itemExtra;
           const getSuffix = isFunction(suffix) ? suffix(unref(getValues)) : suffix;
+          const getItemExtra = isFunction(itemExtra) ? itemExtra(unref(getValues)) : itemExtra;
 
           return (
             <Form.Item
@@ -371,6 +372,7 @@
                 <div style="flex:1;">{getContent()}</div>
                 {showSuffix && <span class="suffix">{getSuffix}</span>}
               </div>
+              {showItemExtra && <div class="extra">{getItemExtra}</div>}
             </Form.Item>
           );
         }

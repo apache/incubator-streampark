@@ -44,12 +44,11 @@
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
 
-        <swagger.version>1.9.3</swagger.version>
-        <springfox.version>2.9.2</springfox.version>
-        <swagger-models.version>1.5.24</swagger-models.version>
+        <swagger-bootstrap.version>2.0.9</swagger-bootstrap.version>
+        <springfox.version>3.0.0</springfox.version>
         <commons-compress.version>1.21</commons-compress.version>
         <javax-mail.version>1.4.7</javax-mail.version>
-        <shiro.version>1.9.1</shiro.version>
+        <shiro.version>1.10.0</shiro.version>
         <p6spy.version>3.9.1</p6spy.version>
         <freemarker.version>2.3.30</freemarker.version>
         <commons-email.version>1.5</commons-email.version>
@@ -107,6 +106,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>${commons-compress.version}</version>
@@ -153,7 +158,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>provided</scope>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.jupiter</groupId>
+                    <artifactId>junit-jupiter</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -358,31 +369,25 @@
             <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
         </dependency>
 
-        <!-- swagger 2 -->
+        <!-- swagger 3 -->
         <dependency>
             <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
+            <artifactId>springfox-boot-starter</artifactId>
             <version>${springfox.version}</version>
         </dependency>
 
+        <!-- swagger-bootstrap -->
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>${springfox.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-models</artifactId>
-            <version>${swagger-models.version}</version>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-spring-ui</artifactId>
+            <version>${swagger-bootstrap.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
-            <artifactId>swagger-bootstrap-ui</artifactId>
-            <version>${swagger.version}</version>
+            <artifactId>knife4j-spring-boot-autoconfigure</artifactId>
+            <version>${swagger-bootstrap.version}</version>
         </dependency>
-
     </dependencies>
 
     <profiles>
@@ -537,6 +542,7 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>3.1.1</version>
                         <configuration>
+                            <tarLongFileMode>gnu</tarLongFileMode>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
                                 <descriptor>src/assembly/assembly.xml</descriptor>

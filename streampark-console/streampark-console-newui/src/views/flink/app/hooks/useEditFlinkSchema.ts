@@ -37,7 +37,7 @@ export const useEditFlinkSchema = (jars: Ref) => {
     flinkEnvs,
     flinkClusters,
     alerts,
-  } = useCreateAndEditSchema(null, { appId: route.query.appId as string, mode: 'streamx' });
+  } = useCreateAndEditSchema(null, { appId: route.query.appId as string, mode: 'streampark' });
 
   const getEditFlinkFormSchema = computed((): FormSchema[] => {
     return [

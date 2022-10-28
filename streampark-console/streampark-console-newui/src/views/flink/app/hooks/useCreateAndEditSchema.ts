@@ -20,7 +20,7 @@ import { k8sRestExposedType, resolveOrder } from '../data';
 import optionData from '../data/option';
 import {
   getAlertSvgIcon,
-  renderDynamicOption,
+  renderProperties,
   renderInputDropdown,
   renderInputGroup,
   renderIsSetConfig,
@@ -50,7 +50,7 @@ import { useMessage } from '/@/hooks/web/useMessage';
 
 export const useCreateAndEditSchema = (
   dependencyRef: Ref | null,
-  edit?: { appId: string; mode: 'streamx' | 'flink' },
+  edit?: { appId: string; mode: 'streampark' | 'flink' },
 ) => {
   const { createErrorModal } = useMessage();
   const flinkEnvs = ref<FlinkEnv[]>([]);
@@ -381,7 +381,7 @@ export const useCreateAndEditSchema = (
         field: 'cpMaxFailureInterval',
         label: 'CheckPoint Failure Options',
         component: 'InputNumber',
-        render: ({ model }) => renderInputGroup(model),
+        renderColContent: ({ model }) => renderInputGroup(model),
         show: ({ values }) =>
           edit?.mode == 'flink' ? true : ![5, 6].includes(values.executionMode),
       },
@@ -467,10 +467,10 @@ export const useCreateAndEditSchema = (
         ifShow: ({ values }) => values.executionMode == 6,
       },
       {
-        field: 'dynamicOptions',
-        label: 'Dynamic Option',
+        field: 'properties',
+        label: 'Properties',
         component: 'Input',
-        render: (renderCallbackParams) => renderDynamicOption(renderCallbackParams),
+        render: (renderCallbackParams) => renderProperties(renderCallbackParams),
       },
       {
         field: 'args',
@@ -507,8 +507,11 @@ export const useCreateAndEditSchema = (
               { type: 'info' },
               {
                 message: () => [
-                  h(Icon, { icon: 'ant-design:code-outlined', style: { color: '#108ee9' } }),
-                  h('span', { class: 'pl-5px' }, 'Custom Code'),
+                  h(Icon, {
+                    icon: 'ant-design:code-outlined',
+                    style: { color: '#108ee9' },
+                  }),
+                  h('span', { class: 'pl-8px' }, 'Custom Code'),
                 ],
               },
             );

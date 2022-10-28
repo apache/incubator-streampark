@@ -29,16 +29,16 @@
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
   import { fetchListJars } from '/@/api/flink/project';
   import { useEditFlinkSchema } from './hooks/useEditFlinkSchema';
-  import { useTabs } from '/@/hooks/web/useTabs';
   import { useEdit } from './hooks/useEdit';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useRoute } from 'vue-router';
+  import { useGo } from '/@/hooks/web/usePage';
 
   const route = useRoute();
   const { t } = useI18n();
   const { createMessage } = useMessage();
-  const { close } = useTabs();
+  const go = useGo();
 
   const submitLoading = ref<boolean>(false);
   const jars = ref<string[]>([]);
@@ -74,7 +74,7 @@
         args: app.args,
         jar: app.jar,
         description: app.description,
-        dynamicOptions: app.dynamicOptions,
+        properties: app.properties,
         resolveOrder: app.resolveOrder,
         executionMode: app.executionMode,
         yarnQueue: app.yarnQueue,
@@ -137,7 +137,7 @@
         cpMaxFailureInterval: values.cpMaxFailureInterval || null,
         cpFailureRateInterval: values.cpFailureRateInterval || null,
         cpFailureAction: values.cpFailureAction || null,
-        dynamicOptions: values.dynamicOptions,
+        properties: values.properties,
         restartSize: values.restartSize,
         // alertEmail: values.alertEmail || null,
         alertId: values.alertId,
@@ -168,13 +168,13 @@
     const updated = await fetchUpdate(params);
     if (updated) {
       createMessage.success('update successful');
-      close(undefined, { path: '/flink/app' });
+      go('/flink/app');
     }
   }
 
   onMounted(async () => {
     if (!route?.query?.appId) {
-      close(undefined, { path: '/flink/app' });
+      go('/flink/app');
       createMessage.warning('appid can not be empty');
       return;
     }
@@ -214,7 +214,7 @@
       </template>
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button @click="close(undefined, { path: '/flink/app' })">
+          <a-button @click="go('/flink/app')">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button class="ml-4" :loading="submitLoading" type="primary" @click="submit()">
@@ -225,4 +225,6 @@
     </BasicForm>
   </PageWrapper>
 </template>
-<style scoped></style>
+<style lang="less">
+  @import url('./styles/Add.less');
+</style>

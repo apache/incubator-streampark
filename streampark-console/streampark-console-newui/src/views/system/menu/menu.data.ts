@@ -145,14 +145,13 @@ export const formSchema: FormSchema[] = [
     field: 'orderNum',
     label: 'sort',
     component: 'InputNumber',
-    required: true,
+    componentProps: { class: '!w-full' },
     ifShow: ({ values }) => !isButton(values.type),
   },
   {
     field: 'icon',
     label: 'icon',
     component: 'IconPicker',
-    required: true,
     ifShow: ({ values }) => !isButton(values.type),
   },
   {

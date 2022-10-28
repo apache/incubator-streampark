@@ -169,6 +169,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
+    public long countByTeamId(Long teamId) {
+        return this.count(new LambdaQueryWrapper<Project>().eq(Project::getTeamId, teamId));
+    }
+
+    @Override
     public void build(Long id) throws Exception {
         Project project = getById(id);
         this.baseMapper.startBuild(project);

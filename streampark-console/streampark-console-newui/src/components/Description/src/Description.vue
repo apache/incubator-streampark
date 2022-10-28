@@ -101,7 +101,7 @@
       });
 
       /**
-       * @description:设置desc
+       * @description:set desc
        */
       function setDescProps(descProps: Partial<DescriptionProps>): void {
         // Keep the last setDrawerProps

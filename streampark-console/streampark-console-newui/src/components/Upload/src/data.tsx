@@ -27,7 +27,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 
 const { t } = useI18n();
 
-// 文件上传列表
+// File upload list
 export function createTableColumns(): BasicColumn[] {
   return [
     {
@@ -71,11 +71,6 @@ export function createTableColumns(): BasicColumn[] {
         return text && (text / 1024).toFixed(2) + 'KB';
       },
     },
-    // {
-    //   dataIndex: 'type',
-    //   title: '文件类型',
-    //   width: 100,
-    // },
     {
       dataIndex: 'status',
       title: t('component.upload.fileStatue'),
@@ -118,7 +113,7 @@ export function createActionColumn(handleRemove: Function): BasicColumn {
     },
   };
 }
-// 文件预览列表
+// A list of file previews
 export function createPreviewColumns(): BasicColumn[] {
   return [
     {

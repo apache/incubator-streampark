@@ -53,7 +53,7 @@ public class OssStorageService implements StorageService {
         try {
             ossClient.getObject(new GetObjectRequest(bucket, objectPath), new File(localFilePath));
         } catch (Exception e) {
-            log.error("GetData failed. ObjectPath: %s, local path: %s.", objectPath, localFilePath, e);
+            log.error("GetData failed. ObjectPath: {}, local path: {}.", objectPath, localFilePath, e);
             throw handleOssException(e);
         }
     }
@@ -64,7 +64,7 @@ public class OssStorageService implements StorageService {
             PutObjectRequest putObjectRequest = new PutObjectRequest(ossConfig.getBucket(), objectPath, new File(localFilePath));
             ossClient.putObject(putObjectRequest);
         } catch (Exception e) {
-            log.error("PutData failed. ObjectPath: %s, local path: %s.", objectPath, localFilePath, e);
+            log.error("PutData failed. ObjectPath: {}, local path: {}.", objectPath, localFilePath, e);
             throw handleOssException(e);
         }
     }

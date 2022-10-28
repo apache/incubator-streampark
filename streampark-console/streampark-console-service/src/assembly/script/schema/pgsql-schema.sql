@@ -42,6 +42,7 @@ drop table if exists "public"."t_alert_config";
 drop table if exists "public"."t_access_token";
 drop table if exists "public"."t_flink_log";
 drop table if exists "public"."t_team";
+drop table if exists "public"."t_variable";
 
 -- ----------------------------
 -- drop sequence if exists
@@ -66,6 +67,7 @@ drop sequence if exists "public"."streampark_t_alert_config_id_seq";
 drop sequence if exists "public"."streampark_t_access_token_id_seq";
 drop sequence if exists "public"."streampark_t_flink_log_id_seq";
 drop sequence if exists "public"."streampark_t_team_id_seq";
+drop sequence if exists "public"."streampark_t_variable_id_seq";
 
 -- ----------------------------
 -- drop trigger if exists
@@ -241,7 +243,7 @@ create table "public"."t_flink_app" (
   "cp_max_failure_interval" int4,
   "cp_failure_rate_interval" int4,
   "cp_failure_action" int2,
-  "dynamic_options" text collate "pg_catalog"."default",
+  "properties" text collate "pg_catalog"."default",
   "description" varchar(255) collate "pg_catalog"."default",
   "resolve_order" int2,
   "k8s_rest_exposed_type" int2,
@@ -306,7 +308,7 @@ create table "public"."t_flink_cluster" (
   "description" varchar(255) collate "pg_catalog"."default",
   "user_id" int8,
   "flink_image" varchar(255) collate "pg_catalog"."default",
-  "dynamic_options" text collate "pg_catalog"."default",
+  "properties" text collate "pg_catalog"."default",
   "k8s_rest_exposed_type" int2 default 2,
   "k8s_hadoop_integration" boolean default false,
   "flame_graph" boolean default false,
@@ -327,7 +329,7 @@ comment on column "public"."t_flink_cluster"."version_id" is 'flink version id';
 comment on column "public"."t_flink_cluster"."k8s_namespace" is 'k8s namespace';
 comment on column "public"."t_flink_cluster"."service_account" is 'k8s service account';
 comment on column "public"."t_flink_cluster"."flink_image" is 'flink image';
-comment on column "public"."t_flink_cluster"."dynamic_options" is 'dynamic parameters';
+comment on column "public"."t_flink_cluster"."properties" is 'allows specifying multiple generic configuration options';
 comment on column "public"."t_flink_cluster"."k8s_rest_exposed_type" is 'k8s export(0:loadbalancer,1:clusterip,2:nodeport)';
 comment on column "public"."t_flink_cluster"."flame_graph" is 'enable the flame graph';
 comment on column "public"."t_flink_cluster"."k8s_conf" is 'the path where the k 8 s configuration file is located';
@@ -600,6 +602,38 @@ comment on column "public"."t_team"."create_time" is 'creation time';
 comment on column "public"."t_team"."modify_time" is 'modify time';
 create index "un_team_name" on "public"."t_team" using btree (
   "team_name" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
+);
+
+-- ----------------------------
+-- Table of t_variable
+-- ----------------------------
+create sequence "public"."streampark_t_variable_id_seq"
+    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+
+create table "public"."t_variable" (
+  "id" int8 not null default nextval('streampark_t_variable_id_seq'::regclass),
+  "variable_code" varchar(100) collate "pg_catalog"."default" not null,
+  "variable_value" text collate "pg_catalog"."default" not null,
+  "description" text collate "pg_catalog"."default" default null,
+  "creator_id" int8 collate "pg_catalog"."default" not null,
+  "team_id" int8 collate "pg_catalog"."default" not null,
+  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+)
+;
+comment on column "public"."t_variable"."id" is 'variable id';
+comment on column "public"."t_variable"."variable_code" is 'Variable code is used for parameter names passed to the program or as placeholders';
+comment on column "public"."t_variable"."variable_value" is 'The specific value corresponding to the variable';
+comment on column "public"."t_variable"."description" is 'More detailed description of variables';
+comment on column "public"."t_variable"."creator_id" is 'user id of creator';
+comment on column "public"."t_variable"."team_id" is 'team id';
+comment on column "public"."t_variable"."create_time" is 'creation time';
+comment on column "public"."t_variable"."modify_time" is 'modify time';
+
+alter table "public"."t_variable" add constraint "t_variable_pkey" primary key ("id");
+create index "un_team_vcode_inx" on "public"."t_variable" using btree (
+  "team_id" "pg_catalog"."int8_ops" asc nulls last,
+  "variable_code" collate "pg_catalog"."default" "pg_catalog"."text_ops" asc nulls last
 );
 
 

@@ -117,8 +117,8 @@ export class Persistent {
 }
 
 window.addEventListener('beforeunload', function () {
-  // TOKEN_KEY 在登录或注销时已经写入到storage了，此处为了解决同时打开多个窗口时token不同步的问题
-  // LOCK_INFO_KEY 在锁屏和解锁时写入，此处也不应修改
+  // TOKEN_KEY It has been written to storage when logging in or logging out, and here is to solve the problem that the token is out of sync when multiple windows are open at the same time
+  // LOCK_INFO_KEY Written on lock screen and unlock, it should not be modified here either
   ls.set(APP_LOCAL_CACHE_KEY, {
     ...omit(localMemory.getCache, LOCK_INFO_KEY),
     ...pick(ls.get(APP_LOCAL_CACHE_KEY), [TOKEN_KEY, USER_INFO_KEY, LOCK_INFO_KEY]),
@@ -131,12 +131,21 @@ window.addEventListener('beforeunload', function () {
 
 function storageChange(e: any) {
   const { key, newValue, oldValue } = e;
-
   if (!key) {
     Persistent.clearAll();
     return;
   }
-
+  // token change reload
+  if (key === TOKEN_KEY && oldValue !== newValue) {
+    const { [TOKEN_KEY]: tokenCache } = pick(ls.get(APP_LOCAL_CACHE_KEY), TOKEN_KEY);
+    // no token or token value is invalid
+    if (tokenCache?.value !== newValue) {
+      Persistent.clearLocal();
+      return;
+    }
+    window.location.reload();
+    return;
+  }
   if (!!newValue && !!oldValue) {
     if (APP_LOCAL_CACHE_KEY === key) {
       Persistent.clearLocal();

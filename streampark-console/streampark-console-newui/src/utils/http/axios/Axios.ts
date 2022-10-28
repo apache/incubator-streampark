@@ -77,7 +77,7 @@ export class VAxios {
   }
 
   /**
-   * @description: Interceptor configuration 拦截器配置
+   * @description: Interceptor configuration
    */
   private setupInterceptors() {
     const transform = this.getTransform();
@@ -194,8 +194,23 @@ export class VAxios {
   get<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
     return this.request({ ...config, method: 'GET' }, options);
   }
-
+  // form data
   post<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+    return this.request({ ...config, method: 'POST' }, options);
+  }
+  // json
+  postJson<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+    if (config.headers) {
+      Object.assign(config.headers, {
+        'Content-Type': ContentTypeEnum.JSON,
+      });
+    } else {
+      config.headers = { 'Content-Type': ContentTypeEnum.JSON };
+    }
+    config.data = Object.assign({}, config.data, {
+      isJsonType: true,
+    });
+
     return this.request({ ...config, method: 'POST' }, options);
   }
 

@@ -13,7 +13,8 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---><template>
+-->
+<template>
   <SvgIcon
     :size="size"
     :name="getSvgIcon"
@@ -57,7 +58,7 @@
       // icon size
       size: {
         type: [String, Number] as PropType<string | number>,
-        default: 16,
+        default: 18,
       },
       spin: propTypes.bool.def(false),
       prefix: propTypes.string.def(''),

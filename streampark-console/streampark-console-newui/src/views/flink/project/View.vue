@@ -27,7 +27,11 @@
             >{{ item.label }}</a-radio-button
           >
         </a-radio-group>
-        <a-input-search @search="handleSearch" class="search-input" />
+        <a-input-search
+          @search="handleSearch"
+          placeholder="please enter a keyword search"
+          class="search-input"
+        />
       </template>
     </a-card>
     <div class="operate pt-20px bg-white" v-auth="'project:create'">
@@ -44,6 +48,7 @@
             v-for="item in projectDataSource"
             :item="item"
             @view-log="handleViewLog"
+            @success="queryData"
           />
         </a-list>
       </a-spin>
@@ -52,7 +57,7 @@
   </PageWrapper>
 </template>
 <script lang="ts">
-  import { defineComponent, onUnmounted, reactive, ref, unref } from 'vue';
+  import { defineComponent, onUnmounted, reactive, ref, unref, watch } from 'vue';
 
   import { PageWrapper } from '/@/components/Page';
   import { statusList, BuildStatusEnum } from './project.data';
@@ -66,6 +71,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useModal } from '/@/components/Modal';
   import LogModal from './components/LogModal.vue';
+  import { useUserStoreWithOut } from '/@/store/modules/user';
 
   export default defineComponent({
     name: 'ProjectView',
@@ -83,6 +89,7 @@
     },
     setup() {
       const go = useGo();
+      const userStore = useUserStoreWithOut();
       const { t } = useI18n();
       const [registerLogModal, { openModal: openLogModal }] = useModal();
       const buttonList = reactive(statusList);
@@ -102,13 +109,14 @@
         Object.assign(queryParams, { name: value });
         queryData();
       }
-      const queryData = (showLoading = true) => {
+
+      function queryData(showLoading = true) {
         if (showLoading) loading.value = true;
-        getList({ ...queryParams }).then((res) => {
+        getList({ ...queryParams, teamId: userStore.getTeamId }).then((res) => {
           loading.value = false;
           projectDataSource.value = res.records;
         });
-      };
+      }
 
       const handleQuery = function (val) {
         queryParams.buildState = val;
@@ -127,6 +135,13 @@
       function handleViewLog(value) {
         openLogModal(true, { project: value });
       }
+      // teamid update
+      watch(
+        () => userStore.getTeamId,
+        (val) => {
+          if (val) queryData();
+        },
+      );
       queryData();
       start();
 
@@ -145,6 +160,7 @@
         handleSearch,
         registerLogModal,
         handleViewLog,
+        queryData,
       };
     },
   });

@@ -325,18 +325,19 @@
 
   .@{prefix-cls} {
     .ant-form-item {
+      margin-bottom: 30px;
       &-label label::after {
         margin: 0 6px 0 2px;
       }
 
       &-with-help {
-        margin-bottom: 0;
+        margin-bottom: 6px;
       }
-
+      /*
       &:not(.ant-form-item-with-help) {
-        margin-bottom: 20px;
+        margin-bottom: 24px;
       }
-
+      */
       &.suffix-item {
         .ant-form-item-children {
           display: flex;

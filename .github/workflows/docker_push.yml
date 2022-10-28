@@ -17,7 +17,14 @@
 
 name: "Build Docker Image"
 
-on: workflow_dispatch
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*.*.*'
 
 jobs:
   build_image:
@@ -51,21 +58,25 @@ jobs:
 
       - name: Mixed front-end and back-end packaging
         run: |
-          mvn clean install -DskipTests -Dscala.version=2.12.15 -Dscala.binary.version=2.12 -Pwebapp
+          ./mvnw clean install -DskipTests -Dscala.version=2.12.8 -Dscala.binary.version=2.12 -Pwebapp
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: streamxhub/streampark-console
+          images: apache/streampark
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=tag
+            type=ref,event=branch
 
-      - name: Build and push streamx
+      - name: Build and push streampark
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -73,6 +84,3 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-
-

@@ -13,7 +13,8 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---><template>
+-->
+<template>
   <a-input
     disabled
     :style="{ width }"
@@ -40,7 +41,7 @@
 
         <template #content>
           <div v-if="getPaginationList.length">
-            <ScrollContainer class="border border-solid border-t-0">
+            <ScrollContainer class="border border-solid border-transparent border-t-0">
               <ul class="flex flex-wrap px-2">
                 <li
                   v-for="icon in getPaginationList"
@@ -96,7 +97,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import svgIcons from 'virtual:svg-icons-names';
 
-  // 没有使用别名引入，是因为WebStorm当前版本还不能正确识别，会报unused警告
+  // The use of alias is not introduced because the current version of WebStorm is not yet correctly recognized and will report an unused warning
   const AInput = Input;
   const APopover = Popover;
   const APagination = Pagination;
@@ -192,7 +193,7 @@
     }
 
     &-popover {
-      width: 300px;
+      width: 350px;
 
       .ant-popover-inner-content {
         padding: 0;

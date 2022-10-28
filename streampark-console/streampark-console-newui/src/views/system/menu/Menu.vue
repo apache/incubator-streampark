@@ -18,13 +18,17 @@
   <div>
     <BasicTable @register="registerTable" @fetch-success="onFetchSuccess">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate"> Add Menu </a-button>
+        <a-button type="primary" @click="handleCreate" v-auth="'menu:add'">
+          <Icon icon="ant-design:plus-outlined" />
+          {{ t('common.add') }}
+        </a-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
           <TableAction
             :actions="[
               {
+                auth: 'menu:update',
                 icon: 'clarity:note-edit-line',
                 onClick: handleEdit.bind(null, record),
               },
@@ -33,34 +37,39 @@
         </template>
       </template>
     </BasicTable>
-    <MenuDrawer @register="registerDrawer" @success="handleSuccess" />
+    <MenuDrawer okText="Submit" @register="registerDrawer" @success="handleSuccess" />
   </div>
 </template>
 <script lang="ts">
   import { defineComponent, nextTick } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import { getMenuList } from '/@/api/demo/system';
+  import { getMenuList } from '/@/api/base/system';
 
   import { useDrawer } from '/@/components/Drawer';
   import MenuDrawer from './MenuDrawer.vue';
 
   import { columns, searchFormSchema } from './menu.data';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
     name: 'MenuManagement',
-    components: { BasicTable, MenuDrawer, TableAction },
+    components: { BasicTable, MenuDrawer, TableAction, Icon },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { createMessage } = useMessage();
+      const { t } = useI18n();
       const [registerTable, { reload, expandAll }] = useTable({
-        title: '',
+        title: 'Menu List',
         api: getMenuList,
         columns,
         formConfig: {
-          labelWidth: 120,
+          baseColProps: { style: { paddingRight: '30px' } },
+          colon: true,
           schemas: searchFormSchema,
+          fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
         fetchSetting: {
           listField: 'rows.children',
@@ -69,7 +78,7 @@
         pagination: false,
         striped: false,
         useSearchForm: true,
-        showTableSetting: false,
+        showTableSetting: true,
         bordered: true,
         showIndexColumn: false,
         canResize: false,
@@ -102,6 +111,7 @@
       }
 
       return {
+        t,
         registerTable,
         registerDrawer,
         handleCreate,

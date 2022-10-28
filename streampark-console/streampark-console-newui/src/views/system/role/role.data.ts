@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { RuleObject, StoreValue } from 'ant-design-vue/lib/form/interface';
-import { fetchCheckName } from '/@/api/sys/role';
+import { fetchCheckName } from '/@/api/system/role';
 import { BasicColumn } from '/@/components/Table';
 import { FormSchema } from '/@/components/Table';
 
@@ -25,16 +25,19 @@ export const columns: BasicColumn[] = [
     dataIndex: 'roleName',
   },
   {
-    title: 'Description',
-    dataIndex: 'remark',
-  },
-  {
     title: 'Create Time',
     dataIndex: 'createTime',
+    sorter: true,
   },
   {
     title: 'Modify Time',
     dataIndex: 'modifyTime',
+    sorter: true,
+  },
+  {
+    title: 'Description',
+    dataIndex: 'remark',
+    ellipsis: true,
   },
 ];
 
@@ -52,10 +55,10 @@ export const searchFormSchema: FormSchema[] = [
     colProps: { span: 8 },
   },
 ];
-async function handleRoleCheck(_rule: RuleObject, value: StoreValue) {
+export async function handleRoleCheck(_rule: RuleObject, value: StoreValue) {
   if (value) {
-    if (value.length > 10) {
-      return Promise.reject('Role name should not be longer than 10 characters');
+    if (value.length > 255) {
+      return Promise.reject('Role name should not be longer than 255 characters');
     } else {
       const res = await fetchCheckName({
         roleName: value,
@@ -93,8 +96,7 @@ export const formSchema: FormSchema[] = [
     label: '',
     field: 'menuId',
     slot: 'menu',
-    defaultValue: [],
-    component: 'Input',
+    component: 'Select',
     rules: [{ required: true, message: 'Please select the permission.' }],
   },
 ];

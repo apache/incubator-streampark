@@ -83,12 +83,51 @@ const storage = {
     window.localStorage.removeItem(name)
     window.localStorage.removeItem(`${name}_EXPIRE`)
   },
+
   clear: () => {
     if (!global.window || !name) {
       return
     }
     window.localStorage.clear()
-  }
+  },
+
+  setSession: (name, content) => {
+    name = config.storageOptions.namespace + name
+    if (!global.window || !name) {
+      return
+    }
+    if (typeof content !== 'string') {
+      content = JSON.stringify(content)
+    }
+    const storage = global.window.sessionStorage
+    storage.setItem(name, content)
+  },
+
+  getSession: (name, defValue) => {
+    name = config.storageOptions.namespace + name
+    defValue = defValue === undefined ? null : defValue
+    if (!global.window || !name) {
+      return defValue
+    }
+    const storage = global.window.sessionStorage
+    const content = storage.getItem(name)
+    if (!content) return defValue
+    try {
+      return JSON.parse(content)
+    } catch (e) {
+      return content
+    }
+  },
+
+  rmSession: (name) => {
+    name = config.storageOptions.namespace + name
+    if (!global.window || !name) {
+      return
+    }
+    window.sessionStorage.removeItem(name)
+  },
+
+
 }
 
 export default storage

@@ -138,7 +138,10 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         case null | "" =>
           logWarn("Usage:can't fond config,you can set \"--conf $path \" in main arguments")
           ParameterTool.fromSystemProperties().mergeWith(argsMap) -> new Configuration()
-        case file => super.parseConfig(file)
+        case file =>
+          val (userConf, flinkConf) = super.parseConfig(file)
+          // config priority: explicitly specified priority > project profiles > system profiles
+          ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(userConf)).mergeWith(argsMap) -> Configuration.fromMap(flinkConf)
       }
     }
 

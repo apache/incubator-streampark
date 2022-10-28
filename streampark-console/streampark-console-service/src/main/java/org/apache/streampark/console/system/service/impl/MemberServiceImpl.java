@@ -19,7 +19,6 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -58,9 +57,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
     @Autowired
     private TeamService teamService;
 
-    @Autowired
-    private CommonService commonService;
-
     @Override
     @Transactional
     public void deleteByRoleIds(String[] roleIds) {
@@ -71,6 +67,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member>
     @Transactional
     public void deleteByUserIds(String[] userIds) {
         Arrays.stream(userIds).forEach(id -> baseMapper.deleteByUserId(Long.valueOf(id)));
+    }
+
+    @Override
+    public void deleteByTeamId(Long teamId) {
+        this.remove(new LambdaQueryWrapper<Member>().eq(Member::getTeamId, teamId));
     }
 
     @Override

@@ -30,10 +30,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AgentITCase {
+class AgentITCase {
 
     @Test
-    public void runAgent() throws InterruptedException, IOException {
+    void runAgent() throws InterruptedException, IOException {
         String javaHome = System.getProperty("java.home");
         String javaBin = Paths.get(javaHome, "bin/java").toAbsolutePath().toString();
 
@@ -107,7 +107,7 @@ public class AgentITCase {
     }
 
     @Test
-    public void runAgent_noop() throws InterruptedException, IOException {
+    void runAgent_noop() throws InterruptedException, IOException {
         String javaHome = System.getProperty("java.home");
         String javaBin = Paths.get(javaHome, "bin/java").toAbsolutePath().toString();
 
@@ -142,7 +142,7 @@ public class AgentITCase {
     }
 
     @Test
-    public void runAgent_noopConfigProvider() throws InterruptedException, IOException {
+    void runAgent_noopConfigProvider() throws InterruptedException, IOException {
         String javaHome = System.getProperty("java.home");
         String javaBin = Paths.get(javaHome, "bin/java").toAbsolutePath().toString();
 
@@ -177,7 +177,7 @@ public class AgentITCase {
     }
 
     @Test
-    public void runAgent_argumentProfilingZero() throws InterruptedException, IOException {
+    void runAgent_argumentProfilingZero() throws InterruptedException, IOException {
         String javaHome = System.getProperty("java.home");
         String javaBin = Paths.get(javaHome, "bin/java").toAbsolutePath().toString();
 
@@ -243,7 +243,7 @@ public class AgentITCase {
     }
 
     @Test
-    public void runAgent_appIdVariable() throws InterruptedException, IOException {
+    void runAgent_appIdVariable() throws InterruptedException, IOException {
         String javaHome = System.getProperty("java.home");
         String javaBin = Paths.get(javaHome, "bin/java").toAbsolutePath().toString();
 

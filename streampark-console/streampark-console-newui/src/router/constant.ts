@@ -20,7 +20,7 @@ export const PARENT_LAYOUT_NAME = 'ParentLayout';
 
 export const PAGE_NOT_FOUND_NAME = 'PageNotFound';
 
-export const EXCEPTION_COMPONENT = () => import('/@/views/sys/exception/Exception.vue');
+export const EXCEPTION_COMPONENT = () => import('/@/views/base/exception/Exception.vue');
 
 /**
  * @description: default layout
@@ -37,4 +37,18 @@ export const getParentLayout = (_name?: string) => {
         name: PARENT_LAYOUT_NAME,
       });
     });
+};
+const projectPath = '/flink/project';
+const settingPath = '/flink/setting';
+const applicationPath = '/flink/app';
+export const menuMap = {
+  [`${projectPath}/add`]: projectPath,
+  [`${projectPath}/edit`]: projectPath,
+  [`${applicationPath}/add`]: applicationPath,
+  [`${applicationPath}/detail`]: applicationPath,
+  [`${applicationPath}/edit_flink`]: applicationPath,
+  [`${applicationPath}/edit_streampark`]: applicationPath,
+  [`${applicationPath}/edit_streampark`]: applicationPath,
+  [`${settingPath}/add_cluster`]: settingPath,
+  [`${settingPath}/edit_cluster`]: settingPath,
 };
