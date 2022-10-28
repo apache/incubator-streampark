@@ -17,7 +17,7 @@
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { computed, onMounted, reactive, ref, unref } from 'vue';
-import { executionModes, k8sRestExposedType, resolveOrder } from '../../app/data';
+import { k8sRestExposedType, resolveOrder } from '../../app/data';
 import {
   renderProperties,
   renderInputDropdown,
@@ -102,7 +102,11 @@ export const useClusterSetting = () => {
         component: 'Select',
         componentProps: {
           placeholder: 'Please enter cluster name',
-          options: executionModes,
+          options: [
+            { label: 'remote (standalone)', value: 1 },
+            { label: 'yarn session', value: 3 },
+            { label: 'kubernetes session', value: 5 },
+          ],
         },
         dynamicRules: () => {
           return [{ required: true, validator: handleCheckExecMode }];

@@ -26,6 +26,7 @@ export interface AlertSetting {
   larkParams: string;
   createTime: string;
   modifyTime: string;
+  alertTypeTags?: string[];
 }
 
 // Create an alert

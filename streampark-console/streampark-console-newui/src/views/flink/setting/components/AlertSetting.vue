@@ -24,7 +24,7 @@
 </script>
 <script setup lang="ts" name="AlertSetting">
   import { onMounted, ref } from 'vue';
-  import { List, Popconfirm, Tooltip } from 'ant-design-vue';
+  import { List, Popconfirm, Tooltip, Card, Tag } from 'ant-design-vue';
   import {
     ThunderboltOutlined,
     EditOutlined,
@@ -32,35 +32,42 @@
     PlusOutlined,
   } from '@ant-design/icons-vue';
   import { useModal } from '/@/components/Modal';
-  import { SvgIcon } from '/@/components/Icon';
   import AlertModal from './AlertModal.vue';
   import { fetchAlertSetting, fetchSendAlert, fetchAlertDelete } from '/@/api/flink/setting/alert';
   import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import AlertTypeInfo from './AlertTypeInfo.vue';
 
   const ListItem = List.Item;
-  const ListItemMeta = ListItem.Meta;
 
   const { t } = useI18n();
   const { Swal, createMessage } = useMessage();
   const [registerAlertModal, { openModal: openAlertModal }] = useModal();
   const alerts = ref<AlertSetting[]>([]);
-  const alertType = ref<number[]>([]);
+
   /* Get alert configuration */
   async function getAlertSetting() {
     const res = await fetchAlertSetting();
+    res.map((a) => (a.alertTypeTags = computeAlertType(a.alertType)));
     alerts.value = res;
   }
+  const alertTypeMap = {
+    1: 'mail',
+    2: 'dingtalk',
+    4: 'wecom',
+    8: 'message',
+    16: 'lark',
+  };
   /* compute type */
   function computeAlertType(level: number) {
     if (level === null) {
       level = 0;
     }
-    const result: number[] = [];
+    const result: string[] = [];
     while (level != 0) {
       // Get the lowest 1
       const code = level & -level;
-      result.push(code);
+      result.push(String(code));
       // Set the lowest position to 0
       level ^= code;
     }
@@ -86,24 +93,22 @@
   }
   /* Click the edit button */
   function handleEditAlertConf(item: AlertSetting) {
-    alertType.value = computeAlertType(item.alertType);
-
     let emailParams: Recordable<any> = {};
     let dingTalkParams: Recordable<any> = {};
     let weComParams: Recordable<any> = {};
     let larkParams: Recordable<any> = {};
-    if (alertType.value.indexOf(1) > -1) {
+    if (item.alertTypeTags?.includes('1')) {
       emailParams = JSON.parse(item.emailParams);
     }
-    if (alertType.value.indexOf(2) > -1) {
+    if (item.alertTypeTags?.includes('2')) {
       dingTalkParams = JSON.parse(item.dingTalkParams);
       // dingtalkIsAtAll = dingTalkParams.isAtAll;
       // dingtalkSecretEnable = dingTalkParams.secretEnable;
     }
-    if (alertType.value.indexOf(4) > -1) {
+    if (item.alertTypeTags?.includes('4')) {
       weComParams = JSON.parse(item.weComParams) as Recordable;
     }
-    if (alertType.value.indexOf(16) > -1) {
+    if (item.alertTypeTags?.includes('16')) {
       larkParams = JSON.parse(item.larkParams) as Recordable;
       // larkIsAtAll = larkParams.isAtAll;
       // larkSecretEnable = larkParams.secretEnable;
@@ -113,7 +118,7 @@
     openAlertModal(true, {
       alertId: item.id,
       alertName: item.alertName,
-      alertType: alertType.value,
+      alertType: item.alertTypeTags,
       alertEmail: emailParams.contacts,
       alertDingURL: dingTalkParams.alertDingURL,
       dingtalkToken: dingTalkParams.token,
@@ -153,75 +158,133 @@
       console.error(error);
     }
   }
+
+  function getAlertTypeName(type: number) {
+    return alertTypeMap[type] || '';
+  }
+
   onMounted(() => {
     getAlertSetting();
   });
 </script>
 
 <template>
-  <div v-auth="'project:create'">
+  <div v-auth="'project:create'" class="bg-white p-10px">
     <a-button type="dashed" style="width: 100%; margin-top: 20px" @click="openAlertModal(true, {})">
       <PlusOutlined />
       {{ t('common.add') }}
     </a-button>
   </div>
-  <List>
-    <ListItem v-for="(item, index) in alerts" :key="index">
-      <ListItemMeta style="width: 40%">
-        <template #title>{{ item.alertName }}</template>
-        <template #avatar>
-          <div class="avatar">
-            <SvgIcon name="flink" />
-          </div>
-        </template>
-      </ListItemMeta>
-      <div class="list-content" style="width: 40%">
-        <div text-align center>Alert Type</div>
-        <SvgIcon name="mail" size="25" v-if="computeAlertType(item.alertType).indexOf(1) > -1" />
-        <SvgIcon
-          name="dingtalk"
-          size="25"
-          v-if="computeAlertType(item.alertType).indexOf(2) > -1"
-        />
-        <SvgIcon name="wecom" size="25" v-if="computeAlertType(item.alertType).indexOf(4) > -1" />
-        <SvgIcon name="message" size="25" v-if="computeAlertType(item.alertType).indexOf(8) > -1" />
-        <SvgIcon name="lark" size="25" v-if="computeAlertType(item.alertType).indexOf(16) > -1" />
-      </div>
-      <template #actions>
-        <Tooltip title="Alert Test">
-          <a-button
-            @click="handleTestAlarm(item)"
-            type="link"
-            size="large"
-            style="margin-left: 3px"
-            class="control-button ctl-btn-color"
-          >
-            <ThunderboltOutlined />
-          </a-button>
-        </Tooltip>
-        <Tooltip title="Edit Alert Config">
-          <a-button
-            @click="handleEditAlertConf(item)"
-            type="link"
-            size="large"
-            style="margin-left: 3px"
-            class="control-button ctl-btn-color"
-          >
-            <EditOutlined />
-          </a-button>
-        </Tooltip>
-        <Popconfirm
-          :title="t('flink.setting.alert.delete')"
-          :cancel-text="t('common.no')"
-          :ok-text="t('common.yes')"
-          @confirm="handleDeleteAlertConf(item)"
+
+  <List
+    class="alert-card-list"
+    :grid="{ gutter: 40, lg: 2, xxl: 3 }"
+    :data-source="alerts"
+    :pagination="false"
+  >
+    <template #renderItem="{ item }">
+      <ListItem>
+        <Card
+          class="shadow-xl alert-card"
+          :bordered="false"
+          :bodyStyle="{ height: '260px', padding: '15px', overflowY: 'auto' }"
         >
-          <a-button type="link" size="large" style="margin-left: 3px" class="control-button">
-            <DeleteOutlined style="color: red" />
-          </a-button>
-        </Popconfirm>
-      </template>
-    </ListItem>
+          <template #title>
+            {{ item.alertName }}
+            <div class="tag-list mt-4px">
+              <Tag
+                color="blue"
+                size="small"
+                v-for="type in item.alertTypeTags"
+                :key="type"
+                class="!leading-15px"
+              >
+                {{ getAlertTypeName(type) }}
+              </Tag>
+            </div>
+          </template>
+          <template #actions>
+            <Tooltip title="Alert Test">
+              <a-button
+                @click="handleTestAlarm(item)"
+                shape="circle"
+                size="large"
+                style="margin-left: 3px"
+                class="control-button ctl-btn-color"
+              >
+                <ThunderboltOutlined />
+              </a-button>
+            </Tooltip>
+            <Tooltip title="Edit Alert Config">
+              <a-button
+                @click="handleEditAlertConf(item)"
+                shape="circle"
+                size="large"
+                style="margin-left: 3px"
+                class="control-button ctl-btn-color"
+              >
+                <EditOutlined />
+              </a-button>
+            </Tooltip>
+            <Popconfirm
+              :title="t('flink.setting.alert.delete')"
+              :cancel-text="t('common.no')"
+              :ok-text="t('common.yes')"
+              @confirm="handleDeleteAlertConf(item)"
+            >
+              <a-button
+                type="danger"
+                shape="circle"
+                size="large"
+                style="margin-left: 3px"
+                class="control-button"
+              >
+                <DeleteOutlined />
+              </a-button>
+            </Popconfirm>
+          </template>
+
+          <AlertTypeInfo
+            alertType="1"
+            :alertSource="item"
+            v-if="item.alertTypeTags.includes('1')"
+          />
+          <AlertTypeInfo
+            alertType="2"
+            :alertSource="item"
+            v-if="item.alertTypeTags.includes('2')"
+          />
+          <AlertTypeInfo
+            alertType="4"
+            :alertSource="item"
+            v-if="item.alertTypeTags.includes('4')"
+          />
+          <AlertTypeInfo
+            alertType="8"
+            :alertSource="item"
+            v-if="item.alertTypeTags.includes('8')"
+          />
+          <AlertTypeInfo
+            alertType="16"
+            :alertSource="item"
+            v-if="item.alertTypeTags.includes('16')"
+          />
+        </Card>
+      </ListItem>
+    </template>
   </List>
+
   <AlertModal @register="registerAlertModal" @reload="getAlertSetting" width="850px" />
 </template>
+<style lang="less">
+  .alert-card {
+    .ant-card-head-title {
+      padding: 8px 0;
+    }
+  }
+  .alert-card-list {
+    .ant-list-empty-text {
+      background-color: white;
+    }
+  }
+</style>

@@ -40,9 +40,10 @@ import { getPermCode } from '/@/api/system/user';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { PageEnum } from '/@/enums/pageEnum';
 import { fetchUserTeam } from '/@/api/system/member';
-import { Persistent } from '/@/utils/cache/persistent';
+// import { Persistent } from '/@/utils/cache/persistent';
 import { USER_INFO_KEY } from '/@/enums/cacheEnum';
 import { UserInfo } from '/#/store';
+import { getAuthCache } from '/@/utils/auth';
 
 interface PermissionState {
   // Permission code list
@@ -126,7 +127,7 @@ export const usePermissionStore = defineStore({
       const userStore = useUserStore();
       const appStore = useAppStoreWithOut();
       // get teamList
-      const { userId } = Persistent.getLocal(USER_INFO_KEY) as UserInfo;
+      const { userId } = getAuthCache(USER_INFO_KEY) as UserInfo;
       if (userStore.teamList.length == 0 && userId) {
         const teamList = await fetchUserTeam({ userId });
         userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
@@ -239,6 +240,7 @@ export const usePermissionStore = defineStore({
                 title: t('sys.api.errorTip'),
                 content: 'No permission, please contact the administrator',
               });
+              userStore.logout();
               return Promise.reject(new Error('routeList is empty'));
             }
             routeList = (routeList[0].children as AppRouteRecordRaw[]).map((v) => {

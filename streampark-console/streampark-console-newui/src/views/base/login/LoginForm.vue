@@ -23,12 +23,14 @@
     ref="formRef"
     v-show="getShow"
     @keypress.enter="handleLogin"
+    autocomplete="off"
   >
     <FormItem name="account" class="enter-x">
       <Input
         v-model:value="formData.account"
         :placeholder="t('sys.login.userName')"
-        class="fix-auto-fill">
+        class="fix-auto-fill"
+      >
         <template #prefix>
           <user-outlined type="user" />
         </template>
@@ -38,7 +40,8 @@
       <InputPassword
         visibilityToggle
         v-model:value="formData.password"
-        :placeholder="t('sys.login.password')">
+        :placeholder="t('sys.login.password')"
+      >
         <template #prefix>
           <lock-outlined type="user" />
         </template>
