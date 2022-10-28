@@ -15,30 +15,28 @@
  * limitations under the License.
  */
 
-import Vue from 'vue'
-import Vuex from 'vuex'
-
-import app from './modules/app'
-import application from './modules/application'
-import project from './modules/project'
-import cluster from './modules/cluster'
-import user from './modules/user'
-import variable from './modules/variable'
-import getters from './getters'
-
-Vue.use(Vuex)
-
-export default new Vuex.Store({
-  modules: {
-    app,
-    user,
-    application,
-    cluster,
-    project,
-    variable
+const variable = {
+  state: {
+    variableCode: null
   },
-  state: {},
-  mutations: {},
-  actions: {},
-  getters
-})
+
+  mutations: {
+    SET_VARIABLE_CODE: (state, variableCode) => {
+      state.variableCode = variableCode
+    },
+    CLEAN_VARIABLE_CODE: (state, empty) => {
+      state.variableCode = null
+    }
+  },
+
+  actions: {
+    SetVariableCode ({ commit }, variableCode) {
+      commit('SET_VARIABLE_CODE', variableCode)
+    },
+    CleanVariableCode ({ commit }, empty) {
+      commit('CLEAN_VARIABLE_CODE', empty)
+    }
+  }
+}
+
+export default variable

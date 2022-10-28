@@ -15,30 +15,29 @@
  * limitations under the License.
  */
 
-import Vue from 'vue'
-import Vuex from 'vuex'
+  .app_type {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 12px;
+    overflow: hidden;
+    overflow: hidden;
+  }
 
-import app from './modules/app'
-import application from './modules/application'
-import project from './modules/project'
-import cluster from './modules/cluster'
-import user from './modules/user'
-import variable from './modules/variable'
-import getters from './getters'
+  .app_sql {
+    padding: 2px 4px;
+    border: 1px solid #0070cc;
+    background: rgba(0,112,204,.2);
+    color: rgba(0,0,0,.85);
+    font-size: 14px;
+    -webkit-transform: scale(0.7);
+  }
 
-Vue.use(Vuex)
-
-export default new Vuex.Store({
-  modules: {
-    app,
-    user,
-    application,
-    cluster,
-    project,
-    variable
-  },
-  state: {},
-  mutations: {},
-  actions: {},
-  getters
-})
+  .app_jar {
+    border: 1px solid #0066ff;
+    padding: 3px 5px;
+    background: #1890ff;
+    color: #f5f5f5;
+    font-size: 14px;
+    -webkit-transform: scale(0.7);
+  }

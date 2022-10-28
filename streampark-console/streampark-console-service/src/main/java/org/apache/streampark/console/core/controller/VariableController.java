@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.service.VariableService;
 
@@ -44,8 +45,6 @@ import javax.validation.constraints.NotBlank;
 @RequestMapping("variable")
 public class VariableController {
 
-    private final String formatPattern = "^([A-Za-z])+([A-Za-z0-9._-])+$";
-
     @Autowired
     private VariableService variableService;
 
@@ -54,6 +53,13 @@ public class VariableController {
     public RestResponse variableList(RestRequest restRequest, Variable variable) {
         IPage<Variable> variableList = variableService.page(variable, restRequest);
         return RestResponse.success(variableList);
+    }
+
+    @PostMapping("dependApps")
+    @RequiresPermissions("variable:dependApps")
+    public RestResponse dependApps(RestRequest restRequest, Variable variable) {
+        IPage<Application> dependApps = variableService.dependAppsPage(variable, restRequest);
+        return RestResponse.success(dependApps);
     }
 
     @PostMapping("post")
