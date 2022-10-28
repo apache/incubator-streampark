@@ -69,7 +69,6 @@
         const { data } = await fetchCheckVariableCode({
           variableCode: value,
         });
-        console.log('data', data);
         if (data.status !== 'success') {
           setValidateStatus('error');
           setHelp(data.message);

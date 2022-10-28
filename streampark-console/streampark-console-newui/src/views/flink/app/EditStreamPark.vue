@@ -69,7 +69,7 @@
     tmPodTemplate: '',
   });
   const { handleResetApplication, defaultOptions } = useEdit();
-  const { getEditStreamParkFormSchema, registerDifferentDrawer, alerts, flinkEnvs } =
+  const { getEditStreamParkFormSchema, registerDifferentDrawer, alerts, flinkEnvs, flinkClusters } =
     useEditStreamParkSchema(configVersions, flinkSqlHistory, dependencyRef);
 
   const [registerForm, { setFieldsValue, getFieldsValue, submit }] = useForm({
@@ -169,7 +169,15 @@
       if (values.uploadJars != null && values.uploadJars.length > 0) {
         Object.assign(dependency, { jar: values.dependency });
       }
-
+      if (values.yarnSessionClusterId) {
+        const cluster =
+          flinkClusters.value.filter(
+            (c) => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1,
+          )[0] || null;
+        values.clusterId = cluster.id;
+        values.flinkClusterId = cluster.id;
+        values.yarnSessionClusterId = cluster.clusterId;
+      }
       let config = values.configOverride;
       if (config != null && config.trim() !== '') {
         config = decodeByBase64(config);
@@ -203,6 +211,15 @@
         config = decodeByBase64(config);
       } else {
         config = null;
+      }
+      if (values.yarnSessionClusterId) {
+        const cluster =
+          flinkClusters.value.filter(
+            (c) => c.clusterId === values.yarnSessionClusterId && c.clusterState === 1,
+          )[0] || null;
+        values.clusterId = cluster.id;
+        values.flinkClusterId = cluster.id;
+        values.yarnSessionClusterId = cluster.clusterId;
       }
       const configId = values.strategy === 1 ? app.configId : null;
       const params = {
@@ -238,13 +255,15 @@
     const appId = route.query.appId;
     const res = await fetchGet({ id: appId as string });
     let configId = '';
-    const confVersion = await fetchConfHistory({ id: route.query.appId });
-    confVersion.forEach((value) => {
-      if (value.effective) {
-        configId = value.id;
-      }
+    fetchConfHistory({ id: route.query.appId }).then((confVersion) => {
+      confVersion.forEach((value) => {
+        if (value.effective) {
+          configId = value.id;
+        }
+      });
+      configVersions.value = confVersion;
     });
-    configVersions.value = confVersion;
+
     Object.assign(app, res);
     Object.assign(defaultOptions, JSON.parse(app.options || '{}'));
     setFieldsValue({
@@ -261,8 +280,9 @@
       unref(flinkSql)?.setContent(decodeByBase64(res.flinkSql));
     });
     if (app.jobType === 2) {
-      const res = await fetchFlinkHistory({ id: appId });
-      flinkSqlHistory.value = res;
+      fetchFlinkHistory({ id: appId }).then((res) => {
+        flinkSqlHistory.value = res;
+      });
     }
     if (app.alertId) {
       selectAlertId.value = unref(alerts).filter((t) => t.id == app.alertId)[0]?.id;

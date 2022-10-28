@@ -22,6 +22,7 @@ import { VariableDeleteParam, VariableListRecord, VariableParam } from './model/
 
 enum VARIABLE_API {
   LIST = '/variable/list',
+  DEPEND = '/variable/dependApps',
   UPDATE = '/variable/update',
   POST = '/variable/post',
   DELETE = '/variable/delete',
@@ -62,6 +63,7 @@ export function fetchUpdateVariable(data: VariableParam): Promise<boolean | unde
 export function fetchVariableDelete(data: VariableDeleteParam): Promise<AxiosResponse<Result>> {
   return defHttp.delete({ url: VARIABLE_API.DELETE, data }, { isReturnNativeResponse: true });
 }
+
 /**
  * Code check
  * @param {Object} data
@@ -71,4 +73,13 @@ export function fetchCheckVariableCode(data: {
   variableCode: string;
 }): Promise<AxiosResponse<Result>> {
   return defHttp.post({ url: VARIABLE_API.CHECK_CODE, data }, { isReturnNativeResponse: true });
+}
+
+/**
+ * Code check
+ * @param {Object} data
+ * @returns {Promise<AxiosResponse<Result>>}
+ */
+export function fetchDependApps(data: Recordable): Promise<any> {
+  return defHttp.post({ url: VARIABLE_API.DEPEND, data });
 }
