@@ -595,6 +595,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setLaunch(LaunchState.NEED_LAUNCH.get());
         appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
+        appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
         appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
             String jarPath = WebUtils.getAppTempDir().getAbsolutePath().concat("/").concat(appParam.getJar());
