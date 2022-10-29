@@ -74,10 +74,6 @@ public class FlinkEnv implements Serializable {
         }
     }
 
-    public String getFlinkConf() throws ApiDetailException {
-        return String.format("%s/conf/flink-conf.yaml", this, flinkHome);
-    }
-
     public void doSetVersion() {
         this.setVersion(this.getFlinkVersion().version());
         this.setScalaVersion(this.getFlinkVersion().scalaVersion());

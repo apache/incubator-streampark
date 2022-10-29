@@ -17,13 +17,10 @@
 
 package org.apache.streampark.archives;
 
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 public class Jobs {
 
-    @JsonProperty("jobs")
     private List<Overview> jobs;
 
     public List<Overview> getJobs() {

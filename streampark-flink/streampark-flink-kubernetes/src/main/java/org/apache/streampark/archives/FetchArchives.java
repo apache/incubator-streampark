@@ -17,37 +17,24 @@
 
 package org.apache.streampark.archives;
 
-import org.apache.flink.core.fs.FileStatus;
-import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.runtime.history.FsJobArchivist;
 import org.apache.flink.runtime.webmonitor.history.ArchivedJson;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
 public class FetchArchives {
 
-    private static String FAILED = "FAILED";
+    private static final String FAILED_STATE = "FAILED";
 
     public static String getJobStateFromArchiveFile(String jobId, String archivePath) {
         try {
             Objects.requireNonNull(jobId, "JobId cannot be empty.");
             Objects.requireNonNull(archivePath, "archivePath cannot be empty.");
-            Path refreshPath = new Path(archivePath);
-            FileSystem refreshFS = refreshPath.getFileSystem();
-            // contents of /:refreshDir
-            FileStatus[] jobArchives = listArchives(refreshFS, refreshPath);
-            Path jobArchivePath = Arrays.stream(jobArchives)
-                .map(FileStatus::getPath)
-                .filter(path -> path.getName().equals(jobId)).findFirst().orElse(null);
-
-            Objects.requireNonNull(jobArchivePath, "Archive Log Path Exception");
-            for (ArchivedJson archive : FsJobArchivist.getArchivedJsons(jobArchivePath)) {
+            Path archiveFilePath = new Path(String.format("%s/%s", archivePath, jobId));
+            for (ArchivedJson archive : FsJobArchivist.getArchivedJsons(archiveFilePath)) {
                 String path = archive.getPath();
                 if (path.equals("/jobs/overview")) {
                     String json = archive.getJson();
@@ -57,22 +44,9 @@ public class FetchArchives {
                     return overviews.get(0).getState();
                 }
             }
-            return FAILED;
+            return FAILED_STATE;
         } catch (Exception e) {
-            return FAILED;
+            return FAILED_STATE;
         }
-    }
-
-    private static FileStatus[] listArchives(FileSystem refreshFS, Path refreshDir)
-        throws IOException {
-        // contents of /:refreshDir
-        FileStatus[] jobArchives = refreshFS.listStatus(refreshDir);
-        if (jobArchives == null) {
-            // the entire refreshDirectory was removed
-            return new FileStatus[0];
-        }
-        Arrays.sort(
-            jobArchives, Comparator.comparingLong(FileStatus::getModificationTime).reversed());
-        return jobArchives;
     }
 }

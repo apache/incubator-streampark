@@ -21,6 +21,25 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonPro
 
 public class Overview {
 
+    private String jid;
+
+    private String name;
+
+    private String state;
+
+    @JsonProperty("start-time")
+    private Long startTime;
+
+    @JsonProperty("end-time")
+    private Long endTime;
+
+    private Integer duration;
+
+    @JsonProperty("last-modification")
+    private Long lastModification;
+
+    private Task tasks;
+
     public String getJid() {
         return jid;
     }
@@ -84,29 +103,5 @@ public class Overview {
     public void setTasks(Task tasks) {
         this.tasks = tasks;
     }
-
-    @JsonProperty("jid")
-    private String jid;
-
-    @JsonProperty("name")
-    private String name;
-
-    @JsonProperty("state")
-    private String state;
-
-    @JsonProperty("start-time")
-    private Long startTime;
-
-    @JsonProperty("end-time")
-    private Long endTime;
-
-    @JsonProperty("duration")
-    private Integer duration;
-
-    @JsonProperty("last-modification")
-    private Long lastModification;
-
-    @JsonProperty("tasks")
-    private Task tasks;
 
 }

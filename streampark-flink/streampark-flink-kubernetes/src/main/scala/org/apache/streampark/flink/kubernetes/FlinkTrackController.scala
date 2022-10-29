@@ -242,6 +242,7 @@ object MetricCache {
 }
 
 class ArchivesCache {
+
   def put(k: String, v: String): Unit = cache.put(k, v)
 
   def get(k: String): String = cache.getIfPresent(k)
@@ -249,6 +250,8 @@ class ArchivesCache {
   def asMap(): Map[String, String] = cache.asMap().toMap
 
   def cleanUp(): Unit = cache.cleanUp()
+
+  def invalidate(key: String): Unit = cache.invalidate(key)
 
   val cache: Cache[String, String] = Caffeine.newBuilder.build()
 }

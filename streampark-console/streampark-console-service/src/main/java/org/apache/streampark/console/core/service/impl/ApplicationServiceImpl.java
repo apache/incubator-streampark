@@ -210,8 +210,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Autowired
     private FlinkClusterService flinkClusterService;
 
-    @Value("${streampark.archive.path:#{null}}")
-    private String archivePath;
+    @Value("${streampark.workspace.remote:#{null}}")
+    private String basePath;
 
     @Autowired
     private VariableService variableService;
@@ -1369,8 +1369,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         } else {
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
                 AssertUtils.state(buildResult != null);
-                ParameterTool parameter = ParameterTool.fromPropertiesFile(flinkEnv.getFlinkConf());
-                String fsPath = Optional.ofNullable(parameter.get(JobManagerOptions.ARCHIVE_DIR.key())).orElse(archivePath);
+                ParameterTool parameter = ParameterTool.fromPropertiesFile(String.format("%s/conf/flink-conf.yaml", flinkEnv.getFlinkHome()));
+                String fsPath = Optional.ofNullable(properties.get(JobManagerOptions.ARCHIVE_DIR.key())).isPresent() ? properties.get(JobManagerOptions.ARCHIVE_DIR.key()) : Optional.ofNullable(parameter.get(JobManagerOptions.ARCHIVE_DIR.key())).orElse(String.format("%s/%s/", basePath, "completed-jobs"));
                 k8SFlinkTrackMonitor.archivesJob(jobId, fsPath);
                 properties.put(JobManagerOptions.ARCHIVE_DIR.key(), fsPath);
                 DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
