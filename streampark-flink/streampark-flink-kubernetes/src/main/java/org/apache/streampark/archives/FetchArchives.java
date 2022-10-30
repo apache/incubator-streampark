@@ -34,7 +34,7 @@ public class FetchArchives {
     public static String getJobStateFromArchiveFile(String jobId) {
         try {
             Objects.requireNonNull(jobId, "JobId cannot be empty.");
-            Path archiveFilePath = new Path(String.format("%s/%s", Workspace.remote().ARCHIVES_FILE_PATH(), jobId));
+            Path archiveFilePath = new Path(String.format("%s/%s", Workspace.ARCHIVES_FILE_PATH(), jobId));
             for (ArchivedJson archive : FsJobArchivist.getArchivedJsons(archiveFilePath)) {
                 String path = archive.getPath();
                 if (path.equals("/jobs/overview")) {

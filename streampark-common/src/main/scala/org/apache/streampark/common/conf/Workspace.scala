@@ -105,7 +105,7 @@ case class Workspace(storageType: StorageType) {
   /**
    * project archives path
    */
-  lazy val ARCHIVES_FILE_PATH = s"$WORKSPACE/historyserver/archive"
+  lazy val ARCHIVES_FILE_PATH = s"${Workspace.remote.WORKSPACE}/historyserver/archive"
 
   /**
    * dirpath of the maven local repository with built-in compilation process

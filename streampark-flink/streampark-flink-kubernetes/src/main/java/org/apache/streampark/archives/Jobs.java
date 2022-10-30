@@ -17,8 +17,11 @@
 
 package org.apache.streampark.archives;
 
+import lombok.Data;
+
 import java.util.List;
 
+@Data
 public class Jobs {
 
     private List<Overview> jobs;
