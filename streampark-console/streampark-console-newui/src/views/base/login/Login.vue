@@ -144,7 +144,9 @@
     input {
       min-width: 300px;
       background: transparent;
-
+      &:autofill {
+        background: transparent;
+      }
       @media (max-width: @screen-xl) {
         min-width: 260px;
       }

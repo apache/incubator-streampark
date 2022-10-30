@@ -61,22 +61,13 @@
       </span>
     </div>
   </BasicTitle>
-  <Descriptions size="small" :column="2" class="pl-15px mt-10px">
+  <Descriptions size="small" :column="1" class="pl-15px mt-10px">
     <template v-if="alertType === '1'">
-      <DescriptionsItem label="Alert Email" :span="2">
+      <DescriptionsItem label="Alert Email">
         <span class="text-blue-500">{{ emailInfo.contacts || '' }}</span>
       </DescriptionsItem>
     </template>
     <template v-else-if="alertType === '2'">
-      <DescriptionsItem label="DingTalk Url" :span="2">
-        {{ dingTalk.alertDingURL || '' }}
-      </DescriptionsItem>
-      <DescriptionsItem label="Access Token" :span="2">
-        {{ desensitization(dingTalk.token || '') }}
-      </DescriptionsItem>
-      <DescriptionsItem label="Secret Token" v-if="dingTalk.secretToken" :span="2">
-        {{ desensitization(dingTalk.secretToken || '') }}
-      </DescriptionsItem>
       <DescriptionsItem label="DingTalk User">
         {{ dingTalk.contacts || '' }}
       </DescriptionsItem>
@@ -87,17 +78,11 @@
       </DescriptionsItem>
     </template>
     <template v-else-if="alertType === '4'">
-      <DescriptionsItem label="WeChat token" :span="2">
+      <DescriptionsItem label="WeChat token">
         {{ desensitization(weChat.token || '') }}
       </DescriptionsItem>
     </template>
     <template v-else-if="alertType === '16'">
-      <DescriptionsItem label="Lark Token" :span="2">
-        {{ desensitization(lark.token || '') }}
-      </DescriptionsItem>
-      <DescriptionsItem label="Lark Secret Token" :span="2">
-        {{ desensitization(lark.secretToken || '') }}
-      </DescriptionsItem>
       <DescriptionsItem label="At All User">
         <Tag :color="lark.isAtAll ? 'green' : 'red'" class="!leading-20px">
           {{ lark.isAtAll }}

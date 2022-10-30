@@ -15,13 +15,15 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent, ref, toRefs, watch } from 'vue';
-  import { useI18n } from '/@/hooks/web/useI18n';
-  export default defineComponent({
+  export default {
     name: 'DetailTab',
-  });
+  };
 </script>
 <script setup lang="ts" name="DetailTab">
+  import { ref, toRefs, watch } from 'vue';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import { useDrawer } from '/@/components/Drawer';
+  import Mergely from '../Mergely.vue';
   import { Tabs, Descriptions, Tag } from 'ant-design-vue';
 
   import { useMonaco } from '/@/hooks/web/useMonaco';
@@ -36,7 +38,7 @@
   import { getMonacoOptions } from '../../data';
   import { handleView } from '../../utils';
   import { useRoute } from 'vue-router';
-  import { fetchListVer, fetchRemoveConf } from '/@/api/flink/config';
+  import { fetchGetVer, fetchListVer, fetchRemoveConf } from '/@/api/flink/config';
   import { fetchRemoveSavePoint, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
 
   import { fetchBackUps, fetchOptionLog } from '/@/api/flink/app/app';
@@ -96,6 +98,7 @@
 
   const [registerCompare, { openModal: openCompareModal }] = useModal();
   const [registerExecOption, { openModal: openExecOptionModal }] = useModal();
+  const [registerDetailDrawer, { openDrawer: openDetailDrawer }] = useDrawer();
 
   const [registerConfigTable, { getDataSource, reload: reloadConf }] = useTable({
     api: fetchListVer,
@@ -125,13 +128,13 @@
     return [
       {
         tooltip: { title: t('flink.app.detail.detailTab.configDetail') },
-        shape: 'circle',
+        type: 'link',
         icon: 'ant-design:eye-outlined',
         onClick: handleConfDetail.bind(null, record),
       },
       {
         tooltip: { title: t('flink.app.detail.compareConfig') },
-        shape: 'circle',
+        type: 'link',
         icon: 'ant-design:swap-outlined',
         onClick: handleCompare.bind(null, record),
         ifShow: getDataSource().length > 1,
@@ -142,14 +145,28 @@
           confirm: handleDeleteConf.bind(null, record),
         },
         auth: 'conf:delete',
-        shape: 'circle',
+        type: 'link',
         icon: 'ant-design:delete-outlined',
-        type: 'danger' as any,
+        color: 'error',
         ifShow: !record.effective,
       },
     ];
   }
-  function handleConfDetail() {}
+  async function handleConfDetail(record: Recordable) {
+    const hide = createMessage.loading('loading');
+    try {
+      const res = await fetchGetVer({
+        id: record.id,
+      });
+      openDetailDrawer(true, {
+        configOverride: decodeByBase64(res.content),
+      });
+    } catch (error: unknown) {
+      console.error(error);
+    } finally {
+      hide();
+    }
+  }
 
   /* delete configuration */
   async function handleDeleteConf(record) {
@@ -326,5 +343,6 @@
 
     <CompareModal @register="registerCompare" />
     <ExecOptionModal @register="registerExecOption" />
+    <Mergely :read-only="true" @register="registerDetailDrawer" />
   </div>
 </template>

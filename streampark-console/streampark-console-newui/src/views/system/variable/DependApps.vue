@@ -20,19 +20,21 @@
   };
 </script>
 <script setup lang="ts" name="DependApp">
-  import { ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { fetchDependApps } from '/@/api/system/variable';
   import Icon from '/@/components/Icon';
   import { PageWrapper } from '/@/components/Page';
-  import { BasicTable } from '/@/components/Table';
+  import { BasicTable, useTable } from '/@/components/Table';
 
   const route = useRoute();
   const router = useRouter();
-  const tableConfig = ref({
+  const [registerTable] = useTable({
+    title: 'Variable Depend Apps',
     api: fetchDependApps,
     canResize: false,
     showIndexColumn: false,
+    showTableSetting: true,
+    tableSetting: { setting: true },
     beforeFetch(params: Recordable) {
       Object.assign(params, {
         variableCode: route.query.id,
@@ -48,14 +50,19 @@
 </script>
 
 <template>
-  <PageWrapper content-full-height content-background contentClass="p-24px">
-    <div class="mb-15px">
-      <a-button type="primary" shape="circle" @click="router.back()" class="mr-10px -mt-8px">
+  <PageWrapper content-full-height>
+    <div class="mb-15px py-24px px-10px bg-white">
+      <a-button
+        type="primary"
+        shape="circle"
+        @click="router.back()"
+        class="float-right mr-10px -mt-8px"
+      >
         <Icon icon="ant-design:arrow-left-outlined" />
       </a-button>
       <span class="app-bar">Variable "{{ route.query.id }}" used list</span>
     </div>
-    <BasicTable v-bind="tableConfig" />
+    <BasicTable @register="registerTable" />
   </PageWrapper>
 </template>
 

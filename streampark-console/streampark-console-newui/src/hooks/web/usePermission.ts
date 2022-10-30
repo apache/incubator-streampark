@@ -20,7 +20,7 @@ import { useAppStore } from '/@/store/modules/app';
 import { usePermissionStore } from '/@/store/modules/permission';
 import { useUserStore } from '/@/store/modules/user';
 
-import { useTabs } from './useTabs';
+// import { useTabs } from './useTabs';
 
 import { router, resetRouter } from '/@/router';
 
@@ -31,13 +31,16 @@ import { RoleEnum } from '/@/enums/roleEnum';
 import { isArray } from '/@/utils/is';
 import { useMultipleTabStore } from '/@/store/modules/multipleTab';
 import { intersection } from 'lodash-es';
+import { PageEnum } from '/@/enums/pageEnum';
+import { useRedo } from './usePage';
+import { menuMap } from '/@/router/constant';
 
 // User permissions related operations
 export function usePermission() {
   const userStore = useUserStore();
   const appStore = useAppStore();
   const permissionStore = usePermissionStore();
-  const { closeAll } = useTabs(router);
+  // const { closeAll } = useTabs(router);
 
   /**
    * Change permission mode
@@ -56,16 +59,30 @@ export function usePermission() {
    * Reset and regain authority resource information
    * @param id
    */
-  async function resume() {
+  async function resume(nextPath?: string) {
     const tabStore = useMultipleTabStore();
     tabStore.clearCacheTabs();
+
+    const redo = useRedo(router);
+
     resetRouter();
-    const routes = await permissionStore.buildRoutesAction();
+    const [routes, hasAuth] = await permissionStore.buildRoutesAction(nextPath);
     routes.forEach((route) => {
       router.addRoute(route as unknown as RouteRecordRaw);
     });
     permissionStore.setLastBuildMenuTime();
-    closeAll();
+    const currentPath = router.currentRoute.value?.path;
+    if (Object.keys(menuMap).includes(currentPath)) {
+      router.replace(menuMap[currentPath]);
+    } else {
+      if (!hasAuth) {
+        router.push({ path: PageEnum.BASE_HOME });
+      } else {
+        await redo();
+      }
+    }
+
+    // closeAll();
   }
 
   /**
@@ -117,8 +134,8 @@ export function usePermission() {
   /**
    * refresh menu data
    */
-  async function refreshMenu() {
-    resume();
+  async function refreshMenu(nextPath?: string) {
+    resume(nextPath);
   }
 
   return { changeRole, hasPermission, togglePermissionMode, refreshMenu };

@@ -15,13 +15,13 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent } from 'vue';
-  import { useGo } from '/@/hooks/web/usePage';
-  export default defineComponent({
+  export default {
     name: 'AppCreate',
-  });
+  };
 </script>
 <script setup lang="ts" name="AppCreate">
+  import { useGo } from '/@/hooks/web/usePage';
+  import ProgramArgs from './components/ProgramArgs.vue';
   import { Switch, Alert } from 'ant-design-vue';
   import { onMounted, reactive, ref, unref } from 'vue';
   import { PageWrapper } from '/@/components/Page';
@@ -32,7 +32,6 @@
   import { useDrawer } from '/@/components/Drawer';
   import Mergely from './components/Mergely.vue';
   import { handleConfTemplate } from '/@/api/flink/config';
-  import { decodeByBase64 } from '/@/utils/cipher';
   import UploadJobJar from './components/UploadJobJar.vue';
   import { fetchAppConf, fetchCreate, fetchMain, fetchUpload } from '/@/api/flink/app/app';
   import options from './data/option';
@@ -42,13 +41,25 @@
   import { createLocalStorage } from '/@/utils/cache';
   import { buildUUID } from '/@/utils/uuid';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import VariableReview from './components/VariableReview.vue';
+  import { CreateParams } from '/@/api/flink/app/app.type';
+  import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
 
-  const FlinkSqlEditor = createAsyncComponent(() => import('./components/flinkSql.vue'));
-  const Dependency = createAsyncComponent(() => import('./components/Dependency.vue'));
+  const FlinkSqlEditor = createAsyncComponent(() => import('./components/flinkSql.vue'), {
+    loading: true,
+  });
+  const Dependency = createAsyncComponent(() => import('./components/Dependency.vue'), {
+    loading: true,
+  });
   const PomTemplateTab = createAsyncComponent(
     () => import('./components/PodTemplate/PomTemplateTab.vue'),
+    {
+      loading: true,
+    },
   );
-  const UseSysHadoopConf = createAsyncComponent(() => import('./components/UseSysHadoopConf.vue'));
+  const UseSysHadoopConf = createAsyncComponent(() => import('./components/UseSysHadoopConf.vue'), {
+    loading: true,
+  });
 
   const go = useGo();
   const flinkSql = ref();
@@ -71,7 +82,9 @@
     tmPodTemplate: '',
   });
 
-  const { getCreateFormSchema, flinkEnvs, flinkClusters } = useCreateSchema(dependencyRef);
+  const { flinkEnvs, flinkClusters, getCreateFormSchema, suggestions } =
+    useCreateSchema(dependencyRef);
+
   const [registerAppForm, { setFieldsValue, getFieldsValue, submit }] = useForm({
     labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
     wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
@@ -81,6 +94,7 @@
   });
 
   const [registerConfDrawer, { openDrawer: openConfDrawer }] = useDrawer();
+  const [registerReviewDrawer, { openDrawer: openReviewDrawer }] = useDrawer();
 
   /* Initialize the form */
   async function handleInitForm() {
@@ -149,9 +163,9 @@
     const cluster =
       unref(flinkClusters).filter((c) => {
         if (values.flinkClusterId) {
-          return c.clusterId === values.flinkClusterId && c.clusterState === 1;
+          return c.id == values.flinkClusterId && c.clusterState === 1;
         } else {
-          return c.clusterId === values.yarnSessionClusterId && c.clusterState === 1;
+          return c.clusterId == values.yarnSessionClusterId && c.clusterState === 1;
         }
       })[0] || null;
     if (cluster) {
@@ -173,14 +187,13 @@
       appType: values.appType,
     };
     handleSubmitParams(params, values, k8sTemplate);
-
     // common params...
     const resourceFrom = values.resourceFrom;
     if (resourceFrom != null) {
-      if (resourceFrom === 'cvs') {
+      if (resourceFrom === 'csv') {
         params['resourceFrom'] = 1;
         //streampark flink
-        if (values.appType === 1) {
+        if (values.appType === '1') {
           const configVal = values['config'];
           params['format'] = configVal.endsWith('.properties') ? 2 : 1;
           if (values.configOverride == null) {
@@ -188,16 +201,14 @@
               config: configVal,
             });
             params['config'] = res;
-            handleCreateApp(params);
           } else {
             params['config'] = decodeByBase64(values.configOverride);
-            handleCreateApp(params);
           }
         } else {
           params['jar'] = values.jar || null;
           params['mainClass'] = values.mainClass || null;
-          handleCreateApp(params);
         }
+        handleCreateApp(params);
       } else {
         // from upload
         Object.assign(params, {
@@ -211,25 +222,27 @@
     }
   }
   /* flink sql mode */
-  function handleSubmitSQL(values) {
+  async function handleSubmitSQL(values) {
     // Trigger a pom confirmation operation.
-    unref(dependencyRef)?.handleApplyPom();
+    await unref(dependencyRef)?.handleApplyPom();
     // common params...
     const dependency: { pom?: string; jar?: string } = {};
-    if (values.dependency && values.dependency.length > 0) {
+    const dependencyRecords = unref(dependencyRef)?.dependencyRecords;
+    const uploadJars = unref(dependencyRef)?.uploadJars;
+    if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {
       Object.assign(dependency, {
-        pom: values.dependency,
+        pom: unref(dependencyRecords),
       });
     }
-    if (values.uploadJars && values.uploadJars.length > 0) {
+    if (uploadJars && unref(uploadJars).length > 0) {
       Object.assign(dependency, {
-        jar: values.dependency,
+        jar: unref(uploadJars),
       });
     }
 
     let config = values.configOverride;
     if (config != null && config !== undefined && config.trim() != '') {
-      config = decodeByBase64(config);
+      config = encryptByBase64(config);
     } else {
       config = null;
     }
@@ -239,7 +252,7 @@
       jobType: 2,
       flinkSql: values.flinkSql,
       appType: 1,
-      config: config,
+      config,
       format: values.isSetConfig ? 1 : null,
       dependency:
         dependency.pom === undefined && dependency.jar === undefined
@@ -250,14 +263,14 @@
     handleCreateApp(params);
   }
   /* Submit to create */
-  function handleAppCreate(formValue: Recordable) {
+  async function handleAppCreate(formValue: Recordable) {
     try {
       submitLoading.value = true;
       if (formValue.jobType === 'sql') {
         if (formValue.flinkSql == null || formValue.flinkSql.trim() === '') {
           createMessage.warning('Flink Sql is required');
         } else {
-          const access = flinkSql?.value?.handleVerifySql();
+          const access = await flinkSql?.value?.handleVerifySql();
           if (!access) return;
         }
       }
@@ -282,7 +295,8 @@
     const socketId = buildUUID();
     ls.set('DOWN_SOCKET_ID', socketId);
     Object.assign(param, { socketId });
-    const { data } = await fetchCreate(param);
+    console.log('param', param);
+    const { data } = await fetchCreate(param as CreateParams);
     if (data.data) {
       go('/flink/app');
     } else {
@@ -296,13 +310,15 @@
 </script>
 
 <template>
-  <PageWrapper contentFullHeight contentBackground contentClass="p-24px app_controller">
+  <PageWrapper contentFullHeight contentBackground contentClass="p-26px app_controller">
     <BasicForm @register="registerAppForm" @submit="handleAppCreate" :schemas="getCreateFormSchema">
       <template #flinkSql="{ model, field }">
         <FlinkSqlEditor
           ref="flinkSql"
           v-model:value="model[field]"
           :versionId="model['versionId']"
+          :suggestions="suggestions"
+          @preview="(value) => openReviewDrawer(true, { value, suggestions })"
         />
       </template>
       <template #dependency="{ model, field }">
@@ -343,6 +359,13 @@
           v-model:tmPodTemplate="k8sTemplate.tmPodTemplate"
         />
       </template>
+      <template #args="{ model }">
+        <ProgramArgs
+          v-model:value="model.args"
+          :suggestions="suggestions"
+          @preview="(value) => openReviewDrawer(true, { value, suggestions })"
+        />
+      </template>
       <template #useSysHadoopConf="{ model, field }">
         <UseSysHadoopConf v-model:hadoopConf="model[field]" />
       </template>
@@ -362,6 +385,7 @@
       @close="handleEditConfClose"
       @register="registerConfDrawer"
     />
+    <VariableReview @register="registerReviewDrawer" />
   </PageWrapper>
 </template>
 <style lang="less">

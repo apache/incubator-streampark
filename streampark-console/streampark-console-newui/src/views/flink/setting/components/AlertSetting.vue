@@ -26,6 +26,7 @@
   import { onMounted, ref } from 'vue';
   import { List, Popconfirm, Tooltip, Card, Tag } from 'ant-design-vue';
   import {
+    EyeOutlined,
     ThunderboltOutlined,
     EditOutlined,
     DeleteOutlined,
@@ -33,6 +34,7 @@
   } from '@ant-design/icons-vue';
   import { useModal } from '/@/components/Modal';
   import AlertModal from './AlertModal.vue';
+  import AlertDetailModal from './AlertDetailModal.vue';
   import { fetchAlertSetting, fetchSendAlert, fetchAlertDelete } from '/@/api/flink/setting/alert';
   import { AlertSetting } from '/@/api/flink/setting/types/alert.type';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -43,6 +45,7 @@
   const { t } = useI18n();
   const { Swal, createMessage } = useMessage();
   const [registerAlertModal, { openModal: openAlertModal }] = useModal();
+  const [registerAlertDetailModal, { openModal: openAlertDetailModal }] = useModal();
   const alerts = ref<AlertSetting[]>([]);
 
   /* Get alert configuration */
@@ -178,7 +181,7 @@
 
   <List
     class="alert-card-list"
-    :grid="{ gutter: 40, lg: 2, xxl: 3 }"
+    :grid="{ gutter: 40, xs: 1, sm: 2, md: 4, lg: 4, xl: 4, xxl: 4 }"
     :data-source="alerts"
     :pagination="false"
   >
@@ -187,7 +190,7 @@
         <Card
           class="shadow-xl alert-card"
           :bordered="false"
-          :bodyStyle="{ height: '260px', padding: '15px', overflowY: 'auto' }"
+          :bodyStyle="{ height: '240px', padding: '15px', overflowY: 'auto' }"
         >
           <template #title>
             {{ item.alertName }}
@@ -213,6 +216,17 @@
                 class="control-button ctl-btn-color"
               >
                 <ThunderboltOutlined />
+              </a-button>
+            </Tooltip>
+            <Tooltip title="Alert Detail">
+              <a-button
+                @click="openAlertDetailModal(true, item)"
+                shape="circle"
+                size="large"
+                style="margin-left: 3px"
+                class="control-button ctl-btn-color"
+              >
+                <EyeOutlined />
               </a-button>
             </Tooltip>
             <Tooltip title="Edit Alert Config">
@@ -275,6 +289,7 @@
   </List>
 
   <AlertModal @register="registerAlertModal" @reload="getAlertSetting" width="850px" />
+  <AlertDetailModal @register="registerAlertDetailModal" width="850px" />
 </template>
 <style lang="less">
   .alert-card {

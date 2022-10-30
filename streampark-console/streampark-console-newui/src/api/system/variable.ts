@@ -28,6 +28,7 @@ enum VARIABLE_API {
   DELETE = '/variable/delete',
   SELECT = '/variable/select',
   CHECK_CODE = '/variable/check/code',
+  ALL = '/variable/all',
 }
 /**
  * get variable list
@@ -76,10 +77,25 @@ export function fetchCheckVariableCode(data: {
 }
 
 /**
- * Code check
+ * search depend app
  * @param {Object} data
- * @returns {Promise<AxiosResponse<Result>>}
+ * @returns {Promise<any>}
  */
 export function fetchDependApps(data: Recordable): Promise<any> {
   return defHttp.post({ url: VARIABLE_API.DEPEND, data });
+}
+/**
+ * Code check
+ * @param {Object} data
+ * @returns {Promise<any>}
+ */
+export function fetchVariableContent(data: Recordable): Promise<any> {
+  return defHttp.post({ url: VARIABLE_API.DEPEND, data });
+}
+/**
+ * get all variable
+ * @returns {Promise<any>}
+ */
+export function fetchVariableAll(data?: { key: string }): Promise<VariableListRecord[]> {
+  return defHttp.post({ url: VARIABLE_API.ALL, data });
 }

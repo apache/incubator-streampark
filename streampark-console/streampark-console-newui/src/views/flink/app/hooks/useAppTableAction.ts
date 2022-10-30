@@ -35,7 +35,7 @@ export const useAppTableAction = (
   openStopModal: Fn,
   openLogModal: Fn,
   openBuildDrawer: Fn,
-  reload: Fn,
+  handlePageDataReload: Fn,
   optionApps: Recordable,
 ) => {
   const tagsOptions = ref<Recordable>([]);
@@ -120,7 +120,7 @@ export const useAppTableAction = (
       router.push({ path: '/flink/app/edit_streampark', query: { appId: app.id } });
     } else if (app.appType === 2) {
       //Apache Flink
-      router.push({ path: '/flink/app/edit_flink' });
+      router.push({ path: '/flink/app/edit_flink', query: { appId: app.id } });
     }
   }
 
@@ -198,7 +198,7 @@ export const useAppTableAction = (
     try {
       await fetchAppRemove(app.id);
       createMessage.success('delete successful');
-      reload();
+      handlePageDataReload();
     } catch (error) {
       console.error(error);
     } finally {
@@ -229,6 +229,7 @@ export const useAppTableAction = (
             placeholder: 'Tags',
             showSearch: true,
             options: tagsOptions.value.map((t: Recordable) => ({ label: t, value: t })),
+            onChange: handlePageDataReload,
           },
         },
         {
@@ -241,6 +242,7 @@ export const useAppTableAction = (
             options: users.value.map((u: Recordable) => {
               return { label: u.nickName || u.username, value: u.userId };
             }),
+            onChange: handlePageDataReload,
           },
         },
         {
@@ -254,15 +256,17 @@ export const useAppTableAction = (
               { label: 'JAR', value: JobTypeEnum.JAR },
               { label: 'SQL', value: JobTypeEnum.SQL },
             ],
+            onChange: handlePageDataReload,
           },
         },
         {
-          label: 'keyWords',
-          field: 'searchText',
+          label: 'Name',
+          field: 'jobName',
           component: 'InputSearch',
           componentProps: {
             placeholder: 'Search',
-            onSearch: () => reload({ polling: true }),
+            onChange: handlePageDataReload,
+            onSearch: handlePageDataReload,
           },
         },
       ],

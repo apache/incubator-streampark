@@ -15,7 +15,13 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent, reactive, ref, unref } from 'vue';
+  export default {
+    name: 'FlinkSql',
+  };
+</script>
+
+<script setup lang="ts" name="FlinkSql">
+  import { computed, reactive, ref, unref } from 'vue';
   import { getMonacoOptions } from '../data';
   import { Icon } from '/@/components/Icon';
   import { useMonaco } from '/@/hooks/web/useMonaco';
@@ -26,15 +32,7 @@
   import { format } from '../FlinkSqlFormatter';
   import { useFullscreen } from '@vueuse/core';
   import { useI18n } from '/@/hooks/web/useI18n';
-
   const ButtonGroup = Button.Group;
-
-  export default defineComponent({
-    name: 'FlinkSql',
-  });
-</script>
-
-<script setup lang="ts" name="FlinkSql">
   const { t } = useI18n();
   const vertifyRes = reactive({
     errorMsg: '',
@@ -45,8 +43,9 @@
   const flinkSql = ref();
   const flinkScreen = ref();
   const { isFullscreen, toggle } = useFullscreen(flinkScreen);
-  const emit = defineEmits(['update:value']);
+  const emit = defineEmits(['update:value', 'preview']);
   const { createMessage } = useMessage();
+
   const props = defineProps({
     value: {
       type: String,
@@ -54,6 +53,10 @@
     },
     versionId: {
       type: String as PropType<Nullable<string>>,
+    },
+    suggestions: {
+      type: Array as PropType<Array<{ text: string; description: string }>>,
+      default: () => [],
     },
   });
   const defaultValue = '';
@@ -146,10 +149,15 @@
   const { onChange, setContent, getInstance, getMonacoInstance } = useMonaco(flinkSql, {
     language: 'sql',
     code: props.value || defaultValue,
+    suggestions: props.suggestions,
     options: {
       minimap: { enabled: true },
       ...(getMonacoOptions(false) as any),
+      autoClosingBrackets: 'never',
     },
+  });
+  const canPreview = computed(() => {
+    return /\${.+}/.test(props.value);
   });
 
   onChange((data) => {
@@ -169,6 +177,15 @@
       ></div>
 
       <ButtonGroup class="flinksql-tool">
+        <a-button
+          class="flinksql-tool-item"
+          v-if="canPreview"
+          size="small"
+          @click="emit('preview', value)"
+        >
+          <Icon icon="ant-design:eye-outlined" />
+          preview
+        </a-button>
         <a-button class="flinksql-tool-item" type="primary" size="small" @click="handleVerifySql">
           <Icon icon="ant-design:check-outlined" />
           {{ t('flink.app.flinkSql.verify') }}
@@ -199,5 +216,3 @@
     </div>
   </div>
 </template>
-
-<style></style>
