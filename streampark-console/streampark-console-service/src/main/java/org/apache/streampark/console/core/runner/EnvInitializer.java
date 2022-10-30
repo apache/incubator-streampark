@@ -143,7 +143,7 @@ public class EnvInitializer implements ApplicationRunner {
 
             // 1. prepare workspace dir
             if (storageType.equals(LFS)) {
-                String localDist = workspace.APP_LOCAL_DIST();
+                String localDist = Workspace.APP_LOCAL_DIST();
                 if (!fsOperator.exists(localDist)) {
                     log.info(mkdirLog, localDist);
                     fsOperator.mkdirs(localDist);
@@ -231,7 +231,7 @@ public class EnvInitializer implements ApplicationRunner {
 
             // 2.4) create maven local repository dir
 
-            String localMavenRepo = workspace.MAVEN_LOCAL_DIR();
+            String localMavenRepo = Workspace.MAVEN_LOCAL_DIR();
             if (FsOperator.lfs().exists(localMavenRepo)) {
                 FsOperator.lfs().mkdirs(localMavenRepo);
             }

@@ -113,7 +113,7 @@ public class Project implements Serializable {
     @JsonIgnore
     public File getAppSource() {
         if (appSource == null) {
-            appSource = Workspace.local().PROJECT_LOCAL_DIR();
+            appSource = Workspace.PROJECT_LOCAL_DIR();
         }
         File sourcePath = new File(appSource);
         if (!sourcePath.exists()) {
@@ -131,7 +131,7 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public File getDistHome() {
-        return new File(Workspace.local().APP_LOCAL_DIST(), id.toString());
+        return new File(Workspace.APP_LOCAL_DIST(), id.toString());
     }
 
     @JsonIgnore
