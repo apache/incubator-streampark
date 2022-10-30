@@ -18,7 +18,7 @@ import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import { Button, Form, Input, InputNumber, Tag, Select } from 'ant-design-vue';
 import Icon from '/@/components/Icon';
-interface PriceValue {
+export interface CheckPointFailure {
   cpMaxFailureInterval: number;
   cpFailureRateInterval: number;
   cpFailureAction: string;
@@ -26,12 +26,15 @@ interface PriceValue {
 import { cpTriggerAction } from '../data';
 export default defineComponent({
   props: {
-    value: { type: Object as PropType<PriceValue>, isRequired: true },
+    value: {
+      type: Object as PropType<CheckPointFailure>,
+      required: true,
+    },
   },
   emits: ['updateValue'],
   setup(props, { emit }) {
     const formItemContext = Form.useInjectFormItemContext();
-    const triggerChange = (changedValue: Partial<PriceValue>) => {
+    const triggerChange = (changedValue: Partial<CheckPointFailure>) => {
       emit('updateValue', { ...props.value, ...changedValue });
       formItemContext.onFieldChange();
     };

@@ -15,9 +15,9 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent, ref, unref, onUnmounted, watch } from 'vue';
-  import { useUserStore } from '/@/store/modules/user';
+  import { defineComponent, nextTick, ref, unref, onUnmounted } from 'vue';
   import { useAppTableAction } from './hooks/useAppTableAction';
+
   export default defineComponent({
     name: 'AppView',
   });
@@ -42,8 +42,6 @@
   import AppDashboard from './components/AppView/AppDashboard.vue';
   import State from './components/State';
 
-  const userStore = useUserStore();
-
   const optionApps = {
     starting: new Map(),
     stopping: new Map(),
@@ -51,10 +49,7 @@
   };
 
   const appDashboardRef = ref<any>();
-  const searchText = ref('');
-  const tags = ref(undefined);
-  const jobType = ref(undefined);
-  const userId = ref(undefined);
+
   const yarn = ref<Nullable<string>>(null);
 
   const [registerStartModal, { openModal: openStartModal }] = useModal();
@@ -72,12 +67,6 @@
         }
         delete params.state;
       }
-      Object.assign(params, {
-        jobName: searchText.value,
-        jobType: jobType.value,
-        userId: userId.value,
-        tags: tags.value,
-      });
       return params;
     },
     afterFetch: (dataSource) => {
@@ -128,20 +117,8 @@
     openStopModal,
     openLogModal,
     openBuildDrawer,
-    reload,
+    handlePageDataReload,
     optionApps,
-  );
-
-  watch(
-    () => userStore.getTeamId,
-    async (val) => {
-      if (val) {
-        tags.value = undefined;
-        jobType.value = undefined;
-        userId.value = undefined;
-        reload();
-      }
-    },
   );
 
   // build Detail
@@ -168,10 +145,15 @@
     optionApps[data.type].set(data.key, data.value);
   }
 
-  const { start, stop } = useTimeoutFn(() => {
-    if (!getLoading()) {
+  function handlePageDataReload() {
+    nextTick(() => {
       appDashboardRef.value?.handleDashboard(false);
       reload({ polling: true });
+    });
+  }
+  const { start, stop } = useTimeoutFn(() => {
+    if (!getLoading()) {
+      handlePageDataReload();
     }
     start();
   }, 2000);
@@ -179,13 +161,6 @@
   onUnmounted(() => {
     stop();
   });
-
-  watch(
-    () => [tags.value, userId.value, jobType.value],
-    () => {
-      reload({ polling: true });
-    },
-  );
 </script>
 <template>
   <PageWrapper contentFullHeight>

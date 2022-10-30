@@ -54,7 +54,7 @@
         label: 'Alert Name',
         component: 'Input',
         componentProps: { allowClear: true, placeholder: 'Please enter alert name' },
-        itemExtra: h(
+        afterItem: h(
           'span',
           { class: 'conf-switch' },
           'the alert name, e.g: StreamPark team alert',
@@ -217,7 +217,6 @@
           </SelectOption>
         </Select>
       </template>
-      {{ alertType }}
       <template #alertEmail="{ model, field }">
         <!-- Alert Email -->
         <template v-if="(alertType || []).includes('1')">

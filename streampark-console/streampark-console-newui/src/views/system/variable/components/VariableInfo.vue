@@ -27,6 +27,7 @@
       Variable Info
     </template>
     <Description
+      class="variable-desc"
       @register="registerDescription"
       :column="1"
       :data="variableInfo"
@@ -90,3 +91,10 @@
     closeDrawer();
   }
 </script>
+<style lang="less">
+  .variable-desc {
+    .ant-descriptions-item-label {
+      min-width: 160px;
+    }
+  }
+</style>

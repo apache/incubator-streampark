@@ -23,6 +23,7 @@
           {{ t('common.add') }}
         </a-button>
       </template>
+      <template #resetBefore> 1111 </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
           <TableAction

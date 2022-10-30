@@ -103,8 +103,9 @@
       {
         field: 'variableValue',
         label: t('system.variable.table.variableValue'),
-        component: 'Input',
-        rules: [{ required: true, max: 100, message: 'please enter Variable Value' }],
+        component: 'InputTextArea',
+        componentProps: { rows: 4, placeholder: 'Please enter Variable Value' },
+        rules: [{ required: true, message: 'please enter Variable Value' }],
       },
       {
         field: 'description',

@@ -84,7 +84,8 @@ export const getMonacoOptions = (readOnly: boolean) => {
     selectOnLineNumbers: false,
     foldingStrategy: 'indentation', // code fragmentation
     overviewRulerBorder: false, // Don't scroll bar borders
-    autoClosingBrackets: true,
+    autoClosingBrackets: 'always',
+    autoClosingDelete: 'always',
     tabSize: 2, // tab indent length
     readOnly,
     inherit: true,

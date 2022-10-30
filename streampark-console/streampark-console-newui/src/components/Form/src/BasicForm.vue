@@ -60,7 +60,7 @@
   import { defineComponent, reactive, ref, computed, unref, onMounted, watch, nextTick } from 'vue';
   import { Form, Row } from 'ant-design-vue';
   import FormItem from './components/FormItem.vue';
-  import FormAction from './components/FormAction.vue';
+  import FormAction from './components/FormAction';
 
   import { dateItemType } from './helper';
   import { dateUtil } from '/@/utils/dateUtil';
@@ -106,6 +106,7 @@
 
       // Get the basic configuration of the form
       const getProps = computed((): FormProps => {
+        // @ts-ignore
         return { ...props, ...unref(propsRef) } as FormProps;
       });
 

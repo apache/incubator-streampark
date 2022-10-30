@@ -14,12 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { omit } from 'lodash-es';
 import { optionsKeyMapping } from '../data/option';
 import { fetchYarn } from '/@/api/flink/app/app';
 import { AppListRecord } from '/@/api/flink/app/app.type';
 import { fetchActiveURL } from '/@/api/flink/setting/flinkCluster';
-import { useUserStore } from '/@/store/modules/user';
 
 export function handleAppBuildStatusColor(statusCode) {
   switch (statusCode) {
@@ -167,9 +165,9 @@ export function handleYarnQueue(values) {
 }
 
 /* Splice parameters */
-export function handleFormValue(values) {
+export function handleFormValue(values: Recordable) {
   const options = {};
-  for (const k in omit(values, ['totalOptions', 'jmOptions', 'tmOptions'])) {
+  for (const k in values) {
     const v = values[k];
     if (v != null && v !== '' && v !== undefined) {
       if (k === 'parallelism') {
@@ -179,8 +177,8 @@ export function handleFormValue(values) {
       } else {
         if (
           values.totalOptions?.includes(k) ||
-          values.jmMemoryItems?.includes(k) ||
-          values.tmMemoryItems?.includes(k)
+          values.jmOptions?.includes(k) ||
+          values.tmOptions?.includes(k)
         ) {
           const opt = optionsKeyMapping.get(k);
           const unit = opt?.['unit'] || '';
@@ -246,10 +244,8 @@ export function handleSubmitParams(
   values: Recordable,
   k8sTemplate: Recordable,
 ) {
-  const useStore = useUserStore();
   const options = handleFormValue(values);
   Object.assign(params, {
-    teamId: useStore?.getTeamId,
     executionMode: values.executionMode,
     versionId: values.versionId,
     jobName: values.jobName,
@@ -257,9 +253,9 @@ export function handleSubmitParams(
     args: values.args || null,
     options: JSON.stringify(options),
     yarnQueue: handleYarnQueue(values),
-    cpMaxFailureInterval: values.cpMaxFailureInterval || null,
-    cpFailureRateInterval: values.cpFailureRateInterval || null,
-    cpFailureAction: values.cpFailureAction || null,
+    cpMaxFailureInterval: values.checkPointFailure?.cpMaxFailureInterval || null,
+    cpFailureRateInterval: values.checkPointFailure?.cpFailureRateInterval || null,
+    cpFailureAction: values.checkPointFailure?.cpFailureAction || null,
     properties: values.properties || null,
     resolveOrder: values.resolveOrder,
     k8sRestExposedType: values.k8sRestExposedType,

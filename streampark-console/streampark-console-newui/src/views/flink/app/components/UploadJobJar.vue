@@ -15,10 +15,9 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { defineComponent } from 'vue';
-  export default defineComponent({
+  export default {
     name: 'UploadJobJar',
-  });
+  };
 </script>
 <script setup lang="ts" name="UploadJobJar">
   import { Upload } from 'ant-design-vue';
@@ -64,25 +63,27 @@
 </script>
 
 <template>
-  <UploadDragger
-    name="file"
-    :multiple="true"
-    @change="handleUploadJar"
-    :showUploadList="loading"
-    :customRequest="customRequest"
-    :beforeUpload="handleBeforeUpload"
-  >
-    <div class="h-266px">
-      <p class="ant-upload-drag-icon !pt-40px">
-        <Icon icon="ant-design:inbox-outlined" :style="{ fontSize: '70px' }" />
-      </p>
-      <p class="ant-upload-text h-45px">
-        {{ t('flink.app.dragUploadTitle') }}
-      </p>
-      <p class="ant-upload-hint h-45px">
-        {{ t('flink.app.dragUploadTip') }}
-      </p>
-    </div>
-  </UploadDragger>
-  <slot name="uploadInfo"></slot>
+  <div>
+    <UploadDragger
+      name="file"
+      :multiple="true"
+      @change="handleUploadJar"
+      :showUploadList="loading"
+      :customRequest="customRequest"
+      :beforeUpload="handleBeforeUpload"
+    >
+      <div class="h-266px">
+        <p class="ant-upload-drag-icon !pt-40px">
+          <Icon icon="ant-design:inbox-outlined" :style="{ fontSize: '70px' }" />
+        </p>
+        <p class="ant-upload-text h-45px">
+          {{ t('flink.app.dragUploadTitle') }}
+        </p>
+        <p class="ant-upload-hint h-45px">
+          {{ t('flink.app.dragUploadTip') }}
+        </p>
+      </div>
+    </UploadDragger>
+    <slot name="uploadInfo"></slot>
+  </div>
 </template>
