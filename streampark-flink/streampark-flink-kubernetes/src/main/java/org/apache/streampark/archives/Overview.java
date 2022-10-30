@@ -17,8 +17,10 @@
 
 package org.apache.streampark.archives;
 
+import lombok.Data;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
+@Data
 public class Overview {
 
     private String jid;
@@ -37,71 +39,5 @@ public class Overview {
 
     @JsonProperty("last-modification")
     private Long lastModification;
-
-    private Task tasks;
-
-    public String getJid() {
-        return jid;
-    }
-
-    public void setJid(String jid) {
-        this.jid = jid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public Long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Long startTime) {
-        this.startTime = startTime;
-    }
-
-    public Long getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Long endTime) {
-        this.endTime = endTime;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public Long getLastModification() {
-        return lastModification;
-    }
-
-    public void setLastModification(Long lastModification) {
-        this.lastModification = lastModification;
-    }
-
-    public Task getTasks() {
-        return tasks;
-    }
-
-    public void setTasks(Task tasks) {
-        this.tasks = tasks;
-    }
 
 }

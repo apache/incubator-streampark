@@ -107,9 +107,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.CheckpointingOptions;
-import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,7 +130,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1369,10 +1366,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         } else {
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
                 AssertUtils.state(buildResult != null);
-                ParameterTool parameter = ParameterTool.fromPropertiesFile(String.format("%s/conf/flink-conf.yaml", flinkEnv.getFlinkHome()));
-                String fsPath = Optional.ofNullable(properties.get(JobManagerOptions.ARCHIVE_DIR.key())).isPresent() ? properties.get(JobManagerOptions.ARCHIVE_DIR.key()) : Optional.ofNullable(parameter.get(JobManagerOptions.ARCHIVE_DIR.key())).orElse(String.format("%s/%s/", basePath, "completed-jobs"));
-                k8SFlinkTrackMonitor.archivesJob(jobId, fsPath);
-                properties.put(JobManagerOptions.ARCHIVE_DIR.key(), fsPath);
                 DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
                 String ingressTemplates = application.getIngressTemplate();
                 String domainName = application.getDefaultModeIngress();

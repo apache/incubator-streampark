@@ -17,10 +17,12 @@
 
 package org.apache.streampark.archives;
 
+import org.apache.streampark.common.conf.CommonConfig;
+import org.apache.streampark.common.util.JsonUtils;
+
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.runtime.history.FsJobArchivist;
 import org.apache.flink.runtime.webmonitor.history.ArchivedJson;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Objects;
@@ -33,15 +35,14 @@ public class FetchArchives {
         try {
             Objects.requireNonNull(jobId, "JobId cannot be empty.");
             Objects.requireNonNull(archivePath, "archivePath cannot be empty.");
-            Path archiveFilePath = new Path(String.format("%s/%s", archivePath, jobId));
+            Path archiveFilePath = new Path(CommonConfig.STREAMPARK_WORKSPACE_REMOTE().defaultValue().toString());
             for (ArchivedJson archive : FsJobArchivist.getArchivedJsons(archiveFilePath)) {
                 String path = archive.getPath();
                 if (path.equals("/jobs/overview")) {
                     String json = archive.getJson();
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    Jobs jobs = objectMapper.readValue(json, Jobs.class);
+                    Jobs jobs = JsonUtils.read(json, Jobs.class);
                     List<Overview> overviews = jobs.getJobs();
-                    return overviews.get(0).getState();
+                    return overviews.stream().filter(x -> x.getJid().equals(jobId)).map(Overview::getState).findFirst().orElse(FAILED_STATE);
                 }
             }
             return FAILED_STATE;
