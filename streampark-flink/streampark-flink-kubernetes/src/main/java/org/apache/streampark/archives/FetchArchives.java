@@ -17,7 +17,7 @@
 
 package org.apache.streampark.archives;
 
-import org.apache.streampark.common.conf.CommonConfig;
+import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.JsonUtils;
 
 import org.apache.flink.core.fs.Path;
@@ -34,7 +34,7 @@ public class FetchArchives {
     public static String getJobStateFromArchiveFile(String jobId) {
         try {
             Objects.requireNonNull(jobId, "JobId cannot be empty.");
-            Path archiveFilePath = new Path(CommonConfig.STREAMPARK_WORKSPACE_REMOTE().defaultValue().toString());
+            Path archiveFilePath = new Path(String.format("%s/%s", Workspace.remote().ARCHIVES_FILE_PATH(), jobId));
             for (ArchivedJson archive : FsJobArchivist.getArchivedJsons(archiveFilePath)) {
                 String path = archive.getPath();
                 if (path.equals("/jobs/overview")) {

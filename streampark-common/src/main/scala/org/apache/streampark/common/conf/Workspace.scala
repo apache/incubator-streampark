@@ -103,6 +103,11 @@ case class Workspace(storageType: StorageType) {
   lazy val APP_JARS = s"$WORKSPACE/jars"
 
   /**
+   * project archives path
+   */
+  lazy val ARCHIVES_FILE_PATH = s"$WORKSPACE/historyserver/archive"
+
+  /**
    * dirpath of the maven local repository with built-in compilation process
    */
   lazy val MAVEN_LOCAL_DIR = s"${Workspace.local.WORKSPACE}/mvnrepo"
@@ -121,6 +126,7 @@ case class Workspace(storageType: StorageType) {
    * project build log dir.
    */
   lazy val PROJECT_BUILD_LOG_DIR = s"$LOG_LOCAL_DIR/build_logs"
+
 
 }
 
