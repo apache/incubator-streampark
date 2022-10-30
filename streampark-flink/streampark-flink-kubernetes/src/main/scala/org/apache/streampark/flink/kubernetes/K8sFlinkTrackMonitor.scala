@@ -68,11 +68,6 @@ trait K8sFlinkTrackMonitor extends Logger with AutoCloseable {
   def trackingJob(trackId: TrackId): Unit
 
   /**
-   * Add archived log path record save
-   */
-  def archivesJob(jobId: String, archivePath: String): Unit
-
-  /**
    * remove tracking for the specified flink job which on k8s cluster.
    *
    * @param trackId identifier of flink job

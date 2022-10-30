@@ -31,10 +31,9 @@ public class FetchArchives {
 
     private static final String FAILED_STATE = "FAILED";
 
-    public static String getJobStateFromArchiveFile(String jobId, String archivePath) {
+    public static String getJobStateFromArchiveFile(String jobId) {
         try {
             Objects.requireNonNull(jobId, "JobId cannot be empty.");
-            Objects.requireNonNull(archivePath, "archivePath cannot be empty.");
             Path archiveFilePath = new Path(CommonConfig.STREAMPARK_WORKSPACE_REMOTE().defaultValue().toString());
             for (ArchivedJson archive : FsJobArchivist.getArchivedJsons(archiveFilePath)) {
                 String path = archive.getPath();
