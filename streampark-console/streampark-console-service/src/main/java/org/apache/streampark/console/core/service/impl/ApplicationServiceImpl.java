@@ -1364,7 +1364,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
                 AssertUtils.state(buildResult != null);
                 properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.remote().ARCHIVES_FILE_PATH());
-                updateById(application);
                 DockerImageBuildResponse result = buildResult.as(DockerImageBuildResponse.class);
                 String ingressTemplates = application.getIngressTemplate();
                 String domainName = application.getDefaultModeIngress();
