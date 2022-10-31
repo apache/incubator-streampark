@@ -211,7 +211,7 @@ export default {
     ROUTER: '/menu/router'
   },
   Variable: {
-    LIST: '/variable/list',
+    LIST: '/variable/page',
     DEPEND: '/variable/dependApps',
     UPDATE: '/variable/update',
     POST: '/variable/post',

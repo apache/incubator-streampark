@@ -21,7 +21,7 @@ import { BasicTableParams } from '../model/baseModel';
 import { VariableDeleteParam, VariableListRecord, VariableParam } from './model/variableModel';
 
 enum VARIABLE_API {
-  LIST = '/variable/list',
+  LIST = '/variable/page',
   UPDATE = '/variable/update',
   POST = '/variable/post',
   DELETE = '/variable/delete',

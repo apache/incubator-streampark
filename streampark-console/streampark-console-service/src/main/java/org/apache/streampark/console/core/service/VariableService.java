@@ -44,6 +44,14 @@ public interface VariableService extends IService<Variable> {
      */
     List<Variable> findByTeamId(Long teamId);
 
+    /**
+     * Get variables through team and search keywords.
+     * @param teamId
+     * @param keyword Fuzzy search keywords through variable code or description, Nullable.
+     * @return
+     */
+    List<Variable> findByTeamId(Long teamId, String keyword);
+
     long countByTeamId(Long teamId);
 
     /**
