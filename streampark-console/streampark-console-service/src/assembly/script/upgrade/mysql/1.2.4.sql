@@ -62,7 +62,7 @@ where alert_type = 1;
 -- t_flink_app
 alter table `t_flink_app`
     drop column alert_email,
-    change column dynamic_option properties text comment 'allows specifying multiple generic configuration options',
+    change column dynamic_options properties text comment 'allows specifying multiple generic configuration options',
     add column `job_manager_url` varchar(255) default null after `job_id`,
     add column `option_time` datetime default null after `create_time`,
     add column `ingress_template` text collate utf8mb4_general_ci comment 'ingress模版文件',
@@ -79,6 +79,7 @@ alter table `t_flink_project`
     add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`,
     add index `inx_team` (`team_id`) using btree;
 
+alter table `t_flink_cluster` add column `properties` text comment 'allows specifying multiple generic configuration options' after `flink_image`;
 
 -- change `update_time` to `modify_time`
 alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime not null default current_timestamp on update current_timestamp;
